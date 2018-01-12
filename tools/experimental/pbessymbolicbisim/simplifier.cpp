@@ -38,7 +38,7 @@ simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter&
       return new simplifier_identity(rewr, proving_rewr);
     case simplify_auto:
     {
-      if(std::find_if(process_parameters.begin(), process_parameters.end(), [&](const variable& v){ return v.sort() == sort_real::real_();}) == process_parameters.end())
+      if(std::find_if(process_parameters.begin(), process_parameters.end(), [&](const variable& v){ return v.sort() == sort_real::real_();}) != process_parameters.end())
       {
 #ifdef DBM_PACKAGE_AVAILABLE
         return new simplifier_dbm(rewr, proving_rewr, process_parameters, dataspec, lu_map);

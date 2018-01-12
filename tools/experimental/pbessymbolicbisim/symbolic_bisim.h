@@ -253,7 +253,8 @@ protected:
     if(used_functions.find(sort_real::creal()) != used_functions.end())
     {
       // Specification contains real numbers, so we should add all relevant
-      // function symbols
+      // function symbols since the simplifiers might introduce funtions
+      // symbols that are not present in the specificaton.
       used_functions.insert(less(sort_real::real_()));
       used_functions.insert(less_equal(sort_real::real_()));
       used_functions.insert(greater(sort_real::real_()));

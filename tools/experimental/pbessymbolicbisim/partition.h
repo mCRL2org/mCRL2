@@ -67,10 +67,11 @@ protected:
   std::list< block_t >      m_other_blocks;
   std::map<pbes_system::propositional_variable, simplifier*>                    simpl;
   smt::solver        smt_solver;
+  bool m_contains_reals;
 
   typedef std::set< std::tuple< block_t, block_t, summand_type_t > > refinement_cache_t;
   refinement_cache_t refinement_cache;
-  typedef std::map< std::pair< block_t, block_t >, bool > reachability_cache_t;
+  typedef std::unordered_map< std::pair< block_t, block_t >, bool, std::hash< std::pair<std::pair<atermpp::aterm, atermpp::aterm>,std::pair<atermpp::aterm, atermpp::aterm>>> > reachability_cache_t;
   reachability_cache_t reachability_cache;
   typedef std::map< std::tuple< block_t, block_t, summand_type_t >, bool> transition_cache_t;
   transition_cache_t transition_cache;
@@ -106,7 +107,11 @@ protected:
           make_application(phi_l.second, cl.new_state().parameters())
         )
       )));
-    transition_exists = rewr(replace_data_expressions(transition_exists, fourier_motzkin_sigma(rewr), true));
+    if(m_contains_reals)
+    {
+      transition_exists = replace_data_expressions(transition_exists, fourier_motzkin_sigma(rewr), true);
+    }
+    transition_exists = one_point_rule_rewrite(rewr(transition_exists));
     data_expression block2_body = rewr(
         sort_bool::and_(
           make_application(phi_k.second, eq.variable().parameters()),
@@ -295,9 +300,15 @@ protected:
     // The SMT solver failed, so we fallback to the rewriter
     data_expression is_sat = make_abstraction(exists_binder(), vars, expr);
     is_sat = rewr(one_point_rule_rewrite(quantifiers_inside_rewrite(is_sat)));
-    data_expression succ_result;
-    succ_result = rewr(replace_data_expressions(is_sat, fourier_motzkin_sigma(rewr), true));
-    return succ_result == sort_bool::true_();
+    if(m_contains_reals)
+    {
+      is_sat = rewr(replace_data_expressions(is_sat, fourier_motzkin_sigma(rewr), true));
+    }
+    if(is_sat != sort_bool::true_() && is_sat != sort_bool::false_())
+    {
+      throw mcrl2::runtime_error("Failed to establish whether " + data::pp(expr) + " is satisfiable");
+    }
+    return is_sat == sort_bool::true_();
   }
 
   /**
@@ -388,11 +399,11 @@ protected:
       const block_t block = open_set.front();
       open_set.pop();
 
-      std::set<block_t> new_unreachable = unreachable;
       // Look for possible successors of block in the set of unreachable blocks
-      for(const block_t& potential_succ: unreachable)
+      for(std::set<block_t>::const_iterator i = unreachable.begin(); i != unreachable.end();)
       {
         bool transition_found = false;
+        const block_t& potential_succ = *i;
 
         reachability_cache_t::iterator previous_result =
           reachability_cache.find(std::make_pair(block, potential_succ));
@@ -416,9 +427,13 @@ protected:
         if(transition_found)
         {
           // A transition was found, so potential_succ is reachable
-          new_unreachable.erase(new_unreachable.find(potential_succ));
+          unreachable.erase(i++);
           open_set.push(potential_succ);
           m_proof_blocks.push_back(potential_succ);
+        }
+        else
+        {
+          ++i;
         }
         if(previous_result == reachability_cache.end())
         {
@@ -426,7 +441,6 @@ protected:
           reachability_cache.insert(std::make_pair(std::make_pair(block, potential_succ), transition_found));
         }
       }
-      unreachable = new_unreachable;
     }
 
 
@@ -542,30 +556,32 @@ protected:
       bool has_outgoing_edge = false;
       for(const block_t& dest: blocks)
       {
+        bool transition_found = false;
+
         // Find out if there are any transitions at all
         reachability_cache_t::iterator previous_result =
           reachability_cache.find(std::make_pair(src, dest));
-        if(previous_result != reachability_cache.end() && !previous_result->second)
+        if(previous_result != reachability_cache.end())
         {
-          // No transition exists between src and dest
-          continue;
+          transition_found = previous_result->second;
         }
-
-        bool transition_found = false;
-        for(const summand_type_t& cl: eq.summands())
+        else
         {
-          if(transition_exists(src, dest, cl))
+          for(const summand_type_t& cl: eq.summands())
           {
-            edges.push_back(std::make_pair(node_map[src], node_map[dest]));
-            has_outgoing_edge = true;
-            transition_found = true;
-            break;
+            if(transition_exists(src, dest, cl))
+            {
+              transition_found = true;
+              break;
+            }
           }
-        }
-        if(previous_result == reachability_cache.end())
-        {
           // There was no information in this cache yet, so we add it
           reachability_cache.insert(std::make_pair(std::make_pair(src, dest), transition_found));
+        }
+        if(transition_found)
+        {
+          edges.push_back(std::make_pair(node_map[src], node_map[dest]));
+          has_outgoing_edge = true;
         }
       }
 
@@ -617,14 +633,18 @@ public:
   , proving_rewr(pr)
   , smt_solver(new smt::smt4_data_specification(spec.data()))
   {
+    m_contains_reals = false;
     for(const equation_type_t& eq: m_spec.equations())
     {
       simpl.insert(std::make_pair(eq.variable(), get_simplifier_instance(simpl_mode, rewr, proving_rewr, eq.variable().parameters(), m_spec.data())));
-    }
-    for(const equation_type_t& eq: m_spec.equations())
-    {
       m_proof_blocks.push_back(std::make_pair(eq.variable(), make_abstraction(lambda_binder(), eq.variable().parameters(), sort_bool::true_())));
+      m_contains_reals |= std::find_if(eq.variable().parameters().begin(), eq.variable().parameters().end(), 
+        [&](const variable& var) { return var.sort() == sort_real::real_();}) != eq.variable().parameters().end();
     }
+    // Make sure the initial block is the first in the list
+    const block_t& initial_block = find_initial_block(m_proof_blocks);
+    m_proof_blocks.erase(std::find(m_proof_blocks.begin(), m_proof_blocks.end(), initial_block));
+    m_proof_blocks.push_front(initial_block);
   }
 
   std::list< block_t > get_proof_blocks()
@@ -698,24 +718,23 @@ public:
       {
         break;
       }
-      // Check reachability only in m_proof_blocks
+      // Check reachability only in m_proof_blocks.
+      // Blocks that are not reachable in there will
+      // be moved to m_other_blocks, because it is not
+      // certain that they are unreachable when considering
+      // the whole graph.
       find_reachable_blocks(true);
-      if(num_steps == 0)
-      {
-        make_bes(m_proof_blocks);
-      }
       mCRL2log(log::verbose) << "End of a refinement step " << num_iterations << std::endl;
     }
-    // Check reachability in the full graph
+    // Check reachability in the full graph.
+    // In this case, unreachable blocks will really be
+    // thrown away.
     find_reachable_blocks(false);
     if(num_iterations == 0)
     {
       mCRL2log(log::verbose) << "Final partition:" << std::endl;
       print_partition(m_proof_blocks);
     }
-    // std::set< data_expression > final_partition;
-    // std::for_each(partition.begin(), partition.end(), [&](const block_t& block){ final_partition.insert(rewr(block)); });
-    // split_logger->output_dot("split_tree.dot", final_partition);
     return num_iterations == 0;
   }
 
