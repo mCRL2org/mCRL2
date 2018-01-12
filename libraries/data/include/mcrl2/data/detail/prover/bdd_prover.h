@@ -80,6 +80,12 @@ namespace detail
  * example is a valuation for which it does not hold.
 */
 
+// Auxiliary function to deliver an indent of length n.
+inline std::string indent(size_t n)
+{
+  return std::string(' ',n);
+}
+
 enum Answer
 {
   answer_yes,
@@ -139,11 +145,11 @@ class BDD_Prover: protected rewriter
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
-    std::map < data_expression, data_expression > f_formula_to_bdd;
+    std::unordered_map < data_expression, data_expression > f_formula_to_bdd;
 
     /// \brief A hashtable that maps formulas to the smallest guard occuring in those formulas.
     /// \brief If the smallest guard of a formula is unknown, it maps this formula to 0.
-    std::map < data_expression, data_expression > f_smallest;
+    std::unordered_map < data_expression, data_expression > f_smallest;
 
     /// \brief Class that provides information about the structure of BDDs.
     BDD_Info f_bdd_info;
@@ -186,15 +192,7 @@ class BDD_Prover: protected rewriter
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    data_expression bdd_down(const data_expression& a_formula)
-    {
-      std::string indent;
-
-      return bdd_down(a_formula, indent);
-    }
-
-    /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    data_expression bdd_down(const data_expression& a_formula, const std::string& a_indent)
+    data_expression bdd_down(const data_expression& a_formula, const size_t a_indent=0)
     {
 
       if (f_time_limit != 0 && (f_deadline - time(nullptr)) <= 0)
@@ -218,7 +216,7 @@ class BDD_Prover: protected rewriter
         return abstraction(a.binding_operator(), a.variables(), bdd_down(a.body(), a_indent));
       }
 
-      const std::map < data_expression, data_expression >::const_iterator i = f_formula_to_bdd.find(a_formula);
+      const std::unordered_map < data_expression, data_expression >::const_iterator i = f_formula_to_bdd.find(a_formula);
       if (i!=f_formula_to_bdd.end()) // found
       {
         return i->second;
@@ -231,24 +229,24 @@ class BDD_Prover: protected rewriter
       }
       else
       {
-        mCRL2log(log::debug) << a_indent << "Smallest guard: " << v_guard << std::endl;
+        mCRL2log(log::debug) << indent(a_indent) << "Smallest guard: " << v_guard << std::endl;
       }
 
-      const std::string extra_indent = a_indent + "  ";
+      const size_t extra_indent = a_indent + 2;
 
       data_expression v_term1 = f_manipulator.set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewrite(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
-      mCRL2log(log::debug) << extra_indent << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
+      mCRL2log(log::debug) << indent(extra_indent) << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
       v_term1 = bdd_down(v_term1, extra_indent);
-      mCRL2log(log::debug) << extra_indent << "BDD of the true-branch: " << v_term1 << std::endl;
+      mCRL2log(log::debug) << indent(extra_indent) << "BDD of the true-branch: " << v_term1 << std::endl;
 
       data_expression v_term2 = f_manipulator.set_false(a_formula, v_guard);
       v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
-      mCRL2log(log::debug) << extra_indent << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
+      mCRL2log(log::debug) << indent(extra_indent) << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
       v_term2 = bdd_down(v_term2, extra_indent);
-      mCRL2log(log::debug) << extra_indent << "BDD of the false-branch: " << v_term2 << std::endl;
+      mCRL2log(log::debug) << indent(extra_indent) << "BDD of the false-branch: " << v_term2 << std::endl;
 
       data_expression v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
@@ -370,7 +368,7 @@ class BDD_Prover: protected rewriter
         return data_expression();
       }
 
-      const std::map < data_expression, data_expression >::const_iterator i = f_smallest.find(a_formula);
+      const std::unordered_map < data_expression, data_expression >::const_iterator i = f_smallest.find(a_formula);
       if (i!=f_smallest.end()) //found
       {
         return i->second;

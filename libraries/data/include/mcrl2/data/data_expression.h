@@ -291,5 +291,23 @@ application data_expression::operator()(const data_expression& e1, const data_ex
 } // namespace data
 } // namespace mcrl2
 
+
+namespace std
+{
+
+template<>
+struct hash<mcrl2::data::data_expression>
+{
+    std::size_t operator()(const mcrl2::data::data_expression& v) const
+    {
+      const hash<atermpp::aterm> hasher;
+      return hasher(v);
+    }
+};
+
+} // namespace std
+
+
+
 #endif // MCRL2_DATA_DATA_EXPRESSION_H
 

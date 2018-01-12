@@ -34,7 +34,7 @@ class Manipulator
     /// The method Manipulator::orient stores resulting terms in this
     /// table. If a term is encountered that has already been processed, it is
     /// not processed again, but retreived from this table.
-    std::map < data_expression, data_expression> f_orient;
+    std::unordered_map < data_expression, data_expression> f_orient;
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
@@ -42,7 +42,7 @@ class Manipulator
     data_expression set_true_auxiliary(
                 const data_expression& a_formula,
                 const data_expression& a_guard,
-                std::map < data_expression, data_expression >& f_set_true)
+                std::unordered_map < data_expression, data_expression >& f_set_true)
     {
       if (is_function_symbol(a_formula))
       {
@@ -76,19 +76,18 @@ class Manipulator
         return a_formula;
       }
 
-      std::map < data_expression, data_expression >::const_iterator i=f_set_true.find(a_formula);
+      std::unordered_map < data_expression, data_expression >::const_iterator i=f_set_true.find(a_formula);
       if (i!=f_set_true.end())
       {
         return i->second;
       }
 
-      const application t(a_formula);
-      data_expression_vector v_parts;
-      for (application::const_iterator i = t.begin(); i!=t.end(); ++i)
-      {
-        v_parts.push_back(set_true_auxiliary(*i, a_guard,f_set_true));
-      }
-      data_expression v_result = application(set_true_auxiliary(t.head(), a_guard,f_set_true), v_parts);
+      const application& t=atermpp::down_cast<application>(a_formula);
+      data_expression v_result = application(set_true_auxiliary(t.head(), a_guard,f_set_true), 
+                                             t.begin(), 
+                                             t.end(), 
+                                             [&a_guard, &f_set_true, this](const data_expression& d){ return set_true_auxiliary(d, a_guard,f_set_true);});
+
       f_set_true[a_formula]=v_result;
 
       return v_result;
@@ -98,7 +97,7 @@ class Manipulator
     data_expression set_false_auxiliary(
               const data_expression& a_formula,
               const data_expression& a_guard,
-              std::map < data_expression, data_expression >& f_set_false)
+              std::unordered_map < data_expression, data_expression >& f_set_false)
     {
       if (is_function_symbol(a_formula))
       {
@@ -121,19 +120,17 @@ class Manipulator
         return a_formula;
       }
 
-      std::map < data_expression, data_expression >::const_iterator i=f_set_false.find(a_formula);
+      std::unordered_map < data_expression, data_expression >::const_iterator i=f_set_false.find(a_formula);
       if (i!=f_set_false.end())
       {
         return i->second;
       }
 
       const application t(a_formula);
-      data_expression_vector v_parts;
-      for (application::const_iterator i = t.begin(); i!=t.end(); ++i)
-      {
-        v_parts.push_back(set_false_auxiliary(*i, a_guard,f_set_false));
-      }
-      data_expression v_result = application(set_false_auxiliary(t.head(), a_guard,f_set_false), v_parts);
+      data_expression v_result = application(set_false_auxiliary(t.head(), a_guard,f_set_false), 
+                                             t.begin(), 
+                                             t.end(), 
+                                             [&a_guard, &f_set_false, this](const data_expression& d){ return set_false_auxiliary(d, a_guard,f_set_false);});
       f_set_false[a_formula]=v_result;
       return v_result;
     }
@@ -194,23 +191,14 @@ class Manipulator
         return abstraction(a.binding_operator(), a.variables(), orient(a.body()));
       }
 
-      std::map < data_expression, data_expression> :: const_iterator it=f_orient.find(a_term);
+      std::unordered_map < data_expression, data_expression> :: const_iterator it=f_orient.find(a_term);
       if (it!=f_orient.end())   // found
       {
         return it->second;
       }
 
       const application& a = atermpp::down_cast<application>(a_term);
-      /*const atermpp::function_symbol& v_symbol = a_term.function();
-      const data::function_symbol& v_function = atermpp::down_cast<data::function_symbol>(a_term[0]);
-      std::size_t v_arity = v_symbol.arity(); */
-
-      data_expression_vector v_parts;
-      for (auto i = a.begin(); i !=a.end(); ++i)
-      {
-        v_parts.push_back(orient(data_expression(*i)));
-      }
-      application v_result(orient(a.head()), v_parts);
+      application v_result(orient(a.head()), a.begin(), a.end(), [this](const data_expression& d){return orient(d); });
 
       if (is_equal_to_application(v_result))
       {
@@ -232,7 +220,7 @@ class Manipulator
                  const data_expression& a_formula,
                  const data_expression& a_guard)
     {
-      std::map < data_expression, data_expression > f_set_true;
+      std::unordered_map < data_expression, data_expression > f_set_true;
       return set_true_auxiliary(a_formula, a_guard, f_set_true);
     }
 
@@ -242,7 +230,7 @@ class Manipulator
                  const data_expression& a_formula,
                  const data_expression& a_guard)
     {
-      std::map < data_expression, data_expression > f_set_false;
+      std::unordered_map < data_expression, data_expression > f_set_false;
       return set_false_auxiliary(a_formula, a_guard,f_set_false);
     }
 };
