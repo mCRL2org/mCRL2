@@ -617,6 +617,37 @@ static void counterexample_postprocessing()
   test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
 }
 
+void is_deterministic_test1()
+{
+  std::string automaton =
+    "des(0,2,2)\n"
+    "(0,\"a\",1)\n"
+    "(0,\"a\",1)\n";
+
+  std::istringstream is(automaton);
+  lts::lts_aut_t l_det;
+  l_det.load(is);
+  BOOST_CHECK(is_deterministic(l_det));
+}
+
+void is_deterministic_test2()
+{
+  std::string automaton =
+    "des(0,2,2)\n"
+    "(0,\"a\",1)\n"
+    "(0,\"a\",0)\n";
+
+  std::istringstream is(automaton);
+  lts::lts_aut_t l_det;
+  l_det.load(is);
+  BOOST_CHECK(!is_deterministic(l_det));
+}
+
+void test_is_deterministic()
+{
+  is_deterministic_test1();
+  is_deterministic_test2();
+}
 
 int test_main(int /* argc*/, char** /* argv */)
 {
@@ -626,6 +657,7 @@ int test_main(int /* argc*/, char** /* argv */)
   reduce_abp();
   reduce_peterson();
   test_reachability();
+  test_is_deterministic();
   failing_test_groote_wijs_algorithm();
   counterexample_jk_1(3);
   counterexample_postprocessing();

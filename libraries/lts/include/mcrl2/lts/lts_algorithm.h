@@ -869,15 +869,19 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 template <class LTS_TYPE>
 bool is_deterministic(const LTS_TYPE& l)
 {
-  outgoing_transitions_per_state_action_t trans_lut=transitions_per_outgoing_state_action_pair(l.get_transitions(),l.hidden_label_map());
+  outgoing_transitions_per_state_action_t trans_lut=
+                  transitions_per_outgoing_state_action_pair(l.get_transitions(),l.hidden_label_map());
 
-  for (outgoing_transitions_per_state_action_t::const_iterator i=trans_lut.begin(); i!=trans_lut.end(); ++i)
+  for(outgoing_transitions_per_state_action_t::const_iterator i=trans_lut.begin(); i!=trans_lut.end(); ++i)
   {
     outgoing_transitions_per_state_action_t::const_iterator i_next=i;
     i_next++;
-    if (i_next!=trans_lut.end() && from(i)==from(i_next) && label(i)==label(i_next))
+    if (i_next!=trans_lut.end() && 
+                  from(i)==from(i_next) && 
+                  label(i)==label(i_next) &&
+                  to(i)!=to(i_next))
     {
-      // found a pair <s,l,t> and <s,l,t'>, so l is not deterministic.
+      // found a pair <s,l,t> and <s,l,t'> with t!=t', so l is not deterministic.
       return false;
     }
   }
@@ -889,24 +893,24 @@ namespace detail
 {
 inline
 void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
-                      tree_set_store* tss,
+                      tree_set_store& tss,
                       std::size_t d,
                       std::vector<transition> &d_trans)
 {
-  if (!tss->is_set_empty(d))
+  if (!tss.is_set_empty(d))
   {
-    if (tss->is_set_empty(tss->get_set_child_right(d)))
+    if (tss.is_set_empty(tss.get_set_child_right(d)))
     {
       for (std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > :: const_iterator
-           j=begin.lower_bound(tss->get_set_child_left(d)); j!=begin.upper_bound(tss->get_set_child_left(d)); ++j)
+           j=begin.lower_bound(tss.get_set_child_left(d)); j!=begin.upper_bound(tss.get_set_child_left(d)); ++j)
       {
         d_trans.push_back(transition(j->first,j->second.first,j->second.second));
       }
     }
     else
     {
-      get_trans(begin,tss,tss->get_set_child_left(d),d_trans);
-      get_trans(begin,tss,tss->get_set_child_right(d),d_trans);
+      get_trans(begin,tss,tss.get_set_child_left(d),d_trans);
+      get_trans(begin,tss,tss.get_set_child_right(d),d_trans);
     }
   }
 }
@@ -916,14 +920,14 @@ void get_trans(std::multimap < transition::size_type, std::pair < transition::si
 template <class LTS_TYPE>
 void determinise(LTS_TYPE& l)
 {
-  tree_set_store* tss = new tree_set_store();
+  tree_set_store tss;
 
   std::vector<transition> d_transs;
   std::vector<std::ptrdiff_t> d_states;
 
   // create the initial state of the DLTS
   d_states.push_back(l.initial_state());
-  std::ptrdiff_t d_id = tss->set_set_tag(tss->create_set(d_states));
+  std::ptrdiff_t d_id = tss.set_set_tag(tss.create_set(d_states));
   d_states.clear();
 
   std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
@@ -937,11 +941,11 @@ void determinise(LTS_TYPE& l)
   std::size_t s;
   std::size_t i,to,lbl,n_t;
 
-  while (d_id < tss->get_next_tag())
+  while (d_id < tss.get_next_tag())
   {
     // collect the outgoing transitions of every state of DLTS state d_id in
     // the vector d_transs
-    detail::get_trans(begin,tss,tss->get_set(d_id),d_transs);
+    detail::get_trans(begin,tss,tss.get_set(d_id),d_transs);
 
     // sort d_transs by label and (if labels are equal) by destination
     const detail::compare_transitions_lts compare(l.hidden_label_map());
@@ -966,17 +970,17 @@ void determinise(LTS_TYPE& l)
           ++i;
         }
       }
-      s = tss->create_set(d_states);
+      s = tss.create_set(d_states);
 
       // generate the transitions to each of the next states
-      if (!tss->is_set_empty(s))
+      if (!tss.is_set_empty(s))
       {
-        d_transitions.push_back(transition(d_id,lbl,tss->set_set_tag(s)));
+        d_transitions.push_back(transition(d_id,lbl,tss.set_set_tag(s)));
 
         if (d_ntransitions%10000 == 0)
         {
           mCRL2log(log::debug) <<
-            "generated " << tss->get_next_tag() << " states and " << d_ntransitions
+            "generated " << tss.get_next_tag() << " states and " << d_ntransitions
                          << " transitions; explored " << d_id << " states" << std::endl;
         }
       }
@@ -986,14 +990,13 @@ void determinise(LTS_TYPE& l)
     ++d_id;
   }
 
-  delete tss;
 
   l.set_num_states(d_id,false); // remove the state values, and reset the number of states.
   l.set_initial_state(0);
 
-  for (std::vector < transition > :: const_iterator i=d_transitions.begin(); i!=d_transitions.end(); ++i)
+  for (const transition& t: d_transitions)
   {
-    l.add_transition(*i);
+    l.add_transition(t);
   }
   assert(is_deterministic(l));
 }
