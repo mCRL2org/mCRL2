@@ -178,11 +178,11 @@ class lps2lts_tool : public lps2lts_base
                  "so state space exploration becomes quadratic with this option on, causing a state "
                  "space exploration to become slow when this option is enabled.", 'F').
       add_option("action", make_mandatory_argument("NAMES"),
-                 "detect and report actions in the transitions system that have action "
-                 "names from NAMES, a comma-separated list. This is for instance useful "
-                 "to find (or prove the absence) of an action error. A message "
+                 "report whether an action from NAMES occurs in the transitions system, "
+                 "where NAMES is a comma-separated list. A message "
                  "is printed for every occurrence of one of these action names. "
-                 "With the -t flag traces towards these actions are generated", 'a').
+                 "With the -t flag traces towards these actions are generated. "
+                 "When using -tN only N traces are generated after which the generation of the state space stops. ", 'a').
       add_option("multiaction", make_mandatory_argument("NAMES"),
                  "detect and report multiactions in the transitions system "
                  "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
