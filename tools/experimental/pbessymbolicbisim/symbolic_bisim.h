@@ -73,7 +73,7 @@ protected:
     // Explore the graph according to the strategy
     while(!open_set.empty())
     {
-      const verti& v = open_set.front();
+      const verti v = open_set.front();
       open_set.pop();
       if(solution[v] != NO_VERTEX)
       {

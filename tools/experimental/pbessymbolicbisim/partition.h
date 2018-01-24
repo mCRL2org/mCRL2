@@ -86,7 +86,7 @@ protected:
   /**
    * \brief Split block phi_k on phi_l wrt summand as
    */
-  bool split_block(const block_t& phi_k, const block_t& phi_l, const equation_type_t& eq, const summand_type_t& cl)
+  bool split_block(const block_t phi_k, const block_t phi_l, const equation_type_t& eq, const summand_type_t& cl)
   {
     if(refinement_cache.find(std::make_tuple(phi_k, phi_l, cl)) != refinement_cache.end())
     {
@@ -403,7 +403,7 @@ protected:
       for(std::set<block_t>::const_iterator i = unreachable.begin(); i != unreachable.end();)
       {
         bool transition_found = false;
-        const block_t& potential_succ = *i;
+        const block_t potential_succ = *i;
 
         reachability_cache_t::iterator previous_result =
           reachability_cache.find(std::make_pair(block, potential_succ));
@@ -718,6 +718,10 @@ public:
       {
         break;
       }
+      // if(num_steps == 0)
+      // {
+      //   make_bes(m_proof_blocks);
+      // }
       // Check reachability only in m_proof_blocks.
       // Blocks that are not reachable in there will
       // be moved to m_other_blocks, because it is not
