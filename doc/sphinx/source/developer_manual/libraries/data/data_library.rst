@@ -38,7 +38,7 @@ that are added to the specification are not checked.
    spec.add_constructor(c2);
    variable x("x", D);                                         // var  x:D;
    data_application e1(c2,x);
-   data_equation e(make_vector(x), sort_bool::true_(), e1, m); // eqn  true -> c1(x)=m;
+   data_equation e(variable_list({x}), sort_bool::true_(), e1, m); // eqn  true -> c1(x)=m;
    spec.add_equation(e);
    basic_sort E("E");                                          // sort E=D; (add a sort alias)
    spec.add_alias(E,D);
