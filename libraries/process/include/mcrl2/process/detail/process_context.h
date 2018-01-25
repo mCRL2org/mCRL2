@@ -16,6 +16,7 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/detail/action_context.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include <algorithm>
 #include <map>
 
@@ -41,6 +42,20 @@ class process_context
         }
       }
       return true;
+    }
+
+    // returns an assignment that does not match with the list of parameters
+    data::untyped_identifier_assignment find_violating_assignment(const data::untyped_identifier_assignment_list& assignments, const data::variable_list& parameters) const
+    {
+      using utilities::detail::contains;
+      std::set<core::identifier_string> parameter_names;
+      for (const data::variable& param: parameters)
+      {
+        parameter_names.insert(param.name());
+      }
+      auto i = std::find_if(assignments.begin(), assignments.end(), [&](const data::untyped_identifier_assignment& a) { return !contains(parameter_names, a.lhs()); });
+      assert(i != assignments.end());
+      return *i;
     }
 
   public:
@@ -107,11 +122,20 @@ class process_context
       }
       if (result.empty())
       {
-        throw mcrl2::runtime_error("no process " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".\n");
+        std::string detailed_message;
+
+        // If there is only one matching process, give a more detailed error message.
+        if (std::distance(range.first, range.second) == 1)
+        {
+          const process_identifier& id = range.first->second;
+          const data::untyped_identifier_assignment& a = find_violating_assignment(x.assignments(), id.variables());
+          detailed_message = "Missing parameter: " + core::pp(a.lhs()) + '\n';
+        }
+        throw mcrl2::runtime_error("There is no process " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".\n" + detailed_message);
       }
       if (result.size() > 1)
       {
-        throw mcrl2::runtime_error("ambiguous process " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".");
+        throw mcrl2::runtime_error("There are multiple processes named " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".");
       }
       return result.front().variables();
     }
