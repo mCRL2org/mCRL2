@@ -80,12 +80,6 @@ namespace detail
  * example is a valuation for which it does not hold.
 */
 
-// Auxiliary function to deliver an indent of length n.
-inline std::string indent(size_t n)
-{
-  return std::string(' ',n);
-}
-
 enum Answer
 {
   answer_yes,
@@ -189,6 +183,12 @@ class BDD_Prover: protected rewriter
       f_bdd = intermediate_bdd;
       mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
 
+    }
+
+    // Auxiliary function to deliver an indent of length n.
+    inline std::string indent(size_t n)
+    {
+      return std::string(n, ' ');
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
