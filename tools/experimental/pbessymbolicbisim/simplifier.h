@@ -65,70 +65,67 @@ public:
     variable vr3("r3", sort_real::real_());
 
     //  a && a = a;
-    ad_hoc_data.add_equation(data_equation({vb1}, sort_bool::and_(vb1, vb1), vb1));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1}), sort_bool::and_(vb1, vb1), vb1));
     //  a && (a && b) = a && b;
-    ad_hoc_data.add_equation(data_equation({vb1,vb2}, sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
-    ad_hoc_data.add_equation(data_equation({vb1,vb2}, sort_bool::and_(vb1, sort_bool::and_(vb2, vb1)), sort_bool::and_(vb1, vb2)));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), sort_bool::and_(vb1, sort_bool::and_(vb2, vb1)), sort_bool::and_(vb1, vb2)));
     //  a || a = a;
-    ad_hoc_data.add_equation(data_equation({vb1}, sort_bool::or_(vb1, vb1), vb1));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1}), sort_bool::or_(vb1, vb1), vb1));
     //  a => b = !a || b;
-    ad_hoc_data.add_equation(data_equation({vb1, vb2}, sort_bool::implies(vb1, vb2), sort_bool::or_(sort_bool::not_(vb1), vb2)));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1, vb2}), sort_bool::implies(vb1, vb2), sort_bool::or_(sort_bool::not_(vb1), vb2)));
     // a && (!a || b) = a && b
-    ad_hoc_data.add_equation(data_equation({vb1,vb2}, sort_bool::and_(vb1, sort_bool::or_(sort_bool::not_(vb1), vb2)), sort_bool::and_(vb1, vb2)));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), sort_bool::and_(vb1, sort_bool::or_(sort_bool::not_(vb1), vb2)), sort_bool::and_(vb1, vb2)));
     // !a && (a || b) == !a && b
-    ad_hoc_data.add_equation(data_equation({vb1,vb2}, sort_bool::and_(sort_bool::not_(vb1), sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), vb2)));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), sort_bool::and_(sort_bool::not_(vb1), sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), vb2)));
     // Pushing not inside
-    ad_hoc_data.add_equation(data_equation({vb1, vb2}, sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
-    ad_hoc_data.add_equation(data_equation({vb1, vb2}, sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1, vb2}), sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1, vb2}), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
     // Formulate all linear equalities with positive rhs: -1 * x_P <= -5   !(1 * x_P < 5)
-    ad_hoc_data.add_equation(data_equation({vr1, vp1, vp2},
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1, vp1, vp2}),
       less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
       sort_bool::not_(less(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
-    ad_hoc_data.add_equation(data_equation({vr1, vp1, vp2},
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1, vp1, vp2}),
       less(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
       sort_bool::not_(less_equal(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
     // -1 * (-1 * r) = r
-    ad_hoc_data.add_equation(data_equation({vr1}, sort_real::times(real_minus_one(), sort_real::times(real_minus_one(), vr1)), vr1));
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1}), sort_real::times(real_minus_one(), sort_real::times(real_minus_one(), vr1)), vr1));
     // -1 * -r = r
-    ad_hoc_data.add_equation(data_equation({vr1}, sort_real::times(real_minus_one(), sort_real::negate(vr1)), vr1));
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1}), sort_real::times(real_minus_one(), sort_real::negate(vr1)), vr1));
     // r1 * (r2 + r3) = r1 * r2 + r1 * r3
-    ad_hoc_data.add_equation(data_equation({vr1,vr2,vr3},
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2,vr3}),
       sort_real::times(vr1, sort_real::plus(vr2,vr3)), sort_real::plus(sort_real::times(vr1,vr2), sort_real::times(vr1,vr3))));
     // 1 * r = r
-    ad_hoc_data.add_equation(data_equation({vr1}, sort_real::times(real_one(), vr1), vr1));
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1}), sort_real::times(real_one(), vr1), vr1));
     // -1 * (r1 - r2) = r2 - r1
-    ad_hoc_data.add_equation(data_equation({vr1,vr2}, sort_real::times(real_minus_one(), sort_real::minus(vr1,vr2)), sort_real::minus(vr2,vr1)));
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2}), sort_real::times(real_minus_one(), sort_real::minus(vr1,vr2)), sort_real::minus(vr2,vr1)));
     // Since there are some problems with !(0 == x1) when feeding it to fourier motzkin, add the following rule
     // !(r2 == r1) = r1 > r2 || r1 < r2
-    ad_hoc_data.add_equation(data_equation({vr1,vr2}, sort_bool::not_(equal_to(vr2,vr1)), sort_bool::or_(greater(vr1, vr2), less(vr1, vr2))));
-    // r1 < 0 = false
-    // Breaks everything when expressions such as -x < 0 are encountered
-    // ad_hoc_data.add_equation(data_equation({vr1}, less(vr1,real_zero()), sort_bool::false_()));
+    ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2}), sort_bool::not_(equal_to(vr2,vr1)), sort_bool::or_(greater(vr1, vr2), less(vr1, vr2))));
 
     // if(a,b,c) = (a && b) || (!a && c);
-    ad_hoc_data.add_equation(data_equation({vb1,vb2,vb3}, if_(vb1, vb2, vb3),
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), if_(vb1, vb2, vb3),
       sort_bool::or_(sort_bool::and_(vb1, vb2), sort_bool::and_(sort_bool::not_(vb1), vb3))));
     // (a && b) || !a = b || !a
-    ad_hoc_data.add_equation(data_equation({vb1,vb2},
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}),
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::not_(vb1)), sort_bool::or_(vb2,sort_bool::not_(vb1))));
     // !a || (a && b) = !a || b
-    ad_hoc_data.add_equation(data_equation({vb1,vb2},
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}),
       sort_bool::or_(sort_bool::not_(vb1), sort_bool::and_(vb1,vb2)), sort_bool::or_(sort_bool::not_(vb1), vb2)));
     // a || (!a && b) = a || b
-    ad_hoc_data.add_equation(data_equation({vb1,vb2},
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}),
       sort_bool::or_(vb1, sort_bool::and_(sort_bool::not_(vb1), vb2)), sort_bool::or_(vb1,vb2)));
 
     // succ(p) < p = false
-    ad_hoc_data.add_equation(data_equation({vp1),
+    ad_hoc_data.add_equation(data_equation(variable_list({vp1}),
       less(sort_pos::succ(vp1), vp1), sort_bool::false_()));
     // p < succ(p) = true
-    ad_hoc_data.add_equation(data_equation({vp1),
+    ad_hoc_data.add_equation(data_equation(variable_list({vp1}),
       less(vp1, sort_pos::succ(vp1)), sort_bool::true_()));
     // succ(n) < n = false
-    ad_hoc_data.add_equation(data_equation({vn1),
+    ad_hoc_data.add_equation(data_equation(variable_list({vn1}),
       less(sort_nat::cnat(sort_nat::succ(vn1)), vn1), sort_bool::false_()));
     // n < succ(n) = true
-    ad_hoc_data.add_equation(data_equation({vn1),
+    ad_hoc_data.add_equation(data_equation(variable_list({vn1}),
       less(vn1, sort_nat::cnat(sort_nat::succ(vn1))), sort_bool::true_()));
 
     return ad_hoc_data;
