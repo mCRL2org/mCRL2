@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_IDENTIFIER_GENERATOR_H
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include <set>

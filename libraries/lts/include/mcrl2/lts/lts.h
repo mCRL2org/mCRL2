@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <cstdio>
+#include <cassert>
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/lts/lts_type.h"
 

@@ -13,7 +13,6 @@
 
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include <algorithm>
 #include <functional>
 #include <map>

@@ -21,7 +21,6 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

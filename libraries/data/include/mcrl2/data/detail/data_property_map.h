@@ -23,7 +23,6 @@
 #include <boost/lexical_cast.hpp>
 #include <functional>
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/utilities/text_utility.h"

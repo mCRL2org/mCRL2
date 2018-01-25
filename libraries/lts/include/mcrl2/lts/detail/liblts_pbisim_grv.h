@@ -10,8 +10,10 @@
 
 #ifndef _LIBLTS_PBISIM_GRV_H
 #define _LIBLTS_PBISIM_GRV_H
-#include <vector>
 #include <cassert>
+#include <vector>
+#include <deque>
+#include <stack>
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/embedded_list.h"

@@ -25,7 +25,6 @@
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include <cassert>
 #include <ctime>
 #include <deque>

@@ -21,7 +21,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 
@@ -716,50 +715,50 @@ namespace mcrl2 {
         variable vq1("q1",pos());
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), equal_to(cdub(vb, vp), c1()), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool::and_(equal_to(vb, vc), equal_to(vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp), equal_to(succ(vp), c1()), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vq), equal_to(c1(), succ(vq)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vc, vp, vq), equal_to(succ(vp), cdub(vc, vq)), equal_to(vp, pos_predecessor(cdub(vc, vq)))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), equal_to(cdub(vb, vp), succ(vq)), equal_to(pos_predecessor(cdub(vb, vp)), vq)));
-        result.push_back(data_equation(atermpp::make_vector(vp), less(vp, c1()), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), less(c1(), cdub(vb, vp)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vc, vp, vq), less(succ(vp), cdub(vc, vq)), less(vp, pos_predecessor(cdub(vc, vq)))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less(cdub(vb, vp), succ(vq)), less_equal(cdub(vb, vp), vq)));
-        result.push_back(data_equation(atermpp::make_vector(vq), less(c1(), succ(vq)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vp), less_equal(c1(), vp), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), less_equal(cdub(vb, vp), c1()), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vc, vp, vq), less_equal(succ(vp), cdub(vc, vq)), less(vp, cdub(vc, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less_equal(cdub(vb, vp), succ(vq)), less_equal(pos_predecessor(cdub(vb, vp)), vq)));
-        result.push_back(data_equation(atermpp::make_vector(vp), less_equal(succ(vp), c1()), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), maximum(vp, vq), if_(less_equal(vp, vq), vq, vp)));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), minimum(vp, vq), if_(less_equal(vp, vq), vp, vq)));
+        result.push_back(data_equation(variable_list({vb, vp}), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vb, vp}), equal_to(cdub(vb, vp), c1()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vb, vc, vp, vq}), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool::and_(equal_to(vb, vc), equal_to(vp, vq))));
+        result.push_back(data_equation(variable_list({vp}), equal_to(succ(vp), c1()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vq}), equal_to(c1(), succ(vq)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vc, vp, vq}), equal_to(succ(vp), cdub(vc, vq)), equal_to(vp, pos_predecessor(cdub(vc, vq)))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), equal_to(cdub(vb, vp), succ(vq)), equal_to(pos_predecessor(cdub(vb, vp)), vq)));
+        result.push_back(data_equation(variable_list({vp}), less(vp, c1()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vb, vp}), less(c1(), cdub(vb, vp)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vb, vc, vp, vq}), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
+        result.push_back(data_equation(variable_list({vc, vp, vq}), less(succ(vp), cdub(vc, vq)), less(vp, pos_predecessor(cdub(vc, vq)))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), less(cdub(vb, vp), succ(vq)), less_equal(cdub(vb, vp), vq)));
+        result.push_back(data_equation(variable_list({vq}), less(c1(), succ(vq)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vp}), less_equal(c1(), vp), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vb, vp}), less_equal(cdub(vb, vp), c1()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vb, vc, vp, vq}), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
+        result.push_back(data_equation(variable_list({vc, vp, vq}), less_equal(succ(vp), cdub(vc, vq)), less(vp, cdub(vc, vq))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), less_equal(cdub(vb, vp), succ(vq)), less_equal(pos_predecessor(cdub(vb, vp)), vq)));
+        result.push_back(data_equation(variable_list({vp}), less_equal(succ(vp), c1()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vp, vq}), maximum(vp, vq), if_(less_equal(vp, vq), vq, vp)));
+        result.push_back(data_equation(variable_list({vp, vq}), minimum(vp, vq), if_(less_equal(vp, vq), vp, vq)));
         result.push_back(data_equation(variable_list(), succ(c1()), cdub(sort_bool::false_(), c1())));
-        result.push_back(data_equation(atermpp::make_vector(vp), succ(cdub(sort_bool::false_(), vp)), cdub(sort_bool::true_(), vp)));
-        result.push_back(data_equation(atermpp::make_vector(vp), succ(cdub(sort_bool::true_(), vp)), cdub(sort_bool::false_(), succ(vp))));
+        result.push_back(data_equation(variable_list({vp}), succ(cdub(sort_bool::false_(), vp)), cdub(sort_bool::true_(), vp)));
+        result.push_back(data_equation(variable_list({vp}), succ(cdub(sort_bool::true_(), vp)), cdub(sort_bool::false_(), succ(vp))));
         result.push_back(data_equation(variable_list(), pos_predecessor(c1()), c1()));
         result.push_back(data_equation(variable_list(), pos_predecessor(cdub(sort_bool::false_(), c1())), c1()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), pos_predecessor(cdub(sort_bool::false_(), cdub(vb, vp))), cdub(sort_bool::true_(), pos_predecessor(cdub(vb, vp)))));
-        result.push_back(data_equation(atermpp::make_vector(vp), pos_predecessor(cdub(sort_bool::true_(), vp)), cdub(sort_bool::false_(), vp)));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), plus(vp, vq), add_with_carry(sort_bool::false_(), vp, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vp), add_with_carry(sort_bool::false_(), c1(), vp), succ(vp)));
-        result.push_back(data_equation(atermpp::make_vector(vp), add_with_carry(sort_bool::true_(), c1(), vp), succ(succ(vp))));
-        result.push_back(data_equation(atermpp::make_vector(vp), add_with_carry(sort_bool::false_(), vp, c1()), succ(vp)));
-        result.push_back(data_equation(atermpp::make_vector(vp), add_with_carry(sort_bool::true_(), vp, c1()), succ(succ(vp))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), add_with_carry(vb, cdub(vc, vp), cdub(vc, vq)), cdub(vb, add_with_carry(vc, vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp), times(c1(), vp), vp));
-        result.push_back(data_equation(atermpp::make_vector(vp), times(vp, c1()), vp));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::false_(), vp), vq), cdub(sort_bool::false_(), times(vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(vp, cdub(sort_bool::false_(), vq)), cdub(sort_bool::false_(), times(vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::true_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::true_(), add_with_carry(sort_bool::false_(), vp, add_with_carry(sort_bool::false_(), vq, cdub(sort_bool::false_(), times(vp, vq)))))));
+        result.push_back(data_equation(variable_list({vb, vp}), pos_predecessor(cdub(sort_bool::false_(), cdub(vb, vp))), cdub(sort_bool::true_(), pos_predecessor(cdub(vb, vp)))));
+        result.push_back(data_equation(variable_list({vp}), pos_predecessor(cdub(sort_bool::true_(), vp)), cdub(sort_bool::false_(), vp)));
+        result.push_back(data_equation(variable_list({vp, vq}), plus(vp, vq), add_with_carry(sort_bool::false_(), vp, vq)));
+        result.push_back(data_equation(variable_list({vp}), add_with_carry(sort_bool::false_(), c1(), vp), succ(vp)));
+        result.push_back(data_equation(variable_list({vp}), add_with_carry(sort_bool::true_(), c1(), vp), succ(succ(vp))));
+        result.push_back(data_equation(variable_list({vp}), add_with_carry(sort_bool::false_(), vp, c1()), succ(vp)));
+        result.push_back(data_equation(variable_list({vp}), add_with_carry(sort_bool::true_(), vp, c1()), succ(succ(vp))));
+        result.push_back(data_equation(variable_list({vb, vc, vp, vq}), add_with_carry(vb, cdub(vc, vp), cdub(vc, vq)), cdub(vb, add_with_carry(vc, vp, vq))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), add_with_carry(vb, cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), add_with_carry(vb, cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
+        result.push_back(data_equation(variable_list({vp}), times(c1(), vp), vp));
+        result.push_back(data_equation(variable_list({vp}), times(vp, c1()), vp));
+        result.push_back(data_equation(variable_list({vp, vq}), times(cdub(sort_bool::false_(), vp), vq), cdub(sort_bool::false_(), times(vp, vq))));
+        result.push_back(data_equation(variable_list({vp, vq}), times(vp, cdub(sort_bool::false_(), vq)), cdub(sort_bool::false_(), times(vp, vq))));
+        result.push_back(data_equation(variable_list({vp, vq}), times(cdub(sort_bool::true_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::true_(), add_with_carry(sort_bool::false_(), vp, add_with_carry(sort_bool::false_(), vq, cdub(sort_bool::false_(), times(vp, vq)))))));
         result.push_back(data_equation(variable_list(), powerlog2_pos(c1()), c1()));
-        result.push_back(data_equation(atermpp::make_vector(vb), powerlog2_pos(cdub(vb, c1())), c1()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp), powerlog2_pos(cdub(vb, cdub(vc, vp))), cdub(sort_bool::false_(), powerlog2_pos(vp))));
+        result.push_back(data_equation(variable_list({vb}), powerlog2_pos(cdub(vb, c1())), c1()));
+        result.push_back(data_equation(variable_list({vb, vc, vp}), powerlog2_pos(cdub(vb, cdub(vc, vp))), cdub(sort_bool::false_(), powerlog2_pos(vp))));
         return result;
       }
 

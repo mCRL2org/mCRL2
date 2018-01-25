@@ -20,7 +20,6 @@
 // Workaround for OS X with Apples patched gcc 4.0.1
 #undef nil
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"

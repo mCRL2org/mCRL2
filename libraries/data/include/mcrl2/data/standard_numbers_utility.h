@@ -17,7 +17,6 @@
 // Workaround for OS X with Apples patched gcc 4.0.1
 #undef nil
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/nat.h"

@@ -9,7 +9,6 @@
 /// \file action_test.cpp
 /// \brief Add your file description here.
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/process/process_expression.h"
@@ -22,8 +21,6 @@ using namespace mcrl2;
 
 int test_main(int argc, char** argv)
 {
-  using atermpp::make_vector;
-
   data::sort_expression X(data::basic_sort("X"));
   data::sort_expression Y(data::basic_sort("Y"));
 

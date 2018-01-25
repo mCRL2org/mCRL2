@@ -13,7 +13,7 @@
 #define MCRL2_ATERMPP_BUILDER_H
 
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace atermpp {

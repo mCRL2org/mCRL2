@@ -26,7 +26,7 @@ namespace detail
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression > &l, const atermpp::term_list< CompatibleExpression > &m)
+atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression >& l, const atermpp::term_list< CompatibleExpression >& m)
 {
   static_assert(std::is_convertible< CompatibleExpression, Expression >::value,"Concatenated lists must be of the same type (1)");
 
@@ -40,7 +40,7 @@ atermpp::term_list< Expression > operator+(const atermpp::term_list< Expression 
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, const CompatibleExpression &m)
+atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, const CompatibleExpression& m)
 {
   l.push_back(down_cast< Expression >(m));
   return l;
@@ -53,7 +53,7 @@ atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, c
 /// \note Candidate for moving to atermpp library
 template < typename Expression, typename CompatibleExpression >
 inline
-atermpp::term_list< Expression > operator+(const CompatibleExpression &m, atermpp::term_list< Expression > l)
+atermpp::term_list< Expression > operator+(const CompatibleExpression& m, atermpp::term_list< Expression > l)
 {
   l.push_front(m);
   return l;

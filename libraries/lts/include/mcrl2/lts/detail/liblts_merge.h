@@ -28,6 +28,7 @@
 #ifndef MCRL2_LTS_LIBLTS_MERGE_H
 #define MCRL2_LTS_LIBLTS_MERGE_H
 
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/lts.h"
 
 namespace mcrl2

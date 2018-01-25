@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_BISIMULATION_H
 #define MCRL2_PBES_BISIMULATION_H
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/merge_data_specifications.h"

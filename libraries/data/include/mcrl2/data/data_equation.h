@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/data_expression.h"

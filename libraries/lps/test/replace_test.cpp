@@ -9,7 +9,6 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"

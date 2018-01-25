@@ -715,7 +715,7 @@ class equation_declaration():
     if len(variables) == 0:
       variables_string = "variable_list()"
     else:
-      variables_string = "atermpp::make_vector({0})".format(", ".join(sorted([v.code(spec, function_spec, variable_spec) for v in variables])))
+      variables_string = "variable_list({" + "{0}".format(", ".join(sorted([v.code(spec, function_spec, variable_spec) for v in variables]))) + "})"
 
     if self.condition:
       return "result.push_back(data_equation({0}, {1}, {2}, {3}));".format(variables_string, self.condition.code(spec, function_spec, variable_spec), self.lhs.code(spec, function_spec, variable_spec), self.rhs.code(spec, function_spec, variable_spec))
@@ -979,7 +979,7 @@ class lambda_abstraction(data_expression):
 
   def code(self, spec, function_spec, variable_spec, indentlog = 0):
     LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
-    result = "lambda(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
+    result = "lambda(variable_list({%s}), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
     LOG.debug(indent(indentlog) + "Yields {0}".format(result))
     return result
 
@@ -1017,7 +1017,7 @@ class forall(data_expression):
 
   def code(self, spec, function_spec, variable_spec, indentlog = 0):
     LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
-    result = "forall(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
+    result = "forall(variable_list({%s}), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
     LOG.debug(indent(indentlog) + "Yields {0}".format(result))
     return result
 
@@ -1055,7 +1055,7 @@ class exists(data_expression):
 
   def code(self, spec, function_spec, variable_spec, indentlog=0):
     LOG.debug(indent(indentlog) + "Generating code for {0}".format(self))
-    result = "exists(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
+    result = "exists(variable_list({%s}), %s)" % (data_variable(self.variable_declaration.id).code(spec, function_spec, variable_spec, indentlog+2), self.expression.code(spec, function_spec, variable_spec, indentlog+2))
     LOG.debug(indent(indentlog) + "Yields {0}".format(result))
     return result
 
@@ -1123,7 +1123,7 @@ class sort_expression_list():
     return ", ".join(self.elements)
 
   def code(self):
-    return "atermpp::make_vector({0})".format(", ".join([e.code() for e in self.elements()]))
+    return "variable_list({" + "{0}".format(", ".join([e.code() for e in self.elements()])) + "})"
 
 class sort_expression():
   def __init__(self):
@@ -1311,7 +1311,7 @@ class structured_sort_declaration():
       return str(self.id)
 
   def struct_constructor_arguments(self, spec):
-    return "atermpp::make_vector({0})".format(", ".join(["structured_sort_constructor_argument(\"%s\", %s)" % (a[1], a[0].code(spec)) for a in self.arguments.elements]))
+    return "variable_list({" + "{0}".format(", ".join(["structured_sort_constructor_argument(\"%s\", %s)" % (a[1], a[0].code(spec)) for a in self.arguments.elements])) + "})"
 
   def code(self, spec):
     if self.arguments == None:
@@ -1992,7 +1992,6 @@ class specification():
     code += "#include \"mcrl2/data/function_symbol.h\"\n"
     code += "#include \"mcrl2/data/application.h\"\n"
     code += "#include \"mcrl2/data/data_equation.h\"\n"
-    code += "#include \"mcrl2/atermpp/container_utility.h\"\n"
     code += "#include \"mcrl2/data/standard.h\"\n"
 #    code += "#include \"mcrl2/data/data_specification.h\"\n"
     if self.has_lambda():

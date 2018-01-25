@@ -15,7 +15,6 @@
 #include <iostream>
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"

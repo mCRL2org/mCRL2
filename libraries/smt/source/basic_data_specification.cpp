@@ -756,9 +756,9 @@ void basic_data_specification::add_numerical_operators(
   add_function_definition(data::greater_equal(pos), greater_equal);
   add_function_definition(data::sort_pos::plus(), plus);
   add_function_definition(data::sort_pos::times(), times);
-  add_function_definition(data::sort_pos::maximum(), maximum, atermpp::make_vector(p1, p2), data::if_(data::greater(p1, p2), p1, p2));
-  add_function_definition(data::sort_pos::minimum(), minimum, atermpp::make_vector(p1, p2), data::if_(data::less(p1, p2), p1, p2));
-  add_function_definition(data::sort_pos::succ(), atermpp::make_vector(p1), data::sort_pos::plus(p1, pos_one));
+  add_function_definition(data::sort_pos::maximum(), maximum, {p1, p2}, data::if_(data::greater(p1, p2), p1, p2));
+  add_function_definition(data::sort_pos::minimum(), minimum, {p1, p2}, data::if_(data::less(p1, p2), p1, p2));
+  add_function_definition(data::sort_pos::succ(), {p1}, data::sort_pos::plus(p1, pos_one));
 
   add_function_definition(data::less(nat), less);
   add_function_definition(data::less_equal(nat), less_equal);
@@ -770,14 +770,14 @@ void basic_data_specification::add_numerical_operators(
   add_function_definition(data::sort_nat::times(nat, nat), times);
   add_function_definition(data::sort_nat::div(), div);
   add_function_definition(data::sort_nat::mod(), mod);
-  add_function_definition(data::sort_nat::maximum(pos, nat), maximum, atermpp::make_vector(p1, n1), data::sort_nat::nat2pos(data::if_(data::greater(data::sort_nat::pos2nat(p1), n1), data::sort_nat::pos2nat(p1), n1)));
-  add_function_definition(data::sort_nat::maximum(nat, pos), maximum, atermpp::make_vector(n1, p1), data::sort_nat::nat2pos(data::if_(data::greater(data::sort_nat::pos2nat(p1), n1), data::sort_nat::pos2nat(p1), n1)));
-  add_function_definition(data::sort_nat::maximum(nat, nat), maximum, atermpp::make_vector(n1, n2), data::if_(data::greater(n1, n2), n1, n2));
-  add_function_definition(data::sort_nat::minimum(nat, nat), minimum, atermpp::make_vector(n1, n2), data::if_(data::less(n1, n2), n1, n2));
+  add_function_definition(data::sort_nat::maximum(pos, nat), maximum, {p1, n1}, data::sort_nat::nat2pos(data::if_(data::greater(data::sort_nat::pos2nat(p1), n1), data::sort_nat::pos2nat(p1), n1)));
+  add_function_definition(data::sort_nat::maximum(nat, pos), maximum, {n1, p1}, data::sort_nat::nat2pos(data::if_(data::greater(data::sort_nat::pos2nat(p1), n1), data::sort_nat::pos2nat(p1), n1)));
+  add_function_definition(data::sort_nat::maximum(nat, nat), maximum, {n1, n2}, data::if_(data::greater(n1, n2), n1, n2));
+  add_function_definition(data::sort_nat::minimum(nat, nat), minimum, {n1, n2}, data::if_(data::less(n1, n2), n1, n2));
   add_function_definition(data::sort_nat::pos2nat(), identity);
   add_function_definition(data::sort_nat::nat2pos(), identity);
-  add_function_definition(data::sort_nat::succ(nat), make_vector(n1), data::sort_nat::plus(n1, pos_one));
-  add_function_definition(data::sort_nat::pred(), make_vector(p1), data::sort_int::int2nat(data::sort_int::minus(p1, pos_one)));
+  add_function_definition(data::sort_nat::succ(nat), {n1}, data::sort_nat::plus(n1, pos_one));
+  add_function_definition(data::sort_nat::pred(), {p1}, data::sort_int::int2nat(data::sort_int::minus(p1, pos_one)));
 
   add_function_definition(data::less(int_), less);
   add_function_definition(data::less_equal(int_), less_equal);
@@ -790,23 +790,23 @@ void basic_data_specification::add_numerical_operators(
   add_function_definition(data::sort_int::times(int_, int_), times);
   add_function_definition(data::sort_int::div(int_, pos), div);
   add_function_definition(data::sort_int::mod(int_, pos), mod);
-  add_function_definition(data::sort_int::negate(pos), unary_minus, atermpp::make_vector(p1), data::sort_int::minus(int_zero, data::sort_int::pos2int(p1)));
-  add_function_definition(data::sort_int::negate(nat), unary_minus, atermpp::make_vector(n1), data::sort_int::minus(int_zero, data::sort_int::nat2int(n1)));
-  add_function_definition(data::sort_int::negate(int_), unary_minus, atermpp::make_vector(i1), data::sort_int::minus(int_zero, i1));
-  add_function_definition(data::sort_int::maximum(pos, int_), maximum, atermpp::make_vector(p1, i1), data::sort_int::int2pos(data::if_(data::greater(data::sort_int::pos2int(p1), i1), data::sort_int::pos2int(p1), i1)));
-  add_function_definition(data::sort_int::maximum(int_, pos), maximum, atermpp::make_vector(i1, p1), data::sort_int::int2pos(data::if_(data::greater(data::sort_int::pos2int(p1), i1), data::sort_int::pos2int(p1), i1)));
-  add_function_definition(data::sort_int::maximum(nat, int_), maximum, atermpp::make_vector(n1, i1), data::sort_int::int2nat(data::if_(data::greater(data::sort_int::nat2int(n1), i1), data::sort_int::nat2int(n1), i1)));
-  add_function_definition(data::sort_int::maximum(int_, nat), maximum, atermpp::make_vector(i1, n1), data::sort_int::int2nat(data::if_(data::greater(data::sort_int::nat2int(n1), i1), data::sort_int::nat2int(n1), i1)));
-  add_function_definition(data::sort_int::maximum(int_, int_), maximum, atermpp::make_vector(i1, i2), data::if_(data::greater(i1, i2), i1, i2));
-  add_function_definition(data::sort_int::minimum(int_, int_), minimum, atermpp::make_vector(i1, i2), data::if_(data::less(i1, i2), i1, i2));
-  add_function_definition(data::sort_int::abs(), abs, atermpp::make_vector(i1), data::if_(data::less(i1, int_zero), data::sort_int::negate(i1), i1));
+  add_function_definition(data::sort_int::negate(pos), unary_minus, {p1}, data::sort_int::minus(int_zero, data::sort_int::pos2int(p1)));
+  add_function_definition(data::sort_int::negate(nat), unary_minus, {n1}, data::sort_int::minus(int_zero, data::sort_int::nat2int(n1)));
+  add_function_definition(data::sort_int::negate(int_), unary_minus, {i1}, data::sort_int::minus(int_zero, i1));
+  add_function_definition(data::sort_int::maximum(pos, int_), maximum, {p1, i1}, data::sort_int::int2pos(data::if_(data::greater(data::sort_int::pos2int(p1), i1), data::sort_int::pos2int(p1), i1)));
+  add_function_definition(data::sort_int::maximum(int_, pos), maximum, {i1, p1}, data::sort_int::int2pos(data::if_(data::greater(data::sort_int::pos2int(p1), i1), data::sort_int::pos2int(p1), i1)));
+  add_function_definition(data::sort_int::maximum(nat, int_), maximum, {n1, i1}, data::sort_int::int2nat(data::if_(data::greater(data::sort_int::nat2int(n1), i1), data::sort_int::nat2int(n1), i1)));
+  add_function_definition(data::sort_int::maximum(int_, nat), maximum, {i1, n1}, data::sort_int::int2nat(data::if_(data::greater(data::sort_int::nat2int(n1), i1), data::sort_int::nat2int(n1), i1)));
+  add_function_definition(data::sort_int::maximum(int_, int_), maximum, {i1, i2}, data::if_(data::greater(i1, i2), i1, i2));
+  add_function_definition(data::sort_int::minimum(int_, int_), minimum, {i1, i2}, data::if_(data::less(i1, i2), i1, i2));
+  add_function_definition(data::sort_int::abs(), abs, {i1}, data::if_(data::less(i1, int_zero), data::sort_int::negate(i1), i1));
   add_function_definition(data::sort_int::pos2int(), identity);
   add_function_definition(data::sort_int::int2pos(), identity);
   add_function_definition(data::sort_int::nat2int(), identity);
   add_function_definition(data::sort_int::int2nat(), identity);
-  add_function_definition(data::sort_int::succ(int_), atermpp::make_vector(i1), data::sort_int::plus(i1, int_one));
-  add_function_definition(data::sort_int::pred(nat), atermpp::make_vector(n1), data::sort_int::minus(n1, nat_one));
-  add_function_definition(data::sort_int::pred(int_), atermpp::make_vector(i1), data::sort_int::minus(i1, int_one));
+  add_function_definition(data::sort_int::succ(int_), {i1}, data::sort_int::plus(i1, int_one));
+  add_function_definition(data::sort_int::pred(nat), {n1}, data::sort_int::minus(n1, nat_one));
+  add_function_definition(data::sort_int::pred(int_), {i1}, data::sort_int::minus(i1, int_one));
 
   add_function_definition(data::less(real), less);
   add_function_definition(data::less_equal(real), less_equal);
@@ -820,20 +820,20 @@ void basic_data_specification::add_numerical_operators(
   add_function_definition(data::sort_real::divides(int_, int_), divides);
   add_function_definition(data::sort_real::divides(real, real), divides);
   add_function_definition(data::sort_real::floor(), floor);
-  add_function_definition(data::sort_real::ceil(), ceil, atermpp::make_vector(r1), data::sort_real::negate(data::sort_real::floor(data::sort_real::negate(r1))));
-  add_function_definition(data::sort_real::round(), round, atermpp::make_vector(r1), data::sort_real::floor(data::sort_real::plus(r1, real_half)));
-  add_function_definition(data::sort_real::negate(real), unary_minus, atermpp::make_vector(r1), data::sort_real::minus(real_zero, r1));
-  add_function_definition(data::sort_real::maximum(real, real), maximum, atermpp::make_vector(r1, r2), data::if_(data::greater(r1, r2), r1, r2));
-  add_function_definition(data::sort_real::minimum(real, real), minimum, atermpp::make_vector(r1, r2), data::if_(data::less(r1, r2), r1, r2));
-  add_function_definition(data::sort_real::abs(real), abs, atermpp::make_vector(r1), data::if_(data::less(r1, real_zero), data::sort_real::negate(r1), r1));
+  add_function_definition(data::sort_real::ceil(), ceil, {r1}, data::sort_real::negate(data::sort_real::floor(data::sort_real::negate(r1))));
+  add_function_definition(data::sort_real::round(), round, {r1}, data::sort_real::floor(data::sort_real::plus(r1, real_half)));
+  add_function_definition(data::sort_real::negate(real), unary_minus, {r1}, data::sort_real::minus(real_zero, r1));
+  add_function_definition(data::sort_real::maximum(real, real), maximum, {r1, r2}, data::if_(data::greater(r1, r2), r1, r2));
+  add_function_definition(data::sort_real::minimum(real, real), minimum, {r1, r2}, data::if_(data::less(r1, r2), r1, r2));
+  add_function_definition(data::sort_real::abs(real), abs, {r1}, data::if_(data::less(r1, real_zero), data::sort_real::negate(r1), r1));
   add_function_definition(data::sort_real::pos2real(), identity);
   add_function_definition(data::sort_real::real2pos(), identity);
   add_function_definition(data::sort_real::nat2real(), identity);
   add_function_definition(data::sort_real::real2nat(), identity);
   add_function_definition(data::sort_real::int2real(), identity);
   add_function_definition(data::sort_real::real2int(), identity);
-  add_function_definition(data::sort_real::succ(real), atermpp::make_vector(r1), data::sort_real::plus(r1, real_one));
-  add_function_definition(data::sort_real::pred(real), atermpp::make_vector(r1), data::sort_real::minus(r1, real_one));
+  add_function_definition(data::sort_real::succ(real), {r1}, data::sort_real::plus(r1, real_one));
+  add_function_definition(data::sort_real::pred(real), {r1}, data::sort_real::minus(r1, real_one));
 }
 
 void basic_data_specification::add_recursive_function(const data::function_symbol& function)
@@ -873,7 +873,7 @@ void basic_data_specification::add_recursive_functions(const data::data_specific
       // Add the element_at function.
       data::variable n("n", data::sort_nat::nat());
       data::variable l("l", data::sort_list::list(*i));
-      add_function_definition(data::sort_list::element_at(*i), atermpp::make_vector(l, n), data::if_(data::equal_to(n, data::sort_nat::c0()), data::sort_list::head(*i)(l), data::sort_list::element_at(*i)(data::sort_list::tail(*i)(l), data::sort_nat::pred(n))));
+      add_function_definition(data::sort_list::element_at(*i), {l, n}, data::if_(data::equal_to(n, data::sort_nat::c0()), data::sort_list::head(*i)(l), data::sort_list::element_at(*i)(data::sort_list::tail(*i)(l), data::sort_nat::pred(n))));
     }
   }
 

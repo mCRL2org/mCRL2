@@ -18,7 +18,6 @@
 #include <set>
 #include <utility>
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/container_sort.h"

@@ -17,8 +17,7 @@
 #ifndef MCRL2_LTS_TRANSITION_H
 #define MCRL2_LTS_TRANSITION_H
 
-#include "mcrl2/atermpp/container_utility.h"
-
+#include <cstddef>   // for std::
 
 namespace mcrl2
 {

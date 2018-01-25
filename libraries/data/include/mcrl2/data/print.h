@@ -18,7 +18,6 @@
 #include <sstream>
 #include <type_traits>
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/bag.h"

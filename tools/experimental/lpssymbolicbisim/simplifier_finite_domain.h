@@ -58,17 +58,17 @@ protected:
     variable vb3("b3", sort_bool::bool_());
 
     //  a && (b || c) = a && b || a && c
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), sort_bool::and_(vb1, sort_bool::or_(vb2, vb3)), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), sort_bool::and_(vb1, sort_bool::or_(vb2, vb3)), 
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::and_(vb1,vb3))));
     //  a || (b || c) = (a || b) || c;
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), sort_bool::or_(vb1, sort_bool::or_(vb2,vb3)),
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), sort_bool::or_(vb1, sort_bool::or_(vb2,vb3)),
       sort_bool::or_(sort_bool::or_(vb1,vb2), vb3)));
     //  a && b || !a && b = b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), 
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::and_(sort_bool::not_(vb1), vb2)),
       vb2));
     //  !a && b || a && b = b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), 
       sort_bool::or_(sort_bool::and_(sort_bool::not_(vb1),vb2), sort_bool::and_(vb1, vb2)),
       vb2));
 
@@ -86,11 +86,11 @@ protected:
     variable vb3("b3", sort_bool::bool_());
 
     //  a && b || a && c = a && (b || c)
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), 
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::and_(vb1,vb3)),
       sort_bool::and_(vb1, sort_bool::or_(vb2, vb3))));
     //  (a && b) && c = a && (b && c);
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), sort_bool::and_(sort_bool::and_(vb1,vb2), vb3),
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), sort_bool::and_(sort_bool::and_(vb1,vb2), vb3),
       sort_bool::and_(vb1, sort_bool::and_(vb2,vb3))));
 
     undo_nesting_rewr = rewriter(ad_hoc_data);

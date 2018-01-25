@@ -8,7 +8,6 @@
 /// \file remove_parameters_test.cpp
 /// \brief Tests for removing parameters..
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/detail/test_utility.h"

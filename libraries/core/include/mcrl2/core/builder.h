@@ -15,8 +15,9 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/atermpp/type_traits.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 namespace mcrl2
 {

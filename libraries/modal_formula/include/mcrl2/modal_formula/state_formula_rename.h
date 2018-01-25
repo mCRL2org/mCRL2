@@ -16,7 +16,6 @@
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
 #include <deque>
 

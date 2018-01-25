@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 
 // utilities
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 
 // sort_specification

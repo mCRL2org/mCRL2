@@ -31,7 +31,6 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_LAZY_H

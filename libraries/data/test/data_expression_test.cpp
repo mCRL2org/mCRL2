@@ -12,7 +12,6 @@
 #include <boost/test/minimal.hpp>
 #include <iostream>
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
@@ -157,7 +156,7 @@ void lambda_test()
   BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
   const sort_expression& s_(s);
-  sort_expression_vector s_l(atermpp::make_vector(s_));
+  sort_expression_vector s_l {s_};
   BOOST_CHECK(!s_l.empty());
   function_sort fs(s_l, s);
   BOOST_CHECK(I.sort() == fs);
@@ -187,7 +186,7 @@ void forall_test()
   BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
   const sort_expression& s_(s);
-  sort_expression_vector s_l(atermpp::make_vector(s_));
+  sort_expression_vector s_l {s_};
 
   // TODO Check sort
 
@@ -216,7 +215,7 @@ void exists_test()
   BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
   const sort_expression& s_(s);
-  sort_expression_vector s_l(atermpp::make_vector(s_));
+  sort_expression_vector s_l {s_};
 
   // TODO Check sort
 

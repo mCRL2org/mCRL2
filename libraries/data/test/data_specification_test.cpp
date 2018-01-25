@@ -172,7 +172,7 @@ void test_sorts()
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   basic_sort s2("S2");
-  sort_expression_vector s2l(atermpp::make_vector(reinterpret_cast<sort_expression&>(s2)));
+  sort_expression_vector s2l {s2};
   spec.add_context_sort(s2);
   spec1.add_context_sorts(s2l);
   BOOST_CHECK(compare_for_equality(spec, spec1));
@@ -214,13 +214,13 @@ void test_constructors()
 
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(atermpp::make_vector(sort_expression(s0)),s);
+  function_sort s0s(sort_expression_list({s0}),s);
   data::function_symbol f("f", s);
   data::function_symbol g("g", s0s);
   data::function_symbol h("h", s0);
-  function_symbol_vector fgl(atermpp::make_vector(f,g));
-  function_symbol_vector hl(atermpp::make_vector(h));
-  function_symbol_vector fghl(atermpp::make_vector(f,g,h));
+  function_symbol_vector fgl {f,g};
+  function_symbol_vector hl {h};
+  function_symbol_vector fghl {f,g,h};
 
   data_specification spec;
   spec.add_sort(s);
@@ -252,7 +252,7 @@ void test_constructors()
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   spec.add_constructor(i);
-  function_symbol_vector il(atermpp::make_vector(i));
+  function_symbol_vector il {i};
   std::for_each(il.begin(), il.end(), std::bind(&data_specification::add_constructor, &spec1, std::placeholders::_1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
@@ -267,14 +267,14 @@ void test_functions()
 
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
+  function_sort s0s(sort_expression_list({s0}), s);
   data::function_symbol f("f", s);
   data::function_symbol g("g", s0s);
   data::function_symbol h("h", s0);
 
-  function_symbol_vector fgl(atermpp::make_vector(f,g));
-  function_symbol_vector hl(atermpp::make_vector(h));
-  function_symbol_vector fghl(atermpp::make_vector(f,g,h));
+  function_symbol_vector fgl {f,g};
+  function_symbol_vector hl {h};
+  function_symbol_vector fghl {f,g,h};
 
   data_specification spec;
   spec.add_sort(s);
@@ -306,7 +306,7 @@ std::cerr << "#mappings " << spec.mappings().size() << "\n";
 
   data::function_symbol i("i", s0);
   spec.add_mapping(i);
-  function_symbol_vector il(atermpp::make_vector(i));
+  function_symbol_vector il {i}; 
   std::for_each(il.begin(), il.end(), std::bind(&data_specification::add_mapping, &spec1, std::placeholders::_1));
   compare_for_equality(spec, spec1);
 
@@ -320,12 +320,12 @@ void test_equations()
   std::clog << "test_equations" << std::endl;
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(atermpp::make_vector(reinterpret_cast<sort_expression&>(s0)), s);
+  function_sort s0s(sort_expression_list({s0}), s);
   data::function_symbol f("f", s0s);
   variable x("x", s0);
-  data_expression_vector xel(atermpp::make_vector(reinterpret_cast<data_expression&>(x)));
+  data_expression_vector xel {x};
   application fx(f, xel.begin(), xel.end());
-  variable_vector xl(atermpp::make_vector(x));
+  variable_vector xl {x};
   data_equation fxx(xl, x, fx, x);
 
   data_specification spec;
@@ -336,13 +336,13 @@ void test_equations()
   spec1 = spec;
   BOOST_CHECK(compare_for_equality(spec, spec1));
   spec.add_equation(fxx);
-  data_equation_vector fxxl(atermpp::make_vector(fxx));
+  data_equation_vector fxxl {fxx};
   std::for_each(fxxl.begin(), fxxl.end(), std::bind(&data_specification::add_equation, &spec1, std::placeholders::_1));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   data_equation fxf(xl, x, fx, f);
-  data_equation_vector fxfl(atermpp::make_vector(fxf));
+  data_equation_vector fxfl {fxf};
   spec.add_equation(fxf);
   std::for_each(fxfl.begin(), fxfl.end(), std::bind(&data_specification::add_equation, &spec1, std::placeholders::_1));
 
@@ -362,11 +362,11 @@ void test_is_certainly_finite()
   std::clog << "test_is_certainly_finite" << std::endl;
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s0(atermpp::make_vector(static_cast<sort_expression&>(s0)), s0);
+  function_sort s0s0(sort_expression_list({s0}), s0);
   data::function_symbol f("f", s);
   data::function_symbol g("g", s0s0);
   variable x("x", s0);
-  application gx(g, atermpp::make_vector(static_cast<data_expression&>(x)));
+  application gx(g, x);
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
@@ -556,7 +556,7 @@ void test_utility_functionality()
   basic_sort s("S");
   basic_sort s0("S0");
   basic_sort a("a");
-  function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
+  function_sort s0s(sort_expression_list({s0}), s);
   data::function_symbol f("f", s);
 
   data::function_symbol g("g", s0s);

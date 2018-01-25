@@ -35,7 +35,6 @@
 #include <utility>
 
 using namespace mcrl2;
-using atermpp::make_vector;
 using core::identifier_string;
 using data::data_expression;
 using data::variable;

@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_UNTYPED_POSSIBLE_SORTS_H
 #define MCRL2_DATA_UNTYPED_POSSIBLE_SORTS_H
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
 

@@ -21,7 +21,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 
@@ -187,7 +186,7 @@ namespace mcrl2 {
         variable vi("i",inequality());
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vi), equal_to(vi, vi), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vi}), equal_to(vi, vi), sort_bool::true_()));
         result.push_back(data_equation(variable_list(), equal_to(lt(), le()), sort_bool::false_()));
         result.push_back(data_equation(variable_list(), equal_to(le(), lt()), sort_bool::false_()));
         return result;

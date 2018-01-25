@@ -21,7 +21,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/real.h"
@@ -510,24 +509,24 @@ namespace mcrl2 {
         variable vb2("b2",bound());
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vr1, vr2, vu, vv), equal_to(cbound(vr1, vu), cbound(vr2, vv)), sort_bool::and_(equal_to(vr1, vr2), equal_to(vu, vv))));
+        result.push_back(data_equation(variable_list({vr1, vr2, vu, vv}), equal_to(cbound(vr1, vu), cbound(vr2, vv)), sort_bool::and_(equal_to(vr1, vr2), equal_to(vu, vv))));
         result.push_back(data_equation(variable_list(), equal_to(inf(), inf()), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vr1, vu), equal_to(inf(), cbound(vr1, vu)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vr1, vu), equal_to(cbound(vr1, vu), inf()), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vb1), lt(inf(), vb1), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vr1, vu), lt(cbound(vr1, vu), inf()), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vr1, vr2, vu, vv), lt(cbound(vr1, vu), cbound(vr2, vv)), sort_bool::or_(sort_bool::and_(sort_bool::and_(equal_to(vr1, vr2), equal_to(vu, sort_inequality::lt())), equal_to(vv, sort_inequality::le())), less(vr1, vr2))));
-        result.push_back(data_equation(atermpp::make_vector(vb1, vb2), lt(vb1, vb2), min_b(vb1, vb2), vb1));
-        result.push_back(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(lt(vb1, vb2)), min_b(vb1, vb2), vb2));
-        result.push_back(data_equation(atermpp::make_vector(vb1, vb2), lt(vb1, vb2), max_b(vb1, vb2), vb2));
-        result.push_back(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(lt(vb1, vb2)), max_b(vb1, vb2), vb1));
-        result.push_back(data_equation(atermpp::make_vector(vb1), add(vb1, inf()), inf()));
-        result.push_back(data_equation(atermpp::make_vector(vb1), add(inf(), vb1), inf()));
-        result.push_back(data_equation(atermpp::make_vector(vr1, vr2), add(cbound(vr1, sort_inequality::le()), cbound(vr2, sort_inequality::le())), cbound(sort_real::plus(vr1, vr2), sort_inequality::le())));
-        result.push_back(data_equation(atermpp::make_vector(vr1, vr2, vu), add(cbound(vr1, sort_inequality::lt()), cbound(vr2, vu)), cbound(sort_real::plus(vr1, vr2), sort_inequality::lt())));
-        result.push_back(data_equation(atermpp::make_vector(vr1, vr2, vu), add(cbound(vr1, vu), cbound(vr2, sort_inequality::lt())), cbound(sort_real::plus(vr1, vr2), sort_inequality::lt())));
-        result.push_back(data_equation(atermpp::make_vector(vr1), not_b(cbound(vr1, sort_inequality::lt())), cbound(sort_real::negate(vr1), sort_inequality::le())));
-        result.push_back(data_equation(atermpp::make_vector(vr1), not_b(cbound(vr1, sort_inequality::le())), cbound(sort_real::negate(vr1), sort_inequality::lt())));
+        result.push_back(data_equation(variable_list({vr1, vu}), equal_to(inf(), cbound(vr1, vu)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vr1, vu}), equal_to(cbound(vr1, vu), inf()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vb1}), lt(inf(), vb1), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vr1, vu}), lt(cbound(vr1, vu), inf()), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vr1, vr2, vu, vv}), lt(cbound(vr1, vu), cbound(vr2, vv)), sort_bool::or_(sort_bool::and_(sort_bool::and_(equal_to(vr1, vr2), equal_to(vu, sort_inequality::lt())), equal_to(vv, sort_inequality::le())), less(vr1, vr2))));
+        result.push_back(data_equation(variable_list({vb1, vb2}), lt(vb1, vb2), min_b(vb1, vb2), vb1));
+        result.push_back(data_equation(variable_list({vb1, vb2}), sort_bool::not_(lt(vb1, vb2)), min_b(vb1, vb2), vb2));
+        result.push_back(data_equation(variable_list({vb1, vb2}), lt(vb1, vb2), max_b(vb1, vb2), vb2));
+        result.push_back(data_equation(variable_list({vb1, vb2}), sort_bool::not_(lt(vb1, vb2)), max_b(vb1, vb2), vb1));
+        result.push_back(data_equation(variable_list({vb1}), add(vb1, inf()), inf()));
+        result.push_back(data_equation(variable_list({vb1}), add(inf(), vb1), inf()));
+        result.push_back(data_equation(variable_list({vr1, vr2}), add(cbound(vr1, sort_inequality::le()), cbound(vr2, sort_inequality::le())), cbound(sort_real::plus(vr1, vr2), sort_inequality::le())));
+        result.push_back(data_equation(variable_list({vr1, vr2, vu}), add(cbound(vr1, sort_inequality::lt()), cbound(vr2, vu)), cbound(sort_real::plus(vr1, vr2), sort_inequality::lt())));
+        result.push_back(data_equation(variable_list({vr1, vr2, vu}), add(cbound(vr1, vu), cbound(vr2, sort_inequality::lt())), cbound(sort_real::plus(vr1, vr2), sort_inequality::lt())));
+        result.push_back(data_equation(variable_list({vr1}), not_b(cbound(vr1, sort_inequality::lt())), cbound(sort_real::negate(vr1), sort_inequality::le())));
+        result.push_back(data_equation(variable_list({vr1}), not_b(cbound(vr1, sort_inequality::le())), cbound(sort_real::negate(vr1), sort_inequality::lt())));
         return result;
       }
 

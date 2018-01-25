@@ -21,7 +21,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/bool.h"
@@ -735,32 +734,32 @@ namespace mcrl2 {
         variable vp("p",sort_pos::pos());
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less(vs, vt)), less(vd, ve))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less_equal(vs, vt)), less(vd, ve))));
-        result.push_back(data_equation(atermpp::make_vector(vd), in(s, vd, empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(variable_list({vd, vs}), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, vs}), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
+        result.push_back(data_equation(variable_list({vd, vs}), less(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vd, vs}), less(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less(vs, vt)), less(vd, ve))));
+        result.push_back(data_equation(variable_list({vd, vs}), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vd, vs}), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less_equal(vs, vt)), less(vd, ve))));
+        result.push_back(data_equation(variable_list({vd}), in(s, vd, empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
         result.push_back(data_equation(variable_list(), count(s, empty(s)), sort_nat::c0()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
-        result.push_back(data_equation(atermpp::make_vector(vd), snoc(s, empty(s), vd), cons_(s, vd, empty(s))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), snoc(s, cons_(s, vd, vs), ve), cons_(s, vd, snoc(s, vs, ve))));
-        result.push_back(data_equation(atermpp::make_vector(vs), concat(s, empty(s), vs), vs));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), concat(s, cons_(s, vd, vs), vt), cons_(s, vd, concat(s, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vs), concat(s, vs, empty(s)), vs));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), element_at(s, cons_(s, vd, vs), sort_nat::c0()), vd));
-        result.push_back(data_equation(atermpp::make_vector(vd, vp, vs), element_at(s, cons_(s, vd, vs), sort_nat::cnat(vp)), element_at(s, vs, sort_nat::pred(vp))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), head(s, cons_(s, vd, vs)), vd));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), tail(s, cons_(s, vd, vs)), vs));
-        result.push_back(data_equation(atermpp::make_vector(vd), rhead(s, cons_(s, vd, empty(s))), vd));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), rhead(s, cons_(s, vd, cons_(s, ve, vs))), rhead(s, cons_(s, ve, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vd), rtail(s, cons_(s, vd, empty(s))), empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), rtail(s, cons_(s, vd, cons_(s, ve, vs))), cons_(s, vd, rtail(s, cons_(s, ve, vs)))));
+        result.push_back(data_equation(variable_list({vd, vs}), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
+        result.push_back(data_equation(variable_list({vd}), snoc(s, empty(s), vd), cons_(s, vd, empty(s))));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), snoc(s, cons_(s, vd, vs), ve), cons_(s, vd, snoc(s, vs, ve))));
+        result.push_back(data_equation(variable_list({vs}), concat(s, empty(s), vs), vs));
+        result.push_back(data_equation(variable_list({vd, vs, vt}), concat(s, cons_(s, vd, vs), vt), cons_(s, vd, concat(s, vs, vt))));
+        result.push_back(data_equation(variable_list({vs}), concat(s, vs, empty(s)), vs));
+        result.push_back(data_equation(variable_list({vd, vs}), element_at(s, cons_(s, vd, vs), sort_nat::c0()), vd));
+        result.push_back(data_equation(variable_list({vd, vp, vs}), element_at(s, cons_(s, vd, vs), sort_nat::cnat(vp)), element_at(s, vs, sort_nat::pred(vp))));
+        result.push_back(data_equation(variable_list({vd, vs}), head(s, cons_(s, vd, vs)), vd));
+        result.push_back(data_equation(variable_list({vd, vs}), tail(s, cons_(s, vd, vs)), vs));
+        result.push_back(data_equation(variable_list({vd}), rhead(s, cons_(s, vd, empty(s))), vd));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), rhead(s, cons_(s, vd, cons_(s, ve, vs))), rhead(s, cons_(s, ve, vs))));
+        result.push_back(data_equation(variable_list({vd}), rtail(s, cons_(s, vd, empty(s))), empty(s)));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), rtail(s, cons_(s, vd, cons_(s, ve, vs))), cons_(s, vd, rtail(s, cons_(s, ve, vs)))));
         return result;
       }
 

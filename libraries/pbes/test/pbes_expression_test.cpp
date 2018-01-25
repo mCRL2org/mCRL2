@@ -9,7 +9,6 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"

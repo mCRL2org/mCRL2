@@ -14,7 +14,6 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include <set>
 
 namespace mcrl2

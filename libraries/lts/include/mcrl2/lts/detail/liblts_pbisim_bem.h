@@ -13,6 +13,8 @@
 #include <cmath>
 #include <vector>
 #include <map>
+#include <list>
+#include <deque>
 #include <unordered_map>
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/logger.h"

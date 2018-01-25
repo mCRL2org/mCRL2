@@ -18,7 +18,6 @@
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/sequence.h"
 #include <algorithm>
 #include <functional>

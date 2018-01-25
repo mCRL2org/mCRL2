@@ -20,7 +20,6 @@
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 #include <cassert>
 #include <iostream>
 #include <set>

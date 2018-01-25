@@ -12,8 +12,8 @@
 #ifndef MCRL2_CORE_ADD_BINDING_H
 #define MCRL2_CORE_ADD_BINDING_H
 
-#include "mcrl2/atermpp/container_utility.h"
 #include <set>
+#include "mcrl2/atermpp/type_traits.h"
 
 namespace mcrl2
 {

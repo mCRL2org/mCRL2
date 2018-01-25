@@ -579,7 +579,7 @@ protected:
     {
       for(int j = 0; j < size; j++)
       {
-        m_spec.data().add_equation(data_equation(atermpp::make_vector(vd), sort_dbm::get(vd, sort_nat::nat(i), sort_nat::nat(j)), ms.get_projection_function(i,j)(vd)));
+        m_spec.data().add_equation(data_equation(variable_list({vd}), sort_dbm::get(vd, sort_nat::nat(i), sort_nat::nat(j)), ms.get_projection_function(i,j)(vd)));
       }
     }
 

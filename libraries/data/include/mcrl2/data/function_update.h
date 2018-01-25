@@ -21,7 +21,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 
 namespace mcrl2 {
@@ -149,11 +148,11 @@ namespace mcrl2 {
         variable vf("f",make_function_sort(s, t));
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vf, vv, vx), equal_to(vf(vx), vv), function_update(s, t, vf, vx, vv), vf));
-        result.push_back(data_equation(atermpp::make_vector(vf, vv, vw, vx), function_update(s, t, function_update(s, t, vf, vx, vw), vx, vv), function_update(s, t, vf, vx, vv)));
-        result.push_back(data_equation(atermpp::make_vector(vf, vv, vw, vx, vy), greater(vx, vy), function_update(s, t, function_update(s, t, vf, vy, vw), vx, vv), function_update(s, t, function_update(s, t, vf, vx, vv), vy, vw)));
-        result.push_back(data_equation(atermpp::make_vector(vf, vv, vx, vy), not_equal_to(vx, vy), function_update(s, t, vf, vx, vv)(vy), vf(vy)));
-        result.push_back(data_equation(atermpp::make_vector(vf, vv, vx), function_update(s, t, vf, vx, vv)(vx), vv));
+        result.push_back(data_equation(variable_list({vf, vv, vx}), equal_to(vf(vx), vv), function_update(s, t, vf, vx, vv), vf));
+        result.push_back(data_equation(variable_list({vf, vv, vw, vx}), function_update(s, t, function_update(s, t, vf, vx, vw), vx, vv), function_update(s, t, vf, vx, vv)));
+        result.push_back(data_equation(variable_list({vf, vv, vw, vx, vy}), greater(vx, vy), function_update(s, t, function_update(s, t, vf, vy, vw), vx, vv), function_update(s, t, function_update(s, t, vf, vx, vv), vy, vw)));
+        result.push_back(data_equation(variable_list({vf, vv, vx, vy}), not_equal_to(vx, vy), function_update(s, t, vf, vx, vv)(vy), vf(vy)));
+        result.push_back(data_equation(variable_list({vf, vv, vx}), function_update(s, t, vf, vx, vv)(vx), vv));
         return result;
       }
 

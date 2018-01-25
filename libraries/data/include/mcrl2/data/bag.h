@@ -21,7 +21,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/container_sort.h"
@@ -1175,42 +1174,42 @@ namespace mcrl2 {
         variable vd("d",s);
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vb), bag_fbag(s, vb), constructor(s, zero_function(s), vb)));
-        result.push_back(data_equation(atermpp::make_vector(vf), sort_bag::bag_comprehension(s, vf), constructor(s, vf, sort_fbag::empty(s))));
-        result.push_back(data_equation(atermpp::make_vector(vb, ve, vf), count(s, ve, constructor(s, vf, vb)), sort_nat::swap_zero(vf(ve), count(s, ve, vb))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vx), in(s, ve, vx), greater(count(s, ve, vx), sort_nat::c0())));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), equal_to(constructor(s, vf, vb), constructor(s, vg, vc)), if_(equal_to(vf, vg), equal_to(vb, vc), forall(atermpp::make_vector(vd), equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc)))))));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), union_(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), sort_fbag::join(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(atermpp::make_vector(vx), intersection(s, vx, vx), vx));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), sort_fbag::fbag_intersect(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), sort_fbag::fbag_difference(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(atermpp::make_vector(vb, vf), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));
-        result.push_back(data_equation(atermpp::make_vector(vh, vs), set2bag(s, sort_set::constructor(s, vh, vs)), constructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
-        result.push_back(data_equation(atermpp::make_vector(ve), zero_function(s, ve), sort_nat::c0()));
-        result.push_back(data_equation(atermpp::make_vector(ve), one_function(s, ve), sort_nat::cnat(sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vb}), bag_fbag(s, vb), constructor(s, zero_function(s), vb)));
+        result.push_back(data_equation(variable_list({vf}), sort_bag::bag_comprehension(s, vf), constructor(s, vf, sort_fbag::empty(s))));
+        result.push_back(data_equation(variable_list({vb, ve, vf}), count(s, ve, constructor(s, vf, vb)), sort_nat::swap_zero(vf(ve), count(s, ve, vb))));
+        result.push_back(data_equation(variable_list({ve, vx}), in(s, ve, vx), greater(count(s, ve, vx), sort_nat::c0())));
+        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), equal_to(constructor(s, vf, vb), constructor(s, vg, vc)), if_(equal_to(vf, vg), equal_to(vb, vc), forall(variable_list({vd}), equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc)))))));
+        result.push_back(data_equation(variable_list({vx, vy}), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
+        result.push_back(data_equation(variable_list({vx, vy}), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
+        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), union_(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), sort_fbag::join(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vx}), intersection(s, vx, vx), vx));
+        result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
+        result.push_back(data_equation(variable_list({vx, vy}), intersection(s, vx, intersection(s, vy, vx)), intersection(s, vy, vx)));
+        result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vx, vy), vx), intersection(s, vx, vy)));
+        result.push_back(data_equation(variable_list({vx, vy}), intersection(s, intersection(s, vy, vx), vx), intersection(s, vy, vx)));
+        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), intersection(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, min_function(s, vf, vg), sort_fbag::fbag_intersect(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vf, vg}), difference(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, monus_function(s, vf, vg), sort_fbag::fbag_difference(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vf}), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));
+        result.push_back(data_equation(variable_list({vh, vs}), set2bag(s, sort_set::constructor(s, vh, vs)), constructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
+        result.push_back(data_equation(variable_list({ve}), zero_function(s, ve), sort_nat::c0()));
+        result.push_back(data_equation(variable_list({ve}), one_function(s, ve), sort_nat::cnat(sort_pos::c1())));
         result.push_back(data_equation(variable_list(), equal_to(zero_function(s), one_function(s)), sort_bool::false_()));
         result.push_back(data_equation(variable_list(), equal_to(one_function(s), zero_function(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg), add_function(s, vf, vg)(ve), sort_nat::plus(vf(ve), vg(ve))));
-        result.push_back(data_equation(atermpp::make_vector(vf), add_function(s, vf, zero_function(s)), vf));
-        result.push_back(data_equation(atermpp::make_vector(vf), add_function(s, zero_function(s), vf), vf));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg), min_function(s, vf, vg)(ve), sort_nat::minimum(vf(ve), vg(ve))));
-        result.push_back(data_equation(atermpp::make_vector(vf), min_function(s, vf, vf), vf));
-        result.push_back(data_equation(atermpp::make_vector(vf), min_function(s, vf, zero_function(s)), zero_function(s)));
-        result.push_back(data_equation(atermpp::make_vector(vf), min_function(s, zero_function(s), vf), zero_function(s)));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg), monus_function(s, vf, vg)(ve), sort_nat::monus(vf(ve), vg(ve))));
-        result.push_back(data_equation(atermpp::make_vector(vf), monus_function(s, vf, vf), zero_function(s)));
-        result.push_back(data_equation(atermpp::make_vector(vf), monus_function(s, vf, zero_function(s)), vf));
-        result.push_back(data_equation(atermpp::make_vector(vf), monus_function(s, zero_function(s), vf), zero_function(s)));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf), nat2bool_function(s, vf)(ve), greater(vf(ve), sort_nat::c0())));
+        result.push_back(data_equation(variable_list({ve, vf, vg}), add_function(s, vf, vg)(ve), sort_nat::plus(vf(ve), vg(ve))));
+        result.push_back(data_equation(variable_list({vf}), add_function(s, vf, zero_function(s)), vf));
+        result.push_back(data_equation(variable_list({vf}), add_function(s, zero_function(s), vf), vf));
+        result.push_back(data_equation(variable_list({ve, vf, vg}), min_function(s, vf, vg)(ve), sort_nat::minimum(vf(ve), vg(ve))));
+        result.push_back(data_equation(variable_list({vf}), min_function(s, vf, vf), vf));
+        result.push_back(data_equation(variable_list({vf}), min_function(s, vf, zero_function(s)), zero_function(s)));
+        result.push_back(data_equation(variable_list({vf}), min_function(s, zero_function(s), vf), zero_function(s)));
+        result.push_back(data_equation(variable_list({ve, vf, vg}), monus_function(s, vf, vg)(ve), sort_nat::monus(vf(ve), vg(ve))));
+        result.push_back(data_equation(variable_list({vf}), monus_function(s, vf, vf), zero_function(s)));
+        result.push_back(data_equation(variable_list({vf}), monus_function(s, vf, zero_function(s)), vf));
+        result.push_back(data_equation(variable_list({vf}), monus_function(s, zero_function(s), vf), zero_function(s)));
+        result.push_back(data_equation(variable_list({ve, vf}), nat2bool_function(s, vf)(ve), greater(vf(ve), sort_nat::c0())));
         result.push_back(data_equation(variable_list(), nat2bool_function(s, zero_function(s)), sort_set::false_function(s)));
         result.push_back(data_equation(variable_list(), nat2bool_function(s, one_function(s)), sort_set::true_function(s)));
-        result.push_back(data_equation(atermpp::make_vector(ve, vh), bool2nat_function(s, vh)(ve), if_(vh(ve), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
+        result.push_back(data_equation(variable_list({ve, vh}), bool2nat_function(s, vh)(ve), if_(vh(ve), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::false_function(s)), zero_function(s)));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::true_function(s)), one_function(s)));
         return result;

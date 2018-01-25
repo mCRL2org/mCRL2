@@ -15,6 +15,7 @@
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/probabilistic_lts.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

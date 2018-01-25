@@ -13,7 +13,6 @@
 #define MCRL2_PBES_SIGNIFICANT_VARIABLES_H
 
 #include "mcrl2/pbes/traverser.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

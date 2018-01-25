@@ -91,7 +91,7 @@ int test_main(int argc, char* argv[])
   V.push_back(p1);
   V.push_back(n1);
 
-  sort_expression_vector domain = atermpp::make_vector< sort_expression >(sort_pos::pos(), sort_bool::bool_());
+  sort_expression_vector domain {sort_pos::pos(), sort_bool::bool_()};
   sort_expression sexpr = function_sort(domain, sort_nat::nat());
   variable q1(identifier_string("q1"), sexpr);
 

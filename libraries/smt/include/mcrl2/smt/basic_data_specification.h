@@ -219,7 +219,7 @@ class basic_data_specification: public data_specification
         lhs = data::application(function, parameters);
       }
       data::data_equation equation(parameters, data::sort_bool::true_(), lhs, rhs);
-      function_definition *definition = create_recursive_function_definition(function, atermpp::make_vector(equation));
+      function_definition *definition = create_recursive_function_definition(function, {equation});
       add_function_definition(function, std::shared_ptr<function_definition>(definition));
     }
     void add_function_definition(const data::function_symbol& function, const std::shared_ptr<function_definition>& definition, const data::variable_vector& parameters, const data::data_expression& rhs)

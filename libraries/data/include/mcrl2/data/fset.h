@@ -21,7 +21,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/bool.h"
@@ -792,54 +791,54 @@ namespace mcrl2 {
         variable vt("t",fset(s));
 
         data_equation_vector result;
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), less_equal(vs, vt), less_equal(cons_(s, vd, vs), vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(cons_(s, vd, vs), cons_(s, ve, vt)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), less(vs, vt), less_equal(cons_(s, vd, vs), vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd), insert(s, vd, empty(s)), cons_(s, vd, empty(s))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), insert(s, vd, cons_(s, vd, vs)), cons_(s, vd, vs)));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(vd, ve), insert(s, vd, cons_(s, ve, vs)), cons_(s, vd, cons_(s, ve, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(ve, vd), insert(s, vd, cons_(s, ve, vs)), cons_(s, ve, insert(s, vd, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), cinsert(s, vd, sort_bool::false_(), vs), vs));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), cinsert(s, vd, sort_bool::true_(), vs), insert(s, vd, vs)));
-        result.push_back(data_equation(atermpp::make_vector(vd), in(s, vd, empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, insert(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg), fset_union(s, vf, vg, empty(s), empty(s)), empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fset_union(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, empty(s)))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fset_union(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, empty(s), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_union(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, cons_(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, cons_(s, vd, vs), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg), fset_intersection(s, vf, vg, empty(s), empty(s)), empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fset_intersection(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, empty(s)))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fset_intersection(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, empty(s), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_intersection(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, cons_(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, cons_(s, vd, vs), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vs), difference(s, vs, empty(s)), vs));
-        result.push_back(data_equation(atermpp::make_vector(vt), difference(s, empty(s), vt), empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), difference(s, cons_(s, vd, vs), cons_(s, vd, vt)), difference(s, vs, vt)));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(vd, ve), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, vd, difference(s, vs, cons_(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), difference(s, cons_(s, vd, vs), vt)));
-        result.push_back(data_equation(atermpp::make_vector(vs), union_(s, vs, empty(s)), vs));
-        result.push_back(data_equation(atermpp::make_vector(vt), union_(s, empty(s), vt), vt));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), union_(s, cons_(s, vd, vs), cons_(s, vd, vt)), cons_(s, vd, union_(s, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(vd, ve), union_(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, vd, union_(s, vs, cons_(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), union_(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, ve, union_(s, cons_(s, vd, vs), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vs), intersection(s, vs, empty(s)), empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vt), intersection(s, empty(s), vt), empty(s)));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), intersection(s, cons_(s, vd, vs), cons_(s, vd, vt)), cons_(s, vd, intersection(s, vs, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(vd, ve), intersection(s, cons_(s, vd, vs), cons_(s, ve, vt)), intersection(s, vs, cons_(s, ve, vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), intersection(s, cons_(s, vd, vs), cons_(s, ve, vt)), intersection(s, cons_(s, vd, vs), vt)));
+        result.push_back(data_equation(variable_list({vd, vs}), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, vs}), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
+        result.push_back(data_equation(variable_list({vd, vs}), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vd, vs}), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), less_equal(vs, vt), less_equal(cons_(s, vd, vs), vt)))));
+        result.push_back(data_equation(variable_list({vd, vs}), less(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vd, vs}), less(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(cons_(s, vd, vs), cons_(s, ve, vt)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), less(vs, vt), less_equal(cons_(s, vd, vs), vt)))));
+        result.push_back(data_equation(variable_list({vd}), insert(s, vd, empty(s)), cons_(s, vd, empty(s))));
+        result.push_back(data_equation(variable_list({vd, vs}), insert(s, vd, cons_(s, vd, vs)), cons_(s, vd, vs)));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), less(vd, ve), insert(s, vd, cons_(s, ve, vs)), cons_(s, vd, cons_(s, ve, vs))));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), less(ve, vd), insert(s, vd, cons_(s, ve, vs)), cons_(s, ve, insert(s, vd, vs))));
+        result.push_back(data_equation(variable_list({vd, vs}), cinsert(s, vd, sort_bool::false_(), vs), vs));
+        result.push_back(data_equation(variable_list({vd, vs}), cinsert(s, vd, sort_bool::true_(), vs), insert(s, vd, vs)));
+        result.push_back(data_equation(variable_list({vd}), in(s, vd, empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(variable_list({vd, ve, vs}), in(s, vd, insert(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(variable_list({vf, vg}), fset_union(s, vf, vg, empty(s), empty(s)), empty(s)));
+        result.push_back(data_equation(variable_list({vd, vf, vg, vs}), fset_union(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, empty(s)))));
+        result.push_back(data_equation(variable_list({ve, vf, vg, vt}), fset_union(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, empty(s), vt))));
+        result.push_back(data_equation(variable_list({vd, vf, vg, vs, vt}), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_union(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(vd, ve), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, sort_bool::not_(vg(vd)), fset_union(s, vf, vg, vs, cons_(s, ve, vt)))));
+        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(ve, vd), fset_union(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, sort_bool::not_(vf(ve)), fset_union(s, vf, vg, cons_(s, vd, vs), vt))));
+        result.push_back(data_equation(variable_list({vf, vg}), fset_intersection(s, vf, vg, empty(s), empty(s)), empty(s)));
+        result.push_back(data_equation(variable_list({vd, vf, vg, vs}), fset_intersection(s, vf, vg, cons_(s, vd, vs), empty(s)), cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, empty(s)))));
+        result.push_back(data_equation(variable_list({ve, vf, vg, vt}), fset_intersection(s, vf, vg, empty(s), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, empty(s), vt))));
+        result.push_back(data_equation(variable_list({vd, vf, vg, vs, vt}), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, vd, vt)), cinsert(s, vd, equal_to(vf(vd), vg(vd)), fset_intersection(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(vd, ve), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, vd, vg(vd), fset_intersection(s, vf, vg, vs, cons_(s, ve, vt)))));
+        result.push_back(data_equation(variable_list({vd, ve, vf, vg, vs, vt}), less(ve, vd), fset_intersection(s, vf, vg, cons_(s, vd, vs), cons_(s, ve, vt)), cinsert(s, ve, vf(ve), fset_intersection(s, vf, vg, cons_(s, vd, vs), vt))));
+        result.push_back(data_equation(variable_list({vs}), difference(s, vs, empty(s)), vs));
+        result.push_back(data_equation(variable_list({vt}), difference(s, empty(s), vt), empty(s)));
+        result.push_back(data_equation(variable_list({vd, vs, vt}), difference(s, cons_(s, vd, vs), cons_(s, vd, vt)), difference(s, vs, vt)));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(vd, ve), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, vd, difference(s, vs, cons_(s, ve, vt)))));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(ve, vd), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), difference(s, cons_(s, vd, vs), vt)));
+        result.push_back(data_equation(variable_list({vs}), union_(s, vs, empty(s)), vs));
+        result.push_back(data_equation(variable_list({vt}), union_(s, empty(s), vt), vt));
+        result.push_back(data_equation(variable_list({vd, vs, vt}), union_(s, cons_(s, vd, vs), cons_(s, vd, vt)), cons_(s, vd, union_(s, vs, vt))));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(vd, ve), union_(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, vd, union_(s, vs, cons_(s, ve, vt)))));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(ve, vd), union_(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, ve, union_(s, cons_(s, vd, vs), vt))));
+        result.push_back(data_equation(variable_list({vs}), intersection(s, vs, empty(s)), empty(s)));
+        result.push_back(data_equation(variable_list({vt}), intersection(s, empty(s), vt), empty(s)));
+        result.push_back(data_equation(variable_list({vd, vs, vt}), intersection(s, cons_(s, vd, vs), cons_(s, vd, vt)), cons_(s, vd, intersection(s, vs, vt))));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(vd, ve), intersection(s, cons_(s, vd, vs), cons_(s, ve, vt)), intersection(s, vs, cons_(s, ve, vt))));
+        result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(ve, vd), intersection(s, cons_(s, vd, vs), cons_(s, ve, vt)), intersection(s, cons_(s, vd, vs), vt)));
         result.push_back(data_equation(variable_list(), count(s, empty(s)), sort_nat::c0()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vs), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
-        result.push_back(data_equation(atermpp::make_vector(vs, vt), not_equal_to(vs, vt), sort_bool::not_(equal_to(vs, vt))));
+        result.push_back(data_equation(variable_list({vd, vs}), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
+        result.push_back(data_equation(variable_list({vs, vt}), not_equal_to(vs, vt), sort_bool::not_(equal_to(vs, vt))));
         return result;
       }
 
