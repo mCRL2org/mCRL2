@@ -303,6 +303,28 @@ process_specification parse_process_specification(const std::string& spec_string
   return parse_process_specification(in, alpha_reduce);
 }
 
+/// \brief Parses a process identifier.
+inline
+process_identifier parse_process_identifier(std::string text, const data::data_specification& dataspec)
+{
+  text = utilities::trim_copy(text);
+
+  // unfortunately there is no grammar element for a process identifier, so parsing has to be done in an ad hoc manner
+  auto pos = text.find('(');
+  if (pos == std::string::npos)
+  {
+    return process_identifier(core::identifier_string(text), {});
+  }
+  std::string name    = text.substr(0, pos);
+  std::string vardecl = utilities::trim_copy(text.substr(pos + 1));
+  vardecl.pop_back();
+
+  core::identifier_string id(name);
+  data::variable_list variables = data::parse_variable_declaration_list(vardecl, dataspec);
+
+  return process_identifier(id, variables);
+}
+
 /// \brief Parses and type checks a process expression.
 /// \param[in] text The input text containing a process expression.
 /// \param[in] data_decl A declaration of data and actions ("glob m:Nat; act a:Nat;").

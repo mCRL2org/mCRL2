@@ -572,6 +572,18 @@ data_specification parse_data_specification_new(const std::string& text)
   return result;
 }
 
+inline
+variable_list parse_variable_declaration_list(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("VarsDeclList");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  variable_list result = data_specification_actions(p).parse_VarsDeclList(node);
+  p.destroy_parse_node(node);
+  return result;
+}
+
 inline static data_specification const& default_specification()
 {
   static data_specification specification;
@@ -613,7 +625,7 @@ std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::s
 ///    a single data specification, and nothing else.
 ///    If a parse or type check error is detected
 ///    an mcrl2::runtime_error exception is raised with a string that
-///    indicates the problem. 
+///    indicates the problem.
 ///    A typical example of a specification is:
 ///    \code
 ///     sort D=struct d1 | d2;
@@ -694,7 +706,7 @@ void parse_variables(std::istream& in,
     data_vars = detail::parse_variables_new(text);
     data_type_checker type_checker(data_spec);
     // Check the variable in an empty variable context.
-    type_checker(data_vars,detail::variable_context()); 
+    type_checker(data_vars,detail::variable_context());
 
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
@@ -839,7 +851,7 @@ variable parse_variable(std::istream& text,
 /// \param[in] translate_user_notation Indication whether user notation such a numbers
 ///                                     must be translated to internal format.
 /// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
-/// \returns The parsed data expression. 
+/// \returns The parsed data expression.
 template <typename VariableContainer>
 data_expression parse_data_expression(std::istream& in,
                                       const VariableContainer& variables,
@@ -989,9 +1001,21 @@ data::function_symbol parse_function_symbol(const std::string& text, const std::
   return result;
 }
 
+/// \brief Parses a variable declaration list.
+/// \param[in] text The input text.
+/// \return The parsed variable declaration list.
+inline
+variable_list parse_variable_declaration_list(const std::string& text, const data_specification& dataspec = detail::default_specification())
+{
+  variable_list variables = detail::parse_variable_declaration_list(text);
+  variables = normalize_sorts(variables, dataspec);
+  return variables;
+}
+
 /// \cond INTERNAL_DOCS
 namespace detail
 {
+
 /// \brief Parses a data variable that is applied to arguments.
 /// This is typically used for parsing pbes variables or variables in the modal formula context.
 /// For example: "X(d:D,e:E)".
@@ -1021,6 +1045,7 @@ std::pair<std::string, data_expression_list> parse_variable(std::string const& s
   }
   return std::make_pair(name, data_expression_list(variables.begin(), variables.end()));
 }
+
 } // namespace detail
 /// \endcond
 
