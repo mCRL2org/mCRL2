@@ -29,7 +29,7 @@ namespace detail {
   // Separates all sections with a keyword from the other keyword sections
   // Returns a pair containing consisiting of the keyword section and the other keyword sections
   inline
-  std::pair<std::string, std::string> separate_keyword_section(const std::string& text1, const std::string& keyword, const std::vector<std::string>& all_keywords)
+  std::pair<std::string, std::string> separate_keyword_section(const std::string& text1, const std::string& keyword, const std::vector<std::string>& all_keywords, bool repeat_keyword = false)
   {
     std::string text = boost::trim_copy(text1);
     std::ostringstream out1; // will contain the keyword sections
@@ -57,6 +57,10 @@ namespace detail {
       std::vector<std::string> v = utilities::regex_split(spec, regex_other_keywords);
       if (!v.empty())
       {
+        if (repeat_keyword)
+        {
+          out1 << "\n" << keyword;
+        }
         out1 << "  " << v.front();
         out2 << spec.substr(v.front().size());
       }
@@ -64,7 +68,10 @@ namespace detail {
     std::string s1 = out1.str();
     if (!s1.empty())
     {
-      s1 = keyword + "\n" + s1;
+      if (!repeat_keyword)
+      {
+        s1 = keyword + "\n" + s1;
+      }
     }
     return std::make_pair(s1 + "\n", out2.str() + "\n");
   }

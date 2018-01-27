@@ -33,10 +33,25 @@
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/rewrite.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/detail/separate_keyword_section.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
 using data::tools::rewriter_tool;
+
+/// \brief Reads text from the file filename, or from stdin if filename equals "-".
+inline
+std::string read_text(const std::string& filename)
+{
+  if (filename.empty())
+  {
+    return utilities::read_text(std::cin);
+  }
+  else
+  {
+    return utilities::read_text(filename);
+  }
+}
 
 /// \brief Saves text to the file filename, or to stdout if filename equals "-".
 inline
@@ -350,6 +365,49 @@ struct rewrite_process_command: public process_rewriter_command
   }
 };
 
+struct separate_equations_command: public process_command
+{
+  separate_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : process_command("separate-equations", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    std::string text = read_text(input_filename);
+    std::vector<std::string> all_keywords = { "sort", "var", "map", "cons", "proc", "init", "act" };
+    bool repeat_keyword = true;
+    std::pair<std::string, std::string> q;
+
+    q = utilities::detail::separate_keyword_section(text, "var", all_keywords, repeat_keyword);
+    std::string var_text = q.first;
+    text = q.second;
+
+    q = utilities::detail::separate_keyword_section(text, "proc", all_keywords, repeat_keyword);
+    std::string proc_text = q.first;
+    text = q.second;
+
+    q = utilities::detail::separate_keyword_section(text, "init", all_keywords, repeat_keyword);
+    std::string init_text = q.first;
+    text = q.second;
+
+    q = utilities::detail::separate_keyword_section(text, "act", all_keywords, repeat_keyword);
+    std::string act_text = q.first;
+    text = q.second;
+
+    all_keywords.push_back("eqn");
+    q = utilities::detail::separate_keyword_section(text, "eqn", all_keywords, repeat_keyword);
+    std::string eqn_text = q.first;
+    std::string sort_text = q.second;
+
+    text = "%%%--- dataspec ---%%%\n" + sort_text + "\n"
+         + "%%%--- eqnspec ---%%%\n" + var_text + "\n" + eqn_text + "\n"
+         + "%%%--- actspec ---%%%\n" + act_text + "\n"
+         + "%%%--- procspec ---%%%\n" + proc_text + "\n"
+         + "%%%--- initspec ---%%%\n" + init_text;
+    write_text(output_filename, text);
+  }
+};
+
 class transform_tool: public rewriter_tool<input_output_tool>
 {
   protected:
@@ -413,6 +471,7 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<anonymize_process_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<rewrite_process_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<separate_equations_command>(input_filename(), output_filename(), options));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {
