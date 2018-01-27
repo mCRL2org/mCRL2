@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 
-#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -456,42 +455,39 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void leave(const state_formulas::variable& x)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     const data::data_expression_list& d = x.arguments();
     data::variable_list xp = parameters.lps.process_parameters();
     data::data_expression_list e = d + xp + Par(X, data::variable_list(), parameters.phi0);
     if (is_timed())
     {
-      e = parameters.T + e;
+      e.push_front(parameters.T);
     }
     push(propositional_variable_instantiation(X, e));
   }
 
   void apply(const state_formulas::nu& x)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     data::data_expression_list d = detail::mu_expressions(x);
     data::variable_list xp = parameters.lps.process_parameters();
     data::data_expression_list e = d + xp + Par(X, data::variable_list(), parameters.phi0);
     if (is_timed())
     {
-      e = parameters.T + e;
+      e.push_front(parameters.T);
     }
     push(propositional_variable_instantiation(X, e));
   }
 
   void apply(const state_formulas::mu& x)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     data::data_expression_list d = detail::mu_expressions(x);
     data::variable_list xp = parameters.lps.process_parameters();
     data::data_expression_list e = d + xp + Par(X, data::variable_list(), parameters.phi0);
     if (is_timed())
     {
-      e = parameters.T + e;
+      e.push_front(parameters.T);
     }
     push(propositional_variable_instantiation(X, e));
   }

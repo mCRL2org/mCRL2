@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 
-#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/pbes/pbes.h"
@@ -370,7 +369,6 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 
   void leave(const state_formulas::variable& x)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     const data::data_expression_list& e = x.arguments();
@@ -379,7 +377,6 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 
   void apply(const state_formulas::nu& x)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     data::data_expression_list e = detail::mu_expressions(x);
@@ -388,7 +385,6 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 
   void apply(const state_formulas::mu& x)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     data::data_expression_list e = detail::mu_expressions(x);

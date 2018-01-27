@@ -169,13 +169,15 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   template <typename Expr>
   void apply_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     data::variable_list xf = detail::mu_variables(x);
     data::variable_list xp = parameters.lps.process_parameters();
     const state_formulas::state_formula& phi = x.operand();
     data::variable_list e = xf + xp + Par(X, data::variable_list(), parameters.phi0);
-    e = is_timed() ? parameters.T + e : e;
+    if (is_timed())
+    {
+      e.push_front(parameters.T);
+    }
     propositional_variable v(X, e);
     pbes_expression expr = detail::RHS(phi, parameters, TermTraits());
     pbes_equation eqn(sigma, v, expr);
@@ -256,13 +258,15 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits, Parameter
   template <typename Expr>
   void apply_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     data::variable_list xf = detail::mu_variables(x);
     data::variable_list xp = parameters.lps.process_parameters();
     const state_formulas::state_formula& phi = x.operand();
     data::variable_list d = xf + xp + Par(X, data::variable_list(), parameters.phi0);
-    d = is_timed() ? parameters.T + d : d;
+    if (is_timed())  
+    {
+      d.push_front(parameters.T);
+    }
     data::data_expression_list e = data::make_data_expression_list(d);
     propositional_variable v(X, d);
     std::vector<pbes_equation> equations;

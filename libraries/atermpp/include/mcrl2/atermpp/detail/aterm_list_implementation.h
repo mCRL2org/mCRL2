@@ -146,25 +146,35 @@ term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t)
   return result;
 }
 
-template <typename Term>
+
+template <typename Term1, typename Term2>
 inline
-term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
+typename std::conditional<std::is_convertible<Term2,Term1>::value,term_list<Term1>,term_list<Term2>>::type
+operator+(const term_list<Term1>& l, const term_list<Term2>& m)
 {
-  typedef typename term_list<Term>::const_iterator const_iterator;
+  static_assert(std::is_convertible< Term1, Term2 >::value ||
+                std::is_convertible< Term2, Term1 >::value,
+                       "Concatenated lists must be of convertible types. ");
+  static_assert(sizeof(Term1) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added. ");
+  static_assert(sizeof(Term2) == sizeof(aterm),
+                "aterm cast cannot be applied types derived from aterms where extra fields are added. ");
+  typedef typename std::conditional<std::is_convertible<Term2,Term1>::value,Term1,Term2>::type ResultType;
+  typedef typename term_list<Term1>::const_iterator const_iterator;
 
   if (m.empty())
   {
-    return l;
+    return reinterpret_cast<const term_list<ResultType>&>(l);
   }
 
   std::size_t len = l.size();
 
   if (len == 0)
   {
-    return m;
+    return reinterpret_cast<const term_list<ResultType>&>(m);
   }
 
-  term_list<Term> result = m;
+  term_list<ResultType> result = reinterpret_cast<const term_list<ResultType>&>(m);
 
   if (len<max_len_of_short_list)
   {
@@ -190,16 +200,16 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
   else 
   {
     // The length of l is very long. Use the heap for temporary storage.
-    std::vector<Term> buffer;
+    std::vector<ResultType> buffer;
     buffer.reserve(len);
 
-    for (const Term& t: l)
+    for (const Term1& t: l)
     {
       buffer.push_back(t);
     }
 
     // Insert elements at the front of the list
-    for(typename std::vector<Term>::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i) 
+    for(typename std::vector<ResultType>::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i) 
     {
       result.push_front(*i);
     }
@@ -207,7 +217,6 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
     return result;
   }
 }
-
 
 
 namespace detail
@@ -347,7 +356,8 @@ namespace detail
       return result; 
     }
   }
-}
+} // detail
+
 
 
 } // namespace atermpp

@@ -148,11 +148,19 @@ void test_list_with_apply_filter()
   BOOST_CHECK(result1.size()==2);
 }
 
+void test_concatenation()
+{
+  term_list<aterm_int> l1;
+  term_list<aterm> l2;
+  BOOST_CHECK(l2+l1 == l1+l2);
+}
+
 int test_main(int argc, char* argv[])
 {
   test_aterm_list();
   test_set_operations();
   test_initializer_list();
+  test_concatenation();
 
   return 0;
 }

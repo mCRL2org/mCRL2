@@ -25,7 +25,7 @@ namespace atermpp
 
 
 template <typename Term>
-class term_list:public aterm
+class term_list: public aterm
 {
   protected:
     /// constructor for termlists from internally constructed terms delivered as reference.
@@ -348,14 +348,20 @@ inline
 term_list<Term> reverse(const term_list<Term>& l);
 
 
-/// \brief Returns the concatenation of two lists.
+/// \brief Returns the concatenation of two lists with convertible element types.
+//  \details The type of the result is either the type of l, if the elements of m
+//           can be converted implicitly to the type of the elements of l. Otherwise if the
+//           elements of l can be converted implicitly to the type of the elements
+//           of m, the result type is that or m. 
 /// \param l A list.
 /// \param m A list.
 /// \details The complexity of this operator is linear in the length of l.
-/// \return The concatenation of the lists l followed by m..
-template <typename Term>
+/// \return The concatenation of the lists l followed by m. 
+
+template <typename Term1, typename Term2>
 inline
-term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m);
+typename std::conditional<std::is_convertible<Term2,Term1>::value,term_list<Term1>,term_list<Term2>>::type
+operator+(const term_list<Term1>& l, const term_list<Term2>& m);
 
 
 /// \brief Appends a new element at the end of the list. Note

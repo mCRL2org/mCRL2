@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_LPS2PBES_H
 #define MCRL2_PBES_LPS2PBES_H
 
-#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
@@ -87,7 +86,6 @@ class lps2pbes_algorithm
              const data::variable& T = data::undefined_real_variable()
             )
     {
-      using atermpp::detail::operator+;
       state_formulas::state_formula f = formula;
 
       std::set<core::identifier_string> lps_ids = lps::find_identifiers(lpsspec);
@@ -124,7 +122,7 @@ class lps2pbes_algorithm
       data::data_expression_list e = fi + pi + detail::Par(Xf, data::variable_list(), f);
       if (T != data::undefined_real_variable())
       {
-        e = data::sort_real::real_(0) + e;
+        e.push_front(data::sort_real::real_(0));
       }
       propositional_variable_instantiation init(Xe, e);
 

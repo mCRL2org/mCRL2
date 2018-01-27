@@ -164,7 +164,6 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
   template <typename Expr>
   void handle_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
-    using atermpp::detail::operator+;
     const core::identifier_string& X = x.name();
     data::variable_list d = detail::mu_variables(x);
 
