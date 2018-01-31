@@ -66,6 +66,17 @@ std::vector<std::string> add_parens(const std::vector<std::string>& v)
   return result;
 }
 
+inline
+std::vector<std::string> add_single_quotes(const std::vector<std::string>& v)
+{
+  std::vector<std::string> result;
+  for (const std::string& x: v)
+  {
+    result.push_back('\'' + x + '\'');
+  }
+  return result;
+}
+
 //-------------------------------------- bdd_node -----------------------------------------//
 
 class term
@@ -789,7 +800,7 @@ std::string pbes2bdd(const pbes_system::pbes& p)
 
   std::vector<bdd_equation> equations = split_pbes(p, eqn_index, ids);
 
-  out << "--- bdd variables ---\n" << string_join(to_string(ivar + pvar), " ") << "\n\n";
+  out << "--- bdd variables ---\n" << string_join(add_single_quotes(to_string(ivar + pvar)), ", ") << "\n\n";
   out << "--- all nodes ---\n" << any(ids)->print() << "\n\n";
   out << "--- even nodes ---\n" << any(even_ids(equations))->print() << "\n\n";
   out << "--- odd nodes ---\n" << any(odd_ids(equations))->print() << "\n\n";
@@ -814,7 +825,7 @@ std::string pbes2bdd(const pbes_system::pbes& p)
     std::vector<std::string> E = eqn.edge_relation(eqn_index, ids, pvar);
     edges.insert(edges.end(), E.begin(), E.end());
   }
-  out << "  " << string_join(add_parens(edges), "\n| ") << "\n";
+  out << "'''  " << string_join(add_parens(edges), "\n| ") << "'''\n";
   return out.str();
 }
 
