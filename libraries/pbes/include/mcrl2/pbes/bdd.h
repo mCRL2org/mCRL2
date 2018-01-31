@@ -418,7 +418,7 @@ std::vector<bdd_node> to_bdd(const data::data_expression_list& v)
 // returns the smallest value m such that n <= 2**m
 // N.B. very inefficient
 inline
-constexpr std::size_t log2_rounded_up(std::size_t n)
+std::size_t log2_rounded_up(std::size_t n)
 {
   std::size_t m = 0;
   std::size_t value = 1;

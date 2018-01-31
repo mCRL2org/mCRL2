@@ -2,6 +2,7 @@ set(MCRL2_TOOLS
   lpstransform
   mcrl2parse
   mcrl2transform
+  pbes2bdd
   pbestransform
   reduce_pbes
   reduce_process
