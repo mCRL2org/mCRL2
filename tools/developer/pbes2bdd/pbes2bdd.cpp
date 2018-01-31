@@ -55,9 +55,9 @@ class pbes2bdd_tool: public input_output_tool
 
   public:
     pbes2bdd_tool()
-      : super("mcrl2transform",
+      : super("pbes2bdd",
               "Wieger Wesselink",
-              "applies a transformation to a PBES",
+              "transforms a restricted class of PBESs (in boolean format) to BDD",
               "Transform the PBES in INFILE and write the result to OUTFILE. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              )

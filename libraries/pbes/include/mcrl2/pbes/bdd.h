@@ -591,7 +591,7 @@ struct bdd_equation
     {
       v.push_back(param0[i] + " <-> " + param1[i]);
     }
-    return string_join(add_parens(v), " <-> ");
+    return string_join(add_parens(v), " & ");
   }
 
   std::string edge_relation(const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids, const std::vector<bdd_node>& parameters) const
