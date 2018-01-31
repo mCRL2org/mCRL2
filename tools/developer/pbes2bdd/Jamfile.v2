@@ -1,0 +1,18 @@
+project pbes2bdd
+   : requirements
+       <library>/aterm//aterm
+       <library>/bes//bes
+       <library>/core//core
+       <library>/data//data
+       <library>/lps//lps
+       <library>/pbes//pbes
+       <library>/utilities//utilities
+       <library>/dparser//dparser
+   ;
+
+exe pbes2bdd
+  :
+    pbes2bdd.cpp
+  ;
+
+install dist : pbes2bdd : <variant>debug:<location>../../../install_debug/bin <variant>release:<location>../../../install/bin ;
