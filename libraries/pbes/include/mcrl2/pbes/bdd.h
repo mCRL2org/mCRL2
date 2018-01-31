@@ -15,9 +15,13 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <sstream>
+
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -27,6 +31,43 @@ namespace pbes_system {
 
 namespace bdd {
 
+//-------------------------------------- utilities ----------------------------------------//
+
+template <typename InputIt>
+std::string string_join(InputIt first, InputIt last, const std::string & sep = ", ")
+{
+  std::ostringstream out;
+  if (first != last)
+  {
+    out << *first++;
+  }
+  while (first != last)
+  {
+    out << sep;
+    out << *first++;
+  }
+  return out.str();
+}
+
+inline
+std::string string_join(const std::vector<std::string>& v, const std::string & sep = ", ")
+{
+  return string_join(v.begin(), v.end(), sep);
+}
+
+inline
+std::vector<std::string> add_parens(const std::vector<std::string>& v)
+{
+  std::vector<std::string> result;
+  for (const std::string& x: v)
+  {
+    result.push_back('(' + x + ')');
+  }
+  return result;
+}
+
+//-------------------------------------- bdd_node -----------------------------------------//
+
 class term
 {
   public:
@@ -34,6 +75,23 @@ class term
 };
 
 typedef std::shared_ptr<term> bdd_node;
+
+template <typename BddNodeContainer>
+std::vector<std::string> to_string(const BddNodeContainer& nodes, bool after = false)
+{
+  std::vector<std::string> result;
+  for (const bdd_node& x: nodes)
+  {
+    result.push_back(x->print(after));
+  }
+  return result;
+}
+
+inline
+std::string print_variables(const std::vector<bdd_node>& variables)
+{
+  return string_join(to_string(variables), " ");
+}
 
 class true_: public term
 {
@@ -246,6 +304,46 @@ bdd_node make_imp(bdd_node left, bdd_node right)
 }
 
 inline
+bdd_node all(const std::vector<bdd_node>& v)
+{
+  if (v.empty())
+  {
+    return make_true();
+  }
+  bdd_node result = v[0];
+  for (auto i = ++v.begin(); i != v.end(); ++i)
+  {
+    result = make_and(result, *i);
+  }
+  return result;
+}
+
+inline
+bdd_node any(const std::vector<bdd_node>& v)
+{
+  if (v.empty())
+  {
+    return make_false();
+  }
+  bdd_node result = v[0];
+  for (auto i = ++v.begin(); i != v.end(); ++i)
+  {
+    result = make_or(result, *i);
+  }
+  return result;
+}
+
+inline
+std::vector<bdd_node> operator+(const std::vector<bdd_node>& x, const std::vector<bdd_node>& y)
+{
+  std::vector<bdd_node> result = x;
+  result.insert(result.end(), y.begin(), y.end());
+  return result;
+}
+
+//------------------------------------ data_expression ------------------------------------//
+
+inline
 bdd_node to_bdd(const data::data_expression& x)
 {
   if (data::is_variable(x) && data::sort_bool::is_bool(atermpp::down_cast<data::variable>(x).sort()))
@@ -295,19 +393,17 @@ bdd_node to_bdd(const data::data_expression& x)
 }
 
 inline
-bdd_node join_and(const std::vector<bdd_node> v)
+std::vector<bdd_node> to_bdd(const data::data_expression_list& v)
 {
-  if (v.empty())
+  std::vector<bdd_node> result;
+  for (const data::data_expression& x: v)
   {
-    return make_true();
-  }
-  bdd_node result = v[0];
-  for (auto i = ++v.begin(); i != v.end(); ++i)
-  {
-    result = make_and(result, *i);
+    result.push_back(to_bdd(x));
   }
   return result;
 }
+
+//---------------------------------- equation identifiers ---------------------------------//
 
 // returns the smallest value m such that n <= 2**m
 // N.B. very inefficient
@@ -329,7 +425,7 @@ constexpr std::size_t log2_rounded_up(std::size_t n)
 }
 
 inline
-std::vector<bdd_node> make_bdd_representation_variables(std::size_t n)
+std::vector<bdd_node> equation_identifiers(std::size_t n)
 {
   std::size_t m = log2_rounded_up(n);
   std::vector<bdd_node> result;
@@ -341,11 +437,11 @@ std::vector<bdd_node> make_bdd_representation_variables(std::size_t n)
 }
 
 inline
-std::map<pbes_system::propositional_variable, bdd_node> make_bdd_representation(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node> representation_variables)
+std::map<pbes_system::propositional_variable, bdd_node> equation_identifier_map(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node> equation_variables)
 {
   std::map<pbes_system::propositional_variable, bdd_node> result;
 
-  std::size_t m = representation_variables.size();
+  std::size_t m = equation_variables.size();
   std::size_t n = equations.size();
 
   std::vector<std::vector<bdd_node> > sequences(n, std::vector<bdd_node>());
@@ -355,18 +451,295 @@ std::map<pbes_system::propositional_variable, bdd_node> make_bdd_representation(
     for (std::size_t j = 0; j < n; j++)
     {
       bool negate = (j / repeat) % 2 == 0;
-      sequences[j].push_back(negate ? make_not(representation_variables[i]) : representation_variables[i]);
+      sequences[j].push_back(negate ? make_not(equation_variables[i]) : equation_variables[i]);
     }
   }
 
   for (std::size_t j = 0; j < n; j++)
   {
-    result[equations[j].variable()] = join_and(sequences[j]);
+    result[equations[j].variable()] = all(sequences[j]);
   }
   return result;
 }
 
+//---------------------------------- bdd building blocks ----------------------------------//
+
+inline
+std::vector<bdd_node> propositional_variable_parameters(const pbes_system::propositional_variable& X)
+{
+  std::vector<bdd_node> result;
+  for (const data::variable& x: X.parameters())
+  {
+    result.push_back(to_bdd(x));
+  }
+  return result;
 }
+
+inline
+bdd_node at_least_one_equation(const std::map<pbes_system::propositional_variable, bdd_node>& equation_map)
+{
+  std::vector<bdd_node> v;
+  for (const auto& p: equation_map)
+  {
+    v.push_back(p.second);
+  }
+  return any(v);
+}
+
+inline
+std::string unchanged_variables(const std::vector<bdd_node>& variables)
+{
+  std::vector<std::string> result;
+  for (const bdd_node& x: variables)
+  {
+    result.push_back("(" + x->print() + " <-> " + x->print(true) + ")");
+  }
+  return string_join(result.begin(), result.end(), " & ");
+}
+
+//---------------------------------- bdd equations ----------------------------------------//
+
+struct bdd_equation
+{
+  typedef std::pair<data::data_expression, pbes_system::propositional_variable_instantiation> element;
+
+  bool is_disjunctive;
+  std::vector<element> elements;
+
+  // left and right consists of a propositional variable instantiation and a data expression
+  void add_element(const pbes_system::pbes_expression& left, const pbes_system::pbes_expression& right)
+  {
+    if (data::is_data_expression(left) && pbes_system::is_propositional_variable_instantiation(right))
+    {
+      elements.push_back(element(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<pbes_system::propositional_variable_instantiation>(right)));
+    }
+    else if (pbes_system::is_propositional_variable_instantiation(left) && data::is_data_expression(right))
+    {
+      elements.push_back(element(atermpp::down_cast<data::data_expression>(right), atermpp::down_cast<pbes_system::propositional_variable_instantiation>(left)));
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Unexpected expressions " + pbes_system::pp(left) + " and " + pbes_system::pp(right) + " encountered in split_pbes_equation (expected a data expression and a predicate variable).");
+    }
+  }
+
+  // x is a propositional variable instantiation
+  void add_element(const pbes_system::pbes_expression& x)
+  {
+    data::data_expression T = data::sort_bool::true_();
+    elements.push_back({ T, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x) });
+  }
+
+  std::string parameter_changes(const element& e, const std::vector<bdd_node>& parameters) const
+  {
+    std::vector<std::string> before = to_string(parameters);
+    std::vector<std::string> after = add_parens(to_string(to_bdd(e.second.parameters()), true));
+
+    std::vector<std::string> v;
+    for (std::size_t i = 0; i < before.size(); i++)
+    {
+      v.push_back(before[i] + " <-> " + after[i]);
+    }
+    return string_join(add_parens(v), " <-> ");
+  }
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const bdd_equation& eqn)
+{
+  out << "disjunctive = " << std::boolalpha << eqn.is_disjunctive;
+  for (const auto& element: eqn.elements)
+  {
+    out << " (" << element.first << ", " << element.second << ")";
+  }
+  return out;
+}
+
+inline
+bool is_degenerate_and(const pbes_system::pbes_expression& x)
+{
+  const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::and_>(x).left();
+  const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::and_>(x).right();
+  return data::is_data_expression(left) || data::is_data_expression(right);
+}
+
+inline
+bool is_degenerate_or(const pbes_system::pbes_expression& x)
+{
+  const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::or_>(x).left();
+  const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::or_>(x).right();
+  return data::is_data_expression(left) || data::is_data_expression(right);
+}
+
+inline
+bdd_equation split_pbes_equation(const pbes_equation& eqn)
+{
+  bdd_equation result;
+  const pbes_system::pbes_expression& x = eqn.formula();
+  if (pbes_system::is_propositional_variable_instantiation(x))
+  {
+    result.is_disjunctive = true;
+    result.add_element(x);
+  }
+  else if (pbes_system::is_and(x))
+  {
+    if (is_degenerate_and(x))
+    {
+      result.is_disjunctive = true;
+      const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::and_>(x).left();
+      const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::and_>(x).right();
+      result.add_element(left, right);
+    }
+    else
+    {
+      result.is_disjunctive = false;
+      for (const pbes_system::pbes_expression& x_i: pbes_system::split_and(x))
+      {
+        if (pbes_system::is_propositional_variable_instantiation(x_i))
+        {
+          result.add_element(x_i);
+        }
+        else if (pbes_system::is_or(x_i))
+        {
+          const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::or_>(x_i).left();
+          const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::or_>(x_i).right();
+          result.add_element(left, right);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("Unexpected expression " + pbes_system::pp(x) + " encountered in split_pbes_equation.");
+        }
+      }
+    }
+  }
+  else if (pbes_system::is_or(x))
+  {
+    if (is_degenerate_or(x))
+    {
+      result.is_disjunctive = false;
+      const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::or_>(x).left();
+      const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::or_>(x).right();
+      result.add_element(left, right);
+    }
+    else
+    {
+      result.is_disjunctive = true;
+      for (const pbes_system::pbes_expression& x_i: pbes_system::split_or(x))
+      {
+        if (pbes_system::is_propositional_variable_instantiation(x_i))
+        {
+          result.add_element(x_i);
+        }
+        else if (pbes_system::is_and(x_i))
+        {
+          const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::and_>(x_i).left();
+          const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::and_>(x_i).right();
+          result.add_element(left, right);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("Unexpected expression " + pbes_system::pp(x) + " encountered in split_pbes_equation.");
+        }
+      }
+    }
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Unexpected expression " + pbes_system::pp(x) + " encountered in split_pbes_equation.");
+  }
+  return result;
+}
+
+inline
+std::vector<bdd_equation> split_pbes(const pbes& p)
+{
+  std::vector<bdd_equation> result;
+  for (const pbes_system::pbes_equation& eqn: p.equations())
+  {
+    result.push_back(split_pbes_equation(eqn));
+  }
+  return result;
+}
+
+//---------------------------------- pbes equation index ----------------------------------//
+
+// TODO: share this class with pbesinst_lazy
+struct pbes_equation_index
+{
+  // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
+  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t> > equation_index;
+
+  pbes_equation_index()
+  { }
+
+  pbes_equation_index(const pbes& p)
+  {
+    auto const& equations = p.equations();
+    std::size_t rank;
+    for (std::size_t i = 0; i < equations.size(); i++)
+    {
+      const auto& eqn = equations[i];
+      if (i == 0)
+      {
+        rank = equations.front().symbol().is_mu() ? 1 : 0;
+      }
+      else
+      {
+        if (equations[i - 1].symbol() != equations[i].symbol())
+        {
+          rank++;
+        }
+      }
+      equation_index.insert({eqn.variable().name(), std::make_pair(i, rank)});
+    }
+  }
+
+  /// \brief Returns the index of the equation of the variable with the given name
+  std::size_t index(const core::identifier_string& name) const
+  {
+    auto i = equation_index.find(name);
+    assert (i != equation_index.end());
+    return i->second.first;
+  }
+
+  /// \brief Returns the rank of the equation of the variable with the given name
+  std::size_t rank(const core::identifier_string& name) const
+  {
+    auto i = equation_index.find(name);
+    assert (i != equation_index.end());
+    return i->second.second;
+  }
+};
+
+inline
+std::string pbes2bdd(const pbes_system::pbes& p)
+{
+  std::ostringstream out;
+
+  std::vector<bdd_equation> equations = split_pbes(p);
+  std::size_t n = equations.size();
+
+  pbes_equation_index eqn_index(p);
+
+  // variables
+  std::vector<bdd_node> evar = equation_identifiers(n);
+  std::vector<bdd_node> pvar = propositional_variable_parameters(p.equations().front().variable());
+  std::vector<bdd_node> all_variables = evar + pvar;
+
+  std::map<pbes_system::propositional_variable, bdd_node> emap = equation_identifier_map(p.equations(), evar);
+
+  out << "Variables: " << print_variables(all_variables) << std::endl;
+  out << "At least one equation: " << at_least_one_equation(emap)->print() << std::endl;
+  out << "Unchanged variables (example): " << unchanged_variables(evar) << std::endl;
+  out << "Equations:\n";
+  for (const bdd_equation& eqn: equations)
+  {
+    out << eqn << std::endl;
+  }
+  return out.str();
+}
+
+} // namespace bdd
 
 } // namespace pbes_system
 
