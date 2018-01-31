@@ -87,12 +87,6 @@ std::vector<std::string> to_string(const BddNodeContainer& nodes, bool after = f
   return result;
 }
 
-inline
-std::string print_variables(const std::vector<bdd_node>& variables)
-{
-  return string_join(to_string(variables), " ");
-}
-
 class true_: public term
 {
   std::string print(bool after = false) const override
@@ -425,7 +419,7 @@ constexpr std::size_t log2_rounded_up(std::size_t n)
 }
 
 inline
-std::vector<bdd_node> equation_identifiers(std::size_t n)
+std::vector<bdd_node> id_variables(std::size_t n)
 {
   std::size_t m = log2_rounded_up(n);
   std::vector<bdd_node> result;
@@ -437,27 +431,27 @@ std::vector<bdd_node> equation_identifiers(std::size_t n)
 }
 
 inline
-std::map<pbes_system::propositional_variable, bdd_node> equation_identifier_map(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node> equation_variables)
+std::vector<bdd_node> equation_identifiers(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node> id_variables)
 {
-  std::map<pbes_system::propositional_variable, bdd_node> result;
+  std::vector<bdd_node> result;
 
-  std::size_t m = equation_variables.size();
+  std::size_t m = id_variables.size();
   std::size_t n = equations.size();
 
-  std::vector<std::vector<bdd_node> > sequences(n, std::vector<bdd_node>());
+  std::vector<std::vector<bdd_node>> sequences(n, std::vector<bdd_node>());
   std::size_t repeat = 1;
   for (std::size_t i = 0; i < m; i++)
   {
     for (std::size_t j = 0; j < n; j++)
     {
       bool negate = (j / repeat) % 2 == 0;
-      sequences[j].push_back(negate ? make_not(equation_variables[i]) : equation_variables[i]);
+      sequences[j].push_back(negate ? make_not(id_variables[i]) : id_variables[i]);
     }
   }
 
   for (std::size_t j = 0; j < n; j++)
   {
-    result[equations[j].variable()] = all(sequences[j]);
+    result.push_back(all(sequences[j]));
   }
   return result;
 }
@@ -465,7 +459,7 @@ std::map<pbes_system::propositional_variable, bdd_node> equation_identifier_map(
 //---------------------------------- bdd building blocks ----------------------------------//
 
 inline
-std::vector<bdd_node> propositional_variable_parameters(const pbes_system::propositional_variable& X)
+std::vector<bdd_node> param_variables(const pbes_system::propositional_variable& X)
 {
   std::vector<bdd_node> result;
   for (const data::variable& x: X.parameters())
@@ -497,6 +491,56 @@ std::string unchanged_variables(const std::vector<bdd_node>& variables)
   return string_join(result.begin(), result.end(), " & ");
 }
 
+//---------------------------------- pbes equation index ----------------------------------//
+
+// TODO: share this class with pbesinst_lazy
+struct pbes_equation_index
+{
+  // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
+  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t> > equation_index;
+
+  pbes_equation_index()
+  { }
+
+  pbes_equation_index(const pbes& p)
+  {
+    auto const& equations = p.equations();
+    std::size_t rank;
+    for (std::size_t i = 0; i < equations.size(); i++)
+    {
+      const auto& eqn = equations[i];
+      if (i == 0)
+      {
+        rank = equations.front().symbol().is_mu() ? 1 : 0;
+      }
+      else
+      {
+        if (equations[i - 1].symbol() != equations[i].symbol())
+        {
+          rank++;
+        }
+      }
+      equation_index.insert({eqn.variable().name(), std::make_pair(i, rank)});
+    }
+  }
+
+  /// \brief Returns the index of the equation of the variable with the given name
+  std::size_t index(const core::identifier_string& name) const
+  {
+    auto i = equation_index.find(name);
+    assert (i != equation_index.end());
+    return i->second.first;
+  }
+
+  /// \brief Returns the rank of the equation of the variable with the given name
+  std::size_t rank(const core::identifier_string& name) const
+  {
+    auto i = equation_index.find(name);
+    assert (i != equation_index.end());
+    return i->second.second;
+  }
+};
+
 //---------------------------------- bdd equations ----------------------------------------//
 
 struct bdd_equation
@@ -505,6 +549,8 @@ struct bdd_equation
 
   bool is_disjunctive;
   std::vector<element> elements;
+  bdd_node id; // the unique encoding of this equation
+  std::size_t rank;
 
   // left and right consists of a propositional variable instantiation and a data expression
   void add_element(const pbes_system::pbes_expression& left, const pbes_system::pbes_expression& right)
@@ -572,9 +618,11 @@ bool is_degenerate_or(const pbes_system::pbes_expression& x)
 }
 
 inline
-bdd_equation split_pbes_equation(const pbes_equation& eqn)
+bdd_equation split_pbes_equation(const pbes_equation& eqn, std::size_t rank, const bdd_node& id)
 {
   bdd_equation result;
+  result.rank = rank;
+  result.id = id;
   const pbes_system::pbes_expression& x = eqn.formula();
   if (pbes_system::is_propositional_variable_instantiation(x))
   {
@@ -651,91 +699,89 @@ bdd_equation split_pbes_equation(const pbes_equation& eqn)
 }
 
 inline
-std::vector<bdd_equation> split_pbes(const pbes& p)
+std::vector<bdd_equation> split_pbes(const pbes& p, const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids)
 {
   std::vector<bdd_equation> result;
-  for (const pbes_system::pbes_equation& eqn: p.equations())
+  const std::vector<pbes_system::pbes_equation>& equations = p.equations();
+  for (std::size_t i = 0; i < equations.size(); i++)
   {
-    result.push_back(split_pbes_equation(eqn));
+    const pbes_system::pbes_equation& eqn = equations[i];
+    std::size_t rank = eqn_index.rank(eqn.variable().name());
+    const bdd_node& id = ids[i];
+    result.push_back(split_pbes_equation(eqn, rank, id));
   }
   return result;
 }
 
-//---------------------------------- pbes equation index ----------------------------------//
-
-// TODO: share this class with pbesinst_lazy
-struct pbes_equation_index
+inline
+std::vector<bdd_node> even_ids(const std::vector<bdd_equation>& equations)
 {
-  // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
-  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t> > equation_index;
-
-  pbes_equation_index()
-  { }
-
-  pbes_equation_index(const pbes& p)
+  std::vector<bdd_node> result;
+  for (const bdd_equation& eqn: equations)
   {
-    auto const& equations = p.equations();
-    std::size_t rank;
-    for (std::size_t i = 0; i < equations.size(); i++)
+    if (eqn.is_disjunctive)
     {
-      const auto& eqn = equations[i];
-      if (i == 0)
-      {
-        rank = equations.front().symbol().is_mu() ? 1 : 0;
-      }
-      else
-      {
-        if (equations[i - 1].symbol() != equations[i].symbol())
-        {
-          rank++;
-        }
-      }
-      equation_index.insert({eqn.variable().name(), std::make_pair(i, rank)});
+      result.push_back(eqn.id);
     }
   }
+  return result;
+}
 
-  /// \brief Returns the index of the equation of the variable with the given name
-  std::size_t index(const core::identifier_string& name) const
+inline
+std::vector<bdd_node> odd_ids(const std::vector<bdd_equation>& equations)
+{
+  std::vector<bdd_node> result;
+  for (const bdd_equation& eqn: equations)
   {
-    auto i = equation_index.find(name);
-    assert (i != equation_index.end());
-    return i->second.first;
+    if (!eqn.is_disjunctive)
+    {
+      result.push_back(eqn.id);
+    }
   }
+  return result;
+}
 
-  /// \brief Returns the rank of the equation of the variable with the given name
-  std::size_t rank(const core::identifier_string& name) const
+inline
+std::map<std::size_t, std::vector<bdd_node>> priority_map(const std::vector<bdd_equation>& equations)
+{
+  std::map<std::size_t, std::vector<bdd_node>> result;
+  for (const bdd_equation& eqn: equations)
   {
-    auto i = equation_index.find(name);
-    assert (i != equation_index.end());
-    return i->second.second;
+    result[eqn.rank].push_back(eqn.id);
   }
-};
+  return result;
+}
 
 inline
 std::string pbes2bdd(const pbes_system::pbes& p)
 {
   std::ostringstream out;
 
-  std::vector<bdd_equation> equations = split_pbes(p);
-  std::size_t n = equations.size();
-
   pbes_equation_index eqn_index(p);
 
-  // variables
-  std::vector<bdd_node> evar = equation_identifiers(n);
-  std::vector<bdd_node> pvar = propositional_variable_parameters(p.equations().front().variable());
-  std::vector<bdd_node> all_variables = evar + pvar;
+  // bdd variables
+  std::vector<bdd_node> ivar = id_variables(p.equations().size());
+  std::vector<bdd_node> pvar = param_variables(p.equations().front().variable());
 
-  std::map<pbes_system::propositional_variable, bdd_node> emap = equation_identifier_map(p.equations(), evar);
+  // equation ids
+  std::vector<bdd_node> ids = equation_identifiers(p.equations(), ivar);
 
-  out << "Variables: " << print_variables(all_variables) << std::endl;
-  out << "At least one equation: " << at_least_one_equation(emap)->print() << std::endl;
-  out << "Unchanged variables (example): " << unchanged_variables(evar) << std::endl;
-  out << "Equations:\n";
-  for (const bdd_equation& eqn: equations)
+  std::vector<bdd_equation> equations = split_pbes(p, eqn_index, ids);
+
+  out << "--- bdd variables ---\n" << string_join(to_string(ivar + pvar, " ")) << "\n\n";
+  out << "--- all nodes ---\n" << any(ids)->print() << "\n\n";
+  out << "--- even nodes ---\n" << any(even_ids(equations))->print() << "\n\n";
+  out << "--- odd nodes ---\n" << any(odd_ids(equations))->print() << "\n\n";
+
+  out << "--- priorities ---\n";
+  std::map<std::size_t, std::vector<bdd_node>> priority_ids = priority_map(equations);
+  std::size_t min_rank = equations.front().rank;
+  std::size_t max_rank = equations.back().rank;
+  for (std::size_t rank = min_rank; rank <= max_rank; rank++)
   {
-    out << eqn << std::endl;
+    out << "prio[" << rank << "] = " << any(priority_ids[rank])->print() << "\n";
   }
+
   return out.str();
 }
 
