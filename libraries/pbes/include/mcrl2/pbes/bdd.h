@@ -594,9 +594,9 @@ struct bdd_equation
     return string_join(add_parens(v), " & ");
   }
 
-  std::string edge_relation(const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids, const std::vector<bdd_node>& parameters) const
+  std::vector<std::string> edge_relation(const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids, const std::vector<bdd_node>& parameters) const
   {
-    std::vector<std::string> clauses;
+    std::vector<std::string> result;
     for (const element& e: elements)
     {
       std::string id0 = id->print();
@@ -605,9 +605,9 @@ struct bdd_equation
       std::string f = to_bdd(e.first)->print();
       std::string updates = parameter_updates(e, parameters);
       std::vector<std::string> v = { id0, id1, f, updates };
-      clauses.push_back(string_join(add_parens(v), " & "));
+      result.push_back(string_join(add_parens(v), " & "));
     }
-    return string_join(add_parens(clauses), " | ");
+    return result;
   }
 };
 
@@ -789,7 +789,7 @@ std::string pbes2bdd(const pbes_system::pbes& p)
 
   std::vector<bdd_equation> equations = split_pbes(p, eqn_index, ids);
 
-  out << "--- bdd variables ---\n" << string_join(to_string(ivar + pvar, " ")) << "\n\n";
+  out << "--- bdd variables ---\n" << string_join(to_string(ivar + pvar), " ") << "\n\n";
   out << "--- all nodes ---\n" << any(ids)->print() << "\n\n";
   out << "--- even nodes ---\n" << any(even_ids(equations))->print() << "\n\n";
   out << "--- odd nodes ---\n" << any(odd_ids(equations))->print() << "\n\n";
@@ -798,9 +798,12 @@ std::string pbes2bdd(const pbes_system::pbes& p)
   std::map<std::size_t, std::vector<bdd_node>> priority_ids = priority_map(equations);
   std::size_t min_rank = equations.front().rank;
   std::size_t max_rank = equations.back().rank;
+  // We prefer a max priority game, so the ranks need to be reversed
+  // Start at 0 if max_rank is even
   for (std::size_t rank = min_rank; rank <= max_rank; rank++)
   {
-    out << "prio[" << rank << "] = " << any(priority_ids[rank])->print() << "\n";
+    std::size_t r = max_rank - rank + (max_rank % 2);
+    out << "prio[" << r << "] = " << any(priority_ids[rank])->print() << "\n";
   }
   out << "\n";
 
@@ -808,9 +811,10 @@ std::string pbes2bdd(const pbes_system::pbes& p)
   std::vector<std::string> edges;
   for (const bdd_equation& eqn: equations)
   {
-    edges.push_back(eqn.edge_relation(eqn_index, ids, pvar));
+    std::vector<std::string> E = eqn.edge_relation(eqn_index, ids, pvar);
+    edges.insert(edges.end(), E.begin(), E.end());
   }
-  out << "  " << string_join(add_parens(edges), "\n|  ") << "\n";
+  out << "  " << string_join(add_parens(edges), "\n| ") << "\n";
   return out.str();
 }
 
