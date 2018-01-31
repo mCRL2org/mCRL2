@@ -353,6 +353,11 @@ bdd_node to_bdd(const data::data_expression& x)
   {
     return make_false();
   }
+  else if (data::sort_bool::is_not_application(x))
+  {
+    const auto& operand = data::sort_bool::arg(x);
+    return make_not(to_bdd(operand));
+  }
   else if (data::is_equal_to_application(x))
   {
     const auto& left  = data::binary_left1(x);
@@ -576,17 +581,33 @@ struct bdd_equation
     elements.push_back({ T, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x) });
   }
 
-  std::string parameter_changes(const element& e, const std::vector<bdd_node>& parameters) const
+  std::string parameter_updates(const element& e, const std::vector<bdd_node>& parameters) const
   {
-    std::vector<std::string> before = to_string(parameters);
-    std::vector<std::string> after = add_parens(to_string(to_bdd(e.second.parameters()), true));
+    std::vector<std::string> param0 = to_string(parameters, true);
+    std::vector<std::string> param1 = add_parens(to_string(to_bdd(e.second.parameters())));
 
     std::vector<std::string> v;
-    for (std::size_t i = 0; i < before.size(); i++)
+    for (std::size_t i = 0; i < param0.size(); i++)
     {
-      v.push_back(before[i] + " <-> " + after[i]);
+      v.push_back(param0[i] + " <-> " + param1[i]);
     }
     return string_join(add_parens(v), " <-> ");
+  }
+
+  std::string edge_relation(const pbes_equation_index& eqn_index, const std::vector<bdd_node>& ids, const std::vector<bdd_node>& parameters) const
+  {
+    std::vector<std::string> clauses;
+    for (const element& e: elements)
+    {
+      std::string id0 = id->print();
+      std::size_t i1 = eqn_index.index(e.second.name());
+      std::string id1 = ids[i1]->print(true);
+      std::string f = to_bdd(e.first)->print();
+      std::string updates = parameter_updates(e, parameters);
+      std::vector<std::string> v = { id0, id1, f, updates };
+      clauses.push_back(string_join(add_parens(v), " & "));
+    }
+    return string_join(add_parens(clauses), " | ");
   }
 };
 
@@ -781,7 +802,15 @@ std::string pbes2bdd(const pbes_system::pbes& p)
   {
     out << "prio[" << rank << "] = " << any(priority_ids[rank])->print() << "\n";
   }
+  out << "\n";
 
+  out << "--- edges ---\n";
+  std::vector<std::string> edges;
+  for (const bdd_equation& eqn: equations)
+  {
+    edges.push_back(eqn.edge_relation(eqn_index, ids, pvar));
+  }
+  out << "  " << string_join(add_parens(edges), "\n|  ") << "\n";
   return out.str();
 }
 
