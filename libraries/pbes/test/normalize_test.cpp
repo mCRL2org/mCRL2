@@ -9,6 +9,7 @@
 /// \file normalize_test.cpp
 /// \brief Test for normalization functions.
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -68,15 +69,15 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  x = data::variable("x", data::sort_bool::bool_());
-  y = data::variable("y", data::sort_bool::bool_());
-  z = data::variable("z", data::sort_bool::bool_());
+  x = data::variable("x", data::bool_());
+  y = data::variable("y", data::bool_());
+  z = data::variable("z", data::bool_());
   const data::data_expression& x1 = atermpp::down_cast<data::data_expression>(x);
   const data::data_expression& y1 = atermpp::down_cast<data::data_expression>(y);
 
   f  = not_(x);
   f1 = pbes_system::normalize(f);
-  f2 = data::sort_bool::not_(x1);
+  f2 = data::not_(x1);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -84,7 +85,7 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = pbes_system::normalize(f);
-  f2 = or_(or_(data::sort_bool::not_(x1), data::sort_bool::not_(y1)), z);
+  f2 = or_(or_(data::not_(x1), data::not_(y1)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;

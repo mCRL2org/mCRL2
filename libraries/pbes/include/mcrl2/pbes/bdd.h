@@ -19,6 +19,7 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/application.h"
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/pbes/join.h"
@@ -351,49 +352,49 @@ std::vector<bdd_node> operator+(const std::vector<bdd_node>& x, const std::vecto
 inline
 bdd_node to_bdd(const data::data_expression& x)
 {
-  if (data::is_variable(x) && data::sort_bool::is_bool(atermpp::down_cast<data::variable>(x).sort()))
+  if (data::is_variable(x) && data::is_bool(atermpp::down_cast<data::variable>(x).sort()))
   {
     const data::variable& y = atermpp::down_cast<data::variable>(x);
     return make_variable(y.name());
   }
-  else if (data::sort_bool::is_true_function_symbol(x))
+  else if (data::is_true(x))
   {
     return make_true();
   }
-  else if (data::sort_bool::is_false_function_symbol(x))
+  else if (data::is_false(x))
   {
     return make_false();
   }
-  else if (data::sort_bool::is_not_application(x))
+  else if (data::is_not(x))
   {
     const auto& operand = data::sort_bool::arg(x);
     return make_not(to_bdd(operand));
   }
-  else if (data::is_equal_to_application(x))
+  else if (data::is_equal_to(x))
   {
     const auto& left  = data::binary_left1(x);
     const auto& right = data::binary_right1(x);
     return make_eq(to_bdd(left), to_bdd(right));
   }
-  else if (data::is_not_equal_to_application(x))
+  else if (data::is_not_equal_to(x))
   {
     const auto& left  = data::binary_left1(x);
     const auto& right = data::binary_right1(x);
     return make_imp(to_bdd(left), make_not(to_bdd(right)));
   }
-  else if (data::sort_bool::is_or_application(x))
+  else if (data::is_or(x))
   {
     const auto& left  = data::binary_left1(x);
     const auto& right = data::binary_right1(x);
     return make_or(to_bdd(left), to_bdd(right));
   }
-  else if (data::sort_bool::is_and_application(x))
+  else if (data::is_and(x))
   {
     const auto& left  = data::binary_left1(x);
     const auto& right = data::binary_right1(x);
     return make_and(to_bdd(left), to_bdd(right));
   }
-  else if (data::sort_bool::is_implies_application(x))
+  else if (data::is_imp(x))
   {
     const auto& left  = data::binary_left1(x);
     const auto& right = data::binary_right1(x);
@@ -588,7 +589,7 @@ struct bdd_equation
   // x is a propositional variable instantiation
   void add_element(const pbes_system::pbes_expression& x)
   {
-    data::data_expression T = data::sort_bool::true_();
+    data::data_expression T = data::true_();
     elements.push_back({ T, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x) });
   }
 

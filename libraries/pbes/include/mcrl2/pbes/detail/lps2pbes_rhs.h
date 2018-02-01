@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -411,7 +412,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& ci = i.condition();
       const data::data_expression& ti = i.multi_action().time();
       const data::variable_list&   yi = i.summation_variables();
-      pbes_expression p = tr::forall(yi, tr::or_(data::sort_bool::not_(ci), data::greater(t, ti)));
+      pbes_expression p = tr::forall(yi, tr::or_(data::not_(ci), data::greater(t, ti)));
       v.push_back(p);
     }
     for (const lps::deadlock_summand& j: parameters.lps.deadlock_summands())
@@ -419,7 +420,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& cj = j.condition();
       const data::data_expression& tj = j.deadlock().time();
       const data::variable_list&   yj = j.summation_variables();
-      pbes_expression p = tr::forall(yj, tr::or_(data::sort_bool::not_(cj), data::greater(t, tj)));
+      pbes_expression p = tr::forall(yj, tr::or_(data::not_(cj), data::greater(t, tj)));
       v.push_back(p);
     }
     push(tr::and_(tr::join_or(v.begin(), v.end()), data::greater(t, parameters.T)));

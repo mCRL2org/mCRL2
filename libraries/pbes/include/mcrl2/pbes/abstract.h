@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_ABSTRACT_H
 #define MCRL2_PBES_ABSTRACT_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/pbes.h"
@@ -39,7 +40,7 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
 
   pbes_abstract_builder(const std::vector<data::variable>& selected_variables, bool value_true)
     : m_selected_variables(selected_variables),
-      m_value(value_true ? data::sort_bool::true_() : data::sort_bool::false_())
+      m_value(value_true ? data::true_() : data::false_())
   {}
 
   /// \brief Returns true if the m_quantifier_stack contains a given data variable
@@ -121,7 +122,7 @@ class pbes_abstract_algorithm
     /// \param value_true An indication whether the abstraction is towards true or towards false.
     void run(pbes& p,
              const detail::pbes_parameter_map& parameter_map,
-             bool value_true 
+             bool value_true
             )
     {
       for (pbes_equation& eqn: p.equations())

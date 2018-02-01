@@ -9,6 +9,7 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
@@ -49,7 +50,7 @@ data::variable pos(const std::string& name)
 inline
 data::variable bool_(const std::string& name)
 {
-  return data::variable(core::identifier_string(name), data::sort_bool::bool_());
+  return data::variable(core::identifier_string(name), data::bool_());
 }
 
 void test_find()
@@ -99,7 +100,7 @@ void test_free_variables()
 
   free_variables = find_free_variables(specification.process().action_summands().front());
   BOOST_CHECK(free_variables.size() == 1);
-  BOOST_CHECK(free_variables.find(data::variable("z", data::sort_bool::bool_())) != free_variables.end());
+  BOOST_CHECK(free_variables.find(data::variable("z", data::bool_())) != free_variables.end());
 
   BOOST_CHECK(check_well_typedness(specification));
 }

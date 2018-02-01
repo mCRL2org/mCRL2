@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/detail/stategraph_split.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
@@ -28,17 +29,17 @@ pbes_expression stategraph_not(const pbes_expression& x)
   if (is_data(x))
   {
     auto const& x1 = atermpp::down_cast<data::data_expression>(x);
-    if (data::sort_bool::is_not_application(x1))
+    if (data::is_not(x1))
     {
       return data::unary_operand1(x1);
     }
-    else if (data::is_not_equal_to_application(x1))
+    else if (data::is_not(x1))
     {
       auto const& left  = data::binary_left1(x1);
       auto const& right = data::binary_right1(x1);
       return data::equal_to(left, right);
     }
-    else if (data::is_equal_to_application(x1))
+    else if (data::is_equal_to(x1))
     {
       auto const& left  = data::binary_left1(x1);
       auto const& right = data::binary_right1(x1);
@@ -46,7 +47,7 @@ pbes_expression stategraph_not(const pbes_expression& x)
     }
     else
     {
-      return data::sort_bool::not_(x1);
+      return data::not_(x1);
     }
   }
   return not_(x);
@@ -57,7 +58,7 @@ pbes_expression smart_and(const pbes_expression& x, const pbes_expression& y)
 {
   if (is_data(x) && is_data(y))
   {
-    return data::sort_bool::and_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
+    return data::and_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
   }
   return and_(x, y);
 }
@@ -67,7 +68,7 @@ pbes_expression smart_or(const pbes_expression& x, const pbes_expression& y)
 {
   if (is_data(x) && is_data(y))
   {
-    return data::sort_bool::or_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
+    return data::or_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
   }
   return or_(x, y);
 }
@@ -87,21 +88,6 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
-  }
-
-  bool is_data_not(const pbes_expression& x) const
-  {
-    return data::is_data_expression(x) && data::sort_bool::is_not_application(x);
-  }
-
-  bool is_data_and(const pbes_expression& x) const
-  {
-    return data::is_data_expression(x) && data::sort_bool::is_and_application(x);
-  }
-
-  bool is_data_or(const pbes_expression& x) const
-  {
-    return data::is_data_expression(x) && data::sort_bool::is_or_application(x);
   }
 
   // returns the argument of a not expression (pbes or data)

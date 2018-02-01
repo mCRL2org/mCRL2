@@ -9,6 +9,7 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
@@ -94,8 +95,8 @@ void test_lps_substituter()
 
 void test_lps_substitute()
 {
-  data::variable v("v", data::sort_bool::bool_());
-  const data::data_expression& w = data::sort_bool::true_();
+  data::variable v("v", data::bool_());
+  const data::data_expression& w = data::true_();
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
   data::data_expression e = v;
@@ -111,8 +112,8 @@ void test_replace_process_parameters()
     ;
   specification spec = parse_linear_process_specification(SPEC);
   data::mutable_map_substitution<> sigma;
-  data::variable b("b", data::sort_bool::bool_());
-  data::variable b0("b0", data::sort_bool::bool_());
+  data::variable b("b", data::bool_());
+  data::variable b0("b0", data::bool_());
   sigma[b] = b0;
   lps::replace_process_parameters(spec, sigma);
   std::set<data::variable> variables = lps::find_all_variables(spec);
@@ -128,8 +129,8 @@ void test_replace_summand_variables()
     ;
   specification spec = parse_linear_process_specification(SPEC);
   data::mutable_map_substitution<> sigma;
-  data::variable c("c", data::sort_bool::bool_());
-  data::variable c0("c0", data::sort_bool::bool_());
+  data::variable c("c", data::bool_());
+  data::variable c0("c0", data::bool_());
   sigma[c] = c0;
   lps::replace_summand_variables(spec, sigma);
   std::cout << lps::pp(spec) << std::endl;
@@ -143,12 +144,12 @@ void test_action_list()
   s.push_front(sort_expression(sort_nat::nat()));
   process::action_label label(core::identifier_string("a"), s);
 
-  variable b("b", data::sort_bool::bool_());
-  variable c("c", data::sort_bool::bool_());
+  variable b("b", data::bool_());
+  variable c("c", data::bool_());
   data_expression_list e1;
-  e1.push_front(data_expression(sort_bool::and_(b, c)));
+  e1.push_front(data_expression(data::and_(b, c)));
   data_expression_list e2;
-  e2.push_front(data_expression(sort_bool::and_(c, c)));
+  e2.push_front(data_expression(data::and_(c, c)));
 
   process::action_list l1;
   process::action a1(label, e1);

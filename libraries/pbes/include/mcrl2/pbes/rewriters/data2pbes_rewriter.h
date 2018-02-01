@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_REWRITERS_DATA2PBES_REWRITER_H
 #define MCRL2_PBES_REWRITERS_DATA2PBES_REWRITER_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
@@ -34,22 +35,22 @@ struct data2pbes_builder: public pbes_expression_builder<Derived>
 
   bool is_not(const data::data_expression& x) const
   {
-    return data::sort_bool::is_not_application(x);
+    return data::is_not(x);
   }
 
   bool is_and(const data::data_expression& x) const
   {
-    return data::sort_bool::is_and_application(x);
+    return data::is_and(x);
   }
 
   bool is_or(const data::data_expression& x) const
   {
-    return data::sort_bool::is_or_application(x);
+    return data::is_or(x);
   }
 
   bool is_imp(const data::data_expression& x) const
   {
-    return data::sort_bool::is_implies_application(x);
+    return data::is_imp(x);
   }
 
   bool is_forall(const data::data_expression& x) const

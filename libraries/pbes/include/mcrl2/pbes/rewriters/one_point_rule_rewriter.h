@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H
 #define MCRL2_PBES_REWRITERS_ONE_POINT_RULE_REWRITER_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -111,7 +112,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     pbes_expression operand = derived().apply(x.operand());
     if (data::is_data_expression(operand))
     {
-      return data::sort_bool::not_(atermpp::down_cast<data::data_expression>(operand));
+      return data::not_(atermpp::down_cast<data::data_expression>(operand));
     }
     else
     {

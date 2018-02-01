@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_IS_BES_H
 #define MCRL2_PBES_IS_BES_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {
@@ -45,7 +46,7 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
 
   void enter(const data::data_expression& x)
   {
-    if (x != data::sort_bool::true_() && x != data::sort_bool::false_())
+    if (x != data::true_() && x != data::false_())
     {
       result = false;
     }

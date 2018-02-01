@@ -26,6 +26,7 @@
 #ifndef MCRL2_PBES_COMPLEMENT_H
 #define MCRL2_PBES_COMPLEMENT_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -49,7 +50,7 @@ struct complement_builder: public pbes_expression_builder<Derived>
 
   pbes_expression apply(const data::data_expression& x)
   {
-    return data::sort_bool::not_(x);
+    return data::not_(x);
   }
 
   pbes_expression apply(const and_& x)

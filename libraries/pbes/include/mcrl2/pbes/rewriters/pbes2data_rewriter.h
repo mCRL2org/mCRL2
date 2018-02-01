@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_REWRITERS_PBES2DATA_REWRITER_H
 #define MCRL2_PBES_REWRITERS_PBES2DATA_REWRITER_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
@@ -38,19 +39,19 @@ struct pbes2data_builder: public pbes_expression_builder<Derived>
   {
     if (is_not(x))
     {
-      return data::sort_bool::not_(pbes2data(accessors::arg(x)));
+      return data::not_(pbes2data(accessors::arg(x)));
     }
     else if (is_and(x))
     {
-      return data::sort_bool::and_(pbes2data(accessors::left(x)), pbes2data(accessors::right(x)));
+      return data::and_(pbes2data(accessors::left(x)), pbes2data(accessors::right(x)));
     }
     else if (is_or(x))
     {
-      return data::sort_bool::or_(pbes2data(accessors::left(x)), pbes2data(accessors::right(x)));
+      return data::or_(pbes2data(accessors::left(x)), pbes2data(accessors::right(x)));
     }
     else if (is_imp(x))
     {
-      return data::sort_bool::implies(pbes2data(accessors::left(x)), pbes2data(accessors::right(x)));
+      return data::imp(pbes2data(accessors::left(x)), pbes2data(accessors::right(x)));
     }
     else if (is_forall(x))
     {

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <utility>
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
@@ -344,11 +345,11 @@ struct absinthe_algorithm
       data::data_expression x1 = lift(x);
       if (m_is_over_approximation)
       {
-        result = data::detail::create_set_in(data::sort_bool::true_(), x1);
+        result = data::detail::create_set_in(data::true_(), x1);
       }
       else
       {
-        result = data::sort_bool::not_(data::detail::create_set_in(data::sort_bool::false_(), x1));
+        result = data::not_(data::detail::create_set_in(data::false_(), x1));
       }
       return result;
     }
@@ -640,7 +641,7 @@ struct absinthe_algorithm
     {
       mCRL2log(log::debug, "absinthe") << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
       data::variable_list variables;
-      const data::data_expression& condition = data::sort_bool::true_();
+      const data::data_expression& condition = data::true_();
       data::data_expression lhs;
       data::data_expression rhs;
 
@@ -763,7 +764,7 @@ struct absinthe_algorithm
     {
       //mCRL2log(log::debug, "absinthe") << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
       data::variable_list variables;
-      const data::data_expression& condition = data::sort_bool::true_();
+      const data::data_expression& condition = data::true_();
       data::data_expression lhs;
       data::data_expression rhs;
 
@@ -792,7 +793,7 @@ struct absinthe_algorithm
         lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));
         data::variable y("y", data::detail::get_set_sort(atermpp::down_cast<data::container_sort>(fs2.codomain())));
         data::data_expression Y = data::application(f2, data::data_expression_list(x.begin(), x.end()));
-        data::data_expression body = data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y));
+        data::data_expression body = data::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y));
         rhs = data::detail::create_set_comprehension(y, data::exists(x, body));
       }
       else if (data::is_container_sort(s2))

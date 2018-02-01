@@ -11,6 +11,7 @@
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/print.h"
@@ -71,14 +72,14 @@ void test_equal_multi_actions()
   process::action_list a34 ( { act("a", data_expression_list({ d3 })), act("a", data_expression_list({ d4 })) });
   process::action_list a12b1 ( { act("a", data_expression_list({ d1 })), act("a", data_expression_list({ d2 })), act("b", data_expression_list({ d1 })) });
   process::action_list a34b2 ( { act("a", data_expression_list({ d3 })), act("a", data_expression_list({ d4 })), act("b", data_expression_list({ d2 })) });
-  test_multi_actions(a1,  a1, d::sort_bool::true_());
+  test_multi_actions(a1,  a1, d::true_());
   test_multi_actions(a1,  a2, d::equal_to(d1, d2));
-  test_multi_actions(a11, a11, d::sort_bool::true_());
-  test_multi_actions(a12, a21, d::sort_bool::true_());
-  test_multi_actions(a21, a12, d::sort_bool::true_());
+  test_multi_actions(a11, a11, d::true_());
+  test_multi_actions(a12, a21, d::true_());
+  test_multi_actions(a21, a12, d::true_());
   test_multi_actions(a11, a22, d::equal_to(d1, d2));
-  test_multi_actions(a1, a12,  d::sort_bool::false_());
-  test_multi_actions(a1, b1,   d::sort_bool::false_());
+  test_multi_actions(a1, a12,  d::false_());
+  test_multi_actions(a1, b1,   d::false_());
   test_multi_actions(a12, a34);
   test_multi_actions(a12b1, a34b2);
 

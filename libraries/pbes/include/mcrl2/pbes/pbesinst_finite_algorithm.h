@@ -184,11 +184,10 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
   template <typename VariableContainer, typename ExpressionContainer>
   data::data_expression make_condition(const VariableContainer& variables, const ExpressionContainer& expressions) const
   {
-    using namespace data::sort_bool;
     assert(variables.size() == expressions.size());
     if (variables.empty())
     {
-      return data::sort_bool::true_();
+      return data::true_();
     }
     typename VariableContainer::const_iterator vi = variables.begin();
     typename ExpressionContainer::const_iterator ei = expressions.begin();
@@ -197,7 +196,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     ++ei;
     for (; vi != variables.end(); ++vi, ++ei)
     {
-      result = data::sort_bool::and_(result, equal_to(*vi, *ei));
+      result = data::and_(result, equal_to(*vi, *ei));
     }
     return result;
   }
@@ -228,7 +227,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R, id_generator);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
     const data::variable_list vl(di.begin(), di.end());
-    std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+    std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::true_()));
     for (auto i = enumerator.begin(local_sigma, enumerator_deque); i != enumerator.end(); ++i)
     {
       mCRL2log(log::debug1) << "sigma = " << sigma << "\n";
@@ -375,7 +374,7 @@ class pbesinst_finite_algorithm
         data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr, m_id_generator);
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
         const data::variable_list vl(finite_parameters.begin(), finite_parameters.end());
-        std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+        std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, data::true_()));
         for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end(); ++j)
         {
           // apply the substitution contained in the enumerated element.

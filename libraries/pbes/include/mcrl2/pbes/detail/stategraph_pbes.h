@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_PBES_H
 
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
@@ -186,18 +187,18 @@ class stategraph_equation: public pbes_equation
             }
           }
           // handle conjuncts b and !b, with b a variable with sort Bool
-          else if (data::is_variable(v_i) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
+          else if (data::is_variable(v_i) && data::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
           {
             const data::variable& v = atermpp::down_cast<data::variable>(v_i);
-            result[v] = data::sort_bool::true_();
+            result[v] = data::true_();
           }
-          else if (data::sort_bool::is_not_application(v_i))
+          else if (data::is_not(v_i))
           {
             data::data_expression narg(data::sort_bool::arg(v_i));
-            if (data::is_variable(narg) && data::sort_bool::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(narg)) != d.end())
+            if (data::is_variable(narg) && data::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(narg)) != d.end())
             {
               const data::variable& v = atermpp::down_cast<data::variable>(narg);
-              result[v] = data::sort_bool::false_();
+              result[v] = data::false_();
             }
           }
         }

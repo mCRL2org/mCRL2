@@ -12,6 +12,7 @@
 #define MCRL2_DEBUG_ENUMERATE_QUANTIFIERS_BUILDER
 
 #include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
@@ -188,13 +189,12 @@ void test_global_variables()
 void test_complement_method_builder()
 {
   using namespace pbes_system;
-  namespace d = data::sort_bool;
 
-  variable X("x", data::sort_bool::bool_());
-  variable Y("y", data::sort_bool::bool_());
+  variable X("x", data::bool_());
+  variable Y("y", data::bool_());
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
-  pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
+  pbes_expression q = and_(or_(data::not_(X), data::not_(Y)), or_(data::not_(Y), data::not_(X)));
   std::cout << "p             = " << mcrl2::pbes_system::pp(p) << std::endl;
   std::cout << "q             = " << mcrl2::pbes_system::pp(q) << std::endl;
   std::cout << "complement(p) = " << mcrl2::pbes_system::pp(complement(p)) << std::endl;

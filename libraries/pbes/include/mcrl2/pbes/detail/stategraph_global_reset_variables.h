@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/traverser.h"
@@ -185,7 +186,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         std::size_t N = u.marked_parameters().size();
         assert(e.size() == u.marked_parameters().size());
         data::data_expression_list::const_iterator k = u.values().begin();
-        data::data_expression condition = data::sort_bool::true_();
+        data::data_expression condition = data::true_();
         for (std::size_t j = 0; j < N; ++j)
         {
           mCRL2log(log::debug, "stategraph") << "    j = " << j;
@@ -226,7 +227,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         if (m_simplify)
         {
           condition = m_datar(condition);
-          if (condition != data::sort_bool::false_())
+          if (condition != data::false_())
           {
             phi.push_back(imp(condition, Yr));
           }

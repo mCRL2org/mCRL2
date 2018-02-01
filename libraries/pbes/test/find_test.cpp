@@ -10,6 +10,7 @@
 /// \brief Add your file description here.
 
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/print.h"
@@ -34,7 +35,7 @@ data::variable pos(const std::string& name)
 inline
 data::variable bool_(const std::string& name)
 {
-  return data::variable(core::identifier_string(name), data::sort_bool::bool_());
+  return data::variable(core::identifier_string(name), data::bool_());
 }
 
 void test_find()

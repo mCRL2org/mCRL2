@@ -13,6 +13,7 @@
 #define MCRL2_PBES_NORMALIZE_H
 
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/traverser.h"
@@ -68,7 +69,7 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
 
   pbes_expression apply(const data::data_expression& x)
   {
-    return negated ? data::sort_bool::not_(x) : x;
+    return negated ? data::not_(x) : x;
   }
 
   pbes_expression apply(const not_& x)

@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_TYPECHECK_H
 #define MCRL2_PBES_TYPECHECK_H
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/pbes_context.h"
@@ -47,7 +48,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 
   pbes_expression apply(const data::data_expression& x)
   {
-    return m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+    return m_data_type_checker.typecheck_data_expression(x, data::bool_(), m_variable_context);
   }
 
   pbes_expression apply(const forall& x)
@@ -121,7 +122,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     const core::identifier_string& name = x.name();
     if (!m_pbes_context.is_declared(name))
     {
-      return data::typecheck_untyped_data_parameter(m_data_type_checker, x.name(), x.arguments(), data::sort_bool::bool_(), m_variable_context);
+      return data::typecheck_untyped_data_parameter(m_data_type_checker, x.name(), x.arguments(), data::bool_(), m_variable_context);
     }
 
     data::sort_expression_list equation_sorts = m_pbes_context.propositional_variable_sorts(name);

@@ -78,7 +78,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
       const regular_formula R1 = alt(reg_frm).left();
       const regular_formula R2 = alt(reg_frm).right();
       //red([R1+R2]phi) -> red([R1]phi) && red([R2]phi)
-      part = and_(
+      part = state_formulas::and_(
                translate_reg_frms_appl(must(R1,phi),xyz_generator),
                translate_reg_frms_appl(must(R2,phi),xyz_generator)
              );
@@ -95,7 +95,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
       //red([R*]phi) -> nu X. red(phi) && red([R]X),
       //where X does not occur free in phi and R
       const identifier_string X = xyz_generator("X");
-      part = nu(X, assignment_list(), and_(
+      part = nu(X, assignment_list(), state_formulas::and_(
                      translate_reg_frms_appl(phi,xyz_generator),
                      translate_reg_frms_appl(must(R,mcrl2::state_formulas::variable(X, data_expression_list())),xyz_generator)
                ));
@@ -123,7 +123,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
       const regular_formula R1 = alt(reg_frm).left();
       const regular_formula R2 = alt(reg_frm).right();
       //red(<R1+R2>phi) -> red(<R1>phi) || red(<R2>phi)
-      part = or_(
+      part = state_formulas::or_(
                translate_reg_frms_appl(may(R1,phi),xyz_generator),
                translate_reg_frms_appl(may(R2,phi),xyz_generator)
              );
@@ -140,7 +140,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
       //red(<R*>phi) -> mu X. red(phi) || red(<R>X),
       //where X does not occur free in phi and R
       const identifier_string X =xyz_generator("X");
-      part = mu(X, assignment_list(), or_(
+      part = mu(X, assignment_list(), state_formulas::or_(
                      translate_reg_frms_appl(phi,xyz_generator),
                      translate_reg_frms_appl(may(R,mcrl2::state_formulas::variable(X, data_expression_list())),xyz_generator)
                ));
@@ -153,23 +153,23 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
   }
   else if (state_formulas::is_not(part))
   {
-    const not_& not_part = atermpp::down_cast<not_>(part);
-    part = not_(translate_reg_frms_appl(not_part.operand(),xyz_generator));
+    const state_formulas::not_& not_part = atermpp::down_cast<state_formulas::not_>(part);
+    part = state_formulas::not_(translate_reg_frms_appl(not_part.operand(),xyz_generator));
   }
   else if (state_formulas::is_and(part))
   {
-    part = and_(translate_reg_frms_appl(and_(part).left(),xyz_generator),
-                translate_reg_frms_appl(and_(part).right(),xyz_generator));
+    part = state_formulas::and_(translate_reg_frms_appl(state_formulas::and_(part).left(),xyz_generator),
+                translate_reg_frms_appl(state_formulas::and_(part).right(),xyz_generator));
   }
   else if (state_formulas::is_or(part))
   {
-    part = or_(translate_reg_frms_appl(or_(part).left(),xyz_generator),
-               translate_reg_frms_appl(or_(part).right(),xyz_generator));
+    part = state_formulas::or_(translate_reg_frms_appl(state_formulas::or_(part).left(),xyz_generator),
+               translate_reg_frms_appl(state_formulas::or_(part).right(),xyz_generator));
   }
   else if (state_formulas::is_imp(part))
   {
-    part = imp(translate_reg_frms_appl(imp(part).left(),xyz_generator),
-                translate_reg_frms_appl(imp(part).right(),xyz_generator));
+    part = state_formulas::imp(translate_reg_frms_appl(state_formulas::imp(part).left(),xyz_generator),
+                translate_reg_frms_appl(state_formulas::imp(part).right(),xyz_generator));
   }
   else if (state_formulas::is_forall(part))
   {
