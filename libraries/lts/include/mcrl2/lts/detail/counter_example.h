@@ -93,8 +93,9 @@ class counter_example_constructor
       return m_backward_tree.size()-1;
     }
 
+    /* A trace to index is saved, followed by a list of actions in extra_actions. */
     template < class LTS_TYPE >
-    void save_counter_example(index_type index, const LTS_TYPE& l) const
+    void save_counter_example(index_type index, const LTS_TYPE& l, const std::vector<size_t>& extra_actions=std::vector<size_t>()) const
     {
       // We first store the label indices in reverse order in a stack.
       std::stack< index_type > reversed_label_indices;
@@ -114,6 +115,16 @@ class counter_example_constructor
                                        mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));
         reversed_label_indices.pop();
+      }
+
+      /* Add the actions in extra actions. */
+      for(const size_t& a: extra_actions)
+      {
+        result.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
+                                mcrl2::process::action_label(
+                                       core::identifier_string(mcrl2::lts::pp(l.action_label(a))),
+                                       mcrl2::data::sort_expression_list()),
+                                mcrl2::data::data_expression_list())));
       }
       mCRL2log(log::verbose) << "Saved trace to file " + m_filename + "\n";
       result.save(m_filename);
@@ -146,7 +157,7 @@ class dummy_counter_example_constructor
     }
  
     template < class LTS_TYPE >
-    void save_counter_example(index_type /* index */, const LTS_TYPE& /*l*/) const
+    void save_counter_example(index_type /* index */, const LTS_TYPE& /*l*/, const std::vector<size_t>& /* extra_actions */ =std::vector<size_t>()) const
     {
       // This dummy counter example generator intentionally does not save anything.
     }

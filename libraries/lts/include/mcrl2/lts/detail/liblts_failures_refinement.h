@@ -117,7 +117,7 @@ namespace detail
             m_tau_reachable_states[t.from()].push_back(t.to());  // There is an outgoing tau. 
           }
           m_sorted_transitions[t.from()].push_back(t);
-    // The reduction below is only correct if . 
+         
           if (weak_reduction && m_l.is_tau(m_l.apply_hidden_label_map(t.label())) && 
               strongly_connected_component_partitioner.in_same_class(t.from(),t.to()))
           {
@@ -149,17 +149,17 @@ namespace detail
         return m_tau_reachable_states[s];
       }
 
-      const std::vector<transition>::const_iterator transitions_begin(const state_type s) const
+      const std::vector<transition>& transitions(const state_type s) const
       {
         assert(s<m_sorted_transitions.size());
-        return m_sorted_transitions[s].begin();
+        return m_sorted_transitions[s];
       }
 
-      const std::vector<transition>::const_iterator transitions_end(const state_type s) const
+      /* const std::vector<transition>::const_iterator transitions_end(const state_type s) const
       {
         assert(s<m_sorted_transitions.size());
         return m_sorted_transitions[s].end();
-      }
+      } */
 
       bool diverges(const state_type s) const
       {
@@ -190,7 +190,85 @@ namespace detail
   bool refusals_contained_in(
               const state_type impl, 
               const set_of_states& spec, 
-              const lts_cache<LTS_TYPE>& weak_property_cache);
+              const lts_cache<LTS_TYPE>& weak_property_cache,
+              label_type& culprit);
+
+  /* Construct a path to state s using the backward map, and return it in result */
+  void reconstruct_path(const state_type s, 
+                        const std::map<state_type, std::pair<label_type,state_type> >& backward_map, 
+                        std::vector<label_type>& result)
+  {
+    if (backward_map.count(s)==0)
+    {
+      return;
+    }
+    const std::pair<label_type,state_type> p=backward_map.at(s);
+    {
+      reconstruct_path(p.second, backward_map, result);
+      result.push_back(p.first);
+    }
+  }
+
+  template < class LTS_TYPE >
+  std::vector<label_type> find_path_to_stable_state_without_action_in_impl(const label_type offending_action, 
+                                                                           const state_type s, 
+                                                                           const lts_cache<LTS_TYPE>& lts_cache,
+                                                                           const LTS_TYPE& l,
+                                                                           const bool find_trace_with_taus)
+  {
+    set_of_states visited;
+    visited.insert(s);
+    std::deque<state_type> todo_stack={s};
+    std::map<state_type, std::pair<label_type,state_type> > backward_map;
+    while (todo_stack.size()>0)  
+    {
+      state_type current_state=todo_stack.front();
+      todo_stack.pop_front();
+
+      if (lts_cache.stable(current_state))  
+      {
+        // Check that the current state does not occur in all outgoing transitions. 
+        bool found=false;
+        for(const transition& t: lts_cache.transitions(current_state))
+        {
+          if (t.label()==offending_action)
+          {
+            found=true;
+            break;
+          }
+        }
+        if (!found)
+        { 
+          std::vector<label_type> resulting_path;
+          reconstruct_path(current_state, backward_map, resulting_path);
+          assert(find_trace_with_taus || resulting_path.empty()); // There are no tau's in the path if taus were not requested. 
+          if (!lts_cache.transitions(current_state).empty())
+          {
+            // Add one extra transition found in the state with a refusal set that does not occur in the specification. 
+            resulting_path.push_back(lts_cache.transitions(current_state)[0].label());
+          }
+          return resulting_path;
+        }
+      }
+      else // The current state is not stable. 
+      {
+        for(const transition& t: lts_cache.transitions(current_state))
+        {
+          if (find_trace_with_taus && l.is_tau(l.apply_hidden_label_map(t.label())))
+          {
+            if (visited.insert(t.to()).second)  // The state to() was not yet explored.
+            {
+              todo_stack.push_back(t.to());
+              backward_map[t.to()]=std::pair<label_type,state_type>(t.label(), t.from()); // Store how the to state could be reached.
+            }
+          }
+        }
+      }
+    }
+    // The action was not found. Do not return a path. 
+    return std::vector<label_type>();
+  }
+
 } // namespace detail
 
 enum refinement_type { trace, failures, failures_divergence };
@@ -275,17 +353,25 @@ bool destructive_refinement_checker(
     {
       if (refinement==failures || refinement==failures_divergence)
       { 
-        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache))
+        detail::label_type offending_action=std::size_t(-1);
+        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache,offending_action))   
         {
-          generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1);
+          std::vector<detail::label_type> counter_example_extension;
+          if (offending_action!=std::size_t(-1))
+          { 
+            counter_example_extension = 
+                       detail::find_path_to_stable_state_without_action_in_impl(offending_action, impl_spec.state(),weak_property_cache,l1, failures_divergence || weak_reduction);
+          }
+          generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1, counter_example_extension);
           return false;                               // return false; 
         }
       }
       
-      for(std::vector<transition>::const_iterator i=weak_property_cache.transitions_begin(impl_spec.state());
-               i!=weak_property_cache.transitions_end(impl_spec.state()); ++i)
+      // for(std::vector<transition>::const_iterator i=weak_property_cache.transitions_begin(impl_spec.state());
+      //         i!=weak_property_cache.transitions_end(impl_spec.state()); ++i)
+      for(const transition& t: weak_property_cache.transitions(impl_spec.state()))
       {
-        const transition& t=*i;
+        // const transition& t=*i;
         const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index=
                generate_counter_example.add_transition(t.label(),impl_spec.counter_example_index());
         detail::set_of_states spec_prime;
@@ -379,10 +465,8 @@ namespace detail
     set_of_states states_reachable_via_e;
     for(const state_type s: set_before_action_e)
     {
-      for(std::vector<transition>::const_iterator i=weak_property_cache.transitions_begin(s);
-               i!=weak_property_cache.transitions_end(s); ++i)
+      for(const transition& t: weak_property_cache.transitions(s))
       {
-        const transition& t=*i;
         {
           if (l.apply_hidden_label_map(t.label())==e)
           { 
@@ -470,7 +554,7 @@ namespace detail
         const set_of_states& s, 
         const lts_cache<LTS_TYPE>& weak_property_cache)
   {
-    set_of_states visited;
+    set_of_states visited(s);
     std::deque < state_type > todo_stack(s.begin(), s.end());
     std::vector < action_label_set > result;
 
@@ -503,12 +587,16 @@ namespace detail
   /* This function checks that the refusals(impl) are contained in the refusals of spec, where
      the refusals of spec are defined by { r | exists s in spec. r in refusals(s) }.
      This is equivalent to saying that for all stable states s' reachable via tau's from impl there is a stable t'
-     reachable via tau's from some t in spec, enable(t') is contained in enable(s'). The last expression is calculated below. */
+     reachable via tau's from some t in spec, enable(t') is contained in enable(s'). The last expression is calculated below. 
+     If enable(t') is not included in enable(s'), their is a problematic action a. This action is returned as "culprit".
+     It can be used to construct an extended counterexample. 
+  */
   template < class LTS_TYPE >
   bool refusals_contained_in(
               const state_type impl, 
               const set_of_states& spec, 
-              const lts_cache<LTS_TYPE>& weak_property_cache)
+              const lts_cache<LTS_TYPE>& weak_property_cache,
+              label_type& culprit)
   {
     // This function calculates whether refusals(impl) are not included in the refusals(spec).
     // This is equivalent to:
@@ -521,6 +609,7 @@ namespace detail
 
     // Now walk through the tau-reachable stable states s' of impl.
     set_of_states visited;
+    visited.insert(impl);
     std::deque < state_type > todo_stack;
     todo_stack.push_back(impl);
 
@@ -546,6 +635,7 @@ namespace detail
             if (impl_enabled_action_set.count(a)==0) // action in spec_actions_labels is not in this implementation set. This is not ok.
             {
               inclusion_success=false;
+              culprit=a;
               break;
             }
           }

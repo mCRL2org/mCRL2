@@ -43,19 +43,19 @@ template <typename T>
 class shared_subset
 {
   protected:
-    static atermpp::aterm_string &get_true()
+    static atermpp::aterm_string& get_true()
     {
       static atermpp::aterm_string true_ = atermpp::aterm_string("true");
       return true_;
     }
 
-    static atermpp::aterm_string &get_false()
+    static atermpp::aterm_string& get_false()
     {
       static atermpp::aterm_string false_ = atermpp::aterm_string("false");
       return false_;
     }
 
-    static atermpp::function_symbol &get_node()
+    static atermpp::function_symbol& get_node()
     {
       static atermpp::function_symbol node_ = atermpp::function_symbol("node", 3);
       return node_;
@@ -67,7 +67,7 @@ class shared_subset
         bdd_node()
         {}
 
-        bdd_node(const atermpp::aterm_appl &t)
+        bdd_node(const atermpp::aterm_appl& t)
           : atermpp::aterm_appl(t)
         {}
 
@@ -75,7 +75,7 @@ class shared_subset
           : atermpp::aterm_appl(value ? get_true() : get_false())
         {}
 
-        bdd_node(std::size_t bit, const bdd_node &true_node, const bdd_node &false_node)
+        bdd_node(std::size_t bit, const bdd_node& true_node, const bdd_node& false_node)
           : atermpp::aterm_appl(get_node(), atermpp::aterm_int(bit), true_node, false_node)
         {}
 
@@ -131,7 +131,7 @@ class shared_subset
         {
         }
 
-        iterator(const shared_subset &subset)
+        iterator(const shared_subset& subset)
           : m_subset(&subset),
             m_index(0)
         {
@@ -156,7 +156,7 @@ class shared_subset
           return m_index == other.m_index;
         }
 
-        T &dereference() const
+        T& dereference() const
         {
           return (*m_subset->m_set)[m_index];
         }
@@ -256,7 +256,7 @@ class shared_subset
     {}
 
     /// \brief Constructor.
-    shared_subset(std::vector<T> &set)
+    shared_subset(std::vector<T>& set)
       : m_set(&set),
         m_bdd_root(true)
     {
@@ -277,7 +277,7 @@ class shared_subset
     }
 
     template <class Predicate>
-    shared_subset(const shared_subset<T> &set, Predicate p)
+    shared_subset(const shared_subset<T>& set, Predicate p)
       : m_set(set.m_set),
         m_bits(set.m_bits)
     {
