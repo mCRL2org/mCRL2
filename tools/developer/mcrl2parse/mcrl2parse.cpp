@@ -549,7 +549,7 @@ class mcrl2parse_tool : public input_tool
               data::data_specification x = data::parse_data_specification(text);
               if (aterm_format)
               {
-                std::cout << data::detail::data_specification_to_aterm_data_spec(x) << std::endl;
+                std::cout << data::detail::data_specification_to_aterm(x) << std::endl;
               }
               else
               {
