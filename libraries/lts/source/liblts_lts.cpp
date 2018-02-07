@@ -150,7 +150,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
                const action_labels_t& action_label_list)
       : aterm_appl(lts_header(),
                    aterm_appl(meta_data_header(),
-                              ts.has_data() ? data::detail::data_specification_to_aterm_data_spec(ts.data()) : core::nil(),
+                              ts.has_data() ? data::detail::data_specification_to_aterm(ts.data()) : core::nil(),
                               ts.has_process_parameters() ? static_cast<aterm>(ts.process_parameters()) : core::nil(),
                               ts.has_action_labels() ? static_cast<aterm>(ts.action_labels()) : core::nil(),
                               aterm_appl(num_of_states_labels_and_initial_state(),

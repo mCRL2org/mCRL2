@@ -268,7 +268,7 @@ inline
 atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec)
 {
   return atermpp::aterm_appl(core::detail::function_symbol_ProcSpec(),
-           data::detail::data_specification_to_aterm_data_spec(spec.data()),
+           data::detail::data_specification_to_aterm(spec.data()),
            atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
            atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
            atermpp::aterm_appl(core::detail::function_symbol_ProcEqnSpec(), process_equation_list(spec.equations().begin(), spec.equations().end())),

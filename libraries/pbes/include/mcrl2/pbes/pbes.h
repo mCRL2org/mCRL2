@@ -419,7 +419,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes& p)
   atermpp::aterm_appl result;
 
   result = atermpp::aterm_appl(core::detail::function_symbol_PBES(),
-             data::detail::data_specification_to_aterm_data_spec(p.data()),
+             data::detail::data_specification_to_aterm(p.data()),
              global_variables,
              equations,
              initial_state);

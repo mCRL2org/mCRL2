@@ -33,7 +33,7 @@ void compatibility_test()
   );
 
   std::string text = utilities::read_text(data_stream);
-  atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm_data_spec(data::detail::parse_data_specification_new(text));
+  atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm(data::detail::parse_data_specification_new(text));
   if (data_spec_aterm == atermpp::aterm())
   {
     throw mcrl2::runtime_error("Error while parsing data specification");
@@ -42,7 +42,7 @@ void compatibility_test()
   data::typecheck_data_specification(data_spec);
 
   atermpp::aterm_appl data_spec_aterm_new =
-    mcrl2::data::detail::data_specification_to_aterm_data_spec(
+    mcrl2::data::detail::data_specification_to_aterm(
       data_spec
       // mcrl2::data::remove_all_system_defined(
       // mcrl2::data::data_specification(data_spec_aterm)

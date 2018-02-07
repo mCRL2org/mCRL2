@@ -453,7 +453,7 @@ void test_constructor()
     "                          \n"
     ;
   data_specification data = parse_data_specification(SPEC);
-  atermpp::aterm_appl a = data::detail::data_specification_to_aterm_data_spec(data);
+  atermpp::aterm_appl a = data::detail::data_specification_to_aterm(data);
   data_specification spec1(a);
 }
 
@@ -504,9 +504,9 @@ void test_system_defined()
 
   data_specification copy = specification;
 
-  // A data specification that is constructed using data_specification_to_aterm_data_spec is assumed not
+  // A data specification that is constructed using data_specification_to_aterm is assumed not
   // not be type checked. This must be indicated explicitly.
-  data_specification specification1=data_specification(data::detail::data_specification_to_aterm_data_spec(copy));
+  data_specification specification1=data_specification(data::detail::data_specification_to_aterm(copy));
   specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1,specification));
 
@@ -526,7 +526,7 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
 
   /* copy = specification;
-  specification1=data_specification(data::detail::data_specification_to_aterm_data_spec(copy));
+  specification1=data_specification(data::detail::data_specification_to_aterm(copy));
   specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1, specification)); */
 

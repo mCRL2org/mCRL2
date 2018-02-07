@@ -37,7 +37,7 @@ namespace detail
  * here for compatibility with the old parser, type checker and pretty
  * print implementations.
  **/
-atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
+atermpp::aterm_appl data_specification_to_aterm(const data_specification& s)
 {
   return atermpp::aterm_appl(core::detail::function_symbol_DataSpec(),
            atermpp::aterm_appl(core::detail::function_symbol_SortSpec(), atermpp::aterm_list(s.user_defined_sorts().begin(),s.user_defined_sorts().end()) +

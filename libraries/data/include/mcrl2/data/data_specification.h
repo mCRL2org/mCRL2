@@ -18,6 +18,8 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 
+#include "mcrl2/core/load_aterm.h"
+
 // utilities
 #include "mcrl2/data/detail/data_functional.h"
 
@@ -27,6 +29,7 @@
 // data expressions
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/function_update.h"
+#include "mcrl2/data/detail/io.h"
 
 
 namespace mcrl2
@@ -50,10 +53,19 @@ std::string pp(const data::data_specification& x);
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
+atermpp::aterm_appl data_specification_to_aterm(const data_specification&);
 
 } // namespace detail
 /// \endcond
+
+/// \brief Test for a data specification expression
+/// \param x A term
+/// \return True if \a x is a data specification expression
+inline
+bool is_data_specification(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::DataSpec;
+}
 
 /// \brief data specification.
 
@@ -111,7 +123,7 @@ class data_specification: public sort_specification
       }
     };
 
-    friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
+    friend atermpp::aterm_appl detail::data_specification_to_aterm(const data_specification&);
 
     ///\brief Builds a specification from aterm
     void build_from_aterm(const atermpp::aterm_appl& term);
@@ -492,7 +504,7 @@ class data_specification: public sort_specification
 
     ///\brief Adds the system defined sorts to the sets with constructors, mappings, and equations for
     //        a given sort. If the boolean skip_equations is true, no equations are added.
-    
+
     void find_associated_system_defined_data_types_for_a_sort(
                        const sort_expression& sort,
                        std::set < function_symbol >& constructors,
@@ -648,7 +660,7 @@ class data_specification: public sort_specification
       else if (is_structured_sort(sort))
       {
         insert_mappings_constructors_for_structured_sort(
-                        atermpp::down_cast<structured_sort>(sort), 
+                        atermpp::down_cast<structured_sort>(sort),
                         constructors, mappings, equations, skip_equations);
       }
       add_standard_mappings_and_equations(sort, mappings, equations, skip_equations);
@@ -666,8 +678,8 @@ class data_specification: public sort_specification
       std::set < function_symbol > constructors;
       std::set < function_symbol > mappings;
       std::set < data_equation > equations;
-      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations);  
-      
+      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations);
+
       // add normalised constructors, mappings and equations
       add_normalised_constructors(constructors.begin(), constructors.end());
       add_normalised_mappings(mappings.begin(), mappings.end());
@@ -678,9 +690,9 @@ class data_specification: public sort_specification
 
     /// \brief This function provides a sample of all system defined sorts, constructors and mappings
     ///        that contains at least one specimen of each sort and function symbol. Because types
-    ///        can be parameterised not all function symbols for all types are provided. 
+    ///        can be parameterised not all function symbols for all types are provided.
     /// \details The sorts, constructors and mappings for the following types are added:
-    ///            Bool, Pos, Int, Nat, Real, List(Pos), FSet(Pos), FBag(Pos), Set(Pos), Bag(Pos). 
+    ///            Bool, Pos, Int, Nat, Real, List(Pos), FSet(Pos), FBag(Pos), Set(Pos), Bag(Pos).
     ///       How to deal with struct...
     void get_system_defined_sorts_constructors_and_mappings(
                 std::set < sort_expression >& sorts,
@@ -810,6 +822,42 @@ class data_specification: public sort_specification
       return *this;
     }
 
+    /// \brief Reads a data specification from a stream.
+    /// \param stream An input stream.
+    /// \param binary An boolean that if true means the stream contains a term in binary encoding.
+    //                Otherwise the encoding is textual.
+    /// \param source The source from which the stream originates. Used for error messages.
+    void load(std::istream& stream, bool binary = true, const std::string& source = "")
+    {
+      atermpp::aterm t = core::load_aterm(stream, binary, "data specification", source);
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      t = data::detail::add_index(t, cache);
+      if (!t.type_is_appl() || !is_data_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
+      {
+        throw mcrl2::runtime_error("Input stream does not contain a data specification");
+      }
+      build_from_aterm(atermpp::aterm_appl(t));
+    }
+
+    /// \brief Writes the data specification to a stream.
+    /// \param stream The output stream.
+    /// \param binary
+    /// If binary is true the data specification is saved in compressed binary format.
+    /// Otherwise an ascii representation is saved. In general the binary format is
+    /// much more compact than the ascii representation.
+    void save(std::ostream& stream, bool binary=true) const
+    {
+      atermpp::aterm t = detail::data_specification_to_aterm(*this);
+      t = data::detail::remove_index(t);
+      if (binary)
+      {
+        atermpp::write_term_to_binary_stream(t, stream);
+      }
+      else
+      {
+        atermpp::write_term_to_text_stream(t, stream);
+      }
+    }
 }; // class data_specification
 
 //--- start generated class data_specification ---//

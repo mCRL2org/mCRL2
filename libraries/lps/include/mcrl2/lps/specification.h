@@ -340,7 +340,7 @@ template <typename LinearProcess, typename InitialProcessExpression>
 atermpp::aterm_appl specification_to_aterm(const specification_base<LinearProcess, InitialProcessExpression>& spec)
 {
   return atermpp::aterm_appl(core::detail::function_symbol_LinProcSpec(),
-           data::detail::data_specification_to_aterm_data_spec(spec.data()),
+           data::detail::data_specification_to_aterm(spec.data()),
            atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
            atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), data::variable_list(spec.global_variables().begin(),spec.global_variables().end())),
            linear_process_to_aterm(spec.process()),

@@ -280,7 +280,7 @@ atermpp::aterm_appl action_rename_specification_to_aterm(const action_rename_spe
     rules.push_back(action_rename_rule_to_aterm(*i));
   }
   return atermpp::aterm_appl(core::detail::function_symbol_ActionRenameSpec(),
-    data::detail::data_specification_to_aterm_data_spec(spec.data()),
+    data::detail::data_specification_to_aterm(spec.data()),
     atermpp::aterm_appl(core::detail::function_symbol_ActSpec(), spec.action_labels()),
     atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRules(), atermpp::aterm_list(rules.begin(), rules.end()))
   );

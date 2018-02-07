@@ -117,7 +117,7 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
     std::string output = utilities::trim_copy(de_out);
     if (input != output)
     {
-      std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
+      std::clog << "aterm : " << data::detail::data_specification_to_aterm(result) << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
