@@ -194,6 +194,7 @@ namespace detail
               label_type& culprit);
 
   /* Construct a path to state s using the backward map, and return it in result */
+  inline
   void reconstruct_path(const state_type s, 
                         const std::map<state_type, std::pair<label_type,state_type> >& backward_map, 
                         std::vector<label_type>& result)
