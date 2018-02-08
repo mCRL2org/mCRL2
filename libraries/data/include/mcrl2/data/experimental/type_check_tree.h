@@ -16,7 +16,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/type_checker.h"
+#include "mcrl2/data/experimental/type_checker.h"
 #include "mcrl2/data/untyped_sort_variable.h"
 #include "mcrl2/utilities/text_utility.h"
 #include <iostream>

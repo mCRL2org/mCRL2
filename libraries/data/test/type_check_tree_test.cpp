@@ -13,7 +13,7 @@
 #include "mcrl2/data/experimental/type_check_tree.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/type_checker.h"
+#include "mcrl2/data/experimental/type_checker.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/utilities/text_utility.h"

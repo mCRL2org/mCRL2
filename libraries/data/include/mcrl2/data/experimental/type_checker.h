@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/type_checker.h
+/// \file mcrl2/data/experimental/type_checker.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_DATA_TYPE_CHECKER_H
@@ -71,7 +71,7 @@ sort_expression unwind_sort_expression(const sort_expression& x, const alias_vec
   {
     const basic_sort& bs = atermpp::down_cast<const basic_sort>(x);
     for(const alias& a: aliases)
-    { 
+    {
       if (bs == a.name())
       {
         return unwind_sort_expression(a.reference(), aliases);
