@@ -148,13 +148,13 @@ class lps2lts_tool : public lps2lts_base
 
       desc.
       add_option("cached",
-                 "use enumeration caching techniques to speed up state space generation.").
+                 "use enumeration caching techniques to speed up state space generation. ").
       add_option("prune",
-                 "use summand pruning to speed up state space generation.").
+                 "use summand pruning to speed up state space generation. ").
       add_option("dummy", make_mandatory_argument("BOOL"),
-                 "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
+                 "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'. ", 'y').
       add_option("unused-data",
-                 "do not remove unused parts of the data specification", 'u').
+                 "do not remove unused parts of the data specification. ", 'u').
       add_option("bit-hash", make_optional_argument("NUM", "200000000"),
                  "use bit hashing to store states and store at most NUM states. "
                  "This means that instead of keeping a full record of all states "
@@ -163,20 +163,22 @@ class lps2lts_tool : public lps2lts_base
                  "that this option may cause states to be mistaken for others (because "
                  "they are mapped to the same hash), it can be useful to explore very "
                  "large LTSs that are otherwise not explorable. The default value for NUM is "
-                 "2*10^8 (this corresponds to 25MB of memory)",'b').
+                 "2*10^8 (this corresponds to 25MB of memory). ",'b').
       add_option("max", make_mandatory_argument("NUM"),
                  "explore at most NUM states", 'l').
       add_option("todo-max", make_mandatory_argument("NUM"),
                  "keep at most NUM states in todo lists; this option is only relevant for "
                  "breadth-first search, where NUM is the maximum number of states per "
-                 "level, and for depth first search, where NUM is the maximum depth").
+                 "level, and for depth first search, where NUM is the maximum depth. ").
+      add_option("nondeterminism",
+                 "detect nondeterministic states, i.e. states with outgoing transitions with the same label to different states. ", 'n').
       add_option("deadlock",
-                 "detect deadlocks (i.e. for every deadlock a message is printed)", 'D').
+                 "detect deadlocks (i.e. for every deadlock a message is printed). ", 'D').
       add_option("divergence",
                  "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed). "
                  "The algorithm to detect the divergences is linear for every state, "
                  "so state space exploration becomes quadratic with this option on, causing a state "
-                 "space exploration to become slow when this option is enabled.", 'F').
+                 "space exploration to become slow when this option is enabled. ", 'F').
       add_option("action", make_mandatory_argument("NAMES"),
                  "report whether an action from NAMES occurs in the transitions system, "
                  "where NAMES is a comma-separated list. A message "
@@ -186,25 +188,25 @@ class lps2lts_tool : public lps2lts_base
       add_option("multiaction", make_mandatory_argument("NAMES"),
                  "detect and report multiactions in the transitions system "
                  "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
-                 "are matched exactly, including data parameters.", 'm').
+                 "are matched exactly, including data parameters. ", 'm').
       add_option("trace", make_optional_argument("NUM", std::to_string(lts_generation_options::default_max_traces)),
                  "Write a shortest trace to each state that is reached with an action from NAMES "
-                 "from option --action, is a deadlock detected with --deadlock, or is a "
-                 "divergence detected with --divergence to a file. "
+                 "with the option --action, is a deadlock with the option --deadlock, is nondeterministic with the option --nondeterminism, or is a "
+                 "divergence with the option --divergence to a file. "
                  "No more than NUM traces will be written. If NUM is not supplied the number of "
-                 "traces is unbounded."
+                 "traces is unbounded. "
                  "For each trace that is to be written a unique file with extension .trc (trace) "
                  "will be created containing a shortest trace from the initial state to the deadlock "
-                 "state. The traces can be pretty printed and converted to other formats using tracepp.", 't').
+                 "state. The traces can be pretty printed and converted to other formats using tracepp. ", 't').
       add_option("error-trace",
                  "if an error occurs during exploration, save a trace to the state that could "
-                 "not be explored").
+                 "not be explored. ").
       add_option("confluence", make_optional_argument("NAME", "ctau"),
-                 "apply prioritization of transitions with the action label NAME."
+                 "apply prioritization of transitions with the action label NAME. "
                  "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
                  "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
                  "state space is necessarily branching bisimilar to the state space of the lps. The generation "
-                 "algorithm that is used does not require the linear process to be tau convergent.", 'c').
+                 "algorithm that is used does not require the linear process to be tau convergent. ", 'c').
       add_option("strategy", make_enum_argument<exploration_strategy>("NAME")
                  .add_value_short(es_breadth, "b", true)
                  .add_value_short(es_depth, "d")
@@ -214,20 +216,20 @@ class lps2lts_tool : public lps2lts_base
                  , "explore the state space using strategy NAME:"
                  , 's').
       add_option("out", make_mandatory_argument("FORMAT"),
-                 "save the output in the specified FORMAT", 'o').
+                 "save the output in the specified FORMAT. ", 'o').
       add_option("no-info", "do not add state information to OUTFILE. "
                  "Without this option lps2lts adds state vector to the LTS. This "
                  "option causes this information to be discarded and states are only "
                  "indicated by a sequence number. Explicit state information is useful "
                  "for visualisation purposes, for instance, but can cause the OUTFILE "
                  "to grow considerably. Note that this option is implicit when writing "
-                 "in the AUT format.").
+                 "in the AUT format. ").
       add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions. "
                  "For large state spaces the number of progress messages can be quite "
                  "horrendous. This feature helps to suppress those. Other verbose messages, "
-                 "such as the total number of states explored, just remain visible.").
+                 "such as the total number of states explored, just remain visible. ").
       add_option("init-tsize", make_mandatory_argument("NUM"),
-                 "set the initial size of the internally used hash tables (default is 10000)").
+                 "set the initial size of the internally used hash tables (default is 10000). ").
       add_option("tau",make_mandatory_argument("ACTNAMES"),
                  "consider actions with a name in the comma separated list ACTNAMES to be internal. "
                  "This list is only used and allowed when searching for divergencies. ");
@@ -238,6 +240,7 @@ class lps2lts_tool : public lps2lts_base
       lps2lts_base::parse_options(parser);
       m_options.removeunused    = parser.options.count("unused-data") == 0;
       m_options.detect_deadlock = parser.options.count("deadlock") != 0;
+      m_options.detect_nondeterminism = parser.options.count("nondeterminism") != 0;
       m_options.detect_divergence = parser.options.count("divergence") != 0;
       m_options.outinfo         = parser.options.count("no-info") == 0;
       m_options.suppress_progress_messages = parser.options.count("suppress") !=0;

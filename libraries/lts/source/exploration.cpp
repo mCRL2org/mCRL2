@@ -276,6 +276,11 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     mCRL2log(verbose) << "Detect deadlocks.\n" ;
   }
 
+  if (m_options.detect_nondeterminism)
+  {
+    mCRL2log(verbose) << "Detect nondeterministic states.\n" ;
+  }
+
   return true;
 }
 
@@ -774,9 +779,32 @@ void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_g
     if (save_trace(state,transition, filename))
       mCRL2log(info) << " and saved to '" << filename << "'";
     else
-      mCRL2log(info) << " but could not saved to '" << filename << "'";
+      mCRL2log(info) << " but it could not saved to '" << filename << "'";
   }
   mCRL2log(info) << std::endl;
+}
+
+void lps2lts_algorithm::save_nondeterministic_state(const lps::state& state)
+{
+  std::size_t state_number = m_state_numbers.index(state);
+  if (m_options.trace && m_traces_saved < m_options.max_traces)
+  {
+    std::string filename = m_options.trace_prefix + "_nondeterministic_" + std::to_string(m_traces_saved) + ".trc";
+    if (save_trace(state, filename))
+    {
+      mCRL2log(info) << "Nondeterministic state found and saved to '" << filename
+                     << "' (state index: " << state_number << ").\n";
+    }
+    else
+    {
+      mCRL2log(info) << "Nondeterministic state found, but its trace could not be saved to '" << filename
+                     << "' (state index: " << state_number << ").\n";
+    }
+  }
+  else
+  {
+    mCRL2log(info) << "Nondeterministic state found (state index: " << state_number <<  ").\n";
+  }
 }
 
 void lps2lts_algorithm::save_deadlock(const lps::state& state)
@@ -792,7 +820,7 @@ void lps2lts_algorithm::save_deadlock(const lps::state& state)
     }
     else
     {
-      mCRL2log(info) << "deadlock-detect: deadlock found, but could not be saved to '" << filename
+      mCRL2log(info) << "deadlock-detect: deadlock found, but its trace could not be saved to '" << filename
                      << "' (state index: " << state_number << ").\n";
     }
   }
@@ -962,6 +990,32 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, const nex
   return destination_state_number.second;
 }
 
+bool lps2lts_algorithm::is_nondeterministic(std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions)
+{
+  // Below a mapping from transition labels to target states is made. 
+  static std::map<lps::multi_action, lps::state> sorted_transitions; // The set is static to avoid repeated construction.
+  assert(sorted_transitions.empty());
+  for(const lps2lts_algorithm::next_state_generator::transition_t& t: transitions)
+  {
+    const std::map<lps::multi_action, lps::state>::const_iterator i=sorted_transitions.find(t.action());
+    if (i!=sorted_transitions.end())
+    { 
+      if (i->second!=t.target_state())
+      {
+        // Two transitions with the same label and different targets states have been found. This state is nondeterministic.
+        sorted_transitions.clear();
+        return true;
+      }
+    }
+    else 
+    { 
+      sorted_transitions[t.action()]=t.target_state();
+    }
+  }
+  sorted_transitions.clear();
+  return false;
+}
+
 void lps2lts_algorithm::get_transitions(const lps::state& state,
                                         std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                                         next_state_generator::enumerator_queue_t& enumeration_queue
@@ -1013,9 +1067,14 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
     value_prioritize(transitions);
   }
 
-  if (transitions.empty() && m_options.detect_deadlock)
+  if (m_options.detect_deadlock && transitions.empty())
   {
     save_deadlock(state);
+  }
+
+  if (m_options.detect_nondeterminism && is_nondeterministic(transitions))
+  {
+    save_nondeterministic_state(state);
   }
 
   if (m_use_confluence_reduction)

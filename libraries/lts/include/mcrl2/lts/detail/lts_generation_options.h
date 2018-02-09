@@ -57,6 +57,7 @@ class lts_generation_options
     std::string trace_prefix;
     bool save_error_trace;
     bool detect_deadlock;
+    bool detect_nondeterminism;
     bool detect_divergence;
     bool detect_action;
     std::set < mcrl2::core::identifier_string > trace_actions;
@@ -85,6 +86,7 @@ class lts_generation_options
       max_traces(default_max_traces),
       save_error_trace(false),
       detect_deadlock(false),
+      detect_nondeterminism(false),
       detect_divergence(false),
       detect_action(false),
       use_enumeration_caching(false),
