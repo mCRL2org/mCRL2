@@ -191,7 +191,8 @@ namespace detail
               const state_type impl, 
               const set_of_states& spec, 
               const lts_cache<LTS_TYPE>& weak_property_cache,
-              label_type& culprit);
+              label_type& culprit,
+              const LTS_TYPE& l);
 
   /* Construct a path to state s using the backward map, and return it in result */
   inline
@@ -243,11 +244,11 @@ namespace detail
           std::vector<label_type> resulting_path;
           reconstruct_path(current_state, backward_map, resulting_path);
           assert(find_trace_with_taus || resulting_path.empty()); // There are no tau's in the path if taus were not requested. 
-          if (!lts_cache.transitions(current_state).empty())
+          /* if (!lts_cache.transitions(current_state).empty())
           {
             // Add one extra transition found in the state with a refusal set that does not occur in the specification. 
             resulting_path.push_back(lts_cache.transitions(current_state)[0].label());
-          }
+          } */
           return resulting_path;
         }
       }
@@ -355,7 +356,7 @@ bool destructive_refinement_checker(
       if (refinement==failures || refinement==failures_divergence)
       { 
         detail::label_type offending_action=std::size_t(-1);
-        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache,offending_action))   
+        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache,offending_action,l1))   
         {
           std::vector<detail::label_type> counter_example_extension;
           if (offending_action!=std::size_t(-1))
@@ -597,7 +598,8 @@ namespace detail
               const state_type impl, 
               const set_of_states& spec, 
               const lts_cache<LTS_TYPE>& weak_property_cache,
-              label_type& culprit)
+              label_type& culprit,
+              const LTS_TYPE& l)
   {
     // This function calculates whether refusals(impl) are not included in the refusals(spec).
     // This is equivalent to:
@@ -648,6 +650,38 @@ namespace detail
         }
         if (!success)
         {
+          // Print the acceptance set of the implementation 
+          if (impl_enabled_action_set.empty())
+          {
+            mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
+          }
+          else
+          {
+            mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
+            for(const label_type& a: impl_enabled_action_set)
+            {
+              mCRL2log(log::verbose) << l.action_label(a) << "\n";
+            }
+          }
+          // Print the acceptance sets of the specification. 
+          if (enabled_stable_sets_of_specification.empty())
+          {
+            mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
+          }
+          else 
+          {
+            mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
+            for(action_label_set spec_action_labels: enabled_stable_sets_of_specification)
+            {
+              mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
+              for(const label_type a: spec_action_labels)
+              {
+                mCRL2log(log::verbose) << l.action_label(a) << "\n";
+              }
+            }
+          }
+          mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";          
+          // Ready printing acceptance sets. 
           return false;
         }
       }
