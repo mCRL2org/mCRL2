@@ -464,6 +464,7 @@ std::vector<bdd_node> equation_identifiers(const std::vector<pbes_system::pbes_e
       bool negate = (j / repeat) % 2 == 0;
       sequences[j].push_back(negate ? make_not(id_variables[i]) : id_variables[i]);
     }
+    repeat *= 2;
   }
 
   for (std::size_t j = 0; j < n; j++)
