@@ -14,6 +14,7 @@
 
 #define MCRL2_PBESINST_DEBUG
 
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/replace.h"
