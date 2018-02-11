@@ -135,7 +135,8 @@ class lps2lts_algorithm
     bool save_trace(const lps::state& state1, const next_state_generator::transition_t& transition, const std::string& filename);
     void construct_trace(const lps::state& state1, mcrl2::trace::Trace& trace);
 
-    bool is_nondeterministic(std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions);
+    bool is_nondeterministic(std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
+                             next_state_generator::transition_t& nondeterminist_transition);
     template <class COUNTER_EXAMPLE_GENERATOR>
     bool search_divergence(const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state, 
                            std::set<lps::state>& current_path, std::set<lps::state>& visited, 
@@ -145,7 +146,7 @@ class lps2lts_algorithm
                           COUNTER_EXAMPLE_GENERATOR divergence_loop);
     void save_actions(const lps::state& state, const next_state_generator::transition_t& transition);
     void save_deadlock(const lps::state& state);
-    void save_nondeterministic_state(const lps::state& state);
+    void save_nondeterministic_state(const lps::state& state, const next_state_generator::transition_t& nondeterminist_transition);
     void save_error(const lps::state& state);
     std::pair<std::size_t, bool> add_target_state(const lps::state& source_state, const lps::state& target_state);
     bool add_transition(const lps::state& source_state, const next_state_generator::transition_t& transition);
