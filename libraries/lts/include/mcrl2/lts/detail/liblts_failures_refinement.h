@@ -356,11 +356,8 @@ bool destructive_refinement_checker(
         }
       }
       
-      // for(std::vector<transition>::const_iterator i=weak_property_cache.transitions_begin(impl_spec.state());
-      //         i!=weak_property_cache.transitions_end(impl_spec.state()); ++i)
       for(const transition& t: weak_property_cache.transitions(impl_spec.state()))
       {
-        // const transition& t=*i;
         const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index=
                generate_counter_example.add_transition(t.label(),impl_spec.counter_example_index());
         detail::set_of_states spec_prime;
@@ -624,22 +621,21 @@ namespace detail
           // Check whether the enabled actions of spec are included in the enabled actions of impl.
           // This is equivalent to checking that all spec_action_labels are in the impl_enabled_action_set.
           const action_label_set& spec_action_labels=weak_property_cache.action_labels(s);
-          // bool inclusion_success=true;
-          
-          bool inclusion_success=std::includes(spec_action_labels.begin(), spec_action_labels.end(), 
-                                               impl_enabled_action_set.begin(), impl_enabled_action_set.end());
+          // Warning: std::includes checks whether the second range is included in the first. 
+          bool inclusion_success=std::includes(impl_enabled_action_set.begin(), impl_enabled_action_set.end(),
+                                               spec_action_labels.begin(), spec_action_labels.end());
           if (inclusion_success)
           {
             success=true;
             break;
           }
           else 
-          { // Find the offending action. 
+          { 
+            // Find the offending action. 
             for(const label_type a: spec_action_labels)
             {
-              if (impl_enabled_action_set.count(a)==0) // action in spec_actions_labels is not in this implementation set. This is not ok.
+              if (impl_enabled_action_set.count(a)==0) // We want to know which action caused the problem. 
               {
-                // inclusion_success=false;
                 culprit=a;
               }
             }
