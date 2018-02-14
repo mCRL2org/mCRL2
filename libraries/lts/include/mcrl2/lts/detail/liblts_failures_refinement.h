@@ -383,7 +383,8 @@ bool destructive_refinement_checker(
           return false;                             //    return false;  
         }
                                                     // if (impl',spec') in antichain is not true then
-        const detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > impl_spec_counterex(t.to(),spec_prime,new_counterexample_index);
+        const detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > 
+                          impl_spec_counterex(t.to(),spec_prime,new_counterexample_index);
         if (detail::antichain_insert(anti_chain, impl_spec_counterex))   
         {
           working.push_back(impl_spec_counterex);   // push(impl,spec') into working;
