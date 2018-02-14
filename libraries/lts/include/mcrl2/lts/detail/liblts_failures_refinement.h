@@ -84,14 +84,9 @@ namespace detail
   };
  
   template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
-  inline void antichain_insert(
+  inline bool antichain_insert(
                   anti_chain_type& anti_chain, 
                   const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& impl_spec);
-  template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
-  inline bool member_of_antichain(
-                  const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& p, 
-                  const anti_chain_type& anti_chain);
-
 
   // The class below recalls what the stable states and the states with a divergent
   // self loop of a transition system are, such that it does not have to be recalculated each time again.
@@ -154,12 +149,6 @@ namespace detail
         assert(s<m_sorted_transitions.size());
         return m_sorted_transitions[s];
       }
-
-      /* const std::vector<transition>::const_iterator transitions_end(const state_type s) const
-      {
-        assert(s<m_sorted_transitions.size());
-        return m_sorted_transitions[s].end();
-      } */
 
       bool diverges(const state_type s) const
       {
@@ -244,11 +233,6 @@ namespace detail
           std::vector<label_type> resulting_path;
           reconstruct_path(current_state, backward_map, resulting_path);
           assert(find_trace_with_taus || resulting_path.empty()); // There are no tau's in the path if taus were not requested. 
-          /* if (!lts_cache.transitions(current_state).empty())
-          {
-            // Add one extra transition found in the state with a refusal set that does not occur in the specification. 
-            resulting_path.push_back(lts_cache.transitions(current_state)[0].label());
-          } */
           return resulting_path;
         }
       }
@@ -325,14 +309,17 @@ bool destructive_refinement_checker(
                                   generate_counter_example.root_index() ) });
                                                       // let antichain := emptyset;
   detail::anti_chain_type anti_chain;
+  detail::antichain_insert(anti_chain, working.front());   // antichain := antichain united with (impl,spec); 
+                                                           // This line occurs at another place in the code than in 
+                                                           // the original algorithm, where insertion in the anti-chain
+                                                           // was too late, causing too many impl-spec pairs to be investigated. 
   while (working.size()>0)                            // while working!=empty
   {
     detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > impl_spec;   // pop (impl,spec) from working;
     impl_spec.swap(working.front());  
-    working.pop_front();
-    detail::antichain_insert(anti_chain,impl_spec);   // antichain := antichain united with (impl,spec);
-                                                      // refusals(impl) not included in refusals(spec);
-
+    working.pop_front();     // At this point it could be checked whether impl_spec still exists in anti_chain. 
+                             // Small scale experiments show that this is a little bit more expensive than doing the explicit check below. 
+    
     if (refinement==failures_divergence && weak_property_cache.diverges(impl_spec.state()))
                                                       // if impl diverges
     {
@@ -395,15 +382,15 @@ bool destructive_refinement_checker(
           generate_counter_example.save_counter_example(new_counterexample_index,l1);
           return false;                             //    return false;  
         }
-                                                      // if (impl',spec') in antichain is not true then
-        if (!detail::member_of_antichain(detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR >
-                                     (t.to(),spec_prime,new_counterexample_index),anti_chain))
+                                                    // if (impl',spec') in antichain is not true then
+        const detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > impl_spec_counterex(t.to(),spec_prime,new_counterexample_index);
+        if (detail::antichain_insert(anti_chain, impl_spec_counterex))   
         {
-                                                      // push(impl,spec') into working;
-            working.push_back(detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR >(t.to(),spec_prime,new_counterexample_index));
+          working.push_back(impl_spec_counterex);   // push(impl,spec') into working;
         }
       }
     }
+    
   }
   return true;                                      // return true;
 }
@@ -489,9 +476,10 @@ namespace detail
      If p.states() is smaller than a set si associated to p.state(), this set is removed.
      If p.states() is larger than a set si, there is no need to add p.states(), as a better candidate
      is already there. 
+     This function returns true if insertion was succesful, and false otherwise.
    */
   template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
-  inline void antichain_insert(
+  inline bool antichain_insert(
                   anti_chain_type& anti_chain, 
                   const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& impl_spec)
   {
@@ -502,7 +490,7 @@ namespace detail
       const set_of_states s=i->second;
       if (std::includes(s.begin(),s.end(),impl_spec.states().begin(),impl_spec.states().end()))  
       {
-        return;
+        return false;
       }
     }
 
@@ -523,67 +511,66 @@ namespace detail
       }
     }
     anti_chain.insert(std::pair<detail::state_type,detail::set_of_states>(impl_spec.state(),impl_spec.states()));
+    return true;
   }
   
-  /* This function checks whether p is contained in anti_chain. This is rather subtle.
-     It is important that an anti_chain contains for each state a set of states of which 
-     no set is a subset of another. The idea is that if such two sets occur, it is enough
-     to keep the smallest.
-
-     What is checked is that for the sets s1,...,sn in the antichain belonging to p.state(),
-     p.states() is a superset of one of these si's. If so, it is considered that p.states() is
-     in the set, or there is a smaller set than p.states(), which is even better. */
-  template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
-  inline bool member_of_antichain(
-                   const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& p, 
-                   const anti_chain_type& anti_chain)
-  {
-    for(anti_chain_type::const_iterator i=anti_chain.lower_bound(p.state()); i!=anti_chain.upper_bound(p.state()); ++i)
-    {
-      const set_of_states s=i->second;
-      if (std::includes(s.begin(),s.end(),p.states().begin(),p.states().end()))  // Check that there is a set s in anti_chain which is contained in p.states().
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /* Calculate the enabled sets of actions of states reachable via tau's */
-
+  /* Calculate the states that are stable and reachable through tau-steps */
   template < class LTS_TYPE >
-  std::vector < action_label_set > calculate_stable_enabled_sets(
-        const set_of_states& s, 
+  const set_of_states& calculate_tau_reachable_states(
+        const set_of_states& states, 
         const lts_cache<LTS_TYPE>& weak_property_cache)
   {
-    set_of_states visited(s);
-    std::deque < state_type > todo_stack(s.begin(), s.end());
-    std::vector < action_label_set > result;
-
-    while (todo_stack.size()>0)
+    static std::map<set_of_states, set_of_states> cache;
+    const std::map<set_of_states, set_of_states>::const_iterator i=cache.find(states);
+    if (i!=cache.end())
     {
-      const state_type current_state=todo_stack.front();
-      todo_stack.pop_front();
-      if (weak_property_cache.stable(current_state))
-      {
+      return i->second;
+    }
+
+    static set_of_states visited;
+    assert(visited.empty());
+    static std::stack < state_type > todo_stack;
+    assert(todo_stack.empty());
+    set_of_states result;
+
+    for(const state_type s: states)
+    {
+      if (weak_property_cache.stable(s))
+      { 
         // Put the outgoing action labels in a set and put these in the result.
-        result.push_back(weak_property_cache.action_labels(current_state));
+        result.insert(s);
       }
       else
       {
-        // Put the states reachable in one tau step onto the todo stack, if they have not 
-        // been visited yet. 
-        for(const state_type s: weak_property_cache.tau_reachable_states(current_state)) 
-                                                      // This should be done per state.
+        visited.insert(s);
+        todo_stack.push(s);
+      }
+    }
+    
+    while (todo_stack.size()>0)
+    {
+      const state_type current_state=todo_stack.top();
+      todo_stack.pop();
+      // Consider the states reachable in one tau step. 
+      for(const state_type s: weak_property_cache.tau_reachable_states(current_state)) 
+      {
+        if (weak_property_cache.stable(s))
+        { 
+          // Put the outgoing action labels in a set and put these in the result.
+          result.insert(s);
+        }
+        else
         {
           if (visited.insert(s).second) // t.to() is a new state.
-          {
-            todo_stack.push_back(s);
+          { 
+            todo_stack.push(s);
           }
         }
       }
     }
-    return result;
+    cache[states]=result;
+    visited.clear();
+    return cache[states];
   }
 
   /* This function checks that the refusals(impl) are contained in the refusals of spec, where
@@ -608,18 +595,20 @@ namespace detail
 
     // First calculate the refusal sets reachable from spec.
     
-    std::vector < action_label_set > enabled_stable_sets_of_specification=calculate_stable_enabled_sets(spec,weak_property_cache);
+    const set_of_states& tau_reachable_states_of_the_specification=calculate_tau_reachable_states(spec,weak_property_cache);
 
     // Now walk through the tau-reachable stable states s' of impl.
-    set_of_states visited;
+    static set_of_states visited;
+    assert(visited.empty());
     visited.insert(impl);
-    std::deque < state_type > todo_stack;
-    todo_stack.push_back(impl);
+    static std::stack < state_type > todo_stack;
+    assert(todo_stack.empty());
+    todo_stack.push(impl);
 
     while (todo_stack.size()>0)
     {
-      const state_type current_state=todo_stack.front();
-      todo_stack.pop_front();
+      const state_type current_state=todo_stack.top();
+      todo_stack.pop();
       if (weak_property_cache.stable(current_state))
       {
         // Put the outgoing action labels in a set and put these in the result.
@@ -628,24 +617,31 @@ namespace detail
 
         bool success=false;
         // Compare the obtained enable set of s' with all those of the specification.
-        for(action_label_set spec_action_labels: enabled_stable_sets_of_specification)
+        // for(const action_label_set& spec_action_labels: enabled_stable_sets_of_specification)
+        for(const state_type s: tau_reachable_states_of_the_specification)
         {
           // Check whether the enabled actions of spec are included in the enabled actions of impl.
           // This is equivalent to checking that all spec_action_labels are in the impl_enabled_action_set.
-          bool inclusion_success=true;
-          for(const label_type a: spec_action_labels)
-          {
-            if (impl_enabled_action_set.count(a)==0) // action in spec_actions_labels is not in this implementation set. This is not ok.
-            {
-              inclusion_success=false;
-              culprit=a;
-              break;
-            }
-          }
+          const action_label_set& spec_action_labels=weak_property_cache.action_labels(s);
+          // bool inclusion_success=true;
+          
+          bool inclusion_success=std::includes(spec_action_labels.begin(), spec_action_labels.end(), 
+                                               impl_enabled_action_set.begin(), impl_enabled_action_set.end());
           if (inclusion_success)
           {
             success=true;
             break;
+          }
+          else 
+          { // Find the offending action. 
+            for(const label_type a: spec_action_labels)
+            {
+              if (impl_enabled_action_set.count(a)==0) // action in spec_actions_labels is not in this implementation set. This is not ok.
+              {
+                // inclusion_success=false;
+                culprit=a;
+              }
+            }
           }
         }
         if (!success)
@@ -658,21 +654,23 @@ namespace detail
           else
           {
             mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
-            for(const label_type& a: impl_enabled_action_set)
+            for(const label_type a: impl_enabled_action_set)
             {
               mCRL2log(log::verbose) << l.action_label(a) << "\n";
             }
           }
           // Print the acceptance sets of the specification. 
-          if (enabled_stable_sets_of_specification.empty())
+          // if (enabled_stable_sets_of_specification.empty())
+          if (tau_reachable_states_of_the_specification.empty())
           {
             mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
           }
           else 
           {
             mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
-            for(action_label_set spec_action_labels: enabled_stable_sets_of_specification)
+            for(const state_type s: tau_reachable_states_of_the_specification)
             {
+              const action_label_set& spec_action_labels=weak_property_cache.action_labels(s);
               mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
               for(const label_type a: spec_action_labels)
               {
@@ -682,6 +680,9 @@ namespace detail
           }
           mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";          
           // Ready printing acceptance sets. 
+          // tau_reachable_states_of_the_specification.clear();
+          visited.clear();
+          todo_stack=std::stack < state_type >();
           return false;
         }
       }
@@ -693,13 +694,13 @@ namespace detail
         {
           if (visited.insert(s).second) // s is a new state.
           {
-            todo_stack.push_back(s);
+            todo_stack.push(s);
           }
         }
 
       }
     }
-
+    visited.clear();
     return true;   
   }
   
