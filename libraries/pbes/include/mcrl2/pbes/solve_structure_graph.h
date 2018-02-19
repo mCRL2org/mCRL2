@@ -98,9 +98,26 @@ structure_graph::vertex_set compute_attractor_set_conjunctive(structure_graph::v
     todo.erase(todo.begin());
     assert(!contains(A, u));
 
+    // TODO: perhaps this is not needed
+    u->strategy = nullptr;
+
     if (is_attractor_conjunctive(*u, A))
     {
       A.insert(u);
+
+      // set strategy
+      if (u->decoration != structure_graph::d_conjunction)
+      {
+        for (const vertex* w: u->successors)
+        {
+          if (contains(A, w))
+          {
+            u->strategy = w;
+            break;
+          }
+        }
+      }
+
       for (const vertex* v: u->predecessors)
       {
         if (v->enabled && !contains(A, v))
@@ -139,9 +156,26 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
     todo.erase(todo.begin());
     assert(!contains(A, u));
 
+    // TODO: perhaps this is not needed
+    u->strategy = nullptr;
+
     if (is_attractor_disjunctive(*u, A))
     {
       A.insert(u);
+
+      // set strategy
+      if (u->decoration != structure_graph::d_disjunction)
+      {
+        for (const vertex* w: u->successors)
+        {
+          if (contains(A, w))
+          {
+            u->strategy = w;
+            break;
+          }
+        }
+      }
+
       for (const vertex* v: u->predecessors)
       {
         if (v->enabled && !contains(A, v))
@@ -248,6 +282,7 @@ structure_graph::vertex_set remove_disabled_vertices(const structure_graph::vert
 inline
 std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(structure_graph::vertex_set& V)
 {
+  typedef structure_graph::vertex vertex;
   typedef structure_graph::vertex_set vertex_set;
 
   vertex_set Wconj;
@@ -283,6 +318,15 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
     else if (m % 2 != 0)
     {
+      // set strategy
+      for (const vertex* u: U)
+      {
+        if (u->decoration == structure_graph::d_conjunction)
+        {
+          u->strategy = *(u->predecessors.begin());
+        }
+      }
+
       vertex_set A = compute_attractor_set_conjunctive(U);
       mCRL2log(log::debug) << "A = " << pp(A) << std::endl;
       std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
@@ -301,6 +345,15 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
     else
     {
+      // set strategy
+      for (const vertex* u: U)
+      {
+        if (u->decoration == structure_graph::d_disjunction)
+        {
+          u->strategy = *(u->predecessors.begin());
+        }
+      }
+
       vertex_set A = compute_attractor_set_disjunctive(U);
       mCRL2log(log::debug) << "A = " << pp(A) << std::endl;
       std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);

@@ -44,20 +44,23 @@ class structure_graph
       mutable std::vector<const vertex*> predecessors;
       mutable std::vector<const vertex*> successors;
       mutable bool enabled;
+      mutable const vertex* strategy;
 
       vertex(const pbes_expression& formula_ = pbes_expression(),
              decoration_type decoration_ = d_none,
              std::size_t rank_ = data::undefined_index(),
              std::vector<const vertex*> pred_ = std::vector<const vertex*>(),
              std::vector<const vertex*> succ_ = std::vector<const vertex*>(),
-             bool enabled_ = true
+             bool enabled_ = true,
+             const vertex* strategy_ = nullptr
             )
         : formula(formula_),
           decoration(decoration_),
           rank(rank_),
           predecessors(pred_),
           successors(succ_),
-          enabled(enabled_)
+          enabled(enabled_),
+          strategy(strategy_)
       {}
 
       std::vector<pbes_expression> predecessor_formulas() const
@@ -235,6 +238,7 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
       << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
       << ", predecessors = " << core::detail::print_list(u.predecessor_formulas())
       << ", successors = " << core::detail::print_list(u.successor_formulas())
+      << ", strategy = " << (u.strategy ? pbes_system::pp(u.strategy->formula) : "undefined")
       << ")";
   return out;
 }
