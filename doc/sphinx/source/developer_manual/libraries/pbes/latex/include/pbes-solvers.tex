@@ -10,19 +10,22 @@ In this section we describe algorithms for solving PBESs.
 
 Let $A$ be a set of vertices of a structure graph $G=(V,E,d,r)$. Then we
 define the following algorithms for computing an attractor set of $%
-A\subseteq V$.%
+A\subseteq V$. As a side effect, a strategy $\tau $ is computed.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{AttractorSetConjunctive(}}A\text{\textsc{)}} \\ 
 todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
+\tau :=\emptyset  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}u\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
 \qquad \text{\textbf{if} }attr_{\blacktriangle }(A,u)\text{ \textbf{then}}
 \\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangle }\text{ \textbf{%
+then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in A\cap succ(u) \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
-\text{\textbf{return }}A%
+\text{\textbf{return }}A,\tau 
 \end{array}%
 \end{equation*}%
 and%
@@ -30,14 +33,17 @@ and%
 \begin{array}{l}
 \text{\textsc{AttractorSetDisjunctive(}}A\text{\textsc{)}} \\ 
 todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
+\tau :=\emptyset  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}u\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
 \qquad \text{\textbf{if} }attr_{\blacktriangledown }(A,u)\text{ \textbf{then}%
 } \\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangledown }\text{ \textbf{%
+then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in A\cap succ(u) \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
-\text{\textbf{return }}A%
+\text{\textbf{return }}A,\tau 
 \end{array}%
 \end{equation*}%
 where%
@@ -57,7 +63,9 @@ The following algorithm is used to compute a partitioning of $V$ into $%
 W_{\blacktriangle }$ that represent equations evaluating to false and
 vertices $W_{\blacktriangledown }$ that represent equations evaluating to
 true. A precondition of this algorithm is that it contains no nodes with
-decoration $\top $ or $\bot $.%
+decoration $\top $ or $\bot $. As a side effect, also corresponding
+strategies $\tau _{\blacktriangle }$ and $\tau _{\blacktriangledown }$ are
+computed.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{SolveRecursive(}}V\text{\textsc{)}} \\ 
@@ -70,36 +78,54 @@ h:=\max (\{r(v)\mid v\in V\}) \\
 \text{\textbf{if }}h=m\wedge odd(m)\text{ \textbf{then return} }(V,\emptyset
 ) \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
+\tau :=\emptyset  \\ 
 \text{\textbf{if} }odd(m)\text{ \textbf{then}} \\ 
-\qquad A:=Attr_{\blacktriangle }\left( U\right)  \\ 
-\qquad \left( W_{\blacktriangle }^{\prime },W_{\blacktriangledown }^{\prime
+\qquad \text{\textbf{for} }u\in U\text{ \textbf{if} }u_{\blacktriangle }%
+\text{ \textbf{then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in
+succ(u) \\ 
+\qquad A,\tau _{A}:=Attr_{\blacktriangle }\left( U\right)  \\ 
+\qquad \left( W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime
+},W_{\blacktriangledown }^{\prime },\tau _{\blacktriangledown }^{\prime
 }\right) :=\text{\textsc{SolveRecursive(}}V\setminus A\text{)} \\ 
 \qquad \text{\textbf{if} }W_{\blacktriangledown }^{\prime }=\emptyset \text{ 
 \textbf{then}} \\ 
-\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right)
-:=\left( A\cup W_{\blacktriangle }^{\prime },\emptyset \right)  \\ 
+\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
+},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\left( A\cup
+W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime }\cup \tau
+\cup \tau _{A},\emptyset ,\emptyset \right)  \\ 
 \qquad \text{\textbf{else}} \\ 
-\qquad \qquad B:=Attr_{\blacktriangledown }\left( W_{\blacktriangledown
-}^{\prime }\right)  \\ 
-\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=%
-\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
-\qquad \qquad W_{\blacktriangledown }:=W_{\blacktriangledown }\cup B \\ 
+\qquad \qquad B,\tau _{B}:=Attr_{\blacktriangledown }\left(
+W_{\blacktriangledown }^{\prime }\right)  \\ 
+\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
+},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\text{\textsc{%
+SolveRecursive(}}V\setminus B\text{)} \\ 
+\qquad \qquad W_{\blacktriangledown },\tau _{\blacktriangledown
+}:=W_{\blacktriangledown }\cup B,\tau _{\blacktriangledown }\cup \tau \cup
+\tau _{B} \\ 
 \text{\textbf{else}} \\ 
-\qquad A:=Attr_{\blacktriangledown }\left( U\right)  \\ 
-\qquad \left( W_{\blacktriangle }^{\prime },W_{\blacktriangledown }^{\prime
+\qquad \text{\textbf{for} }u\in U\text{ \textbf{if} }u_{\blacktriangledown }%
+\text{ \textbf{then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in
+succ(u) \\ 
+\qquad A,\tau _{A}:=Attr_{\blacktriangledown }\left( U\right)  \\ 
+\qquad \left( W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime
+},W_{\blacktriangledown }^{\prime },\tau _{\blacktriangledown }^{\prime
 }\right) :=\text{\textsc{SolveRecursive(}}V\setminus A\text{)} \\ 
 \qquad \text{\textbf{if} }W_{\blacktriangle }^{\prime }=\emptyset \text{ 
 \textbf{then}} \\ 
-\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right)
-:=\left( \emptyset ,A\cup W_{\blacktriangledown }^{\prime }\right)  \\ 
+\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
+},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\left(
+\emptyset ,\emptyset ,A\cup W_{\blacktriangledown }^{\prime },\tau
+_{\blacktriangledown }^{\prime }\cup \tau \cup \tau _{A}\right)  \\ 
 \qquad \text{\textbf{else}} \\ 
-\qquad \qquad B:=Attr_{\blacktriangle }\left( W_{\blacktriangle }^{\prime
-}\right)  \\ 
-\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=%
-\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
-\qquad \qquad W_{\blacktriangle }:=W_{\blacktriangle }\cup B \\ 
-\text{\textbf{return }}\left( W_{\blacktriangle },W_{\blacktriangledown
-}\right) 
+\qquad \qquad B,\tau _{B}:=Attr_{\blacktriangle }\left( W_{\blacktriangle
+}^{\prime }\right)  \\ 
+\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
+},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\text{\textsc{%
+SolveRecursive(}}V\setminus B\text{)} \\ 
+\qquad \qquad W_{\blacktriangle },\tau _{\blacktriangle }:=W_{\blacktriangle
+}\cup B,\tau _{\blacktriangle }\cup \tau \cup \tau _{B} \\ 
+\text{\textbf{return }}\left( W_{\blacktriangle },\tau _{\blacktriangle
+},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) 
 \end{array}%
 \end{equation*}%
 where $Attr_{\blacktriangle }$=\textsc{AttractorSetConjunctive} and $%
@@ -111,14 +137,14 @@ The algorithm can be extended to sets $V$ containing nodes with decoration $%
 \begin{array}{l}
 \text{\textsc{SolveRecursiveExtended(}}V\text{\textsc{)}} \\ 
 V_{\blacktriangle }:=Attr_{\blacktriangle }\left( \{v\in V\mid v\bot
-\}\right)  \\ 
+\}\right) \\ 
 V_{\blacktriangledown }:=Attr_{\blacktriangledown }\left( \{v\in V\mid v\top
-\}\right)  \\ 
+\}\right) \\ 
 \left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=\text{\textsc{%
 SolveRecursive(}}V\setminus (V_{\blacktriangle }\cup V_{\blacktriangledown })%
 \text{\textsc{)}} \\ 
 \text{\textbf{return }}\left( W_{\blacktriangle }\cup V_{\blacktriangle
-},W_{\blacktriangledown }\cup V_{\blacktriangledown }\right) 
+},W_{\blacktriangledown }\cup V_{\blacktriangledown }\right)%
 \end{array}%
 \end{equation*}%
-\newpage 
+\newpage
