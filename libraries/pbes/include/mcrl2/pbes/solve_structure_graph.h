@@ -103,15 +103,20 @@ structure_graph::vertex_set compute_attractor_set_conjunctive(structure_graph::v
       A.insert(u);
 
       // set strategy
-      if (u->decoration != structure_graph::d_conjunction)
+      if (u->decoration == structure_graph::d_conjunction)
       {
         for (const vertex* w: u->successors)
         {
           if (contains(A, w))
           {
+            mCRL2log(log::verbose) << "set strategy for node " << w->formula << std::endl;
             u->strategy = w;
             break;
           }
+        }
+        if (u->strategy == 0)
+        {
+          mCRL2log(log::verbose) << "Error: no strategy for node " << u << std::endl;
         }
       }
 
@@ -158,15 +163,20 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
       A.insert(u);
 
       // set strategy
-      if (u->decoration != structure_graph::d_disjunction)
+      if (u->decoration == structure_graph::d_disjunction)
       {
         for (const vertex* w: u->successors)
         {
           if (contains(A, w))
           {
+            mCRL2log(log::verbose) << "set strategy for node " << w->formula << std::endl;
             u->strategy = w;
             break;
           }
+        }
+        if (u->strategy == 0)
+        {
+          mCRL2log(log::verbose) << "Error: no strategy for node " << u << std::endl;
         }
       }
 
@@ -297,6 +307,30 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     const vertex_set& U = std::get<2>(q);
     mCRL2log(log::debug) << "U = " << pp(U) << std::endl;
 
+    // set strategy
+    if (m % 2 == 0)
+    {
+      for (const vertex* u: U)
+      {
+        if (u->decoration == structure_graph::d_disjunction && !u->successors.empty())
+        {
+          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << std::endl;
+          u->strategy = *(u->successors.begin());
+        }
+      }
+    }
+    else
+    {
+      for (const vertex* u: U)
+      {
+        if (u->decoration == structure_graph::d_conjunction && !u->successors.empty())
+        {
+          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << std::endl;
+          u->strategy = *(u->successors.begin());
+        }
+      }
+    }
+
     if (h == m)
     {
       if (m % 2 == 0)
@@ -312,15 +346,6 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
     else if (m % 2 != 0)
     {
-      // set strategy
-      for (const vertex* u: U)
-      {
-        if (u->decoration == structure_graph::d_conjunction)
-        {
-          u->strategy = *(u->predecessors.begin());
-        }
-      }
-
       vertex_set A = compute_attractor_set_conjunctive(U);
       mCRL2log(log::debug) << "A = " << pp(A) << std::endl;
       std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
@@ -339,15 +364,6 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
     else
     {
-      // set strategy
-      for (const vertex* u: U)
-      {
-        if (u->decoration == structure_graph::d_disjunction)
-        {
-          u->strategy = *(u->predecessors.begin());
-        }
-      }
-
       vertex_set A = compute_attractor_set_disjunctive(U);
       mCRL2log(log::debug) << "A = " << pp(A) << std::endl;
       std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
@@ -521,7 +537,7 @@ bool solve_structure_graph(const structure_graph& G)
   mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
   mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;
 
-  // check_solve_recursive_solution(Wconj, Wdisj);
+  check_solve_recursive_solution(Wconj, Wdisj);
 
   if (contains(Wdisj, &init))
   {
