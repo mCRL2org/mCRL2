@@ -39,7 +39,7 @@ class structure_graph
     struct vertex
     {
       pbes_expression formula;
-      decoration_type decoration;
+      mutable decoration_type decoration;
       std::size_t rank;
       mutable std::vector<const vertex*> predecessors;
       mutable std::vector<const vertex*> successors;
@@ -62,6 +62,11 @@ class structure_graph
           enabled(enabled_),
           strategy(strategy_)
       {}
+
+      void remove_predecessor(const vertex& u) const
+      {
+        predecessors.erase(std::remove(predecessors.begin(), predecessors.end(), &u), predecessors.end());
+      }
 
       std::vector<pbes_expression> predecessor_formulas() const
       {

@@ -98,9 +98,6 @@ structure_graph::vertex_set compute_attractor_set_conjunctive(structure_graph::v
     todo.erase(todo.begin());
     assert(!contains(A, u));
 
-    // TODO: perhaps this is not needed
-    u->strategy = nullptr;
-
     if (is_attractor_conjunctive(*u, A))
     {
       A.insert(u);
@@ -155,9 +152,6 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
     const vertex* u = *todo.begin();
     todo.erase(todo.begin());
     assert(!contains(A, u));
-
-    // TODO: perhaps this is not needed
-    u->strategy = nullptr;
 
     if (is_attractor_disjunctive(*u, A))
     {
@@ -424,6 +418,64 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
 }
 
 inline
+void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structure_graph::vertex_set& Wdisj)
+{
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
+  vertex_set Wconj1;
+  vertex_set Wdisj1;
+
+  for (const vertex* u: Wconj)
+  {
+    if (u->decoration == structure_graph::d_conjunction)
+    {
+      u->decoration = structure_graph::d_none;
+
+      for (const vertex* v: u->successors)
+      {
+        v->remove_predecessor(*u);
+      }
+      u->successors.clear();
+
+      // add the edge (u, u.strategy)
+      assert(u->strategy != 0);
+      u->successors.push_back(u->strategy);
+      u->strategy->predecessors.push_back(u);
+    }
+  }
+  std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wconj);
+  if (!Wdisj1.empty() || Wconj1 != Wconj)
+  {
+    throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
+  }
+
+  for (const vertex* u: Wdisj)
+  {
+    if (u->decoration == structure_graph::d_disjunction)
+    {
+      u->decoration = structure_graph::d_none;
+
+      for (const vertex* v: u->successors)
+      {
+        v->remove_predecessor(*u);
+      }
+      u->successors.clear();
+
+      // add the edge (u, u.strategy)
+      assert(u->strategy != 0);
+      u->successors.push_back(u->strategy);
+      u->strategy->predecessors.push_back(u);
+    }
+  }
+  std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wdisj);
+  if (!Wconj1.empty() || Wdisj1 != Wdisj)
+  {
+    throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
+  }
+}
+
+inline
 bool solve_structure_graph(const structure_graph& G)
 {
   typedef structure_graph::vertex_set vertex_set;
@@ -438,6 +490,9 @@ bool solve_structure_graph(const structure_graph& G)
   vertex_set Wconj;
   vertex_set Wdisj;
   std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
+
+  // check_solve_recursive_solution(Wconj, Wdisj);
+
   const vertex& init = G.initial_vertex();
   mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
   mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;
