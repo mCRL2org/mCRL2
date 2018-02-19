@@ -418,6 +418,19 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
 }
 
 inline
+void log_vertex_set(const structure_graph::vertex_set& V, const std::string& name)
+{
+  mCRL2log(log::verbose) << "--- " << name << " ---" << std::endl;
+  for (const structure_graph::vertex* v: V)
+  {
+    if (v->enabled)
+    {
+      mCRL2log(log::verbose) << *v << std::endl;
+    }
+  }
+}
+
+inline
 void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structure_graph::vertex_set& Wdisj)
 {
   typedef structure_graph::vertex_set vertex_set;
@@ -426,6 +439,8 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
   vertex_set Wconj1;
   vertex_set Wdisj1;
 
+  mCRL2log(log::verbose) << "--- check_solve_recursive_solution ---" << std::endl;
+  log_vertex_set(Wconj, "Wconj");
   for (const vertex* u: Wconj)
   {
     if (u->decoration == structure_graph::d_conjunction)
@@ -439,17 +454,23 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
       u->successors.clear();
 
       // add the edge (u, u.strategy)
+      if (u->strategy == 0)
+      {
+        std::cout << "no strategy for node " << *u << std::endl;
+      }
       assert(u->strategy != 0);
       u->successors.push_back(u->strategy);
       u->strategy->predecessors.push_back(u);
     }
   }
+  log_vertex_set(Wconj, "Wconj after removal of edges");
   std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wconj);
   if (!Wdisj1.empty() || Wconj1 != Wconj)
   {
     throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
   }
 
+  log_vertex_set(Wdisj, "Wdisj");
   for (const vertex* u: Wdisj)
   {
     if (u->decoration == structure_graph::d_disjunction)
@@ -463,11 +484,16 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
       u->successors.clear();
 
       // add the edge (u, u.strategy)
+      if (u->strategy == 0)
+      {
+        std::cout << "no strategy for node " << *u << std::endl;
+      }
       assert(u->strategy != 0);
       u->successors.push_back(u->strategy);
       u->strategy->predecessors.push_back(u);
     }
   }
+  log_vertex_set(Wdisj, "Wdisj after removal of edges");
   std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wdisj);
   if (!Wconj1.empty() || Wdisj1 != Wdisj)
   {
@@ -491,11 +517,12 @@ bool solve_structure_graph(const structure_graph& G)
   vertex_set Wdisj;
   std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
 
-  // check_solve_recursive_solution(Wconj, Wdisj);
-
   const vertex& init = G.initial_vertex();
   mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
   mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;
+
+  // check_solve_recursive_solution(Wconj, Wdisj);
+
   if (contains(Wdisj, &init))
   {
     return true;
