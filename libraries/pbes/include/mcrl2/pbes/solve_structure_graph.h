@@ -537,7 +537,7 @@ bool solve_structure_graph(const structure_graph& G)
   mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
   mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;
 
-  check_solve_recursive_solution(Wconj, Wdisj);
+  // check_solve_recursive_solution(Wconj, Wdisj);
 
   if (contains(Wdisj, &init))
   {
