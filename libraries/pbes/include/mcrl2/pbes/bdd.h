@@ -436,9 +436,9 @@ std::size_t log2_rounded_up(std::size_t n)
 }
 
 inline
-std::vector<bdd_node> id_variables(std::size_t n)
+std::vector<bdd_node> id_variables(std::size_t n, bool unary_encoding)
 {
-  std::size_t m = log2_rounded_up(n);
+  std::size_t m = unary_encoding ? n : log2_rounded_up(n);
   std::vector<bdd_node> result;
   for (std::size_t i = 0; i < m; i++)
   {
@@ -448,23 +448,36 @@ std::vector<bdd_node> id_variables(std::size_t n)
 }
 
 inline
-std::vector<bdd_node> equation_identifiers(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node> id_variables)
+std::vector<bdd_node> equation_identifiers(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node> id_variables, bool unary_encoding)
 {
   std::vector<bdd_node> result;
-
-  std::size_t m = id_variables.size();
   std::size_t n = equations.size();
-
   std::vector<std::vector<bdd_node>> sequences(n, std::vector<bdd_node>());
-  std::size_t repeat = 1;
-  for (std::size_t i = 0; i < m; i++)
+
+  if (unary_encoding)
   {
-    for (std::size_t j = 0; j < n; j++)
+    for (std::size_t i = 0; i < n; i++)
     {
-      bool negate = (j / repeat) % 2 == 0;
-      sequences[j].push_back(negate ? make_not(id_variables[i]) : id_variables[i]);
+      for (std::size_t j = 0; j < n; j++)
+      {
+        sequences[j].push_back(i == j ? make_not(id_variables[i]) : id_variables[i]);
+      }
     }
-    repeat *= 2;
+  }
+  else
+  {
+    std::size_t m = id_variables.size();
+
+    std::size_t repeat = 1;
+    for (std::size_t i = 0; i < m; i++)
+    {
+      for (std::size_t j = 0; j < n; j++)
+      {
+        bool negate = (j / repeat) % 2 == 0;
+        sequences[j].push_back(negate ? make_not(id_variables[i]) : id_variables[i]);
+      }
+      repeat *= 2;
+    }
   }
 
   for (std::size_t j = 0; j < n; j++)
@@ -787,18 +800,18 @@ std::map<std::size_t, std::vector<bdd_node>> priority_map(const std::vector<bdd_
 }
 
 inline
-std::string pbes2bdd(const pbes_system::pbes& p)
+std::string pbes2bdd(const pbes_system::pbes& p, bool unary_encoding = false)
 {
   std::ostringstream out;
 
   pbes_equation_index eqn_index(p);
 
   // bdd variables
-  std::vector<bdd_node> ivar = id_variables(p.equations().size());
+  std::vector<bdd_node> ivar = id_variables(p.equations().size(), unary_encoding);
   std::vector<bdd_node> pvar = param_variables(p.equations().front().variable());
 
   // equation ids
-  std::vector<bdd_node> ids = equation_identifiers(p.equations(), ivar);
+  std::vector<bdd_node> ids = equation_identifiers(p.equations(), ivar, unary_encoding);
 
   std::vector<bdd_equation> equations = split_pbes(p, eqn_index, ids);
 

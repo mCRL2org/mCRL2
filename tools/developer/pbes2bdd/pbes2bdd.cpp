@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbestransform.cpp
+/// \file pbes2bdd.cpp
 
 #include <iostream>
 #include <string>
@@ -39,18 +39,18 @@ class pbes2bdd_tool: public input_output_tool
   protected:
     typedef input_output_tool super;
 
-    std::string algorithm_and_options;
-    int algorithm_number = -1;
-    bool print_algorithms = false;
+    bool unary_encoding = false;
 
     void parse_options(const utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
+      unary_encoding = parser.options.count("unary-encoding") > 0;
     }
 
     void add_options(utilities::interface_description& desc)
     {
       super::add_options(desc);
+      desc.add_option("unary-encoding", "use a unary encoding of the predicate variables", 'u');
     }
 
   public:
@@ -67,7 +67,7 @@ class pbes2bdd_tool: public input_output_tool
     {
       pbes_system::pbes pbesspec;
       pbes_system::load_pbes(pbesspec, input_filename());
-      std::string result = pbes_system::bdd::pbes2bdd(pbesspec);
+      std::string result = pbes_system::bdd::pbes2bdd(pbesspec, unary_encoding);
       write_text(output_filename(), result);
       return true;
     }
