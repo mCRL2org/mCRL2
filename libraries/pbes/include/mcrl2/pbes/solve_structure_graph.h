@@ -441,9 +441,10 @@ void log_vertex_set(const structure_graph::vertex_set& V, const std::string& nam
   {
     if (v->enabled)
     {
-      mCRL2log(log::verbose) << *v << std::endl;
+      mCRL2log(log::verbose) << "  " << *v << std::endl;
     }
   }
+  mCRL2log(log::verbose) << "\n";
 }
 
 inline
@@ -455,7 +456,7 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
   vertex_set Wconj1;
   vertex_set Wdisj1;
 
-  mCRL2log(log::verbose) << "--- check_solve_recursive_solution ---" << std::endl;
+  mCRL2log(log::verbose) << "\n--- check_solve_recursive_solution ---" << std::endl;
   log_vertex_set(Wconj, "Wconj");
   for (const vertex* u: Wconj)
   {
@@ -483,6 +484,8 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
   std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wconj);
   if (!Wdisj1.empty() || Wconj1 != Wconj)
   {
+    log_vertex_set(Wconj1, "Wconj1");
+    log_vertex_set(Wdisj1, "Wdisj1");
     throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
   }
 
@@ -513,22 +516,20 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
   std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wdisj);
   if (!Wconj1.empty() || Wdisj1 != Wdisj)
   {
+    log_vertex_set(Wconj1, "Wconj1");
+    log_vertex_set(Wdisj1, "Wdisj1");
     throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
   }
 }
 
 inline
-bool solve_structure_graph(const structure_graph& G)
+bool solve_structure_graph(const structure_graph& G, bool check_strategy = false)
 {
   typedef structure_graph::vertex_set vertex_set;
   typedef structure_graph::vertex vertex;
 
-  mCRL2log(log::verbose) << "--- structure graph ----\n" << std::endl;
   structure_graph::vertex_set V = G.vertices();
-  for (const structure_graph::vertex* v: V)
-  {
-    mCRL2log(log::verbose) << *v << std::endl;
-  }
+  log_vertex_set(V, "structure graph");
   vertex_set Wconj;
   vertex_set Wdisj;
   std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
@@ -537,7 +538,10 @@ bool solve_structure_graph(const structure_graph& G)
   mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
   mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;
 
-  // check_solve_recursive_solution(Wconj, Wdisj);
+  if (check_strategy)
+  {
+    check_solve_recursive_solution(Wconj, Wdisj);
+  }
 
   if (contains(Wdisj, &init))
   {
