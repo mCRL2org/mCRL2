@@ -3,12 +3,13 @@ set(MCRL2_TOOLS
   mcrl2parse
   mcrl2transform
   pbes2bdd
+  pbessolve
   pbestransform
   reduce_pbes
   reduce_process
 )
 
-# N.B. The developer tool lpstransform is needed for the random tests.
+# N.B. Some developer tools are needed for the random tests.
 if(${MCRL2_ENABLE_DEVELOPER} OR ${MCRL2_ENABLE_TESTS})
   foreach(TOOL ${MCRL2_TOOLS})
     add_subdirectory(${TOOL})

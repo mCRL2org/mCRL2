@@ -3,8 +3,6 @@ nodes:
     type: PbesSpec
   l2:
     type: PBES
-  l3:
-    type: TEXT
 
 tools:
   t1:
@@ -14,13 +12,13 @@ tools:
     name: txt2pbes
   t2:
     input: [l2]
-    output: [l3]
-    args: [-asolve-structure-graph]
-    name: pbestransform
+    output: []
+    args: [--check-strategy]
+    name: pbessolve
   t3:
     input: [l2]
     output: []
     args: []
     name: pbes2bool
 result: |
-  result = (l3.value.strip() == 'true') == t3.value['solution']
+  result = t2.value['solution'] == t3.value['solution']
