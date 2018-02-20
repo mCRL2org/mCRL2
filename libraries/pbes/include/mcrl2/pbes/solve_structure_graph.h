@@ -100,16 +100,14 @@ structure_graph::vertex_set compute_attractor_set_conjunctive(structure_graph::v
 
     if (is_attractor_conjunctive(*u, A))
     {
-      A.insert(u);
-
       // set strategy
-      if (u->decoration == structure_graph::d_conjunction)
+      if (u->decoration != structure_graph::d_disjunction)
       {
         for (const vertex* w: u->successors)
         {
           if (contains(A, w))
           {
-            mCRL2log(log::verbose) << "set strategy for node " << w->formula << std::endl;
+            mCRL2log(log::verbose) << "set strategy for node " << u->formula << " to " << w->formula << std::endl;
             u->strategy = w;
             break;
           }
@@ -119,6 +117,8 @@ structure_graph::vertex_set compute_attractor_set_conjunctive(structure_graph::v
           mCRL2log(log::verbose) << "Error: no strategy for node " << u << std::endl;
         }
       }
+
+      A.insert(u);
 
       for (const vertex* v: u->predecessors)
       {
@@ -160,16 +160,14 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
 
     if (is_attractor_disjunctive(*u, A))
     {
-      A.insert(u);
-
       // set strategy
-      if (u->decoration == structure_graph::d_disjunction)
+      if (u->decoration != structure_graph::d_conjunction)
       {
         for (const vertex* w: u->successors)
         {
           if (contains(A, w))
           {
-            mCRL2log(log::verbose) << "set strategy for node " << w->formula << std::endl;
+            mCRL2log(log::verbose) << "set strategy for node " << u->formula << " to " << w->formula << std::endl;
             u->strategy = w;
             break;
           }
@@ -179,6 +177,8 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
           mCRL2log(log::verbose) << "Error: no strategy for node " << u << std::endl;
         }
       }
+
+      A.insert(u);
 
       for (const vertex* v: u->predecessors)
       {
@@ -314,8 +314,8 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
       {
         if (u->decoration == structure_graph::d_disjunction && !u->successors.empty())
         {
-          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << std::endl;
           u->strategy = *(u->successors.begin());
+          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
         }
       }
     }
@@ -325,8 +325,8 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
       {
         if (u->decoration == structure_graph::d_conjunction && !u->successors.empty())
         {
-          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << std::endl;
           u->strategy = *(u->successors.begin());
+          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
         }
       }
     }
@@ -385,6 +385,20 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   return { Wconj, Wdisj };
 }
 
+inline
+void log_vertex_set(const structure_graph::vertex_set& V, const std::string& name)
+{
+  mCRL2log(log::verbose) << "--- " << name << " ---" << std::endl;
+  for (const structure_graph::vertex* v: V)
+  {
+    if (v->enabled)
+    {
+      mCRL2log(log::verbose) << "  " << *v << std::endl;
+    }
+  }
+  mCRL2log(log::verbose) << "\n";
+}
+
 // Handles nodes with decoration true or false.
 inline
 std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive_extended(structure_graph::vertex_set& V)
@@ -408,6 +422,11 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
   }
 
+  mCRL2log(log::verbose) << "\n--- solve_recursive_extended ---" << std::endl;
+  log_vertex_set(V, "V");
+  log_vertex_set(Vconj, "Vconj");
+  log_vertex_set(Vdisj, "Vdisj");
+
   // extend Vconj and Vdisj
   if (!Vconj.empty())
   {
@@ -417,6 +436,8 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   {
     Vdisj = compute_attractor_set_disjunctive(Vdisj);
   }
+  log_vertex_set(Vconj, "Vconj after extension");
+  log_vertex_set(Vdisj, "Vdisj after extension");
 
   // default case
   if (Vconj.empty() && Vdisj.empty())
@@ -431,20 +452,6 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     std::tie(Wconj, Wdisj) = solve_recursive(V, Vunion);
     return std::make_pair(set_union(Wconj, Vconj), set_union(Wdisj, Vdisj));
   }
-}
-
-inline
-void log_vertex_set(const structure_graph::vertex_set& V, const std::string& name)
-{
-  mCRL2log(log::verbose) << "--- " << name << " ---" << std::endl;
-  for (const structure_graph::vertex* v: V)
-  {
-    if (v->enabled)
-    {
-      mCRL2log(log::verbose) << "  " << *v << std::endl;
-    }
-  }
-  mCRL2log(log::verbose) << "\n";
 }
 
 inline

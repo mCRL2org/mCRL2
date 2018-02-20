@@ -21,9 +21,9 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
 \qquad \text{\textbf{if} }attr_{\blacktriangle }(A,u)\text{ \textbf{then}}
 \\ 
-\qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangle }\text{ \textbf{%
 then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in A\cap succ(u) \\ 
+\qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
 \text{\textbf{return }}A,\tau 
 \end{array}%
@@ -39,9 +39,9 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
 \qquad \text{\textbf{if} }attr_{\blacktriangledown }(A,u)\text{ \textbf{then}%
 } \\ 
-\qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangledown }\text{ \textbf{%
 then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in A\cap succ(u) \\ 
+\qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
 \text{\textbf{return }}A,\tau 
 \end{array}%
