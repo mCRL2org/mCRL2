@@ -458,6 +458,16 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
 
   mCRL2log(log::verbose) << "\n--- check_solve_recursive_solution ---" << std::endl;
   log_vertex_set(Wconj, "Wconj");
+  log_vertex_set(Wdisj, "Wdisj");
+
+  for (const vertex* u: Wconj)
+  {
+    u->enabled = true;
+  }
+  for (const vertex* u: Wdisj)
+  {
+    u->enabled = false;
+  }
   for (const vertex* u: Wconj)
   {
     if (u->decoration == structure_graph::d_conjunction)
@@ -489,7 +499,14 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
     throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
   }
 
-  log_vertex_set(Wdisj, "Wdisj");
+  for (const vertex* u: Wconj)
+  {
+    u->enabled = false;
+  }
+  for (const vertex* u: Wdisj)
+  {
+    u->enabled = true;
+  }
   for (const vertex* u: Wdisj)
   {
     if (u->decoration == structure_graph::d_disjunction)
