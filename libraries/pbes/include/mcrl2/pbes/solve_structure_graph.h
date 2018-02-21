@@ -107,14 +107,14 @@ structure_graph::vertex_set compute_attractor_set_conjunctive(structure_graph::v
         {
           if (contains(A, w))
           {
-            mCRL2log(log::verbose) << "set strategy for node " << u->formula << " to " << w->formula << std::endl;
+            mCRL2log(log::debug) << "set strategy for node " << u->formula << " to " << w->formula << std::endl;
             u->strategy = w;
             break;
           }
         }
         if (u->strategy == 0)
         {
-          mCRL2log(log::verbose) << "Error: no strategy for node " << u << std::endl;
+          mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
         }
       }
 
@@ -167,14 +167,14 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
         {
           if (contains(A, w))
           {
-            mCRL2log(log::verbose) << "set strategy for node " << u->formula << " to " << w->formula << std::endl;
+            mCRL2log(log::debug) << "set strategy for node " << u->formula << " to " << w->formula << std::endl;
             u->strategy = w;
             break;
           }
         }
         if (u->strategy == 0)
         {
-          mCRL2log(log::verbose) << "Error: no strategy for node " << u << std::endl;
+          mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
         }
       }
 
@@ -285,15 +285,15 @@ structure_graph::vertex_set remove_disabled_vertices(const structure_graph::vert
 inline
 void log_vertex_set(const structure_graph::vertex_set& V, const std::string& name)
 {
-  mCRL2log(log::verbose) << "--- " << name << " ---" << std::endl;
+  mCRL2log(log::debug) << "--- " << name << " ---" << std::endl;
   for (const structure_graph::vertex* v: V)
   {
     if (v->enabled)
     {
-      mCRL2log(log::verbose) << "  " << *v << std::endl;
+      mCRL2log(log::debug) << "  " << *v << std::endl;
     }
   }
-  mCRL2log(log::verbose) << "\n";
+  mCRL2log(log::debug) << "\n";
 }
 
 // find a successor of u in U, or a random one if no successor in U exists
@@ -360,7 +360,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
           if (v)
           {
             u->strategy = v;
-            mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
+            mCRL2log(log::debug) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
           }
         }
       }
@@ -375,7 +375,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
           if (v)
           {
             u->strategy = v;
-            mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
+            mCRL2log(log::debug) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
           }
         }
       }
@@ -458,7 +458,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
   }
 
-  mCRL2log(log::verbose) << "\n--- solve_recursive_extended ---" << std::endl;
+  mCRL2log(log::debug) << "\n--- solve_recursive_extended ---" << std::endl;
   log_vertex_set(V, "V");
   log_vertex_set(Vconj, "Vconj");
   log_vertex_set(Vdisj, "Vdisj");
@@ -499,7 +499,7 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
   vertex_set Wconj1;
   vertex_set Wdisj1;
 
-  mCRL2log(log::verbose) << "\n--- check_solve_recursive_solution ---" << std::endl;
+  mCRL2log(log::debug) << "\n--- check_solve_recursive_solution ---" << std::endl;
   log_vertex_set(Wconj, "Wconj");
   log_vertex_set(Wdisj, "Wdisj");
 
