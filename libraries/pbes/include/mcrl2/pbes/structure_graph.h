@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
@@ -339,6 +340,56 @@ bool all_vertices_enabled(const structure_graph::vertex_set& V)
     }
   }
   return true;
+}
+
+inline
+std::string print_decoration(structure_graph::decoration_type d)
+{
+  switch (d)
+  {
+    case structure_graph::d_conjunction : return "&#9652;";
+    case structure_graph::d_disjunction : return "&#9662;";
+    case structure_graph::d_true        : return "T";
+    case structure_graph::d_false       : return "F";
+    case structure_graph::d_none        : return "-";
+  }
+}
+
+inline
+std::string to_dot(const structure_graph::vertex_set& V)
+{
+  typedef structure_graph::vertex vertex;
+
+  std::ostringstream out;
+  out << "digraph G {" << std::endl;
+
+  // create id map for nodes
+  std::map<const vertex*, std::string> id;
+  int index = 0;
+  for (const vertex* v: V)
+  {
+    id[v] = "l" + std::to_string(index++);
+  }
+
+  // draw vertices
+  for (const vertex* v: V)
+  {
+    std::string shape = (v->decoration == structure_graph::d_disjunction) ? "diamond" : "box";
+    std::string label = pbes_system::pp(v->formula) + "<br/>r = " + std::to_string(v->rank) + "<br/>d = " + print_decoration(v->decoration);
+    out << "  " << id[v] << " [label=<" << label << "> shape=" << shape << "];" << std::endl;
+  }
+
+  // draw edges
+  for (const vertex* u: V)
+  {
+    for (const vertex* v: u->successors)
+    {
+      out << "  " << id[u] << " -> " << id[v] << ";" << std::endl;
+    }
+  }
+
+  out << "}" << std::endl;
+  return out.str();
 }
 
 } // namespace pbes_system
