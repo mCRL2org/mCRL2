@@ -282,12 +282,54 @@ structure_graph::vertex_set remove_disabled_vertices(const structure_graph::vert
   return result;
 }
 
+inline
+void log_vertex_set(const structure_graph::vertex_set& V, const std::string& name)
+{
+  mCRL2log(log::verbose) << "--- " << name << " ---" << std::endl;
+  for (const structure_graph::vertex* v: V)
+  {
+    if (v->enabled)
+    {
+      mCRL2log(log::verbose) << "  " << *v << std::endl;
+    }
+  }
+  mCRL2log(log::verbose) << "\n";
+}
+
+// find a successor of u in U, or a random one if no successor in U exists
+inline
+const structure_graph::vertex* find_successor(const structure_graph::vertex* u, const structure_graph::vertex_set& U)
+{
+  if (u->successors.empty())
+  {
+    throw mcrl2::runtime_error("no successor found!");
+  }
+
+  typedef structure_graph::vertex vertex;
+  const vertex* result = nullptr;
+  for (const vertex* v: u->successors)
+  {
+    if (v->enabled)
+    {
+      result =  v;
+    }
+    if (contains(U, v))
+    {
+      result = v;
+      break;
+    }
+  }
+  return result;
+}
+
 // pre: V does not contain nodes with decoration true or false.
 inline
 std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(structure_graph::vertex_set& V)
 {
   typedef structure_graph::vertex vertex;
   typedef structure_graph::vertex_set vertex_set;
+
+  log_vertex_set(V, "solve_recursive input");
 
   vertex_set Wconj;
   vertex_set Wdisj;
@@ -312,10 +354,14 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     {
       for (const vertex* u: U)
       {
-        if (u->decoration == structure_graph::d_disjunction && !u->successors.empty())
+        if (u->decoration == structure_graph::d_disjunction)
         {
-          u->strategy = *(u->successors.begin());
-          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
+          auto v = find_successor(u, U);
+          if (v)
+          {
+            u->strategy = v;
+            mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
+          }
         }
       }
     }
@@ -323,10 +369,14 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     {
       for (const vertex* u: U)
       {
-        if (u->decoration == structure_graph::d_conjunction && !u->successors.empty())
+        if (u->decoration == structure_graph::d_conjunction)
         {
-          u->strategy = *(u->successors.begin());
-          mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
+          auto v = find_successor(u, U);
+          if (v)
+          {
+            u->strategy = v;
+            mCRL2log(log::verbose) << "set initial strategy for node " << u->formula << " to " << u->strategy->formula << std::endl;
+          }
         }
       }
     }
@@ -383,20 +433,6 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   }
 
   return { Wconj, Wdisj };
-}
-
-inline
-void log_vertex_set(const structure_graph::vertex_set& V, const std::string& name)
-{
-  mCRL2log(log::verbose) << "--- " << name << " ---" << std::endl;
-  for (const structure_graph::vertex* v: V)
-  {
-    if (v->enabled)
-    {
-      mCRL2log(log::verbose) << "  " << *v << std::endl;
-    }
-  }
-  mCRL2log(log::verbose) << "\n";
 }
 
 // Handles nodes with decoration true or false.

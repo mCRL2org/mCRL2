@@ -22,7 +22,8 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 \qquad \text{\textbf{if} }attr_{\blacktriangle }(A,u)\text{ \textbf{then}}
 \\ 
 \qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangle }\text{ \textbf{%
-then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in A\cap succ(u) \\ 
+then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with} }v\in A\cap
+succ(u) \\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
 \text{\textbf{return }}A,\tau 
@@ -40,7 +41,8 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 \qquad \text{\textbf{if} }attr_{\blacktriangledown }(A,u)\text{ \textbf{then}%
 } \\ 
 \qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangledown }\text{ \textbf{%
-then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in A\cap succ(u) \\ 
+then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with} }v\in A\cap
+succ(u) \\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
 \text{\textbf{return }}A,\tau 
@@ -73,16 +75,12 @@ m:=\min (\{r(v)\mid v\in V\}) \\
 h:=\max (\{r(v)\mid v\in V\}) \\ 
 \text{\textbf{if} }V=\emptyset \text{ \textbf{then return }}(\emptyset
 ,\emptyset ) \\ 
-\text{\textbf{if }}h=m\wedge even(m)\text{ \textbf{then return} }(\emptyset
-,V) \\ 
-\text{\textbf{if }}h=m\wedge odd(m)\text{ \textbf{then return} }(V,\emptyset
-) \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
 \tau :=\emptyset  \\ 
 \text{\textbf{if} }odd(m)\text{ \textbf{then}} \\ 
 \qquad \text{\textbf{for} }u\in U\text{ \textbf{if} }u_{\blacktriangle }%
-\text{ \textbf{then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in
-succ(u) \\ 
+\text{ \textbf{then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with}
+}v\in succ(u,U) \\ 
 \qquad A,\tau _{A}:=Attr_{\blacktriangle }\left( U\right)  \\ 
 \qquad \left( W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime
 },W_{\blacktriangledown }^{\prime },\tau _{\blacktriangledown }^{\prime
@@ -104,8 +102,8 @@ SolveRecursive(}}V\setminus B\text{)} \\
 \tau _{B} \\ 
 \text{\textbf{else}} \\ 
 \qquad \text{\textbf{for} }u\in U\text{ \textbf{if} }u_{\blacktriangledown }%
-\text{ \textbf{then }}\tau :=\tau \cup \{(u,v)\}\text{ \textbf{with} }v\in
-succ(u) \\ 
+\text{ \textbf{then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with}
+}v\in succ(u,U) \\ 
 \qquad A,\tau _{A}:=Attr_{\blacktriangledown }\left( U\right)  \\ 
 \qquad \left( W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime
 },W_{\blacktriangledown }^{\prime },\tau _{\blacktriangledown }^{\prime
@@ -129,7 +127,15 @@ SolveRecursive(}}V\setminus B\text{)} \\
 \end{array}%
 \end{equation*}%
 where $Attr_{\blacktriangle }$=\textsc{AttractorSetConjunctive} and $%
-Attr_{\blacktriangledown }$=\textsc{AttractorSetDisjunctive}
+Attr_{\blacktriangledown }$=\textsc{AttractorSetDisjunctive} and where%
+\begin{equation*}
+succ(u,U)=\left\{ 
+\begin{array}{ll}
+succ(u)\cap U & \text{if }succ(u)\cap U\neq \emptyset  \\ 
+succ(u) & \text{otherwise}%
+\end{array}%
+\right. 
+\end{equation*}
 
 The algorithm can be extended to sets $V$ containing nodes with decoration $%
 \top $ or $\bot $ as follows:%
@@ -137,14 +143,24 @@ The algorithm can be extended to sets $V$ containing nodes with decoration $%
 \begin{array}{l}
 \text{\textsc{SolveRecursiveExtended(}}V\text{\textsc{)}} \\ 
 V_{\blacktriangle }:=Attr_{\blacktriangle }\left( \{v\in V\mid v\bot
-\}\right) \\ 
+\}\right)  \\ 
 V_{\blacktriangledown }:=Attr_{\blacktriangledown }\left( \{v\in V\mid v\top
-\}\right) \\ 
+\}\right)  \\ 
 \left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=\text{\textsc{%
 SolveRecursive(}}V\setminus (V_{\blacktriangle }\cup V_{\blacktriangledown })%
 \text{\textsc{)}} \\ 
 \text{\textbf{return }}\left( W_{\blacktriangle }\cup V_{\blacktriangle
-},W_{\blacktriangledown }\cup V_{\blacktriangledown }\right)%
+},W_{\blacktriangledown }\cup V_{\blacktriangledown }\right) 
 \end{array}%
 \end{equation*}%
-\newpage
+Note that a small optimization of the \textsc{SolveRecursive} algorithm is
+to add the following shortcuts at the start:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textbf{if }}h=m\wedge even(m)\text{ \textbf{then return} }(\emptyset
+,V) \\ 
+\text{\textbf{if }}h=m\wedge odd(m)\text{ \textbf{then return} }(V,\emptyset
+)%
+\end{array}%
+\end{equation*}%
+\newpage 
