@@ -225,7 +225,7 @@ class PbesstategraphTest(PbesTest):
 
 class Pbessolve_structure_graphTest(PbesTest):
     def __init__(self, name, settings = dict()):
-        super(Pbessolve_structure_graphTest, self).__init__(name, ymlfile('pbessolve_structure_graph'), settings)
+        super(Pbessolve_structure_graphTest, self).__init__(name, ymlfile('pbessolve-structure-graph'), settings)
 
 # N.B does not work due to unknown expressions (F_or)
 class SymbolicExplorationTest(PbesTest):
