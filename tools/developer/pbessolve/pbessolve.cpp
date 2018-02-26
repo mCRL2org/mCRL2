@@ -105,7 +105,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         lps::specification lpsspec;
         lps::load_lps(lpsspec, lpsfile);
         lps::specification counter_example = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
-        lps::save_lps(lpsspec, input_filename() + ".counter_example.lps");
+        lps::save_lps(counter_example, input_filename() + ".counter_example.lps");
       }
       return true;
     }

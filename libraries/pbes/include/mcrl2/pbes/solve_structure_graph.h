@@ -23,6 +23,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/structure_graph.h"
 
+#include "mcrl2/lps/print.h"
+
 namespace mcrl2 {
 
 namespace pbes_system {
@@ -656,7 +658,7 @@ structure_graph::vertex_set find_counter_example_nodes(const structure_graph::ve
 }
 
 inline
-lps::specification create_counter_example_lps(const structure_graph::vertex_set& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index, const std::string& regex)
+lps::specification create_counter_example_lps(const structure_graph::vertex_set& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
 {
   typedef structure_graph::vertex vertex;
 
@@ -664,15 +666,11 @@ lps::specification create_counter_example_lps(const structure_graph::vertex_set&
   result.process().action_summands().clear();
   result.process().deadlock_summands().clear();
   auto& action_summands = result.process().action_summands();
-  std::regex re(regex);
+  std::regex re("Z(neg|pos)_(\\d+)_.*");
   std::size_t n = lpsspec.process().process_parameters().size();
 
   for (const vertex* v: V)
   {
-    if (!is_propositional_variable_instantiation(v->formula))
-    {
-      continue;
-    }
     const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
     std::string Zname = Z.name();
     std::smatch m;
@@ -680,7 +678,7 @@ lps::specification create_counter_example_lps(const structure_graph::vertex_set&
     {
       mCRL2log(log::verbose) << "Z = " << Z << std::endl;
 
-      std::size_t summand_index = std::stoul(m[1]);
+      std::size_t summand_index = std::stoul(m[2]);
       lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
 
       std::size_t equation_index = p_index.index(Z.name());
@@ -720,6 +718,32 @@ lps::specification create_counter_example_lps(const structure_graph::vertex_set&
   return result;
 }
 
+inline
+structure_graph::vertex_set filter_counter_example_nodes(const structure_graph::vertex_set& V)
+{
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
+  vertex_set result;
+  std::regex re("Z(neg|pos)_(\\d+)_.*");
+
+  for (const vertex* v: V)
+  {
+    if (!is_propositional_variable_instantiation(v->formula))
+    {
+      continue;
+    }
+    const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
+    std::string Zname = Z.name();
+    std::smatch m;
+    if (std::regex_match(Zname, m, re))
+    {
+      result.insert(v);
+    }
+  }
+  return result;
+}
+
 /// \param lpsspec The original LPS that was used to create the PBES.
 inline
 lps::specification solve_structure_graph_with_counter_example(const structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
@@ -733,17 +757,19 @@ lps::specification solve_structure_graph_with_counter_example(const structure_gr
   std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
   const vertex& init = G.initial_vertex();
 
+  mCRL2log(log::verbose) << "Wdisj = " << pp(Wdisj) << std::endl;
+  mCRL2log(log::verbose) << "Wconj = " << pp(Wconj) << std::endl;
   if (contains(Wdisj, &init))
   {
     vertex_set W = find_counter_example_nodes(Wdisj, init, true);
-    mCRL2log(log::verbose) << "W = " << pp(W) << std::endl;
-    return create_counter_example_lps(W, lpsspec, p, p_index, "Zneg_(\\d+)_.*");
+    mCRL2log(log::verbose) << "Counter example nodes in Wdisj (contains init) = " << pp(filter_counter_example_nodes(W)) << std::endl;
+    return create_counter_example_lps(W, lpsspec, p, p_index);
   }
   else if (contains(Wconj, &init))
   {
     vertex_set W = find_counter_example_nodes(Wconj, init, false);
-    mCRL2log(log::verbose) << "W = " << pp(W) << std::endl;
-    return create_counter_example_lps(W, lpsspec, p, p_index, "Zpos_(\\d+)_.*");
+    mCRL2log(log::verbose) << "Counter example nodes in Wconj (contains init) = " << pp(filter_counter_example_nodes(W)) << std::endl;
+    return create_counter_example_lps(W, lpsspec, p, p_index);
   }
   throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
 }
