@@ -46,7 +46,23 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     void add_options(utilities::interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("check-strategy", "do a sanity check on the computed strategy", 's');
+      desc.add_option("check-strategy", "do a sanity check on the computed strategy", 'c');
+      desc.add_option("strategy",
+                 utilities::make_enum_argument<transformation_strategy>("STRAT")
+                   .add_value(lazy, true)
+                   .add_value(optimize)
+                   .add_value(on_the_fly)
+                   .add_value(on_the_fly_with_fixed_points),
+                 "use substitution strategy STRAT:",
+                 's');
+     desc.add_option("search",
+                 utilities::make_enum_argument<search_strategy>("SEARCH")
+                   .add_value(breadth_first, true)
+                   .add_value(depth_first)
+                   .add_value(breadth_first_short)
+                   .add_value(depth_first_short),
+                 "use search strategy SEARCH:",
+                 'z');
     }
 
   public:
