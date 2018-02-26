@@ -23,7 +23,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
@@ -521,56 +521,6 @@ std::string unchanged_variables(const std::vector<bdd_node>& variables)
   }
   return string_join(result.begin(), result.end(), " & ");
 }
-
-//---------------------------------- pbes equation index ----------------------------------//
-
-// TODO: share this class with pbesinst_lazy
-struct pbes_equation_index
-{
-  // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
-  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t> > equation_index;
-
-  pbes_equation_index()
-  { }
-
-  pbes_equation_index(const pbes& p)
-  {
-    auto const& equations = p.equations();
-    std::size_t rank;
-    for (std::size_t i = 0; i < equations.size(); i++)
-    {
-      const auto& eqn = equations[i];
-      if (i == 0)
-      {
-        rank = equations.front().symbol().is_mu() ? 1 : 0;
-      }
-      else
-      {
-        if (equations[i - 1].symbol() != equations[i].symbol())
-        {
-          rank++;
-        }
-      }
-      equation_index.insert({eqn.variable().name(), std::make_pair(i, rank)});
-    }
-  }
-
-  /// \brief Returns the index of the equation of the variable with the given name
-  std::size_t index(const core::identifier_string& name) const
-  {
-    auto i = equation_index.find(name);
-    assert (i != equation_index.end());
-    return i->second.first;
-  }
-
-  /// \brief Returns the rank of the equation of the variable with the given name
-  std::size_t rank(const core::identifier_string& name) const
-  {
-    auto i = equation_index.find(name);
-    assert (i != equation_index.end());
-    return i->second.second;
-  }
-};
 
 //---------------------------------- bdd equations ----------------------------------------//
 

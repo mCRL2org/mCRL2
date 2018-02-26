@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
@@ -169,53 +170,6 @@ bool has_key(const Map& m, const typename Map::key_type& x)
 {
   return m.find(x) != m.end();
 }
-
-struct pbes_equation_index
-{
-  // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
-  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t> > equation_index;
-
-  pbes_equation_index()
-  { }
-
-  pbes_equation_index(const pbes& p)
-  {
-    auto const& equations = p.equations();
-    std::size_t rank;
-    for (std::size_t i = 0; i < equations.size(); i++)
-    {
-      const auto& eqn = equations[i];
-      if (i == 0)
-      {
-        rank = equations.front().symbol().is_mu() ? 1 : 0;
-      }
-      else
-      {
-        if (equations[i - 1].symbol() != equations[i].symbol())
-        {
-          rank++;
-        }
-      }
-      equation_index.insert({eqn.variable().name(), std::make_pair(i, rank)});
-    }
-  }
-
-  /// \brief Returns the index of the equation of the variable with the given name
-  std::size_t index(const core::identifier_string& name) const
-  {
-    auto i = equation_index.find(name);
-    assert (i != equation_index.end());
-    return i->second.first;
-  }
-
-  /// \brief Returns the rank of the equation of the variable with the given name
-  std::size_t rank(const core::identifier_string& name) const
-  {
-    auto i = equation_index.find(name);
-    assert (i != equation_index.end());
-    return i->second.second;
-  }
-};
 
 struct find_loop_simplifier
 {
@@ -575,7 +529,7 @@ class pbesinst_lazy_algorithm
     pbes m_pbes;
 
     /// \brief A lookup map for PBES equations.
-    detail::pbes_equation_index equation_index;
+    pbes_equation_index m_equation_index;
 
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
@@ -719,11 +673,11 @@ class pbesinst_lazy_algorithm
       :
         datar(p.data(), rewrite_strategy),
         m_pbes(preprocess(p)),
-        equation_index(p),
+        m_equation_index(p),
         R(datar, p.data()),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy),
-        m_find_loop_simplifier(equation_index, equation)
+        m_find_loop_simplifier(m_equation_index, equation)
     {}
 
     /// \brief Reports BES equations that are produced by the algorithm.
@@ -731,7 +685,7 @@ class pbesinst_lazy_algorithm
     virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)
     {}
 
-    inline propositional_variable_instantiation next_todo()
+    propositional_variable_instantiation next_todo()
     {
       if (m_search_strategy == breadth_first)
       {
@@ -762,7 +716,7 @@ class pbesinst_lazy_algorithm
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
-        std::size_t index = equation_index.index(X_e.name());
+        std::size_t index = m_equation_index.index(X_e.name());
 
         const pbes_equation& eqn = m_pbes.equations()[index];
         data::rewriter::substitution_type sigma;
@@ -787,7 +741,7 @@ class pbesinst_lazy_algorithm
 
         // Store the result
         equation[X_e] = psi_e;
-        report_equation(X_e, psi_e, equation_index.rank(X_e.name()));
+        report_equation(X_e, psi_e, m_equation_index.rank(X_e.name()));
 
         // optional step (backward substitution)
         backward_substitute(psi_e, X_e, justification, equation); // N.B. modifies equation, justification
@@ -798,6 +752,11 @@ class pbesinst_lazy_algorithm
         mCRL2log(log::status) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
       }
+    }
+
+    const pbes_equation_index& equation_index() const
+    {
+      return m_equation_index;
     }
 
     template <typename Rename>
@@ -811,7 +770,7 @@ class pbesinst_lazy_algorithm
       for (auto const& p: equation)
       {
         auto const& X_e = p.first;
-        std::size_t index = equation_index.index(X_e.name());
+        std::size_t index = m_equation_index.index(X_e.name());
         auto const& symbol = this->symbol(index);
         auto lhs = propositional_variable(rename(X_e), data::variable_list());
         auto rhs = replace_propositional_variables(equation[X_e], [&](const propositional_variable_instantiation& x)
