@@ -13,10 +13,14 @@
 #define MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H
 
 #include <limits>
+#include <regex>
 #include <sstream>
 #include <unordered_set>
 #include <tuple>
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/join.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {
@@ -610,6 +614,136 @@ bool solve_structure_graph(const structure_graph& G, bool check_strategy = false
   else if (contains(Wconj, &init))
   {
     return false;
+  }
+  throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
+}
+
+inline
+structure_graph::vertex_set find_counter_example_nodes(const structure_graph::vertex_set& V, const structure_graph::vertex& init, bool is_disjunctive)
+{
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
+  vertex_set todo = { &init };
+  vertex_set done;
+  while (!todo.empty())
+  {
+    const vertex* u = *todo.begin();
+    todo.erase(todo.begin());
+    done.insert(u);
+    if ((is_disjunctive && u->decoration == structure_graph::d_disjunction) || (!is_disjunctive && u->decoration == structure_graph::d_conjunction))
+    {
+      // explore only the strategy edge
+      const vertex* v = u->strategy;
+      if (!contains(done, v))
+      {
+        todo.insert(v);
+      }
+    }
+    else
+    {
+      // explore all outgoing edges
+      for (const vertex* v: u->successors)
+      {
+        if (!contains(done, v))
+        {
+          todo.insert(v);
+        }
+      }
+    }
+  }
+  return done;
+}
+
+inline
+lps::specification create_counter_example_lps(const structure_graph::vertex_set& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index, const std::string& regex)
+{
+  typedef structure_graph::vertex vertex;
+
+  lps::specification result = lpsspec;
+  result.process().action_summands().clear();
+  result.process().deadlock_summands().clear();
+  auto& action_summands = result.process().action_summands();
+  std::regex re(regex);
+  std::size_t n = lpsspec.process().process_parameters().size();
+
+  for (const vertex* v: V)
+  {
+    if (!is_propositional_variable_instantiation(v->formula))
+    {
+      continue;
+    }
+    const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
+    std::string Zname = Z.name();
+    std::smatch m;
+    if (std::regex_match(Zname, m, re))
+    {
+      mCRL2log(log::verbose) << "Z = " << Z << std::endl;
+
+      std::size_t summand_index = std::stoul(m[1]);
+      lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
+
+      std::size_t equation_index = p_index.index(Z.name());
+      const pbes_equation& eqn = p.equations()[equation_index];
+      const data::variable_list& d = eqn.variable().parameters();
+      data::variable_vector d1(d.begin(), d.end());
+
+      const data::data_expression_list& e = Z.parameters();
+      data::data_expression_vector e1(e.begin(), e.end());
+
+      data::data_expression_vector condition;
+      data::assignment_vector next_state_assignments;
+      std::size_t m = d.size() - 2 * n;
+
+      for (std::size_t i = 0; i < n; i++)
+      {
+        condition.push_back(data::equal_to(d[i], e[i]));
+        next_state_assignments.push_back(data::assignment(d[i], e[n + m + i]));
+      }
+
+      process::action_vector actions;
+      std::size_t index = 0;
+      for (const process::action& a: summand.multi_action().actions())
+      {
+        process::action a1(a.label(), data::data_expression_list(&e1[n + index], &e1[n + index + a.arguments().size()]));
+        actions.push_back(a1);
+        index = index + a.arguments().size();
+      }
+
+      summand.condition() = data::join_and(condition.begin(), condition.end());
+      summand.multi_action().actions() = process::action_list(actions.begin(), actions.end());
+      summand.assignments() = data::assignment_list(next_state_assignments.begin(), next_state_assignments.end());
+
+      action_summands.push_back(summand);
+    }
+  }
+  return result;
+}
+
+/// \param lpsspec The original LPS that was used to create the PBES.
+inline
+lps::specification solve_structure_graph_with_counter_example(const structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
+{
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
+  structure_graph::vertex_set V = G.vertices();
+  vertex_set Wconj;
+  vertex_set Wdisj;
+  std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
+  const vertex& init = G.initial_vertex();
+
+  if (contains(Wdisj, &init))
+  {
+    vertex_set W = find_counter_example_nodes(Wdisj, init, true);
+    mCRL2log(log::verbose) << "W = " << pp(W) << std::endl;
+    return create_counter_example_lps(W, lpsspec, p, p_index, "Zneg_(\\d+)_.*");
+  }
+  else if (contains(Wconj, &init))
+  {
+    vertex_set W = find_counter_example_nodes(Wconj, init, false);
+    mCRL2log(log::verbose) << "W = " << pp(W) << std::endl;
+    return create_counter_example_lps(W, lpsspec, p, p_index, "Zpos_(\\d+)_.*");
   }
   throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
 }

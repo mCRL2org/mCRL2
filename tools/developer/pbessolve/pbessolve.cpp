@@ -13,6 +13,7 @@
 
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
@@ -34,13 +35,17 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     transformation_strategy m_transformation_strategy; // The strategy to substitute the value of variables with
                                                        // a trivial rhs (aka true or false) in other equations when generating a BES.
     search_strategy m_search_strategy;                 // The search strategy (depth first/breadth first)
-
     bool check_strategy = false;
+    std::string lpsfile;
 
     void parse_options(const utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
       check_strategy = parser.options.count("check-strategy") > 0;
+      if (parser.options.count("lpsfile") > 0)
+      {
+        lpsfile = parser.option_argument("lpsfile");
+      }
     }
 
     void add_options(utilities::interface_description& desc)
@@ -63,6 +68,10 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                    .add_value(depth_first_short),
                  "use search strategy SEARCH:",
                  'z');
+      desc.add_option("lpsfile",
+                 utilities::make_optional_argument("NAME", "name"),
+                 "The file containing the LPS that was used to generate the PBES. If this option is set, a counter example will be generated.",
+                 'f');
     }
 
   public:
@@ -82,9 +91,22 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       pbes_system::pbes pbesspec;
       pbes_system::load_pbes(pbesspec, input_filename());
       structure_graph G;
-      pbesinst_structure_graph(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy);
-      bool result = solve_structure_graph(G, check_strategy);
-      std::cout << (result ? "true" : "false") << std::endl;
+
+      pbesinst_structure_graph_algorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy);
+      algorithm.run();
+
+      if (lpsfile.empty())
+      {
+        bool result = solve_structure_graph(G, check_strategy);
+        std::cout << (result ? "true" : "false") << std::endl;
+      }
+      else
+      {
+        lps::specification lpsspec;
+        lps::load_lps(lpsspec, lpsfile);
+        lps::specification counter_example = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
+        lps::save_lps(lpsspec, input_filename() + ".counter_example.lps");
+      }
       return true;
     }
 };
