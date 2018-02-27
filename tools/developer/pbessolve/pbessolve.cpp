@@ -13,6 +13,7 @@
 
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
@@ -139,6 +140,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         lps::specification lpsspec;
         load_lps(lpsspec, lpsfile);
+        lps::detail::instantiate_global_variables(lpsspec); // N.B. This is necessary, because the global variables might not be valid for the evidence.
         bool result;
         lps::specification evidence;
         std::tie(result, evidence) = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
