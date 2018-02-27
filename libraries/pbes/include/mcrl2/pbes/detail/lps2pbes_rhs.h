@@ -153,8 +153,8 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     {
       const lps::multi_action& ai = summand.multi_action();
       data::variable_list actvars = action_variables(ai.actions());
-      core::identifier_string pos = id_generator("Zneg_" + utilities::number2string(index) + "_" + multi_action_name(ai));
-      core::identifier_string neg = id_generator("Zpos_" + utilities::number2string(index) + "_" + multi_action_name(ai));
+      core::identifier_string pos = id_generator("Zpos_" + utilities::number2string(index) + "_" + multi_action_name(ai));
+      core::identifier_string neg = id_generator("Zneg_" + utilities::number2string(index) + "_" + multi_action_name(ai));
       Zpos[ai] = propositional_variable(pos, d + actvars + d1);
       Zneg[ai] = propositional_variable(neg, d + actvars + d1);
       index++;
