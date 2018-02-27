@@ -14,6 +14,7 @@
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/io.h"
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
@@ -26,6 +27,38 @@ using namespace mcrl2::utilities::tools;
 using mcrl2::bes::tools::pbes_input_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
+
+/// \brief Loads an lps from input_filename, or from stdin if filename equals "".
+inline
+lps::specification load_lps(const std::string& input_filename)
+{
+  lps::specification result;
+  if (input_filename.empty())
+  {
+    result.load(std::cin);
+  }
+  else
+  {
+    std::ifstream from(input_filename, std::ifstream::in | std::ifstream::binary);
+    result.load(from);
+  }
+  return result;
+}
+
+/// \brief Saves an LPS to output_filename, or to stdout if filename equals "".
+inline
+void save_lps(const lps::specification& lpsspec, const std::string& output_filename)
+{
+  if (output_filename.empty())
+  {
+    lpsspec.save(std::cout);
+  }
+  else
+  {
+    std::ofstream to(output_filename, std::ofstream::out | std::ofstream::binary);
+    lpsspec.save(to);
+  }
+}
 
 class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 {
@@ -90,9 +123,11 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {
       pbes_system::pbes pbesspec;
       pbes_system::load_pbes(pbesspec, input_filename());
+      pbes_system::algorithms::normalize(pbesspec);
       structure_graph G;
 
       pbesinst_structure_graph_algorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy);
+      mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       algorithm.run();
 
       if (lpsfile.empty())
@@ -103,9 +138,14 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       else
       {
         lps::specification lpsspec;
-        lps::load_lps(lpsspec, lpsfile);
-        lps::specification counter_example = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
-        lps::save_lps(counter_example, input_filename() + ".counter_example.lps");
+        load_lps(lpsspec, lpsfile);
+        bool result;
+        lps::specification evidence;
+        std::tie(result, evidence) = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
+        std::cout << (result ? "true" : "false") << std::endl;
+        std::string output_filename = input_filename() + ".evidence.lps";
+        save_lps(evidence, output_filename);
+        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << output_filename << std::endl;
       }
       return true;
     }
