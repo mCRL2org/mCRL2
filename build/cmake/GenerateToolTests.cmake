@@ -101,7 +101,7 @@ endfunction()
 
 # mcrl22lps
 function(gen_mcrl22lps_release_tests MCRL2FILE LPSFILE)
-  set(ARGUMENTS "-a" "-b" "-c" "-e" "-f" "-g" "-lregular" "-lregular2" "-lstack" "-m" 
+  set(ARGUMENTS "-a" "-b" "-c" "-e" "-f" "-g" "-lregular" "-lregular2" "-lstack" "-m"
                 "-n" "--no-constelm" "-o" "-rjitty" "-rjittyp" ${_JITTYC}
                 "--timings" "-w" "-z")
   foreach(arglist ${ARGUMENTS})
@@ -167,7 +167,7 @@ endfunction()
 
 # lpsactionrename
 function(gen_lpsactionrename_release_tests LPSFILE RENFILE)
-  set(ARGUMENTS "" "-m" "-o" "-ppa" "-ptc" "-P" "-rjitty" "-rjittyp" ${_JITTYC})
+  set(ARGUMENTS "" "-m" "-o" "-P" "-rjitty" "-rjittyp" ${_JITTYC})
   foreach(arglist ${ARGUMENTS})
     add_tool_test(lpsactionrename -f${RENFILE} ${arglist} ${tagIN} ${LPSFILE})
   endforeach()
@@ -287,7 +287,7 @@ endfunction()
 
 # pbesconstelm
 function(gen_pbesconstelm_release_tests PBESFILE)
-  set(ARGUMENTS "-c" "-e" "-psimplify" "-pquantifier-all" "-pquantifier-finite" "-ppfnf" 
+  set(ARGUMENTS "-c" "-e" "-psimplify" "-pquantifier-all" "-pquantifier-finite" "-ppfnf"
                 "-rjitty" "-rjittyp" ${_JITTYC})
   foreach(arglist ${ARGUMENTS})
     add_tool_test(pbesconstelm ${arglist} ${tagIN} ${PBESFILE})
@@ -301,7 +301,7 @@ endfunction()
 
 # pbesrewr
 function(gen_pbesrewr_release_tests PBESFILE)
-  set(ARGUMENTS "-psimplify" "-pquantifier-all" "-pquantifier-finite" "-ppfnf" 
+  set(ARGUMENTS "-psimplify" "-pquantifier-all" "-pquantifier-finite" "-ppfnf"
                 "-rjitty" "-rjittyp" ${_JITTYC})
   foreach(arglist ${ARGUMENTS})
     add_tool_test(pbesrewr ${arglist} ${tagIN} ${PBESFILE})
@@ -329,7 +329,7 @@ endfunction()
 
 # pbes2bes
 function(gen_pbes2bes_release_tests PBESFILE BESFILE)
-  set(ARGUMENTS "-opbes" "-otext" "-obes" "-opgsolver" "-rjitty" "-rjittyp" ${_JITTYC} 
+  set(ARGUMENTS "-opbes" "-otext" "-obes" "-opgsolver" "-rjitty" "-rjittyp" ${_JITTYC}
                 "-s0" "-s1" "-s2" "-s3" "-u" "-zb" "-zd" "--erase=none" "--erase=some" "--erase=all")
   add_tool_test(pbes2bes ${arglist} ${tagIN} ${PBESFILE} ${tagOUT} ${BESFILE})
   foreach(arglist ${ARGUMENTS})
