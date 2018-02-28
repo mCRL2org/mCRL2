@@ -7,4 +7,5 @@ add_mcrl2_library(core
   DEPENDS
     mcrl2_atermpp
     mcrl2_utilities
+    dparser
 )
