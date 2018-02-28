@@ -49,6 +49,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
     bool            m_pretty;
     bool            m_rewrite;
     bool            m_sumelm;
+    bool            m_typecheck;
     std::string     m_action_rename_filename;
 
     std::string synopsis() const
@@ -66,6 +67,8 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
                       "does not terminate", 'o');
       desc.add_option("no-sumelm",
                       "do not apply sum elimination to the final result", 'm');
+      desc.add_option("no-typecheck",
+                      "do not typecheck the resulting specfication", 't');
       desc.add_option("pretty",
                       "return a pretty printed version of the output", 'P');
 
@@ -77,6 +80,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
       m_rewrite = (parser.options.count("no-rewrite")==0);
       m_sumelm  = (parser.options.count("no-sumelm")==0);
+      m_typecheck = (parser.options.count("no-typecheck")==0);
       m_pretty = (parser.options.count("pretty")!=0);
       m_action_rename_filename = parser.option_argument("renamefile");
     }
@@ -92,7 +96,8 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       ),
       m_pretty(false),
       m_rewrite(true),
-      m_sumelm(true)
+      m_sumelm(true),
+      m_typecheck(true)
     {}
 
     bool run()
@@ -127,6 +132,14 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       //rename all assigned actions
       mCRL2log(verbose) << "Renaming actions in LPS..." << std::endl;
       stochastic_specification new_spec = action_rename(action_rename_spec, old_spec);
+      if(m_typecheck)
+      {
+        mCRL2log(verbose) << "Type checking resulting LPS..." << std::endl;
+        if(!check_well_typedness(new_spec))
+        {
+          throw mcrl2::runtime_error("Type checking the specification obtained after renaming was unsuccesful.");
+        }
+      }
       data::rewriter datar;
       if (m_rewrite)
       {
