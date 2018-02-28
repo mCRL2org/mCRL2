@@ -49,7 +49,6 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
     bool            m_pretty;
     bool            m_rewrite;
     bool            m_sumelm;
-    t_phase         m_end_phase;
     std::string     m_action_rename_filename;
 
     std::string synopsis() const
@@ -67,11 +66,6 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
                       "does not terminate", 'o');
       desc.add_option("no-sumelm",
                       "do not apply sum elimination to the final result", 'm');
-      desc.add_option("end-phase", make_mandatory_argument("PHASE"),
-                      "stop conversion and output the action rename specification after phase PHASE: "
-                      "'pa' (parsing), "
-                      "'tc' (type checking) "
-                      , 'p');
       desc.add_option("pretty",
                       "return a pretty printed version of the output", 'P');
 
@@ -84,25 +78,6 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       m_rewrite = (parser.options.count("no-rewrite")==0);
       m_sumelm  = (parser.options.count("no-sumelm")==0);
       m_pretty = (parser.options.count("pretty")!=0);
-
-      if (parser.options.count("end-phase")>0)
-      {
-        std::string phase = parser.option_argument("end-phase");
-
-        if (std::strncmp(phase.c_str(), "pa", 3) == 0)
-        {
-          m_end_phase = PH_PARSE;
-        }
-        else if (std::strncmp(phase.c_str(), "tc", 3) == 0)
-        {
-          m_end_phase = PH_TYPE_CHECK;
-        }
-        else
-        {
-          throw parser.error("option -p has illegal argument '" + phase + "'");
-        }
-      }
-
       m_action_rename_filename = parser.option_argument("renamefile");
     }
 
@@ -117,8 +92,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       ),
       m_pretty(false),
       m_rewrite(true),
-      m_sumelm(true),
-      m_end_phase(PH_NONE)
+      m_sumelm(true)
     {}
 
     bool run()
