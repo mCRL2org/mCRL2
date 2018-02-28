@@ -602,8 +602,8 @@ bool solve_structure_graph(const structure_graph& G, bool check_strategy = false
   std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
 
   const vertex& init = G.initial_vertex();
-  mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
-  mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;
+  mCRL2log(log::debug) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
+  mCRL2log(log::debug) << "vertices corresponding to false " << pp(Wconj) << std::endl;
 
   if (check_strategy)
   {
