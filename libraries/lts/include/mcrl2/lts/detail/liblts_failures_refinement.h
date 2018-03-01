@@ -181,7 +181,8 @@ namespace detail
               const set_of_states& spec, 
               const lts_cache<LTS_TYPE>& weak_property_cache,
               label_type& culprit,
-              const LTS_TYPE& l);
+              const LTS_TYPE& l,
+              const bool provide_a_counter_example);
 
   /* Construct a path to state s using the backward map, and return it in result */
   inline
@@ -343,7 +344,7 @@ bool destructive_refinement_checker(
       if (refinement==failures || refinement==failures_divergence)
       { 
         detail::label_type offending_action=std::size_t(-1);
-        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache,offending_action,l1))   
+        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache,offending_action,l1,!generate_counter_example.is_dummy()))   
         {
           std::vector<detail::label_type> counter_example_extension;
           if (offending_action!=std::size_t(-1))
@@ -584,7 +585,8 @@ namespace detail
               const set_of_states& spec, 
               const lts_cache<LTS_TYPE>& weak_property_cache,
               label_type& culprit,
-              const LTS_TYPE& l)
+              const LTS_TYPE& l,
+              const bool provide_a_counter_example)
   {
     // This function calculates whether refusals(impl) are not included in the refusals(spec).
     // This is equivalent to:
@@ -643,41 +645,44 @@ namespace detail
         }
         if (!success)
         {
-          // Print the acceptance set of the implementation 
-          if (impl_enabled_action_set.empty())
+          if (provide_a_counter_example)
           {
-            mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
-          }
-          else
-          {
-            mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
-            for(const label_type a: impl_enabled_action_set)
+            // Print the acceptance set of the implementation 
+            if (impl_enabled_action_set.empty())
             {
-              mCRL2log(log::verbose) << l.action_label(a) << "\n";
+              mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
             }
-          }
-          // Print the acceptance sets of the specification. 
-          // if (enabled_stable_sets_of_specification.empty())
-          if (tau_reachable_states_of_the_specification.empty())
-          {
-            mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
-          }
-          else 
-          {
-            mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
-            for(const state_type s: tau_reachable_states_of_the_specification)
+            else
             {
-              const action_label_set& spec_action_labels=weak_property_cache.action_labels(s);
-              mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
-              for(const label_type a: spec_action_labels)
+              mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
+              for(const label_type a: impl_enabled_action_set)
               {
                 mCRL2log(log::verbose) << l.action_label(a) << "\n";
               }
             }
+            // Print the acceptance sets of the specification. 
+            // if (enabled_stable_sets_of_specification.empty())
+            if (tau_reachable_states_of_the_specification.empty())
+            {
+              mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
+            }
+            else 
+            {
+              mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
+              for(const state_type s: tau_reachable_states_of_the_specification)
+              {
+                const action_label_set& spec_action_labels=weak_property_cache.action_labels(s);
+                mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
+                for(const label_type a: spec_action_labels)
+                {
+                  mCRL2log(log::verbose) << l.action_label(a) << "\n";
+                }
+              }
+            }
+            mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";          
+            // Ready printing acceptance sets. 
           }
-          mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";          
-          // Ready printing acceptance sets. 
-          // tau_reachable_states_of_the_specification.clear();
+          
           visited.clear();
           todo_stack=std::stack < state_type >();
           return false;
