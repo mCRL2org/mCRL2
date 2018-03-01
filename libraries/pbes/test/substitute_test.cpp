@@ -14,10 +14,8 @@
 #include "mcrl2/data/substitutions/variable_assignment.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/replace.h"
-#include "mcrl2/pbes/substitutions.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

@@ -16,27 +16,16 @@
 
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/detail/test_operation.h"
-#include "mcrl2/utilities/text_utility.h"
 #include <boost/test/minimal.hpp>
-#include <functional>
-#include <iostream>
-#include <set>
-#include <sstream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

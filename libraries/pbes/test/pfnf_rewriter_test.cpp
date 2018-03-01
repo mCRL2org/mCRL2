@@ -16,7 +16,6 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/minimal.hpp>
 

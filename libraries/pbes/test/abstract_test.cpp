@@ -10,11 +10,8 @@
 /// \brief Test the pbes abstract algorithm.
 
 #include "mcrl2/pbes/abstract.h"
-#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/minimal.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

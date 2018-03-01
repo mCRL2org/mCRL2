@@ -114,8 +114,6 @@ class GCFP_graph
     std::vector<GCFP_vertex> m_vertices;
 
   public:
-    typedef std::vector<GCFP_vertex> vertex_iterator;
-
     const std::vector<GCFP_vertex>& vertices() const
     {
       return m_vertices;

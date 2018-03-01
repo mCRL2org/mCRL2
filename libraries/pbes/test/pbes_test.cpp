@@ -19,21 +19,11 @@
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/algorithm/string.hpp>
 #include <boost/test/minimal.hpp>
-#include <cstdio>
-#include <iostream>
-#include <iterator>
-#include <set>
-#include <sstream>
-#include <utility>
 
 using namespace mcrl2;
 using core::identifier_string;

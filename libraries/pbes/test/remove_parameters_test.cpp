@@ -9,12 +9,9 @@
 /// \brief Tests for removing parameters..
 
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/detail/test_utility.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include <boost/test/minimal.hpp>
-#include <iostream>
 
 using namespace mcrl2::core;
 using namespace mcrl2;

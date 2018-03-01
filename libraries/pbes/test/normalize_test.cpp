@@ -11,18 +11,14 @@
 
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 #include <boost/test/minimal.hpp>
-#include <functional>
-#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

@@ -932,6 +932,11 @@ class stategraph_algorithm
     {
       return m_pbes;
     }
+
+    const GCFP_graph& GCFP() const
+    {
+      return m_GCFP_graph;
+    }
 };
 
 } // namespace detail

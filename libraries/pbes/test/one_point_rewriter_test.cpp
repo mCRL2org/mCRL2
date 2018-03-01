@@ -16,13 +16,7 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/detail/test_operation.h"
-#include "mcrl2/utilities/text_utility.h"
 #include <boost/test/included/unit_test_framework.hpp>
-#include <functional>
-#include <iostream>
-#include <set>
-#include <sstream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

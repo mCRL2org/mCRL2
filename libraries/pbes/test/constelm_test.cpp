@@ -16,9 +16,7 @@
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/utilities/logger.h"
 #include <boost/test/minimal.hpp>
-#include <string>
 
 
 using namespace mcrl2;

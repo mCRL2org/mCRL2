@@ -13,7 +13,6 @@
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/included/unit_test_framework.hpp>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

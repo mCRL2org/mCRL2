@@ -24,9 +24,6 @@
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/minimal.hpp>
-#include <fstream>
-#include <iomanip>
-#include <string>
 
 #ifdef MCRL2_PGSOLVER_ENABLED
 #include <cstdlib>

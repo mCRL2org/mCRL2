@@ -15,12 +15,8 @@
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/parelm.h"
-#include "mcrl2/pbes/pbes.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/test/minimal.hpp>
-#include <iostream>
-#include <iterator>
-#include <utility>
 
 using namespace std;
 using namespace mcrl2;

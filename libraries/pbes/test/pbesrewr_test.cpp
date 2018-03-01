@@ -18,14 +18,11 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/minimal.hpp>
-#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

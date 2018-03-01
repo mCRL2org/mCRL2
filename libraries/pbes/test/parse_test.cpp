@@ -11,8 +11,6 @@
 
 #include "mcrl2/pbes/parse.h"
 #include <boost/test/minimal.hpp>
-#include <sstream>
-#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

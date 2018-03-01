@@ -14,14 +14,10 @@
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/detail/split.h"
 #include <boost/test/minimal.hpp>
-#include <iostream>
-#include <set>
-#include <utility>
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -48,11 +44,6 @@ std::string print_set(const std::set<data::variable>& variables)
   return out.str();
 }
 
-propositional_variable_instantiation propvar(const std::string& name)
-{
-  return propositional_variable_instantiation(core::identifier_string(name), data::data_expression_list());
-}
-
 void check_result(const std::string& expression, const std::string& result, const std::string& expected_result, const std::string& title)
 {
   if (result != expected_result)
@@ -63,6 +54,43 @@ void check_result(const std::string& expression, const std::string& result, cons
     std::cout << "expected result = " << expected_result << std::endl;
     BOOST_CHECK(result == expected_result);
   }
+}
+
+inline
+std::string print_connected_component(const std::set<std::size_t>& component, const pbes_system::detail::stategraph_algorithm& algorithm)
+{
+  const std::vector<detail::GCFP_vertex>& V = algorithm.GCFP().vertices();
+  std::ostringstream out;
+  out << "{";
+  for (auto i = component.begin(); i != component.end(); ++i)
+  {
+    if (!algorithm.is_valid_connected_component(component))
+    {
+      continue;
+    }
+    if (i != component.begin())
+    {
+      out << ", ";
+    }
+    out << algorithm.print(V[*i]);
+  }
+  out << "}";
+  return out.str();
+}
+
+inline
+std::set<std::string> print_connected_components(const std::vector<std::set<std::size_t> >& components, const pbes_system::detail::stategraph_algorithm& algorithm)
+{
+  std::set<std::string> result;
+  for (const auto &component: components)
+  {
+    result.insert(print_connected_component(component, algorithm));
+  }
+  if (result.empty()) // Special handling of empty result to distinguish undefined/empty results
+  {
+    result.insert("{}");
+  }
+  return result;
 }
 
 void test_significant_variables(const pbes_expression& x, const std::string& expected_result)
@@ -103,7 +131,6 @@ propositional_variable_instantiation find_propvar(const std::string& name, const
     }
   }
   throw mcrl2::runtime_error("propvar not found!");
-  return propositional_variable_instantiation();
 }
 
 void test_guard(const std::string& pbesspec, const std::string& X, const std::string& expected_result)
@@ -279,7 +306,7 @@ void test_local_stategraph()
     "\n"
     "init X(1, d1);\n"
    ;
-  p = txt2pbes(text, normalize);
+  // p = txt2pbes(text, normalize);
   // This fails because no suitable must graph is found
   // pbes_system::detail::local_reset_variables_algorithm(p).run();
 
@@ -714,9 +741,7 @@ void test_cfp()
   std::vector<std::string> test_cases = utilities::detail::split_text(text, "----------");
   for (const std::string& s: test_cases)
   {
-    std::vector<std::string> keywords;
-    keywords.push_back("pbes");
-    keywords.push_back("expected_result");
+    std::vector<std::string> keywords = { "pbes", "expected_result" };
     std::map<std::string, std::string> test_case = utilities::detail::split_text_using_keywords(s, keywords);
     pbes p = txt2pbes(test_case["pbes"], false);
     std::string expected_result = boost::trim_copy(test_case["expected_result"]);
@@ -730,7 +755,9 @@ void test_cfp()
     pbesstategraph_options options;
     pbes_system::detail::stategraph_algorithm algorithm(p, options);
     algorithm.run();
-    //std::string result = utilities::string_join(print_connected_components(algorithm.connected_components(), algorithm), ", ");
+    std::string result = utilities::string_join(print_connected_components(algorithm.connected_components(), algorithm), ", ");
+
+    // This check is no longer valid due to changes in the computation of components.
     //
     //if (result != expected)
     //{
@@ -749,7 +776,7 @@ int test_main(int, char**)
   test_guard();
   test_significant_variables();
   test_local_stategraph();
-  test_cfp(); // This does not longer work since the computation of components has been changed.
+  test_cfp();
 
   return 0;
 }

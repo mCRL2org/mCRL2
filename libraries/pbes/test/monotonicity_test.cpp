@@ -10,7 +10,6 @@
 /// \brief Tests for the is_monotonous function for pbes expressions.
 
 #include <iostream>
-#include <string>
 
 #include <boost/test/included/unit_test_framework.hpp>
 

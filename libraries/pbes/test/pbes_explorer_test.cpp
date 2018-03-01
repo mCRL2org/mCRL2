@@ -17,8 +17,6 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include <boost/test/included/unit_test_framework.hpp>
-#include <cstdio>
-#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

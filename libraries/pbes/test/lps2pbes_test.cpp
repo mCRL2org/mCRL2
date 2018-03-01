@@ -18,17 +18,10 @@
 #include "mcrl2/pbes/detail/pbes2bool.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/rewriters/data_rewriter.h"
-#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
-#include <iostream>
-#include <iterator>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

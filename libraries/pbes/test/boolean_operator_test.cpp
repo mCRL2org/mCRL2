@@ -15,8 +15,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
 #include <boost/test/minimal.hpp>
-#include <iostream>
-#include <string>
 
 using namespace mcrl2;
 

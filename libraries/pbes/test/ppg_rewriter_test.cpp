@@ -18,7 +18,6 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/minimal.hpp>
-#include <iostream>
 
 
 using namespace mcrl2;

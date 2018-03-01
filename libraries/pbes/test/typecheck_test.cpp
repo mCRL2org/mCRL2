@@ -11,11 +11,7 @@
 
 #include "mcrl2/core/parse.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/typecheck.h"
 #include <boost/test/minimal.hpp>
-#include <iostream>
-#include <sstream>
-#include <string>
 
 using namespace mcrl2;
 
