@@ -750,24 +750,35 @@ process::action_label rename_action_label(const process::action_label& act, cons
 
 } // namespace detail
 
+/**
+ * \brief Rename actions in given specification based on a regular expression and
+ * a string that specifies how the replacement should be formatted.
+ */
 inline
 stochastic_specification action_rename(
   const std::regex& matching_regex,
   const std::string& replacing_fmt,
   const stochastic_specification& lps_old_spec)
 {
+  // Use a set to store the new action labels to avoid duplicates
+  std::set<process::action_label> new_actions_set;
   process::action_label_list new_actions;
   for(const process::action_label& act: lps_old_spec.action_labels())
   {
     process::action_label new_action_label(detail::rename_action_label(act, matching_regex, replacing_fmt));
-    if(std::string(new_action_label.name()) != "delta" && std::string(new_action_label.name()) != "tau")
+    if(std::string(new_action_label.name()) != "delta" && std::string(new_action_label.name()) != "tau" &&
+        new_actions_set.find(new_action_label) == new_actions_set.end())
     {
+      // The list of actions should not contain delta and tau actions and also no duplicates.
+      new_actions_set.insert(new_action_label);
       new_actions.push_front(new_action_label);
     }
   }
   new_actions = reverse(new_actions);
 
+  // The list of new actions summands is initially empty
   std::vector<stochastic_action_summand> new_action_summands;
+  // The list of new deadlock summands is initialised to the existing list, we will only add new deadlock summands
   std::vector<deadlock_summand> new_deadlock_summands(lps_old_spec.process().deadlock_summands());
   for(const stochastic_action_summand& as: lps_old_spec.process().action_summands())
   {
@@ -779,12 +790,14 @@ stochastic_specification action_rename(
       if(std::string(new_action_label.name()) == "delta")
       {
         // delta is the absorbing element for multi action concatenation
+        // Therefore, this summand now becomes a deadlock summand
         becomes_deadlock_summand = true;
         break;
       }
+      // tau is the identity for multi action concatenation
+      // therefore, we should not add it to a multi action
       if(std::string(new_action_label.name()) != "tau")
       {
-        // tau is the identity for multi action concatenation
         new_action_list.push_front(process::action(new_action_label, act.arguments()));
       }
     }
@@ -794,11 +807,13 @@ stochastic_specification action_rename(
       new_action_list = reverse(new_action_list);
       multi_action new_multi_action(new_action_list, as.multi_action().time());
 
+      // Copy most of the old information, only the multi action has changed
       stochastic_action_summand new_summand(as.summation_variables(), as.condition(), new_multi_action, as.assignments(), as.distribution());
       new_action_summands.push_back(new_summand);
     }
     else
     {
+      // Add a new deadlock summand, copying most of the information for the old action summand
       new_deadlock_summands.push_back(deadlock_summand(as.summation_variables(), as.condition(), deadlock(as.multi_action().time())));
     }
   }
