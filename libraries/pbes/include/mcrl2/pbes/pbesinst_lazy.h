@@ -209,21 +209,22 @@ struct find_loop_simplifier
       {
         return false;
       }
-      visited[Y] = false;
-      return visited[Y] = find_loop_rec<is_mu>(equation.at(Y), X, rank, visited);
+      bool b = find_loop_rec<is_mu>(equation.at(Y), X, rank, visited);
+      visited[Y] = b;
+      return b;
     }
 
     if (is_mu)
     {
       if (is_and(expr))
       {
-        const and_& expra = atermpp::down_cast<and_>(expr);
+        const auto& expra = atermpp::down_cast<and_>(expr);
         return find_loop_rec<is_mu>(expra.left(), X, rank, visited) ||
                find_loop_rec<is_mu>(expra.right(), X, rank, visited);
       }
       if (is_or(expr))
       {
-        const or_& expro = atermpp::down_cast<or_>(expr);
+        const auto& expro = atermpp::down_cast<or_>(expr);
         return find_loop_rec<is_mu>(expro.left(), X, rank, visited) &&
                find_loop_rec<is_mu>(expro.right(), X, rank, visited);
       }
@@ -232,13 +233,13 @@ struct find_loop_simplifier
     {
       if (is_and(expr))
       {
-        const and_& expra = atermpp::down_cast<and_>(expr);
+        const auto& expra = atermpp::down_cast<and_>(expr);
         return find_loop_rec<is_mu>(expra.left(), X, rank, visited) &&
                find_loop_rec<is_mu>(expra.right(), X, rank, visited);
       }
       if (is_or(expr))
       {
-        const or_& expro = atermpp::down_cast<or_>(expr);
+        const auto& expro = atermpp::down_cast<or_>(expr);
         return find_loop_rec<is_mu>(expro.left(), X, rank, visited) ||
                find_loop_rec<is_mu>(expro.right(), X, rank, visited);
       }
@@ -380,7 +381,7 @@ struct pbesinst_resetter
 
       if (is_propositional_variable_instantiation(expr))
       {
-        auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
+        const auto& X = atermpp::down_cast<propositional_variable_instantiation>(expr);
         if (!has_key(reachable, X))
         {
           if (has_key(equation, X))
@@ -397,25 +398,25 @@ struct pbesinst_resetter
       }
       else if (is_and(expr))
       {
-        const and_& expra = atermpp::down_cast<and_>(expr);
+        const auto& expra = atermpp::down_cast<and_>(expr);
         stack.push(expra.left());
         stack.push(expra.right());
       }
       else if (is_or(expr))
       {
-        const or_& expro = atermpp::down_cast<or_>(expr);
+        const auto& expro = atermpp::down_cast<or_>(expr);
         stack.push(expro.left());
         stack.push(expro.right());
       }
       else if (is_imp(expr))
       {
-        const or_& expro = atermpp::down_cast<or_>(expr);
+        const auto& expro = atermpp::down_cast<or_>(expr);
         stack.push(expro.left());
         stack.push(expro.right());
       }
       else if (is_not(expr))
       {
-        const not_& y = atermpp::down_cast<not_>(expr);
+        const auto& y = atermpp::down_cast<not_>(expr);
         stack.push(y.operand());
       }
     }
@@ -423,41 +424,41 @@ struct pbesinst_resetter
 };
 
 inline
-pbes_expression pbes_expression_order_quantified_variables(const mcrl2::pbes_system::pbes_expression& p, const mcrl2::data::data_specification& data_spec)
+pbes_expression pbes_expression_order_quantified_variables(const mcrl2::pbes_system::pbes_expression& p, const mcrl2::data::data_specification& dataspec)
 {
   if (is_pbes_and(p))
   {
-    const and_& pa=atermpp::down_cast<and_>(p);
-    return and_(pbes_expression_order_quantified_variables(pa.left(),data_spec),
-                pbes_expression_order_quantified_variables(pa.right(),data_spec));
+    const auto& pa = atermpp::down_cast<and_>(p);
+    return and_(pbes_expression_order_quantified_variables(pa.left(), dataspec),
+                pbes_expression_order_quantified_variables(pa.right(), dataspec));
   }
   else if (is_pbes_or(p))
   {
-    const or_& po=atermpp::down_cast<or_>(p);
-    return or_(pbes_expression_order_quantified_variables(po.left(),data_spec),
-               pbes_expression_order_quantified_variables(po.right(),data_spec));
+    const auto& po = atermpp::down_cast<or_>(p);
+    return or_(pbes_expression_order_quantified_variables(po.left(), dataspec),
+               pbes_expression_order_quantified_variables(po.right(), dataspec));
   }
   else if (is_pbes_imp(p))
   {
-    const imp& pi=atermpp::down_cast<imp>(p);
-    return imp(pbes_expression_order_quantified_variables(pi.left(),data_spec),
-               pbes_expression_order_quantified_variables(pi.right(),data_spec));
+    const auto& pi = atermpp::down_cast<imp>(p);
+    return imp(pbes_expression_order_quantified_variables(pi.left(), dataspec),
+               pbes_expression_order_quantified_variables(pi.right(), dataspec));
   }
   else if (is_pbes_not(p))
   {
-    return not_(pbes_expression_order_quantified_variables(atermpp::down_cast<not_>(p).operand(),data_spec));
+    return not_(pbes_expression_order_quantified_variables(atermpp::down_cast<not_>(p).operand(), dataspec));
   }
   else if (is_pbes_forall(p))
   {
-    const forall& pf=atermpp::down_cast<forall>(p);
-    const pbes_expression expr = pbes_expression_order_quantified_variables(pf.body(),data_spec);
-    return make_forall(mcrl2::data::order_variables_to_optimise_enumeration(pf.variables(),data_spec),expr);
+    const auto& pf = atermpp::down_cast<forall>(p);
+    const pbes_expression expr = pbes_expression_order_quantified_variables(pf.body(), dataspec);
+    return make_forall(mcrl2::data::order_variables_to_optimise_enumeration(pf.variables(), dataspec), expr);
   }
   else if (is_pbes_exists(p))
   {
-    const exists& pe=atermpp::down_cast<exists>(p);
-    const pbes_expression expr = pbes_expression_order_quantified_variables(pe.body(),data_spec);
-    return make_exists(mcrl2::data::order_variables_to_optimise_enumeration(pe.variables(),data_spec),expr);
+    const auto& pe = atermpp::down_cast<exists>(p);
+    const pbes_expression expr = pbes_expression_order_quantified_variables(pe.body(), dataspec);
+    return make_exists(mcrl2::data::order_variables_to_optimise_enumeration(pe.variables(), dataspec), expr);
   }
   else
   {
@@ -498,9 +499,7 @@ struct pbesinst_backward_substitute
           trivials.erase(trivials.begin());
 
           auto oc = occurrence[X];
-          for (auto i = oc.begin(); i != oc.end(); i++)
-          {
-            auto Y = *i;
+          for (const auto& Y: oc) {
             pbes_expression& f = equation[Y];
             f = make_forward_substitute_rewriter(equation, justification[Y])(f);
             if (is_true(f) || is_false(f))

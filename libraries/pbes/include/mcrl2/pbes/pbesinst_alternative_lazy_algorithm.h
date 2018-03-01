@@ -364,8 +364,9 @@ class pbesinst_alternative_lazy_algorithm
         {
           return false;
         }
-        visited[Y] = false;
-        return visited[Y] = find_loop_rec<is_mu>(equation[Y], X, rank, visited);
+        bool b = find_loop_rec<is_mu>(equation[Y], X, rank, visited);
+        visited[Y] = b;
+        return b;
       }
 
       if (is_mu)
