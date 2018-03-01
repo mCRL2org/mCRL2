@@ -756,31 +756,55 @@ stochastic_specification action_rename(
   const std::string& replacing_fmt,
   const stochastic_specification& lps_old_spec)
 {
-
   process::action_label_list new_actions;
   for(const process::action_label& act: lps_old_spec.action_labels())
   {
-    new_actions.push_front(detail::rename_action_label(act, matching_regex, replacing_fmt));
+    process::action_label new_action_label(detail::rename_action_label(act, matching_regex, replacing_fmt));
+    if(std::string(new_action_label.name()) != "delta" && std::string(new_action_label.name()) != "tau")
+    {
+      new_actions.push_front(new_action_label);
+    }
   }
   new_actions = reverse(new_actions);
 
   std::vector<stochastic_action_summand> new_action_summands;
+  std::vector<deadlock_summand> new_deadlock_summands(lps_old_spec.process().deadlock_summands());
   for(const stochastic_action_summand& as: lps_old_spec.process().action_summands())
   {
     process::action_list new_action_list;
+    bool becomes_deadlock_summand = false;
     for(const process::action& act: as.multi_action().actions())
     {
-      new_action_list.push_front(process::action(detail::rename_action_label(act.label(), matching_regex, replacing_fmt), act.arguments()));
+      process::action_label new_action_label(detail::rename_action_label(act.label(), matching_regex, replacing_fmt));
+      if(std::string(new_action_label.name()) == "delta")
+      {
+        // delta is the absorbing element for multi action concatenation
+        becomes_deadlock_summand = true;
+        break;
+      }
+      if(std::string(new_action_label.name()) != "tau")
+      {
+        // tau is the identity for multi action concatenation
+        new_action_list.push_front(process::action(new_action_label, act.arguments()));
+      }
     }
-    new_action_list = reverse(new_action_list);
-    multi_action new_multi_action(new_action_list, as.multi_action().time());
 
-    lps::stochastic_action_summand new_summand(as.summation_variables(), as.condition(), new_multi_action, as.assignments(), as.distribution());
-    new_action_summands.push_back(new_summand);
+    if(!becomes_deadlock_summand)
+    {
+      new_action_list = reverse(new_action_list);
+      multi_action new_multi_action(new_action_list, as.multi_action().time());
+
+      stochastic_action_summand new_summand(as.summation_variables(), as.condition(), new_multi_action, as.assignments(), as.distribution());
+      new_action_summands.push_back(new_summand);
+    }
+    else
+    {
+      new_deadlock_summands.push_back(deadlock_summand(as.summation_variables(), as.condition(), deadlock(as.multi_action().time())));
+    }
   }
 
   stochastic_linear_process new_process(lps_old_spec.process().process_parameters(),
-                                        lps_old_spec.process().deadlock_summands(),
+                                        new_deadlock_summands,
                                         new_action_summands);
   stochastic_specification lps_new_spec(lps_old_spec.data(),
                                         new_actions,
