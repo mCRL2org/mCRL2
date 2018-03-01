@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_ACTION_RENAME_H
 #define MCRL2_LPS_ACTION_RENAME_H
 
+#include <regex>
+
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/parse.h"
@@ -736,6 +738,57 @@ lps::stochastic_specification action_rename(
   mCRL2log(log::debug) << "New lps complete\n";
   return lps_new_spec;
 } //end of rename(...)
+
+namespace detail
+{
+
+inline
+process::action_label rename_action_label(const process::action_label& act, const std::regex& matching_regex, const std::string& replacing_fmt)
+{
+  return process::action_label(std::regex_replace(std::string(act.name()), matching_regex, replacing_fmt), act.sorts());
+}
+
+} // namespace detail
+
+inline
+stochastic_specification action_rename(
+  const std::regex& matching_regex,
+  const std::string& replacing_fmt,
+  const stochastic_specification& lps_old_spec)
+{
+
+  process::action_label_list new_actions;
+  for(const process::action_label& act: lps_old_spec.action_labels())
+  {
+    new_actions.push_front(detail::rename_action_label(act, matching_regex, replacing_fmt));
+  }
+  new_actions = reverse(new_actions);
+
+  std::vector<stochastic_action_summand> new_action_summands;
+  for(const stochastic_action_summand& as: lps_old_spec.process().action_summands())
+  {
+    process::action_list new_action_list;
+    for(const process::action& act: as.multi_action().actions())
+    {
+      new_action_list.push_front(process::action(detail::rename_action_label(act.label(), matching_regex, replacing_fmt), act.arguments()));
+    }
+    new_action_list = reverse(new_action_list);
+    multi_action new_multi_action(new_action_list, as.multi_action().time());
+
+    lps::stochastic_action_summand new_summand(as.summation_variables(), as.condition(), new_multi_action, as.assignments(), as.distribution());
+    new_action_summands.push_back(new_summand);
+  }
+
+  stochastic_linear_process new_process(lps_old_spec.process().process_parameters(),
+                                        lps_old_spec.process().deadlock_summands(),
+                                        new_action_summands);
+  stochastic_specification lps_new_spec(lps_old_spec.data(),
+                                        new_actions,
+                                        lps_old_spec.global_variables(),
+                                        new_process,
+                                        lps_old_spec.initial_process());
+  return lps_new_spec;
+}
 
 } // namespace lps
 
