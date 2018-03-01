@@ -16,6 +16,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <utility>
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/application.h"
@@ -83,7 +84,7 @@ std::vector<std::string> add_single_quotes(const std::vector<std::string>& v)
 class term
 {
   public:
-    virtual std::string print(bool after = false) const = 0;
+    virtual std::string print(bool after) const = 0;
 };
 
 typedef std::shared_ptr<term> bdd_node;
@@ -101,7 +102,7 @@ std::vector<std::string> to_string(const BddNodeContainer& nodes, bool after = f
 
 class true_: public term
 {
-  std::string print(bool after = false) const override
+  std::string print(bool after) const override
   {
     return "True";
   }
@@ -138,7 +139,7 @@ class variable: public term
       m_name = name;
     }
 
-    std::string print(bool after = false) const override
+    std::string print(bool after) const override
     {
       return after ? m_name + '_' : m_name;
     }
@@ -165,7 +166,7 @@ class not_: public term
       return *m_operand;
     }
 
-    std::string print(bool after = false) const override
+    std::string print(bool after) const override
     {
       return "~" + m_operand->print(after);
     }
@@ -198,7 +199,7 @@ class and_: public term
       return *m_right;
     }
 
-    std::string print(bool after = false) const override
+    std::string print(bool after) const override
     {
       return "(" + m_left->print(after) + " & " + m_right->print(after) + ")";
     }
@@ -231,7 +232,7 @@ class or_: public term
       return *m_right;
     }
 
-    std::string print(bool after = false) const override
+    std::string print(bool after) const override
     {
       return "(" + m_left->print(after) + " | " + m_right->print(after) + ")";
     }
@@ -264,7 +265,7 @@ class eq: public term
       return *m_right;
     }
 
-    std::string print(bool after = false) const override
+    std::string print(bool after) const override
     {
       return "(" + m_left->print(after) + " <-> " + m_right->print(after) + ")";
     }
@@ -297,7 +298,7 @@ class imp: public term
       return *m_right;
     }
 
-    std::string print(bool after = false) const override
+    std::string print(bool after) const override
     {
       return "(" + m_left->print(after) + " -> " + m_right->print(after) + ")";
     }
@@ -354,7 +355,7 @@ bdd_node to_bdd(const data::data_expression& x)
 {
   if (data::is_variable(x) && data::is_bool(atermpp::down_cast<data::variable>(x).sort()))
   {
-    const data::variable& y = atermpp::down_cast<data::variable>(x);
+    const auto& y = atermpp::down_cast<data::variable>(x);
     return make_variable(y.name());
   }
   else if (data::is_true(x))
@@ -448,7 +449,7 @@ std::vector<bdd_node> id_variables(std::size_t n, bool unary_encoding)
 }
 
 inline
-std::vector<bdd_node> equation_identifiers(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node> id_variables, bool unary_encoding)
+std::vector<bdd_node> equation_identifiers(const std::vector<pbes_system::pbes_equation>& equations, const std::vector<bdd_node>& id_variables, bool unary_encoding)
 {
   std::vector<bdd_node> result;
   std::size_t n = equations.size();
@@ -517,7 +518,7 @@ std::string unchanged_variables(const std::vector<bdd_node>& variables)
   std::vector<std::string> result;
   for (const bdd_node& x: variables)
   {
-    result.push_back("(" + x->print() + " <-> " + x->print(true) + ")");
+    result.push_back("(" + x->print(false) + " <-> " + x->print(true) + ")");
   }
   return string_join(result.begin(), result.end(), " & ");
 }
@@ -528,21 +529,21 @@ struct bdd_equation
 {
   typedef std::pair<data::data_expression, pbes_system::propositional_variable_instantiation> element;
 
-  bool is_disjunctive;
+  bool is_disjunctive = false;
   std::vector<element> elements;
   bdd_node id; // the unique encoding of this equation
-  std::size_t rank;
+  std::size_t rank = 0;
 
   // left and right consists of a propositional variable instantiation and a data expression
   void add_element(const pbes_system::pbes_expression& left, const pbes_system::pbes_expression& right)
   {
     if (data::is_data_expression(left) && pbes_system::is_propositional_variable_instantiation(right))
     {
-      elements.push_back(element(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<pbes_system::propositional_variable_instantiation>(right)));
+      elements.emplace_back(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<pbes_system::propositional_variable_instantiation>(right));
     }
     else if (pbes_system::is_propositional_variable_instantiation(left) && data::is_data_expression(right))
     {
-      elements.push_back(element(atermpp::down_cast<data::data_expression>(right), atermpp::down_cast<pbes_system::propositional_variable_instantiation>(left)));
+      elements.emplace_back(atermpp::down_cast<data::data_expression>(right), atermpp::down_cast<pbes_system::propositional_variable_instantiation>(left));
     }
     else
     {
@@ -554,7 +555,7 @@ struct bdd_equation
   void add_element(const pbes_system::pbes_expression& x)
   {
     data::data_expression T = data::true_();
-    elements.push_back({ T, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x) });
+    elements.emplace_back(T, atermpp::down_cast<pbes_system::propositional_variable_instantiation>(x));
   }
 
   std::string parameter_updates(const element& e, const std::vector<bdd_node>& parameters) const
@@ -575,10 +576,10 @@ struct bdd_equation
     std::vector<std::string> result;
     for (const element& e: elements)
     {
-      std::string id0 = id->print();
+      std::string id0 = id->print(false);
       std::size_t i1 = eqn_index.index(e.second.name());
       std::string id1 = ids[i1]->print(true);
-      std::string f = to_bdd(e.first)->print();
+      std::string f = to_bdd(e.first)->print(false);
       std::string updates = parameter_updates(e, parameters);
       std::vector<std::string> v = { id0, id1, f, updates };
       result.push_back(string_join(add_parens(v), " & "));
@@ -766,9 +767,9 @@ std::string pbes2bdd(const pbes_system::pbes& p, bool unary_encoding = false)
   std::vector<bdd_equation> equations = split_pbes(p, eqn_index, ids);
 
   out << "--- bdd variables ---\n" << string_join(add_single_quotes(to_string(ivar + pvar)), ", ") << "\n\n";
-  out << "--- all nodes ---\n" << any(ids)->print() << "\n\n";
-  out << "--- even nodes ---\n" << any(even_ids(equations))->print() << "\n\n";
-  out << "--- odd nodes ---\n" << any(odd_ids(equations))->print() << "\n\n";
+  out << "--- all nodes ---\n" << any(ids)->print(false) << "\n\n";
+  out << "--- even nodes ---\n" << any(even_ids(equations))->print(false) << "\n\n";
+  out << "--- odd nodes ---\n" << any(odd_ids(equations))->print(false) << "\n\n";
 
   out << "--- priorities ---\n";
   std::map<std::size_t, std::vector<bdd_node>> priority_ids = priority_map(equations);
@@ -779,7 +780,7 @@ std::string pbes2bdd(const pbes_system::pbes& p, bool unary_encoding = false)
   for (std::size_t rank = min_rank; rank <= max_rank; rank++)
   {
     std::size_t r = max_rank - rank + (max_rank % 2);
-    out << "prio[" << r << "] = " << any(priority_ids[rank])->print() << "\n";
+    out << "prio[" << r << "] = " << any(priority_ids[rank])->print(false) << "\n";
   }
   out << "\n";
 

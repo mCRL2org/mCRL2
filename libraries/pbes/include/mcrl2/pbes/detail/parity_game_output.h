@@ -83,7 +83,7 @@ class parity_game_output: public parity_game_generator
     std::vector<std::string> apply(const Container& c, const Function& f) const
     {
       std::vector<std::string> result;
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+      for (auto i = c.begin(); i != c.end(); ++i)
       {
         result.push_back(f(*i));
       }
@@ -98,7 +98,7 @@ class parity_game_output: public parity_game_generator
     std::string join(const Container& c, const std::string& sep) const
     {
       std::ostringstream out;
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+      for (auto i = c.begin(); i != c.end(); ++i)
       {
         out << (i == c.begin() ? "" : sep) << *i;
       }
@@ -119,7 +119,7 @@ class parity_game_output: public parity_game_generator
     void print_set(const std::string& name, const std::set<std::size_t>& todo) const
     {
       mCRL2log(log::verbose) << name << " = {";
-      for (std::set<std::size_t>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+      for (auto i = todo.begin(); i != todo.end(); ++i)
       {
         mCRL2log(log::verbose) << (i == todo.begin() ? "" : ", ") << *i;
       }
@@ -127,7 +127,7 @@ class parity_game_output: public parity_game_generator
     }
 
   public:
-    parity_game_output(pbes& p, bool min_parity_game = true)
+    explicit parity_game_output(pbes& p, bool min_parity_game = true)
       : parity_game_generator(p, true, min_parity_game)
     {}
 

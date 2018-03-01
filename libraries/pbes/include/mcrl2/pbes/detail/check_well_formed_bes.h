@@ -28,8 +28,7 @@ struct is_well_formed_bes_traverser: public pbes_expression_traverser<is_well_fo
   using super::leave;
   using super::apply;
 
-  is_well_formed_bes_traverser()
-  {}
+  is_well_formed_bes_traverser() = default;
 
   void enter(const forall& x)
   {

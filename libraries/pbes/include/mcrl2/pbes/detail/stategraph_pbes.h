@@ -24,6 +24,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include <utility>
 
 namespace mcrl2 {
 
@@ -164,32 +165,32 @@ class stategraph_equation: public pbes_equation
     // Extracts all conjuncts d[i] == e from the pbes expression x, for some i in 0 ... d.size(), and with e a constant.
     void find_equality_conjuncts(const pbes_expression& x, const std::vector<data::variable>& d, std::map<data::variable, data::data_expression>& result) const
     {
-      std::vector<pbes_expression> v;
-      detail::stategraph_split_and(x, v);
-      for (const pbes_expression& expr: v)
+      std::vector<pbes_expression> conjuncts;
+      detail::stategraph_split_and(x, conjuncts);
+      for (const pbes_expression& expr: conjuncts)
       {
         if (data::is_data_expression(expr))
         {
-          const data::data_expression& v_i = atermpp::down_cast<const data::data_expression>(expr);
+          const auto& v_i = atermpp::down_cast<const data::data_expression>(expr);
           if (data::is_equal_to_application(v_i))
           {
             const data::data_expression& left = data::binary_left1(v_i);
             const data::data_expression& right = data::binary_right1(v_i);
             if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && data::is_constant(right))
             {
-              const data::variable& vleft = atermpp::down_cast<data::variable>(left);
+              const auto& vleft = atermpp::down_cast<data::variable>(left);
               result[vleft] = right;
             }
             else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && data::is_constant(left))
             {
-              const data::variable& vright = atermpp::down_cast<data::variable>(right);
+              const auto& vright = atermpp::down_cast<data::variable>(right);
               result[vright] = left;
             }
           }
           // handle conjuncts b and !b, with b a variable with sort Bool
           else if (data::is_variable(v_i) && data::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(v_i)) != d.end())
           {
-            const data::variable& v = atermpp::down_cast<data::variable>(v_i);
+            const auto& v = atermpp::down_cast<data::variable>(v_i);
             result[v] = data::true_();
           }
           else if (data::is_not(v_i))
@@ -197,7 +198,7 @@ class stategraph_equation: public pbes_equation
             data::data_expression narg(data::sort_bool::arg(v_i));
             if (data::is_variable(narg) && data::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(narg)) != d.end())
             {
-              const data::variable& v = atermpp::down_cast<data::variable>(narg);
+              const auto& v = atermpp::down_cast<data::variable>(narg);
               result[v] = data::false_();
             }
           }
@@ -335,7 +336,7 @@ class stategraph_equation: public pbes_equation
       const std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >& guards = f.expression_stack.back().guards;
       for (const auto& guard: guards)
       {
-        m_predvars.push_back(predicate_variable(guard.first, guard.second));
+        m_predvars.emplace_back(guard.first, guard.second);
       }
       m_condition = f.expression_stack.back().condition;
       data::variable_list params = variable().parameters();
@@ -499,18 +500,17 @@ class stategraph_pbes
     propositional_variable_instantiation m_initial_state;
 
   public:
-    stategraph_pbes()
-    {}
+    stategraph_pbes() = default;
 
     /// \brief Constructor
     /// \pre The pbes p must be in STATEGRAPH format
-    stategraph_pbes(const pbes& p)
+    explicit stategraph_pbes(const pbes& p)
       : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
       const std::vector<pbes_equation>& equations = p.equations();
       for (const pbes_equation& equation: equations)
       {
-        m_equations.push_back(stategraph_equation(equation, m_data));
+        m_equations.emplace_back(equation, m_data);
       }
     }
 

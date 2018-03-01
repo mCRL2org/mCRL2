@@ -131,7 +131,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     std::vector<std::string> v;
     for (const process::action& ai: a.actions())
     {
-      v.push_back(std::string(ai.label().name()));
+      v.emplace_back(ai.label().name());
     }
     return utilities::string_join(v, "_");
   }

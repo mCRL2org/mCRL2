@@ -261,7 +261,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   {
     edge_condition ec(false_(), false_());
     std::vector<true_false_pair > c;
-    c.push_back(true_false_pair(false_(), false_()));
+    c.emplace_back(false_(), false_());
     ec.condition.insert(std::make_pair(x, c));
     push(ec);
   }
@@ -362,8 +362,7 @@ class pbes_constelm_algorithm
 
       public:
         /// \brief Constructor
-        edge()
-        {}
+        edge() = default;
 
         /// \brief Constructor
         /// \param src A propositional variable declaration
@@ -414,8 +413,7 @@ class pbes_constelm_algorithm
 
       public:
         /// \brief Constructor
-        vertex()
-        {}
+        vertex() = default;
 
         /// \brief Constructor
         /// \param x A propositional variable declaration
@@ -492,7 +490,7 @@ class pbes_constelm_algorithm
         {
           std::ostringstream out;
           out << m_variable << "  assertions = ";
-          for (typename constraint_map::const_iterator i = m_constraints.begin(); i != m_constraints.end(); ++i)
+          for (auto i = m_constraints.begin(); i != m_constraints.end(); ++i)
           {
             out << "{" << i->first << " := " << i->second << "} ";
           }
@@ -590,7 +588,7 @@ class pbes_constelm_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
         out << i->second.to_string() << std::endl;
       }
@@ -603,7 +601,7 @@ class pbes_constelm_algorithm
       std::ostringstream out;
       for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
       {
-        for (typename std::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+        for (auto j = i->second.begin(); j != i->second.end(); ++j)
         {
           out << j->to_string() << std::endl;
         }
@@ -615,7 +613,7 @@ class pbes_constelm_algorithm
     {
       std::ostringstream out;
       out << "\n<todo list> [";
-      for (typename std::deque<propositional_variable>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+      for (auto i = todo.begin(); i != todo.end(); ++i)
       {
         if (i != todo.begin())
         {

@@ -128,7 +128,7 @@ bool is_pfnf_outer_and(const pbes_expression& x)
   std::vector<pbes_expression> v;
   split_and(x, v);
   std::size_t simple_count = 0;
-  for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     if (is_pfnf_inner_and(x))
     {

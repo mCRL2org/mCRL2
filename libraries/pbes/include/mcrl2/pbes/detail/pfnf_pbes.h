@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/logger.h"
 #include <cassert>
 #include <iostream>
+#include <utility>
 
 namespace mcrl2 {
 
@@ -170,12 +171,12 @@ class pfnf_equation
       {
         if (is_forall(y))
         {
-          m_quantifiers.push_back(pfnf_quantifier(true, forall(y).variables()));
+          m_quantifiers.emplace_back(true, forall(y).variables());
           y = forall(y).body();
         }
         else if (is_exists(y))
         {
-          m_quantifiers.push_back(pfnf_quantifier(false, exists(y).variables()));
+          m_quantifiers.emplace_back(false, exists(y).variables());
           y = exists(y).body();
         }
       }
@@ -183,7 +184,7 @@ class pfnf_equation
       split_pfnf_expression(y, m_h, g);
       for (const pbes_expression& expr: g)
       {
-        m_implications.push_back(pfnf_implication(expr));
+        m_implications.emplace_back(expr);
       }
     }
 
@@ -235,7 +236,7 @@ class pfnf_equation
       phi = and_(m_h, phi);
 
       // apply quantifiers
-      for (std::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      for (auto i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
       {
         phi = i->apply(phi);
       }
@@ -249,7 +250,7 @@ class pfnf_equation
       phi = and_(m_h, phi);
 
       // apply quantifiers
-      for (std::vector<pfnf_quantifier>::const_reverse_iterator i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      for (auto i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
       {
         phi = i->apply(phi);
       }
@@ -275,12 +276,11 @@ class pfnf_pbes
     pbes_expression m_initial_state;
 
   public:
-    pfnf_pbes()
-    {}
+    pfnf_pbes() = default;
 
     /// \brief Constructor
     /// \pre The pbes p must be in PFNF format
-    pfnf_pbes(const pbes& p)
+    explicit pfnf_pbes(const pbes& p)
       : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
       pbes q = p;
@@ -293,7 +293,7 @@ class pfnf_pbes
       }
       for (const pbes_equation& equation: q.equations())
       {
-        m_equations.push_back(pfnf_equation(equation));
+        m_equations.emplace_back(equation);
       }
     }
 

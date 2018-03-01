@@ -112,7 +112,7 @@ class lps2pbes_algorithm
       }
 
       // compute the initial state
-      assert(equations.size() > 0);
+      assert(!equations.empty());
       pbes_equation e1 = equations.front();
       core::identifier_string Xe(e1.variable().name());
       assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));

@@ -18,6 +18,7 @@
 #include "mcrl2/utilities/detail/container_utility.h"
 #include <algorithm>
 #include <sstream>
+#include <utility>
 
 namespace mcrl2 {
 
@@ -366,8 +367,7 @@ struct control_flow_graph
   }
 
   /// \brief Default constructor
-  control_flow_graph()
-  {}
+  control_flow_graph() = default;
 
   /// \brief Copy constructor N.B. The implementation is rather inefficient!
   control_flow_graph(const control_flow_graph<Vertex>& other)
@@ -531,13 +531,10 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
   using super::insert_vertex;
 
   /// \brief Default constructor
-  local_control_flow_graph()
-  {}
+  local_control_flow_graph() = default;
 
   /// \brief Copy constructor N.B. The implementation is rather inefficient!
-  local_control_flow_graph(const local_control_flow_graph& other)
-    : super(other)
-  {}
+  local_control_flow_graph(const local_control_flow_graph& other) = default;
 
   // Inserts an edge between the vertex u and the vertex v = (Y, k1, e1).
   void insert_edge(std::set<const local_control_flow_graph_vertex*>& todo,
@@ -761,13 +758,10 @@ struct global_control_flow_graph: public control_flow_graph<global_control_flow_
   typedef global_control_flow_graph_vertex vertex_type;
 
   /// \brief Default constructor
-  global_control_flow_graph()
-  {}
+  global_control_flow_graph() = default;
 
   /// \brief Copy constructor N.B. The implementation is rather inefficient!
-  global_control_flow_graph(const global_control_flow_graph& other)
-    : super(other)
-  {}
+  global_control_flow_graph(const global_control_flow_graph& other) = default;
 
   std::string print_marking() const
   {

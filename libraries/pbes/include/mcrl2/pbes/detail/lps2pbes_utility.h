@@ -79,12 +79,12 @@ const core::identifier_string& mu_name(const state_formulas::state_formula& f)
 {
   if (state_formulas::is_mu(f))
   {
-    const state_formulas::mu& g = atermpp::down_cast<state_formulas::mu>(f);
+    const auto& g = atermpp::down_cast<state_formulas::mu>(f);
     return g.name();
   }
   else
   {
-    const state_formulas::nu& g = atermpp::down_cast<state_formulas::nu>(f);
+    const auto& g = atermpp::down_cast<state_formulas::nu>(f);
     return g.name();
   }
 }
@@ -98,12 +98,12 @@ data::variable_list mu_variables(const state_formulas::state_formula& f)
   assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
   if (state_formulas::is_mu(f))
   {
-    const state_formulas::mu& g = atermpp::down_cast<state_formulas::mu>(f);
+    const auto& g = atermpp::down_cast<state_formulas::mu>(f);
     return lhs_variables(g.assignments());
   }
   else
   {
-    const state_formulas::nu& g = atermpp::down_cast<state_formulas::nu>(f);
+    const auto& g = atermpp::down_cast<state_formulas::nu>(f);
     return lhs_variables(g.assignments());
   }
 }
@@ -117,12 +117,12 @@ data::data_expression_list mu_expressions(const state_formulas::state_formula& f
   assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
   if (state_formulas::is_mu(f))
   {
-    const state_formulas::mu& g = atermpp::down_cast<state_formulas::mu>(f);
+    const auto& g = atermpp::down_cast<state_formulas::mu>(f);
     return rhs_expressions(g.assignments());
   }
   else
   {
-    const state_formulas::nu& g = atermpp::down_cast<state_formulas::nu>(f);
+    const auto& g = atermpp::down_cast<state_formulas::nu>(f);
     return rhs_expressions(g.assignments());
   }
 }

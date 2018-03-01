@@ -182,7 +182,7 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
 
     /// \brief Constructor
     /// Initializes the pbes_property_map with a linear process specification
-    pbes_property_map(const pbes& p)
+    explicit pbes_property_map(const pbes& p)
     {
       std::pair<std::size_t, std::size_t>  equation_counts              = compute_equation_counts(p);
       std::size_t block_nesting_depth                                    = compute_block_nesting_depth(p);

@@ -43,7 +43,7 @@ std::set<propositional_variable> reachable_variables(const pbes& p)
 
   // create a mapping from variable names to iterators
   std::map<core::identifier_string, iterator> index;
-  for (iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     // index[i->variable().name()] = i;  <-- This leads to a attempt to copy-
     //                                       construct an iterator from a singular iterator when the toolset

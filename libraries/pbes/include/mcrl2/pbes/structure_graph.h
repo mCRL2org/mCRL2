@@ -18,6 +18,7 @@
 #include <sstream>
 #include <unordered_set>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/undefined.h"
@@ -128,8 +129,7 @@ class structure_graph
     }
 
   public:
-    structure_graph()
-    {}
+    structure_graph() = default;
 
     // don't allow copying, to prevent pointers to vertices being invalidated
     structure_graph(const structure_graph&) = delete;
@@ -353,6 +353,7 @@ std::string print_decoration(structure_graph::decoration_type d)
     case structure_graph::d_false       : return "F";
     case structure_graph::d_none        : return "-";
   }
+  throw mcrl2::runtime_error("unknown decoration");
 }
 
 inline

@@ -49,10 +49,10 @@ class bisimulation_algorithm
     name_map summand_names;
 
     /// \brief Store the address of the model.
-    const lps::linear_process* model_ptr;
+    const lps::linear_process* model_ptr = nullptr;
 
     /// \brief Store the address of the specification.
-    const lps::linear_process* spec_ptr;
+    const lps::linear_process* spec_ptr = nullptr;
 
     /// \brief Generates a name for an action_list.
     /// \param l A sequence of actions
@@ -65,7 +65,7 @@ class bisimulation_algorithm
         out << (i != l.begin() ? "-" : "") << std::string(i->label().name());
       }
       std::string result = out.str();
-      if (result == "")
+      if (result.empty())
       {
         result = "tau";
       }
@@ -78,7 +78,7 @@ class bisimulation_algorithm
     std::string summand_name(my_iterator i) const
     {
       const lps::action_summand* t = &(*i);
-      name_map::const_iterator j = summand_names.find(t);
+      auto j = summand_names.find(t);
       assert(j != summand_names.end());
       return j->second;
     }
@@ -480,8 +480,8 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
 
 
       // E1
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m))));
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
+      equations.emplace_back(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m)));
+      equations.emplace_back(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1));
 
       // E2
       for (auto i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
@@ -577,8 +577,8 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
 
 
       // E
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m))));
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
+      equations.emplace_back(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m)));
+      equations.emplace_back(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1));
 
       return build_pbes(equations, model, spec1);
     }
@@ -719,7 +719,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         std::vector<data::variable> tmp;
         for (const data::variable& v: e1)
         {
-          tmp.push_back(data::variable(m_generator(std::string(v.name())), v.sort()));
+          tmp.emplace_back(m_generator(std::string(v.name())), v.sort());
         }
         data::variable_list e11(tmp.begin(), tmp.end());
 
@@ -758,8 +758,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       std::vector<pbes_equation> equations;
 
       // E1
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m))));
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
+      equations.emplace_back(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m)));
+      equations.emplace_back(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1));
 
       // E2
       for (auto i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
@@ -819,8 +819,8 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
 
 
       // E1
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m))));
-      equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
+      equations.emplace_back(nu(), propositional_variable(X(m, s), d + d1), optimized_and(match(m, s), match(s, m)));
+      equations.emplace_back(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1));
 
       // E2
       for (auto i = m.action_summands().begin(); i != m.action_summands().end(); ++i)

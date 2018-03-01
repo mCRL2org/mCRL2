@@ -95,7 +95,7 @@ class parity_game_generator
       mCRL2log(log::debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
-      std::map<pbes_expression, std::size_t>::iterator i = m_pbes_expression_index.find(t);
+      auto i = m_pbes_expression_index.find(t);
       if (i != m_pbes_expression_index.end())
       {
         result = i->second;
@@ -108,7 +108,7 @@ class parity_game_generator
         {
           priority = m_priorities[atermpp::down_cast<propositional_variable_instantiation>(t).name()];
         }
-        m_bes.push_back(std::make_pair(t, priority));
+        m_bes.emplace_back(t, priority);
         detail::check_bes_equation_limit(m_bes.size());
         mCRL2log(log::status) << print_equation_count(m_bes.size());
         result = p;
@@ -137,7 +137,7 @@ class parity_game_generator
       // expand the right hand side if needed
       if (is_propositional_variable_instantiation(psi))
       {
-        const propositional_variable_instantiation& psi1 = atermpp::down_cast<propositional_variable_instantiation>(psi);
+        const auto& psi1 = atermpp::down_cast<propositional_variable_instantiation>(psi);
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[psi1.name()];
         substitution_function sigma;
         make_substitution(pbes_eqn.variable().parameters(), psi1.parameters(), sigma);
@@ -166,7 +166,7 @@ class parity_game_generator
 
       fixpoint_symbol sigma = fixpoint_symbol::nu();
       std::size_t priority = 0;
-      for (typename Container::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      for (auto i = equations.begin(); i != equations.end(); ++i)
       {
         if (pbes_equation(*i).symbol() == sigma)
         {
@@ -213,7 +213,7 @@ class parity_game_generator
       const std::size_t priority = eqn.second;
       out << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
       std::string op = (get_operation(index) == PGAME_AND ? " && " : " || ");
-      for (std::set<std::size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
+      for (auto i = rhs.begin(); i != rhs.end(); ++i)
       {
         out << (i == rhs.begin() ? "" : op) << "Y" << *i;
       }
@@ -284,7 +284,7 @@ class parity_game_generator
       pbes_system::algorithms::instantiate_global_variables(p);
     }
 
-    virtual ~parity_game_generator() {}
+    virtual ~parity_game_generator() = default;
 
     /// \brief Returns the (rewritten) initial state.
     /// \return the initial state rewritten by R
@@ -427,7 +427,7 @@ class parity_game_generator
       {
         if (m_true_false_dependencies)
         {
-          std::map<pbes_expression, std::size_t>::iterator i = m_pbes_expression_index.find(true_());
+          auto i = m_pbes_expression_index.find(true_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }
@@ -436,7 +436,7 @@ class parity_game_generator
       {
         if (m_true_false_dependencies)
         {
-          std::map<pbes_expression, std::size_t>::iterator i = m_pbes_expression_index.find(false_());
+          auto i = m_pbes_expression_index.find(false_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }

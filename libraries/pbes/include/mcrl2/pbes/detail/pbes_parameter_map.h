@@ -63,7 +63,7 @@ inline
 std::vector<data::variable> find_matching_parameters(const pbes& p, const std::string& name, const std::set<std::string>& declarations)
 {
   std::set<data::variable> result;
-  for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
   {
     propositional_variable X = i->variable();
     if (name == "*" || (name == std::string(X.name())))
@@ -126,7 +126,7 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
   }
 
   // expand the name "*"
-  name_map::iterator q = parameter_declarations.find("*");
+  auto q = parameter_declarations.find("*");
   if (q != parameter_declarations.end())
   {
     std::set<std::string> v = q->second;

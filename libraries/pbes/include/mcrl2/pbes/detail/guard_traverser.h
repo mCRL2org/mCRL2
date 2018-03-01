@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 
+#include <utility>
+
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_functions.h"
@@ -188,7 +190,7 @@ struct guard_expression
     }
   }
 
-  guard_expression(const pbes_expression& condition_ = pbes_system::true_())
+  explicit guard_expression(const pbes_expression& condition_ = pbes_system::true_())
     : condition(condition_)
   {}
 
@@ -258,7 +260,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   simplify_data_rewriter<data::rewriter> R;
   std::vector<guard_expression> expression_stack;
 
-  guard_traverser(const data::rewriter& r)
+  explicit guard_traverser(const data::rewriter& r)
     : R(r)
   {}
 
@@ -294,7 +296,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
     guard_expression node;
-    node.guards.push_back(std::make_pair(x, pbes_system::true_()));
+    node.guards.emplace_back(x, pbes_system::true_());
     push(node);
     assert(top().check_guards(x, R));
   }

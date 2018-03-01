@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 namespace mcrl2
 {
@@ -127,7 +128,7 @@ class pbes_abstract_algorithm
     {
       for (pbes_equation& eqn: p.equations())
       {
-        detail::pbes_parameter_map::const_iterator j = parameter_map.find(eqn.variable().name());
+        auto j = parameter_map.find(eqn.variable().name());
         if (j != parameter_map.end())
         {
           detail::pbes_abstract_builder builder(j->second, value_true);

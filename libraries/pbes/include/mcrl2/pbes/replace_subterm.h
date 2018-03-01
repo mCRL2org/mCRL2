@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_REPLACE_SUBTERM_H
 #define MCRL2_PBES_REPLACE_SUBTERM_H
 
+#include <utility>
+
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/position_count_traverser.h"
 

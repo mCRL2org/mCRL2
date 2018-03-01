@@ -20,10 +20,10 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/pbes/structure_graph.h"
-
 #include "mcrl2/lps/print.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {
 
@@ -118,7 +118,7 @@ structure_graph::vertex_set compute_attractor_set_conjunctive(structure_graph::v
             break;
           }
         }
-        if (u->strategy == 0)
+        if (u->strategy == nullptr)
         {
           mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
         }
@@ -178,7 +178,7 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
             break;
           }
         }
-        if (u->strategy == 0)
+        if (u->strategy == nullptr)
         {
           mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
         }
@@ -530,11 +530,11 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
       u->successors.clear();
 
       // add the edge (u, u.strategy)
-      if (u->strategy == 0)
+      if (u->strategy == nullptr)
       {
         std::cout << "no strategy for node " << *u << std::endl;
       }
-      assert(u->strategy != 0);
+      assert(u->strategy != nullptr);
       u->successors.push_back(u->strategy);
       u->strategy->predecessors.push_back(u);
     }
@@ -569,11 +569,11 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
       u->successors.clear();
 
       // add the edge (u, u.strategy)
-      if (u->strategy == 0)
+      if (u->strategy == nullptr)
       {
         std::cout << "no strategy for node " << *u << std::endl;
       }
-      assert(u->strategy != 0);
+      assert(u->strategy != nullptr);
       u->successors.push_back(u->strategy);
       u->strategy->predecessors.push_back(u);
     }
@@ -672,12 +672,12 @@ lps::specification create_counter_example_lps(const structure_graph::vertex_set&
 
   for (const vertex* v: V)
   {
-    const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
+    const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
     std::string Zname = Z.name();
-    std::smatch m;
-    if (std::regex_match(Zname, m, re))
+    std::smatch match;
+    if (std::regex_match(Zname, match, re))
     {
-      std::size_t summand_index = std::stoul(m[2]);
+      std::size_t summand_index = std::stoul(match[2]);
       lps::action_summand summand = lpsspec.process().action_summands()[summand_index];
 
       std::size_t equation_index = p_index.index(Z.name());
@@ -695,7 +695,7 @@ lps::specification create_counter_example_lps(const structure_graph::vertex_set&
       for (std::size_t i = 0; i < n; i++)
       {
         condition.push_back(data::equal_to(d[i], e[i]));
-        next_state_assignments.push_back(data::assignment(d[i], e[n + m + i]));
+        next_state_assignments.emplace_back(d[i], e[n + m + i]);
       }
 
       process::action_vector actions;
@@ -732,7 +732,7 @@ structure_graph::vertex_set filter_counter_example_nodes(const structure_graph::
     {
       continue;
     }
-    const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
+    const auto &Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
     std::string Zname = Z.name();
     std::smatch m;
     if (std::regex_match(Zname, m, re))

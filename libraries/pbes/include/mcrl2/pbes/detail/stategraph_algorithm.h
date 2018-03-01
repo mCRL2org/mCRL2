@@ -623,8 +623,7 @@ class stategraph_algorithm
       // check (2)
       for (const stategraph_equation& equation: m_pbes.equations())
       {
-        auto const& predvars = equation.predicate_variables();
-        for (const auto & predvar : predvars)
+        for (const auto& predvar: equation.predicate_variables())
         {
           if (predvar.name() == X && !is_undefined(predvar.target(), m))
           {
@@ -662,7 +661,7 @@ class stategraph_algorithm
 
     const std::vector<bool>& is_GCFP(const core::identifier_string& X) const
     {
-      std::map<core::identifier_string, std::vector<bool> >::const_iterator i = m_is_GCFP.find(X);
+      auto i = m_is_GCFP.find(X);
       assert (i != m_is_GCFP.end());
       return i->second;
     }

@@ -132,7 +132,7 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
     std::vector<std::string> v;
     for (const process::action& ai: a.actions())
     {
-      v.push_back(std::string(ai.label().name()));
+      v.emplace_back(ai.label().name());
     }
     return utilities::string_join(v, "_");
   }
@@ -308,7 +308,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     const auto& lts1 = parameters.lts1;
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
+    const auto& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
     const state_formulas::state_formula& phi = x.operand();
 
     // traverse all transitions s --a--> t
@@ -330,7 +330,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     const auto& lts1 = parameters.lts1;
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
-    const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
+    const auto& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
     const state_formulas::state_formula& phi = x.operand();
 
     // traverse all transitions s --a--> t

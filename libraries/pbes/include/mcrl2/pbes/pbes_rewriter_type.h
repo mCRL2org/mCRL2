@@ -147,7 +147,7 @@ std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
   {
     t = parse_pbes_rewriter_type(s);
   }
-  catch (mcrl2::runtime_error)
+  catch (const mcrl2::runtime_error&)
   {
     is.setstate(std::ios_base::failbit);
   }

@@ -52,7 +52,7 @@ struct pbesinst_finite_rename
   {
     std::ostringstream out;
     out << std::string(name);
-    for (typename ExpressionContainer::const_iterator i = parameters.begin(); i != parameters.end(); ++i)
+    for (auto i = parameters.begin(); i != parameters.end(); ++i)
     {
       out << "@" << data::pp(*i);
     }
@@ -112,12 +112,12 @@ void split_parameters(const PropositionalVariable& X,
                      )
 {
   typedef typename PropositionalVariable::parameter_type parameter_type;
-  pbesinst_index_map::const_iterator pi = index_map.find(X.name());
+  auto pi = index_map.find(X.name());
   assert(pi != index_map.end());
   const std::vector<std::size_t>& v = pi->second;
   typename atermpp::term_list<parameter_type>::const_iterator i = X.parameters().begin();
   std::size_t index = 0;
-  std::vector<std::size_t>::const_iterator j = v.begin();
+  auto j = v.begin();
   for (; i != X.parameters().end(); ++i, ++index)
   {
     if (j != v.end() && index == *j)
@@ -216,7 +216,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     const core::identifier_string& Xi = x.name();
     // x = Xi(d,e)
 
-    pbesinst_variable_map::const_iterator vi = m_variable_map.find(Xi);
+    auto vi = m_variable_map.find(Xi);
     std::vector<data::variable> di;
     if (vi != m_variable_map.end())
     {
@@ -286,7 +286,7 @@ class pbesinst_finite_algorithm
     data::rewriter::strategy m_rewriter_strategy;
 
     /// \brief The number of generated equations.
-    int m_equation_count;
+    int m_equation_count = 0;
 
     /// \brief Identifier generator for the enumerator
     data::enumerator_identifier_generator m_id_generator;
@@ -304,13 +304,13 @@ class pbesinst_finite_algorithm
                            const pbesinst_variable_map& variable_map,
                            pbesinst_index_map& index_map)
     {
-      for (typename EquationContainer::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      for (auto i = equations.begin(); i != equations.end(); ++i)
       {
         core::identifier_string name = i->variable().name();
         data::variable_list parameters = i->variable().parameters();
 
         std::vector<std::size_t> v;
-        pbesinst_variable_map::const_iterator j = variable_map.find(name);
+        auto j = variable_map.find(name);
         if (j != variable_map.end())
         {
           std::size_t index = 0;

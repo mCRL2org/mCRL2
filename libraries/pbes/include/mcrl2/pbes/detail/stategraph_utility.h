@@ -32,7 +32,7 @@ std::string print_set(const std::set<std::size_t>& v)
 {
   std::ostringstream out;
   out << "{";
-  for (std::set<std::size_t>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     if (i != v.begin())
     {
@@ -61,7 +61,7 @@ std::string print_pbes_expressions(const std::set<pbes_expression>& v)
 {
   std::ostringstream out;
   out << "{";
-  for (std::set<pbes_expression>::const_iterator j = v.begin(); j != v.end(); ++j)
+  for (auto j = v.begin(); j != v.end(); ++j)
   {
     if (j != v.begin())
     {

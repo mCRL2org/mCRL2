@@ -22,6 +22,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 
 namespace mcrl2
 {
@@ -95,7 +96,7 @@ class pbes
       m_equations.clear();
       for (const atermpp::aterm& j: eqn)
       {
-        m_equations.push_back(pbes_equation(j));
+        m_equations.emplace_back(j);
       }
 
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
@@ -137,8 +138,7 @@ class pbes
 
   public:
     /// \brief Constructor.
-    pbes()
-    {}
+    pbes() = default;
 
     /// \brief Constructor.
     /// \param t An aterm representing a pbes_specification.

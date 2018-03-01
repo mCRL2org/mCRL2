@@ -127,7 +127,7 @@ void pbesrewr(const std::string& input_filename,
     default:
     {
       // Just ignore.
-      assert(0);  // The PBES rewriter cannot be activated through
+      assert(false);  // The PBES rewriter cannot be activated through
       // the commandline. So, we cannot end up here.
       break;
     }

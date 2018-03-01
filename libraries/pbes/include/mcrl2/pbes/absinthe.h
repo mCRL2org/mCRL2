@@ -90,7 +90,7 @@ namespace detail {
       const data::sort_expression& s = a.reference();
       if (data::is_structured_sort(s))
       {
-        const data::structured_sort& ss = atermpp::down_cast<data::structured_sort>(s);
+        const auto& ss = atermpp::down_cast<data::structured_sort>(s);
         for (const data::function_symbol& g: ss.constructor_functions())
         {
           if (f.name() == g.name())
@@ -123,7 +123,7 @@ namespace detail {
     }
     else if (data::is_function_sort(s))
     {
-      const data::function_sort& fs = atermpp::down_cast<data::function_sort>(s);
+      const auto& fs = atermpp::down_cast<data::function_sort>(s);
       return fs.codomain();
     }
     else if (data::is_container_sort(s))
@@ -169,7 +169,7 @@ struct absinthe_algorithm
     data::sort_expression apply(const data::sort_expression& x)
     {
       data::sort_expression result;
-      sort_expression_substitution_map::const_iterator i = sigmaS.find(x);
+      auto i = sigmaS.find(x);
       if (i == sigmaS.end())
       {
         result = super::apply(x);
@@ -185,7 +185,7 @@ struct absinthe_algorithm
 
     data::data_expression apply(const data::function_symbol& x)
     {
-      function_symbol_substitution_map::const_iterator i = sigmaF.find(x);
+      auto i = sigmaF.find(x);
       if (i != sigmaF.end())
       {
         //pbes_system::detail::absinthe_check_expression(i->second);
@@ -247,7 +247,7 @@ struct absinthe_algorithm
       else
       {
         // check if it is a "ground term", i.e. it does not contain any variables
-        abstraction_map::const_iterator i = sigmaH.find(x.sort());
+        auto i = sigmaH.find(x.sort());
         if (i != sigmaH.end() && data::find_all_variables(x).empty())
         {
           data::data_expression_list args = { x };
@@ -296,7 +296,7 @@ struct absinthe_algorithm
       std::size_t i = 0;
       for (auto j = x.begin(); j != x.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + utilities::number2string(i), sigma(j->sort())));
+        result.emplace_back(hint + utilities::number2string(i), sigma(j->sort()));
       }
       return data::variable_list(result.begin(), result.end());
     }
@@ -402,7 +402,7 @@ struct absinthe_algorithm
       pbes_expression kappa = apply(x.initial_state());
       core::identifier_string name("GeneratedZ");
       propositional_variable Z(name, data::variable_list());
-      x.equations().push_back(pbes_equation(fixpoint_symbol::mu(), Z, kappa));
+      x.equations().emplace_back(fixpoint_symbol::mu(), Z, kappa);
       x.initial_state() = propositional_variable_instantiation(name, data::data_expression_list());
     }
   };
@@ -469,7 +469,7 @@ struct absinthe_algorithm
     data::data_specification dataspec = data::parse_data_specification(text);
     for (const data::function_symbol& i: dataspec.user_defined_mappings())
     {
-      const data::function_sort& f = atermpp::down_cast<data::function_sort>(i.sort());
+      const auto& f = atermpp::down_cast<data::function_sort>(i.sort());
       if (f.domain().size() != 1)
       {
         throw mcrl2::runtime_error("cannot abstract the function " + data::pp(i) + " since the arity of the domain is not equal to one!");
@@ -607,7 +607,7 @@ struct absinthe_algorithm
       }
       else if (is_function_sort(s))
       {
-        const data::function_sort& fs = atermpp::down_cast<data::function_sort>(s);
+        const auto& fs = atermpp::down_cast<data::function_sort>(s);
         const sort_expression_list& sl = fs.domain();
         return function_symbol(name, function_sort(sort_expression_list(sl.begin(),sl.end(), make_set()), fs.codomain()));
       }
@@ -622,8 +622,7 @@ struct absinthe_algorithm
   // function that generates an equation from a function symbol and it's corresponding 'generated' version
   struct lift_equation_1_2
   {
-    lift_equation_1_2()
-    {}
+    lift_equation_1_2() = default;
 
     std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
@@ -631,7 +630,7 @@ struct absinthe_algorithm
       std::size_t i = 0;
       for (auto j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + utilities::number2string(i), sigma(*j)));
+        result.emplace_back(hint + utilities::number2string(i), sigma(*j));
       }
       return result;
     }
@@ -653,7 +652,7 @@ struct absinthe_algorithm
         lhs = f2;
         data::function_symbol f1_sigma(f1.name(), sigma(f1.sort()));
 
-        abstraction_map::const_iterator i = sigmaH.find(f1.sort());
+        auto i = sigmaH.find(f1.sort());
         if (i == sigmaH.end())
         {
           rhs = f1_sigma;
@@ -687,7 +686,7 @@ struct absinthe_algorithm
 
         data::function_symbol f1_sigma(f1.name(), sigma(f1.sort()));
 
-        abstraction_map::const_iterator i = sigmaH.find(detail::target_sort(f1.sort()));
+        auto i = sigmaH.find(detail::target_sort(f1.sort()));
         if (i == sigmaH.end())
         {
           data::application f1_sigma_x(f1_sigma, data::data_expression_list(x.begin(), x.end()));
@@ -730,8 +729,7 @@ struct absinthe_algorithm
   // function that generates an equation from a function symbol and it's corresponding lifted version
   struct lift_equation_2_3
   {
-    lift_equation_2_3()
-    {}
+    lift_equation_2_3() = default;
 
     std::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
@@ -739,7 +737,7 @@ struct absinthe_algorithm
       std::size_t i = 0;
       for (auto j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + utilities::number2string(i), sigma(*j)));
+        result.emplace_back(hint + utilities::number2string(i), sigma(*j));
       }
       return result;
     }
@@ -750,8 +748,8 @@ struct absinthe_algorithm
     data::data_expression enumerate_domain(const std::vector<data::variable>& x, const std::vector<data::variable>& X) const
     {
       std::vector<data::data_expression> a;
-      std::vector<data::variable>::const_iterator i = x.begin();
-      std::vector<data::variable>::const_iterator j = X.begin();
+      auto i = x.begin();
+      auto j = X.begin();
       for (; i != x.end(); ++i, ++j)
       {
         a.push_back(data::detail::create_set_in(*i, *j));
@@ -813,7 +811,7 @@ struct absinthe_algorithm
   std::string print_mapping(const Map& m)
   {
     std::ostringstream out;
-    for (typename Map::const_iterator i = m.begin(); i != m.end(); ++i)
+    for (auto i = m.begin(); i != m.end(); ++i)
     {
       out << i->first << " -> " << i->second << std::endl;
     }
@@ -969,14 +967,7 @@ struct absinthe_algorithm
     std::string pbes_sorts_text;
 
     std::string text = abstraction_text;
-    std::vector<std::string> all_keywords;
-    all_keywords.push_back("sort");
-    all_keywords.push_back("var");
-    all_keywords.push_back("eqn");
-    all_keywords.push_back("map");
-    all_keywords.push_back("cons");
-    all_keywords.push_back("absfunc");
-    all_keywords.push_back("absmap");
+    std::vector<std::string> all_keywords = { "sort", "var", "eqn", "map", "cons", "absfunc", "absmap" };
     std::pair<std::string, std::string> q;
 
     q = utilities::detail::separate_keyword_section(text, "sort", all_keywords);

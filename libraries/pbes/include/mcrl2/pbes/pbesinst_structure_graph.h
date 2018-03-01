@@ -110,7 +110,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
         m_initial_state_assigned(false)
     {}
 
-    void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
+    void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
     {
       if (!m_initial_state_assigned)
       {

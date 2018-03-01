@@ -193,17 +193,17 @@ class symbolic_exploration_algorithm
       }
       else if (is_or(x))
       {
-        const pbes_system::or_& y = atermpp::down_cast<pbes_system::or_>(x);
+        const auto& y = atermpp::down_cast<pbes_system::or_>(x);
         result = or_(expr_or(y.left()), expr_or(y.right()));
       }
       else if (is_forall(x))
       {
-        const pbes_system::forall& y = atermpp::down_cast<pbes_system::forall>(x);
+        const auto& y = atermpp::down_cast<pbes_system::forall>(x);
         result = forall(y.variables(), expr_or(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
-        const pbes_system::exists& y = atermpp::down_cast<pbes_system::exists>(x);
+        const auto& y = atermpp::down_cast<pbes_system::exists>(x);
         result = exists(y.variables(), expr_or(y.body(), y.variables()));
       }
       else
@@ -229,17 +229,17 @@ class symbolic_exploration_algorithm
       }
       else if (is_and(x))
       {
-        const pbes_system::and_& y = atermpp::down_cast<pbes_system::and_>(x);
+        const auto& y = atermpp::down_cast<pbes_system::and_>(x);
         result = and_(expr_and(y.left()), expr_and(y.right()));
       }
       else if (is_forall(x))
       {
-        const pbes_system::forall& y = atermpp::down_cast<pbes_system::forall>(x);
+        const auto& y = atermpp::down_cast<pbes_system::forall>(x);
         result = forall(y.variables(), expr_and(y.body(), y.variables()));
       }
       else if (is_exists(x))
       {
-        const pbes_system::exists& y = atermpp::down_cast<pbes_system::exists>(x);
+        const auto& y = atermpp::down_cast<pbes_system::exists>(x);
         result = exists(y.variables(), expr_and(y.body(), y.variables()));
       }
       else

@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/propositional_variable.h"
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace mcrl2
 {
@@ -55,8 +56,7 @@ class pbes_equation
     typedef fixpoint_symbol symbol_type;
 
     /// \brief Constructor.
-    pbes_equation()
-    {}
+    pbes_equation() = default;
 
     /// \brief Constructor.
     /// \param t A term

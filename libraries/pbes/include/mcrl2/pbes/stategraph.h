@@ -24,9 +24,7 @@ namespace pbes_system {
 /// \param p A PBES to which the algorithm is applied.
 /// \param options The options for the algorithm.
 inline
-void stategraph(pbes& p,
-                const pbesstategraph_options& options
-               )
+void stategraph(pbes& p, const pbesstategraph_options& options)
 {
   algorithms::normalize(p);
   if (options.use_global_variant)

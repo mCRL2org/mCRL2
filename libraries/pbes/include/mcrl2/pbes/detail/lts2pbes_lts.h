@@ -39,19 +39,18 @@ class lts2pbes_lts
   public:
     lts2pbes_lts(const lts::lts_lts_t& lts0)
     {
-      const std::vector<lts::transition>& transitions = lts0.get_transitions();
-      for (std::vector<lts::transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
+      for (const lts::transition& i: lts0.get_transitions())
       {
-        state_type s = i->from();
-        label_type a = i->label();
-        state_type t = i->to();
-        m_map[s].push_back(std::make_pair(a, t));
+        state_type s = i.from();
+        label_type a = i.label();
+        state_type t = i.to();
+        m_map[s].emplace_back(a, t);
       }
 
       for (lts::lts_lts_t::labels_size_type i = 0; i < lts0.num_action_labels(); i++)
       {
         lts::action_label_lts a = lts0.action_label(i);
-        m_action_labels.push_back(lps::multi_action(a.actions(), a.time()));
+        m_action_labels.emplace_back(a.actions(), a.time());
       }
       m_state_count = lts0.num_states();
     }
@@ -59,7 +58,7 @@ class lts2pbes_lts
     // returns the outgoing edges of state s
     const edge_list& edges(state_type s) const
     {
-      lts_type::const_iterator i = m_map.find(s);
+      auto i = m_map.find(s);
       if (i == m_map.end())
       {
         return m_empty_edge_list;

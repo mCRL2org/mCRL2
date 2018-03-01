@@ -176,8 +176,7 @@ class pbes_parelm_algorithm
 
         // right hand side (Y)
         pbes_expression phi = eqn.formula();
-        std::set<propositional_variable_instantiation> propvars = find_propositional_variable_instantiations(phi);
-        for (const propositional_variable_instantiation& propvar : propvars)
+        for (const propositional_variable_instantiation& propvar: find_propositional_variable_instantiations(phi))
         {
           const core::identifier_string& Y = propvar.name();
           data::data_expression_list Yparams = propvar.parameters();
@@ -210,11 +209,11 @@ class pbes_parelm_algorithm
       // create a map that specifies the parameters that need to be removed
       std::map<core::identifier_string, std::vector<std::size_t> > removals;
       std::size_t index = 0;
-      std::vector<std::size_t>::iterator sfirst = s.begin();
+      auto sfirst = s.begin();
       for (pbes_equation& eqn: p.equations())
       {
         std::size_t maxindex = index + eqn.variable().parameters().size();
-        std::vector<std::size_t>::iterator slast = std::find_if(sfirst, s.end(), std::bind(std::greater_equal<std::size_t>(), std::placeholders::_1, maxindex));
+        auto slast = std::find_if(sfirst, s.end(), std::bind(std::greater_equal<std::size_t>(), std::placeholders::_1, maxindex));
         if (slast > sfirst)
         {
           std::vector<std::size_t> w(sfirst, slast);
@@ -242,11 +241,11 @@ class pbes_parelm_algorithm
         edge_iterator last  = e.second;
         for (; first != last; ++first)
         {
-          edge_descriptor e = *first;
-          std::size_t i1 = boost::source(e, G);
+          edge_descriptor f = *first;
+          std::size_t i1 = boost::source(f, G);
           core::identifier_string X1 = find_predicate_variable(p, i1);
           data::variable v1 = predicate_variables[i1];
-          std::size_t i2 = boost::target(e, G);
+          std::size_t i2 = boost::target(f, G);
           core::identifier_string X2 = find_predicate_variable(p, i2);
           data::variable v2 = predicate_variables[i2];
           std::string left  = "(" + core::pp(X1) + ", " + data::pp(v1) + ")";

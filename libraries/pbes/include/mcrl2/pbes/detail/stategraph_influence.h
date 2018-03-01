@@ -26,6 +26,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 namespace mcrl2 {
@@ -38,7 +39,7 @@ namespace detail {
 class stategraph_influence_graph_algorithm
 {
   public:
-    stategraph_influence_graph_algorithm(const stategraph_pbes& p)
+    explicit stategraph_influence_graph_algorithm(const stategraph_pbes& p)
       : m_pbes(p)
     {}
 
@@ -104,7 +105,7 @@ class stategraph_influence_graph_algorithm
     // very inefficient
     std::vector<influence_vertex>::const_iterator find_vertex(const core::identifier_string& X, const data::variable& v) const
     {
-      for (std::vector<influence_vertex>::const_iterator i = m_influence_vertices.begin(); i != m_influence_vertices.end(); ++i)
+      for (auto i = m_influence_vertices.begin(); i != m_influence_vertices.end(); ++i)
       {
         if (i->X == X && i->v == v)
         {
@@ -126,7 +127,7 @@ class stategraph_influence_graph_algorithm
         auto const& Xparams = equation.parameters();
         for (const auto & Xparam : Xparams)
         {
-          m_influence_vertices.push_back(influence_vertex(X, Xparam));
+          m_influence_vertices.emplace_back(X, Xparam);
         }
       }
 
@@ -149,8 +150,8 @@ class stategraph_influence_graph_algorithm
             {
               if (contains(freevars, v))
               {
-                std::vector<influence_vertex>::const_iterator source = find_vertex(Xname, v);
-                std::vector<influence_vertex>::const_iterator target = find_vertex(Y.name(), d_Y[p]);
+                auto source = find_vertex(Xname, v);
+                auto target = find_vertex(Y.name(), d_Y[p]);
                 influence_edge e(&(*source), &(*target));
                 m_influence_edges.push_back(e);
               }

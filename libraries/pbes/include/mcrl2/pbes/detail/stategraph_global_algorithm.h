@@ -127,10 +127,10 @@ class stategraph_global_algorithm: public stategraph_algorithm
 
       // initialize todo
       auto const& Xinit = m_pbes.initial_state();
-      auto const& eq_X = *find_equation(m_pbes, Xinit.name());
-      auto einit = eq_X.project(Xinit.parameters());
-      auto const& u = m_control_flow_graph.insert_vertex(global_control_flow_graph_vertex(Xinit.name(), einit));
-      todo.insert(&u);
+      auto const& eq_Xinit = *find_equation(m_pbes, Xinit.name());
+      auto einit = eq_Xinit.project(Xinit.parameters());
+      auto const& w = m_control_flow_graph.insert_vertex(global_control_flow_graph_vertex(Xinit.name(), einit));
+      todo.insert(&w);
 
       while (!todo.empty())
       {

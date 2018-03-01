@@ -37,7 +37,7 @@ atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::
 {
   std::size_t index = 0;
   std::vector<Term> result;
-  std::vector<std::size_t>::const_iterator j = to_be_removed.begin();
+  auto j = to_be_removed.begin();
   for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
   {
     if (j != to_be_removed.end() && index == *j)
@@ -231,7 +231,7 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 
   void remove_parameters(std::set<data::variable>& x) const
   {
-    for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+    for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
     {
       x.erase(*i);
     }

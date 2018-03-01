@@ -50,7 +50,7 @@ class propositional_variable_substitution: public std::unary_function<propositio
     /// \return expression equivalent to s(e), or a reference to such an expression.
     pbes_expression operator()(const variable_type& v) const
     {
-      map_type::const_iterator i = m_map.find(v.name());
+      auto i = m_map.find(v.name());
       if (i == m_map.end())
       {
         return v;
@@ -106,8 +106,7 @@ class propositional_variable_substitution: public std::unary_function<propositio
         }
     };
 
-    propositional_variable_substitution()
-    {}
+    propositional_variable_substitution() = default;
 
     propositional_variable_substitution(const map_type& other)
       : m_map(other)
@@ -135,7 +134,7 @@ class propositional_variable_substitution: public std::unary_function<propositio
      **/
     assignment operator[](const propositional_variable& v)
     {
-      return assignment(v, this->m_map);
+      return { v, this->m_map };
     }
 
     /// \brief Constructor. Initializes the substitution with the assignment X := phi.
