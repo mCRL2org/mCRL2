@@ -52,7 +52,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
     std::string synopsis() const
     {
-      return "[OPTION]... [--renamefile=NAME | --regex=EXPR] [INFILE [OUTFILE]]\n";
+      return "[OPTION]... (--renamefile=NAME | --regex=EXPR) [INFILE [OUTFILE]]\n";
     }
 
     void add_options(interface_description& desc)
@@ -61,7 +61,10 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       desc.add_option("renamefile", make_file_argument("NAME"),
                       "use the rename rules from NAME", 'f');
       desc.add_option("regex", make_mandatory_argument("EXPR"),
-                      "use the provided regular expression to rename action labels", 'e');
+                      "use the provided regular expression to rename action labels. "
+                      "Argument should be of the shape 'matching pattern/replacement'. "
+                      "Matched groups can be substituted in the result with $n, where n is the index of the group. "
+                      "It is generally good to surround the matching expression with ^$. Example: '^(.*)_send$/$1_receive' ", 'e');
       desc.add_option("no-rewrite",
                       "do not rewrite data expressions while renaming; use when the rewrite system "
                       "does not terminate", 'o');

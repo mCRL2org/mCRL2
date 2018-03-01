@@ -170,6 +170,87 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
   BOOST_CHECK(new_spec.process().summand_count()==8);
 }
 
+// Check whether renaming with a regular expression works well
+static void test_regex1()
+{
+  const std::string SPEC =
+  "act a_out, b_out, cout, ab_out, ac_out;\n"
+  "init a_out|ab_out . b_out . cout . delta;";
+
+  stochastic_specification spec = lps::linearise(SPEC);
+  // This should rename a_out and ac_out, leaving the rest
+  stochastic_specification new_spec = action_rename(std::regex("^([^b]*)_out"), "out_$1", spec);
+
+  BOOST_CHECK(std::string(new_spec.action_labels()[0].name()) == "out_a");
+  BOOST_CHECK(std::string(new_spec.action_labels()[1].name()) == "b_out");
+  BOOST_CHECK(std::string(new_spec.action_labels()[2].name()) == "cout");
+  BOOST_CHECK(std::string(new_spec.action_labels()[3].name()) == "ab_out");
+  BOOST_CHECK(std::string(new_spec.action_labels()[4].name()) == "out_ac");
+
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().front().label().name()) == "out_a");
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().tail().front().label().name()) == "ab_out");
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[1].multi_action().actions().front().label().name()) == "b_out");
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[2].multi_action().actions().front().label().name()) == "cout");
+}
+
+// Check whether renaming some actions to delta works
+static void test_regex2()
+{
+  const std::string SPEC =
+  "act a_out, b_out, cout, ab_out, ac_out;\n"
+  "init a_out|ab_out . b_out . cout . delta;";
+
+  stochastic_specification spec = lps::linearise(SPEC);
+  // This should rename a_out, leaving the rest
+  stochastic_specification new_spec = action_rename(std::regex("^a_out"), "delta", spec);
+
+  BOOST_CHECK(std::string(new_spec.action_labels()[0].name()) == "b_out");
+  BOOST_CHECK(std::string(new_spec.action_labels()[1].name()) == "cout");
+  BOOST_CHECK(std::string(new_spec.action_labels()[2].name()) == "ab_out");
+
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().front().label().name()) == "b_out");
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[1].multi_action().actions().front().label().name()) == "cout");
+
+  BOOST_CHECK(new_spec.process().deadlock_summands().size() == 2);
+  BOOST_CHECK(new_spec.process().deadlock_summands()[1].condition() == spec.process().action_summands()[0].condition());
+}
+
+// Check whether renaming some actions to tau works
+static void test_regex3()
+{
+  const std::string SPEC =
+  "act a_out, b_out, cout, ab_out, ac_out;\n"
+  "init a_out|ab_out . b_out . cout . delta;";
+
+  stochastic_specification spec = lps::linearise(SPEC);
+  // This should rename a_out and cout, leaving the rest
+  stochastic_specification new_spec = action_rename(std::regex("^(a_out|cout)$"), "tau", spec);
+
+  BOOST_CHECK(std::string(new_spec.action_labels()[0].name()) == "b_out");
+  BOOST_CHECK(std::string(new_spec.action_labels()[1].name()) == "ab_out");
+  BOOST_CHECK(std::string(new_spec.action_labels()[2].name()) == "ac_out");
+
+  BOOST_CHECK(new_spec.process().action_summands()[0].multi_action().actions().size() == 1);
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().front().label().name()) == "ab_out");
+  BOOST_CHECK(std::string(new_spec.process().action_summands()[1].multi_action().actions().front().label().name()) == "b_out");
+  BOOST_CHECK(new_spec.process().action_summands()[2].multi_action().actions().size() == 0);
+}
+
+// Check whether the list of actions contains no duplicates after renaming multiple actions
+// to one action.
+static void test_regex4()
+{
+  const std::string SPEC =
+  "act a_out, b_out;\n"
+  "init a_out . b_out . delta;";
+
+  stochastic_specification spec = lps::linearise(SPEC);
+  // This should rename both actions to 'out'
+  stochastic_specification new_spec = action_rename(std::regex("^(a|b)_out$"), "out", spec);
+
+  BOOST_CHECK(new_spec.action_labels().size() == 1);
+  BOOST_CHECK(std::string(new_spec.action_labels()[0].name()) == "out");
+}
 
 int test_main(int argc, char** argv)
 {
@@ -178,5 +259,10 @@ int test_main(int argc, char** argv)
   test3();
   test4();
   test5();
+
+  test_regex1();
+  test_regex2();
+  test_regex3();
+  test_regex4();
   return 0;
 }
