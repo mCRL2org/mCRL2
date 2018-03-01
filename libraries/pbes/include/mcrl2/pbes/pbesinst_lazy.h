@@ -209,6 +209,7 @@ struct find_loop_simplifier
       {
         return false;
       }
+      visited[Y] = false;
       bool b = find_loop_rec<is_mu>(equation.at(Y), X, rank, visited);
       visited[Y] = b;
       return b;
