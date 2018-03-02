@@ -42,7 +42,6 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
   protected:
 
-    bool            m_pretty;
     bool            m_rewrite;
     bool            m_sumelm;
     bool            m_typecheck;
@@ -72,8 +71,6 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
                       "do not apply sum elimination to the final result", 'm');
       desc.add_option("no-typecheck",
                       "do not typecheck the resulting specfication", 't');
-      desc.add_option("pretty",
-                      "return a pretty printed version of the output", 'P');
 
     }
 
@@ -84,7 +81,6 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       m_rewrite = (parser.options.count("no-rewrite")==0);
       m_sumelm  = (parser.options.count("no-sumelm")==0);
       m_typecheck = (parser.options.count("no-typecheck")==0);
-      m_pretty = (parser.options.count("pretty")!=0);
 
       bool renamefile_argument_present = (parser.options.count("renamefile")!=0);
       bool regex_argument_present = (parser.options.count("regex")!=0);
@@ -110,7 +106,6 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
         "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
       ),
-      m_pretty(false),
       m_rewrite(true),
       m_sumelm(true),
       m_typecheck(true)

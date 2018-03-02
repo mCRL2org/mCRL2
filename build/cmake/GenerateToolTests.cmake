@@ -167,7 +167,7 @@ endfunction()
 
 # lpsactionrename
 function(gen_lpsactionrename_release_tests LPSFILE RENFILE)
-  set(ARGUMENTS "" "-m" "-o" "-P" "-rjitty" "-rjittyp" ${_JITTYC})
+  set(ARGUMENTS "" "-m" "-o" "-t" "-rjitty" "-rjittyp" ${_JITTYC})
   foreach(arglist ${ARGUMENTS})
     add_tool_test(lpsactionrename -f${RENFILE} ${arglist} ${tagIN} ${LPSFILE})
   endforeach()
