@@ -145,7 +145,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 
       pbesinst_structure_graph_algorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy);
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
+      timer().start("instantiation");
       algorithm.run();
+      timer().finish("instantiation");
 
       if (!lpsfile.empty())
       {
@@ -154,7 +156,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         lps::detail::instantiate_global_variables(lpsspec); // N.B. This is necessary, because the global variables might not be valid for the evidence.
         bool result;
         lps::specification evidence;
+        timer().start("solving");
         std::tie(result, evidence) = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
+        timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
         std::string output_filename = input_filename() + ".evidence.lps";
         save_lps(evidence, output_filename);
@@ -163,7 +167,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       else if (!ltsfile.empty())
       {
         lts::lts_lts_t evidence;
+        timer().start("solving");
         bool result = solve_structure_graph_with_counter_example(G, ltsspec, pbesspec, algorithm.equation_index());
+        timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
         std::string output_filename = input_filename() + ".evidence.lts";
         ltsspec.save(output_filename);
@@ -171,7 +177,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       }
       else
       {
+        timer().start("solving");
         bool result = solve_structure_graph(G, check_strategy);
+        timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
       }
       return true;
