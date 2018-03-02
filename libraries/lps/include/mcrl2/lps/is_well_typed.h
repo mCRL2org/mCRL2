@@ -177,7 +177,7 @@ struct lps_well_typed_checker
   {
     if (a.has_time())
     {
-      check_time(a.time(), "deadlock");
+      check_time(a.time(), "multi_action");
     }
     return true;
   }
@@ -340,6 +340,12 @@ struct lps_well_typed_checker
     if (!(detail::check_action_label_sorts(spec.action_labels(), declared_sorts)))
     {
       error << "is_well_typed(specification) failed: some of the sorts occurring in the action labels " << lps::pp(spec.action_labels()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+      return false;
+    }
+
+    if(!detail::check_action_label_duplicates(spec.action_labels()))
+    {
+      error << "is_well_typed(specification) failed: some action label in " << lps::pp(spec.action_labels()) << " is defined more than once with different sorts." << std::endl;
       return false;
     }
 
