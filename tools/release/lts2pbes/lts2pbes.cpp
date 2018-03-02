@@ -48,8 +48,8 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       desc.add_option("preprocess-modal-operators",
                       "insert dummy fixpoints in modal operators, which may lead to smaller PBESs", 'p');
 
-      desc.add_hidden_option("counter-example",
-                             "add counter example equations to the generated PBES", 'c');
+      desc.add_option("counter-example",
+                      "add counter example equations to the generated PBES", 'c');
       lts::detail::add_options(desc);
     }
 

@@ -90,7 +90,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       if (parser.options.count("ltsfile") > 0)
       {
         ltsfile = parser.option_argument("ltsfile");
-        // lts::detail::load_lts(parser, ltsfile, ltsspec);
         ltsspec.load(ltsfile);
       }
     }
@@ -98,7 +97,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     void add_options(utilities::interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("check-strategy", "do a sanity check on the computed strategy", 'c');
+      desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'c');
       desc.add_option("strategy",
                  utilities::make_enum_argument<transformation_strategy>("STRAT")
                    .add_value(lazy, true)
@@ -123,7 +122,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  utilities::make_optional_argument("NAME", "name"),
                  "The file containing the LTS that was used to generate the PBES. If this option is set, a counter example LTS will be generated.",
                  'g');
-      // lts::detail::add_options(desc);
     }
 
   public:
