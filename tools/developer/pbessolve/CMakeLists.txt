@@ -4,4 +4,5 @@ add_mcrl2_tool(pbessolve
   DEPENDS
     mcrl2_pbes
     mcrl2_bes
+    mcrl2_lts
 )

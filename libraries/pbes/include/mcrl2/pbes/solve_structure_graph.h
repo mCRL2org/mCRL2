@@ -22,6 +22,8 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/structure_graph.h"
 
@@ -717,6 +719,46 @@ lps::specification create_counter_example_lps(const structure_graph::vertex_set&
   return result;
 }
 
+// Removes all transitions from ltsspec, except the ones in transition_indices.
+// After that, the unreachable parts of the LTS are removed.
+inline
+void filter_transitions(lts::lts_lts_t& ltsspec, const std::set<std::size_t>& transition_indices)
+{
+  // remove transitions
+  const auto& lts_transitions = ltsspec.get_transitions();
+  std::vector<lts::transition> transitions;
+  for (std::size_t i: transition_indices)
+  {
+    transitions.push_back(lts_transitions[i]);
+  }
+  ltsspec.get_transitions() = transitions;
+
+  // remove unreachable states
+  lts::reachability_check(ltsspec, true);
+}
+
+// modifies ltsspec
+inline
+void create_counter_example_lts(const structure_graph::vertex_set& V, lts::lts_lts_t& ltsspec, const pbes& p, const pbes_equation_index& p_index)
+{
+  typedef structure_graph::vertex vertex;
+  std::regex re("Z(neg|pos)_(\\d+)_.*");
+
+  std::set<std::size_t> transition_indices;
+  for (const vertex* v: V)
+  {
+    const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v->formula);
+    std::string Zname = Z.name();
+    std::smatch match;
+    if (std::regex_match(Zname, match, re))
+    {
+      std::size_t transition_index = std::stoul(match[2]);
+      transition_indices.insert(transition_index);
+    }
+  }
+  filter_transitions(ltsspec, transition_indices);
+}
+
 inline
 structure_graph::vertex_set filter_counter_example_nodes(const structure_graph::vertex_set& V)
 {
@@ -772,6 +814,41 @@ std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(c
     vertex_set W = find_counter_example_nodes(Wconj, init, false);
     mCRL2log(log::debug) << "Counter example nodes in Wconj (contains init) = " << pp(filter_counter_example_nodes(W)) << std::endl;
     return { false, create_counter_example_lps(W, lpsspec, p, p_index) };
+  }
+  throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
+}
+
+/// \param ltsspec The original LTS that was used to create the PBES.
+inline
+bool solve_structure_graph_with_counter_example(const structure_graph& G, lts::lts_lts_t& ltsspec, const pbes& p, const pbes_equation_index& p_index)
+{
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
+  mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
+  structure_graph::vertex_set V = G.vertices();
+  vertex_set Wconj;
+  vertex_set Wdisj;
+  std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
+  const vertex& init = G.initial_vertex();
+
+  mCRL2log(log::debug) << "Wdisj = " << pp(Wdisj) << std::endl;
+  mCRL2log(log::debug) << "Wconj = " << pp(Wconj) << std::endl;
+  if (contains(Wdisj, &init))
+  {
+    mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
+    vertex_set W = find_counter_example_nodes(Wdisj, init, true);
+    mCRL2log(log::debug) << "Counter example nodes in Wdisj (contains init) = " << pp(filter_counter_example_nodes(W)) << std::endl;
+    create_counter_example_lts(W, ltsspec, p, p_index);
+    return true;
+  }
+  else if (contains(Wconj, &init))
+  {
+    mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
+    vertex_set W = find_counter_example_nodes(Wconj, init, false);
+    mCRL2log(log::debug) << "Counter example nodes in Wconj (contains init) = " << pp(filter_counter_example_nodes(W)) << std::endl;
+    create_counter_example_lts(W, ltsspec, p, p_index);
+    return false;
   }
   throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
 }

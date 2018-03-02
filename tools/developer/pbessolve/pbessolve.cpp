@@ -15,6 +15,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/io.h"
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
@@ -71,14 +72,26 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     search_strategy m_search_strategy;                 // The search strategy (depth first/breadth first)
     bool check_strategy = false;
     std::string lpsfile;
+    std::string ltsfile;
+    lts::lts_lts_t ltsspec;
 
     void parse_options(const utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
       check_strategy = parser.options.count("check-strategy") > 0;
+      if (parser.options.count("lpsfile") > 0 && parser.options.count("ltsfile") > 0)
+      {
+        throw mcrl2::runtime_error("It is not allowed to use both options --lpsfile and --ltsfile");
+      }
       if (parser.options.count("lpsfile") > 0)
       {
         lpsfile = parser.option_argument("lpsfile");
+      }
+      if (parser.options.count("ltsfile") > 0)
+      {
+        ltsfile = parser.option_argument("ltsfile");
+        // lts::detail::load_lts(parser, ltsfile, ltsspec);
+        ltsspec.load(ltsfile);
       }
     }
 
@@ -94,7 +107,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                    .add_value(on_the_fly_with_fixed_points),
                  "use substitution strategy STRAT:",
                  's');
-     desc.add_option("search",
+      desc.add_option("search",
                  utilities::make_enum_argument<search_strategy>("SEARCH")
                    .add_value(breadth_first, true)
                    .add_value(depth_first)
@@ -104,8 +117,13 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  'z');
       desc.add_option("lpsfile",
                  utilities::make_optional_argument("NAME", "name"),
-                 "The file containing the LPS that was used to generate the PBES. If this option is set, a counter example will be generated.",
+                 "The file containing the LPS that was used to generate the PBES. If this option is set, a counter example LPS will be generated.",
                  'f');
+      desc.add_option("ltsfile",
+                 utilities::make_optional_argument("NAME", "name"),
+                 "The file containing the LTS that was used to generate the PBES. If this option is set, a counter example LTS will be generated.",
+                 'g');
+      // lts::detail::add_options(desc);
     }
 
   public:
@@ -131,12 +149,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       algorithm.run();
 
-      if (lpsfile.empty())
-      {
-        bool result = solve_structure_graph(G, check_strategy);
-        std::cout << (result ? "true" : "false") << std::endl;
-      }
-      else
+      if (!lpsfile.empty())
       {
         lps::specification lpsspec;
         load_lps(lpsspec, lpsfile);
@@ -148,6 +161,20 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         std::string output_filename = input_filename() + ".evidence.lps";
         save_lps(evidence, output_filename);
         mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << output_filename << std::endl;
+      }
+      else if (!ltsfile.empty())
+      {
+        lts::lts_lts_t evidence;
+        bool result = solve_structure_graph_with_counter_example(G, ltsspec, pbesspec, algorithm.equation_index());
+        std::cout << (result ? "true" : "false") << std::endl;
+        std::string output_filename = input_filename() + ".evidence.lts";
+        ltsspec.save(output_filename);
+        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << output_filename << std::endl;
+      }
+      else
+      {
+        bool result = solve_structure_graph(G, check_strategy);
+        std::cout << (result ? "true" : "false") << std::endl;
       }
       return true;
     }
