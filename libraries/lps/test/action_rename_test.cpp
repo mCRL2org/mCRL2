@@ -260,9 +260,13 @@ int test_main(int argc, char** argv)
   test4();
   test5();
 
-  test_regex1();
-  test_regex2();
-  test_regex3();
-  test_regex4();
+  // GCC 4.8 does not support regexes. Check the support first.
+  if(std::regex_search("a", std::regex(".*")))
+  {
+    test_regex1();
+    test_regex2();
+    test_regex3();
+    test_regex4();
+  }
   return 0;
 }
