@@ -27,11 +27,23 @@ class lts2pbes_lts
     typedef std::size_t state_type;
     typedef std::size_t label_type;
 
-    typedef std::vector<std::pair<label_type, state_type> > edge_list;
-    typedef std::map<state_type, edge_list> lts_type;
+    struct edge
+    {
+      edge(label_type label_, state_type state_, std::size_t index_)
+        : label(label_),
+          state(state_),
+          index(index_)
+      {}
+
+      label_type label;
+      state_type state;
+      std::size_t index;
+    };
+
+    typedef std::vector<edge> edge_list;
 
   protected:
-    lts_type m_map;
+    std::map<state_type, edge_list> m_state_map;
     std::vector<lps::multi_action> m_action_labels;
     std::size_t m_state_count;
     edge_list m_empty_edge_list;
@@ -39,12 +51,14 @@ class lts2pbes_lts
   public:
     lts2pbes_lts(const lts::lts_lts_t& lts0)
     {
-      for (const lts::transition& i: lts0.get_transitions())
+      const auto& transitions = lts0.get_transitions();
+      for (std::size_t i = 0; i < transitions.size(); i++)
       {
-        state_type s = i.from();
-        label_type a = i.label();
-        state_type t = i.to();
-        m_map[s].emplace_back(a, t);
+        const auto& transition = transitions[i];
+        state_type s = transition.from();
+        label_type a = transition.label();
+        state_type t = transition.to();
+        m_state_map[s].emplace_back(a, t, i);
       }
 
       for (lts::lts_lts_t::labels_size_type i = 0; i < lts0.num_action_labels(); i++)
@@ -58,8 +72,8 @@ class lts2pbes_lts
     // returns the outgoing edges of state s
     const edge_list& edges(state_type s) const
     {
-      auto i = m_map.find(s);
-      if (i == m_map.end())
+      auto i = m_state_map.find(s);
+      if (i == m_state_map.end())
       {
         return m_empty_edge_list;
       }
@@ -77,6 +91,11 @@ class lts2pbes_lts
     std::size_t state_count() const
     {
       return m_state_count;
+    }
+
+    const std::map<state_type, edge_list>& state_map() const
+    {
+      return m_state_map;
     }
 };
 

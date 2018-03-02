@@ -57,7 +57,8 @@ struct lts2pbes_parameters
   pbes_expression rhs_may_must(bool is_must,
                                const pbes_expression& left,  // Sat(a(x), alpha)
                                const pbes_expression& right, // RHS(phi, t)
-                               const lps::multi_action& /* a */,   // a(x)
+                               std::size_t, /* i */
+                               const lps::multi_action& /* a */,
                                lts2pbes_state_type /* s */,
                                lts2pbes_state_type /* t */,
                                TermTraits
@@ -78,8 +79,8 @@ struct lts2pbes_parameters
 // TODO: reuse code from lps2pbes_counter_example_parameters
 struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
 {
-  std::map<lps::multi_action, propositional_variable> Zpos; // represents the additional equations { nu Zpos_a(s, a(x), s) = true }
-  std::map<lps::multi_action, propositional_variable> Zneg; // represents the additional equations { nu Zneg_a(s, a(x), t) = false }
+  std::vector<propositional_variable> Zpos; // represents the additional equations { nu Zpos_i(s, a(i), s) = true }
+  std::vector<propositional_variable> Zneg; // represents the additional equations { nu Zneg_i(s, a(i), t) = false }
   data::variable_list s_list;                               // contains the process parameter s: Nat
   data::variable_list t_list;                               // contains the process parameter t: Nat
 
@@ -116,12 +117,12 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
     std::vector<pbes_equation> result;
     for (auto const& p: Zneg)
     {
-      pbes_equation eqn(fixpoint_symbol::nu(), p.second, false_());
+      pbes_equation eqn(fixpoint_symbol::nu(), p, false_());
       result.push_back(eqn);
     }
     for (auto const& p: Zpos)
     {
-      pbes_equation eqn(fixpoint_symbol::nu(), p.second, true_());
+      pbes_equation eqn(fixpoint_symbol::nu(), p, true_());
       result.push_back(eqn);
     }
     return result;
@@ -147,12 +148,18 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
       s_list { data::variable(id_generator("s"), data::sort_nat::nat()) },
       t_list { data::variable(id_generator("t"), data::sort_nat::nat()) }
   {
-    for (const lps::multi_action& a: lts1.action_labels())
+    for (const auto& p: lts1.state_map())
     {
-      core::identifier_string pos = id_generator("Z" + multi_action_name(a) + "_pos");
-      core::identifier_string neg = id_generator("Z" + multi_action_name(a) + "_neg");
-      Zpos[a] = propositional_variable(pos, s_list + action_variables(a.actions()) + t_list);
-      Zneg[a] = propositional_variable(neg, s_list + action_variables(a.actions()) + t_list);
+      for (const lts2pbes_lts::edge& e: p.second)
+      {
+        const lps::multi_action& ai = lts1.action_labels()[e.label];
+        data::variable_list actvars = action_variables(ai.actions());
+        std::string suffix = utilities::number2string(e.index) + "_" + multi_action_name(ai);
+        core::identifier_string pos = id_generator("Zpos_" + suffix);
+        core::identifier_string neg = id_generator("Zneg_" + suffix);
+        Zpos.push_back(propositional_variable(pos, s_list + actvars + t_list));
+        Zneg.push_back(propositional_variable(neg, s_list + actvars + t_list));
+      }
     }
   }
 
@@ -172,7 +179,8 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
   pbes_expression rhs_may_must(bool is_must,
                                const pbes_expression& left,  // Sat(a(x), alpha)
                                const pbes_expression& right, // RHS(phi, t)
-                               const lps::multi_action& a,   // a(x)
+                               std::size_t i,                // The index of the transition s --a--> t
+                               const lps::multi_action& a,
                                lts2pbes_state_type s,
                                lts2pbes_state_type t,
                                TermTraits
@@ -181,8 +189,8 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
     typedef TermTraits tr;
     auto f = action_expressions(a.actions());
     data::data_expression_list dx = data::data_expression_list({ data::sort_nat::nat(s) }) + f + data::data_expression_list({ data::sort_nat::nat(t) });
-    propositional_variable_instantiation Pos(Zpos.at(a).name(), dx);
-    propositional_variable_instantiation Neg(Zneg.at(a).name(), dx);
+    propositional_variable_instantiation Pos(Zpos[i].name(), dx);
+    propositional_variable_instantiation Neg(Zneg[i].name(), dx);
     auto right1 = right;
 
     if (is_must)
@@ -312,14 +320,13 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     const state_formulas::state_formula& phi = x.operand();
 
     // traverse all transitions s --a--> t
-    const lts2pbes_lts::edge_list& m = lts1.edges(s);
-    for (lts2pbes_lts::edge_list::const_iterator i = m.begin(); i != m.end(); ++i)
+    for (const lts2pbes_lts::edge& e: lts1.edges(s))
     {
-      lts2pbes_state_type t = i->second;
-      const lps::multi_action& a = lts1.action_labels()[i->first];
+      lts2pbes_state_type t = e.state;
+      const lps::multi_action& a = lts1.action_labels()[e.label];
       pbes_expression left = detail::Sat(a, alpha, parameters.id_generator, TermTraits());
       pbes_expression right = RHS(phi, t, parameters, TermTraits());
-      pbes_expression p = parameters.rhs_may_must(true, left, right, a, s, t, TermTraits());
+      pbes_expression p = parameters.rhs_may_must(true, left, right, e.index, a, s, t, TermTraits());
       v.push_back(p);
     }
     push(tr::join_and(v.begin(), v.end()));
@@ -334,14 +341,13 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     const state_formulas::state_formula& phi = x.operand();
 
     // traverse all transitions s --a--> t
-    const lts2pbes_lts::edge_list& m = lts1.edges(s);
-    for (lts2pbes_lts::edge_list::const_iterator i = m.begin(); i != m.end(); ++i)
+    for (const lts2pbes_lts::edge& e: lts1.edges(s))
     {
-      lts2pbes_state_type t = i->second;
-      const lps::multi_action& a = lts1.action_labels()[i->first];
+      lts2pbes_state_type t = e.state;
+      const lps::multi_action& a = lts1.action_labels()[e.label];
       pbes_expression left = detail::Sat(a, alpha, parameters.id_generator, TermTraits());
       pbes_expression right = RHS(phi, t, parameters, TermTraits());
-      pbes_expression p = parameters.rhs_may_must(false, left, right, a, s, t, TermTraits());
+      pbes_expression p = parameters.rhs_may_must(false, left, right, e.index, a, s, t, TermTraits());
       v.push_back(p);
     }
     push(tr::join_or(v.begin(), v.end()));
