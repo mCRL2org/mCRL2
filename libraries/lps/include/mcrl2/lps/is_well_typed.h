@@ -343,12 +343,6 @@ struct lps_well_typed_checker
       return false;
     }
 
-    if(!detail::check_action_label_duplicates(spec.action_labels()))
-    {
-      error << "is_well_typed(specification) failed: some action label in " << lps::pp(spec.action_labels()) << " is defined more than once with different sorts." << std::endl;
-      return false;
-    }
-
     // check 5)
     for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
     {

@@ -84,25 +84,6 @@ bool check_action_label_sorts(const process::action_label_list& action_labels, c
   return true;
 }
 
-/// \brief Check whether some action name is defined multiple times with different sorts
-/// \param actions_labels A sequence of action labels
-/// \return True if there are two action label with the same name but with different sorts
-inline
-bool check_action_label_duplicates(const process::action_label_list& actions_labels)
-{
-  std::map< core::identifier_string, data::sort_expression_list > sort_map;
-  for(const process::action_label& al: actions_labels)
-  {
-    auto find_result = sort_map.find(al.name());
-    if(find_result != sort_map.end() && find_result->second != al.sorts())
-    {
-      return false;
-    }
-    sort_map.insert(std::make_pair(al.name(), al.sorts()));
-  }
-  return true;
-}
-
 } // namespace detail
 
 } // namespace lps
