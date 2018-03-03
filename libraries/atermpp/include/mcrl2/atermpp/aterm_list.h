@@ -231,19 +231,6 @@ class term_list: public aterm
     /// \param l A list.
     term_list<Term>& operator=(term_list&& l) noexcept = default;
     
-    /// \brief Returns an element at position m in a list
-    /// \details This operator is linear in the number m. If m>=length of the list
-    ///          the result is undefined.
-    /// \param m An index. The first element is at position 0.
-    /// \return The element at position i in the list l.
-    const Term& operator[](std::size_t m) const
-    {
-      assert(size()>m);
-      typename term_list<Term>::const_iterator i=begin();
-      for( ; m>0; --m, ++i) {}
-      return *i;
-    }
-
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
     const term_list<Term>& tail() const

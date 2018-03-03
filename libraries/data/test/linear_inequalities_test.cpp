@@ -237,7 +237,7 @@ void test_split_conditions()
   BOOST_CHECK(real_conditions.size() == 1);
   BOOST_CHECK(non_real_conditions.size() == 1);
   BOOST_CHECK(real_conditions[0].size() == 1);
-  BOOST_CHECK(is_less_application(real_conditions[0][0]));
+  BOOST_CHECK(is_less_application(real_conditions[0].front()));
   BOOST_CHECK(sort_bool::is_or_application(non_real_conditions[0]));
   real_conditions.clear(); non_real_conditions.clear();
 
@@ -246,8 +246,8 @@ void test_split_conditions()
   BOOST_CHECK(non_real_conditions.size() == 2);
   BOOST_CHECK(real_conditions[0].size() == 1);
   BOOST_CHECK(real_conditions[1].size() == 1);
-  BOOST_CHECK((is_equal_to_application(real_conditions[0][0]) && is_greater_application(real_conditions[1][0])) ||
-              (is_equal_to_application(real_conditions[1][0]) && is_greater_application(real_conditions[0][0])));
+  BOOST_CHECK((is_equal_to_application(real_conditions[0].front()) && is_greater_application(real_conditions[1].front())) ||
+              (is_equal_to_application(real_conditions[1].front()) && is_greater_application(real_conditions[0].front())));
   BOOST_CHECK(non_real_conditions[0] == non_real_conditions[1]);
   real_conditions.clear(); non_real_conditions.clear();
 
