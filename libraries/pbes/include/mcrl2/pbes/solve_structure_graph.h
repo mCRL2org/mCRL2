@@ -696,8 +696,8 @@ lps::specification create_counter_example_lps(const structure_graph::vertex_set&
 
       for (std::size_t i = 0; i < n; i++)
       {
-        condition.push_back(data::equal_to(d[i], e[i]));
-        next_state_assignments.emplace_back(d[i], e[n + m + i]);
+        condition.push_back(data::equal_to(d1[i], e1[i]));
+        next_state_assignments.emplace_back(d1[i], e1[n + m + i]);
       }
 
       process::action_vector actions;
