@@ -26,6 +26,19 @@ using namespace mcrl2::utilities;
 using bes::tools::pbes_output_tool;
 using utilities::tools::input_output_tool;
 
+inline
+void check_lts(const lts::lts_lts_t& ltsspec)
+{
+  for (const lts::transition& tr: ltsspec.get_transitions())
+  {
+    std::size_t label = tr.label();
+    if (label >= ltsspec.action_labels().size())
+    {
+      throw mcrl2::runtime_error("Invalid LTS detected: there are not enough action labels");
+    }
+  }
+}
+
 class lts2pbes_tool : public pbes_output_tool<input_output_tool>
 {
   private:
@@ -65,6 +78,9 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
       generate_counter_example = parser.options.count("counter-example") > 0;
       lts::detail::load_lts(parser, input_filename(), l);
+      // l.load(input_filename());
+      check_lts(l);
+      pbes_system::detail::print_lts(l, "l");
     }
 
   public:
