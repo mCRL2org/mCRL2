@@ -352,7 +352,7 @@ inline void lts_convert_translate_state(const state_label_lts& state_label_in, s
     assert(state_label_in.size()>1);
     // In this case the state label consists of a list of labels. However, the .fsm format cannot deal
     // with this, and we take only one of the labels in this list in the translation. 
-    local_state_label_in=state_label_lts(state_label_in[0]);
+    local_state_label_in=state_label_lts(state_label_in.front());
     static bool warning_is_already_printed=false; 
     if (!warning_is_already_printed)
     { 
