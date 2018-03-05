@@ -58,7 +58,7 @@ lps::specification transform_lts2lps(const lts_lts_t& l)
   }
   
   const linear_process lps1(process_parameters,deadlock_summands,action_summands);
-  const specification spec(l.data(),l.action_labels(),global_variables,lps1,initial_process);
+  const specification spec(l.data(),l.action_label_declarations(),global_variables,lps1,initial_process);
   
   return spec;
 }

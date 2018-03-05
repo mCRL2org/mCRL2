@@ -94,7 +94,7 @@ lps::specification extract_specification(const lts_lts_t& l)
   lps::deadlock_summand_vector deadlock_summands(1, lps::deadlock_summand(data::variable_list(), data::sort_bool::true_(), lps::deadlock()));
   lps::linear_process lps(process_parameters, deadlock_summands, lps::action_summand_vector());
   lps::process_initializer initial_process(data::assignment_list({ data::assignment(process_parameter, data::sort_pos::pos(l.initial_state() + 1)) }));
-  return lps::specification(l.data(), l.action_labels(), global_variables, lps, initial_process);
+  return lps::specification(l.data(), l.action_label_declarations(), global_variables, lps, initial_process);
 }
 
 } // namespace detail

@@ -277,14 +277,14 @@ class lts_lts_base
 
     /** \brief Indicates whether the labels in lts_extra is valid
     */
-    bool has_action_labels() const
+    bool has_action_label_declarations() const
     {
       return m_has_valid_action_decls;
     }
 
     /** \brief Return action label declarations stored in this LTS.
     */
-    const process::action_label_list& action_labels() const
+    const process::action_label_list& action_label_declarations() const
     {
       assert(m_has_valid_action_decls);
       return m_action_decls;
@@ -293,7 +293,7 @@ class lts_lts_base
     /** \brief Set the action label information for this LTS.
      * \param[in] decls  The action labels to be set in this lts.
     */
-    void set_action_labels(const process::action_label_list& decls)
+    void set_action_label_declarations(const process::action_label_list& decls)
     {
       m_has_valid_action_decls=true;
       m_action_decls=decls;

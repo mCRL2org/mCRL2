@@ -272,6 +272,13 @@ class lts: public LTS_BASE
       m_state_labels[state] = label;
     }
 
+    /** \brief The action labels in this lts. 
+        \return The action labels of this lts.  **/
+    const std::vector<ACTION_LABEL_T>& action_labels() const
+    {
+      return m_action_labels;
+    } 
+
     /** \brief Sets the label of an action.
      * \param[in] action The number of the action.
      * \param[in] label The label that will be assigned to the action. */

@@ -491,7 +491,7 @@ inline void lts_convert_base_class(const lts_fsm_base& base_in,
   if (extra_data_is_defined)
   {
     base_out.set_data(data);
-    base_out.set_action_labels(action_labels);
+    base_out.set_action_label_declarations(action_labels);
     base_out.set_process_parameters(process_parameters);
   }
   else 
@@ -502,7 +502,7 @@ inline void lts_convert_base_class(const lts_fsm_base& base_in,
 
 inline action_label_lts lts_convert_translate_label(const action_label_string& l1, convertor<lts_fsm_base, lts_lts_base>& c) 
 {
-  return translate_label_aux(l1, c.m_lts_out.data(), c.m_lts_out.action_labels());
+  return translate_label_aux(l1, c.m_lts_out.data(), c.m_lts_out.action_label_declarations());
 }
 
 inline void lts_convert_translate_state(const state_label_fsm& state_label_in, 
@@ -681,7 +681,7 @@ class convertor<lts_aut_base, lts_lts_base>
 
     convertor(const lts_aut_base& /* lts_base_in*/, const lts_lts_base& lts_base_out)
       : m_data(lts_base_out.data()),
-        m_action_labels(lts_base_out.action_labels())
+        m_action_labels(lts_base_out.action_label_declarations())
     {
     }
 };
@@ -701,7 +701,7 @@ inline void lts_convert_base_class(const lts_aut_base& base_in,
   if (extra_data_is_defined)
   {
     base_out.set_data(data);
-    base_out.set_action_labels(action_labels);
+    base_out.set_action_label_declarations(action_labels);
     base_out.set_process_parameters(process_parameters);
   }
   else

@@ -134,7 +134,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
                       << " format to '" << m_options.lts << "'." << std::endl;
     m_output_lts.set_data(specification.data());
     m_output_lts.set_process_parameters(specification.process().process_parameters());
-    m_output_lts.set_action_labels(specification.action_labels());
+    m_output_lts.set_action_label_declarations(specification.action_labels());
   }
 
 

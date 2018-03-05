@@ -152,7 +152,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
                    aterm_appl(meta_data_header(),
                               ts.has_data() ? data::detail::data_specification_to_aterm(ts.data()) : core::nil(),
                               ts.has_process_parameters() ? static_cast<aterm>(ts.process_parameters()) : core::nil(),
-                              ts.has_action_labels() ? static_cast<aterm>(ts.action_labels()) : core::nil(),
+                              ts.has_action_label_declarations() ? static_cast<aterm>(ts.action_label_declarations()) : core::nil(),
                               aterm_appl(num_of_states_labels_and_initial_state(),
                                          aterm_int(ts.num_states()),
                                          aterm_int(ts.num_action_labels()),
@@ -170,7 +170,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
       aterm_appl md=meta_data();
       aterm_probabilistic_transition_list trans=transitions(); 
       state_labels_t state_labels=get_state_labels();
-      action_labels_t action_labels=get_action_labels();
+      action_labels_t action_label_declarations=get_action_label_declarations();
       
       (*this)=aterm(); // Clear this aterm. It is often huge, and in this way the list of transitions can be garbage collected,
                        // while being transformed. 
@@ -194,7 +194,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
                              data::detail::add_index(md,cache),
                              new_trans,
                              data::detail::add_index(state_labels,cache),
-                             data::detail::add_index(action_labels,cache));
+                             data::detail::add_index(action_label_declarations,cache));
     }
 
     /// \brief Remove indices from dedicated terms such as variables and process names. 
@@ -203,7 +203,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
       aterm_appl md=meta_data();
       aterm_probabilistic_transition_list trans=transitions(); 
       state_labels_t state_labels=get_state_labels();
-      action_labels_t action_labels=get_action_labels();
+      action_labels_t action_label_declarations=get_action_label_declarations();
       
       (*this)=aterm(); // Clear this aterm. It is often huge, and in this way the list of transitions can be garbage collected,
                        // while being transformed. 
@@ -226,7 +226,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
                              data::detail::remove_index(md,cache),
                              new_trans,
                              data::detail::remove_index(state_labels,cache),
-                             data::detail::remove_index(action_labels,cache));
+                             data::detail::remove_index(action_label_declarations,cache));
     }
 
     bool has_data() const
@@ -256,7 +256,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
       return meta_data()[2]!=core::nil();
     } 
 
-    const process::action_label_list action_labels() const
+    const process::action_label_list action_label_declarations() const
     {
       assert(meta_data()[2]!=core::nil());
       return down_cast<process::action_label_list>(meta_data()[2]);
@@ -294,7 +294,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
       return down_cast<state_labels_t>((*this)[2]);
     }
   
-    action_labels_t get_action_labels() const
+    action_labels_t get_action_label_declarations() const
     {
       return down_cast<action_labels_t>((*this)[3]);
     }
@@ -382,7 +382,7 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
 
   if (input_lts.has_action_labels())
   {
-    l.set_action_labels(input_lts.action_labels());
+    l.set_action_label_declarations(input_lts.action_label_declarations());
   }
   
   aterm_probabilistic_transition_list input_transitions=input_lts.transitions();
@@ -407,14 +407,14 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
     }
   }
 
-  if (input_lts.get_action_labels().size()==0)
+  if (input_lts.get_action_label_declarations().size()==0)
   {
     l.set_num_action_labels(input_lts.num_action_labels());
   }
   else
   {
-    assert(input_lts.num_action_labels()==input_lts.get_action_labels().size());
-    for (const atermpp::aterm_appl& t: input_lts.get_action_labels())
+    assert(input_lts.num_action_labels()==input_lts.get_action_label_declarations().size());
+    for (const atermpp::aterm_appl& t: input_lts.get_action_label_declarations())
     {
       assert(t.function()==temporary_multi_action_header());
       const lps::multi_action action=lps::multi_action(process::action_list(t[0]), data::data_expression(t[1]));
