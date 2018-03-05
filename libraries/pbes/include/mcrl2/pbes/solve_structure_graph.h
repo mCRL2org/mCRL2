@@ -209,7 +209,7 @@ std::tuple<std::size_t, std::size_t, structure_graph::vertex_set> get_minmax_ran
 
   std::size_t min_rank = (std::numeric_limits<std::size_t>::max)();
   std::size_t max_rank = 0;
-  vertex_set M; // vertices with minimal rank
+  std::vector<const vertex*> M; // vertices with minimal rank
 
   for (const vertex* v: V)
   {
@@ -224,14 +224,14 @@ std::tuple<std::size_t, std::size_t, structure_graph::vertex_set> get_minmax_ran
         M.clear();
         min_rank = v->rank;
       }
-      M.insert(v);
+      M.push_back(v);
     }
     if (v->rank > max_rank)
     {
       max_rank = v->rank;
     }
   }
-  auto result = std::make_tuple(min_rank, max_rank, M);
+  auto result = std::make_tuple(min_rank, max_rank, vertex_set(M.begin(), M.end()));
   return result;
 }
 
@@ -253,15 +253,12 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
 
   auto result = solve_recursive(V);
 
-  std::string VminusA = pp(V, false);
-
   // add A to V
   for (const structure_graph::vertex* v: changed)
   {
     v->enabled = true;
   }
 
-  mCRL2log(log::debug) << "<solve_recursive> V = " << pp(V, false) << " A = " << pp(A) << " V - A = " << VminusA << " Wconj = " << pp(result.first) << " Wdisj = " << pp(result.second) << std::endl;
   return result;
 }
 
