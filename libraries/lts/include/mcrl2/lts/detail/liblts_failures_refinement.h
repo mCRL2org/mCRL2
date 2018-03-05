@@ -20,6 +20,7 @@
 #ifndef _LIBLTS_FAILURES_REFINEMENT_H
 #define _LIBLTS_FAILURES_REFINEMENT_H
 
+#include "unordered_set"
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 #include "mcrl2/lts/detail/counter_example.h"
 
@@ -344,6 +345,7 @@ bool destructive_refinement_checker(
       if (refinement==failures || refinement==failures_divergence)
       { 
         detail::label_type offending_action=std::size_t(-1);
+        // if refusals(impl) not contained in refusals(spec) then 
         if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache,offending_action,l1,!generate_counter_example.is_dummy()))   
         {
           std::vector<detail::label_type> counter_example_extension;
@@ -588,17 +590,18 @@ namespace detail
               const LTS_TYPE& l,
               const bool provide_a_counter_example)
   {
+    if (!weak_property_cache.stable(impl)) return true; // Checking in case of instability is not necessary, but rather time consuming. 
+
     // This function calculates whether refusals(impl) are not included in the refusals(spec).
     // This is equivalent to:
     // There is a tau-reachable stable state s' from impl, such that for each tau-reachable stable state s''
     // from any of the states in spec: enable(s'')\enable(s') is not empty.
 
     // First calculate the refusal sets reachable from spec.
-    
     const set_of_states& tau_reachable_states_of_the_specification=calculate_tau_reachable_states(spec,weak_property_cache);
 
     // Now walk through the tau-reachable stable states s' of impl.
-    static set_of_states visited;
+    static std::unordered_set<state_type> visited;
     assert(visited.empty());
     visited.insert(impl);
     static std::stack < state_type > todo_stack;
@@ -607,6 +610,7 @@ namespace detail
 
     while (todo_stack.size()>0)
     {
+// std::cerr << "STACKSIZE " << todo_stack.size() << "\n";
       const state_type current_state=todo_stack.top();
       todo_stack.pop();
       if (weak_property_cache.stable(current_state))
