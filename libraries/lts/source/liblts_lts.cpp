@@ -11,7 +11,6 @@
 #include <string>
 #include <cstring>
 #include <sstream>
-#include "mcrl2/core/nil.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/io.h"
@@ -150,9 +149,9 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
                const action_labels_t& action_label_list)
       : aterm_appl(lts_header(),
                    aterm_appl(meta_data_header(),
-                              ts.has_data() ? data::detail::data_specification_to_aterm(ts.data()) : core::nil(),
-                              ts.has_process_parameters() ? static_cast<aterm>(ts.process_parameters()) : core::nil(),
-                              ts.has_action_label_declarations() ? static_cast<aterm>(ts.action_label_declarations()) : core::nil(),
+                              data::detail::data_specification_to_aterm(ts.data()),
+                              ts.process_parameters(),
+                              ts.action_label_declarations(),
                               aterm_appl(num_of_states_labels_and_initial_state(),
                                          aterm_int(ts.num_states()),
                                          aterm_int(ts.num_action_labels()),
@@ -229,36 +228,18 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
                              data::detail::remove_index(action_label_declarations,cache));
     }
 
-    bool has_data() const
-    {
-      return meta_data()[0]!=core::nil();
-    } 
-
     const data::data_specification data() const
     {
-      assert(meta_data()[0]!=core::nil());
       return data::data_specification(down_cast<aterm_appl>(meta_data()[0]));
     }
     
-    bool has_process_parameters() const
-    {
-      return meta_data()[1]!=core::nil();
-    } 
-
     const data::variable_list process_parameters() const
     {
-      assert(meta_data()[1]!=core::nil());
       return down_cast<data::variable_list>(meta_data()[1]);
     }
     
-    bool has_action_labels() const
-    {
-      return meta_data()[2]!=core::nil();
-    } 
-
     const process::action_label_list action_label_declarations() const
     {
-      assert(meta_data()[2]!=core::nil());
       return down_cast<process::action_label_list>(meta_data()[2]);
     }
 
@@ -370,20 +351,11 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
   input=aterm(); // The input is a large term. We do not need it anymore. 
   input_lts.add_indices();  // Add indices to certain term types, such as variables, and process/pbes names. 
   
-  if (input_lts.has_data())
-  {
-    l.set_data(input_lts.data());
-  }
+  l.set_data(input_lts.data());
 
-  if (input_lts.has_process_parameters())
-  {
-    l.set_process_parameters(input_lts.process_parameters());
-  }
+  l.set_process_parameters(input_lts.process_parameters());
 
-  if (input_lts.has_action_labels())
-  {
-    l.set_action_label_declarations(input_lts.action_label_declarations());
-  }
+  l.set_action_label_declarations(input_lts.action_label_declarations());
   
   aterm_probabilistic_transition_list input_transitions=input_lts.transitions();
   while (input_transitions.function()!= transition_empty_header()) 

@@ -213,51 +213,28 @@ namespace detail
 class lts_lts_base
 {
   protected:
-    bool m_has_valid_data_spec;
     data::data_specification m_data_spec;
-    bool m_has_valid_parameters;
     data::variable_list m_parameters;
-    bool m_has_valid_action_decls;
     process::action_label_list m_action_decls;
 
   public:
     /// \brief Default constructor
     lts_lts_base()
-    : m_has_valid_data_spec(false),
-      m_has_valid_parameters(false),
-      m_has_valid_action_decls(false)
     {}
 
     /// \brief Copy constructor
     lts_lts_base(const lts_lts_base& l)
-    : m_has_valid_data_spec(l.m_has_valid_data_spec),
-      m_data_spec(l.m_data_spec),
-      m_has_valid_parameters(l.m_has_valid_parameters),
+    : m_data_spec(l.m_data_spec),
       m_parameters(l.m_parameters),
-      m_has_valid_action_decls(l.m_has_valid_action_decls),
       m_action_decls(l.m_action_decls) 
     {}
 
     void swap(lts_lts_base& l)
     {
-      bool aux=m_has_valid_data_spec;
-      m_has_valid_data_spec=l.m_has_valid_data_spec;
-      l.m_has_valid_data_spec=aux;
-      
       const data::data_specification auxd=m_data_spec;
       m_data_spec=l.m_data_spec;
       l.m_data_spec=auxd;
-      
-      aux=m_has_valid_parameters;
-      m_has_valid_parameters=l.m_has_valid_parameters;
-      l.m_has_valid_parameters=aux;
-      
       m_parameters.swap(l.m_parameters);
-      
-      aux=m_has_valid_action_decls;
-      m_has_valid_action_decls=l.m_has_valid_action_decls;
-      l.m_has_valid_action_decls=aux;
-      
       m_action_decls.swap(l.m_action_decls);
     }
 
@@ -271,22 +248,13 @@ class lts_lts_base
     */
     const data::data_specification& data() const
     {
-      assert(m_has_valid_data_spec);
       return m_data_spec;
-    }
-
-    /** \brief Indicates whether the labels in lts_extra is valid
-    */
-    bool has_action_label_declarations() const
-    {
-      return m_has_valid_action_decls;
     }
 
     /** \brief Return action label declarations stored in this LTS.
     */
     const process::action_label_list& action_label_declarations() const
     {
-      assert(m_has_valid_action_decls);
       return m_action_decls;
     }
 
@@ -295,15 +263,7 @@ class lts_lts_base
     */
     void set_action_label_declarations(const process::action_label_list& decls)
     {
-      m_has_valid_action_decls=true;
       m_action_decls=decls;
-    }
-
-    /** \brief Indicates whether the data in lts_extra is valid
-    */
-    bool has_data() const
-    {
-      return m_has_valid_data_spec;
     }
 
     /** \brief Set the mCRL2 data specification of this LTS.
@@ -311,22 +271,13 @@ class lts_lts_base
     */
     void set_data(const data::data_specification& spec)
     {
-      m_has_valid_data_spec=true;
       m_data_spec=spec;
-    }
-
-    /** \brief Indicates whether the process parameters are valid
-    */
-    bool has_process_parameters() const
-    {
-      return m_has_valid_parameters;
     }
 
     /** \brief Return the process parameters stored in this LTS.
     */
     const data::variable_list& process_parameters() const
     {
-      assert(m_has_valid_parameters);
       return m_parameters;
     }
 
@@ -336,7 +287,6 @@ class lts_lts_base
     const data::variable& process_parameter(std::size_t i) const
     {
       assert(i<m_parameters.size());
-      assert(m_has_valid_parameters);
       data::variable_list::const_iterator j=m_parameters.begin();
       for(std::size_t c=0; c!=i; ++j, ++c)
       {}
@@ -349,7 +299,6 @@ class lts_lts_base
     */
     void set_process_parameters(const data::variable_list& params)
     {
-      m_has_valid_parameters=true;
       m_parameters=params;
     }
 
