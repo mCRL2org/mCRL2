@@ -26,20 +26,22 @@ namespace detail {
 // Part 1: functions for creating function symbols.
 //----------------------------------------------------------------------------------------------//
 
-// We use a deque here, and not a vector, as a vector is relocated in
-// memory, which means that function_symbol_DataAppl and function_symbol_DataAppl_helper
+// We use a vector of pointers here, and not a vector of objects. The latter would
+// result in references becoming invalid when the vector is resized, i.e., when a new
+// element is added. That would mean that function_symbol_DataAppl and function_symbol_DataAppl_helper
 // cannot deliver a reference.
-extern std::deque<atermpp::function_symbol> function_symbols_DataAppl;
+// Another solution used in the past is a deque of objects. That turned out to be somewhat slower.
+extern std::vector<atermpp::function_symbol*> function_symbols_DataAppl;
 
 inline
 const atermpp::function_symbol& function_symbol_DataAppl_helper(std::size_t i)
 {
   do
   {
-    function_symbols_DataAppl.push_back(atermpp::function_symbol("DataAppl", function_symbols_DataAppl.size()));
+    function_symbols_DataAppl.push_back(new atermpp::function_symbol("DataAppl", function_symbols_DataAppl.size()));
   }
   while (i >= function_symbols_DataAppl.size());
-  return function_symbols_DataAppl[i];
+  return *function_symbols_DataAppl[i];
 }
 
 inline
@@ -51,7 +53,7 @@ const atermpp::function_symbol& function_symbol_DataAppl(std::size_t i)
     // will be inlined.
     return function_symbol_DataAppl_helper(i);
   }
-  return function_symbols_DataAppl[i];
+  return *function_symbols_DataAppl[i];
 }
 
 inline
@@ -63,7 +65,7 @@ bool gsIsDataAppl(const atermpp::aterm_appl& Term)
 inline
 bool gsIsDataAppl_no_check(const atermpp::aterm_appl& Term)
 {
-  return Term.function() == function_symbols_DataAppl[Term.function().arity()];
+  return Term.function() == *function_symbols_DataAppl[Term.function().arity()];
 }
 
 // DataVarIdNoIndex
