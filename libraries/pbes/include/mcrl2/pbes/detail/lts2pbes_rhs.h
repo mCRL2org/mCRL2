@@ -148,6 +148,9 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
       s_list { data::variable(id_generator("s"), data::sort_nat::nat()) },
       t_list { data::variable(id_generator("t"), data::sort_nat::nat()) }
   {
+    std::size_t n = lts0.get_transitions().size();
+    Zpos = std::vector<propositional_variable>(n);
+    Zneg = std::vector<propositional_variable>(n);
     for (const auto& p: lts1.state_map())
     {
       for (const lts2pbes_lts::edge& e: p.second)
@@ -157,8 +160,8 @@ struct lts2pbes_counter_example_parameters: public lts2pbes_parameters
         std::string suffix = utilities::number2string(e.index) + "_" + multi_action_name(ai);
         core::identifier_string pos = id_generator("Zpos_" + suffix);
         core::identifier_string neg = id_generator("Zneg_" + suffix);
-        Zpos.push_back(propositional_variable(pos, s_list + actvars + t_list));
-        Zneg.push_back(propositional_variable(neg, s_list + actvars + t_list));
+        Zpos[e.index] = propositional_variable(pos, s_list + actvars + t_list);
+        Zneg[e.index] = propositional_variable(neg, s_list + actvars + t_list);
       }
     }
   }
