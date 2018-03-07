@@ -13,10 +13,6 @@
 #define MCRL2_DATA_STANDARD_UTILITY_H
 
 #include "mcrl2/utilities/detail/join.h"
-
-// Workaround for OS X with Apples patched gcc 4.0.1
-#undef nil
-
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/int.h"
