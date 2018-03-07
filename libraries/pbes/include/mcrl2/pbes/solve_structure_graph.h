@@ -38,14 +38,16 @@ bool contains(const structure_graph::vertex_set& V, const structure_graph::verte
 }
 
 // Returns true if the vertex u satisfies the conditions for being added to the attractor set A.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
 inline
-bool is_attractor(const structure_graph::vertex& u, const structure_graph::vertex_set& A, structure_graph::decoration_type decoration_self, structure_graph::decoration_type decoration_other)
+bool is_attractor(const structure_graph::vertex& u, const structure_graph::vertex_set& A, int alpha)
 {
-  if (u.decoration != decoration_self)
+  if (u.decoration != alpha)
   {
     return true;
   }
-  if (u.decoration != decoration_other)
+  if (u.decoration != (1 - alpha))
   {
     for (const structure_graph::vertex* v: u.successors)
     {
@@ -60,8 +62,10 @@ bool is_attractor(const structure_graph::vertex& u, const structure_graph::verte
 }
 
 // Computes the conjunctive attractor set, by extending A.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
 inline
-structure_graph::vertex_set compute_attractor_set(structure_graph::vertex_set A, structure_graph::decoration_type decoration_self, structure_graph::decoration_type decoration_other)
+structure_graph::vertex_set compute_attractor_set(structure_graph::vertex_set A, int alpha)
 {
   typedef structure_graph::vertex vertex;
 
@@ -84,10 +88,10 @@ structure_graph::vertex_set compute_attractor_set(structure_graph::vertex_set A,
     todo.erase(todo.begin());
     assert(!contains(A, u));
 
-    if (is_attractor(*u, A, decoration_other, decoration_self))
+    if (is_attractor(*u, A, 1 - alpha))
     {
       // set strategy
-      if (u->decoration != decoration_other)
+      if (u->decoration != (1 - alpha))
       {
         for (const vertex* w: u->successors)
         {
@@ -268,13 +272,12 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   std::size_t m = std::get<0>(q);
   const vertex_set& U = std::get<2>(q);
 
-  structure_graph::decoration_type decoration_self  = (m % 2 == 0) ? structure_graph::d_disjunction : structure_graph::d_conjunction;
-  structure_graph::decoration_type decoration_other = (m % 2 == 0) ? structure_graph::d_conjunction : structure_graph::d_disjunction;
+  int alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
   // set strategy
   for (const vertex* u: U)
   {
-    if (u->decoration == decoration_self)
+    if (u->decoration == alpha)
     {
       auto v = succ(u, U);
       if (v)
@@ -287,7 +290,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
 
   if (m % 2 == 0)
   {
-    vertex_set A = compute_attractor_set(U, decoration_self, decoration_other);
+    vertex_set A = compute_attractor_set(U, alpha);
     std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
     if (is_empty(Wconj1))
     {
@@ -296,14 +299,14 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
     else
     {
-      vertex_set B = compute_attractor_set(Wconj1, decoration_other, decoration_self);
+      vertex_set B = compute_attractor_set(Wconj1, 1 - alpha);
       std::tie(Wconj, Wdisj) = solve_recursive(V, B);
       Wconj = set_union(Wconj, B);
     }
   }
   else
   {
-    vertex_set A = compute_attractor_set(U, decoration_self, decoration_other);
+    vertex_set A = compute_attractor_set(U, alpha);
     std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
     if (is_empty(Wdisj1))
     {
@@ -312,7 +315,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
     else
     {
-      vertex_set B = compute_attractor_set(Wdisj1, decoration_other, decoration_self);
+      vertex_set B = compute_attractor_set(Wdisj1, 1 - alpha);
       std::tie(Wconj, Wdisj) = solve_recursive(V, B);
       Wdisj = set_union(Wdisj, B);
     }
@@ -352,11 +355,11 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   // extend Vconj and Vdisj
   if (!Vconj.empty())
   {
-    Vconj = compute_attractor_set(Vconj, structure_graph::d_conjunction, structure_graph::d_disjunction);
+    Vconj = compute_attractor_set(Vconj, 1);
   }
   if (!Vdisj.empty())
   {
-    Vdisj = compute_attractor_set(Vdisj, structure_graph::d_disjunction, structure_graph::d_conjunction);
+    Vdisj = compute_attractor_set(Vdisj, 0);
   }
   log_vertex_set(Vconj, "Vconj after extension");
   log_vertex_set(Vdisj, "Vdisj after extension");

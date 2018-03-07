@@ -35,7 +35,11 @@ class structure_graph
   public:
     enum decoration_type
     {
-      d_conjunction, d_disjunction, d_true, d_false, d_none
+      d_disjunction = 0,
+      d_conjunction = 1,
+      d_true,
+      d_false,
+      d_none
     };
 
     struct vertex
