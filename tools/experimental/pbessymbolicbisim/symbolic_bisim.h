@@ -37,9 +37,6 @@ class symbolic_bisim_algorithm
 {
   typedef rewriter::substitution_type substitution_t;
   typedef std::pair< pbes_system::propositional_variable, data_expression > block_t;
-  typedef pbes_system::detail::ppg_summand summand_type_t;
-  typedef pbes_system::detail::ppg_equation equation_type_t;
-  typedef pbes_system::detail::ppg_pbes pbes_type_t;
 
 protected:
   rewriter rewr;
@@ -178,7 +175,7 @@ protected:
       const std::set<verti> &operator[](std::size_t i) const { return sccs[i]; }
 
       /*! Add a strongly connected component to the list.
-          @param scc an array of length `size` giving indices of the vertices 
+          @param scc an array of length `size` giving indices of the vertices
           @param size the size of the component
           @return zero */
       int operator()(const verti scc[], std::size_t size)
@@ -284,7 +281,7 @@ public:
   void run()
   {
     mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
-    const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = 
+    const std::chrono::time_point<std::chrono::high_resolution_clock> t_start =
       std::chrono::high_resolution_clock::now();
 
     mCRL2log(log::verbose) << m_spec << std::endl;
@@ -298,7 +295,7 @@ public:
       double total_pg_time = 0.0;
       do
       {
-        const std::chrono::time_point<std::chrono::high_resolution_clock> t_start_pg_solver = 
+        const std::chrono::time_point<std::chrono::high_resolution_clock> t_start_pg_solver =
           std::chrono::high_resolution_clock::now();
 
         ParityGame pg;
@@ -317,13 +314,13 @@ public:
         num_iterations++;
         latest_winner = pg.winner(solution,0);
         mCRL2log(log::status) << "End of iteration " << num_iterations << ", " << (latest_winner == PLAYER_EVEN ? "positive" : "negative")
-         << " proof graph has size " << proof_graph.size() 
+         << " proof graph has size " << proof_graph.size()
          << ", total amount of blocks " << (m_partition.get_proof_blocks().size() + m_partition.get_other_blocks().size()) << "\n";
         total_pg_time += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start_pg_solver).count();
       } while(!m_partition.refine_n_steps(m_num_refine_steps));
-      mCRL2log(log::info) << "Partition refinement completed in " << 
-          std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << 
-          " seconds.\n" << 
+      mCRL2log(log::info) << "Partition refinement completed in " <<
+          std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
+          " seconds.\n" <<
           "Time spent on PG solving: " << total_pg_time << " seconds" << std::endl;
     }
     else
@@ -336,8 +333,8 @@ public:
       latest_winner = pg.winner(solution,0);
 
       mCRL2log(log::status) << "Amount of blocks " << m_partition.get_proof_blocks().size() << "\n";
-      mCRL2log(log::info) << "Partition refinement completed in " << 
-          std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << 
+      mCRL2log(log::info) << "Partition refinement completed in " <<
+          std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
           " seconds.\n" << std::endl;
     }
 

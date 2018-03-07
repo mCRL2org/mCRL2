@@ -33,7 +33,7 @@ protected:
   }
 
 public:
-  simplifier_identity(rewriter r, rewriter pr)
+  simplifier_identity(const rewriter& r, const rewriter& pr)
   : super(r, pr)
   {}
 

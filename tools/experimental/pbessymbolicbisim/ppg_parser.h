@@ -40,9 +40,9 @@ protected:
   propositional_variable_instantiation m_new_state;
 
 public:
-  ppg_summand(){}
+  ppg_summand() = default;
 
-  ppg_summand(const pbes_expression& e)
+  explicit ppg_summand(const pbes_expression& e)
   {
     pbes_expression expr = e;
     if(is_exists(expr) || is_forall(expr))
@@ -53,7 +53,7 @@ public:
     m_condition = data::sort_bool::true_();
     if(is_or(expr) || is_and(expr))
     {
-      pbes_expression lhs = accessors::left(expr);
+      const pbes_expression& lhs = accessors::left(expr);
       m_condition = atermpp::down_cast<data::data_expression>(pbes2data(lhs));
       if(is_or(expr))
       {
@@ -95,9 +95,9 @@ public:
     return result;
   }
 
-  const bool operator<(const ppg_summand& summ) const
+  bool operator<(const ppg_summand& summ) const
   {
-    return m_quantification_domain <  summ.m_quantification_domain || 
+    return m_quantification_domain <  summ.m_quantification_domain ||
            (m_quantification_domain == summ.m_quantification_domain && m_condition <  summ.m_condition) ||
            (m_quantification_domain == summ.m_quantification_domain && m_condition == summ.m_condition && m_new_state < summ.m_new_state);
   }
@@ -113,13 +113,13 @@ protected:
 
 public:
 
-  ppg_equation(){}
+  ppg_equation() = default;
 
   ppg_equation(const pbes_equation& eq, const core::identifier_string& x_false_name, const core::identifier_string& x_true_name)
   : m_symbol(eq.symbol())
   , m_var(eq.variable())
   {
-    pbes_expression rhs = eq.formula();
+    const pbes_expression& rhs = eq.formula();
     data::data_expression simple_formula;
     if(is_simple_expression(rhs))
     {
@@ -141,7 +141,7 @@ public:
         }
         else
         {
-          m_summands.push_back(ppg_summand(expr));
+          m_summands.emplace_back(expr);
         }
       }
     }
@@ -149,7 +149,7 @@ public:
     {
       m_is_conjunctive = true;
       simple_formula = data::sort_bool::true_();
-      m_summands.push_back(ppg_summand(rhs));
+      m_summands.emplace_back(rhs);
     }
     else if(is_or(rhs))
     {
@@ -165,7 +165,7 @@ public:
         }
         else
         {
-          m_summands.push_back(ppg_summand(expr));
+          m_summands.emplace_back(expr);
         }
       }
     }
@@ -173,15 +173,15 @@ public:
     {
       m_is_conjunctive = false;
       simple_formula = data::sort_bool::false_();
-      m_summands.push_back(ppg_summand(rhs));
+      m_summands.emplace_back(rhs);
     }
     else if(is_propositional_variable_instantiation(rhs))
     {
-      m_summands.push_back(ppg_summand(data::variable_list(), data::sort_bool::true_(), propositional_variable_instantiation(rhs)));
+      m_summands.emplace_back(data::variable_list(), data::sort_bool::true_(), propositional_variable_instantiation(rhs));
     }
 
     // Build a summand using the simple formula
-    if(!(( m_is_conjunctive && data::sort_bool::true_() == simple_formula) || 
+    if(!(( m_is_conjunctive && data::sort_bool::true_() == simple_formula) ||
          (!m_is_conjunctive && data::sort_bool::false_() == simple_formula) ||
          simple_formula == data::data_expression()))
     {
@@ -190,14 +190,14 @@ public:
         simple_formula = data::sort_bool::not_(simple_formula);
       }
       propositional_variable_instantiation next_state(m_is_conjunctive ? x_false_name : x_true_name, data::data_expression_list());
-      m_summands.push_back(ppg_summand(data::variable_list(), simple_formula, next_state));
+      m_summands.emplace_back(data::variable_list(), simple_formula, next_state);
     }
     // Add a summand for X_true or X_false to ensure the underlying BES is in SRF
     // This extra summand does not change the solution
-    m_summands.push_back(ppg_summand(
+    m_summands.emplace_back(
         data::variable_list(),
         data::sort_bool::true_(),
-        propositional_variable_instantiation(m_is_conjunctive ? x_true_name : x_false_name, data::data_expression_list())));
+        propositional_variable_instantiation(m_is_conjunctive ? x_true_name : x_false_name, data::data_expression_list()));
   }
 
   const fixpoint_symbol& symbol() const
@@ -233,9 +233,9 @@ public:
     return result;
   }
 
-  const bool operator<(const ppg_equation& eq) const
+  bool operator<(const ppg_equation& eq) const
   {
-    return m_symbol <  eq.m_symbol || 
+    return m_symbol <  eq.m_symbol ||
            (m_symbol == eq.m_symbol && m_var <  eq.m_var) ||
            (m_symbol == eq.m_symbol && m_var == eq.m_var && m_is_conjunctive < eq.m_is_conjunctive) ||
            (m_symbol == eq.m_symbol && m_var == eq.m_var && m_is_conjunctive == eq.m_is_conjunctive && m_summands < eq.m_summands);
@@ -251,9 +251,9 @@ protected:
   std::set<data::variable> m_global_variables;
 
 public:
-  ppg_pbes(){}
+  ppg_pbes() = default;
 
-  ppg_pbes(const pbes& p)
+  explicit ppg_pbes(const pbes& p)
   : m_initial_state(p.initial_state())
   , m_data(p.data())
   , m_global_variables(p.global_variables())
@@ -272,19 +272,19 @@ public:
     core::identifier_string x_true_name("X_true");
     for(const pbes_equation& eq: q.equations())
     {
-      m_equations.push_back(ppg_equation(eq, x_false_name, x_true_name));
+      m_equations.emplace_back(eq, x_false_name, x_true_name);
     }
-    m_equations.push_back(ppg_equation(
-      pbes_equation(
-        fixpoint_symbol::nu(), 
-        propositional_variable(x_true_name, data::variable_list()), 
-        propositional_variable_instantiation(x_true_name, data::data_expression_list())), 
+    m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::nu(); }).base(),
+      ppg_equation(pbes_equation(
+        fixpoint_symbol::nu(),
+        propositional_variable(x_true_name, data::variable_list()),
+        propositional_variable_instantiation(x_true_name, data::data_expression_list())),
       x_false_name, x_true_name));
-    m_equations.push_back(ppg_equation(
-      pbes_equation(
-        fixpoint_symbol::mu(), 
-        propositional_variable(x_false_name, data::variable_list()), 
-        propositional_variable_instantiation(x_false_name, data::data_expression_list())), 
+    m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::mu(); }).base(),
+      ppg_equation(pbes_equation(
+        fixpoint_symbol::mu(),
+        propositional_variable(x_false_name, data::variable_list()),
+        propositional_variable_instantiation(x_false_name, data::data_expression_list())),
       x_false_name, x_true_name));
   }
 

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file symbolic_bisim.h
+/// \file partition.h
 
 
 #ifndef MCRL2_PBESSYMBOLICBISIM_PARTITION_H
@@ -42,6 +42,7 @@
 #define RED(S)    "\033[" S ";31m"
 #define NORMAL    "\033[0;0m"
 #include "ppg_parser.h"
+#include "block.h"
 
 
 namespace mcrl2
@@ -51,212 +52,71 @@ namespace data
 
 class dependency_graph_partition
 {
-  typedef rewriter::substitution_type substitution_t;
-  typedef std::pair< pbes_system::propositional_variable, data_expression > block_t;
-  typedef pbes_system::detail::ppg_summand summand_type_t;
+  typedef block block_t;
   typedef pbes_system::detail::ppg_equation equation_type_t;
-  typedef pbes_system::detail::ppg_pbes pbes_type_t;
 
 protected:
-  pbes_system::detail::ppg_pbes m_spec;
+  const pbes_system::detail::ppg_pbes m_spec;
 
-  rewriter rewr;
-  rewriter proving_rewr;
+  data_manipulators m_dm;
 
   std::list< block_t >      m_proof_blocks;
   std::list< block_t >      m_other_blocks;
-  std::map<pbes_system::propositional_variable, simplifier*>                    simpl;
-  smt::solver        smt_solver;
-  bool m_contains_reals;
 
-  typedef std::set< std::tuple< block_t, block_t, summand_type_t > > refinement_cache_t;
-  refinement_cache_t refinement_cache;
-  typedef std::unordered_map< std::pair< block_t, block_t >, bool, std::hash< std::pair<std::pair<atermpp::aterm, atermpp::aterm>,std::pair<atermpp::aterm, atermpp::aterm>>> > reachability_cache_t;
-  reachability_cache_t reachability_cache;
-  typedef std::map< std::tuple< block_t, block_t, summand_type_t >, bool> transition_cache_t;
-  transition_cache_t transition_cache;
+  split_cache<block>* m_block_cache;
+  split_cache<subblock>* m_subblock_cache;
+  std::map< pbes_system::detail::ppg_equation, priority_t > m_rank_map;
 
-  std::string pp(const block_t& block)
+  elements_iterator< subblock, std::list< std::list<subblock> >> get_subblock_iterator(std::list< std::list<subblock> >& subblocks)
   {
-    std::ostringstream out;
-    out << block.first.name() << " - " << data::pp(rewr(block.second));
-    return out.str();
+    for(const block& b: m_proof_blocks)
+    {
+      subblocks.push_back(b.subblocks());
+    }
+    for(const block& b: m_other_blocks)
+    {
+      subblocks.push_back(b.subblocks());
+    }
+    return elements_iterator< subblock, std::list< std::list<subblock>>>(subblocks);
   }
 
   /**
-   * \brief Split block phi_k on phi_l wrt summand as
+   * \brief Split block phi_k on phi_l
    */
-  bool split_block(const block_t phi_k, const block_t phi_l, const equation_type_t& eq, const summand_type_t& cl)
+  bool split_block(const block_t& phi_k, const block_t& phi_l)
   {
-    if(refinement_cache.find(std::make_tuple(phi_k, phi_l, cl)) != refinement_cache.end())
+    if(m_block_cache->check_refinement(phi_k, phi_l))
     {
-      // This split has already been tried before.
+      // This split has already been tried before
       return false;
     }
-    // Search the cache for information on this transition
-    if(!transition_exists(phi_k, phi_l, cl))
+    if(!phi_k.has_transition(phi_l))
     {
-      // Cache entry found
       return false;
     }
 
-    data_expression transition_exists = one_point_rule_rewrite(quantifiers_inside_rewrite(
-      make_abstraction(exists_binder(), cl.quantification_domain(),
-        sort_bool::and_(
-          cl.condition(),
-          make_application(phi_l.second, cl.new_state().parameters())
-        )
-      )));
-    if(m_contains_reals)
+    const std::pair<block, block> split_result = phi_k.split(phi_l);
+    if(split_result.first.is_empty() || split_result.second.is_empty())
     {
-      transition_exists = replace_data_expressions(transition_exists, fourier_motzkin_sigma(rewr), true);
-    }
-    transition_exists = one_point_rule_rewrite(rewr(transition_exists));
-    data_expression block2_body = rewr(
-        sort_bool::and_(
-          make_application(phi_k.second, eq.variable().parameters()),
-          sort_bool::not_(transition_exists)
-        ));
-    if(!is_satisfiable(eq.variable().parameters(), block2_body))
-    {
-      // There are no (X,v) without transitions in phi_k
-      // Therefore, we cannot split
+      // Split failed
       return false;
     }
-    data_expression block2 = 
-      make_abstraction(lambda_binder(), eq.variable().parameters(),
-        block2_body
-      );
-    block2 = simpl.at(phi_k.first)->apply(block2);
-    data_expression block1 = 
-      make_abstraction(lambda_binder(), eq.variable().parameters(),
-        sort_bool::and_(
-          make_application(phi_k.second, eq.variable().parameters()),
-          transition_exists
-        )
-      );
 
-    block1 = simpl.at(phi_k.first)->apply(block1);
-    if(block1 == make_abstraction(lambda_binder(), eq.variable().parameters(), sort_bool::false_()))
-    {
-      data_expression is_succ =
-          sort_bool::and_(
-            make_application(phi_k.second, phi_k.first.parameters()),
-            sort_bool::and_(
-              cl.condition(),
-              make_application(phi_l.second, cl.new_state().parameters())
-            )
-          )
-        ;
-      std::cout << is_succ << std::endl;
-      std::cout << simpl.at(phi_k.first)->apply(make_abstraction(lambda_binder(), eq.variable().parameters(),is_succ)) << std::endl;
+    mCRL2log(log::verbose) << "Split " << phi_k << "\nwrt " << phi_l << std::endl;
 
-      // smt::smt_problem problem;
-      // for(const variable& v: phi_k.first.parameters() + cl.quantification_domain())
-      // {
-      //   problem.add_variable(v);
-      // }
-      // problem.add_assertion(is_succ);
-      // smt::data_specification* spec = new smt::smt4_data_specification(m_spec.data());
-      // std::string smt_instance(spec->generate_data_specification() + "\n" + spec->generate_smt_problem(problem));
-      throw mcrl2::runtime_error("Found an empty block1\n" + pp(phi_k) + "\n" + pp(phi_l) + "\n"
-       + pbes_system::detail::pp(cl, eq.is_conjunctive()));
-    }
-    
     // Update the caches and the partition
-    refinement_cache.insert(std::make_tuple(phi_k, phi_l, cl));
+    block_t phi_k_copy(phi_k);
+    block_t phi_l_copy(phi_l);
     m_proof_blocks.remove(phi_k);
-    update_caches(phi_k, std::make_pair(phi_k.first, block1), std::make_pair(phi_k.first, block2));
-    transition_cache.insert(std::make_pair(std::make_tuple(std::make_pair(phi_k.first, block1), phi_l, cl), true));
-    transition_cache.insert(std::make_pair(std::make_tuple(std::make_pair(phi_k.first, block2), phi_l, cl), false));
+    std::vector<std::list<block>> block_vec({m_proof_blocks, m_other_blocks});
+    elements_iterator< block, std::vector<std::list<block>>> block_it(block_vec);
+    m_block_cache->replace_after_split(block_it, block_it.end(), phi_k_copy, split_result.first, split_result.second);
+    m_block_cache->insert_transition(split_result.first, phi_l_copy, true);
+    m_block_cache->insert_transition(split_result.second, phi_l_copy, false);
 
-    // block_tree* logging_node_phi_k = split_logger->find(rewr(phi_k));
-    m_proof_blocks.push_front(std::make_pair(phi_k.first, block1));
-    m_proof_blocks.push_front(std::make_pair(phi_k.first, block2));
-    // logging_node_phi_k->add_child(rewr(block1));
-    // logging_node_phi_k->add_child(rewr(block2));
+    m_proof_blocks.push_front(split_result.first);
+    m_proof_blocks.push_front(split_result.second);
     return true;
-  }
-
-  /**
-   * \brief Update caches, adding information about the new blocks.
-   * \details New entries are deduced from existng entries
-   * refering to phi_k. phi_k is the parent of the new blocks.
-   */
-  void update_caches(const block_t& phi_k, const block_t& block1, const block_t& block2)
-  {
-    for(std::list< block_t >::const_iterator i = m_proof_blocks.begin() != m_proof_blocks.end() ? m_proof_blocks.begin() : m_other_blocks.begin(); i != m_other_blocks.end();)
-    {
-      const block_t& phi_l1 = *i;
-      for(const summand_type_t& cl1: find_equation(phi_l1.first).summands())
-      {
-        transition_cache_t::iterator find_result =
-          transition_cache.find(std::make_tuple(phi_k, phi_l1, cl1));
-        if(find_result != transition_cache.end() && !find_result->second)
-        {
-          // phi_k has no transition to phi_l1 based on cl1.
-          // We add the new blocks to the transition cache
-          transition_cache.insert(std::make_pair(std::make_tuple(block1, phi_l1, cl1), false));
-          transition_cache.insert(std::make_pair(std::make_tuple(block2, phi_l1, cl1), false));
-        }
-        transition_cache.erase(std::make_tuple(phi_k, phi_l1, cl1));
-
-        find_result =
-          transition_cache.find(std::make_tuple(phi_l1, phi_k, cl1));
-        if(find_result != transition_cache.end() && !find_result->second)
-        {
-          // phi_l1 has no transitions to phi_k based on cl1.
-          // We add the new blocks to the transition cache
-          transition_cache.insert(std::make_pair(std::make_tuple(phi_l1, block1, cl1), false));
-          transition_cache.insert(std::make_pair(std::make_tuple(phi_l1, block2, cl1), false));
-        }
-        transition_cache.erase(std::make_tuple(phi_l1, phi_k, cl1));
-
-        if(refinement_cache.find(std::make_tuple(phi_k, phi_l1, cl1)) != refinement_cache.end())
-        {
-          // phi_k is stable wrt phi_l1 and cl1, so new blocks (which are contained in phi_k)
-          // are also stable wrt phi_l1 and cl1.
-          // We add the new blocks to the refinement cache
-          refinement_cache.insert(std::make_tuple(block1, phi_l1, cl1));
-          refinement_cache.insert(std::make_tuple(block2, phi_l1, cl1));
-          refinement_cache.erase(std::make_tuple(phi_k, phi_l1, cl1));
-        }
-        refinement_cache.erase(std::make_tuple(phi_l1, phi_k, cl1));
-        // We now check whether phi_l1 has transitions to the new blocks.
-        // If not, phi_l1 is also stable wrt the new block
-        if(refinement_cache.find(std::make_tuple(phi_l1, block1, cl1)) != refinement_cache.end() &&
-             !transition_exists(phi_l1, block1, cl1))
-        {
-          refinement_cache.insert(std::make_tuple(phi_l1, block1, cl1));
-        }
-        if(refinement_cache.find(std::make_tuple(phi_l1, block2, cl1)) != refinement_cache.end() &&
-             !transition_exists(phi_l1, block2, cl1))
-        {
-          refinement_cache.insert(std::make_tuple(phi_l1, block2, cl1));
-        }
-        reachability_cache.erase(std::make_pair(phi_k, phi_l1));
-        reachability_cache.erase(std::make_pair(phi_l1, phi_k));
-      }
-      ++i;
-      if(i == m_proof_blocks.end())
-      {
-        i = m_other_blocks.begin();
-      }
-    }
-    for(const summand_type_t& cl: find_equation(phi_k.first).summands())
-    {
-      transition_cache.erase(std::make_tuple(phi_k, phi_k, cl));
-    }
-  }
-
-  const equation_type_t& find_equation(const pbes_system::propositional_variable& v)
-  {
-    std::vector<pbes_system::detail::ppg_equation>::const_iterator result = std::find_if(m_spec.equations().begin(), m_spec.equations().end(), [&](const equation_type_t& e){return e.variable() == v;});
-    if(result == m_spec.equations().end())
-    {
-      throw mcrl2::runtime_error("Equation for variable " + core::pp(v.name()) + " not found.\naterm: " + atermpp::pp(v));
-    }
-    return *result;
   }
 
   /**
@@ -267,87 +127,15 @@ protected:
   {
     for(const block_t& phi_k: m_proof_blocks)
     {
-      const equation_type_t& eq = find_equation(phi_k.first);
       for(const block_t& phi_l: m_proof_blocks)
       {
-        for(const summand_type_t& cl: eq.summands())
+        if(split_block(phi_k, phi_l))
         {
-          if(cl.new_state().name() == phi_l.first.name() && split_block(phi_k, phi_l, eq, cl))
-          {
-            return true;
-          }
+          return true;
         }
       }
     } // stop when we have investigated all blocks
     return false;
-  }
-
-  bool is_satisfiable(const variable_list& vars, const data_expression& expr)
-  {
-    smt::smt_problem problem;
-    for(const variable& v: vars)
-    {
-      problem.add_variable(v);
-    }
-    problem.add_assertion(expr);
-    try
-    {
-      return smt_solver.solve(problem);
-    }
-    catch(const smt::translation_error&)
-    {}
-
-    // The SMT solver failed, so we fallback to the rewriter
-    data_expression is_sat = make_abstraction(exists_binder(), vars, expr);
-    is_sat = rewr(one_point_rule_rewrite(quantifiers_inside_rewrite(is_sat)));
-    if(m_contains_reals)
-    {
-      is_sat = rewr(replace_data_expressions(is_sat, fourier_motzkin_sigma(rewr), true));
-    }
-    if(is_sat != sort_bool::true_() && is_sat != sort_bool::false_())
-    {
-      throw mcrl2::runtime_error("Failed to establish whether " + data::pp(expr) + " is satisfiable");
-    }
-    return is_sat == sort_bool::true_();
-  }
-
-  /**
-   * \brief Checks whether a transition between src and dest exists based on as
-   */
-  bool transition_exists(const block_t& src, const block_t& dest, const summand_type_t& cl)
-  {
-    // Check whether the predicate variable of the clause is actually matching
-    if(cl.new_state().name() != dest.first.name())
-    {
-      return false;
-    }
-    // Search the cache for information on this transition
-    transition_cache_t::iterator find_result = transition_cache.find(std::make_tuple(src, dest, cl));
-    if(find_result != transition_cache.end())
-    {
-      // Cache entry found
-      return find_result->second;
-    }
-
-    // This expression expresses whether there is a transition between src and dest based on this summand
-    data_expression is_succ =
-        rewr(sort_bool::and_(
-          make_application(src.second, src.first.parameters()),
-          sort_bool::and_(
-            cl.condition(),
-            rewr(make_application(dest.second, cl.new_state().parameters()))
-          )
-        ))
-      ;
-
-    bool result = is_satisfiable(src.first.parameters() + cl.quantification_domain(), is_succ);
-
-    transition_cache.insert(std::make_pair(std::make_tuple(src, dest, cl), result));
-    if(!result)
-    {
-      refinement_cache.insert(std::make_tuple(src,dest,cl));
-    }
-    return result;
   }
 
   /**
@@ -358,7 +146,7 @@ protected:
   {
     for(const block_t& block: blocks)
     {
-      if(block.first.name() == m_spec.initial_state().name() && rewr(make_application(block.second, m_spec.initial_state().parameters())) == sort_bool::true_())
+      if(block.contains_state(m_spec.initial_state()))
       {
         return block;
       }
@@ -375,16 +163,16 @@ protected:
    */
   void find_reachable_blocks(const bool& only_check_proof_blocks)
   {
-    std::set<block_t> unreachable(m_proof_blocks.begin(),m_proof_blocks.end());
+    std::list<block_t> unreachable(m_proof_blocks.begin(),m_proof_blocks.end());
     if(!only_check_proof_blocks)
     {
-      unreachable.insert(m_other_blocks.begin(), m_other_blocks.end());
+      unreachable.insert(unreachable.end(), m_other_blocks.begin(), m_other_blocks.end());
     }
     std::queue<block_t> open_set;
 
     // Search for the block that contains the initial state
     block_t initial_block = find_initial_block(unreachable);
-    unreachable.erase(unreachable.find(initial_block));
+    unreachable.erase(std::find(unreachable.begin(), unreachable.end(), initial_block));
     open_set.push(initial_block);
     m_proof_blocks.clear();
     if(!only_check_proof_blocks)
@@ -400,45 +188,18 @@ protected:
       open_set.pop();
 
       // Look for possible successors of block in the set of unreachable blocks
-      for(std::set<block_t>::const_iterator i = unreachable.begin(); i != unreachable.end();)
+      for(std::list<block_t>::const_iterator i = unreachable.begin(); i != unreachable.end();)
       {
-        bool transition_found = false;
-        const block_t potential_succ = *i;
-
-        reachability_cache_t::iterator previous_result =
-          reachability_cache.find(std::make_pair(block, potential_succ));
-        if(previous_result != reachability_cache.end())
-        {
-          // Use the information from the cache
-          transition_found = previous_result->second;
-        }
-        else
-        {
-          for(const summand_type_t& cl: find_equation(block.first).summands())
-          {
-            if(transition_exists(block, potential_succ, cl))
-            {
-              transition_found = true;
-              break;
-            }
-          }
-        }
-
-        if(transition_found)
+        if(block.has_transition(*i))
         {
           // A transition was found, so potential_succ is reachable
+          open_set.push(*i);
+          m_proof_blocks.push_back(*i);
           unreachable.erase(i++);
-          open_set.push(potential_succ);
-          m_proof_blocks.push_back(potential_succ);
         }
         else
         {
           ++i;
-        }
-        if(previous_result == reachability_cache.end())
-        {
-          // There was no information in the cache yet, so we add it
-          reachability_cache.insert(std::make_pair(std::make_pair(block, potential_succ), transition_found));
         }
       }
     }
@@ -460,7 +221,7 @@ protected:
         m_other_blocks.push_front(block);
       }
       // split_logger->mark_deleted(rewr(block));
-      mCRL2log(log::verbose) << "  block " << i << "  " << pp(block) << std::endl;
+      mCRL2log(log::verbose) << "  block " << i << "\n" << pp(block) << std::endl;
       i++;
     }
   }
@@ -479,42 +240,23 @@ protected:
     std::map< block_t, bes::boolean_variable > var_map;
     for(const block_t& block: blocks)
     {
-      var_map.insert(std::make_pair(block, bes::boolean_variable(id_gen(std::string(block.first.name())))));
+      var_map.insert(std::make_pair(block, bes::boolean_variable(id_gen(std::string(block.name())))));
     }
 
     std::vector< bes::boolean_equation > equations;
-    for(const equation_type_t& eq: m_spec.equations())
+    for(const block_t& src: blocks)
     {
-      for(const block_t& src: blocks)
+      std::set<bes::boolean_expression> right_hand_side;
+      for(const block_t& dest: blocks)
       {
-        if(eq.variable() == src.first)
+        if(src.has_transition(dest))
         {
-
-          std::set<bes::boolean_expression> right_hand_side;
-          for(const block_t& dest: blocks)
-          {
-            // Find out if there are any transitions at all
-            reachability_cache_t::iterator previous_result =
-              reachability_cache.find(std::make_pair(src, dest));
-            if(previous_result != reachability_cache.end() && !previous_result->second)
-            {
-              // No transition exists between src and dest
-              continue;
-            }
-
-            for(const summand_type_t& cl: find_equation(src.first).summands())
-            {
-              if(transition_exists(src, dest, cl))
-              {
-                right_hand_side.insert(var_map[dest]);
-              }
-            }
-          }
-
-          bes::boolean_expression rhs_expr = eq.is_conjunctive() ? bes::join_and(right_hand_side.begin(), right_hand_side.end()) : bes::join_or(right_hand_side.begin(), right_hand_side.end());
-          equations.push_back(bes::boolean_equation(eq.symbol(), var_map[src], rhs_expr));
+          right_hand_side.insert(var_map[dest]);
         }
       }
+
+      bes::boolean_expression rhs_expr = src.is_conjunctive() ? bes::join_and(right_hand_side.begin(), right_hand_side.end()) : bes::join_or(right_hand_side.begin(), right_hand_side.end());
+      equations.emplace_back(src.fixpoint_symbol(), var_map[src], rhs_expr);
     }
 
     // Search for the initial block
@@ -522,67 +264,42 @@ protected:
     return bes::boolean_equation_system(equations, var_map[initial_block]);
   }
 
-  template <typename Container>
-  void make_pg(ParityGame& pg, const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr)
+  void make_rank_map()
   {
-    std::map< block_t, int > node_map;
-    int i = 0;
-    for(const block_t& block: blocks)
-    {
-      node_map.insert(std::make_pair(block, i));
-      i++;
-    }
-    std::map< pbes_system::detail::ppg_equation, priority_t > rank_map;
-    pbes_system::fixpoint_symbol last_symbol(pbes_system::fixpoint_symbol::nu());
+    pbes_system::fixpoint_symbol previous_symbol(pbes_system::fixpoint_symbol::nu());
     priority_t rank = 0;
     for(const equation_type_t& eq: m_spec.equations())
     {
-      if(eq.symbol() != last_symbol)
+      if(eq.symbol() != previous_symbol)
       {
-        last_symbol = eq.symbol();
+        previous_symbol = eq.symbol();
         rank++;
       }
-      rank_map.insert(std::make_pair(eq, rank));
+      m_rank_map.insert(std::make_pair(eq, rank));
     }
+  }
 
+  inline
+  void make_pg(ParityGame& pg, const std::list<block>& blocks) const
+  {
     StaticGraph::edge_list edges;
     ParityGameVertex* node_attributes = new ParityGameVertex[blocks.size()];
-    for(const block_t& src: blocks)
+    int src_index = 0;
+    for(const auto& src: blocks)
     {
-      const equation_type_t& eq = find_equation(src.first);
-      node_attributes[node_map[src]].player = eq.is_conjunctive() ? player_t::PLAYER_ODD : player_t::PLAYER_EVEN;
-      node_attributes[node_map[src]].priority = rank_map[eq];
+      node_attributes[src_index].player = src.is_conjunctive() ? player_t::PLAYER_ODD : player_t::PLAYER_EVEN;
+      node_attributes[src_index].priority = src.rank(m_rank_map);
 
       bool has_outgoing_edge = false;
-      for(const block_t& dest: blocks)
+      int dest_index = 0;
+      for(const auto& dest: blocks)
       {
-        bool transition_found = false;
-
-        // Find out if there are any transitions at all
-        reachability_cache_t::iterator previous_result =
-          reachability_cache.find(std::make_pair(src, dest));
-        if(previous_result != reachability_cache.end())
+        if(src.has_transition(dest))
         {
-          transition_found = previous_result->second;
-        }
-        else
-        {
-          for(const summand_type_t& cl: eq.summands())
-          {
-            if(transition_exists(src, dest, cl))
-            {
-              transition_found = true;
-              break;
-            }
-          }
-          // There was no information in this cache yet, so we add it
-          reachability_cache.insert(std::make_pair(std::make_pair(src, dest), transition_found));
-        }
-        if(transition_found)
-        {
-          edges.push_back(std::make_pair(node_map[src], node_map[dest]));
+          edges.emplace_back(src_index, dest_index);
           has_outgoing_edge = true;
         }
+        dest_index++;
       }
 
       if(!has_outgoing_edge)
@@ -591,6 +308,7 @@ protected:
         // a summand to either X_true or X_false in every right-hand side
         throw mcrl2::runtime_error("Did not find an outgoing edge for the block " + pp(src));
       }
+      src_index++;
     }
 
     StaticGraph underlying_graph;
@@ -607,40 +325,56 @@ protected:
     int i = 0;
     for(const block_t& block: blocks)
     {
-      mCRL2log(log::verbose) << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(block) << std::endl;
-      // detail::BDD2Dot bddwriter;
-      // bddwriter.output_bdd(atermpp::down_cast<abstraction>(block).body(), ("block" + std::to_string(i) + ".dot").c_str());
-      i++;
+      mCRL2log(log::verbose) << YELLOW(THIN) << "  block " << i << "\n" << NORMAL << block;
+      ++i;
     }
   }
 
-  data_expression make_abstraction(const binder_type& b, const variable_list& vars, const data_expression& expr)
+  void make_initial_partition()
   {
-    return vars.empty() ? expr : abstraction(b, vars, expr);
-  }
+    pbes_system::fixpoint_symbol previous_symbol;
+    std::list<subblock> conjunctive_subblocks;
+    std::list<subblock> disjunctive_subblocks;
+    for(std::vector<equation_type_t>::const_iterator it = m_spec.equations().begin(); it != m_spec.equations().end();)
+    {
+      previous_symbol = it->symbol();
+      (it->is_conjunctive() ? conjunctive_subblocks : disjunctive_subblocks).emplace_back(*it, m_dm, m_subblock_cache);
 
-  template <typename Container>
-  data_expression make_application(const data_expression& func, const Container& args, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
-  {
-    return args.empty() ? func : application(func, args);
+      ++it;
+      if(it == m_spec.equations().end() || it->symbol() != previous_symbol)
+      {
+        if(!conjunctive_subblocks.empty())
+        {
+          m_proof_blocks.emplace_back(conjunctive_subblocks, m_block_cache);
+          conjunctive_subblocks = std::list<subblock>();
+        }
+        if(!disjunctive_subblocks.empty())
+        {
+          m_proof_blocks.emplace_back(disjunctive_subblocks, m_block_cache);
+          disjunctive_subblocks = std::list<subblock>();
+        }
+      }
+    }
   }
 
 public:
 
   dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode)
   : m_spec(spec)
-  , rewr(r)
-  , proving_rewr(pr)
-  , smt_solver(new smt::smt4_data_specification(spec.data()))
+  , m_dm(r, pr, spec.data())
   {
-    m_contains_reals = false;
+    m_dm.contains_reals = false;
     for(const equation_type_t& eq: m_spec.equations())
     {
-      simpl.insert(std::make_pair(eq.variable(), get_simplifier_instance(simpl_mode, rewr, proving_rewr, eq.variable().parameters(), m_spec.data())));
-      m_proof_blocks.push_back(std::make_pair(eq.variable(), make_abstraction(lambda_binder(), eq.variable().parameters(), sort_bool::true_())));
-      m_contains_reals |= std::find_if(eq.variable().parameters().begin(), eq.variable().parameters().end(), 
-        [&](const variable& var) { return var.sort() == sort_real::real_();}) != eq.variable().parameters().end();
+      m_dm.simpl->insert(std::make_pair(eq.variable(), get_simplifier_instance(simpl_mode, m_dm.rewr, m_dm.proving_rewr, eq.variable().parameters(), m_spec.data())));
+      m_dm.contains_reals |= std::find_if(eq.variable().parameters().begin(), eq.variable().parameters().end(),
+        [](const variable& var) { return var.sort() == sort_real::real_();}) != eq.variable().parameters().end();
     }
+    m_block_cache = new split_cache<block>();
+    m_subblock_cache = new split_cache<subblock>();
+    make_initial_partition();
+    make_rank_map();
+    print_partition(m_proof_blocks);
     // Make sure the initial block is the first in the list
     const block_t& initial_block = find_initial_block(m_proof_blocks);
     m_proof_blocks.erase(std::find(m_proof_blocks.begin(), m_proof_blocks.end(), initial_block));

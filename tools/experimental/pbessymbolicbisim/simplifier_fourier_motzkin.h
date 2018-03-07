@@ -46,7 +46,7 @@ protected:
       std::vector< linear_inequality > linear_inequalities;
       for(const data_expression& d: real_conditions[i])
       {
-        linear_inequalities.push_back(linear_inequality(d, rewr));
+        linear_inequalities.emplace_back(d, rewr);
       }
       std::vector< linear_inequality > resulting_inequalities;
       remove_redundant_inequalities(linear_inequalities, resulting_inequalities, rewr);

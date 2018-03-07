@@ -143,7 +143,7 @@ protected:
       return sort_bool::or_(simplify_with_enumeration(sort_bool::left(result)), simplify_with_enumeration(sort_bool::right(result)));
     }
     // Now we deal with the base case of the recursion: a conjunction
-    for(variable v: free_vars)
+    for(const variable& v: free_vars)
     {
       if(dataspec.is_certainly_finite(v.sort()))
       {
@@ -154,7 +154,7 @@ protected:
         data_expression next_result = result;
         int positive_size = 0;
         int negative_size = 0;
-        for(data_expression d: valid_exprs)
+        for(const data_expression& d: valid_exprs)
         {
           data::mutable_indexed_substitution<> sigma;
           sigma[v] = d;
@@ -184,7 +184,7 @@ protected:
   }
 
 public:
-  simplifier_finite_domain(rewriter r, rewriter pr, data_specification dataspec_)
+  simplifier_finite_domain(const rewriter& r, const rewriter& pr, const data_specification& dataspec_)
   : super(r, pr)
   , dataspec(dataspec_)
   {
