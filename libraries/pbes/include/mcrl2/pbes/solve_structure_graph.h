@@ -258,11 +258,6 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
 
   log_vertex_set(V, "solve_recursive input");
 
-  vertex_set Wconj;
-  vertex_set Wdisj;
-  vertex_set Wconj1;
-  vertex_set Wdisj1;
-
   if (is_empty(V))
   {
     return { vertex_set(), vertex_set() };
@@ -288,40 +283,24 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
   }
 
-  if (m % 2 == 0)
+  vertex_set W[2];
+  vertex_set W_1[2];
+
+  vertex_set A = compute_attractor_set(U, alpha);
+  std::tie(W_1[1], W_1[0]) = solve_recursive(V, A);
+  if (is_empty(W_1[1 - alpha]))
   {
-    vertex_set A = compute_attractor_set(U, alpha);
-    std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
-    if (is_empty(Wconj1))
-    {
-      Wconj.clear();
-      Wdisj = set_union(A, Wdisj1);
-    }
-    else
-    {
-      vertex_set B = compute_attractor_set(Wconj1, 1 - alpha);
-      std::tie(Wconj, Wdisj) = solve_recursive(V, B);
-      Wconj = set_union(Wconj, B);
-    }
+    W[alpha] = set_union(A, W_1[alpha]);
+    W[1 - alpha].clear();
   }
   else
   {
-    vertex_set A = compute_attractor_set(U, alpha);
-    std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
-    if (is_empty(Wdisj1))
-    {
-      Wconj = set_union(A, Wconj1);
-      Wdisj.clear();
-    }
-    else
-    {
-      vertex_set B = compute_attractor_set(Wdisj1, 1 - alpha);
-      std::tie(Wconj, Wdisj) = solve_recursive(V, B);
-      Wdisj = set_union(Wdisj, B);
-    }
+    vertex_set B = compute_attractor_set(W_1[1 - alpha], 1 - alpha);
+    std::tie(W[1], W[0]) = solve_recursive(V, B);
+    W[1 - alpha] = set_union(W[1 - alpha], B);
   }
 
-  return { Wconj, Wdisj };
+  return { W[1], W[0] };
 }
 
 // Handles nodes with decoration true or false.
