@@ -287,7 +287,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   vertex_set W_1[2];
 
   vertex_set A = compute_attractor_set(U, alpha);
-  std::tie(W_1[1], W_1[0]) = solve_recursive(V, A);
+  std::tie(W_1[0], W_1[1]) = solve_recursive(V, A);
   if (is_empty(W_1[1 - alpha]))
   {
     W[alpha] = set_union(A, W_1[alpha]);
@@ -296,11 +296,11 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   else
   {
     vertex_set B = compute_attractor_set(W_1[1 - alpha], 1 - alpha);
-    std::tie(W[1], W[0]) = solve_recursive(V, B);
+    std::tie(W[0], W[1]) = solve_recursive(V, B);
     W[1 - alpha] = set_union(W[1 - alpha], B);
   }
 
-  return { W[1], W[0] };
+  return { W[0], W[1] };
 }
 
 // Handles nodes with decoration true or false.
@@ -353,8 +353,8 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     vertex_set Wconj;
     vertex_set Wdisj;
     vertex_set Vunion = set_union(Vconj, Vdisj);
-    std::tie(Wconj, Wdisj) = solve_recursive(V, Vunion);
-    return std::make_pair(set_union(Wconj, Vconj), set_union(Wdisj, Vdisj));
+    std::tie(Wdisj, Wconj) = solve_recursive(V, Vunion);
+    return std::make_pair(set_union(Wdisj, Vdisj), set_union(Wconj, Vconj));
   }
 }
 
@@ -402,7 +402,7 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
     }
   }
   log_vertex_set(Wconj, "Wconj after removal of edges");
-  std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wconj);
+  std::tie(Wdisj1, Wconj1) = solve_recursive_extended(Wconj);
   if (!Wdisj1.empty() || Wconj1 != Wconj)
   {
     log_vertex_set(Wconj1, "Wconj1");
@@ -441,7 +441,7 @@ void check_solve_recursive_solution(structure_graph::vertex_set& Wconj, structur
     }
   }
   log_vertex_set(Wdisj, "Wdisj after removal of edges");
-  std::tie(Wconj1, Wdisj1) = solve_recursive_extended(Wdisj);
+  std::tie(Wdisj1, Wconj1) = solve_recursive_extended(Wdisj);
   if (!Wconj1.empty() || Wdisj1 != Wdisj)
   {
     log_vertex_set(Wconj1, "Wconj1");
@@ -461,7 +461,7 @@ bool solve_structure_graph(const structure_graph& G, bool check_strategy = false
   log_vertex_set(V, "structure graph");
   vertex_set Wconj;
   vertex_set Wdisj;
-  std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
+  std::tie(Wdisj, Wconj) = solve_recursive_extended(V);
 
   const vertex& init = G.initial_vertex();
   mCRL2log(log::debug) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
@@ -656,7 +656,7 @@ std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(c
   structure_graph::vertex_set V = G.vertices();
   vertex_set Wconj;
   vertex_set Wdisj;
-  std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
+  std::tie(Wdisj, Wconj) = solve_recursive_extended(V);
   const vertex& init = G.initial_vertex();
 
   mCRL2log(log::debug) << "Wdisj = " << pp(Wdisj) << std::endl;
@@ -689,7 +689,7 @@ bool solve_structure_graph_with_counter_example(const structure_graph& G, lts::l
   structure_graph::vertex_set V = G.vertices();
   vertex_set Wconj;
   vertex_set Wdisj;
-  std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
+  std::tie(Wdisj, Wconj) = solve_recursive_extended(V);
   const vertex& init = G.initial_vertex();
 
   mCRL2log(log::debug) << "Wdisj = " << pp(Wdisj) << std::endl;
