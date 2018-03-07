@@ -390,10 +390,6 @@ template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<core::builder, Derived>
 {
   typedef add_sort_expressions<core::builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_sort_expressions code ---//
 
@@ -622,10 +618,6 @@ template <typename Derived>
 struct data_expression_builder: public add_data_expressions<core::builder, Derived>
 {
   typedef add_data_expressions<core::builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_data_expressions code ---//
 
@@ -853,10 +845,6 @@ template <typename Derived>
 struct variable_builder: public add_variables<core::builder, Derived>
 {
   typedef add_variables<core::builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_variables code ---//
 

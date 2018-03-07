@@ -13,7 +13,6 @@
 #define MCRL2_CORE_TRAVERSER_H
 
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/nil.h"
 #include <set>
 
 namespace mcrl2
@@ -57,14 +56,8 @@ struct traverser
     }
   }
 
-  // TODO: This dependency on identifier_string and nil should be moved elsewhere...
+  // TODO: This dependency on identifier_string should be moved elsewhere...
   void apply(const core::identifier_string& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).leave(x);
-  }
-
-  void apply(const core::nil& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).leave(x);

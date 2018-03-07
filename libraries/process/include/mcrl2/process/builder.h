@@ -359,10 +359,6 @@ template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
 {
   typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_sort_expressions code ---//
 
@@ -684,10 +680,6 @@ template <typename Derived>
 struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
 {
   typedef add_data_expressions<data::data_expression_builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_data_expressions code ---//
 
@@ -1017,10 +1009,6 @@ template <typename Derived>
 struct variable_builder: public add_variables<data::data_expression_builder, Derived>
 {
   typedef add_variables<data::data_expression_builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_variables code ---//
 
@@ -1334,10 +1322,6 @@ template <typename Derived>
 struct process_expression_builder: public add_process_expressions<core::builder, Derived>
 {
   typedef add_process_expressions<core::builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_process_expressions code ---//
 
@@ -1658,10 +1642,6 @@ template <typename Derived>
 struct process_identifier_builder: public add_process_identifiers<core::builder, Derived>
 {
   typedef add_process_identifiers<core::builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_process_identifiers code ---//
 

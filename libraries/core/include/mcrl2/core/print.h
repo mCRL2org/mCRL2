@@ -171,13 +171,6 @@ struct printer: public core::traverser<Derived>
     derived().leave(x);
   }
 
-  void apply(const core::nil& x)
-  {
-    derived().enter(x);
-    derived().print("nil");
-    derived().leave(x);
-  }
-
   void apply(const atermpp::aterm& x)
   {
     derived().enter(x);
@@ -246,9 +239,6 @@ std::string pp(const T& x)
   stream_printer()(x, out);
   return out.str();
 }
-
-/// \brief Prototypes for aterm overloads
-std::string pp(const nil& x);
 
 } // namespace core
 

@@ -145,10 +145,6 @@ template <typename Derived>
 struct boolean_expression_builder: public add_boolean_expressions<core::builder, Derived>
 {
   typedef add_boolean_expressions<core::builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_boolean_expressions code ---//
 
@@ -277,10 +273,6 @@ template <typename Derived>
 struct boolean_variable_builder: public add_boolean_variables<core::builder, Derived>
 {
   typedef add_boolean_variables<core::builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 //--- end generated add_boolean_variables code ---//
 

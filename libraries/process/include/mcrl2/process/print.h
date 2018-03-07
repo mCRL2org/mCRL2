@@ -299,11 +299,8 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
   {
     derived().enter(x);
     derived().apply(x.action_name());
-    if (!core::is_nil(x.name()))
-    {
-      derived().print(" -> ");
-      derived().apply(x.name());
-    }
+    derived().print(" -> ");
+    derived().apply(x.name());
     derived().leave(x);
   }
 

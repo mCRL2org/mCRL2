@@ -605,14 +605,6 @@ const atermpp::function_symbol& function_symbol_MultActName()
   return function_symbol_MultActName;
 }
 
-// Nil
-inline
-const atermpp::function_symbol& function_symbol_Nil()
-{
-  static const atermpp::function_symbol function_symbol_Nil = atermpp::function_symbol("Nil", 0);
-  return function_symbol_Nil;
-}
-
 // Nu
 inline
 const atermpp::function_symbol& function_symbol_Nu()
@@ -1351,7 +1343,6 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol PBESTrue;
   static const atermpp::function_symbol MultActName;
   static const atermpp::function_symbol IfThenElse;
-  static const atermpp::function_symbol Nil;
   static const atermpp::function_symbol UntypedSortVariable;
   static const atermpp::function_symbol ProcEqn;
   static const atermpp::function_symbol StructProj;

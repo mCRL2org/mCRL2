@@ -178,7 +178,6 @@ const atermpp::aterm_appl& default_value_StateMay();
 const atermpp::aterm_appl& default_value_PBESTrue();
 const atermpp::aterm_appl& default_value_MultActName();
 const atermpp::aterm_appl& default_value_IfThenElse();
-const atermpp::aterm_appl& default_value_Nil();
 const atermpp::aterm_appl& default_value_UntypedSortVariable();
 const atermpp::aterm_appl& default_value_ProcEqn();
 const atermpp::aterm_appl& default_value_StructProj();
@@ -210,7 +209,6 @@ const atermpp::aterm_appl& default_value_DataExpr();
 const atermpp::aterm_appl& default_value_BindingOperator();
 const atermpp::aterm_appl& default_value_WhrDecl();
 const atermpp::aterm_appl& default_value_SortDecl();
-const atermpp::aterm_appl& default_value_DataExprOrNil();
 const atermpp::aterm_appl& default_value_ProcExpr();
 const atermpp::aterm_appl& default_value_MultActOrDelta();
 const atermpp::aterm_appl& default_value_ProcInit();
@@ -444,7 +442,7 @@ const atermpp::aterm_appl& default_value_DataEqnSpec()
 inline
 const atermpp::aterm_appl& default_value_LinearProcessSummand()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessSummand(), default_value_List(), default_value_DataExpr(), default_value_MultActOrDelta(), default_value_DataExprOrNil(), default_value_List(), default_value_Distribution());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_LinearProcessSummand(), default_value_List(), default_value_DataExpr(), default_value_MultActOrDelta(), default_value_DataExpr(), default_value_List(), default_value_Distribution());
   return t;
 }
 
@@ -1136,14 +1134,6 @@ const atermpp::aterm_appl& default_value_IfThenElse()
   return t;
 }
 
-// Nil
-inline
-const atermpp::aterm_appl& default_value_Nil()
-{
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_Nil());
-  return t;
-}
-
 // UntypedSortVariable
 inline
 const atermpp::aterm_appl& default_value_UntypedSortVariable()
@@ -1386,13 +1376,6 @@ const atermpp::aterm_appl& default_value_SortDecl()
   return default_value_SortId();
 }
 
-// DataExprOrNil
-inline
-const atermpp::aterm_appl& default_value_DataExprOrNil()
-{
-  return default_value_DataExpr();
-}
-
 // ProcExpr
 inline
 const atermpp::aterm_appl& default_value_ProcExpr()
@@ -1599,7 +1582,6 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl PBESTrue;
   static const atermpp::aterm_appl MultActName;
   static const atermpp::aterm_appl IfThenElse;
-  static const atermpp::aterm_appl Nil;
   static const atermpp::aterm_appl UntypedSortVariable;
   static const atermpp::aterm_appl ProcEqn;
   static const atermpp::aterm_appl StructProj;
@@ -1631,7 +1613,6 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl BindingOperator;
   static const atermpp::aterm_appl WhrDecl;
   static const atermpp::aterm_appl SortDecl;
-  static const atermpp::aterm_appl DataExprOrNil;
   static const atermpp::aterm_appl ProcExpr;
   static const atermpp::aterm_appl MultActOrDelta;
   static const atermpp::aterm_appl ProcInit;

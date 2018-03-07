@@ -29,7 +29,6 @@ std::vector<atermpp::function_symbol> function_symbols_DataAppl_;
 
 //--- start generated core overloads ---//
 std::string pp(const core::identifier_string& x) { return core::pp< core::identifier_string >(x); }
-std::string pp(const core::nil& x) { return core::pp< core::nil >(x); }
 //--- end generated core overloads ---//
 
 //--- start generated function symbol definitions ---//
@@ -147,7 +146,6 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::PBESTrue = core::detail::function_symbol_PBESTrue();
   const atermpp::function_symbol core::detail::function_symbols::MultActName = core::detail::function_symbol_MultActName();
   const atermpp::function_symbol core::detail::function_symbols::IfThenElse = core::detail::function_symbol_IfThenElse();
-  const atermpp::function_symbol core::detail::function_symbols::Nil = core::detail::function_symbol_Nil();
   const atermpp::function_symbol core::detail::function_symbols::UntypedSortVariable = core::detail::function_symbol_UntypedSortVariable();
   const atermpp::function_symbol core::detail::function_symbols::ProcEqn = core::detail::function_symbol_ProcEqn();
   const atermpp::function_symbol core::detail::function_symbols::StructProj = core::detail::function_symbol_StructProj();
@@ -290,7 +288,6 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::PBESTrue = core::detail::default_value_PBESTrue();
   const atermpp::aterm_appl core::detail::default_values::MultActName = core::detail::default_value_MultActName();
   const atermpp::aterm_appl core::detail::default_values::IfThenElse = core::detail::default_value_IfThenElse();
-  const atermpp::aterm_appl core::detail::default_values::Nil = core::detail::default_value_Nil();
   const atermpp::aterm_appl core::detail::default_values::UntypedSortVariable = core::detail::default_value_UntypedSortVariable();
   const atermpp::aterm_appl core::detail::default_values::ProcEqn = core::detail::default_value_ProcEqn();
   const atermpp::aterm_appl core::detail::default_values::StructProj = core::detail::default_value_StructProj();
@@ -322,7 +319,6 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::BindingOperator = core::detail::default_value_BindingOperator();
   const atermpp::aterm_appl core::detail::default_values::WhrDecl = core::detail::default_value_WhrDecl();
   const atermpp::aterm_appl core::detail::default_values::SortDecl = core::detail::default_value_SortDecl();
-  const atermpp::aterm_appl core::detail::default_values::DataExprOrNil = core::detail::default_value_DataExprOrNil();
   const atermpp::aterm_appl core::detail::default_values::ProcExpr = core::detail::default_value_ProcExpr();
   const atermpp::aterm_appl core::detail::default_values::MultActOrDelta = core::detail::default_value_MultActOrDelta();
   const atermpp::aterm_appl core::detail::default_values::ProcInit = core::detail::default_value_ProcInit();

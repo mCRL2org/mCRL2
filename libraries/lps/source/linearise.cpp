@@ -8,7 +8,7 @@
 //
 /// \file linearise.cpp
 /// \brief This file contains code to transform an mCRL2 process
-///        into a linear process. 
+///        into a linear process.
 
 /* This file contains the implementation of an mCRL2 lineariser.
 
@@ -182,7 +182,7 @@ class specification_basic_type
     variable_list initdatavars; /* storage place for free variables in
                                    init clause */
     data_specification data;    /* contains the data specification for the current process.  */
-    
+
     specification_basic_type(const specification_basic_type& )=delete;
     specification_basic_type& operator=(const specification_basic_type&)=delete;
 
@@ -770,7 +770,7 @@ class specification_basic_type
     }
 
     bool searchProcDeclaration(
-      const variable_list& parameters,  
+      const variable_list& parameters,
       const process_expression& body,
       const processstatustype s,
       const bool canterminate,
@@ -778,7 +778,7 @@ class specification_basic_type
       process_identifier& p)
     {
       for(const objectdatatype& d:objectdata)
-      { 
+      {
         if (d.object==proc &&
             d.parameters==parameters &&
             d.processbody==body &&
@@ -923,7 +923,7 @@ class specification_basic_type
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("The parallel operator occurs in the scope of recursion, or the condition, sequential or choice operatar in " + 
+          throw mcrl2::runtime_error("The parallel operator occurs in the scope of recursion, or the condition, sequential or choice operatar in " +
                                       process::pp(body) + ". The lineariser cannot handle such processes. ");
         }
         determine_process_statusterm(process::merge(body).left(),mCRL);
@@ -974,7 +974,7 @@ class specification_basic_type
         insertvariables(sum(body).variables(),false);
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("The sum operator occurs within a multi-action in " + process::pp(body) + ". " 
+          throw mcrl2::runtime_error("The sum operator occurs within a multi-action in " + process::pp(body) + ". "
                                       + "The lineariser cannot handle such processes. ");
         }
         const processstatustype s1=determine_process_statusterm(sum(body).operand(),pCRL);
@@ -1010,7 +1010,7 @@ class specification_basic_type
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("The communication operator occurs in the scope of recursion, the condition, the sequential operation or the choice in " 
+          throw mcrl2::runtime_error("The communication operator occurs in the scope of recursion, the condition, the sequential operation or the choice in "
                                       + process::pp(body) + ". The lineariser cannot linearise such processes. ");
         }
         determine_process_statusterm(comm(body).operand(),mCRL);
@@ -1552,7 +1552,7 @@ class specification_basic_type
       MutableSubstitution& sigma,
       const variable_list& occurvars,
       const data_expression_list& occurterms,
-      std::set<variable>& variables_occurring_in_rhs_of_sigma) 
+      std::set<variable>& variables_occurring_in_rhs_of_sigma)
     {
       /* This function replaces the variables in sumvars
          by unique ones if these variables occur in occurvars
@@ -3299,7 +3299,7 @@ class specification_basic_type
       process_identifier new_process;
 
       /* Sequence consists of a sequence of process references,
-         concatenated with the sequential composition operator, which may be preceded by 
+         concatenated with the sequential composition operator, which may be preceded by
          a stochastic operator.  */
       if (is_stochastic_operator(sequence))
       {
@@ -3832,7 +3832,7 @@ class specification_basic_type
     /*                                                              */
     /****************************************************************/
 
-    /* substitute process_identifiers in a pCRL process. This code should be replaced. 
+    /* substitute process_identifiers in a pCRL process. This code should be replaced.
        Can be removed.
 
     process_expression substitute_pCRL_procs(const process_expression& t,
@@ -3889,7 +3889,7 @@ class specification_basic_type
 
     /* make_pCRL_procs searches for all process identifiers reachable from id in pCRL equations. */
 
-    void make_pCRL_procs(const process_identifier& id, 
+    void make_pCRL_procs(const process_identifier& id,
                          std::set<process_identifier>& reachable_process_identifiers)
     {
       if (reachable_process_identifiers.count(id)==0)  // not found
@@ -3950,37 +3950,37 @@ class specification_basic_type
     }
 
     /**************** minimize_set_of_reachable_process_identifiers  ******************************/
-    
-    /* The process identifiers in reachable_process_identifiers have bodies and parameters lists 
+
+    /* The process identifiers in reachable_process_identifiers have bodies and parameters lists
      * that can be the same. If that is the case, they are identified. The right hand sides are substituted to
      * reflect the identified processes. Example: P1 = a.P2, P3=a.P4, P2=b.Q, P4=b.Q. This reduces to P1 = a.P2, P2 = b.Q.
      * The result is a map from remaining process identifiers to their adapted process bodies.
      * The initial process was part of the reachable_process_identifiers and must be part of the map.
      */
 
-    /* set_proc_identifier_map is an auxiliary procedure that effectively sets identfier_identifier_map[id1]:=... or 
+    /* set_proc_identifier_map is an auxiliary procedure that effectively sets identfier_identifier_map[id1]:=... or
        identifier_identifier_map[id1]:=... in such a way that they map to the same element. In this way identifier_identifier_map
        acts as a representation of the equivalence set induced by equations id1==id2. A constraint is that
        initial_process may never occur as a left hand side. An invariant of identifier_identifier_map is
-       that no id1 that occurs at the right of the map can occur at the left. 
+       that no id1 that occurs at the right of the map can occur at the left.
     */
 
     process_identifier get_last(const process_identifier& id, const std::map< process_identifier, process_identifier >& identifier_identifier_map)
     {
       process_identifier target_id=id;
       bool ready=false;
-      do 
+      do
       {
         const std::map< process_identifier, process_identifier >::const_iterator i=identifier_identifier_map.find(target_id);
         if (i==identifier_identifier_map.end())
         {
           ready=true;
         }
-        else 
+        else
         {
           target_id=i->second;
         }
-      } 
+      }
       while (!ready);
       return target_id;
     }
@@ -3989,7 +3989,7 @@ class specification_basic_type
     void set_proc_identifier_map(
             std::map< process_identifier, process_identifier >& identifier_identifier_map,
             const process_identifier& id1_,
-            const process_identifier& id2_, 
+            const process_identifier& id2_,
             const process_identifier& initial_process)
     {
       assert(id1_!=id2_);
@@ -4047,8 +4047,8 @@ class specification_basic_type
         return i->second;
       }
     };
-      
-    std::set< process_identifier > 
+
+    std::set< process_identifier >
           minimize_set_of_reachable_process_identifiers(const std::set<process_identifier>& reachable_process_identifiers,
                                                         const process_identifier& initial_process)
     {
@@ -4078,7 +4078,7 @@ class specification_basic_type
 
       while (!identifier_identifier_map.empty())
       {
-        /* Move the elements of process_mapping into new_process_mapping, under application 
+        /* Move the elements of process_mapping into new_process_mapping, under application
          * of the identifier_identifier_map. If this yields new process_identifiers to be identified store
          * these in new_proc_identifier_map. Do this until no process_identifiers are mapped onto
          * each other anymore. */
@@ -4123,7 +4123,7 @@ class specification_basic_type
     }
 
     /****************   remove_stochastic_operators_from_front **********************/
-    
+
    class process_pid_pair
    {
      protected:
@@ -4131,8 +4131,8 @@ class specification_basic_type
        process_identifier m_pid;
 
      public:
-       process_pid_pair(const process_expression& process_body, const process_identifier& pid) 
-         : m_process_body(process_body), m_pid(pid) 
+       process_pid_pair(const process_expression& process_body, const process_identifier& pid)
+         : m_process_body(process_body), m_pid(pid)
        {}
 
        process_pid_pair& operator=(const process_pid_pair& other) = default;
@@ -4152,12 +4152,12 @@ class specification_basic_type
        no process equation has an initial distribution. The changed equations are reported
        back, including adapted parameter lists because sometimes the variables bound in the
        stochastic operators need to be added.
-       The initial distribution of the initial process is reported back in 
+       The initial distribution of the initial process is reported back in
        initial_stochastic_distribution, including if necessary adapted sets of arguments. */
- 
-    std::set< process_identifier > 
+
+    std::set< process_identifier >
               remove_stochastic_operators_from_front(
-                   const std::set< process_identifier >& reachable_process_identifiers, 
+                   const std::set< process_identifier >& reachable_process_identifiers,
                    process_identifier& procId, // If parameters change, another procId will be substituted.
                    stochastic_distribution& initial_stochastic_distribution)
     {
@@ -4191,8 +4191,8 @@ class specification_basic_type
                                            pCRL,
                                            canterminatebody(proc.operand()),
                                            containstimebody(proc.operand()));
-          // calculate the substitution to be applied on proc.distribution() which is moved outside the 
-          // body the process. 
+          // calculate the substitution to be applied on proc.distribution() which is moved outside the
+          // body the process.
           processes_with_stochastic_distribution_first.insert(
                         std::pair< process_identifier, process_pid_pair >
                                  (p,
@@ -4218,7 +4218,7 @@ class specification_basic_type
       // Adapt the initial process
       process_expression initial_distribution=processes_with_stochastic_distribution_first.at(procId).process_body();
       if (is_stochastic_operator(initial_distribution))
-      { 
+      {
         const stochastic_operator sto=atermpp::down_cast<stochastic_operator>(initial_distribution);
         initial_stochastic_distribution = stochastic_distribution(sto.variables(), sto.distribution());
         procId=processes_with_stochastic_distribution_first.at(procId).process_id();
@@ -4229,7 +4229,7 @@ class specification_basic_type
       }
 
       return result;
-    } 
+    }
 
 
     /**************** Collectparameterlist ******************************/
@@ -4284,7 +4284,7 @@ class specification_basic_type
     variable_list collectparameterlist(const std::set< process_identifier >& pCRLprocs)
     {
       variable_list parameters;
-      for (const process_identifier& p: pCRLprocs) 
+      for (const process_identifier& p: pCRLprocs)
       {
         const std::size_t n=objectIndex(p);
         parameters=joinparameters(parameters,objectdata[n].parameters);
@@ -4314,7 +4314,7 @@ class specification_basic_type
         data::function_symbol getstate;
         stackoperations* next;
 
-        // Stack operations are not supposed to be copied. 
+        // Stack operations are not supposed to be copied.
         stackoperations(const stackoperations& )=delete;
         stackoperations& operator=(const stackoperations& )=delete;
 
@@ -4623,7 +4623,7 @@ class specification_basic_type
       int regular)
     {
       std::size_t i=1;
-      for (const process_identifier& p: pCRLproc) 
+      for (const process_identifier& p: pCRLproc)
       {
         if (p==procId)
         {
@@ -4985,11 +4985,11 @@ class specification_basic_type
       const variable_list& stochastic_variables)
     {
       const std::size_t n=objectIndex(procId);
-      const data_expression_list t=findarguments(objectdata[n].parameters,  
+      const data_expression_list t=findarguments(objectdata[n].parameters,
                                                  stack.parameters,
                                                  args,t2,stack,vars,
-                                                 get_free_variables(n), 
-                                                 stochastic_variables);    
+                                                 get_free_variables(n),
+                                                 stochastic_variables);
 
       std::size_t i=1;
       for (const process_identifier& p: pCRLprocs)
@@ -5046,7 +5046,7 @@ class specification_basic_type
                             vars,
                             stochastic_variables);
         }
-        return push_stack(procId, 
+        return push_stack(procId,
                           t1,
                           data_expression_list({ data_expression(stack.opns->emptystack) }),
                           stack,
@@ -5115,7 +5115,7 @@ class specification_basic_type
         result.push_front(assignment(par,par));
         return result;
       }
-      // Otherwise, check that is is an ordinary parameter. 
+      // Otherwise, check that is is an ordinary parameter.
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
         assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
@@ -5548,7 +5548,7 @@ class specification_basic_type
       bool regular,
       bool singlestate)
     {
-      for (const process_identifier& p: pCRLprocs) 
+      for (const process_identifier& p: pCRLprocs)
       {
         const std::size_t n=objectIndex(p);
 
@@ -5556,7 +5556,7 @@ class specification_basic_type
           p,
           action_summands,
           deadlock_summands,
-          objectdata[n].processbody, 
+          objectdata[n].processbody,
           pars,
           stack,
           regular,
@@ -5762,7 +5762,7 @@ class specification_basic_type
 
       const function_sort newsort(newsortlist,sort);
       const data::function_symbol casefunction(
-        fresh_identifier_generator("C" + std::to_string(n) + "_" + 
+        fresh_identifier_generator("C" + std::to_string(n) + "_" +
                          (!is_basic_sort(newsort)?"":std::string(basic_sort(sort).name()))), newsort);
       // insertmapping(casefunction,true);
       data.add_mapping(casefunction);
@@ -5774,12 +5774,12 @@ class specification_basic_type
       return;
     }
 
-    class enumtype 
+    class enumtype
     {
       public:
         // enumtypes are not supposed to be copied.
         enumtype(const enumtype&)=delete;
-        enumtype& operator =(const enumtype& )=delete; 
+        enumtype& operator =(const enumtype& )=delete;
 
         std::size_t enumeratedtype_index;
         variable var;
@@ -5921,7 +5921,7 @@ class specification_basic_type
       result.push_front(data_expression(lazy::and_(c,cl.front())));
       return result;
     }
- 
+
     data_expression variables_are_equal_to_default_values(const variable_list& vl)
     {
       data_expression result=sort_bool::true_();
@@ -7198,28 +7198,28 @@ class specification_basic_type
 
       bool singlecontrolstate=false;
       std::set< process_identifier > reachable_process_identifiers;
-      make_pCRL_procs(procId, reachable_process_identifiers);  
+      make_pCRL_procs(procId, reachable_process_identifiers);
 
       /* now reachable process identifiers contains a list of all process id's in this pCRL process.
          Some of these processes have equal parameter lists and right hand sides. A typical example is
          P1 = a.P2, P3=a.P4, P2=b.Q, P4=b.Q. This reduces to P1 = a.P2, P2 = b.Q.
          We reduce the set of process_identifiers in reachable_process_identifiers and perform the
-         appropriate substitution in the right hand side. 
+         appropriate substitution in the right hand side.
          The result is a map from process_identifiers to adapted process bodies.
-      */ 
+      */
       const std::set< process_identifier > reduced_set_of_process_identifiers =
           minimize_set_of_reachable_process_identifiers(reachable_process_identifiers,procId);
 
       /* The equations can still contain stochastic operators that occur before the first action.
          We translate the equations such that the stochastic operators do not occur in front anymore.
-         Moving the stochastic operators to the front means that the number of parameters of each 
+         Moving the stochastic operators to the front means that the number of parameters of each
          process can increase. In this case we introduce a new process identifiers. The resulting
          ids of processes occur in stochastic_normalized_process_identifiers. */
 
       process_identifier initial_proc_id=procId;  // the initial process id may be renamed.
       const std::set< process_identifier > stochastic_normalized_process_identifiers =
                   remove_stochastic_operators_from_front(reduced_set_of_process_identifiers, initial_proc_id, initial_stochastic_distribution);
- 
+
       /* collect the parameters, but assume that variables
          have a unique sort */
       if (stochastic_normalized_process_identifiers.size()==1)
@@ -7449,7 +7449,7 @@ class specification_basic_type
     bool allowsingleaction(const action_name_multiset& allowaction,
                            const action_list& multiaction)
     {
-      /* The special cases where multiaction==tau and multiaction=={ Terminated } must have been 
+      /* The special cases where multiaction==tau and multiaction=={ Terminated } must have been
          dealt with separately. */
       assert(multiaction.size()!=0 && multiaction != action_list({ terminationAction }));
 
@@ -7557,9 +7557,9 @@ class specification_basic_type
         const data_expression actiontime=smmnd.multi_action().time();
         const data_expression& condition=smmnd.condition();
 
-        // Explicitly allow the termination action in any allow. 
+        // Explicitly allow the termination action in any allow.
         if ((is_allow && allow_(allowlist,multiaction)) ||
-            (!is_allow && !encap(allowlist,multiaction)))    
+            (!is_allow && !encap(allowlist,multiaction)))
         {
           action_summands.push_back(smmnd);
         }
@@ -7870,7 +7870,7 @@ class specification_basic_type
     class comm_entry
     {
       public:
-        // comm_entries are not copyable. 
+        // comm_entries are not copyable.
         comm_entry(const comm_entry& )=delete;
         comm_entry& operator=(const comm_entry& )=delete;
 
@@ -8263,10 +8263,6 @@ class specification_basic_type
       {
         const action_name_multiset source=i->action_name();
         const identifier_string target=i->name();
-        if (is_nil(i->name()))  // Right hand side of communication is empty. We receive a bad datatype.
-        {
-          throw mcrl2::runtime_error("Right hand side of communication " + process::pp(source) + " in a comm command cannot be empty or tau");
-        }
         resultingCommunications.push_front(communication_expression(sortActionLabels(source),target));
       }
       communication_expression_list communications1=resultingCommunications;
@@ -8673,7 +8669,7 @@ class specification_basic_type
           local_sigma[v]=v;
         }
         ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
-                                                       ultimate_delay_condition.constraint(), 
+                                                       ultimate_delay_condition.constraint(),
                                                        local_sigma,
                                                        rhs_variables_sigma);  // Only substitute the variables in the lhs.
       }
@@ -8768,12 +8764,12 @@ class specification_basic_type
 
 
     /// \brief Returns the conjunction of the two delay conditions and the join of the variables, where
-    ///        the variables in delay2 are renamed to avoid conflict with those in delay1. 
+    ///        the variables in delay2 are renamed to avoid conflict with those in delay1.
     lps::detail::ultimate_delay combine_ultimate_delays(
-                           const lps::detail::ultimate_delay& delay1, 
+                           const lps::detail::ultimate_delay& delay1,
                            const lps::detail::ultimate_delay& delay2)
     {
-      // Make the bound variables of the second ultimate delay different from those in the first. 
+      // Make the bound variables of the second ultimate delay different from those in the first.
       variable_list renameable_variables=delay2.variables();
       mutable_map_substitution<> sigma;
       std::set<variable> rhs_variables_in_sigma;
@@ -8784,8 +8780,8 @@ class specification_basic_type
       data_expression new_constraint = optimized_and(delay1.constraint(),
                                           data::replace_variables_capture_avoiding(delay2.constraint(),sigma, rhs_variables_in_sigma));
       variable_list new_existential_variables = delay1.variables()+renameable_variables;
-      
-      // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged. 
+
+      // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged.
       return lps::detail::ultimate_delay(
                             delay1.time_var(),
                             new_existential_variables,
@@ -8834,7 +8830,7 @@ class specification_basic_type
               {
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
-                condition1=lazy::and_(condition1, 
+                condition1=lazy::and_(condition1,
                                       data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
                                                                                sigma,
                                                                                variables_in_rhs_of_sigma));
@@ -8901,7 +8897,7 @@ class specification_basic_type
               {
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
-                condition1=optimized_and(condition1, 
+                condition1=optimized_and(condition1,
                                          data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
                                                                                   sigma,
                                                                                   variables_in_rhs_of_sigma));
@@ -8943,9 +8939,9 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
-      calculate_left_merge_deadlock(ultimate_delay_condition2, deadlock_summands1, 
+      calculate_left_merge_deadlock(ultimate_delay_condition2, deadlock_summands1,
                                     is_allow, is_block, action_summands, deadlock_summands);
-      calculate_left_merge_action(ultimate_delay_condition2, action_summands1, 
+      calculate_left_merge_action(ultimate_delay_condition2, action_summands1,
                                     allowlist, is_allow, is_block, action_summands);
     }
 
@@ -9102,7 +9098,7 @@ class specification_basic_type
                                                         condition3,
                                                         has_time3?deadlock(action_time3):deadlock()));
           }
-          
+
         }
       }
     }
@@ -9160,7 +9156,7 @@ class specification_basic_type
                                                         condition3,
                                                         has_time3?deadlock(action_time3):deadlock()));
           }
-          
+
         }
       }
     }
@@ -9186,10 +9182,10 @@ class specification_basic_type
     void combine_summand_lists(
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
-      const lps::detail::ultimate_delay& ultimate_delay_condition1, 
+      const lps::detail::ultimate_delay& ultimate_delay_condition1,
       const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
-      const lps::detail::ultimate_delay& ultimate_delay_condition2, 
+      const lps::detail::ultimate_delay& ultimate_delay_condition2,
       const variable_list& par1,
       const variable_list& par3,
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
@@ -9216,18 +9212,18 @@ class specification_basic_type
       /* first we enumerate the summands of t1 */
 
       action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
-      calculate_left_merge(action_summands1, deadlock_summands1, 
-                           ultimate_delay_condition2, allowlist, is_allow, is_block, 
+      calculate_left_merge(action_summands1, deadlock_summands1,
+                           ultimate_delay_condition2, allowlist, is_allow, is_block,
                            action_summands, deadlock_summands);
 
       /* second we enumerate the summands of sumlist2 */
-      calculate_left_merge(action_summands2, deadlock_summands2, 
-                           ultimate_delay_condition1, allowlist, is_allow, is_block, 
+      calculate_left_merge(action_summands2, deadlock_summands2,
+                           ultimate_delay_condition1, allowlist, is_allow, is_block,
                            action_summands, deadlock_summands);
 
       /* thirdly we enumerate all multi actions*/
 
-      calculate_communication_merge(action_summands1, deadlock_summands1, action_summands2, deadlock_summands2, 
+      calculate_communication_merge(action_summands1, deadlock_summands1, action_summands2, deadlock_summands2,
                                     allowlist, is_allow, is_block, action_summands, deadlock_summands);
     }
 
@@ -9338,7 +9334,7 @@ class specification_basic_type
             (objectdata[n].processstatus==pCRL)||
             (objectdata[n].processstatus==GNFalpha))
         {
-          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition,std::string(objectdata[n].objectname));   
+          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition,std::string(objectdata[n].objectname));
         }
         else
         {
@@ -9361,13 +9357,13 @@ class specification_basic_type
 
           stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
           constelm_algorithm < rewriter, stochastic_specification > alg(temporary_spec,rewr);
-          
+
           // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
           data::mutable_map_substitution<> sigma = alg.compute_constant_parameters(true);
           alg.remove_parameters(sigma);
 
-          if (!options.ignore_time) 
+          if (!options.ignore_time)
           {
             ultimate_delay_condition.constraint()=data::replace_variables(ultimate_delay_condition.constraint(),sigma);
           }
@@ -9523,7 +9519,7 @@ class specification_basic_type
 
     /**************** GENERaTE LPEmCRL **********************************/
 
-    /* The result are a list of action summands, deadlock summand, the parameters of this 
+    /* The result are a list of action summands, deadlock summand, the parameters of this
        linear process and its initial values. A initial stochastic distribution that must
        precede the initial linear process and the ultimate delay condition of this
        linear process that can be used or be ignored. */
@@ -9552,7 +9548,7 @@ class specification_basic_type
                                objectdata[n].containstime,regular,pars,init,initial_stochastic_distribution);
         if (options.ignore_time)
         {
-          ultimate_delay_condition=lps::detail::ultimate_delay(); 
+          ultimate_delay_condition=lps::detail::ultimate_delay();
         }
         else
         {
@@ -9563,21 +9559,21 @@ class specification_basic_type
           variable_list reduced_sumvars;
           try
           {
-            fourier_motzkin(ultimate_delay_condition.constraint(), 
-                            ultimate_delay_condition.variables(), 
-                            simplified_ultimate_delay_condition, 
-                            reduced_sumvars, 
+            fourier_motzkin(ultimate_delay_condition.constraint(),
+                            ultimate_delay_condition.variables(),
+                            simplified_ultimate_delay_condition,
+                            reduced_sumvars,
                             rewr);
             std::swap(ultimate_delay_condition.constraint(), simplified_ultimate_delay_condition);
             std::swap(ultimate_delay_condition.variables(), reduced_sumvars);
           }
           catch (mcrl2::runtime_error& e)
           {
-            // Applying Fourier Motzkin failed. Continue working with the old ultimate delay condition. 
+            // Applying Fourier Motzkin failed. Continue working with the old ultimate delay condition.
             mCRL2log(mcrl2::log::debug) << "Simplifying a condition using Fourier-Motzkin reduction failed (I). \n" << e.what() << std::endl;
           }
         }
-         
+
         return;
       }
       /* process is a mCRLdone */
@@ -9978,10 +9974,10 @@ class specification_basic_type
           const std::size_t n=objectIndex(new_identifier);
           variable_list new_parameters=objectdata[n].parameters;
           const stochastic_operator& sto=down_cast<const stochastic_operator>(new_process);
-          assignment_list new_assignments; 
+          assignment_list new_assignments;
           for(const variable& v: sto.variables())
           {
-            new_assignments=push_back(new_assignments,assignment(new_parameters.front(),v)); 
+            new_assignments=push_back(new_assignments,assignment(new_parameters.front(),v));
             new_parameters.pop_front();
           }
           // Some of the variables may occur only in the distribution, which is now moved out.
@@ -10002,7 +9998,7 @@ class specification_basic_type
                                      data::replace_variables_capture_avoiding(sto.distribution(),
                                                                               local_sigma,
                                                                               variables_occurring_in_rhs_of_sigma),
-                                     process_instance_assignment(new_identifier,new_assignments)); 
+                                     process_instance_assignment(new_identifier,new_assignments));
         }
         return t;
 
@@ -10193,17 +10189,17 @@ class specification_basic_type
       }
 
       throw mcrl2::runtime_error("unexpected process format in transform_initial_distribution_term " + process::pp(t) +".");
-    } 
+    }
 
     /***** obtain_initial_distribution **********/
 
-    process_expression obtain_initial_distribution_term(const process_expression& t) 
+    process_expression obtain_initial_distribution_term(const process_expression& t)
     {
       /* This function obtains the initial distribution of a pCRL term that is in Greibach normal form.  */
       if (is_process_instance_assignment(t))
       {
         assert(0); // This is not possible.
-        return t; 
+        return t;
       }
 
       if (is_choice(t))
@@ -10411,9 +10407,9 @@ class specification_basic_type
         return stochastic_operator(initial_distribution.variables(),
                                    initial_distribution.distribution(),
                                    process_instance_assignment(new_procId,assignment_list())); // TODO add correct assignment here.
-      } 
+      }
       return initial_distribution;
-    } 
+    }
 
     /***** determinewhetherprocessescanterminate(init); **********/
 
@@ -11166,7 +11162,7 @@ class specification_basic_type
         if (multiaction == action_list({ terminationAction }))
         {
           acts.push_front(terminationAction.label());
-          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << " followed by a deadlock is added to signal termination of the linear process. \n" << 
+          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << " followed by a deadlock is added to signal termination of the linear process. \n" <<
                                            "Note that this has as effect that a terminating process always contains a deadlock. \n";
           return;
         }

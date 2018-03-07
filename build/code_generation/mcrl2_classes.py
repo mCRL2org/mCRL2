@@ -27,7 +27,6 @@ import string
 
 CORE_CLASSES = r'''
 identifier_string() : public atermpp::aterm_string | SC | String | An identifier
-nil() : public atermpp::aterm_appl | CI | Nil | The value nil
 '''
 
 CONTAINER_TYPES = r'''

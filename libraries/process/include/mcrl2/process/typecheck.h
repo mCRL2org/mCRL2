@@ -392,14 +392,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
       //Actions must be declared
       data::sorts_list c_sorts;
-      if (!core::is_nil(c.name()))
+      if (!m_action_context.is_declared(c.name()))
       {
-        if (!m_action_context.is_declared(c.name()))
-        {
-          throw mcrl2::runtime_error("synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
-        }
-        c_sorts = action_sorts(c.name());
+        throw mcrl2::runtime_error("synchronizing to an undefined action " + core::pp(c.name()) + " (typechecking " + process::pp(x) + ")");
       }
+      c_sorts = action_sorts(c.name());
 
       for (const core::identifier_string& a: cnames)
       {

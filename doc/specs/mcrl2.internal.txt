@@ -110,9 +110,6 @@
 //data equation
 <DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>, <DataExpr>, <DataExpr>)
 
-//data expression or nil
-<DataExprOrNil>::= <DataExpr>
-                 | Nil
 
 //Multiactions
 //------------
@@ -214,7 +211,7 @@
 //Linear process summand
 <LinearProcessSummand>
                 ::= LinearProcessSummand(<DataVarId>*, <DataExpr>,
-                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*, <Distribution>)
+                      <MultActOrDelta>, <DataExpr>, <DataVarIdInit>*, <Distribution>)
 
 //process initialisation
 <LinearProcessInit>
