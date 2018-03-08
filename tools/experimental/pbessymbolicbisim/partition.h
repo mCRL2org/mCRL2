@@ -102,7 +102,7 @@ protected:
       return false;
     }
 
-    mCRL2log(log::verbose) << "Split " << phi_k << "\nwrt " << phi_l << std::endl;
+    // mCRL2log(log::verbose) << "Split " << phi_k << "\nwrt " << phi_l << std::endl;
 
     // Update the caches and the partition
     block_t phi_k_copy(phi_k);

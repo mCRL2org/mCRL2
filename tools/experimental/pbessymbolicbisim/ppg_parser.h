@@ -42,6 +42,14 @@ protected:
 public:
   ppg_summand() = default;
 
+  /**
+   * \brief Create a summand in the shape true => X
+   */
+  explicit ppg_summand(const std::string& name)
+  : m_condition(data::sort_bool::true_())
+  , m_new_state(name, data::data_expression_list())
+  {}
+
   explicit ppg_summand(const pbes_expression& e)
   {
     pbes_expression expr = e;
@@ -115,7 +123,21 @@ public:
 
   ppg_equation() = default;
 
-  ppg_equation(const pbes_equation& eq, const core::identifier_string& x_false_name, const core::identifier_string& x_true_name)
+  /**
+   * \brief Constructor to create a ppg_equation in the shape \sigma X = X
+   * \details Useful for equations such as nu X_true = X_true
+   */
+  ppg_equation(const std::string& name, const fixpoint_symbol& symbol, bool is_conjunctive)
+  : m_symbol(symbol)
+  , m_var(propositional_variable(name, data::variable_list()))
+  , m_is_conjunctive(is_conjunctive)
+  {
+    m_summands.emplace_back(name);
+  }
+
+  ppg_equation(const pbes_equation& eq,
+              const std::string& x_false_conj_name, const std::string& x_true_conj_name,
+              const std::string& x_false_disj_name, const std::string& x_true_disj_name)
   : m_symbol(eq.symbol())
   , m_var(eq.variable())
   {
@@ -177,7 +199,10 @@ public:
     }
     else if(is_propositional_variable_instantiation(rhs))
     {
+      // m_is_conjunctive = false;
       m_summands.emplace_back(data::variable_list(), data::sort_bool::true_(), propositional_variable_instantiation(rhs));
+      // We already have a summand that's always enable, so we don't need a summand with X_true or X_false
+      return;
     }
 
     // Build a summand using the simple formula
@@ -189,7 +214,7 @@ public:
       {
         simple_formula = data::sort_bool::not_(simple_formula);
       }
-      propositional_variable_instantiation next_state(m_is_conjunctive ? x_false_name : x_true_name, data::data_expression_list());
+      propositional_variable_instantiation next_state(m_is_conjunctive ? x_false_conj_name : x_true_disj_name, data::data_expression_list());
       m_summands.emplace_back(data::variable_list(), simple_formula, next_state);
     }
     // Add a summand for X_true or X_false to ensure the underlying BES is in SRF
@@ -197,7 +222,7 @@ public:
     m_summands.emplace_back(
         data::variable_list(),
         data::sort_bool::true_(),
-        propositional_variable_instantiation(m_is_conjunctive ? x_true_name : x_false_name, data::data_expression_list()));
+        propositional_variable_instantiation(m_is_conjunctive ? x_true_conj_name : x_false_disj_name, data::data_expression_list()));
   }
 
   const fixpoint_symbol& symbol() const
@@ -268,24 +293,85 @@ public:
     // leave nested quantification, which this parse doesn't
     // deal with.
     pbes_rewrite(q, one_point_rule_rewriter());
-    core::identifier_string x_false_name("X_false");
-    core::identifier_string x_true_name("X_true");
+
+    // Group equations by fixpoint symbol. Each mu group gets its
+    // own instances of X_false. Each nu group gets its own instances
+    // of X_true.
+    fixpoint_symbol previous_symbol(q.equations()[0].symbol());
+    int rank = previous_symbol == fixpoint_symbol::nu() ? 0 : 1;
+    std::string x_false_conj_name;
+    std::string x_true_conj_name;
+    std::string x_false_disj_name;
+    std::string x_true_disj_name;
+    if(previous_symbol == fixpoint_symbol::mu())
+    {
+      // For a mu block we can only use local X_false
+      x_false_conj_name = "X_false_conj" + std::to_string(rank);
+      x_true_conj_name = "X_true";
+      x_false_disj_name = "X_false_disj" + std::to_string(rank);
+      x_true_disj_name = "X_true";
+    }
+    else
+    {
+      // For a nu block we can only use local X_true
+      x_false_conj_name = "X_false";
+      x_true_conj_name = "X_true_conj" + std::to_string(rank);
+      x_false_disj_name = "X_false";
+      x_true_disj_name = "X_true_disj" + std::to_string(rank);
+    }
     for(const pbes_equation& eq: q.equations())
     {
-      m_equations.emplace_back(eq, x_false_name, x_true_name);
+      if(eq.symbol() != previous_symbol)
+      {
+        // Add the equations for the previous block
+        // X_false for a mu block
+        // X_true for a nu block
+        m_equations.emplace_back(previous_symbol == fixpoint_symbol::mu() ? x_false_conj_name : x_true_conj_name, previous_symbol, true);
+        m_equations.emplace_back(previous_symbol == fixpoint_symbol::mu() ? x_false_disj_name : x_true_disj_name, previous_symbol, false);
+
+        // Update for the new block
+        rank++;
+        previous_symbol = eq.symbol();
+        if(previous_symbol == fixpoint_symbol::mu())
+        {
+          // For a mu block we can only use local X_false
+          x_false_conj_name = "X_false_conj" + std::to_string(rank);
+          x_true_conj_name = "X_true";
+          x_false_disj_name = "X_false_disj" + std::to_string(rank);
+          x_true_disj_name = "X_true";
+        }
+        else
+        {
+          // For a nu block we can only use local X_true
+          x_false_conj_name = "X_false";
+          x_true_conj_name = "X_true_conj" + std::to_string(rank);
+          x_false_disj_name = "X_false";
+          x_true_disj_name = "X_true_disj" + std::to_string(rank);
+        }
+      }
+      m_equations.emplace_back(eq, x_false_conj_name, x_true_conj_name, x_false_disj_name, x_true_disj_name);
     }
-    m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::nu(); }).base(),
-      ppg_equation(pbes_equation(
-        fixpoint_symbol::nu(),
-        propositional_variable(x_true_name, data::variable_list()),
-        propositional_variable_instantiation(x_true_name, data::data_expression_list())),
-      x_false_name, x_true_name));
-    m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::mu(); }).base(),
-      ppg_equation(pbes_equation(
-        fixpoint_symbol::mu(),
-        propositional_variable(x_false_name, data::variable_list()),
-        propositional_variable_instantiation(x_false_name, data::data_expression_list())),
-      x_false_name, x_true_name));
+    // Add the final set of equations for X_true and X_false
+    m_equations.emplace_back(previous_symbol == fixpoint_symbol::mu() ? x_false_conj_name : x_true_conj_name, previous_symbol, true);
+    m_equations.emplace_back(previous_symbol == fixpoint_symbol::mu() ? x_false_disj_name : x_true_disj_name, previous_symbol, false);
+
+    // Add global equations for X_true and X_false that are used throughout the
+    // PBES
+    m_equations.emplace_back("X_false", fixpoint_symbol::mu(), true);
+    m_equations.emplace_back("X_true", fixpoint_symbol::nu(), true);
+
+    // m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::nu(); }).base(),
+    //   ppg_equation(pbes_equation(
+    //     fixpoint_symbol::nu(),
+    //     propositional_variable(x_true_name, data::variable_list()),
+    //     propositional_variable_instantiation(x_true_name, data::data_expression_list())),
+    //   x_false_name, x_true_name));
+    // m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::mu(); }).base(),
+    //   ppg_equation(pbes_equation(
+    //     fixpoint_symbol::mu(),
+    //     propositional_variable(x_false_name, data::variable_list()),
+    //     propositional_variable_instantiation(x_false_name, data::data_expression_list())),
+    //   x_false_name, x_true_name));
   }
 
   const std::vector<ppg_equation>& equations() const
