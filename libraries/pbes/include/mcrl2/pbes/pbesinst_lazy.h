@@ -707,7 +707,7 @@ class pbesinst_lazy_algorithm
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    void run()
+    virtual void run()
     {
       std::size_t m_iteration_count = 0;
 

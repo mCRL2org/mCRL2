@@ -12,26 +12,23 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_H
 
-#include <cassert>
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
-#include <unordered_set>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/undefined.h"
-#include "mcrl2/pbes/pbes.h"
+#include <boost/range/adaptor/filtered.hpp>
+#include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-// Implementation of a structure_graph that supports removal of vertices, by setting
-// the enabled attribute to false.
+namespace detail {
+
+struct structure_graph_builder;
+
+} // namespace detail
+
 class structure_graph
 {
+  friend struct detail::structure_graph_builder;
+
   public:
     enum decoration_type
     {
@@ -45,184 +42,148 @@ class structure_graph
     struct vertex
     {
       pbes_expression formula;
-      mutable decoration_type decoration;
+      decoration_type decoration;
       std::size_t rank;
-      mutable std::vector<const vertex*> predecessors;
-      mutable std::vector<const vertex*> successors;
-      mutable bool enabled;
-      mutable const vertex* strategy;
+      std::vector<int> predecessors;
+      std::vector<int> successors;
+      mutable int strategy;
 
-      vertex(const pbes_expression& formula_ = pbes_expression(),
-             decoration_type decoration_ = d_none,
+      vertex(const pbes_expression& formula_,
+             decoration_type decoration_ = structure_graph::d_none,
              std::size_t rank_ = data::undefined_index(),
-             std::vector<const vertex*> pred_ = std::vector<const vertex*>(),
-             std::vector<const vertex*> succ_ = std::vector<const vertex*>(),
-             bool enabled_ = true,
-             const vertex* strategy_ = nullptr
+             std::vector<int> pred_ = std::vector<int>(),
+             std::vector<int> succ_ = std::vector<int>(),
+             int strategy_ = -1
             )
         : formula(formula_),
           decoration(decoration_),
           rank(rank_),
           predecessors(pred_),
           successors(succ_),
-          enabled(enabled_),
           strategy(strategy_)
       {}
+    };
 
-      void remove_predecessor(const vertex& u) const
-      {
-        predecessors.erase(std::remove(predecessors.begin(), predecessors.end(), &u), predecessors.end());
-      }
+  protected:
+    std::vector<vertex> m_vertices;
+    int m_initial_vertex;
+    std::vector<bool> m_exclude;
 
-      std::vector<pbes_expression> predecessor_formulas() const
-      {
-        std::vector<pbes_expression> result;
-        for (const vertex* u: predecessors)
-        {
-          if (u->enabled)
-          {
-            result.push_back(u->formula);
-          }
-        }
-        return result;
-      }
+    struct integers_not_contained_in
+    {
+      const std::vector<bool>& subset;
 
-      std::vector<pbes_expression> successor_formulas() const
+      integers_not_contained_in(const std::vector<bool>& subset_)
+        : subset(subset_)
+      {}
+
+      bool operator()(int i) const
       {
-        std::vector<pbes_expression> result;
-        for (const vertex* u: successors)
-        {
-          if (u->enabled)
-          {
-            result.push_back(u->formula);
-          }
-        }
-        return result;
+        return !subset[i];
       }
     };
 
-    typedef std::unordered_set<const vertex*> vertex_set;
-
-  protected:
-    std::unordered_map<pbes_expression, vertex> m_vertices;
-    pbes_expression m_initial_state; // The initial state.
-
-    decoration_type get_decoration(const pbes_expression& x) const
+    struct vertices_not_contained_in
     {
-      if (is_true(x))
+      const std::vector<vertex>& vertices;
+      const std::vector<bool>& subset;
+
+      vertices_not_contained_in(const std::vector<vertex>& vertices_, const std::vector<bool>& subset_)
+        : vertices(vertices_),
+          subset(subset_)
+      {}
+
+      bool operator()(const vertex& v) const
       {
-        return d_true;
+        auto i = &v - &(vertices.front());
+        return !subset[i];
       }
-      else if (is_false(x))
-      {
-        return d_false;
-      }
-      else if (is_propositional_variable_instantiation(x))
-      {
-        return d_none;
-      }
-      else if (is_and(x))
-      {
-        return d_conjunction;
-      }
-      else if (is_or(x))
-      {
-        return d_disjunction;
-      }
-      throw std::runtime_error("Unknown pbes_expression " + pp(x));
-    }
+    };
 
   public:
     structure_graph() = default;
 
-    // don't allow copying, to prevent pointers to vertices being invalidated
-    structure_graph(const structure_graph&) = delete;
-
-    // insert the variable corresponding to the equation x = phi; overwrites existing value, but leaves pred/succ intact
-    const vertex& insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k)
+    int initial_vertex() const
     {
-      vertex& u = m_vertices[x];
-      u.formula = x;
-      u.decoration = get_decoration(psi);
-      u.rank = k;
-      return u;
+      return m_initial_vertex;
     }
 
-    // insert the variable x; does not overwrite existing value
-    const vertex& insert_variable(const pbes_expression& x)
+    decoration_type decoration(int u) const
     {
-      auto i = m_vertices.find(x);
-      if (i != m_vertices.end())
-      {
-        return i->second;
-      }
-      else
-      {
-        vertex& u = m_vertices[x];
-        u = vertex(x);
-        return u;
-      }
+      return m_vertices[u].decoration;
     }
 
-    const vertex& insert_vertex(const pbes_expression& x)
+    std::size_t rank(int u) const
     {
-      // if the vertex already exists, return it
-      auto i = m_vertices.find(x);
-      if (i != m_vertices.end())
-      {
-        return i->second;
-      }
-
-      // create a new vertex, and insert it
-      auto q = m_vertices.insert({ x, vertex(x, get_decoration(x)) });
-      assert(q.second);
-      return q.first->second;
+      return m_vertices[u].rank;
     }
 
-    void insert_edge(const vertex& u, const vertex& v)
-    {
-      u.successors.push_back(&v);
-      v.predecessors.push_back(&u);
-    }
-
-    const std::unordered_map<pbes_expression, vertex>& vertex_map() const
+    const std::vector<vertex>& all_vertices() const
     {
       return m_vertices;
     }
 
-    vertex_set vertices() const
+    const std::vector<int>& all_predecessors(int u) const
     {
-      vertex_set result;
-      for (const auto& p: m_vertices)
+      return m_vertices[u].predecessors;
+    }
+
+    const std::vector<int>& all_successors(int u) const
+    {
+      return m_vertices[u].successors;
+    }
+
+    boost::filtered_range<vertices_not_contained_in, const std::vector<vertex>> vertices() const
+    {
+      return all_vertices() | boost::adaptors::filtered(vertices_not_contained_in(m_vertices, m_exclude));
+    }
+
+    boost::filtered_range<integers_not_contained_in, const std::vector<int>> predecessors(int u) const
+    {
+      return all_predecessors(u) | boost::adaptors::filtered(integers_not_contained_in(m_exclude));
+    }
+
+    boost::filtered_range<integers_not_contained_in, const std::vector<int>> successors(int u) const
+    {
+      return all_successors(u) | boost::adaptors::filtered(integers_not_contained_in(m_exclude));
+    }
+
+    int strategy(int u) const
+    {
+      return m_vertices[u].strategy;
+    }
+
+    const vertex& find_vertex(int u) const
+    {
+      return m_vertices[u];
+    }
+
+    const std::vector<bool>& exclude() const
+    {
+      return m_exclude;
+    }
+
+    std::vector<bool>& exclude()
+    {
+      return m_exclude;
+    }
+
+    bool contains(int u) const
+    {
+      return !m_exclude[u];
+    }
+
+    // TODO: avoid this linear time check
+    bool is_empty() const
+    {
+      for (bool b: m_exclude)
       {
-        result.insert(&p.second);
+        if (!b)
+        {
+          return false;
+        }
       }
-      return result;
-    }
-
-    const vertex& get_vertex(const pbes_expression& x) const
-    {
-      auto i = m_vertices.find(x);
-      if (i != m_vertices.end())
-      {
-        return i->second;
-      }
-      throw std::runtime_error("vertex " + pp(x) + " not found in structure_graph!");
-    }
-
-    pbes_expression& initial_state()
-    {
-      return m_initial_state;
-    }
-
-    const pbes_expression& initial_state() const
-    {
-      return m_initial_state;
-    }
-
-    const vertex& initial_vertex() const
-    {
-      return get_vertex(m_initial_state);
+      return true;
     }
 };
 
@@ -246,156 +207,151 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
   out << "vertex(formula = " << u.formula
       << ", decoration = " << u.decoration
       << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
-      << ", predecessors = " << core::detail::print_list(u.predecessor_formulas())
-      << ", successors = " << core::detail::print_list(u.successor_formulas())
-      << ", strategy = " << (u.strategy ? pbes_system::pp(u.strategy->formula) : "undefined")
+      << ", predecessors = " << core::detail::print_list(u.predecessors)
+      << ", successors = " << core::detail::print_list(u.successors)
+      << ", strategy = " << u.strategy
       << ")";
   return out;
 }
 
-inline
-std::ostream& operator<<(std::ostream& out, const structure_graph::vertex_set& V)
+// inline
+// std::ostream& operator<<(std::ostream& out, const structure_graph::vertex_set& V)
+// {
+//   for (const structure_graph::vertex* v: V)
+//   {
+//     if (v->enabled)
+//     {
+//       out << *v << std::endl;
+//     }
+//   }
+//   return out;
+// }
+//
+// inline
+// std::string pp(const structure_graph& G)
+// {
+//   std::ostringstream out;
+//   for (const structure_graph::vertex* v: G.vertices())
+//   {
+//     out << *v << std::endl;
+//   }
+//   return out.str();
+// }
+
+namespace detail {
+
+struct structure_graph_builder
 {
-  for (const structure_graph::vertex* v: V)
+  structure_graph& m_graph;
+  std::vector<structure_graph::vertex> m_vertices;
+  std::unordered_map<pbes_expression, int> m_vertex_map;
+  pbes_expression m_initial_state; // The initial state.
+
+  structure_graph_builder(structure_graph& G)
+    : m_graph(G)
+  {}
+
+  structure_graph::decoration_type decoration(const pbes_expression& x) const
   {
-    if (v->enabled)
+    if (is_true(x))
     {
-      out << *v << std::endl;
+      return structure_graph::d_true;
     }
-  }
-  return out;
-}
-
-inline
-std::string pp(const structure_graph& G)
-{
-  std::ostringstream out;
-  for (const structure_graph::vertex* v: G.vertices())
-  {
-    out << *v << std::endl;
-  }
-  return out.str();
-}
-
-inline
-std::string pp(const structure_graph::vertex_set& V, bool display_disabled = true)
-{
-  std::vector<std::string> s;
-  for (const structure_graph::vertex* v: V)
-  {
-    if (display_disabled || v->enabled)
+    else if (is_false(x))
     {
-      s.push_back(pbes_system::pp(v->formula));
+      return structure_graph::d_false;
     }
-  }
-  return core::detail::print_set(s);
-}
-
-inline
-void check_vertex_set(const structure_graph::vertex_set& V, const std::string& msg = "")
-{
-  using utilities::detail::contains;
-  std::cout << "<check_vertex_set> " << pp(V) << " " << msg << std::endl;
-
-  for (const structure_graph::vertex* u: V)
-  {
-    if (!u->enabled)
+    else if (is_propositional_variable_instantiation(x))
     {
-      continue;
+      return structure_graph::d_none;
     }
-    for (const structure_graph::vertex* v: u->predecessors)
+    else if (is_and(x))
     {
-      if (v->enabled && !contains(V, v))
-      {
-        throw mcrl2::runtime_error("predecessor vertex not found!");
-      }
+      return structure_graph::d_conjunction;
     }
-    for (const structure_graph::vertex* v: u->successors)
+    else if (is_or(x))
     {
-      if (v->enabled && !contains(V, v))
-      {
-        throw mcrl2::runtime_error("successor vertex not found!");
-      }
+      return structure_graph::d_disjunction;
     }
+    throw std::runtime_error("structure_graph_builder: encountered unsupported pbes_expression " + pp(x));
   }
-}
 
-inline
-bool is_empty(const structure_graph::vertex_set& V)
-{
-  for (const structure_graph::vertex* v: V)
+  int create_vertex(const pbes_expression& x)
   {
-    if (v->enabled)
+    assert(m_vertex_map.find(x) == m_vertex_map.end());
+    m_vertices.emplace_back(x, decoration(x));
+    int index = m_vertices.size() - 1;
+    m_vertex_map.insert({ x, index });
+    return index;
+  }
+
+  // insert the variable corresponding to the equation x = phi; overwrites existing value, but leaves pred/succ intact
+  int insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k)
+  {
+    auto i = m_vertex_map.find(x);
+    int ui = i == m_vertex_map.end() ? create_vertex(x) : i->second;
+    auto& u = m_vertices[ui];
+    u.decoration = decoration(psi);
+    u.rank = k;
+    return ui;
+  }
+
+  // insert the variable x; does not overwrite existing value
+  int insert_variable(const pbes_expression& x)
+  {
+    auto i = m_vertex_map.find(x);
+    if (i != m_vertex_map.end())
     {
-      return false;
+      return i->second;
     }
-  }
-  return true;
-}
-
-inline
-bool all_vertices_enabled(const structure_graph::vertex_set& V)
-{
-  for (const structure_graph::vertex* v: V)
-  {
-    if (!v->enabled)
+    else
     {
-      return false;
-    }
-  }
-  return true;
-}
-
-inline
-std::string print_decoration(structure_graph::decoration_type d)
-{
-  switch (d)
-  {
-    case structure_graph::d_conjunction : return "&#9652;";
-    case structure_graph::d_disjunction : return "&#9662;";
-    case structure_graph::d_true        : return "T";
-    case structure_graph::d_false       : return "F";
-    case structure_graph::d_none        : return "-";
-  }
-  throw mcrl2::runtime_error("unknown decoration");
-}
-
-inline
-std::string to_dot(const structure_graph::vertex_set& V)
-{
-  typedef structure_graph::vertex vertex;
-
-  std::ostringstream out;
-  out << "digraph G {" << std::endl;
-
-  // create id map for nodes
-  std::map<const vertex*, std::string> id;
-  int index = 0;
-  for (const vertex* v: V)
-  {
-    id[v] = "l" + std::to_string(index++);
-  }
-
-  // draw vertices
-  for (const vertex* v: V)
-  {
-    std::string shape = (v->decoration == structure_graph::d_disjunction) ? "diamond" : "box";
-    std::string label = pbes_system::pp(v->formula) + "<br/>r = " + std::to_string(v->rank) + "<br/>d = " + print_decoration(v->decoration);
-    out << "  " << id[v] << " [label=<" << label << "> shape=" << shape << "];" << std::endl;
-  }
-
-  // draw edges
-  for (const vertex* u: V)
-  {
-    for (const vertex* v: u->successors)
-    {
-      out << "  " << id[u] << " -> " << id[v] << ";" << std::endl;
+      return create_vertex(x);
     }
   }
 
-  out << "}" << std::endl;
-  return out.str();
-}
+  int insert_vertex(const pbes_expression& x)
+  {
+    // if the vertex already exists, return it
+    auto i = m_vertex_map.find(x);
+    if (i != m_vertex_map.end())
+    {
+      return i->second;
+    }
+
+    // create a new vertex, and return it
+    return create_vertex(x);
+  }
+
+  void insert_edge(int ui, int vi)
+  {
+    auto& u = m_vertices[ui];
+    auto& v = m_vertices[vi];
+    u.successors.push_back(vi);
+    v.predecessors.push_back(ui);
+  }
+
+  void set_initial_state(const propositional_variable_instantiation& x)
+  {
+    m_initial_state = x;
+  }
+
+  // call at the end, to put the results into m_graph
+  void finalize()
+  {
+    std::size_t N = m_vertices.size();
+
+    std::swap(m_graph.m_vertices, m_vertices);
+
+    auto i = m_vertex_map.find(m_initial_state);
+    assert (i != m_vertex_map.end());
+    m_graph.m_initial_vertex = i->second;
+
+    m_graph.m_exclude = std::vector<bool>(N, false);
+  }
+};
+
+} // namespace detail
 
 } // namespace pbes_system
 

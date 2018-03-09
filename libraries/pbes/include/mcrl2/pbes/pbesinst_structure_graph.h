@@ -26,12 +26,12 @@ namespace pbes_system {
 class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
 {
   protected:
-    structure_graph& m_graph;
+    detail::structure_graph_builder m_graph_builder;
     bool m_initial_state_assigned;
 
     void SG0(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
     {
-      const auto& vertex_phi = m_graph.insert_variable(X, psi, k);
+      int vertex_phi = m_graph_builder.insert_variable(X, psi, k);
       if (is_true(psi))
       {
         // skip
@@ -42,30 +42,30 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       }
       else if (is_propositional_variable_instantiation(psi))
       {
-        const auto& vertex_psi = m_graph.insert_variable(psi);
-        m_graph.insert_edge(vertex_phi, vertex_psi);
+        int vertex_psi = m_graph_builder.insert_variable(psi);
+        m_graph_builder.insert_edge(vertex_phi, vertex_psi);
       }
       else if (is_and(psi))
       {
         for (const pbes_expression& psi_i: split_and(psi))
         {
-          const auto& vertex_psi_i = SG1(psi_i);
-          m_graph.insert_edge(vertex_phi, vertex_psi_i);
+          int vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_phi, vertex_psi_i);
         }
       }
       else if (is_or(psi))
       {
         for (const pbes_expression& psi_i: split_or(psi))
         {
-          const auto& vertex_psi_i = SG1(psi_i);
-          m_graph.insert_edge(vertex_phi, vertex_psi_i);
+          int vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_phi, vertex_psi_i);
         }
       }
     }
 
-    const structure_graph::vertex& SG1(const pbes_expression& psi)
+    int SG1(const pbes_expression& psi)
     {
-      const auto& vertex_psi = m_graph.insert_vertex(psi);
+      int vertex_psi = m_graph_builder.insert_vertex(psi);
       if (is_true(psi))
       {
         // skip
@@ -82,16 +82,16 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       {
         for (const pbes_expression& psi_i: split_and(psi))
         {
-          const auto& vertex_psi_i = SG1(psi_i);
-          m_graph.insert_edge(vertex_psi, vertex_psi_i);
+          int vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_psi, vertex_psi_i);
         }
       }
       else if (is_or(psi))
       {
         for (const pbes_expression& psi_i: split_or(psi))
         {
-          const auto& vertex_psi_i = SG1(psi_i);
-          m_graph.insert_edge(vertex_psi, vertex_psi_i);
+          int vertex_psi_i = SG1(psi_i);
+          m_graph_builder.insert_edge(vertex_psi, vertex_psi_i);
         }
       }
       return vertex_psi;
@@ -106,7 +106,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
          transformation_strategy transformation_strategy = lazy
         )
       : pbesinst_lazy_algorithm(p, rewrite_strategy, search_strategy, transformation_strategy),
-        m_graph(G),
+        m_graph_builder(G),
         m_initial_state_assigned(false)
     {}
 
@@ -114,15 +114,16 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
     {
       if (!m_initial_state_assigned)
       {
-        m_graph.initial_state() = X;
+        m_graph_builder.set_initial_state(X);
         m_initial_state_assigned = true;
       }
       SG0(X, psi, k);
     }
 
-    const structure_graph& get_graph() const
+    void run() override
     {
-      return m_graph;
+      pbesinst_lazy_algorithm::run();
+      m_graph_builder.finalize();
     }
 };
 
