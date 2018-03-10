@@ -92,6 +92,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         ltsfile = parser.option_argument("ltsfile");
         ltsspec.load(ltsfile);
       }
+      m_transformation_strategy = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
+      m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
     }
 
     void add_options(utilities::interface_description& desc)
