@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_H
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include "mcrl2/pbes/structure_graph.h"
 
@@ -67,13 +68,13 @@ class structure_graph
   protected:
     std::vector<vertex> m_vertices;
     int m_initial_vertex;
-    std::vector<bool> m_exclude;
+    boost::dynamic_bitset<> m_exclude;
 
     struct integers_not_contained_in
     {
-      const std::vector<bool>& subset;
+      const boost::dynamic_bitset<>& subset;
 
-      integers_not_contained_in(const std::vector<bool>& subset_)
+      integers_not_contained_in(const boost::dynamic_bitset<>& subset_)
         : subset(subset_)
       {}
 
@@ -86,9 +87,9 @@ class structure_graph
     struct vertices_not_contained_in
     {
       const std::vector<vertex>& vertices;
-      const std::vector<bool>& subset;
+      const boost::dynamic_bitset<>& subset;
 
-      vertices_not_contained_in(const std::vector<vertex>& vertices_, const std::vector<bool>& subset_)
+      vertices_not_contained_in(const std::vector<vertex>& vertices_, const boost::dynamic_bitset<>& subset_)
         : vertices(vertices_),
           subset(subset_)
       {}
@@ -158,12 +159,12 @@ class structure_graph
       return m_vertices[u];
     }
 
-    const std::vector<bool>& exclude() const
+    const boost::dynamic_bitset<>& exclude() const
     {
       return m_exclude;
     }
 
-    std::vector<bool>& exclude()
+    boost::dynamic_bitset<>& exclude()
     {
       return m_exclude;
     }
@@ -176,14 +177,7 @@ class structure_graph
     // TODO: avoid this linear time check
     bool is_empty() const
     {
-      for (bool b: m_exclude)
-      {
-        if (!b)
-        {
-          return false;
-        }
-      }
-      return true;
+      return m_exclude.all();
     }
 };
 
@@ -347,7 +341,7 @@ struct structure_graph_builder
     assert (i != m_vertex_map.end());
     m_graph.m_initial_vertex = i->second;
 
-    m_graph.m_exclude = std::vector<bool>(N, false);
+    m_graph.m_exclude = boost::dynamic_bitset<>(N);
   }
 };
 

@@ -36,10 +36,9 @@ struct vertex_set
 {
   protected:
     std::vector<int> m_vertices;
-    std::vector<bool> m_I;
+    boost::dynamic_bitset<> m_include;
 
   public:
-
     void self_check(const std::string& msg = "") const
     {
 #ifndef NDEBUG
@@ -49,11 +48,11 @@ struct vertex_set
       }
       for (int v: m_vertices)
       {
-        if (v >= m_I.size())
+        if (v >= m_include.size())
         {
-          throw mcrl2::runtime_error("The value " + std::to_string(v) + " is bigger than I.size() = " + std::to_string(m_I.size()));
+          throw mcrl2::runtime_error("The value " + std::to_string(v) + " is bigger than I.size() = " + std::to_string(m_include.size()));
         }
-        if (!m_I[v])
+        if (!m_include[v])
         {
           throw mcrl2::runtime_error("Inconsistency detected with element " + std::to_string(v) + "!");
         }
@@ -65,14 +64,14 @@ struct vertex_set
     {}
 
     vertex_set(std::size_t N)
-      : m_I(N, false)
+      : m_include(N)
     {
       self_check();
     }
 
     template <typename Iter>
     vertex_set(std::size_t N, Iter first, Iter last)
-      : m_I(N, false)
+      : m_include(N)
     {
       for (auto i = first; i != last; ++i)
       {
@@ -88,34 +87,36 @@ struct vertex_set
 
     bool contains(int u) const
     {
-      return m_I[u];
+      return m_include[u];
     }
 
     void insert(int u)
     {
-      if (u >= m_I.size())
-      {
-        throw mcrl2::runtime_error("The value " + std::to_string(u) + " is bigger than I.size() = " + std::to_string(m_I.size()));
-      }
-      if (m_I[u])
-      {
-        throw mcrl2::runtime_error("The value " + std::to_string(u) + " is already contained!");
-      }
+      assert(u < m_include.size());
+      assert(!m_include[u]);
+      // if (u >= m_include.size())
+      // {
+      //   throw mcrl2::runtime_error("The value " + std::to_string(u) + " is bigger than I.size() = " + std::to_string(m_include.size()));
+      // }
+      // if (m_include[u])
+      // {
+      //   throw mcrl2::runtime_error("The value " + std::to_string(u) + " is already contained!");
+      // }
       m_vertices.push_back(u);
-      m_I[u] = true;
+      m_include[u] = true;
       self_check();
     }
 
     void clear()
     {
       m_vertices.clear();
-      m_I = std::vector<bool>(m_I.size(), false);
+      m_include = boost::dynamic_bitset<>(m_include.size());
       self_check();
     }
 
     std::size_t extent() const
     {
-      return m_I.size();
+      return m_include.size();
     }
 
     const std::vector<int>& vertices() const
@@ -128,9 +129,9 @@ struct vertex_set
       return m_vertices.size();
     }
 
-    const std::vector<bool>& I() const
+    const boost::dynamic_bitset<>& I() const
     {
-      return m_I;
+      return m_include;
     }
 };
 
@@ -169,6 +170,21 @@ vertex_set set_difference(const vertex_set& V, const vertex_set& W)
 }
 
 inline
+vertex_set make_vertex_set(const structure_graph& G)
+{
+  std::size_t N = G.all_vertices().size();
+  vertex_set result(N);
+  for (int i = 0; i < N; i++)
+  {
+    if (G.contains(i))
+    {
+      result.insert(i);
+    }
+  }
+  return result;
+}
+
+inline
 void log_vertex_set(const structure_graph& G, const vertex_set& V, const std::string& name)
 {
   mCRL2log(log::debug) << "--- " << name << " ---" << std::endl;
@@ -177,7 +193,7 @@ void log_vertex_set(const structure_graph& G, const vertex_set& V, const std::st
     mCRL2log(log::debug) << "  " << v << std::endl;
   }
   mCRL2log(log::debug) << "\n";
-  mCRL2log(log::debug) << "exclude = " << core::detail::print_list(G.exclude()) << "\n";
+  mCRL2log(log::debug) << "exclude = " << G.exclude() << "\n";
 }
 
 // Returns true if the vertex u satisfies the conditions for being added to the attractor set A.
@@ -317,14 +333,10 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G);
 inline
 std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G, const vertex_set& A)
 {
-  auto exclude = G.exclude();
-  for (int u: A.vertices())
-  {
-    exclude[u] = true;
-  }
+  auto exclude = G.exclude() | A.I();
   std::swap(G.exclude(), exclude);
   auto result = solve_recursive(G);
-  G.exclude() = exclude;
+  std::swap(G.exclude(), exclude);
   return result;
 }
 
@@ -340,6 +352,7 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
 
   auto q = get_minmax_rank(G);
   std::size_t m = std::get<0>(q);
+  std::size_t h = std::get<1>(q);
   const vertex_set& U = std::get<2>(q);
 
   int alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
@@ -355,6 +368,19 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
       {
         u.strategy = v;
       }
+    }
+  }
+
+  // optimization
+  if (h == m)
+  {
+    if (m % 2 == 0)
+    {
+      return { vertex_set(N), make_vertex_set(G) };
+    }
+    else
+    {
+      return { make_vertex_set(G), vertex_set(N) };
     }
   }
 
