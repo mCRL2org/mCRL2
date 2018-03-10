@@ -26,7 +26,7 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/structure_graph.h"
-#include "mcrl2/utilities/chrono_timer.h"
+//#include "mcrl2/utilities/chrono_timer.h"
 
 namespace mcrl2 {
 
