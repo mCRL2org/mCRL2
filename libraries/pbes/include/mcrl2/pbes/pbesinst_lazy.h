@@ -671,7 +671,7 @@ class pbesinst_lazy_algorithm
          transformation_strategy transformation_strategy = lazy
         )
       :
-        datar(p.data(), rewrite_strategy),
+        datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
         m_pbes(preprocess(p)),
         m_equation_index(p),
         R(datar, p.data()),
