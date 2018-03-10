@@ -352,7 +352,7 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
 
   auto q = get_minmax_rank(G);
   std::size_t m = std::get<0>(q);
-  std::size_t h = std::get<1>(q);
+//  std::size_t h = std::get<1>(q);
   const vertex_set& U = std::get<2>(q);
 
   int alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
@@ -371,18 +371,18 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
     }
   }
 
-  // optimization
-  if (h == m)
-  {
-    if (m % 2 == 0)
-    {
-      return { vertex_set(N), make_vertex_set(G) };
-    }
-    else
-    {
-      return { make_vertex_set(G), vertex_set(N) };
-    }
-  }
+//  // optimization
+//  if (h == m)
+//  {
+//    if (m % 2 == 0)
+//    {
+//      return { vertex_set(N), make_vertex_set(G) };
+//    }
+//    else
+//    {
+//      return { make_vertex_set(G), vertex_set(N) };
+//    }
+//  }
 
   vertex_set W[2]   = { vertex_set(N), vertex_set(N) };
   vertex_set W_1[2] = { vertex_set(N), vertex_set(N) };
