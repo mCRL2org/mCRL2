@@ -22,6 +22,26 @@ namespace pbes_system {
 
 namespace detail {
 
+//--- workaround for missing dynamic_bitset::all() function in boost versions prior to 1.56 ---//
+template <typename T>
+auto call_dynamic_bitset_all_helper(T t, int) -> decltype(t.all())
+{
+  return t.all();
+}
+
+// inefficient alternative for all()
+template <typename T>
+auto call_dynamic_bitset_all_helper(T t, long) -> int
+{
+  return ~t.none();
+}
+
+template <typename T>
+int call_dynamic_bitset_all(const T& t)
+{
+  return call_dynamic_bitset_all_helper(t, 0);
+}
+
 struct structure_graph_builder;
 
 } // namespace detail
@@ -177,7 +197,9 @@ class structure_graph
     // TODO: avoid this linear time check
     bool is_empty() const
     {
-      return m_exclude.all();
+      // This requires boost 1.56
+      // return m_exclude.all();
+      return detail::call_dynamic_bitset_all(m_exclude);
     }
 };
 
