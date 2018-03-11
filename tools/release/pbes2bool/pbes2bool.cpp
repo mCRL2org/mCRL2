@@ -206,7 +206,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       add_option("approximate-false",
                  "If set, variables that are removed from the todo buffer are set to true. This means that the result "
                  "false is reliable, and the result true can still mean that the formula is false. Without this flag "
-                 "true is appromated, meaning that true is the reliable answer, and false is not. ").
+                 "true is approximated, meaning that true is the reliable answer, and false is not. ").
       add_option("unused_data",
                  "do not remove unused parts of the data specification. ",
                  'u').

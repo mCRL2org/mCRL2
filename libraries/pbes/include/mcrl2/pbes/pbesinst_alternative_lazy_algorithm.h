@@ -226,11 +226,11 @@ class pbesinst_alternative_lazy_algorithm
                        " boolean variables";
         if (m_maximum_todo_size!=atermpp::npos)
         {
-          mCRL2log(mcrl2::log::status) << " with a todo buffer of size " << todo_size << ".\n";
+          mCRL2log(mcrl2::log::status) << " with a todo buffer of size " << todo_size << ".    \n";
         }
         else
         {
-          mCRL2log(mcrl2::log::status) << ".\n";
+          mCRL2log(mcrl2::log::status) << ".   \n"; // Extra spaces, as the log messages are shown repeatedly on top of each other and can shorten, leaving residual letter on the output. 
         }
       }
     }
