@@ -31,9 +31,9 @@ auto call_dynamic_bitset_all_helper(T t, int) -> decltype(t.all())
 
 // inefficient alternative for all()
 template <typename T>
-auto call_dynamic_bitset_all_helper(T t, long) -> int
+auto call_dynamic_bitset_all_helper(T t, long) -> bool
 {
-  return ~t.none();
+  return (~t).none();
 }
 
 template <typename T>
