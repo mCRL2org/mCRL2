@@ -80,12 +80,12 @@ std::string description(const remove_level s)
 {
   switch(s)
   {
-    case none: return "do not remove generated bes variables. This can lead to excessive"
-        " usage of memory.";
-    case some: return "remove generated bes variables that are not used, except if"
-        " the right hand side of its equation is true or false. The rhss of variables"
-        " must have to be recalculated, if encountered again, which is quite normal.";
-    case all: return "remove every bes variable that is not used anymore in any equation."
+    case none: return "never remove a generated bes variable and its equation. This can lead to excessive"
+        " memory usage.";
+    case some: return "remove generated bes variables that do not occur anymore in the generated BES, except if"
+        " the right hand side of its equation is true or false. The rhss of removed variables"
+        " must have to be recalculated, when this bes variable is encountered again.";
+    case all: return "remove the equation for bes variables that do not occur anymore in generated boolean equation system."
         " This is quite memory efficient, but it can be very time consuming as the rhss of removed bes"
         " variables may have to be recalculated quite often.";
   }
