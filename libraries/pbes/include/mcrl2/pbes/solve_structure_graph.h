@@ -94,14 +94,6 @@ struct vertex_set
     {
       assert(u < m_include.size());
       assert(!m_include[u]);
-      // if (u >= m_include.size())
-      // {
-      //   throw mcrl2::runtime_error("The value " + std::to_string(u) + " is bigger than I.size() = " + std::to_string(m_include.size()));
-      // }
-      // if (m_include[u])
-      // {
-      //   throw mcrl2::runtime_error("The value " + std::to_string(u) + " is already contained!");
-      // }
       m_vertices.push_back(u);
       m_include[u] = true;
       self_check();
@@ -129,9 +121,27 @@ struct vertex_set
       return m_vertices.size();
     }
 
-    const boost::dynamic_bitset<>& I() const
+    const boost::dynamic_bitset<>& include() const
     {
       return m_include;
+    }
+
+    int pop_back()
+    {
+      int u = m_vertices.back();
+      m_vertices.pop_back();
+      m_include[u] = false;
+      return u;
+    }
+
+    bool operator==(const vertex_set& other) const
+    {
+      return m_include == other.m_include;
+    }
+
+    bool operator!=(const vertex_set& other) const
+    {
+      return !(*this == other);
     }
 };
 
@@ -188,12 +198,12 @@ inline
 void log_vertex_set(const structure_graph& G, const vertex_set& V, const std::string& name)
 {
   mCRL2log(log::debug) << "--- " << name << " ---" << std::endl;
-  for (const structure_graph::vertex& v: G.vertices())
+  for (int v: V.vertices())
   {
-    mCRL2log(log::debug) << "  " << v << std::endl;
+    mCRL2log(log::debug) << "  " << v << " " << G.find_vertex(v) << std::endl;
   }
-  mCRL2log(log::debug) << "\n";
-  mCRL2log(log::debug) << "exclude = " << G.exclude() << "\n";
+  // mCRL2log(log::debug) << "\n";
+  // mCRL2log(log::debug) << "exclude = " << G.exclude() << "\n";
 }
 
 // Returns true if the vertex u satisfies the conditions for being added to the attractor set A.
@@ -226,23 +236,25 @@ bool is_attractor(const structure_graph& G, int u, const vertex_set& A, int alph
 inline
 vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alpha)
 {
+  // utilities::chrono_timer timer;
+  // std::size_t A_size = A.size();
+
   // put all predecessors of elements in A in todo
-  std::set<int> todo;
+  vertex_set todo(G.all_vertices().size());
   for (int u: A.vertices())
   {
     for (int v: G.predecessors(u))
     {
-      if (!(A.contains(v)))
+      if (!(A.contains(v)) && !todo.contains(v))
       {
         todo.insert(v);
       }
     }
   }
 
-  while (!todo.empty())
+  while (!todo.is_empty())
   {
-    int u = *todo.begin();
-    todo.erase(todo.begin());
+    int u = todo.pop_back();
 
     if (is_attractor(G, u, A, 1 - alpha))
     {
@@ -253,6 +265,7 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
         {
           if ((A.contains(w)))
           {
+            mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
             G.find_vertex(u).strategy = w;
             break;
           }
@@ -267,13 +280,15 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
 
       for (int v: G.predecessors(u))
       {
-        if (!(A.contains(v)))
+        if (!A.contains(v) && !todo.contains(v))
         {
           todo.insert(v);
         }
       }
     }
   }
+
+  // mCRL2log(log::verbose) << "computed attractor set, alpha = " << alpha << ", size before = " << A_size << ", size after = " << A.size() << ", time = " << timer.elapsed() << std::endl;
   return A;
 }
 
@@ -313,17 +328,11 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
 inline
 int succ(const structure_graph& G, int u, const vertex_set& U)
 {
-  int result = -1;
-
   for (int v: G.successors(u))
   {
-    if (U.contains(v))
-    {
-      result = v;
-      break;
-    }
+    return v;
   }
-  return result;
+  return -1;
 }
 
 inline
@@ -333,7 +342,7 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G);
 inline
 std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G, const vertex_set& A)
 {
-  auto exclude = G.exclude() | A.I();
+  auto exclude = G.exclude() | A.include();
   std::swap(G.exclude(), exclude);
   auto result = solve_recursive(G);
   std::swap(G.exclude(), exclude);
@@ -344,7 +353,9 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G, const vert
 inline
 std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
 {
+  mCRL2log(log::debug) << "\n--- solve_recursive input ---\n" << G << std::endl;
   std::size_t N = G.all_vertices().size();
+
   if (G.is_empty())
   {
     return { vertex_set(N), vertex_set(N) };
@@ -352,7 +363,7 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
 
   auto q = get_minmax_rank(G);
   std::size_t m = std::get<0>(q);
-//  std::size_t h = std::get<1>(q);
+  // std::size_t h = std::get<1>(q);
   const vertex_set& U = std::get<2>(q);
 
   int alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
@@ -366,37 +377,38 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
       auto v = succ(G, ui, U);
       if (v != -1)
       {
+        mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
         u.strategy = v;
       }
     }
   }
 
-//  // optimization
-//  if (h == m)
-//  {
-//    if (m % 2 == 0)
-//    {
-//      return { vertex_set(N), make_vertex_set(G) };
-//    }
-//    else
-//    {
-//      return { make_vertex_set(G), vertex_set(N) };
-//    }
-//  }
+  // // optimization
+  // if (h == m)
+  // {
+  //   if (m % 2 == 0)
+  //   {
+  //     return { make_vertex_set(G), vertex_set(N) };
+  //   }
+  //   else
+  //   {
+  //     return { vertex_set(N), make_vertex_set(G) };
+  //   }
+  // }
 
   vertex_set W[2]   = { vertex_set(N), vertex_set(N) };
-  vertex_set W_1[2] = { vertex_set(N), vertex_set(N) };
+  vertex_set W_1[2];
 
   vertex_set A = compute_attractor_set(G, U, alpha);
   std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
-  if (W_1[1 - alpha].is_empty())
+  vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
+  if (W_1[1 - alpha].size() == B.size())
   {
     W[alpha] = set_union(A, W_1[alpha]);
     W[1 - alpha].clear();
   }
   else
   {
-    vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
     std::tie(W[0], W[1]) = solve_recursive(G, B);
     W[1 - alpha] = set_union(W[1 - alpha], B);
   }
@@ -408,12 +420,11 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
 inline
 std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
 {
+  mCRL2log(log::debug) << "\n--- solve_recursive_extended input ---\n" << G << std::endl;
+
   std::size_t N = G.all_vertices().size();
   vertex_set Vconj(N);
   vertex_set Vdisj(N);
-
-  log_vertex_set(G, Vconj, "Vconj---");
-  log_vertex_set(G, Vdisj, "Vdisj---");
 
   // find vertices Vconj with decoration false and Vdisj with decoration true
   for (int vi = 0; vi < N; vi++)
@@ -433,10 +444,6 @@ std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
     }
   }
 
-  mCRL2log(log::debug) << "\n--- solve_recursive_extended ---" << std::endl;
-  log_vertex_set(G, Vconj, "Vconj");
-  log_vertex_set(G, Vdisj, "Vdisj");
-
   // extend Vconj and Vdisj
   if (!Vconj.is_empty())
   {
@@ -446,9 +453,6 @@ std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
   {
     Vdisj = compute_attractor_set(G, Vdisj, 0);
   }
-
-  log_vertex_set(G, Vconj, "Vconj after extension");
-  log_vertex_set(G, Vdisj, "Vdisj after extension");
 
   // default case
   if (Vconj.is_empty() && Vdisj.is_empty())
@@ -466,12 +470,97 @@ std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
 }
 
 inline
+void check_solve_recursive_solution(const structure_graph& G, const vertex_set& Wdisj, const vertex_set& Wconj)
+{
+  mCRL2log(log::debug) << "\n--- check_solve_recursive_solution ---" << std::endl;
+  log_vertex_set(G, Wconj, "Wconj");
+  log_vertex_set(G, Wdisj, "Wdisj");
+
+  typedef structure_graph::vertex vertex;
+
+  vertex_set Wconj1;
+  vertex_set Wdisj1;
+  structure_graph Gcopy;
+
+  Gcopy = G;
+  for (int ui: Wconj.vertices())
+  {
+    vertex& u = Gcopy.find_vertex(ui);
+    if (u.decoration == structure_graph::d_conjunction)
+    {
+      if (u.strategy == -1)
+      {
+        throw mcrl2::runtime_error("check_solve_recursive_solution failed: vertex " + std::to_string(ui) + " has no strategy");
+      }
+      u.decoration = structure_graph::d_none;
+
+      for (int vi: Gcopy.successors(ui))
+      {
+        vertex& v = Gcopy.find_vertex(vi);
+        v.remove_predecessor(ui);
+      }
+      u.successors.clear();
+
+      // add the edge (u, u.strategy)
+      int wi = u.strategy;
+      u.successors.push_back(wi);
+      vertex& w = Gcopy.find_vertex(wi);
+      w.predecessors.push_back(ui);
+    }
+  }
+  Gcopy.exclude() = ~(Wconj.include());
+  log_vertex_set(Gcopy, Wconj, "Wconj after removal of edges");
+  std::tie(Wdisj1, Wconj1) = solve_recursive_extended(Gcopy);
+  if (!Wdisj1.is_empty() || Wconj1 != Wconj)
+  {
+    log_vertex_set(Gcopy, Wconj1, "Wconj1");
+    log_vertex_set(Gcopy, Wdisj1, "Wdisj1");
+    throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
+  }
+
+  Gcopy = G;
+  for (int ui: Wdisj.vertices())
+  {
+    vertex& u = Gcopy.find_vertex(ui);
+    if (u.decoration == structure_graph::d_disjunction)
+    {
+      if (u.strategy == -1)
+      {
+        throw mcrl2::runtime_error("check_solve_recursive_solution failed: vertex " + std::to_string(ui) + " has no strategy");
+      }
+      u.decoration = structure_graph::d_none;
+
+      for (int vi: Gcopy.successors(ui))
+      {
+        vertex& v = Gcopy.find_vertex(vi);
+        v.remove_predecessor(ui);
+      }
+      u.successors.clear();
+
+      // add the edge (u, u.strategy)
+      assert(u.strategy != -1);
+      int wi = u.strategy;
+      u.successors.push_back(wi);
+      vertex& w = Gcopy.find_vertex(wi);
+      w.predecessors.push_back(ui);
+    }
+  }
+  Gcopy.exclude() = ~(Wdisj.include());
+  log_vertex_set(Gcopy, Wdisj, "Wdisj after removal of edges");
+  std::tie(Wdisj1, Wconj1) = solve_recursive_extended(Gcopy);
+  if (!Wconj1.is_empty() || Wdisj1 != Wdisj)
+  {
+    log_vertex_set(Gcopy, Wconj1, "Wconj1");
+    log_vertex_set(Gcopy, Wdisj1, "Wdisj1");
+    throw mcrl2::runtime_error("check_solve_recursive_solution failed!");
+  }
+}
+
+inline
 bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
 {
   mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
-  // utilities::chrono_timer timer;
   auto W = solve_recursive_extended(G);
-  // std::cout << "time: " << timer.elapsed() << std::endl;
   bool result;
   if (W.first.contains(G.initial_vertex()))
   {
@@ -485,13 +574,11 @@ bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
   {
     throw mcrl2::runtime_error("No solution found!!!");
   }
+  if (check_strategy)
+  {
+    check_solve_recursive_solution(G, W.first, W.second);
+  }
   return result;
-
-  // const vertex& init = G.initial_vertex();
-  // if (check_strategy)
-  // {
-  //   check_solve_recursive_solution(Wconj, Wdisj);
-  // }
 }
 
 inline

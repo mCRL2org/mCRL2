@@ -9,19 +9,14 @@
 /// \file pbessolve.cpp
 
 #include <iostream>
-#include <string>
 
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/io.h"
 #include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/input_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -62,6 +57,23 @@ void save_lps(const lps::specification& lpsspec, const std::string& output_filen
   }
 }
 
+/// \brief Loads a PBES from input_filename, or from stdin if filename equals "".
+inline
+pbes load_pbes(const std::string& input_filename)
+{
+    pbes result;
+    if (input_filename.empty())
+    {
+        result.load(std::cin);
+    }
+    else
+    {
+        std::ifstream from(input_filename, std::ifstream::in | std::ifstream::binary);
+        result.load(from);
+    }
+    return result;
+}
+
 class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 {
   protected:
@@ -75,7 +87,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     std::string ltsfile;
     lts::lts_lts_t ltsspec;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       check_strategy = parser.options.count("check-strategy") > 0;
@@ -96,7 +108,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'c');
@@ -138,10 +150,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       m_search_strategy(breadth_first)
     {}
 
-    bool run()
+    bool run() override
     {
-      pbes_system::pbes pbesspec;
-      pbes_system::load_pbes(pbesspec, input_filename());
+      pbes_system::pbes pbesspec = load_pbes(input_filename());
       pbes_system::algorithms::normalize(pbesspec);
       structure_graph G;
 
@@ -153,8 +164,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 
       if (!lpsfile.empty())
       {
-        lps::specification lpsspec;
-        load_lps(lpsspec, lpsfile);
+        lps::specification lpsspec = load_lps(lpsfile);
         lps::detail::instantiate_global_variables(lpsspec); // N.B. This is necessary, because the global variables might not be valid for the evidence.
         bool result;
         lps::specification evidence;

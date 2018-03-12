@@ -83,6 +83,11 @@ class structure_graph
           successors(succ_),
           strategy(strategy_)
       {}
+
+      void remove_predecessor(int u)
+      {
+        predecessors.erase(std::remove(predecessors.begin(), predecessors.end(), u), predecessors.end());
+      }
     };
 
   protected:
@@ -174,6 +179,11 @@ class structure_graph
       return m_vertices[u].strategy;
     }
 
+    vertex& find_vertex(int u)
+    {
+      return m_vertices[u];
+    }
+
     const vertex& find_vertex(int u) const
     {
       return m_vertices[u];
@@ -230,29 +240,23 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
   return out;
 }
 
-// inline
-// std::ostream& operator<<(std::ostream& out, const structure_graph::vertex_set& V)
-// {
-//   for (const structure_graph::vertex* v: V)
-//   {
-//     if (v->enabled)
-//     {
-//       out << *v << std::endl;
-//     }
-//   }
-//   return out;
-// }
-//
-// inline
-// std::string pp(const structure_graph& G)
-// {
-//   std::ostringstream out;
-//   for (const structure_graph::vertex* v: G.vertices())
-//   {
-//     out << *v << std::endl;
-//   }
-//   return out.str();
-// }
+inline
+std::ostream& operator<<(std::ostream& out, const structure_graph& G)
+{
+  std::size_t N = G.all_vertices().size();
+  for (int i = 0; i < N; i++)
+  {
+    if (G.contains(i))
+    {
+      out << G.find_vertex(i) << std::endl;
+    }
+  }
+  if (G.is_empty())
+  {
+    out << "empty" << std::endl;
+  }
+  return out;
+}
 
 namespace detail {
 
