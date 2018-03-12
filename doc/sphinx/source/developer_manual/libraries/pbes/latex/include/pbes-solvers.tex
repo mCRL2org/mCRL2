@@ -10,42 +10,34 @@ In this section we describe algorithms for solving PBESs.
 
 Let $A$ be a set of vertices of a structure graph $G=(V,E,d,r)$. Then we
 define the following algorithms for computing an attractor set of $%
-A\subseteq V$. As a side effect, a strategy $\tau $ is computed.%
+A\subseteq V$. As a side effect, a strategy $\tau $ is computed. The
+following notations are used for player Even and Odd:%
 \begin{equation*}
-\begin{array}{l}
-\text{\textsc{AttractorSetConjunctive(}}A\text{\textsc{)}} \\ 
-todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
-\tau :=\emptyset  \\ 
-\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
-\qquad \text{\textbf{choose }}u\in todo \\ 
-\qquad todo:=todo\ \backslash \ \{u\} \\ 
-\qquad \text{\textbf{if} }attr_{\blacktriangle }(A,u)\text{ \textbf{then}}
-\\ 
-\qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangle }\text{ \textbf{%
-then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with} }v\in A\cap
-succ(u) \\ 
-\qquad \qquad A:=A\cup \{u\} \\ 
-\qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
-\text{\textbf{return }}A,\tau 
+\begin{array}{cc}
+Even & Odd \\ 
+0 & 1 \\ 
+\Diamond  & \square  \\ 
+\vee  & \wedge  \\ 
+\blacktriangledown  & \blacktriangle  \\ 
+\nu  & \mu  \\ 
+\top  & \bot 
 \end{array}%
 \end{equation*}%
-and%
+In the algoritms below we assume that the decoration $\blacktriangledown $
+has value 0 and the decoration $\blacktriangle $ has value 1.%
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{AttractorSetDisjunctive(}}A\text{\textsc{)}} \\ 
+\text{\textsc{Attr(}}A,\alpha \text{\textsc{)}} \\ 
 todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
-\tau :=\emptyset  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}u\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
-\qquad \text{\textbf{if} }attr_{\blacktriangledown }(A,u)\text{ \textbf{then}%
-} \\ 
-\qquad \qquad \text{\textbf{if} }\lnot u_{\blacktriangledown }\text{ \textbf{%
-then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with} }v\in A\cap
-succ(u) \\ 
+\qquad \text{\textbf{if} }attr_{\alpha }(A,u)\text{ \textbf{then}} \\ 
+\qquad \qquad \text{\textbf{if} }d(u)\neq \alpha \text{ \textbf{then }}\tau
+\lbrack u]:=v\text{ \textbf{with} }v\in A\cap succ(u) \\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
-\text{\textbf{return }}A,\tau 
+\text{\textbf{return }}A%
 \end{array}%
 \end{equation*}%
 where%
@@ -54,80 +46,39 @@ pred(v) &=&\{u\in V\mid (u,v)\in E\} \\
 succ(u) &=&\{v\in V\mid (u,v)\in E\}
 \end{eqnarray*}%
 and where%
-\begin{eqnarray*}
-attr_{\blacktriangle }(A,u) &=&\{\lnot u\blacktriangledown \vee \left( \lnot
-u\blacktriangle \wedge succ(u)\subseteq A\right) \} \\
-attr_{\blacktriangledown }(A,u) &=&\{\lnot u\blacktriangle \vee \left( \lnot
-u\blacktriangledown \wedge succ(u)\subseteq A\right) \}
-\end{eqnarray*}%
+\begin{equation*}
+attr_{\alpha }(A,u)=\{d(u)\neq 1-\alpha \vee \left( d(u)\neq \alpha \wedge
+succ(u)\subseteq A\right) \}
+\end{equation*}%
 The following algorithm is used to compute a partitioning of $V$ into $%
-\left( W_{\blacktriangle },W_{\blacktriangledown }\right) $ of vertices $%
-W_{\blacktriangle }$ that represent equations evaluating to false and
-vertices $W_{\blacktriangledown }$ that represent equations evaluating to
-true. A precondition of this algorithm is that it contains no nodes with
-decoration $\top $ or $\bot $. As a side effect, also corresponding
-strategies $\tau _{\blacktriangle }$ and $\tau _{\blacktriangledown }$ are
-computed.%
+\left( W_{0},W_{1}\right) $ of vertices $W_{1}$ that represent equations
+evaluating to false and vertices $W_{0}$ that represent equations evaluating
+to true. A precondition of this algorithm is that it contains no nodes with
+decoration $\top $ or $\bot $.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{SolveRecursive(}}V\text{\textsc{)}} \\ 
-m:=\min (\{r(v)\mid v\in V\}) \\ 
-h:=\max (\{r(v)\mid v\in V\}) \\ 
 \text{\textbf{if} }V=\emptyset \text{ \textbf{then return }}(\emptyset
 ,\emptyset ) \\ 
+m:=\min (\{r(v)\mid v\in V\}) \\ 
+\alpha :=m\func{mod}2 \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
-\tau :=\emptyset  \\ 
-\text{\textbf{if} }odd(m)\text{ \textbf{then}} \\ 
-\qquad \text{\textbf{for} }u\in U\text{ \textbf{if} }u_{\blacktriangle }%
-\text{ \textbf{then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with}
-}v\in succ(u,U) \\ 
-\qquad A,\tau _{A}:=Attr_{\blacktriangle }\left( U\right)  \\ 
-\qquad \left( W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime
-},W_{\blacktriangledown }^{\prime },\tau _{\blacktriangledown }^{\prime
-}\right) :=\text{\textsc{SolveRecursive(}}V\setminus A\text{)} \\ 
-\qquad \text{\textbf{if} }W_{\blacktriangledown }^{\prime }=\emptyset \text{ 
-\textbf{then}} \\ 
-\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
-},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\left( A\cup
-W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime }\cup \tau
-\cup \tau _{A},\emptyset ,\emptyset \right)  \\ 
-\qquad \text{\textbf{else}} \\ 
-\qquad \qquad B,\tau _{B}:=Attr_{\blacktriangledown }\left(
-W_{\blacktriangledown }^{\prime }\right)  \\ 
-\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
-},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\text{\textsc{%
-SolveRecursive(}}V\setminus B\text{)} \\ 
-\qquad \qquad W_{\blacktriangledown },\tau _{\blacktriangledown
-}:=W_{\blacktriangledown }\cup B,\tau _{\blacktriangledown }\cup \tau \cup
-\tau _{B} \\ 
+\text{\textbf{for} }u\in U\text{ \textbf{if} }d(u)=\alpha \wedge succ(u)\neq
+\emptyset \text{ \textbf{then }}\tau \lbrack u]:=v\text{ \textbf{with} }v\in
+succ(u) \\ 
+A:=\text{\textsc{Attr}}\left( U,\alpha \right)  \\ 
+W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
+\text{)} \\ 
+B:=\text{\textsc{Attr}}\left( W_{1-\alpha }^{\prime },1-\alpha \right)  \\ 
+\text{\textbf{if} }W_{1-\alpha }^{\prime }=B\text{ \textbf{then}} \\ 
+\qquad W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime },\emptyset  \\ 
 \text{\textbf{else}} \\ 
-\qquad \text{\textbf{for} }u\in U\text{ \textbf{if} }u_{\blacktriangledown }%
-\text{ \textbf{then }}\tau :=\tau \lbrack u\rightarrow v]\text{ \textbf{with}
-}v\in succ(u,U) \\ 
-\qquad A,\tau _{A}:=Attr_{\blacktriangledown }\left( U\right)  \\ 
-\qquad \left( W_{\blacktriangle }^{\prime },\tau _{\blacktriangle }^{\prime
-},W_{\blacktriangledown }^{\prime },\tau _{\blacktriangledown }^{\prime
-}\right) :=\text{\textsc{SolveRecursive(}}V\setminus A\text{)} \\ 
-\qquad \text{\textbf{if} }W_{\blacktriangle }^{\prime }=\emptyset \text{ 
-\textbf{then}} \\ 
-\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
-},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\left(
-\emptyset ,\emptyset ,A\cup W_{\blacktriangledown }^{\prime },\tau
-_{\blacktriangledown }^{\prime }\cup \tau \cup \tau _{A}\right)  \\ 
-\qquad \text{\textbf{else}} \\ 
-\qquad \qquad B,\tau _{B}:=Attr_{\blacktriangle }\left( W_{\blacktriangle
-}^{\prime }\right)  \\ 
-\qquad \qquad \left( W_{\blacktriangle },\tau _{\blacktriangle
-},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) :=\text{\textsc{%
-SolveRecursive(}}V\setminus B\text{)} \\ 
-\qquad \qquad W_{\blacktriangle },\tau _{\blacktriangle }:=W_{\blacktriangle
-}\cup B,\tau _{\blacktriangle }\cup \tau \cup \tau _{B} \\ 
-\text{\textbf{return }}\left( W_{\blacktriangle },\tau _{\blacktriangle
-},W_{\blacktriangledown },\tau _{\blacktriangledown }\right) 
+\qquad W_{0},W_{1}:=\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
+\qquad W_{1-\alpha }:=W_{1-\alpha }\cup B \\ 
+\text{\textbf{return }}W_{0},W_{1}%
 \end{array}%
 \end{equation*}%
-where $Attr_{\blacktriangle }$=\textsc{AttractorSetConjunctive} and $%
-Attr_{\blacktriangledown }$=\textsc{AttractorSetDisjunctive} and where%
+where%
 \begin{equation*}
 succ(u,U)=\left\{ 
 \begin{array}{ll}
@@ -142,19 +93,17 @@ The algorithm can be extended to sets $V$ containing nodes with decoration $%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{SolveRecursiveExtended(}}V\text{\textsc{)}} \\ 
-V_{\blacktriangle }:=Attr_{\blacktriangle }\left( \{v\in V\mid v\bot
-\}\right)  \\ 
-V_{\blacktriangledown }:=Attr_{\blacktriangledown }\left( \{v\in V\mid v\top
-\}\right)  \\ 
-\left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=\text{\textsc{%
-SolveRecursive(}}V\setminus (V_{\blacktriangle }\cup V_{\blacktriangledown })%
-\text{\textsc{)}} \\ 
-\text{\textbf{return }}\left( W_{\blacktriangle }\cup V_{\blacktriangle
-},W_{\blacktriangledown }\cup V_{\blacktriangledown }\right) 
+V_{1}:=Attr\left( \{v\in V\mid v\bot \},1\right)  \\ 
+V_{0}:=Attr\left( \{v\in V\mid v\top \},0\right)  \\ 
+\left( W_{0},W_{1}\right) :=\text{\textsc{SolveRecursive(}}V\setminus
+(V_{0}\cup V_{1})\text{\textsc{)}} \\ 
+\text{\textbf{return }}\left( W_{0}\cup V_{1},W_{0}\cup V_{1}\right) 
 \end{array}%
 \end{equation*}%
-Note that a small optimization of the \textsc{SolveRecursive} algorithm is
-to add the following shortcuts at the start:%
+Note that a possible optimization of the \textsc{SolveRecursive} algorithm
+is to insert the following shortcuts after the initial strategy assignment.
+This doesn't seem to have much effect in practice, so currently it isn't
+enabled in the code.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textbf{if }}h=m\wedge even(m)\text{ \textbf{then return} }(\emptyset
