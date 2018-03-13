@@ -153,6 +153,7 @@ class Tool(object):
         self.parse_boolean(text, 'result'                     , r'LTSs are strongly trace equivalent', 'LTSs are not strongly trace equivalent')
         self.parse_boolean(text, 'result'                     , r'LTSs are weak trace equivalent', 'LTSs are not weak trace equivalent')
         self.parse_boolean(text, 'result'                     , r'LTSs are equal', 'LTSs are not equal')
+        self.parse_boolean(text, 'result'                     , r'is included in', 'is not included in')
 
     def command(self, runpath = None):
         args = self.arguments(runpath)
