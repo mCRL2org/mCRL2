@@ -8,6 +8,7 @@
 from subprocess import  PIPE
 import os.path
 import re
+import shutil
 from text_utility import read_text
 
 def is_list_of(l, types):
@@ -267,6 +268,39 @@ class Lps2LtsTool(Tool):
         if '-D' in self.args and not 'has-deadlock' in self.value:
             self.value['has-deadlock'] = False
 
+class PbesSolveTool(Tool):
+    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
+        super(PbesSolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+
+    def arguments(self, runpath = None):
+        # no counter example generation
+        if len(self.input_nodes) == 1:
+            return super(PbesSolveTool, self).arguments(runpath)
+
+        # counter example generation
+        if not runpath:
+            runpath = os.getcwd()
+        return [os.path.join(runpath, self.input_nodes[0].filename()),
+                '-f' + os.path.join(runpath, self.input_nodes[1].filename())
+               ]
+
+    def assign_outputs(self):
+        text = self.stdout.strip() + self.stderr.strip()
+        if text.endswith('true'):
+            value = True
+        elif text.endswith('false'):
+            value = False
+        else:
+            value = None
+        self.value['solution'] = value
+
+        # move the generated evidence LPS to the designated output node
+        if len(self.output_nodes) == 1:
+            pbesfile = self.input_nodes[0].filename()
+            evidence_file = pbesfile + '.evidence.lps'
+            shutil.move(evidence_file, self.output_nodes[0].filename())
+            self.output_nodes[0].value = 'executed'
+
 class ToolFactory(object):
     def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args):
         if name == 'lps2pbes':
@@ -277,6 +311,8 @@ class ToolFactory(object):
             return Lps2LtsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2lps':
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name in ['pbespgsolve', 'pbes2bool', 'bessolve', 'pbessolve']:
+        elif name in ['pbespgsolve', 'pbes2bool', 'bessolve']:
             return SolveTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name in ['pbessolve']:
+            return PbesSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)

@@ -10,6 +10,7 @@ import re
 import sys
 sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 
+import random_state_formula_generator
 from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes
 import random_process_expression
@@ -227,6 +228,17 @@ class Pbessolve_structure_graphTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(Pbessolve_structure_graphTest, self).__init__(name, ymlfile('pbessolve-structure-graph'), settings)
 
+class Pbessolve_counter_exampleTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(Pbessolve_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
+
+    def create_inputfiles(self, runpath = '.'):
+        super(Pbessolve_counter_exampleTest, self).create_inputfiles(runpath)
+        filename = '{0}.mcf'.format(self.name, self.settings)
+        formula = random_state_formula_generator.make_modal_formula()
+        write_text(filename, str(formula))
+        self.inputfiles += [filename]
+
 # N.B does not work due to unknown expressions (F_or)
 class SymbolicExplorationTest(PbesTest):
     def __init__(self, name, settings = dict()):
@@ -304,6 +316,7 @@ available_tests = {
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)               ,
     'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                           ,
     'pbessolve-structure-graph'                   : lambda name, settings: Pbessolve_structure_graphTest(name, settings)                           ,
+    'pbessolve-counter-example'                   : lambda name, settings: Pbessolve_counter_exampleTest(name, settings)                           ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                      ,
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                            ,
 }
