@@ -31,6 +31,30 @@ class simplifier_fourier_motzkin : public simplifier
 protected:
   simplifier_finite_domain simpl_discr;
 
+  data_expression reduce_lineq(const data_expression_list& lineq)
+  {
+    std::vector< linear_inequality > linear_inequalities;
+    for(const data_expression& e: lineq)
+    {
+      linear_inequalities.emplace_back(e, rewr);
+    }
+    std::vector< linear_inequality > resulting_inequalities;
+    remove_redundant_inequalities(linear_inequalities, resulting_inequalities, rewr);
+    if(!(resulting_inequalities.size() == 1 && resulting_inequalities[0].is_false(rewr)))
+    {
+      data_expression result = sort_bool::true_();
+      for(const linear_inequality& li: resulting_inequalities)
+      {
+        result = lazy::and_(result, li.transform_to_data_expression());
+      }
+      return result;
+    }
+    else
+    {
+      return sort_bool::false_();
+    }
+  }
+
   data_expression simplify_expression(const data_expression& expr)
   {
     // Split the expression into two equally sized lists of
@@ -39,32 +63,27 @@ protected:
     std::vector < data_expression_list > real_conditions;
     std::vector < data_expression > non_real_conditions;
     detail::split_condition(expr, real_conditions, non_real_conditions);
-
-    data_expression result = sort_bool::false_();
+    std::map< data_expression, std::vector< data_expression_list >> discr_to_real;
+    // We collect the real conditions per distinct non real condition
     for(uint32_t i = 0; i < real_conditions.size(); i++)
     {
-      std::vector< linear_inequality > linear_inequalities;
-      for(const data_expression& d: real_conditions[i])
-      {
-        linear_inequalities.emplace_back(d, rewr);
-      }
-      std::vector< linear_inequality > resulting_inequalities;
-      remove_redundant_inequalities(linear_inequalities, resulting_inequalities, rewr);
-
-      // If the resulting list of inequalities is false, we don't add it
-      // to the result (which is a disjunction).
-      if(!(resulting_inequalities.size() == 1 && resulting_inequalities[0].is_false(rewr)))
-      {
-        data_expression real_con = sort_bool::true_();
-        for(uint32_t j = 0; j < resulting_inequalities.size(); j++)
-        {
-          real_con = lazy::and_(real_con, resulting_inequalities[j].transform_to_data_expression());
-        }
-        result = lazy::or_(result, lazy::and_(simpl_discr.apply(non_real_conditions[i]), real_con));
-      }
+      std::pair< std::map< data_expression, std::vector< data_expression_list >>::iterator, bool > res =
+          discr_to_real.insert(std::make_pair(non_real_conditions[i], std::vector< data_expression_list >()));
+      res.first->second.push_back(real_conditions[i]);
     }
+    data_expression result = sort_bool::false_();
+    for(std::map< data_expression, std::vector< data_expression_list >>::iterator it = discr_to_real.begin(); it != discr_to_real.end(); it++)
+    {
+      // Reduce each of the linear systems individually
+      data_expression real_condition = sort_bool::false_();
+      for(data_expression_list zone: it->second)
+      {
+        real_condition = lazy::or_(real_condition, reduce_lineq(zone));
+      }
 
-    return result;
+      result = lazy::or_(result, lazy::and_(simpl_discr.apply(it->first), real_condition));
+    }
+    return rewr(result);
   }
 
 public:
