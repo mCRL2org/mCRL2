@@ -11,6 +11,10 @@ nodes:
     type: LPS
   l6:
     type: PBES
+  l7:
+    type: LTS
+  l8:
+    type: LTS
 
 tools:
   t1:
@@ -38,7 +42,21 @@ tools:
     output: []
     args: []
     name: pbes2bool
+  t6:
+    input: [l3]
+    output: [l7]
+    args: []
+    name: lps2lts
+  t7:
+    input: [l5]
+    output: [l8]
+    args: []
+    name: lps2lts
+  t8:
+    input: [l8, l7]
+    output: []
+    args: [--equivalence=none, --preorder=trace]
+    name: ltscompare
 
 result: |
-  result = t3.value['solution'] == t5.value['solution']
-
+  result = t3.value['solution'] == t5.value['solution'] and t8.value['result']
