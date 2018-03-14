@@ -17,6 +17,10 @@ class TestRunner(testing.TestRunner):
         I = range(self._args.count)
         self.tests = []
         for name in sorted(available_tests):
+            # TODO: remove this when g++ 4.8 is no longer used
+            if name == 'pbessolve-counter-example':
+                continue
+
             for i in I:
                 self.tests.append(available_tests[name]('random_{}_{}'.format(name, i), self.settings))
 
