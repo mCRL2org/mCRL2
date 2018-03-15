@@ -14,6 +14,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {
@@ -37,7 +38,7 @@ auto call_dynamic_bitset_all_helper(T t, long) -> bool
 }
 
 template <typename T>
-int call_dynamic_bitset_all(const T& t)
+bool call_dynamic_bitset_all(const T& t)
 {
   return call_dynamic_bitset_all_helper(t, 0);
 }

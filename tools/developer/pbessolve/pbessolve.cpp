@@ -106,6 +106,10 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       }
       m_transformation_strategy = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
       m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
+      if ((parser.options.count("lpsfile") > 0 || parser.options.count("ltsfile") > 0) && m_transformation_strategy != lazy)
+      {
+        throw mcrl2::runtime_error("Counter example generation only works in combination with transformation strategy lazy");
+      }
     }
 
     void add_options(utilities::interface_description& desc) override

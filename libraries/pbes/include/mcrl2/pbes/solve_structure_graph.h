@@ -326,7 +326,7 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
 
 // find a successor of u in U, or a random one if no successor in U exists
 inline
-int succ(const structure_graph& G, int u, const vertex_set& U)
+int succ(const structure_graph& G, int u)
 {
   for (int v: G.successors(u))
   {
@@ -363,7 +363,6 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
 
   auto q = get_minmax_rank(G);
   std::size_t m = std::get<0>(q);
-  // std::size_t h = std::get<1>(q);
   const vertex_set& U = std::get<2>(q);
 
   int alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
@@ -374,7 +373,7 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
     const auto& u = G.find_vertex(ui);
     if (u.decoration == alpha)
     {
-      auto v = succ(G, ui, U);
+      auto v = succ(G, ui);
       if (v != -1)
       {
         mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
@@ -384,6 +383,7 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
   }
 
   // // optimization
+  // std::size_t h = std::get<1>(q);
   // if (h == m)
   // {
   //   if (m % 2 == 0)
