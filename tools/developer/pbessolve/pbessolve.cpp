@@ -184,7 +184,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         lts::lts_lts_t evidence;
         timer().start("solving");
-        bool result = solve_structure_graph_with_counter_example(G, ltsspec, pbesspec, algorithm.equation_index());
+        bool result = solve_structure_graph_with_counter_example(G, ltsspec, pbesspec);
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
         std::string output_filename = input_filename() + ".evidence.lts";

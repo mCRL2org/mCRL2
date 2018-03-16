@@ -32,7 +32,7 @@ struct print_sub_expressions_traverser: public data::data_expression_traverser<p
   }
 
   template <typename T>
-  void leave(const T& x,
+  void leave(const T& /* x */,
              typename std::enable_if<!std::is_base_of<data::data_expression, T>::value>::type* = nullptr
             )
   {}
