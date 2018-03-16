@@ -35,7 +35,7 @@ namespace pbes_system {
 struct vertex_set
 {
   protected:
-    std::vector<int> m_vertices;
+    std::vector<structure_graph::index_type> m_vertices;
     boost::dynamic_bitset<> m_include;
 
   public:
@@ -46,7 +46,7 @@ struct vertex_set
       {
         std::cout << "--- " << msg << " ---" << std::endl;
       }
-      for (int v: m_vertices)
+      for (structure_graph::index_type v: m_vertices)
       {
         if (v >= m_include.size())
         {
@@ -84,12 +84,12 @@ struct vertex_set
       return m_vertices.empty();
     }
 
-    bool contains(int u) const
+    bool contains(structure_graph::index_type u) const
     {
       return m_include[u];
     }
 
-    void insert(int u)
+    void insert(structure_graph::index_type u)
     {
       assert(u < m_include.size());
       assert(!m_include[u]);
@@ -110,7 +110,7 @@ struct vertex_set
       return m_include.size();
     }
 
-    const std::vector<int>& vertices() const
+    const std::vector<structure_graph::index_type>& vertices() const
     {
       return m_vertices;
     }
@@ -125,9 +125,9 @@ struct vertex_set
       return m_include;
     }
 
-    int pop_back()
+    structure_graph::index_type pop_back()
     {
-      int u = m_vertices.back();
+      structure_graph::index_type u = m_vertices.back();
       m_vertices.pop_back();
       m_include[u] = false;
       return u;
@@ -154,7 +154,7 @@ inline
 vertex_set set_union(const vertex_set& V, const vertex_set& W)
 {
   vertex_set result = V;
-  for (int w: W.vertices())
+  for (structure_graph::index_type w: W.vertices())
   {
     if (!result.contains(w))
     {
@@ -168,7 +168,7 @@ inline
 vertex_set set_difference(const vertex_set& V, const vertex_set& W)
 {
   vertex_set result(V.extent());
-  for (int v: V.vertices())
+  for (structure_graph::index_type v: V.vertices())
   {
     if (!W.contains(v))
     {
@@ -178,26 +178,26 @@ vertex_set set_difference(const vertex_set& V, const vertex_set& W)
   return result;
 }
 
-inline
-vertex_set make_vertex_set(const structure_graph& G)
-{
-  std::size_t N = G.all_vertices().size();
-  vertex_set result(N);
-  for (int i = 0; i < N; i++)
-  {
-    if (G.contains(i))
-    {
-      result.insert(i);
-    }
-  }
-  return result;
-}
+// inline
+// vertex_set make_vertex_set(const structure_graph& G)
+// {
+//   std::size_t N = G.all_vertices().size();
+//   vertex_set result(N);
+//   for (std::size_t i = 0; i < N; i++)
+//   {
+//     if (G.contains(i))
+//     {
+//       result.insert(i);
+//     }
+//   }
+//   return result;
+// }
 
 inline
 void log_vertex_set(const structure_graph& G, const vertex_set& V, const std::string& name)
 {
   mCRL2log(log::debug) << "--- " << name << " ---" << std::endl;
-  for (int v: V.vertices())
+  for (structure_graph::index_type v: V.vertices())
   {
     mCRL2log(log::debug) << "  " << v << " " << G.find_vertex(v) << std::endl;
   }
@@ -209,7 +209,7 @@ void log_vertex_set(const structure_graph& G, const vertex_set& V, const std::st
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
 inline
-bool is_attractor(const structure_graph& G, int u, const vertex_set& A, int alpha)
+bool is_attractor(const structure_graph& G, structure_graph::index_type u, const vertex_set& A, int alpha)
 {
   if (G.decoration(u) != alpha)
   {
@@ -217,7 +217,7 @@ bool is_attractor(const structure_graph& G, int u, const vertex_set& A, int alph
   }
   if (G.decoration(u) != (1 - alpha))
   {
-    for (int v: G.successors(u))
+    for (structure_graph::index_type v: G.successors(u))
     {
       if (!(A.contains(v)))
       {
@@ -240,9 +240,9 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
 
   // put all predecessors of elements in A in todo
   vertex_set todo(G.all_vertices().size());
-  for (int u: A.vertices())
+  for (structure_graph::index_type u: A.vertices())
   {
-    for (int v: G.predecessors(u))
+    for (structure_graph::index_type v: G.predecessors(u))
     {
       if (!(A.contains(v)) && !todo.contains(v))
       {
@@ -253,14 +253,14 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
 
   while (!todo.is_empty())
   {
-    int u = todo.pop_back();
+    structure_graph::index_type u = todo.pop_back();
 
     if (is_attractor(G, u, A, 1 - alpha))
     {
       // set strategy
       if (G.decoration(u) != (1 - alpha))
       {
-        for (int w: G.successors(u))
+        for (structure_graph::index_type w: G.successors(u))
         {
           if ((A.contains(w)))
           {
@@ -269,7 +269,7 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
             break;
           }
         }
-        if (G.strategy(u) == -1)
+        if (G.strategy(u) == structure_graph::undefined_vertex)
         {
           mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
         }
@@ -277,7 +277,7 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
 
       A.insert(u);
 
-      for (int v: G.predecessors(u))
+      for (structure_graph::index_type v: G.predecessors(u))
       {
         if (!A.contains(v) && !todo.contains(v))
         {
@@ -296,10 +296,10 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
 {
   std::size_t min_rank = (std::numeric_limits<std::size_t>::max)();
   std::size_t max_rank = 0;
-  std::vector<int> M; // vertices with minimal rank
+  std::vector<structure_graph::index_type> M; // vertices with minimal rank
   std::size_t N = G.all_vertices().size();
 
-  for (int vi = 0; vi < N; vi++)
+  for (structure_graph::index_type vi = 0; vi < N; vi++)
   {
     if (!G.contains(vi))
     {
@@ -325,13 +325,13 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
 
 // find a successor of u in U, or a random one if no successor in U exists
 inline
-int succ(const structure_graph& G, int u)
+structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u)
 {
-  for (int v: G.successors(u))
+  for (structure_graph::index_type v: G.successors(u))
   {
     return v;
   }
-  return -1;
+  return structure_graph::undefined_vertex;
 }
 
 inline
@@ -367,13 +367,13 @@ std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
   int alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
   // set strategy
-  for (int ui: U.vertices())
+  for (structure_graph::index_type ui: U.vertices())
   {
     const auto& u = G.find_vertex(ui);
     if (u.decoration == alpha)
     {
       auto v = succ(G, ui);
-      if (v != -1)
+      if (v != structure_graph::undefined_vertex)
       {
         mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
         u.strategy = v;
@@ -426,7 +426,7 @@ std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
   vertex_set Vdisj(N);
 
   // find vertices Vconj with decoration false and Vdisj with decoration true
-  for (int vi = 0; vi < N; vi++)
+  for (structure_graph::index_type vi = 0; vi < N; vi++)
   {
     if (!G.contains(vi))
     {
@@ -482,18 +482,18 @@ void check_solve_recursive_solution(const structure_graph& G, const vertex_set& 
   structure_graph Gcopy;
 
   Gcopy = G;
-  for (int ui: Wconj.vertices())
+  for (structure_graph::index_type ui: Wconj.vertices())
   {
     vertex& u = Gcopy.find_vertex(ui);
     if (u.decoration == structure_graph::d_conjunction)
     {
-      if (u.strategy == -1)
+      if (u.strategy == structure_graph::undefined_vertex)
       {
         throw mcrl2::runtime_error("check_solve_recursive_solution failed: vertex " + std::to_string(ui) + " has no strategy");
       }
       u.decoration = structure_graph::d_none;
 
-      for (int vi: Gcopy.successors(ui))
+      for (structure_graph::index_type vi: Gcopy.successors(ui))
       {
         vertex& v = Gcopy.find_vertex(vi);
         v.remove_predecessor(ui);
@@ -501,7 +501,7 @@ void check_solve_recursive_solution(const structure_graph& G, const vertex_set& 
       u.successors.clear();
 
       // add the edge (u, u.strategy)
-      int wi = u.strategy;
+      structure_graph::index_type wi = u.strategy;
       u.successors.push_back(wi);
       vertex& w = Gcopy.find_vertex(wi);
       w.predecessors.push_back(ui);
@@ -518,18 +518,18 @@ void check_solve_recursive_solution(const structure_graph& G, const vertex_set& 
   }
 
   Gcopy = G;
-  for (int ui: Wdisj.vertices())
+  for (structure_graph::index_type ui: Wdisj.vertices())
   {
     vertex& u = Gcopy.find_vertex(ui);
     if (u.decoration == structure_graph::d_disjunction)
     {
-      if (u.strategy == -1)
+      if (u.strategy == structure_graph::undefined_vertex)
       {
         throw mcrl2::runtime_error("check_solve_recursive_solution failed: vertex " + std::to_string(ui) + " has no strategy");
       }
       u.decoration = structure_graph::d_none;
 
-      for (int vi: Gcopy.successors(ui))
+      for (structure_graph::index_type vi: Gcopy.successors(ui))
       {
         vertex& v = Gcopy.find_vertex(vi);
         v.remove_predecessor(ui);
@@ -537,8 +537,8 @@ void check_solve_recursive_solution(const structure_graph& G, const vertex_set& 
       u.successors.clear();
 
       // add the edge (u, u.strategy)
-      assert(u.strategy != -1);
-      int wi = u.strategy;
+      assert(u.strategy != structure_graph::undefined_vertex);
+      structure_graph::index_type wi = u.strategy;
       u.successors.push_back(wi);
       vertex& w = Gcopy.find_vertex(wi);
       w.predecessors.push_back(ui);
@@ -581,24 +581,24 @@ bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
 }
 
 inline
-std::set<int> find_counter_example_nodes(structure_graph& G, int init, bool is_disjunctive)
+std::set<structure_graph::index_type> find_counter_example_nodes(structure_graph& G, structure_graph::index_type init, bool is_disjunctive)
 {
   using utilities::detail::contains;
 
   typedef structure_graph::vertex vertex;
   std::vector<const vertex*> result;
 
-  std::set<int> todo = { init };
-  std::set<int> done;
+  std::set<structure_graph::index_type> todo = { init };
+  std::set<structure_graph::index_type> done;
   while (!todo.empty())
   {
-    int u = *todo.begin();
+    structure_graph::index_type u = *todo.begin();
     todo.erase(todo.begin());
     done.insert(u);
     if ((is_disjunctive && G.decoration(u) == structure_graph::d_disjunction) || (!is_disjunctive && G.decoration(u) == structure_graph::d_conjunction))
     {
       // explore only the strategy edge
-      int v = G.strategy(u);
+      structure_graph::index_type v = G.strategy(u);
       if (!contains(done, v))
       {
         todo.insert(v);
@@ -607,7 +607,7 @@ std::set<int> find_counter_example_nodes(structure_graph& G, int init, bool is_d
     else
     {
       // explore all outgoing edges
-      for (int v: G.successors(u))
+      for (structure_graph::index_type v: G.successors(u))
       {
         if (!contains(done, v))
         {
@@ -620,7 +620,7 @@ std::set<int> find_counter_example_nodes(structure_graph& G, int init, bool is_d
 }
 
 inline
-lps::specification create_counter_example_lps(structure_graph& G, const std::set<int>& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
+lps::specification create_counter_example_lps(structure_graph& G, const std::set<structure_graph::index_type>& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
 {
   lps::specification result = lpsspec;
   result.process().action_summands().clear();
@@ -629,7 +629,7 @@ lps::specification create_counter_example_lps(structure_graph& G, const std::set
   std::regex re("Z(neg|pos)_(\\d+)_.*");
   std::size_t n = lpsspec.process().process_parameters().size();
 
-  for (int vi: V)
+  for (structure_graph::index_type vi: V)
   {
     const auto& v = G.find_vertex(vi);
     const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
@@ -697,12 +697,12 @@ void filter_transitions(lts::lts_lts_t& ltsspec, const std::set<std::size_t>& tr
 
 // modifies ltsspec
 inline
-void create_counter_example_lts(structure_graph& G, const std::set<int>& V, lts::lts_lts_t& ltsspec, const pbes& p)
+void create_counter_example_lts(structure_graph& G, const std::set<structure_graph::index_type>& V, lts::lts_lts_t& ltsspec, const pbes& p)
 {
   std::regex re("Z(neg|pos)_(\\d+)_.*");
 
   std::set<std::size_t> transition_indices;
-  for (int vi: V)
+  for (structure_graph::index_type vi: V)
   {
     const auto& v = G.find_vertex(vi);
     const auto& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula);
@@ -725,20 +725,18 @@ std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(s
   vertex_set Wconj;
   vertex_set Wdisj;
   std::tie(Wdisj, Wconj) = solve_recursive_extended(G);
-  int init = G.initial_vertex();
+  structure_graph::index_type init = G.initial_vertex();
 
-  bool result;
   if (Wdisj.contains(init))
   {
-    result = true;
     mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
-    std::set<int> W = find_counter_example_nodes(G, init, true);
+    std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, true);
     return { true, create_counter_example_lps(G, W, lpsspec, p, p_index) };
   }
   else if (Wconj.contains(init))
   {
     mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
-    std::set<int>  W = find_counter_example_nodes(G, init, false);
+    std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, false);
     return { false, create_counter_example_lps(G, W, lpsspec, p, p_index) };
   }
   throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
@@ -752,19 +750,19 @@ bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts
   vertex_set Wconj;
   vertex_set Wdisj;
   std::tie(Wdisj, Wconj) = solve_recursive_extended(G);
-  int init = G.initial_vertex();
+  structure_graph::index_type init = G.initial_vertex();
 
   if (Wdisj.contains(init))
   {
     mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
-    std::set<int>  W = find_counter_example_nodes(G, init, true);
+    std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, true);
     create_counter_example_lts(G, W, ltsspec, p);
     return true;
   }
   else if (Wconj.contains(init))
   {
     mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
-    std::set<int>  W = find_counter_example_nodes(G, init, false);
+    std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, false);
     create_counter_example_lts(G, W, ltsspec, p);
     return false;
   }
