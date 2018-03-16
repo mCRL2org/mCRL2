@@ -60,8 +60,7 @@ struct vertex_set
 #endif
     }
 
-    vertex_set()
-    {}
+    vertex_set() = default;
 
     vertex_set(std::size_t N)
       : m_include(N)
@@ -582,7 +581,7 @@ bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
 }
 
 inline
-std::set<int> find_counter_example_nodes(structure_graph& G, const vertex_set& V, int init, bool is_disjunctive)
+std::set<int> find_counter_example_nodes(structure_graph& G, int init, bool is_disjunctive)
 {
   using utilities::detail::contains;
 
@@ -698,7 +697,7 @@ void filter_transitions(lts::lts_lts_t& ltsspec, const std::set<std::size_t>& tr
 
 // modifies ltsspec
 inline
-void create_counter_example_lts(structure_graph& G, const std::set<int>& V, lts::lts_lts_t& ltsspec, const pbes& p, const pbes_equation_index& p_index)
+void create_counter_example_lts(structure_graph& G, const std::set<int>& V, lts::lts_lts_t& ltsspec, const pbes& p)
 {
   std::regex re("Z(neg|pos)_(\\d+)_.*");
 
@@ -728,16 +727,18 @@ std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(s
   std::tie(Wdisj, Wconj) = solve_recursive_extended(G);
   int init = G.initial_vertex();
 
+  bool result;
   if (Wdisj.contains(init))
   {
+    result = true;
     mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
-    std::set<int> W = find_counter_example_nodes(G, Wdisj, init, true);
+    std::set<int> W = find_counter_example_nodes(G, init, true);
     return { true, create_counter_example_lps(G, W, lpsspec, p, p_index) };
   }
   else if (Wconj.contains(init))
   {
     mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
-    std::set<int>  W = find_counter_example_nodes(G, Wconj, init, false);
+    std::set<int>  W = find_counter_example_nodes(G, init, false);
     return { false, create_counter_example_lps(G, W, lpsspec, p, p_index) };
   }
   throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
@@ -745,7 +746,7 @@ std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(s
 
 /// \param ltsspec The original LTS that was used to create the PBES.
 inline
-bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec, const pbes& p, const pbes_equation_index& p_index)
+bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec, const pbes& p)
 {
   mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
   vertex_set Wconj;
@@ -756,15 +757,15 @@ bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts
   if (Wdisj.contains(init))
   {
     mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
-    std::set<int>  W = find_counter_example_nodes(G, Wdisj, init, true);
-    create_counter_example_lts(G, W, ltsspec, p, p_index);
+    std::set<int>  W = find_counter_example_nodes(G, init, true);
+    create_counter_example_lts(G, W, ltsspec, p);
     return true;
   }
   else if (Wconj.contains(init))
   {
     mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
-    std::set<int>  W = find_counter_example_nodes(G, Wconj, init, false);
-    create_counter_example_lts(G, W, ltsspec, p, p_index);
+    std::set<int>  W = find_counter_example_nodes(G, init, false);
+    create_counter_example_lts(G, W, ltsspec, p);
     return false;
   }
   throw mcrl2::runtime_error("No solution found in solve_structure_graph!");

@@ -102,7 +102,7 @@ std::vector<std::string> to_string(const BddNodeContainer& nodes, bool after = f
 
 class true_: public term
 {
-  std::string print(bool after) const override
+  std::string print(bool /* after */) const override
   {
     return "True";
   }
@@ -116,7 +116,7 @@ bdd_node make_true()
 
 class false_: public term
 {
-  std::string print(bool after = false) const override
+  std::string print(bool /* after */ = false) const override
   {
     return "False";
   }

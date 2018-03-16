@@ -590,7 +590,6 @@ class pbesinst_lazy_algorithm
     }
 
     pbes_expression forward_substitute(const pbes_expression& psi_e,
-                                       const propositional_variable_instantiation& X_e,
                                        const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                                       )
     {
@@ -707,7 +706,7 @@ class pbesinst_lazy_algorithm
         pbes_expression psi_e = R(phi, sigma);
 
         // optional step
-        psi_e = forward_substitute(psi_e, X_e, equation);
+        psi_e = forward_substitute(psi_e, equation);
 
         // optional step
         psi_e = simplify_loop(psi_e, eqn.symbol(), X_e);
