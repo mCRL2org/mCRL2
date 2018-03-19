@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H
 
-#define MCRL2_PBESINST_DEBUG
-
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/data/enumerator.h"
@@ -192,12 +190,12 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     }
     typename VariableContainer::const_iterator vi = variables.begin();
     typename ExpressionContainer::const_iterator ei = expressions.begin();
-    data::data_expression result = equal_to(*vi, *ei);
+    data::data_expression result = data::equal_to(*vi, *ei);
     ++vi;
     ++ei;
     for (; vi != variables.end(); ++vi, ++ei)
     {
-      result = data::and_(result, equal_to(*vi, *ei));
+      result = data::and_(result, data::equal_to(*vi, *ei));
     }
     return result;
   }
@@ -286,7 +284,7 @@ class pbesinst_finite_algorithm
     data::rewriter::strategy m_rewriter_strategy;
 
     /// \brief The number of generated equations.
-    int m_equation_count = 0;
+    std::size_t m_equation_count = 0;
 
     /// \brief Identifier generator for the enumerator
     data::enumerator_identifier_generator m_id_generator;
