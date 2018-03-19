@@ -21,6 +21,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/consistency.h"
+#include "mcrl2/data/join.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/pbes/join.h"
@@ -615,6 +616,37 @@ bool is_degenerate_or(const pbes_system::pbes_expression& x)
   return data::is_data_expression(left) || data::is_data_expression(right);
 }
 
+// pre: v contains exactly one propositional variable instantiation and the rest are data expressions
+// returns: { v_k, join({ v_i | i != k }) }
+template <typename Split, typename Join>
+std::pair<propositional_variable_instantiation, data::data_expression> split_expression(const pbes_expression& x, Split split, Join join)
+{
+  std::vector<data::data_expression> d;
+  propositional_variable_instantiation X;
+
+  auto split_x = split(x, false);
+  for (const pbes_expression& x_i: split_x)
+  {
+    if (data::is_data_expression(x_i))
+    {
+      d.push_back(atermpp::down_cast<data::data_expression>(x_i));
+    }
+    else if (pbes_system::is_propositional_variable_instantiation(x_i))
+    {
+      X = atermpp::down_cast<propositional_variable_instantiation>(x_i);
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Unexpected expression " + pbes_system::pp(x_i) + " encountered in split_pbes_equation.");
+    }
+  }
+  if (d.size() + 1 != split_x.size())
+  {
+    throw mcrl2::runtime_error("The number of propositional variable instantiations is not equal to one in " + pbes_system::pp(x));
+  }
+  return { X, join(d) };
+}
+
 inline
 bdd_equation split_pbes_equation(const pbes_equation& eqn, std::size_t rank, const bdd_node& id)
 {
@@ -641,20 +673,12 @@ bdd_equation split_pbes_equation(const pbes_equation& eqn, std::size_t rank, con
       result.is_disjunctive = false;
       for (const pbes_system::pbes_expression& x_i: pbes_system::split_and(x))
       {
-        if (pbes_system::is_propositional_variable_instantiation(x_i))
-        {
-          result.add_element(x_i);
-        }
-        else if (pbes_system::is_or(x_i))
-        {
-          const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::or_>(x_i).left();
-          const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::or_>(x_i).right();
-          result.add_element(left, right);
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Unexpected expression " + pbes_system::pp(x) + " encountered in split_pbes_equation.");
-        }
+        std::pair<propositional_variable_instantiation, data::data_expression> p =
+            split_expression(x_i,
+                             pbes_system::split_or,
+                             [](const std::vector<data::data_expression>& v) { return data::join_or(v.begin(), v.end()); }
+                            );
+        result.add_element(p.first, p.second);
       }
     }
   }
@@ -672,20 +696,12 @@ bdd_equation split_pbes_equation(const pbes_equation& eqn, std::size_t rank, con
       result.is_disjunctive = true;
       for (const pbes_system::pbes_expression& x_i: pbes_system::split_or(x))
       {
-        if (pbes_system::is_propositional_variable_instantiation(x_i))
-        {
-          result.add_element(x_i);
-        }
-        else if (pbes_system::is_and(x_i))
-        {
-          const pbes_system::pbes_expression& left  = atermpp::down_cast<pbes_system::and_>(x_i).left();
-          const pbes_system::pbes_expression& right = atermpp::down_cast<pbes_system::and_>(x_i).right();
-          result.add_element(left, right);
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Unexpected expression " + pbes_system::pp(x) + " encountered in split_pbes_equation.");
-        }
+        std::pair<propositional_variable_instantiation, data::data_expression> p =
+            split_expression(x_i,
+                             pbes_system::split_and,
+                             [](const std::vector<data::data_expression>& v) { return data::join_and(v.begin(), v.end()); }
+                            );
+        result.add_element(p.first, p.second);
       }
     }
   }
