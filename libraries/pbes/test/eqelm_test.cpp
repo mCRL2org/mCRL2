@@ -6,20 +6,18 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file constelm_test.cpp
+/// \file eqelm_test.cpp
 /// \brief Add your file description here.
 
-// #define MCRL2_PBES_CONSTELM_DEBUG
-
+#define BOOST_TEST_MODULE eqelm_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/detail/pbes2bool.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
-using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 
 // Example provided by Frank Stappers
@@ -114,15 +112,11 @@ std::string random1 =
   "init X0(true);                                   \n"
   ;
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(eqelm_test1)
 {
-  log::mcrl2_logger::set_reporting_level(log::debug);
-
   bool compute_conditions = false;
   bool remove_equations = true;
-  test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");
-  test_pbes(t2 , x2, compute_conditions, remove_equations, "test 2");
-  test_eqelm(random1,false);
-
-  return 0;
+  test_pbes(t1, x1, compute_conditions, remove_equations, "test 1");
+  test_pbes(t2, x2, compute_conditions, remove_equations, "test 2");
+  test_eqelm(random1, false);
 }

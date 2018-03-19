@@ -9,6 +9,8 @@
 /// \file one_point_rewriter_test.cpp
 /// \brief Test for PBES rewriters.
 
+#define BOOST_TEST_MODULE find_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
@@ -16,7 +18,6 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/detail/test_operation.h"
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -58,8 +59,7 @@ class parser
     std::string m_data_spec;
 
   public:
-
-    parser(const std::string& var_decl = VARIABLE_SPECIFICATION, const std::string& data_spec = "")
+    explicit parser(const std::string& var_decl = VARIABLE_SPECIFICATION, const std::string& data_spec = "")
       : m_var_decl(var_decl),
         m_data_spec(data_spec)
     {}
@@ -118,17 +118,11 @@ BOOST_AUTO_TEST_CASE(ticket_1388)
   pbes_rewrite(p, R);
   BOOST_CHECK(p.is_closed() && p.is_well_typed());
 
-  // text =
-  //   "pbes nu X = forall b,c: Bool. !val(b == false) || !val(c == b);\n"
-  //   "init X;"
-  //   ;
-  // p = txt2pbes(text, normalize);
-  // pbes_rewrite(p, R);
-  // BOOST_CHECK(p.is_closed() && p.is_well_typed());
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  log::mcrl2_logger::set_reporting_level(log::debug, "one_point_rewriter");
-  return nullptr;
+  text =
+    "pbes nu X = forall b,c: Bool. !val(b == false) || !val(c == b);\n"
+    "init X;"
+    ;
+  p = txt2pbes(text, normalize);
+  pbes_rewrite(p, R);
+  BOOST_CHECK(p.is_closed() && p.is_well_typed());
 }

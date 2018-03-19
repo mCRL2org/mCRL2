@@ -9,16 +9,15 @@
 /// \file absinthe_test.cpp
 /// \brief Test program for absinthe algorithm.
 
+#define BOOST_TEST_MODULE absinthe_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
-using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
-using namespace mcrl2::log;
 
-void test_separate_keyword_section()
+BOOST_AUTO_TEST_CASE(test_separate_keyword_section)
 {
   std::string text =
     "\n"
@@ -27,13 +26,10 @@ void test_separate_keyword_section()
     "h: Nat -> AbsNat\n"
   ;
 
-  std::vector<std::string> all_keywords;
-  all_keywords.push_back("sort");
-  all_keywords.push_back("absmap");
-
+  std::vector<std::string> all_keywords = { "sort", "absmap" };
   std::pair<std::string, std::string> q = utilities::detail::separate_keyword_section(text, "absmap", all_keywords);
   BOOST_CHECK(q.first.find("absmap") == 0);
-  BOOST_CHECK(boost::trim_copy(q.second).empty());
+  BOOST_CHECK(utilities::trim_copy(q.second).empty());
 }
 
 void test_absinthe(const std::string& pbes_text, const std::string& abstraction_text, bool is_over_approximation)
@@ -44,7 +40,7 @@ void test_absinthe(const std::string& pbes_text, const std::string& abstraction_
 }
 
 // test with structured sorts
-void test2()
+BOOST_AUTO_TEST_CASE(test_structured_sorts)
 {
   std::string PBES_TEXT =
     "sort Bit = struct e0 | e1;                     \n"
@@ -82,12 +78,4 @@ void test2()
   ;
 
   test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
-}
-
-int test_main(int argc, char* argv[])
-{
-  test_separate_keyword_section();
-  test2();
-
-  return 0;
 }

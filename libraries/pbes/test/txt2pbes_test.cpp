@@ -6,11 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes_test.cpp
+/// \file txt2pbes_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE txt2pbes_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -35,19 +36,11 @@ const std::string PBESSPEC2 =
   "init X(1, dc);                                      \n"
   ;
 
-void test_txt2pbes()
+BOOST_AUTO_TEST_CASE(test_txt2pbes)
 {
   pbes p;
   p = txt2pbes(PBESSPEC1);
   BOOST_CHECK(p.is_well_typed());
   p = txt2pbes(PBESSPEC2);
   BOOST_CHECK(p.is_well_typed());
-}
-
-
-int test_main(int argc, char* argv[])
-{
-  test_txt2pbes();
-
-  return 0;
 }

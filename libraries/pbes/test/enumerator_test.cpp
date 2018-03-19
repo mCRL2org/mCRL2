@@ -9,12 +9,13 @@
 /// \file enumerator_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE enumerator_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -31,7 +32,7 @@ using namespace mcrl2::pbes_system;
     "  Y: Nat;       \n"
     ;
 
-void test_enumerator()
+BOOST_AUTO_TEST_CASE(test_enumerator)
 {
   typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
   typedef data::enumerator_list_element<pbes_expression> enumerator_element;
@@ -61,7 +62,7 @@ void test_enumerator()
   BOOST_CHECK(solutions.size() >= 1);
 }
 
-void test_enumerator_with_iterator()
+BOOST_AUTO_TEST_CASE(test_enumerator_with_iterator)
 {
   typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
   typedef data::enumerator_list_element<pbes_expression> enumerator_element;
@@ -89,7 +90,7 @@ void test_enumerator_with_iterator()
   BOOST_CHECK(solutions.size() >= 1);
 }
 
-void test_enumerator_with_substitutions()
+BOOST_AUTO_TEST_CASE(test_enumerator_with_substitutions)
 {
   typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
   typedef data::enumerator_list_element_with_substitution<pbes_expression> enumerator_element;
@@ -119,14 +120,4 @@ void test_enumerator_with_substitutions()
   }
   std::clog << "solutions = " << core::detail::print_list(solutions) << std::endl;
   BOOST_CHECK(solutions.size() >= 1);
-}
-
-int test_main(int argc, char** argv)
-{
-  log::mcrl2_logger::set_reporting_level(log::debug);
-  test_enumerator();
-  test_enumerator_with_iterator();
-  test_enumerator_with_substitutions();
-
-  return 0;
 }

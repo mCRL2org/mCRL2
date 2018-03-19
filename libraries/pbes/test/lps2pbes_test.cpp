@@ -11,6 +11,8 @@
 
 // Test program for timed lps2pbes.
 
+#define BOOST_TEST_MODULE find_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
@@ -19,9 +21,8 @@
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -112,7 +113,7 @@ void one_point_rule_rewrite(pbes& p)
 void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std::string expected_solution, bool linearize = false)
 {
   bool timed = false;
-  boost::trim(expected_solution);
+  utilities::trim(expected_solution);
   std::cerr << "=== solve_pbes === " << std::endl;
   std::cerr << "specification = \n" << lps_spec << std::endl;
   std::cerr << "formula = " << mcf_formula << std::endl;
@@ -668,11 +669,10 @@ BOOST_AUTO_TEST_CASE(test_1090)
   const std::string FORMULA = "[!exists d:D . a(d)]false";
   pbes p = test_lps2pbes(SPEC, FORMULA);
 
-  std::set<data::variable> vars(pbes_system::find_all_variables(p));
-  for(std::set<data::variable>::const_iterator i = vars.begin(); i != vars.end(); ++i)
+  for (const data::variable& v: pbes_system::find_all_variables(p))
   {
-    BOOST_CHECK_NE(i->name(), core::identifier_string("d1"));
-    BOOST_CHECK_NE(i->name(), core::identifier_string("d2"));
+    BOOST_CHECK_NE(v.name(), core::identifier_string("d1"));
+    BOOST_CHECK_NE(v.name(), core::identifier_string("d2"));
   }
 }
 
@@ -780,9 +780,4 @@ BOOST_AUTO_TEST_CASE(test_counter_example)
 
   generate_counter_example = true;
   test_lps2pbes_and_solve(lps_spec, mcf_formula, expected_solution, timed, rewrite, generate_counter_example);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

@@ -7,14 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file boolean_operator.cpp
-/// \brief Test for the pbes rewriters.
+/// \brief Test for boolean operators.
 
-#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-
+#define BOOST_TEST_MODULE boolean_operator_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/optimized_boolean_operators.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 
@@ -47,15 +45,9 @@ pbes_system::pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-void test_boolean_operators()
+BOOST_AUTO_TEST_CASE(test_boolean_operators)
 {
   BOOST_CHECK(data::optimized_or(expr("false"), expr("X")) == expr("X"));
   BOOST_CHECK(data::optimized_and(expr("false"), expr("X")) == expr("false"));
 }
 
-int test_main(int argc, char* argv[])
-{
-  test_boolean_operators();
-
-  return 0;
-}

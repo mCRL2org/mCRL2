@@ -9,18 +9,15 @@
 /// \file constelm_test.cpp
 /// \brief Add your file description here.
 
-// #define MCRL2_PBES_CONSTELM_DEBUG
-
+#define BOOST_TEST_MODULE constelm_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
-
 
 using namespace mcrl2;
-using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 
 std::string t1 =
@@ -244,10 +241,8 @@ void test_pbes(const std::string& pbes_spec, const std::string& expected_result,
 
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_constelm)
 {
-  log::mcrl2_logger::set_reporting_level(log::debug);
-
   test_pbes(t1 , x1 , false);
   test_pbes(t2 , x2 , false);
   test_pbes(t3 , x3 , false);
@@ -265,6 +260,4 @@ int test_main(int argc, char** argv)
   test_pbes(t15, x15, false);
   test_pbes(t16, x16, true);
   test_pbes(t17, x17, false);
-
-  return 0;
 }

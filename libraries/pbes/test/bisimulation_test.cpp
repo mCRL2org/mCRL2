@@ -1,9 +1,21 @@
+// Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file bisimulation_test.cpp
+/// \brief Test the bisimulation algorithm.
+
+#define BOOST_TEST_MODULE bisimulation_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/detail/pbes2bool.h"
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -184,9 +196,4 @@ BOOST_AUTO_TEST_CASE(buffers_explicit_lose)
 
   test_bisimulation(buffer, lossy_buffer, false, false, false, false);
   test_bisimulation(lossy_buffer, buffer, false, false, false, false);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

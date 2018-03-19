@@ -9,9 +9,10 @@
 /// \file abstract_test.cpp
 /// \brief Test the pbes abstract algorithm.
 
+#define BOOST_TEST_MODULE abstract_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -25,7 +26,7 @@ void test_pbesabstract(const std::string& pbes_spec, const std::string& variable
   std::cout << "\n-------------------------------\n" << pbes_system::pp(p) << std::endl;
 }
 
-void test_pbesabstract()
+BOOST_AUTO_TEST_CASE(pbesabstract)
 {
   test_pbesabstract(
     "pbes nu X(a: Bool, b: Nat) =  \n"
@@ -59,11 +60,4 @@ void test_pbesabstract()
     ,
     true
   );
-}
-
-int test_main(int argc, char** argv)
-{
-  test_pbesabstract();
-
-  return 0;
 }

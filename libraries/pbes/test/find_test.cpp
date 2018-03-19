@@ -9,13 +9,14 @@
 /// \file find_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE find_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -38,7 +39,7 @@ data::variable bool_(const std::string& name)
   return data::variable(core::identifier_string(name), data::bool_());
 }
 
-void test_find()
+BOOST_AUTO_TEST_CASE(test_find)
 {
   const std::string VARSPEC =
     "datavar         \n"
@@ -56,17 +57,17 @@ void test_find()
   data::variable m = nat("m");
   data::variable n = nat("n");
   std::set<data::variable> v = pbes_system::find_all_variables(x);
-  BOOST_CHECK(v.find(m) != v.end());
-  BOOST_CHECK(v.find(n) != v.end());
+  std::set<data::variable> v_expected = { m, n };
+  BOOST_CHECK(v == v_expected);
 
   //--- find_sort_expressions ---//
-  std::set<data::sort_expression> e = pbes_system::find_sort_expressions(x);
-  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
-  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) != e.end());
-
+  std::set<data::sort_expression> s = pbes_system::find_sort_expressions(x);
+  std::cout << "s = " << core::detail::print_set(s) << std::endl;
+  std::set<data::sort_expression> s_expected = { data::sort_nat::nat(), data::sort_pos::pos() };
+  BOOST_CHECK(std::includes(s.begin(), s.end(), s_expected.begin(), s_expected.end()));
 }
 
-void test_free_variables()
+BOOST_AUTO_TEST_CASE(test_free_variables)
 {
   const std::string VARSPEC =
     "datavar         \n"
@@ -81,13 +82,12 @@ void test_free_variables()
   data::variable m = nat("m");
   data::variable n = nat("n");
 
-  std::set<data::variable> free_variables = pbes_system::find_free_variables(x);
-  std::cout << "free variables: " << core::detail::print_set(free_variables) << std::endl;
-  BOOST_CHECK(free_variables.find(m) == free_variables.end());
-  BOOST_CHECK(free_variables.find(n) != free_variables.end());
+  std::set<data::variable> v = pbes_system::find_free_variables(x);
+  std::set<data::variable> v_expected = { n };
+  BOOST_CHECK(v == v_expected);
 }
 
-void test_find_free_variables()
+BOOST_AUTO_TEST_CASE(test_find_free_variables)
 {
   std::string test1 =
     "pbes                                                                   \n"
@@ -101,32 +101,17 @@ void test_find_free_variables()
   pbes p = txt2pbes(test1);
 
   std::set<data::variable> v = find_free_variables(p);
-  std::cout << "variables: " << core::detail::print_set(v) << std::endl;
-  BOOST_CHECK(v.size() == 0);
+  BOOST_CHECK(v.empty());
 
   v = find_free_variables(p.equations()[0]);
-  std::cout << "variables: " << core::detail::print_set(v) << std::endl;
-  BOOST_CHECK(v.size() == 0);
+  BOOST_CHECK(v.empty());
 
   v = find_free_variables(p.equations()[1]);
-  std::cout << "variables: " << core::detail::print_set(v) << std::endl;
-  BOOST_CHECK(v.size() == 0);
+  BOOST_CHECK(v.empty());
 
   v = find_free_variables(p.equations()[0].formula());
-  std::cout << "variables: " << core::detail::print_set(v) << std::endl;
   BOOST_CHECK(v.size() == 2);
 
   v = find_free_variables(p.equations()[1].formula());
-  std::cout << "variables: " << core::detail::print_set(v) << std::endl;
   BOOST_CHECK(v.size() == 2);
-
-}
-
-int test_main(int argc, char** argv)
-{
-  test_find();
-  test_free_variables();
-  test_find_free_variables();
-
-  return 0;
 }
