@@ -10,7 +10,7 @@
 /// \brief Tests for pfnf rewriter.
 
 #include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
 #include "mcrl2/pbes/parse.h"
@@ -133,7 +133,7 @@ void test_pfnf_rewriter2(const std::string& text, const bool expected_result)
   std::cout << "--- before ---\n";
   std::cout << pbes_system::pp(p) << std::endl;
 
-  bool solution = detail::pbes2bool(p);
+  bool solution = detail::pbessolve(p);
   BOOST_CHECK(solution == expected_result);
 
   pfnf_rewriter R;
@@ -143,7 +143,7 @@ void test_pfnf_rewriter2(const std::string& text, const bool expected_result)
   std::cout << pbes_system::pp(p) << std::endl;
 
   BOOST_CHECK(p.is_well_typed());
-  solution = detail::pbes2bool(p);
+  solution = detail::pbessolve(p);
   BOOST_CHECK(solution == expected_result);
 }
 

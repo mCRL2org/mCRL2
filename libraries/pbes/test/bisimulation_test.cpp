@@ -15,7 +15,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/pbes/bisimulation.h"
-#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pbessolve.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -45,24 +45,24 @@ void test_bisimulation(const std::string& s1, const std::string& s2,
   std::clog << "Testing strong bisimulation" << std::endl;
   pbes sb  = strong_bisimulation(spec1, spec2);
   BOOST_CHECK(sb.is_well_typed());
-  bool sb_solution = pbes_system::detail::pbes2bool(sb);
+  bool sb_solution = pbes_system::detail::pbessolve(sb);
   BOOST_CHECK(sb_solution == strongly_bisimilar);
 
   std::clog << "Testing branching bisimulation" << std::endl;
   pbes bb  = branching_bisimulation(spec1, spec2);
-  bool bb_solution = pbes_system::detail::pbes2bool(bb);
+  bool bb_solution = pbes_system::detail::pbessolve(bb);
   BOOST_CHECK(bb.is_well_typed());
   BOOST_CHECK(bb_solution == branching_bisimilar);
 
   std::clog << "Testing branching simulation" << std::endl;
   pbes bs = branching_simulation_equivalence(spec1, spec2);
-  bool bs_solution = pbes_system::detail::pbes2bool(bs);
+  bool bs_solution = pbes_system::detail::pbessolve(bs);
   BOOST_CHECK(bs.is_well_typed());
   BOOST_CHECK(bs_solution == branching_similar);
 
   std::clog << "Testing weak bisimulation" << std::endl;
   pbes wb  = weak_bisimulation(spec1, spec2);
-  bool wb_solution = pbes_system::detail::pbes2bool(wb);
+  bool wb_solution = pbes_system::detail::pbessolve(wb);
   BOOST_CHECK(wb.is_well_typed());
   BOOST_CHECK(wb_solution == weakly_bisimilar);
 }

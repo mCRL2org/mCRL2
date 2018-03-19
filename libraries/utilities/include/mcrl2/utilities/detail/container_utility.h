@@ -133,7 +133,7 @@ void remove_if(ContainerT& items, const PredicateT& predicate)
 	}
 	else ++it;
   }
-};
+}
 
 /// Returns true if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
 template <typename InputIterator1, typename InputIterator2>

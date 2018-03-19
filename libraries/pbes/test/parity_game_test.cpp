@@ -19,7 +19,7 @@
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
-#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -127,7 +127,7 @@ void test_pbes(const std::string& pbes_spec, const bool expected_result)
 // check the result
 #ifdef MCRL2_PGSOLVER_ENABLED
   static int index;
-  BOOST_CHECK(pbes_system::detail::pbes2bool(p,expected_result));
+  BOOST_CHECK(pbes_system::detail::pbessolve(p,expected_result));
   std::string name = "parity_game_test" + boost::lexical_cast<std::string>(++index);
   std::string output_file   = name + ".pg";
   std::string solution_file = name + ".solution";

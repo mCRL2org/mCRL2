@@ -17,7 +17,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rewrite.h"
@@ -93,7 +93,7 @@ void test_lps2pbes_and_solve(const std::string& lps_spec,
     pbes_rewrite(p, R);
   }
 
-  bool solution = detail::pbes2bool(p);
+  bool solution = detail::pbessolve(p);
   BOOST_CHECK(solution == expected_solution);
 }
 
@@ -139,7 +139,7 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "true";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
-    bool solution = detail::pbes2bool(p);
+    bool solution = detail::pbessolve(p);
     BOOST_CHECK(solution == expected_result);
   }
 
@@ -152,7 +152,7 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "false";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
-    bool solution = detail::pbes2bool(p);
+    bool solution = detail::pbessolve(p);
     BOOST_CHECK(solution == expected_result);
   }
 }

@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE eqelm_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -97,8 +97,8 @@ void test_eqelm(const std::string& pbes_spec, const bool expected_outcome)
   pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
   algorithm.run(q);
 
-  bool solution_p = pbes_system::detail::pbes2bool(p);
-  bool solution_q = pbes_system::detail::pbes2bool(q);
+  bool solution_p = pbes_system::detail::pbessolve(p);
+  bool solution_q = pbes_system::detail::pbessolve(q);
   BOOST_CHECK(solution_p == expected_outcome);
   BOOST_CHECK(solution_q == expected_outcome);
 }
