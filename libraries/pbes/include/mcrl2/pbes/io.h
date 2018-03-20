@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Alexander van Dam
+// Author(s): anonymous
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -79,7 +79,7 @@ const utilities::file_format guess_format(const std::string& filename)
 ///        pbes_file_unknown is specified, then a default format is chosen.
 ///
 inline
-void save_pbes(const pbes& pbes, 
+void save_pbes(const pbes& pbes,
                std::ostream& stream,
                utilities::file_format format=utilities::file_format())
 {
@@ -154,12 +154,12 @@ void save_pbes(const pbes &pbes, const std::string &filename,
   {
     format = guess_format(filename);
   }
-  
-  if (filename.empty()) 
+
+  if (filename.empty())
   {
     save_pbes(pbes, std::cout, format);
   }
-  else 
+  else
   {
     std::ofstream filestream(filename,(format.text_format()?std::ios_base::out: std::ios_base::binary));
     if (!filestream.good())
@@ -178,7 +178,7 @@ void save_pbes(const pbes &pbes, const std::string &filename,
 /// The format of the file in infilename is guessed if format is not given or if it is equal to
 /// utilities::file_format().
 inline
-void load_pbes(pbes& pbes, 
+void load_pbes(pbes& pbes,
                const std::string& filename,
                utilities::file_format format=utilities::file_format())
 {
@@ -187,11 +187,11 @@ void load_pbes(pbes& pbes,
     format = guess_format(filename);
   }
  if (filename.empty())
-  { 
+  {
     load_pbes(pbes, std::cin, format);
   }
-  else 
-  {  
+  else
+  {
     std::ifstream filestream(filename,(format.text_format()?std::ios_base::in: std::ios_base::binary));
     if (!filestream.good())
     {

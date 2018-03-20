@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): anonymous
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -91,19 +91,19 @@ static void reduce_lts_in_various_ways(const std::string& test_description,
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
   test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
-                                      expected.states_divergence_preserving_branching_bisimulation, 
+                                      expected.states_divergence_preserving_branching_bisimulation,
                                       expected.transitions_divergence_preserving_branching_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gv);
   test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Vaandrager 1990])",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
-                                      expected.states_divergence_preserving_branching_bisimulation, 
+                                      expected.states_divergence_preserving_branching_bisimulation,
                                       expected.transitions_divergence_preserving_branching_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
   test_lts(test_description + " (divergence-preserving branching bisimulation signature [Blom/Orzan 2003])",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
-                                      expected.states_divergence_preserving_branching_bisimulation, 
+                                      expected.states_divergence_preserving_branching_bisimulation,
                                       expected.transitions_divergence_preserving_branching_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_weak_bisim);
@@ -112,7 +112,7 @@ static void reduce_lts_in_various_ways(const std::string& test_description,
   reduce(l,lts::lts_eq_divergence_preserving_weak_bisim);
   test_lts(test_description + " (divergence-preserving weak bisimulation)",l,
                                       expected.labels_divergence_preserving_weak_bisimulation,
-                                      expected.states_divergence_preserving_weak_bisimulation, 
+                                      expected.states_divergence_preserving_weak_bisimulation,
                                       expected.transitions_divergence_preserving_weak_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_sim);
@@ -436,7 +436,7 @@ static void test_reachability()
   BOOST_CHECK(reachability_check(l_reach,false));
 }
 
-// The example below caused failures in the GW mlogn branching bisimulation 
+// The example below caused failures in the GW mlogn branching bisimulation
 // algorithm when cleaning the code up.
 static void failing_test_groote_wijs_algorithm()
 {
@@ -661,6 +661,6 @@ int test_main(int /* argc*/, char** /* argv */)
   failing_test_groote_wijs_algorithm();
   counterexample_jk_1(3);
   counterexample_postprocessing();
-  // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate. 
+  // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate.
   return 0;
 }

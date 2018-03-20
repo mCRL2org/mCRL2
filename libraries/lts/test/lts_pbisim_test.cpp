@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jan Friso Groote
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -26,7 +26,7 @@ static probabilistic_lts_aut_t parse_aut(const std::string& s)
 	return l;
 }
 
-void execute_test(const std::string test_name,   
+void execute_test(const std::string test_name,
                   const std::string input_lts,
                   const std::size_t expected_number_of_states,
                   const std::size_t expected_number_of_transitions,
@@ -35,7 +35,7 @@ void execute_test(const std::string test_name,
   mcrl2::utilities::execution_timer timer;
   probabilistic_lts_aut_t t1 = parse_aut(input_lts);
   probabilistic_lts_aut_t t2=t1;
-  detail::probabilistic_bisimulation_reduce_grv(t1,timer); 
+  detail::probabilistic_bisimulation_reduce_grv(t1,timer);
   if (t1.num_states()!=expected_number_of_states || t1.num_transitions() != expected_number_of_transitions || t1.num_probabilistic_states()!=expected_number_of_probabilistic_states)
   {
     std::cerr << "The test " << test_name << " failed using Groote, Rivera Verduzco, de Vink reduction.\n";
@@ -45,7 +45,7 @@ void execute_test(const std::string test_name,
     BOOST_CHECK(false);
   }
 
-  detail::probabilistic_bisimulation_reduce_bem(t2,timer); 
+  detail::probabilistic_bisimulation_reduce_bem(t2,timer);
   if (t2.num_states()!=expected_number_of_states || t2.num_transitions() != expected_number_of_transitions || t2.num_probabilistic_states()!=expected_number_of_probabilistic_states)
   {
     std::cerr << "The test " << test_name << " failed using Baier, Engelen, Majster-Cederbaum reduction.\n";
