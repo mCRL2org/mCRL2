@@ -38,23 +38,23 @@ class Info
 
     /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
     /// \brief when determining the order of expressions.
-    bool f_full;
+    const bool f_full;
 
     /// \brief Flag indicating whether or not the result of the comparison between the first two arguments
     /// \brief weighs stronger than the result of the comparison between the second pair of arguments of an
     /// \brief equation, when determining the order of expressions.
-    bool f_reverse;
+    const bool f_reverse;
 
-    Compare_Result lexico(
+    inline Compare_Result lexico(
               const Compare_Result& a_result1,
-              const Compare_Result& a_result2)
+              const Compare_Result& a_result2) const
     {
       return (a_result1 != compare_result_equal) ? a_result1 : a_result2;
     }
 
     Compare_Result compare_address(
               const atermpp::aterm& a_term1,
-              const atermpp::aterm& a_term2)
+              const atermpp::aterm& a_term2) const
     {
       if (a_term1 < a_term2)
       {
@@ -67,69 +67,8 @@ class Info
       return compare_result_equal;
     }
 
-    bool alpha1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
-    {
-      if (get_number_of_arguments(a_term1) == a_number)
-      {
-        return false;
-      }
-      else
-      {
-        data_expression v_term = get_argument(a_term1, a_number);
-        return (v_term == a_term2) || lpo1(v_term, a_term2) || alpha1(a_term1, a_term2, ++a_number);
-      }
-    }
-
-    bool beta1(const data_expression& a_term1, const data_expression& a_term2)
-    {
-      const atermpp::aterm v_operator_1 = get_operator(a_term1);
-      const atermpp::aterm v_operator_2 = get_operator(a_term2);
-      return (compare_address(v_operator_1, v_operator_2) == compare_result_bigger) && majo1(a_term1, a_term2, 0);
-    }
-
-    bool gamma1(const data_expression& a_term1, const data_expression& a_term2)
-    {
-      const atermpp::aterm v_operator_1 = get_operator(a_term1);
-      const atermpp::aterm v_operator_2 = get_operator(a_term2);
-      return (v_operator_1 == v_operator_2) && lex1(a_term1, a_term2, 0) && majo1(a_term1, a_term2, 0);
-    }
-
-    bool majo1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
-    {
-      if (get_number_of_arguments(a_term2) == a_number)
-      {
-        return true;
-      }
-      else
-      {
-        data_expression v_term = get_argument(a_term2, a_number);
-        return lpo1(a_term1, v_term) && majo1(a_term1, a_term2, ++a_number);
-      }
-    }
-
-    bool lex1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
-    {
-      if (get_number_of_arguments(a_term1) == a_number)
-      {
-        return false;
-      }
-      else
-      {
-        data_expression v_term1 = get_argument(a_term1, a_number);
-        data_expression v_term2 = get_argument(a_term2, a_number);
-        if (v_term1 == v_term2)
-        {
-          return lex1(a_term1, a_term2, ++a_number);
-        }
-        else
-        {
-          return lpo1(v_term1, v_term2);
-        }
-      }
-    }
-
-    /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c a_guard.
-    int get_guard_structure(const data_expression& a_guard)
+        /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c a_guard.
+    int get_guard_structure(const data_expression& a_guard) const
     {
       if (is_variable(a_guard))
       {
@@ -155,7 +94,7 @@ class Info
     }
 
     /// \brief Compares the structure of two guards.
-    Compare_Result compare_guard_structure(const data_expression& a_guard1, const data_expression& a_guard2)
+    Compare_Result compare_guard_structure(const data_expression& a_guard1, const data_expression& a_guard2) const
     {
       if (get_guard_structure(a_guard1) < get_guard_structure(a_guard2))
       {
@@ -169,7 +108,7 @@ class Info
     }
 
     /// \brief Compares two guards by their arguments.
-    Compare_Result compare_guard_equality(const data_expression& a_guard1, const data_expression& a_guard2)
+    Compare_Result compare_guard_equality(const data_expression& a_guard1, const data_expression& a_guard2) const
     {
       if (f_full && is_equal_to_application(a_guard1) && is_equal_to_application(a_guard2))
       {
@@ -191,7 +130,7 @@ class Info
       return compare_result_equal;
     }
 
-    Compare_Result compare_term_free_variables(const data_expression& a_term1, const data_expression& a_term2)
+    Compare_Result compare_term_free_variables(const data_expression& a_term1, const data_expression& a_term2) const
     {
       bool term1_is_closed = find_free_variables(a_term1).empty();
       bool term2_is_closed = find_free_variables(a_term2).empty();
@@ -207,7 +146,7 @@ class Info
     }
 
     /// \brief Compares terms by their type.
-    Compare_Result compare_term_type(const data_expression& a_term1, const data_expression& a_term2)
+    Compare_Result compare_term_type(const data_expression& a_term1, const data_expression& a_term2) const
     {
       if (is_variable(a_term1) && !is_variable(a_term2))
       {
@@ -221,7 +160,7 @@ class Info
     }
 
     /// \brief Compares terms by checking whether one is a part of the other.
-    Compare_Result compare_term_occurs(const data_expression& a_term1, const data_expression& a_term2)
+    Compare_Result compare_term_occurs(const data_expression& a_term1, const data_expression& a_term2) const
     {
       if (occurs(a_term1, a_term2))
       {
@@ -236,12 +175,9 @@ class Info
 
   public:
     /// \brief Constructor that initializes the rewriter.
-    Info()
-    {
-    }
-
-    /// \brief Destructor with no particular functionality.
-    ~Info()
+    Info(bool a_reverse, bool a_full)
+    : f_full(a_full)
+    , f_reverse(a_reverse)
     {}
 
     // Perform an occur check of expression t2 in expression t1.
@@ -250,20 +186,8 @@ class Info
       return atermpp::find_if(t1,[&](const atermpp::aterm_appl& t){return t == t2;}) != atermpp::aterm_appl();
     }
 
-    /// \brief Sets the flag Info::f_reverse.
-    void set_reverse(bool a_reverse)
-    {
-      f_reverse = a_reverse;
-    }
-
-    /// \brief Sets the flag Info::f_full.
-    void set_full(bool a_bool)
-    {
-      f_full = a_bool;
-    }
-
     /// \brief Compares two guards.
-    Compare_Result compare_guard(const data_expression& a_guard1, const data_expression& a_guard2)
+    Compare_Result compare_guard(const data_expression& a_guard1, const data_expression& a_guard2) const
     {
       return lexico(
                lexico(
@@ -275,7 +199,7 @@ class Info
     }
 
     /// \brief Compares two terms.
-    Compare_Result compare_term(const data_expression& a_term1, const data_expression& a_term2)
+    Compare_Result compare_term(const data_expression& a_term1, const data_expression& a_term2) const
     {
       return lexico(
                 lexico(
@@ -289,32 +213,11 @@ class Info
              );
     }
 
-    /// \brief Compares two terms using lpo.
-    bool lpo1(const data_expression& a_term1, const data_expression& a_term2)
-    {
-      if (is_variable(a_term1) && is_variable(a_term2))
-      {
-        return compare_address(a_term1, a_term2) == compare_result_bigger;
-      }
-      else if (is_variable(a_term1))
-      {
-        return false;
-      }
-      else if (is_variable(a_term2))
-      {
-        return occurs(a_term2, a_term1);
-      }
-      else
-      {
-        return alpha1(a_term1, a_term2, 0) || beta1(a_term1, a_term2) || gamma1(a_term1, a_term2);
-      }
-    }
-
     /// \brief Returns the number of arguments of the main operator of a term.
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    std::size_t get_number_of_arguments(const data_expression& a_term)
+    std::size_t get_number_of_arguments(const data_expression& a_term) const
     {
       if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term))
       {
@@ -327,7 +230,7 @@ class Info
     }
 
     /// \brief Returns the main operator of the term \c a_term;
-    data_expression get_operator(const data_expression& a_term)
+    data_expression get_operator(const data_expression& a_term) const
     {
       if (is_function_symbol(a_term))
       {
@@ -342,7 +245,7 @@ class Info
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    data_expression get_argument(const data_expression& a_term, const std::size_t a_number)
+    data_expression get_argument(const data_expression& a_term, const std::size_t a_number) const
     {
       return data_expression(a_term[a_number + 1]);
     }

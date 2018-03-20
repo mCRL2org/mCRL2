@@ -19,8 +19,8 @@
 
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
-#include "mcrl2/data/detail/prover/bdd_manipulator.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
+#include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/utilities/logger.h"
@@ -64,9 +64,6 @@ class BDD_Path_Eliminator: public BDD_Simplifier
 
     /// \brief Class that provides information about the structure of BDDs.
     BDD_Info f_bdd_info;
-
-    /// \brief Class that can be used to manipulate BDDs.
-    BDD_Manipulator f_bdd_manipulator;
 
     /// \brief Returns a list representing the conjunction of all guards in a_path and the guard a_guard.
     /// \param a_path A list of guards and negated guards, representing a path in a BDD.
@@ -161,7 +158,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           v_true_path.push_front(v_guard);
           data_expression_list v_false_path = a_path;
           v_false_path.push_front(v_negated_guard);
-          return f_bdd_manipulator.make_reduced_if_then_else(
+          return Manipulator::make_reduced_if_then_else(
                    v_guard,
                    aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path),
                    aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path)

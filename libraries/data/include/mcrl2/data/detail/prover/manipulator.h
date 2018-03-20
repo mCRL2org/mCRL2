@@ -28,7 +28,7 @@ class Manipulator
   protected:
     /// \brief A class that provides information on the structure of expressions in one of the
     /// \brief internal formats of the rewriter.
-    Info& f_info;
+    const Info& f_info;
 
     /// \brief A table used by the method Manipulator::orient.
     /// The method Manipulator::orient stores resulting terms in this
@@ -42,7 +42,7 @@ class Manipulator
     data_expression set_true_auxiliary(
                 const data_expression& a_formula,
                 const data_expression& a_guard,
-                std::unordered_map < data_expression, data_expression >& f_set_true)
+                std::unordered_map < data_expression, data_expression >& f_set_true) const
     {
       if (is_function_symbol(a_formula))
       {
@@ -83,9 +83,9 @@ class Manipulator
       }
 
       const application& t=atermpp::down_cast<application>(a_formula);
-      data_expression v_result = application(set_true_auxiliary(t.head(), a_guard,f_set_true), 
-                                             t.begin(), 
-                                             t.end(), 
+      data_expression v_result = application(set_true_auxiliary(t.head(), a_guard,f_set_true),
+                                             t.begin(),
+                                             t.end(),
                                              [&a_guard, &f_set_true, this](const data_expression& d){ return set_true_auxiliary(d, a_guard,f_set_true);});
 
       f_set_true[a_formula]=v_result;
@@ -97,7 +97,7 @@ class Manipulator
     data_expression set_false_auxiliary(
               const data_expression& a_formula,
               const data_expression& a_guard,
-              std::unordered_map < data_expression, data_expression >& f_set_false)
+              std::unordered_map < data_expression, data_expression >& f_set_false) const
     {
       if (is_function_symbol(a_formula))
       {
@@ -127,28 +127,17 @@ class Manipulator
       }
 
       const application t(a_formula);
-      data_expression v_result = application(set_false_auxiliary(t.head(), a_guard,f_set_false), 
-                                             t.begin(), 
-                                             t.end(), 
+      data_expression v_result = application(set_false_auxiliary(t.head(), a_guard,f_set_false),
+                                             t.begin(),
+                                             t.end(),
                                              [&a_guard, &f_set_false, this](const data_expression& d){ return set_false_auxiliary(d, a_guard,f_set_false);});
       f_set_false[a_formula]=v_result;
       return v_result;
     }
 
-    /// \brief Returns an expression.
-    /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
-    /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
-    data_expression make_if_then_else(
-               const data_expression& a_expr,
-               const data_expression& a_high,
-               const data_expression& a_low)
-    {
-      return if_(a_expr, a_high, a_low);
-    }
-
   public:
     /// \brief Constructor initializing the rewriter and the field \c f_info.
-    Manipulator(Info& a_info):
+    Manipulator(const Info& a_info):
       f_info(a_info)
     {
     }
@@ -162,18 +151,11 @@ class Manipulator
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low. If \c a_high equals \c a_low, the
     /// \brief method returns \c a_high instead.
-    data_expression make_reduced_if_then_else(const data_expression& a_expr,
+    static data_expression make_reduced_if_then_else(const data_expression& a_expr,
                                                   const data_expression& a_high,
                                                   const data_expression& a_low)
     {
-      if (a_high == a_low)
-      {
-        return a_high;
-      }
-      else
-      {
-        return make_if_then_else(a_expr, a_high, a_low);
-      }
+      return a_high == a_low ? a_high : if_(a_expr, a_high, a_low);
     }
 
     /// \brief Orients the term \c a_term such that all equations of the form t1 == t2 are
@@ -218,7 +200,7 @@ class Manipulator
     /// \brief f_set_true_auxiliary.
     data_expression set_true(
                  const data_expression& a_formula,
-                 const data_expression& a_guard)
+                 const data_expression& a_guard) const
     {
       std::unordered_map < data_expression, data_expression > f_set_true;
       return set_true_auxiliary(a_formula, a_guard, f_set_true);
@@ -228,7 +210,7 @@ class Manipulator
     /// \brief AM_Jitty::f_set_false_auxiliary.
     data_expression set_false(
                  const data_expression& a_formula,
-                 const data_expression& a_guard)
+                 const data_expression& a_guard) const
     {
       std::unordered_map < data_expression, data_expression > f_set_false;
       return set_false_auxiliary(a_formula, a_guard,f_set_false);

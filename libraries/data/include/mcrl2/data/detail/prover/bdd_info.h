@@ -27,7 +27,7 @@ namespace detail
 class BDD_Info
 {
   protected:
-    const mcrl2::data::data_expression& argument(const mcrl2::data::data_expression& x, std::size_t n) const
+    static const mcrl2::data::data_expression& argument(const mcrl2::data::data_expression& x, std::size_t n)
     {
       const mcrl2::data::application& a = atermpp::down_cast<mcrl2::data::application>(x);
       mcrl2::data::application::const_iterator i = a.begin();
@@ -40,7 +40,7 @@ class BDD_Info
     /// \brief Method that returns the guard of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The guard at the root of the BDD.
-    inline mcrl2::data::data_expression get_guard(const mcrl2::data::data_expression& a_bdd)
+    static inline mcrl2::data::data_expression get_guard(const mcrl2::data::data_expression& a_bdd)
     {
       return argument(a_bdd,0);
     }
@@ -48,7 +48,7 @@ class BDD_Info
     /// \brief Method that returns the true-branch of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The true-branch of the BDD.
-    inline mcrl2::data::data_expression get_true_branch(const mcrl2::data::data_expression&  a_bdd)
+    static inline mcrl2::data::data_expression get_true_branch(const mcrl2::data::data_expression&  a_bdd)
     {
       return argument(a_bdd,1);
     }
@@ -56,7 +56,7 @@ class BDD_Info
     /// \brief Method that returns the false-branch of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The false-branch of the BDD.
-    inline mcrl2::data::data_expression get_false_branch(const mcrl2::data::data_expression& a_bdd)
+    static inline mcrl2::data::data_expression get_false_branch(const mcrl2::data::data_expression& a_bdd)
     {
       return argument(a_bdd,2);
     }
@@ -65,7 +65,7 @@ class BDD_Info
     /// \param[in] a_bdd A binary decision diagram.
     /// \return True, if the BDD equals true.
     ///         False, if the BDD does not equal true.
-    inline bool is_true(const data_expression& a_bdd)
+    static inline bool is_true(const data_expression& a_bdd)
     {
       return mcrl2::data::sort_bool::is_true_function_symbol(a_bdd);
     }
@@ -74,7 +74,7 @@ class BDD_Info
     /// \param[in] a_bdd A binary decision diagram.
     /// \return True, if the BDD equals false.
     ///         False, if the BDD does not equal true.
-    inline bool is_false(const data_expression& a_bdd)
+    static inline bool is_false(const data_expression& a_bdd)
     {
       return mcrl2::data::sort_bool::is_false_function_symbol(a_bdd);
     }
@@ -83,7 +83,7 @@ class BDD_Info
     /// \param[in] a_bdd A binary decision diagram.
     /// \return True, if the root of the BDD is a guard node.
     ///         False, if the BDD equals true or if the BDD equals false.
-    inline bool is_if_then_else(const data_expression& a_bdd)
+    static inline bool is_if_then_else(const data_expression& a_bdd)
     {
       return mcrl2::data::is_if_application(a_bdd);
     }

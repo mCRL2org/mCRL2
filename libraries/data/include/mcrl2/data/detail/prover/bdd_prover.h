@@ -98,11 +98,11 @@ class BDD_Prover: protected rewriter
     /// \brief An expression of sort Bool.
     data_expression f_formula;
 
-    /// \brief A class that can be used to manipulate expressions.
-    Manipulator f_manipulator;
-
     /// \brief A class that provides information about expressions.
     Info f_info;
+
+    /// \brief A class that can be used to manipulate expressions.
+    Manipulator f_manipulator;
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
     bool f_processed = false;
@@ -114,7 +114,7 @@ class BDD_Prover: protected rewriter
     Answer f_contradiction;
 
     /// \brief An integer representing the maximal amount of seconds to be spent on processing a formula.
-    int f_time_limit;
+    const int f_time_limit;
 
     /// \brief A timestamp representing the moment when the maximal amount of seconds has been spent on processing the current formula.
     time_t f_deadline;
@@ -125,11 +125,11 @@ class BDD_Prover: protected rewriter
     /// \brief Flag indicating whether or not the result of the comparison between the first two arguments
     /// \brief weighs stronger than the result of the comparison between the second pair of arguments of an
     /// \brief equation, when determining the order of expressions.
-    bool f_reverse = true;
+    const bool f_reverse = true;
 
     /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
     /// \brief when determining the order of expressions.
-    bool f_full = false;
+    const bool f_full = true;
 
     /// \brief A flag indicating whether or not induction on lists is applied.
     bool f_apply_induction;
@@ -144,9 +144,6 @@ class BDD_Prover: protected rewriter
     /// \brief A hashtable that maps formulas to the smallest guard occuring in those formulas.
     /// \brief If the smallest guard of a formula is unknown, it maps this formula to 0.
     std::unordered_map < data_expression, data_expression > f_smallest;
-
-    /// \brief Class that provides information about the structure of BDDs.
-    BDD_Info f_bdd_info;
 
     /// \brief Class that simplifies a BDD.
     BDD_Simplifier* f_bdd_simplifier;
@@ -248,7 +245,7 @@ class BDD_Prover: protected rewriter
       v_term2 = bdd_down(v_term2, extra_indent);
       mCRL2log(log::debug) << indent(extra_indent) << "BDD of the false-branch: " << v_term2 << std::endl;
 
-      data_expression v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
+      data_expression v_bdd = Manipulator::make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
 
       return v_bdd;
@@ -278,17 +275,17 @@ class BDD_Prover: protected rewriter
         eliminate_paths();
         data_expression v_original_formula = f_formula;
         data_expression v_original_bdd = f_bdd;
-        if (f_apply_induction && !(f_bdd_info.is_true(f_bdd) || f_bdd_info.is_false(f_bdd)))
+        if (f_apply_induction && !(BDD_Info::is_true(f_bdd) || BDD_Info::is_false(f_bdd)))
         {
           f_induction.initialize(v_original_formula);
-          while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
+          while (f_induction.can_apply_induction() && !BDD_Info::is_true(f_bdd))
           {
             mCRL2log(log::debug) << "Applying induction." << std::endl;
             f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
           }
-          if (f_bdd_info.is_true(f_bdd))
+          if (BDD_Info::is_true(f_bdd))
           {
             f_tautology = answer_yes;
             f_contradiction = answer_no;
@@ -298,14 +295,14 @@ class BDD_Prover: protected rewriter
             v_original_formula = sort_bool::not_(v_original_formula);
             f_bdd = v_original_bdd;
             f_induction.initialize(v_original_formula);
-            while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
+            while (f_induction.can_apply_induction() && !BDD_Info::is_true(f_bdd))
             {
               mCRL2log(log::debug) << "Applying induction on the negated formula." << std::endl;
               f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();
             }
-            if (f_bdd_info.is_true(f_bdd))
+            if (BDD_Info::is_true(f_bdd))
             {
               f_bdd = sort_bool::false_();
               f_tautology = answer_no;
@@ -321,12 +318,12 @@ class BDD_Prover: protected rewriter
         }
         else
         {
-          if (f_bdd_info.is_true(f_bdd))
+          if (BDD_Info::is_true(f_bdd))
           {
             f_tautology = answer_yes;
             f_contradiction = answer_no;
           }
-          else if (f_bdd_info.is_false(f_bdd))
+          else if (BDD_Info::is_false(f_bdd))
           {
             f_tautology = answer_no;
             f_contradiction = answer_yes;
@@ -413,11 +410,11 @@ class BDD_Prover: protected rewriter
     {
       data_expression v_result;
 
-      if (f_bdd_info.is_if_then_else(a_bdd))
+      if (BDD_Info::is_if_then_else(a_bdd))
       {
-        data_expression v_guard = f_bdd_info.get_guard(a_bdd);
-        data_expression v_true_branch = f_bdd_info.get_true_branch(a_bdd);
-        data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
+        data_expression v_guard = BDD_Info::get_guard(a_bdd);
+        data_expression v_true_branch = BDD_Info::get_true_branch(a_bdd);
+        data_expression v_false_branch = BDD_Info::get_false_branch(a_bdd);
         data_expression v_branch = get_branch(v_true_branch, a_polarity);
         if (v_branch==data_expression())
         {
@@ -439,7 +436,7 @@ class BDD_Prover: protected rewriter
       }
       else
       {
-        if ((f_bdd_info.is_true(a_bdd) && a_polarity) || (f_bdd_info.is_false(a_bdd) && !a_polarity))
+        if ((BDD_Info::is_true(a_bdd) && a_polarity) || (BDD_Info::is_false(a_bdd) && !a_polarity))
         {
           v_result = sort_bool::true_();
         }
@@ -483,12 +480,13 @@ class BDD_Prover: protected rewriter
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
     : rewriter(data_spec, equations_selector, a_rewrite_strategy)
+    , f_info(f_full, f_reverse)
     , f_manipulator(f_info)
+    , f_time_limit(a_time_limit)
+    , f_apply_induction(a_apply_induction)
     , f_bdd_simplifier(a_path_eliminator ? new BDD_Path_Eliminator(a_solver_type) : new BDD_Simplifier())
     , f_induction(data_spec)
     {
-      f_time_limit = a_time_limit;
-
       switch (a_rewrite_strategy)
       {
         case(jitty):
@@ -513,9 +511,6 @@ class BDD_Prover: protected rewriter
         }
       }
 
-      f_apply_induction = a_apply_induction;
-      f_info.set_reverse(f_reverse);
-      f_info.set_full(f_full);
       mCRL2log(log::debug) << "Flags:" << std::endl
                       << "  Reverse: " << bool_to_char_string(f_reverse) << "," << std::endl
                       << "  Full: " << bool_to_char_string(f_full) << "," << std::endl;
@@ -629,7 +624,7 @@ class BDD_Prover: protected rewriter
       f_processed = false;
       mCRL2log(log::debug) << "The formula has been set." << std::endl;
     }
-  
+
 
 };
 } // namespace detail
