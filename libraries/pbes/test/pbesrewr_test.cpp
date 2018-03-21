@@ -10,8 +10,6 @@
 /// \brief Test for the pbes rewriters.
 
 #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/detail/test_input.h"

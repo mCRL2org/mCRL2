@@ -9,6 +9,8 @@
 /// \file normalize_test.cpp
 /// \brief Test for normalization functions.
 
+#define BOOST_TEST_MODULE normalize_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -18,12 +20,11 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/detail/test_operation.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-void test_normalize1()
+BOOST_AUTO_TEST_CASE(test_normalize1)
 {
   pbes_expression x = propositional_variable_instantiation("x:X");
   pbes_expression y = propositional_variable_instantiation("y:Y");
@@ -102,7 +103,7 @@ void test_normalize1()
   std::cout << "z = " << z << std::endl;
 }
 
-void test_normalize2()
+BOOST_AUTO_TEST_CASE(test_normalize2)
 {
   // test case from Aad Mathijssen, 2/11/2008
   lps::specification spec=remove_stochastic_operators(lps::linearise("init tau + tau;"));
@@ -112,7 +113,7 @@ void test_normalize2()
   pbes_system::normalize(p);
 }
 
-void test_normalize3()
+BOOST_AUTO_TEST_CASE(test_normalize3)
 {
   // test case from Aad Mathijssen, 1-4-2008
   lps::specification spec=remove_stochastic_operators(lps::linearise(
@@ -191,19 +192,9 @@ void test_normalize_and_or_equality(const std::string& expr1, const std::string&
   ));
 }
 
-void test_normalize_and_or()
+BOOST_AUTO_TEST_CASE(test_normalize_and_or)
 {
   test_normalize_and_or_equality("X && Y", "Y && X");
   test_normalize_and_or_equality("X && X && Y", "X && Y && X");
   test_normalize_and_or_equality("X && X && Y", "Y && X && X");
-}
-
-int test_main(int argc, char** argv)
-{
-  test_normalize1();
-  test_normalize2();
-  test_normalize3();
-  test_normalize_and_or();
-
-  return 0;
 }

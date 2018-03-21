@@ -9,10 +9,11 @@
 /// \file print_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE print_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -66,9 +67,4 @@ BOOST_AUTO_TEST_CASE(pbes_val)
   p = txt2pbes(PBES);
   std::string result = pbes_system::pp(p);
   BOOST_CHECK(result == expected_result);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

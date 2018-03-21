@@ -9,8 +9,8 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
-#define MCRL2_DEBUG_ENUMERATE_QUANTIFIERS_BUILDER
-
+#define BOOST_TEST_MODULE pbes_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/print_utility.h"
@@ -23,101 +23,29 @@
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
-using core::identifier_string;
-using data::data_expression;
-using data::variable;
-using data::basic_sort;
-using data::multiset_identifier_generator;
-using state_formulas::state_formula;
-using lps::linearise;
-using lps::specification;
-using pbes_system::pbes;
-using pbes_system::pbes_expression;
-using pbes_system::pbes_equation;
-using pbes_system::lps2pbes;
-using pbes_system::propositional_variable_instantiation;
+using namespace mcrl2::pbes_system;
 
-const std::string SPECIFICATION =
-  "act a:Nat;                               \n"
-  "                                         \n"
-  "map smaller: Nat#Nat -> Bool;            \n"
-  "                                         \n"
-  "var x,y : Nat;                           \n"
-  "                                         \n"
-  "eqn smaller(x,y) = x < y;                \n"
-  "                                         \n"
-  "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
-  "                                         \n"
-  "init P(0);                               \n";
-
-const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
-
-const std::string MPSU_SPECIFICATION =
-  "% This file describes a controller for a simplified Movable Patient                   \n"
-  "% Support Unit. It is described in Fokkink, Groote and Reniers,                       \n"
-  "% Modelling reactive systems.                                                         \n"
-  "%                                                                                     \n"
-  "% Jan Friso Groote, September, 2006.                                                  \n"
-  "                                                                                      \n"
-  "sort Mode = struct Normal | Emergency ;                                               \n"
-  "     MotorStatus = struct turnleft | turnright | stopped ;                            \n"
-  "                                                                                      \n"
-  "act pressStop, pressResume,                                                           \n"
-  "    pressUndock, pressLeft,                                                           \n"
-  "    pressRight, motorLeft,                                                            \n"
-  "    motorRight, motorOff,                                                             \n"
-  "    applyBrake, releaseBrake,                                                         \n"
-  "    isDocked, unlockDock,                                                             \n"
-  "    atInnermost, atOutermost;                                                         \n"
-  "                                                                                      \n"
-  "proc Controller(m:Mode,docked,rightmost,leftmost:Bool,ms:MotorStatus)=                \n"
-  "       pressStop.Controller(Emergency,docked,rightmost,leftmost,ms)+                  \n"
-  "       pressResume.Controller(Normal,docked,rightmost,leftmost,ms)+                   \n"
-  "       pressUndock.                                                                   \n"
-  "         (docked && rightmost)                                                        \n"
-  "                -> applyBrake.unlockDock.Controller(m,false,rightmost,leftmost,ms)    \n"
-  "                <> Controller(m,docked,rightmost,leftmost,ms)+                        \n"
-  "       pressLeft.                                                                     \n"
-  "          (docked && ms!=turnleft && !leftmost && m==Normal)                          \n"
-  "                -> releaseBrake.motorLeft.                                            \n"
-  "                     Controller(m,docked,false,leftmost,turnleft)                     \n"
-  "                <> Controller(m,docked,rightmost,leftmost,ms)+                        \n"
-  "       pressRight.                                                                    \n"
-  "          (docked && ms!=turnright && !rightmost && m==Normal)                        \n"
-  "                -> releaseBrake.motorRight.                                           \n"
-  "                     Controller(m,docked,rightmost,false,turnright)                   \n"
-  "                <> Controller(m,docked,rightmost,leftmost,ms)+                        \n"
-  "       isDocked.Controller(m,true,rightmost,leftmost,ms)+                             \n"
-  "       atInnermost.motorOff.applyBrake.Controller(m,docked,true,false,stopped)+       \n"
-  "       atOutermost.motorOff.applyBrake.Controller(m,docked,false,true,stopped);       \n"
-  "                                                                                      \n"
-  "                                                                                      \n"
-  "                                                                                      \n"
-  "init Controller(Normal,true,false,false,stopped);                                     \n"
-  ;
-
-const std::string FORMULA  = "nu X(n:Nat = 1). [forall m:Nat. a(m)](val(n < 10)  && X(n+2))";
-const std::string FORMULA2 = "forall m:Nat. [a(m)]false";
-
-const std::string MPSU_FORMULA =
-  "% This file describes the modal formulas for property 5 used in section \n"
-  "% 5.3 of Designing and understanding the behaviour of systems           \n"
-  "% by J.F. Groote and M.A. Reniers.                                      \n"
-  "                                                                        \n"
-  "nu X(b1:Bool=false, b2:Bool=true,b3:Bool=true,b4:Bool=true).            \n"
-  "        val(b1 && b2 && b3 && b4) => ([pressLeft]                       \n"
-  "              (mu Y.[!motorLeft &&                                      \n"
-  "                    !unlockDock &&                                      \n"
-  "                    !pressStop &&                                       \n"
-  "                    !atInnermost]Y))                                    \n";
-
-void test_pbes()
+BOOST_AUTO_TEST_CASE(test_pbes)
 {
-  specification spec=remove_stochastic_operators(linearise(SPECIFICATION));
-  state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
+  const std::string SPECIFICATION =
+    "act a:Nat;                               \n"
+    "                                         \n"
+    "map smaller: Nat#Nat -> Bool;            \n"
+    "                                         \n"
+    "var x,y : Nat;                           \n"
+    "                                         \n"
+    "eqn smaller(x,y) = x < y;                \n"
+    "                                         \n"
+    "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
+    "                                         \n"
+    "init P(0);                               \n";
+
+  const std::string FORMULA2 = "forall m:Nat. [a(m)]false";
+
+  lps::specification spec = lps::remove_stochastic_operators(lps::linearise(SPECIFICATION));
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   pbes_expression e = p.equations().front().formula();
@@ -155,7 +83,7 @@ void test_pbes()
   remove(filename.c_str());
 }
 
-void test_global_variables()
+BOOST_AUTO_TEST_CASE(test_global_variables)
 {
   std::string TEXT =
     "glob k, m, n:Nat;                        \n"
@@ -171,17 +99,17 @@ void test_global_variables()
   pbes p;
   std::stringstream s(TEXT);
   s >> p;
-  std::set<variable> freevars = p.global_variables();
+  std::set<data::variable> freevars = p.global_variables();
   BOOST_CHECK(freevars.size() == 3);  // The global variable k does not occur in the specification,
   // but occurs in the global variables list.
 }
 
-void test_complement_method_builder()
+BOOST_AUTO_TEST_CASE(test_complement_method_builder)
 {
   using namespace pbes_system;
 
-  variable X("x", data::bool_());
-  variable Y("y", data::bool_());
+  data::variable X("x", data::bool_());
+  data::variable Y("y", data::bool_());
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(data::not_(X), data::not_(Y)), or_(data::not_(Y), data::not_(X)));
@@ -191,22 +119,23 @@ void test_complement_method_builder()
   BOOST_CHECK(complement(p) == q);
 }
 
-void test_pbes_expression()
+BOOST_AUTO_TEST_CASE(test_pbes_expression)
 {
-  variable x1("x1", basic_sort("X"));
+  data::variable x1("x1", data::basic_sort("X"));
   pbes_expression e = x1;
 }
 
-void test_trivial()
+BOOST_AUTO_TEST_CASE(test_trivial)
 {
-  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
-  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
+  lps::specification spec = lps::remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 }
 
-void test_instantiate_global_variables()
+BOOST_AUTO_TEST_CASE(test_instantiate_global_variables)
 {
   std::string spec_text =
     "act a,b:Nat;             \n"
@@ -215,8 +144,8 @@ void test_instantiate_global_variables()
     "init d.P(1);             \n"
     ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
-  specification spec=remove_stochastic_operators(linearise(spec_text));
-  state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
+  lps::specification spec = lps::remove_stochastic_operators(lps::linearise(spec_text));
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::pbes_system::pp(p) << std::endl;
@@ -225,20 +154,19 @@ void test_instantiate_global_variables()
   std::cout << "<after>" << pbes_system::pp(p) << std::endl;
 }
 
-void test_find_sort_expressions()
+BOOST_AUTO_TEST_CASE(test_find_sort_expressions)
 {
-  using data::sort_expression;
-
-  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
-  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
+  lps::specification spec = lps::remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
-  std::set<sort_expression> s;
+  std::set<data::sort_expression> s;
   pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
   std::cout << core::detail::print_set(s) << std::endl;
 }
 
-void test_io()
+BOOST_AUTO_TEST_CASE(test_io)
 {
   using namespace pbes_system;
 
@@ -255,7 +183,7 @@ void test_io()
   load_pbes(p, "pbes.txt",   pbes_format_text());
 }
 
-void test_is_bes()
+BOOST_AUTO_TEST_CASE(test_is_bes)
 {
   // found with random testing 14-1-2011
   using namespace pbes_system;
@@ -267,19 +195,4 @@ void test_is_bes()
     ;
   pbes p = txt2pbes(text);
   BOOST_CHECK(is_bes(p));
-}
-
-int test_main(int argc, char** argv)
-{
-  test_trivial();
-  test_pbes();
-  test_global_variables();
-  test_complement_method_builder();
-  test_pbes_expression();
-  test_instantiate_global_variables();
-  test_find_sort_expressions();
-  test_is_bes();
-  test_io();
-
-  return 0;
 }

@@ -6,26 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes_test.cpp
+/// \file parelm_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE parelm_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/parelm.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/test/minimal.hpp>
 
-using namespace std;
 using namespace mcrl2;
-using namespace mcrl2::data;
-using namespace mcrl2::lps;
-using namespace mcrl2::lps::detail;
-using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::detail;
 
 const std::string SPECIFICATION =
   "act a:Nat;                               \n"
@@ -42,20 +36,13 @@ const std::string SPECIFICATION =
 
 const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
-void test_parelm()
+BOOST_AUTO_TEST_CASE(test_parelm1)
 {
-  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
-  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  lps::specification spec = lps::remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
   pbes_parelm_algorithm algorithm;
   algorithm.run(p);
   BOOST_CHECK(p.is_well_typed());
-}
-
-int test_main(int argc, char** argv)
-{
-  test_parelm();
-
-  return 0;
 }

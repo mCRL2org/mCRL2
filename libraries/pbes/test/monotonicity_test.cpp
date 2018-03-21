@@ -9,10 +9,8 @@
 /// \file monotonicity_test.cpp
 /// \brief Tests for the is_monotonous function for pbes expressions.
 
-#include <iostream>
-
+#define BOOST_TEST_MODULE monotonicity_test
 #include <boost/test/included/unit_test_framework.hpp>
-
 #include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -61,9 +59,4 @@ BOOST_AUTO_TEST_CASE(test_monotonicity)
   {
     run_monotonicity_test_case(eqn[i].formula(), expected_results[i]);
   }
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }
