@@ -18,25 +18,11 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/replace_subterm.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
-
-/// \brief Saves text to the file filename, or to stdout if filename equals "-".
-inline
-void write_text(const std::string& filename, const std::string& text)
-{
-  if (filename.empty())
-  {
-    std::cout << text;
-  }
-  else
-  {
-    std::ofstream out(filename);
-    out << text;
-  }
-}
 
 /// \brief Loads a process specification from input_filename, or from stdin if filename equals "".
 inline
@@ -98,7 +84,7 @@ void generate_reduced_processes(const process::process_specification& p, std::si
       process::process_specification q = replace_subterm(p, x, depth, replacement);
       std::string filename = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "_" + utilities::number2string(index) + ".mcrl2";
       std::string text = process::pp(q);
-      write_text(filename, text);
+      utilities::detail::write_text(filename, text);
       std::cout << "file = " << filename << std::endl;
       index++;
     }

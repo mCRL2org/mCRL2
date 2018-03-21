@@ -23,12 +23,12 @@
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
+#include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/eqelm.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
@@ -43,60 +43,13 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/pbes/stategraph.h"
+#include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
 using data::tools::rewriter_tool;
-
-/// \brief Saves text to the file filename, or to stdout if filename equals "-".
-inline
-void write_text(const std::string& filename, const std::string& text)
-{
-  if (filename.empty())
-  {
-    std::cout << text;
-  }
-  else
-  {
-    std::ofstream out(filename);
-    out << text;
-  }
-}
-
-inline
-std::string file_extension(const std::string& filename)
-{
-  auto pos = filename.find_last_of('.');
-  if (pos == std::string::npos)
-  {
-    return "";
-  }
-  return filename.substr(pos + 1);
-}
-
-inline
-void my_save_pbes(const pbes& p, const std::string& filename)
-{
-  auto ext = file_extension(filename);
-  if (ext == "pbes")
-  {
-    save_pbes(p, filename, pbes_format_internal());
-  }
-  else if (ext == "bes")
-  {
-    bes::save_pbes(p, filename, bes::bes_format_internal());
-  }
-  else if (ext == "pg")
-  {
-    bes::save_pbes(p, filename, bes::bes_format_pgsolver());
-  }
-  else
-  {
-    pbes_system::save_pbes(p, filename);
-  }
-}
 
 /// \brief
 struct command
@@ -135,7 +88,7 @@ struct pbes_command: public command
 
   void execute()
   {
-    pbes_system::load_pbes(pbesspec, input_filename);
+    pbesspec = pbes_system::detail::load_pbes(input_filename);
   }
 };
 
@@ -168,7 +121,7 @@ struct rewrite_pbes_data_rewriter_command: public pbes_rewriter_command
     data::rewriter r(pbesspec.data(), strategy);
     pbes_system::data_rewriter<data::rewriter> R(r);
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -184,7 +137,7 @@ struct rewrite_pbes_enumerate_quantifiers_rewriter_command: public pbes_rewriter
     data::rewriter r(pbesspec.data(), strategy);
     pbes_system::enumerate_quantifiers_rewriter R(r, pbesspec.data());
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -199,7 +152,7 @@ struct rewrite_pbes_simplify_rewriter_command: public pbes_command
     pbes_command::execute();
     pbes_system::simplify_rewriter R;
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -215,7 +168,7 @@ struct rewrite_pbes_simplify_data_rewriter_command: public pbes_rewriter_command
     data::rewriter r(pbesspec.data(), strategy);
     pbes_system::simplify_data_rewriter<data::rewriter> R(r);
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -230,7 +183,7 @@ struct rewrite_pbes_simplify_quantifiers_rewriter_command: public pbes_command
     pbes_command::execute();
     pbes_system::simplify_quantifiers_rewriter R;
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -246,7 +199,7 @@ struct rewrite_pbes_simplify_quantifiers_data_rewriter_command: public pbes_rewr
     data::rewriter r(pbesspec.data(), strategy);
     pbes_system::simplify_data_rewriter<data::rewriter> R(r);
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -261,7 +214,7 @@ struct rewrite_pbes_one_point_rule_rewriter_command: public pbes_command
     pbes_command::execute();
     pbes_system::one_point_rule_rewriter R;
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -276,7 +229,7 @@ struct rewrite_pbes_quantifiers_inside_rewriter_command: public pbes_command
     pbes_command::execute();
     pbes_system::quantifiers_inside_rewriter R;
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -291,7 +244,7 @@ struct rewrite_pbes_data2pbes_rewriter_command: public pbes_command
     pbes_command::execute();
     pbes_system::data2pbes_rewriter R;
     pbes_rewrite(pbesspec, R);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -305,7 +258,7 @@ struct remove_unreachable_pbes_equations_command: public pbes_command
   {
     pbes_command::execute();
     pbes_system::remove_unreachable_variables(pbesspec);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -319,7 +272,7 @@ struct pbesinst_lazy_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, lazy);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -337,7 +290,7 @@ struct pbesinst_structure_graph_command: public pbes_rewriter_command
     pbesinst_structure_graph(pbesspec, G, strategy, breadth_first, lazy);
     std::ostringstream out;
     out << G.vertices();
-    write_text(output_filename, out.str());
+    utilities::detail::write_text(output_filename, out.str());
   }
 };
 
@@ -356,11 +309,11 @@ struct solve_structure_graph_command: public pbes_rewriter_command
     bool result = solve_structure_graph(G);
     if (result)
     {
-      write_text(output_filename, "true\n");
+      utilities::detail::write_text(output_filename, "true\n");
     }
     else
     {
-      write_text(output_filename, "false\n");
+      utilities::detail::write_text(output_filename, "false\n");
     }
   }
 };
@@ -375,7 +328,7 @@ struct pbesinst_optimize_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, optimize);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -389,7 +342,7 @@ struct pbesinst_on_the_fly_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, on_the_fly);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -403,7 +356,7 @@ struct pbesinst_on_the_fly_with_fixed_points_command: public pbes_rewriter_comma
   {
     pbes_command::execute();
     pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, on_the_fly_with_fixed_points);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -417,7 +370,7 @@ struct instantiate_global_variables_command: public pbes_command
   {
     pbes_command::execute();
     pbes_system::detail::instantiate_global_variables(pbesspec);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -433,15 +386,15 @@ struct gauss_elimination_command: public pbes_command
     int result = gauss_elimination(pbesspec);
     if (result == 0)
     {
-      write_text(output_filename, "false\n");
+      utilities::detail::write_text(output_filename, "false\n");
     }
     else if (result == 1)
     {
-      write_text(output_filename, "true\n");
+      utilities::detail::write_text(output_filename, "true\n");
     }
     else
     {
-      write_text(output_filename, "unknown\n");
+      utilities::detail::write_text(output_filename, "unknown\n");
     }
   }
 };
@@ -456,7 +409,7 @@ struct eqelm_simplify_rewriter_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     eqelm(pbesspec, strategy, simplify);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -470,7 +423,7 @@ struct eqelm_quantifier_all_rewriter_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     eqelm(pbesspec, strategy, quantifier_all);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -484,7 +437,7 @@ struct eqelm_quantifier_finite_rewriter_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     eqelm(pbesspec, strategy, quantifier_finite);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -498,7 +451,7 @@ struct constelm_simplify_rewriter_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     constelm(pbesspec, strategy, simplify);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -512,7 +465,7 @@ struct constelm_quantifier_all_rewriter_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     constelm(pbesspec, strategy, quantifier_all);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -526,7 +479,7 @@ struct constelm_quantifier_finite_rewriter_command: public pbes_rewriter_command
   {
     pbes_command::execute();
     constelm(pbesspec, strategy, quantifier_finite);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -540,7 +493,7 @@ struct normalize_command: public pbes_command
   {
     pbes_command::execute();
     normalize(pbesspec);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -554,7 +507,7 @@ struct normalize_and_or_command: public pbes_command
   {
     pbes_command::execute();
     detail::normalize_and_or(pbesspec);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -568,7 +521,7 @@ struct complement_command: public pbes_command
   {
     pbes_command::execute();
     pbes_rewrite(pbesspec, &complement);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -582,7 +535,7 @@ struct is_bes_command: public pbes_command
   {
     pbes_command::execute();
     bool result = is_bes(pbesspec);
-    write_text(output_filename, result ? "true\n" : "false\n");
+    utilities::detail::write_text(output_filename, result ? "true\n" : "false\n");
   }
 };
 
@@ -596,7 +549,7 @@ struct is_monotonous_command: public pbes_command
   {
     pbes_command::execute();
     bool result = is_monotonous(pbesspec);
-    write_text(output_filename, result ? "true\n" : "false\n");
+    utilities::detail::write_text(output_filename, result ? "true\n" : "false\n");
   }
 };
 
@@ -612,7 +565,7 @@ struct stategraph_local_command: public pbes_command
     pbesstategraph_options options;
     options.use_global_variant = false;
     stategraph(pbesspec, options);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -628,7 +581,7 @@ struct stategraph_global_command: public pbes_command
     pbesstategraph_options options;
     options.use_global_variant = false;
     stategraph(pbesspec, options);
-    my_save_pbes(pbesspec, output_filename);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 

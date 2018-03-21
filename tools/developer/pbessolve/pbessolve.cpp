@@ -13,7 +13,9 @@
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -24,55 +26,6 @@ using namespace mcrl2::utilities::tools;
 using mcrl2::bes::tools::pbes_input_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
-
-/// \brief Loads an lps from input_filename, or from stdin if filename equals "".
-inline
-lps::specification load_lps(const std::string& input_filename)
-{
-  lps::specification result;
-  if (input_filename.empty())
-  {
-    result.load(std::cin);
-  }
-  else
-  {
-    std::ifstream from(input_filename, std::ifstream::in | std::ifstream::binary);
-    result.load(from);
-  }
-  return result;
-}
-
-/// \brief Saves an LPS to output_filename, or to stdout if filename equals "".
-inline
-void save_lps(const lps::specification& lpsspec, const std::string& output_filename)
-{
-  if (output_filename.empty())
-  {
-    lpsspec.save(std::cout);
-  }
-  else
-  {
-    std::ofstream to(output_filename, std::ofstream::out | std::ofstream::binary);
-    lpsspec.save(to);
-  }
-}
-
-/// \brief Loads a PBES from input_filename, or from stdin if filename equals "".
-inline
-pbes load_pbes(const std::string& input_filename)
-{
-    pbes result;
-    if (input_filename.empty())
-    {
-        result.load(std::cin);
-    }
-    else
-    {
-        std::ifstream from(input_filename, std::ifstream::in | std::ifstream::binary);
-        result.load(from);
-    }
-    return result;
-}
 
 class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 {
@@ -156,7 +109,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 
     bool run() override
     {
-      pbes_system::pbes pbesspec = load_pbes(input_filename());
+      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       pbes_system::algorithms::normalize(pbesspec);
       structure_graph G;
 
@@ -168,7 +121,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 
       if (!lpsfile.empty())
       {
-        lps::specification lpsspec = load_lps(lpsfile);
+        lps::specification lpsspec = lps::detail::load_lps(lpsfile);
         lps::detail::instantiate_global_variables(lpsspec); // N.B. This is necessary, because the global variables might not be valid for the evidence.
         bool result;
         lps::specification evidence;
@@ -177,7 +130,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
         std::string output_filename = input_filename() + ".evidence.lps";
-        save_lps(evidence, output_filename);
+        lps::detail::save_lps(evidence, output_filename);
         mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << output_filename << std::endl;
       }
       else if (!ltsfile.empty())

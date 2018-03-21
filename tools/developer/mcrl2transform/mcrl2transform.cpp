@@ -32,41 +32,13 @@
 #include "mcrl2/process/remove_data_parameters.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/rewrite.h"
-#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
 using data::tools::rewriter_tool;
-
-/// \brief Reads text from the file filename, or from stdin if filename equals "-".
-inline
-std::string read_text(const std::string& filename)
-{
-  if (filename.empty())
-  {
-    return utilities::read_text(std::cin);
-  }
-  else
-  {
-    return utilities::read_text(filename);
-  }
-}
-
-/// \brief Saves text to the file filename, or to stdout if filename equals "-".
-inline
-void write_text(const std::string& filename, const std::string& text)
-{
-  if (filename.empty())
-  {
-    std::cout << text;
-  }
-  else
-  {
-    std::ofstream out(filename);
-    out << text;
-  }
-}
 
 /// \brief Loads a process specification from input_filename, or from stdin if filename equals "".
 inline
@@ -152,7 +124,7 @@ struct eliminate_trivial_equations_command: public process_command
   {
     process_command::execute();
     process::eliminate_trivial_equations(procspec);
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -167,7 +139,7 @@ struct join_bisimilar_equations_command: public process_command
   {
     process_command::execute();
     process::remove_duplicate_equations(procspec);
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -182,7 +154,7 @@ struct alphabet_reduce_command: public process_command
   {
     process_command::execute();
     process::alphabet_reduce(procspec, 0);
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -214,7 +186,7 @@ struct eliminate_single_usage_equations_command: public process_command
   {
     process_command::execute();
     process::eliminate_single_usage_equations(procspec);
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -229,7 +201,7 @@ struct eliminate_unused_equations_command: public process_command
   {
     process_command::execute();
     process::eliminate_unused_equations(procspec.equations(), procspec.init());
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -258,7 +230,7 @@ struct remove_data_parameters_command: public process_command
   {
     process_command::execute();
     remove_data_parameters(procspec);
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -273,7 +245,7 @@ struct alphabet_command: public process_command
   {
     process_command::execute();
     process::multi_action_name_set alpha = process::alphabet(procspec.init(), procspec.equations());
-    write_text(output_filename, process::pp(alpha));
+    utilities::detail::write_text(output_filename, process::pp(alpha));
   }
 };
 
@@ -288,7 +260,7 @@ struct alphabet_efficient_command: public process_command
   {
     process_command::execute();
     process::multi_action_name_set alpha = process::alphabet_efficient(procspec.init(), procspec.equations());
-    write_text(output_filename, process::pp(alpha));
+    utilities::detail::write_text(output_filename, process::pp(alpha));
   }
 };
 
@@ -303,7 +275,7 @@ struct alphabet_new_command: public process_command
   {
     process_command::execute();
     process::multi_action_name_set alpha = process::alphabet_new(procspec.init(), procspec.equations());
-    write_text(output_filename, process::pp(alpha));
+    utilities::detail::write_text(output_filename, process::pp(alpha));
   }
 };
 
@@ -331,7 +303,7 @@ struct alphabet_bounded_command: public process_command
       A.insert(process::multi_action_name(names.begin(), names.end()));
     }
     process::multi_action_name_set A1 = process::alphabet_bounded(init.operand(), A, procspec.equations());
-    write_text(output_filename, process::pp(A1));
+    utilities::detail::write_text(output_filename, process::pp(A1));
   }
 };
 
@@ -346,7 +318,7 @@ struct anonymize_process_command: public process_command
   {
     process_command::execute();
     process::anonymize(procspec);
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -361,7 +333,7 @@ struct rewrite_process_command: public process_rewriter_command
     process_rewriter_command::execute();
     data::rewriter r(procspec.data(), strategy);
     process::rewrite(procspec, r);
-    write_text(output_filename, process::pp(procspec));
+    utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
 
@@ -373,7 +345,7 @@ struct separate_equations_command: public process_command
 
   void execute()
   {
-    std::string text = read_text(input_filename);
+    std::string text = utilities::detail::read_text(input_filename);
     std::vector<std::string> all_keywords = { "sort", "var", "map", "cons", "proc", "init", "act" };
     bool repeat_keyword = true;
     std::pair<std::string, std::string> q;
@@ -404,7 +376,7 @@ struct separate_equations_command: public process_command
          + "%%%--- actspec ---%%%\n" + act_text + "\n"
          + "%%%--- procspec ---%%%\n" + proc_text + "\n"
          + "%%%--- initspec ---%%%\n" + init_text;
-    write_text(output_filename, text);
+    utilities::detail::write_text(output_filename, text);
   }
 };
 

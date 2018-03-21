@@ -11,28 +11,14 @@
 #include <iostream>
 #include <string>
 
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/bdd.h"
+#include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
-
-/// \brief Saves text to the file filename, or to stdout if filename equals "-".
-inline
-void write_text(const std::string& filename, const std::string& text)
-{
-  if (filename.empty())
-  {
-    std::cout << text;
-  }
-  else
-  {
-    std::ofstream out(filename);
-    out << text;
-  }
-}
 
 class pbes2bdd_tool: public input_output_tool
 {
@@ -65,10 +51,9 @@ class pbes2bdd_tool: public input_output_tool
 
     bool run()
     {
-      pbes_system::pbes pbesspec;
-      pbes_system::load_pbes(pbesspec, input_filename());
+      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       std::string result = pbes_system::bdd::pbes2bdd(pbesspec, unary_encoding);
-      write_text(output_filename(), result);
+      utilities::detail::write_text(output_filename(), result);
       return true;
     }
 };

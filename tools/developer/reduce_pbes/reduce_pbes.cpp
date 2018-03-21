@@ -18,6 +18,7 @@
 
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/replace_subterm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
@@ -67,7 +68,7 @@ void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::strin
       pbes_system::pbes q = replace_subterm(p, x, depth, replacement);
       std::string filename = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "_" + utilities::number2string(index) + ".pbes";
       std::string text = pbes_system::pp(q);
-      save_pbes(q, filename, pbes_system::pbes_format_internal());
+      pbes_system::detail::save_pbes(q, filename);
       std::cout << "file = " << filename << std::endl;
       index++;
     }
@@ -109,8 +110,7 @@ class reduce_pbes_tool: public pbes_input_tool<input_tool>
 
     bool run()
     {
-      pbes p;
-      load_pbes(p, input_filename(), pbes_input_format());
+      pbes p = pbes_system::detail::load_pbes(input_filename());
       if (m_verbose)
       {
         std::cout << "Position counts = " << core::detail::print_list(detail::position_counts(p)) << std::endl;

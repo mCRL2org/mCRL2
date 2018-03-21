@@ -15,42 +15,11 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
-
-/// \brief Loads an lps from input_filename, or from stdin if filename equals "".
-inline
-lps::specification load_lps(const std::string& input_filename)
-{
-  lps::specification result;
-  if (input_filename.empty())
-  {
-    result.load(std::cin);
-  }
-  else
-  {
-    std::ifstream from(input_filename, std::ifstream::in | std::ifstream::binary);
-    result.load(from);
-  }
-  return result;
-}
-
-/// \brief Saves an LPS to output_filename, or to stdout if filename equals "".
-inline
-void save_lps(const lps::specification& lpsspec, const std::string& output_filename)
-{
-  if (output_filename.empty())
-  {
-    lpsspec.save(std::cout);
-  }
-  else
-  {
-    std::ofstream to(output_filename, std::ofstream::out | std::ofstream::binary);
-    lpsspec.save(to);
-  }
-}
 
 /// \brief
 struct command
@@ -88,7 +57,7 @@ struct lpscommand: public command
 
   void execute()
   {
-    lpsspec = load_lps(input_filename);
+    lpsspec = lps::detail::load_lps(input_filename);
   }
 };
 
@@ -102,7 +71,7 @@ struct rewrite_lps_one_point_rule_rewriter_command: public lpscommand
   {
     lpscommand::execute();
     lps::one_point_rule_rewrite(lpsspec);
-    save_lps(lpsspec, output_filename);
+    lps::detail::save_lps(lpsspec, output_filename);
   }
 };
 
