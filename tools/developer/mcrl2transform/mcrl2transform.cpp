@@ -354,6 +354,12 @@ struct separate_equations_command: public process_command
     std::string var_text = q.first;
     text = q.second;
 
+    // N.B. Don't forget isolated 'eqn' sections without a preceding 'var'.
+    all_keywords.push_back("eqn");
+    q = utilities::detail::separate_keyword_section(text, "eqn", all_keywords, repeat_keyword);
+    var_text = var_text + '\n' + q.first;
+    text = q.second;
+
     q = utilities::detail::separate_keyword_section(text, "proc", all_keywords, repeat_keyword);
     std::string proc_text = q.first;
     text = q.second;
