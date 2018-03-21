@@ -1,3 +1,0 @@
-variables m: Nat; b: Bool;
-
-dataexpr b && exists n:Nat . m < n
