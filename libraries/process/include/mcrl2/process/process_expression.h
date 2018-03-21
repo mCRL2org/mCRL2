@@ -1695,6 +1695,7 @@ std::string pp(const action_list& x);
 std::string pp(const action_vector& x);
 action normalize_sorts(const action& x, const data::sort_specification& sortspec);
 action translate_user_notation(const action& x);
+process::process_expression translate_user_notation(const process::process_expression& x);
 std::set<data::variable> find_all_variables(const action& x);
 std::set<data::variable> find_free_variables(const action& x);
 

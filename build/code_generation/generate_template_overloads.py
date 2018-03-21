@@ -80,6 +80,7 @@ data::data_equation
 lps::multi_action
 pbes_system::pbes
 process::action
+process::process_expression
 process::process_specification
 state_formulas::state_formula
 '''

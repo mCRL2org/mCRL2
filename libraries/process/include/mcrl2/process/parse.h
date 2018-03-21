@@ -388,6 +388,7 @@ process_expression parse_process_expression(const std::string& text,
 {
   process_expression x = detail::parse_process_expression_new(text);
   x = typecheck_process_expression(x, variables, dataspec, action_labels, process_identifiers);
+  x = translate_user_notation(x);
   return x;
 }
 

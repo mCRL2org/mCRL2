@@ -69,6 +69,7 @@ process::action_label_list normalize_sorts(const process::action_label_list& x, 
 void normalize_sorts(process::process_equation_vector& x, const data::sort_specification& sortspec) { process::normalize_sorts< process::process_equation_vector >(x, sortspec); }
 void normalize_sorts(process::process_specification& x, const data::sort_specification& /* sortspec */) { process::normalize_sorts< process::process_specification >(x, x.data()); }
 process::action translate_user_notation(const process::action& x) { return process::translate_user_notation< process::action >(x); }
+process::process_expression translate_user_notation(const process::process_expression& x) { return process::translate_user_notation< process::process_expression >(x); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x) { return process::find_sort_expressions< process::action_label_list >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x) { return process::find_sort_expressions< process::process_equation_vector >(x); }
