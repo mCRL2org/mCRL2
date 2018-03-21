@@ -94,12 +94,23 @@ class BDD_Prover: protected rewriter
   public:
     typedef rewriter::substitution_type substitution_type;
 
+  private:
+
+    /// \brief Flag indicating whether or not the result of the comparison between the first two arguments
+    /// \brief weighs stronger than the result of the comparison between the second pair of arguments of an
+    /// \brief equation, when determining the order of expressions.
+    static constexpr bool f_reverse = true;
+
+    /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
+    /// \brief when determining the order of expressions.
+    static constexpr bool f_full = true;
+
   protected:
     /// \brief An expression of sort Bool.
     data_expression f_formula;
 
     /// \brief A class that provides information about expressions.
-    Info f_info;
+    const Info f_info;
 
     /// \brief A class that can be used to manipulate expressions.
     Manipulator f_manipulator;
@@ -119,18 +130,7 @@ class BDD_Prover: protected rewriter
     /// \brief A timestamp representing the moment when the maximal amount of seconds has been spent on processing the current formula.
     time_t f_deadline;
 
-
   private:
-
-    /// \brief Flag indicating whether or not the result of the comparison between the first two arguments
-    /// \brief weighs stronger than the result of the comparison between the second pair of arguments of an
-    /// \brief equation, when determining the order of expressions.
-    const bool f_reverse = true;
-
-    /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
-    /// \brief when determining the order of expressions.
-    const bool f_full = true;
-
     /// \brief A flag indicating whether or not induction on lists is applied.
     bool f_apply_induction;
 

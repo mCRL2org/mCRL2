@@ -139,13 +139,7 @@ class Manipulator
     /// \brief Constructor initializing the rewriter and the field \c f_info.
     Manipulator(const Info& a_info):
       f_info(a_info)
-    {
-    }
-
-    /// \brief Destructor with no particular functionality.
-    ~Manipulator()
-    {
-    }
+    {}
 
     /// \brief Returns an expression in the internal format of the rewriter with the jitty strategy.
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,

@@ -175,7 +175,7 @@ class Info
 
   public:
     /// \brief Constructor that initializes the rewriter.
-    Info(bool a_reverse, bool a_full)
+    constexpr Info(bool a_full, bool a_reverse)
     : f_full(a_full)
     , f_reverse(a_reverse)
     {}
