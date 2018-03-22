@@ -1,6 +1,6 @@
 // Author(s): Jan Friso Groote
 //            Xiao Qi
-//            Wieger Wesselink 2017
+//            Wieger Wesselink 2017-2018
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -280,57 +280,6 @@ struct find_loop_simplifier
   }
 };
 
-struct todo_list
-{
-  /// \brief Propositional variable instantiations that need to be handled.
-  std::deque<propositional_variable_instantiation> todo;
-
-  /// \brief The content of todo as a set.
-  std::unordered_set<propositional_variable_instantiation> todo_set;
-
-  bool empty() const
-  {
-    return todo.empty();
-  }
-
-  const propositional_variable_instantiation& front() const
-  {
-    return todo.front();
-  }
-
-  const propositional_variable_instantiation& back() const
-  {
-    return todo.back();
-  }
-
-  void pop_front()
-  {
-    todo.pop_front();
-  }
-
-  void pop_back()
-  {
-    todo.pop_back();
-  }
-
-  void push_back(const propositional_variable_instantiation& x)
-  {
-    todo.push_back(x);
-    todo_set.insert(x);
-  }
-
-  bool contains(const propositional_variable_instantiation& x) const
-  {
-    return todo_set.find(x) != todo_set.end();
-  }
-
-  void clear()
-  {
-    todo.clear();
-    todo_set.clear();
-  }
-};
-
 // This class is used to periodically reset some attributes of the pbesinst algorithm, using a reachability analysis.
 struct pbesinst_resetter
 {
@@ -351,7 +300,8 @@ struct pbesinst_resetter
   {}
 
   void operator()(const propositional_variable_instantiation& init,
-                  todo_list& todo,
+                  std::deque<propositional_variable_instantiation>& todo,
+                  std::unordered_set<propositional_variable_instantiation>& done,
                   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
@@ -390,6 +340,7 @@ struct pbesinst_resetter
           else
           {
             todo.push_back(X);
+            done.insert(X);
             reachable.insert(X);
           }
         }
@@ -530,8 +481,11 @@ class pbesinst_lazy_algorithm
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
 
-    /// \brief Propositional variable instantiations that need to be handled.
-    detail::todo_list todo;
+    /// \brief The propositional variable instantiations that need to be handled.
+    std::deque<propositional_variable_instantiation> todo;
+
+    /// \brief The propositional variable instantiations that have already been handled.
+    std::unordered_set<propositional_variable_instantiation> done;
 
     /// \brief Map a variable instantiation to its right hand side.
     std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
@@ -628,13 +582,14 @@ class pbesinst_lazy_algorithm
     }
 
     void reset(const propositional_variable_instantiation& init,
-               detail::todo_list& todo,
+               std::deque<propositional_variable_instantiation>& todo,
+               std::unordered_set<propositional_variable_instantiation>& done,
                const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
               )
     {
       if (m_transformation_strategy >= on_the_fly)
       {
-        m_pbesinst_resetter(init, todo, equation);
+        m_pbesinst_resetter(init, todo, done, equation);
       }
     }
 
@@ -694,6 +649,7 @@ class pbesinst_lazy_algorithm
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
+      done.insert(init);
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
@@ -713,9 +669,10 @@ class pbesinst_lazy_algorithm
 
         for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
-          if (!todo.contains(v) && !detail::has_key(equation, v))
+          if (done.find(v) == done.end() && !detail::has_key(equation, v))
           {
             todo.push_back(v);
+            done.insert(v);
           }
           m_pbesinst_backward_substitute.add_dependency(v, X_e);
         }
@@ -728,7 +685,7 @@ class pbesinst_lazy_algorithm
         backward_substitute(psi_e, X_e, equation);
 
         // optional step
-        reset(init, todo, equation); // N.B. modifies todo
+        reset(init, todo, done, equation); // N.B. modifies todo and done
 
         mCRL2log(log::status) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
