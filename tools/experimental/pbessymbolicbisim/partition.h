@@ -62,22 +62,18 @@ protected:
 
   std::list< block_t >      m_proof_blocks;
   std::list< block_t >      m_other_blocks;
+  std::map< block_t, block_t > m_strategy;
 
   split_cache<block>* m_block_cache;
   split_cache<subblock>* m_subblock_cache;
   std::map< pbes_system::detail::ppg_equation, priority_t > m_rank_map;
 
-  elements_iterator< subblock, std::list< std::list<subblock> >> get_subblock_iterator(std::list< std::list<subblock> >& subblocks)
+  bool is_in_strategy(const block_t& src, const block_t& dest)
   {
-    for(const block& b: m_proof_blocks)
-    {
-      subblocks.push_back(b.subblocks());
-    }
-    for(const block& b: m_other_blocks)
-    {
-      subblocks.push_back(b.subblocks());
-    }
-    return elements_iterator< subblock, std::list< std::list<subblock>>>(subblocks);
+    auto find_result = m_strategy.find(src);
+    // If there is no winning strategy in src, then m_strategy does not contain
+    // src and all outgoing transitions from src have to be considered.
+    return find_result == m_strategy.end() || find_result->second == dest;
   }
 
   /**
@@ -85,6 +81,11 @@ protected:
    */
   bool split_block(const block_t& phi_k, const block_t& phi_l)
   {
+    if(!is_in_strategy(phi_k, phi_l))
+    {
+      // This edge is not part of the winning strategy in the parity game
+      return false;
+    }
     if(m_block_cache->check_refinement(phi_k, phi_l))
     {
       // This split has already been tried before
@@ -92,9 +93,12 @@ protected:
     }
     if(!phi_k.has_transition(phi_l))
     {
+      // There is no transition between phi_k and phi_l, so a split will definitely
+      // not succeed
       return false;
     }
 
+    // Try to split
     const std::pair<block, block> split_result = phi_k.split(phi_l);
     if(split_result.first.is_empty() || split_result.second.is_empty())
     {
@@ -391,22 +395,28 @@ public:
     return m_other_blocks;
   }
 
-  void set_proof(const std::set< verti >& proof_nodes)
+  void set_proof(const std::set< std::size_t >& proof_nodes, const std::vector< std::size_t >& strategy)
   {
     // Move all the blocks to the other set while keeping the order m_proof_block ++ m_other_blocks
-    std::list< block_t > all_blocks = m_proof_blocks;
+    std::vector< block_t > all_blocks(m_proof_blocks.begin(), m_proof_blocks.end());
     // all_blocks.swap(m_proof_blocks);
     all_blocks.insert(all_blocks.end(), m_other_blocks.begin(), m_other_blocks.end());
     m_proof_blocks.clear();
     m_other_blocks.clear();
 
     // Move the requested blocks to the main set
-    verti i = 0;
+    std::size_t i = 0;
+    m_strategy.clear();
     for(const block_t& b: all_blocks)
     {
       if(proof_nodes.find(i) != proof_nodes.end())
       {
         m_proof_blocks.push_back(b);
+        if(strategy[i] != (std::size_t) -1)
+        {
+          // There is a winning strategy in node i by going to strategy[i]
+          m_strategy.insert(std::make_pair(b, all_blocks[strategy[i]]));
+        }
       }
       else
       {

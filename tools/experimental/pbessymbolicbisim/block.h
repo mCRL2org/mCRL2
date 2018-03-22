@@ -30,7 +30,7 @@ class block
 protected:
   // const pbes_type_t m_spec;
   // invariant: forall b: m_subblocks. !b.is_empty()
-  const std::shared_ptr<std::list< subblock_t >> m_subblocks;
+  std::shared_ptr<const std::list< subblock_t >> m_subblocks;
 
   split_cache<block>* m_cache;
 
@@ -41,12 +41,16 @@ public:
   , m_cache(nullptr)
   {}
 
-  block(const block& other) = default;
-
   block(const std::list< subblock >& subblocks, split_cache<block>* cache)
   : m_subblocks(std::make_shared<std::list<subblock_t>>(subblocks.begin(), subblocks.end()))
   , m_cache(cache)
   {}
+
+  /// Move semantics
+  block(const block&) noexcept = default;
+  block(block&&) noexcept = default;
+  block& operator=(const block&) noexcept = default;
+  block& operator=(block&&) noexcept = default;
 
   bool has_transition(const block& other) const
   {
@@ -143,6 +147,11 @@ public:
   bool operator==(const block& other) const
   {
     return *m_subblocks == *other.m_subblocks;
+  }
+
+  bool operator!=(const block& other) const
+  {
+    return *m_subblocks != *other.m_subblocks;
   }
 
   bool operator<(const block& other) const

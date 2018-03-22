@@ -309,7 +309,7 @@ public:
         // compute_sink_subgraphs(pg);
 
         std::set<verti> proof_graph = compute_subpartition_from_strategy(pg, solution);
-        m_partition.set_proof(proof_graph);
+        m_partition.set_proof(proof_graph, solution);
 
         num_iterations++;
         latest_winner = pg.winner(solution,0);
