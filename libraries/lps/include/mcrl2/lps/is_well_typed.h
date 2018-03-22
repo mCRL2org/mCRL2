@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_IS_WELL_TYPED_H
 #define MCRL2_LPS_IS_WELL_TYPED_H
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/action_utility.h"
 #include "mcrl2/lps/specification.h"
@@ -22,9 +23,6 @@
 namespace mcrl2 {
 
 namespace lps {
-
-template <typename T>
-std::string pp(const T&);
 
 namespace detail
 {
@@ -188,7 +186,7 @@ struct lps_well_typed_checker
   {
     if (!data::detail::unique_names(s.summation_variables()))
     {
-      error << "is_well_typed(action_summand) failed: summation variables " << data::pp(s.summation_variables()) << " don't have unique names." << std::endl;
+      error << "is_well_typed(action_summand) failed: summation variables " << core::detail::print_list(s.summation_variables()) << " don't have unique names." << std::endl;
       return false;
     }
     if (!check_condition(s.condition(), "action_summand"))
@@ -246,7 +244,7 @@ struct lps_well_typed_checker
     // check 2)
     if (!data::detail::unique_names(p.process_parameters()))
     {
-      error << "is_well_typed(linear_process) failed: process parameters " << data::pp(p.process_parameters()) << " don't have unique names." << std::endl;
+      error << "is_well_typed(linear_process) failed: process parameters " << core::detail::print_list(p.process_parameters()) << " don't have unique names." << std::endl;
       return false;
     }
 
@@ -260,7 +258,7 @@ struct lps_well_typed_checker
     {
       if (!data::detail::check_variable_names(i->summation_variables(), names))
       {
-        error << "is_well_typed(linear_process) failed: some of the names of the summation variables " << data::pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
+        error << "is_well_typed(linear_process) failed: some of the names of the summation variables " << core::detail::print_list(i->summation_variables()) << " also appear as process parameters." << std::endl;
         return false;
       }
     }
@@ -270,7 +268,7 @@ struct lps_well_typed_checker
     {
       if (!data::detail::check_assignment_variables(i->assignments(), p.process_parameters()))
       {
-        error << "is_well_typed(linear_process) failed: some left hand sides of the assignments " << data::pp(i->assignments()) << " do not appear as process parameters." << std::endl;
+        error << "is_well_typed(linear_process) failed: some left hand sides of the assignments " << core::detail::print_list(i->assignments()) << " do not appear as process parameters." << std::endl;
         return false;
       }
     }
@@ -317,7 +315,7 @@ struct lps_well_typed_checker
     {
       if (!(data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
       {
-        error << "is_well_typed(specification) failed: some of the sorts of the summation variables " << data::pp(i->summation_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+        error << "is_well_typed(specification) failed: some of the sorts of the summation variables " << core::detail::print_list(i->summation_variables()) << " are not declared in the data specification " << core::detail::print_list(spec.data().sorts()) << std::endl;
         return false;
       }
     }
@@ -325,21 +323,21 @@ struct lps_well_typed_checker
     // check 2)
     if (!(data::detail::check_variable_sorts(spec.process().process_parameters(), declared_sorts)))
     {
-      error << "is_well_typed(specification) failed: some of the sorts of the process parameters " << data::pp(spec.process().process_parameters()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+      error << "is_well_typed(specification) failed: some of the sorts of the process parameters " << core::detail::print_list(spec.process().process_parameters()) << " are not declared in the data specification " << core::detail::print_list(spec.data().sorts()) << std::endl;
       return false;
     }
 
     // check 3)
     if (!(data::detail::check_variable_sorts(spec.global_variables(), declared_sorts)))
     {
-      error << "is_well_typed(specification) failed: some of the sorts of the free variables " << data::pp(spec.global_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+      error << "is_well_typed(specification) failed: some of the sorts of the free variables " << core::detail::print_list(spec.global_variables()) << " are not declared in the data specification " << core::detail::print_list(spec.data().sorts()) << std::endl;
       return false;
     }
 
     // check 4)
     if (!(detail::check_action_label_sorts(spec.action_labels(), declared_sorts)))
     {
-      error << "is_well_typed(specification) failed: some of the sorts occurring in the action labels " << lps::pp(spec.action_labels()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+      error << "is_well_typed(specification) failed: some of the sorts occurring in the action labels " << core::detail::print_list(spec.action_labels()) << " are not declared in the data specification " << core::detail::print_list(spec.data().sorts()) << std::endl;
       return false;
     }
 
@@ -348,7 +346,7 @@ struct lps_well_typed_checker
     {
       if (!(detail::check_action_labels(i->multi_action().actions(), declared_labels)))
       {
-        error << "is_well_typed(specification) failed: some of the labels occurring in the actions " << lps::pp(i->multi_action().actions()) << " are not declared in the action specification " << lps::pp(spec.action_labels()) << std::endl;
+        error << "is_well_typed(specification) failed: some of the labels occurring in the actions " << core::detail::print_list(i->multi_action().actions()) << " are not declared in the action specification " << core::detail::print_list(spec.action_labels()) << std::endl;
         return false;
       }
     }
@@ -368,15 +366,15 @@ struct lps_well_typed_checker
     if (!free_variables.empty())
     {
       error << "is_well_typed(specification) failed: some of the free variables were not declared\n";
-      error << "declared global variables: " << data::pp(spec.global_variables()) << std::endl;
-      error << "occurring free variables: " << data::pp(free_variables) << std::endl;
+      error << "declared global variables: " << core::detail::print_list(spec.global_variables()) << std::endl;
+      error << "occurring free variables: " << core::detail::print_list(free_variables) << std::endl;
       return false;
     }
 
     // check 3)
     if (!data::detail::unique_names(spec.global_variables()))
     {
-      error << "is_well_typed(specification) failed: global variables " << data::pp(spec.global_variables()) << " don't have unique names." << std::endl;
+      error << "is_well_typed(specification) failed: global variables " << core::detail::print_list(spec.global_variables()) << " don't have unique names." << std::endl;
       return false;
     }
 
