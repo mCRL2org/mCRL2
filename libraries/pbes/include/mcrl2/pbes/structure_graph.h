@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_H
 
+#include <iomanip>
 #include <limits>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/filtered.hpp>
@@ -253,7 +254,7 @@ std::ostream& operator<<(std::ostream& out, const structure_graph& G)
   {
     if (G.contains(i))
     {
-      out << G.find_vertex(i) << std::endl;
+      out << std::setw(4) << i << " " << G.find_vertex(i) << std::endl;
     }
   }
   if (G.is_empty())
