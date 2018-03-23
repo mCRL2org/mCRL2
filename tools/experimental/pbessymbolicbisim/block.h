@@ -192,7 +192,7 @@ namespace std
 
     std::size_t operator()(const mcrl2::data::block& t) const
     {
-      const hash< mcrl2::data::subblock > hasher;
+      const hash< mcrl2::data::subblock > hasher{};
       std::size_t result = 0;
       for(const mcrl2::data::subblock& sb: t.subblocks())
       {

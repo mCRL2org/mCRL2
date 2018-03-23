@@ -44,6 +44,7 @@ simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter&
         return new simplifier_dbm(rewr, proving_rewr, process_parameters, dataspec, lu_map);
 #else
         return new simplifier_fourier_motzkin(rewr, proving_rewr, dataspec);
+        (void) lu_map;
 #endif
       }
       else

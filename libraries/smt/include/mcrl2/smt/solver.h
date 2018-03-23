@@ -296,7 +296,7 @@ public:
     // Clean up the child process
     // It terminates when we close its stdin
 #ifdef WIN32
-    CloseHandle(g_hChildStd_IN_Wr)
+    CloseHandle(g_hChildStd_IN_Wr);
 #else
     ::close(pipe_stdin[1]);
     ::close(pipe_stdout[0]);
@@ -338,5 +338,3 @@ public:
 } // namespace mcrl2
 
 #endif // MCRL2_SMT_SOLVER_H
-
-
