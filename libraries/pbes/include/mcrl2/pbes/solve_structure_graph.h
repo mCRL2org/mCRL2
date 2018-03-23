@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H
 
+#include <deque>
 #include <limits>
-#include <random>
 #include <regex>
 #include <sstream>
 #include <unordered_set>
@@ -32,6 +32,100 @@
 namespace mcrl2 {
 
 namespace pbes_system {
+
+struct deque_vertex_set
+{
+  protected:
+    std::deque<structure_graph::index_type> m_vertices;
+    boost::dynamic_bitset<> m_include;
+
+  public:
+    deque_vertex_set() = default;
+
+    deque_vertex_set(std::size_t N)
+      : m_include(N)
+    {}
+
+    template <typename Iter>
+    deque_vertex_set(std::size_t N, Iter first, Iter last)
+      : m_include(N)
+    {
+      for (auto i = first; i != last; ++i)
+      {
+        insert(*i);
+      }
+    }
+
+    bool is_empty() const
+    {
+      return m_vertices.empty();
+    }
+
+    bool contains(structure_graph::index_type u) const
+    {
+      return m_include[u];
+    }
+
+    void insert(structure_graph::index_type u)
+    {
+      assert(u < m_include.size());
+      assert(!m_include[u]);
+      m_vertices.push_back(u);
+      m_include[u] = true;
+    }
+
+    void clear()
+    {
+      m_vertices.clear();
+      m_include = boost::dynamic_bitset<>(m_include.size());
+    }
+
+    std::size_t extent() const
+    {
+      return m_include.size();
+    }
+
+    const std::deque<structure_graph::index_type>& vertices() const
+    {
+      return m_vertices;
+    }
+
+    std::size_t size() const
+    {
+      return m_vertices.size();
+    }
+
+    const boost::dynamic_bitset<>& include() const
+    {
+      return m_include;
+    }
+
+    structure_graph::index_type pop_front()
+    {
+      structure_graph::index_type u = m_vertices.front();
+      m_vertices.pop_front();
+      m_include[u] = false;
+      return u;
+    }
+
+    structure_graph::index_type pop_back()
+    {
+      structure_graph::index_type u = m_vertices.back();
+      m_vertices.pop_back();
+      m_include[u] = false;
+      return u;
+    }
+
+    bool operator==(const deque_vertex_set& other) const
+    {
+      return m_include == other.m_include;
+    }
+
+    bool operator!=(const deque_vertex_set& other) const
+    {
+      return !(*this == other);
+    }
+};
 
 struct vertex_set
 {
@@ -240,7 +334,7 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
   // std::size_t A_size = A.size();
 
   // put all predecessors of elements in A in todo
-  vertex_set todo(G.all_vertices().size());
+  deque_vertex_set todo(G.all_vertices().size());
   for (structure_graph::index_type u: A.vertices())
   {
     for (structure_graph::index_type v: G.predecessors(u))
@@ -254,7 +348,8 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
 
   while (!todo.is_empty())
   {
-    structure_graph::index_type u = todo.pop_back();
+    // N.B. Use a breadth first search, to minimize counter examples
+    structure_graph::index_type u = todo.pop_front();
 
     if (is_attractor(G, u, A, 1 - alpha))
     {
