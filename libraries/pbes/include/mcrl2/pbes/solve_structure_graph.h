@@ -327,47 +327,17 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
 class solve_structure_graph_algorithm
 {
   protected:
-    // heuristic for choosing a vertex
-    //   0 random vertex in U (default)
-    //   1 random vertex
-    int vertex_heuristic = 0;
-
     // do a sanity check on the computed strategy
     bool check_strategy = false;
 
-    // find a successor of u in U, or a random one if no successor in U exists
-    inline
-    structure_graph::index_type succ_0(const structure_graph& G, int u, const vertex_set& U)
-    {
-      int result = structure_graph::undefined_vertex;
-      for (int v: G.successors(u))
-      {
-        if (U.contains(v))
-        {
-          return v;
-        }
-        result = v;
-      }
-      return result;
-    }
-
     // find a successor of u
-    structure_graph::index_type succ_1(const structure_graph& G, structure_graph::index_type u)
+    structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u)
     {
       for (structure_graph::index_type v: G.successors(u))
       {
         return v;
       }
       return structure_graph::undefined_vertex;
-    }
-
-    structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u, const vertex_set& U)
-    {
-      if (vertex_heuristic == 0)
-      {
-        return succ_0(G, u, U);
-      }
-      return succ_1(G, u);
     }
 
     // computes solve_recursive(G \ A)
@@ -405,7 +375,7 @@ class solve_structure_graph_algorithm
         const auto& u = G.find_vertex(ui);
         if (u.decoration == alpha)
         {
-          auto v = succ(G, ui, U);
+          auto v = succ(G, ui);
           if (v != structure_graph::undefined_vertex)
           {
             mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
@@ -589,9 +559,8 @@ class solve_structure_graph_algorithm
     }
 
   public:
-    solve_structure_graph_algorithm(int vertex_heuristic_ = 0, bool check_strategy_ = false)
-      : vertex_heuristic(vertex_heuristic_),
-        check_strategy(check_strategy_)
+    solve_structure_graph_algorithm(bool check_strategy_ = false)
+      : check_strategy(check_strategy_)
     {}
 
     inline
@@ -720,9 +689,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
     }
 
   public:
-    lps_solve_structure_graph_algorithm(int vertex_heuristic = 0)
-      : solve_structure_graph_algorithm(vertex_heuristic)
-    {}
+    lps_solve_structure_graph_algorithm() = default;
 
     /// \param lpsspec The original LPS that was used to create the PBES.
     std::pair<bool, lps::specification> solve_with_counter_example(structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
@@ -793,9 +760,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
     }
 
   public:
-    lts_solve_structure_graph_algorithm(int vertex_heuristic = 0)
-      : solve_structure_graph_algorithm(vertex_heuristic)
-    {}
+    lts_solve_structure_graph_algorithm() = default;
 
     /// \param ltsspec The original LTS that was used to create the PBES.
     inline
@@ -826,24 +791,24 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 };
 
 inline
-bool solve_structure_graph(structure_graph& G, int vertex_heuristic = 0, bool check_strategy = false)
+bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
 {
   solve_structure_graph_algorithm algorithm(check_strategy);
   return algorithm.solve(G);
 }
 
 inline
-std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index, int vertex_heuristic = 0)
+std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
 {
-  lps_solve_structure_graph_algorithm algorithm(vertex_heuristic);
+  lps_solve_structure_graph_algorithm algorithm;
   return algorithm.solve_with_counter_example(G, lpsspec, p, p_index);
 }
 
 /// \param ltsspec The original LTS that was used to create the PBES.
 inline
-bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec, const pbes& p, int vertex_heuristic = 0)
+bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec, const pbes& p)
 {
-  lts_solve_structure_graph_algorithm algorithm(vertex_heuristic);
+  lts_solve_structure_graph_algorithm algorithm;
   return algorithm.solve_with_counter_example(G, ltsspec, p);
 }
 

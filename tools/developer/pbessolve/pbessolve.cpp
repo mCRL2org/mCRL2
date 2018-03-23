@@ -39,7 +39,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     std::string lpsfile;
     std::string ltsfile;
     lts::lts_lts_t ltsspec;
-    int m_heuristic;
 
     void parse_options(const utilities::command_line_parser& parser) override
     {
@@ -58,7 +57,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         ltsfile = parser.option_argument("ltsfile");
         ltsspec.load(ltsfile);
       }
-      m_heuristic               = parser.option_argument_as<int>("heuristic");
       m_transformation_strategy = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
       m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       if ((parser.options.count("lpsfile") > 0 || parser.options.count("ltsfile") > 0) && m_transformation_strategy != lazy)
@@ -87,10 +85,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                    .add_value(depth_first_short),
                  "use search strategy SEARCH:",
                  'z');
-      desc.add_option("heuristic",
-                      utilities::make_optional_argument("NAME", "0"),
-                      "heuristic for choosing a vertex\n  '0' vertex in U (default)\n  '1' random vertex"
-                     );
       desc.add_option("lpsfile",
                  utilities::make_optional_argument("NAME", "name"),
                  "The file containing the LPS that was used to generate the PBES. If this option is set, a counter example LPS will be generated.",
@@ -132,7 +126,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         bool result;
         lps::specification evidence;
         timer().start("solving");
-        std::tie(result, evidence) = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index(), m_heuristic);
+        std::tie(result, evidence) = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
         std::string output_filename = input_filename() + ".evidence.lps";
@@ -143,7 +137,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         lts::lts_lts_t evidence;
         timer().start("solving");
-        bool result = solve_structure_graph_with_counter_example(G, ltsspec, pbesspec, m_heuristic);
+        bool result = solve_structure_graph_with_counter_example(G, ltsspec, pbesspec);
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
         std::string output_filename = input_filename() + ".evidence.lts";
@@ -153,7 +147,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       else
       {
         timer().start("solving");
-        bool result = solve_structure_graph(G, m_heuristic, m_check_strategy);
+        bool result = solve_structure_graph(G, m_check_strategy);
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
       }
