@@ -192,7 +192,7 @@ protected:
       open_set.pop();
 
       // Look for possible successors of block in the set of unreachable blocks
-      for(std::list<block_t>::const_iterator i = unreachable.begin(); i != unreachable.end();)
+      for(std::list<block_t>::iterator i = unreachable.begin(); i != unreachable.end();)
       {
         if(block.has_transition(*i))
         {
