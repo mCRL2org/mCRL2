@@ -220,6 +220,28 @@ class structure_graph
 };
 
 inline
+std::vector<structure_graph::index_type> predecessors(const structure_graph& G, structure_graph::index_type u)
+{
+  std::vector<structure_graph::index_type> result;
+  for (auto v: G.predecessors(u))
+  {
+    result.push_back(v);
+  }
+  return result;
+}
+
+inline
+std::vector<structure_graph::index_type> successors(const structure_graph& G, structure_graph::index_type u)
+{
+  std::vector<structure_graph::index_type> result;
+  for (auto v: G.successors(u))
+  {
+    result.push_back(v);
+  }
+  return result;
+}
+
+inline
 std::ostream& operator<<(std::ostream& out, const structure_graph::decoration_type& decoration)
 {
   switch (decoration)
@@ -241,7 +263,7 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
       << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
       << ", predecessors = " << core::detail::print_list(u.predecessors)
       << ", successors = " << core::detail::print_list(u.successors)
-      << ", strategy = " << u.strategy
+      << ", strategy = " << (u.strategy == structure_graph::undefined_vertex ? std::string("undefined") : std::to_string(u.strategy))
       << ")";
   return out;
 }
@@ -254,12 +276,21 @@ std::ostream& operator<<(std::ostream& out, const structure_graph& G)
   {
     if (G.contains(i))
     {
-      out << std::setw(4) << i << " " << G.find_vertex(i) << std::endl;
+      const structure_graph::vertex& u = G.find_vertex(i);
+      out << std::setw(4) << i << " "
+          << "vertex(formula = " << u.formula
+          << ", decoration = " << u.decoration
+          << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
+          << ", predecessors = " << core::detail::print_list(predecessors(G, i))
+          << ", successors = " << core::detail::print_list(successors(G, i))
+          << ", strategy = " << (u.strategy == structure_graph::undefined_vertex ? std::string("undefined") : std::to_string(u.strategy))
+          << ")"
+          << std::endl;
     }
   }
   if (G.is_empty())
   {
-    out << "empty" << std::endl;
+    out << "  empty" << std::endl;
   }
   return out;
 }
