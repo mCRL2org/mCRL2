@@ -496,39 +496,40 @@ class solve_structure_graph_algorithm
       vertex_set W[2]   = { vertex_set(N), vertex_set(N) };
       vertex_set W_1[2];
 
-// N.B. This code is wrong!
-//
-//      vertex_set A = compute_attractor_set(G, U, alpha);
-//      std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
-//      vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
-//      if (W_1[1 - alpha].size() == B.size())
-//      {
-//        W[alpha] = set_union(A, W_1[alpha]);
-//        W[1 - alpha].clear();
-//      }
-//      else
-//      {
-//        std::tie(W[0], W[1]) = solve_recursive(G, B);
-//        W[1 - alpha] = set_union(W[1 - alpha], B);
-//      }
-
       vertex_set A = compute_attractor_set(G, U, alpha);
       std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
-      if (W_1[1 - alpha].is_empty())
+      vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
+      if (W_1[1 - alpha].size() == B.size())
       {
         W[alpha] = set_union(A, W_1[alpha]);
-        W[1 - alpha].clear();
+        W[1- alpha] = B;
       }
       else
       {
-        vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
         std::tie(W[0], W[1]) = solve_recursive(G, B);
         W[1 - alpha] = set_union(W[1 - alpha], B);
       }
 
+      // Original Zielonka version
+      //
+      // vertex_set A = compute_attractor_set(G, U, alpha);
+      // std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
+      // if (W_1[1 - alpha].is_empty())
+      // {
+      //   W[alpha] = set_union(A, W_1[alpha]);
+      //   W[1 - alpha].clear();
+      // }
+      // else
+      // {
+      //   vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
+      //   std::tie(W[0], W[1]) = solve_recursive(G, B);
+      //   W[1 - alpha] = set_union(W[1 - alpha], B);
+      // }
+
       mCRL2log(log::debug) << "\n--- solution for solve_recursive input ---\n" << G;
       mCRL2log(log::debug) << "   W0 = " << W[0] << std::endl;
       mCRL2log(log::debug) << "   W1 = " << W[1] << std::endl;
+      assert(W[0].size() + W[1].size() + G.exclude().count() == N);
       return { W[0], W[1] };
     }
 
