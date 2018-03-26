@@ -361,9 +361,17 @@ protected:
     }
   }
 
+  void make_fine_initial_partition()
+  {
+    for(const equation_type_t& eq: m_spec.equations())
+    {
+      m_proof_blocks.emplace_back(std::list<subblock>({subblock(eq, m_dm, m_subblock_cache)}), m_block_cache);
+    }
+  }
+
 public:
 
-  dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode)
+  dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode, bool fine_initial)
   : m_spec(spec)
   , m_dm(r, pr, spec.data())
   {
@@ -376,7 +384,14 @@ public:
     }
     m_block_cache = new split_cache<block>();
     m_subblock_cache = new split_cache<subblock>();
-    make_initial_partition();
+    if(fine_initial)
+    {
+      make_fine_initial_partition();
+    }
+    else
+    {
+      make_initial_partition();
+    }
     make_rank_map();
     print_partition(m_proof_blocks);
     // Make sure the initial block is the first in the list

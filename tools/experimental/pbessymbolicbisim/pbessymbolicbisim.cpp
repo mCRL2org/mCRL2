@@ -43,6 +43,7 @@ protected:
 
   simplifier_mode m_mode;
   std::size_t m_num_refine_steps;
+  bool m_fine_initial_partition;
 
   /// Parse the non-default options.
   void parse_options(const command_line_parser& parser)
@@ -54,12 +55,13 @@ protected:
     {
       m_num_refine_steps = parser.option_argument_as<std::size_t>("refine-steps");
     }
+    m_fine_initial_partition = parser.options.count("fine-initial") > 0;
   }
 
   void add_options(interface_description& desc)
   {
     super::add_options(desc);
-    desc.add_option("simplifier", make_enum_argument<simplifier_mode>("S")
+    desc.add_option("simplifier", make_enum_argument<simplifier_mode>("MODE")
       .add_value(simplify_fm)
 #ifdef DBM_PACKAGE_AVAILABLE
       .add_value(simplify_dbm)
@@ -69,9 +71,11 @@ protected:
       .add_value(simplify_auto, true),
       "set the simplifying strategy for expressions",'s');
     desc.add_option("refine-steps",
-               make_mandatory_argument("num"),
+               make_mandatory_argument("NUM"),
                "perform the given number of refinement steps between each search for a proof graph",
                'n');
+    desc.add_option("fine-initial",
+               "use a fine initial partition, such that each block contains only one PBES variable");
   }
 
 public:
@@ -83,7 +87,8 @@ public:
       "Performs partition refinement on "
       "INFILE and outputs the resulting LTS. "
       "This tool is highly experimental. "),
-      m_num_refine_steps(1)
+      m_num_refine_steps(1),
+      m_fine_initial_partition(false)
   {}
 
   /// Runs the algorithm.
@@ -101,7 +106,7 @@ public:
     spec.load(in);
     in.close();
 
-    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode).run();
+    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode, m_fine_initial_partition).run();
 
     return true;
   }
