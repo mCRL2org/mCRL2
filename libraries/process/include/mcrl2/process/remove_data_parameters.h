@@ -73,7 +73,7 @@ struct remove_data_parameters_builder: public process_expression_builder<remove_
   {
     process_expression then_case = apply(x.then_case());
     process_expression else_case = apply(x.else_case());
-    return if_then_else(data::sort_bool::true_(), x.then_case(), x.else_case());
+    return if_then_else(data::sort_bool::true_(), then_case, else_case);
   }
 
   process_expression apply(const process::process_instance& x)
