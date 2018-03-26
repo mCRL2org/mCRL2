@@ -87,10 +87,6 @@ class AlphabetReduceTest(ProcessTest):
         super(AlphabetReduceTest, self).__init__(name, ymlfile('alphabet-reduce'), settings)
         self.actions = ['a', 'b', 'c', 'd', 'e']
 
-class AlphabetComputeTest(ProcessTest):
-    def __init__(self, name, settings = dict()):
-        super(AlphabetComputeTest, self).__init__(name, ymlfile('alphabet-compute'), settings)
-
 class LpsSuminstTest(ProcessTest):
     def __init__(self, name, settings = dict()):
         super(LpsSuminstTest, self).__init__(name, ymlfile('lpssuminst'), settings)
@@ -261,7 +257,6 @@ class BessolveTest(BesTest):
         super(BessolveTest, self).__init__(name, ymlfile('bessolve'), settings)
 
 available_tests = {
-    'alphabet-compute'                            : lambda name, settings: AlphabetComputeTest(name, settings)                                     ,
     'alphabet-reduce'                             : lambda name, settings: AlphabetReduceTest(name, settings)                                      ,
     'lpssuminst'                                  : lambda name, settings: LpsSuminstTest(name, settings)                                          ,
     'lpssumelm'                                   : lambda name, settings: LpsSumelmTest(name, settings)                                           ,
