@@ -44,8 +44,7 @@ template<class StrategyT>
 ParityGame::Player ParityGame::winner(const StrategyT &s, verti v) const
 {
     /* A vertex is won by its player iff the player has a strategy for it: */
-    return (s[v] != NO_VERTEX) ? player(v) : ParityGame::Player(1 - player(v));
+    return (s[v] != NO_VERTEX) ? player(v) : opponent(player(v));
 }
 
 #endif // MCRL2_PG_PARITYGAME_IMPL_H
-

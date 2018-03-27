@@ -73,7 +73,7 @@ public:
     //! Returns the winner for vertex `v` assuming it is controlled by `p`.
     ParityGame::Player winner(verti v, ParityGame::Player p)
     {
-        if (strategy_[global(v)] == NO_VERTEX) p = ParityGame::Player(1 - p);
+        if (strategy_[global(v)] == NO_VERTEX) p = opponent(p);
         return p;
     }
 

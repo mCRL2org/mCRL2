@@ -185,7 +185,7 @@ void ParityGame::compress_priorities( const verti cardinality[],
     {
         assert(prio_map[vertex_[v].priority] >= 0);
         vertex_[v].priority = prio_map[vertex_[v].priority];
-        if (0 != swap_players) vertex_[v].player = Player(1 - vertex_[v].player);
+        if (0 != swap_players) vertex_[v].player = opponent(vertex_[v].player);
     }
 
     return;
