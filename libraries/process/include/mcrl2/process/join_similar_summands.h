@@ -280,12 +280,18 @@ process_expression join_similar_summands(const process_expression& x, std::size_
   std::map<action_label, std::map<process_identifier, std::vector<process_expression>>> condition_action_summands;
 
   // separate the summands
-  for (const process_expression& x_i: split_summands(x))
+  auto x_split = split_summands(x);
+  if (x_split.size() <= lowerbound)
+  {
+    return x;
+  }
+  for (const process_expression& x_i: x_split)
   {
     if (is_process_instance_assignment(x_i))
     {
       const auto& xi = atermpp::down_cast<process_instance_assignment>(x_i);
       process_summands[xi.identifier()].push_back(xi);
+mCRL2log(log::debug) << "<process_summand>" << x_i << std::endl;
       continue;
     }
     if (is_seq(x_i))
@@ -298,6 +304,7 @@ process_expression join_similar_summands(const process_expression& x, std::size_
         const auto& Q = atermpp::down_cast<process_instance_assignment>(right);
         action_summands[a.label()][Q.identifier()].push_back(x_i);
         continue;
+mCRL2log(log::debug) << "<action_summand>" << x_i << std::endl;
       }
     }
     if (is_if_then(x_i))
@@ -307,6 +314,7 @@ process_expression join_similar_summands(const process_expression& x, std::size_
       {
         const auto& xi = atermpp::down_cast<process_instance_assignment>(then_case);
         condition_summands[xi.identifier()].push_back(x_i);
+mCRL2log(log::debug) << "<condition_summand>" << x_i << std::endl;
         continue;
       }
       if (is_seq(then_case))
@@ -318,10 +326,12 @@ process_expression join_similar_summands(const process_expression& x, std::size_
           const auto& a = atermpp::down_cast<action>(left);
           const auto& Q = atermpp::down_cast<process_instance_assignment>(right);
           condition_action_summands[a.label()][Q.identifier()].push_back(x_i);
+mCRL2log(log::debug) << "<condition_action_summand>" << x_i << std::endl;
           continue;
         }
       }
     }
+mCRL2log(log::debug) << "<other>" << x_i << std::endl;
     summands.push_back(x_i);
   }
 
@@ -366,8 +376,33 @@ process_expression join_similar_summands(const process_expression& x, std::size_
     }
   }
 
+mCRL2log(log::debug) << "<result>" << core::detail::print_set(summands) << std::endl;
   return join_summands(summands.begin(), summands.end());
 }
+
+struct join_similar_summands_builder: public process_expression_builder<join_similar_summands_builder>
+{
+  typedef process_expression_builder<join_similar_summands_builder> super;
+  using super::apply;
+
+  std::size_t lowerbound;
+
+  join_similar_summands_builder(std::size_t lowerbound_)
+    : lowerbound(lowerbound_)
+  {}
+
+  process_expression apply(const process::choice& x)
+  {
+    std::set<process_expression> x_split = split_summands(x);
+    std::vector<process_expression> v(x_split.begin(), x_split.end());
+    for (process_expression& v_i: v)
+    {
+      v_i = apply(v_i);
+    }
+    process_expression x1 = join_summands(v.begin(), v.end());
+    return join_similar_summands(x1, lowerbound);
+  }
+};
 
 } // namespace detail
 
@@ -382,9 +417,10 @@ process_expression join_similar_summands(const process_expression& x, std::size_
 inline
 void join_similar_summands(process_specification& procspec, std::size_t lowerbound = 5)
 {
+  detail::join_similar_summands_builder f(lowerbound);
   for (process_equation& eqn: procspec.equations())
   {
-    eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), detail::join_similar_summands(eqn.expression(), lowerbound));
+    eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), f.apply(eqn.expression()));
   }
 }
 

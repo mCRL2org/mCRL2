@@ -23,6 +23,7 @@
 #include "mcrl2/process/eliminate_single_usage_equations.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
 #include "mcrl2/process/eliminate_unused_equations.h"
+#include "mcrl2/process/join_similar_summands.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
@@ -41,7 +42,7 @@ struct eliminate_trivial_equations_command: public process::detail::process_comm
     : process::detail::process_command("eliminate-trivial-equations", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     process::detail::process_command::execute();
     process::eliminate_trivial_equations(procspec);
@@ -56,7 +57,7 @@ struct alphabet_reduce_command: public process::detail::process_command
     : process::detail::process_command("alphabet-reduce", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     process::detail::process_command::execute();
     process::alphabet_reduce(procspec, 0);
@@ -71,7 +72,7 @@ struct eliminate_single_usage_equations_command: public process::detail::process
     : process::detail::process_command("eliminate-single-usage-equations", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     process::detail::process_command::execute();
     process::eliminate_single_usage_equations(procspec);
@@ -86,10 +87,25 @@ struct eliminate_unused_equations_command: public process::detail::process_comma
     : process::detail::process_command("eliminate-unused-equations", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     process::detail::process_command::execute();
     process::eliminate_unused_equations(procspec.equations(), procspec.init());
+    utilities::detail::write_text(output_filename, process::pp(procspec));
+  }
+};
+
+/// \brief Joins similar summands
+struct join_similar_summands_command: public process::detail::process_command
+{
+  join_similar_summands_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : process::detail::process_command("join-similar-summands", input_filename, output_filename, options)
+  {}
+
+  void execute() override
+  {
+    process::detail::process_command::execute();
+    process::join_similar_summands(procspec, 2);
     utilities::detail::write_text(output_filename, process::pp(procspec));
   }
 };
@@ -101,7 +117,7 @@ struct anonymize_process_command: public process::detail::process_command
     : process::detail::process_command("anonymize", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     process::detail::process_command::execute();
     process::anonymize(procspec);
@@ -115,7 +131,7 @@ struct separate_equations_command: public process::detail::process_command
     : process::detail::process_command("separate-equations", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     std::string text = utilities::detail::read_text(input_filename);
     std::vector<std::string> all_keywords = { "sort", "var", "map", "cons", "proc", "init", "act" };
@@ -129,7 +145,7 @@ struct separate_equations_command: public process::detail::process_command
     // N.B. Don't forget isolated 'eqn' sections without a preceding 'var'.
     all_keywords.push_back("eqn");
     q = utilities::detail::separate_keyword_section(text, "eqn", all_keywords, repeat_keyword);
-    var_text = var_text + '\n' + q.first;
+    var_text = var_text + "\n" + q.first;
     text = q.second;
 
     q = utilities::detail::separate_keyword_section(text, "proc", all_keywords, repeat_keyword);
@@ -174,11 +190,12 @@ class mcrl2transform_tool: public transform_tool<rewriter_tool<input_output_tool
 
     void add_commands(const std::vector<std::string>& options) override
     {
-      add_command(std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<alphabet_reduce_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<eliminate_single_usage_equations_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<anonymize_process_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<eliminate_single_usage_equations_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<join_similar_summands_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<separate_equations_command>(input_filename(), output_filename(), options));
     }
 };
