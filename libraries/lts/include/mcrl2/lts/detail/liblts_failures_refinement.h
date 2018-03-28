@@ -346,13 +346,22 @@ bool destructive_refinement_checker(
       { 
         detail::label_type offending_action=std::size_t(-1);
         // if refusals(impl) not contained in refusals(spec) then 
-        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache,offending_action,l1,!generate_counter_example.is_dummy()))   
+        if (!detail::refusals_contained_in(impl_spec.state(),
+                                           impl_spec.states(),
+                                           weak_property_cache,
+                                           offending_action,
+                                           l1,
+                                           !generate_counter_example.is_dummy()))   
         {
           std::vector<detail::label_type> counter_example_extension;
           if (offending_action!=std::size_t(-1))
           { 
             counter_example_extension = 
-                       detail::find_path_to_stable_state_without_action_in_impl(offending_action, impl_spec.state(),weak_property_cache,l1, failures_divergence || weak_reduction);
+                       detail::find_path_to_stable_state_without_action_in_impl(offending_action, 
+                                                                                impl_spec.state(),
+                                                                                weak_property_cache,
+                                                                                l1, 
+                                                                                failures_divergence || weak_reduction);
           }
           generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1, counter_example_extension);
           return false;                               // return false; 
@@ -489,7 +498,8 @@ namespace detail
     for(anti_chain_type::const_iterator i=anti_chain.lower_bound(impl_spec.state()); i!=anti_chain.upper_bound(impl_spec.state()); ++i)
     {
       const set_of_states s=i->second;
-      if (std::includes(s.begin(),s.end(),impl_spec.states().begin(),impl_spec.states().end()))  
+      // If s is included in impl_spec.states() 
+      if (std::includes(impl_spec.states().begin(), impl_spec.states().end(), s.begin(),s.end()))
       {
         return false;
       }
@@ -497,11 +507,12 @@ namespace detail
 
     // Here impl_spec.states() must be inserted in the antichain. Moreover, all sets in the antichain that 
     // are a superset of impl_spec.states() must be removed.
-    
     for(anti_chain_type::iterator i=anti_chain.lower_bound(impl_spec.state()); i!=anti_chain.upper_bound(impl_spec.state()); )
     {
       const set_of_states s=i->second;
-      if (std::includes(impl_spec.states().begin(),impl_spec.states().end(),s.begin(),s.end()))  
+      // if s is a superset of impl_spec.states() 
+      // if (std::includes(impl_spec.states().begin(),impl_spec.states().end(),s.begin(),s.end()))  
+      if (std::includes(s.begin(), s.end(), impl_spec.states().begin(),impl_spec.states().end()))  
       {
         // set s must be removed. 
         i=anti_chain.erase(i);
@@ -610,7 +621,6 @@ namespace detail
 
     while (todo_stack.size()>0)
     {
-// std::cerr << "STACKSIZE " << todo_stack.size() << "\n";
       const state_type current_state=todo_stack.top();
       todo_stack.pop();
       if (weak_property_cache.stable(current_state))

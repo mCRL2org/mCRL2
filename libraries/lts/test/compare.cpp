@@ -345,6 +345,49 @@ BOOST_AUTO_TEST_CASE(failures_divergence_inclusion_test)
   BOOST_CHECK(!preorder_compare(abc_div,l1,lts_pre_failures_divergence_refinement));
 }
 
+//  Example by Verum showing an error in the weak failures inclusion check. Did not work with 
+//  the -c flag (which does not preprocess using branching bisimulation) but did work after
+//  applying branching bisimulation.
+
+  const std::string lts_impl =
+   "des (1,8,6)\n"
+   "(0,f,1)\n"
+   "(1,b,2)\n"
+   "(1,a,2)\n"
+   "(2,tau,0)\n"
+   "(2,tau,5)\n"
+   "(3,tau,5)\n"
+   "(4,tau,0)\n"
+   "(5,t,1)\n";
+
+  const std::string lts_spec =
+   "des (1,5,3)\n"
+   "(0,f,1)\n"
+   "(1,b,2)\n"
+   "(1,b,0)\n"
+   "(1,a,2)\n"
+   "(2,t,1)\n";
+  
+BOOST_AUTO_TEST_CASE(verum_test)
+{
+  BOOST_CHECK(!preorder_compare(lts_impl,lts_spec,lts_pre_failures_refinement));
+  BOOST_CHECK(!preorder_compare(lts_impl,lts_spec,lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(!preorder_compare(lts_impl,lts_spec,lts_pre_weak_failures_refinement));
+  BOOST_CHECK(!preorder_compare(lts_impl,lts_spec,lts_pre_weak_trace));
+  BOOST_CHECK(!preorder_compare(lts_impl,lts_spec,lts_pre_trace));
+  BOOST_CHECK(!preorder_compare(lts_impl,lts_spec,lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(!preorder_compare(lts_impl,lts_spec,lts_pre_trace_anti_chain));
+
+  BOOST_CHECK(!preorder_compare(lts_spec,lts_impl,lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts_spec,lts_impl,lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(preorder_compare(lts_spec,lts_impl,lts_pre_weak_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts_spec,lts_impl,lts_pre_weak_trace));
+  BOOST_CHECK(!preorder_compare(lts_spec,lts_impl,lts_pre_trace));
+  BOOST_CHECK(preorder_compare(lts_spec,lts_impl,lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(!preorder_compare(lts_spec,lts_impl,lts_pre_trace_anti_chain));
+}
+
+
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
