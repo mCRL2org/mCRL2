@@ -63,10 +63,10 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // array, we first have to collect the labels of both LTSs in a
   // map, of which the second element indicates the new index of each action label.
 
-  typedef typename LTS_TYPE::action_label_t type1;
-  typedef typename LTS_TYPE::labels_size_type type2;
-  typedef typename std::pair< typename std::map < type1,type2 >::const_iterator, bool > insert_type;
-  std::map < type1,type2 > labs;
+  typedef typename LTS_TYPE::action_label_t action_label_type;
+  typedef typename LTS_TYPE::labels_size_type label_index;
+  typedef typename std::pair< typename std::map < action_label_type,label_index >::const_iterator, bool > insert_type;
+  std::map < action_label_type,label_index > labs;
 
   // Put the labels of the LTS l1 in a map.
   for (std::size_t i = 0; i < l1.num_action_labels(); ++i)
@@ -84,48 +84,31 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   for (std::size_t i=0; i<l2.num_action_labels(); ++i)
   {
     typename LTS_TYPE::labels_size_type new_index;
-    const insert_type it= labs.insert(std::pair < type1,type2 >
+    const insert_type it=labs.insert(std::pair < action_label_type,label_index >
                                (l2.action_label(i),l1.num_action_labels()));
     if (it.second) 
     {
       // New element has been inserted.
       new_index=l1.add_action(l2.action_label(i));
+      if (l2.is_tau(l2.apply_hidden_label_map(i)))
+      {
+        l1.hidden_label_map()[new_index]=l1.tau_label_index();
+      }
+
     }
     else 
     {
       new_index=it.first->second; // Old index to which i is mapped.
+
+      // If label i occurred in l1 and was not mapped to the same hidden label, raise an exception.
+      if (l1.is_tau(l1.apply_hidden_label_map(new_index) != l2.is_tau(l2.apply_hidden_label_map(i))))
+      {
+        throw mcrl2::runtime_error("The action " + pp(l2.action_label(i)) + " has incompatible hidden actions " +
+                                       pp(l1.action_label(l1.apply_hidden_label_map(new_index))) + " and " + 
+                                       pp(l2.action_label(l2.apply_hidden_label_map(i))) + ".");
+      }
     }
     assert(new_index==it.first->second);
-    // Now update the hidden_label_map by setting hidden_label_map[new_index]
-    // to the index corresponding to the value of hidden_label_map(i) in l2.
-    // The values of hidden_label_map(new_index) and hidden_label_map(i) may
-    // differ due to the fact that corresponding actions in l1 and l2 are
-    // hidden in different ways. In this case an exception is raised. 
-
-    const typename LTS_TYPE::labels_size_type hidden_index_in_l1=l1.apply_hidden_label_map(new_index);
-    const typename LTS_TYPE::labels_size_type hidden_index_in_l2=l2.apply_hidden_label_map(i);
-
-    // Find the corresponding index in l1 of hidden_index_in_l2. If it does not exist, insert it.
-    const insert_type it_hidden= labs.insert(std::pair <type1,type2>
-                                  (l2.action_label(hidden_index_in_l2),l1.num_action_labels()));
-    typename LTS_TYPE::labels_size_type new_hidden_index;
-    if (it_hidden.second) 
-    {
-      // New element has been inserted.
-      new_hidden_index=l1.add_action(l2.action_label(hidden_index_in_l2));
-    }
-    else 
-    {
-      new_hidden_index=it_hidden.first->second; // Old index to which i is mapped.
-    }
-    assert(new_hidden_index==it_hidden.first->second);
-
-    // If label i occurred in l1 and was not mapped to the same hidden label, raise an exception.
-    if (!it.second && new_hidden_index!=hidden_index_in_l1) 
-    {
-      throw mcrl2::runtime_error("The action " + pp(l2.action_label(i)) + " has incompatible hidden actions " +
-                                 pp(l1.action_label(hidden_index_in_l1)) + " and " + pp(l2.action_label(hidden_index_in_l2)) + ".");
-    }
   }
 
   // Update the label numbers of all transitions of the LTS l1 to reflect
