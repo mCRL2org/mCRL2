@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file rewriter_test.cpp
+/// \file pbesrewr_test.cpp
 /// \brief Test for the pbes rewriters.
 
-#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-
+#define BOOST_TEST_MODULE pbesrewr_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
@@ -20,12 +20,11 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-void test_pbesrewr1()
+BOOST_AUTO_TEST_CASE(test_pbesrewr1)
 {
   std::string pbes_text =
     "sort Enum = struct e1 | e2;                           \n"
@@ -37,12 +36,12 @@ void test_pbesrewr1()
   bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
-  // p.save("pbesrewr.pbes");
+  BOOST_CHECK(p.is_well_typed());
 }
 
-void test_pbesrewr2()
+BOOST_AUTO_TEST_CASE(test_pbesrewr2)
 {
-  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
+  lps::specification spec = remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -53,12 +52,4 @@ void test_pbesrewr2()
   enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
   BOOST_CHECK(p.is_well_typed());
-}
-
-int test_main(int argc, char* argv[])
-{
-  test_pbesrewr1();
-  test_pbesrewr2();
-
-  return 0;
 }

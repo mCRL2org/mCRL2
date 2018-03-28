@@ -6,9 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pfnf_rewriter.cpp
+/// \file pfnf_rewriter_test.cpp
 /// \brief Tests for pfnf rewriter.
 
+#define BOOST_TEST_MODULE pfnf_rewriter_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
@@ -17,7 +19,6 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -61,10 +62,8 @@ void test_pfnf_expression(const std::string& s)
 {
   pbes_system::detail::pfnf_traverser visitor;
   pbes_system::pbes_expression t1 = expr(s);
-std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
   visitor.apply(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
-std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
   data::rewriter datar;
   pbes_system::simplify_data_rewriter<data::rewriter> R(datar);
   if (R(t1) != R(t2))
@@ -78,7 +77,7 @@ std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
   }
 }
 
-void test_pfnf_visitor()
+BOOST_AUTO_TEST_CASE(test_pfnf_visitor)
 {
   test_pfnf_expression("forall m:Nat. false");
   test_pfnf_expression("X && (Y(3) || X)");
@@ -100,7 +99,7 @@ void test_pfnf(const std::string& pbes_spec)
   std::cerr << "-----------------" << std::endl;
 }
 
-void test_pfnf_rewriter()
+BOOST_AUTO_TEST_CASE(test_pfnf_rewriter)
 {
   using namespace pbes_system;
 
@@ -147,7 +146,7 @@ void test_pfnf_rewriter2(const std::string& text, const bool expected_result)
   BOOST_CHECK(solution == expected_result);
 }
 
-void test_pfnf_rewriter2()
+BOOST_AUTO_TEST_CASE(test_pfnf_rewriter_2)
 {
   // problematic case found by random tests 14-1-2011
   std::string text =
@@ -181,7 +180,7 @@ void test_pfnf_rewriter2()
   test_pfnf_rewriter2(text,true);
 }
 
-void test_is_pfnf()
+BOOST_AUTO_TEST_CASE(test_is_pfnf)
 {
   std::string text =
     "pbes nu X(n: Nat) = X(0) || X(1) || X(2);   \n"
@@ -289,7 +288,7 @@ void test_is_pfnf()
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 }
 
-void test_pfnf_print()
+BOOST_AUTO_TEST_CASE(test_pfnf_print)
 {
   std::string text =
     "pbes nu X(n: Nat) = X(0) || X(1) || X(2);   \n"
@@ -306,7 +305,7 @@ void test_pfnf_print()
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
 }
 
-void test_pfnf_rewriter3()
+BOOST_AUTO_TEST_CASE(test_pfnf_rewriter3)
 {
   std::string text =
     "sort D = struct d1 | d2 | d3;                                                \n"
@@ -344,16 +343,4 @@ void test_pfnf_rewriter3()
   pfnf_rewriter R;
   pbes_system::pbes_rewrite(p, R);
   BOOST_CHECK(pbes_system::detail::is_pfnf(p));
-}
-
-int test_main(int argc, char** argv)
-{
-  test_pfnf_visitor();
-  test_pfnf_rewriter();
-  test_pfnf_rewriter2();
-  test_pfnf_rewriter3();
-  test_is_pfnf();
-  test_pfnf_print();
-
-  return 0;
 }

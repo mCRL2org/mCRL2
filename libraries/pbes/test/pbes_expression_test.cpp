@@ -6,41 +6,34 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes_test.cpp
+/// \file pbes_expression_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE pbes_expression_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/parse.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
-std::string EXPRESSIONS =
-  "datavar                                  \n"
-  "  n: Nat;                                \n"
-  "                                         \n"
-  "predvar                                  \n"
-  "                                         \n"
-  "expressions                              \n"
-  "  val(n > 2);                            \n"
-  "  val(n > 3)                             \n"
-  ;
-
-void print(std::set<pbes_expression> q)
-{
-  for (const pbes_expression& expr: q)
-  {
-    std::cout << pbes_system::pp(expr) << std::endl;
-  }
-}
-
-void test_accessors()
+BOOST_AUTO_TEST_CASE(test_accessors)
 {
   using namespace mcrl2::pbes_system::accessors;
+
+  std::string EXPRESSIONS =
+    "datavar                                  \n"
+    "  n: Nat;                                \n"
+    "                                         \n"
+    "predvar                                  \n"
+    "                                         \n"
+    "expressions                              \n"
+    "  val(n > 2);                            \n"
+    "  val(n > 3)                             \n"
+  ;
 
   std::vector<pbes_expression> expressions = parse_pbes_expressions(EXPRESSIONS).first;
   pbes_expression x = expressions[0];
@@ -105,19 +98,13 @@ void test_accessors()
     data::data_expression_list g = { d };
     BOOST_CHECK(f == g);
 
-    print(q);
-
     a = join_or(q.begin(), q.end());
     q1 = split_or(a);
     BOOST_CHECK(q == q1);
 
-    print(q1);
-
     a = join_and(q.begin(), q.end());
     q1 = split_and(a);
     BOOST_CHECK(q == q1);
-
-    print(q1);
   }
 
   {
@@ -141,7 +128,7 @@ void test_accessors()
   }
 }
 
-void test_term_traits()
+BOOST_AUTO_TEST_CASE(test_term_traits)
 {
   typedef core::term_traits<pbes_expression> tr;
 
@@ -232,13 +219,4 @@ void test_term_traits()
   x = parse_pbes_expression("exists k:Nat.Y(k)", VARSPEC);
   v = tr::var(x);
   z = pbes_system::accessors::arg(x);
-
-}
-
-int test_main(int argc, char** argv)
-{
-  test_term_traits();
-  test_accessors();
-
-  return 0;
 }

@@ -9,11 +9,8 @@
 /// \file rewriter_test.cpp
 /// \brief Test for PBES rewriters.
 
-//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-//#define PBES_REWRITE_TEST_DEBUG
-
+#define BOOST_TEST_MODULE rewriter_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -25,7 +22,6 @@
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/detail/test_operation.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -198,10 +194,8 @@ void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string e
   ));
 }
 
-void test_simplifying_rewriter()
+BOOST_AUTO_TEST_CASE(test_simplifying_rewriter)
 {
-  std::cout << "<test_simplifying_rewriter>" << std::endl;
-
   data::data_specification data_spec = data::data_specification();
   data_spec.add_context_sort(data::sort_nat::nat());
   data::rewriter datar(data_spec);
@@ -260,10 +254,8 @@ void test_simplifying_rewriter()
   // test_expressions(R, "Y(n1 + n2)"                                                      , "Y(n2 + n1)");
 }
 
-void test_enumerate_quantifiers_rewriter()
+BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter)
 {
-  std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;
-
   data::data_specification dataspec = data::data_specification();
   dataspec.add_context_sort(data::sort_nat::nat());
   data::rewriter datar(dataspec);
@@ -339,7 +331,7 @@ void test_enumerate_quantifiers_rewriter(const std::string& expr1, const std::st
   test_expressions(R, expr1, R, expr2, var_decl, sigma, data_spec);
 }
 
-void test_enumerate_quantifiers_rewriter2()
+BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter2)
 {
   std::string var_decl;
   std::string data_spec;
@@ -376,10 +368,8 @@ void test_enumerate_quantifiers_rewriter2()
   // R2(y) = X(e1) || X(e2)
 }
 
-void test_enumerate_quantifiers_rewriter_finite()
+BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter_finite)
 {
-  std::cout << "<test_enumerate_quantifiers_rewriter_finite>" << std::endl;
-
   data::data_specification data_spec = data::data_specification();
   data_spec.add_context_sort(data::sort_list::list(data::sort_nat::nat()));
   data::rewriter datar(data_spec);
@@ -409,7 +399,7 @@ void test_enumerate_quantifiers_rewriter_finite()
   test_expressions(R, expr1, S, expr2, var_decl, sigma);
 }
 
-void test_substitutions1()
+BOOST_AUTO_TEST_CASE(test_substitutions1)
 {
   std::cout << "<test_substitutions1>" << std::endl;
 
@@ -435,7 +425,7 @@ void test_substitutions1()
   BOOST_CHECK(r(d1, sigma) == r(d2));
 }
 
-void test_substitutions2()
+BOOST_AUTO_TEST_CASE(test_substitutions2)
 {
   std::cout << "<test_substitutions2>" << std::endl;
   data::data_specification data_spec;
@@ -510,7 +500,7 @@ void test_substitutions2()
   test_expressions(R, expr1, R, expr2, var_decl, sigma);
 }
 
-void test_substitutions3()
+BOOST_AUTO_TEST_CASE(test_substitutions3)
 {
   std::cout << "<test_substitutions3>" << std::endl;
   std::string DATA_SPEC =
@@ -585,7 +575,7 @@ void test_substitutions3()
   pbes_system::pbes_expression x = r(phi, sigma);
 }
 
-void test_substitutions4()
+BOOST_AUTO_TEST_CASE(test_substitutions4)
 {
   std::cout << "<test_substitutions4>" << std::endl;
   data::data_specification data_spec;
@@ -643,7 +633,7 @@ void test_substitutions4()
   test_expressions(R, expr1, R, expr2, var_decl, sigma);
 }
 
-void test_substitutions5()
+BOOST_AUTO_TEST_CASE(test_substitutions5)
 {
   std::cout << "<test_substitutions5>" << std::endl;
   data::data_specification data_spec;
@@ -674,7 +664,7 @@ void test_substitutions5()
   test_expressions(R, expr1, R, expr2, var_decl, sigma);
 }
 
-void test_data2pbes()
+BOOST_AUTO_TEST_CASE(test_data2pbes)
 {
   std::cout << "<test_data2pbes>" << std::endl;
   pbes_system::pbes_expression x;
@@ -693,7 +683,7 @@ void test_data2pbes()
   BOOST_CHECK(pbes_system::pp(y) == "forall n: Nat. val(n != 3) && val(n == 5)");
 }
 
-void test_simplify_rewriter()
+BOOST_AUTO_TEST_CASE(test_simplify_rewriter)
 {
   std::string text =
     "pbes nu X(b: Bool) =                                  \n"
@@ -710,23 +700,4 @@ void test_simplify_rewriter()
   pbes p = txt2pbes(text, false);
   pbes_system::simplify_rewriter R;
   pbes_system::pbes_rewrite(p, R);
-}
-
-int test_main(int argc, char* argv[])
-{
-  // log::mcrl2_logger::set_reporting_level(log::debug);
-
-  test_simplifying_rewriter();
-  test_enumerate_quantifiers_rewriter();
-  test_enumerate_quantifiers_rewriter2();
-  test_enumerate_quantifiers_rewriter_finite();
-  test_substitutions1();
-  test_substitutions2();
-  test_substitutions3();
-  test_substitutions4();
-  test_substitutions5();
-  test_data2pbes();
-  test_simplify_rewriter();
-
-  return 0;
 }

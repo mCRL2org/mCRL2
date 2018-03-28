@@ -9,9 +9,10 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE typecheck_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/parse.h"
 #include "mcrl2/pbes/parse.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 
@@ -33,7 +34,7 @@ void test_pbes_specification(const std::string& pbes_in, bool test_type_checker 
   }
 }
 
-void test_pbes_specification1()
+BOOST_AUTO_TEST_CASE(test_pbes_specification1)
 {
   //test PBES specification involving global variables
   test_pbes_specification(
@@ -46,7 +47,7 @@ void test_pbes_specification1()
   );
 }
 
-void test_pbes_specification2()
+BOOST_AUTO_TEST_CASE(test_pbes_specification2)
 {
   //test PBES specification where the type of [10,m] should become List(Nat), not List(Pos).
   //This failed in revision 10180 and before.
@@ -56,12 +57,4 @@ void test_pbes_specification2()
    "\n"
    "init X0(0);\n"
   );
-}
-
-int test_main(int argc, char* argv[])
-{
- test_pbes_specification1();
-  test_pbes_specification2();
-
-  return 0;
 }

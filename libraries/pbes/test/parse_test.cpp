@@ -9,30 +9,31 @@
 /// \file parse_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE parse_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/pbes/parse.h"
-#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-const std::string PBESSPEC =
-  "pbes nu X(b: Bool) = exists n: Nat. Y(n) && val(b); \n"
-  "     mu Y(n: Nat)  = X(n >= 10);                    \n"
-  "                                                    \n"
-  "init X(true);                                       \n"
-  ;
-
-const std::string VARSPEC =
-  "datavar         \n"
-  "  n: Nat;       \n"
-  "                \n"
-  "predvar         \n"
-  "  X: Bool, Pos; \n"
-  "  Y: Nat;       \n"
-  ;
-
-void test_parse()
+BOOST_AUTO_TEST_CASE(test_parse)
 {
+  const std::string PBESSPEC =
+    "pbes nu X(b: Bool) = exists n: Nat. Y(n) && val(b); \n"
+    "     mu Y(n: Nat)  = X(n >= 10);                    \n"
+    "                                                    \n"
+    "init X(true);                                       \n"
+  ;
+
+  const std::string VARSPEC =
+    "datavar         \n"
+    "  n: Nat;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Bool, Pos; \n"
+    "  Y: Nat;       \n"
+  ;
+
   pbes p;
   std::stringstream s(PBESSPEC);
   s >> p;
@@ -41,7 +42,7 @@ void test_parse()
   std::cout << "x = " << pbes_system::pp(x) << std::endl;
 }
 
-void test_parse_pbes_expression()
+BOOST_AUTO_TEST_CASE(test_parse_pbes_expression)
 {
   data::variable_vector vardecl;
   data::parse_variables("b: Bool; n: Nat;", std::back_inserter(vardecl));
@@ -52,12 +53,4 @@ void test_parse_pbes_expression()
   propvardecl.push_back(Y);
   pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1)", vardecl, propvardecl);
   BOOST_CHECK(pbes_system::pp(x) == "X(true, 2) && Y(n + 1)");
-}
-
-int test_main(int argc, char* argv[])
-{
-  test_parse();
-  test_parse_pbes_expression();
-
-  return 0;
 }
