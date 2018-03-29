@@ -35,6 +35,42 @@ process::process_specification parse_process_specification(const std::string& in
   return result;
 }
 
+/// \brief Loads a PBES from filename, or from stdin if filename equals "".
+inline
+process_specification load_process_specification(const std::string& filename)
+{
+  process_specification result;
+  if (filename.empty())
+  {
+    result.load(std::cin);
+  }
+  else
+  {
+    std::ifstream from(filename, std::ifstream::in | std::ifstream::binary);
+    result.load(from);
+  }
+  return result;
+}
+
+/// \brief Saves an PBES to filename, or to stdout if filename equals "".
+inline
+void save_process_specification(const process_specification& pbesspec, const std::string& filename)
+{
+  if (filename.empty())
+  {
+    pbesspec.save(std::cout);
+  }
+  else
+  {
+    std::ofstream to(filename, std::ofstream::out | std::ofstream::binary);
+    if (!to.good())
+    {
+      throw mcrl2::runtime_error("Could not write to filename " + filename);
+    }
+    pbesspec.save(to);
+  }
+}
+
 } // namespace detail
 
 } // namespace process
