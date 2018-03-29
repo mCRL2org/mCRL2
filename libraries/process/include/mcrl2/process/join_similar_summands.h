@@ -14,6 +14,8 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/standard_numbers_utility.h"
+#include "mcrl2/process/builder.h"
+#include "mcrl2/process/join.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {
@@ -21,39 +23,6 @@ namespace mcrl2 {
 namespace process {
 
 namespace detail {
-
-/// \brief Splits a choice into a set of operands
-/// Given a process expression of the form p1 + p2 + .... + pn, this will yield a
-/// set of the form { p1, p2, ..., pn }, assuming that pi does not have a + as main
-/// function symbol.
-/// \param expr A process expression
-/// \return A set of process expressions
-inline
-std::set<process_expression> split_summands(const process_expression &x)
-{
-  std::set<process_expression> result;
-  utilities::detail::split(x, std::insert_iterator<std::set<process_expression>>(
-          result,
-          result.begin()),
-          is_choice,
-          [](const process_expression &x) { return atermpp::down_cast<choice>(x).left(); },
-          [](const process_expression &x) { return atermpp::down_cast<choice>(x).right(); }
-  );
-  return result;
-}
-
-/// \brief Returns or applied to the sequence of process expressions [first, last)
-/// \param first Start of a sequence of process expressions
-/// \param last End of a sequence of of process expressions
-/// \return The choice operator applied to the sequence of process expressions [first, last)
-template<typename FwdIt>
-process_expression join_summands(FwdIt first, FwdIt last)
-{
-  process_expression delta_ = delta();
-  return utilities::detail::join(first, last, [](const process_expression &x, const process_expression &y) {
-      return choice(x, y);
-  }, delta_);
-}
 
 // returns l + [x]
 inline
@@ -393,8 +362,7 @@ struct join_similar_summands_builder: public process_expression_builder<join_sim
 
   process_expression apply(const process::choice& x)
   {
-    std::set<process_expression> x_split = split_summands(x);
-    std::vector<process_expression> v(x_split.begin(), x_split.end());
+    std::vector<process_expression> v = split_summands(x);
     for (process_expression& v_i: v)
     {
       v_i = apply(v_i);
