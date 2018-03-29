@@ -14,12 +14,48 @@
 
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/join.h"
 
 namespace mcrl2 {
 
 namespace process {
 
 namespace detail {
+
+struct expand_if_then_else_builder: public process_expression_builder<expand_if_then_else_builder>
+{
+  typedef process_expression_builder<expand_if_then_else_builder> super;
+  using super::apply;
+
+  process_expression apply(const process::if_then_else& x)
+  {
+    process_expression then_case = apply(x.then_case());
+    process_expression else_case = apply(x.else_case());
+    return choice(if_then(x.condition(), then_case), if_then(data::not_(x.condition()), else_case));
+  }
+};
+
+struct expand_if_then_choice_builder: public process_expression_builder<expand_if_then_choice_builder>
+{
+  typedef process_expression_builder<expand_if_then_choice_builder> super;
+  using super::apply;
+
+  process_expression apply(const process::if_then& x)
+  {
+    process_expression then_case = apply(x.then_case());
+    if (is_choice(then_case))
+    {
+      std::vector<process_expression> summands = split_summands(then_case);
+      for (auto& summand: summands)
+      {
+        summand = if_then(x.condition(), summand);
+      }
+      return join_summands(summands.begin(), summands.end());
+    }
+    return if_then(x.condition(), then_case);
+  }
+};
+
 
 struct remove_nested_if_then_builder: public process_expression_builder<remove_nested_if_then_builder>
 {
@@ -73,6 +109,20 @@ struct convert_process_instances_builder: public process_expression_builder<conv
 };
 
 } // namespace detail
+
+inline
+void expand_if_then_else(process_specification& procspec)
+{
+  detail::expand_if_then_else_builder f;
+  f.update(procspec);
+}
+
+inline
+void expand_if_then_choice(process_specification& procspec)
+{
+  detail::expand_if_then_choice_builder f;
+  f.update(procspec);
+}
 
 inline
 void remove_nested_if_then(process_specification& procspec)
