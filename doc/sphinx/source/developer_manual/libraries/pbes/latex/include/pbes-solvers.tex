@@ -71,7 +71,7 @@ W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
 \text{)} \\ 
 B:=\text{\textsc{Attr}}\left( W_{1-\alpha }^{\prime },1-\alpha \right)  \\ 
 \text{\textbf{if} }W_{1-\alpha }^{\prime }=B\text{ \textbf{then}} \\ 
-\qquad W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime },\emptyset  \\ 
+\qquad W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime },B \\ 
 \text{\textbf{else}} \\ 
 \qquad W_{0},W_{1}:=\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
 \qquad W_{1-\alpha }:=W_{1-\alpha }\cup B \\ 
@@ -93,11 +93,11 @@ The algorithm can be extended to sets $V$ containing nodes with decoration $%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{SolveRecursiveExtended(}}V\text{\textsc{)}} \\ 
-V_{1}:=Attr\left( \{v\in V\mid v\bot \},1\right)  \\ 
-V_{0}:=Attr\left( \{v\in V\mid v\top \},0\right)  \\ 
+V_{1}:=Attr\left( \{v\in V\mid v\bot \},1\right) \\ 
+V_{0}:=Attr\left( \{v\in V\mid v\top \},0\right) \\ 
 \left( W_{0},W_{1}\right) :=\text{\textsc{SolveRecursive(}}V\setminus
 (V_{0}\cup V_{1})\text{\textsc{)}} \\ 
-\text{\textbf{return }}\left( W_{0}\cup V_{1},W_{0}\cup V_{1}\right) 
+\text{\textbf{return }}\left( W_{0}\cup V_{1},W_{0}\cup V_{1}\right)%
 \end{array}%
 \end{equation*}%
 Note that a possible optimization of the \textsc{SolveRecursive} algorithm
@@ -112,4 +112,4 @@ enabled in the code.%
 )%
 \end{array}%
 \end{equation*}%
-\newpage 
+\newpage
