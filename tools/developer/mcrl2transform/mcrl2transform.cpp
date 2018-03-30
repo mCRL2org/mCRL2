@@ -65,21 +65,6 @@ struct alphabet_reduce_command: public process::detail::process_command
   }
 };
 
-/// \brief Eliminates equations that are used in a single place
-struct eliminate_single_usage_equations_command: public process::detail::process_command
-{
-  eliminate_single_usage_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : process::detail::process_command("eliminate-single-usage-equations", input_filename, output_filename, options)
-  {}
-
-  void execute() override
-  {
-    process::detail::process_command::execute();
-    process::eliminate_single_usage_equations(procspec);
-    utilities::detail::write_text(output_filename, process::pp(procspec));
-  }
-};
-
 /// \brief Eliminates unused equations
 struct eliminate_unused_equations_command: public process::detail::process_command
 {
@@ -192,7 +177,6 @@ class mcrl2transform_tool: public transform_tool<rewriter_tool<input_output_tool
     {
       add_command(std::make_shared<alphabet_reduce_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<anonymize_process_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<eliminate_single_usage_equations_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<join_similar_summands_command>(input_filename(), output_filename(), options));
