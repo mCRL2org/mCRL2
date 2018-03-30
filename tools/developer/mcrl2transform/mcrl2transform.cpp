@@ -20,7 +20,6 @@
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/anonymize.h"
 #include "mcrl2/process/detail/process_command.h"
-#include "mcrl2/process/eliminate_single_usage_equations.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
 #include "mcrl2/process/eliminate_unused_equations.h"
 #include "mcrl2/process/join_similar_summands.h"
