@@ -115,6 +115,7 @@ struct eliminate_single_usage_builder: public process_expression_builder<elimina
 struct eliminate_single_usage_equations_algorithm
 {
   process_specification& procspec;
+  std::size_t lowerbound;
 
   // Contains the number of times each process variable is used
   std::map<process_identifier, int> count;
@@ -130,8 +131,9 @@ struct eliminate_single_usage_equations_algorithm
   // Contains the order in which substitutions will be applied
   std::vector<process_identifier> substitution_order;
 
-  eliminate_single_usage_equations_algorithm(process_specification& procspec_)
-    : procspec(procspec_)
+  eliminate_single_usage_equations_algorithm(process_specification& procspec_, std::size_t lowerbound_)
+    : procspec(procspec_),
+      lowerbound(lowerbound_)
   {}
 
   void print_dependencies() const
@@ -161,7 +163,7 @@ struct eliminate_single_usage_equations_algorithm
     {
       const process_identifier& P = i.first;
       const std::set<process_identifier>& dependencies_P = i.second;
-      if (count[P] == 1 && !contains(dependencies_P, P))
+      if (count[P] <= lowerbound && !contains(dependencies_P, P))
       {
         to_be_eliminated.insert(P);
       }
@@ -189,18 +191,41 @@ struct eliminate_single_usage_equations_algorithm
       i.second = set_intersection(i.second, to_be_eliminated);
     }
 
-    // find sources
-    std::set<process_identifier> sources = to_be_eliminated;
-    for (const process_identifier& P: to_be_eliminated)
+    // add the equations that will be eliminated, in the proper order
+    while (true)
     {
-      for (const process_identifier& Q: dependencies[P])
+      std::set<process_identifier> remove;
+      for (auto i = dependencies.cbegin(); i != dependencies.cend();)
       {
-        sources.erase(Q);
+        if (i->second.empty())
+        {
+          substitution_order.push_back(i->first);
+          remove.insert(i->first);
+          dependencies.erase(i++);
+        }
+        else
+        {
+          ++i;
+        }
+      }
+      if (remove.empty())
+      {
+        break;
+      }
+      substitution_order.insert(substitution_order.end(), remove.begin(), remove.end());
+      for (auto& p: dependencies)
+      {
+        // p.second := p.second \ remove
+        std::set<process_identifier> tmp;
+        std::set_difference(std::make_move_iterator(p.second.begin()),
+                            std::make_move_iterator(p.second.end()),
+                            remove.begin(), remove.end(),
+                            std::inserter(tmp, tmp.begin()));
+        p.second.swap(tmp);
       }
     }
-    mCRL2log(log::verbose) << "sources: " << core::detail::print_set(sources) << std::endl;
 
-    // first add the equations that will not be eliminated
+    // add the equations that will not be eliminated
     for (const process_equation& eqn: procspec.equations())
     {
       const process_identifier& P = eqn.identifier();
@@ -210,21 +235,6 @@ struct eliminate_single_usage_equations_algorithm
       }
     }
 
-    // add the chains corresponding to the sources
-    for (const process_identifier& P: sources)
-    {
-      substitution_order.push_back(P);
-      auto i = dependencies.find(P);
-      while (!i->second.empty())
-      {
-        const process_identifier& Q = *(i->second.begin());
-        substitution_order.push_back(Q);
-        i = dependencies.find(Q);
-      }
-    }
-
-    // the variables have been added in the reversed order
-    std::reverse(substitution_order.begin(), substitution_order.end());
     mCRL2log(log::verbose) << "substitution order: " << core::detail::print_list(substitution_order) << std::endl;
   }
 
@@ -258,9 +268,9 @@ struct eliminate_single_usage_equations_algorithm
 };
 
 /// \brief Eliminates equations that are used only once, using substitution.
-void eliminate_single_usage_equations(process_specification& procspec)
+void eliminate_single_usage_equations(process_specification& procspec, std::size_t lowerbound = 1)
 {
-  eliminate_single_usage_equations_algorithm algorithm(procspec);
+  eliminate_single_usage_equations_algorithm algorithm(procspec, lowerbound);
   algorithm.run();
 }
 
