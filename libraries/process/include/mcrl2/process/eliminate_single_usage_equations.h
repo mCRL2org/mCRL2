@@ -79,10 +79,11 @@ struct eliminate_single_usage_builder: public process_expression_builder<elimina
 
   const process_specification& procspec;
   std::map<process_identifier, int>& count;
+  std::size_t lowerbound;
   process_identifier current_equation_identifier;
 
-  eliminate_single_usage_builder(const process_specification& procspec_, std::map<process_identifier, int>& count_)
-    : procspec(procspec_), count(count_)
+  eliminate_single_usage_builder(const process_specification& procspec_, std::map<process_identifier, int>& count_, std::size_t lowerbound_)
+    : procspec(procspec_), count(count_), lowerbound(lowerbound_)
   {}
 
   void enter(const process_equation& x)
@@ -92,7 +93,7 @@ struct eliminate_single_usage_builder: public process_expression_builder<elimina
 
   process_expression apply(const process::process_instance& x)
   {
-    if (count[x.identifier()] == 1 && x.identifier() != current_equation_identifier)
+    if (count[x.identifier()] <= lowerbound && x.identifier() != current_equation_identifier)
     {
       return expand_process_instance_assignments(x, procspec.equations());
     }
@@ -101,7 +102,7 @@ struct eliminate_single_usage_builder: public process_expression_builder<elimina
 
   process_expression apply(const process::process_instance_assignment& x)
   {
-    if (count[x.identifier()] == 1 && x.identifier() != current_equation_identifier)
+    if (count[x.identifier()] <= lowerbound && x.identifier() != current_equation_identifier)
     {
       return expand_process_instance_assignments(x, procspec.equations());
     }
@@ -248,7 +249,7 @@ struct eliminate_single_usage_equations_algorithm
     }
 
     // apply substitutions to the equation in the order given by substitution_order
-    detail::eliminate_single_usage_builder f(procspec, count);
+    detail::eliminate_single_usage_builder f(procspec, count, lowerbound);
     for (const process_identifier& P: substitution_order)
     {
       process_equation& eqn = *equation_index[P];
