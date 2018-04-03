@@ -120,6 +120,11 @@ process_expression push_action_inside(const action& a, const process_expression&
     const if_then_else& x_ = atermpp::down_cast<if_then_else>(x);
     return if_then_else(x_.condition(), push_action_inside(a, x_.then_case()), push_action_inside(a, x_.else_case()));
   }
+  else if (is_seq(x))
+  {
+    const seq& x_ = atermpp::down_cast<seq>(x);
+    return seq(push_action_inside(a, x_.left()), x_.right());
+  }
   else if (is_choice(x))
   {
     auto summands = split_summands(x);
@@ -163,6 +168,12 @@ bool is_dummy_action(const process_expression& x)
   return is_action(x) && atermpp::down_cast<action>(x).label() == action_label(core::identifier_string("dummy"), {});
 }
 
+inline
+bool has_action_prefix(const process_expression& x)
+{
+  return is_action(x) || (is_seq(x) && has_action_prefix(atermpp::down_cast<seq>(x).left()));
+}
+
 struct remove_dummy_action_builder: public process_expression_builder<remove_dummy_action_builder>
 {
   typedef process_expression_builder<remove_dummy_action_builder> super;
@@ -172,7 +183,7 @@ struct remove_dummy_action_builder: public process_expression_builder<remove_dum
   {
     process_expression left  = apply(x.left());
     process_expression right = apply(x.right());
-    if (is_dummy_action(left) && is_action(right))
+    if (is_dummy_action(left) && has_action_prefix(right))
     {
       return right;
     }
