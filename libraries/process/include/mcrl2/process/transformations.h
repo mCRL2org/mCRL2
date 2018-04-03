@@ -56,7 +56,6 @@ struct expand_if_then_choice_builder: public process_expression_builder<expand_i
   }
 };
 
-
 struct remove_nested_if_then_builder: public process_expression_builder<remove_nested_if_then_builder>
 {
   typedef process_expression_builder<remove_nested_if_then_builder> super;
@@ -108,6 +107,79 @@ struct convert_process_instances_builder: public process_expression_builder<conv
   }
 };
 
+inline
+process_expression push_action_inside(const action& a, const process_expression& x)
+{
+  if (is_if_then(x))
+  {
+    const if_then& x_ = atermpp::down_cast<if_then>(x);
+    return if_then(x_.condition(), push_action_inside(a, x_.then_case()));
+  }
+  else if (is_if_then_else(x))
+  {
+    const if_then_else& x_ = atermpp::down_cast<if_then_else>(x);
+    return if_then_else(x_.condition(), push_action_inside(a, x_.then_case()), push_action_inside(a, x_.else_case()));
+  }
+  else if (is_choice(x))
+  {
+    auto summands = split_summands(x);
+    for (auto& summand: summands)
+    {
+      summand = push_action_inside(a, summand);
+    }
+    return join_summands(summands.begin(), summands.end());
+  }
+  else if (is_sum(x) && a.arguments().empty()) // conservative
+  {
+    const sum& x_ = atermpp::down_cast<sum>(x);
+    return sum(x_.variables(), push_action_inside(a, x_.operand()));
+  }
+  return seq(a, x);
+}
+
+struct push_actions_inside_builder: public process_expression_builder<push_actions_inside_builder>
+{
+  typedef process_expression_builder<push_actions_inside_builder> super;
+  using super::apply;
+
+  process_expression apply(const process::seq& x)
+  {
+    process_expression left  = apply(x.left());
+    process_expression right = apply(x.right());
+    if (is_action(left))
+    {
+      return push_action_inside(atermpp::down_cast<action>(left), right);
+    }
+    else
+    {
+      return seq(left, right);
+    }
+  }
+};
+
+inline
+bool is_dummy_action(const process_expression& x)
+{
+  return is_action(x) && atermpp::down_cast<action>(x).label() == action_label(core::identifier_string("dummy"), {});
+}
+
+struct remove_dummy_action_builder: public process_expression_builder<remove_dummy_action_builder>
+{
+  typedef process_expression_builder<remove_dummy_action_builder> super;
+  using super::apply;
+
+  process_expression apply(const process::seq& x)
+  {
+    process_expression left  = apply(x.left());
+    process_expression right = apply(x.right());
+    if (is_dummy_action(left) && is_action(right))
+    {
+      return right;
+    }
+    return seq(left, right);
+  }
+};
+
 } // namespace detail
 
 inline
@@ -135,6 +207,20 @@ inline
 void convert_process_instances(process_specification& procspec)
 {
   detail::convert_process_instances_builder f(procspec);
+  f.update(procspec);
+}
+
+inline
+void push_actions_inside(process_specification& procspec)
+{
+  detail::push_actions_inside_builder f;
+  f.update(procspec);
+}
+
+inline
+void remove_dummy_action(process_specification& procspec)
+{
+  detail::remove_dummy_action_builder f;
   f.update(procspec);
 }
 
