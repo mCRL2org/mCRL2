@@ -11,7 +11,7 @@
 #ifdef DBM_PACKAGE_AVAILABLE
   #include "simplifier_dbm.h"
 #endif
-#include "simplifier_finite_domain.h"
+#include "simplifier_mdd.h"
 #include "simplifier_fourier_motzkin.h"
 #include "simplifier_identity.h"
 #include "simplifier_mode.h"
@@ -33,7 +33,7 @@ simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter&
       return new simplifier_dbm(rewr, proving_rewr, process_parameters, dataspec, lu_map);
 #endif
     case simplify_finite_domain:
-      return new simplifier_finite_domain(rewr, proving_rewr, dataspec);
+      return new simplifier_mdd(rewr, proving_rewr, dataspec);
     case simplify_identity:
       return new simplifier_identity(rewr, proving_rewr);
     case simplify_auto:
@@ -49,7 +49,7 @@ simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter&
       }
       else
       {
-        return new simplifier_finite_domain(rewr, proving_rewr, dataspec);
+        return new simplifier_mdd(rewr, proving_rewr, dataspec);
       }
     }
     default:

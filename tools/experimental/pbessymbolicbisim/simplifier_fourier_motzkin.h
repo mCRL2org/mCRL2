@@ -15,7 +15,7 @@
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 
 #include "simplifier.h"
-#include "simplifier_finite_domain.h"
+#include "simplifier_mdd.h"
 
 namespace mcrl2
 {
@@ -29,7 +29,7 @@ class simplifier_fourier_motzkin : public simplifier
   using super::proving_rewr;
 
 protected:
-  simplifier_finite_domain simpl_discr;
+  simplifier_mdd simpl_discr;
 
   data_expression reduce_lineq(const data_expression_list& lineq)
   {
