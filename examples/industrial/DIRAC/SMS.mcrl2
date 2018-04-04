@@ -38,7 +38,7 @@ sort Tasks = struct
 		  tFailed?is_tFailed | 
 		 tDeleted?is_tdeleted;
 
-sort Tuple = struct p(t:Nat,r:Nat,link:Bool);
+sort Tuple = struct p(t_:Nat,r:Nat,link:Bool);
 
 % tasks-to-ids mapping: given a list of Tasks, and a Tasks value, get the positions of the list matching the value
 % example t2id([one,two,two,three],two)->[1,2] 
@@ -156,7 +156,7 @@ eqn
 	%listTuples = [p(0,0),p(0,1),p(1,0),p(1,1),p(0,2),p(2,3)];
 	t4r(listTuples,RepIDs) = t4r'(listTuples,RepIDs,0);
 	t4r'([],RepIDs,n) = [];
-	r(tuple) in RepIDs -> t4r'(tuple|>lt,RepIDs,n) = t(tuple)|>t4r'(lt,RepIDs,n+1);
+	r(tuple) in RepIDs -> t4r'(tuple|>lt,RepIDs,n) = t_(tuple)|>t4r'(lt,RepIDs,n+1);
 	!(r(tuple) in RepIDs) -> t4r'(tuple|>lt,RepIDs,n) = t4r'(lt,RepIDs,n+1);
 %------------------------------------
 
@@ -173,8 +173,8 @@ var
 eqn
 	removeLinks(listTuples,TaskIDs) = removeLinks'(listTuples,TaskIDs,0);
 	removeLinks'([],TaskIDs,n) = [];
-	t(tuple) in TaskIDs -> removeLinks'(tuple|>lt,TaskIDs,n) = p(t(tuple),r(tuple),false)|>removeLinks'(lt,TaskIDs,n+1);
-	!(t(tuple) in TaskIDs) -> removeLinks'(tuple|>lt,TaskIDs,n) = tuple|>removeLinks'(lt,TaskIDs,n+1);
+	t_(tuple) in TaskIDs -> removeLinks'(tuple|>lt,TaskIDs,n) = p(t_(tuple),r(tuple),false)|>removeLinks'(lt,TaskIDs,n+1);
+	!(t_(tuple) in TaskIDs) -> removeLinks'(tuple|>lt,TaskIDs,n) = tuple|>removeLinks'(lt,TaskIDs,n+1);
 %------------------------------------
 
 %given a list of tuples of the form p(taskID,replicaID,bool) , select a list of replica IDs such that there is no link(third parameter of the tuple is false) between a replica and any task
