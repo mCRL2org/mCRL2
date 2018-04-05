@@ -126,6 +126,10 @@ process_expression make_guarded(const process_expression& x, const action& dummy
   else if (process::is_seq(x))
   {
     const auto& x_ = atermpp::down_cast<process::seq>(x);
+    if (is_action(x_.left()))
+    {
+      return x;
+    }
     return seq(x_.left(), make_guarded(x_.right(), dummy));
   }
   else if (process::is_if_then(x))
