@@ -260,7 +260,6 @@ process_expression join_similar_summands(const process_expression& x, std::size_
     {
       const auto& xi = atermpp::down_cast<process_instance_assignment>(x_i);
       process_summands[xi.identifier()].push_back(xi);
-mCRL2log(log::debug) << "<process_summand>" << x_i << std::endl;
       continue;
     }
     if (is_seq(x_i))
@@ -273,7 +272,6 @@ mCRL2log(log::debug) << "<process_summand>" << x_i << std::endl;
         const auto& Q = atermpp::down_cast<process_instance_assignment>(right);
         action_summands[a.label()][Q.identifier()].push_back(x_i);
         continue;
-mCRL2log(log::debug) << "<action_summand>" << x_i << std::endl;
       }
     }
     if (is_if_then(x_i))
@@ -283,7 +281,6 @@ mCRL2log(log::debug) << "<action_summand>" << x_i << std::endl;
       {
         const auto& xi = atermpp::down_cast<process_instance_assignment>(then_case);
         condition_summands[xi.identifier()].push_back(x_i);
-mCRL2log(log::debug) << "<condition_summand>" << x_i << std::endl;
         continue;
       }
       if (is_seq(then_case))
@@ -295,12 +292,10 @@ mCRL2log(log::debug) << "<condition_summand>" << x_i << std::endl;
           const auto& a = atermpp::down_cast<action>(left);
           const auto& Q = atermpp::down_cast<process_instance_assignment>(right);
           condition_action_summands[a.label()][Q.identifier()].push_back(x_i);
-mCRL2log(log::debug) << "<condition_action_summand>" << x_i << std::endl;
           continue;
         }
       }
     }
-mCRL2log(log::debug) << "<other>" << x_i << std::endl;
     summands.push_back(x_i);
   }
 
@@ -345,7 +340,6 @@ mCRL2log(log::debug) << "<other>" << x_i << std::endl;
     }
   }
 
-mCRL2log(log::debug) << "<result>" << core::detail::print_set(summands) << std::endl;
   return join_summands(summands.begin(), summands.end());
 }
 
