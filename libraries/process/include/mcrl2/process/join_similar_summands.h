@@ -79,9 +79,9 @@ action join_actions(const std::vector<action>& actions, const data::variable& q)
   for (const action& a: actions)
   {
     std::size_t i = 0;
-    for (auto j = a.arguments().begin(); j != a.arguments().end(); ++j)
+    for (const auto& arg: a.arguments())
     {
-      v[i].push_back(*j);
+      v[i].push_back(arg);
       i++;
     }
   }
@@ -158,7 +158,7 @@ process_expression join_condition_process_instances(const std::vector<process_ex
   {
     const data::data_expression& c = atermpp::down_cast<if_then>(x_i).condition();
     const process_expression& then_case = atermpp::down_cast<if_then>(x_i).then_case();
-    const process_instance_assignment& Q = atermpp::down_cast<process_instance_assignment>(then_case);
+    const auto& Q = atermpp::down_cast<process_instance_assignment>(then_case);
     C.push_back(c);
     X.push_back(Q);
   }
