@@ -18,9 +18,6 @@ The top directory is mcrl2, containing a header file with toolset specific build
 
 The command line interfacing sublibrary standardises some more aspects of tool command line interfaces.
 
-ext is the BDD implementation (on top of the ATerm library), consisting of bdd2dot.h, bdd_info.h and bdd_manipulator.h.
-Reference
-
 .. _cli_library:
 
 CLI Library
@@ -89,7 +86,7 @@ Up to here functionality focusses on specifying input. The user interface conven
   * printing a copyright message,
   * printing a man page,
   * version information (--version option),
-  * error reporting for command line parsing. 
+  * error reporting for command line parsing.
 
 Especially the error reporting functionality can be useful for tool developers in situations where problems arise during processing the results of command line parsing.
 
@@ -99,7 +96,7 @@ Important usability notes
 The interface conventions specify a number of standard options:
 
   #. for messaging \-\-verbose (-v), \-\-quiet (-q), \-\-debug (-d), and
-  #. for strategy selection for rewriting using the rewrite library 
+  #. for strategy selection for rewriting using the rewrite library
 
 If the tool uses the core messaging layer, it is necessary to include mcrl2/core/messaging.h prior to the header file of this library in order to activate automatic handling of messaging options on the command line. Similarly if a tool uses the rewriter library, it is necessary to include mcrl2/data/rewriter.h prior to header files of this library to activate handling of rewriter options.
 
@@ -264,7 +261,7 @@ Available tool classes
 
 The table below gives an overview of the
 available tool classes, and the command line options that they handle.
-                           
+
 .. table:: Tool classes and their supported command line arguments
 
    ================================================================================  ===================================================================
@@ -276,27 +273,27 @@ available tool classes, and the command line options that they handle.
    template <typename Tool> class :cpp:class:`mcrl2::utilities::rewriter_tool`       extends a tool with a =--rewriter= option
    template <typename Tool> class :cpp:class:`mcrl2::utilities::pbes_rewriter_tool`  extends a tool with =--rewriter= and =--pbes-rewriter= options
    ================================================================================  ===================================================================
-                                                                                 
+
 The class :cpp:class:`mcrl2::utilities::rewriter_tool` makes strategies of the
 data rewriter available to the user. The class
 :cpp:class:`mcrl2::utilities::pbes_rewriter_tool` makes pbes rewriters available
 to the user.
-                                                           
+
 Example
 -------
 
 A good example to look at is the pbesparelm tool. Since this is a tool that
 takes a file as input and also writes output to a file, it derives from the
-class :cpp:class:`mcrl2:utilities:input_output_tool`. It can be found in 
-the directory ``tools/release/pbesparelm/pbesparelm.cpp``. 
+class :cpp:class:`mcrl2:utilities:input_output_tool`. It can be found in
+the directory ``tools/release/pbesparelm/pbesparelm.cpp``.
 
 In the constructor a few settings are provided.
 
 This is enough to create a tool with the follow help message::
 
   Usage: pbesparelm [OPTION]... [INFILE [OUTFILE]]
-  Reads a file containing a PBES, and applies parameter elimination to it. If 
-  OUTFILE is not present, standard output is used. If INFILE is not present,     
+  Reads a file containing a PBES, and applies parameter elimination to it. If
+  OUTFILE is not present, standard output is used. If INFILE is not present,
   standard input is used.
 
 Tool properties
@@ -306,7 +303,7 @@ Tool properties
 
    ========  ==============================
    Property  Meaning
-   ========  ============================== 
+   ========  ==============================
    synopsis  Summary of command-line syntax
    what is   don't know
    ========  ==============================
@@ -317,19 +314,19 @@ Creating a new tool
 To create a new tool, the following needs to be done:
 
   #. Override the :cpp:member:`run` member function
-  
+
      The actual execution of the tool happens in the virtual member function :cpp:member:`run`.
      The developer has to override this function to add the behavior of the tool
      The :cpp:member:`run` function is called from the :cpp:member:`execute` member function, after the
      command line parameters have been parsed.
 
   #. Set some parameters in the constructor
-     
+
      In the constructor of a tool, one has to supply a name for the tool,
      an author and a description:
 
      .. code-block:: c++
-     
+
         class my_tool: public input_tool
         {
           public:
@@ -651,4 +648,3 @@ The file logger_test_file.txt contains the following::
   [11:52:35.381 my_algorithm::debug]     Iteration 2
   [11:52:35.381 my_algorithm::debug]       iteration number >= 2, treating specially
   [11:52:35.381 my_algorithm::debug]       doing something special
-

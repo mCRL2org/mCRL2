@@ -110,9 +110,15 @@ def generate_rst(binpath, temppath, outpath, version):
   options = shared_opts + ['-c', cfg_dev, temp_dev, out_dev]
   print '<OPTIONS>', ' '.join(options)
 
-  sphinx.main( shared_opts +
-               ['-c', cfg_dev,
-               temp_dev, out_dev])
-  sphinx.main( shared_opts +
-               ['-c', cfg_usr,
-               temp_usr, out_usr])
+  try:
+    sphinx.main( shared_opts +
+                 ['-c', cfg_dev,
+                 temp_dev, out_dev])
+  except SystemExit:
+    pass
+  try:
+    sphinx.main( shared_opts +
+                 ['-c', cfg_usr,
+                 temp_usr, out_usr])
+  except SystemExit:
+    pass
