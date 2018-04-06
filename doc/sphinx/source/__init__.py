@@ -114,11 +114,13 @@ def generate_rst(binpath, temppath, outpath, version):
     sphinx.main( shared_opts +
                  ['-c', cfg_dev,
                  temp_dev, out_dev])
-  except SystemExit:
-    pass
+  except SystemExit as e:
+    if e.code != 0:
+      raise e
   try:
     sphinx.main( shared_opts +
                  ['-c', cfg_usr,
                  temp_usr, out_usr])
-  except SystemExit:
-    pass
+  except SystemExit as e:
+    if e.code != 0:
+      raise e
