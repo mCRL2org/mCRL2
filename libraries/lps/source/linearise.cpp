@@ -587,9 +587,9 @@ class specification_basic_type
     data_expression_list RewriteTermList(const data_expression_list& t)
     {
       data_expression_vector v;
-      for(data_expression_list::const_iterator i=t.begin(); i!=t.end(); ++i)
+      for(const data_expression& d: t)
       {
-        v.push_back(RewriteTerm(*i));
+        v.push_back(RewriteTerm(d));
       }
       return data_expression_list(v.begin(),v.end());
     }
@@ -597,9 +597,9 @@ class specification_basic_type
     assignment_list rewrite_assignments(const assignment_list& t)
     {
       assignment_vector v;
-      for(assignment_list::const_iterator i=t.begin(); i!=t.end(); ++i)
+      for(const assignment& a: t)
       {
-        v.push_back(assignment(i->lhs(), RewriteTerm(i->rhs())));
+        v.push_back(assignment(a.lhs(), RewriteTerm(a.rhs())));
       }
       return assignment_list(v.begin(),v.end());
     }
