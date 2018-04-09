@@ -30,39 +30,36 @@ string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 MCRL2_COPYRIGHT_YEAR)
 option(MCRL2_PACKAGE_RELEASE "Include release version information. This discards SVN revision information and uses only the MCRL2_MAJOR_VERSION CMake variable." FALSE)
 mark_as_advanced(MCRL2_PACKAGE_RELEASE)
 
-#
-# Find Subversion information: revision number and a modified/not modified
-# status.
-#
+# Find Git information: git short-hash and modified/not modified
 set(MCRL2_MINOR_VERSION "Unknown")
-find_package(Subversion)
-if(SUBVERSION_FOUND)
-  # Check current directory and up to two parent directories for svn information.
-  # The .svn directory may be two directories higher, when checking out the full tree and
-  # building a branch or a tag.
-  if(EXISTS "${CMAKE_SOURCE_DIR}/.svn" OR EXISTS "${CMAKE_SOURCE_DIR}/../.svn" OR EXISTS "${CMAKE_SOURCE_DIR}/../../.svn")
-    # Subversion available: minor revision becomes SVN revision
-    Subversion_WC_INFO(${CMAKE_SOURCE_DIR} Project)
-    set(MCRL2_MINOR_VERSION ${Project_WC_REVISION})
-    # Check for local changes; if there are any, then minor revision gets a 
-    # postfix "M"
-    execute_process(
-      COMMAND ${Subversion_SVN_EXECUTABLE} st -q ${PROJECT_SOURCE_DIR}
-      OUTPUT_VARIABLE Project_WC_REVISION_M
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    if(NOT ${Project_WC_REVISION_M} STREQUAL "")
-      set(MCRL2_MINOR_VERSION "${MCRL2_MINOR_VERSION}M")
-      if(MCRL2_PACKAGE_RELEASE)
-        # Do not allow maintainers to package a release from a modified build
-        message(WARNING "You are trying to package a release from an SVN repository that has local modifications.")
-      endif()
-    endif()
-  else()
-    message(WARNING "No version information could be included because ${CMAKE_SOURCE_DIR} is unversioned.")
-  endif()
+
+find_package(Git REQUIRED)
+# Prints the commit hash of the last commit and its short version.
+execute_process(
+  COMMAND ${GIT_EXECUTABLE} rev-list --max-count=1 --format=%h HEAD
+  OUTPUT_VARIABLE GIT_REV_LIST
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+# Convert multiple lines into a list
+STRING(REPLACE "\n" ";" GIT_REV_LIST ${GIT_REV_LIST})
+# The second line is the short-hash, specified by %h
+LIST(GET GIT_REV_LIST 1 GIT_COMMIT_HASH)
+
+# List the changed files compared to the last pushed commit.
+execute_process(
+  COMMAND ${GIT_EXECUTABLE} status --porcelain
+  OUTPUT_VARIABLE GIT_FILES_CHANGED
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# When the files changed are empty it was not modified.
+if(GIT_FILES_CHANGED STREQUAL "")
+  set(MCRL2_MINOR_VERSION "${GIT_COMMIT_HASH}")
 else()
-  message(WARNING "No version information could be included because the Subversion package could not be found.")
+  set(MCRL2_MINOR_VERSION "${GIT_COMMIT_HASH}M")
+  if (${MCRL2_PACKAGE_RELEASE})
+    message(FATAL_ERROR "You are trying to package a release from an SVN repository that has local modifications.")
+  endif()
 endif()
 
 # Try to read build/SourceVersion, and set that version
