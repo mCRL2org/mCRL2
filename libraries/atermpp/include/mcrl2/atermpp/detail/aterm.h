@@ -174,7 +174,31 @@ _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_t
 // Provides the address where the data belonging to this aterm is stored.
 inline _aterm* address(const aterm& t); 
 
+inline std::size_t hash_value_aterm_int(const std::size_t val)
+{
+  return val;
+}
+
 } // namespace detail
 } // namespace atermpp
+
+namespace std
+{
+
+// \brief specialisation of the hash function.
+template<>
+struct hash<atermpp::detail::_aterm*>
+{
+  // Default constructor, required for const qualified hash functions. 
+  hash()
+  {}
+
+  std::size_t operator()(const atermpp::detail::_aterm* t) const
+  {
+    return reinterpret_cast<std::size_t>(t)>>4;
+  }
+};
+
+} // namespace detail
 
 #endif /* DETAIL_ATERM_H */

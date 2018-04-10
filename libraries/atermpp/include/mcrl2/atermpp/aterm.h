@@ -415,8 +415,8 @@ struct hash<atermpp::aterm>
 
   std::size_t operator()(const atermpp::aterm& t) const
   {
-    const std::size_t a_prime_number = 134217689;
-    return (reinterpret_cast<std::size_t>(atermpp::detail::address(t))>>3) * a_prime_number;
+    std::hash<atermpp::detail::_aterm*> aterm_hasher;
+    return aterm_hasher(atermpp::detail::address(t));
   }
 };
 

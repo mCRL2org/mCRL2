@@ -87,15 +87,16 @@ void call_creation_hook(_aterm*);
 
 // Auxiliary function to calculate a hash for _aterm's.
 inline
-std::size_t COMBINE(const std::size_t hnr, const std::size_t w)
+std::size_t COMBINE_aux(const std::size_t hnr, const std::size_t w)
 {
-  return (w>>3) + (hnr>>1) + (hnr<<1);
+  return w + (hnr>>1) + (hnr<<1);  // plus works better than exor. 
 }
 
 inline
 std::size_t COMBINE(const std::size_t hnr, const aterm& w)
 {
-  return COMBINE(hnr,reinterpret_cast<std::size_t>(address(w)));
+  std::hash<aterm> aterm_hasher;
+  return COMBINE_aux(hnr,aterm_hasher(w));
 }
 
 inline
@@ -116,11 +117,18 @@ inline std::size_t hash_number(detail::_aterm *t)
   const std::hash<function_symbol> function_symbol_hasher;
   std::size_t hnr = function_symbol_hasher(f);
 
+  // If the term is an aterm_int, the argument is a value, which is hashed differently.
+  if (f==function_adm.AS_INT)
+  {
+    return detail::hash_value_aterm_int(*(reinterpret_cast<const std::size_t*>(t)+TERM_SIZE));
+  }
+  // Else treat the arguments in a normal way. 
   const std::size_t* begin=reinterpret_cast<const std::size_t*>(t)+TERM_SIZE;
   const std::size_t* end=begin+f.arity();
+  std::hash<atermpp::detail::_aterm*> aterm_hasher;
   for (const std::size_t* i=begin; i!=end; ++i)
   {
-    hnr = COMBINE(hnr, *i);
+    hnr = COMBINE_aux(hnr, aterm_hasher(reinterpret_cast<const _aterm*>(*i)));
   }
 
   return hnr;
