@@ -37,6 +37,7 @@ find_package(Git REQUIRED)
 # Prints the commit hash of the last commit and its short version.
 execute_process(
   COMMAND ${GIT_EXECUTABLE} rev-list --max-count=1 --format=%h HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_REV_LIST
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
@@ -48,6 +49,7 @@ LIST(GET GIT_REV_LIST 1 GIT_COMMIT_HASH)
 # List the changed files compared to the last pushed commit.
 execute_process(
   COMMAND ${GIT_EXECUTABLE} status --porcelain
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_FILES_CHANGED
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
