@@ -20,7 +20,7 @@ else()
 endif()
 
 set(MCRL2_GENERATE_DOC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/generate.py)
-set(MCRL2_GENERATE_DOC_COMMAND ${MCRL2_GENERATE_DOC_SCRIPT} --version=${MCRL2_VERSION} --path=${BIN_PATH}
+set(MCRL2_GENERATE_DOC_COMMAND ${MCRL2_GENERATE_DOC_SCRIPT} --version ${MCRL2_VERSION} --path=${BIN_PATH}
   --temp=${CMAKE_CURRENT_BINARY_DIR}/_temp --out=${CMAKE_CURRENT_BINARY_DIR}/html)
 
 if(MCRL2_PACKAGE_RELEASE)
@@ -32,7 +32,7 @@ add_custom_target(doc
   COMMENT "(Re)-generating mCRL2 documentation (regenerates all cached documentation)" VERBATIM
 )
 
-add_custom_target(fastdoc
+add_custom_target(fastdoc 
   COMMAND ${MCRL2_GENERATE_DOC_COMMAND} -dd
   COMMENT "Generating mCRL2 documentation (does not regenerate cached PDF, manual pages and Doxygen documentation)" VERBATIM
 )
