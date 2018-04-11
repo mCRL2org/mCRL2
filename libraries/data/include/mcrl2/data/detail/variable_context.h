@@ -50,7 +50,7 @@ class variable_context
     variable_context()
     { }
 
-    variable_context(const std::map<core::identifier_string, sort_expression>& variables)
+    explicit variable_context(const std::map<core::identifier_string, sort_expression>& variables)
       : m_variables(variables)
     { }
 

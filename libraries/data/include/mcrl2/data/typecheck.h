@@ -182,7 +182,7 @@ class data_type_checker: public sort_type_checker
       try
       {
         data_expression x1 = x;
-        UpCastNumericType(expected_sort, x.sort(), x1, variable_context.context(), false, false, false);
+        UpCastNumericType(expected_sort, x.sort(), x1, variable_context, false, false, false);
         return data::normalize_sorts(x1, get_sort_specification());
       }
       catch (mcrl2::runtime_error& e)
@@ -198,7 +198,7 @@ class data_type_checker: public sort_type_checker
                                              )
     {
       data_expression x1 = x;
-      TraverseVarConsTypeD(variable_context.context(), x1, expected_sort);
+      TraverseVarConsTypeD(variable_context, x1, expected_sort);
       x1 = data::normalize_sorts(x1, get_sort_specification());
       if (x1.sort() != expected_sort)
       {
