@@ -8,7 +8,7 @@
 //
 /// \file fourier_motzkin.h
 /// \brief Contains functions to apply Fourier-Motzkin on linear inequalities
-///        and data expressions. 
+///        and data expressions.
 
 
 #ifndef MCRL2_DATA_FOURIER_MOTZKIN_H
@@ -111,7 +111,7 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
 
     for (const linear_inequality& e: inequalities)
     {
-      const detail::lhs_t::const_iterator factor_it=e.lhs().find(best_variable); 
+      const detail::lhs_t::const_iterator factor_it=e.lhs().find(best_variable);
       if (factor_it==e.lhs().end()) // variable best_variable does not occur in inequality e.
       {
         new_inequalities.push_back(e);
@@ -151,12 +151,12 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
       {
         const detail::lhs_t::const_iterator e1_best_variable_it=e1.lhs().find(best_variable);
         const data_expression& e1_factor=e1_best_variable_it->factor();
-        const data_expression& e1_reduced_rhs=real_divides(e1.rhs(),e1_factor);  
+        const data_expression& e1_reduced_rhs=real_divides(e1.rhs(),e1_factor);
         const detail::lhs_t e1_reduced_lhs=detail::remove_variable_and_divide(e1.lhs(),best_variable,e1_factor,r);
 
         const detail::lhs_t::const_iterator e2_best_variable_it=e2.lhs().find(best_variable);
         const data_expression& e2_factor=e2_best_variable_it->factor();
-        const data_expression& e2_reduced_rhs=real_divides(e2.rhs(),e2_factor);  
+        const data_expression& e2_reduced_rhs=real_divides(e2.rhs(),e2_factor);
         const detail::lhs_t e2_reduced_lhs=detail::remove_variable_and_divide(e2.lhs(),best_variable,e2_factor,r);
         const linear_inequality new_inequality(subtract(e1_reduced_lhs,e2_reduced_lhs,r),
                                                rewrite_with_memory(real_minus(e1_reduced_rhs,e2_reduced_rhs), r),
@@ -193,10 +193,10 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
 
 /// \brief Eliminate variables from a data expression using Gauss elimination and
 ///        Fourier-Motzkin elimination.
-/// \details Deliver a data_expression e_out and a set of variables vars_out such that 
-///          exists vars_in.e_in is equivalent to exists vars_out.e_out. 
+/// \details Deliver a data_expression e_out and a set of variables vars_out such that
+///          exists vars_in.e_in is equivalent to exists vars_out.e_out.
 ///          If the resulting list of inequalities is inconsistent, then [false] is
-///          returned. 
+///          returned.
 /// \param e_in An input data_expression of sort Bool.
 /// \param vars_in A container with variables. Supports iterating over these variables.
 /// \param e_out The output data expression of sort Bool.
@@ -214,18 +214,18 @@ inline void fourier_motzkin(const data_expression& e_in,
   assert(vars_out.empty());
 
   const std::set<variable>& all_free_variables = find_free_variables(e_in);
-  // First check whether there are variables of sort real in vars_in. 
+  // First check whether there are variables of sort real in vars_in.
   // Also check whether the variables in vars_in occur freely in e_in
-  // If either is not the case, fourier motzkin does not make sense. 
-  if (std::find_if(vars_in.begin(),vars_in.end(),[&](variable v){ 
+  // If either is not the case, fourier motzkin does not make sense.
+  if (std::find_if(vars_in.begin(),vars_in.end(),[&](variable v){
     return v.sort()==sort_real::real_() && all_free_variables.find(v) != all_free_variables.end();})==vars_in.end())
   {
     vars_out=vars_in;
     e_out=e_in;
     return;
   }
-  
-  std::vector <data_expression_list> real_conditions; 
+
+  std::vector <data_expression_list> real_conditions;
   std::vector <data_expression> non_real_conditions;
   detail::split_condition(e_in,real_conditions,non_real_conditions);
 
@@ -251,12 +251,12 @@ inline void fourier_motzkin(const data_expression& e_in,
   }
   if (vars_out.size()==vars_in.size())
   {
-    // No variables can be eliminated. Stop here. 
+    // No variables can be eliminated. Stop here.
     e_out=e_in;
     return;
   }
 
-  // Now apply fourier-motzkin to each conjunct of linear inequalities. 
+  // Now apply fourier-motzkin to each conjunct of linear inequalities.
   std::vector <data_expression>::const_iterator j_n=non_real_conditions.begin();
   std::set< data_expression > result_disjunction_set;
 
@@ -284,12 +284,12 @@ inline void fourier_motzkin(const data_expression& e_in,
                         r);
         inequalities.clear();
         remove_redundant_inequalities(new_inequalities,inequalities,r);
-        // Save the result in the output expression. 
+        // Save the result in the output expression.
         data_expression partial_result=*j_n;
 
         for(const linear_inequality& l: inequalities)
         {
-          partial_result=optimized_and(partial_result,l.transform_to_data_expression());       
+          partial_result=optimized_and(partial_result,l.transform_to_data_expression());
         }
         result_disjunction_set.insert(partial_result);
       }
@@ -303,7 +303,7 @@ inline void fourier_motzkin(const data_expression& e_in,
       }
     }
   }
-  
+
   e_out=lazy::join_or(result_disjunction_set.begin(),result_disjunction_set.end());
 }
 
@@ -319,19 +319,19 @@ inline void fourier_motzkin(const data_expression& e_in,
 /// \author Thomas Neele
 struct fourier_motzkin_sigma: public std::unary_function<data_expression, data_expression>
 {
-  
+
   protected:
     rewriter rewr;
-  
+
     const data_expression apply(const abstraction& d, bool negate) const
     {
-      const variable_list variables = d.variables();
+      const variable_list& variables = d.variables();
       const data_expression body = rewr(negate ? sort_bool::not_(d.body()) : d.body());
-  
+
       variable_list new_variables;
       data_expression new_body;
       fourier_motzkin(body, variables, new_body, new_variables, rewr);
-  
+
       if (negate)
       {
         return rewr(new_variables.empty() ? sort_bool::not_(new_body) : forall(new_variables, sort_bool::not_(new_body)));
@@ -341,13 +341,13 @@ struct fourier_motzkin_sigma: public std::unary_function<data_expression, data_e
         return rewr(new_variables.empty() ? new_body : exists(new_variables, new_body));
       }
     }
-  
+
   public:
-  
+
     fourier_motzkin_sigma(const rewriter& rewr_)
     :  rewr(rewr_)
     {}
-  
+
     const data_expression operator()(const data_expression& d) const
     {
       return is_forall(d) || is_exists(d) ? apply(atermpp::down_cast<abstraction>(d), is_forall(d)) : d;

@@ -7,14 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file linear_inequalities_utilities.h
-/// \brief Contains utility functions for linear inequalities. 
+/// \brief Contains utility functions for linear inequalities.
 
 
 #ifndef MCRL2_LPSREALELM_DETAIL_LINEAR_INEQUALITY_UTILITIES_H
 #define MCRL2_LPSREALELM_DETAIL_LINEAR_INEQUALITY_UTILITIES_H
 
 
-#include "mcrl2/data/linear_inequalities.h" 
+#include "mcrl2/data/linear_inequalities.h"
 
 namespace mcrl2
 {
@@ -22,7 +22,7 @@ namespace mcrl2
 namespace data
 {
 
-namespace detail 
+namespace detail
 {
 
 inline data_expression negate_inequality(const data_expression& e)
@@ -171,7 +171,7 @@ static bool split_condition_aux(
         }
       }
     }
-    else 
+    else
     {
       assert((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)));
 
@@ -217,15 +217,15 @@ static bool split_condition_aux(
     non_real_conditions.push_back(data_expression_list({ negate ? data_expression(sort_bool::not_(e)) : e }));
     real_conditions.push_back(data_expression_list());
     return false;
-  }  
+  }
 }
 
 /// \brief This function first splits the given condition e into real conditions and
-///        non real conditions. 
+///        non real conditions.
 /// \detail This function first uses split_condition_aux to split the condition e. Then
 //          it merges equal real conditions by merging the non-real conditions. No further
 //          calculations take place with the non-real conditions, but if the non-real conditions
-//          lead to unnecessary copying, this may lead to a huge overhead in removing the 
+//          lead to unnecessary copying, this may lead to a huge overhead in removing the
 //          real conditions.
 inline void split_condition(
   const data_expression& e,
@@ -237,17 +237,16 @@ inline void split_condition(
 
   split_condition_aux(e,aux_real_conditions, aux_non_real_conditions);
   assert(aux_non_real_conditions.size()==aux_real_conditions.size() && aux_non_real_conditions.size()>0);
-  
+
   // For every list of real expressions, gather the corresponding non real expressions
   std::map< data_expression_list, data_expression > non_real_expression_map;
   for(std::vector < data_expression_list >::const_iterator i=aux_real_conditions.begin(), j=aux_non_real_conditions.begin();
               i!=aux_real_conditions.end(); ++i, ++j)
   {
-    if(non_real_expression_map[*i] == data_expression())
-    {
-      non_real_expression_map[*i] = sort_bool::false_();
-    }
-    non_real_expression_map[*i] = lazy::or_(non_real_expression_map[*i], lazy::join_and(j->begin(), j->end()));
+    // Find the entry for *i, inserting false if it does not exist yet
+    std::map< data_expression_list, data_expression >::iterator insert_result =
+        non_real_expression_map.insert(std::make_pair(*i, sort_bool::false_())).first;
+    insert_result->second = lazy::or_(insert_result->second, lazy::join_and(j->begin(), j->end()));
   }
   // Convert the map to a pair of vectors
   for(const std::pair< data_expression_list, data_expression >& expr_pair: non_real_expression_map)
