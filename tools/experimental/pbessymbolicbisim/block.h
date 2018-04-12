@@ -64,7 +64,7 @@ public:
     return result;
   }
 
-  std::pair<block, block> split(const block& other) const
+  std::pair<block, block> split(const block& other, const std::vector<subblock>& subblock_list) const
   {
     if(!has_transition(other))
     {
@@ -81,7 +81,7 @@ public:
     std::list<subblock> pos_subblocks, neg_subblocks;
     for(const subblock& sb: *m_subblocks)
     {
-      std::pair<subblock,subblock> sb_split = sb.split(*other.m_subblocks);
+      std::pair<subblock,subblock> sb_split = sb.split(*other.m_subblocks, subblock_list);
       if(!sb_split.first.is_empty())
       {
         pos_subblocks.push_back(sb_split.first);

@@ -79,7 +79,7 @@ protected:
   /**
    * \brief Split block phi_k on phi_l
    */
-  bool split_block(const block_t& phi_k, const block_t& phi_l)
+  bool split_block(const block_t& phi_k, const block_t& phi_l, const std::vector<subblock>& subblocks)
   {
     if(!is_in_strategy(phi_k, phi_l))
     {
@@ -99,7 +99,7 @@ protected:
     }
 
     // Try to split
-    const std::pair<block, block> split_result = phi_k.split(phi_l);
+    const std::pair<block, block> split_result = phi_k.split(phi_l, subblocks);
     if(split_result.first.is_empty() || split_result.second.is_empty())
     {
       // Split failed
@@ -123,17 +123,32 @@ protected:
     return true;
   }
 
+  std::vector<subblock> make_subblock_list()
+  {
+    std::vector<subblock> result;
+    for(const block_t& b: m_proof_blocks)
+    {
+      result.insert(result.end(), b.subblocks().begin(), b.subblocks().end());
+    }
+    for(const block_t& b: m_other_blocks)
+    {
+      result.insert(result.end(), b.subblocks().begin(), b.subblocks().end());
+    }
+    return result;
+  }
+
   /**
    * \brief Try every combination of phi_k, phi_l and action summand to
    * see whether the partition can be refined.
    */
   bool refine_step()
   {
-    for(const block_t& phi_k: m_proof_blocks)
+    std::vector<subblock> subblocks = make_subblock_list();
+    for(const block_t phi_k: m_proof_blocks)
     {
-      for(const block_t& phi_l: m_proof_blocks)
+      for(const block_t phi_l: m_proof_blocks)
       {
-        if(split_block(phi_k, phi_l))
+        if(split_block(phi_k, phi_l, subblocks))
         {
           return true;
         }
@@ -192,14 +207,14 @@ protected:
       open_set.pop();
 
       // Look for possible successors of block in the set of unreachable blocks
-      for(std::list<block_t>::iterator i = unreachable.begin(); i != unreachable.end();)
+      for(std::list<block_t>::const_iterator i = unreachable.begin(); i != unreachable.end();)
       {
         if(block.has_transition(*i))
         {
-          // A transition was found, so potential_succ is reachable
+          // A transition was found, so *i is reachable
           open_set.push(*i);
           m_proof_blocks.push_back(*i);
-          unreachable.erase(i++);
+          i = unreachable.erase(i);
         }
         else
         {
@@ -231,42 +246,45 @@ protected:
   }
 
   /**
-   * \brief Build the LTS that follows from the current
+   * \brief Build the BES that follows from the current
    * partition.
-   * \detail Build the LTS that contains one state for each
+   * \detail Build the BES that contains one variable for each
    * block in the partition. If the partition is stable,
-   * then this LTS is minimal under bisimulation.
+   * then this BES is bisimilar to the original PBES.
    */
-  template <typename Container>
-  bes::boolean_equation_system make_bes(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr)
-  {
-    set_identifier_generator id_gen;
-    std::map< block_t, bes::boolean_variable > var_map;
-    for(const block_t& block: blocks)
-    {
-      var_map.insert(std::make_pair(block, bes::boolean_variable(id_gen(std::string(block.name())))));
-    }
-
-    std::vector< bes::boolean_equation > equations;
-    for(const block_t& src: blocks)
-    {
-      std::set<bes::boolean_expression> right_hand_side;
-      for(const block_t& dest: blocks)
-      {
-        if(src.has_transition(dest))
-        {
-          right_hand_side.insert(var_map[dest]);
-        }
-      }
-
-      bes::boolean_expression rhs_expr = src.is_conjunctive() ? bes::join_and(right_hand_side.begin(), right_hand_side.end()) : bes::join_or(right_hand_side.begin(), right_hand_side.end());
-      equations.emplace_back(src.fixpoint_symbol(), var_map[src], rhs_expr);
-    }
-
-    // Search for the initial block
-    const block_t& initial_block = find_initial_block(blocks);
-    return bes::boolean_equation_system(equations, var_map[initial_block]);
-  }
+  // template <typename Container>
+  // bes::boolean_equation_system make_bes(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr)
+  // {
+  //   //TODO fix bug where variables are sorted according to BFS layer and not according
+  //   // to the order in the original PBES.
+  //   // This may result in a BES with a different solution.
+  //   set_identifier_generator id_gen;
+  //   std::map< block_t, bes::boolean_variable > var_map;
+  //   for(const block_t& block: blocks)
+  //   {
+  //     var_map.insert(std::make_pair(block, bes::boolean_variable(id_gen(std::string(block.name())))));
+  //   }
+  //
+  //   std::vector< bes::boolean_equation > equations;
+  //   for(const block_t& src: blocks)
+  //   {
+  //     std::set<bes::boolean_expression> right_hand_side;
+  //     for(const block_t& dest: blocks)
+  //     {
+  //       if(src.has_transition(dest))
+  //       {
+  //         right_hand_side.insert(var_map[dest]);
+  //       }
+  //     }
+  //
+  //     bes::boolean_expression rhs_expr = src.is_conjunctive() ? bes::join_and(right_hand_side.begin(), right_hand_side.end()) : bes::join_or(right_hand_side.begin(), right_hand_side.end());
+  //     equations.emplace_back(src.fixpoint_symbol(), var_map[src], rhs_expr);
+  //   }
+  //
+  //   // Search for the initial block
+  //   const block_t& initial_block = find_initial_block(blocks);
+  //   return bes::boolean_equation_system(equations, var_map[initial_block]);
+  // }
 
   void make_rank_map()
   {
@@ -334,28 +352,41 @@ protected:
     }
   }
 
-  void make_initial_partition()
+  void make_initial_partition(bool fine_initial)
   {
-    pbes_system::fixpoint_symbol previous_symbol;
-    std::list<subblock> conjunctive_subblocks;
-    std::list<subblock> disjunctive_subblocks;
-    for(std::vector<equation_type_t>::const_iterator it = m_spec.equations().begin(); it != m_spec.equations().end();)
+    if(fine_initial)
     {
-      previous_symbol = it->symbol();
-      (it->is_conjunctive() ? conjunctive_subblocks : disjunctive_subblocks).emplace_back(*it, m_dm, m_subblock_cache);
-
-      ++it;
-      if(it == m_spec.equations().end() || it->symbol() != previous_symbol)
+      // Create on block for every equation
+      for(const equation_type_t& eq: m_spec.equations())
       {
-        if(!conjunctive_subblocks.empty())
+        m_proof_blocks.emplace_back(std::list<subblock>({subblock(eq, m_dm, m_subblock_cache)}), m_block_cache);
+      }
+    }
+    else
+    {
+      // For each PBES rank, create one block with conjunctive subblocks and one
+      // block with disjunctive subblocks.
+      pbes_system::fixpoint_symbol previous_symbol;
+      std::list<subblock> conjunctive_subblocks;
+      std::list<subblock> disjunctive_subblocks;
+      for(std::vector<equation_type_t>::const_iterator it = m_spec.equations().begin(); it != m_spec.equations().end();)
+      {
+        previous_symbol = it->symbol();
+        (it->is_conjunctive() ? conjunctive_subblocks : disjunctive_subblocks).emplace_back(*it, m_dm, m_subblock_cache);
+
+        ++it;
+        if(it == m_spec.equations().end() || it->symbol() != previous_symbol)
         {
-          m_proof_blocks.emplace_back(conjunctive_subblocks, m_block_cache);
-          conjunctive_subblocks = std::list<subblock>();
-        }
-        if(!disjunctive_subblocks.empty())
-        {
-          m_proof_blocks.emplace_back(disjunctive_subblocks, m_block_cache);
-          disjunctive_subblocks = std::list<subblock>();
+          if(!conjunctive_subblocks.empty())
+          {
+            m_proof_blocks.emplace_back(conjunctive_subblocks, m_block_cache);
+            conjunctive_subblocks = std::list<subblock>();
+          }
+          if(!disjunctive_subblocks.empty())
+          {
+            m_proof_blocks.emplace_back(disjunctive_subblocks, m_block_cache);
+            disjunctive_subblocks = std::list<subblock>();
+          }
         }
       }
     }
@@ -363,10 +394,6 @@ protected:
 
   void make_fine_initial_partition()
   {
-    for(const equation_type_t& eq: m_spec.equations())
-    {
-      m_proof_blocks.emplace_back(std::list<subblock>({subblock(eq, m_dm, m_subblock_cache)}), m_block_cache);
-    }
   }
 
 public:
@@ -384,14 +411,7 @@ public:
     }
     m_block_cache = new split_cache<block>();
     m_subblock_cache = new split_cache<subblock>();
-    if(fine_initial)
-    {
-      make_fine_initial_partition();
-    }
-    else
-    {
-      make_initial_partition();
-    }
+    make_initial_partition(fine_initial);
     make_rank_map();
     print_partition(m_proof_blocks);
     // Make sure the initial block is the first in the list
@@ -446,14 +466,14 @@ public:
     make_pg(pg, m_proof_blocks);
   }
 
-  void save_bes()
-  {
-    const bes::boolean_equation_system& bes = make_bes(m_proof_blocks);
-    std::ofstream out;
-    out.open("out.bes");
-    bes.save(out);
-    out.close();
-  }
+  // void save_bes()
+  // {
+  //   const bes::boolean_equation_system& bes = make_bes(m_proof_blocks);
+  //   std::ofstream out;
+  //   out.open("out.bes");
+  //   bes.save(out);
+  //   out.close();
+  // }
 
   /**
    * Refine the partition num_steps times
@@ -493,7 +513,7 @@ public:
     // In this case, unreachable blocks will really be
     // thrown away.
     find_reachable_blocks(false);
-    if(num_iterations == 0)
+    if(num_iterations == 0 || num_steps == 0)
     {
       mCRL2log(log::verbose) << "Final partition:" << std::endl;
       print_partition(m_proof_blocks);

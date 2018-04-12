@@ -199,9 +199,9 @@ public:
     }
     else if(is_propositional_variable_instantiation(rhs))
     {
-      // m_is_conjunctive = false;
+      m_is_conjunctive = false;
       m_summands.emplace_back(data::variable_list(), data::sort_bool::true_(), propositional_variable_instantiation(rhs));
-      // We already have a summand that's always enable, so we don't need a summand with X_true or X_false
+      // We already have a summand that's always enabled, so we don't need a summand with X_true or X_false
       return;
     }
 
