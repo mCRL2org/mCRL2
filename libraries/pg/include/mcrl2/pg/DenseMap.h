@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 /*! \ingroup Containers
 
