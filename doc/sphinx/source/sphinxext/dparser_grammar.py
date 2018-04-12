@@ -1,5 +1,4 @@
 from sphinx.domains.std import ProductionList
-from sphinx.util.compat import make_admonition
 from docutils import nodes
 import os
 
