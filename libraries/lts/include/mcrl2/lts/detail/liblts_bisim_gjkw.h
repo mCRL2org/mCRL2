@@ -1986,7 +1986,7 @@ class bisim_partitioner_gjkw
     /* interrupt locatns:*/ (REFINE_BLUE_PREDECESSOR_HANDLED)
                             (REFINE_BLUE_TESTING)
                             (REFINE_BLUE_STATE_HANDLED)
-                            (REFINE_BLUE_COLLECT_BOTTOM));
+                            (REFINE_BLUE_COLLECT_BOTTOM))
 
     DECLARE_COROUTINE(refine_red,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
@@ -2000,7 +2000,7 @@ class bisim_partitioner_gjkw
     /* shared data:      */ struct bisim_gjkw::refine_shared_t, shared_data,
     /* interrupt locatns:*/ (REFINE_RED_COLLECT_FROMRED)
                             (REFINE_RED_PREDECESSOR_HANDLED)
-                            (REFINE_RED_STATE_HANDLED));
+                            (REFINE_RED_STATE_HANDLED))
 
     /*--------- PostprocessNewBottom -- Algorithm 4 of [GJKW 2017] ----------*/
 
