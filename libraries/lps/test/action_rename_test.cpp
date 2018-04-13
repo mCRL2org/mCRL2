@@ -10,6 +10,8 @@
 /// \brief Action rename test.
 
 #include "mcrl2/lps/action_rename.h"
+#include "mcrl2/lps/action_summand.h"
+#include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
@@ -19,7 +21,9 @@
 using namespace mcrl2;
 using lps::stochastic_specification;
 using lps::action_rename_specification;
-// using lps::action_rename;
+using lps::action_summand;
+using lps::action_summand_vector;
+using lps::deadlock_summand;
 
 static
 void test1()
@@ -187,10 +191,12 @@ static void test_regex1()
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().tail().front().name()) == "ab_out");
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().tail().tail().front().name()) == "out_ac");
 
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().front().label().name()) == "out_a");
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().tail().front().label().name()) == "ab_out");
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[1].multi_action().actions().front().label().name()) == "b_out");
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[2].multi_action().actions().front().label().name()) == "cout");
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "out_a|ab_out"; }));
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "cout"; }));
 }
 
 // Check whether renaming some actions to delta works
@@ -208,11 +214,20 @@ static void test_regex2()
   BOOST_CHECK(std::string(new_spec.action_labels().tail().front().name()) == "cout");
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().front().name()) == "ab_out");
 
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().front().label().name()) == "b_out");
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[1].multi_action().actions().front().label().name()) == "cout");
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "cout"; }));
 
   BOOST_CHECK(new_spec.process().deadlock_summands().size() == 2);
-  BOOST_CHECK(new_spec.process().deadlock_summands()[1].condition() == spec.process().action_summands()[0].condition());
+  auto find_result = std::find_if(spec.process().action_summands().begin(), spec.process().action_summands().end(),
+    [](const action_summand& as){ return lps::pp(as.multi_action()) == "a_out|ab_out"; });
+  BOOST_CHECK(find_result != spec.process().action_summands().end());
+  if(find_result != spec.process().action_summands().end())
+  {
+    BOOST_CHECK(std::any_of(new_spec.process().deadlock_summands().begin(), new_spec.process().deadlock_summands().end(),
+                                [&find_result](const deadlock_summand& ds){ return ds.condition() == find_result->condition(); }));
+  }
 }
 
 // Check whether renaming some actions to tau works
@@ -230,10 +245,12 @@ static void test_regex3()
   BOOST_CHECK(std::string(new_spec.action_labels().tail().front().name()) == "ab_out");
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().front().name()) == "ac_out");
 
-  BOOST_CHECK(new_spec.process().action_summands()[0].multi_action().actions().size() == 1);
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[0].multi_action().actions().front().label().name()) == "ab_out");
-  BOOST_CHECK(std::string(new_spec.process().action_summands()[1].multi_action().actions().front().label().name()) == "b_out");
-  BOOST_CHECK(new_spec.process().action_summands()[2].multi_action().actions().size() == 0);
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "ab_out"; }));
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
+  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "tau"; }));
 }
 
 // Check whether the list of actions contains no duplicates after renaming multiple actions
@@ -264,6 +281,6 @@ int test_main(int argc, char** argv)
   test_regex2();
   test_regex3();
   test_regex4();
-  
+
   return 0;
 }
