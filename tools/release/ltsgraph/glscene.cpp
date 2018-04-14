@@ -701,6 +701,11 @@ void GLScene::init(const QColor& clear)
 
 void GLScene::updateFog()
 {
+#ifndef __APPLE__   // With Apple LLVM version 9.1.0 (clang-902.0.39.1) and Xcode (9E145)
+                    // the code below leads to a crash. Therefore we disable it. 
+                    // This is most probably caused by a bug in the compiler or Qt. 
+                    // This condition should be removed whenever possible as it
+                    // is undesirable to have this unconditional code. 
   if (m_drawfog)
   {
     glFogf(GL_FOG_START, m_fogdistance);
@@ -711,6 +716,7 @@ void GLScene::updateFog()
   {
     glDisable(GL_FOG);
   }
+#endif
 }
 
 void GLScene::startPainter(QPainter& painter)
