@@ -27,7 +27,6 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/structure_graph.h"
-//#include "mcrl2/utilities/chrono_timer.h"
 
 namespace mcrl2 {
 
@@ -42,7 +41,7 @@ struct deque_vertex_set
   public:
     deque_vertex_set() = default;
 
-    deque_vertex_set(std::size_t N)
+    explicit deque_vertex_set(std::size_t N)
       : m_include(N)
     {}
 
@@ -157,7 +156,7 @@ struct vertex_set
 
     vertex_set() = default;
 
-    vertex_set(std::size_t N)
+    explicit vertex_set(std::size_t N)
       : m_include(N)
     {
       self_check();
@@ -674,7 +673,7 @@ class solve_structure_graph_algorithm
     }
 
   public:
-    solve_structure_graph_algorithm(bool check_strategy_ = false)
+    explicit solve_structure_graph_algorithm(bool check_strategy_ = false)
       : check_strategy(check_strategy_)
     {}
 
@@ -855,7 +854,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 
     // modifies ltsspec
     inline
-    void create_counter_example_lts(structure_graph& G, const std::set<structure_graph::index_type>& V, lts::lts_lts_t& ltsspec, const pbes& p)
+    void create_counter_example_lts(structure_graph& G, const std::set<structure_graph::index_type>& V, lts::lts_lts_t& ltsspec)
     {
       std::regex re("Z(neg|pos)_(\\d+)_.*");
 
@@ -880,7 +879,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 
     /// \param ltsspec The original LTS that was used to create the PBES.
     inline
-    bool solve_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec, const pbes& p)
+    bool solve_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       vertex_set Wconj;
@@ -892,14 +891,14 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       {
         mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
         std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, true);
-        create_counter_example_lts(G, W, ltsspec, p);
+        create_counter_example_lts(G, W, ltsspec);
         return true;
       }
       else if (Wconj.contains(init))
       {
         mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
         std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, false);
-        create_counter_example_lts(G, W, ltsspec, p);
+        create_counter_example_lts(G, W, ltsspec);
         return false;
       }
       throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
@@ -922,10 +921,10 @@ std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(s
 
 /// \param ltsspec The original LTS that was used to create the PBES.
 inline
-bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec, const pbes& p)
+bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec)
 {
   lts_solve_structure_graph_algorithm algorithm;
-  return algorithm.solve_with_counter_example(G, ltsspec, p);
+  return algorithm.solve_with_counter_example(G, ltsspec);
 }
 
 } // namespace pbes_system
