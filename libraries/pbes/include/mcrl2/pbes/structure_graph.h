@@ -16,7 +16,9 @@
 #include <limits>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/undefined.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {

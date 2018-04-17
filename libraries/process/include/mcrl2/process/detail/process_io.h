@@ -12,6 +12,11 @@
 #ifndef MCRL2_PROCESS_DETAIL_PROCESS_IO_H
 #define MCRL2_PROCESS_DETAIL_PROCESS_IO_H
 
+#include <iostream>
+#include <fstream>
+#include "mcrl2/process/parse.h"
+#include "mcrl2/process/process_specification.h"
+
 namespace mcrl2 {
 
 namespace process {
@@ -20,9 +25,9 @@ namespace detail {
 
 /// \brief Loads a process specification from input_filename, or from stdin if filename equals "".
 inline
-process::process_specification parse_process_specification(const std::string& input_filename)
+process_specification parse_process_specification(const std::string& input_filename)
 {
-  process::process_specification result;
+  process_specification result;
   if (input_filename.empty())
   {
     return process::parse_process_specification(std::cin);
@@ -54,11 +59,11 @@ process_specification load_process_specification(const std::string& filename)
 
 /// \brief Saves an PBES to filename, or to stdout if filename equals "".
 inline
-void save_process_specification(const process_specification& pbesspec, const std::string& filename)
+void save_process_specification(const process_specification& procspec, const std::string& filename)
 {
   if (filename.empty())
   {
-    pbesspec.save(std::cout);
+    procspec.save(std::cout);
   }
   else
   {
@@ -67,7 +72,7 @@ void save_process_specification(const process_specification& pbesspec, const std
     {
       throw mcrl2::runtime_error("Could not write to filename " + filename);
     }
-    pbesspec.save(to);
+    procspec.save(to);
   }
 }
 

@@ -79,21 +79,6 @@ struct eliminate_unused_equations_command: public process::detail::process_comma
   }
 };
 
-/// \brief Joins similar summands
-struct join_similar_summands_command: public process::detail::process_command
-{
-  join_similar_summands_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : process::detail::process_command("join-similar-summands", input_filename, output_filename, options)
-  {}
-
-  void execute() override
-  {
-    process::detail::process_command::execute();
-    process::join_similar_summands(procspec, 2);
-    utilities::detail::write_text(output_filename, process::pp(procspec));
-  }
-};
-
 /// \brief Anonimizes the identifiers of a process specification
 struct anonymize_process_command: public process::detail::process_command
 {
@@ -178,7 +163,6 @@ class mcrl2transform_tool: public transform_tool<rewriter_tool<input_output_tool
       add_command(std::make_shared<anonymize_process_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<join_similar_summands_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<separate_equations_command>(input_filename(), output_filename(), options));
     }
 };
