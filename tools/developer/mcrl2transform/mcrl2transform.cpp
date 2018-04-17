@@ -22,7 +22,6 @@
 #include "mcrl2/process/detail/process_command.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
 #include "mcrl2/process/eliminate_unused_equations.h"
-#include "mcrl2/process/join_similar_summands.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
