@@ -655,7 +655,6 @@ class pbesinst_lazy_algorithm
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
-        done.insert(X_e);
 
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
@@ -679,6 +678,7 @@ class pbesinst_lazy_algorithm
           if (!contains(done, Y_f))
           {
             todo.push_back(Y_f);
+            done.insert(Y_f);
           }
           m_pbesinst_backward_substitute.add_dependency(Y_f, X_e);
         }
