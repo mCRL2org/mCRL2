@@ -4,26 +4,69 @@
 
 \section{PBES instantiation}
 
-In this section we describe two instantiation algorithms for PBESs.
+In this section we describe several implementations of instantiation
+algorithms for PBESs.
+
+\subsection{Finite algorithm}
+
+In this section we describe an implementation of the finite instantiation
+algorithm \textsc{Pbes2besFinite} that eliminates data parameters with
+finite sorts. It is implemented in the tool \textbf{pbesinst}. Let $\mathcal{%
+E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi _{1})\cdots \mathcal{%
+(\sigma }_{n}X_{n}(d_{n}:D_{n},e_{n}:E_{n})=\varphi _{n})$ be a PBES. We
+assume that all data sorts $D_{i}$ are finite and all data sorts $E_{i}$ are
+infinite. Let $r$ be a data rewriter, and let $\rho $ be an injective
+function that creates a unique predicate variable from a predicate variable
+name and a data value according to $\rho (X(d:D,e:E),d_{0})\rightarrow Y(e:E)
+$, where $D$ is finite and $E$ is infinite and $d_{0}\in D$. Note that $D$
+and $D_{i}$ may be multi-dimensional sorts.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Pbes2besFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
+\textsc{)}} \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do}} \\ 
+\qquad \mathcal{E}_{i}:=\{\mathcal{\sigma }_{i}\rho (X_{i},d)=R(\varphi
+_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\ 
+\text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+with $R$ a rewriter on pbes expressions that is defined as follows:%
+\begin{eqnarray*}
+R(b) &=&b \\
+R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
+R(\varphi \oplus \psi ) &=&R(\varphi )\oplus R(\psi ) \\
+R(X_{i}(d,e)) &=&\left\{ 
+\begin{array}{cc}
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset  \\ 
+\dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
+\text{if }FV(d)\neq \emptyset 
+\end{array}%
+\right.  \\
+R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
+R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
+\end{eqnarray*}%
+where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
+$\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
+variables appearing in $d$.\newpage 
 
 \subsection{Lazy algorithm}
 
 In this section we describe an implementation of the lazy instantiation
 algorithm \textsc{Pbes2besLazy} that uses instantiation to compute a BES. It
-takes two extra parameters, an injective function $\rho $ that renames
-proposition variables to predicate variables, and a rewriter $R$ that
-eliminates quantifiers from predicate formulae. Let $\mathcal{E=(\sigma }%
-_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\ldots \mathcal{(\sigma }%
-_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES, and $X_{init}(e_{init})$ an
-initial state.%
+is implemented in the tool \textbf{pbesinst}. It takes two extra parameters,
+an injective function $\rho $ that renames proposition variables to
+predicate variables, and a rewriter $R$ that eliminates quantifiers from
+predicate formulae. Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi
+_{1})\ldots \mathcal{(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a
+PBES, and $X_{init}(e_{init})$ an initial state.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{Pbes2besLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
 \text{, }\rho \text{\textsc{)}} \\ 
-\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}_{i}:=\epsilon
-\\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}%
+_{i}:=\epsilon  \\ 
 todo:=\{R(X_{init}(e_{init}))\} \\ 
-done:=\emptyset \\ 
+done:=\emptyset  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
@@ -38,16 +81,131 @@ done:=\emptyset \\
 \end{array}%
 \end{equation*}%
 where $\rho $ is extended from predicate variables to quantifier free
-predicate formulae using%
+predicate formulae using
+
+\begin{eqnarray*}
+\rho (b) &=&b \\
+\quad \rho (\varphi \oplus \psi ) &=&\rho (\varphi )\oplus \rho (\psi )
+\end{eqnarray*}%
+\newpage 
+
+\subsection{Alternative lazy algorithm}
+
+Another version of the lazy algorithm named \textsc{Pbes2besAlternativeLazy}
+has been implemented in the tool \textbf{pbesinst}, but for the current
+implementation no specification is available. It is also used in the tool 
+\textbf{pbes2bool}. In 2015 Xiao Qi has made a specification and a
+corresponding implementation of \textsc{Pbes2besAlternativeLazy}. However,
+since then a lot of changes have been made to the implementation, without
+updating the specification. Below some specifications made by Xiao Qi are
+included, that are still relevant.
+
+The subroutine \textsc{FindLoop} attempts to find a $\mu $- or $\nu $-loop
+within all generated equations on the same rank of $X_{k}$. The map $\mathrm{%
+visited}$, intially empty, is used both as a mechanism to ensure termination
+and as a memoization table. It is passed by reference. Due to the fact that 
+\textsc{FindLoop} only considers generated equations, loops are only found
+after all variable instantiations on the loop have been generated.
+
 \begin{equation*}
-\begin{array}{cc}
-\rho (b)=_{def}b & \quad \rho (\varphi \oplus \psi )=_{def}\rho (\varphi
-)\oplus \rho (\psi )%
+\begin{array}{l}
+\text{\textsc{FindLoop}}(\sigma ,\varphi ,X_{k}(e),\mathrm{equations},%
+\mathrm{visited}) \\ 
+\text{\textbf{if }}\varphi \in \{true,false\}\text{ \textbf{then }}\text{%
+\textbf{return }}false \\ 
+\text{\textbf{if }}\varphi =X_{l}(f)\text{ \textbf{then }} \\ 
+\qquad \text{\textbf{if }}X_{l}(f)=X_{k}(e)\text{ \textbf{then }}\text{%
+\textbf{return }}true \\ 
+\qquad \text{\textbf{if }}\mathrm{rank}(X_{l})\neq \mathrm{rank}(X_{k})\text{
+\textbf{then }}\text{\textbf{return }}false \\ 
+\qquad \text{\textbf{if }}X_{l}(f)\in keys(\mathrm{visited})\text{ \textbf{%
+then }}\text{\textbf{return }}\mathrm{visited}(X_{l}(f)) \\ 
+\qquad \text{\textbf{if }}X_{l}(f)\in keys(\mathrm{equations})\text{ \textbf{%
+then }} \\ 
+\qquad \qquad \psi _{f}:=\mathrm{equations}(X_{l}(f)) \\ 
+\qquad \qquad \mathrm{visited}(X_{l}(f)):=false \\ 
+\qquad \qquad b:=\text{\textsc{FindLoop}}(\sigma ,\psi _{f},Y(f),\mathrm{%
+equations},\mathrm{visited}) \\ 
+\qquad \qquad \mathrm{visited}(X_{l}(f)):=b \\ 
+\qquad \qquad \text{\textbf{return }}b \\ 
+\qquad \text{\textbf{return }}false \\ 
+\text{\textbf{if }}\sigma =\mu \text{ \textbf{then }} \\ 
+\qquad \text{\textbf{if }}\varphi =\psi \wedge \chi \text{ \textbf{then }}
+\\ 
+\qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
+,X_{k}(e),\mathrm{equations},\mathrm{visited}))\vee \text{\textsc{FindLoop}}%
+(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\ 
+\qquad \text{\textbf{if }}\varphi =\psi \vee \chi \text{ \textbf{then }} \\ 
+\qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
+,X_{k}(e),\mathrm{equations},\mathrm{visited}))\wedge \text{\textsc{FindLoop}%
+}(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\ 
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then}} \\ 
+\qquad \text{\textbf{if }}\varphi =\psi \wedge \chi \text{ \textbf{then }}
+\\ 
+\qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
+,X_{k}(e),\mathrm{equations},\mathrm{visited}))\wedge \text{\textsc{FindLoop}%
+}(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\ 
+\qquad \text{\textbf{if }}\varphi =\psi \vee \chi \text{ \textbf{then }} \\ 
+\qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
+,X_{k}(e),\mathrm{equations},\mathrm{visited}))\vee \text{\textsc{FindLoop}}%
+(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited}))%
+\end{array}%
+\end{equation*}
+
+The subroutine \textsc{BackSubstitute} subsitutes the value of $X_{k}(e)$,
+which is either $true$ or $false$, to all its occurences, and do this
+recursively for all new variable instantiations that are found trivial. The
+argument $\mathrm{equations}$ is passed by reference:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{BackSubstitute}}(X_{k}(e),\mathrm{equations})\mathrm{%
+tosubstitute}:=\{X_{k}(e)\} \\ 
+\text{\textbf{while }}\mathrm{tosubstitute}\neq \emptyset \text{ \textbf{do }%
+} \\ 
+\qquad \text{\textbf{choose }}X_{l}(f)\in \mathrm{tosubstitute} \\ 
+\qquad \mathrm{tosubstitute}:=\mathrm{tosubstitute}\backslash \{X_{l}(f)\}
+\\ 
+\qquad \text{\textbf{foreach }}(Z(g),\varphi )\in \mathrm{equations} \\ 
+\qquad \qquad \text{\textbf{if }}X_{l}(f)\in \mathrm{occ}(\varphi )\text{ 
+\textbf{then }} \\ 
+\qquad \qquad \qquad \varphi :=\text{\textsc{Simplify}}(\varphi \lbrack
+X_{l}(f):=\mathrm{equations}(X_{l}(f))]) \\ 
+\qquad \qquad \qquad \mathrm{equations}(Z(g)):=\varphi  \\ 
+\qquad \qquad \qquad \text{\textbf{if }}\varphi \in \{true,false\}\text{ 
+\textbf{then }} \\ 
+\qquad \qquad \qquad \qquad \mathrm{tosubstitute}:=\mathrm{tosubstitute}\cup
+Z(g)%
+\end{array}%
+\end{equation*}
+
+The subroutine \textsc{RegenerateStates} re-explores the reachable state
+space. The arguments $\mathrm{todo}$ and $\mathrm{reachable}$ are passed by
+reference:
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{RegenerateStates}}(\mathrm{todo},\mathrm{reachable},\mathrm{%
+done},\mathrm{equations}) \\ 
+\mathrm{todo}:=\emptyset  \\ 
+\mathrm{reachable}:=\emptyset  \\ 
+\mathrm{grey}:=\{Xinit(einit)\} \\ 
+\text{\textbf{while }}grey\neq \emptyset  \\ 
+\qquad \text{\textbf{choose }}X_{k}(e)\in \mathrm{grey} \\ 
+\qquad \mathrm{reachable}:=\mathrm{reachable}\cup X_{k}(e) \\ 
+\qquad \text{\textbf{if }}X_{k}(e)\in \mathrm{done}\text{ \textbf{then }} \\ 
+\qquad \qquad \mathrm{grey}:=\mathrm{grey}\cup \mathrm{occ}(\mathrm{equations%
+}(X_{k}(e))) \\ 
+\qquad \text{\textbf{else }} \\ 
+\qquad \qquad \mathrm{todo}:=\mathrm{todo}\cup X_{k}(e)%
 \end{array}%
 \end{equation*}%
-\pagebreak
+\newpage 
 
 \subsection{Lazy algorithm (structure graph)}
+
+There is a third version of the lazy algorithm named \textsc{%
+Pbes2besStructureGraph} that produces a structure graph (parity game)
+instead of a BES. It is implemented in the tool \textbf{pbessolve}.
 
 A structure graph is a graph $(V,E)$ with $V$ a set of BES variables. On
 this graph a partial function $r:V\rightarrow \mathbb{N}$ is defined that
@@ -210,28 +368,51 @@ f^{\prime }}
 Note that in this definition separate nodes are created for the left hand
 side $X$ and the right hand side $f$ of each equation $\sigma X=f$ . This is
 undesirable, hence in the implementation below the nodes $X$ and $f$ are
-merged into one node labeled with $X$.%
+merged into one node labeled with $X$.
+
+The current implementation of \textsc{Pbes2besStructureGraph} is an
+application of a generic algorithm \textsc{Pbes2besLazy2} that reports all
+discovered equations using the callback function \textsc{ReportEquation}.%
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{Pbes2besStructureGraph(}}\mathcal{E}\text{, }X_{init}(e_{init})%
-\text{, }R\text{, }\rho \text{\textsc{)}} \\ 
-\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}%
-_{i}:=\epsilon  \\ 
-todo:=\{R(X_{init}(e_{init}))\} \\ 
-done:=\emptyset  \\ 
+\text{\textsc{Pbes2besLazy2(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }%
+R\text{\textsc{)}} \\ 
+init:=R(X_{init}(e_{init})) \\ 
+todo:=\{init\} \\ 
+done:=\{init\} \\ 
+\mathrm{equation}:=\emptyset  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
-\qquad G:=(\emptyset ,\emptyset ) \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
-\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
-\qquad done:=done\cup \{X_{k}(e)\} \\ 
-\qquad X^{e}:=\rho (X_{k}(e)) \\ 
+\qquad \mathrm{todo}:=\mathrm{todo}\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad G:=G\cup SG^{0}(X^{e},\psi ^{e}) \\ 
-\qquad todo:=todo\cup \{Y(f)\in \mathsf{occ}(\psi ^{e})\ |\ Y(f)\notin done\}
-\\ 
-\text{\textbf{return }}G,%
+\qquad \psi ^{e}:=\text{\textsc{ForwardSubstitute}}(\psi ^{e},\mathrm{%
+equation}) \\ 
+\qquad \psi ^{e}:=\text{\textsc{SimplifyLoop}}(\psi ^{e},X_{k}(e)) \\ 
+\qquad \mathrm{equation}(X_{k}(e)):=\psi ^{e} \\ 
+\qquad \text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\ 
+\qquad \mathrm{todo}:=\mathrm{todo}\cup (\mathrm{occ}(\psi ^{e})\setminus
+done) \\ 
+\qquad \mathrm{done}:=\mathrm{done}\cup \mathrm{occ}(\psi ^{e}) \\ 
+\qquad \mathrm{equation}:=\text{\textsc{BackwardSubstitute}}(\psi
+^{e},X_{k}(e),\mathrm{equation}) \\ 
+\qquad \mathrm{todo},\mathrm{done}:=\text{\textsc{Reset}}(init,\mathrm{todo},%
+\mathrm{done},\mathrm{equation})%
 \end{array}%
 \end{equation*}%
+The calls to \textsc{ForwardSubstitute}, \textsc{SimplifyLoop}, \textsc{%
+BackwardSubstitute}, and \textsc{Reset} are optimizations that can be
+omitted. Note that elements are added to the set $\mathrm{done}$ at a
+different moment than in the original \textsc{Pbes2besLazy} algorithm.
+Apparently this is necessary in combination with some of the optimizations.
+The callback function \textsc{ReportEquation} extends the structure graph $G$
+as follows:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\ 
+G:=G\cup SG^{0}(X_{k}(e),\psi ^{e})%
+\end{array}%
+\end{equation*}
+
 where $SG^{0}$ and $SG^{1}$ are defined as%
 \begin{equation*}
 \begin{array}{|c|c|}
@@ -265,46 +446,4 @@ _{n}\},\{(\psi ,\psi _{1}),\cdots ,(\psi ,\psi _{n})\}\right) \cup
 \end{equation*}%
 where we assume that in $\psi _{1}\wedge \cdots \wedge \psi _{n}$ none of
 the $\psi _{i}$ is a conjunction, and in $\psi _{1}\vee \cdots \vee \psi _{n}
-$ none of the $\psi _{i}$ is a disjunction.
-
-\newpage
-
-\subsection{Finite algorithm}
-
-Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi
-_{1})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{n}:D_{n},e_{n}:E_{n})=\varphi
-_{n})$ be a PBES. We assume that all data sorts $D_{i}$ are finite and all
-data sorts $E_{i}$ are infinite. Let $r$ be a data rewriter, and let $\rho $
-be an injective function that creates a unique predicate variable from a
-predicate variable name and a data value according to $\rho
-(X(d:D,e:E),d_{0})\rightarrow Y(e:E)$, where $D$ is finite and $E$ is
-infinite and $d_{0}\in D$. Note that $D$ and $D_{i}$ may be
-multi-dimensional sorts.%
-\begin{equation*}
-\begin{array}{l}
-\text{\textsc{Pbes2besFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
-\textsc{)}} \\ 
-\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do}} \\ 
-\qquad \mathcal{E}_{i}:=\{\mathcal{\sigma }_{i}\rho (X_{i},d)=R(\varphi
-_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\ 
-\text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
-\end{array}%
-\end{equation*}%
-with $R$ a rewriter on pbes expressions that is defined as follows:%
-\begin{eqnarray*}
-R(b) &=&b \\
-R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
-R(\varphi \oplus \psi ) &=&R(\varphi )\oplus (\psi ) \\
-R(X_{i}(d,e)) &=&\left\{ 
-\begin{array}{cc}
-\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\ 
-\dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
-\text{if }FV(d)\neq \emptyset%
-\end{array}%
-\right. \\
-R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
-R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
-\end{eqnarray*}%
-where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
-$\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
-variables appearing in $d$.\newpage
+$ none of the $\psi _{i}$ is a disjunction.\newpage 
