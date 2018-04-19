@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_LAZY_H
@@ -418,7 +419,7 @@ pbes_expression pbes_expression_order_quantified_variables(const mcrl2::pbes_sys
 struct pbesinst_backward_substitute
 {
   /// \brief Map a variable instantiation to a set of other variable instantiations on whose right hand sides it appears.
-  std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> > occurrence;
+  std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation>> occurrence;
 
   // Substitute X_e to its value in all its occurrences, and substitute all other variables to their values that are found
   // to be either true or false in all their occurrences.
@@ -446,8 +447,7 @@ struct pbesinst_backward_substitute
           auto X = *trivials.begin();
           trivials.erase(trivials.begin());
 
-          auto oc = occurrence[X];
-          for (const auto& Y: oc) {
+          for (const auto& Y: occurrence[X]) {
             pbes_expression& f = equation[Y];
             f = make_forward_substitute_rewriter(equation)(f);
             if (is_true(f) || is_false(f))
@@ -645,6 +645,8 @@ class pbesinst_lazy_algorithm
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     virtual void run()
     {
+      using utilities::detail::contains;
+
       std::size_t m_iteration_count = 0;
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
@@ -653,8 +655,9 @@ class pbesinst_lazy_algorithm
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
-        std::size_t index = m_equation_index.index(X_e.name());
+        done.insert(X_e);
 
+        std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
@@ -667,22 +670,21 @@ class pbesinst_lazy_algorithm
         // optional step
         psi_e = simplify_loop(psi_e, eqn.symbol(), X_e);
 
-        for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
-        {
-          if (done.find(v) == done.end() && !detail::has_key(equation, v))
-          {
-            todo.push_back(v);
-            done.insert(v);
-          }
-          m_pbesinst_backward_substitute.add_dependency(v, X_e);
-        }
-
-        // Store the result
+        // Store and report the new equation
         equation[X_e] = psi_e;
         report_equation(X_e, psi_e, m_equation_index.rank(X_e.name()));
 
+        for (const propositional_variable_instantiation& Y_f: find_propositional_variable_instantiations(psi_e))
+        {
+          if (!contains(done, Y_f))
+          {
+            todo.push_back(Y_f);
+          }
+          m_pbesinst_backward_substitute.add_dependency(Y_f, X_e);
+        }
+
         // optional step (backward substitution)
-        backward_substitute(psi_e, X_e, equation);
+        backward_substitute(psi_e, X_e, equation); // N.B. modifies equation
 
         // optional step
         reset(init, todo, done, equation); // N.B. modifies todo and done
