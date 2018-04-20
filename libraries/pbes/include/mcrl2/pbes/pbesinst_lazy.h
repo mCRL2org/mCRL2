@@ -651,10 +651,23 @@ class pbesinst_lazy_algorithm
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
-      done.insert(init);
+      mCRL2log(log::debug) << "Add todo element " << init << std::endl;
       while (!todo.empty())
       {
+        mCRL2log(log::debug) << "todo = " << core::detail::print_list(todo) << std::endl;
+        mCRL2log(log::debug) << "done = " << core::detail::print_set(done) << std::endl;
         auto const& X_e = next_todo();
+
+        // The todo set is stored as a deque, and therefore it may contain duplicates. This is
+        // the (ugly) way to avoid handling the same element twice. It would be cleaner to prevent
+        // duplicates to be added to the todo set.
+        if (contains(done, X_e))
+        {
+          continue;
+        }
+
+        done.insert(X_e);
+        mCRL2log(log::debug) << "Choose todo element " << X_e << std::endl;
 
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
@@ -672,13 +685,14 @@ class pbesinst_lazy_algorithm
         // Store and report the new equation
         equation[X_e] = psi_e;
         report_equation(X_e, psi_e, m_equation_index.rank(X_e.name()));
+        mCRL2log(log::debug) << "Report equation " << X_e << " = " << psi_e << std::endl;
 
         for (const propositional_variable_instantiation& Y_f: find_propositional_variable_instantiations(psi_e))
         {
           if (!contains(done, Y_f))
           {
             todo.push_back(Y_f);
-            done.insert(Y_f);
+            mCRL2log(log::debug) << "Add todo element " << Y_f << std::endl;
           }
           m_pbesinst_backward_substitute.add_dependency(Y_f, X_e);
         }

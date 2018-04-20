@@ -17,9 +17,9 @@ E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi _{1})\cdots \mathcal{%
 assume that all data sorts $D_{i}$ are finite and all data sorts $E_{i}$ are
 infinite. Let $r$ be a data rewriter, and let $\rho $ be an injective
 function that creates a unique predicate variable from a predicate variable
-name and a data value according to $\rho (X(d:D,e:E),d_{0})\rightarrow Y(e:E)
-$, where $D$ is finite and $E$ is infinite and $d_{0}\in D$. Note that $D$
-and $D_{i}$ may be multi-dimensional sorts.%
+name and a data value according to $\rho (X(d:D,e:E),d_{0})\rightarrow
+Y(e:E) $, where $D$ is finite and $E$ is infinite and $d_{0}\in D$. Note
+that $D$ and $D_{i}$ may be multi-dimensional sorts.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{Pbes2besFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
@@ -37,17 +37,17 @@ R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
 R(\varphi \oplus \psi ) &=&R(\varphi )\oplus R(\psi ) \\
 R(X_{i}(d,e)) &=&\left\{ 
 \begin{array}{cc}
-\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset  \\ 
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\ 
 \dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
-\text{if }FV(d)\neq \emptyset 
+\text{if }FV(d)\neq \emptyset%
 \end{array}%
-\right.  \\
+\right. \\
 R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
 R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
 \end{eqnarray*}%
 where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
 $\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
-variables appearing in $d$.\newpage 
+variables appearing in $d$.\newpage
 
 \subsection{Lazy algorithm}
 
@@ -63,10 +63,10 @@ PBES, and $X_{init}(e_{init})$ an initial state.%
 \begin{array}{l}
 \text{\textsc{Pbes2besLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
 \text{, }\rho \text{\textsc{)}} \\ 
-\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}%
-_{i}:=\epsilon  \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}_{i}:=\epsilon
+\\ 
 todo:=\{R(X_{init}(e_{init}))\} \\ 
-done:=\emptyset  \\ 
+done:=\emptyset \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
@@ -87,7 +87,7 @@ predicate formulae using
 \rho (b) &=&b \\
 \quad \rho (\varphi \oplus \psi ) &=&\rho (\varphi )\oplus \rho (\psi )
 \end{eqnarray*}%
-\newpage 
+\newpage
 
 \subsection{Alternative lazy algorithm}
 
@@ -170,7 +170,7 @@ tosubstitute}:=\{X_{k}(e)\} \\
 \textbf{then }} \\ 
 \qquad \qquad \qquad \varphi :=\text{\textsc{Simplify}}(\varphi \lbrack
 X_{l}(f):=\mathrm{equations}(X_{l}(f))]) \\ 
-\qquad \qquad \qquad \mathrm{equations}(Z(g)):=\varphi  \\ 
+\qquad \qquad \qquad \mathrm{equations}(Z(g)):=\varphi \\ 
 \qquad \qquad \qquad \text{\textbf{if }}\varphi \in \{true,false\}\text{ 
 \textbf{then }} \\ 
 \qquad \qquad \qquad \qquad \mathrm{tosubstitute}:=\mathrm{tosubstitute}\cup
@@ -186,10 +186,10 @@ reference:
 \begin{array}{l}
 \text{\textsc{RegenerateStates}}(\mathrm{todo},\mathrm{reachable},\mathrm{%
 done},\mathrm{equations}) \\ 
-\mathrm{todo}:=\emptyset  \\ 
-\mathrm{reachable}:=\emptyset  \\ 
+\mathrm{todo}:=\emptyset \\ 
+\mathrm{reachable}:=\emptyset \\ 
 \mathrm{grey}:=\{Xinit(einit)\} \\ 
-\text{\textbf{while }}grey\neq \emptyset  \\ 
+\text{\textbf{while }}grey\neq \emptyset \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in \mathrm{grey} \\ 
 \qquad \mathrm{reachable}:=\mathrm{reachable}\cup X_{k}(e) \\ 
 \qquad \text{\textbf{if }}X_{k}(e)\in \mathrm{done}\text{ \textbf{then }} \\ 
@@ -199,7 +199,7 @@ done},\mathrm{equations}) \\
 \qquad \qquad \mathrm{todo}:=\mathrm{todo}\cup X_{k}(e)%
 \end{array}%
 \end{equation*}%
-\newpage 
+\newpage
 
 \subsection{Lazy algorithm (structure graph)}
 
@@ -379,11 +379,12 @@ discovered equations using the callback function \textsc{ReportEquation}.%
 R\text{\textsc{)}} \\ 
 init:=R(X_{init}(e_{init})) \\ 
 todo:=\{init\} \\ 
-done:=\{init\} \\ 
+done:=\emptyset  \\ 
 \mathrm{equation}:=\emptyset  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
 \qquad \mathrm{todo}:=\mathrm{todo}\ \backslash \ \{X_{k}(e)\} \\ 
+\qquad \mathrm{done}:=\mathrm{done}\cup \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
 \qquad \psi ^{e}:=\text{\textsc{ForwardSubstitute}}(\psi ^{e},\mathrm{%
 equation}) \\ 
@@ -392,7 +393,6 @@ equation}) \\
 \qquad \text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\ 
 \qquad \mathrm{todo}:=\mathrm{todo}\cup (\mathrm{occ}(\psi ^{e})\setminus
 done) \\ 
-\qquad \mathrm{done}:=\mathrm{done}\cup \mathrm{occ}(\psi ^{e}) \\ 
 \qquad \mathrm{equation}:=\text{\textsc{BackwardSubstitute}}(\psi
 ^{e},X_{k}(e),\mathrm{equation}) \\ 
 \qquad \mathrm{todo},\mathrm{done}:=\text{\textsc{Reset}}(init,\mathrm{todo},%
@@ -417,7 +417,7 @@ where $SG^{0}$ and $SG^{1}$ are defined as%
 \begin{equation*}
 \begin{array}{|c|c|}
 \hline
-\psi  & SG^{0}(\varphi ,\psi ) \\ \hline\hline
+\psi & SG^{0}(\varphi ,\psi ) \\ \hline\hline
 true & (\{\varphi \},\emptyset ) \\ \hline
 false & (\{\varphi \},\emptyset ) \\ \hline
 Y & (\{\varphi ,\psi \},\{(\varphi ,\psi )\}) \\ \hline
@@ -432,7 +432,7 @@ Y & (\{\varphi ,\psi \},\{(\varphi ,\psi )\}) \\ \hline
 \begin{equation*}
 \begin{array}{|c|c|}
 \hline
-\psi  & SG^{1}(\varphi ) \\ \hline\hline
+\psi & SG^{1}(\varphi ) \\ \hline\hline
 true & (\{\psi \},\emptyset ) \\ \hline
 false & (\{\psi \},\emptyset ) \\ \hline
 Y & (\{\psi \},\emptyset ) \\ \hline
@@ -445,5 +445,5 @@ _{n}\},\{(\psi ,\psi _{1}),\cdots ,(\psi ,\psi _{n})\}\right) \cup
 \end{array}%
 \end{equation*}%
 where we assume that in $\psi _{1}\wedge \cdots \wedge \psi _{n}$ none of
-the $\psi _{i}$ is a conjunction, and in $\psi _{1}\vee \cdots \vee \psi _{n}
-$ none of the $\psi _{i}$ is a disjunction.\newpage 
+the $\psi _{i}$ is a conjunction, and in $\psi _{1}\vee \cdots \vee \psi
+_{n} $ none of the $\psi _{i}$ is a disjunction.\newpage
