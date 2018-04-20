@@ -81,7 +81,7 @@ struct pbesinst_rename_short
   std::unordered_map<propositional_variable_instantiation, core::identifier_string>& name_map;
   std::size_t index = 0;
 
-  pbesinst_rename_short(std::unordered_map<propositional_variable_instantiation, core::identifier_string>& name_map_)
+  explicit pbesinst_rename_short(std::unordered_map<propositional_variable_instantiation, core::identifier_string>& name_map_)
     : name_map(name_map_)
   {}
 
@@ -108,7 +108,7 @@ struct add_forward_substitute_rewriter: public Builder<Derived>
 
   const Map &map;
 
-  add_forward_substitute_rewriter(const Map& m)
+  explicit add_forward_substitute_rewriter(const Map& m)
     : map(m)
   {}
 
@@ -135,7 +135,7 @@ template <typename Map>
 struct forward_substitute_rewriter_builder: public add_forward_substitute_rewriter<pbes_system::detail::simplify_builder, forward_substitute_rewriter_builder<Map>, Map>
 {
   typedef add_forward_substitute_rewriter<pbes_system::detail::simplify_builder, forward_substitute_rewriter_builder<Map>, Map> super;
-  forward_substitute_rewriter_builder(const Map& m)
+  explicit forward_substitute_rewriter_builder(const Map& m)
     : super(m)
   {}
 };
@@ -145,7 +145,7 @@ struct forward_substitute_rewriter
 {
   const Map& map;
 
-  forward_substitute_rewriter(const Map& m)
+  explicit forward_substitute_rewriter(const Map& m)
     : map(m)
   {}
 
@@ -178,19 +178,19 @@ struct find_loop_simplifier
   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation;
 
   template <bool is_mu>
-  bool find_loop_rec(const pbes_expression& expr,
+  bool find_loop_rec(const pbes_expression& x,
                      propositional_variable_instantiation X,
                      std::size_t rank,
                      std::unordered_map<propositional_variable_instantiation, bool>& visited
                     ) const
   {
-    if (is_false(expr) || is_true(expr))
+    if (is_false(x) || is_true(x))
     {
       return false;
     }
-    if (is_propositional_variable_instantiation(expr))
+    if (is_propositional_variable_instantiation(x))
     {
-      auto const& Y = atermpp::down_cast<propositional_variable_instantiation>(expr);
+      auto const& Y = atermpp::down_cast<propositional_variable_instantiation>(x);
       if (Y == X)
       {
         return true;
@@ -215,32 +215,32 @@ struct find_loop_simplifier
 
     if (is_mu)
     {
-      if (is_and(expr))
+      if (is_and(x))
       {
-        const auto& expra = atermpp::down_cast<and_>(expr);
-        return find_loop_rec<is_mu>(expra.left(), X, rank, visited) ||
-               find_loop_rec<is_mu>(expra.right(), X, rank, visited);
+        const auto& x_ = atermpp::down_cast<and_>(x);
+        return find_loop_rec<is_mu>(x_.left(), X, rank, visited) ||
+               find_loop_rec<is_mu>(x_.right(), X, rank, visited);
       }
-      if (is_or(expr))
+      if (is_or(x))
       {
-        const auto& expro = atermpp::down_cast<or_>(expr);
-        return find_loop_rec<is_mu>(expro.left(), X, rank, visited) &&
-               find_loop_rec<is_mu>(expro.right(), X, rank, visited);
+        const auto& x_ = atermpp::down_cast<or_>(x);
+        return find_loop_rec<is_mu>(x_.left(), X, rank, visited) &&
+               find_loop_rec<is_mu>(x_.right(), X, rank, visited);
       }
     }
     else
     {
-      if (is_and(expr))
+      if (is_and(x))
       {
-        const auto& expra = atermpp::down_cast<and_>(expr);
-        return find_loop_rec<is_mu>(expra.left(), X, rank, visited) &&
-               find_loop_rec<is_mu>(expra.right(), X, rank, visited);
+        const auto& x_ = atermpp::down_cast<and_>(x);
+        return find_loop_rec<is_mu>(x_.left(), X, rank, visited) &&
+               find_loop_rec<is_mu>(x_.right(), X, rank, visited);
       }
-      if (is_or(expr))
+      if (is_or(x))
       {
-        const auto& expro = atermpp::down_cast<or_>(expr);
-        return find_loop_rec<is_mu>(expro.left(), X, rank, visited) ||
-               find_loop_rec<is_mu>(expro.right(), X, rank, visited);
+        const auto& x_ = atermpp::down_cast<or_>(x);
+        return find_loop_rec<is_mu>(x_.left(), X, rank, visited) ||
+               find_loop_rec<is_mu>(x_.right(), X, rank, visited);
       }
     }
     return false;
@@ -306,6 +306,8 @@ struct pbesinst_resetter
                   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
+    using utilities::detail::contains;
+
     if (++regeneration_count == regeneration_period)
     {
       regeneration_count = 0;
@@ -316,58 +318,30 @@ struct pbesinst_resetter
       return;
     }
 
-    // Propositional variable instantiations that are reachable from init.
-    std::unordered_set<propositional_variable_instantiation> reachable;
     todo.clear();
 
-    std::stack<pbes_expression> stack;
-    stack.push(init);
+    std::stack<propositional_variable_instantiation> todo1;
+    std::unordered_set<propositional_variable_instantiation> done1;
+    todo1.push(init);
 
-    while (!stack.empty())
+    while (!todo1.empty())
     {
-      const pbes_expression expr = stack.top();
-      stack.pop();
-
-      if (is_propositional_variable_instantiation(expr))
+      propositional_variable_instantiation X_e = todo1.top();
+      todo1.pop();
+      done1.insert(X_e);
+      if (contains(done, X_e))
       {
-        const auto& X = atermpp::down_cast<propositional_variable_instantiation>(expr);
-        if (!has_key(reachable, X))
+        for (const propositional_variable_instantiation& Y_f: find_propositional_variable_instantiations(equation.at(X_e)))
         {
-          if (has_key(equation, X))
+          if (!contains(done1, Y_f))
           {
-            stack.push(equation.at(X));
-            reachable.insert(X);
-          }
-          else
-          {
-            todo.push_back(X);
-            done.insert(X);
-            reachable.insert(X);
+            todo1.push(Y_f);
           }
         }
       }
-      else if (is_and(expr))
+      else
       {
-        const auto& expra = atermpp::down_cast<and_>(expr);
-        stack.push(expra.left());
-        stack.push(expra.right());
-      }
-      else if (is_or(expr))
-      {
-        const auto& expro = atermpp::down_cast<or_>(expr);
-        stack.push(expro.left());
-        stack.push(expro.right());
-      }
-      else if (is_imp(expr))
-      {
-        const auto& expro = atermpp::down_cast<or_>(expr);
-        stack.push(expro.left());
-        stack.push(expro.right());
-      }
-      else if (is_not(expr))
-      {
-        const auto& y = atermpp::down_cast<not_>(expr);
-        stack.push(y.operand());
+        todo.push_back(X_e);
       }
     }
   }
@@ -600,7 +574,7 @@ class pbesinst_lazy_algorithm
     /// \param rewrite_strategy A strategy for the data rewriter.
     /// \param search_strategy The search strategy used to explore the pbes, typically depth or breadth first.
     /// \param transformation_strategy The strategy that determines to which extent the generated bes is simplified while being generated.
-    pbesinst_lazy_algorithm(
+    explicit pbesinst_lazy_algorithm(
          const pbes& p,
          data::rewriter::strategy rewrite_strategy = data::jitty,
          search_strategy search_strategy = breadth_first,
