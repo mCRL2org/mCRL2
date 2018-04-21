@@ -302,7 +302,7 @@ struct pbesinst_resetter
 
   void operator()(const propositional_variable_instantiation& init,
                   std::deque<propositional_variable_instantiation>& todo,
-                  std::unordered_set<propositional_variable_instantiation>& done,
+                  std::unordered_set<propositional_variable_instantiation>& discovered,
                   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
@@ -329,7 +329,7 @@ struct pbesinst_resetter
       propositional_variable_instantiation X_e = todo1.top();
       todo1.pop();
       done1.insert(X_e);
-      if (contains(done, X_e))
+      if (equation.find(X_e) != equation.end())
       {
         for (const propositional_variable_instantiation& Y_f: find_propositional_variable_instantiations(equation.at(X_e)))
         {
@@ -342,6 +342,7 @@ struct pbesinst_resetter
       else
       {
         todo.push_back(X_e);
+        discovered.insert(X_e);
       }
     }
   }
