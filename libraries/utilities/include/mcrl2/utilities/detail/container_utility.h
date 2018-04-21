@@ -18,6 +18,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <unordered_set>
 
 namespace mcrl2 {
 
@@ -70,6 +71,13 @@ bool contains(const std::set<T>& c, const typename std::set<T>::value_type& v)
 // specialization
 template <typename T>
 bool contains(const std::multiset<T>& c, const typename std::multiset<T>::value_type& v)
+{
+  return c.find(v) != c.end();
+}
+
+// specialization
+template <typename T>
+bool contains(const std::unordered_set<T>& c, const typename std::set<T>::value_type& v)
 {
   return c.find(v) != c.end();
 }
