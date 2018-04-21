@@ -458,8 +458,8 @@ class pbesinst_lazy_algorithm
     /// \brief The propositional variable instantiations that need to be handled.
     std::deque<propositional_variable_instantiation> todo;
 
-    /// \brief The propositional variable instantiations that have already been handled.
-    std::unordered_set<propositional_variable_instantiation> done;
+    /// \brief The propositional variable instantiations that have been discovered (not necessarily handled).
+    std::unordered_set<propositional_variable_instantiation> discovered;
 
     /// \brief Map a variable instantiation to its right hand side.
     std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
@@ -625,23 +625,10 @@ class pbesinst_lazy_algorithm
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
-      mCRL2log(log::debug) << "Add todo element " << init << std::endl;
+      discovered.insert(init);
       while (!todo.empty())
       {
-        mCRL2log(log::debug) << "todo = " << core::detail::print_list(todo) << std::endl;
-        mCRL2log(log::debug) << "done = " << core::detail::print_set(done) << std::endl;
         auto const& X_e = next_todo();
-
-        // The todo set is stored as a deque, and therefore it may contain duplicates. This is
-        // the (ugly) way to avoid handling the same element twice. It would be cleaner to prevent
-        // duplicates to be added to the todo set.
-        if (contains(done, X_e))
-        {
-          continue;
-        }
-
-        done.insert(X_e);
-        mCRL2log(log::debug) << "Choose todo element " << X_e << std::endl;
 
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
@@ -659,14 +646,13 @@ class pbesinst_lazy_algorithm
         // Store and report the new equation
         equation[X_e] = psi_e;
         report_equation(X_e, psi_e, m_equation_index.rank(X_e.name()));
-        mCRL2log(log::debug) << "Report equation " << X_e << " = " << psi_e << std::endl;
 
         for (const propositional_variable_instantiation& Y_f: find_propositional_variable_instantiations(psi_e))
         {
-          if (!contains(done, Y_f))
+          if (!contains(discovered, Y_f))
           {
             todo.push_back(Y_f);
-            mCRL2log(log::debug) << "Add todo element " << Y_f << std::endl;
+            discovered.insert(Y_f);
           }
           m_pbesinst_backward_substitute.add_dependency(Y_f, X_e);
         }
@@ -675,7 +661,7 @@ class pbesinst_lazy_algorithm
         backward_substitute(psi_e, X_e, equation); // N.B. modifies equation
 
         // optional step
-        reset(init, todo, done, equation); // N.B. modifies todo and done
+        reset(init, todo, discovered, equation); // N.B. modifies todo and done
 
         mCRL2log(log::status) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);

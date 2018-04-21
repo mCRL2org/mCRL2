@@ -1,6 +1,6 @@
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
-                      
+
 
 \section{PBES instantiation}
 
@@ -23,10 +23,10 @@ that $D$ and $D_{i}$ may be multi-dimensional sorts.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{Pbes2besFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
-\textsc{)}} \\ 
-\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do}} \\ 
+\textsc{)}} \\
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do}} \\
 \qquad \mathcal{E}_{i}:=\{\mathcal{\sigma }_{i}\rho (X_{i},d)=R(\varphi
-_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\ 
+_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\
 \text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
 \end{array}%
 \end{equation*}%
@@ -35,17 +35,17 @@ with $R$ a rewriter on pbes expressions that is defined as follows:%
 R(b) &=&b \\
 R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
 R(\varphi \oplus \psi ) &=&R(\varphi )\oplus R(\psi ) \\
-R(X_{i}(d,e)) &=&\left\{ 
+R(X_{i}(d,e)) &=&\left\{
 \begin{array}{cc}
-\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\ 
-\dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\
+\dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) &
 \text{if }FV(d)\neq \emptyset%
 \end{array}%
 \right. \\
 R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
 R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
 \end{eqnarray*}%
-where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
+where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and
 $\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
 variables appearing in $d$.\newpage
 
@@ -62,21 +62,21 @@ PBES, and $X_{init}(e_{init})$ an initial state.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{Pbes2besLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
-\text{, }\rho \text{\textsc{)}} \\ 
+\text{, }\rho \text{\textsc{)}} \\
 \text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}_{i}:=\epsilon
-\\ 
-todo:=\{R(X_{init}(e_{init}))\} \\ 
-done:=\emptyset \\ 
-\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
-\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
-\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
-\qquad done:=done\cup \{X_{k}(e)\} \\ 
-\qquad X^{e}:=\rho (X_{k}(e)) \\ 
-\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+\\
+todo:=\{R(X_{init}(e_{init}))\} \\
+done:=\emptyset \\
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\
+\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
+\qquad done:=done\cup \{X_{k}(e)\} \\
+\qquad X^{e}:=\rho (X_{k}(e)) \\
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
 \qquad \mathcal{E}_{k}:=\mathcal{E}_{k}(\mathcal{\sigma }_{k}X^{e}=\rho
-(\psi ^{e})) \\ 
+(\psi ^{e})) \\
 \qquad todo:=todo\cup \{Y(f)\in \mathsf{occ}(\psi ^{e})\ |\ Y(f)\notin done\}
-\\ 
+\\
 \text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
 \end{array}%
 \end{equation*}%
@@ -93,7 +93,7 @@ predicate formulae using
 
 Another version of the lazy algorithm named \textsc{Pbes2besAlternativeLazy}
 has been implemented in the tool \textbf{pbesinst}, but for the current
-implementation no specification is available. It is also used in the tool 
+implementation no specification is available. It is also used in the tool
 \textbf{pbes2bool}. In 2015 Xiao Qi has made a specification and a
 corresponding implementation of \textsc{Pbes2besAlternativeLazy}. However,
 since then a lot of changes have been made to the implementation, without
@@ -103,49 +103,49 @@ included, that are still relevant.
 The subroutine \textsc{FindLoop} attempts to find a $\mu $- or $\nu $-loop
 within all generated equations on the same rank of $X_{k}$. The map $\mathrm{%
 visited}$, intially empty, is used both as a mechanism to ensure termination
-and as a memoization table. It is passed by reference. Due to the fact that 
+and as a memoization table. It is passed by reference. Due to the fact that
 \textsc{FindLoop} only considers generated equations, loops are only found
 after all variable instantiations on the loop have been generated.
 
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{FindLoop}}(\sigma ,\varphi ,X_{k}(e),\mathrm{equations},%
-\mathrm{visited}) \\ 
+\mathrm{visited}) \\
 \text{\textbf{if }}\varphi \in \{true,false\}\text{ \textbf{then }}\text{%
-\textbf{return }}false \\ 
-\text{\textbf{if }}\varphi =X_{l}(f)\text{ \textbf{then }} \\ 
+\textbf{return }}false \\
+\text{\textbf{if }}\varphi =X_{l}(f)\text{ \textbf{then }} \\
 \qquad \text{\textbf{if }}X_{l}(f)=X_{k}(e)\text{ \textbf{then }}\text{%
-\textbf{return }}true \\ 
+\textbf{return }}true \\
 \qquad \text{\textbf{if }}\mathrm{rank}(X_{l})\neq \mathrm{rank}(X_{k})\text{
-\textbf{then }}\text{\textbf{return }}false \\ 
+\textbf{then }}\text{\textbf{return }}false \\
 \qquad \text{\textbf{if }}X_{l}(f)\in keys(\mathrm{visited})\text{ \textbf{%
-then }}\text{\textbf{return }}\mathrm{visited}(X_{l}(f)) \\ 
+then }}\text{\textbf{return }}\mathrm{visited}(X_{l}(f)) \\
 \qquad \text{\textbf{if }}X_{l}(f)\in keys(\mathrm{equations})\text{ \textbf{%
-then }} \\ 
-\qquad \qquad \psi _{f}:=\mathrm{equations}(X_{l}(f)) \\ 
-\qquad \qquad \mathrm{visited}(X_{l}(f)):=false \\ 
+then }} \\
+\qquad \qquad \psi _{f}:=\mathrm{equations}(X_{l}(f)) \\
+\qquad \qquad \mathrm{visited}(X_{l}(f)):=false \\
 \qquad \qquad b:=\text{\textsc{FindLoop}}(\sigma ,\psi _{f},Y(f),\mathrm{%
-equations},\mathrm{visited}) \\ 
-\qquad \qquad \mathrm{visited}(X_{l}(f)):=b \\ 
-\qquad \qquad \text{\textbf{return }}b \\ 
-\qquad \text{\textbf{return }}false \\ 
-\text{\textbf{if }}\sigma =\mu \text{ \textbf{then }} \\ 
+equations},\mathrm{visited}) \\
+\qquad \qquad \mathrm{visited}(X_{l}(f)):=b \\
+\qquad \qquad \text{\textbf{return }}b \\
+\qquad \text{\textbf{return }}false \\
+\text{\textbf{if }}\sigma =\mu \text{ \textbf{then }} \\
 \qquad \text{\textbf{if }}\varphi =\psi \wedge \chi \text{ \textbf{then }}
-\\ 
+\\
 \qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
 ,X_{k}(e),\mathrm{equations},\mathrm{visited}))\vee \text{\textsc{FindLoop}}%
-(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\ 
-\qquad \text{\textbf{if }}\varphi =\psi \vee \chi \text{ \textbf{then }} \\ 
+(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\
+\qquad \text{\textbf{if }}\varphi =\psi \vee \chi \text{ \textbf{then }} \\
 \qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
 ,X_{k}(e),\mathrm{equations},\mathrm{visited}))\wedge \text{\textsc{FindLoop}%
-}(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\ 
-\text{\textbf{if }}\sigma =\nu \text{ \textbf{then}} \\ 
+}(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then}} \\
 \qquad \text{\textbf{if }}\varphi =\psi \wedge \chi \text{ \textbf{then }}
-\\ 
+\\
 \qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
 ,X_{k}(e),\mathrm{equations},\mathrm{visited}))\wedge \text{\textsc{FindLoop}%
-}(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\ 
-\qquad \text{\textbf{if }}\varphi =\psi \vee \chi \text{ \textbf{then }} \\ 
+}(\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited})) \\
+\qquad \text{\textbf{if }}\varphi =\psi \vee \chi \text{ \textbf{then }} \\
 \qquad \qquad \text{\textbf{return }}\text{\textsc{FindLoop}}(\sigma ,\psi
 ,X_{k}(e),\mathrm{equations},\mathrm{visited}))\vee \text{\textsc{FindLoop}}%
 (\sigma ,\chi ,X_{k}(e),\mathrm{equations},\mathrm{visited}))%
@@ -159,20 +159,20 @@ argument $\mathrm{equations}$ is passed by reference:%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{BackSubstitute}}(X_{k}(e),\mathrm{equations})\mathrm{%
-tosubstitute}:=\{X_{k}(e)\} \\ 
+tosubstitute}:=\{X_{k}(e)\} \\
 \text{\textbf{while }}\mathrm{tosubstitute}\neq \emptyset \text{ \textbf{do }%
-} \\ 
-\qquad \text{\textbf{choose }}X_{l}(f)\in \mathrm{tosubstitute} \\ 
+} \\
+\qquad \text{\textbf{choose }}X_{l}(f)\in \mathrm{tosubstitute} \\
 \qquad \mathrm{tosubstitute}:=\mathrm{tosubstitute}\backslash \{X_{l}(f)\}
-\\ 
-\qquad \text{\textbf{foreach }}(Z(g),\varphi )\in \mathrm{equations} \\ 
-\qquad \qquad \text{\textbf{if }}X_{l}(f)\in \mathrm{occ}(\varphi )\text{ 
-\textbf{then }} \\ 
+\\
+\qquad \text{\textbf{foreach }}(Z(g),\varphi )\in \mathrm{equations} \\
+\qquad \qquad \text{\textbf{if }}X_{l}(f)\in \mathrm{occ}(\varphi )\text{
+\textbf{then }} \\
 \qquad \qquad \qquad \varphi :=\text{\textsc{Simplify}}(\varphi \lbrack
-X_{l}(f):=\mathrm{equations}(X_{l}(f))]) \\ 
-\qquad \qquad \qquad \mathrm{equations}(Z(g)):=\varphi \\ 
-\qquad \qquad \qquad \text{\textbf{if }}\varphi \in \{true,false\}\text{ 
-\textbf{then }} \\ 
+X_{l}(f):=\mathrm{equations}(X_{l}(f))]) \\
+\qquad \qquad \qquad \mathrm{equations}(Z(g)):=\varphi \\
+\qquad \qquad \qquad \text{\textbf{if }}\varphi \in \{true,false\}\text{
+\textbf{then }} \\
 \qquad \qquad \qquad \qquad \mathrm{tosubstitute}:=\mathrm{tosubstitute}\cup
 Z(g)%
 \end{array}%
@@ -185,17 +185,17 @@ reference:
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{RegenerateStates}}(\mathrm{todo},\mathrm{reachable},\mathrm{%
-done},\mathrm{equations}) \\ 
-\mathrm{todo}:=\emptyset \\ 
-\mathrm{reachable}:=\emptyset \\ 
-\mathrm{grey}:=\{Xinit(einit)\} \\ 
-\text{\textbf{while }}grey\neq \emptyset \\ 
-\qquad \text{\textbf{choose }}X_{k}(e)\in \mathrm{grey} \\ 
-\qquad \mathrm{reachable}:=\mathrm{reachable}\cup X_{k}(e) \\ 
-\qquad \text{\textbf{if }}X_{k}(e)\in \mathrm{done}\text{ \textbf{then }} \\ 
+done},\mathrm{equations}) \\
+\mathrm{todo}:=\emptyset \\
+\mathrm{reachable}:=\emptyset \\
+\mathrm{grey}:=\{Xinit(einit)\} \\
+\text{\textbf{while }}grey\neq \emptyset \\
+\qquad \text{\textbf{choose }}X_{k}(e)\in \mathrm{grey} \\
+\qquad \mathrm{reachable}:=\mathrm{reachable}\cup X_{k}(e) \\
+\qquad \text{\textbf{if }}X_{k}(e)\in \mathrm{done}\text{ \textbf{then }} \\
 \qquad \qquad \mathrm{grey}:=\mathrm{grey}\cup \mathrm{occ}(\mathrm{equations%
-}(X_{k}(e))) \\ 
-\qquad \text{\textbf{else }} \\ 
+}(X_{k}(e))) \\
+\qquad \text{\textbf{else }} \\
 \qquad \qquad \mathrm{todo}:=\mathrm{todo}\cup X_{k}(e)%
 \end{array}%
 \end{equation*}%
@@ -206,6 +206,8 @@ done},\mathrm{equations}) \\
 There is a third version of the lazy algorithm named \textsc{%
 Pbes2besStructureGraph} that produces a structure graph (parity game)
 instead of a BES. It is implemented in the tool \textbf{pbessolve}.
+
+\subsubsection{Structure graph definition}
 
 A structure graph is a graph $(V,E)$ with $V$ a set of BES variables. On
 this graph a partial function $r:V\rightarrow \mathbb{N}$ is defined that
@@ -230,7 +232,7 @@ following SOS rules:%
 \begin{equation*}
 \frac{\left\langle f,\mathcal{E}\right\rangle \blacktriangle \quad \lnot
 \left\langle f,\mathcal{E}\right\rangle \pitchfork \quad \left\langle f,%
-\mathcal{E}\right\rangle \rightarrow \left\langle g,\mathcal{E}\right\rangle 
+\mathcal{E}\right\rangle \rightarrow \left\langle g,\mathcal{E}\right\rangle
 }{\left\langle f\wedge f^{\prime },\mathcal{E}\right\rangle \rightarrow
 \left\langle g,\mathcal{E}\right\rangle }\qquad \frac{\left\langle f^{\prime
 },\mathcal{E}\right\rangle \blacktriangle \quad \lnot \left\langle f^{\prime
@@ -242,7 +244,7 @@ following SOS rules:%
 \begin{equation*}
 \frac{\left\langle f,\mathcal{E}\right\rangle \blacktriangledown \quad \lnot
 \left\langle f,\mathcal{E}\right\rangle \pitchfork \quad \left\langle f,%
-\mathcal{E}\right\rangle \rightarrow \left\langle g,\mathcal{E}\right\rangle 
+\mathcal{E}\right\rangle \rightarrow \left\langle g,\mathcal{E}\right\rangle
 }{\left\langle f\vee f^{\prime },\mathcal{E}\right\rangle \rightarrow
 \left\langle g,\mathcal{E}\right\rangle }\qquad \frac{\left\langle f^{\prime
 },\mathcal{E}\right\rangle \blacktriangledown \quad \lnot \left\langle
@@ -284,7 +286,7 @@ f\vee f^{\prime },\mathcal{E}\right\rangle \rightarrow \left\langle f,%
 \begin{equation*}
 \frac{\sigma X=f\in \mathcal{E}\quad \left\langle f,\mathcal{E}\right\rangle
 \blacktriangle \quad \lnot \left\langle f,\mathcal{E}\right\rangle
-\pitchfork }{\left\langle X,\mathcal{E}\right\rangle \blacktriangle }\qquad 
+\pitchfork }{\left\langle X,\mathcal{E}\right\rangle \blacktriangle }\qquad
 \frac{\sigma X=f\in \mathcal{E}\quad \left\langle f,\mathcal{E}\right\rangle
 \blacktriangledown \quad \lnot \left\langle f,\mathcal{E}\right\rangle
 \pitchfork }{\left\langle X,\mathcal{E}\right\rangle \blacktriangledown }
@@ -338,7 +340,7 @@ f\rightarrow g}{(f^{\prime }\vee f)\rightarrow g}
 \lnot f^{\prime }\blacktriangle }{f\wedge f^{\prime }\rightarrow f^{\prime }}
 \end{equation*}%
 \begin{equation*}
-\frac{\lnot f\blacktriangledown }{f\vee f^{\prime }\rightarrow f}\qquad 
+\frac{\lnot f\blacktriangledown }{f\vee f^{\prime }\rightarrow f}\qquad
 \frac{\lnot f^{\prime }\blacktriangledown }{f\vee f^{\prime }\rightarrow
 f^{\prime }}
 \end{equation*}%
@@ -349,7 +351,7 @@ f^{\prime }}
 \frac{{}}{X\vee f\rightarrow X}\qquad \frac{{}}{f\vee X\rightarrow X}
 \end{equation*}%
 \begin{equation*}
-\frac{\sigma X=f\wedge f^{\prime }\in \mathcal{E}}{X\blacktriangle }\qquad 
+\frac{\sigma X=f\wedge f^{\prime }\in \mathcal{E}}{X\blacktriangle }\qquad
 \frac{\sigma X=f\vee f^{\prime }\in \mathcal{E}}{X\blacktriangledown }
 \end{equation*}%
 \begin{equation*}
@@ -370,45 +372,87 @@ side $X$ and the right hand side $f$ of each equation $\sigma X=f$ . This is
 undesirable, hence in the implementation below the nodes $X$ and $f$ are
 merged into one node labeled with $X$.
 
-The current implementation of \textsc{Pbes2besStructureGraph} is an
-application of a generic algorithm \textsc{Pbes2besLazy2} that reports all
-discovered equations using the callback function \textsc{ReportEquation}.%
+\subsubsection{Generic lazy PBES instantiation algorithms}
+
+In this section two generic variants of lazy PBES instantiation are described that that report all discovered BES
+equations using a callback function \textsc{ReportEquation}. These algorithms contain a number of optimizations
+with respect to the original version. The first version \textsc{Pbes2besLazy2} stores todo elements in a set,
+and is a straightforward generalization of \textsc{Pbes2besLazy}.
+
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{Pbes2besLazy2(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }%
-R\text{\textsc{)}} \\ 
-init:=R(X_{init}(e_{init})) \\ 
-todo:=\{init\} \\ 
-done:=\emptyset  \\ 
-\mathrm{equation}:=\emptyset  \\ 
-\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
-\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
-\qquad \mathrm{todo}:=\mathrm{todo}\ \backslash \ \{X_{k}(e)\} \\ 
-\qquad \mathrm{done}:=\mathrm{done}\cup \{X_{k}(e)\} \\ 
-\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+R\text{\textsc{)}} \\
+\mathrm{init}:=R(X_{init}(e_{init})) \\
+\mathrm{todo}:=\{\mathrm{init}\} \\
+\mathrm{done}:=\emptyset  \\
+\mathrm{equation}:=\emptyset  \\
+\text{\textbf{while }}\mathrm{todo}\neq \emptyset \text{ \textbf{do}} \\
+\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\
+\qquad \mathrm{todo}:=\mathrm{todo}\ \backslash \ \{X_{k}(e)\} \\
+\qquad \mathrm{done}:=\mathrm{done}\cup \{X_{k}(e)\} \\
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
 \qquad \psi ^{e}:=\text{\textsc{ForwardSubstitute}}(\psi ^{e},\mathrm{%
-equation}) \\ 
-\qquad \psi ^{e}:=\text{\textsc{SimplifyLoop}}(\psi ^{e},X_{k}(e)) \\ 
-\qquad \mathrm{equation}(X_{k}(e)):=\psi ^{e} \\ 
-\qquad \text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\ 
+equation}) \\
+\qquad \psi ^{e}:=\text{\textsc{SimplifyLoop}}(\psi ^{e},X_{k}(e)) \\
+\qquad \mathrm{equation}(X_{k}(e)):=\psi ^{e} \\
+\qquad \text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\
 \qquad \mathrm{todo}:=\mathrm{todo}\cup (\mathrm{occ}(\psi ^{e})\setminus
-done) \\ 
+\mathrm{done}) \\
 \qquad \mathrm{equation}:=\text{\textsc{BackwardSubstitute}}(\psi
-^{e},X_{k}(e),\mathrm{equation}) \\ 
-\qquad \mathrm{todo},\mathrm{done}:=\text{\textsc{Reset}}(init,\mathrm{todo},%
+^{e},X_{k}(e),\mathrm{equation}) \\
+\qquad \mathrm{todo}:=\text{\textsc{ResetTodo}}(\mathrm{init},\mathrm{todo},%
 \mathrm{done},\mathrm{equation})%
 \end{array}%
 \end{equation*}%
 The calls to \textsc{ForwardSubstitute}, \textsc{SimplifyLoop}, \textsc{%
 BackwardSubstitute}, and \textsc{Reset} are optimizations that can be
-omitted. Note that elements are added to the set $\mathrm{done}$ at a
-different moment than in the original \textsc{Pbes2besLazy} algorithm.
-Apparently this is necessary in combination with some of the optimizations.
-The callback function \textsc{ReportEquation} extends the structure graph $G$
-as follows:%
+omitted.
+
+The second version \textsc{Pbes2besLazy3} stores todo elements in a double ended queue. This is done to support
+breadth first and depth first search. This is achieved by choosing the first respectively the last element of the todo
+queue. The choice for a double ended queue introduces a complication: the todo queue may contain duplicate
+elements. This problem is solved by immediatiely adding new todo elements to the set done. This changes the
+role of the set done, hence it is renamed to discovered.
+
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\ 
+\text{\textsc{Pbes2besLazy3(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }%
+R\text{\textsc{)}} \\
+\mathrm{init}:=R(X_{init}(e_{init})) \\
+\mathrm{todo}:=[\mathrm{init}] \\
+\mathrm{discovered}:=\{ \mathrm{init} \} \\
+\mathrm{equation}:=\emptyset  \\
+\text{\textbf{while }}\mathrm{todo}\neq \emptyset \text{ \textbf{do}} \\
+\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\
+\qquad \mathrm{todo}:=\mathrm{todo}\ +\!\!+ \ [X_{k}(e)] \\
+\qquad \mathrm{discovered}:=\mathrm{discovered}\cup \{X_{k}(e)\} \\
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
+\qquad \psi ^{e}:=\text{\textsc{ForwardSubstitute}}(\psi ^{e},\mathrm{%
+equation}) \\
+\qquad \psi ^{e}:=\text{\textsc{SimplifyLoop}}(\psi ^{e},X_{k}(e)) \\
+\qquad \mathrm{equation}(X_{k}(e)):=\psi ^{e} \\
+\qquad \text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\
+
+\qquad \text{\textbf{for }} Y_{l}(f) \in \mathrm{occ}(\psi ^{e})\setminus \mathrm{discovered} \ \text{\textbf{do }}\\
+\qquad \qquad \mathrm{todo}:=\mathrm{todo}\ +\!\!+ \ [Y_{l}(f)] \\
+\qquad \qquad \mathrm{discovered}:=\mathrm{discovered}\ \cup \{Y_{l}(f)\} \\
+
+\qquad \mathrm{equation}:=\text{\textsc{BackwardSubstitute}}(\psi
+^{e},X_{k}(e),\mathrm{equation}) \\
+\qquad \mathrm{todo}:=\text{\textsc{ResetTodo}}(\mathrm{init},\mathrm{todo},%
+\mathrm{discovered},\mathrm{equation})%
+\end{array}%
+\end{equation*}
+
+\subsubsection{Pbes2besStructureGraph}
+
+For the \textsc{Pbes2besStructureGraph} algorithm a concrete implementation of \textsc{ReportEquation}
+needs to be defined. We assume there is a structure graph $G$. The callback function
+\textsc{ReportEquation} extends $G$ as follows:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\
 G:=G\cup SG^{0}(X_{k}(e),\psi ^{e})%
 \end{array}%
 \end{equation*}
@@ -446,4 +490,7 @@ _{n}\},\{(\psi ,\psi _{1}),\cdots ,(\psi ,\psi _{n})\}\right) \cup
 \end{equation*}%
 where we assume that in $\psi _{1}\wedge \cdots \wedge \psi _{n}$ none of
 the $\psi _{i}$ is a conjunction, and in $\psi _{1}\vee \cdots \vee \psi
-_{n} $ none of the $\psi _{i}$ is a disjunction.\newpage
+_{n} $ none of the $\psi _{i}$ is a disjunction.
+Note that both $SG^{0}(\varphi ,\psi)$ and $SG^{1}(\varphi ,\psi )$ are defined as a pair ($V$, $E$) of
+nodes and edges.
+\newpage
