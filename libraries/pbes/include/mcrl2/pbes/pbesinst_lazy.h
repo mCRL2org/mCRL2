@@ -21,17 +21,18 @@
 #include <unordered_map>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/remove_equations.h"
-#include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
+#include "mcrl2/pbes/transformations.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -348,49 +349,6 @@ struct pbesinst_resetter
   }
 };
 
-inline
-pbes_expression pbes_expression_order_quantified_variables(const mcrl2::pbes_system::pbes_expression& p, const mcrl2::data::data_specification& dataspec)
-{
-  if (is_pbes_and(p))
-  {
-    const auto& pa = atermpp::down_cast<and_>(p);
-    return and_(pbes_expression_order_quantified_variables(pa.left(), dataspec),
-                pbes_expression_order_quantified_variables(pa.right(), dataspec));
-  }
-  else if (is_pbes_or(p))
-  {
-    const auto& po = atermpp::down_cast<or_>(p);
-    return or_(pbes_expression_order_quantified_variables(po.left(), dataspec),
-               pbes_expression_order_quantified_variables(po.right(), dataspec));
-  }
-  else if (is_pbes_imp(p))
-  {
-    const auto& pi = atermpp::down_cast<imp>(p);
-    return imp(pbes_expression_order_quantified_variables(pi.left(), dataspec),
-               pbes_expression_order_quantified_variables(pi.right(), dataspec));
-  }
-  else if (is_pbes_not(p))
-  {
-    return not_(pbes_expression_order_quantified_variables(atermpp::down_cast<not_>(p).operand(), dataspec));
-  }
-  else if (is_pbes_forall(p))
-  {
-    const auto& pf = atermpp::down_cast<forall>(p);
-    const pbes_expression expr = pbes_expression_order_quantified_variables(pf.body(), dataspec);
-    return make_forall(mcrl2::data::order_variables_to_optimise_enumeration(pf.variables(), dataspec), expr);
-  }
-  else if (is_pbes_exists(p))
-  {
-    const auto& pe = atermpp::down_cast<exists>(p);
-    const pbes_expression expr = pbes_expression_order_quantified_variables(pe.body(), dataspec);
-    return make_exists(mcrl2::data::order_variables_to_optimise_enumeration(pe.variables(), dataspec), expr);
-  }
-  else
-  {
-    return p;
-  }
-}
-
 struct pbesinst_backward_substitute
 {
   /// \brief Map a variable instantiation to a set of other variable instantiations on whose right hand sides it appears.
@@ -513,7 +471,7 @@ class pbesinst_lazy_algorithm
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
       for (pbes_equation& eq: p.equations())
       {
-        eq.formula() = detail::pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), p.data());
+        eq.formula() = order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), p.data());
       }
       return p;
     }
