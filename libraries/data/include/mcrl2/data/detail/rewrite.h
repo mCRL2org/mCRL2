@@ -41,9 +41,10 @@ namespace detail
  **/
 class Rewriter
 {
-  public:
-    enumerator_identifier_generator generator;  //name for variables.
+  protected:
+    enumerator_identifier_generator m_generator;  //name for variables.
 
+  public:
     typedef mutable_indexed_substitution<> substitution_type;
 
     used_data_equation_selector data_equation_selector;
@@ -70,7 +71,7 @@ class Rewriter
     /** \brief The fresh name generator of the rewriter */
     data::enumerator_identifier_generator& identifier_generator()
     {
-      return generator;
+      return m_generator;
     }
 
     /**

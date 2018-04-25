@@ -488,7 +488,7 @@ static data_expression subst_values(
       if (variables_in_substitution.count(*it)>0)
       {
         // Replace *it in the list and in the body by a new variable name.
-        const variable fresh_variable(generator(it->name()),it->sort());
+        const variable fresh_variable(generator(),it->sort());
         new_variables.push_back(fresh_variable);
         sigma[*it]=fresh_variable;
         sigma_trivial=false;
@@ -785,13 +785,13 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         if (matches)
         {
           if (rule1.condition()==sort_bool::true_() || rewrite_aux(
-                   subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rule1.condition(),generator),sigma)==sort_bool::true_())
+                   subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rule1.condition(),m_generator),sigma)==sort_bool::true_())
           {
             const data_expression& rhs=rule1.rhs();
 
             if (arity == rule_arity)
             {
-              const data_expression result=rewrite_aux(subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,generator),sigma);
+              const data_expression result=rewrite_aux(subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,m_generator),sigma);
               for (std::size_t i=0; i<arity; i++)
               {
                 if (rewritten_defined[i])
@@ -808,7 +808,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
               // There are more arguments than those that have been rewritten.
               // Get those, put them in rewritten.
 
-              data_expression result=subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,generator);
+              data_expression result=subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,m_generator);
 
               for(std::size_t i=rule_arity; i<arity; ++i)
               {

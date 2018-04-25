@@ -86,7 +86,7 @@ data_expression Rewriter::rewrite_where(
   for (const assignment& a: assignments)
   {
     const variable& v=a.lhs();
-    const variable v_fresh(generator("whr_"), v.sort());
+    const variable v_fresh(m_generator(), v.sort());
     variable_renaming[v]=v_fresh;
     sigma[v_fresh]=rewrite(a.rhs(),sigma);
   }
@@ -125,7 +125,7 @@ abstraction Rewriter::rewrite_single_lambda(
       if (variables_in_sigma.find(v) != variables_in_sigma.end() || sigma(v) != v)
       {
         number_of_renamed_variables++;
-        new_variables[count]=data::variable(generator("y_"), v.sort());
+        new_variables[count]=data::variable(m_generator(), v.sort());
         assert(occur_check(v, new_variables[count]));
       }
       else 
@@ -240,7 +240,7 @@ data_expression Rewriter::rewrite_lambda_application(
   std::size_t count=1;
   for(const variable& v: vl)
   {
-    const variable v_fresh(generator("x_"), v.sort());
+    const variable v_fresh(m_generator(), v.sort());
     variable_renaming[v]=v_fresh;
     sigma[v_fresh]=rewrite(data_expression(t[count]),sigma);
     ++count;
@@ -299,7 +299,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   {
     if (sigma(v)!=v)
     {
-      const variable v_fresh(generator("ex_"), v.sort());
+      const variable v_fresh(m_generator(), v.sort());
       variable_renaming[v]=v_fresh;
       vl_new_v.push_back(v_fresh);
     }
@@ -344,7 +344,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
                                              rewriter_wrapper::substitution_type> enumerator_type;
   try
   {
-    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, generator, max_count, throw_exceptions);
+    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, m_generator, max_count, throw_exceptions);
   
     /* Create a list to store solutions */
     data_expression partial_result=sort_bool::false_();
@@ -412,7 +412,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   {
     if (sigma(v)!=v)  // Check whether sigma is defined on v. If not, renaming is not necessary.
     {
-      const variable v_fresh(generator("all_"), v.sort());
+      const variable v_fresh(m_generator(), v.sort());
       variable_renaming[v]=v_fresh;
       vl_new_v.push_back(v_fresh);
     }
@@ -457,7 +457,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
                                              rewriter_wrapper::substitution_type> enumerator_type;
   try
   {
-    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, generator, max_count, throw_exceptions);
+    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, m_generator, max_count, throw_exceptions);
 
     /* Create lists to store solutions */
     data_expression partial_result=sort_bool::true_();

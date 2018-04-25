@@ -41,7 +41,7 @@ class enumerator_identifier_generator
     { }
     
     /// \brief Generates a unique function symbol with the given prefix followed by a number.
-    core::identifier_string operator()(const std::string& = "", bool = false)
+    core::identifier_string operator()(void)
     {
       return core::identifier_string(f());
     }

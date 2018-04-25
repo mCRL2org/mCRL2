@@ -131,7 +131,7 @@ bool compute_finite_function_sorts(const function_sort& sort,
   {
     domain_expressions.push_back(enumerate_expressions(s, dataspec, datar, id_generator));
     total_domain_size = total_domain_size * domain_expressions.back().size();
-    function_parameters.push_back(variable(id_generator("x"), s));
+    function_parameters.push_back(variable(id_generator(), s));
   }
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -498,8 +498,8 @@ class enumerator_algorithm
         const sort_expression element_sort = container_sort(sort).element_sort();
         if (dataspec.is_certainly_finite(element_sort))
         {
-          const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator("x"), element_sort) }, sort_bool::false_());
-          const variable fset_variable(id_generator("@var_fset@", false), sort_fset::fset(element_sort));
+          const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator(), element_sort) }, sort_bool::false_());
+          const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
           const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
           const data_expression old_substituted_value = sigma(v1);
           sigma[v1] = term;
@@ -559,7 +559,7 @@ class enumerator_algorithm
             if (data::is_function_sort(constructor.sort()))
             {
               auto const& domain = atermpp::down_cast<data::function_sort>(constructor.sort()).domain();
-              data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s) { return data::variable(id_generator("@x"), s); });
+              data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s) { return data::variable(id_generator(), s); });
               // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
               sigma[v1] = cy;

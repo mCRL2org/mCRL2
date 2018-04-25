@@ -801,7 +801,7 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
         variable_vector var_vec;
         for(sort_expression_list::const_iterator s=sl->begin(); s!=sl->end(); ++s)
         {
-          variable v=variable(jitty_rewriter.generator("v@r"),*s); // Find a new name for a variable that is temporarily in use.
+          variable v=variable(jitty_rewriter.identifier_generator()(),*s); // Find a new name for a variable that is temporarily in use.
           var_vec.push_back(v);
           vars.push_front(v);
         }
