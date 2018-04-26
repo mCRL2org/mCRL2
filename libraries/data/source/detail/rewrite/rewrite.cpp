@@ -224,10 +224,10 @@ data_expression Rewriter::rewrite_lambda_application(
                       const data_expression& t,
                       substitution_type& sigma)
 {
-  // using namespace atermpp;
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
-  const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
+  // const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
+  const data_expression& lambda_body=lambda_term.body();
   std::size_t arity=t.size();
   assert(arity>0);
   if (arity==1) // The term has shape application(lambda d..:D...t), i.e. without arguments.
@@ -236,30 +236,52 @@ data_expression Rewriter::rewrite_lambda_application(
   }
   assert(vl.size()<arity);
 
-  mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-  std::size_t count=1;
+  // The variable vl_backup will be used to first store the values to be substituted
+  // for the variables in vl. Subsequently, it will be used to temporarily save the values in sigma
+  // assigned to vl. 
+  data_expression* vl_backup = MCRL2_SPECIFIC_STACK_ALLOCATOR(data_expression,vl.size());
+
+  // Calculate the values that must be substituted for the variables in vl and store these in vl_backup.
+  for(std::size_t count=0; count<vl.size(); count++)
+  {
+    new (&vl_backup[count]) data_expression(rewrite(data_expression(t[count+1]),sigma));
+  }
+
+  // Swap the values assigned to variables in vl with those in vl_backup.
+  std::size_t count=0;
   for(const variable& v: vl)
   {
-    const variable v_fresh(m_generator(), v.sort());
-    variable_renaming[v]=v_fresh;
-    sigma[v_fresh]=rewrite(data_expression(t[count]),sigma);
-    ++count;
+    const data_expression temp=sigma(v);
+    sigma[v]=vl_backup[count];
+    vl_backup[count]=temp;
+    count++;
   }
 
-  const data_expression result=rewrite(replace_variables(lambda_body,variable_renaming),sigma);
+  const data_expression result=rewrite(lambda_body,sigma);
 
-  // Reset variables in sigma
-  for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
-                 it!=variable_renaming.end(); ++it)
+  // Reset variables in sigma and destroy the elements in vl_backup.
+  count=0; 
+  for(const variable& v: vl)
   {
-    sigma[atermpp::down_cast<variable>(it->second)]=it->second;
+    sigma[v]=vl_backup[count];
+    vl_backup[count].~data_expression();
+    count++;
   }
+
   if (vl.size()+1==arity)
   {
     return result;
   }
 
+
   // There are more arguments than bound variables.
+  // Rewrite the remaining arguments and apply the rewritten lambda term to them.  
+  // TODO: BELOW IS THE DESIRED CODE, but there is a type error confusing aterms and data_expressions. 
+  /* return application(result, 
+                     t.begin()+vl.size()+1, 
+                     t.end(), 
+                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); }); */
+
   std::vector < data_expression > args;
   for(std::size_t i=1; i<arity-vl.size(); ++i)
   {
@@ -267,7 +289,7 @@ data_expression Rewriter::rewrite_lambda_application(
     args.push_back(atermpp::down_cast<data_expression>(t[vl.size()+i]));
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
-  return rewrite(application(result, args.begin(), args.end()),sigma);
+  return rewrite(application(result, args.begin(), args.end()),sigma); 
 }
 
 data_expression Rewriter::existential_quantifier_enumeration(
