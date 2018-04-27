@@ -34,14 +34,19 @@ void test_data_expression(const std::string& s, const variable_vector& v, Predic
 
 void test_expression(const std::string& evaluate, const std::string& expected, data::rewriter r)
 {
-  data_expression d1 = parse_data_expression(evaluate);
-  data_expression d2 = parse_data_expression(expected);
-  if (r(d1)!=r(d2))
+  const data_expression d1 = parse_data_expression(evaluate);
+  const data_expression rd1 =r(d1);
+  const data_expression d2 = parse_data_expression(expected);
+  const data_expression rd2 =r(d2);
+
+  if (rd1!=rd2)
   {
+    std::cerr << "------------------------------------------------------\n";
     std::cerr << "Evaluating: " << evaluate << "\n";
-    std::cerr << "Result: " << d1 << "\n";
+    std::cerr << "Result: " << rd1 << "\n";
     std::cerr << "Expected result: " << expected << "\n";
-    BOOST_CHECK(r(d1) == r(d2));
+    std::cerr << "Evaluated expected result " << rd2 << "\n";
+    BOOST_CHECK(rd1 == rd2);
     std::cerr << "------------------------------------------------------\n";
   }
 }

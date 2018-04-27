@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jeroen Keiren, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -171,8 +171,6 @@ class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator
 {
   protected:
     mutable data_expression m_stable_store;
-    // ForwardIterator m_it;
-    // const data_expression *m_prepend;
     ArgumentConverter m_argument_converter;
 
   public:
@@ -409,15 +407,7 @@ class application: public data_expression
     ///          application starts at the first argument. This also means that
     ///          t[n] for t an application is equal to t[n+1] if t is interpreted as an
     ///          aterm_appl.
-    class const_iterator : public atermpp::term_appl_iterator<const data_expression>
-    {
-      public:
-        /// \brief Constructor from a data_expression::const_iterator
-        explicit const_iterator(const data_expression::const_iterator& p)
-          : atermpp::term_appl_iterator<const data_expression>(static_cast<const data_expression*>(&*p))
-        {}
-
-    };
+    typedef atermpp::term_appl_iterator<data_expression> const_iterator;
 
     /// \brief Constructor.
     template <typename FwdIter>
@@ -489,15 +479,14 @@ class application: public data_expression
     ///        application.
     const_iterator begin() const
     {
-      return const_iterator(data_expression::begin()+1);
-      // return ++const_iterator(data_expression::begin());
+      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm_appl::begin()+1);
     }
 
     /// \brief Returns an iterator pointing past the last argument of the
     ///        application.
     const_iterator end() const
     {
-      return const_iterator(data_expression::end());
+      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm_appl::end());
     }
 
     /// \brief Returns an iterator pointing past the last argument of the

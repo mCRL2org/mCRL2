@@ -695,7 +695,7 @@ data_expression RewriterJitty::rewrite_aux(
   const binder_type& binder(ta.binding_operator());
   if (is_lambda_binder(binder))
   {
-    return rewrite_lambda_application(t,term,sigma);
+    return rewrite_lambda_application(t,tapp,sigma);
   }
   if (is_exists_binder(binder))
   {

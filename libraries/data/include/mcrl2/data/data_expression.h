@@ -163,6 +163,13 @@ class data_expression: public atermpp::aterm_appl
     /// \brief Returns the sort of the data expression
 
     sort_expression sort() const;
+
+    private:
+      // The following methods are not to be used in a data_expression.
+      // They are restricted to a data_appl. 
+      const_iterator begin() const;
+      const_iterator end() const;
+
 //--- end user section data_expression ---//
 };
 

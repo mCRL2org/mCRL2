@@ -221,20 +221,23 @@ data_expression Rewriter::rewrite_lambda_application(
 
 data_expression Rewriter::rewrite_lambda_application(
                       const abstraction& lambda_term,
-                      const data_expression& t,
+                      const application& t,
                       substitution_type& sigma)
 {
+std::cerr << "TEMP " << lambda_term << "  " << t << "\n";
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
   // const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
   const data_expression& lambda_body=lambda_term.body();
   std::size_t arity=t.size();
-  assert(arity>0);
-  if (arity==1) // The term has shape application(lambda d..:D...t), i.e. without arguments.
+std::cerr << "ARITY " << arity << "\n";
+  if (arity==0) // The term has shape application(lambda d..:D...t), i.e. without arguments.
   {
-    return rewrite_single_lambda(vl, lambda_body, true, sigma);
+    data_expression r= rewrite_single_lambda(vl, lambda_body, true, sigma);
+std::cerr << "RESULT1 " << r << "\n";
+    return r;
   }
-  assert(vl.size()<arity);
+  assert(vl.size()<=arity);
 
   // The variable vl_backup will be used to first store the values to be substituted
   // for the variables in vl. Subsequently, it will be used to temporarily save the values in sigma
@@ -244,7 +247,7 @@ data_expression Rewriter::rewrite_lambda_application(
   // Calculate the values that must be substituted for the variables in vl and store these in vl_backup.
   for(std::size_t count=0; count<vl.size(); count++)
   {
-    new (&vl_backup[count]) data_expression(rewrite(data_expression(t[count+1]),sigma));
+    new (&vl_backup[count]) data_expression(rewrite(data_expression(t[count]),sigma));
   }
 
   // Swap the values assigned to variables in vl with those in vl_backup.
@@ -268,28 +271,19 @@ data_expression Rewriter::rewrite_lambda_application(
     count++;
   }
 
-  if (vl.size()+1==arity)
+  if (vl.size()==arity)
   {
+std::cerr << "RESULT2 " << result << "\n";
     return result;
   }
 
 
   // There are more arguments than bound variables.
   // Rewrite the remaining arguments and apply the rewritten lambda term to them.  
-  // TODO: BELOW IS THE DESIRED CODE, but there is a type error confusing aterms and data_expressions. 
-  /* return application(result, 
-                     t.begin()+vl.size()+1, 
+  return application(result, 
+                     t.begin()+vl.size(), 
                      t.end(), 
-                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); }); */
-
-  std::vector < data_expression > args;
-  for(std::size_t i=1; i<arity-vl.size(); ++i)
-  {
-    assert(vl.size()+i<arity);
-    args.push_back(atermpp::down_cast<data_expression>(t[vl.size()+i]));
-  }
-  // We do not employ the knowledge that the first argument is in normal form... TODO.
-  return rewrite(application(result, args.begin(), args.end()),sigma); 
+                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); }); 
 }
 
 data_expression Rewriter::existential_quantifier_enumeration(

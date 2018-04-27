@@ -20,6 +20,10 @@ namespace atermpp
 template <class Term>
 class term_appl;
 
+template <typename Term>
+class term_appl_iterator;
+
+
 /// \cond INTERNAL_DOCS
 namespace detail
 {
@@ -71,6 +75,13 @@ _aterm* term_appl6(const function_symbol& sym, const Term& arg0, const Term& arg
 
 template <class Term>
 _aterm* term_appl7(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4, const Term& arg5, const Term& arg6);
+
+template < class Derived, class Base >
+term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,
+                                                                typename std::enable_if<
+                                                                     std::is_base_of<aterm, Base>::value &&
+                                                                     std::is_base_of<aterm, Derived>::value
+                                                                >::type* = nullptr);
 
 
 } // namespace detail

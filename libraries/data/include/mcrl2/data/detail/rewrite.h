@@ -150,7 +150,7 @@ class Rewriter
 
     data_expression rewrite_lambda_application(
                       const abstraction& lambda_term,
-                      const data_expression& t,
+                      const application& t,
                       substitution_type& sigma);
 
 
