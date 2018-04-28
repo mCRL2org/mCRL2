@@ -224,17 +224,14 @@ data_expression Rewriter::rewrite_lambda_application(
                       const application& t,
                       substitution_type& sigma)
 {
-std::cerr << "TEMP " << lambda_term << "  " << t << "\n";
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
   // const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
   const data_expression& lambda_body=lambda_term.body();
   std::size_t arity=t.size();
-std::cerr << "ARITY " << arity << "\n";
   if (arity==0) // The term has shape application(lambda d..:D...t), i.e. without arguments.
   {
     data_expression r= rewrite_single_lambda(vl, lambda_body, true, sigma);
-std::cerr << "RESULT1 " << r << "\n";
     return r;
   }
   assert(vl.size()<=arity);
@@ -273,7 +270,6 @@ std::cerr << "RESULT1 " << r << "\n";
 
   if (vl.size()==arity)
   {
-std::cerr << "RESULT2 " << result << "\n";
     return result;
   }
 
