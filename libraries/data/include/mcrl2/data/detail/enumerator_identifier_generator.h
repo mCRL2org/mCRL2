@@ -36,7 +36,7 @@ class enumerator_identifier_generator
     /// \brief Constructor
     /// \param prefix The prefix of the generated generated strings
     /// \pre The prefix may not be empty, and it may not have trailing digits
-    enumerator_identifier_generator(const std::string& prefix = "@x")
+    enumerator_identifier_generator(const std::string& prefix = "x_")
       : f(prefix)
     { }
     

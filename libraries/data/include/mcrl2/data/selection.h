@@ -80,6 +80,10 @@ class used_data_equation_selector
           const container_sort &s = atermpp::down_cast<container_sort>(sort);
           add_symbol(sort_fset::insert(s.element_sort()));
         }
+
+        // Always add the if:Bool#S#S->S for every sort as enumerating elements over function sorts S1 #... # S # ... # Sn -> S 
+        // rewriting over functions of this shape. 
+        add_symbol(if_(sort));
       }
 
       std::set< data_equation > equations(specification.equations().begin(),specification.equations().end());

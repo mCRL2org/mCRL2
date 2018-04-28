@@ -119,15 +119,17 @@ void test_expressions(Rewriter R, std::string const& expr1, std::string const& e
   data::detail::parse_substitution(substitution_text, sigma, data_spec);
   data_expression d1 = parse_data_expression(expr1, parse_variables(declarations), data_spec);
   data_expression d2 = parse_data_expression(expr2, parse_variables(declarations), data_spec);
-  if (R(d1, sigma) != R(d2))
+  data_expression rd1 = R(d1, sigma);
+  data_expression rd2 = R(d2);
+  if (rd1 != rd2)
   {
-    BOOST_CHECK(R(d1, sigma) == R(d2));
+    BOOST_CHECK(rd1 == rd2);
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
     std::cout << "d1           " << d1 << std::endl;
     std::cout << "d2           " << d2 << std::endl;
     std::cout << "sigma\n      " << sigma << std::endl;
-    std::cout << "R(d1, sigma) " << R(d1, sigma) << std::endl;
-    std::cout << "R(d2)        " << R(d2) << std::endl;
+    std::cout << "R(d1, sigma) " << rd1 << std::endl;
+    std::cout << "R(d2)        " << rd2 << std::endl;
   }
 }
 
@@ -199,7 +201,6 @@ void simplify_rewriter_test()
 // The testcase below corresponds to ticket #1426. 
 void test_lambda_expression()
 {
-std::cerr << "LAMBDA EXPRESSION TEST \n";
   data_specification data_spec;
   data::rewriter R(data_spec);
 
@@ -230,6 +231,25 @@ void test_equality_on_functions()
   test_expressions(R, expr1, expr2, "", data_spec, sigma);
 }
 
+// The testcase below corresponds to ticket #1461 which indicated
+// that rewriting enumerated functions failed as the if function would be removed
+// from the rewriters if it does not occur explicitly in the specification. 
+void test_enumeration_of_functions()
+{
+  std::string DATA_SPEC1 =
+    "sort Hat = struct black | white;"
+    ;
+
+  data_specification data_spec = parse_data_specification(DATA_SPEC1);
+  // For this test it is essential that unnecessary equations are removed. 
+  data::rewriter R(data_spec,used_data_equation_selector(data_spec,std::set<function_symbol>()));
+
+  std::string expr1 = "exists f:Hat->Hat.f(black)!=f(white)";
+  std::string expr2 = "true";
+  std::string sigma = "[]";
+  test_expressions(R, expr1, expr2, "", data_spec, sigma);
+}
+
 int test_main(int argc, char** argv)
 {
   test1();
@@ -240,6 +260,7 @@ int test_main(int argc, char** argv)
   simplify_rewriter_test();
   test_lambda_expression();
   test_equality_on_functions();
+  test_enumeration_of_functions();
 
   return 0;
 }
