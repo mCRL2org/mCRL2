@@ -226,7 +226,6 @@ data_expression Rewriter::rewrite_lambda_application(
 {
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
-  // const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
   const data_expression& lambda_body=lambda_term.body();
   std::size_t arity=t.size();
   if (arity==0) // The term has shape application(lambda d..:D...t), i.e. without arguments.
