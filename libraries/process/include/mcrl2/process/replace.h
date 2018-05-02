@@ -67,12 +67,12 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
         data::data_expression e = apply(variable);
         if (e != variable)
         {
-          v.push_back(data::assignment(variable, e));
+          v.emplace_back(variable, e);
         }
       }
       else
       {
-        v.push_back(data::assignment(k->lhs(), apply(k->rhs())));
+        v.emplace_back(k->lhs(), apply(k->rhs()));
       }
     }
     process::process_expression result = process::process_instance_assignment(x.identifier(), data::assignment_list(v.begin(), v.end()));

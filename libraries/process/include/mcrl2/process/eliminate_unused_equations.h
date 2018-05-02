@@ -124,7 +124,7 @@ struct eliminate_unused_equations_algorithm
         }
       }
     }
-    mCRL2log(log::verbose) << "done = " << core::detail::print_set(done) << std::endl;
+    mCRL2log(log::debug) << "done = " << core::detail::print_set(done) << std::endl;
 
     // print the removed equations
     std::vector<process_identifier> removed_equations;
@@ -135,7 +135,7 @@ struct eliminate_unused_equations_algorithm
         removed_equations.push_back(eqn.identifier());
       }
     }
-    mCRL2log(log::verbose) << "removed unused equations: " << core::detail::print_list(removed_equations) << std::endl;
+    mCRL2log(log::verbose) << "Removed unused equations: " << core::detail::print_list(removed_equations) << std::endl;
 
     equations = new_equations;
   }

@@ -31,11 +31,11 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
 
   const std::vector<process_equation>& equations;
 
-  expand_process_instance_assignments_builder(const std::vector<process_equation>& equations_)
+  explicit expand_process_instance_assignments_builder(const std::vector<process_equation>& equations_)
     : equations(equations_)
   {}
 
-  /// \brief Converts a process instance P(e) into p[d := e], where P(d) = d is the equation
+  /// \brief Converts a process instance P(e) into p[d := e], where P(d) = p is the equation
   /// corresponding to P.
   process_expression apply(const process::process_instance& x)
   {
@@ -44,8 +44,8 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     data::mutable_map_substitution<> sigma;
     const data::variable_list& d = eqn.formal_parameters();
     const data::data_expression_list& e = x.actual_parameters();
-    data::variable_list::iterator di = d.begin();
-    data::data_expression_list::iterator ei = e.begin();
+    auto di = d.begin();
+    auto ei = e.begin();
     for (; di != d.end(); ++di, ++ei)
     {
       sigma[*di] = *ei;
@@ -54,7 +54,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     return result;
   }
 
-  /// \brief Converts a process instance assignment P(d = e) into p[d := e], where P(d) = d is the equation
+  /// \brief Converts a process instance assignment P(d = e) into p[d := e], where P(d) = p is the equation
   /// corresponding to P.
   process_expression apply(const process::process_instance_assignment& x)
   {
