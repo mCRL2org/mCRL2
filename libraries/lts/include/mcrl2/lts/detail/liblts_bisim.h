@@ -97,15 +97,21 @@ class bisim_partitioner
 
       for (const transition& i: aut.get_transitions()) 
       {
+        const bool is_transition_i_hidden=aut.is_tau(aut.apply_hidden_label_map(i.label()));
         if (!branching ||
-            !aut.is_tau(aut.apply_hidden_label_map(i.label())) ||
+            !is_transition_i_hidden ||
             get_eq_class(i.from())!=get_eq_class(i.to()) ||
             (preserve_divergences && i.from()==i.to()))
         {
           resulting_transitions.insert(
             transition(
               get_eq_class(i.from()),
-              i.label(),
+// In the line below all hidden transitions are replaced by an explicit tau. It is possible to 
+// always use i.label() where the resulting transition is only implicitly hidden. This has as effect that
+// the labels of non inert hidden transitions are preserved (e.g. for use in counter examples) but that
+// there are possibly multiple hidden transitions between states, leading to a larger number of 
+// transitions than strictly necessary. 
+              (is_transition_i_hidden?aut.tau_label_index():i.label()),
               get_eq_class(i.to())));
         }
       }
