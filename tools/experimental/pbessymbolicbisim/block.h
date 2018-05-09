@@ -59,7 +59,7 @@ public:
     {
       return find_result->second;
     }
-    bool result = std::any_of(m_subblocks->begin(), m_subblocks->end(), [this,&other](const subblock& sb){ return sb.has_transition(*other.m_subblocks); });
+    bool result = std::any_of(m_subblocks->begin(), m_subblocks->end(), [&other](const subblock& sb){ return sb.has_transition(*other.m_subblocks); });
     m_cache->insert_transition(*this, other, result);
     return result;
   }
