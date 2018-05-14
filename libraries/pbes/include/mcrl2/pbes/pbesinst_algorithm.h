@@ -159,7 +159,7 @@ class pbesinst_algorithm
     /// \param data_spec A data specification.
     /// \param rewrite_strategy A strategy for the data rewriter.
     /// \param print_equations If true, the generated equations are printed.
-    pbesinst_algorithm(data::data_specification const& data_spec,
+    explicit pbesinst_algorithm(data::data_specification const& data_spec,
                        data::rewriter::strategy rewrite_strategy = data::jitty,
                        bool print_equations = false
                       )
@@ -199,7 +199,7 @@ class pbesinst_algorithm
       for (const pbes_equation& eqn : equations)
       {
         equation_index[eqn.variable().name()] = eqn_index++;
-        E.push_back(std::vector<pbes_equation>());
+        E.emplace_back();
       }
       init = atermpp::down_cast<propositional_variable_instantiation>(R(p.initial_state()));
       todo.insert(init);
