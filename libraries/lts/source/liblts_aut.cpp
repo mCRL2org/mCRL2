@@ -401,16 +401,30 @@ static void write_probabilistic_state(const detail::lts_aut_base::probabilistic_
 
 static void write_to_aut(const probabilistic_lts_aut_t& l, ostream& os)
 {
+  // Do not use "endl" below to avoid flushing. Use "\n" instead.
   os << "des (";
   write_probabilistic_state(l.initial_probabilistic_state(),os);
 
-  os << "," << l.num_transitions() << "," << l.num_states() << ")" << endl;
+  os << "," << l.num_transitions() << "," << l.num_states() << ")" << "\n";
 
   for (const transition& t: l.get_transitions())
   {
     os << "(" << t.from() << ",\"" << pp(l.action_label(l.apply_hidden_label_map(t.label()))) << "\",";
     write_probabilistic_state(l.probabilistic_state(t.to()),os);
-    os << ")" << endl;
+    os << ")" << "\n";
+  }
+}
+
+static void write_to_aut(const lts_aut_t& l, ostream& os)
+{
+  // Do not use "endl" below to avoid flushing. Use "\n" instead.
+  os << "des (" << l.initial_state() << "," << l.num_transitions() << "," << l.num_states() << ")" << "\n"; 
+
+  for (const transition& t: l.get_transitions())
+  {
+    os << "(" << t.from() << ",\"" 
+       << pp(l.action_label(l.apply_hidden_label_map(t.label()))) << "\"," 
+       << t.to() << ")" << "\n";
   }
 }
 
@@ -488,13 +502,23 @@ void lts_aut_t::load(istream& is)
 
 void lts_aut_t::save(string const& filename) const
 {
-  probabilistic_lts_aut_t l;
-  detail::translate_to_probabilistic_lts
-            <state_label_empty, 
-             action_label_string, 
-             detail::lts_aut_base::probabilistic_state, 
-             detail::lts_aut_base>(*this,l);
-  l.save(filename);
+std::cerr << "start saving \n";
+  if (filename=="")
+  {
+    write_to_aut(*this,cout);
+  }
+  else
+  {
+    ofstream os(filename.c_str());
+
+    if (!os.is_open())
+    {
+      throw mcrl2::runtime_error("cannot create .aut file '" + filename + ".");
+      return;
+    }
+    write_to_aut(*this,os);
+    os.close();
+  }
 }
 
 
