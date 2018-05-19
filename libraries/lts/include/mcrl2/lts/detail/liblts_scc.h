@@ -12,6 +12,7 @@
 #define _LIBLTS_SCC_H
 #include <vector>
 #include <map>
+#include <unordered_set>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -165,7 +166,7 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
   // Put all the non inert transitions in a set. Add the transitions that form a self
   // loop. Such transitions only exist in case divergence preserving branching bisimulation is
   // used. A set is used to remove double occurrences of transitions.
-  std::set < transition > resulting_transitions;
+  std::unordered_set < transition > resulting_transitions;
   for (const transition& t: aut.get_transitions())
   {
     if (!aut.is_tau(aut.apply_hidden_label_map(t.label())) ||
@@ -175,7 +176,7 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
       resulting_transitions.insert(
         transition(
           block_index_of_a_state[t.from()],
-          t.label(),
+          aut.apply_hidden_label_map(t.label()),
           block_index_of_a_state[t.to()]));
     }
   }

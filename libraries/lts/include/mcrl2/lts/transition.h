@@ -107,6 +107,20 @@ class transition
       m_to = to;
     }
 
+    ///\brief Standard equality on transitions.
+    bool
+    operator ==(const transition& t) const
+    {
+      return m_from == t.m_from && m_label == t.m_label && m_to == t.m_to;
+    }
+
+    ///\brief Standard inequality on transitions.
+    bool
+    operator !=(const transition& t) const
+    {
+      return !(*this==t);
+    }
+
     ///\brief Standard lexicographic ordering on transitions.
     ///\details The ordering is lexicographic from left to right.
     ///         First t.from are compared, then the label, and
@@ -119,8 +133,24 @@ class transition
     }
 };
 
-}
-}
+} // namespace lts
+} // namespace mcrl2
+
+namespace std
+{
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<mcrl2::lts::transition>
+{
+  std::size_t operator()(const mcrl2::lts::transition& t) const
+  {
+    return t.from() << 2 ^ t.label() << 1 ^ t.to();
+  }
+};
+
+} // namespace std
+
 
 #include "mcrl2/lts/detail/transition.h"
 
