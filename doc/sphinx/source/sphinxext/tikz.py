@@ -57,7 +57,7 @@ except ImportError:
     from sha import sha
 
 from docutils import nodes, utils
-from docutils.parsers.rst import directives
+from docutils.parsers.rst import directives, Directive
 
 from sphinx.errors import SphinxError
 try:
@@ -65,8 +65,6 @@ try:
 except:
     from sphinx.util import ensuredir, ENOENT, EPIPE
     
-from sphinx.util.compat import Directive
-
 class TikzExtError(SphinxError):
     category = 'Tikz extension error'
 
