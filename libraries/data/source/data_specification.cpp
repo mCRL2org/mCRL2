@@ -237,11 +237,9 @@ void sort_specification::check_for_alias_loop(
 // This normal form is obtained by repeatedly applying map1 and map2, until this
 // is not possible anymore. It is assumed that this procedure terminates. There is
 // no check for loops.
-static
-sort_expression find_normal_form(
+static sort_expression find_normal_form(
   const sort_expression& e,
   const std::multimap< sort_expression, sort_expression >& map1,
-  const std::multimap< sort_expression, sort_expression >& map2,
   std::set < sort_expression > sorts_already_seen = std::set < sort_expression >())
 {
   assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
@@ -252,12 +250,12 @@ sort_expression find_normal_form(
   {
     const function_sort fs(e);
     const sort_expression normalised_codomain=
-      find_normal_form(fs.codomain(),map1,map2,sorts_already_seen);
+      find_normal_form(fs.codomain(),map1,sorts_already_seen);
     const sort_expression_list& domain=fs.domain();
     sort_expression_list normalised_domain;
     for(const sort_expression& s: domain)
     {
-      normalised_domain.push_front(find_normal_form(s,map1,map2,sorts_already_seen));
+      normalised_domain.push_front(find_normal_form(s,map1,sorts_already_seen));
     }
     return function_sort(reverse(normalised_domain),normalised_codomain);
   }
@@ -265,7 +263,7 @@ sort_expression find_normal_form(
   if (is_container_sort(e))
   {
     const container_sort cs(e);
-    return container_sort(cs.container_name(),find_normal_form(cs.element_sort(),map1,map2,sorts_already_seen));
+    return container_sort(cs.container_name(),find_normal_form(cs.element_sort(),map1,sorts_already_seen));
   }
 
   sort_expression result_sort;
@@ -281,7 +279,7 @@ sort_expression find_normal_form(
       for(const structured_sort_constructor_argument& a: constructor.arguments())
       {
         normalised_ssa.push_front(structured_sort_constructor_argument(a.name(),
-                                      find_normal_form(a.sort(),map1,map2,sorts_already_seen)));
+                                      find_normal_form(a.sort(),map1,sorts_already_seen)));
       }
 
       normalised_constructors.push_front(
@@ -307,19 +305,7 @@ sort_expression find_normal_form(
 #ifndef NDEBUG
     sorts_already_seen.insert(result_sort);
 #endif
-   return find_normal_form(i1->second,map1,map2
-                           ,sorts_already_seen
-                          );
- }
- const std::multimap< sort_expression, sort_expression >::const_iterator i2=map2.find(result_sort);
- if (i2!=map2.end()) // found
- {
-#ifndef NDEBUG
-    sorts_already_seen.insert(result_sort);
-#endif
-    return find_normal_form(i2->second,map1,map2,
-                            sorts_already_seen
-                           );
+   return find_normal_form(i1->second,map1,sorts_already_seen);
   }
   return result_sort;
 }
@@ -327,15 +313,18 @@ sort_expression find_normal_form(
 // The function below recalculates m_normalised_aliases, such that
 // it forms a confluent terminating rewriting system using which
 // sorts can be normalised.
+// This algorithm is described in the document: algorithm-for-sort-equivalence.tex in
+// the developers library of the mCRL2 toolset. 
 void sort_specification::reconstruct_m_normalised_aliases() const
 {
   // First reset the normalised aliases and the mappings and constructors that have been
   // inherited to basic sort aliases during a previous round of sort normalisation.
   m_normalised_aliases.clear();
 
+  // This is the first step of the algorithm. 
   // Check for loops in the aliases. The type checker should already have done this,
   // but we check it again here. If there is a loop m_normalised_aliases will not be
-  // built.
+  // built. 
     for(const alias& a: m_user_defined_aliases)
     {
       std::set < sort_expression > sorts_already_seen; // Empty set.
@@ -350,12 +339,15 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     }
   }
 
+  // This is the second step of the algorithm. 
   // Copy m_normalised_aliases. All aliases are stored from left to right,
   // except structured sorts, which are stored from right to left. The reason is
   // that structured sorts can be recursive, and therefore, they cannot be
   // rewritten from left to right, as this can cause sorts to be infinitely rewritten.
 
   std::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
+  std::multimap< sort_expression, sort_expression > resulting_normalized_sort_aliases;
+
   for(const alias& a: m_user_defined_aliases)
   {
     if (is_structured_sort(a.reference()))
@@ -364,22 +356,19 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     }
     else
     {
-      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(a.name(),a.reference()));
+      resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression>(a.name(),a.reference()));
     }
   }
 
   // Apply Knuth-Bendix completion to the rules in m_normalised_aliases.
-
-  std::multimap< sort_expression, sort_expression > resulting_normalized_sort_aliases;
-
   for(; !sort_aliases_to_be_investigated.empty() ;)
   {
-    const std::multimap< sort_expression, sort_expression >::iterator p=sort_aliases_to_be_investigated.begin();
-    const sort_expression lhs=p->first;
-    const sort_expression rhs=p->second;
-    sort_aliases_to_be_investigated.erase(p);
+    const std::multimap< sort_expression, sort_expression >::iterator it=sort_aliases_to_be_investigated.begin();
+    const sort_expression lhs=it->first;
+    const sort_expression rhs=it->second;
+    sort_aliases_to_be_investigated.erase(it);
 
-    for(const std::pair< sort_expression, sort_expression >& p: resulting_normalized_sort_aliases)
+    for(const std::pair< sort_expression, sort_expression >&p: resulting_normalized_sort_aliases)
     {
       const sort_expression s1=data::replace_sort_expressions(lhs,sort_expression_assignment(p.first,p.second), true);
 
@@ -397,7 +386,16 @@ void sort_specification::reconstruct_m_normalised_aliases() const
         const sort_expression& e1=pre_normal_form;
         if (e1!=left_hand_side)
         {
-          sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e1));
+          const sort_expression normalised_lhs=find_normal_form(left_hand_side,resulting_normalized_sort_aliases);
+          // Check whether the inserted sort rewrite rule is already in sort_aliases_to_be_investigated.
+          if (std::find_if(sort_aliases_to_be_investigated.lower_bound(normalised_lhs),
+                        sort_aliases_to_be_investigated.upper_bound(normalised_lhs),
+                        [&rhs](const std::pair<sort_expression,sort_expression>& x){ return x.second==rhs; }) 
+                   == sort_aliases_to_be_investigated.upper_bound(normalised_lhs)) // Not found.
+          {
+            sort_aliases_to_be_investigated.insert(
+                  std::pair<sort_expression,sort_expression > (normalised_lhs, e1));
+          }
         }
       }
       else
@@ -415,24 +413,36 @@ void sort_specification::reconstruct_m_normalised_aliases() const
           const sort_expression& e2=pre_normal_form;
           if (e2!=left_hand_side)
           {
-            sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e2));
+            const sort_expression normalised_lhs=find_normal_form(left_hand_side,resulting_normalized_sort_aliases);
+            // Check whether the inserted sort rewrite rule is already in sort_aliases_to_be_investigated.
+            if (std::find_if(sort_aliases_to_be_investigated.lower_bound(normalised_lhs),
+                          sort_aliases_to_be_investigated.upper_bound(normalised_lhs),
+                          [&rhs](const std::pair<sort_expression,sort_expression>& x){ return x.second==rhs; }) 
+                     == sort_aliases_to_be_investigated.upper_bound(normalised_lhs)) // Not found.
+            {
+              sort_aliases_to_be_investigated.insert(
+                    std::pair<sort_expression,sort_expression > (normalised_lhs,e2));
+            }
           }
         }
       }
     }
     assert(lhs!=rhs);
-    resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression >(lhs,rhs));
-
+    const sort_expression normalised_lhs = find_normal_form(lhs,resulting_normalized_sort_aliases);
+    if (normalised_lhs!=rhs)
+    {
+      resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression >(normalised_lhs,rhs)); 
+    }
   }
   // Copy resulting_normalized_sort_aliases into m_normalised_aliases, i.e. from multimap to map.
   // If there are rules with equal left hand side, only one is arbitrarily chosen. Rewrite the
   // right hand side to normal form.
 
-  const std::multimap< sort_expression, sort_expression > empty_multimap;
   for(const std::pair< sort_expression,sort_expression>& p: resulting_normalized_sort_aliases)
   {
-    m_normalised_aliases[p.first]=find_normal_form(p.second,resulting_normalized_sort_aliases,empty_multimap);
-    assert(p.first!=p.second);
+    const sort_expression normalised_rhs = find_normal_form(p.second,resulting_normalized_sort_aliases);
+    m_normalised_aliases[p.first]=normalised_rhs;
+    assert(p.first!=normalised_rhs);
   }
 }
 

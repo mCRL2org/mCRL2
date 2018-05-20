@@ -17,7 +17,7 @@
 #ifndef MCRL2_LTS_TRANSITION_H
 #define MCRL2_LTS_TRANSITION_H
 
-#include <cstddef>   // for std::
+#include <functional>
 
 namespace mcrl2
 {
