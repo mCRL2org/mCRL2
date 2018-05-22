@@ -23,8 +23,10 @@ void MainWindow::setupMenuBar(){
     QMenu *fileMenu = menuBar()->addMenu("File");
 
     fileMenu->addAction("New Project", this, &MainWindow::actionNewProject);
+    fileMenu->addSeparator();
     fileMenu->addAction("Open Project", this, &MainWindow::actionOpenProject);
     fileMenu->addAction("Open Example Project", this, &MainWindow::actionOpenExampleProject);
+    fileMenu->addSeparator();
     fileMenu->addAction("Save Project", this, &MainWindow::actionSaveProject);
     fileMenu->addAction("Save Project As", this, &MainWindow::actionSaveProjectAs);
     fileMenu->addSeparator();
