@@ -36,12 +36,13 @@ the `developers' documentation <../developer_manual/index.html>`_.
    
           tools
 
-   * - **Build instructions**
+   * - **Contributing**
 
        .. toctree::
           :maxdepth: 2
 
           build_instructions/index
+          contributing/contributing
 
      - **Reference**
 

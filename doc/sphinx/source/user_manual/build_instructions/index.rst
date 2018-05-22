@@ -3,13 +3,13 @@
 Build instructions
 ==================
 
-The mCRL2 source code can be obtained in two ways. The source code of the latest
-release version of the toolset is available as a source tarball, see :ref:`download`.
-The development
-version can be checked out from our `Subversion <http://subversion.tigris.org>`_
-repository::
+The mCRL2 source code can be obtained in two ways. The source code for releases
+of the toolset are available as a source tarball, see :ref:`download`. The source
+code is also available in our `Git <https://git-scm.com/>`_ repository hosted 
+at `Github <https://github.com/mCRL2org/mCRL2>`_. The latest development version 
+can be obtained using:
 
-  svn co https://svn.win.tue.nl/repos/MCRL2/trunk mCRL2
+  git clone https://github.com/mCRL2org/mCRL2.git
 
 In the remainder of this manual, we assume that you have the source code on
 your system in a folder called ``mcrl2/src``. We will set up an out-of-source

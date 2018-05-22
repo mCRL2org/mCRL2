@@ -11,7 +11,7 @@ There are several ways to get support:
   <http://listserver.tue.nl/mailman/listinfo/mcrl2-users>`_ and post your
   question to the mCRL2 developers and other users.
 - If you think you have found a bug in our tools, you are welcome to 
-  `submit a bug at our issue tracker <https://svn.win.tue.nl/trac/MCRL2>`_.
+  `submit a bug at our issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_.
 
 If you appreciate the mCRL2 language or want to get in touch with mCRL2 users
 and developers, you can join the special mCRL2 community at
