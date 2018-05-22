@@ -7,5 +7,5 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    /*test*/
+    /*test2*/
 }
