@@ -8,8 +8,12 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    textEdit = new QTextEdit;
+    setCentralWidget(textEdit);
+
     setupMenuBar();
     setupToolbar();
+    setupDocks();
 }
 
 MainWindow::~MainWindow()
@@ -50,13 +54,6 @@ void MainWindow::setupMenuBar(){
 
     /* Create the View Menu (actions are added in setupDocks())*/
     viewMenu = menuBar()->addMenu("View");
-
-    /*
-     * viewMenu->addAction(propertiesDock->toggleViewAction());
-     * viewMenu->addAction(consoleDock->toggleViewAction());
-     * viewMenu->addAction(rewriteDock->toggleViewAction());
-     * viewMenu->addAction(solveDock->toggleViewAction());
-    */
 
     /* Create the Actions menu */
     QMenu *actionsMenu = menuBar()->addMenu("Actions");
@@ -141,6 +138,30 @@ void MainWindow::setupToolbar(){
     QAction *abortVerificationAction = new QAction(abortVerificationIcon, "Abort Verification", this);
     connect(abortVerificationAction, &QAction::triggered, this, &MainWindow::actionAbortVerification);
     toolbar->addAction(abortVerificationAction);
+}
+
+/**
+ * @brief MainWindow::setupDocks creates the docks
+ */
+void MainWindow::setupDocks(){
+
+    /* instantiate the docks */
+    propertiesDock = new PropertiesDock(this);
+    consoleDock = new ConsoleDock(this);
+    rewriteDock = new RewriteDock(this);
+    solveDock = new SolveDock(this);
+
+    /* add toggleable option in the view menu for each dock */
+    viewMenu->addAction(propertiesDock->toggleViewAction());
+    viewMenu->addAction(consoleDock->toggleViewAction());
+    viewMenu->addAction(rewriteDock->toggleViewAction());
+    viewMenu->addAction(solveDock->toggleViewAction());
+
+    /* Place the docks in their default location */
+    addDockWidget(propertiesDock->defaultArea, propertiesDock);
+    addDockWidget(consoleDock->defaultArea, consoleDock);
+    addDockWidget(rewriteDock->defaultArea, rewriteDock);
+    addDockWidget(solveDock->defaultArea, solveDock);
 }
 
 /**

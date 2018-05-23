@@ -2,6 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTextEdit>
+#include "propertiesdock.h"
+#include "consoledock.h"
+#include "rewritedock.h"
+#include "solvedock.h"
 
 class MainWindow : public QMainWindow
 {
@@ -43,10 +48,13 @@ private:
 
     QMenu *viewMenu;
     QToolBar *toolbar;
-    QDockWidget *propertiesDock;
-    QDockWidget *consoleDock;
-    QDockWidget *rewriteDock;
-    QDockWidget *solveDock;
+    QTextEdit *textEdit;
+    PropertiesDock *propertiesDock;
+    ConsoleDock *consoleDock;
+    RewriteDock *rewriteDock;
+    SolveDock *solveDock;
 };
+
+
 
 #endif // MAINWINDOW_H

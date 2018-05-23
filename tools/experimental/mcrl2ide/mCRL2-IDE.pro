@@ -26,11 +26,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    propertiesdock.cpp
+    propertiesdock.cpp \
+    consoledock.cpp \
+    rewritedock.cpp \
+    solvedock.cpp
 
 HEADERS += \
         mainwindow.h \
-    propertiesdock.h
+    propertiesdock.h \
+    consoledock.h \
+    rewritedock.h \
+    solvedock.h
 
 RESOURCES += \
     mcrl2-ide.qrc
