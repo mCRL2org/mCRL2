@@ -38,7 +38,10 @@ public slots:
 
 private:
     void setupMenuBar();
+    void setupToolbar();
+    void setupDocks();
 
+    QMenu *viewMenu;
     QToolBar *toolbar;
     QDockWidget *propertiesDock;
     QDockWidget *consoleDock;
