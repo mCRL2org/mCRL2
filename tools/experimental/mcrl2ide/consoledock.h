@@ -2,6 +2,8 @@
 #define CONSOLEDOCK_H
 
 #include <QDockWidget>
+#include <QPlainTextEdit>
+#include <QTabWidget>
 
 class ConsoleDock : public QDockWidget
 {
@@ -11,6 +13,12 @@ public:
     const Qt::DockWidgetArea defaultArea = Qt::BottomDockWidgetArea;
 
     explicit ConsoleDock(QWidget *parent);
+
+private:
+    QTabWidget *consoleTabs;
+    QPlainTextEdit *parseConsole;
+    QPlainTextEdit *LTSConsole;
+    QPlainTextEdit *verificationConsole;
 };
 
 #endif // CONSOLEDOCK_H
