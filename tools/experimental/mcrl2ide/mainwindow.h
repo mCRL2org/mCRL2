@@ -44,6 +44,7 @@ public slots:
 private:
     void setupMenuBar();
     void setupToolbar();
+    void setDocksToDefault();
     void setupDocks();
 
     QMenu *viewMenu;

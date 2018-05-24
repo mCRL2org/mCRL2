@@ -75,9 +75,11 @@ void MainWindow::setupMenuBar(){
 void MainWindow::setupToolbar(){
 
     QToolBar *toolbar = addToolBar("Actions");
+    toolbar->setIconSize(QSize(32, 32));
 
-    const QIcon tmp = QIcon(":/icons/cogwheelsmall.png"); /* placeholder */
+    const QIcon tmp = QIcon(":/icons/cogwheelmedium.png"); /* placeholder */
 
+    /* create each toolbar item by adding an icon and an action */
     const QIcon newProjectIcon = tmp;
     QAction *newProjectAction = new QAction(newProjectIcon, "New Project", this);
     connect(newProjectAction, &QAction::triggered, this, &MainWindow::actionNewProject);
@@ -141,6 +143,20 @@ void MainWindow::setupToolbar(){
 }
 
 /**
+ * @brief MainWindow::setDocksToDefault puts all docks in their default location
+ */
+void MainWindow::setDocksToDefault(){
+
+    addDockWidget(propertiesDock->defaultArea, propertiesDock);
+    addDockWidget(consoleDock->defaultArea, consoleDock);
+    addDockWidget(rewriteDock->defaultArea, rewriteDock);
+    addDockWidget(solveDock->defaultArea, solveDock);
+
+    rewriteDock->hide();
+    solveDock->hide();
+}
+
+/**
  * @brief MainWindow::setupDocks creates the docks
  */
 void MainWindow::setupDocks(){
@@ -157,11 +173,12 @@ void MainWindow::setupDocks(){
     viewMenu->addAction(rewriteDock->toggleViewAction());
     viewMenu->addAction(solveDock->toggleViewAction());
 
-    /* Place the docks in their default location */
-    addDockWidget(propertiesDock->defaultArea, propertiesDock);
-    addDockWidget(consoleDock->defaultArea, consoleDock);
-    addDockWidget(rewriteDock->defaultArea, rewriteDock);
-    addDockWidget(solveDock->defaultArea, solveDock);
+    /* place the docks in the default dock layout */
+    setDocksToDefault();
+
+    /* add option to view menu to put all docks back to their default layout */
+    viewMenu->addSeparator();
+    viewMenu->addAction("Revert to default layout", this, &MainWindow::setDocksToDefault);
 }
 
 /**
