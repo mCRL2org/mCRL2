@@ -28,7 +28,7 @@ Contents
    - :doc:`code_generation`
    - :doc:`cronjobs`
    - :doc:`packaging`
-   - `Issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_
+   - `Bug tracker <https://svn.win.tue.nl/trac/MCRL2/timeline>`_
    - :doc:`testing`
    - :doc:`testing_old`
    - :doc:`performance/index`

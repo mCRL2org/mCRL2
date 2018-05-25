@@ -45,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'mCRL2'
-copyright = u'2011-2017, Technische Universiteit Eindhoven'
+copyright = u'2011-2018, Technische Universiteit Eindhoven'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -68,7 +68,7 @@ release = 'unknown'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', '.git']
+exclude_patterns = ['_build', '.git', '.svn']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
