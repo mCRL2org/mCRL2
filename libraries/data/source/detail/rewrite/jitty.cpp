@@ -671,8 +671,8 @@ data_expression RewriterJitty::rewrite_aux(
   }
 
   const application& tapp=atermpp::down_cast<application>(term);
-  data_expression t=tapp.head();
-  t = rewrite_aux(t,sigma);
+  
+  data_expression t = rewrite_aux(tapp.head(),sigma);
   // Here t has the shape f(u1,....,un)(u1',...,um')....: f applied several times to arguments,
   // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
   // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
