@@ -72,7 +72,9 @@ inline sort_expression residual_sort(const sort_expression& s, std::size_t no_of
 
 // This function returns <b, arg_i> where arg_i is the i-th argument of the application t and
 // b is a boolean that indicates whether this argument exists. 
-inline std::pair<bool, const data_expression&> get_argument_of_higher_order_term_helper(const application& t, std::size_t& i)
+// TODO: use the optional class of c++17 when it can be used. Current solution is somewhat ugly. 
+// This function yields a pointer to argument_i if it exists. If not it yields the nullptr;
+inline const data_expression* get_argument_of_higher_order_term_helper(const application& t, std::size_t& i)
 {
   // t has the shape t application(....)
   if (!is_application(t.head()))
@@ -80,25 +82,25 @@ inline std::pair<bool, const data_expression&> get_argument_of_higher_order_term
     const std::size_t arity = t.size();
     if (arity>i)
     {
-      return std::make_pair(true,t[i]);
+      return &t[i];
     }
     // arity <=i
     i=i-arity;
-    return std::make_pair(false,data_expression());
+    return nullptr;
   }
-  const std::pair<bool, const data_expression&> p=get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t.head()),i);
-  if (p.first)
+  const data_expression* p=get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t.head()),i);
+  if (p!=nullptr)
   {
     return p;
   }
   const std::size_t arity = t.size();
   if (arity>i)
   {
-    return std::make_pair(true,t[i]);
+    return &t[i];
   }
   // arity <=i
   i=i-arity;
-  return std::make_pair(false,data_expression());
+  return nullptr;
 }
 
 // This function returns the i-th argument t_i. NOTE: The first argument has index 1.
@@ -114,9 +116,9 @@ inline const data_expression& get_argument_of_higher_order_term(const applicatio
     return t[i];
   }
 
-  const std::pair<bool, const data_expression&> p=get_argument_of_higher_order_term_helper(t,i);
-  assert(p.first);
-  return p.second;
+  const data_expression* p=get_argument_of_higher_order_term_helper(t,i);
+  assert(p!=nullptr);
+  return *p;
 }
 
 inline std::size_t recursive_number_of_args(const data_expression& t)
