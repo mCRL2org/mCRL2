@@ -70,9 +70,9 @@ inline sort_expression residual_sort(const sort_expression& s, std::size_t no_of
   return result;
 }
 
-typedef std::pair<bool, const data_expression&> PAIR;
-
-inline PAIR get_argument_of_higher_order_term_helper(const application& t, std::size_t& i)
+// This function returns <b, arg_i> where arg_i is the i-th argument of the application t and
+// b is a boolean that indicates whether this argument exists. 
+inline std::pair<bool, const data_expression&> get_argument_of_higher_order_term_helper(const application& t, std::size_t& i)
 {
   // t has the shape t application(....)
   if (!is_application(t.head()))
@@ -80,13 +80,13 @@ inline PAIR get_argument_of_higher_order_term_helper(const application& t, std::
     const std::size_t arity = t.size();
     if (arity>i)
     {
-      return PAIR(true,t[i]);
+      return std::make_pair(true,t[i]);
     }
     // arity <=i
     i=i-arity;
-    return PAIR(false,data_expression());
+    return std::make_pair(false,data_expression());
   }
-  const PAIR p=get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t.head()),i);
+  const std::pair<bool, const data_expression&> p=get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t.head()),i);
   if (p.first)
   {
     return p;
@@ -94,17 +94,18 @@ inline PAIR get_argument_of_higher_order_term_helper(const application& t, std::
   const std::size_t arity = t.size();
   if (arity>i)
   {
-    return PAIR(true,t[i]);
+    return std::make_pair(true,t[i]);
   }
   // arity <=i
   i=i-arity;
-  return PAIR(false,data_expression());
+  return std::make_pair(false,data_expression());
 }
 
+// This function returns the i-th argument t_i. NOTE: The first argument has index 1.
+// t is an applicatoin of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
+// i must be a valid index of an argument. 
 inline const data_expression& get_argument_of_higher_order_term(const application& t, std::size_t i)
 {
-  // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
-  // Return the i-th argument t_i. NOTE: The first argument has index 1.
   
   if (!is_application(t.head()) && t.size()>i) // This first case applies to the majority of cases.
                                                  // Therefore this cheap check is done first, before 
@@ -113,7 +114,7 @@ inline const data_expression& get_argument_of_higher_order_term(const applicatio
     return t[i];
   }
 
-  const PAIR p=get_argument_of_higher_order_term_helper(t,i);
+  const std::pair<bool, const data_expression&> p=get_argument_of_higher_order_term_helper(t,i);
   assert(p.first);
   return p.second;
 }
