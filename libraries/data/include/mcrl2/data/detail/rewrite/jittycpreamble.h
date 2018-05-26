@@ -211,11 +211,11 @@ data_expression rewrite_abstraction_aux(const abstraction& head, const data_expr
 static inline
 data_expression rewrite_appl_aux(const application& t, RewriterCompilingJitty* this_rewriter)
 {
-  function_symbol thead;
-  if (head_is_function_symbol(t, thead))
+  const data_expression& thead=get_nested_head(t);
+  if (is_function_symbol(thead))
   {
     const std::size_t arity=recursive_number_of_args(t);
-    const rewriter_function f = get_precompiled_rewrite_function(thead,arity,false,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function(atermpp::down_cast<function_symbol>(thead),arity,false,this_rewriter);
     if (f != NULL)
     {
       const data_expression& result=f(t,this_rewriter);

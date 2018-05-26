@@ -72,7 +72,7 @@ inline sort_expression residual_sort(const sort_expression& s, std::size_t no_of
 
 // This function returns <b, arg_i> where arg_i is the i-th argument of the application t and
 // b is a boolean that indicates whether this argument exists. 
-// TODO: use the optional class of c++17 when it can be used. Current solution is somewhat ugly. 
+// TODO: use the optional class of c++17 when it can be used. The current solution is somewhat ugly. 
 // This function yields a pointer to argument_i if it exists. If not it yields the nullptr;
 inline const data_expression* get_argument_of_higher_order_term_helper(const application& t, std::size_t& i)
 {
@@ -108,11 +108,17 @@ inline const data_expression* get_argument_of_higher_order_term_helper(const app
 // i must be a valid index of an argument. 
 inline const data_expression& get_argument_of_higher_order_term(const application& t, std::size_t i)
 {
-  
-  if (!is_application(t.head()) && t.size()>i) // This first case applies to the majority of cases.
-                                                 // Therefore this cheap check is done first, before 
-                                                 // going into a recursive algorithm.
+  // This first case applies to the majority of cases. Therefore this cheap check is done first, before
+  // going into a recursive algorithm. Furthermore checking that t is a function_symbol, etc. is cheaper
+  // than checking that t is not an application by !is_application(t.head()). 
+  const data_expression& head=t.head();
+  if (is_function_symbol(head) ||
+      is_variable(head) ||
+      is_where_clause(head) ||
+      is_where_clause(head) ||
+      is_abstraction(head))
   {
+    assert(t.size()>i);
     return t[i];
   }
 
@@ -123,54 +129,61 @@ inline const data_expression& get_argument_of_higher_order_term(const applicatio
 
 inline std::size_t recursive_number_of_args(const data_expression& t)
 {
-  if (is_function_symbol(t))
-  {
-    return 0;
-  }
-
-  if (is_variable(t))
+  // Checking these cases is together more efficient than
+  // checking whether t is an application. 
+  if (is_function_symbol(t) ||
+      is_variable(t) ||
+      is_where_clause(t) ||
+      is_where_clause(t) ||
+      is_abstraction(t))
   {
     return 0;
   }
  
-  if (is_where_clause(t))
-  {
-    return 0;
-  }
-
-  if (is_abstraction(t))
-  {
-    return 0;
-  }
-
+  assert(is_application(t));
+  
   const application& ta = atermpp::down_cast<application>(t);
   const std::size_t result=ta.size()+recursive_number_of_args(ta.head());
   return result;
 }
 
-// Assume that the expression t is an application, and return its leading function symbol.
-inline const function_symbol& get_function_symbol_of_head(const data_expression& t)
+// Return the head symbol, nested within applications.
+// This helper function is used to allow inlining of the function
+// get_nested_head.
+inline const data_expression& get_nested_head_helper(const application& t)
 {
-  if (is_function_symbol(t))
+  if (is_application(t.head()))
   {
-    return atermpp::down_cast<function_symbol>(t);
+    return get_nested_head_helper(atermpp::down_cast<application>(t.head()));
   }
-  assert(t.type_is_appl());
 
-  const application& ta = atermpp::down_cast<application>(t);
-  return get_function_symbol_of_head(ta.head());
+  return t.head();
 }
 
 // Return the head symbol, nested within applications.
 inline const data_expression& get_nested_head(const data_expression& t)
 {
-  if (is_application(t))
+  if (is_function_symbol(t) ||
+      is_variable(t) ||
+      is_where_clause(t) ||
+      is_where_clause(t) ||
+      is_abstraction(t))
   {
-    const application& ta = atermpp::down_cast<application>(t);
-    return get_nested_head(ta.head());
+    return t;
   }
 
-  return t;
+  const application& ta = atermpp::down_cast<application>(t);
+  const data_expression& head=ta.head();
+
+  if (is_function_symbol(head) ||
+      is_variable(head) ||
+      is_where_clause(head) ||
+      is_where_clause(head) ||
+      is_abstraction(head))
+  {
+    return head;
+  }
+  return get_nested_head_helper(atermpp::down_cast<application>(head));
 }
 
 // Replace the recursively nested head symbol in t by head.
@@ -189,59 +202,7 @@ template <class ARGUMENT_REWRITER>
 inline const data_expression rewrite_all_arguments(const application& t, const ARGUMENT_REWRITER rewriter)
 {
   return application(t.head(),t.begin(),t.end(),rewriter);
-}
-
-// Assume that the expression t is an application, and return its leading variable.
-inline const variable& get_variable_of_head(const data_expression& t)
-{
-  if (is_variable(t))
-  {
-    return atermpp::down_cast<variable>(t);
-  }
-  assert(t.type_is_appl());
-
-  return get_variable_of_head(atermpp::down_cast<data_expression>(t[0]));
-}
-
-inline bool head_is_variable(const data_expression& t)
-{
-  assert(!is_where_clause(t));
-
-  if (is_function_symbol(t))
-  {
-    return false;
-  }
-  if (is_variable(t))
-  {
-    // v=atermpp::down_cast<variable>(t);
-    return true;
-  }
-  if (is_abstraction(t))
-  {
-    return false;
-  }
-  // shape is application(t1,...,tn)
-  const application& ta = atermpp::down_cast<application>(t);
-  return head_is_variable(ta.head());
-}
-
-
-inline bool head_is_function_symbol(const data_expression& t, function_symbol& head)
-{
-  if (is_application(t))
-  {
-    const application& ta = atermpp::down_cast<application>(t);
-    return head_is_function_symbol(ta.head(),head);
-  }
-
-  if (is_function_symbol(t))
-  {
-    head=atermpp::down_cast<function_symbol>(t);
-    return true;
-  }
-
-  return false;
-}
+} 
 
 }
 }

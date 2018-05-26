@@ -783,8 +783,8 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
   data_expression rhs=e.rhs();
   variable_list vars=e.variables();
 
-  function_symbol f;
-  if (!head_is_function_symbol(lhs,f))
+  const data_expression& f=get_nested_head(lhs);
+  if (!is_function_symbol(f))
   {
     throw mcrl2::runtime_error("Equation " + pp(e) + " does not start with a function symbol in its left hand side.");
   }
@@ -1062,8 +1062,8 @@ class RewriterCompilingJitty::ImplementTree
       const application& appl = down_cast<application>(t);
       const std::size_t arity = recursive_number_of_args(appl);
       const data_expression& head = appl.head();
-      function_symbol dummy;
-      if (!head_is_function_symbol(head, dummy))
+      
+      if (!is_function_symbol(get_nested_head(head)))
       {
         return false;
       }
@@ -2624,7 +2624,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   jittyc_eqns.clear();
   for(std::set < data_equation >::const_iterator it = rewrite_rules.begin(); it != rewrite_rules.end(); ++it)
   {
-    jittyc_eqns[get_function_symbol_of_head(it->lhs())].push_front(*it);
+    jittyc_eqns[down_cast<function_symbol>(get_nested_head(it->lhs()))].push_front(*it);
   }
 
   std::string cpp_file = generate_cpp_filename(reinterpret_cast<std::size_t>(this));

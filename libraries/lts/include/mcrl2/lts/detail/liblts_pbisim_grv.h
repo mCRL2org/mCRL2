@@ -477,6 +477,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       action_blocks.push_back(initial_action_block);
 
       // Refine the initial action block based on the outgoing transitions.
+      // This corresponds to line 5 of Algorithm 2 in [GRV].
       refine_initial_action_block(transitions_per_label.transitions());
 
       // Initialise the probabilistic block. Initally, there is only one block of probabilistic states.

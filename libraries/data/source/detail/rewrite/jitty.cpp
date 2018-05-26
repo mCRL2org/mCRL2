@@ -378,7 +378,7 @@ RewriterJitty::RewriterJitty(
         continue;
       }
 
-      const function_symbol& lhs_head_index=get_function_symbol_of_head(j->lhs());
+      const function_symbol& lhs_head_index=atermpp::down_cast<function_symbol>(get_nested_head(j->lhs()));
 
       data_equation_list n;
       std::map< function_symbol, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
@@ -663,11 +663,11 @@ data_expression RewriterJitty::rewrite_aux(
   // including all its subterms. But this is costly, as not all subterms will be rewritten again
   // in rewrite_aux_function_symbol.
 
-  function_symbol head;
+  const data_expression& head=get_nested_head(term);
 
-  if (detail::head_is_function_symbol(term,head) && head!=this_term_is_in_normal_form())
+  if (is_function_symbol(head) && head!=this_term_is_in_normal_form())
   {
-    return rewrite_aux_function_symbol(head,term,sigma);
+    return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head),term,sigma);
   }
 
   const application& tapp=atermpp::down_cast<application>(term);
@@ -677,14 +677,15 @@ data_expression RewriterJitty::rewrite_aux(
   // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
   // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
 
-  if (head_is_function_symbol(t,head))
+  const data_expression& head1 = get_nested_head(t);
+  if (is_function_symbol(head1))
   {
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
     const data_expression result=application(t,tapp.begin(), tapp.end()); 
-    return rewrite_aux_function_symbol(head,result,sigma);
+    return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head1),result,sigma);
   }
-  else if (head_is_variable(t))
+  else if (is_variable(head1))
   {
     // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
     jitty_argument_rewriter r(sigma,*this);
@@ -704,7 +705,7 @@ data_expression RewriterJitty::rewrite_aux(
   }
   assert(is_forall_binder(binder));
   assert(term.size()==1);
-  return universal_quantifier_enumeration(head,sigma);
+  return universal_quantifier_enumeration(head1,sigma);
 }
 
 data_expression RewriterJitty::rewrite_aux_function_symbol(
