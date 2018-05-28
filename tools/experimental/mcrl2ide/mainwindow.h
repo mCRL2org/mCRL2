@@ -8,6 +8,7 @@
 #include "rewritedock.h"
 #include "solvedock.h"
 #include "addeditpropertydialog.h"
+#include "codeeditor.h"
 
 class MainWindow : public QMainWindow
 {
@@ -50,7 +51,7 @@ private:
 
     QMenu *viewMenu;
     QToolBar *toolbar;
-    QTextEdit *textEdit;
+    QPlainTextEdit *textEdit;
     PropertiesDock *propertiesDock;
     ConsoleDock *consoleDock;
     RewriteDock *rewriteDock;

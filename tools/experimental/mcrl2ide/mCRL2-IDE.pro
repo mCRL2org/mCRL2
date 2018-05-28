@@ -31,7 +31,8 @@ SOURCES += \
     rewritedock.cpp \
     solvedock.cpp \
     addeditpropertydialog.cpp \
-    propertywidget.cpp
+    propertywidget.cpp \
+    codeeditor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,7 +41,8 @@ HEADERS += \
     rewritedock.h \
     solvedock.h \
     addeditpropertydialog.h \
-    propertywidget.h
+    propertywidget.h \
+    codeeditor.h
 
 RESOURCES += \
     mcrl2-ide.qrc
