@@ -130,7 +130,6 @@ class check_complexity
         // Invariant: block->constln()->size() << (counter value) <= n
         while_C_contains_a_nontrivial_constellation_2_4 = 0,
         BLOCK_MIN = while_C_contains_a_nontrivial_constellation_2_4,
-        Mark_all_states_of_SpB_as_predecessors_2_9,
 
         // If a loop runs over every state of a block exactly once, we simplify
         // the task of updating the counters by making the corresponding loop

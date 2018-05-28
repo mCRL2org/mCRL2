@@ -328,18 +328,6 @@ class state_info_entry
     /// iterator past the last inert outgoing transition
     succ_const_iter_t inert_succ_end() const  {  return state_inert_out_end;  }
     succ_iter_t inert_succ_end()  {  return state_inert_out_end;  }
-    void set_inert_succ_end(succ_iter_t const new_inert_out_end)
-    {
-        state_inert_out_end = new_inert_out_end;
-        assert(inert_succ_begin() <= inert_succ_end());
-        assert(inert_succ_end() <= succ_end());
-        // The following assertions cannot be tested because the respective
-        // types are not yet complete.
-        // assert(inert_succ_begin() == inert_succ_end() ||
-        //                        inert_succ_end()[-1].target->block == block);
-        // assert(succ_end() == inert_succ_end() ||
-        //                  *constln() < *inert_succ_end()->target->constln());
-    }
 
     void set_inert_succ_begin_and_end(succ_iter_t new_inert_out_begin,
                                                  succ_iter_t new_inert_out_end)
@@ -785,10 +773,6 @@ class block_t
         assert(int_inert_begin <= int_inert_end);
     }
 
-    /// \brief mark all states in the block
-    /// \details This function is used to mark all states of the splitter.
-    void mark_all_states();
-
     /// \brief mark a non-bottom state
     /// \details Marking is done by moving the state to the slice of the marked
     /// non-bottom states of the block.
@@ -1074,22 +1058,6 @@ class constln_t
     }
 #endif
 };
-
-
-/// \brief mark all states in the block
-/// \details This function is used to mark all states of the splitter.
-inline void block_t::mark_all_states()
-{
-    assert(marked_nonbottom_begin() == marked_nonbottom_end() &&
-                                 marked_bottom_begin() == marked_bottom_end());
-    mCRL2complexity(this, add_work(
-                  check_complexity::Mark_all_states_of_SpB_as_predecessors_2_9,
-                   check_complexity::log_n - check_complexity::ilog2(size())));
-    set_marked_nonbottom_begin(nonbottom_begin());
-    // set_marked_nonbottom_end(nonbottom_end());
-    set_marked_bottom_begin(bottom_begin());
-    // set_marked_bottom_end(bottom_end());
-}
 
 
 template <class LTS_TYPE>
