@@ -16,6 +16,10 @@ class SolveDock : public QDockWidget
 public:
     const Qt::DockWidgetArea defaultArea = Qt::RightDockWidgetArea;
 
+    /**
+     * @brief SolveDock Constructor
+     * @param parent The parent of this widget
+     */
     explicit SolveDock(QWidget *parent);
 
 private:

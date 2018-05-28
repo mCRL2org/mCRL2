@@ -13,37 +13,41 @@ class CodeEditor : public QPlainTextEdit
     Q_OBJECT
 
 public:
+    /**
+     * @brief CodeEditor Constructor
+     * @param parent The parent of this widget
+     */
     CodeEditor(QWidget *parent = 0);
 
     /**
-     * @brief lineNumberAreaPaintEvent paints the line number area on the screen
-     * @param event a paint event
+     * @brief lineNumberAreaPaintEvent Paints the line number area on the screen
+     * @param event A paint event
      */
     void lineNumberAreaPaintEvent(QPaintEvent *event);
 
     /**
-     * @brief lineNumberAreaWidth computes the width needed for the line number area
-     * @return the width needed for the line number area
+     * @brief lineNumberAreaWidth Computes the width needed for the line number area
+     * @return The width needed for the line number area
      */
     int lineNumberAreaWidth();
 
 protected:
     /**
-     * @brief resizeEvent resizes the line number area when the window is resized
-     * @param e the resize event
+     * @brief resizeEvent Resizes the line number area when the window is resized
+     * @param e The resize event
      */
     void resizeEvent(QResizeEvent *event) override;
 
 private slots:
     /**
-     * @brief updateLineNumberAreaWidth updates the width of the line number area
+     * @brief updateLineNumberAreaWidth Updates the width of the line number area
      */
     void updateLineNumberAreaWidth(int);
 
     /**
-     * @brief updateLineNumberArea updates the line number area after the scrollbar has been used
-     * @param rect the rectangle that covers the line number area
-     * @param dy the amount of pixels scrolled
+     * @brief updateLineNumberArea Updates the line number area after the scrollbar has been used
+     * @param rect The rectangle that covers the line number area
+     * @param dy The amount of pixels scrolled
      */
     void updateLineNumberArea(const QRect &, int);
 
@@ -58,18 +62,22 @@ private:
 class LineNumberArea : public QWidget
 {
 public:
+    /**
+     * @brief LineNumberArea Constructor
+     * @param editor The code editor this line number area belongs to
+     */
     LineNumberArea(CodeEditor *editor);
 
     /**
-     * @brief sizeHint returns the recommended size of the widget
-     * @return the recommended size of the widget
+     * @brief sizeHint Returns the recommended size of the widget
+     * @return The recommended size of the widget
      */
     QSize sizeHint() const override;
 
 protected:
     /**
-     * @brief paintEvent handles paint events
-     * @param event a paint event
+     * @brief paintEvent Handles paint events
+     * @param event A paint event
      */
     void paintEvent(QPaintEvent *event) override;
 

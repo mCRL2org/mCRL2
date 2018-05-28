@@ -16,19 +16,23 @@ class PropertiesDock : public QDockWidget
 public:
     const Qt::DockWidgetArea defaultArea = Qt::RightDockWidgetArea;
 
+    /**
+     * @brief PropertiesDock Constructor
+     * @param parent The parent of this widget
+     */
     explicit PropertiesDock(QWidget *parent);
 
 
     /**
-     * @brief PropertiesDock::addProperty adds a property to the dock
-     * @param propertyName the name of the property
-     * @param propertyText the body of the property
+     * @brief addProperty Adds a property to the dock
+     * @param propertyName The name of the property
+     * @param propertyText The body of the property
      */
     void addProperty(QString propertyName, QString propertyText);
 
     /**
-     * @brief PropertiesDock::deleteProperty removes a property from the dock
-     * @param property the property to remove
+     * @brief deleteProperty Removes a property from the dock
+     * @param property The property to remove
      */
     void deleteProperty(PropertyWidget *property);
 
@@ -39,7 +43,7 @@ private:
 
 
     /**
-     * @brief PropertiesDock::setToNoProperties empties the dock
+     * @brief setToNoProperties Empties the dock
      */
     void setToNoProperties();
 };

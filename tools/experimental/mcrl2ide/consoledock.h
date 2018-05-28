@@ -15,6 +15,10 @@ class ConsoleDock : public QDockWidget
 public:
     const Qt::DockWidgetArea defaultArea = Qt::BottomDockWidgetArea;
 
+    /**
+     * @brief ConsoleDock Constructor
+     * @param parent The parent of this widget
+     */
     explicit ConsoleDock(QWidget *parent);
 
 private:

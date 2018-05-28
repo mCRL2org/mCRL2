@@ -9,53 +9,59 @@
 class PropertiesDock;
 
 /**
- * @brief The PropertyWidget classdefines a widget for a single property in the properties dock
+ * @brief The PropertyWidget class defines a widget for a single property in the properties dock
  */
 class PropertyWidget : public QWidget
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief PropertyWidget Constructor
+     * @param name The name of the property
+     * @param text The text of the property
+     * @param parent The parent of this widget
+     */
     PropertyWidget(QString name, QString text, PropertiesDock *parent);
 
 
     /**
-     * @brief getPropertyName gets the name of the property of this widget
-     * @return the name of the property
+     * @brief getPropertyName Gets the name of the property of this widget
+     * @return The name of the property
      */
     QString getPropertyName();
 
     /**
-     * @brief getPropertyText gets the text of the property of this widget
-     * @return the text of the property
+     * @brief getPropertyText Gets the text of the property of this widget
+     * @return The text of the property
      */
     QString getPropertyText();
 
     /**
-     * @brief setPropertyName set the name of the property of this widget
-     * @param name the new name of the property
+     * @brief setPropertyName Set the name of the property of this widget
+     * @param name The new name of the property
      */
     void setPropertyName(QString name);
 
     /**
-     * @brief setPropertyText set the text of the property of this widget
-     * @param text the new text of the property
+     * @brief setPropertyText Set the text of the property of this widget
+     * @param text The new text of the property
      */
     void setPropertyText(QString text);
 
 public slots:
     /**
-     * @brief actionVerify allows the user to verify this property
+     * @brief actionVerify Allows the user to verify this property
      */
     void actionVerify();
 
     /**
-     * @brief actionEdit allows the user to edit this property
+     * @brief actionEdit Allows the user to edit this property
      */
     void actionEdit();
 
     /**
-     * @brief actionDelete allows the user to delete this property
+     * @brief actionDelete Allows the user to delete this property
      */
     void actionDelete();
 

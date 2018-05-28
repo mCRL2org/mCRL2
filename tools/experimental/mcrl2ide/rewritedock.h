@@ -16,6 +16,10 @@ class RewriteDock : public QDockWidget
 public:
     const Qt::DockWidgetArea defaultArea = Qt::RightDockWidgetArea;
 
+    /**
+     * @brief RewriteDock Constructor
+     * @param parent The parent of this widget
+     */
     explicit RewriteDock(QWidget *parent);
 
 private:

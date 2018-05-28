@@ -18,135 +18,139 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    /**
+     * @brief MainWindow Constructor
+     * @param parent The parent of this widget
+     */
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 public slots:
     /**
-     * @brief actionNewProject allows the user to create a new project
+     * @brief actionNewProject Allows the user to create a new project
      */
     void actionNewProject();
 
     /**
-     * @brief actionOpenProject allows the user to open a project
+     * @brief actionOpenProject Allows the user to open a project
      */
     void actionOpenProject();
 
     /**
-     * @brief actionNewProject allows the user to open an example project
+     * @brief actionNewProject Allows the user to open an example project
      */
     void actionOpenExampleProject();
 
     /**
-     * @brief actionNewProject allows the user to save a project
+     * @brief actionNewProject Allows the user to save a project
      */
     void actionSaveProject();
 
     /**
-     * @brief actionNewProject allows the user to save a new project under a new name
+     * @brief actionNewProject Allows the user to save a new project under a new name
      */
     void actionSaveProjectAs();
 
     /**
-     * @brief actionAddProperty allows the user to add a property
+     * @brief actionAddProperty Allows the user to add a property
      */
     void actionAddProperty();
 
 
     /**
-     * @brief actionUndo allows the user to undo the last action made in the text editor
+     * @brief actionUndo Allows the user to undo the last action made in the text editor
      */
     void actionUndo();
 
     /**
-     * @brief actionRedo allows the user to redo the last undo
+     * @brief actionRedo Allows the user to redo the last undo
      */
     void actionRedo();
 
     /**
-     * @brief actionFindAndReplace allows the user to find and replace strings in the text editor
+     * @brief actionFindAndReplace Allows the user to find and replace strings in the text editor
      */
     void actionFindAndReplace();
 
     /**
-     * @brief actionCut allows the user to cut the selected text in the text editor
+     * @brief actionCut Allows the user to cut the selected text in the text editor
      */
     void actionCut();
 
     /**
-     * @brief actionCopy allows the user to copy the selected text in the text editor
+     * @brief actionCopy Allows the user to copy the selected text in the text editor
      */
     void actionCopy();
 
     /**
-     * @brief actionPaste allows the user to paste text in the text editor
+     * @brief actionPaste Allows the user to paste text in the text editor
      */
     void actionPaste();
 
     /**
-     * @brief actionDelete allows the user to delete selected text in the text editor
+     * @brief actionDelete Allows the user to delete selected text in the text editor
      */
     void actionDelete();
 
     /**
-     * @brief actionSelectAll allows the user to select all text in the text editor
+     * @brief actionSelectAll Allows the user to select all text in the text editor
      */
     void actionSelectAll();
 
 
     /**
-     * @brief actionParse allows the user to parse the current specification
+     * @brief actionParse Allows the user to parse the current specification
      */
     void actionParse();
 
     /**
-     * @brief actionSimulate allows the user to simulate the current specification
+     * @brief actionSimulate Allows the user to simulate the current specification
      */
     void actionSimulate();
 
     /**
-     * @brief actionCreateLTS allows the user to create the LTS of the current specification
+     * @brief actionCreateLTS Allows the user to create the LTS of the current specification
      */
     void actionCreateLTS();
 
     /**
-     * @brief actionCreateReducedLTS allows the user to create a reduced LTS of the current specification
+     * @brief actionCreateReducedLTS Allows the user to create a reduced LTS of the current specification
      */
     void actionCreateReducedLTS();
 
     /**
-     * @brief actionAbortLTSCreation allows the user to abort LTS creation
+     * @brief actionAbortLTSCreation Allows the user to abort LTS creation
      */
     void actionAbortLTSCreation();
 
     /**
-     * @brief actionVerifyAllProperties allows the user to verify all defined properties on the current specification
+     * @brief actionVerifyAllProperties Allows the user to verify all defined properties on the current specification
      */
     void actionVerifyAllProperties();
 
     /**
-     * @brief actionAbortVerification allows the user to abort verification
+     * @brief actionAbortVerification Allows the user to abort verification
      */
     void actionAbortVerification();
 
 private:
     /**
-     * @brief setupMenuBar creates the menubar
+     * @brief setupMenuBar Creates the menubar
      */
     void setupMenuBar();
 
     /**
-     * @brief setupToolbar creates the toolbar
+     * @brief setupToolbar Creates the toolbar
      */
     void setupToolbar();
 
     /**
-     * @brief setDocksToDefault puts all docks in their default location
+     * @brief setDocksToDefault Puts all docks in their default location
      */
     void setDocksToDefault();
 
     /**
-     * @brief setupDocks creates the docks
+     * @brief setupDocks Creates the docks
      */
     void setupDocks();
 
