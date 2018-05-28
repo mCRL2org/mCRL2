@@ -115,7 +115,6 @@ inline const data_expression& get_argument_of_higher_order_term(const applicatio
   if (is_function_symbol(head) ||
       is_variable(head) ||
       is_where_clause(head) ||
-      is_where_clause(head) ||
       is_abstraction(head))
   {
     assert(t.size()>i);
@@ -133,7 +132,6 @@ inline std::size_t recursive_number_of_args(const data_expression& t)
   // checking whether t is an application. 
   if (is_function_symbol(t) ||
       is_variable(t) ||
-      is_where_clause(t) ||
       is_where_clause(t) ||
       is_abstraction(t))
   {
@@ -166,7 +164,6 @@ inline const data_expression& get_nested_head(const data_expression& t)
   if (is_function_symbol(t) ||
       is_variable(t) ||
       is_where_clause(t) ||
-      is_where_clause(t) ||
       is_abstraction(t))
   {
     return t;
@@ -177,7 +174,6 @@ inline const data_expression& get_nested_head(const data_expression& t)
 
   if (is_function_symbol(head) ||
       is_variable(head) ||
-      is_where_clause(head) ||
       is_where_clause(head) ||
       is_abstraction(head))
   {
