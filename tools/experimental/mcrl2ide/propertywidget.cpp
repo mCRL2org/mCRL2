@@ -23,7 +23,7 @@ PropertyWidget::PropertyWidget(QString name, QString text, PropertiesDock *paren
     editButton->setIconSize(QSize(32, 32));
     connect(editButton, SIGNAL(clicked()), this, SLOT(actionEdit()));
 
-    /*create the delete button */
+    /* create the delete button */
     QPushButton *deleteButton = new QPushButton();
     deleteButton->setIcon(QIcon(":/icons/cogwheelmedium.png")); /* placeholder */
     deleteButton->setIconSize(QSize(32, 32));

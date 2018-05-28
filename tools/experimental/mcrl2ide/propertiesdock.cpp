@@ -55,7 +55,6 @@ void PropertiesDock::deleteProperty(PropertyWidget *property)
 {
     propertiesLayout->removeWidget(property);
     if (propertiesLayout->isEmpty()){
-        printf("empty");
         this->setToNoProperties();
     }
 }
