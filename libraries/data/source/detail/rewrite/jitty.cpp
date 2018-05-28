@@ -50,7 +50,7 @@ typedef atermpp::detail::_aterm* unprotected_data_expression;    // Idem, but no
 // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
 
 
-static const function_symbol this_term_is_in_normal_form()
+static const function_symbol& this_term_is_in_normal_form()
 {
   static const function_symbol this_term_is_in_normal_form(
                          std::string("Rewritten@@term"),
