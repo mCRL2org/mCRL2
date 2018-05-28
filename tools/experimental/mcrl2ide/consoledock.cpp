@@ -16,7 +16,7 @@ ConsoleDock::ConsoleDock(QWidget *parent) : QDockWidget("Console", parent)
     verificationConsole->setReadOnly(true);
 
     /* lay them out */
-    consoleTabs->addTab(parseConsole, "Parse");
+    consoleTabs->addTab(parseConsole, "Parsing");
     consoleTabs->addTab(LTSConsole, "LTS creation");
     consoleTabs->addTab(verificationConsole, "Verification");
 

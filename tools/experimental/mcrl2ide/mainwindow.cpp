@@ -152,6 +152,11 @@ void MainWindow::setDocksToDefault()
     addDockWidget(rewriteDock->defaultArea, rewriteDock);
     addDockWidget(solveDock->defaultArea, solveDock);
 
+    propertiesDock->setFloating(false);
+    consoleDock->setFloating(false);
+    rewriteDock->setFloating(false);
+    solveDock->setFloating(false);
+
     rewriteDock->hide();
     solveDock->hide();
 }
