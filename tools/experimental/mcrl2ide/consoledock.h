@@ -5,6 +5,9 @@
 #include <QPlainTextEdit>
 #include <QTabWidget>
 
+/**
+ * @brief The ConsoleDock class defines the dock that shows console output
+ */
 class ConsoleDock : public QDockWidget
 {
     Q_OBJECT

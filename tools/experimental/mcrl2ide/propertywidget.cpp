@@ -40,54 +40,32 @@ PropertyWidget::PropertyWidget(QString name, QString text, PropertiesDock *paren
     this->setLayout(propertyLayout);
 }
 
-/**
- * @brief PropertyWidget::getPropertyName gets the name of the property of this widget
- * @return the name of the property
- */
 QString PropertyWidget::getPropertyName()
 {
     return name;
 }
 
-/**
- * @brief PropertyWidget::getPropertyText gets the text of the property of this widget
- * @return the text of the property
- */
 QString PropertyWidget::getPropertyText()
 {
     return text;
 }
 
-/**
- * @brief PropertyWidget::setPropertyName set the name of the property of this widget
- * @param name the new name of the property
- */
 void PropertyWidget::setPropertyName(QString name)
 {
     this->name = name;
     propertyNameLabel->setText(name);
 }
 
-/**
- * @brief PropertyWidget::setPropertyText set the text of the property of this widget
- * @param text the new text of the property
- */
 void PropertyWidget::setPropertyText(QString text)
 {
     this->text = text;
 }
 
-/**
- * @brief PropertyWidget::actionVerify allows the user to verify this property
- */
 void PropertyWidget::actionVerify()
 {
     /* not yet implemented */
 }
 
-/**
- * @brief PropertyWidget::actionEdit allows the user to edit this property
- */
 void PropertyWidget::actionEdit()
 {
     AddEditPropertyDialog *editPropertyDialog = new AddEditPropertyDialog(false, this, name, text);
@@ -99,9 +77,6 @@ void PropertyWidget::actionEdit()
     }
 }
 
-/**
- * @brief PropertyWidget::actionDelete allows the user to delete this property
- */
 void PropertyWidget::actionDelete()
 {
     parent->deleteProperty(this);

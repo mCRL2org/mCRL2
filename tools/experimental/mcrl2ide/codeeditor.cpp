@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QTextBlock>
+#include <QWidget>
 
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
@@ -22,10 +23,6 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     updateLineNumberAreaWidth(0);
 }
 
-/**
- * @brief CodeEditor::lineNumberAreaWidth computes the width needed for the line number area
- * @return the width needed for the line number area
- */
 int CodeEditor::lineNumberAreaWidth()
 {
     int digits = 1;
@@ -38,19 +35,11 @@ int CodeEditor::lineNumberAreaWidth()
     return 3 + fontMetrics().width(QLatin1Char('9')) * digits;
 }
 
-/**
- * @brief CodeEditor::updateLineNumberAreaWidth updates the width of the line number area
- */
 void CodeEditor::updateLineNumberAreaWidth(int)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
-/**
- * @brief CodeEditor::updateLineNumberArea updates the line number area after the scrollbar has been used
- * @param rect the rectangle that covers the line number area
- * @param dy the amount of pixels scrolled
- */
 void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy)
@@ -62,10 +51,6 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
         updateLineNumberAreaWidth(0);
 }
 
-/**
- * @brief CodeEditor::resizeEvent resizes the line number area when the window is resized
- * @param e the resize event
- */
 void CodeEditor::resizeEvent(QResizeEvent *e)
 {
     QPlainTextEdit::resizeEvent(e);
@@ -74,10 +59,6 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-/**
- * @brief CodeEditor::lineNumberAreaPaintEvent paints the line number area on the screen
- * @param event a paint event
- */
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
@@ -100,4 +81,20 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         bottom = top + (int) blockBoundingRect(block).height();
         ++blockNumber;
     }
+}
+
+
+LineNumberArea::LineNumberArea(CodeEditor *editor) : QWidget(editor)
+{
+    codeEditor = editor;
+}
+
+QSize LineNumberArea::sizeHint() const
+{
+    return QSize(codeEditor->lineNumberAreaWidth(), 0);
+}
+
+void LineNumberArea::paintEvent(QPaintEvent *event)
+{
+    codeEditor->lineNumberAreaPaintEvent(event);
 }

@@ -6,6 +6,9 @@
 #include <QDockWidget>
 #include <QVBoxLayout>
 
+/**
+ * @brief The PropertiesDock class defines the dock that contains the properties
+ */
 class PropertiesDock : public QDockWidget
 {
     Q_OBJECT
@@ -15,7 +18,18 @@ public:
 
     explicit PropertiesDock(QWidget *parent);
 
+
+    /**
+     * @brief PropertiesDock::addProperty adds a property to the dock
+     * @param propertyName the name of the property
+     * @param propertyText the body of the property
+     */
     void addProperty(QString propertyName, QString propertyText);
+
+    /**
+     * @brief PropertiesDock::deleteProperty removes a property from the dock
+     * @param property the property to remove
+     */
     void deleteProperty(PropertyWidget *property);
 
 private:
@@ -23,6 +37,10 @@ private:
     QWidget *innerDockWidget;
     QVBoxLayout *propertiesLayout;
 
+
+    /**
+     * @brief PropertiesDock::setToNoProperties empties the dock
+     */
     void setToNoProperties();
 };
 

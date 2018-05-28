@@ -13,9 +13,6 @@ PropertiesDock::PropertiesDock(QWidget *parent) : QDockWidget("Properties", pare
     this->setWidget(innerDockWidget);
 }
 
-/**
- * @brief PropertiesDock::setToNoProperties empties the dock
- */
 void PropertiesDock::setToNoProperties()
 {
     /* empty the layout (is usually already empty) */
@@ -30,11 +27,6 @@ void PropertiesDock::setToNoProperties()
     noProperties = true;
 }
 
-/**
- * @brief PropertiesDock::addProperty adds a property to the dock
- * @param propertyName the name of the property
- * @param propertyText the body of the property
- */
 void PropertiesDock::addProperty(QString propertyName, QString propertyText)
 {
     if (noProperties){
@@ -47,10 +39,6 @@ void PropertiesDock::addProperty(QString propertyName, QString propertyText)
     propertiesLayout->addWidget(new PropertyWidget(propertyName, propertyText, this));
 }
 
-/**
- * @brief PropertiesDock::deleteProperty removes a property from the dock
- * @param property the property to remove
- */
 void PropertiesDock::deleteProperty(PropertyWidget *property)
 {
     propertiesLayout->removeWidget(property);

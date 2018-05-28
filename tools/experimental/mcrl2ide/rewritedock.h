@@ -6,6 +6,9 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 
+/**
+ * @brief The RewriteDock class defines the dock where the user can rewrite data expressions
+ */
 class RewriteDock : public QDockWidget
 {
     Q_OBJECT

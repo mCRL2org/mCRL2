@@ -6,6 +6,9 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 
+/**
+ * @brief The SolveDock class defines the dock where the user can solve data expressions
+ */
 class SolveDock : public QDockWidget
 {
     Q_OBJECT
