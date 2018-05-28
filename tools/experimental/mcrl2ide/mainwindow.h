@@ -7,6 +7,7 @@
 #include "consoledock.h"
 #include "rewritedock.h"
 #include "solvedock.h"
+#include "addeditpropertydialog.h"
 
 class MainWindow : public QMainWindow
 {

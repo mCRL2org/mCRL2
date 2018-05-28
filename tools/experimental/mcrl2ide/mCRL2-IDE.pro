@@ -29,14 +29,21 @@ SOURCES += \
     propertiesdock.cpp \
     consoledock.cpp \
     rewritedock.cpp \
-    solvedock.cpp
+    solvedock.cpp \
+    addeditpropertydialog.cpp \
+    propertywidget.cpp
 
 HEADERS += \
         mainwindow.h \
     propertiesdock.h \
     consoledock.h \
     rewritedock.h \
-    solvedock.h
+    solvedock.h \
+    addeditpropertydialog.h \
+    propertywidget.h
 
 RESOURCES += \
     mcrl2-ide.qrc
+
+FORMS += \
+    addeditpropertydialog.ui

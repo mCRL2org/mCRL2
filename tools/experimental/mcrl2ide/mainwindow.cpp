@@ -23,8 +23,8 @@ MainWindow::~MainWindow()
 /**
  * @brief MainWindow::setupMenuBar creates the menubar
  */
-void MainWindow::setupMenuBar(){
-
+void MainWindow::setupMenuBar()
+{
     /* Create the File menu */
     QMenu *fileMenu = menuBar()->addMenu("File");
 
@@ -72,8 +72,8 @@ void MainWindow::setupMenuBar(){
 /**
  * @brief MainWindow::setupToolbar creates the toolbar
  */
-void MainWindow::setupToolbar(){
-
+void MainWindow::setupToolbar()
+{
     QToolBar *toolbar = addToolBar("Actions");
     toolbar->setIconSize(QSize(32, 32));
 
@@ -145,8 +145,8 @@ void MainWindow::setupToolbar(){
 /**
  * @brief MainWindow::setDocksToDefault puts all docks in their default location
  */
-void MainWindow::setDocksToDefault(){
-
+void MainWindow::setDocksToDefault()
+{
     addDockWidget(propertiesDock->defaultArea, propertiesDock);
     addDockWidget(consoleDock->defaultArea, consoleDock);
     addDockWidget(rewriteDock->defaultArea, rewriteDock);
@@ -159,8 +159,8 @@ void MainWindow::setDocksToDefault(){
 /**
  * @brief MainWindow::setupDocks creates the docks
  */
-void MainWindow::setupDocks(){
-
+void MainWindow::setupDocks()
+{
     /* instantiate the docks */
     propertiesDock = new PropertiesDock(this);
     consoleDock = new ConsoleDock(this);
@@ -184,146 +184,171 @@ void MainWindow::setupDocks(){
 /**
  * @brief MainWindow::actionNewProject allows the user to create a new project
  */
-void MainWindow::actionNewProject(){
+void MainWindow::actionNewProject()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionOpenProject allows the user to open a project
  */
-void MainWindow::actionOpenProject(){
+void MainWindow::actionOpenProject()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionNewProject allows the user to open an example project
  */
-void MainWindow::actionOpenExampleProject(){
+void MainWindow::actionOpenExampleProject()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionNewProject allows the user to save a project
  */
-void MainWindow::actionSaveProject(){
+void MainWindow::actionSaveProject()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionNewProject allows the user to save a new project under a new name
  */
-void MainWindow::actionSaveProjectAs(){
+void MainWindow::actionSaveProjectAs()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionAddProperty allows the user to add a property
  */
-void MainWindow::actionAddProperty(){
-    /* Not yet implemented */
+void MainWindow::actionAddProperty()
+{
+    AddEditPropertyDialog *addPropertyDialog = new AddEditPropertyDialog(true, this);
+    /* if adding was succesfull (Add button was pressed), add the property to the properties dock */
+    if (addPropertyDialog->exec()){
+        propertiesDock->addProperty(addPropertyDialog->getPropertyName(), addPropertyDialog->getPropertyText());
+    }
 }
 
 /**
  * @brief MainWindow::actionUndo allows the user to undo the last action made in the text editor
  */
-void MainWindow::actionUndo(){
+void MainWindow::actionUndo()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionRedo allows the user to redo the last undo
  */
-void MainWindow::actionRedo(){
+void MainWindow::actionRedo()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionFindAndReplace allows the user to find and replace strings in the text editor
  */
-void MainWindow::actionFindAndReplace(){
+void MainWindow::actionFindAndReplace()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionCut allows the user to cut the selected text in the text editor
  */
-void MainWindow::actionCut(){
+void MainWindow::actionCut()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionCopy allows the user to copy the selected text in the text editor
  */
-void MainWindow::actionCopy(){
+void MainWindow::actionCopy()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionPaste allows the user to paste text in the text editor
  */
-void MainWindow::actionPaste(){
+void MainWindow::actionPaste()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionDelete allows the user to delete selected text in the text editor
  */
-void MainWindow::actionDelete(){
+void MainWindow::actionDelete()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionSelectAll allows the user to select all text in the text editor
  */
-void MainWindow::actionSelectAll(){
+void MainWindow::actionSelectAll()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionParse allows the user to parse the current specification
  */
-void MainWindow::actionParse(){
+void MainWindow::actionParse()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionSimulate allows the user to simulate the current specification
  */
-void MainWindow::actionSimulate(){
+void MainWindow::actionSimulate()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionCreateLTS allows the user to create the LTS of the current specification
  */
-void MainWindow::actionCreateLTS(){
+void MainWindow::actionCreateLTS()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionCreateReducedLTS allows the user to create a reduced LTS of the current specification
  */
-void MainWindow::actionCreateReducedLTS(){
+void MainWindow::actionCreateReducedLTS()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionAbortLTSCreation allows the user to abort LTS creation
  */
-void MainWindow::actionAbortLTSCreation(){
+void MainWindow::actionAbortLTSCreation()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionVerifyAllProperties allows the user to verify all defined properties on the current specification
  */
-void MainWindow::actionVerifyAllProperties(){
+void MainWindow::actionVerifyAllProperties()
+{
     /* Not yet implemented */
 }
 
 /**
  * @brief MainWindow::actionAbortVerification allows the user to abort verification
  */
-void MainWindow::actionAbortVerification(){
+void MainWindow::actionAbortVerification()
+{
     /* Not yet implemented */
 }
