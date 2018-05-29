@@ -96,7 +96,7 @@ signed_state_type check_complexity::sensible_work = 0;
 /// in the pseudocode in the article [Groote/Jansen/Keiren/Wijs: An O(m log n)
 /// algorithm for computing stuttering equivalence and branching bisimulation.
 /// Accepted for publication in ACM TOCL 2017].
-const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
+const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 2] =
 {
     // block counters
     "2.4: while C contains a nontrivial constellation",
