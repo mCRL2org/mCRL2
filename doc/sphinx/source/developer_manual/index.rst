@@ -22,11 +22,11 @@ Contents
 .. compound::
    :class: toctree-wrapper
 
-   - :doc:`repository`
    - :doc:`developer`
    - :doc:`guidelines`
    - :doc:`code_generation`
    - :doc:`cronjobs`
+   - :doc:`repository`
    - :doc:`packaging`
    - `Bug tracker <https://svn.win.tue.nl/trac/MCRL2/timeline>`_
    - :doc:`testing`

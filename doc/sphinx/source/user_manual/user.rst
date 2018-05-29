@@ -36,7 +36,7 @@ the `developers' documentation <../developer_manual/index.html>`_.
    
           tools
 
-   * - **Contributing**
+   * - **Build instructions**
 
        .. toctree::
           :maxdepth: 2
