@@ -1,5 +1,26 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/cogwheelmedium.png</file>
+        <file>icons/abort.png</file>
+        <file>icons/abort_LTS_creation.png</file>
+        <file>icons/abort_verification.png</file>
+        <file>icons/add_property.png</file>
+        <file>icons/create_LTS.png</file>
+        <file>icons/create_reduced_LTS.png</file>
+        <file>icons/delete.png</file>
+        <file>icons/edit.png</file>
+        <file>icons/false.png</file>
+        <file>icons/LTS.png</file>
+        <file>icons/new_project.png</file>
+        <file>icons/open_project.png</file>
+        <file>icons/parse.png</file>
+        <file>icons/parse_correct.png</file>
+        <file>icons/project.png</file>
+        <file>icons/property.png</file>
+        <file>icons/save_project.png</file>
+        <file>icons/simulate.png</file>
+        <file>icons/specification.png</file>
+        <file>icons/true.png</file>
+        <file>icons/verify.png</file>
+        <file>icons/verify_all.png</file>
     </qresource>
 </RCC>

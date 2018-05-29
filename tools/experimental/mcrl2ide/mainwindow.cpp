@@ -69,68 +69,66 @@ void MainWindow::setupMenuBar()
 void MainWindow::setupToolbar()
 {
     QToolBar *toolbar = addToolBar("Actions");
-    toolbar->setIconSize(QSize(32, 32));
-
-    const QIcon tmp = QIcon(":/icons/cogwheelmedium.png"); /* placeholder */
+    toolbar->setIconSize(QSize(48, 48));
 
     /* create each toolbar item by adding an icon and an action */
-    const QIcon newProjectIcon = tmp;
+    const QIcon newProjectIcon = QIcon(":/icons/new_project.png");
     QAction *newProjectAction = new QAction(newProjectIcon, "New Project", this);
     connect(newProjectAction, &QAction::triggered, this, &MainWindow::actionNewProject);
     toolbar->addAction(newProjectAction);
 
-    const QIcon openProjectIcon = tmp;
+    const QIcon openProjectIcon = QIcon(":/icons/open_project.png");
     QAction *openProjectAction = new QAction(openProjectIcon, "Open Project", this);
     connect(openProjectAction, &QAction::triggered, this, &MainWindow::actionOpenProject);
     toolbar->addAction(openProjectAction);
 
-    const QIcon saveProjectIcon = tmp;
+    const QIcon saveProjectIcon = QIcon(":/icons/save_project.png");
     QAction *saveProjectAction = new QAction(saveProjectIcon, "Save Project", this);
     connect(saveProjectAction, &QAction::triggered, this, &MainWindow::actionSaveProject);
     toolbar->addAction(saveProjectAction);
 
     toolbar->addSeparator();
 
-    const QIcon parseIcon = tmp;
+    const QIcon parseIcon = QIcon(":/icons/parse_correct.png");
     QAction *parseAction = new QAction(parseIcon, "Parse", this);
     connect(parseAction, &QAction::triggered, this, &MainWindow::actionParse);
     toolbar->addAction(parseAction);
 
-    const QIcon simulateIcon = tmp;
+    const QIcon simulateIcon = QIcon(":/icons/simulate.png");
     QAction *simulateAction = new QAction(simulateIcon, "Simulate", this);
     connect(simulateAction, &QAction::triggered, this, &MainWindow::actionSimulate);
     toolbar->addAction(simulateAction);
 
     toolbar->addSeparator();
 
-    const QIcon createLTSIcon = tmp;
+    const QIcon createLTSIcon = QIcon(":/icons/create_LTS.png");
     QAction *createLTSAction = new QAction(createLTSIcon, "Create LTS", this);
     connect(createLTSAction, &QAction::triggered, this, &MainWindow::actionCreateLTS);
     toolbar->addAction(createLTSAction);
 
-    const QIcon createReducedLTSIcon = tmp;
+    const QIcon createReducedLTSIcon = QIcon(":/icons/create_reduced_LTS.png");
     QAction *createReducedLTSAction = new QAction(createReducedLTSIcon, "Create Reduced LTS", this);
     connect(createReducedLTSAction, &QAction::triggered, this, &MainWindow::actionCreateReducedLTS);
     toolbar->addAction(createReducedLTSAction);
 
-    const QIcon abortLTSCreationIcon = tmp;
+    const QIcon abortLTSCreationIcon = QIcon(":/icons/abort_LTS_creation.png");
     QAction *abortLTSCreationAction = new QAction(abortLTSCreationIcon, "Abort LTS Creation", this);
     connect(abortLTSCreationAction, &QAction::triggered, this, &MainWindow::actionAbortLTSCreation);
     toolbar->addAction(abortLTSCreationAction);
 
     toolbar->addSeparator();
 
-    const QIcon addPropertyIcon = tmp;
+    const QIcon addPropertyIcon = QIcon(":/icons/add_property.png");
     QAction *addPropertyAction = new QAction(addPropertyIcon, "Add Property", this);
     connect(addPropertyAction, &QAction::triggered, this, &MainWindow::actionAddProperty);
     toolbar->addAction(addPropertyAction);
 
-    const QIcon verifyAllPropertiesIcon = tmp;
+    const QIcon verifyAllPropertiesIcon = QIcon(":/icons/verify_all.png");
     QAction *verifyAllPropertiesAction = new QAction(verifyAllPropertiesIcon, "Verify All Properties", this);
     connect(verifyAllPropertiesAction, &QAction::triggered, this, &MainWindow::actionVerifyAllProperties);
     toolbar->addAction(verifyAllPropertiesAction);
 
-    const QIcon abortVerificationIcon = tmp;
+    const QIcon abortVerificationIcon = QIcon(":/icons/abort_verification.png");
     QAction *abortVerificationAction = new QAction(abortVerificationIcon, "Abort Verification", this);
     connect(abortVerificationAction, &QAction::triggered, this, &MainWindow::actionAbortVerification);
     toolbar->addAction(abortVerificationAction);
