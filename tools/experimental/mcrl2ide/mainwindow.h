@@ -135,12 +135,12 @@ public slots:
 
 private:
     /**
-     * @brief setupMenuBar Creates the menubar
+     * @brief setupMenuBar Creates the menubar, also creates the actions
      */
     void setupMenuBar();
 
     /**
-     * @brief setupToolbar Creates the toolbar
+     * @brief setupToolbar Creates the toolbar, also adds icons to actions
      */
     void setupToolbar();
 
@@ -154,9 +154,33 @@ private:
      */
     void setupDocks();
 
+    QAction *newProjectAction;
+    QAction *openProjectAction;
+    QAction *openExampleProjectAction;
+    QAction *saveProjectAction;
+    QAction *saveProjectAsAction;
+    QAction *addPropertyAction;
+
+    QAction *undoAction;
+    QAction *redoAction;
+    QAction *findAndReplaceAction;
+    QAction *cutAction;
+    QAction *copyAction;
+    QAction *pasteAction;
+    QAction *deleteAction;
+    QAction *selectAllAction;
+
+    QAction *parseAction;
+    QAction *simulateAction;
+    QAction *createLTSAction;
+    QAction *createReducedLTSAction;
+    QAction *abortLTSCreationAction;
+    QAction *verifyAllPropertiesAction;
+    QAction *abortVerificationAction;
+
     QMenu *viewMenu;
     QToolBar *toolbar;
-    CodeEditor *textEdit;
+    CodeEditor *specificationEditor;
     PropertiesDock *propertiesDock;
     ConsoleDock *consoleDock;
     RewriteDock *rewriteDock;
