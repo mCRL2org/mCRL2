@@ -2,6 +2,8 @@
 #include "propertiesdock.h"
 #include "propertywidget.h"
 
+#include <QMessageBox>
+
 PropertyWidget::PropertyWidget(QString name, QString text, PropertiesDock *parent) : QWidget(parent)
 {
     this->parent = parent;
@@ -72,7 +74,8 @@ void PropertyWidget::actionVerify()
 void PropertyWidget::actionEdit()
 {
     AddEditPropertyDialog *editPropertyDialog = new AddEditPropertyDialog(false, this, name, text);
-    /* if editing was succesfull (Edit button was pressed), update the property and its widget */
+
+    /* if editing was succesful (Edit button was pressed), update the property and its widget */
     if (editPropertyDialog->exec()){
         name = editPropertyDialog->getPropertyName();
         text = editPropertyDialog->getPropertyText();
@@ -82,6 +85,13 @@ void PropertyWidget::actionEdit()
 
 void PropertyWidget::actionDelete()
 {
-    parent->deleteProperty(this);
-    delete this;
+    /* show a message box to ask the user whether he is sure to delete the property */
+    QMessageBox *msgBox = new QMessageBox();
+    msgBox->setText("Are you sure you want to delete the property " + name + "?");
+    msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+    /* only delete the property if the user agrees */
+    if (msgBox->exec() == QMessageBox::Yes){
+        parent->deleteProperty(this);
+        delete this;
+    }
 }

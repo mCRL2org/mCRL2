@@ -37,6 +37,13 @@ public:
      */
     QString getPropertyText();
 
+public slots:
+    /**
+     * @brief parseAndAccept checks whether the fields are non-empty and the property is valid before accepting
+     * (parsing has not yet been implemented)
+     */
+    void parseAndAccept();
+
 private:
     Ui::AddEditPropertyDialog *ui;
 };
