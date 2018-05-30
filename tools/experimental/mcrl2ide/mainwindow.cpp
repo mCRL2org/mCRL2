@@ -182,7 +182,7 @@ void MainWindow::actionSaveProjectAs()
 void MainWindow::actionAddProperty()
 {
     AddEditPropertyDialog *addPropertyDialog = new AddEditPropertyDialog(true, this);
-    /* if adding was succesfull (Add button was pressed), add the property to the properties dock */
+    /* if adding was succesful (Add button was pressed), add the property to the properties dock */
     if (addPropertyDialog->exec()) {
         propertiesDock->addProperty(addPropertyDialog->getPropertyName(), addPropertyDialog->getPropertyText());
     }
@@ -201,7 +201,8 @@ void MainWindow::actionRedo()
 
 void MainWindow::actionFindAndReplace()
 {
-    /* Not yet implemented */
+    FindAndReplaceDialog *findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
+    findAndReplaceDialog->show();
 }
 
 void MainWindow::actionCut()

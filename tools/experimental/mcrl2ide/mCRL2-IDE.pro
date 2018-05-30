@@ -32,7 +32,8 @@ SOURCES += \
     solvedock.cpp \
     addeditpropertydialog.cpp \
     propertywidget.cpp \
-    codeeditor.cpp
+    codeeditor.cpp \
+    findandreplacedialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,10 +43,12 @@ HEADERS += \
     solvedock.h \
     addeditpropertydialog.h \
     propertywidget.h \
-    codeeditor.h
+    codeeditor.h \
+    findandreplacedialog.h
 
 RESOURCES += \
     mcrl2-ide.qrc
 
 FORMS += \
-    addeditpropertydialog.ui
+    addeditpropertydialog.ui \
+    findandreplacedialog.ui

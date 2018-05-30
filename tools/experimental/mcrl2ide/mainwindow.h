@@ -8,6 +8,7 @@
 #include "rewritedock.h"
 #include "solvedock.h"
 #include "addeditpropertydialog.h"
+#include "findandreplacedialog.h"
 #include "codeeditor.h"
 
 /**
