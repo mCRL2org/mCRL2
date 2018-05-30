@@ -84,6 +84,10 @@ inline bool is_variable(const atermpp::aterm_appl& x)
 }
 
 /// \brief Returns true if the term t is an application
+/// \detail This function is inefficient as the arity of a term must 
+///         be determined and an inspection must take place in an 
+///         array of function symbols. Therefore, there is an more efficient overload
+///         is_application(const data_expression& x).
 inline bool is_application(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsDataAppl(x);
@@ -266,8 +270,18 @@ namespace mcrl2
 {
 namespace data
 {
+/// \brief Returns true if the term t is an application.
+inline bool is_application(const data_expression& t)
+{
+  return !(is_function_symbol(t) ||
+           is_variable(t) ||
+           is_where_clause(t) ||
+           is_abstraction(t) ||
+           is_untyped_identifier(t));
+} 
 
-/// \brief Apply data expression to a data expression
+
+/// \brief Apply data expression to a data expression.
 inline
 application data_expression::operator()(const data_expression& e) const
 {
