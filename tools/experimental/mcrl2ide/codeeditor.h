@@ -16,8 +16,9 @@ public:
     /**
      * @brief CodeEditor Constructor
      * @param parent The parent of this widget
+     * @param spec Whether this code editor is to create a specification (else a property)
      */
-    CodeEditor(QWidget *parent = 0);
+    explicit CodeEditor(QWidget *parent = 0, bool spec = false);
 
     /**
      * @brief lineNumberAreaPaintEvent Paints the line number area on the screen

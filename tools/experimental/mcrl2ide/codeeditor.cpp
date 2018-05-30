@@ -4,7 +4,7 @@
 #include <QTextBlock>
 #include <QWidget>
 
-CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
+CodeEditor::CodeEditor(QWidget *parent, bool spec) : QPlainTextEdit(parent)
 {
     /* set the font used (monospaced) */
     QFont *font = new QFont("Courier New", 10);

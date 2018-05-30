@@ -8,7 +8,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    textEdit = new CodeEditor(this);
+    textEdit = new CodeEditor(this, true);
     setCentralWidget(textEdit);
 
     setupMenuBar();

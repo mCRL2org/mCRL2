@@ -41,7 +41,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPlainTextEdit" name="propertyTextField"/>
+       <widget class="CodeEditor" name="propertyTextField"/>
       </item>
      </layout>
     </widget>
@@ -81,6 +81,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CodeEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>codeeditor.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
