@@ -166,24 +166,25 @@ sort_expression data_expression::sort() const
       }
     }
   }
-  else if (is_application(*this))
-  {
-    const data_expression& head = atermpp::down_cast<const data_expression>((*this)[0]);
-    sort_expression s(head.sort());
-    if (is_function_sort(s))
-    {
-      const function_sort& fs = atermpp::down_cast<function_sort>(s);
-      assert(fs.domain().size()+1==this->size());
-      return (fs.codomain());
-    }
-    return s;
-  }
   else if (is_where_clause(*this))
   {
     return atermpp::down_cast<data_expression>((*this)[0]).sort();
   }
-  assert(is_untyped_identifier(*this)); // All cases have been deal with here, except this one.
-  return untyped_sort();
+  else if (is_untyped_identifier(*this))
+  {
+    return untyped_sort();
+  }
+
+  assert(is_application(*this));
+  const data_expression& head = atermpp::down_cast<const data_expression>((*this)[0]);
+  sort_expression s(head.sort());
+  if (is_function_sort(s))
+  {
+    const function_sort& fs = atermpp::down_cast<function_sort>(s);
+    assert(fs.domain().size()+1==this->size());
+    return (fs.codomain());
+  }
+  return s;
 }
 
 std::set<data::variable> substitution_variables(const mutable_map_substitution<>& sigma)
