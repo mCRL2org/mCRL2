@@ -17,7 +17,7 @@ void PropertiesDock::setToNoProperties()
 {
     /* empty the layout (is usually already empty) */
     QLayoutItem *item;
-    while((item = propertiesLayout->takeAt(0))) {
+    while ((item = propertiesLayout->takeAt(0))) {
         propertiesLayout->removeItem(item);
         delete item;
     }
@@ -29,7 +29,7 @@ void PropertiesDock::setToNoProperties()
 
 void PropertiesDock::addProperty(QString propertyName, QString propertyText)
 {
-    if (noProperties){
+    if (noProperties) {
         /* remove the QLabel */
         QWidget *label = propertiesLayout->takeAt(0)->widget();
         propertiesLayout->removeWidget(label);
@@ -42,7 +42,7 @@ void PropertiesDock::addProperty(QString propertyName, QString propertyText)
 void PropertiesDock::deleteProperty(PropertyWidget *property)
 {
     propertiesLayout->removeWidget(property);
-    if (propertiesLayout->isEmpty()){
+    if (propertiesLayout->isEmpty()) {
         this->setToNoProperties();
     }
 }

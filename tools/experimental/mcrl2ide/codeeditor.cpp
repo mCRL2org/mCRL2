@@ -42,13 +42,15 @@ void CodeEditor::updateLineNumberAreaWidth(int)
 
 void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 {
-    if (dy)
+    if (dy) {
         lineNumberArea->scroll(0, dy);
-    else
+    } else {
         lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+    }
 
-    if (rect.contains(viewport()->rect()))
+    if (rect.contains(viewport()->rect())) {
         updateLineNumberAreaWidth(0);
+    }
 }
 
 void CodeEditor::resizeEvent(QResizeEvent *e)

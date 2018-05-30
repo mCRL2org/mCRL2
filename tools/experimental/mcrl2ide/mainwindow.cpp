@@ -183,7 +183,7 @@ void MainWindow::actionAddProperty()
 {
     AddEditPropertyDialog *addPropertyDialog = new AddEditPropertyDialog(true, this);
     /* if adding was succesfull (Add button was pressed), add the property to the properties dock */
-    if (addPropertyDialog->exec()){
+    if (addPropertyDialog->exec()) {
         propertiesDock->addProperty(addPropertyDialog->getPropertyName(), addPropertyDialog->getPropertyText());
     }
 }

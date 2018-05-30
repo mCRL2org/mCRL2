@@ -11,7 +11,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add, QWidget *parent, QString 
     ui->setupUi(this);
 
     /* change the ui depending on whether this should be an add or edit property window */
-    if (add){
+    if (add) {
         this->setWindowTitle("Add Property");
         ui->addEditButton->setText("Add");
     } else {
@@ -41,14 +41,14 @@ void AddEditPropertyDialog::parseAndAccept()
     msgBox->setStandardButtons(QMessageBox::Ok);
 
     /* show a message box if the property name field is empty */
-    if (ui->propertyNameField->text().trimmed().count() == 0){
+    if (ui->propertyNameField->text().trimmed().count() == 0) {
         msgBox->setText("The property name may not be empty");
         msgBox->exec();
         return;
     }
 
     /* show a message box if the property text field is empty */
-    if (ui->propertyTextField->toPlainText().trimmed().count() == 0){
+    if (ui->propertyTextField->toPlainText().trimmed().count() == 0) {
         msgBox->setText("The property text may not be empty");
         msgBox->exec();
         return;

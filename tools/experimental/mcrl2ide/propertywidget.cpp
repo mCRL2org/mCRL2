@@ -76,7 +76,7 @@ void PropertyWidget::actionEdit()
     AddEditPropertyDialog *editPropertyDialog = new AddEditPropertyDialog(false, this, name, text);
 
     /* if editing was succesful (Edit button was pressed), update the property and its widget */
-    if (editPropertyDialog->exec()){
+    if (editPropertyDialog->exec()) {
         name = editPropertyDialog->getPropertyName();
         text = editPropertyDialog->getPropertyText();
         propertyNameLabel->setText(name);
@@ -90,7 +90,7 @@ void PropertyWidget::actionDelete()
     msgBox->setText("Are you sure you want to delete the property " + name + "?");
     msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
     /* only delete the property if the user agrees */
-    if (msgBox->exec() == QMessageBox::Yes){
+    if (msgBox->exec() == QMessageBox::Yes) {
         parent->deleteProperty(this);
         delete this;
     }
