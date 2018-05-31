@@ -96,11 +96,10 @@ signed_state_type check_complexity::sensible_work = 0;
 /// in the pseudocode in the article [Groote/Jansen/Keiren/Wijs: An O(m log n)
 /// algorithm for computing stuttering equivalence and branching bisimulation.
 /// Accepted for publication in ACM TOCL 2017].
-const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 2] =
+const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
 {
     // block counters
     "2.4: while C contains a nontrivial constellation",
-    "2.9: Mark all states of SpB as predecessors",
     "2.10: for all s in SpB",
     "3.29: Move Blue/Red to a new block NewB (set pointers to new block)",
     "3.29: Move Blue/Red to a new block NewB (for all states s in NewB)",
@@ -194,7 +193,6 @@ void check_complexity::test_work_names()
     // block counters
     assert(check_complexity::BLOCK_MIN == i);
     test_work_name(i, while_C_contains_a_nontrivial_constellation_2_4);
-    test_work_name(i, Mark_all_states_of_SpB_as_predecessors_2_9);
     test_work_name(i, for_all_s_in_SpB_2_10);
     test_work_name(i, Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29);
     test_work_name(i, Move_Blue_or_Red_to_a_new_block_states_3_29);
