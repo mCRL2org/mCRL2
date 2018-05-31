@@ -297,9 +297,7 @@ class check_complexity
 
   public:
     /// \brief printable names of the counter types (for error messages)
-    static const char *work_names[TRANS_MAX - BLOCK_MIN + 2];  // JFG: Changed +1 into +2 as the initialiser on line 99
-                                                               //      in libraries/lts/source/check_complexity.cpp has too
-                                                               //      too many element. David Jansen should look into this. 
+    static const char *work_names[TRANS_MAX - BLOCK_MIN + 1];
 
     /// \brief check that not too much superfluous work has been done
     /// \details After having moved all temporary work counters to the normal
