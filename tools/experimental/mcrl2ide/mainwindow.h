@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QTextEdit>
 #include "propertiesdock.h"
 #include "consoledock.h"
 #include "rewritedock.h"
@@ -10,6 +8,8 @@
 #include "addeditpropertydialog.h"
 #include "findandreplacedialog.h"
 #include "codeeditor.h"
+
+#include <QMainWindow>
 
 /**
  * @brief The MainWindow class defines the main window off the application
@@ -149,6 +149,9 @@ private:
     ConsoleDock *consoleDock;
     RewriteDock *rewriteDock;
     SolveDock *solveDock;
+
+    FindAndReplaceDialog *findAndReplaceDialog;
+    AddEditPropertyDialog *addPropertyDialog;
 };
 
 

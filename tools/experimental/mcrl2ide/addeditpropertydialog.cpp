@@ -1,6 +1,5 @@
 #include "addeditpropertydialog.h"
 #include "ui_addeditpropertydialog.h"
-#include "propertywidget.h"
 
 #include <QMessageBox>
 

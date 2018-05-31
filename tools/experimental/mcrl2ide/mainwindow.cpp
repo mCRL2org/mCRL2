@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
     setupMenuBar();
     setupToolbar();
     setupDocks();
+
+    findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
 }
 
 MainWindow::~MainWindow()
@@ -181,7 +183,7 @@ void MainWindow::actionSaveProjectAs()
 
 void MainWindow::actionAddProperty()
 {
-    AddEditPropertyDialog *addPropertyDialog = new AddEditPropertyDialog(true, this);
+    addPropertyDialog = new AddEditPropertyDialog(true, this);
     /* if adding was succesful (Add button was pressed), add the property to the properties dock */
     if (addPropertyDialog->exec()) {
         propertiesDock->addProperty(addPropertyDialog->getPropertyName(), addPropertyDialog->getPropertyText());
@@ -190,8 +192,11 @@ void MainWindow::actionAddProperty()
 
 void MainWindow::actionFindAndReplace()
 {
-    FindAndReplaceDialog *findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
-    findAndReplaceDialog->show();
+    if (findAndReplaceDialog->isVisible()) {
+        findAndReplaceDialog->setFocus();
+    } else {
+        findAndReplaceDialog->show();
+    }
 }
 
 void MainWindow::actionParse()

@@ -22,19 +22,19 @@ public:
      */
     explicit PropertiesDock(QWidget *parent);
 
+    /**
+     * @brief deleteProperty Removes a property from the dock
+     * @param property The property to remove
+     */
+    void deleteProperty(PropertyWidget *property);
 
+public slots:
     /**
      * @brief addProperty Adds a property to the dock
      * @param propertyName The name of the property
      * @param propertyText The body of the property
      */
     void addProperty(QString propertyName, QString propertyText);
-
-    /**
-     * @brief deleteProperty Removes a property from the dock
-     * @param property The property to remove
-     */
-    void deleteProperty(PropertyWidget *property);
 
 private:
     bool noProperties;
