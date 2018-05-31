@@ -24,25 +24,39 @@ void PropertiesDock::setToNoProperties()
     /* show a QLabel that tells the user that no properties have been defined */
     QLabel *noPropertiesLabel = new QLabel("No properties have been defined");
     propertiesLayout->addWidget(noPropertiesLabel);
-    noProperties = true;
 }
 
 void PropertiesDock::addProperty(QString propertyName, QString propertyText)
 {
-    if (noProperties) {
+    if (propertyWidgets.empty()) {
         /* remove the QLabel */
         QWidget *label = propertiesLayout->takeAt(0)->widget();
         propertiesLayout->removeWidget(label);
         delete label;
         noProperties = false;
     }
-    propertiesLayout->addWidget(new PropertyWidget(propertyName, propertyText, this));
+
+    /* add the property to the rest */
+    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, this);
+    propertiesLayout->addWidget(propertyWidget);
+    propertyWidgets.push_back(propertyWidget);
 }
 
-void PropertiesDock::deleteProperty(PropertyWidget *property)
+void PropertiesDock::deleteProperty(PropertyWidget *propertyWidget)
 {
-    propertiesLayout->removeWidget(property);
+    propertiesLayout->removeWidget(propertyWidget);
     if (propertiesLayout->isEmpty()) {
         this->setToNoProperties();
     }
+    propertyWidgets.remove(propertyWidget);
+}
+
+bool PropertiesDock::propertyNameExists(QString propertyName)
+{
+    for (PropertyWidget *propertyWidget : propertyWidgets) {
+        if (propertyWidget->getPropertyName() == propertyName) {
+            return true;
+        }
+    }
+    return false;
 }

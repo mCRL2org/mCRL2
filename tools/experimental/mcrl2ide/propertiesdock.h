@@ -23,24 +23,29 @@ public:
     explicit PropertiesDock(QWidget *parent);
 
     /**
-     * @brief deleteProperty Removes a property from the dock
-     * @param property The property to remove
-     */
-    void deleteProperty(PropertyWidget *property);
-
-public slots:
-    /**
      * @brief addProperty Adds a property to the dock
      * @param propertyName The name of the property
      * @param propertyText The body of the property
      */
     void addProperty(QString propertyName, QString propertyText);
 
+    /**
+     * @brief deleteProperty Removes a property from the dock
+     * @param propertyWidget The property widget to remove
+     */
+    void deleteProperty(PropertyWidget *propertyWidget);
+
+    /**
+     * @brief propertyNameExists Checks whether there already exists a property with the name propertyName
+     * @param propertyName The property name to check for
+     * @return Whether there already exists a property with the name propertyName
+     */
+    bool propertyNameExists(QString propertyName);
+
 private:
-    bool noProperties;
     QWidget *innerDockWidget;
     QVBoxLayout *propertiesLayout;
-
+    std::list<PropertyWidget*> propertyWidgets;
 
     /**
      * @brief setToNoProperties Empties the dock

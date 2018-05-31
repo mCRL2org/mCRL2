@@ -73,7 +73,7 @@ void PropertyWidget::actionVerify()
 
 void PropertyWidget::actionEdit()
 {
-    AddEditPropertyDialog *editPropertyDialog = new AddEditPropertyDialog(false, this, name, text);
+    AddEditPropertyDialog *editPropertyDialog = new AddEditPropertyDialog(false, parent, this, name, text);
 
     /* if editing was succesful (Edit button was pressed), update the property and its widget */
     if (editPropertyDialog->exec()) {

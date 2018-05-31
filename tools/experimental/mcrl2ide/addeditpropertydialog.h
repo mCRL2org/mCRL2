@@ -1,6 +1,8 @@
 #ifndef ADDEDITPROPERTYDIALOG_H
 #define ADDEDITPROPERTYDIALOG_H
 
+#include "propertiesdock.h"
+
 #include <QDialog>
 
 namespace Ui {
@@ -18,11 +20,12 @@ public:
     /**
      * @brief AddEditPropertyDialog Constructor
      * @param add Whether this should be an add (or else an edit) window
+     * @param propertiesDock The properties dock
      * @param parent The parent of this widget
      * @param propertyName The current name of the property (in case of edit)
      * @param propertyText The current text of the property (in case of edit)
      */
-    AddEditPropertyDialog(bool add, QWidget *parent = 0, QString propertyName = "", QString propertyText = "");
+    AddEditPropertyDialog(bool add, PropertiesDock *propertiesDock, QWidget *parent = 0, QString propertyName = "", QString propertyText = "");
     ~AddEditPropertyDialog();
 
     /**
@@ -46,6 +49,8 @@ public slots:
 
 private:
     Ui::AddEditPropertyDialog *ui;
+
+    PropertiesDock *propertiesDock;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H
