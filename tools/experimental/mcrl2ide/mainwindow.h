@@ -99,12 +99,12 @@ public slots:
 
 private:
     /**
-     * @brief setupMenuBar Creates the menubar, also creates the actions
+     * @brief setupMenuBar Creates the menubar, also creates the actions and their icons and shortcuts (if applicable)
      */
     void setupMenuBar();
 
     /**
-     * @brief setupToolbar Creates the toolbar, also adds icons to actions
+     * @brief setupToolbar Creates the toolbar
      */
     void setupToolbar();
 

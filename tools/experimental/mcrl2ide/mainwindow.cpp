@@ -28,28 +28,60 @@ void MainWindow::setupMenuBar()
     QMenu *fileMenu = menuBar()->addMenu("File");
 
     newProjectAction = fileMenu->addAction("New Project", this, &MainWindow::actionNewProject);
+    newProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+    newProjectAction->setIcon(QIcon(":/icons/new_project.png"));
+
     fileMenu->addSeparator();
+
     openProjectAction = fileMenu->addAction("Open Project", this, &MainWindow::actionOpenProject);
+    openProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    openProjectAction->setIcon(QIcon(":/icons/open_project.png"));
+
     openExampleProjectAction = fileMenu->addAction("Open Example Project", this, &MainWindow::actionOpenExampleProject);
+
     fileMenu->addSeparator();
+
     saveProjectAction = fileMenu->addAction("Save Project", this, &MainWindow::actionSaveProject);
+    saveProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+    saveProjectAction->setIcon(QIcon(":/icons/save_project.png"));
+
     saveProjectAsAction = fileMenu->addAction("Save Project As", this, &MainWindow::actionSaveProjectAs);
+
     fileMenu->addSeparator();
+
     addPropertyAction = fileMenu->addAction("Add Property", this, &MainWindow::actionAddProperty);
+    addPropertyAction->setIcon(QIcon(":/icons/add_property.png"));
 
     /* Create the Edit menu */
     QMenu *editMenu = menuBar()->addMenu("Edit");
 
     undoAction = editMenu->addAction("Undo", specificationEditor, &CodeEditor::undo);
+    undoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
+
     redoAction = editMenu->addAction("Redo", specificationEditor, &CodeEditor::redo);
+    redoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Y));
+
     editMenu->addSeparator();
+
     findAndReplaceAction = editMenu->addAction("Find and Replace", this, &MainWindow::actionFindAndReplace);
+    findAndReplaceAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+
     editMenu->addSeparator();
+
     cutAction = editMenu->addAction("Cut", specificationEditor, &CodeEditor::cut);
+    cutAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
+
     copyAction = editMenu->addAction("Copy", specificationEditor, &CodeEditor::copy);
+    copyAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+
     pasteAction = editMenu->addAction("Paste", specificationEditor, &CodeEditor::paste);
+    pasteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+
     deleteAction = editMenu->addAction("Delete", specificationEditor, &CodeEditor::deleteChar);
+    deleteAction->setShortcut(QKeySequence(Qt::Key_Delete));
+
     selectAllAction = editMenu->addAction("Select All", specificationEditor, &CodeEditor::selectAll);
+    selectAllAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
 
     /* Create the View Menu (actions are added in setupDocks())*/
     viewMenu = menuBar()->addMenu("View");
@@ -58,14 +90,29 @@ void MainWindow::setupMenuBar()
     QMenu *actionsMenu = menuBar()->addMenu("Actions");
 
     parseAction = actionsMenu->addAction("Parse", this, &MainWindow::actionParse);
+    parseAction->setIcon(QIcon(":/icons/parse_correct.png"));
+
     simulateAction = actionsMenu->addAction("Simulate", this, &MainWindow::actionSimulate);
+    simulateAction->setIcon(QIcon(":/icons/simulate.png"));
+
     actionsMenu->addSeparator();
+
     createLTSAction = actionsMenu->addAction("Create LTS", this, &MainWindow::actionCreateLTS);
+    createLTSAction->setIcon(QIcon(":/icons/create_LTS.png"));
+
     createReducedLTSAction = actionsMenu->addAction("Create reduced LTS", this, &MainWindow::actionCreateReducedLTS);
+    createReducedLTSAction->setIcon(QIcon(":/icons/create_reduced_LTS.png"));
+
     abortLTSCreationAction = actionsMenu->addAction("Abort LTS creation", this, &MainWindow::actionAbortLTSCreation);
+    abortLTSCreationAction->setIcon(QIcon(":/icons/abort_LTS_creation.png"));
+
     actionsMenu->addSeparator();
+
     verifyAllPropertiesAction = actionsMenu->addAction("Verify all Properties", this, &MainWindow::actionVerifyAllProperties);
+    verifyAllPropertiesAction->setIcon(QIcon(":/icons/verify_all.png"));
+
     abortVerificationAction = actionsMenu->addAction("Abort verification", this, &MainWindow::actionAbortVerification);
+    abortVerificationAction->setIcon(QIcon(":/icons/abort_verification.png"));
 }
 
 void MainWindow::setupToolbar()
@@ -73,44 +120,20 @@ void MainWindow::setupToolbar()
     toolbar = addToolBar("Actions");
     toolbar->setIconSize(QSize(48, 48));
 
-    /* create each toolbar item by adding an icon and an action */
-    newProjectAction->setIcon(QIcon(":/icons/new_project.png"));
+    /* create each toolbar item by adding the actions */
     toolbar->addAction(newProjectAction);
-
-    openProjectAction->setIcon(QIcon(":/icons/open_project.png"));
     toolbar->addAction(openProjectAction);
-
-    saveProjectAction->setIcon(QIcon(":/icons/save_project.png"));
     toolbar->addAction(saveProjectAction);
-
     toolbar->addSeparator();
-
-    parseAction->setIcon(QIcon(":/icons/parse_correct.png"));
     toolbar->addAction(parseAction);
-
-    simulateAction->setIcon(QIcon(":/icons/simulate.png"));
     toolbar->addAction(simulateAction);
-
     toolbar->addSeparator();
-
-    createLTSAction->setIcon(QIcon(":/icons/create_LTS.png"));
     toolbar->addAction(createLTSAction);
-
-    createReducedLTSAction->setIcon(QIcon(":/icons/create_reduced_LTS.png"));
     toolbar->addAction(createReducedLTSAction);
-
-    abortLTSCreationAction->setIcon(QIcon(":/icons/abort_LTS_creation.png"));
     toolbar->addAction(abortLTSCreationAction);
-
     toolbar->addSeparator();
-
-    addPropertyAction->setIcon(QIcon(":/icons/add_property.png"));
     toolbar->addAction(addPropertyAction);
-
-    verifyAllPropertiesAction->setIcon(QIcon(":/icons/verify_all.png"));
     toolbar->addAction(verifyAllPropertiesAction);
-
-    abortVerificationAction->setIcon(QIcon(":/icons/abort_verification.png"));
     toolbar->addAction(abortVerificationAction);
 
     /* disable the abort actions since they should only be used when something is running */
