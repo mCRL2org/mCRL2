@@ -33,7 +33,6 @@ void PropertiesDock::addProperty(QString propertyName, QString propertyText)
         QWidget *label = propertiesLayout->takeAt(0)->widget();
         propertiesLayout->removeWidget(label);
         delete label;
-        noProperties = false;
     }
 
     /* add the property to the rest */
