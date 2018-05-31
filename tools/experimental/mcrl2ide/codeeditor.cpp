@@ -23,6 +23,11 @@ CodeEditor::CodeEditor(QWidget *parent, bool spec) : QPlainTextEdit(parent)
     updateLineNumberAreaWidth(0);
 }
 
+void CodeEditor::deleteChar()
+{
+    this->textCursor().deleteChar();
+}
+
 int CodeEditor::lineNumberAreaWidth()
 {
     int digits = 1;

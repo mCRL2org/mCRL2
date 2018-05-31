@@ -57,47 +57,10 @@ public slots:
      */
     void actionAddProperty();
 
-
-    /**
-     * @brief actionUndo Allows the user to undo the last action made in the text editor
-     */
-    void actionUndo();
-
-    /**
-     * @brief actionRedo Allows the user to redo the last undo
-     */
-    void actionRedo();
-
     /**
      * @brief actionFindAndReplace Allows the user to find and replace strings in the text editor
      */
     void actionFindAndReplace();
-
-    /**
-     * @brief actionCut Allows the user to cut the selected text in the text editor
-     */
-    void actionCut();
-
-    /**
-     * @brief actionCopy Allows the user to copy the selected text in the text editor
-     */
-    void actionCopy();
-
-    /**
-     * @brief actionPaste Allows the user to paste text in the text editor
-     */
-    void actionPaste();
-
-    /**
-     * @brief actionDelete Allows the user to delete selected text in the text editor
-     */
-    void actionDelete();
-
-    /**
-     * @brief actionSelectAll Allows the user to select all text in the text editor
-     */
-    void actionSelectAll();
-
 
     /**
      * @brief actionParse Allows the user to parse the current specification

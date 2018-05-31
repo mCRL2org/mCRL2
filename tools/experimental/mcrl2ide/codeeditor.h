@@ -32,12 +32,21 @@ public:
      */
     int lineNumberAreaWidth();
 
+public slots:
+    /**
+     * @brief deleteChar Allows the user to delete text
+     */
+    void deleteChar();
+
 protected:
     /**
      * @brief resizeEvent Resizes the line number area when the window is resized
      * @param e The resize event
      */
     void resizeEvent(QResizeEvent *event) override;
+
+private:
+    QWidget *lineNumberArea;
 
 private slots:
     /**
@@ -51,9 +60,6 @@ private slots:
      * @param dy The amount of pixels scrolled
      */
     void updateLineNumberArea(const QRect &, int);
-
-private:
-    QWidget *lineNumberArea;
 };
 
 

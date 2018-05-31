@@ -38,16 +38,16 @@ void MainWindow::setupMenuBar()
     /* Create the Edit menu */
     QMenu *editMenu = menuBar()->addMenu("Edit");
 
-    undoAction = editMenu->addAction("Undo", this, &MainWindow::actionUndo);
-    redoAction = editMenu->addAction("Redo", this, &MainWindow::actionRedo);
+    undoAction = editMenu->addAction("Undo", specificationEditor, &CodeEditor::undo);
+    redoAction = editMenu->addAction("Redo", specificationEditor, &CodeEditor::redo);
     editMenu->addSeparator();
     findAndReplaceAction = editMenu->addAction("Find and Replace", this, &MainWindow::actionFindAndReplace);
     editMenu->addSeparator();
-    cutAction = editMenu->addAction("Cut", this, &MainWindow::actionCut);
-    copyAction = editMenu->addAction("Copy", this, &MainWindow::actionCopy);
-    pasteAction = editMenu->addAction("Paste", this, &MainWindow::actionPaste);
-    deleteAction = editMenu->addAction("Delete", this, &MainWindow::actionDelete);
-    selectAllAction = editMenu->addAction("Select All", this, &MainWindow::actionSelectAll);
+    cutAction = editMenu->addAction("Cut", specificationEditor, &CodeEditor::cut);
+    copyAction = editMenu->addAction("Copy", specificationEditor, &CodeEditor::copy);
+    pasteAction = editMenu->addAction("Paste", specificationEditor, &CodeEditor::paste);
+    deleteAction = editMenu->addAction("Delete", specificationEditor, &CodeEditor::deleteChar);
+    selectAllAction = editMenu->addAction("Select All", specificationEditor, &CodeEditor::selectAll);
 
     /* Create the View Menu (actions are added in setupDocks())*/
     viewMenu = menuBar()->addMenu("View");
@@ -188,48 +188,11 @@ void MainWindow::actionAddProperty()
     }
 }
 
-
-void MainWindow::actionUndo()
-{
-    /* Not yet implemented */
-}
-
-void MainWindow::actionRedo()
-{
-    /* Not yet implemented */
-}
-
 void MainWindow::actionFindAndReplace()
 {
     FindAndReplaceDialog *findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
     findAndReplaceDialog->show();
 }
-
-void MainWindow::actionCut()
-{
-    /* Not yet implemented */
-}
-
-void MainWindow::actionCopy()
-{
-    /* Not yet implemented */
-}
-
-void MainWindow::actionPaste()
-{
-    /* Not yet implemented */
-}
-
-void MainWindow::actionDelete()
-{
-    /* Not yet implemented */
-}
-
-void MainWindow::actionSelectAll()
-{
-    /* Not yet implemented */
-}
-
 
 void MainWindow::actionParse()
 {
