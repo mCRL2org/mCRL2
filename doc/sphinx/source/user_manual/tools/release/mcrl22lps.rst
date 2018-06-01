@@ -19,7 +19,7 @@ operators can only be used on the outer level. Typical input examples are found
 in the directory examples of the mCRL2 repository.
 
 For certain inputs, :ref:`tool-mcrl22lps` can take a large amount of time. In
-some cases it will not terminate, for instance with a non terminating rewrite
+some cases it will not terminate, for instance with non terminating rewrite
 rules. The following options can be used to speed up the linearisation, at the
 expense of a less readable result.
 
@@ -45,7 +45,7 @@ Linearisation methods
 ---------------------
 
 The tool supports three different linearisation methods, configurable using
-the option:`-l/--lin-method`:
+the option :option:`-l/--lin-method`:
 
 ``regular``
 
@@ -60,22 +60,22 @@ the option:`-l/--lin-method`:
   ``regular2`` generates an LPS in a few cases where the use of regular leads to
   non-termination. The difference between the two methods is explained best by
   an example.
-  
+
   The tool sometimes has to replace a sequence of process variables
   by a single new variable. For instance, ``P1(f(x)) · P2(g(x))`` must be
   replaced by a new process ``P``. With the ``regular`` method, the new process
   has a single parameter ``x``, matching the single free variable ``x``. I.e.
   the definition of ``P`` is ``P(x) = P1(f(x)) · P2(g(x))``. With the
   ``regular2`` method a variable is introduced for every term. In this latter
-  case ``P`` is defined by ``P(y,z) = P1(y) · P2(z)`` and the expression
+  case, ``P`` is defined by ``P(y,z) = P1(y) · P2(z)`` and the expression
   ``P1(f(x)) · P2(g(x))`` is replaced by ``P(f(x),g(x))``.
 
   We give an example in which linearisation with ``regular`` fails to terminate
   and the use of ``regular2`` succeeds. Consider the process definition
   ``P(n:Nat) = a·P(n+1) + b`` and let the initial process be ``P(0)·delta``. Now
   with regular infinitely many new processes are generated, each of the
-  following form: ``P(0)·delta, P(1)·delta, etc. With ``regular2`` only one new
-  process is generated, namely one for ``P(n)·delta``.
+  following form: ``P(0)·delta``, ``P(1)·delta``, etc. With ``regular2`` only
+  one new process is generated, namely one for ``P(n)·delta``.
 
 ``regular2``
 
@@ -83,9 +83,9 @@ the option:`-l/--lin-method`:
   parameters can be very large, and consequently, the number of global variables
   can be huge too. In this case, linearising using the option
   :option:`-f/--no-globvars` is advisable.
-  
+
 ``stack``
-  
+
   The LPS is generated using stack data types. The non parallel processes are
   transformed to restricted Greibach Normal Form and straightforwardly
   translated to linear processes using a stack. The resulting linear processes
@@ -94,5 +94,3 @@ the option:`-l/--lin-method`:
   for state space generation. Symbolic operations on the stacks are generally
   not very effective, because the stack data type is too complex. For symbolic
   analysis, linearisation methods ``regular`` or ``regular2`` can be used.
-  
-
