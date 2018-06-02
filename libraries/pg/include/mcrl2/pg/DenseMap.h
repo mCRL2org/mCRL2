@@ -10,6 +10,7 @@
 #ifndef MCRL2_PG_DENSE_MAP_H
 #define MCRL2_PG_DENSE_MAP_H
 
+#include <vector>
 #include <memory>
 #include <utility>
 
