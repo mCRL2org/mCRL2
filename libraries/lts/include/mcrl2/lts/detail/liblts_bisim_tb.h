@@ -309,7 +309,7 @@ class state_info_entry
 
     friend class part_state_t;
   public:
-    mutable check_complexity::state_counter_t work_counter;
+    mutable bisim_gjkw::check_complexity::state_counter_t work_counter;
 #endif
 };
 
@@ -752,7 +752,7 @@ class block_t
     /// for debugging.  It is only available if compiled in Debug mode.
     static permutation_const_iter_t permutation_begin()  { return perm_begin; }
 
-    mutable check_complexity::block_counter_t work_counter;
+    mutable bisim_gjkw::check_complexity::block_counter_t work_counter;
   private:
     static permutation_const_iter_t perm_begin;
 
@@ -767,9 +767,11 @@ inline void block_t::mark_all_states()
 {
     assert(marked_nonbottom_begin() == marked_nonbottom_end() &&
                                  marked_bottom_begin() == marked_bottom_end());
-    mCRL2complexity(this, add_work(
-                  check_complexity::Mark_all_states_of_SpB_as_predecessors_2_9,
-                   check_complexity::log_n - check_complexity::ilog2(size())));
+// In onderstaande regel heb ik uitgecommentarieerde want Mark_all_states_of_SpB_as_predecessors_2_9
+// is nergens gedefinieerd, en deze code lijkt niet te compileren in maintainer mode. 
+//    mCRL2complexity(this, add_work(
+//                   bisim_gjkw::check_complexity::Mark_all_states_of_SpB_as_predecessors_2_9,
+//                   bisim_gjkw::check_complexity::log_n - bisim_gjkw::check_complexity::ilog2(size())));
     set_marked_nonbottom_begin(nonbottom_begin());
     // set_marked_nonbottom_end(nonbottom_end());
     set_marked_bottom_begin(bottom_begin());
@@ -981,7 +983,7 @@ class pred_entry
         return "transition " + debug_id_short();
     }
 
-    mutable check_complexity::trans_counter_t work_counter;
+    mutable bisim_gjkw::check_complexity::trans_counter_t work_counter;
 #endif
 };
 
@@ -1018,7 +1020,7 @@ class out_descriptor
 #ifndef NDEBUG
     /// adds work (for time complexity measurement) to every transition in the
     /// slice.
-    void add_work_to_transns(enum check_complexity::counter_type ctr,
+    void add_work_to_transns(enum bisim_gjkw::check_complexity::counter_type ctr,
                                                        unsigned char max_value)
     {
         assert(begin < end);
@@ -1175,7 +1177,7 @@ class B_a_B_slice_t
     /// is kept with the slice and the function returns false.  The work should
     /// be transferred later (but if there is no later transfer, it should be
     /// tested that the function returns true).
-    bool add_work_to_bottom_transns(enum check_complexity::counter_type ctr,
+    bool add_work_to_bottom_transns(enum bisim_gjkw::check_complexity::counter_type ctr,
                                                        unsigned char max_value)
     {
         bool added = false;
