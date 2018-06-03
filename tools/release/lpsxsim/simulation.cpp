@@ -27,7 +27,6 @@ void Simulation::init(const QString& filename, bool do_not_use_dummies)
   try
   {
     load_lps(spec, filename.toStdString());
-    m_simulation = new mcrl2::lps::simulation(spec, m_strategy);
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -44,10 +43,12 @@ void Simulation::init(const QString& filename, bool do_not_use_dummies)
   {
     mcrl2::lps::detail::instantiate_global_variables(spec);
   }
+    
+  m_simulation = new mcrl2::lps::simulation(spec, m_strategy);
 
-  for (mcrl2::data::variable_list::const_iterator i = spec.process().process_parameters().begin(); i != spec.process().process_parameters().end(); i++)
+  for (const mcrl2::data::variable& v: spec.process().process_parameters())
   {
-    m_parameters += QString::fromStdString(mcrl2::data::pp(*i));
+    m_parameters += QString::fromStdString(mcrl2::data::pp(v));
   }
 
   updateTrace(0);
@@ -76,7 +77,7 @@ void Simulation::updateTrace(unsigned int firstChangedState)
   }
 }
 
-Simulation::State Simulation::renderState(const mcrl2::lps::state &state)
+Simulation::State Simulation::renderState(const mcrl2::lps::state& state)
 {
   State output;
   for (std::size_t i = 0; i < state.size(); i++)

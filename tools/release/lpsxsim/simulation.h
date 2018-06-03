@@ -45,7 +45,7 @@ class Simulation : public QObject
     Simulation(QString filename, QThread *atermThread, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies);
     ~Simulation() { delete m_simulation; }
     bool initialized() const { return m_initialized; }
-    const QStringList &parameters() const { return m_parameters; }
+    const QStringList& parameters() const { return m_parameters; }
     Trace trace() { QMutexLocker locker(&m_traceMutex); return m_trace; }
 
   private slots:
@@ -53,7 +53,7 @@ class Simulation : public QObject
     void updateTrace(unsigned int firstChangedState);
 
   private:
-    State renderState(const mcrl2::lps::state &state);
+    State renderState(const mcrl2::lps::state& state);
 
   public slots:
     void reset(unsigned int stateNumber) { m_simulation->truncate(stateNumber); updateTrace(stateNumber); }
