@@ -28,7 +28,6 @@
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/coroutine.h"
-#include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
 
 namespace mcrl2
@@ -51,6 +50,8 @@ namespace detail
 #endif
 
 // state_type and trans_type are defined in check_complexity.h.
+typedef std::size_t state_type;
+typedef std::size_t trans_type;
 
 /// \brief type used to store label numbers and counts
 typedef std::size_t label_type;
@@ -308,8 +309,6 @@ class state_info_entry
     static state_info_const_ptr s_i_end;
 
     friend class part_state_t;
-  public:
-    mutable bisim_gjkw::check_complexity::state_counter_t work_counter;
 #endif
 };
 
@@ -419,11 +418,10 @@ class block_t
     /// to this very block.  Consequently, it is possible to check whether some
     /// block is refinable without an additional variable.
     block_t* postprocessing_this_bunch_next;
-
+  public:
     /// first block in the list of refinable blocks
     static block_t* postprocessing_this_bunch_first;
 
-  public:
     /// \brief unique sequence number of this block
     /// \details After the stuttering equivalence algorithm has terminated,
     /// this number is used as a state number in the quotient LTS.
@@ -751,8 +749,6 @@ class block_t
     /// \details This iterator is required to be able to print identifications
     /// for debugging.  It is only available if compiled in Debug mode.
     static permutation_const_iter_t permutation_begin()  { return perm_begin; }
-
-    mutable bisim_gjkw::check_complexity::block_counter_t work_counter;
   private:
     static permutation_const_iter_t perm_begin;
 
@@ -767,11 +763,6 @@ inline void block_t::mark_all_states()
 {
     assert(marked_nonbottom_begin() == marked_nonbottom_end() &&
                                  marked_bottom_begin() == marked_bottom_end());
-// In onderstaande regel heb ik uitgecommentarieerde want Mark_all_states_of_SpB_as_predecessors_2_9
-// is nergens gedefinieerd, en deze code lijkt niet te compileren in maintainer mode. 
-//    mCRL2complexity(this, add_work(
-//                   bisim_gjkw::check_complexity::Mark_all_states_of_SpB_as_predecessors_2_9,
-//                   bisim_gjkw::check_complexity::log_n - bisim_gjkw::check_complexity::ilog2(size())));
     set_marked_nonbottom_begin(nonbottom_begin());
     // set_marked_nonbottom_end(nonbottom_end());
     set_marked_bottom_begin(bottom_begin());
@@ -982,8 +973,6 @@ class pred_entry
     {
         return "transition " + debug_id_short();
     }
-
-    mutable bisim_gjkw::check_complexity::trans_counter_t work_counter;
 #endif
 };
 
@@ -1014,26 +1003,6 @@ class out_descriptor
     {
         return end - begin;
     }
-
-
-
-#ifndef NDEBUG
-    /// adds work (for time complexity measurement) to every transition in the
-    /// slice.
-    void add_work_to_transns(enum bisim_gjkw::check_complexity::counter_type ctr,
-                                                       unsigned char max_value)
-    {
-        assert(begin < end);
-        succ_iter_t iter = begin;
-        mCRL2complexity(iter->B_a_B->pred, add_work(ctr, max_value));
-        while (++iter != end)
-        {
-            // treat temporary counters specially
-            mCRL2complexity(iter->B_a_B->pred,
-                                         add_work_notemporary(ctr, max_value));
-        }
-    }
-#endif
 };
 
 
@@ -1167,36 +1136,6 @@ class B_a_B_slice_t
         }
         return result;
     }
-
-
-    /// The function is meant to transfer work temporarily assigned to the
-    /// B_a_B slice to the transitions in the slice.  It is used during
-    /// handling of new bottom states, so the work is only assigned to
-    /// transitions that start in a (new) bottom state.
-    /// If at this moment no such (new) bottom state has been found, the work
-    /// is kept with the slice and the function returns false.  The work should
-    /// be transferred later (but if there is no later transfer, it should be
-    /// tested that the function returns true).
-    bool add_work_to_bottom_transns(enum bisim_gjkw::check_complexity::counter_type ctr,
-                                                       unsigned char max_value)
-    {
-        bool added = false;
-
-        for (B_a_B_const_iter_t iter = begin; iter != end; ++iter)
-        {
-            if (iter->pred->source->pos >=
-                                     iter->pred->source->block->bottom_begin())
-            {
-                // source state of the transition is a bottom state
-                mCRL2complexity(iter->pred, add_work(ctr, max_value));
-                added = true;
-            }
-        }
-        return added;
-    }
-
-
-    //mutable check_complexity::B_a_B_counter_t work_counter;
 #endif
 };
 

@@ -1608,7 +1608,7 @@ bisim_tb::block_t* bisim_partitioner_tb<LTS_TYPE>::postprocess_new_bottom(
 
     /*--------------- stabilise w. r. t. found constellations ---------------*/
 
-    assert(nullptr == block_t::postprocessing_this_bunch_first);
+    assert(nullptr == bisim_tb::block_t::postprocessing_this_bunch_first);
     // for all refinable bunches SpBu do
     while (!part_tr.R.empty())
     {
@@ -1670,7 +1670,7 @@ bisim_tb::block_t* bisim_partitioner_tb<LTS_TYPE>::postprocess_new_bottom(
             RfnB->make_non_postprocessing_this_bunch();
         }
         // empty the set of blocks that need postprocessing
-        assert(nullptr == block_t::postprocessing_this_bunch_first);
+        assert(nullptr == bisim_tb::block_t::postprocessing_this_bunch_first);
 
     // 4.25: end for
     }
