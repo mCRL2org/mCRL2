@@ -12,13 +12,24 @@
  */
 class FileSystem
 {
-public:
+public:    
     /**
      * @brief FileSystem Constructor
      * @param specificationEditor The specification editor in the main window
+     */
+    explicit FileSystem(CodeEditor *specificationEditor);
+
+    /**
+     * @brief setConsoleDock Assigns the console dock to the file system for logging
      * @param consoleDock The console dock
      */
-    explicit FileSystem(CodeEditor *specificationEditor, ConsoleDock *consoleDock);
+
+    void setConsoleDock(ConsoleDock *consoleDock);
+    /**
+     * @brief projectOpened Returns whether a project is opened
+     * @return Whether a project is opened
+     */
+    bool projectOpened();
 
     /**
      * @brief getExecutablesFolder Gets the folder containing the mCRL2 tool executables
@@ -43,9 +54,16 @@ public:
     void openProject(QString projectName);
 
     /**
-     * @brief saveProject Saves the current project
+     * @brief saveProject Saves the current specification
      */
-    void saveProject();
+    void saveSpecification();
+
+    /**
+     * @brief saveProperty Saves the given property
+     * @param propertyName The name of the property
+     * @param propertyText The text of the property
+     */
+    void saveProperty(QString propertyName, QString propertyText);
 
     /**
      * @brief saveProjectAs Saves the current project under a different name
@@ -91,9 +109,12 @@ private:
     const QString propertiesFolderName = "properties";
     const QDir *executablesFolder = new QDir("C:\\Users\\s123188\\Documents\\QtProjects\\mCRL2-IDE\\execs");
 
+    bool projectOpen;
     CodeEditor *specificationEditor;
     ConsoleDock *consoleDock;
     QString projectName;
+    QDir *projectFolder;
+    QDir *propertiesFolder;
 
     /**
      * @brief specificationFileName Defines the file anem of a specification
@@ -120,18 +141,6 @@ private:
      * @return The file name of the pbes
      */
     QString pbesFileName(QString propertyName);
-
-    /**
-     * @brief projectFolder Defines the project folder
-     * @return The project folder
-     */
-    QDir *projectFolder();
-
-    /**
-     * @brief propertiesFolder Defines the properties folder
-     * @return The properties folder
-     */
-    QDir *propertiesFolder();
 };
 
 #endif // FILESYSTEM_H

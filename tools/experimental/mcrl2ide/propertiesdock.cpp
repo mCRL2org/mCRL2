@@ -3,8 +3,11 @@
 #include <QMainWindow>
 #include <QLabel>
 
-PropertiesDock::PropertiesDock(QWidget *parent) : QDockWidget("Properties", parent)
+PropertiesDock::PropertiesDock(FileSystem *fileSystem, QWidget *parent) : QDockWidget("Properties", parent)
 {
+    this->fileSystem = fileSystem;
+
+    /* create the properties layout */
     propertiesLayout = new QVBoxLayout();
     propertiesLayout->setAlignment(Qt::AlignTop);
     setToNoProperties();
@@ -36,7 +39,7 @@ void PropertiesDock::addProperty(QString propertyName, QString propertyText)
     }
 
     /* add the property to the rest */
-    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, this);
+    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, fileSystem, this);
     propertiesLayout->addWidget(propertyWidget);
     propertyWidgets.push_back(propertyWidget);
 }
@@ -58,4 +61,11 @@ bool PropertiesDock::propertyNameExists(QString propertyName)
         }
     }
     return false;
+}
+
+void PropertiesDock::saveAllProperties()
+{
+    for (PropertyWidget *propertyWidget : propertyWidgets) {
+        propertyWidget->saveProperty();
+    }
 }

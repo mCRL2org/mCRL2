@@ -4,8 +4,9 @@
 
 #include <QMessageBox>
 
-PropertyWidget::PropertyWidget(QString name, QString text, PropertiesDock *parent) : QWidget(parent)
+PropertyWidget::PropertyWidget(QString name, QString text, FileSystem *fileSystem, PropertiesDock *parent) : QWidget(parent)
 {
+    this->fileSystem = fileSystem;
     this->parent = parent;
     this->name = name;
     this->text = text;
@@ -15,21 +16,21 @@ PropertyWidget::PropertyWidget(QString name, QString text, PropertiesDock *paren
 
     /* create the verify button */
     verifyButton = new QPushButton();
-    verifyButton->setIcon(QIcon(":/icons/verify.png")); /* placeholder */
+    verifyButton->setIcon(QIcon(":/icons/verify.png"));
     verifyButton->setIconSize(QSize(24, 24));
     verifyButton->setStyleSheet("border:none;");
     connect(verifyButton, SIGNAL(clicked()), this, SLOT(actionVerify()));
 
     /* create the edit button */
     QPushButton *editButton = new QPushButton();
-    editButton->setIcon(QIcon(":/icons/edit.png")); /* placeholder */
+    editButton->setIcon(QIcon(":/icons/edit.png"));
     editButton->setIconSize(QSize(24, 24));
     editButton->setStyleSheet("border:none;");
     connect(editButton, SIGNAL(clicked()), this, SLOT(actionEdit()));
 
     /* create the delete button */
     QPushButton *deleteButton = new QPushButton();
-    deleteButton->setIcon(QIcon(":/icons/delete.png")); /* placeholder */
+    deleteButton->setIcon(QIcon(":/icons/delete.png"));
     deleteButton->setIconSize(QSize(24, 24));
     deleteButton->setStyleSheet("border:none;");
     connect(deleteButton, SIGNAL(clicked()), this, SLOT(actionDelete()));
@@ -66,9 +67,14 @@ void PropertyWidget::setPropertyText(QString text)
     this->text = text;
 }
 
+void PropertyWidget::saveProperty()
+{
+    fileSystem->saveProperty(name, text);
+}
+
 void PropertyWidget::actionVerify()
 {
-    /* not yet implemented */
+    /* Not implemented yet */
 }
 
 void PropertyWidget::actionEdit()

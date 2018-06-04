@@ -1,10 +1,13 @@
 #ifndef PROPERTYWIDGET_H
 #define PROPERTYWIDGET_H
 
+#include "filesystem.h"
+
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QWidget>
 #include <QPushButton>
+#include <QProcess>
 
 class PropertiesDock;
 
@@ -22,7 +25,7 @@ public:
      * @param text The text of the property
      * @param parent The parent of this widget
      */
-    PropertyWidget(QString name, QString text, PropertiesDock *parent);
+    PropertyWidget(QString name, QString text, FileSystem *fileSystem, PropertiesDock *parent);
 
 
     /**
@@ -49,6 +52,11 @@ public:
      */
     void setPropertyText(QString text);
 
+    /**
+     * @brief saveProperty Saves the property to file
+     */
+    void saveProperty();
+
 public slots:
     /**
      * @brief actionVerify Allows the user to verify this property
@@ -66,6 +74,7 @@ public slots:
     void actionDelete();
 
 private:
+    FileSystem *fileSystem;
     PropertiesDock *parent;
     QString name;
     QString text;

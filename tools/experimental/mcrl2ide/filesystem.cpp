@@ -1,11 +1,14 @@
 #include "filesystem.h"
 
 #include <QMessageBox>
+#include <QFileInfo>
+#include <QTextStream>
 
-FileSystem::FileSystem(CodeEditor *specificationEditor, ConsoleDock *consoleDock)
+FileSystem::FileSystem(CodeEditor *specificationEditor)
 {
     this->specificationEditor = specificationEditor;
     this->consoleDock = consoleDock;
+    projectOpen = false;
 
     /* check if the projects folder exists, if not create it */
     if (!projectsFolder->exists()) {
@@ -15,38 +18,34 @@ FileSystem::FileSystem(CodeEditor *specificationEditor, ConsoleDock *consoleDock
 
 QString FileSystem::specificationFileName()
 {
-    return projectName.append("_spec.mcrl");
+    return projectName + "_spec.mcrl";
 }
 
 QString FileSystem::lpsFileName()
 {
-    return projectName.append("_lps.lps");
+    return projectName + "_lps.lps";
 }
 
 QString FileSystem::propertyFileName(QString propertyName)
 {
-    return propertyName.append(".mcf");
+    return propertyName + ".mcf";
 }
 
 QString FileSystem::pbesFileName(QString propertyName)
 {
-    return projectName.append("_").append(propertyName).append("_pbes.pbes");
+    return projectName + "_" + propertyName + "_pbes.pbes";
 }
 
-QDir *FileSystem::projectFolder()
+
+void FileSystem::setConsoleDock(ConsoleDock *consoleDock)
 {
-    QDir *projectFolder = new QDir(*projectsFolder);
-    projectFolder->cd(projectName);
-    return projectFolder;
+    this->consoleDock = consoleDock;
 }
 
-QDir *FileSystem::propertiesFolder()
+bool FileSystem::projectOpened()
 {
-    QDir *propertiesFolder = projectFolder();
-    propertiesFolder->cd(propertiesFolderName);
-    return propertiesFolder;
+    return projectOpen;
 }
-
 
 const QDir *FileSystem::getExecutablesFolder()
 {
@@ -64,7 +63,10 @@ void FileSystem::newProject(QString projectName)
     if (projectsFolder->mkdir(projectName)) {
         /* if successful, create the properties folder too */
         this->projectName = projectName;
-        projectFolder()->mkdir(propertiesFolderName);
+        projectFolder = new QDir(projectsFolder->path() + QDir::separator() + projectName);
+        projectFolder->mkdir(propertiesFolderName);
+        propertiesFolder = new QDir(projectFolder->path() + QDir::separator() + propertiesFolderName);
+        projectOpen = true;
     } else {
         /* if not succesful, tell the user */
         QMessageBox *msgBox = new QMessageBox();
@@ -79,9 +81,24 @@ void FileSystem::openProject(QString projectName)
     /* Not implemented yet */
 }
 
-void FileSystem::saveProject()
+void FileSystem::saveSpecification()
 {
-    /* Not implemented yet */
+    QString specificationFilePath = projectFolder->path() + QDir::separator() + specificationFileName();
+    QFile *specificationFile = new QFile(specificationFilePath);
+    specificationFile->open(QIODevice::WriteOnly);
+    QTextStream *saveStream = new QTextStream(specificationFile);
+    *saveStream << specificationEditor->toPlainText();
+    specificationFile->close();
+}
+
+void FileSystem::saveProperty(QString propertyName, QString propertyText)
+{
+    QString propertyFilePath = propertiesFolder->path() + QDir::separator() + propertyFileName(propertyName);
+    QFile *propertyFile = new QFile(propertyFilePath);
+    propertyFile->open(QIODevice::WriteOnly);
+    QTextStream *saveStream = new QTextStream(propertyFile);
+    *saveStream << propertyText;
+    propertyFile->close();
 }
 
 void FileSystem::saveProjectAs(QString projectName)

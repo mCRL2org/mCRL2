@@ -12,11 +12,13 @@ MainWindow::MainWindow(QWidget *parent)
     specificationEditor = new CodeEditor(this, true);
     setCentralWidget(specificationEditor);
 
+    fileSystem = new FileSystem(specificationEditor);
+
     setupMenuBar();
     setupToolbar();
     setupDocks();
 
-    fileSystem = new FileSystem(specificationEditor, consoleDock);
+    fileSystem->setConsoleDock(consoleDock);
 
     findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
 
@@ -165,7 +167,7 @@ void MainWindow::setDocksToDefault()
 void MainWindow::setupDocks()
 {
     /* instantiate the docks */
-    propertiesDock = new PropertiesDock(this);
+    propertiesDock = new PropertiesDock(fileSystem, this);
     consoleDock = new ConsoleDock(this);
     rewriteDock = new RewriteDock(this);
     solveDock = new SolveDock(this);
@@ -209,7 +211,13 @@ void MainWindow::actionOpenExampleProject()
 
 void MainWindow::actionSaveProject()
 {
-    /* Not yet implemented */
+    /* if we have a project open, we have a location to save in so we can simply save, else use save as */
+    if (fileSystem->projectOpened()) {
+        fileSystem->saveSpecification();
+        propertiesDock->saveAllProperties();
+    } else {
+        actionSaveProjectAs();
+    }
 }
 
 void MainWindow::actionSaveProjectAs()
@@ -263,7 +271,7 @@ void MainWindow::actionAbortLTSCreation()
 
 void MainWindow::actionVerifyAllProperties()
 {
-    propertiesDock->verifyAllProperties();
+    //propertiesDock->verifyAllProperties();
 }
 
 void MainWindow::actionAbortVerification()
