@@ -20,6 +20,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/structure_graph.h"
+#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 
