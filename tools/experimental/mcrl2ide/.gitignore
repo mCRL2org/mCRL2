@@ -1,0 +1,8 @@
+
+lps2pbes.exe
+mcrl22lps.exe
+pbes2bool.exe
+*.mcrl
+*.lps
+*.lts
+*.pbes

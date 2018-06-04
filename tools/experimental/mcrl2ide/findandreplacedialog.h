@@ -13,6 +13,11 @@ class FindAndReplaceDialog : public QDialog
     Q_OBJECT
 
 public:
+    /**
+     * @brief FindAndReplaceDialog Constructor
+     * @param codeEditor The editor to find/replace in
+     * @param parent The parent of this widget
+     */
     explicit FindAndReplaceDialog(CodeEditor *codeEditor, QWidget *parent = 0);
     ~FindAndReplaceDialog();
 
