@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Author(s): Jeroen Keiren
 # Copyright: see the accompanying file COPYING or copy at
-# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+# https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
@@ -1972,7 +1972,7 @@ class specification():
     code  = ""
     code += "// Author(s): Jeroen Keiren\n"
     code += "// Copyright: see the accompanying file COPYING or copy at\n"
-    code += "// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING\n"
+    code += "// https://github.com/mCRL2org/mCRL2/blob/master/COPYING\n"
     code += "//\n"
     code += "// Distributed under the Boost Software License, Version 1.0.\n"
     code += "// (See accompanying file LICENSE_1_0.txt or copy at\n"

@@ -1,6 +1,6 @@
 #include <boost/test/minimal.hpp>
 // Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 #include "mcrl2/utilities/reachable_nodes.h"
 #include <boost/graph/adjacency_list.hpp>
 

@@ -69,7 +69,7 @@ follows, where `AUTHORS` stands for the names of the authors:
   // Author(s): AUTHORS
   //
   // Copyright: see the accompanying file COPYING or copy at
-  // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+  // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
   //
   // Distributed under the Boost Software License, Version 1.0.
   // (See accompanying file LICENSE_1_0.txt or copy at
@@ -119,7 +119,7 @@ The following is a sample header:
   // Author(s): AUTHORS
   //
   // Copyright: see the accompanying file COPYING or copy at
-  // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+  // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
   //
   // Distributed under the Boost Software License, Version 1.0.
   // (See accompanying file LICENSE_1_0.txt or copy at
