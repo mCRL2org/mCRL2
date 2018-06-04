@@ -40,7 +40,7 @@ def getarguments():
                       default="unknown.unknown", 
                       help="The version number to be used in the documentation. This "
                            "should be a release number, followed by a period, followed "
-                           "by the SVN revision number.")
+                           "by the Git commit hash.")
   parser.add_argument("-d", "--debug", dest="debug", action="count",
                       help="Be more verbose. Adding the option multiple times will "
                            "increase verbosity")                     

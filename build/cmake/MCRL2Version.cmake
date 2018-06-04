@@ -10,8 +10,8 @@
 #     a regular (scheduled) release, B should be set to 0. Example: the first
 #     bugfix of the July 2011 release should be numbered 201107.1
 #   MCRL2_MINOR_VERSION: This is the minor version number of the toolset, which
-#     is equal to the current SVN revision number. A locally modified SVN 
-#     revision will result in a MCRL2_MINOR_VERSION that ends in "M".
+#     is equal to the current Git commit short-hash. A locally modified Git 
+#     commit will result in a MCRL2_MINOR_VERSION that ends in "M".
 #   MCRL2_VERSION: The version string that should be displayed in tools. It 
 #     consists of MCRL2_MAJOR_VERSION and MCRL2_MINOR_VERSION for development
 #     builds, and only MCRL2_MAJOR_VERSION for release builds.
@@ -21,13 +21,13 @@
 #   MCRL2_PACKAGE_RELEASE: This boolean allows you to create a release package.
 #     When set, MCRL2_VERSION is changed accordingly, and extra checks are put
 #     in place to prevent users from unknowingly publishing a release that can
-#     not be generated from a clean SVN checkout.
+#     not be generated from a clean Git clone.
 #
 # Package maintainers may set the variable below to issue a new release.
 set(MCRL2_MAJOR_VERSION "201707.1")
 string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 MCRL2_COPYRIGHT_YEAR)
 
-option(MCRL2_PACKAGE_RELEASE "Include release version information. This discards SVN revision information and uses only the MCRL2_MAJOR_VERSION CMake variable." FALSE)
+option(MCRL2_PACKAGE_RELEASE "Include release version information. This discards Git commit information and only uses the MCRL2_MAJOR_VERSION CMake variable." FALSE)
 mark_as_advanced(MCRL2_PACKAGE_RELEASE)
 
 # Find Git information: git short-hash and modified/not modified
@@ -60,7 +60,7 @@ if(GIT_FILES_CHANGED STREQUAL "")
 else()
   set(MCRL2_MINOR_VERSION "${GIT_COMMIT_HASH}M")
   if (${MCRL2_PACKAGE_RELEASE})
-    message(FATAL_ERROR "You are trying to package a release from an SVN repository that has local modifications.")
+    message(FATAL_ERROR "You are trying to package a release from a Git repository that has local modifications.")
   endif()
 endif()
 
