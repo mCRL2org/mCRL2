@@ -89,32 +89,38 @@ void FileSystem::saveProjectAs(QString projectName)
     /* Not implemented yet */
 }
 
-QProcess FileSystem::mcrl22lps(bool verification)
+QProcess *FileSystem::mcrl22lps(bool verification)
 {
     /* Not implemented yet */
+    return new QProcess();
 }
 
-QProcess FileSystem::lpsxsim()
+QProcess *FileSystem::lpsxsim()
 {
     /* Not implemented yet */
+    return new QProcess();
 }
 
-QProcess FileSystem::lps2lts()
+QProcess *FileSystem::lps2lts()
 {
     /* Not implemented yet */
+    return new QProcess();
 }
 
-QProcess FileSystem::ltsconvert()
+QProcess *FileSystem::ltsconvert()
 {
     /* Not implemented yet */
+    return new QProcess();
 }
 
-QProcess FileSystem::lps2pbes(QString propertyName)
+QProcess *FileSystem::lps2pbes(QString propertyName)
 {
     /* Not implemented yet */
+    return new QProcess();
 }
 
-QProcess FileSystem::pbes2bool(QString propertyName)
+QProcess *FileSystem::pbes2bool(QString propertyName)
 {
     /* Not implemented yet */
+    return new QProcess();
 }
