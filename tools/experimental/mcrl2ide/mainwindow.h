@@ -8,6 +8,7 @@
 #include "addeditpropertydialog.h"
 #include "findandreplacedialog.h"
 #include "codeeditor.h"
+#include "filesystem.h"
 
 #include <QMainWindow>
 
@@ -152,6 +153,8 @@ private:
 
     FindAndReplaceDialog *findAndReplaceDialog;
     AddEditPropertyDialog *addPropertyDialog;
+
+    FileSystem *fileSystem;
 };
 
 

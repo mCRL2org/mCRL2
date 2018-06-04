@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QToolBar>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,11 +12,15 @@ MainWindow::MainWindow(QWidget *parent)
     specificationEditor = new CodeEditor(this, true);
     setCentralWidget(specificationEditor);
 
+    fileSystem = new FileSystem(specificationEditor);
+
     setupMenuBar();
     setupToolbar();
     setupDocks();
 
     findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
+
+    setWindowTitle("mCRL2 IDE - Unnamed project");
 }
 
 MainWindow::~MainWindow()
@@ -181,7 +186,15 @@ void MainWindow::setupDocks()
 
 void MainWindow::actionNewProject()
 {
-    /* Not yet implemented */
+    /* ask the user for a project name */
+    bool ok;
+    QString projectName = QInputDialog::getText(this, "New project", "Project name:", QLineEdit::Normal, "", &ok);
+
+    /* if ok, create the project */
+    if(ok && !projectName.isEmpty()){
+        fileSystem->newProject(projectName);
+        setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+    }
 }
 
 void MainWindow::actionOpenProject()
@@ -250,7 +263,7 @@ void MainWindow::actionAbortLTSCreation()
 
 void MainWindow::actionVerifyAllProperties()
 {
-    /* Not yet implemented */
+    propertiesDock->verifyAllProperties();
 }
 
 void MainWindow::actionAbortVerification()
