@@ -2,9 +2,10 @@
 
 #include <QMessageBox>
 
-FileSystem::FileSystem(CodeEditor *specificationEditor)
+FileSystem::FileSystem(CodeEditor *specificationEditor, ConsoleDock *consoleDock)
 {
     this->specificationEditor = specificationEditor;
+    this->consoleDock = consoleDock;
 
     /* check if the projects folder exists, if not create it */
     if (!projectsFolder->exists()) {
@@ -71,4 +72,49 @@ void FileSystem::newProject(QString projectName)
         msgBox->setText("A project with this name already exists");
         msgBox->exec();
     }
+}
+
+void FileSystem::openProject(QString projectName)
+{
+    /* Not implemented yet */
+}
+
+void FileSystem::saveProject()
+{
+    /* Not implemented yet */
+}
+
+void FileSystem::saveProjectAs(QString projectName)
+{
+    /* Not implemented yet */
+}
+
+QProcess FileSystem::mcrl22lps(bool verification)
+{
+    /* Not implemented yet */
+}
+
+QProcess FileSystem::lpsxsim()
+{
+    /* Not implemented yet */
+}
+
+QProcess FileSystem::lps2lts()
+{
+    /* Not implemented yet */
+}
+
+QProcess FileSystem::ltsconvert()
+{
+    /* Not implemented yet */
+}
+
+QProcess FileSystem::lps2pbes(QString propertyName)
+{
+    /* Not implemented yet */
+}
+
+QProcess FileSystem::pbes2bool(QString propertyName)
+{
+    /* Not implemented yet */
 }

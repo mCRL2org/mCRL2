@@ -12,11 +12,11 @@ MainWindow::MainWindow(QWidget *parent)
     specificationEditor = new CodeEditor(this, true);
     setCentralWidget(specificationEditor);
 
-    fileSystem = new FileSystem(specificationEditor);
-
     setupMenuBar();
     setupToolbar();
     setupDocks();
+
+    fileSystem = new FileSystem(specificationEditor, consoleDock);
 
     findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
 
