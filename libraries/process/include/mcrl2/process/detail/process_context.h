@@ -103,8 +103,8 @@ class process_context
       }
     }
 
-    // returns the equation parameters that correspond to the untyped process assignment x
-    data::variable_list matching_process_parameters(const untyped_process_assignment& x) const
+    // returns the process identifier that corresponds to the untyped process assignment x
+    process_identifier match_untyped_process_instance_assignment(const untyped_process_assignment& x) const
     {
       auto range = m_process_identifiers.equal_range(x.name());
       if (range.first == m_process_identifiers.end())
@@ -137,7 +137,7 @@ class process_context
       {
         throw mcrl2::runtime_error("There are multiple processes named " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".");
       }
-      return result.front().variables();
+      return result.front();
     }
 
     process_instance make_process_instance(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters) const

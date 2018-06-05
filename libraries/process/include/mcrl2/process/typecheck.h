@@ -277,52 +277,34 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + core::pp(x.name()) + core::detail::print_arguments(x.assignments()) + ".");
     }
 
-    data::variable_list formal_parameters = m_process_context.matching_process_parameters(x);
-    std::map<core::identifier_string, data::data_expression> assignments = make_assignment_map(x.assignments());
+    process_identifier P = m_process_context.match_untyped_process_instance_assignment(x);
+    const data::variable_list& formal_parameters = P.variables();
 
-    // create actual parameters, with untyped identifiers for the parameters that are not assigned a value
-    data::data_expression_list actual_parameters;
-    for (const data::variable& d: formal_parameters)
+    // This checks for duplicate left hand sides.
+    std::map<core::identifier_string, data::data_expression> assignment_map = make_assignment_map(x.assignments());
+
+    std::map<core::identifier_string, data::variable> formal_parameter_map;
+    for (const data::variable& v:formal_parameters)
     {
-      data::data_expression e;
-      auto i = assignments.find(d.name());
-      if (i == assignments.end())
+      formal_parameter_map[v.name()] = v;
+    }
+
+    // Typecheck the right hand sides of the assignments
+    std::vector<data::assignment> assignments;
+    for (const data::untyped_identifier_assignment& a: x.assignments())
+    {
+      try
       {
-        e = data::untyped_identifier(d.name());
+        data::variable v = formal_parameter_map[a.lhs()];
+        data::data_expression e = m_data_type_checker.typecheck_data_expression(a.rhs(), v.sort(), m_variable_context);
+        assignments.emplace_back(v, e);
       }
-      else
+      catch (const mcrl2::runtime_error& e)
       {
-        e = i->second;
-      }
-      actual_parameters.push_front(e);
-    }
-    actual_parameters = atermpp::reverse(actual_parameters);
-
-    // typecheck the actual parameters
-    process_instance px;
-    try
-    {
-      px = typecheck_process_instance(x.name(), actual_parameters);
-    }
-    catch (mcrl2::runtime_error& e)
-    {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
-    }
-    const data::data_expression_list& typechecked_actual_parameters = px.actual_parameters();
-
-    // construct typechecked assignments
-    data::assignment_list typechecked_assignments;
-    auto q1 = formal_parameters.begin();
-    auto q2 = typechecked_actual_parameters.begin();
-    for (; q1 != formal_parameters.end(); ++q1, ++q2)
-    {
-      if (assignments.find(q1->name()) != assignments.end())
-      {
-        typechecked_assignments.push_front(data::assignment(*q1, *q2));
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
       }
     }
-    typechecked_assignments = atermpp::reverse(typechecked_assignments);
-    return process_instance_assignment(px.identifier(), typechecked_assignments);
+    return process_instance_assignment(P, data::assignment_list(assignments.begin(), assignments.end()));
   }
 
   process_expression apply(const data::untyped_data_parameter& x)
