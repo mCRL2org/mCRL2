@@ -69,3 +69,10 @@ void PropertiesDock::saveAllProperties()
         propertyWidget->saveProperty();
     }
 }
+
+void PropertiesDock::verifyAllProperties()
+{
+    for (PropertyWidget *propertyWidget : propertyWidgets) {
+        propertyWidget->actionVerify();
+    }
+}

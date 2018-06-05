@@ -1,7 +1,9 @@
 #include "filesystem.h"
 
+#include <QObject>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QDateTime>
 #include <QTextStream>
 
 FileSystem::FileSystem(CodeEditor *specificationEditor)
@@ -16,24 +18,24 @@ FileSystem::FileSystem(CodeEditor *specificationEditor)
     }
 }
 
-QString FileSystem::specificationFileName()
+QString FileSystem::specificationFilePath()
 {
-    return projectName + "_spec.mcrl";
+    return projectFolder->path() + QDir::separator() + projectName + "_spec.mcrl";
 }
 
-QString FileSystem::lpsFileName()
+QString FileSystem::lpsFilePath()
 {
-    return projectName + "_lps.lps";
+    return projectFolder->path() + QDir::separator() + projectName + "_lps.lps";
 }
 
-QString FileSystem::propertyFileName(QString propertyName)
+QString FileSystem::propertyFilePath(QString propertyName)
 {
-    return propertyName + ".mcf";
+    return propertiesFolder->path() + QDir::separator() + propertyName + ".mcf";
 }
 
-QString FileSystem::pbesFileName(QString propertyName)
+QString FileSystem::pbesFilePath(QString propertyName)
 {
-    return projectName + "_" + propertyName + "_pbes.pbes";
+    return propertiesFolder->path() + QDir::separator() + projectName + "_" + propertyName + "_pbes.pbes";
 }
 
 
@@ -83,8 +85,7 @@ void FileSystem::openProject(QString projectName)
 
 void FileSystem::saveSpecification()
 {
-    QString specificationFilePath = projectFolder->path() + QDir::separator() + specificationFileName();
-    QFile *specificationFile = new QFile(specificationFilePath);
+    QFile *specificationFile = new QFile(specificationFilePath());
     specificationFile->open(QIODevice::WriteOnly);
     QTextStream *saveStream = new QTextStream(specificationFile);
     *saveStream << specificationEditor->toPlainText();
@@ -93,8 +94,7 @@ void FileSystem::saveSpecification()
 
 void FileSystem::saveProperty(QString propertyName, QString propertyText)
 {
-    QString propertyFilePath = propertiesFolder->path() + QDir::separator() + propertyFileName(propertyName);
-    QFile *propertyFile = new QFile(propertyFilePath);
+    QFile *propertyFile = new QFile(propertyFilePath(propertyName));
     propertyFile->open(QIODevice::WriteOnly);
     QTextStream *saveStream = new QTextStream(propertyFile);
     *saveStream << propertyText;
@@ -108,8 +108,35 @@ void FileSystem::saveProjectAs(QString projectName)
 
 QProcess *FileSystem::mcrl22lps(bool verification)
 {
-    /* Not implemented yet */
-    return new QProcess();
+    ConsoleDock::ConsoleTab consoleTab = verification ? ConsoleDock::Verification : ConsoleDock::LTSCreation;
+    consoleDock->setConsoleTab(consoleTab);
+    consoleDock->writeToConsole(consoleTab, "##### CREATING LPS #####\n");
+
+    /* check if we need to run this (specification is modified or lps file does not exist) */
+    if (specificationEditor->isWindowModified() || !QFile(lpsFilePath()).exists()) {
+        /* save the specification */
+        saveSpecification();
+
+        /* create the process */
+        QProcess *mcrl22lpsProcess = new QProcess();
+        QString program = getExecutablesFolder()->path() + QDir::separator() + "mcrl22lps.exe";
+        QStringList arguments;
+        arguments << specificationFilePath() << lpsFilePath() << "--lin-method=regular" << "--rewriter=jitty" << "--verbose";
+
+        /* connect to logger */
+        if (verification) {
+            QObject::connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock, SLOT(logToVerificationConsole()));
+        } else {
+            QObject::connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock, SLOT(logToLTSCreationConsole()));
+        }
+
+        /* start the process */
+        mcrl22lpsProcess->start(program, arguments);
+        return mcrl22lpsProcess;
+    } else {
+        consoleDock->writeToConsole(consoleTab, "Up to date lps already exists\n");
+        return NULL;
+    }
 }
 
 QProcess *FileSystem::lpsxsim()
@@ -132,12 +159,40 @@ QProcess *FileSystem::ltsconvert()
 
 QProcess *FileSystem::lps2pbes(QString propertyName)
 {
-    /* Not implemented yet */
-    return new QProcess();
+    consoleDock->writeToConsole(ConsoleDock::Verification, "##### CREATING PBES #####\n");
+    /* check if we need to run this (lps file does not exist or lps file is newer than pbes file) */
+    if (!QFile(pbesFilePath(propertyName)).exists() || QFileInfo(lpsFilePath()).fileTime(QFileDevice::FileModificationTime) > QFileInfo(pbesFilePath(propertyName)).fileTime(QFileDevice::FileModificationTime)) {
+        /* create the process */
+        QProcess *lps2pbesProcess = new QProcess();
+        QString program = getExecutablesFolder()->path() + QDir::separator() + "lps2pbes.exe";
+        QStringList arguments;
+        arguments << lpsFilePath() << pbesFilePath(propertyName) << "--formula=" + propertyFilePath(propertyName) << "--out=pbes" << "--verbose";
+
+        /* connect to logger */
+        QObject::connect(lps2pbesProcess, SIGNAL(readyReadStandardError()), consoleDock, SLOT(logToVerificationConsole()));
+
+        /* start the process */
+        lps2pbesProcess->start(program, arguments);
+        return lps2pbesProcess;
+    } else {
+        consoleDock->writeToConsole(ConsoleDock::Verification, "Up to date pbes already exists for property " + propertyName + "\n");
+        return NULL;
+    }
 }
 
 QProcess *FileSystem::pbes2bool(QString propertyName)
 {
-    /* Not implemented yet */
-    return new QProcess();
+    /* create the process */
+    QProcess *pbes2boolProcess = new QProcess();
+    QString program = getExecutablesFolder()->path() + QDir::separator() + "pbes2bool.exe";
+    QStringList arguments;
+    arguments << pbesFilePath(propertyName) << "--erase=none" << "--in=pbes" << "--rewriter=jitty" << "--search=breadth-first" << "--solver=lf" << "--strategy=0" <<"--verbose";
+
+    /* connect to logger */
+    consoleDock->writeToConsole(ConsoleDock::Verification, "##### SOLVING PBES #####\n");
+    QObject::connect(pbes2boolProcess, SIGNAL(readyReadStandardError()), consoleDock, SLOT(logToVerificationConsole()));
+
+    /*start the process */
+    pbes2boolProcess->start(program, arguments);
+    return pbes2boolProcess;
 }

@@ -48,6 +48,11 @@ public:
      */
     void saveAllProperties();
 
+    /**
+     * @brief verifyAllProperties Verifies all properties in this dock
+     */
+    void verifyAllProperties();
+
 private:
     FileSystem *fileSystem;
     QWidget *innerDockWidget;

@@ -117,30 +117,30 @@ private:
     QDir *propertiesFolder;
 
     /**
-     * @brief specificationFileName Defines the file anem of a specification
-     * @return The file name of the specification
+     * @brief specificationFilePath Defines the file path of a specification
+     * @return The file path of the specification
      */
-    QString specificationFileName();
+    QString specificationFilePath();
 
     /**
-     * @brief lpsFileName Defines the file name of a lps
-     * @return The file name of the lps
+     * @brief lpsFilePath Defines the file path of a lps
+     * @return The file path of the lps
      */
-    QString lpsFileName();
+    QString lpsFilePath();
 
     /**
-     * @brief propertyFileName Defines the file name of a property
+     * @brief propertyFilePath Defines the file path of a property
      * @param propertyName The name of the property
-     * @return The file name of the property
+     * @return The file path of the property
      */
-    QString propertyFileName(QString propertyName);
+    QString propertyFilePath(QString propertyName);
 
     /**
-     * @brief pbesFileName Defines the file name of a pbes
+     * @brief pbesFilePath Defines the file path of a pbes
      * @param propertyName The name of the property this pbes correspeonds to
-     * @return The file name of the pbes
+     * @return The file path of the pbes
      */
-    QString pbesFileName(QString propertyName);
+    QString pbesFilePath(QString propertyName);
 };
 
 #endif // FILESYSTEM_H

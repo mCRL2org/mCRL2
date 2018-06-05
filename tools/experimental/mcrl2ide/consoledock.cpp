@@ -7,18 +7,64 @@ ConsoleDock::ConsoleDock(QWidget *parent) : QDockWidget("Console", parent)
     consoleTabs = new QTabWidget();
 
     /* define the console widgets and set them to read only*/
-    parseConsole = new QPlainTextEdit();
-    LTSConsole = new QPlainTextEdit();
+    parsingConsole = new QPlainTextEdit();
+    LTSCreationConsole = new QPlainTextEdit();
     verificationConsole = new QPlainTextEdit();
 
-    parseConsole->setReadOnly(true);
-    LTSConsole->setReadOnly(true);
+    parsingConsole->setReadOnly(true);
+    LTSCreationConsole->setReadOnly(true);
     verificationConsole->setReadOnly(true);
 
     /* lay them out */
-    consoleTabs->addTab(parseConsole, "Parsing");
-    consoleTabs->addTab(LTSConsole, "LTS creation");
+    consoleTabs->addTab(parsingConsole, "Parsing");
+    consoleTabs->addTab(LTSCreationConsole, "LTS creation");
     consoleTabs->addTab(verificationConsole, "Verification");
 
     this->setWidget(consoleTabs);
 }
+
+void ConsoleDock::setConsoleTab(ConsoleTab tab)
+{
+    switch (tab) {
+        case Parsing: consoleTabs->setCurrentIndex(0);
+        case LTSCreation: consoleTabs->setCurrentIndex(1);
+        case Verification: consoleTabs->setCurrentIndex(2);
+    }
+}
+
+void ConsoleDock::logToParsingConsole()
+{
+    logToConsole(parsingConsole, qobject_cast<QProcess*>(sender()));
+}
+
+void ConsoleDock::logToLTSCreationConsole()
+{
+    logToConsole(LTSCreationConsole, qobject_cast<QProcess*>(sender()));
+}
+
+void ConsoleDock::logToVerificationConsole()
+{
+    logToConsole(verificationConsole, qobject_cast<QProcess*>(sender()));
+}
+
+void ConsoleDock::logToConsole(QPlainTextEdit *console, QProcess *process)
+{
+    /* print to console line by line */
+    process->setReadChannel(QProcess::StandardError);
+    while(process->canReadLine()) {
+        console->appendPlainText(process->readLine());
+  }
+}
+
+void ConsoleDock::writeToConsole(ConsoleTab tab, QString output)
+{
+    QPlainTextEdit *console;
+    switch (tab) {
+        case Parsing: console = parsingConsole;
+        case LTSCreation: console = LTSCreationConsole;
+        case Verification: console = verificationConsole;
+    }
+
+    console->appendPlainText(output);
+}
+

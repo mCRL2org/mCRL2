@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QProcess>
+#include <QStackedWidget>
 
 class PropertiesDock;
 
@@ -64,6 +65,11 @@ public slots:
     void actionVerify();
 
     /**
+     * @brief actionAbortVerification Allows the user to abort the verification
+     */
+    void actionAbortVerification();
+
+    /**
      * @brief actionEdit Allows the user to edit this property
      */
     void actionEdit();
@@ -73,6 +79,9 @@ public slots:
      */
     void actionDelete();
 
+protected:
+    void paintEvent(QPaintEvent *pe);
+
 private:
     FileSystem *fileSystem;
     PropertiesDock *parent;
@@ -80,9 +89,30 @@ private:
     QString text;
     QHBoxLayout *propertyLayout;
     QLabel *propertyNameLabel;
-    QPushButton *verifyButton;
+    QStackedWidget *verificationWidgets;
+
+    QProcess *mcrl22lpsProcess;
+    QProcess *lps2pbesProcess;
+    QProcess *pbes2boolProcess;
 
     void setToDefault();
+
+private slots:
+    /**
+     * @brief actionVerify2 The second step of verification, creating the pbes
+     * @param exitStatus How the process was exited
+     */
+    void actionVerify2();
+
+    /**
+     * @brief actionVerify3 The third step of verification, solving the pbes
+     */
+    void actionVerify3();
+
+    /**
+     * @brief actionVerifyResult Applies the result of the verification
+     */
+    void actionVerifyResult();
 };
 
 #endif // PROPERTYWIDGET_H
