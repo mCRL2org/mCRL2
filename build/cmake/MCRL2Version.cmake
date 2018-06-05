@@ -1,18 +1,18 @@
 # MCRL2Version.cmake
-# 
+#
 # This script defines the version information that is displayed in the tools and
 # the documentation. It defines the following variables:
 #
 #   MCRL2_MAJOR_VERSION: The major version number. This number should be set
 #     by the maintainer who releases a new version of the toolset. This version
-#     number should be of the form YYYYMM.B, where YYYY is the year of the 
+#     number should be of the form YYYYMM.B, where YYYY is the year of the
 #     release, MM the month of the release, and B the bugfix release number. For
 #     a regular (scheduled) release, B should be set to 0. Example: the first
 #     bugfix of the July 2011 release should be numbered 201107.1
 #   MCRL2_MINOR_VERSION: This is the minor version number of the toolset, which
-#     is equal to the current Git commit short-hash. A locally modified Git 
+#     is equal to the current Git commit short-hash. A locally modified Git
 #     commit will result in a MCRL2_MINOR_VERSION that ends in "M".
-#   MCRL2_VERSION: The version string that should be displayed in tools. It 
+#   MCRL2_VERSION: The version string that should be displayed in tools. It
 #     consists of MCRL2_MAJOR_VERSION and MCRL2_MINOR_VERSION for development
 #     builds, and only MCRL2_MAJOR_VERSION for release builds.
 #
@@ -36,7 +36,7 @@ set(MCRL2_MINOR_VERSION "Unknown")
 find_package(Git REQUIRED)
 # Prints the commit hash of the last commit and its short version.
 execute_process(
-  COMMAND ${GIT_EXECUTABLE} rev-list --max-count=1 --format=%h HEAD
+  COMMAND ${GIT_EXECUTABLE} rev-list --max-count=1 --format=%h --abbrev=10 HEAD
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_REV_LIST
   OUTPUT_STRIP_TRAILING_WHITESPACE
