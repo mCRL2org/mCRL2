@@ -9,6 +9,7 @@
 #include "findandreplacedialog.h"
 #include "codeeditor.h"
 #include "filesystem.h"
+#include "processsystem.h"
 
 #include <QMainWindow>
 
@@ -155,6 +156,7 @@ private:
     AddEditPropertyDialog *addPropertyDialog;
 
     FileSystem *fileSystem;
+    ProcessSystem *processSystem;
 };
 
 

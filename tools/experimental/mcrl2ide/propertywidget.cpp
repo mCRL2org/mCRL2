@@ -1,18 +1,15 @@
 #include "addeditpropertydialog.h"
-#include "propertiesdock.h"
-#include "propertywidget.h"
 
 #include <QMessageBox>
 #include <QSpacerItem>
 #include <QStyleOption>
 #include <QPainter>
 
-PropertyWidget::PropertyWidget(QString name, QString text, FileSystem *fileSystem, PropertiesDock *parent) : QWidget(parent)
+PropertyWidget::PropertyWidget(QString name, QString text, ProcessSystem *processSystem, PropertiesDock *parent) : QWidget(parent)
 {
-    this->fileSystem = fileSystem;
+    this->processSystem = processSystem;
     this->parent = parent;
-    this->name = name;
-    this->text = text;
+    this->property = new Property(name, text);
 
     /* create the label for the property name */
     propertyNameLabel = new QLabel(name);
@@ -83,42 +80,32 @@ void PropertyWidget::paintEvent(QPaintEvent *pe) {
   style()->drawPrimitive(QStyle::PE_Widget, &o, &p, this);
 }
 
-QString PropertyWidget::getPropertyName()
+Property *PropertyWidget::getProperty()
 {
-    return name;
-}
-
-QString PropertyWidget::getPropertyText()
-{
-    return text;
+    return this->property;
 }
 
 void PropertyWidget::setPropertyName(QString name)
 {
-    this->name = name;
+    this->property->name = name;
     propertyNameLabel->setText(name);
 }
 
 void PropertyWidget::setPropertyText(QString text)
 {
-    this->text = text;
-}
-
-void PropertyWidget::saveProperty()
-{
-    fileSystem->saveProperty(name, text);
+    this->property->text = text;
 }
 
 void PropertyWidget::actionVerify()
 {
     /* save the property */
-    saveProperty();
+    //saveProperty();
 
     /* change the button */
     verificationWidgets->setCurrentIndex(1);
 
     /* create the lps */
-    mcrl22lpsProcess = fileSystem->mcrl22lps(true);
+    mcrl22lpsProcess = processSystem->mcrl22lps(true);
     /* if we don't need to run this, move to the next step, else wait until it is finished */
     if (mcrl22lpsProcess == NULL) {
         actionVerify2();
@@ -130,7 +117,7 @@ void PropertyWidget::actionVerify()
 void PropertyWidget::actionVerify2()
 {
     /* create the pbes */
-    lps2pbesProcess = fileSystem->lps2pbes(name);
+    lps2pbesProcess = processSystem->lps2pbes(property->name);
     /* if we don't need to run this, move to the next step, else wait until it is finished */
     if (lps2pbesProcess == NULL) {
         actionVerify3();
@@ -141,8 +128,8 @@ void PropertyWidget::actionVerify2()
 
 void PropertyWidget::actionVerify3()
 {
-    /* extract the result */
-    pbes2boolProcess = fileSystem->pbes2bool(name);
+    /* solve the pbes */
+    pbes2boolProcess = processSystem->pbes2bool(property->name);
     connect(pbes2boolProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(actionVerifyResult()));
 }
 
@@ -171,13 +158,13 @@ void PropertyWidget::actionAbortVerification()
 
 void PropertyWidget::actionEdit()
 {
-    AddEditPropertyDialog *editPropertyDialog = new AddEditPropertyDialog(false, parent, this, name, text);
+    AddEditPropertyDialog *editPropertyDialog = new AddEditPropertyDialog(false, parent, this, property->name, property->text);
 
     /* if editing was succesful (Edit button was pressed), update the property and its widget */
     if (editPropertyDialog->exec()) {
-        name = editPropertyDialog->getPropertyName();
-        text = editPropertyDialog->getPropertyText();
-        propertyNameLabel->setText(name);
+        property->name = editPropertyDialog->getPropertyName();
+        property->text = editPropertyDialog->getPropertyText();
+        propertyNameLabel->setText(property->name);
     }
 }
 
@@ -185,7 +172,7 @@ void PropertyWidget::actionDelete()
 {
     /* show a message box to ask the user whether he is sure to delete the property */
     QMessageBox *msgBox = new QMessageBox();
-    msgBox->setText("Are you sure you want to delete the property " + name + "?");
+    msgBox->setText("Are you sure you want to delete the property " + property->name + "?");
     msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
     /* only delete the property if the user agrees */
     if (msgBox->exec() == QMessageBox::Yes) {

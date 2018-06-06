@@ -2,10 +2,12 @@
 #define PROPERTIESDOCK_H
 
 #include "propertywidget.h"
-#include "filesystem.h"
+#include "processsystem.h"
 
 #include <QDockWidget>
 #include <QVBoxLayout>
+
+class PropertyWidget;
 
 /**
  * @brief The PropertiesDock class defines the dock that contains the properties
@@ -21,7 +23,7 @@ public:
      * @brief PropertiesDock Constructor
      * @param parent The parent of this widget
      */
-    PropertiesDock(FileSystem *fileSystem, QWidget *parent);
+    PropertiesDock(ProcessSystem *processSystem, QWidget *parent);
 
     /**
      * @brief addProperty Adds a property to the dock
@@ -44,9 +46,10 @@ public:
     bool propertyNameExists(QString propertyName);
 
     /**
-     * @brief saveAllProperties Saves all properties in this dock
+     * @brief getAllProperties Gets all properties in this dock
+     * @return All properties in this dock
      */
-    void saveAllProperties();
+    std::list<Property*> getAllProperties();
 
     /**
      * @brief verifyAllProperties Verifies all properties in this dock
@@ -54,7 +57,7 @@ public:
     void verifyAllProperties();
 
 private:
-    FileSystem *fileSystem;
+    ProcessSystem *processSystem;
     QWidget *innerDockWidget;
     QVBoxLayout *propertiesLayout;
     std::list<PropertyWidget*> propertyWidgets;

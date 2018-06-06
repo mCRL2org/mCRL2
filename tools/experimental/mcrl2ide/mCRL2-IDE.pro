@@ -34,7 +34,8 @@ SOURCES += \
     propertywidget.cpp \
     codeeditor.cpp \
     findandreplacedialog.cpp \
-    filesystem.cpp
+    filesystem.cpp \
+    processsystem.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -46,7 +47,8 @@ HEADERS += \
     propertywidget.h \
     codeeditor.h \
     findandreplacedialog.h \
-    filesystem.h
+    filesystem.h \
+    processsystem.h
 
 RESOURCES += \
     mcrl2-ide.qrc

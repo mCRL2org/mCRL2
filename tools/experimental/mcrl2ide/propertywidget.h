@@ -1,7 +1,9 @@
 #ifndef PROPERTYWIDGET_H
 #define PROPERTYWIDGET_H
 
-#include "filesystem.h"
+#include "propertiesdock.h"
+#include "processsystem.h"
+#include "propertywidget.h"
 
 #include <QLabel>
 #include <QHBoxLayout>
@@ -26,20 +28,14 @@ public:
      * @param text The text of the property
      * @param parent The parent of this widget
      */
-    PropertyWidget(QString name, QString text, FileSystem *fileSystem, PropertiesDock *parent);
+    PropertyWidget(QString name, QString text, ProcessSystem *processSystem, PropertiesDock *parent);
 
 
     /**
-     * @brief getPropertyName Gets the name of the property of this widget
-     * @return The name of the property
+     * @brief getPropertyName Gets the property of this widget
+     * @return The property
      */
-    QString getPropertyName();
-
-    /**
-     * @brief getPropertyText Gets the text of the property of this widget
-     * @return The text of the property
-     */
-    QString getPropertyText();
+    Property *getProperty();
 
     /**
      * @brief setPropertyName Set the name of the property of this widget
@@ -52,11 +48,6 @@ public:
      * @param text The new text of the property
      */
     void setPropertyText(QString text);
-
-    /**
-     * @brief saveProperty Saves the property to file
-     */
-    void saveProperty();
 
 public slots:
     /**
@@ -83,10 +74,9 @@ protected:
     void paintEvent(QPaintEvent *pe);
 
 private:
-    FileSystem *fileSystem;
+    ProcessSystem *processSystem;
     PropertiesDock *parent;
-    QString name;
-    QString text;
+    Property *property;
     QHBoxLayout *propertyLayout;
     QLabel *propertyNameLabel;
     QStackedWidget *verificationWidgets;

@@ -3,9 +3,9 @@
 #include <QMainWindow>
 #include <QLabel>
 
-PropertiesDock::PropertiesDock(FileSystem *fileSystem, QWidget *parent) : QDockWidget("Properties", parent)
+PropertiesDock::PropertiesDock(ProcessSystem *processSystem, QWidget *parent) : QDockWidget("Properties", parent)
 {
-    this->fileSystem = fileSystem;
+    this->processSystem = processSystem;
 
     /* create the properties layout */
     propertiesLayout = new QVBoxLayout();
@@ -39,7 +39,7 @@ void PropertiesDock::addProperty(QString propertyName, QString propertyText)
     }
 
     /* add the property to the rest */
-    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, fileSystem, this);
+    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, processSystem, this);
     propertiesLayout->addWidget(propertyWidget);
     propertyWidgets.push_back(propertyWidget);
 }
@@ -56,18 +56,20 @@ void PropertiesDock::deleteProperty(PropertyWidget *propertyWidget)
 bool PropertiesDock::propertyNameExists(QString propertyName)
 {
     for (PropertyWidget *propertyWidget : propertyWidgets) {
-        if (propertyWidget->getPropertyName() == propertyName) {
+        if (propertyWidget->getProperty()->name == propertyName) {
             return true;
         }
     }
     return false;
 }
 
-void PropertiesDock::saveAllProperties()
+std::list<Property*> PropertiesDock::getAllProperties()
 {
+    std::list<Property*> properties;
     for (PropertyWidget *propertyWidget : propertyWidgets) {
-        propertyWidget->saveProperty();
+        properties.push_back(propertyWidget->getProperty());
     }
+    return properties;
 }
 
 void PropertiesDock::verifyAllProperties()
