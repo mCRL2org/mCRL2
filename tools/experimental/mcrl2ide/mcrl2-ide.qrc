@@ -22,5 +22,10 @@
         <file>icons/true.png</file>
         <file>icons/verify.png</file>
         <file>icons/verify_all.png</file>
+        <file>icons/new_project2.png</file>
+        <file>icons/open_project2.png</file>
+        <file>icons/project2.png</file>
+        <file>icons/project2s.png</file>
+        <file>icons/save_project2.png</file>
     </qresource>
 </RCC>
