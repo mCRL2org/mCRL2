@@ -5,6 +5,7 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QInputDialog>
+#include <QDesktopWidget>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
 
     setWindowTitle("mCRL2 IDE - Unnamed project");
+    resize(QDesktopWidget().availableGeometry(this).size() * 0.75);
 }
 
 MainWindow::~MainWindow()
