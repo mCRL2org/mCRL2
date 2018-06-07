@@ -59,7 +59,7 @@ PropertyWidget::PropertyWidget(QString name, QString text, ProcessSystem *proces
     connect(editButton, SIGNAL(clicked()), this, SLOT(actionEdit()));
 
     /* create the delete button */
-    QPushButton *deleteButton = new QPushButton();
+    deleteButton = new QPushButton();
     deleteButton->setIcon(QIcon(":/icons/delete.png"));
     deleteButton->setIconSize(QSize(24, 24));
     deleteButton->setStyleSheet("border:none;");
@@ -112,6 +112,7 @@ void PropertyWidget::actionVerify()
         /* change the buttons */
         verificationWidgets->setCurrentIndex(1);
         editButton->setEnabled(false);
+        deleteButton->setEnabled(false);
 
         /* start the verification process */
         connect(processSystem, SIGNAL(processFinished(int)), this, SLOT(actionVerifyResult(int)));
@@ -135,6 +136,7 @@ void PropertyWidget::actionVerifyResult(int processid)
             verificationWidgets->setCurrentIndex(0);
         }
         editButton->setEnabled(true);
+        deleteButton->setEnabled(true);
     }
 }
 

@@ -92,6 +92,7 @@ private:
     QLabel *propertyNameLabel;
     QStackedWidget *verificationWidgets;
     QPushButton *editButton;
+    QPushButton *deleteButton;
 
     int verificationProcessId;
 
