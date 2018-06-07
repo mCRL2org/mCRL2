@@ -168,7 +168,7 @@ void MainWindow::setDocksToDefault()
 void MainWindow::setupDocks()
 {
     /* instantiate the docks */
-    propertiesDock = new PropertiesDock(processSystem, this);
+    propertiesDock = new PropertiesDock(processSystem, fileSystem, this);
     consoleDock = new ConsoleDock(this);
     rewriteDock = new RewriteDock(this);
     solveDock = new SolveDock(this);
@@ -215,10 +215,7 @@ void MainWindow::actionSaveProject()
     /* if we have a project open, we have a location to save in so we can simply save, else use save as */
     if (fileSystem->projectOpened()) {
         fileSystem->saveSpecification();
-        std::list<Property*> properties = propertiesDock->getAllProperties();
-        for (Property *property : properties) {
-            fileSystem->saveProperty(property);
-        }
+        propertiesDock->saveAllProperties();
     } else {
         actionSaveProjectAs();
     }

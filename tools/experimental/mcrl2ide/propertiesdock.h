@@ -23,7 +23,7 @@ public:
      * @brief PropertiesDock Constructor
      * @param parent The parent of this widget
      */
-    PropertiesDock(ProcessSystem *processSystem, QWidget *parent);
+    PropertiesDock(ProcessSystem *processSystem, FileSystem *fileSystem, QWidget *parent);
 
     /**
      * @brief addProperty Adds a property to the dock
@@ -46,10 +46,9 @@ public:
     bool propertyNameExists(QString propertyName);
 
     /**
-     * @brief getAllProperties Gets all properties in this dock
-     * @return All properties in this dock
+     * @brief saveAllProperties Saves all properties in this dock
      */
-    std::list<Property*> getAllProperties();
+    void saveAllProperties();
 
     /**
      * @brief verifyAllProperties Verifies all properties in this dock
@@ -58,6 +57,7 @@ public:
 
 private:
     ProcessSystem *processSystem;
+    FileSystem *fileSystem;
     QWidget *innerDockWidget;
     QVBoxLayout *propertiesLayout;
     std::list<PropertyWidget*> propertyWidgets;

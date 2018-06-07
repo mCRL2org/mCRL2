@@ -3,6 +3,7 @@
 
 #include "codeeditor.h"
 
+#include <QObject>
 #include <QDir>
 #include <QProcess>
 #include <QQueue>
@@ -20,8 +21,10 @@ public:
 /**
  * @brief The FileSystem class handles all file related operations, including execution of mCRL2 tools
  */
-class FileSystem
+class FileSystem : QObject
 {
+    Q_OBJECT
+
 public:    
     /**
      * @brief FileSystem Constructor
@@ -68,6 +71,31 @@ public:
     bool projectOpened();
 
     /**
+     * @brief getCurrentSpecification Gets the specification that is in the specification editor
+     * @return the current specification ion the specification editor
+     */
+    QString getCurrentSpecification();
+
+    /**
+     * @brief specificationModified Checks whether the specification has been modified since it has been saved
+     * @return Whether the specification has been modified since it has been saved
+     */
+    bool isSpecificationModified();
+
+    /**
+     * @brief propertyModified Checks whether the property has been modified since it has been saved
+     * @param propertyName The name of the property
+     * @return Whether the property has been modified since it has been saved
+     */
+    bool isPropertyModified(QString propertyName);
+
+    /**
+     * @brief setPropertyModified Sets the property to modified
+     * @param PropertyName The name of the property
+     */
+    void setPropertyModified(QString propertyName);
+
+    /**
      * @brief lpsFileExists Checks whether an lps file exists that is created from the current specification
      * @return Whether an lps file exists that is created from the current specification
      */
@@ -79,12 +107,6 @@ public:
      * @return Whether a pbes file exists that is created from the current specification and property
      */
     bool upToDatePbesFileExists(QString propertyName);
-
-    /**
-     * @brief getCurrentSpecification Gets the specification that is in the specification editor
-     * @return the current specification ion the specification editor
-     */
-    QString getCurrentSpecification();
 
     /**
      * @brief newProject Creates a new project with the corresponding file structure
@@ -113,6 +135,12 @@ public:
      */
     void saveProjectAs(QString projectName);
 
+public slots:
+    /**
+     * @brief setSpecificationModified Sets the specification to modified
+     */
+    void setSpecificationModified();
+
 private:
     const QDir *projectsFolder = new QDir("projects");
     const QString propertiesFolderName = "properties";
@@ -123,6 +151,9 @@ private:
     QString projectName;
     QDir *projectFolder;
     QDir *propertiesFolder;
+
+    bool specificationModified;
+    std::map<QString, bool> propertymodified;
 };
 
 #endif // FILESYSTEM_H

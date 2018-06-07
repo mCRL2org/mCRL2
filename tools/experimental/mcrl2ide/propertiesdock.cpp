@@ -3,9 +3,10 @@
 #include <QMainWindow>
 #include <QLabel>
 
-PropertiesDock::PropertiesDock(ProcessSystem *processSystem, QWidget *parent) : QDockWidget("Properties", parent)
+PropertiesDock::PropertiesDock(ProcessSystem *processSystem, FileSystem *fileSystem, QWidget *parent) : QDockWidget("Properties", parent)
 {
     this->processSystem = processSystem;
+    this->fileSystem = fileSystem;
 
     /* create the properties layout */
     propertiesLayout = new QVBoxLayout();
@@ -39,7 +40,7 @@ void PropertiesDock::addProperty(QString propertyName, QString propertyText)
     }
 
     /* add the property to the rest */
-    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, processSystem, this);
+    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, processSystem, fileSystem, this);
     propertiesLayout->addWidget(propertyWidget);
     propertyWidgets.push_back(propertyWidget);
 }
@@ -63,13 +64,11 @@ bool PropertiesDock::propertyNameExists(QString propertyName)
     return false;
 }
 
-std::list<Property*> PropertiesDock::getAllProperties()
+void PropertiesDock::saveAllProperties()
 {
-    std::list<Property*> properties;
     for (PropertyWidget *propertyWidget : propertyWidgets) {
-        properties.push_back(propertyWidget->getProperty());
+        propertyWidget->saveProperty();
     }
-    return properties;
 }
 
 void PropertiesDock::verifyAllProperties()

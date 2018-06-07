@@ -5,11 +5,15 @@
 #include <QStyleOption>
 #include <QPainter>
 
-PropertyWidget::PropertyWidget(QString name, QString text, ProcessSystem *processSystem, PropertiesDock *parent) : QWidget(parent)
+PropertyWidget::PropertyWidget(QString name, QString text, ProcessSystem *processSystem, FileSystem *fileSystem, PropertiesDock *parent) : QWidget(parent)
 {
     this->processSystem = processSystem;
+    this->fileSystem = fileSystem;
     this->parent = parent;
     this->property = new Property(name, text);
+    verificationProcessId = -1;
+
+    fileSystem->setPropertyModified(name);
 
     /* create the label for the property name */
     propertyNameLabel = new QLabel(name);
@@ -48,7 +52,7 @@ PropertyWidget::PropertyWidget(QString name, QString text, ProcessSystem *proces
     verificationWidgets->setCurrentIndex(0);
 
     /* create the edit button */
-    QPushButton *editButton = new QPushButton();
+    editButton = new QPushButton();
     editButton->setIcon(QIcon(":/icons/edit.png"));
     editButton->setIconSize(QSize(24, 24));
     editButton->setStyleSheet("border:none;");
@@ -96,64 +100,47 @@ void PropertyWidget::setPropertyText(QString text)
     this->property->text = text;
 }
 
+void PropertyWidget::saveProperty()
+{
+    fileSystem->saveProperty(property);
+}
+
 void PropertyWidget::actionVerify()
 {
-    /* save the property */
-    //saveProperty();
+    /* check if the property isn't already being verified or has been verified */
+    if (verificationWidgets->currentIndex() == 0) {
+        /* change the buttons */
+        verificationWidgets->setCurrentIndex(1);
+        editButton->setEnabled(false);
 
-    /* change the button */
-    verificationWidgets->setCurrentIndex(1);
-
-    /* create the lps */
-    mcrl22lpsProcess = processSystem->mcrl22lps(true);
-    /* if we don't need to run this, move to the next step, else wait until it is finished */
-    if (mcrl22lpsProcess == NULL) {
-        actionVerify2();
-    } else {
-        connect(mcrl22lpsProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(actionVerify2()));
+        /* start the verification process */
+        connect(processSystem, SIGNAL(processFinished(int)), this, SLOT(actionVerifyResult(int)));
+        verificationProcessId = processSystem->verifyProperty(property);
     }
 }
 
-void PropertyWidget::actionVerify2()
+void PropertyWidget::actionVerifyResult(int processid)
 {
-    /* create the pbes */
-    lps2pbesProcess = processSystem->lps2pbes(property->name);
-    /* if we don't need to run this, move to the next step, else wait until it is finished */
-    if (lps2pbesProcess == NULL) {
-        actionVerify3();
-    } else {
-        connect(lps2pbesProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(actionVerify3()));
-    }
-}
-
-void PropertyWidget::actionVerify3()
-{
-    /* solve the pbes */
-    pbes2boolProcess = processSystem->pbes2bool(property->name);
-    connect(pbes2boolProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(actionVerifyResult()));
-}
-
-void PropertyWidget::actionVerifyResult()
-{
-    /* get the result (between the last and second last newline character) */
-    std::string output = pbes2boolProcess->readAllStandardOutput().toStdString();
-    if (output.find("true") == 0) {
-        verificationWidgets->setCurrentIndex(2);
-        this->setStyleSheet("background-color:rgb(153,255,153)");
-    } else if (output.find("false") == 0) {
-        verificationWidgets->setCurrentIndex(3);
-        this->setStyleSheet("background-color:rgb(255,153,153)");
-    } else {
-        verificationWidgets->setCurrentIndex(0);
+    /* check if the process that is finished is the verification process of this property */
+    if (processid == verificationProcessId) {
+        /* get the result and apply it to the widget */
+        QString result = processSystem->getResult(verificationProcessId);
+        if (result == "true") {
+            verificationWidgets->setCurrentIndex(2);
+            this->setStyleSheet("background-color:rgb(153,255,153)");
+        } else if (result == "false") {
+            verificationWidgets->setCurrentIndex(3);
+            this->setStyleSheet("background-color:rgb(255,153,153)");
+        } else {
+            verificationWidgets->setCurrentIndex(0);
+        }
+        editButton->setEnabled(true);
     }
 }
 
 void PropertyWidget::actionAbortVerification()
 {
     qDebug("abort");
-    /* first we disconnect the signal chaining so that abortion of one propcess does not start the next */
-    //disconnect(mcrl22lpsProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(actionVerify2()));
-    //disconnect(lps2pbesProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(actionVerify3()));
 }
 
 void PropertyWidget::actionEdit()
@@ -165,6 +152,7 @@ void PropertyWidget::actionEdit()
         property->name = editPropertyDialog->getPropertyName();
         property->text = editPropertyDialog->getPropertyText();
         propertyNameLabel->setText(property->name);
+        fileSystem->setPropertyModified(property->name);
     }
 }
 

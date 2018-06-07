@@ -1,6 +1,5 @@
 #include "filesystem.h"
 
-#include <QObject>
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QDateTime>
@@ -15,6 +14,9 @@ Property::Property(QString name, QString text)
 FileSystem::FileSystem(CodeEditor *specificationEditor)
 {
     this->specificationEditor = specificationEditor;
+    specificationModified = false;
+    connect(specificationEditor, SIGNAL(textChanged()), this, SLOT(setSpecificationModified()));
+
     projectOpen = false;
 
     /* check if the projects folder exists, if not create it */
@@ -53,11 +55,36 @@ bool FileSystem::projectOpened()
     return projectOpen;
 }
 
+QString FileSystem::getCurrentSpecification()
+{
+    return specificationEditor->toPlainText();
+}
+
+bool FileSystem::isSpecificationModified()
+{
+    return specificationModified;
+}
+
+void FileSystem::setSpecificationModified()
+{
+    specificationModified = true;
+}
+
+bool FileSystem::isPropertyModified(QString propertyName)
+{
+    return propertymodified[propertyName];
+}
+
+void FileSystem::setPropertyModified(QString propertyName)
+{
+    propertymodified[propertyName] = true;
+}
+
+
 bool FileSystem::upToDateLpsFileExists()
 {
-    /* an lps file is up to date if the specification has not been modified, the lps file exists and the lps file is created after the the last time the specification file was modified */
-    return !specificationEditor->isWindowModified()
-           && QFile(lpsFilePath()).exists()
+    /* an lps file is up to date if the lps file exists and the lps file is created after the the last time the specification file was modified */
+    return QFile(lpsFilePath()).exists()
            && QFileInfo(specificationFilePath()).fileTime(QFileDevice::FileModificationTime) <= QFileInfo(lpsFilePath()).fileTime(QFileDevice::FileModificationTime);
 }
 
@@ -67,11 +94,6 @@ bool FileSystem::upToDatePbesFileExists(QString propertyName)
     return QFile(pbesFilePath(propertyName)).exists()
            && QFileInfo(lpsFilePath()).fileTime(QFileDevice::FileModificationTime) <= QFileInfo(pbesFilePath(propertyName)).fileTime(QFileDevice::FileModificationTime)
            && QFileInfo(propertyFilePath(propertyName)).fileTime(QFileDevice::FileModificationTime) <= QFileInfo(pbesFilePath(propertyName)).fileTime(QFileDevice::FileModificationTime);
-}
-
-QString FileSystem::getCurrentSpecification()
-{
-    return specificationEditor->toPlainText();
 }
 
 
@@ -106,6 +128,7 @@ void FileSystem::saveSpecification()
     QTextStream *saveStream = new QTextStream(specificationFile);
     *saveStream << specificationEditor->toPlainText();
     specificationFile->close();
+    specificationModified = false;
 }
 
 void FileSystem::saveProperty(Property *property)
@@ -115,6 +138,7 @@ void FileSystem::saveProperty(Property *property)
     QTextStream *saveStream = new QTextStream(propertyFile);
     *saveStream << property->text;
     propertyFile->close();
+    propertymodified[property->name] = false;
 }
 
 void FileSystem::saveProjectAs(QString projectName)

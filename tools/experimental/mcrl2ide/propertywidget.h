@@ -28,7 +28,7 @@ public:
      * @param text The text of the property
      * @param parent The parent of this widget
      */
-    PropertyWidget(QString name, QString text, ProcessSystem *processSystem, PropertiesDock *parent);
+    PropertyWidget(QString name, QString text, ProcessSystem *processSystem, FileSystem *fileSystem, PropertiesDock *parent);
 
 
     /**
@@ -49,11 +49,21 @@ public:
      */
     void setPropertyText(QString text);
 
+    /**
+     * @brief saveProperty Saves this property
+     */
+    void saveProperty();
+
 public slots:
     /**
      * @brief actionVerify Allows the user to verify this property
      */
     void actionVerify();
+
+    /**
+     * @brief actionVerifyResult Applies the result of the verification
+     */
+    void actionVerifyResult(int processid);
 
     /**
      * @brief actionAbortVerification Allows the user to abort the verification
@@ -75,34 +85,17 @@ protected:
 
 private:
     ProcessSystem *processSystem;
+    FileSystem *fileSystem;
     PropertiesDock *parent;
     Property *property;
     QHBoxLayout *propertyLayout;
     QLabel *propertyNameLabel;
     QStackedWidget *verificationWidgets;
+    QPushButton *editButton;
 
-    QProcess *mcrl22lpsProcess;
-    QProcess *lps2pbesProcess;
-    QProcess *pbes2boolProcess;
+    int verificationProcessId;
 
     void setToDefault();
-
-private slots:
-    /**
-     * @brief actionVerify2 The second step of verification, creating the pbes
-     * @param exitStatus How the process was exited
-     */
-    void actionVerify2();
-
-    /**
-     * @brief actionVerify3 The third step of verification, solving the pbes
-     */
-    void actionVerify3();
-
-    /**
-     * @brief actionVerifyResult Applies the result of the verification
-     */
-    void actionVerifyResult();
 };
 
 #endif // PROPERTYWIDGET_H
