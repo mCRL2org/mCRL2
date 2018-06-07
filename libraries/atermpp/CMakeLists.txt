@@ -8,3 +8,7 @@ add_mcrl2_library(atermpp
   DEPENDS
     mcrl2_utilities
 )
+
+if (${MCRL2_ENABLE_BENCHMARKS})
+  add_subdirectory(benchmark/)
+endif()

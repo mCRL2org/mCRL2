@@ -41,6 +41,7 @@ option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." 
 option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OFF)
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
 option(MCRL2_ENABLE_TESTS           "Enable generation of test targets." OFF)
+option(MCRL2_ENABLE_BENCHMARKS      "Enable generation of benchmark targets." OFF)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
