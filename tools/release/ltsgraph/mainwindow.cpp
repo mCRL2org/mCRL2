@@ -189,7 +189,9 @@ void MainWindow::openFile(const QString& fileName)
       m_glwidget->resetViewpoint(0);
       const double scaling = 0.5;
       QVector3D limit = m_glwidget->size3() / 2.0 * scaling;
-      m_graph.load(fileName, -limit, limit);
+      // The argument '-' means we should read from stdin, the lts library
+      // does that when supplied an empty string as the input file name
+      m_graph.load(fileName == "-" ? "" : fileName, -limit, limit);
 
       if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadSelection)
       {
