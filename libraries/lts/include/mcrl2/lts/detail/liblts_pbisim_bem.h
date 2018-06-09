@@ -522,7 +522,7 @@ class prob_bisim_partitioner_bem
               if (new_class_count == 0)
               {
                 // if it is the first element of the mapping then we do not create a new step class; instead, we 
-                // add its elements into the current step class that is being splitted
+                // add its elements into the current step class that is being split.
                 sc_ptr->distributions.swap(distribution_list);
 
                 // clear the prev states of the current step class
@@ -531,7 +531,7 @@ class prob_bisim_partitioner_bem
                   sc_ptr->prev_states[i] = false;
                 }
 
-                // recalculate prev states based on incomming transitions of each distribution
+                // recalculate prev states based on incoming transitions of each distribution
                 for (distribution_type* d : sc_ptr->distributions)
                 {
                   for (transition* t_ptr : d->incoming_transitions_per_label[sc_ptr->action])
@@ -560,7 +560,7 @@ class prob_bisim_partitioner_bem
                 new_step_class_ptr->prev_states.resize(aut.num_states());
                 new_step_class_ptr->distributions.swap(distribution_list);
 
-                // recalculate prev states based ont incomming transitions of each distribution
+                // recalculate prev states based ont incoming transitions of each distribution
                 for (distribution_type* d : new_step_class_ptr->distributions)
                 {
                   for (transition* t_ptr : d->incoming_transitions_per_label[new_step_class_ptr->action])
