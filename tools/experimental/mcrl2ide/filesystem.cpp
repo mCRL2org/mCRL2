@@ -68,6 +68,7 @@ bool FileSystem::isSpecificationModified()
 void FileSystem::setSpecificationModified()
 {
     specificationModified = true;
+    emit hasChanges(true);
 }
 
 bool FileSystem::isPropertyModified(QString propertyName)
@@ -78,6 +79,7 @@ bool FileSystem::isPropertyModified(QString propertyName)
 void FileSystem::setPropertyModified(QString propertyName)
 {
     propertymodified[propertyName] = true;
+    emit hasChanges(true);
 }
 
 

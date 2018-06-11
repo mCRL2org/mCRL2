@@ -21,7 +21,7 @@ public:
 /**
  * @brief The FileSystem class handles all file related operations, including execution of mCRL2 tools
  */
-class FileSystem : QObject
+class FileSystem : public QObject
 {
     Q_OBJECT
 
@@ -140,6 +140,13 @@ public slots:
      * @brief setSpecificationModified Sets the specification to modified
      */
     void setSpecificationModified();
+
+signals:
+    /**
+     * @brief modified Is emitted whenever the specification or a property is changed
+     */
+    void hasChanges(bool changes);
+
 
 private:
     const QDir *projectsFolder = new QDir("projects");

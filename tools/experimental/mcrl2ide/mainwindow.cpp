@@ -24,6 +24,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
 
+    /* make the save project action enabled whenever a change is made */
+    saveProjectAction->setEnabled(false);
+    connect(fileSystem, SIGNAL(hasChanges(bool)), saveProjectAction, SLOT(setEnabled(bool)));
+
+    /* set the title of the main window */
     setWindowTitle("mCRL2 IDE - Unnamed project");
     resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5, QDesktopWidget().availableGeometry(this).height() * 0.75));
 }
@@ -218,9 +223,11 @@ void MainWindow::actionSaveProject()
     if (fileSystem->projectOpened()) {
         fileSystem->saveSpecification();
         propertiesDock->saveAllProperties();
+        saveProjectAction->setEnabled(false);
     } else {
         actionSaveProjectAs();
     }
+
 }
 
 void MainWindow::actionSaveProjectAs()
