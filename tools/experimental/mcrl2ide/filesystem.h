@@ -111,8 +111,9 @@ public:
 
     /**
      * @brief newProject Creates a new project with the corresponding file structure
+     * @return Whether the creation was succesful
      */
-    void newProject(QString projectName);
+    bool newProject(QString projectName);
 
     /**
      * @brief openProject Opens the project with the given project name

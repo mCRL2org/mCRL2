@@ -100,8 +100,14 @@ bool FileSystem::upToDatePbesFileExists(QString propertyName)
 }
 
 
-void FileSystem::newProject(QString projectName)
+bool FileSystem::newProject(QString projectName)
 {
+    /* The project name may not be empty */
+    if (projectName.isEmpty()) {
+        QMessageBox::information(parent, "New Project", "The project name may not be empty", QMessageBox::Ok);
+        return false;
+    }
+
     /* create the folder for this project */
     if (projectsFolder->mkdir(projectName)) {
         /* if successful, create the properties folder too */
@@ -110,9 +116,11 @@ void FileSystem::newProject(QString projectName)
         projectFolder->mkdir(propertiesFolderName);
         propertiesFolder = new QDir(projectFolder->path() + QDir::separator() + propertiesFolderName);
         projectOpen = true;
+        return true;
     } else {
         /* if not succesful, tell the user */
         QMessageBox::information(parent, "New Project", "A project with this name already exists", QMessageBox::Ok);
+        return false;
     }
 }
 

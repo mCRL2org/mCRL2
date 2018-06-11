@@ -201,9 +201,10 @@ void MainWindow::actionNewProject()
     QString projectName = QInputDialog::getText(this, "New project", "Project name:", QLineEdit::Normal, "", &ok);
 
     /* if ok, create the project */
-    if(ok && !projectName.isEmpty()){
-        fileSystem->newProject(projectName);
-        setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+    if (ok) {
+        if (fileSystem->newProject(projectName)) {
+            setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+        }
     }
 }
 
