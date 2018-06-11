@@ -216,7 +216,21 @@ void MainWindow::actionNewProject()
 
 void MainWindow::actionOpenProject()
 {
-    /* Not yet implemented */
+    QStringList projects = fileSystem->getAllProjects();
+
+    bool ok;
+    QString projectName = QInputDialog::getItem(this, "Open Project", "Project name:", projects, 0, false, &ok, Qt::WindowCloseButtonHint);
+
+    /* if user pressed ok, open the project by setting the specification and the properties in the window */
+    if (ok) {
+        std::list<Property*> properties = fileSystem->openProject(projectName);
+        propertiesDock->setToNoProperties();
+        for (Property *property : properties) {
+            propertiesDock->addProperty(property);
+        }
+        saveProjectAction->setEnabled(false);
+        setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+    }
 }
 
 void MainWindow::actionOpenExampleProject()
@@ -262,7 +276,8 @@ void MainWindow::actionAddProperty()
     addPropertyDialog = new AddEditPropertyDialog(true, propertiesDock, this);
     /* if adding was succesful (Add button was pressed), add the property to the properties dock */
     if (addPropertyDialog->exec()) {
-        propertiesDock->addProperty(addPropertyDialog->getPropertyName(), addPropertyDialog->getPropertyText());
+        Property *property = new Property(addPropertyDialog->getPropertyName(), addPropertyDialog->getPropertyText());
+        propertiesDock->addProperty(property);
     }
 }
 

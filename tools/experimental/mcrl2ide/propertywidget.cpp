@@ -5,18 +5,18 @@
 #include <QStyleOption>
 #include <QPainter>
 
-PropertyWidget::PropertyWidget(QString name, QString text, ProcessSystem *processSystem, FileSystem *fileSystem, PropertiesDock *parent) : QWidget(parent)
+PropertyWidget::PropertyWidget(Property *property, ProcessSystem *processSystem, FileSystem *fileSystem, PropertiesDock *parent) : QWidget(parent)
 {
+    this->property = property;
     this->processSystem = processSystem;
     this->fileSystem = fileSystem;
     this->parent = parent;
-    this->property = new Property(name, text);
     verificationProcessId = -1;
 
-    fileSystem->setPropertyModified(name);
+    fileSystem->setPropertyModified(property->name);
 
     /* create the label for the property name */
-    propertyNameLabel = new QLabel(name);
+    propertyNameLabel = new QLabel(property->name);
 
     /* create the verify button */
     QPushButton *verifyButton = new QPushButton();

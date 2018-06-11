@@ -114,9 +114,16 @@ public:
     QString newProject(QString projectName);
 
     /**
-     * @brief openProject Opens the project with the given project name
+     * @brief getAllProjects Gets all projects that are in the project folder
+     * @return The names of all projects
      */
-    void openProject(QString projectName);
+    QStringList getAllProjects();
+
+    /**
+     * @brief openProject Opens the project with the given project name
+     * @return The list of the properties that need to be added
+     */
+    std::list<Property*> openProject(QString projectName);
 
     /**
      * @brief saveProject Saves the current specification
@@ -144,9 +151,9 @@ signals:
 
 
 private:
-    const QDir *projectsFolder = new QDir("projects");
-    const QString propertiesFolderName = "properties";
-    const QDir *executablesFolder = new QDir("C:\\Users\\s123188\\Documents\\QtProjects\\mCRL2-IDE\\execs");
+    QDir *projectsFolder = new QDir("projects");
+    QString propertiesFolderName = "properties";
+    QDir *executablesFolder = new QDir("C:\\Users\\s123188\\Documents\\QtProjects\\mCRL2-IDE\\execs");
 
     QWidget *parent;
     CodeEditor *specificationEditor;

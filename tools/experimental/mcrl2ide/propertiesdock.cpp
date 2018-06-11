@@ -22,15 +22,17 @@ void PropertiesDock::setToNoProperties()
     /* empty the layout (is usually already empty) */
     QLayoutItem *item;
     while ((item = propertiesLayout->takeAt(0))) {
-        propertiesLayout->removeItem(item);
-        delete item;
+        propertiesLayout->removeWidget(item->widget());
+        delete item->widget();
     }
     /* show a QLabel that tells the user that no properties have been defined */
     QLabel *noPropertiesLabel = new QLabel("No properties have been defined");
     propertiesLayout->addWidget(noPropertiesLabel);
+
+    propertyWidgets.clear();
 }
 
-void PropertiesDock::addProperty(QString propertyName, QString propertyText)
+void PropertiesDock::addProperty(Property *property)
 {
     if (propertyWidgets.empty()) {
         /* remove the QLabel */
@@ -40,7 +42,7 @@ void PropertiesDock::addProperty(QString propertyName, QString propertyText)
     }
 
     /* add the property to the rest */
-    PropertyWidget *propertyWidget = new PropertyWidget(propertyName, propertyText, processSystem, fileSystem, this);
+    PropertyWidget *propertyWidget = new PropertyWidget(property, processSystem, fileSystem, this);
     propertiesLayout->addWidget(propertyWidget);
     propertyWidgets.push_back(propertyWidget);
 }

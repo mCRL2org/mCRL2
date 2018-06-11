@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QTextStream>
+#include <QDirIterator>
 
 Property::Property(QString name, QString text)
 {
@@ -23,6 +24,7 @@ FileSystem::FileSystem(CodeEditor *specificationEditor, QWidget *parent)
     if (!projectsFolder->exists()) {
         QDir().mkdir("projects");
     }
+    projectsFolder->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 }
 
 QString FileSystem::specificationFilePath()
@@ -121,9 +123,42 @@ QString FileSystem::newProject(QString projectName)
     }
 }
 
-void FileSystem::openProject(QString projectName)
+QStringList FileSystem::getAllProjects()
 {
-    /* Not implemented yet */
+    return projectsFolder->entryList();
+}
+
+std::list<Property*> FileSystem::openProject(QString projectName)
+{
+    this->projectName = projectName;
+    projectFolder = new QDir(projectsFolder->path() + QDir::separator() + projectName);
+    propertiesFolder = new QDir(projectFolder->path() + QDir::separator() + propertiesFolderName);
+    projectOpen = true;
+
+    /* read the specification and put it in the specification editor */
+    QFile *specificationFile = new QFile(specificationFilePath());
+    specificationFile->open(QIODevice::ReadOnly);
+    QTextStream *openStream = new QTextStream(specificationFile);
+    QString spec = openStream->readAll();
+    specificationEditor->setPlainText(spec);
+
+    /* get all properties and return them */
+    std::list<Property*> properties;
+
+    QDirIterator *dirIterator = new QDirIterator(*propertiesFolder);
+    while (dirIterator->hasNext()) {
+        QFile *propertyFile = new QFile(dirIterator->next());
+        QFileInfo *propertyFileInfo = new QFileInfo(*propertyFile);
+        QString fileName = propertyFileInfo->fileName();
+        if (propertyFileInfo->isFile() && fileName.endsWith(".mcf")) {
+            fileName.chop(4);
+            propertyFile->open(QIODevice::ReadOnly);
+            QTextStream *openStream = new QTextStream(propertyFile);
+            QString propertyText = openStream->readAll();
+            properties.push_back(new Property(fileName, propertyText));
+        }
+    }
+    return properties;
 }
 
 void FileSystem::saveSpecification()

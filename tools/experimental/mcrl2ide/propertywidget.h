@@ -28,7 +28,7 @@ public:
      * @param text The text of the property
      * @param parent The parent of this widget
      */
-    PropertyWidget(QString name, QString text, ProcessSystem *processSystem, FileSystem *fileSystem, PropertiesDock *parent);
+    PropertyWidget(Property *property, ProcessSystem *processSystem, FileSystem *fileSystem, PropertiesDock *parent);
 
 
     /**

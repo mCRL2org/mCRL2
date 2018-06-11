@@ -26,11 +26,16 @@ public:
     PropertiesDock(ProcessSystem *processSystem, FileSystem *fileSystem, QWidget *parent);
 
     /**
+     * @brief setToNoProperties Empties the dock
+     */
+    void setToNoProperties();
+
+    /**
      * @brief addProperty Adds a property to the dock
      * @param propertyName The name of the property
      * @param propertyText The body of the property
      */
-    void addProperty(QString propertyName, QString propertyText);
+    void addProperty(Property *property);
 
     /**
      * @brief deleteProperty Removes a property from the dock
@@ -61,11 +66,6 @@ private:
     QWidget *innerDockWidget;
     QVBoxLayout *propertiesLayout;
     std::list<PropertyWidget*> propertyWidgets;
-
-    /**
-     * @brief setToNoProperties Empties the dock
-     */
-    void setToNoProperties();
 };
 
 #endif // PROPERTIESDOCK_H
