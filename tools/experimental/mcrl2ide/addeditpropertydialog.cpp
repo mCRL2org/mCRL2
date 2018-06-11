@@ -22,6 +22,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add, PropertiesDock *propertie
         ui->propertyTextField->setPlainText(propertyText);
     }
     setWindowTitle(windowTitle);
+    setWindowFlags(Qt::Window);
 
     connect(ui->addEditButton, SIGNAL(clicked()), this, SLOT(parseAndAccept()));
     connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
@@ -42,19 +43,22 @@ void AddEditPropertyDialog::parseAndAccept()
     QString propertyName = ui->propertyNameField->text().trimmed();
     /* show a message box if the property name field is empty */
     if (propertyName.count() == 0) {
-        QMessageBox::information(this, windowTitle, "The property name may not be empty", QMessageBox::Ok);
+        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, windowTitle, "The property name may not be empty", QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+        msgBox->exec();
         return;
     }
 
     /* show a message box if this property name already exists */
     if (propertiesDock->propertyNameExists(propertyName)) {
-        QMessageBox::information(this, windowTitle, "A property with this name already exists", QMessageBox::Ok);
+        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, windowTitle, "A property with this name already exists", QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+        msgBox->exec();
         return;
     }
 
     /* show a message box if the property text field is empty */
     if (ui->propertyTextField->toPlainText().trimmed().count() == 0) {
-        QMessageBox::information(this, windowTitle, "The property text may not be empty", QMessageBox::Ok);
+        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, windowTitle, "The property text may not be empty", QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+        msgBox->exec();
         return;
     }
 

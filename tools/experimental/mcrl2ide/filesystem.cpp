@@ -104,7 +104,8 @@ bool FileSystem::newProject(QString projectName, QString title)
 {
     /* The project name may not be empty */
     if (projectName.isEmpty()) {
-        QMessageBox::information(parent, title, "The project name may not be empty", QMessageBox::Ok);
+        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, title, "The project name may not be empty", QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
+        msgBox->exec();
         return false;
     }
 
@@ -119,7 +120,8 @@ bool FileSystem::newProject(QString projectName, QString title)
         return true;
     } else {
         /* if not successful, there already is a project folder with this name */
-        QMessageBox::information(parent, title, "A project with this name already exists", QMessageBox::Ok);
+        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, title, "A project with this name already exists", QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
+        msgBox->exec();
         return false;
     }
 }

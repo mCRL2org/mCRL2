@@ -198,7 +198,7 @@ void MainWindow::actionNewProject()
 {
     /* ask the user for a project name */
     bool ok;
-    QString projectName = QInputDialog::getText(this, "New project", "Project name:", QLineEdit::Normal, "", &ok);
+    QString projectName = QInputDialog::getText(this, "New project", "Project name:", QLineEdit::Normal, "", &ok, Qt::WindowCloseButtonHint);
 
     /* if user pressed ok, create the project */
     if (ok) {
@@ -235,7 +235,7 @@ void MainWindow::actionSaveProjectAs()
 {
     /* ask the user for a project name */
     bool ok;
-    QString projectName = QInputDialog::getText(this, "Save Project As", "Project name:", QLineEdit::Normal, "", &ok);
+    QString projectName = QInputDialog::getText(this, "Save Project As", "Project name:", QLineEdit::Normal, "", &ok, Qt::WindowCloseButtonHint);
 
     /* if user pressed ok, create the project and save the specification and properties in it */
     if (ok) {

@@ -9,6 +9,8 @@ FindAndReplaceDialog::FindAndReplaceDialog(CodeEditor *codeEditor, QWidget *pare
 
     this->codeEditor = codeEditor;
 
+    setWindowFlags(Qt::Window);
+
     connect(ui->textToFind, SIGNAL(textChanged(QString)), this, SLOT(setFindEnabled()));
     connect(codeEditor, SIGNAL(selectionChanged()), this, SLOT(setReplaceEnabled()));
 
