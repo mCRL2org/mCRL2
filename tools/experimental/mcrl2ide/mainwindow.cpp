@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     specificationEditor = new CodeEditor(this, true);
     setCentralWidget(specificationEditor);
 
-    fileSystem = new FileSystem(specificationEditor);
+    fileSystem = new FileSystem(specificationEditor, this);
     processSystem = new ProcessSystem(fileSystem);
 
     setupMenuBar();

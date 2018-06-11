@@ -29,8 +29,9 @@ public:
     /**
      * @brief FileSystem Constructor
      * @param specificationEditor The specification editor in the main window
+     * @parent The main widget (main window)
      */
-    explicit FileSystem(CodeEditor *specificationEditor);
+    explicit FileSystem(CodeEditor *specificationEditor, QWidget *parent);
 
     /**
      * @brief specificationFilePath Defines the file path of a specification
@@ -153,11 +154,12 @@ private:
     const QString propertiesFolderName = "properties";
     const QDir *executablesFolder = new QDir("C:\\Users\\s123188\\Documents\\QtProjects\\mCRL2-IDE\\execs");
 
-    bool projectOpen;
+    QWidget *parent;
     CodeEditor *specificationEditor;
     QString projectName;
     QDir *projectFolder;
     QDir *propertiesFolder;
+    bool projectOpen;
 
     bool specificationModified;
     std::map<QString, bool> propertymodified;

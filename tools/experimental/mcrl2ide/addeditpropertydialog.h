@@ -51,6 +51,7 @@ private:
     Ui::AddEditPropertyDialog *ui;
 
     PropertiesDock *propertiesDock;
+    QString windowTitle;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

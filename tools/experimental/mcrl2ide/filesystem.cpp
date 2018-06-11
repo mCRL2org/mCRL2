@@ -11,9 +11,10 @@ Property::Property(QString name, QString text)
     this->text = text;
 }
 
-FileSystem::FileSystem(CodeEditor *specificationEditor)
+FileSystem::FileSystem(CodeEditor *specificationEditor, QWidget *parent)
 {
     this->specificationEditor = specificationEditor;
+    this->parent = parent;
     specificationModified = false;
     connect(specificationEditor, SIGNAL(textChanged()), this, SLOT(setSpecificationModified()));
 
@@ -111,10 +112,7 @@ void FileSystem::newProject(QString projectName)
         projectOpen = true;
     } else {
         /* if not succesful, tell the user */
-        QMessageBox *msgBox = new QMessageBox();
-        msgBox->setStandardButtons(QMessageBox::Ok);
-        msgBox->setText("A project with this name already exists");
-        msgBox->exec();
+        QMessageBox::information(parent, "New Project", "A project with this name already exists", QMessageBox::Ok);
     }
 }
 
