@@ -200,9 +200,9 @@ void MainWindow::actionNewProject()
     bool ok;
     QString projectName = QInputDialog::getText(this, "New project", "Project name:", QLineEdit::Normal, "", &ok);
 
-    /* if ok, create the project */
+    /* if user pressed ok, create the project */
     if (ok) {
-        if (fileSystem->newProject(projectName)) {
+        if (fileSystem->newProject(projectName, "New Project")) {
             setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
         }
     }
@@ -233,7 +233,19 @@ void MainWindow::actionSaveProject()
 
 void MainWindow::actionSaveProjectAs()
 {
-    /* Not yet implemented */
+    /* ask the user for a project name */
+    bool ok;
+    QString projectName = QInputDialog::getText(this, "Save Project As", "Project name:", QLineEdit::Normal, "", &ok);
+
+    /* if user pressed ok, create the project and save the specification and properties in it */
+    if (ok) {
+        if (fileSystem->newProject(projectName, "Save Project As")) {
+            setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+            fileSystem->saveSpecification();
+            propertiesDock->saveAllProperties();
+            saveProjectAction->setEnabled(false);
+        }
+    }
 }
 
 void MainWindow::actionAddProperty()

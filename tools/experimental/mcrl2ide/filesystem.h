@@ -111,9 +111,9 @@ public:
 
     /**
      * @brief newProject Creates a new project with the corresponding file structure
-     * @return Whether the creation was succesful
+     * @return Whether the creation was successful
      */
-    bool newProject(QString projectName);
+    bool newProject(QString projectName, QString title);
 
     /**
      * @brief openProject Opens the project with the given project name
@@ -131,11 +131,6 @@ public:
      * @param propertyText The text of the property
      */
     void saveProperty(Property *property);
-
-    /**
-     * @brief saveProjectAs Saves the current project under a different name
-     */
-    void saveProjectAs(QString projectName);
 
 public slots:
     /**

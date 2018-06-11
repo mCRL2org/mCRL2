@@ -100,11 +100,11 @@ bool FileSystem::upToDatePbesFileExists(QString propertyName)
 }
 
 
-bool FileSystem::newProject(QString projectName)
+bool FileSystem::newProject(QString projectName, QString title)
 {
     /* The project name may not be empty */
     if (projectName.isEmpty()) {
-        QMessageBox::information(parent, "New Project", "The project name may not be empty", QMessageBox::Ok);
+        QMessageBox::information(parent, title, "The project name may not be empty", QMessageBox::Ok);
         return false;
     }
 
@@ -118,8 +118,8 @@ bool FileSystem::newProject(QString projectName)
         projectOpen = true;
         return true;
     } else {
-        /* if not succesful, tell the user */
-        QMessageBox::information(parent, "New Project", "A project with this name already exists", QMessageBox::Ok);
+        /* if not successful, there already is a project folder with this name */
+        QMessageBox::information(parent, title, "A project with this name already exists", QMessageBox::Ok);
         return false;
     }
 }
@@ -147,9 +147,4 @@ void FileSystem::saveProperty(Property *property)
     *saveStream << property->text;
     propertyFile->close();
     propertymodified[property->name] = false;
-}
-
-void FileSystem::saveProjectAs(QString projectName)
-{
-    /* Not implemented yet */
 }
