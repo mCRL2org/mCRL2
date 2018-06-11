@@ -20,31 +20,58 @@ FileSystem::FileSystem(CodeEditor *specificationEditor, QWidget *parent)
 
     projectOpen = false;
 
-    /* check if the projects folder exists, if not create it */
-    if (!projectsFolder->exists()) {
-        QDir().mkdir("projects");
+    makeSureProjectsFolderExists();
+}
+
+void FileSystem::makeSureProjectsFolderExists()
+{
+    if (!QDir(projectsFolderPath).exists()) {
+        QDir().mkpath(projectsFolderPath);
     }
-    projectsFolder->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+}
+
+void FileSystem::makeSureProjectFolderExists()
+{
+    if (!QDir(projectFolderPath(projectName)).exists()) {
+        QDir().mkpath(projectFolderPath(projectName));
+    }
+}
+
+void FileSystem::makeSurePropertiesFolderExists()
+{
+    if (!QDir(propertiesFolderPath(projectName)).exists()) {
+        QDir().mkpath(propertiesFolderPath(projectName));
+    }
+}
+
+QString FileSystem::projectFolderPath(QString projectName)
+{
+    return projectsFolderPath + QDir::separator() + projectName;
+}
+
+QString FileSystem::propertiesFolderPath(QString projectName)
+{
+    return projectFolderPath(projectName) + QDir::separator() + propertiesFolderName;
 }
 
 QString FileSystem::specificationFilePath()
 {
-    return projectFolder->path() + QDir::separator() + projectName + "_spec.mcrl";
+    return projectFolderPath(projectName) + QDir::separator() + projectName + "_spec.mcrl";
 }
 
 QString FileSystem::lpsFilePath()
 {
-    return projectFolder->path() + QDir::separator() + projectName + "_lps.lps";
+    return projectFolderPath(projectName) + QDir::separator() + projectName + "_lps.lps";
 }
 
 QString FileSystem::propertyFilePath(QString propertyName)
 {
-    return propertiesFolder->path() + QDir::separator() + propertyName + ".mcf";
+    return propertiesFolderPath(projectName) + QDir::separator() + propertyName + ".mcf";
 }
 
 QString FileSystem::pbesFilePath(QString propertyName)
 {
-    return propertiesFolder->path() + QDir::separator() + projectName + "_" + propertyName + "_pbes.pbes";
+    return propertiesFolderPath(projectName) + QDir::separator() + projectName + "_" + propertyName + "_pbes.pbes";
 }
 
 const QDir *FileSystem::getExecutablesFolder()
@@ -103,18 +130,18 @@ bool FileSystem::upToDatePbesFileExists(QString propertyName)
 
 QString FileSystem::newProject(QString projectName)
 {
+    makeSureProjectsFolderExists();
+
     /* the project name may not be empty */
     if (projectName.isEmpty()) {
         return "The project name may not be empty";
     }
 
     /* create the folder for this project */
-    if (projectsFolder->mkdir(projectName)) {
+    if (QDir(projectsFolderPath).mkdir(projectName)) {
         /* if successful, create the properties folder too */
         this->projectName = projectName;
-        projectFolder = new QDir(projectsFolder->path() + QDir::separator() + projectName);
-        projectFolder->mkdir(propertiesFolderName);
-        propertiesFolder = new QDir(projectFolder->path() + QDir::separator() + propertiesFolderName);
+        QDir(projectFolderPath(projectName)).mkdir(propertiesFolderName);
         projectOpen = true;
         return "";
     } else {
@@ -125,14 +152,13 @@ QString FileSystem::newProject(QString projectName)
 
 QStringList FileSystem::getAllProjects()
 {
-    return projectsFolder->entryList();
+    makeSureProjectsFolderExists();
+    return QDir(projectsFolderPath).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 }
 
 std::list<Property*> FileSystem::openProject(QString projectName)
 {
     this->projectName = projectName;
-    projectFolder = new QDir(projectsFolder->path() + QDir::separator() + projectName);
-    propertiesFolder = new QDir(projectFolder->path() + QDir::separator() + propertiesFolderName);
     projectOpen = true;
 
     /* read the specification and put it in the specification editor */
@@ -145,7 +171,7 @@ std::list<Property*> FileSystem::openProject(QString projectName)
     /* get all properties and return them */
     std::list<Property*> properties;
 
-    QDirIterator *dirIterator = new QDirIterator(*propertiesFolder);
+    QDirIterator *dirIterator = new QDirIterator(QDir(propertiesFolderPath(projectName)));
     while (dirIterator->hasNext()) {
         QFile *propertyFile = new QFile(dirIterator->next());
         QFileInfo *propertyFileInfo = new QFileInfo(*propertyFile);
@@ -163,6 +189,8 @@ std::list<Property*> FileSystem::openProject(QString projectName)
 
 void FileSystem::saveSpecification()
 {
+    makeSureProjectFolderExists();
+
     QFile *specificationFile = new QFile(specificationFilePath());
     specificationFile->open(QIODevice::WriteOnly);
     QTextStream *saveStream = new QTextStream(specificationFile);
@@ -173,6 +201,8 @@ void FileSystem::saveSpecification()
 
 void FileSystem::saveProperty(Property *property)
 {
+    makeSurePropertiesFolderExists();
+
     QFile *propertyFile = new QFile(propertyFilePath(property->name));
     propertyFile->open(QIODevice::WriteOnly);
     QTextStream *saveStream = new QTextStream(propertyFile);

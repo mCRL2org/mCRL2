@@ -32,6 +32,35 @@ public:
     explicit FileSystem(CodeEditor *specificationEditor, QWidget *parent);
 
     /**
+     * @brief makeSureProjectFolderExists Checks whether the projects folder exists, if not creates it
+     */
+    void makeSureProjectsFolderExists();
+
+    /**
+     * @brief makeSureProjectFolderExists Checks whether the project folder exists, if not creates it
+     */
+    void makeSureProjectFolderExists();
+
+    /**
+     * @brief makeSureProjectFolderExists Checks whether the properties folder exists, if not creates it
+     */
+    void makeSurePropertiesFolderExists();
+
+    /**
+     * @brief projectFolderPath Defines the file path of the current project folder
+     * @param projectName The name of the current project
+     * @return The file path of the project folder
+     */
+    QString projectFolderPath(QString projectName);
+
+    /**
+     * @brief propertiesFolderPath Defines the file path of the current properties folder
+     * @param projectName The name of the current project
+     * @return The file path of the properties folder
+     */
+    QString propertiesFolderPath(QString projectName);
+
+    /**
      * @brief specificationFilePath Defines the file path of a specification
      * @return The file path of the specification
      */
@@ -151,15 +180,13 @@ signals:
 
 
 private:
-    QDir *projectsFolder = new QDir("projects");
+    QString projectsFolderPath = QDir::currentPath() + QDir::separator() + "projects";
     QString propertiesFolderName = "properties";
     QDir *executablesFolder = new QDir("C:\\Users\\s123188\\Documents\\QtProjects\\mCRL2-IDE\\execs");
 
     QWidget *parent;
     CodeEditor *specificationEditor;
     QString projectName;
-    QDir *projectFolder;
-    QDir *propertiesFolder;
     bool projectOpen;
 
     bool specificationModified;

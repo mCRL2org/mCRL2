@@ -218,18 +218,23 @@ void MainWindow::actionOpenProject()
 {
     QStringList projects = fileSystem->getAllProjects();
 
-    bool ok;
-    QString projectName = QInputDialog::getItem(this, "Open Project", "Project name:", projects, 0, false, &ok, Qt::WindowCloseButtonHint);
+    if (projects.isEmpty()) {
+        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, "Open Project", "No projects found", QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+        msgBox->exec();
+    } else {
+        bool ok;
+        QString projectName = QInputDialog::getItem(this, "Open Project", "Project name:", projects, 0, false, &ok, Qt::WindowCloseButtonHint);
 
-    /* if user pressed ok, open the project by setting the specification and the properties in the window */
-    if (ok) {
-        std::list<Property*> properties = fileSystem->openProject(projectName);
-        propertiesDock->setToNoProperties();
-        for (Property *property : properties) {
-            propertiesDock->addProperty(property);
+        /* if user pressed ok, open the project by setting the specification and the properties in the window */
+        if (ok) {
+            std::list<Property*> properties = fileSystem->openProject(projectName);
+            propertiesDock->setToNoProperties();
+            for (Property *property : properties) {
+                propertiesDock->addProperty(property);
+            }
+            saveProjectAction->setEnabled(false);
+            setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
         }
-        saveProjectAction->setEnabled(false);
-        setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
     }
 }
 
