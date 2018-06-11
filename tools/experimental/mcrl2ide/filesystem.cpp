@@ -1,6 +1,5 @@
 #include "filesystem.h"
 
-#include <QMessageBox>
 #include <QFileInfo>
 #include <QDateTime>
 #include <QTextStream>
@@ -100,13 +99,11 @@ bool FileSystem::upToDatePbesFileExists(QString propertyName)
 }
 
 
-bool FileSystem::newProject(QString projectName, QString title)
+QString FileSystem::newProject(QString projectName)
 {
-    /* The project name may not be empty */
+    /* the project name may not be empty */
     if (projectName.isEmpty()) {
-        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, title, "The project name may not be empty", QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-        msgBox->exec();
-        return false;
+        return "The project name may not be empty";
     }
 
     /* create the folder for this project */
@@ -117,12 +114,10 @@ bool FileSystem::newProject(QString projectName, QString title)
         projectFolder->mkdir(propertiesFolderName);
         propertiesFolder = new QDir(projectFolder->path() + QDir::separator() + propertiesFolderName);
         projectOpen = true;
-        return true;
+        return "";
     } else {
         /* if not successful, there already is a project folder with this name */
-        QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, title, "A project with this name already exists", QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-        msgBox->exec();
-        return false;
+        return "A project with this name already exists";
     }
 }
 

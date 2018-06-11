@@ -5,8 +5,6 @@
 
 #include <QObject>
 #include <QDir>
-#include <QProcess>
-#include <QQueue>
 
 class Property
 {
@@ -111,9 +109,9 @@ public:
 
     /**
      * @brief newProject Creates a new project with the corresponding file structure
-     * @return Whether the creation was successful
+     * @return An error message if unsuccessful, else the empty string
      */
-    bool newProject(QString projectName, QString title);
+    QString newProject(QString projectName);
 
     /**
      * @brief openProject Opens the project with the given project name

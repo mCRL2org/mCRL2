@@ -6,6 +6,7 @@
 #include <QToolBar>
 #include <QInputDialog>
 #include <QDesktopWidget>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -200,10 +201,15 @@ void MainWindow::actionNewProject()
     bool ok;
     QString projectName = QInputDialog::getText(this, "New project", "Project name:", QLineEdit::Normal, "", &ok, Qt::WindowCloseButtonHint);
 
-    /* if user pressed ok, create the project */
+    /* if user pressed ok, create the project and save the specification and properties in it */
     if (ok) {
-        if (fileSystem->newProject(projectName, "New Project")) {
+        QString error = fileSystem->newProject(projectName);
+        if (error.isEmpty()) {
             setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+        } else {
+            /* if there was an error, tell the user */
+            QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, "New Project", error, QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+            msgBox->exec();
         }
     }
 }
@@ -239,11 +245,14 @@ void MainWindow::actionSaveProjectAs()
 
     /* if user pressed ok, create the project and save the specification and properties in it */
     if (ok) {
-        if (fileSystem->newProject(projectName, "Save Project As")) {
+        QString error = fileSystem->newProject(projectName);
+        if (error.isEmpty()) {
             setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-            fileSystem->saveSpecification();
-            propertiesDock->saveAllProperties();
-            saveProjectAction->setEnabled(false);
+            actionSaveProject();
+        } else {
+            /* if there was an error, tell the user */
+            QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, "Save Project As", error, QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+            msgBox->exec();
         }
     }
 }
