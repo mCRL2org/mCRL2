@@ -41,6 +41,7 @@ Contents
    guidelines
    code_generation
    cronjobs
+   repository
    packaging
    testing
    performance/index
