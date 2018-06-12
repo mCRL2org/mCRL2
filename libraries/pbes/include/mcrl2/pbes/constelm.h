@@ -764,14 +764,14 @@ class pbes_constelm_algorithm
 
           data::rewriter::substitution_type sigma;
           detail::make_constelm_substitution(u.constraints(), sigma);
-          pbes_expression value = m_pbes_rewriter(e.condition(), sigma);
-          mCRL2log(log::debug) << print_condition(e, u, value);
+          pbes_expression needs_update = m_pbes_rewriter(e.condition(), sigma);
+          mCRL2log(log::debug) << print_condition(e, u, needs_update);
 
-          if (!is_false(value) && !is_true(value))
+          if (!is_false(needs_update) && !is_true(needs_update))
           {
             mCRL2log(log::debug) << print_evaluation_failure(e, u);
           }
-          if (!is_false(value))
+          if (!is_false(needs_update))
           {
             bool changed = v.update(e.target().parameters(), u.constraints(), m_data_rewriter);
             if (changed)
