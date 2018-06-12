@@ -74,7 +74,6 @@ PropertyWidget::PropertyWidget(Property *property, ProcessSystem *processSystem,
     propertyLayout->addWidget(deleteButton);
 
     this->setLayout(propertyLayout);
-    this->setMaximumHeight(40);
 }
 
 void PropertyWidget::paintEvent(QPaintEvent *pe) {

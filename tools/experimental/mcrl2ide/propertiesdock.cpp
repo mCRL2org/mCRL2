@@ -39,11 +39,12 @@ void PropertiesDock::addProperty(Property *property)
         QWidget *label = propertiesLayout->takeAt(0)->widget();
         propertiesLayout->removeWidget(label);
         delete label;
+        propertiesLayout->addStretch(1);
     }
 
     /* add the property to the rest */
     PropertyWidget *propertyWidget = new PropertyWidget(property, processSystem, fileSystem, this);
-    propertiesLayout->addWidget(propertyWidget);
+    propertiesLayout->insertWidget(propertiesLayout->count() - 1, propertyWidget);
     propertyWidgets.push_back(propertyWidget);
 }
 
