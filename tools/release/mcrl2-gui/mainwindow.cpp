@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.mnuMain->addMenu(fileMenu);
 
   QMenu *viewMenu = new QMenu("&View", this);
-  m_ui.actionReset_perspective = viewMenu->addAction("&Reset perspective");
+  m_ui.actionReset_perspective = viewMenu->addAction("&Revert to default layout");
   connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
   m_ui.mnuMain->addMenu(viewMenu);
 
@@ -157,4 +157,3 @@ void MainWindow::onTabCloseRequest(int index)
     fileInformation->deleteLater();
   }
 }
-
