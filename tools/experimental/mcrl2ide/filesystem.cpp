@@ -115,16 +115,16 @@ void FileSystem::setPropertyModified(QString propertyName)
 bool FileSystem::upToDateLpsFileExists()
 {
     /* an lps file is up to date if the lps file exists and the lps file is created after the the last time the specification file was modified */
-    return QFile(lpsFilePath()).exists()
-           && QFileInfo(specificationFilePath()).fileTime(QFileDevice::FileModificationTime) <= QFileInfo(lpsFilePath()).fileTime(QFileDevice::FileModificationTime);
+    return QFile(lpsFilePath()).exists() &&
+           QFileInfo(specificationFilePath()).lastModified() <= QFileInfo(lpsFilePath()).lastModified();
 }
 
 bool FileSystem::upToDatePbesFileExists(QString propertyName)
 {
     /* a pbes file is up to date if the pbes file exists and the pbes file is created after the last time both the lps and the property files were modified */
     return QFile(pbesFilePath(propertyName)).exists()
-           && QFileInfo(lpsFilePath()).fileTime(QFileDevice::FileModificationTime) <= QFileInfo(pbesFilePath(propertyName)).fileTime(QFileDevice::FileModificationTime)
-           && QFileInfo(propertyFilePath(propertyName)).fileTime(QFileDevice::FileModificationTime) <= QFileInfo(pbesFilePath(propertyName)).fileTime(QFileDevice::FileModificationTime);
+           && QFileInfo(lpsFilePath()).lastModified() <= QFileInfo(pbesFilePath(propertyName)).lastModified()
+           && QFileInfo(propertyFilePath(propertyName)).lastModified() <= QFileInfo(pbesFilePath(propertyName)).lastModified();
 }
 
 

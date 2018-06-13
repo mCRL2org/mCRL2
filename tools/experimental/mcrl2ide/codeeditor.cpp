@@ -12,7 +12,7 @@ CodeEditor::CodeEditor(QWidget *parent, bool spec) : QPlainTextEdit(parent)
 
     /* set the tab width to 4 characters */
     QFontMetrics *fm = new QFontMetrics(*font);
-    this->setTabStopDistance(fm->width("1234"));
+    this->setTabStopWidth(fm->width("1234"));
 
     lineNumberArea = new LineNumberArea(this);
 
