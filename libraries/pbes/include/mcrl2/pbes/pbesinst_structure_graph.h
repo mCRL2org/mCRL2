@@ -31,7 +31,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
 
     void SG0(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
     {
-      int vertex_phi = m_graph_builder.insert_variable(X, psi, k);
+      auto vertex_phi = m_graph_builder.insert_variable(X, psi, k);
       if (is_true(psi))
       {
         // skip
@@ -42,14 +42,14 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       }
       else if (is_propositional_variable_instantiation(psi))
       {
-        int vertex_psi = m_graph_builder.insert_variable(psi);
+        auto vertex_psi = m_graph_builder.insert_variable(psi);
         m_graph_builder.insert_edge(vertex_phi, vertex_psi);
       }
       else if (is_and(psi))
       {
         for (const pbes_expression& psi_i: split_and(psi))
         {
-          int vertex_psi_i = SG1(psi_i);
+          auto vertex_psi_i = SG1(psi_i);
           m_graph_builder.insert_edge(vertex_phi, vertex_psi_i);
         }
       }
@@ -57,15 +57,15 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       {
         for (const pbes_expression& psi_i: split_or(psi))
         {
-          int vertex_psi_i = SG1(psi_i);
+          auto vertex_psi_i = SG1(psi_i);
           m_graph_builder.insert_edge(vertex_phi, vertex_psi_i);
         }
       }
     }
 
-    int SG1(const pbes_expression& psi)
+    structure_graph::index_type SG1(const pbes_expression& psi)
     {
-      int vertex_psi = m_graph_builder.insert_vertex(psi);
+      auto vertex_psi = m_graph_builder.insert_vertex(psi);
       if (is_true(psi))
       {
         // skip
@@ -82,7 +82,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       {
         for (const pbes_expression& psi_i: split_and(psi))
         {
-          int vertex_psi_i = SG1(psi_i);
+          auto vertex_psi_i = SG1(psi_i);
           m_graph_builder.insert_edge(vertex_psi, vertex_psi_i);
         }
       }
@@ -90,7 +90,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       {
         for (const pbes_expression& psi_i: split_or(psi))
         {
-          int vertex_psi_i = SG1(psi_i);
+          auto vertex_psi_i = SG1(psi_i);
           m_graph_builder.insert_edge(vertex_psi, vertex_psi_i);
         }
       }
