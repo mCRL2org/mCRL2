@@ -472,9 +472,9 @@ class pbes_constelm_algorithm
         std::vector<std::size_t> constant_parameter_indices() const
         {
           std::vector<std::size_t> result;
-          int index = 0;
+          std::size_t index = 0;
           data::variable_list parameters(m_variable.parameters());
-          for (typename data::variable_list::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
+          for (auto i = parameters.begin(); i != parameters.end(); ++i, index++)
           {
             if (is_constant(*i))
             {
@@ -499,7 +499,7 @@ class pbes_constelm_algorithm
 
         /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
         /// The new values have a number of constraints.
-        bool update(data::data_expression_list e, const constraint_map& e_constraints, const DataRewriter& datar)
+        bool update(const data::data_expression_list& e, const constraint_map& e_constraints, const DataRewriter& datar)
         {
           bool changed = false;
 
@@ -736,10 +736,10 @@ class pbes_constelm_algorithm
       // initialize the todo list of vertices that need to be processed
       propositional_variable_instantiation init = p.initial_state();
       std::deque<propositional_variable> todo;
-      const data::data_expression_list& e = init.parameters();
-      vertex& u = m_vertices[init.name()];
-      u.update(e, constraint_map(), m_data_rewriter);
-      todo.push_back(u.variable());
+      const data::data_expression_list& e_init = init.parameters();
+      vertex& u_init = m_vertices[init.name()];
+      u_init.update(e_init, constraint_map(), m_data_rewriter);
+      todo.push_back(u_init.variable());
 
       mCRL2log(log::debug) << "\n--- initial vertices ---\n" << print_vertices();
       mCRL2log(log::debug) << "\n--- edges ---\n" << print_edges();
@@ -756,9 +756,8 @@ class pbes_constelm_algorithm
         const vertex& u = m_vertices[var.name()];
         std::vector<edge>& u_edges = m_edges[var.name()];
 
-        for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
+        for (const edge& e: u_edges)
         {
-          const edge& e = *ei;
           vertex& v = m_vertices[e.target().name()];
           mCRL2log(log::debug) << print_edge_update(e, u, v);
 

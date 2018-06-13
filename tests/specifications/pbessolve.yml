@@ -13,32 +13,32 @@ tools:
   t2:
     input: [l2]
     output: []
-    args: []
-    name: pbes2bool
+    args: [--check-strategy]
+    name: pbessolve
   t3:
     input: [l2]
     output: []
-    args: [-c]
-    name: pbespgsolve
+    args: [-s1]
+    name: pbessolve
   t4:
     input: [l2]
     output: []
-    args: [-sspm]
-    name: pbespgsolve
+    args: [-s2]
+    name: pbessolve
   t5:
     input: [l2]
     output: []
-    args: [-saltspm]
-    name: pbespgsolve
+    args: [-s3]
+    name: pbessolve
   t6:
     input: [l2]
     output: []
-    args: [-srecursive]
-    name: pbespgsolve
+    args: [--optimization1]
+    name: pbessolve
   t7:
     input: [l2]
     output: []
-    args: [-sprioprom]
-    name: pbespgsolve
+    args: []
+    name: pbes2bool
 result: |
-  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution']== t6.value['solution'] == t7.value['solution']
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution']

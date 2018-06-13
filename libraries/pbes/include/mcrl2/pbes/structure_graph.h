@@ -274,7 +274,7 @@ inline
 std::ostream& operator<<(std::ostream& out, const structure_graph& G)
 {
   auto N = G.all_vertices().size();
-  for (std::size_t i = 0; i < N; i++)
+  for (structure_graph::index_type i = 0; i < N; i++)
   {
     if (G.contains(i))
     {
