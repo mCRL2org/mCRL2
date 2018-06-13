@@ -212,9 +212,9 @@ class PbesinstTest(PbesTest):
         super(PbesinstTest, self).__init__(name, ymlfile('pbesinst'), settings)
         self.set_command_line_options('t2', options)
 
-class PbessolveTest(PbesTest):
+class PbespgsolveTest(PbesTest):
     def __init__(self, name, settings = dict()):
-        super(PbessolveTest, self).__init__(name, ymlfile('pbessolve'), settings)
+        super(PbespgsolveTest, self).__init__(name, ymlfile('pbespgsolve'), settings)
 
 class PbesstategraphTest(PbesTest):
     def __init__(self, name, settings = dict()):
@@ -309,7 +309,7 @@ available_tests = {
     'pbesinst-lazy'                               : lambda name, settings: PbesinstTest(name, ['-slazy'], settings)                                ,
     'pbesinst-alternative_lazy'                   : lambda name, settings: PbesinstTest(name, ['-salternative-lazy'], settings)                    ,
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)               ,
-    'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                           ,
+    'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                         ,
     'pbessolve-structure-graph'                   : lambda name, settings: Pbessolve_structure_graphTest(name, settings)                           ,
     'pbessolve-counter-example'                   : lambda name, settings: Pbessolve_counter_exampleTest(name, settings)                           ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                      ,
