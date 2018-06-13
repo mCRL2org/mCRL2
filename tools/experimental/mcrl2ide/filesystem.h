@@ -87,12 +87,6 @@ public:
     QString pbesFilePath(QString propertyName);
 
     /**
-     * @brief getExecutablesFolder Gets the folder containing the mCRL2 tool executables
-     * @return The folder with the executables
-     */
-    const QDir *getExecutablesFolder();
-
-    /**
      * @brief projectOpened Checks whether a project is opened
      * @return Whether a project is opened
      */
@@ -182,7 +176,6 @@ signals:
 private:
     QString projectsFolderPath = QDir::currentPath() + QDir::separator() + "projects";
     QString propertiesFolderName = "properties";
-    QDir *executablesFolder = new QDir("C:\\Users\\s123188\\Documents\\QtProjects\\mCRL2-IDE\\execs");
 
     QWidget *parent;
     CodeEditor *specificationEditor;

@@ -74,11 +74,6 @@ QString FileSystem::pbesFilePath(QString propertyName)
     return propertiesFolderPath(projectName) + QDir::separator() + projectName + "_" + propertyName + "_pbes.pbes";
 }
 
-const QDir *FileSystem::getExecutablesFolder()
-{
-    return executablesFolder;
-}
-
 bool FileSystem::projectOpened()
 {
     return projectOpen;

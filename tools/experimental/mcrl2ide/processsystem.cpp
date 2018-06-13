@@ -18,7 +18,7 @@ QProcess *ProcessSystem::createMcrl22lpsProcess(bool verification)
     if (!fileSystem->upToDateLpsFileExists()) {
 
         /* create the process */
-        mcrl22lpsProcess->setProgram(fileSystem->getExecutablesFolder()->path() + QDir::separator() + "mcrl22lps.exe");
+        mcrl22lpsProcess->setProgram("mcrl22lps");
         mcrl22lpsProcess->setArguments({fileSystem->specificationFilePath(), fileSystem->lpsFilePath(), "--lin-method=regular", "--rewriter=jitty", "--verbose"});
 
         /* connect to logger */
@@ -59,7 +59,7 @@ QProcess *ProcessSystem::createLps2pbesProcess(QString propertyName)
     if (!fileSystem->upToDatePbesFileExists(propertyName)) {
 
         /* create the process */
-        lps2pbesProcess->setProgram(fileSystem->getExecutablesFolder()->path() + QDir::separator() + "lps2pbes.exe");
+        lps2pbesProcess->setProgram("lps2pbes");
         lps2pbesProcess->setArguments({fileSystem->lpsFilePath(), fileSystem->pbesFilePath(propertyName), "--formula=" + fileSystem->propertyFilePath(propertyName), "--out=pbes", "--verbose"});
 
         /* connect to logger */
@@ -75,7 +75,7 @@ QProcess *ProcessSystem::createPbes2boolProcess(QString propertyName)
 {
     /* create the process */
     QProcess *pbes2boolProcess = new QProcess();
-    pbes2boolProcess->setProgram(fileSystem->getExecutablesFolder()->path() + QDir::separator() + "pbes2bool.exe");
+    pbes2boolProcess->setProgram("pbes2bool");
     pbes2boolProcess->setArguments({fileSystem->pbesFilePath(propertyName), "--erase=none", "--in=pbes", "--rewriter=jitty", "--search=breadth-first", "--solver=lf", "--strategy=0", "--verbose"});
 
     /* connect to logger */
