@@ -33,7 +33,12 @@ tools:
   t6:
     input: [l2]
     output: []
+    args: [--optimization1]
+    name: pbessolve
+  t7:
+    input: [l2]
+    output: []
     args: []
     name: pbes2bool
 result: |
-  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution']
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution']
