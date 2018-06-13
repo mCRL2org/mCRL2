@@ -99,6 +99,11 @@ public slots:
      */
     void actionAbortVerification();
 
+	/**
+     * @brief setDocksToDefault Puts all docks in their default location
+     */
+    void setDocksToDefault();
+
 private:
     /**
      * @brief setupMenuBar Creates the menubar, also creates the actions and their icons and shortcuts (if applicable)
@@ -109,11 +114,6 @@ private:
      * @brief setupToolbar Creates the toolbar
      */
     void setupToolbar();
-
-    /**
-     * @brief setDocksToDefault Puts all docks in their default location
-     */
-    void setDocksToDefault();
 
     /**
      * @brief setupDocks Creates the docks

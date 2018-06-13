@@ -30,7 +30,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add, PropertiesDock *propertie
 
 QString AddEditPropertyDialog::getPropertyName()
 {
-    return ui->propertyNameField->text().trimmed();
+    return ui->propertyNameField->text();
 }
 
 QString AddEditPropertyDialog::getPropertyText()
@@ -40,7 +40,7 @@ QString AddEditPropertyDialog::getPropertyText()
 
 void AddEditPropertyDialog::parseAndAccept()
 {
-    QString propertyName = ui->propertyNameField->text().trimmed();
+    QString propertyName = ui->propertyNameField->text();
     /* show a message box if the property name field is empty */
     if (propertyName.count() == 0) {
         QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, windowTitle, "The property name may not be empty", QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
@@ -56,7 +56,7 @@ void AddEditPropertyDialog::parseAndAccept()
     }
 
     /* show a message box if the property text field is empty */
-    if (ui->propertyTextField->toPlainText().trimmed().count() == 0) {
+    if (ui->propertyTextField->toPlainText().count() == 0) {
         QMessageBox *msgBox = new QMessageBox(QMessageBox::Information, windowTitle, "The property text may not be empty", QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
         msgBox->exec();
         return;
