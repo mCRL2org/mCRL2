@@ -160,6 +160,21 @@ struct vertex_set
       self_check();
     }
 
+    // resize to at least n elements
+    void resize(std::size_t n)
+    {
+      std::size_t m = m_include.size();
+      if (m < 1024)
+      {
+        m = 1024;
+      }
+      while (m < n)
+      {
+        m *= 2;
+      }
+      m_include.resize(m);
+    }
+
     bool is_empty() const
     {
       return m_vertices.empty();
@@ -274,11 +289,11 @@ vertex_set set_difference(const vertex_set& V, const vertex_set& W)
 //   return result;
 // }
 
-inline
-void log_vertex_set(const structure_graph& G, const vertex_set& V, const std::string& name)
+template <typename StructureGraph>
+void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::string& name)
 {
   mCRL2log(log::debug) << "--- " << name << " ---" << std::endl;
-  for (structure_graph::index_type v: V.vertices())
+  for (auto v: V.vertices())
   {
     mCRL2log(log::debug) << "  " << v << " " << G.find_vertex(v) << std::endl;
   }
@@ -289,8 +304,8 @@ void log_vertex_set(const structure_graph& G, const vertex_set& V, const std::st
 // Returns true if the vertex u satisfies the conditions for being added to the attractor set A.
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
-inline
-bool is_attractor(const structure_graph& G, structure_graph::index_type u, const vertex_set& A, int alpha)
+template <typename StructureGraph>
+bool is_attractor(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, int alpha)
 {
   if (G.decoration(u) != alpha)
   {
@@ -298,7 +313,7 @@ bool is_attractor(const structure_graph& G, structure_graph::index_type u, const
   }
   if (G.decoration(u) != (1 - alpha))
   {
-    for (structure_graph::index_type v: G.successors(u))
+    for (auto v: G.successors(u))
     {
       if (!(A.contains(v)))
       {
@@ -313,17 +328,18 @@ bool is_attractor(const structure_graph& G, structure_graph::index_type u, const
 // Computes the conjunctive attractor set, by extending A.
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
-inline
-vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alpha)
+// StructureGraph is either structure_graph or simple_structure_graph
+template <typename StructureGraph>
+vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, int alpha)
 {
   // utilities::chrono_timer timer;
   // std::size_t A_size = A.size();
 
   // put all predecessors of elements in A in todo
   deque_vertex_set todo(G.all_vertices().size());
-  for (structure_graph::index_type u: A.vertices())
+  for (auto u: A.vertices())
   {
-    for (structure_graph::index_type v: G.predecessors(u))
+    for (auto v: G.predecessors(u))
     {
       if (!(A.contains(v)) && !todo.contains(v))
       {
@@ -335,14 +351,14 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
   while (!todo.is_empty())
   {
     // N.B. Use a breadth first search, to minimize counter examples
-    structure_graph::index_type u = todo.pop_front();
+    auto u = todo.pop_front();
 
     if (is_attractor(G, u, A, 1 - alpha))
     {
       // set strategy
       if (G.decoration(u) != (1 - alpha))
       {
-        for (structure_graph::index_type w: G.successors(u))
+        for (auto w: G.successors(u))
         {
           if ((A.contains(w)))
           {
@@ -359,7 +375,7 @@ vertex_set compute_attractor_set(const structure_graph& G, vertex_set A, int alp
 
       A.insert(u);
 
-      for (structure_graph::index_type v: G.predecessors(u))
+      for (auto v: G.predecessors(u))
       {
         if (!A.contains(v) && !todo.contains(v))
         {
