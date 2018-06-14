@@ -4,20 +4,20 @@ add_mcrl2_tool(mcrl2ide
   ICON "mcrl2-red"
   SOURCES
     addeditpropertydialog.cpp
-	addeditpropertydialog.ui
-	codeeditor.cpp
-	consoledock.cpp
-	filesystem.cpp
-	findandreplacedialog.cpp
-	findandreplacedialog.ui
-	main.cpp
-	mainwindow.cpp
-	mcrl2-ide.qrc
-	processsystem.cpp
-	propertiesdock.cpp
-	propertywidget.cpp
-	rewritedock.cpp
-	solvedock.cpp
+    addeditpropertydialog.ui
+    codeeditor.cpp
+    consoledock.cpp
+    filesystem.cpp
+    findandreplacedialog.cpp
+    findandreplacedialog.ui
+    main.cpp
+    mainwindow.cpp
+    mcrl2-ide.qrc
+    processsystem.cpp
+    propertiesdock.cpp
+    propertywidget.cpp
+    rewritedock.cpp
+    solvedock.cpp
   DEPENDS
     QtCore
     QtGui
