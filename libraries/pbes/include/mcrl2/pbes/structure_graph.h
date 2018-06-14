@@ -50,6 +50,8 @@ struct structure_graph_builder;
 
 } // namespace detail
 
+// A structure graph with a facility to exclude a subset of the vertices.
+// It has the same interface as simple_structure_graph.
 class structure_graph
 {
   friend struct detail::structure_graph_builder;
@@ -76,7 +78,7 @@ class structure_graph
       std::vector<index_type> successors;
       mutable index_type strategy;
 
-      vertex(const pbes_expression& formula_,
+      explicit vertex(const pbes_expression& formula_,
              decoration_type decoration_ = structure_graph::d_none,
              std::size_t rank_ = data::undefined_index(),
              std::vector<index_type> pred_ = std::vector<index_type>(),
@@ -106,7 +108,7 @@ class structure_graph
     {
       const boost::dynamic_bitset<>& subset;
 
-      integers_not_contained_in(const boost::dynamic_bitset<>& subset_)
+      explicit integers_not_contained_in(const boost::dynamic_bitset<>& subset_)
         : subset(subset_)
       {}
 
@@ -307,7 +309,7 @@ struct structure_graph_builder
   std::unordered_map<pbes_expression, index_type> m_vertex_map;
   pbes_expression m_initial_state; // The initial state.
 
-  structure_graph_builder(structure_graph& G)
+  explicit structure_graph_builder(structure_graph& G)
     : m_graph(G)
   {}
 
@@ -408,6 +410,12 @@ struct structure_graph_builder
     m_graph.m_initial_vertex = i->second;
 
     m_graph.m_exclude = boost::dynamic_bitset<>(N);
+  }
+
+  index_type find_vertex(const pbes_expression& x) const
+  {
+    auto i = m_vertex_map.find(x);
+    return i->second;
   }
 };
 
