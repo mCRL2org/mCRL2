@@ -105,9 +105,9 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
          data::rewriter::strategy rewrite_strategy = data::jitty,
          search_strategy search_strategy = breadth_first,
          transformation_strategy transformation_strategy = lazy,
-         bool optimization1 = false
+         int optimization = 0
         )
-      : pbesinst_lazy_algorithm(p, rewrite_strategy, search_strategy, transformation_strategy, optimization1),
+      : pbesinst_lazy_algorithm(p, rewrite_strategy, search_strategy, transformation_strategy, optimization),
         m_graph_builder(G),
         m_initial_state_assigned(false)
     {}
@@ -135,7 +135,7 @@ void pbesinst_structure_graph(const pbes& p,
                               data::rewriter::strategy rewrite_strategy = data::jitty,
                               search_strategy search_strategy = breadth_first,
                               transformation_strategy transformation_strategy = lazy,
-                              bool optimization1 = false
+                              int optimization = 0
                              )
 {
   if (search_strategy == breadth_first_short)
@@ -151,7 +151,7 @@ void pbesinst_structure_graph(const pbes& p,
   {
     algorithms::normalize(q);
   }
-  pbesinst_structure_graph_algorithm algorithm(q, G, rewrite_strategy, search_strategy, transformation_strategy, optimization1);
+  pbesinst_structure_graph_algorithm algorithm(q, G, rewrite_strategy, search_strategy, transformation_strategy, optimization);
   algorithm.run();
 }
 

@@ -30,7 +30,7 @@ class simple_structure_graph
     const std::vector<vertex>& m_vertices;
 
   public:
-    simple_structure_graph(const std::vector<vertex>& vertices)
+    explicit simple_structure_graph(const std::vector<vertex>& vertices)
       : m_vertices(vertices)
     {}
 

@@ -442,7 +442,7 @@ class pbesinst_lazy_algorithm
     /// \brief Simplifies some attributes based on variables that have the value true or false.
     detail::pbesinst_resetter m_pbesinst_resetter;
 
-    bool m_optimization1 = false;
+    int m_optimization = 0;
 
     /// \brief Prints a log message for every 1000-th equation
     std::string print_equation_count(std::size_t size) const
@@ -510,7 +510,7 @@ class pbesinst_lazy_algorithm
     pbes_expression apply_optimization1(const pbes_expression& psi_e, const fixpoint_symbol& symbol,
                                         const propositional_variable_instantiation& X_e) const
     {
-      if (m_optimization1)
+      if (m_optimization >= 1)
       {
         pbes_expression value;
         if (symbol.is_mu())
@@ -571,7 +571,7 @@ class pbesinst_lazy_algorithm
             data::rewriter::strategy rewrite_strategy = data::jitty,
             search_strategy search_strategy = breadth_first,
             transformation_strategy transformation_strategy = lazy,
-            bool optimization1 = false
+            int optimization = 0
     )
             :
             datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p),
@@ -582,7 +582,7 @@ class pbesinst_lazy_algorithm
             m_search_strategy(search_strategy),
             m_transformation_strategy(transformation_strategy),
             m_find_loop_simplifier(m_equation_index, equation),
-            m_optimization1(optimization1)
+            m_optimization(optimization)
     {
     }
 

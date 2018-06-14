@@ -39,9 +39,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         data::rewriter::strategy rewrite_strategy = data::jitty,
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy,
-        bool optimization1 = false
+        int optimization = 0
     )
-      : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, transformation_strategy, optimization1)
+      : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, transformation_strategy, optimization)
     {}
 
     pbes_expression rewrite_psi(const pbes_expression& psi) override
@@ -73,14 +73,20 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       if (is_true(psi))
       {
         S0.insert(m_graph_builder.find_vertex(X));
-        simple_structure_graph G(m_graph_builder.m_vertices);
-        S0 = compute_attractor_set(G, S0, 0);
+        if (m_optimization > 2)
+        {
+          simple_structure_graph G(m_graph_builder.m_vertices);
+          S0 = compute_attractor_set(G, S0, 0);
+        }
       }
       else if (is_false(psi))
       {
         S1.insert(m_graph_builder.find_vertex(X));
-        simple_structure_graph G(m_graph_builder.m_vertices);
-        S1 = compute_attractor_set(G, S1, 1);
+        if (m_optimization > 2)
+        {
+          simple_structure_graph G(m_graph_builder.m_vertices);
+          S1 = compute_attractor_set(G, S1, 1);
+        }
       }
     }
 };

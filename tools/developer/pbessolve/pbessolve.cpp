@@ -42,8 +42,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     lts::lts_lts_t ltsspec;
 
     // TODO: integrate these options with the search strategy?
-    bool m_optimization1 = false;
-    bool m_optimization2 = false;
+    int m_optimization = false; // can be 0, 1, 2 or 3
 
     void parse_options(const utilities::command_line_parser& parser) override
     {
@@ -64,11 +63,14 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       }
       m_transformation_strategy = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
       m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
-      m_optimization1 = parser.options.count("optimization1") > 0;
-      m_optimization2 = parser.options.count("optimization2") > 0;
       if ((parser.options.count("lpsfile") > 0 || parser.options.count("ltsfile") > 0) && m_transformation_strategy != lazy)
       {
         throw mcrl2::runtime_error("Counter example generation only works in combination with transformation strategy lazy");
+      }
+      m_optimization = parser.option_argument_as<int>("optimization-level");
+      if (m_optimization < 0 || m_optimization > 3)
+      {
+        throw mcrl2::runtime_error("An invalid value " + std::to_string(m_optimization) + " was specified for the optimization option.");
       }
     }
 
@@ -100,8 +102,10 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  utilities::make_optional_argument("NAME", "name"),
                  "The file containing the LTS that was used to generate the PBES. If this option is set, a counter example LTS will be generated.",
                  'g');
-      desc.add_option("optimization1", "Apply optimization 1");
-      desc.add_option("optimization2", "Apply optimization 2");
+      desc.add_option("optimization-level",
+                  utilities::make_optional_argument("NUMBER", "0"),
+                  "Apply optimization level (0 .. 3)",
+                  'l');
     }
 
   public:
@@ -121,7 +125,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {
       structure_graph G;
 
-      PbesInstAlgorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy, m_optimization1);
+      PbesInstAlgorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy, m_optimization);
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       timer().start("instantiation");
       algorithm.run();
@@ -166,7 +170,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       pbes_system::algorithms::normalize(pbesspec);
 
-      if (m_optimization2)
+      if (m_optimization > 1)
       {
         run_algorithm<pbesinst_structure_graph_algorithm2>(pbesspec);
       }
