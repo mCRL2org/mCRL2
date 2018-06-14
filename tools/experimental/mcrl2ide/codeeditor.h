@@ -3,7 +3,7 @@
 
 #include <QPlainTextEdit>
 
-class LineNumberArea;
+class LineNumbersArea;
 
 /**
  * @brief The CodeEditor class defines a text editor for code (used for specification and properties)
@@ -66,14 +66,14 @@ private slots:
 /**
  * @brief The LineNumberArea class defines the area with line numbers in the code editor
  */
-class LineNumberArea : public QWidget
+class LineNumbersArea : public QWidget
 {
 public:
     /**
      * @brief LineNumberArea Constructor
      * @param editor The code editor this line number area belongs to
      */
-    LineNumberArea(CodeEditor *editor);
+    LineNumbersArea(CodeEditor *editor);
 
     /**
      * @brief sizeHint Returns the recommended size of the widget

@@ -14,7 +14,7 @@ CodeEditor::CodeEditor(QWidget *parent, bool spec) : QPlainTextEdit(parent)
     QFontMetrics *fm = new QFontMetrics(*font);
     this->setTabStopWidth(fm->width("1234"));
 
-    lineNumberArea = new LineNumberArea(this);
+    lineNumberArea = new LineNumbersArea(this);
 
     /* signals that need to change the line number area */
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -91,17 +91,17 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 }
 
 
-LineNumberArea::LineNumberArea(CodeEditor *editor) : QWidget(editor)
+LineNumbersArea::LineNumbersArea(CodeEditor *editor) : QWidget(editor)
 {
     codeEditor = editor;
 }
 
-QSize LineNumberArea::sizeHint() const
+QSize LineNumbersArea::sizeHint() const
 {
     return QSize(codeEditor->lineNumberAreaWidth(), 0);
 }
 
-void LineNumberArea::paintEvent(QPaintEvent *event)
+void LineNumbersArea::paintEvent(QPaintEvent *event)
 {
     codeEditor->lineNumberAreaPaintEvent(event);
 }

@@ -1,6 +1,6 @@
 add_mcrl2_tool(mcrl2ide
   MENUNAME "mCRL2 IDE"
-  DESCRIPTION "Graphical IDE for creating, analyzing, visualizing and verifying specifications"
+  DESCRIPTION "A graphical IDE for creating, analyzing, visualizing and verifying mCRL2 specifications"
   ICON "mcrl2-red"
   SOURCES
     addeditpropertydialog.cpp
@@ -19,6 +19,7 @@ add_mcrl2_tool(mcrl2ide
     rewritedock.cpp
     solvedock.cpp
   DEPENDS
+    mcrl2_gui
     QtCore
     QtGui
     QtWidgets
