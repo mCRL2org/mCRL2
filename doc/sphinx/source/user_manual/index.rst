@@ -39,7 +39,7 @@
 
 .. note::
 
-   We switched from svn to git. The mCRL2 toolset is downloadable at `github <https://github.com/mCRL2org>`_. The latest
+   We switched from svn to git. The mCRL2 toolset is downloadable at `github <https://github.com/mCRL2org/mCRL2>`_. The latest
    svn commit is revision 15385 from June 4, 2018. 
 
 .. note::
