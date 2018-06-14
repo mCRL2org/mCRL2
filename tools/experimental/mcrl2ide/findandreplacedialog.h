@@ -1,60 +1,71 @@
+// Author(s): Olav Bunte
+// Copyright: see the accompanying file COPYING or copy at
+// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
 #ifndef FINDANDREPLACEDIALOG_H
 #define FINDANDREPLACEDIALOG_H
 
 #include <QDialog>
 #include "codeeditor.h"
 
-namespace Ui {
+namespace Ui
+{
 class FindAndReplaceDialog;
 }
 
 class FindAndReplaceDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    /**
-     * @brief FindAndReplaceDialog Constructor
-     * @param codeEditor The editor to find/replace in
-     * @param parent The parent of this widget
-     */
-    explicit FindAndReplaceDialog(CodeEditor *codeEditor, QWidget *parent = 0);
-    ~FindAndReplaceDialog();
+  public:
+  /**
+   * @brief FindAndReplaceDialog Constructor
+   * @param codeEditor The editor to find/replace in
+   * @param parent The parent of this widget
+   */
+  explicit FindAndReplaceDialog(CodeEditor* codeEditor, QWidget* parent = 0);
+  ~FindAndReplaceDialog();
 
-public slots:
-    /**
-     * @brief textToFindChanged Is called when the text in the find field changes
-     * Enables or disables the find button
-     */
-    void setFindEnabled();
+  public slots:
+  /**
+   * @brief textToFindChanged Is called when the text in the find field changes
+   * Enables or disables the find button
+   */
+  void setFindEnabled();
 
-    /**
-     * @brief setReplaceEnabled Is called when the selection in the text editor has changed
-     * Enables or disables the replace button
-     */
-    void setReplaceEnabled();
+  /**
+   * @brief setReplaceEnabled Is called when the selection in the text editor
+   * has changed Enables or disables the replace button
+   */
+  void setReplaceEnabled();
 
-    /**
-     * @brief actionFind Allows the user to find a string in the editor
-     */
-    void actionFind();
+  /**
+   * @brief actionFind Allows the user to find a string in the editor
+   */
+  void actionFind();
 
-    /**
-     * @brief actionReplace Allows the user to replace a string in the editor
-     */
-    void actionReplace();
+  /**
+   * @brief actionReplace Allows the user to replace a string in the editor
+   */
+  void actionReplace();
 
-    /**
-     * @brief actionReplaceAll Allows the user to replace all occurences of a string in the editor
-     */
-    void actionReplaceAll();
+  /**
+   * @brief actionReplaceAll Allows the user to replace all occurences of a
+   * string in the editor
+   */
+  void actionReplaceAll();
 
-private:
-    Ui::FindAndReplaceDialog *ui;
+  private:
+  Ui::FindAndReplaceDialog* ui;
 
-    CodeEditor *codeEditor;
+  CodeEditor* codeEditor;
 
-    void showMessage(QString message, bool error = false);
+  void showMessage(QString message, bool error = false);
 };
 
 #endif // FINDANDREPLACEDIALOG_H
