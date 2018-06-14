@@ -415,6 +415,10 @@ struct structure_graph_builder
   index_type find_vertex(const pbes_expression& x) const
   {
     auto i = m_vertex_map.find(x);
+    if (i == m_vertex_map.end())
+    {
+      return structure_graph::undefined_vertex;
+    }
     return i->second;
   }
 };

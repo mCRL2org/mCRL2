@@ -17,6 +17,7 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
+#include "mcrl2/pbes/pbesinst_structure_graph2.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
@@ -100,7 +101,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  "The file containing the LTS that was used to generate the PBES. If this option is set, a counter example LTS will be generated.",
                  'g');
       desc.add_option("optimization1", "Apply optimization 1");
-      desc.add_option("optimization2", "Apply optimization 2 (not implemented yet!)");
+      desc.add_option("optimization2", "Apply optimization 2");
     }
 
   public:
@@ -115,13 +116,12 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       m_search_strategy(breadth_first)
     {}
 
-    bool run() override
+    template <typename PbesInstAlgorithm>
+    void run_algorithm(const pbes_system::pbes& pbesspec)
     {
-      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
-      pbes_system::algorithms::normalize(pbesspec);
       structure_graph G;
 
-      pbesinst_structure_graph_algorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy, m_optimization1);
+      PbesInstAlgorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy, m_optimization1);
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       timer().start("instantiation");
       algorithm.run();
@@ -158,6 +158,21 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         bool result = solve_structure_graph(G, m_check_strategy);
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
+      }
+    }
+
+    bool run() override
+    {
+      pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
+      pbes_system::algorithms::normalize(pbesspec);
+
+      if (m_optimization2)
+      {
+        run_algorithm<pbesinst_structure_graph_algorithm2>(pbesspec);
+      }
+      else
+      {
+        run_algorithm<pbesinst_structure_graph_algorithm>(pbesspec);
       }
       return true;
     }

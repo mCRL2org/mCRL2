@@ -614,6 +614,11 @@ class pbesinst_lazy_algorithm
       return m_pbes.equations()[i].symbol();
     }
 
+    virtual pbes_expression rewrite_psi(const pbes_expression& psi)
+    {
+      return psi;
+    }
+
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     virtual void run()
     {
@@ -643,6 +648,10 @@ class pbesinst_lazy_algorithm
 
         // optional step
         psi_e = apply_optimization1(psi_e, eqn.symbol(), X_e);
+
+        // TODO: move all rewrite steps to the function rewrite_psi.
+        // optional step
+        psi_e = rewrite_psi(psi_e);
 
         // Store and report the new equation
         equation[X_e] = psi_e;

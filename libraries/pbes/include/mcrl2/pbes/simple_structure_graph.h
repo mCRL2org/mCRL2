@@ -27,16 +27,12 @@ class simple_structure_graph
     typedef structure_graph::vertex vertex;
 
   protected:
-    std::vector<vertex> m_vertices;
-    index_type m_initial_vertex;
+    const std::vector<vertex>& m_vertices;
 
   public:
-    simple_structure_graph() = default;
-
-    index_type initial_vertex() const
-    {
-      return m_initial_vertex;
-    }
+    simple_structure_graph(const std::vector<vertex>& vertices)
+      : m_vertices(vertices)
+    {}
 
     decoration_type decoration(index_type u) const
     {
@@ -49,6 +45,11 @@ class simple_structure_graph
     }
 
     const std::vector<vertex>& vertices() const
+    {
+      return m_vertices;
+    }
+
+    const std::vector<vertex>& all_vertices() const
     {
       return m_vertices;
     }
@@ -68,7 +69,7 @@ class simple_structure_graph
       return m_vertices[u].strategy;
     }
 
-    vertex& find_vertex(index_type u)
+    const vertex& find_vertex(index_type u)
     {
       return m_vertices[u];
     }

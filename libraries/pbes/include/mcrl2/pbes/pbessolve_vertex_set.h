@@ -160,6 +160,21 @@ struct vertex_set
       self_check();
     }
 
+    // resize to at least n elements
+    void resize(std::size_t n)
+    {
+      std::size_t m = m_include.size();
+      if (m < 1024)
+      {
+        m = 1024;
+      }
+      while (m < n)
+      {
+        m *= 2;
+      }
+      m_include.resize(m);
+    }
+
     bool is_empty() const
     {
       return m_vertices.empty();
