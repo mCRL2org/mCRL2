@@ -24,10 +24,10 @@ add_mcrl2_tool(mcrl2-gui
   DEPENDS
     mcrl2_utilities
     mcrl2_gui
-    QtCore
-    QtGui
-    QtWidgets
-    QtXml
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Xml
 )
 add_custom_target(mcrl2-gui-shared
   SOURCES

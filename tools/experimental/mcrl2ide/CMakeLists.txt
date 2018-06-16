@@ -20,8 +20,8 @@ add_mcrl2_tool(mcrl2ide
     solvedock.cpp
   DEPENDS
     mcrl2_gui
-    QtCore
-    QtGui
-    QtWidgets
-    QtXml
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Xml
 )

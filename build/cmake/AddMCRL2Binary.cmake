@@ -160,16 +160,17 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   endif()
   
   foreach(DEP ${ARG_DEPENDS})
-    string(REGEX REPLACE "Qt(.*)" "\\1" QT_LIB ${DEP})
-    if(NOT ${QT_LIB} STREQUAL ${DEP})
-      set(QT_LIBS ${QT_LIBS} ${QT_LIB})
-      if(${QT_LIB} STREQUAL "Widgets")
-        set(IS_GUI_BINARY TRUE)
-      endif()
-    else()
-      list(APPEND DEPENDS ${DEP})
+    if(${DEP} MATCHES "Qt.*") 
+      # This variable is true iff one dependency starts with Qt.*.
+      set(HAS_QT_DEPENDENCY TRUE)
+    endif()
+
+    if(${DEP} STREQUAL "Qt5::Widgets") 
+      # This mCRL2 binary depends on Qt5::Widgets, so it is a gui binary.
+      set(IS_GUI_BINARY TRUE)
     endif()
   endforeach()
+  set(DEPENDS ${ARG_DEPENDS})
 
   string(TOLOWER ${ARG_COMPONENT} COMPONENT_LC)
   if((${COMPONENT_LC} STREQUAL "experimental" AND NOT MCRL2_ENABLE_EXPERIMENTAL) OR
@@ -209,6 +210,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       set(SRC_ABS ${PARSER_CODE})
       set(DEPENDS ${DEPENDS} dparser)
       set(INCLUDE ${INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+    # TODO: In CMake 3.0.0 these could be replaced by enabling the AUTOUIC and AUTORCC 
+    # properties for the target.
     elseif("${SRC_EXT}" STREQUAL ".ui")
       qt5_wrap_ui(SRC_ABS ${SRC_ABS})
     elseif("${SRC_EXT}" STREQUAL ".qrc")
@@ -259,20 +262,25 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
             BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
     get_target_property(IS_BUNDLE ${TARGET_NAME} MACOSX_BUNDLE)
   endif()
+
   if(DEPENDS)
     target_link_libraries(${TARGET_NAME} ${DEPENDS})
   endif()
-  if(QT_LIBS)
+
+  if(HAS_QT_DEPENDENCY)
     if(${TARGET_TYPE} STREQUAL "EXECUTABLE")
+      # The variable ${MCRL2_QT_APPS} contains a list of mCRL2 executables that use Qt. 
       if(MCRL2_QT_APPS)
         set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
       else()
         set(MCRL2_QT_APPS "${TARGET_NAME}" CACHE INTERNAL "")
       endif()
     endif()
-    qt5_use_modules(${TARGET_NAME} ${QT_LIBS})
+
+    # Enable the CMake build system to automatically run MOC on source files that need it.
     set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
   endif()
+
   include_directories(${INCLUDE})
 endfunction()
 
