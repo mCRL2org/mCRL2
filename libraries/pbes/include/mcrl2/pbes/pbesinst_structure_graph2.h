@@ -14,6 +14,7 @@
 
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
+#include "mcrl2/pbes/pbesinst_structure_graph.h"
 
 namespace mcrl2 {
 
