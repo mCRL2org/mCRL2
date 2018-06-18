@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 2.8.11)
 project(mCRL2)
   
 if(NOT ${CMAKE_VERSION} VERSION_LESS 3.0)
-  # Do not implicitly dereference variables or keywords when quoted in an if() command. 
-  cmake_policy(SET CMP0054 OLD)
-  
   # Ignore variable COMPILE_DEFINITIONS_<CONFIG>
   cmake_policy(SET CMP0043 NEW)
+endif()
+
+if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
+  # Do not implicitly dereference variables or keywords when quoted in an if() command. 
+  cmake_policy(SET CMP0054 OLD)
 endif()
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS 3.10)
