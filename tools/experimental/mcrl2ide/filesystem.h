@@ -15,6 +15,8 @@
 #include <QObject>
 #include <QDir>
 
+class MainWindow;
+
 class Property
 {
 
@@ -39,7 +41,7 @@ class FileSystem : public QObject
    * @param specificationEditor The specification editor in the main window
    * @parent The main widget (main window)
    */
-  explicit FileSystem(CodeEditor* specificationEditor, QWidget* parent);
+  explicit FileSystem(CodeEditor* specificationEditor, MainWindow* parent);
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the projects folder
@@ -155,6 +157,7 @@ class FileSystem : public QObject
   /**
    * @brief newProject Creates a new project with the corresponding file
    *   structure
+   * @param projectName The name of the new project
    * @return An error message if unsuccessful, else the empty string
    */
   QString newProject(QString projectName);
@@ -167,6 +170,8 @@ class FileSystem : public QObject
 
   /**
    * @brief openProject Opens the project with the given project name
+   * @param context Whether this is done for "Create Project" or "Save Project
+   *   As"
    * @return The list of the properties that need to be added
    */
   std::list<Property*> openProject(QString projectName);
@@ -178,10 +183,15 @@ class FileSystem : public QObject
 
   /**
    * @brief saveProperty Saves the given property
-   * @param propertyName The name of the property
-   * @param propertyText The text of the property
+   * @param property The property to save
    */
   void saveProperty(Property* property);
+
+  /**
+   * @brief saveProject Saves the project to file
+   * @return Whether saving was successful
+   */
+  bool saveProject();
 
   public slots:
   /**
@@ -201,7 +211,7 @@ class FileSystem : public QObject
       QDir::currentPath() + QDir::separator() + "projects";
   QString propertiesFolderName = "properties";
 
-  QWidget* parent;
+  MainWindow* mainWindow;
   CodeEditor* specificationEditor;
   QString projectName;
   bool projectOpen;

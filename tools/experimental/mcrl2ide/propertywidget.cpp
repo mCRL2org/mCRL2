@@ -123,15 +123,20 @@ void PropertyWidget::actionVerify()
   /* check if the property isn't already being verified or has been verified */
   if (verificationWidgets->currentIndex() == 0)
   {
-    /* change the buttons */
-    verificationWidgets->setCurrentIndex(1);
-    editButton->setEnabled(false);
-    deleteButton->setEnabled(false);
+    
 
     /* start the verification process */
     connect(processSystem, SIGNAL(processFinished(int)), this,
             SLOT(actionVerifyResult(int)));
     verificationProcessId = processSystem->verifyProperty(property);
+
+    /* if starting the process was successful, change the buttons */
+    if (verificationProcessId >= 0)
+    {
+      verificationWidgets->setCurrentIndex(1);
+      editButton->setEnabled(false);
+      deleteButton->setEnabled(false);
+    }
   }
 }
 

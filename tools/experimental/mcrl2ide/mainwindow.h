@@ -10,6 +10,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "filesystem.h"
+#include "processsystem.h"
 #include "propertiesdock.h"
 #include "consoledock.h"
 #include "rewritedock.h"
@@ -17,10 +19,10 @@
 #include "addeditpropertydialog.h"
 #include "findandreplacedialog.h"
 #include "codeeditor.h"
-#include "filesystem.h"
-#include "processsystem.h"
 
 #include <QMainWindow>
+
+class FileSystem;
 
 /**
  * @brief The MainWindow class defines the main window off the application
@@ -55,14 +57,16 @@ class MainWindow : public QMainWindow
 
   /**
    * @brief actionNewProject Allows the user to save a project
+   * @return Whether saving was successful
    */
-  void actionSaveProject();
+  bool actionSaveProject();
 
   /**
    * @brief actionNewProject Allows the user to save a new project under a new
-   * name
+   *   name
+   * @return Whether saving was successful
    */
-  void actionSaveProjectAs();
+  bool actionSaveProjectAs();
 
   /**
    * @brief actionAddProperty Allows the user to add a property

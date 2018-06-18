@@ -16,13 +16,18 @@
 #include <QObject>
 #include <QProcess>
 
-class FileSystem;
-
+/**
+ * @brief The ProcessSystem class handles all processes related to mCRL2 tools
+ */
 class ProcessSystem : public QObject
 {
   Q_OBJECT
 
   public:
+  /**
+   * @brief ProcessSystem Constructor
+   * @param fileSystem The file system
+   */
   ProcessSystem(FileSystem* fileSystem);
 
   /**
@@ -44,12 +49,16 @@ class ProcessSystem : public QObject
    * @brief getResult Gets the result of a process
    *   for a verification process, the result is either "" (in case of error),
    *   "false" or "true"
-   * @param processid The id of the proces to get the result from
+   * @param processid The id of the process to get the result from
    * @return The result of the process
    */
   QString getResult(int processid);
 
   signals:
+  /**
+   * @brief processFinished Is emitted when a process is finished
+   * @param processid The id of the process that has finished
+   */
   void processFinished(int processid);
 
   private:

@@ -114,51 +114,47 @@ QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
 
 int ProcessSystem::verifyProperty(Property* property)
 {
-  if (fileSystem->isSpecificationModified())
+  if (fileSystem->saveProject())
   {
-    fileSystem->saveSpecification();
-  }
-  if (fileSystem->isPropertyModified(property->name))
-  {
-    fileSystem->saveProperty(property);
-  }
+    consoleDock->setConsoleTab(ConsoleDock::Verification);
 
-  consoleDock->setConsoleTab(ConsoleDock::Verification);
+    /* create the subprocesses */
+    int processid = pid++;
 
-  /* create the subprocesses */
-  int processid = pid++;
+    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(true);
+    mcrl22lpsProcess->setProperty("pid", processid);
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
+            SLOT(verifyProperty2()));
 
-  QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(true);
-  mcrl22lpsProcess->setProperty("pid", processid);
-  connect(mcrl22lpsProcess, SIGNAL(finished(int)),
-          this, SLOT(verifyProperty2()));
+    QProcess* lps2pbesProcess = createLps2pbesProcess(property->name);
+    lps2pbesProcess->setProperty("pid", processid);
+    connect(lps2pbesProcess, SIGNAL(finished(int)), this,
+            SLOT(verifyProperty3()));
 
-  QProcess* lps2pbesProcess = createLps2pbesProcess(property->name);
-  lps2pbesProcess->setProperty("pid", processid);
-  connect(lps2pbesProcess, SIGNAL(finished(int)),
-          this, SLOT(verifyProperty3()));
+    QProcess* pbes2boolProcess = createPbes2boolProcess(property->name);
+    pbes2boolProcess->setProperty("pid", processid);
+    connect(pbes2boolProcess, SIGNAL(finished(int)), this,
+            SLOT(verifyPropertyResult()));
 
-  QProcess* pbes2boolProcess = createPbes2boolProcess(property->name);
-  pbes2boolProcess->setProperty("pid", processid);
-  connect(pbes2boolProcess, SIGNAL(finished(int)),
-          this, SLOT(verifyPropertyResult()));
+    processes[processid] = {mcrl22lpsProcess, lps2pbesProcess,
+                            pbes2boolProcess};
 
-  processes[processid] = {mcrl22lpsProcess, lps2pbesProcess, pbes2boolProcess};
-
-  consoleDock->writeToConsole(ConsoleDock::Verification,
-                              "##### CREATING LPS #####\n");
-  if (mcrl22lpsProcess->program() == "")
-  {
     consoleDock->writeToConsole(ConsoleDock::Verification,
-                                "Up to date lps already exists\n");
-    emit mcrl22lpsProcess->finished(0);
-  }
-  else
-  {
-    mcrl22lpsProcess->start();
-  }
+                                "##### CREATING LPS #####\n");
+    if (mcrl22lpsProcess->program() == "")
+    {
+      consoleDock->writeToConsole(ConsoleDock::Verification,
+                                  "Up to date lps already exists\n");
+      emit mcrl22lpsProcess->finished(0);
+    }
+    else
+    {
+      mcrl22lpsProcess->start();
+    }
 
-  return processid;
+    return processid;
+  }
+  return -1;
 }
 
 void ProcessSystem::verifyProperty2()

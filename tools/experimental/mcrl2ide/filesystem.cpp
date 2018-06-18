@@ -8,6 +8,7 @@
 //
 
 #include "filesystem.h"
+#include "mainwindow.h"
 
 #include <QFileInfo>
 #include <QDateTime>
@@ -20,10 +21,10 @@ Property::Property(QString name, QString text)
   this->text = text;
 }
 
-FileSystem::FileSystem(CodeEditor* specificationEditor, QWidget* parent)
+FileSystem::FileSystem(CodeEditor* specificationEditor, MainWindow* mainWindow)
 {
   this->specificationEditor = specificationEditor;
-  this->parent = parent;
+  this->mainWindow = mainWindow;
   specificationModified = false;
   connect(specificationEditor, SIGNAL(textChanged()), this,
           SLOT(setSpecificationModified()));
@@ -217,22 +218,35 @@ void FileSystem::saveSpecification()
 {
   makeSureProjectFolderExists();
 
-  QFile* specificationFile = new QFile(specificationFilePath());
-  specificationFile->open(QIODevice::WriteOnly);
-  QTextStream* saveStream = new QTextStream(specificationFile);
-  *saveStream << specificationEditor->toPlainText();
-  specificationFile->close();
-  specificationModified = false;
+  /* only save if there are changes */
+  if (isSpecificationModified())
+  {
+    QFile* specificationFile = new QFile(specificationFilePath());
+    specificationFile->open(QIODevice::WriteOnly);
+    QTextStream* saveStream = new QTextStream(specificationFile);
+    *saveStream << specificationEditor->toPlainText();
+    specificationFile->close();
+    specificationModified = false;
+  }
 }
 
 void FileSystem::saveProperty(Property* property)
 {
   makeSurePropertiesFolderExists();
 
-  QFile* propertyFile = new QFile(propertyFilePath(property->name));
-  propertyFile->open(QIODevice::WriteOnly);
-  QTextStream* saveStream = new QTextStream(propertyFile);
-  *saveStream << property->text;
-  propertyFile->close();
-  propertymodified[property->name] = false;
+  /* only save if there are changes */
+  if (isPropertyModified(property->name))
+  {
+    QFile* propertyFile = new QFile(propertyFilePath(property->name));
+    propertyFile->open(QIODevice::WriteOnly);
+    QTextStream* saveStream = new QTextStream(propertyFile);
+    *saveStream << property->text;
+    propertyFile->close();
+    propertymodified[property->name] = false;
+  }
+}
+
+bool FileSystem::saveProject()
+{
+  return mainWindow->actionSaveProject();
 }

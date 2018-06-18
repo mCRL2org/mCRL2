@@ -291,23 +291,24 @@ void MainWindow::actionOpenExampleProject()
   /* Not yet implemented */
 }
 
-void MainWindow::actionSaveProject()
+bool MainWindow::actionSaveProject()
 {
   /* if we have a project open, we have a location to save in so we can simply
-   * save, else use save as */
+   *   save, else use save as */
   if (fileSystem->projectOpened())
   {
     fileSystem->saveSpecification();
     propertiesDock->saveAllProperties();
     saveProjectAction->setEnabled(false);
+    return true;
   }
   else
   {
-    actionSaveProjectAs();
+    return actionSaveProjectAs();
   }
 }
 
-void MainWindow::actionSaveProjectAs()
+bool MainWindow::actionSaveProjectAs()
 {
   /* ask the user for a project name */
   bool ok;
@@ -323,7 +324,7 @@ void MainWindow::actionSaveProjectAs()
     if (error.isEmpty())
     {
       setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-      actionSaveProject();
+      return actionSaveProject();
     }
     else
     {
@@ -334,6 +335,7 @@ void MainWindow::actionSaveProjectAs()
       msgBox->exec();
     }
   }
+  return false;
 }
 
 void MainWindow::actionAddProperty()
