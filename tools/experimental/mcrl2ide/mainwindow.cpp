@@ -19,7 +19,7 @@
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
-  specificationEditor = new CodeEditor(this, true);
+  specificationEditor = new CodeEditor(this);
   setCentralWidget(specificationEditor);
 
   fileSystem = new FileSystem(specificationEditor, this);

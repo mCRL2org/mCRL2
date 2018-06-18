@@ -90,6 +90,7 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
 
 void PropertyWidget::paintEvent(QPaintEvent* pe)
 {
+  Q_UNUSED(pe);
   QStyleOption o;
   o.initFrom(this);
   QPainter p(this);
