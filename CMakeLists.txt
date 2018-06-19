@@ -54,10 +54,13 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(GL2PS      QUIET REQUIRED)
   find_package(TR         QUIET REQUIRED)
   find_package(CVC3       QUIET)
-  find_package(Qt5 COMPONENTS Core OpenGL Widgets Xml Gui QUIET REQUIRED)
+  find_package(Qt5 ${MCRL2_MIN_QT_VERSION} COMPONENTS Core OpenGL Widgets Xml Gui QUIET REQUIRED)
 
   set_target_properties(Qt5::Core Qt5::OpenGL Qt5::Widgets Qt5::Xml Qt5::Gui
                         PROPERTIES MAP_IMPORTED_CONFIG_MAINTAINER "RELEASE")
+
+  # The directories for components are derived from Qt5_DIR, as such they can be marked as advanced.
+  mark_as_advanced(Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
 endif()
 
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
