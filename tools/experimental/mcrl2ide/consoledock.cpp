@@ -32,15 +32,15 @@ ConsoleDock::ConsoleDock(QWidget* parent) : QDockWidget("Console", parent)
   this->setWidget(consoleTabs);
 }
 
-void ConsoleDock::setConsoleTab(ConsoleTab tab)
+void ConsoleDock::setConsoleTab(ProcessType processType)
 {
-  switch (tab)
+  switch (processType)
   {
-  case Parsing:
+  case ProcessType::Parsing:
     consoleTabs->setCurrentIndex(0);
-  case LTSCreation:
+  case ProcessType::LTSCreation:
     consoleTabs->setCurrentIndex(1);
-  case Verification:
+  case ProcessType::Verification:
     consoleTabs->setCurrentIndex(2);
   }
 }
@@ -70,17 +70,17 @@ void ConsoleDock::logToConsole(QPlainTextEdit* console, QProcess* process)
   }
 }
 
-void ConsoleDock::writeToConsole(ConsoleTab tab, QString output)
+void ConsoleDock::writeToConsole(ProcessType processType, QString output)
 {
   QPlainTextEdit* console;
 
-  switch (tab)
+  switch (processType)
   {
-  case Parsing:
+  case ProcessType::Parsing:
     console = parsingConsole;
-  case LTSCreation:
+  case ProcessType::LTSCreation:
     console = LTSCreationConsole;
-  case Verification:
+  case ProcessType::Verification:
     console = verificationConsole;
   }
 

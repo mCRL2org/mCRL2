@@ -169,7 +169,7 @@ void PropertyWidget::actionVerifyResult(int processid)
 
 void PropertyWidget::actionAbortVerification()
 {
-  qDebug("abort");
+  processSystem->abortProcess(verificationProcessId);
 }
 
 void PropertyWidget::actionEdit()

@@ -11,16 +11,16 @@
 
 #include <QEventLoop>
 
-ProcessThread::ProcessThread(QQueue<int>* processQueue, bool verification)
+ProcessThread::ProcessThread(QQueue<int>* processQueue, ProcessType processType)
 {
   this->processQueue = processQueue;
-  this->verification = verification;
+  this->processType = processType;
   currentProcessid = -1;
 }
 
-void ProcessThread::newProcessQueued(bool verification)
+void ProcessThread::newProcessQueued(ProcessType processType)
 {
-  if (this->verification == verification)
+  if (this->processType == processType)
   {
     emit newProcessInQueue();
   }
@@ -53,26 +53,36 @@ void ProcessThread::run()
     }
     else
     {
+      /* wait until a process is added to the queue */
       queueLoop.exec();
     }
   }
+}
+
+int ProcessThread::getCurrentProcessId()
+{
+  return currentProcessid;
 }
 
 ProcessSystem::ProcessSystem(FileSystem* fileSystem)
 {
   this->fileSystem = fileSystem;
   pid = 0;
-  verificationQueue = new QQueue<int>();
-  verificationThread = new ProcessThread(verificationQueue, true);
 
-  connect(this, SIGNAL(newProcessQueued(bool)),
-          verificationThread, SLOT(newProcessQueued(bool)));
-  connect(this, SIGNAL(processFinished(int)),
-          verificationThread, SLOT(processFinished(int)));
-  connect(verificationThread, SIGNAL(startProcess(int)),
-          this, SLOT(createLps(int)));
+  for (ProcessType processType : PROCESSTYPES)
+  {
+    processQueues[processType] = new QQueue<int>();
+    processThreads[processType] =
+        new ProcessThread(processQueues[processType], processType);
+    connect(this, SIGNAL(newProcessQueued(ProcessType)),
+            processThreads[processType], SLOT(newProcessQueued(ProcessType)));
+    connect(this, SIGNAL(processFinished(int)), processThreads[processType],
+            SLOT(processFinished(int)));
+    connect(processThreads[processType], SIGNAL(startProcess(int)), this,
+            SLOT(createLps(int)));
 
-  verificationThread->start();
+    processThreads[processType]->start();
+  }
 }
 
 void ProcessSystem::setConsoleDock(ConsoleDock* consoleDock)
@@ -80,7 +90,7 @@ void ProcessSystem::setConsoleDock(ConsoleDock* consoleDock)
   this->consoleDock = consoleDock;
 }
 
-QProcess* ProcessSystem::createMcrl22lpsProcess(bool verification)
+QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
 {
   QProcess* mcrl22lpsProcess = new QProcess();
 
@@ -91,15 +101,15 @@ QProcess* ProcessSystem::createMcrl22lpsProcess(bool verification)
        "--lin-method=regular", "--rewriter=jitty", "--verbose"});
 
   /* connect to logger */
-  if (verification)
+  if (processType == ProcessType::Verification)
   {
-    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()),
-            consoleDock, SLOT(logToVerificationConsole()));
+    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+            SLOT(logToVerificationConsole()));
   }
-  else
+  else if (processType == ProcessType::LTSCreation)
   {
-    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()),
-            consoleDock, SLOT(logToLTSCreationConsole()));
+    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+            SLOT(logToLTSCreationConsole()));
   }
 
   return mcrl22lpsProcess;
@@ -126,18 +136,18 @@ QProcess* ProcessSystem::createLtsconvertProcess()
 QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
 {
   QProcess* lps2pbesProcess = new QProcess();
-  
+
   /* create the process */
   lps2pbesProcess->setProgram("lps2pbes");
   lps2pbesProcess->setArguments(
       {fileSystem->lpsFilePath(), fileSystem->pbesFilePath(propertyName),
-        "--formula=" + fileSystem->propertyFilePath(propertyName),
-        "--out=pbes", "--verbose"});
+       "--formula=" + fileSystem->propertyFilePath(propertyName), "--out=pbes",
+       "--verbose"});
   lps2pbesProcess->setProperty("propertyName", propertyName);
 
   /* connect to logger */
-  connect(lps2pbesProcess, SIGNAL(readyReadStandardError()),
-    consoleDock, SLOT(logToVerificationConsole()));
+  connect(lps2pbesProcess, SIGNAL(readyReadStandardError()), consoleDock,
+          SLOT(logToVerificationConsole()));
 
   return lps2pbesProcess;
 }
@@ -154,8 +164,8 @@ QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
   pbes2boolProcess->setProperty("propertyName", propertyName);
 
   /* connect to logger */
-  connect(pbes2boolProcess, SIGNAL(readyReadStandardError()),
-          consoleDock, SLOT(logToVerificationConsole()));
+  connect(pbes2boolProcess, SIGNAL(readyReadStandardError()), consoleDock,
+          SLOT(logToVerificationConsole()));
 
   return pbes2boolProcess;
 }
@@ -164,12 +174,13 @@ int ProcessSystem::verifyProperty(Property* property)
 {
   if (fileSystem->saveProject())
   {
-    consoleDock->setConsoleTab(ConsoleDock::Verification);
+    consoleDock->setConsoleTab(ProcessType::Verification);
 
     /* create the subprocesses */
     int processid = pid++;
+    ProcessType processType = ProcessType::Verification;
 
-    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(true);
+    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
     connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
             SLOT(verifyProperty2()));
@@ -186,9 +197,9 @@ int ProcessSystem::verifyProperty(Property* property)
 
     processes[processid] = {mcrl22lpsProcess, lps2pbesProcess,
                             pbes2boolProcess};
-
-    verificationQueue->enqueue(processid);
-    emit newProcessQueued(true);
+    processTypes[processid] = processType;
+    processQueues[processType]->enqueue(processid);
+    emit newProcessQueued(processType);
 
     return processid;
   }
@@ -199,13 +210,13 @@ void ProcessSystem::createLps(int processid)
 {
   QProcess* mcrl22lpsProcess = processes[processid][0];
 
-  consoleDock->writeToConsole(ConsoleDock::Verification,
+  consoleDock->writeToConsole(ProcessType::Verification,
                               "##### CREATING LPS #####\n");
 
   /* check if we need to run this */
   if (fileSystem->upToDateLpsFileExists())
   {
-    consoleDock->writeToConsole(ConsoleDock::Verification,
+    consoleDock->writeToConsole(ProcessType::Verification,
                                 "Up to date lps already exists\n");
     emit mcrl22lpsProcess->finished(0);
   }
@@ -217,17 +228,18 @@ void ProcessSystem::createLps(int processid)
 
 void ProcessSystem::verifyProperty2()
 {
-  
+
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
   QProcess* lps2pbesProcess = processes[processid][1];
 
-  consoleDock->writeToConsole(ConsoleDock::Verification,
+  consoleDock->writeToConsole(ProcessType::Verification,
                               "##### CREATING PBES #####\n");
-  
+
   /* check if we need to run this */
-  if (fileSystem->upToDatePbesFileExists(lps2pbesProcess->property("propertyName").toString()))
+  if (fileSystem->upToDatePbesFileExists(
+          lps2pbesProcess->property("propertyName").toString()))
   {
-    consoleDock->writeToConsole(ConsoleDock::Verification,
+    consoleDock->writeToConsole(ProcessType::Verification,
                                 "Up to date pbes already exists");
     emit lps2pbesProcess->finished(0);
   }
@@ -239,7 +251,7 @@ void ProcessSystem::verifyProperty2()
 
 void ProcessSystem::verifyProperty3()
 {
-  consoleDock->writeToConsole(ConsoleDock::Verification,
+  consoleDock->writeToConsole(ProcessType::Verification,
                               "##### SOLVING PBES #####\n");
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
   processes[processid][2]->start();
@@ -265,7 +277,38 @@ void ProcessSystem::verifyPropertyResult()
   emit processFinished(processid);
 }
 
+void ProcessSystem::abortProcess(int processid)
+{
+  ProcessType processType = processTypes[processid];
+
+  /* if this process is running, terminate it */
+  if (processThreads[processType]->getCurrentProcessId() == processid)
+  {
+    for (QProcess* process : processes[processid])
+    {
+      process->blockSignals(true);
+      process->kill();
+    }
+  }
+  else
+  {
+    /* if it is not running, simply remove it from the queue */
+    processQueues[processType]->removeOne(processid);
+  }
+
+  consoleDock->writeToConsole(processTypes[processid],
+                              "##### PROCESS WAS ABORTED #####");
+  emit processFinished(processid);
+}
+
 QString ProcessSystem::getResult(int processid)
 {
-  return results[processid];
+  if (results.count(processid) > 0)
+  {
+    return results[processid];
+  }
+  else
+  {
+    return "";
+  }
 }

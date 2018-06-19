@@ -32,7 +32,7 @@ class ProcessThread : public QThread
    * @param processQueue The queue this thread needs to take the processes from
    * @param verification Whether this thread is for verification processes
    */
-  ProcessThread(QQueue<int>* processQueue, bool verification);
+  ProcessThread(QQueue<int>* processQueue, ProcessType processType);
 
   /**
    * @brief run The body of the thread
@@ -50,13 +50,15 @@ class ProcessThread : public QThread
   /**
    * @brief newProcessQueued Is called when a new process is added, emits
    *   newProcessInQueue if this process has to be run by this thread
+   * @param processType The type of the newly added process
    */
-  void newProcessQueued(bool verification);
+  void newProcessQueued(ProcessType processType);
 
   /**
    * @brief processFinished Is called when a process has finished, emits
    *   currentProcessFinished if this process is the one that this thread is
    *   running
+   * @param processid The id of the process that has finished
    */
   void processFinished(int processid);
 
@@ -81,7 +83,7 @@ class ProcessThread : public QThread
 
   private:
   QQueue<int>* processQueue;
-  bool verification;
+  ProcessType processType;
   int currentProcessid;
 };
 
@@ -115,6 +117,12 @@ class ProcessSystem : public QObject
   int verifyProperty(Property* property);
 
   /**
+   * @brief abortProcess Aborts a process by making the running subprocess
+   *   terminate if it is running, else by removing it from the queue
+   */
+  void abortProcess(int processid);
+
+  /**
    * @brief getResult Gets the result of a process
    *   for a verification process, the result is either "" (in case of error),
    *   "false" or "true"
@@ -132,24 +140,25 @@ class ProcessSystem : public QObject
 
   /**
    * @brief newProcessQueued Is emitted when a new process is added to a queue
-   * @param verification Whether this process is a verification process
+   * @param processtype The type of the new process
    */
-  void newProcessQueued(bool verification);
+  void newProcessQueued(ProcessType processType);
 
   private:
   FileSystem* fileSystem;
   ConsoleDock* consoleDock;
   int pid;
   std::map<int, std::vector<QProcess*>> processes;
+  std::map<int, ProcessType> processTypes;
   std::map<int, QString> results;
-  ProcessThread* verificationThread;
-  QQueue<int>* verificationQueue;
-
+  std::map<ProcessType, QQueue<int>*> processQueues;
+  std::map<ProcessType, ProcessThread*> processThreads;
+  
   /**
    * @brief mcrl22lps Executes mcrl22lps on the current specification
    * @param verification Determines what console dock tab to use
    */
-  QProcess* createMcrl22lpsProcess(bool verification);
+  QProcess* createMcrl22lpsProcess(ProcessType processType);
 
   /**
    * @brief lpsxsim Executes lpsxsim on the lps that corresponds to the current
