@@ -16,6 +16,11 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS 3.10)
   cmake_policy(SET CMP0071 OLD)
 endif()  
 
+if(NOT ${CMAKE_VERSION} VERSION_LESS 3.11)
+  # Choose the GLVND (GL Vendor Neutral Dispatch library) over OpenGL legacy if both are available.
+  cmake_policy(SET CMP0072 NEW)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
