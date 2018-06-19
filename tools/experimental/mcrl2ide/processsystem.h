@@ -15,6 +15,75 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QQueue>
+#include <QThread>
+
+/**
+ * @brief The ProcessThread class defines a thread that makes sure that
+ *   processes of certain types (such as verification) happen after each other
+ */
+class ProcessThread : public QThread
+{
+  Q_OBJECT
+
+  public:
+  /**
+   * @brief ProcessThread The constructor
+   * @param processQueue The queue this thread needs to take the processes from
+   * @param verification Whether this thread is for verification processes
+   */
+  ProcessThread(QQueue<int>* processQueue, bool verification);
+
+  /**
+   * @brief run The body of the thread
+   */
+  void run() override;
+
+  /**
+   * @brief getCurrentProcessId Returns the id of the process this thread is
+   *   currently running
+   * @return The id of the process this thread is currently running
+   */
+  int getCurrentProcessId();
+
+  public slots:
+  /**
+   * @brief newProcessQueued Is called when a new process is added, emits
+   *   newProcessInQueue if this process has to be run by this thread
+   */
+  void newProcessQueued(bool verification);
+
+  /**
+   * @brief processFinished Is called when a process has finished, emits
+   *   currentProcessFinished if this process is the one that this thread is
+   *   running
+   */
+  void processFinished(int processid);
+
+  signals:
+  /**
+   * @brief newProcessInQueue Activates this thread if it is waiting for a new
+   *   process
+   */
+  void newProcessInQueue();
+
+  /**
+   * @brief startProcess Tells the process system that a process needs to be
+   *   started
+   */
+  void startProcess(int processid);
+
+  /**
+   * @brief currentProcessFinished Activates this thread if it is waiting for a
+   *   process to finish
+   */
+  void currentProcessFinished();
+
+  private:
+  QQueue<int>* processQueue;
+  bool verification;
+  int currentProcessid;
+};
 
 /**
  * @brief The ProcessSystem class handles all processes related to mCRL2 tools
@@ -61,12 +130,20 @@ class ProcessSystem : public QObject
    */
   void processFinished(int processid);
 
+  /**
+   * @brief newProcessQueued Is emitted when a new process is added to a queue
+   * @param verification Whether this process is a verification process
+   */
+  void newProcessQueued(bool verification);
+
   private:
   FileSystem* fileSystem;
   ConsoleDock* consoleDock;
   int pid;
   std::map<int, std::vector<QProcess*>> processes;
   std::map<int, QString> results;
+  ProcessThread* verificationThread;
+  QQueue<int>* verificationQueue;
 
   /**
    * @brief mcrl22lps Executes mcrl22lps on the current specification
@@ -107,6 +184,12 @@ class ProcessSystem : public QObject
   QProcess* createPbes2boolProcess(QString propertyName);
 
   private slots:
+  /**
+   * @brief createLps The first step of any action, creating the lps
+   * @param processid The id of the process to run
+   */
+  void createLps(int processid);
+
   /**
    * @brief verifyProperty2 The second step of verification, creating the pbes
    */

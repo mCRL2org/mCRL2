@@ -9,10 +9,70 @@
 
 #include "processsystem.h"
 
+#include <QEventLoop>
+
+ProcessThread::ProcessThread(QQueue<int>* processQueue, bool verification)
+{
+  this->processQueue = processQueue;
+  this->verification = verification;
+  currentProcessid = -1;
+}
+
+void ProcessThread::newProcessQueued(bool verification)
+{
+  if (this->verification == verification)
+  {
+    emit newProcessInQueue();
+  }
+}
+
+void ProcessThread::processFinished(int processid)
+{
+  if (processid == currentProcessid)
+  {
+    emit currentProcessFinished();
+  }
+}
+
+void ProcessThread::run()
+{
+  QEventLoop queueLoop;
+  connect(this, SIGNAL(newProcessInQueue()), &queueLoop, SLOT(quit()));
+  QEventLoop finishLoop;
+  connect(this, SIGNAL(currentProcessFinished()), &finishLoop, SLOT(quit()));
+
+  while (true)
+  {
+    if (!processQueue->isEmpty())
+    {
+      /* start a new process */
+      currentProcessid = processQueue->dequeue();
+      emit startProcess(currentProcessid);
+      /* wait until it has finished */
+      finishLoop.exec();
+    }
+    else
+    {
+      queueLoop.exec();
+    }
+  }
+}
+
 ProcessSystem::ProcessSystem(FileSystem* fileSystem)
 {
   this->fileSystem = fileSystem;
   pid = 0;
+  verificationQueue = new QQueue<int>();
+  verificationThread = new ProcessThread(verificationQueue, true);
+
+  connect(this, SIGNAL(newProcessQueued(bool)),
+          verificationThread, SLOT(newProcessQueued(bool)));
+  connect(this, SIGNAL(processFinished(int)),
+          verificationThread, SLOT(processFinished(int)));
+  connect(verificationThread, SIGNAL(startProcess(int)),
+          this, SLOT(createLps(int)));
+
+  verificationThread->start();
 }
 
 void ProcessSystem::setConsoleDock(ConsoleDock* consoleDock)
@@ -23,33 +83,26 @@ void ProcessSystem::setConsoleDock(ConsoleDock* consoleDock)
 QProcess* ProcessSystem::createMcrl22lpsProcess(bool verification)
 {
   QProcess* mcrl22lpsProcess = new QProcess();
-  /* check if we need to run this */
-  if (!fileSystem->upToDateLpsFileExists())
+
+  /* create the process */
+  mcrl22lpsProcess->setProgram("mcrl22lps");
+  mcrl22lpsProcess->setArguments(
+      {fileSystem->specificationFilePath(), fileSystem->lpsFilePath(),
+       "--lin-method=regular", "--rewriter=jitty", "--verbose"});
+
+  /* connect to logger */
+  if (verification)
   {
-    /* create the process */
-    mcrl22lpsProcess->setProgram("mcrl22lps");
-    mcrl22lpsProcess->setArguments(
-        {fileSystem->specificationFilePath(), fileSystem->lpsFilePath(),
-         "--lin-method=regular", "--rewriter=jitty", "--verbose"});
-
-    /* connect to logger */
-    if (verification)
-    {
-      connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()),
-              consoleDock, SLOT(logToVerificationConsole()));
-    }
-    else
-    {
-      connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()),
-              consoleDock, SLOT(logToLTSCreationConsole()));
-    }
-
-    return mcrl22lpsProcess;
+    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()),
+            consoleDock, SLOT(logToVerificationConsole()));
   }
   else
   {
-    return mcrl22lpsProcess;
+    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()),
+            consoleDock, SLOT(logToLTSCreationConsole()));
   }
+
+  return mcrl22lpsProcess;
 }
 
 QProcess* ProcessSystem::createLpsxsimProcess()
@@ -73,26 +126,20 @@ QProcess* ProcessSystem::createLtsconvertProcess()
 QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
 {
   QProcess* lps2pbesProcess = new QProcess();
-  /* check if we need to run this */
-  if (!fileSystem->upToDatePbesFileExists(propertyName))
-  {
-    /* create the process */
-    lps2pbesProcess->setProgram("lps2pbes");
-    lps2pbesProcess->setArguments(
-        {fileSystem->lpsFilePath(), fileSystem->pbesFilePath(propertyName),
-         "--formula=" + fileSystem->propertyFilePath(propertyName),
-         "--out=pbes", "--verbose"});
+  
+  /* create the process */
+  lps2pbesProcess->setProgram("lps2pbes");
+  lps2pbesProcess->setArguments(
+      {fileSystem->lpsFilePath(), fileSystem->pbesFilePath(propertyName),
+        "--formula=" + fileSystem->propertyFilePath(propertyName),
+        "--out=pbes", "--verbose"});
+  lps2pbesProcess->setProperty("propertyName", propertyName);
 
-    /* connect to logger */
-    connect(lps2pbesProcess, SIGNAL(readyReadStandardError()),
-            consoleDock, SLOT(logToVerificationConsole()));
+  /* connect to logger */
+  connect(lps2pbesProcess, SIGNAL(readyReadStandardError()),
+    consoleDock, SLOT(logToVerificationConsole()));
 
-    return lps2pbesProcess;
-  }
-  else
-  {
-    return NULL;
-  }
+  return lps2pbesProcess;
 }
 
 QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
@@ -104,6 +151,7 @@ QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
                                   "--erase=none", "--in=pbes",
                                   "--rewriter=jitty", "--search=breadth-first",
                                   "--solver=lf", "--strategy=0", "--verbose"});
+  pbes2boolProcess->setProperty("propertyName", propertyName);
 
   /* connect to logger */
   connect(pbes2boolProcess, SIGNAL(readyReadStandardError()),
@@ -139,31 +187,45 @@ int ProcessSystem::verifyProperty(Property* property)
     processes[processid] = {mcrl22lpsProcess, lps2pbesProcess,
                             pbes2boolProcess};
 
-    consoleDock->writeToConsole(ConsoleDock::Verification,
-                                "##### CREATING LPS #####\n");
-    if (mcrl22lpsProcess->program() == "")
-    {
-      consoleDock->writeToConsole(ConsoleDock::Verification,
-                                  "Up to date lps already exists\n");
-      emit mcrl22lpsProcess->finished(0);
-    }
-    else
-    {
-      mcrl22lpsProcess->start();
-    }
+    verificationQueue->enqueue(processid);
+    emit newProcessQueued(true);
 
     return processid;
   }
   return -1;
 }
 
+void ProcessSystem::createLps(int processid)
+{
+  QProcess* mcrl22lpsProcess = processes[processid][0];
+
+  consoleDock->writeToConsole(ConsoleDock::Verification,
+                              "##### CREATING LPS #####\n");
+
+  /* check if we need to run this */
+  if (fileSystem->upToDateLpsFileExists())
+  {
+    consoleDock->writeToConsole(ConsoleDock::Verification,
+                                "Up to date lps already exists\n");
+    emit mcrl22lpsProcess->finished(0);
+  }
+  else
+  {
+    mcrl22lpsProcess->start();
+  }
+}
+
 void ProcessSystem::verifyProperty2()
 {
-  consoleDock->writeToConsole(ConsoleDock::Verification,
-                              "##### CREATING PBES #####\n");
+  
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
   QProcess* lps2pbesProcess = processes[processid][1];
-  if (lps2pbesProcess->program() == "")
+
+  consoleDock->writeToConsole(ConsoleDock::Verification,
+                              "##### CREATING PBES #####\n");
+  
+  /* check if we need to run this */
+  if (fileSystem->upToDatePbesFileExists(lps2pbesProcess->property("propertyName").toString()))
   {
     consoleDock->writeToConsole(ConsoleDock::Verification,
                                 "Up to date pbes already exists");
@@ -171,7 +233,7 @@ void ProcessSystem::verifyProperty2()
   }
   else
   {
-    processes[processid][1]->start();
+    lps2pbesProcess->start();
   }
 }
 
