@@ -18,12 +18,12 @@
 enum class ProcessType
 {
   Parsing,
-  LTSCreation,
+  LtsCreation,
   Verification
 };
 
 const std::vector<ProcessType> PROCESSTYPES = {
-    ProcessType::Parsing, ProcessType::LTSCreation, ProcessType::Verification};
+    ProcessType::Parsing, ProcessType::LtsCreation, ProcessType::Verification};
 
 /**
  * @brief The ConsoleDock class defines the dock that shows console output
@@ -61,9 +61,9 @@ class ConsoleDock : public QDockWidget
   void logToParsingConsole();
 
   /**
-   * @brief logToConsole Write output in the LTS creation console
+   * @brief logToConsole Write output in the lts creation console
    */
-  void logToLTSCreationConsole();
+  void logToLtsCreationConsole();
 
   /**
    * @brief logToConsole Write output in the verification console
@@ -73,7 +73,7 @@ class ConsoleDock : public QDockWidget
   private:
   QTabWidget* consoleTabs;
   QPlainTextEdit* parsingConsole;
-  QPlainTextEdit* LTSCreationConsole;
+  QPlainTextEdit* ltsCreationConsole;
   QPlainTextEdit* verificationConsole;
 
   /**

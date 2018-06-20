@@ -90,21 +90,21 @@ class MainWindow : public QMainWindow
   void actionSimulate();
 
   /**
-   * @brief actionCreateLTS Allows the user to create the LTS of the current
+   * @brief actionCreateLts Allows the user to create the lts of the current
    * specification
    */
-  void actionCreateLTS();
+  void actionCreateLts();
 
   /**
-   * @brief actionCreateReducedLTS Allows the user to create a reduced LTS of
+   * @brief actionCreateReducedLts Allows the user to create a reduced lts of
    * the current specification
    */
-  void actionCreateReducedLTS();
+  void actionCreateReducedLts();
 
   /**
-   * @brief actionAbortLTSCreation Allows the user to abort LTS creation
+   * @brief actionAbortLtsCreation Allows the user to abort lts creation
    */
-  void actionAbortLTSCreation();
+  void actionAbortLtsCreation();
 
   /**
    * @brief actionVerifyAllProperties Allows the user to verify all defined
@@ -157,9 +157,9 @@ class MainWindow : public QMainWindow
 
   QAction* parseAction;
   QAction* simulateAction;
-  QAction* createLTSAction;
-  QAction* createReducedLTSAction;
-  QAction* abortLTSCreationAction;
+  QAction* createLtsAction;
+  QAction* createReducedLtsAction;
+  QAction* abortLtsCreationAction;
   QAction* verifyAllPropertiesAction;
   QAction* abortVerificationAction;
 
@@ -176,6 +176,8 @@ class MainWindow : public QMainWindow
 
   FileSystem* fileSystem;
   ProcessSystem* processSystem;
+
+  int ltsCreationProcessid;
 };
 
 #endif // MAINWINDOW_H

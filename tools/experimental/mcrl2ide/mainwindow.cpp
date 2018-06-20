@@ -38,9 +38,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   connect(fileSystem, SIGNAL(hasChanges(bool)), saveProjectAction,
           SLOT(setEnabled(bool)));
 
-  /* make the abort buttons enabled iff a corresponding process is running */
-  connect(processSystem->getProcessThread(ProcessType::LTSCreation),
-          SIGNAL(isRunning(bool)), abortLTSCreationAction,
+  /* make the toolbar buttons enabled or disabled depending on whether processes
+   *   are running */
+  connect(processSystem->getProcessThread(ProcessType::LtsCreation),
+          SIGNAL(isRunning(bool)), createLtsAction,
+          SLOT(setDisabled(bool)));
+  connect(processSystem->getProcessThread(ProcessType::LtsCreation),
+          SIGNAL(isRunning(bool)), createReducedLtsAction,
+          SLOT(setDisabled(bool)));
+  connect(processSystem->getProcessThread(ProcessType::LtsCreation),
+          SIGNAL(isRunning(bool)), abortLtsCreationAction,
           SLOT(setEnabled(bool)));
   connect(processSystem->getProcessThread(ProcessType::Verification),
           SIGNAL(isRunning(bool)), abortVerificationAction,
@@ -50,6 +57,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   setWindowTitle("mCRL2 IDE - Unnamed project");
   resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,
                QDesktopWidget().availableGeometry(this).height() * 0.75));
+
+  ltsCreationProcessid = -1;
 }
 
 MainWindow::~MainWindow()
@@ -142,17 +151,17 @@ void MainWindow::setupMenuBar()
 
   actionsMenu->addSeparator();
 
-  createLTSAction =
-      actionsMenu->addAction("Create LTS", this, SLOT(actionCreateLTS()));
-  createLTSAction->setIcon(QIcon(":/icons/create_LTS.png"));
+  createLtsAction =
+      actionsMenu->addAction("Create LTS", this, SLOT(actionCreateLts()));
+  createLtsAction->setIcon(QIcon(":/icons/create_LTS.png"));
 
-  createReducedLTSAction = actionsMenu->addAction(
-      "Create reduced LTS", this, SLOT(actionCreateReducedLTS()));
-  createReducedLTSAction->setIcon(QIcon(":/icons/create_reduced_LTS.png"));
+  createReducedLtsAction = actionsMenu->addAction(
+      "Create reduced LTS", this, SLOT(actionCreateReducedLts()));
+  createReducedLtsAction->setIcon(QIcon(":/icons/create_reduced_LTS.png"));
 
-  abortLTSCreationAction = actionsMenu->addAction(
-      "Abort LTS creation", this, SLOT(actionAbortLTSCreation()));
-  abortLTSCreationAction->setIcon(QIcon(":/icons/abort_LTS_creation.png"));
+  abortLtsCreationAction = actionsMenu->addAction(
+      "Abort LTS creation", this, SLOT(actionAbortLtsCreation()));
+  abortLtsCreationAction->setIcon(QIcon(":/icons/abort_LTS_creation.png"));
 
   actionsMenu->addSeparator();
 
@@ -178,9 +187,9 @@ void MainWindow::setupToolbar()
   toolbar->addAction(parseAction);
   toolbar->addAction(simulateAction);
   toolbar->addSeparator();
-  toolbar->addAction(createLTSAction);
-  toolbar->addAction(createReducedLTSAction);
-  toolbar->addAction(abortLTSCreationAction);
+  toolbar->addAction(createLtsAction);
+  toolbar->addAction(createReducedLtsAction);
+  toolbar->addAction(abortLtsCreationAction);
   toolbar->addSeparator();
   toolbar->addAction(addPropertyAction);
   toolbar->addAction(verifyAllPropertiesAction);
@@ -188,7 +197,7 @@ void MainWindow::setupToolbar()
 
   /* disable the abort actions since they should only be used when something is
    *   running */
-  abortLTSCreationAction->setEnabled(false);
+  abortLtsCreationAction->setEnabled(false);
   abortVerificationAction->setEnabled(false);
 }
 
@@ -382,17 +391,17 @@ void MainWindow::actionSimulate()
   /* Not yet implemented */
 }
 
-void MainWindow::actionCreateLTS()
+void MainWindow::actionCreateLts()
+{
+  ltsCreationProcessid = processSystem->createLts(LtsReduction::None);
+}
+
+void MainWindow::actionCreateReducedLts()
 {
   /* Not yet implemented */
 }
 
-void MainWindow::actionCreateReducedLTS()
-{
-  /* Not yet implemented */
-}
-
-void MainWindow::actionAbortLTSCreation()
+void MainWindow::actionAbortLtsCreation()
 {
   /* Not yet implemented */
 }

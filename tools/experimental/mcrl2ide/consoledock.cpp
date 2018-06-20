@@ -17,16 +17,16 @@ ConsoleDock::ConsoleDock(QWidget* parent) : QDockWidget("Console", parent)
 
   /* define the console widgets and set them to read only */
   parsingConsole = new QPlainTextEdit();
-  LTSCreationConsole = new QPlainTextEdit();
+  ltsCreationConsole = new QPlainTextEdit();
   verificationConsole = new QPlainTextEdit();
 
   parsingConsole->setReadOnly(true);
-  LTSCreationConsole->setReadOnly(true);
+  ltsCreationConsole->setReadOnly(true);
   verificationConsole->setReadOnly(true);
 
   /* lay them out */
   consoleTabs->addTab(parsingConsole, "Parsing");
-  consoleTabs->addTab(LTSCreationConsole, "LTS creation");
+  consoleTabs->addTab(ltsCreationConsole, "LTS creation");
   consoleTabs->addTab(verificationConsole, "Verification");
 
   this->setWidget(consoleTabs);
@@ -38,10 +38,13 @@ void ConsoleDock::setConsoleTab(ProcessType processType)
   {
   case ProcessType::Parsing:
     consoleTabs->setCurrentIndex(0);
-  case ProcessType::LTSCreation:
+    break;
+  case ProcessType::LtsCreation:
     consoleTabs->setCurrentIndex(1);
+    break;
   case ProcessType::Verification:
     consoleTabs->setCurrentIndex(2);
+    break;
   }
 }
 
@@ -50,9 +53,9 @@ void ConsoleDock::logToParsingConsole()
   logToConsole(parsingConsole, qobject_cast<QProcess*>(sender()));
 }
 
-void ConsoleDock::logToLTSCreationConsole()
+void ConsoleDock::logToLtsCreationConsole()
 {
-  logToConsole(LTSCreationConsole, qobject_cast<QProcess*>(sender()));
+  logToConsole(ltsCreationConsole, qobject_cast<QProcess*>(sender()));
 }
 
 void ConsoleDock::logToVerificationConsole()
@@ -78,10 +81,13 @@ void ConsoleDock::writeToConsole(ProcessType processType, QString output)
   {
   case ProcessType::Parsing:
     console = parsingConsole;
-  case ProcessType::LTSCreation:
-    console = LTSCreationConsole;
+    break;
+  case ProcessType::LtsCreation:
+    console = ltsCreationConsole;
+    break;
   case ProcessType::Verification:
     console = verificationConsole;
+    break;
   }
 
   console->appendPlainText(output);

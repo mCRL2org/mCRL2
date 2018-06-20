@@ -15,6 +15,19 @@
 #include <QObject>
 #include <QDir>
 
+enum class LtsReduction
+{
+  None,
+  StrongBisimulation,
+  BranchingBisimulation
+};
+
+const std::map<LtsReduction, QString> LTSREDUCTIONNAMES = {
+    {LtsReduction::None, "None"},
+    {LtsReduction::StrongBisimulation, "StrongBisimulation"},
+    {LtsReduction::BranchingBisimulation, "BranchingBisimulation"},
+};
+
 class MainWindow;
 
 class Property
@@ -90,6 +103,12 @@ class FileSystem : public QObject
   QString lpsFilePath();
 
   /**
+   * @brief ltsFilePath Defines the file path of a lts
+   * @return The file path of the lts
+   */
+  QString ltsFilePath(LtsReduction reduction);
+
+  /**
    * @brief propertyFilePath Defines the file path of a property
    * @param propertyName The name of the property
    * @return The file path of the property
@@ -138,12 +157,21 @@ class FileSystem : public QObject
   void setPropertyModified(QString propertyName);
 
   /**
-   * @brief lpsFileExists Checks whether an lps file exists that is created from
-   *   the current specification
+   * @brief upToDateLpsFileExists Checks whether an lps file exists that is
+   *   created from the current specification
    * @return Whether an lps file exists that is created from the current
    *   specification
    */
   bool upToDateLpsFileExists();
+
+  /**
+   * @brief upToDateLtsFileExists Checks whether an lts file exists with a given
+   *   reduction that is created from the current specification
+   * @param reduction The reduction that was applied to the lts
+   * @return Whether an lts file exists that is created from the current
+   *   specification
+   */
+  bool upToDateLtsFileExists(LtsReduction reduction);
 
   /**
    * @brief upToDatePbesFileExists Checks whether a pbes file exists that is

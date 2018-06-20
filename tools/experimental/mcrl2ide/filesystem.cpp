@@ -81,6 +81,12 @@ QString FileSystem::lpsFilePath()
          "_lps.lps";
 }
 
+QString FileSystem::ltsFilePath(LtsReduction reduction)
+{
+  return projectFolderPath(projectName) + QDir::separator() + projectName +
+         "_lts_" + LTSREDUCTIONNAMES.at(reduction) + ".lts";
+}
+
 QString FileSystem::propertyFilePath(QString propertyName)
 {
   return propertiesFolderPath(projectName) + QDir::separator() + propertyName +
@@ -132,6 +138,15 @@ bool FileSystem::upToDateLpsFileExists()
   return QFile(lpsFilePath()).exists() &&
          QFileInfo(specificationFilePath()).lastModified() <=
              QFileInfo(lpsFilePath()).lastModified();
+}
+
+bool FileSystem::upToDateLtsFileExists(LtsReduction reduction)
+{
+  /* an lts file is up to date if the lts file exists and the lts file is
+   *   created after the the last time the lps file was modified */
+  return QFile(ltsFilePath(reduction)).exists() &&
+         QFileInfo(lpsFilePath()).lastModified() <=
+             QFileInfo(ltsFilePath(reduction)).lastModified();
 }
 
 bool FileSystem::upToDatePbesFileExists(QString propertyName)

@@ -114,10 +114,10 @@ QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
     connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
             SLOT(logToVerificationConsole()));
   }
-  else if (processType == ProcessType::LTSCreation)
+  else if (processType == ProcessType::LtsCreation)
   {
     connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-            SLOT(logToLTSCreationConsole()));
+            SLOT(logToLtsCreationConsole()));
   }
 
   return mcrl22lpsProcess;
@@ -131,14 +131,37 @@ QProcess* ProcessSystem::createLpsxsimProcess()
 
 QProcess* ProcessSystem::createLps2ltsProcess()
 {
+  QProcess* lps2ltsProcess = new QProcess();
+
+  /* create the process */
+  lps2ltsProcess->setProgram("lps2lts");
+  lps2ltsProcess->setArguments(
+      {fileSystem->lpsFilePath(), fileSystem->ltsFilePath(LtsReduction::None),
+       "--rewriter=jitty", "--strategy=breadth", "--verbose"});
+
+  /* connect to logger */
+  connect(lps2ltsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+          SLOT(logToLtsCreationConsole()));
+
+  return lps2ltsProcess;
+}
+
+QProcess* ProcessSystem::createLtsconvertProcess(LtsReduction reduction)
+{
   /* Not implemented yet */
+  Q_UNUSED(reduction);
   return new QProcess();
 }
 
-QProcess* ProcessSystem::createLtsconvertProcess()
+QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction)
 {
-  /* Not implemented yet */
-  return new QProcess();
+  QProcess* ltsgraphProcesss = new QProcess();
+
+  /* create the process */
+  ltsgraphProcesss->setProgram("ltsgraph");
+  ltsgraphProcesss->setArguments({fileSystem->ltsFilePath(reduction)});
+
+  return ltsgraphProcesss;
 }
 
 QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
@@ -178,15 +201,62 @@ QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
   return pbes2boolProcess;
 }
 
+int ProcessSystem::createLts(LtsReduction reduction)
+{
+  if (fileSystem->saveProject())
+  {
+    /* create the subprocesses */
+    std::vector<QProcess*> ltsCreationProcesses = {};
+    int processid = pid++;
+    ProcessType processType = ProcessType::LtsCreation;
+    consoleDock->setConsoleTab(processType);
+
+    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
+    mcrl22lpsProcess->setProperty("pid", processid);
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(createLts()));
+    ltsCreationProcesses.push_back(mcrl22lpsProcess);
+
+    QProcess* lps2ltsProcess = createLps2ltsProcess();
+    lps2ltsProcess->setProperty("pid", processid);
+    connect(lps2ltsProcess, SIGNAL(finished(int)), this,
+            reduction == LtsReduction::None ? SLOT(showLts())
+                                            : SLOT(reduceLts()));
+    ltsCreationProcesses.push_back(lps2ltsProcess);
+
+    /* create the ltsconvert process if we need to reduce */
+    if (!(reduction == LtsReduction::None))
+    {
+      QProcess* ltsconvertProcess = createLtsconvertProcess(reduction);
+      ltsconvertProcess->setProperty("pid", processid);
+      connect(ltsconvertProcess, SIGNAL(finished(int)), this, SLOT(showLts()));
+      ltsCreationProcesses.push_back(ltsconvertProcess);
+    }
+
+    QProcess* ltsgraphProcess = createLtsgraphProcess(reduction);
+    ltsgraphProcess->setProperty("pid", processid);
+    connect(ltsgraphProcess, SIGNAL(finished(int)), this,
+            SLOT(verificationResult()));
+    ltsCreationProcesses.push_back(ltsgraphProcess);
+
+    processes[processid] = ltsCreationProcesses;
+    processTypes[processid] = processType;
+    processQueues[processType]->enqueue(processid);
+    emit newProcessQueued(processType);
+
+    return processid;
+  }
+  return -1;
+}
+
 int ProcessSystem::verifyProperty(Property* property)
 {
   if (fileSystem->saveProject())
   {
-    consoleDock->setConsoleTab(ProcessType::Verification);
 
     /* create the subprocesses */
     int processid = pid++;
     ProcessType processType = ProcessType::Verification;
+    consoleDock->setConsoleTab(processType);
 
     QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
@@ -215,7 +285,7 @@ int ProcessSystem::verifyProperty(Property* property)
 void ProcessSystem::startProcess(int processid)
 {
   ProcessType processType = processTypes[processid];
-  if (processType == ProcessType::LTSCreation ||
+  if (processType == ProcessType::LtsCreation ||
       processType == ProcessType::Verification)
   {
     createLps(processid);
@@ -225,21 +295,57 @@ void ProcessSystem::startProcess(int processid)
 void ProcessSystem::createLps(int processid)
 {
   QProcess* mcrl22lpsProcess = processes[processid][0];
+  ProcessType processType = processTypes[processid];
 
-  consoleDock->writeToConsole(ProcessType::Verification,
-                              "##### CREATING LPS #####\n");
+  consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
 
   /* check if we need to run this */
   if (fileSystem->upToDateLpsFileExists())
   {
-    consoleDock->writeToConsole(ProcessType::Verification,
-                                "Up to date lps already exists\n");
+    consoleDock->writeToConsole(processType, "Up to date LPS already exists\n");
     emit mcrl22lpsProcess->finished(0);
   }
   else
   {
     mcrl22lpsProcess->start();
   }
+}
+
+void ProcessSystem::createLts()
+{
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  QProcess* lps2ltsProcess = processes[processid][1];
+
+  consoleDock->writeToConsole(ProcessType::LtsCreation,
+                              "##### CREATING LTS #####\n");
+
+  /* check if we need to run this */
+  if (fileSystem->upToDateLtsFileExists(LtsReduction::None))
+  {
+    consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                "Up to date LTS already exists");
+    emit lps2ltsProcess->finished(0);
+  }
+  else
+  {
+    lps2ltsProcess->start();
+  }
+}
+
+void ProcessSystem::reduceLts()
+{
+  /* not implemented yet */
+}
+
+void ProcessSystem::showLts()
+{
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  QProcess* ltsgraphProcess = processes[processid].back();
+
+  consoleDock->writeToConsole(ProcessType::LtsCreation,
+                              "##### SHOWING LTS #####\n");
+  ltsgraphProcess->start();
+  emit processFinished(processid);
 }
 
 void ProcessSystem::createPbes()
@@ -256,7 +362,7 @@ void ProcessSystem::createPbes()
           lps2pbesProcess->property("propertyName").toString()))
   {
     consoleDock->writeToConsole(ProcessType::Verification,
-                                "Up to date pbes already exists");
+                                "Up to date PBES already exists");
     emit lps2pbesProcess->finished(0);
   }
   else

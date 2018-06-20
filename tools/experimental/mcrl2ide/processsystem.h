@@ -124,6 +124,14 @@ class ProcessSystem : public QObject
   ProcessThread* getProcessThread(ProcessType processType);
 
   /**
+   * @brief createLts Create and visualizes the lts of the current specification
+   *   using mcrl22lps, lps2lts optionally ltsconvert and ltsgraph
+   * @param reduction What reduction to apply
+   * @return The process id of the lts creation process
+   */
+  int createLts(LtsReduction reduction);
+
+  /**
    * @brief verifyProperty Verifies a property using mcrl22lps, lps2pbes and
    *   pbes2bool
    * @param property The property to verify
@@ -203,9 +211,18 @@ class ProcessSystem : public QObject
   /**
    * @brief createLtsconvertProcess Creates a process to execute ltsconvert on
    *   the lts that corresponds to the current specification
+   * @param reduction The reduction to apply
    * @return The ltsconvert process
    */
-  QProcess* createLtsconvertProcess();
+  QProcess* createLtsconvertProcess(LtsReduction reduction);
+
+  /**
+   * @brief createLtsgraphProcess Creates a process to execute ltsgraph on the
+   *   lts that corresponds to the current specification and the given reduction
+   * @param reduction The reduction that was applied
+   * @return The ltsgraph process
+   */
+  QProcess* createLtsgraphProcess(LtsReduction reduction);
 
   /**
    * @brief createLps2pbesProcess Creates a process to execute lps2pbes on the
@@ -232,11 +249,26 @@ class ProcessSystem : public QObject
   void startProcess(int processid);
 
   /**
-   * @brief createLps The first step of any LTSCreation and verification
+   * @brief createLps The first step of any lts creation and verification
    *   process, creating the lps
    * @param processid The id of the process to run
    */
   void createLps(int processid);
+
+  /**
+   * @brief createLts The second step of lts creation, creating the lts
+   */
+  void createLts();
+
+  /**
+   * @brief reduceLts An optional step of lts creation, reducing the lts
+   */
+  void reduceLts();
+
+  /**
+   * @brief showLts The last step of lts creation, visualizing the lts
+   */
+  void showLts();
 
   /**
    * @brief createPbes The second step of verification, creating the pbes
