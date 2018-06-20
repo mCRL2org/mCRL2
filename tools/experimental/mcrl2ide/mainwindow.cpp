@@ -35,8 +35,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
   /* make the save project action enabled whenever a change is made */
   saveProjectAction->setEnabled(false);
-  connect(fileSystem, SIGNAL(hasChanges(bool)),
-          saveProjectAction, SLOT(setEnabled(bool)));
+  connect(fileSystem, SIGNAL(hasChanges(bool)), saveProjectAction,
+          SLOT(setEnabled(bool)));
+
+  /* make the abort buttons enabled iff a corresponding process is running */
+  connect(processSystem->getProcessThread(ProcessType::LTSCreation),
+          SIGNAL(isRunning(bool)), abortLTSCreationAction,
+          SLOT(setEnabled(bool)));
+  connect(processSystem->getProcessThread(ProcessType::Verification),
+          SIGNAL(isRunning(bool)), abortVerificationAction,
+          SLOT(setEnabled(bool)));
 
   /* set the title of the main window */
   setWindowTitle("mCRL2 IDE - Unnamed project");
@@ -396,5 +404,5 @@ void MainWindow::actionVerifyAllProperties()
 
 void MainWindow::actionAbortVerification()
 {
-  /* Not yet implemented */
+  processSystem->abortAllProcesses(ProcessType::Verification);
 }

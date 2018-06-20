@@ -48,12 +48,15 @@ void ProcessThread::run()
       /* start a new process */
       currentProcessid = processQueue->dequeue();
       emit startProcess(currentProcessid);
+      emit isRunning(true);
+
       /* wait until it has finished */
       finishLoop.exec();
     }
     else
     {
       /* wait until a process is added to the queue */
+      emit isRunning(false);
       queueLoop.exec();
     }
   }
@@ -76,10 +79,10 @@ ProcessSystem::ProcessSystem(FileSystem* fileSystem)
         new ProcessThread(processQueues[processType], processType);
     connect(this, SIGNAL(newProcessQueued(ProcessType)),
             processThreads[processType], SLOT(newProcessQueued(ProcessType)));
+    connect(processThreads[processType], SIGNAL(startProcess(int)), this,
+            SLOT(startProcess(int)));
     connect(this, SIGNAL(processFinished(int)), processThreads[processType],
             SLOT(processFinished(int)));
-    connect(processThreads[processType], SIGNAL(startProcess(int)), this,
-            SLOT(createLps(int)));
 
     processThreads[processType]->start();
   }
@@ -88,6 +91,11 @@ ProcessSystem::ProcessSystem(FileSystem* fileSystem)
 void ProcessSystem::setConsoleDock(ConsoleDock* consoleDock)
 {
   this->consoleDock = consoleDock;
+}
+
+ProcessThread* ProcessSystem::getProcessThread(ProcessType processType)
+{
+  return processThreads[processType];
 }
 
 QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
@@ -182,18 +190,16 @@ int ProcessSystem::verifyProperty(Property* property)
 
     QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
-            SLOT(verifyProperty2()));
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(createPbes()));
 
     QProcess* lps2pbesProcess = createLps2pbesProcess(property->name);
     lps2pbesProcess->setProperty("pid", processid);
-    connect(lps2pbesProcess, SIGNAL(finished(int)), this,
-            SLOT(verifyProperty3()));
+    connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes()));
 
     QProcess* pbes2boolProcess = createPbes2boolProcess(property->name);
     pbes2boolProcess->setProperty("pid", processid);
     connect(pbes2boolProcess, SIGNAL(finished(int)), this,
-            SLOT(verifyPropertyResult()));
+            SLOT(verificationResult()));
 
     processes[processid] = {mcrl22lpsProcess, lps2pbesProcess,
                             pbes2boolProcess};
@@ -204,6 +210,16 @@ int ProcessSystem::verifyProperty(Property* property)
     return processid;
   }
   return -1;
+}
+
+void ProcessSystem::startProcess(int processid)
+{
+  ProcessType processType = processTypes[processid];
+  if (processType == ProcessType::LTSCreation ||
+      processType == ProcessType::Verification)
+  {
+    createLps(processid);
+  }
 }
 
 void ProcessSystem::createLps(int processid)
@@ -226,7 +242,7 @@ void ProcessSystem::createLps(int processid)
   }
 }
 
-void ProcessSystem::verifyProperty2()
+void ProcessSystem::createPbes()
 {
 
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
@@ -249,7 +265,7 @@ void ProcessSystem::verifyProperty2()
   }
 }
 
-void ProcessSystem::verifyProperty3()
+void ProcessSystem::solvePbes()
 {
   consoleDock->writeToConsole(ProcessType::Verification,
                               "##### SOLVING PBES #####\n");
@@ -257,7 +273,7 @@ void ProcessSystem::verifyProperty3()
   processes[processid][2]->start();
 }
 
-void ProcessSystem::verifyPropertyResult()
+void ProcessSystem::verificationResult()
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
   std::string output =
@@ -296,9 +312,34 @@ void ProcessSystem::abortProcess(int processid)
     processQueues[processType]->removeOne(processid);
   }
 
+  emit processFinished(processid);
   consoleDock->writeToConsole(processTypes[processid],
                               "##### PROCESS WAS ABORTED #####");
+}
+
+void ProcessSystem::abortAllProcesses(ProcessType processType)
+{
+  /* first empty the queue */
+  QQueue<int>* processQueue = processQueues[processType];
+  foreach (int processid, *processQueue)
+  {
+    emit processFinished(processid);
+  }
+  processQueues[processType]->clear();
+
+  /* then stop the process run by the thread */
+  int processid = processThreads[processType]->getCurrentProcessId();
+  if (processes.count(processid) > 0)
+  {
+    for (QProcess* process : processes[processid])
+    {
+      process->blockSignals(true);
+      process->kill();
+    }
+  }
   emit processFinished(processid);
+
+  consoleDock->writeToConsole(processType, "##### ABORTED ALL PROCESSES #####");
 }
 
 QString ProcessSystem::getResult(int processid)

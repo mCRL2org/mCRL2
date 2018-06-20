@@ -72,6 +72,7 @@ class ProcessThread : public QThread
   /**
    * @brief startProcess Tells the process system that a process needs to be
    *   started
+   * @param processid The id of the process that needs to be started
    */
   void startProcess(int processid);
 
@@ -80,6 +81,13 @@ class ProcessThread : public QThread
    *   process to finish
    */
   void currentProcessFinished();
+
+  /**
+   * @brief isRunning Is emitted when this thread moves from running to
+   *   waiting or vice versa
+   * @param running Whether the thread is running (or waiting)
+   */
+  void isRunning(bool running);
 
   private:
   QQueue<int>* processQueue;
@@ -109,6 +117,13 @@ class ProcessSystem : public QObject
   void setConsoleDock(ConsoleDock* consoleDock);
 
   /**
+   * @brief getProcessThread Returns gets the process thread of type processType
+   * @param processType The type of the processThread
+   * @return The process thread of type processType
+   */
+  ProcessThread* getProcessThread(ProcessType processType);
+
+  /**
    * @brief verifyProperty Verifies a property using mcrl22lps, lps2pbes and
    *   pbes2bool
    * @param property The property to verify
@@ -119,8 +134,17 @@ class ProcessSystem : public QObject
   /**
    * @brief abortProcess Aborts a process by making the running subprocess
    *   terminate if it is running, else by removing it from the queue
+   * @param processid The process id of the process to abort
    */
   void abortProcess(int processid);
+
+  /**
+   * @brief abortAllProcesses Aborts all processses of type processType by
+   *   clearing the corresponding queue and killing the corresponding currently
+   *   running process
+   * @param processType The processType to abort all processes of
+   */
+  void abortAllProcesses(ProcessType processType);
 
   /**
    * @brief getResult Gets the result of a process
@@ -133,16 +157,16 @@ class ProcessSystem : public QObject
 
   signals:
   /**
-   * @brief processFinished Is emitted when a process is finished
-   * @param processid The id of the process that has finished
-   */
-  void processFinished(int processid);
-
-  /**
    * @brief newProcessQueued Is emitted when a new process is added to a queue
    * @param processtype The type of the new process
    */
   void newProcessQueued(ProcessType processType);
+
+  /**
+   * @brief processFinished Is emitted when a process is finished
+   * @param processid The id of the process that has finished
+   */
+  void processFinished(int processid);
 
   private:
   FileSystem* fileSystem;
@@ -153,66 +177,82 @@ class ProcessSystem : public QObject
   std::map<int, QString> results;
   std::map<ProcessType, QQueue<int>*> processQueues;
   std::map<ProcessType, ProcessThread*> processThreads;
-  
+
   /**
-   * @brief mcrl22lps Executes mcrl22lps on the current specification
-   * @param verification Determines what console dock tab to use
+   * @brief createMcrl22lpsProcess Creates a process to execute mcrl22lps on the
+   *   current specification
+   * @param processType Determines what console dock tab to use to log to
+   * @return The mcrl22lps process
    */
   QProcess* createMcrl22lpsProcess(ProcessType processType);
 
   /**
-   * @brief lpsxsim Executes lpsxsim on the lps that corresponds to the current
-   *   specification
+   * @brief createLpsxsimProcess Creates a process to execute lpsxsim on the lps
+   *   that corresponds to the current specification
+   * @return The lpsxsim process
    */
   QProcess* createLpsxsimProcess();
 
   /**
-   * @brief lps2lts Executes lps2lts on the lps that corresponds to the current
-   *   specification
+   * @brief createLps2ltsProcess Creates a process to execute lps2lts on the lps
+   *   that corresponds to the current specification
+   * @return The lps2lts process
    */
   QProcess* createLps2ltsProcess();
 
   /**
-   * @brief ltsconvert Executes ltsconvert on the lts that corresponds to the
-   *   current specification
+   * @brief createLtsconvertProcess Creates a process to execute ltsconvert on
+   *   the lts that corresponds to the current specification
+   * @return The ltsconvert process
    */
   QProcess* createLtsconvertProcess();
 
   /**
-   * @brief lps2pbes Executes lps2pbes on the lps that corresponds to the
-   *   current specification and the given property
-   * @param propertyName The name of the property to include
+   * @brief createLps2pbesProcess Creates a process to execute lps2pbes on the
+   *   lps that corresponds to the current specification and a given property
+   * @param propertyName The name of the property to create a pbes of
+   * @return The lps2pbes process
    */
   QProcess* createLps2pbesProcess(QString propertyName);
 
   /**
-   * @brief pbes2bool Executes pbes2bool on the pbes that corresponds to the
-   *   current specification and the given property
-   * @param propertyName The name of the property to include
+   * @brief createPbes2boolProcess Creates a process to execute pbes2bool on the
+   *   pbes that corresponds to the current specification and a given property
+   * @param propertyName The name of the property that corresponds to the pbes
+   * @return The pbes2bool process
    */
   QProcess* createPbes2boolProcess(QString propertyName);
 
   private slots:
+
   /**
-   * @brief createLps The first step of any action, creating the lps
+   * @brief startProcess Starts a process
+   * @param processid The id of the process to run
+   */
+  void startProcess(int processid);
+
+  /**
+   * @brief createLps The first step of any LTSCreation and verification
+   *   process, creating the lps
    * @param processid The id of the process to run
    */
   void createLps(int processid);
 
   /**
-   * @brief verifyProperty2 The second step of verification, creating the pbes
+   * @brief createPbes The second step of verification, creating the pbes
    */
-  void verifyProperty2();
+  void createPbes();
 
   /**
-   * @brief verifyPoperty3 The third step of verification, solving the pbes
+   * @brief solvePbes The third step of verification, solving the pbes
    */
-  void verifyProperty3();
+  void solvePbes();
 
   /**
-   * @brief actionVerifyResult Applies the result of the verification
+   * @brief verificationResult Extracts and stores the result of the
+   *   verification
    */
-  void verifyPropertyResult();
+  void verificationResult();
 };
 
 #endif // PROCESSSYSTEM_H

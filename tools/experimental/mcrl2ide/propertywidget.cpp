@@ -123,8 +123,6 @@ void PropertyWidget::actionVerify()
   /* check if the property isn't already being verified or has been verified */
   if (verificationWidgets->currentIndex() == 0)
   {
-    
-
     /* start the verification process */
     connect(processSystem, SIGNAL(processFinished(int)), this,
             SLOT(actionVerifyResult(int)));
