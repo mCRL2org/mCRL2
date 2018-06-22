@@ -172,6 +172,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t1,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t1.num_states()==1 && t1.num_transitions()==1);
   t1 = parse_aut(test1);
+  reduce(t1,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t1.num_states()==1 && t1.num_transitions()==1);
+  t1 = parse_aut(test1);
   reduce(t1,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t1.num_states()==1 && t1.num_transitions()==1);
  }
@@ -182,6 +185,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t2.num_states()==2 && t2.num_transitions()==2);
   t2 = parse_aut(test2);
   reduce(t2,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t2.num_states()==2 && t2.num_transitions()==2);
+  t2 = parse_aut(test2);
+  reduce(t2,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
   BOOST_CHECK(t2.num_states()==2 && t2.num_transitions()==2);
   t2 = parse_aut(test2);
   reduce(t2,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
@@ -196,6 +202,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t3,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t3.num_states()==2 && t3.num_transitions()==3);
   t3=parse_aut(test3);
+  reduce(t3,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t3.num_states()==2 && t3.num_transitions()==3);
+  t3=parse_aut(test3);
   reduce(t3,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t3.num_states()==2 && t3.num_transitions()==3);
   t3=parse_aut(test3);
@@ -203,6 +212,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==1);
   t3=parse_aut(test3);
   reduce(t3,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==1);
+  t3=parse_aut(test3);
+  reduce(t3,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==1);
   t3=parse_aut(test3);
   reduce(t3,lts_eq_branching_bisim_sigref); //Branching bisimulation reduction sigref [Blom/Orzan 2003]
@@ -217,6 +229,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==2);
   t3=parse_aut(test3);
   reduce(t3,lts_eq_divergence_preserving_branching_bisim_gv);
+  BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==2);
+  t3=parse_aut(test3);
+  reduce(t3,lts_eq_divergence_preserving_branching_bisim_tb);
   BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==2);
   t3=parse_aut(test3);
   reduce(t3,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -234,6 +249,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t4,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t4.num_states()==4 && t4.num_transitions()==5);
   t4=parse_aut(test4);
+  reduce(t4,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t4.num_states()==4 && t4.num_transitions()==5);
+  t4=parse_aut(test4);
   reduce(t4,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t4.num_states()==4 && t4.num_transitions()==5);
   t4=parse_aut(test4);
@@ -241,6 +259,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   t4=parse_aut(test4);
   reduce(t4,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
+  t4=parse_aut(test4);
+  reduce(t4,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   t4=parse_aut(test4);
   reduce(t4,lts_eq_branching_bisim_sigref);
@@ -258,6 +279,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t5,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   t5=parse_aut(test5);
+  reduce(t5,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
+  t5=parse_aut(test5);
   reduce(t5,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   t5=parse_aut(test5);
@@ -265,6 +289,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   t5=parse_aut(test5);
   reduce(t5,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
+  t5=parse_aut(test5);
+  reduce(t5,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   t5=parse_aut(test5);
   reduce(t5,lts_eq_branching_bisim_sigref);
@@ -282,6 +309,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t5a,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
   t5a=parse_aut(test5a);
+  reduce(t5a,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
+  t5a=parse_aut(test5a);
   reduce(t5a,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
   t5a=parse_aut(test5a);
@@ -289,6 +319,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
   t5a=parse_aut(test5a);
   reduce(t5a,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
+  t5a=parse_aut(test5a);
+  reduce(t5a,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t5a.num_states()==6 && t5a.num_transitions()==8);
   t5a=parse_aut(test5a);
   reduce(t5a,lts_eq_branching_bisim_sigref); //Branching bisimulation reduction sigref
@@ -306,6 +339,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t6,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   t6=parse_aut(test6);
+  reduce(t6,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
+  t6=parse_aut(test6);
   reduce(t6,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
 
@@ -315,6 +351,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   t6=parse_aut(test6);
   reduce(t6,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
+  t6=parse_aut(test6);
+  reduce(t6,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   t6=parse_aut(test6);
   reduce(t6,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -329,6 +368,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   t6=parse_aut(test6);
   reduce(t6,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
+  t6=parse_aut(test6);
+  reduce(t6,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   t6=parse_aut(test6);
   reduce(t6,lts_eq_branching_bisim_sigref);
@@ -346,6 +388,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t7,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t7.num_states()==7 && t7.num_transitions()==7);
   t7=parse_aut(test7);
+  reduce(t7,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t7.num_states()==7 && t7.num_transitions()==7);
+  t7=parse_aut(test7);
   reduce(t7,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t7.num_states()==7 && t7.num_transitions()==7);
   t7=parse_aut(test7);
@@ -353,6 +398,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
   reduce(t7,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
+  t7=parse_aut(test7);
+  reduce(t7,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
   reduce(t7,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -365,6 +413,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
   reduce(t7,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
+  t7=parse_aut(test7);
+  reduce(t7,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   t7=parse_aut(test7);
   reduce(t7,lts_eq_branching_bisim_sigref);
@@ -382,6 +433,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t8,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
   t8 = parse_aut(test8);
+  reduce(t8,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
+  t8 = parse_aut(test8);
   reduce(t8,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
 
@@ -391,6 +445,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
   t8=parse_aut(test8);
   reduce(t8,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
+  t8=parse_aut(test8);
+  reduce(t8,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
   t8=parse_aut(test8);
   reduce(t8,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -405,6 +462,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   t8=parse_aut(test8);
   reduce(t8,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
+  t8=parse_aut(test8);
+  reduce(t8,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   t8=parse_aut(test8);
   reduce(t8,lts_eq_branching_bisim_sigref);
@@ -422,6 +482,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t9,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   t9=parse_aut(test9);
+  reduce(t9,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
+  t9=parse_aut(test9);
   reduce(t9,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   t9=parse_aut(test9);
@@ -429,6 +492,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==1);
   t9=parse_aut(test9);
   reduce(t9,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==1);
+  t9=parse_aut(test9);
+  reduce(t9,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==1);
   t9=parse_aut(test9);
   reduce(t9,lts_eq_branching_bisim_sigref);
@@ -441,6 +507,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   t9=parse_aut(test9);
   reduce(t9,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
+  t9=parse_aut(test9);
+  reduce(t9,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   t9=parse_aut(test9);
   reduce(t9,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -458,6 +527,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t10,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t10.num_states()==5 && t10.num_transitions()==7);
   t10=parse_aut(test10);
+  reduce(t10,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t10.num_states()==5 && t10.num_transitions()==7);
+  t10=parse_aut(test10);
   reduce(t10,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t10.num_states()==5 && t10.num_transitions()==7);
   t10=parse_aut(test10);
@@ -465,6 +537,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
   reduce(t10,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
+  t10=parse_aut(test10);
+  reduce(t10,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
   reduce(t10,lts_eq_branching_bisim_sigref);
@@ -477,6 +552,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
   reduce(t10,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
+  t10=parse_aut(test10);
+  reduce(t10,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t10.num_states()==4 && t10.num_transitions()==5);
   t10=parse_aut(test10);
   reduce(t10,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -494,6 +572,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t11,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t11.num_states()==4 && t11.num_transitions()==5);
   t11=parse_aut(test11);
+  reduce(t11,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t11.num_states()==4 && t11.num_transitions()==5);
+  t11=parse_aut(test11);
   reduce(t11,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t11.num_states()==4 && t11.num_transitions()==5);
   t11=parse_aut(test11);
@@ -501,6 +582,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
   reduce(t11,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
+  t11=parse_aut(test11);
+  reduce(t11,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
   reduce(t11,lts_eq_branching_bisim_sigref);
@@ -513,6 +597,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
   reduce(t11,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
+  t11=parse_aut(test11);
+  reduce(t11,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t11.num_states()==2 && t11.num_transitions()==2);
   t11=parse_aut(test11);
   reduce(t11,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -530,6 +617,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t12,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t12.num_states()==6 && t12.num_transitions()==7);
   t12=parse_aut(test12);
+  reduce(t12,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t12.num_states()==6 && t12.num_transitions()==7);
+  t12=parse_aut(test12);
   reduce(t12,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t12.num_states()==6 && t12.num_transitions()==7);
   t12=parse_aut(test12);
@@ -537,6 +627,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
   reduce(t12,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
+  t12=parse_aut(test12);
+  reduce(t12,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
   reduce(t12,lts_eq_branching_bisim_sigref);
@@ -549,6 +642,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
   reduce(t12,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
+  t12=parse_aut(test12);
+  reduce(t12,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t12.num_states()==5 && t12.num_transitions()==6);
   t12=parse_aut(test12);
   reduce(t12,lts_eq_divergence_preserving_branching_bisim_sigref);
@@ -569,6 +665,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t13,lts_eq_bisim_gv); //Strong bisimulation reduction [Groote/Vaandrager 1990]
   BOOST_CHECK(t13.num_states()==4 && t13.num_transitions()==4);
   t13=parse_aut(test13);
+  reduce(t13,lts_eq_bisim_tb); //Strong bisimulation reduction directly on LTS
+  BOOST_CHECK(t13.num_states()==4 && t13.num_transitions()==4);
+  t13=parse_aut(test13);
   reduce(t13,lts_eq_bisim_sigref); //Strong bisimulation reduction sigref [Blom/Orzan 2003]
   BOOST_CHECK(t13.num_states()==4 && t13.num_transitions()==4);
   t13=parse_aut(test13);
@@ -576,6 +675,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==2);
   t13=parse_aut(test13);
   reduce(t13,lts_eq_branching_bisim_gv); //Branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==2);
+  t13=parse_aut(test13);
+  reduce(t13,lts_eq_branching_bisim_tb); //Branching bisimulation reduction directly on LTS
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==2);
   t13=parse_aut(test13);
   reduce(t13,lts_eq_branching_bisim_sigref);
@@ -588,6 +690,9 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t13.num_states()==3 && t13.num_transitions()==3);
   t13=parse_aut(test13);
   reduce(t13,lts_eq_divergence_preserving_branching_bisim_gv); //Divergence-preserving branching bisimulation reduction [Groote/Vaandrager 1990]
+  BOOST_CHECK(t13.num_states()==3 && t13.num_transitions()==3);
+  t13=parse_aut(test13);
+  reduce(t13,lts_eq_divergence_preserving_branching_bisim_tb); //Divergence-preserving branching bisimulation reduction directly on LTS
   BOOST_CHECK(t13.num_states()==3 && t13.num_transitions()==3);
   t13=parse_aut(test13);
   reduce(t13,lts_eq_divergence_preserving_branching_bisim_sigref);

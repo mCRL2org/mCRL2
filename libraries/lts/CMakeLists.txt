@@ -3,6 +3,7 @@ add_mcrl2_library(lts
   SOURCES
     check_complexity.cpp
     liblts_bisim_gjkw.cpp
+    liblts_bisim_tb.cpp
     liblts_fsm.cpp
     liblts_aut.cpp
     liblts_lts.cpp

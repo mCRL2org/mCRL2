@@ -34,12 +34,15 @@ enum lts_equivalence
   lts_eq_none,             /**< Unknown or no equivalence */
   lts_eq_bisim,            /**< Strong bisimulation equivalence using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017] */
   lts_eq_bisim_gv,         /**< Strong bisimulation equivalence using the O(mn) algorithm [Groote/Vaandrager 1990] */
+  lts_eq_bisim_tb,         /**< Strong bisimulation equivalence using the O(m log n) algorithm directly on LTS */
   lts_eq_bisim_sigref,     /**< Strong bisimulation equivalence using the signature refinement algorithm [Blom/Orzan 2003] */
   lts_eq_branching_bisim,  /**< Branching bisimulation equivalence using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017] */
   lts_eq_branching_bisim_gv,     /**< Branching bisimulation equivalence using the O(mn) algorithm [Groote/Vaandrager 1990] */
+  lts_eq_branching_bisim_tb,     /**< Branching bisimulation equivalence using the O(m log n) algorithm directly on LTS */
   lts_eq_branching_bisim_sigref, /**< Branching bisimulation equivalence using the signature refinement algorithm [Blom/Orzan 2003] */
   lts_eq_divergence_preserving_branching_bisim, /**< Divergence-preserving branching bisimulation equivalence using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017] */
   lts_eq_divergence_preserving_branching_bisim_gv,    /**< Divergence-preserving branching bisimulation equivalence using the O(mn) algorithm [Groote/Vaandrager 1990] */
+  lts_eq_divergence_preserving_branching_bisim_tb,    /**< Divergence-preserving branching bisimulation equivalence using the O(m log n) algorithm directly on LTS */
   lts_eq_divergence_preserving_branching_bisim_sigref, /** Divergence-preserving branching bisimulation equivalence using the signature refinement algorithm [Blom/Orzan 2003] */
   lts_eq_weak_bisim,  /**< Weak bisimulation equivalence */
   lts_eq_divergence_preserving_weak_bisim, /**< Divergence-preserving weak bisimulation equivalence */
@@ -97,6 +100,10 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_bisim_gv;
   }
+  else if (s == "bisim-tb")
+  {
+    return lts_eq_bisim_tb;
+  }
   else if (s == "bisim-sig")
   {
     return lts_eq_bisim_sigref;
@@ -109,6 +116,10 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
       return lts_eq_branching_bisim_gv;
   }
+  else if (s == "branching-bisim-tb")
+  {
+      return lts_eq_branching_bisim_tb;
+  }
   else if (s == "branching-bisim-sig")
   {
     return lts_eq_branching_bisim_sigref;
@@ -120,6 +131,10 @@ lts_equivalence parse_equivalence(std::string const& s)
   else if (s == "dpbranching-bisim-gv")
   {
     return lts_eq_divergence_preserving_branching_bisim_gv;
+  }
+  else if (s == "dpbranching-bisim-tb")
+  {
+    return lts_eq_divergence_preserving_branching_bisim_tb;
   }
   else if (s == "dpbranching-bisim-sig")
   {
@@ -195,18 +210,24 @@ inline std::string print_equivalence(const lts_equivalence eq)
       return "bisim";
     case lts_eq_bisim_gv:
       return "bisim-gv";
+    case lts_eq_bisim_tb:
+      return "bisim-tb";
     case lts_eq_bisim_sigref:
       return "bisim-sig";
     case lts_eq_branching_bisim:
       return "branching-bisim";
     case lts_eq_branching_bisim_gv:
       return "branching-bisim-gv";
+    case lts_eq_branching_bisim_tb:
+      return "branching-bisim-tb";
     case lts_eq_branching_bisim_sigref:
       return "branching-bisim-sig";
     case lts_eq_divergence_preserving_branching_bisim:
       return "dpbranching-bisim";
     case lts_eq_divergence_preserving_branching_bisim_gv:
       return "dpbranching-bisim-gv";
+    case lts_eq_divergence_preserving_branching_bisim_tb:
+      return "dpbranching-bisim-tb";
     case lts_eq_divergence_preserving_branching_bisim_sigref:
       return "dpbranching-bisim-sig";
     case lts_eq_weak_bisim:
@@ -252,18 +273,24 @@ inline std::string description(const lts_equivalence eq)
       return "strong bisimilarity using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017]";
     case lts_eq_bisim_gv:
       return "strong bisimilarity using the O(mn) algorithm [Groote/Vaandrager 1990]";
+    case lts_eq_bisim_tb:
+      return "strong bisimilarity using the O(m log n) algorithm directly on LTS";
     case lts_eq_bisim_sigref:
       return "strong bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_branching_bisim:
       return "branching bisimilarity using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017]";
     case lts_eq_branching_bisim_gv:
       return "branching bisimilarity using the O(mn) algorithm [Groote/Vaandrager 1990]";
+    case lts_eq_branching_bisim_tb:
+      return "branching bisimilarity using the O(m log n) algorithm directly on LTS";
     case lts_eq_branching_bisim_sigref:
       return "branching bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_divergence_preserving_branching_bisim:
       return "divergence-preserving branching bisimilarity using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017]";
     case lts_eq_divergence_preserving_branching_bisim_gv:
       return "divergence-preserving branching bisimilarity using the O(mn) algorithm [Groote/Vaandrager 1990]";
+    case lts_eq_divergence_preserving_branching_bisim_tb:
+      return "divergence-preserving branching bisimilarity using the O(m log n) algorithm directly on LTS";
     case lts_eq_divergence_preserving_branching_bisim_sigref:
       return "divergence-preserving branching bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_weak_bisim:
