@@ -4,6 +4,7 @@ set(MCRL2_TOOLS
   lpsrealelm
   lpsrealzone
   lpssymbolicbisim
+  mcrl2ide
   pbesabsinthe
   pbespareqelm
   pbessymbolicbisim

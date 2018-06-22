@@ -57,7 +57,7 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
-    find_program(MACDEPLOYQT NAMES macdeployqt DOC "Path to macdeployqt executable (in the Qt binary directory)")
+    find_program(MACDEPLOYQT NAMES macdeployqt PATHS ${QT5_DIR}/../../../bin DOC "Path to macdeployqt executable (in the Qt binary directory)")
     if (NOT MACDEPLOYQT)
       message(FATAL_ERROR "Could not find macdeployqt; please add it to your PATH or specify the MACDEPLOYQT variable in CMake.")
     endif()
@@ -68,12 +68,12 @@ if(APPLE)
     install(CODE "
       message(STATUS \"Executing ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
       execute_process(
-        COMMAND ${MACDEPLOYQT} ${EXECUTABLES}
+        COMMAND ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
         OUTPUT_FILE /tmp/macdeployqt.log
       )
     ")
-# Explicitly install the Qt frameworks in the lib subdirectory. The program macdeployqt 
+# Explicitly install the Qt frameworks in the lib subdirectory. The program macdeployqt
 # does not do this by itself. A more logical place appears to install the files in Contents/Frameworks
 # but the loader on the mac is not able to find them in that directory.
 # It is helpful to set the environment variable QT_DEBUG_PLUGINS to 1 if investigating issues.
@@ -95,7 +95,7 @@ if(APPLE)
             DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/lib)
     install(DIRECTORY ${Qt5Xml_DIR}/../../../plugins/platforms
             DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
-            
+
   endif()
 endif()
 

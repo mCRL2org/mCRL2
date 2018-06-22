@@ -1,0 +1,44 @@
+nodes:
+  l1:
+    type: PbesSpec
+  l2:
+    type: PBES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: []
+    args: []
+    name: pbes2bool
+  t3:
+    input: [l2]
+    output: []
+    args: [-c]
+    name: pbespgsolve
+  t4:
+    input: [l2]
+    output: []
+    args: [-sspm]
+    name: pbespgsolve
+  t5:
+    input: [l2]
+    output: []
+    args: [-saltspm]
+    name: pbespgsolve
+  t6:
+    input: [l2]
+    output: []
+    args: [-srecursive]
+    name: pbespgsolve
+  t7:
+    input: [l2]
+    output: []
+    args: [-sprioprom]
+    name: pbespgsolve
+result: |
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution']== t6.value['solution'] == t7.value['solution']

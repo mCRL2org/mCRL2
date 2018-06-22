@@ -26,6 +26,7 @@
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/remove_equations.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
@@ -441,6 +442,8 @@ class pbesinst_lazy_algorithm
     /// \brief Simplifies some attributes based on variables that have the value true or false.
     detail::pbesinst_resetter m_pbesinst_resetter;
 
+    int m_optimization = 0;
+
     /// \brief Prints a log message for every 1000-th equation
     std::string print_equation_count(std::size_t size) const
     {
@@ -478,7 +481,7 @@ class pbesinst_lazy_algorithm
 
     pbes_expression forward_substitute(const pbes_expression& psi_e,
                                        const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
-                                      )
+    )
     {
       if (m_transformation_strategy >= optimize)
       {
@@ -491,7 +494,8 @@ class pbesinst_lazy_algorithm
       }
     }
 
-    pbes_expression simplify_loop(const pbes_expression& psi_e, const fixpoint_symbol& symbol, const propositional_variable_instantiation& X_e) const
+    pbes_expression simplify_loop(const pbes_expression& psi_e, const fixpoint_symbol& symbol,
+                                  const propositional_variable_instantiation& X_e) const
     {
       if (m_transformation_strategy >= on_the_fly_with_fixed_points)
       {
@@ -503,10 +507,39 @@ class pbesinst_lazy_algorithm
       }
     }
 
+    pbes_expression apply_optimization1(const pbes_expression& psi_e, const fixpoint_symbol& symbol,
+                                        const propositional_variable_instantiation& X_e) const
+    {
+      if (m_optimization >= 1)
+      {
+        pbes_expression value;
+        if (symbol.is_mu())
+        {
+          value = false_();
+        }
+        else
+        {
+          value = true_();
+        }
+        return replace_propositional_variables(psi_e, [&](const propositional_variable_instantiation& Y) {
+                                                   if (Y == X_e)
+                                                   {
+                                                     return value;
+                                                   }
+                                                   return static_cast<const pbes_expression&>(Y);
+                                               }
+        );
+      }
+      else
+      {
+        return psi_e;
+      }
+    }
+
     void backward_substitute(const pbes_expression& psi_e,
                              const propositional_variable_instantiation& X_e,
                              std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
-                            )
+    )
     {
       if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
       {
@@ -518,7 +551,7 @@ class pbesinst_lazy_algorithm
                std::deque<propositional_variable_instantiation>& todo,
                std::unordered_set<propositional_variable_instantiation>& done,
                const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
-              )
+    )
     {
       if (m_transformation_strategy >= on_the_fly)
       {
@@ -534,25 +567,31 @@ class pbesinst_lazy_algorithm
     /// \param search_strategy The search strategy used to explore the pbes, typically depth or breadth first.
     /// \param transformation_strategy The strategy that determines to which extent the generated bes is simplified while being generated.
     explicit pbesinst_lazy_algorithm(
-         const pbes& p,
-         data::rewriter::strategy rewrite_strategy = data::jitty,
-         search_strategy search_strategy = breadth_first,
-         transformation_strategy transformation_strategy = lazy
-        )
-      :
-        datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
-        m_pbes(preprocess(p)),
-        m_equation_index(p),
-        R(datar, p.data()),
-        m_search_strategy(search_strategy),
-        m_transformation_strategy(transformation_strategy),
-        m_find_loop_simplifier(m_equation_index, equation)
-    {}
+            const pbes& p,
+            data::rewriter::strategy rewrite_strategy = data::jitty,
+            search_strategy search_strategy = breadth_first,
+            transformation_strategy transformation_strategy = lazy,
+            int optimization = 0
+    )
+            :
+            datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p),
+                                                              p.global_variables()), rewrite_strategy),
+            m_pbes(preprocess(p)),
+            m_equation_index(p),
+            R(datar, p.data()),
+            m_search_strategy(search_strategy),
+            m_transformation_strategy(transformation_strategy),
+            m_find_loop_simplifier(m_equation_index, equation),
+            m_optimization(optimization)
+    {
+    }
 
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
-    virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)
-    {}
+    virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */,
+                                 std::size_t /* k */)
+    {
+    }
 
     propositional_variable_instantiation next_todo()
     {
@@ -573,6 +612,11 @@ class pbesinst_lazy_algorithm
     const fixpoint_symbol& symbol(std::size_t i) const
     {
       return m_pbes.equations()[i].symbol();
+    }
+
+    virtual pbes_expression rewrite_psi(const pbes_expression& psi)
+    {
+      return psi;
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
@@ -601,6 +645,13 @@ class pbesinst_lazy_algorithm
 
         // optional step
         psi_e = simplify_loop(psi_e, eqn.symbol(), X_e);
+
+        // optional step
+        psi_e = apply_optimization1(psi_e, eqn.symbol(), X_e);
+
+        // TODO: move all rewrite steps to the function rewrite_psi.
+        // optional step
+        psi_e = rewrite_psi(psi_e);
 
         // Store and report the new equation
         equation[X_e] = psi_e;

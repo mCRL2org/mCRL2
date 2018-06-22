@@ -1,11 +1,24 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(mCRL2)
-
-if("${CMAKE_MAJOR_VERSION}" GREATER 2)
+  
+if(NOT ${CMAKE_VERSION} VERSION_LESS 3.0)
+  # Ignore variable COMPILE_DEFINITIONS_<CONFIG>
   cmake_policy(SET CMP0043 NEW)
-  if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 3.0)
-    cmake_policy(SET CMP0054 OLD)
-  endif()
+endif()
+
+if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
+  # Do not implicitly dereference variables or keywords when quoted in an if() command. 
+  cmake_policy(SET CMP0054 OLD)
+endif()
+
+if(NOT ${CMAKE_VERSION} VERSION_LESS 3.10)
+  # From CMake 3.10 onwards the AUTOMOC and AUTOUIC properties apply to GENERATED files.
+  cmake_policy(SET CMP0071 OLD)
+endif()  
+
+if(NOT ${CMAKE_VERSION} VERSION_LESS 3.11)
+  # Choose the GLVND (GL Vendor Neutral Dispatch library) over OpenGL legacy if both are available.
+  cmake_policy(SET CMP0072 NEW)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
@@ -46,14 +59,15 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(GL2PS      QUIET REQUIRED)
   find_package(TR         QUIET REQUIRED)
   find_package(CVC3       QUIET)
-  find_package(Qt5Core    QUIET REQUIRED)
-  find_package(Qt5OpenGL  QUIET REQUIRED)
-  find_package(Qt5Widgets QUIET REQUIRED)
-  find_package(Qt5Xml     QUIET REQUIRED)
-  find_package(Qt5Gui     QUIET REQUIRED)
+  find_package(Qt5 ${MCRL2_MIN_QT_VERSION} COMPONENTS Core OpenGL Widgets Xml Gui QUIET REQUIRED)
+
   set_target_properties(Qt5::Core Qt5::OpenGL Qt5::Widgets Qt5::Xml Qt5::Gui
                         PROPERTIES MAP_IMPORTED_CONFIG_MAINTAINER "RELEASE")
+
+  # The directories for components are derived from Qt5_DIR, as such they can be marked as advanced.
+  mark_as_advanced(Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
 endif()
+
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 

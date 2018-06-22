@@ -125,7 +125,7 @@
   </action>
   <action name="actionReset_perspective">
    <property name="text">
-    <string>Reset Perspective</string>
+    <string>Revert to default layout</string>
    </property>
   </action>
  </widget>
