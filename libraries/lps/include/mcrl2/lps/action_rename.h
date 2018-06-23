@@ -305,49 +305,54 @@ namespace lps
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-using namespace data;
+// using namespace data;
 
 // Put the equalities t==u in the replacement map as u:=t.
-inline void fill_replacement_map(const data_expression& equalities_in_conjunction, 
-                          std::map<data_expression, data_expression>& replacement_map)
+inline void fill_replacement_map(const data::data_expression& equalities_in_conjunction, 
+                                 std::map<data::data_expression, data::data_expression>& replacement_map)
 {
-  if (equalities_in_conjunction==sort_bool::true_())
+  if (equalities_in_conjunction==data::sort_bool::true_())
   {
     return;
   }
-  if (sort_bool::is_and_application(equalities_in_conjunction))
+  if (data::sort_bool::is_and_application(equalities_in_conjunction))
   {
-    fill_replacement_map(sort_bool::left(equalities_in_conjunction),replacement_map);
-    fill_replacement_map(sort_bool::right(equalities_in_conjunction),replacement_map);
+    fill_replacement_map(data::sort_bool::left(equalities_in_conjunction),replacement_map);
+    fill_replacement_map(data::sort_bool::right(equalities_in_conjunction),replacement_map);
     return;
   }
-  assert(is_equal_to_application(equalities_in_conjunction));
-  const application a=atermpp::down_cast<application>(equalities_in_conjunction);
-  replacement_map[a[1]]=a[0];
+  if(is_equal_to_application(equalities_in_conjunction))
+  { 
+    const data::application a=atermpp::down_cast<data::application>(equalities_in_conjunction);
+    if (a[1]!=a[0])
+    {
+      replacement_map[a[1]]=a[0];
+    }
+  }
 }
 
 // Replace expressions in e according to the replacement map.
 // Assume that e only consists of and, not and equality applied to terms. 
-inline data_expression replace_expressions(const data_expression& e, 
-                                    const std::map<data_expression, data_expression>& replacement_map)
+inline data::data_expression replace_expressions(const data::data_expression& e, 
+                                    const std::map<data::data_expression, data::data_expression>& replacement_map)
 {
-  if (sort_bool::is_and_application(e))
+  if (data::sort_bool::is_and_application(e))
   {
-    return sort_bool::and_(replace_expressions(sort_bool::left(e),replacement_map),
-                           replace_expressions(sort_bool::right(e),replacement_map));
+    return data::sort_bool::and_(replace_expressions(data::sort_bool::left(e),replacement_map),
+                           replace_expressions(data::sort_bool::right(e),replacement_map));
   }
-  if (sort_bool::is_not_application(e))
+  if (data::sort_bool::is_not_application(e))
   {
-    return sort_bool::not_(replace_expressions(sort_bool::arg(e),replacement_map));
+    return data::sort_bool::not_(replace_expressions(data::sort_bool::arg(e),replacement_map));
   }
   if (is_equal_to_application(e))
   {
-    const application a=atermpp::down_cast<application>(e);
-    return application(a.head(),
+    const data::application a=atermpp::down_cast<data::application>(e);
+    return data::application(a.head(),
                        replace_expressions(a[0],replacement_map),
                        replace_expressions(a[1],replacement_map));
   }
-  const std::map<data_expression, data_expression>::const_iterator i=replacement_map.find(e);
+  const std::map<data::data_expression, data::data_expression>::const_iterator i=replacement_map.find(e);
   if (i!=replacement_map.end()) // found;
   {
     return i->second;
@@ -356,9 +361,9 @@ inline data_expression replace_expressions(const data_expression& e,
 }
 
 // Substitute the equalities in equalities_in_conjunction from right to left in e. 
-inline data_expression substitute_equalities(const data_expression& e, const data_expression& equalities_in_conjunction)
+inline data::data_expression substitute_equalities(const data::data_expression& e, const data::data_expression& equalities_in_conjunction)
 {
-  std::map<data_expression, data_expression> replacement_map;
+  std::map<data::data_expression, data::data_expression> replacement_map;
   fill_replacement_map(equalities_in_conjunction, replacement_map);
   return replace_expressions(e,replacement_map);
 }
