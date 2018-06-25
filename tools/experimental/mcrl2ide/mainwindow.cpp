@@ -403,7 +403,7 @@ void MainWindow::actionCreateReducedLts()
 
 void MainWindow::actionAbortLtsCreation()
 {
-  /* Not yet implemented */
+  processSystem->abortProcess(ltsCreationProcessid);
 }
 
 void MainWindow::actionVerifyAllProperties()
