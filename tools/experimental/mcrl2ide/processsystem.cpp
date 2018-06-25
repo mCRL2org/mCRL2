@@ -109,15 +109,22 @@ QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
        "--lin-method=regular", "--rewriter=jitty", "--verbose"});
 
   /* connect to logger */
-  if (processType == ProcessType::Verification)
+  switch (processType)
   {
+  case ProcessType::Simulation:
     connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-            SLOT(logToVerificationConsole()));
-  }
-  else if (processType == ProcessType::LtsCreation)
-  {
+            SLOT(logToSimulationConsole()));
+    break;
+  case ProcessType::LtsCreation:
     connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
             SLOT(logToLtsCreationConsole()));
+    break;
+  case ProcessType::Verification:
+    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+            SLOT(logToVerificationConsole()));
+    break;
+  default:
+    break;
   }
 
   return mcrl22lpsProcess;
@@ -125,8 +132,13 @@ QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
 
 QProcess* ProcessSystem::createLpsxsimProcess()
 {
-  /* Not implemented yet */
-  return new QProcess();
+  QProcess* lpsxsimProcess = new QProcess();
+
+  /* create the process */
+  lpsxsimProcess->setProgram("lpsxsim");
+  lpsxsimProcess->setArguments({fileSystem->lpsFilePath(), "--rewriter=jitty"});
+
+  return lpsxsimProcess;
 }
 
 QProcess* ProcessSystem::createLps2ltsProcess()
@@ -179,13 +191,13 @@ QProcess* ProcessSystem::createLtsconvertProcess(LtsReduction reduction)
 
 QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction)
 {
-  QProcess* ltsgraphProcesss = new QProcess();
+  QProcess* ltsgraphProcess = new QProcess();
 
   /* create the process */
-  ltsgraphProcesss->setProgram("ltsgraph");
-  ltsgraphProcesss->setArguments({fileSystem->ltsFilePath(reduction)});
+  ltsgraphProcess->setProgram("ltsgraph");
+  ltsgraphProcess->setArguments({fileSystem->ltsFilePath(reduction)});
 
-  return ltsgraphProcesss;
+  return ltsgraphProcess;
 }
 
 QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
@@ -225,6 +237,32 @@ QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
   return pbes2boolProcess;
 }
 
+int ProcessSystem::simulate()
+{
+  if (fileSystem->saveProject())
+  {
+    /* create the subprocesses */
+    int processid = pid++;
+    ProcessType processType = ProcessType::Simulation;
+    consoleDock->setConsoleTab(processType);
+
+    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
+    mcrl22lpsProcess->setProperty("pid", processid);
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(simulateLps()));
+
+    QProcess* lpsxsimProcess = createLpsxsimProcess();
+    lpsxsimProcess->setProperty("pid", processid);
+
+    processes[processid] = {mcrl22lpsProcess, lpsxsimProcess};
+    processTypes[processid] = processType;
+    processQueues[processType]->enqueue(processid);
+    emit newProcessQueued(processType);
+
+    return processid;
+  }
+  return -1;
+}
+
 int ProcessSystem::createLts(LtsReduction reduction)
 {
   if (fileSystem->saveProject())
@@ -258,8 +296,6 @@ int ProcessSystem::createLts(LtsReduction reduction)
 
     QProcess* ltsgraphProcess = createLtsgraphProcess(reduction);
     ltsgraphProcess->setProperty("pid", processid);
-    connect(ltsgraphProcess, SIGNAL(finished(int)), this,
-            SLOT(verificationResult()));
     ltsCreationProcesses.push_back(ltsgraphProcess);
 
     processes[processid] = ltsCreationProcesses;
@@ -276,7 +312,6 @@ int ProcessSystem::verifyProperty(Property* property)
 {
   if (fileSystem->saveProject())
   {
-
     /* create the subprocesses */
     int processid = pid++;
     ProcessType processType = ProcessType::Verification;
@@ -309,8 +344,7 @@ int ProcessSystem::verifyProperty(Property* property)
 void ProcessSystem::startProcess(int processid)
 {
   ProcessType processType = processTypes[processid];
-  if (processType == ProcessType::LtsCreation ||
-      processType == ProcessType::Verification)
+  if (!(processType == ProcessType::Parsing))
   {
     createLps(processid);
   }
@@ -333,6 +367,17 @@ void ProcessSystem::createLps(int processid)
   {
     mcrl22lpsProcess->start();
   }
+}
+
+void ProcessSystem::simulateLps()
+{
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  QProcess* lpsxsimProcess = processes[processid][1];
+
+  consoleDock->writeToConsole(ProcessType::Simulation,
+                              "##### SHOWING SIMULATION #####\n");
+  lpsxsimProcess->start();
+  emit processFinished(processid);
 }
 
 void ProcessSystem::createLts()

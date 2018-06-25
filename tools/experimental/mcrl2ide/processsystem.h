@@ -124,8 +124,15 @@ class ProcessSystem : public QObject
   ProcessThread* getProcessThread(ProcessType processType);
 
   /**
+   * @brief simulate Simulates the current specification using mcrl22lps and
+   *   lpsxsim
+   * @return The process id of the simulation process
+   */
+  int simulate();
+
+  /**
    * @brief createLts Create and visualizes the lts of the current specification
-   *   using mcrl22lps, lps2lts optionally ltsconvert and ltsgraph
+   *   using mcrl22lps, lps2lts, optionally ltsconvert and ltsgraph
    * @param reduction What reduction to apply
    * @return The process id of the lts creation process
    */
@@ -249,11 +256,15 @@ class ProcessSystem : public QObject
   void startProcess(int processid);
 
   /**
-   * @brief createLps The first step of any lts creation and verification
-   *   process, creating the lps
+   * @brief createLps The first step of any process, creating the lps
    * @param processid The id of the process to run
    */
   void createLps(int processid);
+
+  /**
+   * @brief simulateLps The last step of simulation, visualizing the simulation
+   */
+  void simulateLps();
 
   /**
    * @brief createLts The second step of lts creation, creating the lts

@@ -178,6 +178,7 @@ class MainWindow : public QMainWindow
   ProcessSystem* processSystem;
 
   int ltsCreationProcessid;
+  int simulationProcessid;
 };
 
 #endif // MAINWINDOW_H

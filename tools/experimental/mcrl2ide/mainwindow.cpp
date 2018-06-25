@@ -40,6 +40,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
   /* make the toolbar buttons enabled or disabled depending on whether processes
    *   are running */
+  connect(processSystem->getProcessThread(ProcessType::Simulation),
+          SIGNAL(isRunning(bool)), simulateAction, SLOT(setDisabled(bool)));
   connect(processSystem->getProcessThread(ProcessType::LtsCreation),
           SIGNAL(isRunning(bool)), createLtsAction, SLOT(setDisabled(bool)));
   connect(processSystem->getProcessThread(ProcessType::LtsCreation),
@@ -387,7 +389,7 @@ void MainWindow::actionParse()
 
 void MainWindow::actionSimulate()
 {
-  /* Not yet implemented */
+  simulationProcessid = processSystem->simulate();
 }
 
 void MainWindow::actionCreateLts()
