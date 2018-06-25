@@ -1,0 +1,8 @@
+% We check that on all reachable states of the system (while traversing non-expire_timer actions)
+% the system never enters a state in which a VSS's next state is not-determined.
+% Technically, this means that on all reachable states we require that for any pair of 
+% action change(v,s,s1) and change(v,s,s2), when enabled, we have s1 = s2.
+
+
+[true*]
+(forall v:VSS_id. (val(legal_vss(v)) =>  forall s,s1,s2:VSS_status. ( (<change(v,s,s1)>true && <change(v,s,s2)>true) => val(s1 == s2))))

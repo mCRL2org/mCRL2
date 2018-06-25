@@ -1,0 +1,2 @@
+* ertms-hl3.mcrl2 contains the Simultaneous Update model of the ERTMS-HL3 model (version 1A)
+* ertms-hl3.announce.mcrl2 contains the Simultaneous Update model of the ERTMS-HL3 model (version 1A), modified to emit the position of the trains on the tracks to facilitate the verification of the collision property
