@@ -9,7 +9,8 @@ function(_add_library_tests TARGET_NAME)
   endif(MCRL2_SKIP_LONG_TESTS)
 
   foreach(category "librarytest" "libraryexample")
-    foreach(test IN ITEMS ${${category}})
+    foreach(test IN LISTS ${category})
+
       get_filename_component(base ${test} NAME_WE)
       set(testname ${category}_${TARGET_NAME}_${base})
       set(CMAKE_THREAD_PREFER_PTHREAD TRUE)       # Added by JFG
