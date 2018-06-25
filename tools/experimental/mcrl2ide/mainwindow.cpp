@@ -341,7 +341,7 @@ void MainWindow::actionCreateReducedLts()
   /* ask the user what reduciton to use */
   bool ok;
   QString reductionName = QInputDialog::getItem(
-      this, "Open Project", "Project name:", reductionNames, 0, false, &ok,
+      this, "Create reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
       Qt::WindowCloseButtonHint);
 
   /* if user pressed ok, create a reduced lts */

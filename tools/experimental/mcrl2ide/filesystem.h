@@ -35,6 +35,8 @@ class Property
   QString text;
 
   Property(QString name, QString text);
+
+  bool equals(Property* property);
 };
 
 class Project

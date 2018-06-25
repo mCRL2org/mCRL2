@@ -65,6 +65,7 @@ class AddEditPropertyDialog : public QDialog
 
   FileSystem* fileSystem;
   QString windowTitle;
+  QString oldPropertyName;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

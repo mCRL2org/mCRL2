@@ -23,6 +23,11 @@ Property::Property(QString name, QString text)
   this->text = text;
 }
 
+bool Property::equals(Property* property)
+{
+  return this->name == property->name && this->text == property->text;
+}
+
 Project::Project(QString projectName, std::list<Property*> properties)
 {
   this->projectName = projectName;
@@ -272,11 +277,12 @@ Property* FileSystem::editProperty(Property* oldProperty)
     newProperty = new Property(editPropertyDialog->getPropertyName(),
                                editPropertyDialog->getPropertyText());
 
+    /* alter the properties list */
     for (Property* property : properties)
     {
-      if (property == oldProperty)
+      if (property->equals(oldProperty))
       {
-        property = newProperty;
+        *property = *newProperty;
         break;
       }
     }
