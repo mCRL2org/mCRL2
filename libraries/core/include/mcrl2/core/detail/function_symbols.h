@@ -16,6 +16,8 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/function_symbol.h"
 
+#include <memory>
+
 namespace mcrl2 {
 
 namespace core {
@@ -31,14 +33,14 @@ namespace detail {
 // element is added. That would mean that function_symbol_DataAppl and function_symbol_DataAppl_helper
 // cannot deliver a reference.
 // Another solution used in the past is a deque of objects. That turned out to be somewhat slower.
-extern std::vector<atermpp::function_symbol*> function_symbols_DataAppl;
+extern std::vector<std::unique_ptr<atermpp::function_symbol>> function_symbols_DataAppl;
 
 inline
 const atermpp::function_symbol& function_symbol_DataAppl_helper(std::size_t i)
 {
   do
   {
-    function_symbols_DataAppl.push_back(new atermpp::function_symbol("DataAppl", function_symbols_DataAppl.size()));
+    function_symbols_DataAppl.push_back(std::unique_ptr<atermpp::function_symbol>(new atermpp::function_symbol("DataAppl", function_symbols_DataAppl.size())));
   }
   while (i >= function_symbols_DataAppl.size());
   return *function_symbols_DataAppl[i];
