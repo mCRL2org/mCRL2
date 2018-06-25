@@ -13,22 +13,19 @@ function(_add_library_tests TARGET_NAME)
 
       get_filename_component(base ${test} NAME_WE)
       set(testname ${category}_${TARGET_NAME}_${base})
-      set(CMAKE_THREAD_PREFER_PTHREAD TRUE)       # Added by JFG
-      set(THREADS_PREFER_PTHREAD_FLAG TRUE)       # Added by JFG
-      find_package(Threads REQUIRED)              # Added by JFG
 
       add_executable(${testname} EXCLUDE_FROM_ALL ${test})
       set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category})
       target_link_libraries(${testname} ${TARGET_NAME})
-      if(NOT  MSVC)                               # MSVC does not know nor needs pthread. There should be a more elegant way than an explicit exclusion.
-        target_link_libraries(${testname} pthread)     # Added by JFG
-      endif()
+
       if(MCRL2_TEST_JITTYC)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
+
       if(TARGET_NAME STREQUAL "mcrl2_pbes")
         target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
       endif()
+
       if(${category} STREQUAL "librarytest")
         add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
            --build-and-test
@@ -44,6 +41,7 @@ function(_add_library_tests TARGET_NAME)
       else()
         add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
       endif()
+
       set_tests_properties(${testname} PROPERTIES
         LABELS ${category}
         ENVIRONMENT "MCRL2_COMPILEREWRITER=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter")
