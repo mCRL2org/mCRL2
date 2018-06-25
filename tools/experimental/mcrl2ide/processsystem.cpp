@@ -239,7 +239,7 @@ QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
 
 int ProcessSystem::simulate()
 {
-  if (fileSystem->saveProject())
+  if (!fileSystem->saveProject().isEmpty())
   {
     /* create the subprocesses */
     int processid = pid++;
@@ -265,7 +265,7 @@ int ProcessSystem::simulate()
 
 int ProcessSystem::createLts(LtsReduction reduction)
 {
-  if (fileSystem->saveProject())
+  if (!fileSystem->saveProject().isEmpty())
   {
     /* create the subprocesses */
     std::vector<QProcess*> ltsCreationProcesses = {};
@@ -310,7 +310,7 @@ int ProcessSystem::createLts(LtsReduction reduction)
 
 int ProcessSystem::verifyProperty(Property* property)
 {
-  if (fileSystem->saveProject())
+  if (!fileSystem->saveProject().isEmpty())
   {
     /* create the subprocesses */
     int processid = pid++;

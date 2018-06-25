@@ -59,11 +59,6 @@ class PropertyWidget : public QWidget
    */
   void setPropertyText(QString text);
 
-  /**
-   * @brief saveProperty Saves this property
-   */
-  void saveProperty();
-
   public slots:
   /**
    * @brief actionVerify Allows the user to verify this property

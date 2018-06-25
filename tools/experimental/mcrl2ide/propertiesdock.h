@@ -54,19 +54,6 @@ class PropertiesDock : public QDockWidget
   void deleteProperty(PropertyWidget* propertyWidget);
 
   /**
-   * @brief propertyNameExists Checks whether there already exists a property
-   *   with the name propertyName
-   * @param propertyName The property name to check for
-   * @return Whether there already exists a property with the name propertyName
-   */
-  bool propertyNameExists(QString propertyName);
-
-  /**
-   * @brief saveAllProperties Saves all properties in this dock
-   */
-  void saveAllProperties();
-
-  /**
    * @brief verifyAllProperties Verifies all properties in this dock
    */
   void verifyAllProperties();

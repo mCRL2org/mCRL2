@@ -13,7 +13,7 @@
 #include <QMessageBox>
 
 AddEditPropertyDialog::AddEditPropertyDialog(bool add,
-                                             PropertiesDock* propertiesDock,
+                                             FileSystem* fileSystem,
                                              QWidget* parent,
                                              QString propertyName,
                                              QString propertyText)
@@ -21,7 +21,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
 {
   ui->setupUi(this);
 
-  this->propertiesDock = propertiesDock;
+  this->fileSystem = fileSystem;
 
   /* change the ui depending on whether this should be an add or edit property
    *   window */
@@ -70,7 +70,7 @@ void AddEditPropertyDialog::parseAndAccept()
   }
 
   /* show a message box if this property name already exists */
-  if (propertiesDock->propertyNameExists(propertyName))
+  if (fileSystem->propertyNameExists(propertyName))
   {
     QMessageBox* msgBox =
         new QMessageBox(QMessageBox::Information, windowTitle,

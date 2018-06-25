@@ -57,16 +57,14 @@ class MainWindow : public QMainWindow
 
   /**
    * @brief actionNewProject Allows the user to save a project
-   * @return Whether saving was successful
    */
-  bool actionSaveProject();
+  void actionSaveProject();
 
   /**
    * @brief actionNewProject Allows the user to save a new project under a new
    *   name
-   * @return Whether saving was successful
    */
-  bool actionSaveProjectAs();
+  void actionSaveProjectAs();
 
   /**
    * @brief actionAddProperty Allows the user to add a property

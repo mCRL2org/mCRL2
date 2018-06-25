@@ -30,7 +30,6 @@ const std::map<LtsReduction, QString> LTSREDUCTIONNAMES = {
 
 class Property
 {
-
   public:
   QString name;
   QString text;
@@ -38,11 +37,17 @@ class Property
   Property(QString name, QString text);
 };
 
-class MainWindow;
+class Project
+{
+  public:
+  QString projectName;
+  std::list<Property*> properties;
+
+  Project(QString projectName, std::list<Property*> properties);
+};
 
 /**
- * @brief The FileSystem class handles all file related operations, including
- *   execution of mCRL2 tools
+ * @brief The FileSystem class handles all file related operations
  */
 class FileSystem : public QObject
 {
@@ -54,19 +59,13 @@ class FileSystem : public QObject
    * @param specificationEditor The specification editor in the main window
    * @parent The main widget (main window)
    */
-  explicit FileSystem(CodeEditor* specificationEditor, MainWindow* parent);
+  explicit FileSystem(CodeEditor* specificationEditor, QWidget* parent);
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the projects folder
    *   exists, if not creates it
    */
   void makeSureProjectsFolderExists();
-
-  /**
-   * @brief makeSureProjectFolderExists Checks whether the project folder
-   *   exists, if not creates it
-   */
-  void makeSureProjectFolderExists();
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder
@@ -143,18 +142,26 @@ class FileSystem : public QObject
   bool isSpecificationModified();
 
   /**
+   * @brief propertyNameExists Checks whether the given property name already
+   *   exists
+   * @param propertyName The property name to check for
+   * @return Whether the given property name already exists
+   */
+  bool propertyNameExists(QString propertyName);
+
+  /**
    * @brief propertyModified Checks whether the property has been modified since
    *   it has been saved
-   * @param propertyName The name of the property
+   * @param propertyName The property
    * @return Whether the property has been modified since it has been saved
    */
-  bool isPropertyModified(QString propertyName);
+  bool isPropertyModified(Property* property);
 
   /**
    * @brief setPropertyModified Sets the property to modified
-   * @param PropertyName The name of the property
+   * @param PropertyName The property
    */
-  void setPropertyModified(QString propertyName);
+  void setPropertyModified(Property* property);
 
   /**
    * @brief upToDateLpsFileExists Checks whether an lps file exists that is
@@ -185,41 +192,44 @@ class FileSystem : public QObject
   /**
    * @brief newProject Creates a new project with the corresponding file
    *   structure
-   * @param projectName The name of the new project
-   * @return An error message if unsuccessful, else the empty string
+   * @param context Whether this is done for "Create Project" or "Save Project
+   *   As"
+   * @return The name of the new project, is "" if failed
    */
-  QString newProject(QString projectName);
+  QString newProject(QString context = "New Project");
 
   /**
-   * @brief getAllProjects Gets all projects that are in the project folder
-   * @return The names of all projects
+   * @brief newProperty Creates a new property
+   * @return The new property, is NULL if failed
    */
-  QStringList getAllProjects();
+  Property* newProperty();
+
+  /**
+   * @brief editProperty Edits an existing property
+   * @param oldProperty The property to be edited
+   * @return The edited property, the old property if failed
+   */
+  Property* editProperty(Property* oldProperty);
 
   /**
    * @brief openProject Opens the project with the given project name
-   * @param context Whether this is done for "Create Project" or "Save Project
-   *   As"
-   * @return The list of the properties that need to be added
+   * @return The opened project, is NULL if failed
    */
-  std::list<Property*> openProject(QString projectName);
-
-  /**
-   * @brief saveProject Saves the current specification
-   */
-  void saveSpecification();
-
-  /**
-   * @brief saveProperty Saves the given property
-   * @param property The property to save
-   */
-  void saveProperty(Property* property);
+  Project openProject();
 
   /**
    * @brief saveProject Saves the project to file
-   * @return Whether saving was successful
+   * @param forceSave Whether the files should be saved even if they have not
+   *   been modified
+   * @return The new project name, is empty if failed
    */
-  bool saveProject();
+  QString saveProject(bool forceSave = false);
+
+  /**
+   * @brief saveProjectAs Saves the project to file under a new name
+   * @return The new project name, is empty if failed
+   */
+  QString saveProjectAs();
 
   public slots:
   /**
@@ -239,13 +249,14 @@ class FileSystem : public QObject
       QDir::currentPath() + QDir::separator() + "projects";
   QString propertiesFolderName = "properties";
 
-  MainWindow* mainWindow;
+  QWidget* parent;
   CodeEditor* specificationEditor;
   QString projectName;
   bool projectOpen;
+  std::list<Property*> properties;
 
   bool specificationModified;
-  std::map<QString, bool> propertymodified;
+  std::map<QString, bool> propertyModified;
 };
 
 #endif // FILESYSTEM_H
