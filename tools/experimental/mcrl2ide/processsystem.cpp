@@ -148,9 +148,33 @@ QProcess* ProcessSystem::createLps2ltsProcess()
 
 QProcess* ProcessSystem::createLtsconvertProcess(LtsReduction reduction)
 {
-  /* Not implemented yet */
-  Q_UNUSED(reduction);
-  return new QProcess();
+  QProcess* ltsconvertProcess = new QProcess();
+
+  /* create the process */
+  ltsconvertProcess->setProgram("ltsconvert");
+
+  QString equivalence = "--equivalence=";
+  switch (reduction)
+  {
+  case LtsReduction::StrongBisimulation:
+    equivalence += "bisim";
+    break;
+  case LtsReduction::BranchingBisimulation:
+    equivalence += "branching-bisim";
+    break;
+  }
+
+  ltsconvertProcess->setArguments({fileSystem->ltsFilePath(LtsReduction::None),
+                                   fileSystem->ltsFilePath(reduction),
+                                   equivalence, "--verbose"});
+
+  ltsconvertProcess->setProperty("reduction", int(reduction));
+
+  /* connect to logger */
+  connect(ltsconvertProcess, SIGNAL(readyReadStandardError()), consoleDock,
+          SLOT(logToLtsCreationConsole()));
+
+  return ltsconvertProcess;
 }
 
 QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction)
@@ -334,7 +358,25 @@ void ProcessSystem::createLts()
 
 void ProcessSystem::reduceLts()
 {
-  /* not implemented yet */
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  QProcess* ltsconvertProcess = processes[processid][2];
+  LtsReduction reduction = static_cast<LtsReduction>(
+      ltsconvertProcess->property("reduction").toInt());
+
+  consoleDock->writeToConsole(ProcessType::LtsCreation,
+                              "##### REDUCING LTS #####\n");
+
+  /* check if we need to run this */
+  if (fileSystem->upToDateLtsFileExists(reduction))
+  {
+    consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                "Up to date LTS already exists");
+    emit ltsconvertProcess->finished(0);
+  }
+  else
+  {
+    ltsconvertProcess->start();
+  }
 }
 
 void ProcessSystem::showLts()

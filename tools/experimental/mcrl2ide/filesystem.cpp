@@ -142,11 +142,23 @@ bool FileSystem::upToDateLpsFileExists()
 
 bool FileSystem::upToDateLtsFileExists(LtsReduction reduction)
 {
-  /* an lts file is up to date if the lts file exists and the lts file is
-   *   created after the the last time the lps file was modified */
-  return QFile(ltsFilePath(reduction)).exists() &&
-         QFileInfo(lpsFilePath()).lastModified() <=
-             QFileInfo(ltsFilePath(reduction)).lastModified();
+  /* in case not reduced, an lts file is up to date if the lts file exists and
+   *   the lts file is created after the the last time the lps file was modified
+   * in case reduced, an lts file is up to date if the lts file exists and
+   *   the lts file is created after the the last time the unreduced lts file
+   *   was modified */
+  if (reduction == LtsReduction::None)
+  {
+    return QFile(ltsFilePath(reduction)).exists() &&
+           QFileInfo(lpsFilePath()).lastModified() <=
+               QFileInfo(ltsFilePath(reduction)).lastModified();
+  }
+  else
+  {
+    return QFile(ltsFilePath(reduction)).exists() &&
+           QFileInfo(ltsFilePath(LtsReduction::None)).lastModified() <=
+               QFileInfo(ltsFilePath(reduction)).lastModified();
+  }
 }
 
 bool FileSystem::upToDatePbesFileExists(QString propertyName)

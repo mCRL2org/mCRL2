@@ -28,8 +28,6 @@ const std::map<LtsReduction, QString> LTSREDUCTIONNAMES = {
     {LtsReduction::BranchingBisimulation, "BranchingBisimulation"},
 };
 
-class MainWindow;
-
 class Property
 {
 
@@ -39,6 +37,8 @@ class Property
 
   Property(QString name, QString text);
 };
+
+class MainWindow;
 
 /**
  * @brief The FileSystem class handles all file related operations, including

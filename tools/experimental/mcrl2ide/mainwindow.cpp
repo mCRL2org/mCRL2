@@ -41,8 +41,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   /* make the toolbar buttons enabled or disabled depending on whether processes
    *   are running */
   connect(processSystem->getProcessThread(ProcessType::LtsCreation),
-          SIGNAL(isRunning(bool)), createLtsAction,
-          SLOT(setDisabled(bool)));
+          SIGNAL(isRunning(bool)), createLtsAction, SLOT(setDisabled(bool)));
   connect(processSystem->getProcessThread(ProcessType::LtsCreation),
           SIGNAL(isRunning(bool)), createReducedLtsAction,
           SLOT(setDisabled(bool)));
@@ -398,7 +397,32 @@ void MainWindow::actionCreateLts()
 
 void MainWindow::actionCreateReducedLts()
 {
-  /* Not yet implemented */
+  QStringList reductionNames;
+  for (auto const item : LTSREDUCTIONNAMES)
+  {
+    reductionNames << item.second;
+  }
+
+  /* ask the user what reduciton to use */
+  bool ok;
+  QString reductionName = QInputDialog::getItem(
+      this, "Open Project", "Project name:", reductionNames, 0, false, &ok,
+      Qt::WindowCloseButtonHint);
+
+  /* if user pressed ok, create a reduced lts */
+  if (ok)
+  {
+    LtsReduction reduction;
+    for (auto const item : LTSREDUCTIONNAMES)
+    {
+      if (item.second == reductionName)
+      {
+        reduction = item.first;
+      }
+    }
+
+    ltsCreationProcessid = processSystem->createLts(reduction);
+  }
 }
 
 void MainWindow::actionAbortLtsCreation()
