@@ -1251,98 +1251,98 @@ act
   expire_timer: TTD_id#TTD_timer;
   expire_timer: TRAIN_id#TRAIN_timer;
 proc
- RBC(previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
+ TS(previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
    sum t: TTD_id.legal_ttd(t) ->
      sum s:TTD_status.
-       r_emit_status(t,s).RBC_stabilise(previous_vs,vs,ttd_update_status(t,s,ts),trs)
+       r_emit_status(t,s).TS_stabilise(previous_vs,vs,ttd_update_status(t,s,ts),trs)
  + sum tr: TRAIN_id.unconnected_train(tr,trs) ->
-     sum p:PTD.r_start_mission(tr,p).RBC_handle_report(tr,p,previous_vs,vs,ts,ptd_train_update(tr,p,trs))
+     sum p:PTD.r_start_mission(tr,p).TS_handle_report(tr,p,previous_vs,vs,ts,ptd_train_update(tr,p,trs))
  + sum tr: TRAIN_id.legal_train(tr,trs) ->
-     sum p:PTD.r_emit_position(tr,p).RBC_handle_report(tr,p,previous_vs,vs,ts,trs)
+     sum p:PTD.r_emit_position(tr,p).TS_handle_report(tr,p,previous_vs,vs,ts,trs)
  + sum v: VSS_id.legal_vss(v) ->
      sum timer: VSS_timer.
-       expire_timer(v,timer).RBC_stabilise(previous_vs,vss_expire_timer(v,timer,vs),ts,trs)
+       expire_timer(v,timer).TS_stabilise(previous_vs,vss_expire_timer(v,timer,vs),ts,trs)
  + sum t: TTD_id.legal_ttd(t) ->
      sum timer: TTD_timer.
-       expire_timer(t,timer).RBC_stabilise(previous_vs,vs,ttd_expire_timer(t,timer,ts),trs)
+       expire_timer(t,timer).TS_stabilise(previous_vs,vs,ttd_expire_timer(t,timer,ts),trs)
  + sum tr: TRAIN_id.legal_train(tr,trs) ->
      sum timer: TRAIN_timer.
-       expire_timer(tr,timer).RBC_stabilise(previous_vs,vs,ts,train_expire_timer(tr,timer,trs))
+       expire_timer(tr,timer).TS_stabilise(previous_vs,vs,ts,train_expire_timer(tr,timer,trs))
  + sum tr: TRAIN_id.legal_train(tr,trs) ->
-     in_advance_vss(max_safe_EoA(tr,vs,trs),eoa(trs(tr))) ->       s_extend_EoA(tr,max_safe_EoA(tr,vs,trs)).RBC(previous_vs,vs,ts,train_eoa_update(tr,max_safe_EoA(tr,vs,trs),trs));
+     in_advance_vss(max_safe_EoA(tr,vs,trs),eoa(trs(tr))) ->       s_extend_EoA(tr,max_safe_EoA(tr,vs,trs)).TS(previous_vs,vs,ts,train_eoa_update(tr,max_safe_EoA(tr,vs,trs),trs));
 
-  RBC_handle_report(tr:TRAIN_id,p:PTD,previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
+  TS_handle_report(tr:TRAIN_id,p:PTD,previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
     sum v: VSS_id.legal_vss(v) -> (
         ( vss_is_free(v,vs) ->
           (   g_f2u(v,vs,ts,trs) ->
                 ( change(v,free_vss,unknown_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
   	    + g_f2o(v,tr,p,previous_vs,vs,ts,trs) ->
   	        ( change(v,free_vss,occupied_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs) )
             + g_f2a(v,tr,p,previous_vs,vs,ts,trs) ->
 	        ( change(v,free_vss,ambiguous_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) ) ) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) ) ) )
       + ( vss_is_occupied(v,vs) ->
           (   g_o2f_ptd(v,tr,p,vs,ts,trs) ->
   	        ( change(v,occupied_vss,free_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
 	    + g_o2u(v,tr,p,vs,trs) ->
 	        ( change(v,occupied_vss,unknown_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
 	    + g_o2a(v,tr,p,vs,trs) ->
 	        ( change(v,occupied_vss,ambiguous_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) ) ) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) ) ) )
       + ( vss_is_unknown(v,vs) ->
           (   g_u2f_ptd(v,tr,p,vs,ts,trs) ->
 	        ( change(v,unknown_vss,free_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
   	    + g_u2a_ptd(v,tr,p,previous_vs,vs,ts,trs) ->
 	        ( change(v,unknown_vss,ambiguous_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) )
             + g_u2o(v,tr,p,previous_vs,vs,ts,trs) ->
   	        ( change(v,unknown_vss,occupied_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs) ) ) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs) ) ) )
       + ( vss_is_ambiguous(v,vs) ->
           (   g_a2f_ptd(v,tr,p,vs,ts,trs) ->
 	        ( change(v,ambiguous_vss,free_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
 	    + g_a2u_ptd(v,tr,p,vs,ts,trs) ->
 	        ( change(v,ambiguous_vss,unknown_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
 	    + g_a2o(v,tr,p,vs,ts,trs) ->
 	        ( change(v,ambiguous_vss,occupied_vss).
-	            RBC_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs)
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs)
     ) ) ) )
     + all_stable_ptd(tr,p,previous_vs,vs,ts,trs) ->
-        ( ptd_stable.RBC_stabilise(vs,vs,ts,ptd_train_update(tr,p,trs)) );
+        ( ptd_stable.TS_stabilise(vs,vs,ts,ptd_train_update(tr,p,trs)) );
 
-  RBC_stabilise(previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
+  TS_stabilise(previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
     sum v: VSS_id.legal_vss(v) ->
       ( vss_is_free(v,vs) ->
            g_f2u(v,vs,ts,trs) ->
              change(v,free_vss,unknown_vss).
-	       RBC_stabilise(previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs)
+	       TS_stabilise(previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs)
       + vss_is_occupied(v,vs) ->
            g_o2f_noptd(v,vs,ts) ->
 	     change(v,occupied_vss,free_vss).
-	       RBC_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
+	       TS_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
       + vss_is_unknown(v,vs) ->
           ( g_u2f_noptd(v,vs,ts) ->
 	     change(v,unknown_vss,free_vss).
-	        RBC_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
+	        TS_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
 	  + g_u2a_noptd(v,vs,ts,trs) ->
 	     change(v,unknown_vss,ambiguous_vss).
-	        RBC_stabilise(previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) )
+	        TS_stabilise(previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) )
       + vss_is_ambiguous(v,vs) ->
           ( g_a2f_noptd(v,vs,ts) ->
 	     change(v,ambiguous_vss,free_vss).
-	        RBC_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
+	        TS_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
 	  + g_a2u_noptd(v,vs,ts,trs) ->
 	     change(v,ambiguous_vss,unknown_vss).
-	        RBC_stabilise(previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+	        TS_stabilise(previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
       )
-    + all_stable_noptd(vs,ts,trs) -> stable(vss_statuslist(vs)).RBC(previous_vs,vs,ts,trs);
+    + all_stable_noptd(vs,ts,trs) -> stable(vss_statuslist(vs)).TS(previous_vs,vs,ts,trs);
   
 %%%%%%%%%%%%%
 %% Onboard %%
@@ -1651,7 +1651,7 @@ proc
               || ( (0 <= LAST_TRAIN) -> Train(0,eoa(TRAINs_config(page_number,instance)(0)),FIRST_VSS,true,true,composition(TRAINs_config(page_number,instance)(0)),positions(0,TRAINs_config(page_number,instance)),page_number,instance) )
               || ( (1 <= LAST_TRAIN) -> Train(1,eoa(TRAINs_config(page_number,instance)(1)),FIRST_VSS,true,true,composition(TRAINs_config(page_number,instance)(1)),positions(1,TRAINs_config(page_number,instance)),page_number,instance) )
               || ( (2 <= LAST_TRAIN) -> Train(2,eoa(TRAINs_config(page_number,instance)(2)),FIRST_VSS,true,true,composition(TRAINs_config(page_number,instance)(2)),positions(2,TRAINs_config(page_number,instance)),page_number,instance) )
-              || RBC(VSSs_config(page_number,instance),VSSs_config(page_number,instance), TTDs_config(page_number,instance), TRAINs_config(page_number,instance))
+              || TS(VSSs_config(page_number,instance),VSSs_config(page_number,instance), TTDs_config(page_number,instance), TRAINs_config(page_number,instance))
            )
          )
      );
