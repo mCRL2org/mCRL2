@@ -174,6 +174,9 @@ QProcess* ProcessSystem::createLtsconvertProcess(LtsReduction reduction)
   case LtsReduction::BranchingBisimulation:
     equivalence += "branching-bisim";
     break;
+  case LtsReduction::None:
+    equivalence += "none";
+    break;
   }
 
   ltsconvertProcess->setArguments({fileSystem->ltsFilePath(LtsReduction::None),

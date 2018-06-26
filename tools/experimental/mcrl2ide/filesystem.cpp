@@ -239,6 +239,7 @@ QString FileSystem::newProject(QString context)
         new QMessageBox(QMessageBox::Information, "New Project", error,
                         QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
     msgBox->exec();
+    delete msgBox;
     return "";
   }
 }
@@ -329,6 +330,7 @@ bool FileSystem::deleteProperty(Property* oldProperty)
           "Could not delete property file: " + propertyFile->errorString(),
           QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
       msgBox->exec();
+      delete msgBox;
       deleteIt = false;
     }
     delete propertyFile;
@@ -353,6 +355,7 @@ Project FileSystem::openProject()
         QMessageBox::Information, "Open Project", "No projects found",
         QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
     msgBox->exec();
+    delete msgBox;
   }
   else
   {
@@ -374,6 +377,7 @@ Project FileSystem::openProject()
       QString spec = openStream->readAll();
       specificationEditor->setPlainText(spec);
       specificationFile->close();
+      delete specificationFile, openStream;
 
       /* read all properties */
       properties.clear();
@@ -394,10 +398,15 @@ Project FileSystem::openProject()
           QString propertyText = openStream->readAll();
           properties.push_back(new Property(fileName, propertyText));
           propertyFile->close();
+          delete openStream;
         }
+
+        delete propertyFile, propertyFileInfo;
       }
+
       this->properties = properties;
       project = Project(projectName, properties);
+      delete dirIterator;
     }
   }
   return project;
@@ -420,6 +429,7 @@ QString FileSystem::saveProject(bool forceSave)
       *saveStream << specificationEditor->toPlainText();
       specificationFile->close();
       specificationModified = false;
+      delete specificationFile, saveStream;
     }
 
     /* save all properties (when there are changes) */
@@ -433,6 +443,7 @@ QString FileSystem::saveProject(bool forceSave)
         *saveStream << property->text;
         propertyFile->close();
         propertyModified[property->name] = false;
+        delete propertyFile, saveStream;
       }
     }
     return projectName;

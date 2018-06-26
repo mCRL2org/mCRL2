@@ -16,12 +16,12 @@
 CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 {
   /* set the font used (monospaced) */
-  QFont* font = new QFont("Courier New", 10);
-  this->document()->setDefaultFont(*font);
+  QFont font = QFont("Courier New", 10);
+  this->document()->setDefaultFont(font);
 
   /* set the tab width to 4 characters */
-  QFontMetrics* fm = new QFontMetrics(*font);
-  this->setTabStopWidth(fm->width("1234"));
+  QFontMetrics fm = QFontMetrics(font);
+  this->setTabStopWidth(fm.width("1234"));
 
   lineNumberArea = new LineNumbersArea(this);
 

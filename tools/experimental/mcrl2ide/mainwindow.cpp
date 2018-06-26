@@ -347,7 +347,7 @@ void MainWindow::actionCreateReducedLts()
   /* if user pressed ok, create a reduced lts */
   if (ok)
   {
-    LtsReduction reduction;
+    LtsReduction reduction = LtsReduction::None;
     for (auto const item : LTSREDUCTIONNAMES)
     {
       if (item.second == reductionName)
