@@ -296,7 +296,7 @@ void MainWindow::actionSaveProjectAs()
 void MainWindow::actionAddProperty()
 {
   Property* property = fileSystem->newProperty();
-  if (!property == NULL)
+  if (property != NULL)
   {
     propertiesDock->addProperty(property);
   }

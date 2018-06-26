@@ -377,7 +377,8 @@ Project FileSystem::openProject()
       QString spec = openStream->readAll();
       specificationEditor->setPlainText(spec);
       specificationFile->close();
-      delete specificationFile, openStream;
+      delete specificationFile;
+      delete openStream;
 
       /* read all properties */
       properties.clear();
@@ -401,7 +402,8 @@ Project FileSystem::openProject()
           delete openStream;
         }
 
-        delete propertyFile, propertyFileInfo;
+        delete propertyFile;
+        delete propertyFileInfo;
       }
 
       this->properties = properties;
@@ -429,7 +431,8 @@ QString FileSystem::saveProject(bool forceSave)
       *saveStream << specificationEditor->toPlainText();
       specificationFile->close();
       specificationModified = false;
-      delete specificationFile, saveStream;
+      delete specificationFile;
+      delete saveStream;
     }
 
     /* save all properties (when there are changes) */
@@ -443,7 +446,8 @@ QString FileSystem::saveProject(bool forceSave)
         *saveStream << property->text;
         propertyFile->close();
         propertyModified[property->name] = false;
-        delete propertyFile, saveStream;
+        delete propertyFile;
+        delete saveStream;
       }
     }
     return projectName;
