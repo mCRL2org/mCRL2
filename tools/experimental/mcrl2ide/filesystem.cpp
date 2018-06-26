@@ -10,6 +10,7 @@
 #include "filesystem.h"
 #include "addeditpropertydialog.h"
 
+#include <QFile>
 #include <QFileInfo>
 #include <QDateTime>
 #include <QTextStream>
@@ -247,8 +248,8 @@ Property* FileSystem::newProperty()
   makeSurePropertiesFolderExists();
 
   Property* property = NULL;
-  AddEditPropertyDialog* addPropertyDialog = new
-      AddEditPropertyDialog(true, this, parent);
+  AddEditPropertyDialog* addPropertyDialog =
+      new AddEditPropertyDialog(true, this, parent);
 
   /* if successful (Add button was pressed), create the new property */
   if (addPropertyDialog->exec())
@@ -288,9 +289,52 @@ Property* FileSystem::editProperty(Property* oldProperty)
     }
     setPropertyModified(newProperty);
   }
-  
+
   delete editPropertyDialog;
   return newProperty;
+}
+
+bool FileSystem::deleteProperty(Property* oldProperty)
+{
+  /* show a message box to ask the user whether he is sure to delete the
+   *   property */
+  bool deleteIt =
+      QMessageBox::question(parent, "Delete Property",
+                            "Are you sure you want to delete the property " +
+                                oldProperty->name + "?",
+                            QMessageBox::Yes | QMessageBox::Cancel) ==
+      QMessageBox::Yes;
+
+  /* if the user agrees, delete the property */
+  if (deleteIt)
+  {
+    Property* toRemove;
+    for (Property* property : properties)
+    {
+      if (property->equals(oldProperty))
+      {
+        toRemove = property;
+        break;
+      }
+    }
+    properties.remove(toRemove);
+
+    /* also delete the file if it exists */
+    QFile* propertyFile = new QFile(propertyFilePath(oldProperty->name));
+    if (propertyFile->exists() && !propertyFile->remove())
+    {
+      /* if deleting the file failed, tell the user */
+      QMessageBox* msgBox = new QMessageBox(
+          QMessageBox::Information, "New Project",
+          "Could not delete property file: " + propertyFile->errorString(),
+          QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
+      msgBox->exec();
+      deleteIt = false;
+    }
+    delete propertyFile;
+  }
+
+  return deleteIt;
 }
 
 Project FileSystem::openProject()
@@ -329,6 +373,7 @@ Project FileSystem::openProject()
       QTextStream* openStream = new QTextStream(specificationFile);
       QString spec = openStream->readAll();
       specificationEditor->setPlainText(spec);
+      specificationFile->close();
 
       /* read all properties */
       properties.clear();
@@ -348,6 +393,7 @@ Project FileSystem::openProject()
           QTextStream* openStream = new QTextStream(propertyFile);
           QString propertyText = openStream->readAll();
           properties.push_back(new Property(fileName, propertyText));
+          propertyFile->close();
         }
       }
       this->properties = properties;

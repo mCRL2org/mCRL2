@@ -171,13 +171,7 @@ void PropertyWidget::actionEdit()
 
 void PropertyWidget::actionDelete()
 {
-  /* show a message box to ask the user whether he is sure to delete the
-   *   property, only delete the property if the user agrees */
-  if (QMessageBox::question(this, "Delete Property",
-                            "Are you sure you want to delete the property " +
-                                property->name + "?",
-                            QMessageBox::Yes | QMessageBox::Cancel) ==
-      QMessageBox::Yes)
+  if (fileSystem->deleteProperty(property))
   {
     parent->deleteProperty(this);
     delete this;

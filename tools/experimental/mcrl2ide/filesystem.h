@@ -214,6 +214,13 @@ class FileSystem : public QObject
   Property* editProperty(Property* oldProperty);
 
   /**
+   * @brief deleteProperty Deletes an existing property
+   * @param property The property to delete
+   * @return Whether the property has been deleted
+   */
+  bool deleteProperty(Property* property);
+
+  /**
    * @brief openProject Opens the project with the given project name
    * @return The opened project, is NULL if failed
    */
