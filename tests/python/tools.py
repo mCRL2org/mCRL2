@@ -288,9 +288,10 @@ class PbesSolveTool(Tool):
 
     def assign_outputs(self):
         text = self.stdout.strip() + self.stderr.strip()
-        if text.endswith('true'):
+        # N.B. In verbose mode, the solution may appear at the start.
+        if text.startswith('true') or text.endswith('true'):
             value = True
-        elif text.endswith('false'):
+        elif text.startswith('false') or text.endswith('false'):
             value = False
         else:
             value = None
