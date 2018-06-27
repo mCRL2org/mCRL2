@@ -269,7 +269,7 @@ int ProcessSystem::parseSpecification()
     QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
     mcrl2ParsingProcess->setProperty("pid", processid);
     connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcrl2ParsingResult()));
+            SLOT(mcrl2ParsingResult(int)));
 
     processes[processid] = {mcrl2ParsingProcess};
     processTypes[processid] = processType;
@@ -292,7 +292,8 @@ int ProcessSystem::simulate()
 
     QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(simulateLps()));
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
+            SLOT(simulateLps(int)));
 
     QProcess* lpsxsimProcess = createLpsxsimProcess();
     lpsxsimProcess->setProperty("pid", processid);
@@ -319,14 +320,15 @@ int ProcessSystem::createLts(LtsReduction reduction)
 
     QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(createLts()));
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
+            SLOT(createLts(int)));
     ltsCreationProcesses.push_back(mcrl22lpsProcess);
 
     QProcess* lps2ltsProcess = createLps2ltsProcess();
     lps2ltsProcess->setProperty("pid", processid);
     connect(lps2ltsProcess, SIGNAL(finished(int)), this,
-            reduction == LtsReduction::None ? SLOT(showLts())
-                                            : SLOT(reduceLts()));
+            reduction == LtsReduction::None ? SLOT(showLts(int))
+                                            : SLOT(reduceLts(int)));
     ltsCreationProcesses.push_back(lps2ltsProcess);
 
     /* create the ltsconvert process if we need to reduce */
@@ -334,7 +336,8 @@ int ProcessSystem::createLts(LtsReduction reduction)
     {
       QProcess* ltsconvertProcess = createLtsconvertProcess(reduction);
       ltsconvertProcess->setProperty("pid", processid);
-      connect(ltsconvertProcess, SIGNAL(finished(int)), this, SLOT(showLts()));
+      connect(ltsconvertProcess, SIGNAL(finished(int)), this,
+              SLOT(showLts(int)));
       ltsCreationProcesses.push_back(ltsconvertProcess);
     }
 
@@ -363,16 +366,17 @@ int ProcessSystem::verifyProperty(Property* property)
 
     QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(createPbes()));
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
+            SLOT(createPbes(int)));
 
     QProcess* lps2pbesProcess = createLps2pbesProcess(property->name);
     lps2pbesProcess->setProperty("pid", processid);
-    connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes()));
+    connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes(int)));
 
     QProcess* pbes2boolProcess = createPbes2boolProcess(property->name);
     pbes2boolProcess->setProperty("pid", processid);
     connect(pbes2boolProcess, SIGNAL(finished(int)), this,
-            SLOT(verificationResult()));
+            SLOT(verificationResult(int)));
 
     processes[processid] = {mcrl22lpsProcess, lps2pbesProcess,
                             pbes2boolProcess};
@@ -390,7 +394,7 @@ void ProcessSystem::startProcess(int processid)
   ProcessType processType = processTypes[processid];
   if (!(processType == ProcessType::Parsing))
   {
-    createLps(processid);
+    createLps(0, processid);
   }
   else
   {
@@ -412,140 +416,233 @@ void ProcessSystem::mcrl2ParsingResult()
   emit processFinished(processid);
 }
 
-void ProcessSystem::createLps(int processid)
+void ProcessSystem::createLps(int previousExitCode, int processid)
 {
-  QProcess* mcrl22lpsProcess = processes[processid][0];
+  /* if this function was called by a signal, extract the process id first */
+  if (processid == -1)
+  {
+    processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  }
   ProcessType processType = processTypes[processid];
 
-  consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
-
-  /* check if we need to run this */
-  if (fileSystem->upToDateLpsFileExists())
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
   {
-    consoleDock->writeToConsole(processType, "Up to date LPS already exists\n");
-    emit mcrl22lpsProcess->finished(0);
+    consoleDock->writeToConsole(processType, "Process finished with an error");
+    emit processFinished(processid);
   }
   else
   {
-    mcrl22lpsProcess->start();
+    QProcess* mcrl22lpsProcess = processes[processid][0];
+
+    consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
+
+    /* check if we need to run this */
+    if (fileSystem->upToDateLpsFileExists())
+    {
+      consoleDock->writeToConsole(processType,
+                                  "Up to date LPS already exists\n");
+      emit mcrl22lpsProcess->finished(0);
+    }
+    else
+    {
+      mcrl22lpsProcess->start();
+    }
   }
 }
 
-void ProcessSystem::simulateLps()
+void ProcessSystem::simulateLps(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  QProcess* lpsxsimProcess = processes[processid][1];
 
-  consoleDock->writeToConsole(ProcessType::Simulation,
-                              "##### SHOWING SIMULATION #####\n");
-  lpsxsimProcess->start();
-  emit processFinished(processid);
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
+  {
+    consoleDock->writeToConsole(ProcessType::Simulation,
+                                "Process finished with an error");
+    emit processFinished(processid);
+  }
+  else
+  {
+    QProcess* lpsxsimProcess = processes[processid][1];
+
+    consoleDock->writeToConsole(ProcessType::Simulation,
+                                "##### SHOWING SIMULATION #####\n");
+    lpsxsimProcess->start();
+    emit processFinished(processid);
+  }
 }
 
-void ProcessSystem::createLts()
+void ProcessSystem::createLts(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  QProcess* lps2ltsProcess = processes[processid][1];
 
-  consoleDock->writeToConsole(ProcessType::LtsCreation,
-                              "##### CREATING LTS #####\n");
-
-  /* check if we need to run this */
-  if (fileSystem->upToDateLtsFileExists(LtsReduction::None))
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                "Up to date LTS already exists");
-    emit lps2ltsProcess->finished(0);
+                                "Process finished with an error");
+    emit processFinished(processid);
   }
   else
   {
-    lps2ltsProcess->start();
+    QProcess* lps2ltsProcess = processes[processid][1];
+
+    consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                "##### CREATING LTS #####\n");
+
+    /* check if we need to run this */
+    if (fileSystem->upToDateLtsFileExists(LtsReduction::None))
+    {
+      consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                  "Up to date LTS already exists");
+      emit lps2ltsProcess->finished(0);
+    }
+    else
+    {
+      lps2ltsProcess->start();
+    }
   }
 }
 
-void ProcessSystem::reduceLts()
+void ProcessSystem::reduceLts(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  QProcess* ltsconvertProcess = processes[processid][2];
-  LtsReduction reduction = static_cast<LtsReduction>(
-      ltsconvertProcess->property("reduction").toInt());
 
-  consoleDock->writeToConsole(ProcessType::LtsCreation,
-                              "##### REDUCING LTS #####\n");
-
-  /* check if we need to run this */
-  if (fileSystem->upToDateLtsFileExists(reduction))
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                "Up to date LTS already exists");
-    emit ltsconvertProcess->finished(0);
+                                "Process finished with an error");
+    emit processFinished(processid);
   }
   else
   {
-    ltsconvertProcess->start();
+    QProcess* ltsconvertProcess = processes[processid][2];
+    LtsReduction reduction = static_cast<LtsReduction>(
+        ltsconvertProcess->property("reduction").toInt());
+
+    consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                "##### REDUCING LTS #####\n");
+
+    /* check if we need to run this */
+    if (fileSystem->upToDateLtsFileExists(reduction))
+    {
+      consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                  "Up to date LTS already exists");
+      emit ltsconvertProcess->finished(0);
+    }
+    else
+    {
+      ltsconvertProcess->start();
+    }
   }
 }
 
-void ProcessSystem::showLts()
+void ProcessSystem::showLts(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  QProcess* ltsgraphProcess = processes[processid].back();
 
-  consoleDock->writeToConsole(ProcessType::LtsCreation,
-                              "##### SHOWING LTS #####\n");
-  ltsgraphProcess->start();
-  emit processFinished(processid);
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
+  {
+    consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                "Process finished with an error");
+    emit processFinished(processid);
+  }
+  else
+  {
+    QProcess* ltsgraphProcess = processes[processid].back();
+
+    consoleDock->writeToConsole(ProcessType::LtsCreation,
+                                "##### SHOWING LTS #####\n");
+    ltsgraphProcess->start();
+    emit processFinished(processid);
+  }
 }
 
-void ProcessSystem::createPbes()
+void ProcessSystem::createPbes(int previousExitCode)
 {
-
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  QProcess* lps2pbesProcess = processes[processid][1];
 
-  consoleDock->writeToConsole(ProcessType::Verification,
-                              "##### CREATING PBES #####\n");
-
-  /* check if we need to run this */
-  if (fileSystem->upToDatePbesFileExists(
-          lps2pbesProcess->property("propertyName").toString()))
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::Verification,
-                                "Up to date PBES already exists");
-    emit lps2pbesProcess->finished(0);
+                                "Process finished with an error");
+    emit processFinished(processid);
   }
   else
   {
-    lps2pbesProcess->start();
+    QProcess* lps2pbesProcess = processes[processid][1];
+
+    consoleDock->writeToConsole(ProcessType::Verification,
+                                "##### CREATING PBES #####\n");
+
+    /* check if we need to run this */
+    if (fileSystem->upToDatePbesFileExists(
+            lps2pbesProcess->property("propertyName").toString()))
+    {
+      consoleDock->writeToConsole(ProcessType::Verification,
+                                  "Up to date PBES already exists");
+      emit lps2pbesProcess->finished(0);
+    }
+    else
+    {
+      lps2pbesProcess->start();
+    }
   }
 }
 
-void ProcessSystem::solvePbes()
+void ProcessSystem::solvePbes(int previousExitCode)
 {
-  consoleDock->writeToConsole(ProcessType::Verification,
-                              "##### SOLVING PBES #####\n");
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  processes[processid][2]->start();
-}
 
-void ProcessSystem::verificationResult()
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  std::string output =
-      processes[processid][2]->readAllStandardOutput().toStdString();
-  if (output.find("true") == 0)
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
   {
-    results[processid] = "true";
-  }
-  else if (output.find("false") == 0)
-  {
-    results[processid] = "false";
+    consoleDock->writeToConsole(ProcessType::Verification,
+                                "Process finished with an error");
+    emit processFinished(processid);
   }
   else
   {
-    results[processid] = "";
+    consoleDock->writeToConsole(ProcessType::Verification,
+                                "##### SOLVING PBES #####\n");
+
+    processes[processid][2]->start();
   }
-  emit processFinished(processid);
+}
+
+void ProcessSystem::verificationResult(int previousExitCode)
+{
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
+  {
+    consoleDock->writeToConsole(ProcessType::Verification,
+                                "Process finished with an error");
+    emit processFinished(processid);
+  }
+  else
+  {
+    std::string output =
+        processes[processid][2]->readAllStandardOutput().toStdString();
+    if (output.find("true") == 0)
+    {
+      results[processid] = "true";
+    }
+    else if (output.find("false") == 0)
+    {
+      results[processid] = "false";
+    }
+    else
+    {
+      results[processid] = "";
+    }
+    emit processFinished(processid);
+  }
 }
 
 void ProcessSystem::abortProcess(int processid)

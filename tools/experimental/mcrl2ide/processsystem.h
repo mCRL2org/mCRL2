@@ -274,7 +274,6 @@ class ProcessSystem : public QObject
    */
   void parseMcrl2(int processid);
 
-
   /**
    * @brief parsingResult Handles the result of parsing a specification
    */
@@ -282,45 +281,54 @@ class ProcessSystem : public QObject
 
   /**
    * @brief createLps The first step of any process, creating the lps
-   * @param processid The id of the process to run
+   * @param previousExitCode The exit code of the previous subprocess
+   * @param processid The id of the process to run (in case it is not called by
+   *   a signal)
    */
-  void createLps(int processid);
+  void createLps(int previousExitCode, int processid = -1);
 
   /**
    * @brief simulateLps The last step of simulation, visualizing the simulation
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void simulateLps();
+  void simulateLps(int previousExitCode);
 
   /**
    * @brief createLts The second step of lts creation, creating the lts
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void createLts();
+  void createLts(int previousExitCode);
 
   /**
    * @brief reduceLts An optional step of lts creation, reducing the lts
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void reduceLts();
+  void reduceLts(int previousExitCode);
 
   /**
    * @brief showLts The last step of lts creation, visualizing the lts
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void showLts();
+  void showLts(int previousExitCode);
 
   /**
    * @brief createPbes The second step of verification, creating the pbes
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void createPbes();
+  void createPbes(int previousExitCode);
 
   /**
    * @brief solvePbes The third step of verification, solving the pbes
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void solvePbes();
+  void solvePbes(int previousExitCode);
 
   /**
    * @brief verificationResult Extracts and stores the result of the
    *   verification
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void verificationResult();
+  void verificationResult(int previousExitCode);
 };
 
 #endif // PROCESSSYSTEM_H
