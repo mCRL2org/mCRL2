@@ -408,6 +408,7 @@ Project FileSystem::openProject()
 
       this->properties = properties;
       project = Project(projectName, properties);
+      emit hasChanges(false);
       delete dirIterator;
     }
   }
@@ -450,6 +451,8 @@ QString FileSystem::saveProject(bool forceSave)
         delete saveStream;
       }
     }
+
+    emit hasChanges(false);
     return projectName;
   }
   else

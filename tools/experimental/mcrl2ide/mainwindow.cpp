@@ -33,12 +33,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
   findAndReplaceDialog = new FindAndReplaceDialog(specificationEditor, this);
 
-  /* make the save project action enabled whenever a change is made */
+  /* make saving a project only enabled whenever there are changes */
   saveProjectAction->setEnabled(false);
   connect(fileSystem, SIGNAL(hasChanges(bool)), saveProjectAction,
           SLOT(setEnabled(bool)));
 
-  /* make the toolbar buttons enabled or disabled depending on whether processes
+  /* make the tool buttons enabled or disabled depending on whether processes
    *   are running */
   connect(processSystem->getProcessThread(ProcessType::Parsing),
           SIGNAL(isRunning(bool)), parseAction, SLOT(setDisabled(bool)));
@@ -265,7 +265,6 @@ void MainWindow::actionOpenProject()
     {
       propertiesDock->addProperty(property);
     }
-    saveProjectAction->setEnabled(false);
     setWindowTitle(QString("mCRL2 IDE - ").append(project.projectName));
   }
 }
@@ -281,7 +280,6 @@ void MainWindow::actionSaveProject()
   if (!projectName.isEmpty())
   {
     setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-    saveProjectAction->setEnabled(false);
   }
 }
 
@@ -291,7 +289,6 @@ void MainWindow::actionSaveProjectAs()
   if (!projectName.isEmpty())
   {
     setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-    saveProjectAction->setEnabled(false);
   }
 }
 
