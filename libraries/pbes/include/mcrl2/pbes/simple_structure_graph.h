@@ -88,6 +88,11 @@ class simple_structure_graph
     {
       return m_vertices.empty();
     }
+
+    std::size_t size() const
+    {
+      return m_vertices.size();
+    }
 };
 
 } // namespace pbes_system

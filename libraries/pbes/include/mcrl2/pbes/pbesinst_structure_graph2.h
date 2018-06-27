@@ -189,20 +189,52 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       super::report_equation(X, psi, k);
       if (is_true(b))
       {
-        S0.insert(m_graph_builder.find_vertex(X));
-        if (m_optimization > 2 && S0_guard(S0.size()))
+        auto u = m_graph_builder.find_vertex(X);
+        S0.insert(u);
+        if (m_optimization > 2)
         {
           simple_structure_graph G(m_graph_builder.m_vertices);
-          S0 = compute_attractor_set(G, S0, 0);
+
+          // Compute the attractor set U of u, and add it to S0
+          auto N = G.size();
+          vertex_set U(N);
+          U.insert(u);
+          U = compute_attractor_set(G, U, 0);
+          for (auto v: U.vertices())
+          {
+            S0.insert(v);
+          }
+
+          // Compute the attractor set of S0
+          if (S0_guard(S0.size()))
+          {
+            S0 = compute_attractor_set(G, S0, 0);
+          }
         }
       }
       else if (is_false(b))
       {
-        S1.insert(m_graph_builder.find_vertex(X));
-        if (m_optimization > 2 && S1_guard(S1.size()))
+        auto u = m_graph_builder.find_vertex(X);
+        S1.insert(u);
+        if (m_optimization > 2)
         {
           simple_structure_graph G(m_graph_builder.m_vertices);
-          S1 = compute_attractor_set(G, S1, 1);
+
+          // Compute the attractor set U of u, and add it to S1
+          auto N = G.size();
+          vertex_set U(N);
+          U.insert(u);
+          U = compute_attractor_set(G, U, 1);
+          for (auto v: U.vertices())
+          {
+            S0.insert(v);
+          }
+
+          // Compute the attractor set of S1
+          if (S1_guard(S1.size()))
+          {
+            S1 = compute_attractor_set(G, S1, 1);
+          }
         }
       }
     }
