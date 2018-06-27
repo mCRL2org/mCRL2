@@ -131,6 +131,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       algorithm.run();
       timer().finish("instantiation");
 
+      mCRL2log(log::verbose) << "Number of vertices in the structure graph: " << G.all_vertices().size() << std::endl;
+
       if (!lpsfile.empty())
       {
         lps::specification lpsspec = lps::detail::load_lps(lpsfile);
