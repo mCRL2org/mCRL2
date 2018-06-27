@@ -98,6 +98,23 @@ ProcessThread* ProcessSystem::getProcessThread(ProcessType processType)
   return processThreads[processType];
 }
 
+QProcess* ProcessSystem::createMcrl2ParsingProcess()
+{
+  QProcess* mcrl22lpsProcess = new QProcess();
+
+  /* create the process */
+  mcrl22lpsProcess->setProgram("mcrl22lps");
+  mcrl22lpsProcess->setArguments({fileSystem->specificationFilePath(),
+                                  fileSystem->lpsFilePath(), "--check-only",
+                                  "--lin-method=regular", "--rewriter=jitty",
+                                  "--verbose"});
+
+  connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+          SLOT(logToParsingConsole()));
+
+  return mcrl22lpsProcess;
+}
+
 QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
 {
   QProcess* mcrl22lpsProcess = new QProcess();
@@ -240,6 +257,30 @@ QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
   return pbes2boolProcess;
 }
 
+int ProcessSystem::parseSpecification()
+{
+  if (!fileSystem->saveProject().isEmpty())
+  {
+    /* create the subprocesses */
+    int processid = pid++;
+    ProcessType processType = ProcessType::Parsing;
+    consoleDock->setConsoleTab(processType);
+
+    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
+    mcrl2ParsingProcess->setProperty("pid", processid);
+    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(mcrl2ParsingResult()));
+
+    processes[processid] = {mcrl2ParsingProcess};
+    processTypes[processid] = processType;
+    processQueues[processType]->enqueue(processid);
+    emit newProcessQueued(processType);
+
+    return processid;
+  }
+  return -1;
+}
+
 int ProcessSystem::simulate()
 {
   if (!fileSystem->saveProject().isEmpty())
@@ -351,6 +392,24 @@ void ProcessSystem::startProcess(int processid)
   {
     createLps(processid);
   }
+  else
+  {
+    parseMcrl2(processid);
+  }
+}
+
+void ProcessSystem::parseMcrl2(int processid)
+{
+  QProcess* mcrl2ParsingProcess = processes[processid][0];
+  consoleDock->writeToConsole(ProcessType::Parsing,
+                              "##### PARSING SPECIFICATION #####\n");
+  mcrl2ParsingProcess->start();
+}
+
+void ProcessSystem::mcrl2ParsingResult()
+{
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  emit processFinished(processid);
 }
 
 void ProcessSystem::createLps(int processid)

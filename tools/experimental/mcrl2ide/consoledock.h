@@ -17,19 +17,19 @@
 
 enum class ProcessType
 {
-  Simulation,
   Parsing,
+  Simulation,
   LtsCreation,
   Verification
 };
 
 const std::vector<ProcessType> PROCESSTYPES = {
-    ProcessType::Simulation, ProcessType::Parsing, ProcessType::LtsCreation,
+    ProcessType::Parsing, ProcessType::Simulation, ProcessType::LtsCreation,
     ProcessType::Verification};
 
 const std::map<ProcessType, QString> PROCESSTYPENAMES = {
-    {ProcessType::Simulation, "Simulation"},
     {ProcessType::Parsing, "Parsing"},
+    {ProcessType::Simulation, "Simulation"},
     {ProcessType::LtsCreation, "LTS Creation"},
     {ProcessType::Verification, "Verification"}};
 

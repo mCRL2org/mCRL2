@@ -124,6 +124,12 @@ class ProcessSystem : public QObject
   ProcessThread* getProcessThread(ProcessType processType);
 
   /**
+   * @brief parseSpecification Parses the current specification
+   * @return The id of the parsing process
+   */
+  int parseSpecification();
+
+  /**
    * @brief simulate Simulates the current specification using mcrl22lps and
    *   lpsxsim
    * @return The process id of the simulation process
@@ -154,7 +160,7 @@ class ProcessSystem : public QObject
   void abortProcess(int processid);
 
   /**
-   * @brief abortAllProcesses Aborts all processses of type processType by
+   * @brief abortAllProcesses Aborts all processes of type processType by
    *   clearing the corresponding queue and killing the corresponding currently
    *   running process
    * @param processType The processType to abort all processes of
@@ -200,6 +206,13 @@ class ProcessSystem : public QObject
    * @return The mcrl22lps process
    */
   QProcess* createMcrl22lpsProcess(ProcessType processType);
+
+  /**
+   * @brief createMcrl2ParsingProcess Creates a process to parse the current
+   *   mCRL2 specification using mcrl22lps
+   * @return The parsing process
+   */
+  QProcess* createMcrl2ParsingProcess();
 
   /**
    * @brief createLpsxsimProcess Creates a process to execute lpsxsim on the lps
@@ -254,6 +267,18 @@ class ProcessSystem : public QObject
    * @param processid The id of the process to run
    */
   void startProcess(int processid);
+
+  /**
+   * @brief parseMcrl2 Parses an mCRL2 specification
+   * @param processid The id of the process to run
+   */
+  void parseMcrl2(int processid);
+
+
+  /**
+   * @brief parsingResult Handles the result of parsing a specification
+   */
+  void mcrl2ParsingResult();
 
   /**
    * @brief createLps The first step of any process, creating the lps
