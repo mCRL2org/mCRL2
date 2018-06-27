@@ -134,6 +134,7 @@ class Tool(object):
         self.parse_number(text, 'mu-count'                    , "Number of mu's:      (\d+)")
         self.parse_number(text, 'nu-count'                    , "Number of nu's:      (\d+)")
         self.parse_number(text, 'block-nesting-depth'         , "Block nesting depth: (\d+)")
+        self.parse_number(text, 'vertex-count'                , "Number of vertices in the structure graph: (\d+)")
         self.parse_numbers(text, 'confluent-tau-summand-count', 'tau-summand-count', '(\d+) of (\d+) tau summands were found to be confluent')
         self.parse_boolean(text, 'has-state-labels'           , 'Has state labels.', 'Does not have state labels.')
         self.parse_boolean(text, 'has-action-labels'          , 'Has action labels.')
