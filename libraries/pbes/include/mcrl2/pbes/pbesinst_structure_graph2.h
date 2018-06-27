@@ -21,6 +21,27 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+namespace detail {
+
+class computation_guard
+{
+  protected:
+     std::size_t m_count = 64;
+
+  public:
+    bool operator()(std::size_t count)
+    {
+      bool result = count >= m_count;
+      while (m_count <= count)
+      {
+        m_count *= 2;
+      }
+      return result;
+    }
+};
+
+} // namespace detail
+
 /// \brief Adds an optimization to pbesinst_structure_graph.
 class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algorithm
 {
@@ -28,6 +49,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     vertex_set S0;
     vertex_set S1;
     pbes_expression b;
+    detail::computation_guard S0_guard;
+    detail::computation_guard S1_guard;
 
     template<typename T>
     pbes_expression expr(const T& x) const
@@ -39,7 +62,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       if (is_true(x) || is_false(x))
       {
-        return {x, x};
+        return { x, x };
       }
       else if (is_propositional_variable_instantiation(x))
       {
@@ -83,7 +106,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         else // if (b1 == data::undefined_data_expression() && b2 == data::undefined_data_expression())
         {
-          return {expr(data::undefined_data_expression()), x};
+          return { expr(data::undefined_data_expression()), x };
         }
       }
       else if (is_or(x))
@@ -167,7 +190,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       if (is_true(b))
       {
         S0.insert(m_graph_builder.find_vertex(X));
-        if (m_optimization > 2)
+        if (m_optimization > 2 && S0_guard(S0.size()))
         {
           simple_structure_graph G(m_graph_builder.m_vertices);
           S0 = compute_attractor_set(G, S0, 0);
@@ -176,7 +199,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       else if (is_false(b))
       {
         S1.insert(m_graph_builder.find_vertex(X));
-        if (m_optimization > 2)
+        if (m_optimization > 2 && S1_guard(S1.size()))
         {
           simple_structure_graph G(m_graph_builder.m_vertices);
           S1 = compute_attractor_set(G, S1, 1);
