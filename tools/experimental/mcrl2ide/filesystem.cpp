@@ -199,9 +199,9 @@ QString FileSystem::newProject(QString context)
 
   /* ask the user for a project name */
   bool ok;
-  QString projectName = QInputDialog::getText(
-      parent, "New project", "Project name:", QLineEdit::Normal, "", &ok,
-      Qt::WindowCloseButtonHint);
+  QString projectName =
+      QInputDialog::getText(parent, context, "Project name:", QLineEdit::Normal,
+                            "", &ok, Qt::WindowCloseButtonHint);
 
   /* if user pressed ok, create the project and save the specification and
    *   properties in it */
@@ -236,7 +236,7 @@ QString FileSystem::newProject(QString context)
   {
     /* if there was an error, tell the user */
     QMessageBox* msgBox =
-        new QMessageBox(QMessageBox::Information, "New Project", error,
+        new QMessageBox(QMessageBox::Information, context, error,
                         QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
     msgBox->exec();
     delete msgBox;
