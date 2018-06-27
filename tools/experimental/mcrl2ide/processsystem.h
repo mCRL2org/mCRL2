@@ -276,16 +276,15 @@ class ProcessSystem : public QObject
 
   /**
    * @brief parsingResult Handles the result of parsing a specification
+   * @param previousExitCode The exit code of the previous subprocess
    */
-  void mcrl2ParsingResult();
+  void mcrl2ParsingResult(int previousExitCode);
 
   /**
    * @brief createLps The first step of any process, creating the lps
    * @param previousExitCode The exit code of the previous subprocess
-   * @param processid The id of the process to run (in case it is not called by
-   *   a signal)
    */
-  void createLps(int previousExitCode, int processid = -1);
+  void createLps(int previousExitCode);
 
   /**
    * @brief simulateLps The last step of simulation, visualizing the simulation
