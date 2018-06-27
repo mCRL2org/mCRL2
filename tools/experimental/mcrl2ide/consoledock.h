@@ -17,13 +17,21 @@
 
 enum class ProcessType
 {
+  Simulation,
   Parsing,
   LtsCreation,
   Verification
 };
 
 const std::vector<ProcessType> PROCESSTYPES = {
-    ProcessType::Parsing, ProcessType::LtsCreation, ProcessType::Verification};
+    ProcessType::Simulation, ProcessType::Parsing, ProcessType::LtsCreation,
+    ProcessType::Verification};
+
+const std::map<ProcessType, QString> PROCESSTYPENAMES = {
+    {ProcessType::Simulation, "Simulation"},
+    {ProcessType::Parsing, "Parsing"},
+    {ProcessType::LtsCreation, "LTS Creation"},
+    {ProcessType::Verification, "Verification"}};
 
 /**
  * @brief The ConsoleDock class defines the dock that shows console output
@@ -56,31 +64,34 @@ class ConsoleDock : public QDockWidget
 
   public slots:
   /**
-   * @brief logToConsole Write output in the parsing console
+   * @brief logToParsingConsole Write output in the parsing console
    */
   void logToParsingConsole();
 
   /**
-   * @brief logToConsole Write output in the lts creation console
+   * @brief logToSimulationConsole Write output in the simulation console
+   */
+  void logToSimulationConsole();
+
+  /**
+   * @brief logToLtsCreationConsole Write output in the lts creation console
    */
   void logToLtsCreationConsole();
 
   /**
-   * @brief logToConsole Write output in the verification console
+   * @brief logToVerificationConsole Write output in the verification console
    */
   void logToVerificationConsole();
 
   private:
   QTabWidget* consoleTabs;
-  QPlainTextEdit* parsingConsole;
-  QPlainTextEdit* ltsCreationConsole;
-  QPlainTextEdit* verificationConsole;
+  std::map<ProcessType, QPlainTextEdit*> consoles;
 
   /**
    * @brief logToConsole Write output in the console
    * @param tab Which console tab to write to
    */
-  void logToConsole(QPlainTextEdit* console, QProcess* process);
+  void logToConsole(ProcessType processType, QProcess* process);
 };
 
 #endif // CONSOLEDOCK_H

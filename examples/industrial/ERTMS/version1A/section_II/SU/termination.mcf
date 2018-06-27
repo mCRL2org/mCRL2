@@ -1,0 +1,7 @@
+% We check that on all reachable states of the system (while traversing non-expire_timer actions)
+% the system never enters a state in which one (or more) VSSs change state infinitely oten without
+% ever stabilising.
+% Technically, this means that for all reachable states we require that any computation involving
+% only change(v,s1,s2) actions or (ptd_)continue actions is finite.
+
+[true*][exists v:VSS_id, s1,s2:VSS_status. change(v,s1,s2)]mu X. ([ptd_continue || continue || ptd_stable || exists v:VSS_id,s1,s2:VSS_status.change(v,s1,s2)]X && <ptd_continue || continue || ptd_stable || exists v:VSS_id,s1,s2:VSS_status.change(v,s1,s2) || exists l:List(VSS_status). stable(l)>true )

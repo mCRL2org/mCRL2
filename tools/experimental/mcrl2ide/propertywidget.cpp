@@ -24,8 +24,6 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
   this->parent = parent;
   verificationProcessId = -1;
 
-  fileSystem->setPropertyModified(property->name);
-
   /* create the label for the property name */
   propertyNameLabel = new QLabel(property->name);
 
@@ -113,11 +111,6 @@ void PropertyWidget::setPropertyText(QString text)
   this->property->text = text;
 }
 
-void PropertyWidget::saveProperty()
-{
-  fileSystem->saveProperty(property);
-}
-
 void PropertyWidget::actionVerify()
 {
   /* check if the property isn't already being verified or has been verified */
@@ -172,29 +165,13 @@ void PropertyWidget::actionAbortVerification()
 
 void PropertyWidget::actionEdit()
 {
-  AddEditPropertyDialog* editPropertyDialog = new AddEditPropertyDialog(
-      false, parent, this, property->name, property->text);
-
-  /* if editing was succesful (Edit button was pressed), update the property and
-   *   its widget */
-  if (editPropertyDialog->exec())
-  {
-    property->name = editPropertyDialog->getPropertyName();
-    property->text = editPropertyDialog->getPropertyText();
-    propertyNameLabel->setText(property->name);
-    fileSystem->setPropertyModified(property->name);
-  }
+  property = fileSystem->editProperty(property);
+  propertyNameLabel->setText(property->name);
 }
 
 void PropertyWidget::actionDelete()
 {
-  /* show a message box to ask the user whether he is sure to delete the
-   *   property, only delete the property if the user agrees */
-  if (QMessageBox::question(this, "Delete Property",
-                            "Are you sure you want to delete the property " +
-                                property->name + "?",
-                            QMessageBox::Yes | QMessageBox::Cancel) ==
-      QMessageBox::Yes)
+  if (fileSystem->deleteProperty(property))
   {
     parent->deleteProperty(this);
     delete this;

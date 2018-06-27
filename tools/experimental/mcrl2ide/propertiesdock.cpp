@@ -72,26 +72,6 @@ void PropertiesDock::deleteProperty(PropertyWidget* propertyWidget)
   propertyWidgets.remove(propertyWidget);
 }
 
-bool PropertiesDock::propertyNameExists(QString propertyName)
-{
-  for (PropertyWidget* propertyWidget : propertyWidgets)
-  {
-    if (propertyWidget->getProperty()->name == propertyName)
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
-void PropertiesDock::saveAllProperties()
-{
-  for (PropertyWidget* propertyWidget : propertyWidgets)
-  {
-    propertyWidget->saveProperty();
-  }
-}
-
 void PropertiesDock::verifyAllProperties()
 {
   for (PropertyWidget* propertyWidget : propertyWidgets)

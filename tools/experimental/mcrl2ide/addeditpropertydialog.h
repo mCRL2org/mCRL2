@@ -31,12 +31,12 @@ class AddEditPropertyDialog : public QDialog
   /**
    * @brief AddEditPropertyDialog Constructor
    * @param add Whether this should be an add (or else an edit) window
-   * @param propertiesDock The properties dock
+   * @param propertiesDock The 
    * @param parent The parent of this widget
    * @param propertyName The current name of the property (in case of edit)
    * @param propertyText The current text of the property (in case of edit)
    */
-  AddEditPropertyDialog(bool add, PropertiesDock* propertiesDock,
+  AddEditPropertyDialog(bool add, FileSystem* fileSystem,
                         QWidget* parent = 0, QString propertyName = "",
                         QString propertyText = "");
   ~AddEditPropertyDialog();
@@ -63,8 +63,9 @@ class AddEditPropertyDialog : public QDialog
   private:
   Ui::AddEditPropertyDialog* ui;
 
-  PropertiesDock* propertiesDock;
+  FileSystem* fileSystem;
   QString windowTitle;
+  QString oldPropertyName;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

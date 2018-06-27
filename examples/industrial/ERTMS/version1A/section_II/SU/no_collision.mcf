@@ -1,0 +1,16 @@
+% We check whether in no reachable state two trains are located on the
+% same vss. We do so by checking whether there are no states reachable
+% where one train has taken over another train.
+
+
+[true*]
+!( exists t,t':TRAIN_id, v: VSS_id. 
+     ( <extend_EoA(t,v)>true &&
+       exists l,l': List(VSS_id). 
+          (
+           (val(v == l'.(Int2Nat(#l' -1)) || in_between_vss(l'.(Int2Nat(#l'-1)), l.0, v) ) )
+          &&
+           <report_location(t,l)>true && <report_location(t',l')>true
+          )
+     )
+ )

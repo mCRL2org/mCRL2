@@ -1,0 +1,1687 @@
+%% Data (RBC perspective)
+%% Instantiate by defining:
+%%   List of VSSs, TTDs, TRAINs
+%%   Constants FIRST_VSS, LAST_VSS, FIRST_TTD, LAST_TTD, FIRST_TRAIN, LAST_TRAIN
+%%
+sort
+  TIMER_status =
+    struct
+      stopped |
+      running |
+      expired;
+      
+sort
+  VSS_id = Nat;
+map
+  FIRST_VSS, LAST_VSS: VSS_id;
+  legal_vss: VSS_id -> Bool;
+  next_vss: VSS_id -> VSS_id;
+  previous_vss: VSS_id -> VSS_id;
+  in_advance_vss: VSS_id#VSS_id -> Bool;
+  in_rear_vss: VSS_id#VSS_id -> Bool;
+  in_between_vss: VSS_id#VSS_id#VSS_id -> Bool;
+var
+  v,v1,v2: VSS_id;
+eqn
+  legal_vss(v) = v >= FIRST_VSS && v <= LAST_VSS;
+  next_vss(v) = if(v==LAST_VSS,v,v+1);
+  previous_vss(v) = if(v==FIRST_VSS,v,Int2Nat(v-1));
+  in_advance_vss(v1,v2) = v1 > v2;
+  in_rear_vss(v1,v2) = in_advance_vss(v2,v1);
+  in_between_vss(v,v1,v2) = in_advance_vss(v,v1) && in_rear_vss(v,v2);
+
+sort
+  VSS_status =
+    struct free_vss |
+           unknown_vss |
+	   ambiguous_vss |
+	   occupied_vss;
+  VSS_timer =
+    struct disc |
+           ilp;
+	   
+  VSS_info =
+    struct vss_info(
+      status: VSS_status,
+      ttd: TTD_id,
+      t_d: TIMER_status,    %% disconnect propagation timer
+      t_ilp: TIMER_status   %% integrity loss propagation timer
+    );
+
+  VSSs = VSS_id -> VSS_info;
+
+  VSS_statuslist = List(VSS_status);
+
+map
+  vss_is_free: VSS_id#VSSs -> Bool;
+  vss_is_unknown: VSS_id#VSSs -> Bool;
+  vss_is_ambiguous: VSS_id#VSSs -> Bool;
+  vss_is_occupied: VSS_id#VSSs -> Bool;
+  disconnect_propagation_timer_expired: VSS_id#VSSs -> Bool;
+  integrity_loss_propagation_timer_expired: VSS_id#VSSs -> Bool;
+  vss_update_status: VSS_id#VSS_status#VSSs -> VSSs;
+  vss_expire_timer: VSS_id#VSS_timer#VSSs -> VSSs;
+  vss_reset_timer: VSS_id#VSS_timer#VSSs -> VSSs;
+  vss_compilestatuslist: VSS_id # VSSs -> VSS_statuslist;
+  vss_statuslist: VSSs -> VSS_statuslist;
+var
+  v: VSS_id;
+  s: VSS_status;
+  b: Bool;
+  vs: VSSs;
+  vsl: VSS_statuslist;
+eqn
+  vss_is_free(v,vs) = status(vs(v))==free_vss;
+  vss_is_unknown(v,vs) = status(vs(v))==unknown_vss;
+  vss_is_ambiguous(v,vs) = status(vs(v))==ambiguous_vss;
+  vss_is_occupied(v,vs) = status(vs(v))==occupied_vss;
+  disconnect_propagation_timer_expired(v,vs) = (t_d(vs(v)) == expired);
+  integrity_loss_propagation_timer_expired(v,vs) = (t_ilp(vs(v)) == expired);
+  vss_update_status(v,s,vs) =
+    vs[v -> vss_info(s,ttd(vs(v)),t_d(vs(v)),t_ilp(vs(v)))];
+  vss_expire_timer(v,disc,vs) =
+    vs[v -> vss_info(status(vs(v)),ttd(vs(v)),expired,t_ilp(vs(v)))];
+  vss_expire_timer(v,ilp,vs) =
+    vs[v -> vss_info(status(vs(v)),ttd(vs(v)),t_d(vs(v)),expired)];
+  vss_reset_timer(v,disc,vs) =
+    vs[v -> vss_info(status(vs(v)),ttd(vs(v)),running,t_ilp(vs(v)))];
+  vss_reset_timer(v,ilp,vs) =
+    vs[v -> vss_info(status(vs(v)),ttd(vs(v)),t_d(vs(v)),running)];
+  vss_compilestatuslist(v,vs) =
+       [status(vs(v))]
+    ++ if(v==LAST_VSS,[],vss_compilestatuslist(next_vss(v),vs));
+  vss_statuslist(vs) = vss_compilestatuslist(FIRST_VSS,vs);
+
+sort
+  TTD_id = Nat;
+map
+  FIRST_TTD, LAST_TTD: TTD_id;
+  legal_ttd: TTD_id -> Bool;
+  next_ttd: TTD_id -> TTD_id;
+  previous_ttd: TTD_id -> TTD_id;
+  in_advance_ttd: TTD_id#TTD_id -> Bool;
+  in_rear_ttd: TTD_id#TTD_id -> Bool;
+  in_between_ttd: TTD_id#TTD_id#TTD_id -> Bool;
+var
+  t,t1,t2: TTD_id;
+eqn
+  legal_ttd(t) = t >= FIRST_TTD && t <= LAST_TTD;
+  next_ttd(t) = if(t==LAST_TTD,t,t+1);
+  previous_vss(t) = if(t==FIRST_TTD,t,Int2Nat(t-1));
+  in_advance_ttd(t1,t2) = t1 > t2;
+  in_rear_ttd(t1,t2) = in_advance_ttd(t2,t1);
+  in_between_ttd(t,t1,t2) = in_advance_ttd(t,t1) && in_rear_ttd(t,t2);
+  
+sort
+  TTD_status =
+    struct free_ttd |
+           occupied_ttd;
+  TTD_timer =
+    struct stA |
+           stB |
+	   gtp;
+	   
+  TTD_info =
+    struct ttd_info(
+      status: TTD_status,
+      vss_first: VSS_id,
+      vss_last: VSS_id,
+      t_stA: TIMER_status, %% shadow train timer A
+      t_stB: TIMER_status, %% shadow train timer B
+      t_gtp: TIMER_status  %% ghost train propagation timer
+    );
+
+  TTDs = TTD_id -> TTD_info;
+
+map
+  next_ttd: TTD_id -> TTD_id;
+  previous_ttd: TTD_id -> TTD_id;
+  ttd_is_first: TTD_id -> Bool;
+  ttd_is_last: TTD_id -> Bool;
+  ttdinfo_of_vss: VSS_id#VSSs#TTDs -> TTD_info;
+  ttd_is_occupied: VSS_id#VSSs#TTDs -> Bool;
+  ttd_is_free: VSS_id#VSSs#TTDs -> Bool;
+  vsss_of_ttd: TTD_id#TTDs -> Set(VSS_id);
+  vss_is_first_on_ttd: VSS_id#VSSs#TTDs -> Bool;
+  vss_is_last_on_ttd: VSS_id#VSSs#TTDs -> Bool;
+  shadow_train_timer_A_expired: VSS_id#VSSs#TTDs -> Bool;
+  shadow_train_timer_B_expired: VSS_id#VSSs#TTDs -> Bool;
+  shadow_train_timer_A_expired: TTD_id#TTDs -> Bool;
+  shadow_train_timer_B_expired: TTD_id#TTDs -> Bool;
+  ghost_train_propagation_timer_expired: VSS_id#VSSs#TTDs -> Bool;
+  ttd_update_status: TTD_id#TTD_status#TTDs -> TTDs;
+  ttd_expire_timer: TTD_id#TTD_timer#TTDs -> TTDs;
+  ttd_reset_timer: TTD_id#TTD_timer#TTDs -> TTDs;
+  
+var
+  t: TTD_id;
+  s: TTD_status;
+  b: Bool;
+  ts: TTDs;
+  v: VSS_id;
+  vs: VSSs;
+eqn
+  next_ttd(t)=if(t==LAST_TTD,t,t+1);
+  previous_ttd(t)=if(t==FIRST_TTD,t,Int2Nat(t-1));
+  ttd_is_first(t) = t==FIRST_TTD;
+  ttd_is_last(t) = t==LAST_TTD;
+  ttdinfo_of_vss(v,vs,ts) = ts(ttd(vs(v)));
+  ttd_is_occupied(v,vs,ts) =
+    (status(ttdinfo_of_vss(v,vs,ts))==occupied_ttd);
+  ttd_is_free(v,vs,ts) =
+    (status(ttdinfo_of_vss(v,vs,ts))==free_ttd);
+  vsss_of_ttd(t,ts) =
+    { v: VSS_id |
+         (v==vss_first(ts(t)))
+      || (in_between_vss(v,vss_first(ts(t)),vss_last(ts(t))))
+      || (v==vss_last(ts(t))) };    
+  vss_is_first_on_ttd(v,vs,ts) = vss_first(ttdinfo_of_vss(v,vs,ts))==v;
+  vss_is_last_on_ttd(v,vs,ts) = vss_last(ttdinfo_of_vss(v,vs,ts))==v;
+  shadow_train_timer_A_expired(t,ts) = (t_stA(ts(t))==expired);
+  shadow_train_timer_B_expired(t,ts) = (t_stB(ts(t))==expired);
+  shadow_train_timer_A_expired(v,vs,ts) = (t_stA(ts(ttd(vs(v))))==expired);
+  shadow_train_timer_B_expired(v,vs,ts) = (t_stB(ts(ttd(vs(v))))==expired);
+  ghost_train_propagation_timer_expired(v,vs,ts) = (t_gtp(ts(ttd(vs(v))))==expired);
+  ttd_update_status(t,s,ts) =
+    ts[t -> ttd_info(s,vss_first(ts(t)),vss_last(ts(t)),t_stA(ts(t)),t_stB(ts(t)),t_gtp(ts(t)))];
+  ttd_expire_timer(t,stA,ts) =
+    ts[t -> ttd_info(status(ts(t)),vss_first(ts(t)),vss_last(ts(t)),expired,t_stB(ts(t)),t_gtp(ts(t)))];
+  ttd_expire_timer(t,stB,ts) =
+    ts[t -> ttd_info(status(ts(t)),vss_first(ts(t)),vss_last(ts(t)),t_stA(ts(t)),expired,t_gtp(ts(t)))];
+  ttd_expire_timer(t,gtp,ts) =
+    ts[t -> ttd_info(status(ts(t)),vss_first(ts(t)),vss_last(ts(t)),t_stA(ts(t)),t_stB(ts(t)),expired)];
+  ttd_reset_timer(t,stA,ts) =
+    ts[t -> ttd_info(status(ts(t)),vss_first(ts(t)),vss_last(ts(t)),running,t_stB(ts(t)),t_gtp(ts(t)))];
+  ttd_reset_timer(t,stB,ts) =
+    ts[t -> ttd_info(status(ts(t)),vss_first(ts(t)),vss_last(ts(t)),t_stA(ts(t)),running,t_gtp(ts(t)))];
+  ttd_reset_timer(t,gtp,ts) =
+    ts[t -> ttd_info(status(ts(t)),vss_first(ts(t)),vss_last(ts(t)),t_stA(ts(t)),t_stB(ts(t)),running)];
+
+sort
+  TRAIN_id = Nat;
+map
+  FIRST_TRAIN, LAST_TRAIN: TRAIN_id;
+  legal_train: TRAIN_id#TRAINs -> Bool;
+  unconnected_train: TRAIN_id#TRAINs -> Bool;
+  next_train: TRAIN_id -> TRAIN_id;
+var
+  tr: TRAIN_id;
+  trs: TRAINs;
+eqn
+  next_train(tr) = if(tr==LAST_TRAIN,tr,tr+1);
+  legal_train(tr,trs) = tr >= FIRST_TRAIN && tr <= LAST_TRAIN && train_is_in_mission(tr,trs);
+  unconnected_train(tr,trs) = tr >= FIRST_TRAIN && tr <= LAST_TRAIN && !(train_is_in_mission(tr,trs));
+
+sort
+  INTEGRITY =
+    struct confirmed |
+           lost |
+	   unknown;
+
+  TRAIN_composition = 
+    struct single |
+           composite(first: TRAIN_id, second: TRAIN_id);
+
+  TRAIN_timer =
+    struct mute |
+           wi;
+  TRAIN_info = struct
+    train_info(
+      front_pos: VSS_id,
+      rear_pos: VSS_id,
+      eoa: VSS_id,
+      integrity: INTEGRITY,
+      in_mission: Bool,
+      composition: TRAIN_composition,
+% For now: let's skip length
+%      length: Nat,
+      t_m: TIMER_status, %% mute timer
+      t_wi: TIMER_status %% wait integrity timer
+    );
+
+  
+  TRAINs = TRAIN_id -> TRAIN_info;
+
+map
+  train_on_vss: TRAIN_id#VSS_id#TRAINs -> Bool;
+  train_on_ttd: TRAIN_id#TTD_id#TRAINs#TTDs -> Bool;
+  mute_timer_expired: TRAIN_id#TRAINs -> Bool;
+  EoM: TRAIN_id#TRAINs -> Bool;
+  wait_integrity_timer_expired: TRAIN_id#TRAINs -> Bool;
+  train_front_pos_update: TRAIN_id#VSS_id#TRAINs -> TRAINs;
+  train_rear_pos_update: TRAIN_id#VSS_id#TRAINs -> TRAINs;
+  train_eoa_update: TRAIN_id#VSS_id#TRAINs -> TRAINs;
+  train_integrity_update: TRAIN_id#INTEGRITY#TRAINs -> TRAINs;
+  train_mission_update: TRAIN_id#Bool#TRAINs -> TRAINs;
+  train_composition_update: TRAIN_id#TRAIN_composition#TRAINs -> TRAINs;
+  train_expire_timer: TRAIN_id#TRAIN_timer#TRAINs -> TRAINs;
+  train_reset_timer: TRAIN_id#TRAIN_timer#TRAINs -> TRAINs;
+  train_is_single : TRAIN_id#TRAINs -> Bool;
+  train_is_in_mission: TRAIN_id#TRAINs -> Bool;
+  
+var
+  tr: TRAIN_id;
+  trs: TRAINs;
+  v: VSS_id;
+  vs: VSSs;
+  t: TTD_id;
+  ts: TTDs;
+  i: INTEGRITY;
+  m: Bool;
+  tc: TRAIN_composition;
+eqn
+  train_is_single(tr,trs) = composition(trs(tr)) == single;
+  train_is_in_mission(tr,trs) = in_mission(trs(tr));
+  train_on_vss(tr,v,trs) =
+       (v==rear_pos(trs(tr)))
+    || (in_between_vss(v,rear_pos(trs(tr)),front_pos(trs(tr))))
+    || (v==front_pos(trs(tr)));
+  train_on_ttd(tr,t,trs,ts) =
+       (rear_pos(trs(tr)) in vsss_of_ttd(t,ts))
+    || (front_pos(trs(tr)) in vsss_of_ttd(t,ts));
+  mute_timer_expired(tr,trs) = (t_m(trs(tr))==expired);
+  EoM(tr,trs) = mute_timer_expired(tr,trs);
+  wait_integrity_timer_expired(tr,trs) = (t_wi(trs(tr))==expired);
+  train_front_pos_update(tr,v,trs) =
+    trs[tr -> train_info(
+                v,
+		rear_pos(trs(tr)),
+		eoa(trs(tr)),
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		t_wi(trs(tr))
+	      )];
+  train_rear_pos_update(tr,v,trs) =
+    trs[tr -> train_info(
+                front_pos(trs(tr)),
+		v,
+		eoa(trs(tr)),
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		t_wi(trs(tr))
+              )];
+  train_eoa_update(tr,v,trs) =
+    trs[tr -> train_info(
+                front_pos(trs(tr)),
+                rear_pos(trs(tr)),
+		v,
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		t_wi(trs(tr))
+	      )];
+  train_integrity_update(tr,i,trs) =
+    trs[tr -> train_info(
+                front_pos(trs(tr)),
+	        rear_pos(trs(tr)),
+		eoa(trs(tr)),
+		i,
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		t_wi(trs(tr))
+              )];
+  train_mission_update(tr,m,trs) =
+    trs[tr -> train_info(
+                front_pos(trs(tr)),
+	        rear_pos(trs(tr)),
+		eoa(trs(tr)),
+		integrity(trs(tr)),
+		m,
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		t_wi(trs(tr))
+              )];
+  train_composition_update(tr,tc,trs) =
+    trs[tr -> train_info(
+                front_pos(trs(tr)),
+	        rear_pos(trs(tr)),
+		eoa(trs(tr)),
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		tc,
+		t_m(trs(tr)),
+		t_wi(trs(tr))
+              )];
+  train_expire_timer(tr,mute,trs) =
+    trs[tr -> train_info(
+	        front_pos(trs(tr)),
+	        rear_pos(trs(tr)),
+		eoa(trs(tr)),
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		expired,
+		t_wi(trs(tr))
+              )];
+  train_expire_timer(tr,wi,trs) =
+    trs[tr -> train_info(
+                front_pos(trs(tr)),
+                rear_pos(trs(tr)),
+      	        eoa(trs(tr)),
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		expired
+	      )];
+  train_reset_timer(tr,mute,trs) =
+    trs[tr -> train_info(
+	        front_pos(trs(tr)),
+		rear_pos(trs(tr)),
+		eoa(trs(tr)),
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		running,
+		t_wi(trs(tr))
+              )];
+  train_reset_timer(tr,wi,trs) =
+    trs[tr -> train_info(
+                front_pos(trs(tr)),
+		rear_pos(trs(tr)),
+		eoa(trs(tr)),
+		integrity(trs(tr)),
+		in_mission(trs(tr)),
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		running
+	      )];
+
+sort
+  MA = Set(VSS_id);
+  MAs_issued = Set(VSS_id);
+map
+%% The map mas_issued should compute from info about trains the set of
+%% all VSSs that are currently part of an MA
+  ma: TRAIN_id#TRAINs -> MA;
+  mas_issued:TRAINs -> MAs_issued;
+ var
+  tr: TRAIN_id;
+  trs: TRAINs;
+eqn
+  ma(tr,trs) = { v: VSS_id | legal_vss(v) &&
+            (   (v==rear_pos(trs(tr)))
+	    || in_between_vss(v,rear_pos(trs(tr)),eoa(trs(tr)))
+	    || (v==eoa(trs(tr)))) };
+  mas_issued(trs) = { v: VSS_id | legal_vss(v) && exists t: TRAIN_id. legal_train(t,trs) && v in ma(t,trs) };
+
+%% PTD is the data sent by a train to the RBC.
+sort
+  PTD =
+    struct ptd_info(
+      front_end_pos: VSS_id,
+      rear_end_pos:VSS_id,
+      integrity:INTEGRITY,
+     % Skipped (safe) train length
+      train_data_train_length_changed: Bool);
+
+map
+  ptd_train_on_vss: VSS_id#PTD -> Bool;
+  ptd_train_on_ttd: TTD_id#PTD#TTDs -> Bool;
+  ptd_train_update: TRAIN_id#PTD#TRAINs -> TRAINs;
+  ptd_integrity_confirmed: PTD -> Bool;
+  ptd_integrity_lost: PTD -> Bool;
+  ptd_integrity_unknown: PTD -> Bool;
+var
+  p: PTD;
+  v: VSS_id;
+  t: TTD_id;
+  ts: TTDs;
+  tr: TRAIN_id;
+  trs: TRAINs;
+eqn
+  ptd_train_on_vss(v,p) =
+       (v==rear_end_pos(p))
+    || (in_between_vss(v,rear_end_pos(p),front_end_pos(p)))
+    || (v==front_end_pos(p));
+  ptd_train_on_ttd(t,p,ts) =
+       (rear_end_pos(p) in vsss_of_ttd(t,ts))
+    || (front_end_pos(p) in vsss_of_ttd(t,ts));
+  ptd_train_update(tr,p,trs)
+    = trs[tr -> train_info(
+                front_end_pos(p),
+		if(ptd_integrity_confirmed(p),rear_end_pos(p),rear_pos(trs(tr))),
+		eoa(trs(tr)),
+		integrity(p),
+		true,
+		composition(trs(tr)),
+		t_m(trs(tr)),
+		t_wi(trs(tr))
+	      )];
+  ptd_integrity_confirmed(p) =
+    (integrity(p) == confirmed);
+  ptd_integrity_lost(p) =
+    (integrity(p) == lost);
+  ptd_integrity_unknown(p) =
+    (integrity(p) == unknown);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guards in state-transition diagram VSS %%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 1 (from free to unknown) %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+%% Assumption is that TTD is the TTD on which VSS occurs.
+  g_f2u: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  g_f2u_A: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  g_f2u_B: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+%% In g_f2u_C, g_f2u_D, the 2nd VSS_id refers to the VSS for which the
+%% disconnect propagation timer is expired.
+  g_f2u_C: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  g_f2u_D: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  g_f2u_E: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  g_f2u_F: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+eqn
+  g_f2u(v,vs,ts,trs) =
+       ttd_is_occupied(v,vs,ts)
+    && (  g_f2u_A(v,vs,ts,trs)
+       || g_f2u_B(v,vs,ts,trs)
+       || g_f2u_C(v,vs,ts,trs)
+       || g_f2u_D(v,vs,ts,trs)
+       || g_f2u_E(v,vs,ts,trs)
+       || g_f2u_F(v,vs,ts,trs)
+       );
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1A:                                                          %%
+%%       (TTD is occupied)                                       %%
+%%   AND (no FS MA is issued or no train is located on this TTD) %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_f2u_A(v,vs,ts,trs) =
+       (((mas_issued(trs)*vsss_of_ttd(ttd(vs(v)),ts))=={})
+        || !(exists t: TRAIN_id.legal_train(t,trs) && train_on_ttd(t,ttd(vs(v)),trs,ts)));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1B:                                                             %%
+%%       (TTD is occupied)                                          %%
+%%   AND (VSS is part of the MA sent to a train for which the mute  %%
+%%       timer is expired and VSS is located in advance of the last %%
+%%       reported VSS of this train)                                %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ g_f2u_B(v,vs,ts,trs) =
+       (exists tr: TRAIN_id. legal_train(tr,trs) &&
+             mute_timer_expired(tr,trs)
+          && (v in ma(tr,trs))
+	  && (in_advance_vss(v,front_pos(trs(tr)))));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1C:                                                               %%
+%%       (TTD is occupied)                                            %%
+%%   AND (there is(/are) only "free" or "unknown" VSS or none between %%
+%%       this VSS and the VSS for which the "disconnect propagation   %%
+%%       timer" is expired)                                           %%
+%%   AND (VSS is located on the same TTD as the VSS for which the     %%
+%%       timer is expired)                                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% We interpret 'the VSS for which the timer is expired' as 'a VSS for
+%% which the timer is expired'
+  g_f2u_C(v,vs,ts,trs) =
+       (exists vtexp:VSS_id.legal_vss(vtexp) &&
+             disconnect_propagation_timer_expired(vtexp,vs)
+	  && (forall v1: VSS_id. legal_vss(v1) =>
+                ( (in_between_vss(v1,v,vtexp) || in_between_vss(v1,vtexp,v))
+	           => (vss_is_free(v1,vs)||vss_is_unknown(v1,vs)) ) )
+          && ttd(vs(v))==ttd(vs(vtexp)));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1D:                                                               %%
+%%       (TTD is occupied)                                            %%
+%%   AND (there is(/are) only "free" or "unknown" VSS or none between %%
+%%       this VSS and the VSS for which the "disconnect propagation   %%
+%%       timer" is expired)                                           %%
+%%   AND (VSS is not located on the same TTD as the VSS for which the %%
+%%       timer is expired                                             %%
+%%   AND (VSS is not part of an MA)                                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% We interpret 'the VSS for which the timer is expired' as 'a VSS for
+%% which the timer is expired'
+  g_f2u_D(v,vs,ts,trs) =
+       (exists vtexp:VSS_id.(legal_vss(vtexp) &&
+             disconnect_propagation_timer_expired(vtexp,vs)
+          && forall v1: VSS_id.(
+               (in_between_vss(v1,v,vtexp) || in_between_vss(v1,vtexp,v))
+	          => (vss_is_free(v1,vs)||vss_is_unknown(v1,vs)))
+          && ttd(vs(v))!=ttd(vs(vtexp))))
+    && !(v in mas_issued(trs));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1E:                                                               %%
+%%       (TTD is occupied)                                            %%
+%%   AND (there is(/are) only "free" or "unknown" VSS or none between %%
+%%       this VSS and the VSS for which the "integrity loss           %%
+%%       propagation timer" is expired)                               %%
+%%   AND (VSS is located on the same TTD as the VSS for which the     %%
+%%       timer is expired)                                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% We interpret 'the VSS for which the timer is expired' as 'a VSS for
+%% which the timer is expired'
+  g_f2u_E(v,vs,ts,trs) =
+       (exists vtexp:VSS_id.(legal_vss(vtexp) &&
+             integrity_loss_propagation_timer_expired(vtexp,vs)
+	  && forall v1: VSS_id.(
+               (in_between_vss(v1,v,vtexp) || in_between_vss(v1,vtexp,v))
+         	 => (vss_is_free(v1,vs)||vss_is_unknown(v1,vs)))
+          && ttd(vs(v))==ttd(vs(vtexp))));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1F:                                                               %%
+%%       (TTD is occupied)                                            %%
+%%   AND (there is(/are) only "free" or "unknown" VSS or none between %%
+%%       this VSS and the VSS for which the "ghost train propagation  %%
+%%       timer" is expired)                                           %%
+%%   AND (VSS is not located on the same TTD as the VSS for which the %%
+%%       timer is expired)                                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_f2u_F(v,vs,ts,trs) =
+       (exists vtexp:VSS_id.(legal_vss(vtexp) &&
+             ghost_train_propagation_timer_expired(vtexp,vs,ts)
+          && forall v1: VSS_id.(
+               (in_between_vss(v1,v,vtexp) || in_between_vss(v1,vtexp,v))
+                  => (vss_is_free(v1,vs)||vss_is_unknown(v1,vs)))
+          && ttd(vs(v))!=ttd(vs(vtexp))));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 2 (from free to occupied) %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+%% Assumption is that TTD is the TTD on which VSS_id occurs.
+  g_f2o: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  g_f2o_A: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  g_f2o_B: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  previous_vs,vs: VSSs;
+  ts: TTDs;
+  tr: TRAIN_id;
+  p: PTD;
+  trs: TRAINs;
+eqn
+  g_f2o(v,tr,p,previous_vs,vs,ts,trs) =
+       (  g_f2o_A(v,tr,p,previous_vs,vs,ts,trs)
+       || g_f2o_B(v,tr,p,previous_vs,vs,ts,trs)
+       );
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #2A:                                                           %%
+%%       (TTD is occupied)                                        %%
+%%   AND (train is located on the VSS)                            %%
+%%   AND (VSS where the estimated front end of the train was last %%
+%%       reported, was "occupied" after the processing of this    %%
+%%       previous position report)                                %%
+%%   AND (current state of the VSS where the train was last       %%
+%%       reported is not "unknown")                               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_f2o_A(v,tr,p,previous_vs,vs,ts,trs) =
+       ttd_is_occupied(v,vs,ts)
+    && ptd_train_on_vss(v,p)
+    && vss_is_occupied(front_pos(trs(tr)),previous_vs)
+%%    && !(vss_is_unknown(front_end_pos(p),vs));
+    && (forall v': VSS_id.((legal_vss(v') && train_on_vss(tr,v',trs))
+         => !(vss_is_unknown(v',vs))));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #2B:                                                           %%
+%%       (TTD is occupied)                                        %%
+%%   AND (TTD in rear is free)                                    %%
+%%   AND (train location is on the previous TTD)                  %%
+%%   AND (train location is not on the TTD)                       %%
+%%   AND (VSS is the first VSS of the TTD)                        %%
+%%   AND (VSS where the estimated front end of the train was last %%
+%%       reported, was "occupied" after the processing of this    %%
+%%       previous position report)                                %%
+%%   AND (VSS is part of the MA set to this train)                %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ g_f2o_B(v,tr,p,previous_vs,vs,ts,trs) =
+       ttd_is_occupied(v,vs,ts)
+    && status(ts(previous_ttd(ttd(vs(v)))))==free_ttd
+    && ptd_train_on_ttd(previous_ttd(ttd(vs(v))),p,ts)
+    && !(ptd_train_on_ttd(ttd(vs(v)),p,ts))
+    && vss_is_first_on_ttd(v,vs,ts)
+    && vss_is_occupied(front_pos(trs(tr)),previous_vs)
+    && (v in ma(tr,trs));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 3 (from free to ambiguous) %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+%% Assumption is that TTD is the TTD on which VSS_id occurs.
+  g_f2a: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  g_f2a_A: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  g_f2a_B: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  previous_vs,vs: VSSs;
+  ts: TTDs;
+  tr: TRAIN_id;
+  p: PTD;
+  trs: TRAINs;
+eqn
+  g_f2a(v,tr,p,previous_vs,vs,ts,trs) =
+       ttd_is_occupied(v,vs,ts)
+    && ( g_f2a_A(v,tr,p,previous_vs,vs,ts,trs)
+       || g_f2a_B(v,tr,p,previous_vs,vs,ts,trs)
+       );
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #3A:                                                           %%
+%%       (TTD is occupied)                                        %%
+%%   AND (train is located on the VSS)                            %%
+%% Note that #2A implies #3A; in fact, #2A is #3A with two extra  %%
+%% conjuncts. Since #2A has priority over #3A, we add the         %%
+%% negation of #2A OR #2B as extra conjunct to #3A.               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_f2a_A(v,tr,p,previous_vs,vs,ts,trs) =
+       ptd_train_on_vss(v,p)
+    && !(g_f2o(v,tr,p,previous_vs,vs,ts,trs));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #3B:                                                           %%
+%%       (TTD is occupied)                                        %%
+%%   AND (TTD in rear is free)                                    %%
+%%   AND (train location is on the previous TTD)                  %%
+%%   AND (train location is not on the TTD)                       %%
+%%   AND (VSS is the first VSS of the TTD)                        %%
+%%   AND (VSS is part of the MA set to this train)                %%
+%% Note that #3B is #2B without the one but last conjunct. Since  %%
+%% #2A has priority over #3A, we add the negation of #2A OR #2B   %%
+%% as extra conjunct to #3A.                                      %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ g_f2a_B(v,tr,p,previous_vs,vs,ts,trs) =
+       status(ts(previous_ttd(ttd(vs(v)))))==free_ttd
+    && ptd_train_on_ttd(previous_ttd(ttd(vs(v))),p,ts)
+    && !(ptd_train_on_ttd(ttd(vs(v)),p,ts))
+    && vss_is_first_on_ttd(v,vs,ts)
+    && (v in ma(tr,trs))
+    && !(g_f2o(v,tr,p,previous_vs,vs,ts,trs));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 4 (from unknown to free)   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_u2f_noptd: VSS_id#VSSs#TTDs -> Bool;
+  g_u2f_ptd: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_u2f_A: VSS_id#VSSs#TTDs -> Bool;
+  g_u2f_B: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_u2f_C: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  vr: VSS_id;
+  vf: VSS_id;
+  vs: VSSs;
+  ts: TTDs;
+  tr: TRAIN_id;
+  p: PTD;
+  trs: TRAINs;
+eqn
+  g_u2f_noptd(v,vs,ts) =
+       g_u2f_A(v,vs,ts);
+  g_u2f_ptd(v,tr,p,vs,ts,trs) =
+       g_u2f_A(v,vs,ts) 
+    || g_u2f_B(v,tr,p,vs,ts,trs)
+    || g_u2f_C(v,tr,p,vs,ts,trs);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #4A:                                                           %%
+%%       (TTD is free)                                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_u2f_A(v,vs,ts) = ttd_is_free(v,vs,ts);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #4B:                                                           %%
+%%       (integer train reconnects within the same session)       %%
+%%   AND (VSS is part of the MA sent to this train)               %%
+%%   AND (VSS is in advance of the VSS where the reconnected      %%
+%%       train is located)                                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_u2f_B(v,tr,p,vs,ts,trs) =
+       ptd_integrity_confirmed(p)
+%% Reconnection is confirmed by checking that the mute timer for the
+%% train is expired
+    && mute_timer_expired(tr,trs)
+    && (v in ma(tr,trs))
+    && in_advance_vss(v,front_end_pos(p));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #4C:                                                           %%
+%%       (integer train reconnects within the same session)       %%
+%%   AND (train data train length has not changed)                %%
+%%   AND (VSS is in advance of, or is, the VSS where the train    %%
+%%       was located when the connection was lost)                %%
+%%   AND (VSS is in rear of the VSS where the reconnected train   %%
+%%       is located)                                              %%
+%%   AND (in rear of this VSS and subsequent VSS(s) that had      %%
+%%       become "unknown" because of the lost connection of this  %%
+%%       train is a "free" VSS on the same TTD as the train is    %%
+%%       located on)                                              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_u2f_C(v,tr,p,vs,ts,trs) =
+       ptd_integrity_confirmed(p)
+%% Reconnection is confirmed by checking that the mute timer for the
+%% train is expired
+    && mute_timer_expired(tr,trs)
+    && !(train_data_train_length_changed(p))
+    && (in_advance_vss(v,front_pos(trs(tr))) || v==front_pos(trs(tr)))
+    && (in_rear_vss(v,rear_end_pos(p)))
+    && (exists v1: VSS_id. legal_vss(v1)
+          && ttd(vs(v1))==ttd(vs(rear_end_pos(p)))
+	  && in_rear_vss(v1,v) && vss_is_free(v1,vs));
+	  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 5 (from unknown to ambiguous)   %%
+%%                                                      %%
+%% #4 and #12 have priority over this transition. Since %%
+%% #4 and #12 can only be evaluated in the context of   %%
+%% ptd info, we assume that the prioritisation only has %%
+%% effect when there is such info. Hence, we add a ptd  %%
+%% version of this guard.                               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_u2a_noptd: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  g_u2a_ptd: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  g_u2a_A: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  p: PTD;
+  previous_vs,vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+eqn
+  g_u2a_noptd(v,vs,ts,trs) =
+       g_u2a_A(v,vs,ts,trs)
+    && !(g_u2f_noptd(v,vs,ts));
+  g_u2a_ptd(v,tr,p,previous_vs,vs,ts,trs) =
+       g_u2a_A(v,vs,ts,ptd_train_update(tr,p,trs))
+    && !(g_u2f_ptd(v,tr,p,vs,ts,trs))
+    && !(g_u2o(v,tr,p,previous_vs,vs,ts,trs));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #5A:                                                           %%
+%%       (train is located on the VSS)                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_u2a_A(v,vs,ts,trs) =
+    (exists tr:TRAIN_id.legal_train(tr,trs) &&
+       train_on_vss(tr,v,trs));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 6 (from occupied to free)   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_o2f_noptd: VSS_id#VSSs#TTDs -> Bool;
+  g_o2f_ptd: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_o2f_A: VSS_id#VSSs#TTDs -> Bool;
+  g_o2f_B: VSS_id#TRAIN_id#PTD#TRAINs -> Bool;
+var
+  p: PTD;
+  v: VSS_id;
+  vs: VSSs;
+  tr:TRAIN_id;
+  ts: TTDs;
+  trs: TRAINs;
+eqn
+  g_o2f_noptd(v,vs,ts) =
+       g_o2f_A(v,vs,ts);
+  g_o2f_ptd(v,tr,p,vs,ts,trs) =
+       g_o2f_A(v,vs,ts)
+    || g_o2f_B(v,tr,p,trs);
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #6A:                                                           %%
+%%       (TTD is free)                                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_o2f_A(v,vs,ts) = ttd_is_free(v,vs,ts);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #6B:                                                           %%
+%%       (integer train has reported to have left the VSS)        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% We interpret this as: train is, according to the TRAINs info still
+%% on this VSS, but has left it according to the position report.
+  g_o2f_B(v,tr,p,trs) =
+       ptd_integrity_confirmed(p)
+    && train_on_vss(tr,v,trs)
+    && in_rear_vss(v,rear_end_pos(p));
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 7 (from occupied to unknown)   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_o2u: VSS_id#TRAIN_id#PTD#VSSs#TRAINs -> Bool;
+  g_o2u_A: VSS_id#TRAIN_id#PTD#TRAINs -> Bool;
+  g_o2u_B: VSS_id#TRAIN_id#PTD#VSSs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  vs: VSSs;
+  trs: TRAINs;
+  p: PTD;
+eqn
+  g_o2u(v,tr,p,vs,trs) =
+        g_o2u_A(v,tr,p,trs)
+    || g_o2u_B(v,tr,p,vs,trs);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #7A:                                                           %%
+%%       (train is located on the VSS)                            %%
+%%   AND ((mute timer is expired) OR (EoM))                       %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_o2u_A(v,tr,p,trs) =
+       ptd_train_on_vss(v,p)
+    && (mute_timer_expired(tr,trs) || EoM(tr,trs));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #7B:                                                           %%
+%%       (train has reported to have left the VSS)                %%
+%%   AND (   train reports "lost integrity"                       %%
+%%        OR PTD with no integrity information is received        %%
+%%           outside the integrity waiting period                 %%
+%%        OR train reports changed train data train length )      %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% We interpret this as: train is, according to the TRAINs info still
+%% on this VSS, but has left it according to the position report.
+  g_o2u_B(v,tr,p,vs,trs) =
+       train_on_vss(tr,v,trs)
+    && in_rear_vss(v,rear_end_pos(p))
+    && (  ptd_integrity_lost(p)
+       || (  ptd_integrity_unknown(p)
+          && wait_integrity_timer_expired(tr,trs) )
+       || train_data_train_length_changed(p));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 8 (from occupied to ambiguous)   %%
+%% Note that #7 has priority over #8                     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_o2a: VSS_id#TRAIN_id#PTD#VSSs#TRAINs -> Bool;
+  g_o2a_A: VSS_id#TRAIN_id#PTD#VSSs#TRAINs -> Bool;
+  g_o2a_B: VSS_id#TRAIN_id#PTD#VSSs#TRAINs -> Bool;
+  g_o2a_C: VSS_id#TRAIN_id#PTD#VSSs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  vs: VSSs;
+  trs: TRAINs;
+  p: PTD;
+eqn
+  g_o2a(v,tr,p,vs,trs) =
+    !(g_o2u(v,tr,p,vs,trs))
+    && ( g_o2a_A(v,tr,p,vs,trs)
+       || g_o2a_B(v,tr,p,vs,trs)
+       || g_o2a_C(v,tr,p,vs,trs)
+       );
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #8A:                                                           %%
+%%       (train is located on the VSS)                            %%
+%%   AND (   train reports "lost integrity"                       %%
+%%        OR PTD with no integrity information is received        %%
+%%           outside the integrity waiting period                 %%
+%%        OR train reports changed train data train length )      %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_o2a_A(v,tr,p,vs,trs) =
+       ptd_train_on_vss(v,p)
+    && (  ptd_integrity_lost(p)
+       || (  ptd_integrity_unknown(p)
+          && wait_integrity_timer_expired(tr,trs) )
+       || train_data_train_length_changed(p));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #8B:                                                           %%
+%%       (train is located on the VSS)                            %%
+%%   AND (VSS in rear is "unknown")                               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_o2a_B(v,tr,p,vs,trs) =
+       ptd_train_on_vss(v,p)
+    && vss_is_unknown(previous_vss(v),vs);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #8C:                                                           %%
+%%       (Another train is located on the VSS)                    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_o2a_C(v,tr,p,vs,trs) =
+       ptd_train_on_vss(v,p)
+    && (exists tr1:TRAIN_id. legal_train(tr1,trs) &&
+           (tr1 != tr)
+	&& train_on_vss(tr1,v,trs));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 9 (from ambiguous to free)       %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_a2f_noptd: VSS_id#VSSs#TTDs -> Bool;
+  g_a2f_ptd: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_a2f_A: VSS_id#VSSs#TTDs -> Bool;
+  g_a2f_B: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+  p: PTD;
+eqn
+  g_a2f_noptd(v,vs,ts) = g_a2f_A(v,vs,ts);
+  g_a2f_ptd(v,tr,p,vs,ts,trs) =
+       g_a2f_A(v,vs,ts)
+    || g_a2f_B(v,tr,p,vs,ts,trs);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #9A:                                                           %%
+%%       (TTD is free)                                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_a2f_A(v,vs,ts) = ttd_is_free(v,vs,ts);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #9B:                                                           %%
+%%       (integer train has reported to have left the VSS)        %%
+%%   AND (the "shadow train timer A" of the TTD was not expired   %%
+%%        at the moment of the time stamp in the position report) %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_a2f_B(v,tr,p,vs,ts,trs) =
+       ptd_integrity_confirmed(p)
+    && train_on_vss(tr,v,trs)
+    && in_rear_vss(v,rear_end_pos(p))
+    && shadow_train_timer_A_expired(v,vs,ts);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 10 (from ambiguous to unknown)   %%
+%% Note that #9B has priority over #10                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_a2u_ptd: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_a2u_noptd: VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  g_a2u_A_noptd: VSS_id#TRAINs -> Bool;
+  g_a2u_A_ptd: VSS_id#TRAIN_id#TRAINs#PTD -> Bool;
+  g_a2u_B: VSS_id#TRAIN_id#PTD#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+  p: PTD;
+eqn
+  g_a2u_ptd(v,tr,p,vs,ts,trs) =
+       !(g_a2f_ptd(v,tr,p,vs,ts,trs))
+    && ( g_a2u_A_ptd(v,tr,trs,p)
+       || g_a2u_B(v,tr,p,trs)
+       );
+
+  g_a2u_noptd(v,vs,ts,trs) =
+       !(g_a2f_noptd(v,vs,ts))
+    && g_a2u_A_noptd(v,trs);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #10A:                                                          %%
+%%       (VSS is left by all reporting trains)                    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_a2u_A_noptd(v,trs) =
+       (forall tr:TRAIN_id.legal_train(tr,trs) => !train_on_vss(tr,v,trs));
+
+  g_a2u_A_ptd(v,tr,trs,p) =
+       g_a2u_A_noptd(v,ptd_train_update(tr,p,trs));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #10B:                                                          %%
+%%       (train is located on the VSS)                            %%
+%%   AND ((mute timer expired) OR (EoM))                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is identical to #7A.
+  g_a2u_B(v,tr,p,trs) = g_o2u_A(v,tr,p,trs);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 11 (from ambiguous to occupied)  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_a2o: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_a2o_A: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_a2o_B: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+  p: PTD;
+eqn
+  g_a2o(v,tr,p,vs,ts,trs) =
+       g_a2o_A(v,tr,p,vs,ts,trs)
+    || g_a2o_B(v,tr,p,vs,ts,trs);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #11A:                                                          %%
+%%       (integer train located on the VSS reported to have left  %%
+%%       the TTD in rear)                                         %%
+%%   AND (the “shadow train timer A” of the TTD in rear was not   %%
+%%       expired at the moment of the time stamp in the position  %%
+%%       report)                                                  %%
+%%   AND (the reported min-safe-rear-end of this train is within  %%
+%%       the distance that can be covered at the reported speed   %%
+%%       within the “shadow train timer A” from the TTD limit)    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Left out third conjunct for now; we do not model min-safe-rear-end,
+% train speed, etc.
+  g_a2o_A(v,tr,p,vs,ts,trs) =
+       ptd_train_on_vss(v,p)
+    && !(ptd_train_on_ttd(previous_ttd(ttd(vs(v))),p,ts))
+    && train_on_ttd(tr,previous_ttd(ttd(vs(v))),trs,ts)
+    && ptd_integrity_confirmed(p)
+    && !(shadow_train_timer_A_expired(previous_ttd(ttd(vs(v))),ts));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #11B:                                                          %%
+%%       (TTD in rear is free)                                    %%
+%%   AND (integer train located on the VSS reported to have left  %%
+%%       the TTD in rear)                                         %%
+%%   AND (the “shadow train timer B” of the TTD in rear for this  %%
+%%       direction was not expired at the moment of the time      %%
+%%       stamp in the position report)                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is identical to #7A, with an added priority condition. (The
+% condition is probably not necessary because, most likely, it is
+% implied by the other condition, but we add it for consistency.)
+  g_a2o_B(v,tr,p,vs,ts,trs) =
+       (status(ts(previous_ttd(ttd(vs(v)))))==free_ttd)
+    && ptd_train_on_vss(v,p)
+    && !(ptd_train_on_ttd(previous_ttd(ttd(vs(v))),p,ts))
+    && train_on_ttd(tr,previous_ttd(ttd(vs(v))),trs,ts)
+    && ptd_integrity_confirmed(p)
+    && !(shadow_train_timer_B_expired(previous_ttd(ttd(vs(v))),ts));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Guard for transition 12 (from unknown to occupied)    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  g_u2o: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  g_u2o_A: VSS_id#TRAIN_id#PTD#VSSs#TTDs#TRAINs -> Bool;
+  g_u2o_B: VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  previous_vs,vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+  p: PTD;
+eqn
+  g_u2o(v,tr,p,previous_vs,vs,ts,trs) =
+       g_u2o_A(v,tr,p,vs,ts,trs)
+    || g_u2o_B(v,tr,p,previous_vs,vs,ts,trs);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #12A:                                                          %%
+%%       (Integer train located on the VSS reconnects within same %%
+%%       session)                                                 %%
+%%   AND (train data train length has not changed)                %%
+%%   AND (In rear of this VSS and subsequent VSS(s) that had      %%
+%%       become “unknown” because of the lost connection of this  %%
+%%       train is a “free” VSS on an “occupied” TTD)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_u2o_A(v,tr,p,vs,ts,trs) =
+       ptd_integrity_confirmed(p)
+    && ptd_train_on_vss(v,p)
+%% Reconnection is confirmed by checking that the mute timer for the
+%% train is expired
+    && mute_timer_expired(tr,trs)
+    && !(train_data_train_length_changed(p))
+    && (exists v1: VSS_id. legal_vss(v1) &&
+          in_rear_vss(v1,v) && vss_is_free(v1,vs) && ttd_is_occupied(v1,vs,ts));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #12B:                                                          %%
+%%       (TTD is occupied)                                        %%
+%%   AND (train is located on the VSS)                            %%
+%%   AND (VSS where the estimated front end of the train was last %%
+%%       reported, was “occupied” after the processing of this    %%
+%%       previous position report)                                %%
+%%   AND (the train is not re-connecting, i.e. the mute timer was %%
+%%       not expired)                                             %%
+%%   AND (current state of the VSS where the train was last       %%
+%%       reported is not “unknown”)                               %%
+%% #4 has priority over #12                                       %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  g_u2o_B(v,tr,p,previous_vs,vs,ts,trs) =
+       g_f2o_A(v,tr,p,previous_vs,vs,ts,trs)
+    && !(mute_timer_expired(tr,trs))
+    && !(g_u2f_ptd(v,tr,p,vs,ts,trs));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Checking stability
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+map
+  vss_stable_ptd:VSS_id#TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  vss_stable_noptd:VSS_id#VSSs#TTDs#TRAINs -> Bool;
+  all_stable_ptd:TRAIN_id#PTD#VSSs#VSSs#TTDs#TRAINs -> Bool;
+  all_stable_noptd: VSSs#TTDs#TRAINs -> Bool;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  previous_vs,vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+  p: PTD;
+eqn
+  vss_stable_ptd(v,tr,p,previous_vs,vs,ts,trs) =
+       ( vss_is_free(v,vs) =>
+           !(    g_f2u(v,vs,ts,trs)
+              || g_f2o(v,tr,p,previous_vs,vs,ts,trs)
+              || g_f2a(v,tr,p,previous_vs,vs,ts,trs) ) )
+    && ( vss_is_occupied(v,vs) =>
+           !(    g_o2f_ptd(v,tr,p,vs,ts,trs)
+	      || g_o2u(v,tr,p,vs,trs)
+	      || g_o2a(v,tr,p,vs,trs) ) )
+    && ( vss_is_unknown(v,vs) =>
+           !(    g_u2f_ptd(v,tr,p,vs,ts,trs)
+              || g_u2a_ptd(v,tr,p,previous_vs,vs,ts,trs)
+              || g_u2o(v,tr,p,previous_vs,vs,ts,trs) ) )
+    && ( vss_is_ambiguous(v,vs) =>
+           !(    g_a2f_ptd(v,tr,p,vs,ts,trs)
+	      || g_a2u_ptd(v,tr,p,vs,ts,trs)
+	      || g_a2o(v,tr,p,vs,ts,trs)) );
+	 
+  all_stable_ptd(tr,p,previous_vs,vs,ts,trs) =
+   forall v:VSS_id. (legal_vss(v) => vss_stable_ptd(v,tr,p,previous_vs,vs,ts,trs));
+
+  vss_stable_noptd(v,vs,ts,trs) =
+       ( vss_is_free(v,vs) =>
+           !(  g_f2u(v,vs,ts,trs) ) )
+    && ( vss_is_occupied(v,vs) =>
+           !(  g_o2f_noptd(v,vs,ts) ) )
+    && ( vss_is_unknown(v,vs) =>
+           !(    g_u2f_noptd(v,vs,ts)
+	      || g_u2a_noptd(v,vs,ts,trs) ) )
+    && ( vss_is_ambiguous(v,vs) =>
+           !(    g_a2f_noptd(v,vs,ts)
+	      || g_a2u_noptd(v,vs,ts,trs) ) );
+
+  all_stable_noptd(vs,ts,trs) =
+    forall v:VSS_id. (legal_vss(v) => vss_stable_noptd(v,vs,ts,trs));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                   %%
+%% Computing maximal safe End-of-Authority for train %%
+%%                                                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+map
+  max_safe_EoA: TRAIN_id#VSSs#TRAINs -> VSS_id;
+  compute_max_safe_EoA: VSS_id#TRAIN_id#VSSs#TRAINs -> VSS_id;
+var
+  v: VSS_id;
+  tr: TRAIN_id;
+  vs: VSSs;
+  ts: TTDs;
+  trs: TRAINs;
+eqn
+  max_safe_EoA(tr,vs,trs) =
+    compute_max_safe_EoA(eoa(trs(tr)),tr,vs,trs);
+
+v!=LAST_VSS && vss_is_free(next_vss(v),vs) ->
+  compute_max_safe_EoA(v,tr,vs,trs) =
+    compute_max_safe_EoA(next_vss(v),tr,vs,trs);
+!(v!=LAST_VSS && vss_is_free(next_vss(v),vs)) ->
+  compute_max_safe_EoA(v,tr,vs,trs) = v;
+
+%%%%%%%%%%%%%%%
+%% Trackside %%
+%%%%%%%%%%%%%%%
+
+act
+  enter,s_enter,r_enter: TTD_id;
+  leave,s_leave,r_leave: TTD_id;
+  emit_status,s_emit_status,r_emit_status: TTD_id#TTD_status;
+  emit_position,s_emit_position,r_emit_position: TRAIN_id#PTD;
+  start_mission,s_start_mission,r_start_mission: TRAIN_id#PTD;
+  error;
+  extend_EoA,s_extend_EoA,r_extend_EoA: TRAIN_id#VSS_id;
+  
+proc
+%% TTDs seems to be real components in the system. Trains may enter and
+%% leave a TTD (to simulate train detection), and TTDs may emit their
+%% status to the RBC.
+%% Alternatively, we could include this in RBC
+  TTD(id: TTD_id, axles: Int) =
+    (axles == 0) -> r_enter(id)|s_emit_status(id,occupied_ttd).TTD(axles=axles+1)
+                 <> r_enter(id).TTD(axles=axles+1)
+  + (axles == 1) -> r_leave(id)|s_emit_status(id,free_ttd).TTD(axles=axles-1)
+                 <> r_leave(id).TTD(axles=axles-1)
+%  + (axles==0) -> s_emit_status(id,free_ttd).TTD()
+%  + (axles>=1) -> s_emit_status(id,occupied_ttd).TTD()
+  + (axles<0) -> error.delta
+  ;
+
+
+act
+  ptd_stable;
+  stable: VSS_statuslist;
+  change: VSS_id#VSS_status#VSS_status;
+  expire_timer: VSS_id#VSS_timer;
+  expire_timer: TTD_id#TTD_timer;
+  expire_timer: TRAIN_id#TRAIN_timer;
+proc
+ TS(previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
+   sum t: TTD_id.legal_ttd(t) ->
+     sum s:TTD_status.
+       r_emit_status(t,s).TS_stabilise(previous_vs,vs,ttd_update_status(t,s,ts),trs)
+ + sum tr: TRAIN_id.unconnected_train(tr,trs) ->
+     sum p:PTD.r_start_mission(tr,p).TS_handle_report(tr,p,previous_vs,vs,ts,ptd_train_update(tr,p,trs))
+ + sum tr: TRAIN_id.legal_train(tr,trs) ->
+     sum p:PTD.r_emit_position(tr,p).TS_handle_report(tr,p,previous_vs,vs,ts,trs)
+ + sum v: VSS_id.legal_vss(v) ->
+     sum timer: VSS_timer.
+       expire_timer(v,timer).TS_stabilise(previous_vs,vss_expire_timer(v,timer,vs),ts,trs)
+ + sum t: TTD_id.legal_ttd(t) ->
+     sum timer: TTD_timer.
+       expire_timer(t,timer).TS_stabilise(previous_vs,vs,ttd_expire_timer(t,timer,ts),trs)
+ + sum tr: TRAIN_id.legal_train(tr,trs) ->
+     sum timer: TRAIN_timer.
+       expire_timer(tr,timer).TS_stabilise(previous_vs,vs,ts,train_expire_timer(tr,timer,trs))
+ + sum tr: TRAIN_id.legal_train(tr,trs) ->
+     in_advance_vss(max_safe_EoA(tr,vs,trs),eoa(trs(tr))) ->       s_extend_EoA(tr,max_safe_EoA(tr,vs,trs)).TS(previous_vs,vs,ts,train_eoa_update(tr,max_safe_EoA(tr,vs,trs),trs));
+
+  TS_handle_report(tr:TRAIN_id,p:PTD,previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
+    sum v: VSS_id.legal_vss(v) -> (
+        ( vss_is_free(v,vs) ->
+          (   g_f2u(v,vs,ts,trs) ->
+                ( change(v,free_vss,unknown_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+  	    + g_f2o(v,tr,p,previous_vs,vs,ts,trs) ->
+  	        ( change(v,free_vss,occupied_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs) )
+            + g_f2a(v,tr,p,previous_vs,vs,ts,trs) ->
+	        ( change(v,free_vss,ambiguous_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) ) ) )
+      + ( vss_is_occupied(v,vs) ->
+          (   g_o2f_ptd(v,tr,p,vs,ts,trs) ->
+  	        ( change(v,occupied_vss,free_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
+	    + g_o2u(v,tr,p,vs,trs) ->
+	        ( change(v,occupied_vss,unknown_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+	    + g_o2a(v,tr,p,vs,trs) ->
+	        ( change(v,occupied_vss,ambiguous_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) ) ) )
+      + ( vss_is_unknown(v,vs) ->
+          (   g_u2f_ptd(v,tr,p,vs,ts,trs) ->
+	        ( change(v,unknown_vss,free_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
+  	    + g_u2a_ptd(v,tr,p,previous_vs,vs,ts,trs) ->
+	        ( change(v,unknown_vss,ambiguous_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) )
+            + g_u2o(v,tr,p,previous_vs,vs,ts,trs) ->
+  	        ( change(v,unknown_vss,occupied_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs) ) ) )
+      + ( vss_is_ambiguous(v,vs) ->
+          (   g_a2f_ptd(v,tr,p,vs,ts,trs) ->
+	        ( change(v,ambiguous_vss,free_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,free_vss,vs),ts,trs) )
+	    + g_a2u_ptd(v,tr,p,vs,ts,trs) ->
+	        ( change(v,ambiguous_vss,unknown_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+	    + g_a2o(v,tr,p,vs,ts,trs) ->
+	        ( change(v,ambiguous_vss,occupied_vss).
+	            TS_handle_report(tr,p,previous_vs,vss_update_status(v,occupied_vss,vs),ts,trs)
+    ) ) ) )
+    + all_stable_ptd(tr,p,previous_vs,vs,ts,trs) ->
+        ( ptd_stable.TS_stabilise(vs,vs,ts,ptd_train_update(tr,p,trs)) );
+
+  TS_stabilise(previous_vs,vs: VSSs, ts: TTDs, trs: TRAINs) =
+    sum v: VSS_id.legal_vss(v) ->
+      ( vss_is_free(v,vs) ->
+           g_f2u(v,vs,ts,trs) ->
+             change(v,free_vss,unknown_vss).
+	       TS_stabilise(previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs)
+      + vss_is_occupied(v,vs) ->
+           g_o2f_noptd(v,vs,ts) ->
+	     change(v,occupied_vss,free_vss).
+	       TS_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
+      + vss_is_unknown(v,vs) ->
+          ( g_u2f_noptd(v,vs,ts) ->
+	     change(v,unknown_vss,free_vss).
+	        TS_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
+	  + g_u2a_noptd(v,vs,ts,trs) ->
+	     change(v,unknown_vss,ambiguous_vss).
+	        TS_stabilise(previous_vs,vss_update_status(v,ambiguous_vss,vs),ts,trs) )
+      + vss_is_ambiguous(v,vs) ->
+          ( g_a2f_noptd(v,vs,ts) ->
+	     change(v,ambiguous_vss,free_vss).
+	        TS_stabilise(previous_vs,vss_update_status(v,free_vss,vs),ts,trs)
+	  + g_a2u_noptd(v,vs,ts,trs) ->
+	     change(v,ambiguous_vss,unknown_vss).
+	        TS_stabilise(previous_vs,vss_update_status(v,unknown_vss,vs),ts,trs) )
+      )
+    + all_stable_noptd(vs,ts,trs) -> stable(vss_statuslist(vs)).TS(previous_vs,vs,ts,trs);
+  
+%%%%%%%%%%%%%
+%% Onboard %%
+%%%%%%%%%%%%%
+
+map
+  update_position: List(VSS_id) # Nat # VSS_id -> List(VSS_id);
+  first_moveable: List(VSS_id) # Nat -> Bool;
+  train_is_master : TRAIN_id#TRAIN_composition -> Bool;
+
+var
+  vs: List(VSS_id);
+  v: VSS_id;
+  tr: TRAIN_id;
+  tc: TRAIN_composition;
+  
+eqn % ugly but quick definitions
+  update_position(vs,0,v) = v |> tail(vs);
+  update_position(vs,1,v) = vs.0 |> v |> tail(tail(vs));
+  update_position(vs,2,v) = vs.0 |> vs.1 |> v |> tail(tail(tail(vs)));
+  update_position(vs,3,v) = vs.0 |> vs.1 |> vs.2 |> v |> tail(tail(tail(tail(vs))));
+  first_moveable(vs,0) = (forall j:Nat. (j < #vs) => vs.0 == vs.j );
+  first_moveable(vs,1) = (vs.0 != vs.1);
+  first_moveable(vs,2) = (vs.0 == vs.1) && (vs.1 != vs.2);
+  first_moveable(vs,3) = (vs.0 == vs.1) && (vs.1 == vs.2) && (vs.2 != vs.3);
+  train_is_master(tr,tc) = (tc == single || first(tc) == tr);
+
+act
+  break,connect,disconnect:TRAIN_id;
+  move:TRAIN_id#List(VSS_id);
+  r_split_train, s_split_train, split_train : TRAIN_id # TRAIN_id # VSS_id # VSS_id;
+
+proc
+  Train(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat)
+=
+  (train_comp!=single && is_connected) -> Train_split()
++
+  train_is_master(id,train_comp) -> 
+  (
+    Train_emit_position()
+  +
+    Train_extend_authority()
+  +
+    Train_connect_disconnect()
+  +
+    train_integer -> Train_move()    % we only allow integer trains to move
+  +
+    !train_integer -> Train_move_notinteger()    % we only allow integer trains to move
+  +
+    Train_break()
+  );
+
+  Train_extend_authority(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat) =
+    ( % if connected, we can receive an extended authority
+      (is_connected) -> sum a:VSS_id.legal_vss(a) -> r_extend_EoA(id,a).Train(ema = a)
+    );
+
+  Train_split(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat)
+= % split a train; the second train sends the position of its front; this becomes the new back for the first train
+  % moreover, the composition of both trains change to single
+   (id == first(train_comp)) -> 
+        ( s_split_train(id,second(train_comp),position.2,position.3)
+        . s_emit_position(id,ptd_info(position.0,position.1,confirmed,true))
+        . Train(position = position.0 |> [position.1], train_comp = single)  % new train is split in two
+        )
+   <>
+        ( sum v1,v2:VSS_id. (legal_vss(v1) && legal_vss(v2) ) ->
+            r_split_train(first(train_comp),id,v1,v2)                        % v1 is the new front, v2 is the new back
+          . s_start_mission(id,ptd_info(v1,v2,confirmed,false))
+          . Train(position = v1 |> [v2], train_comp = single)                % train is live and on VSSs v1 and v2
+        )
+;
+
+  Train_emit_position(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat)
+= % if connected, we can disconnect or emit our position; if disconnected we can connect again
+   (is_connected) -> ( (train_integer)-> s_emit_position(id,ptd_info(position.0,position.Int2Nat(#position-1),confirmed,false)). Train()
+                     + !(train_integer)-> s_emit_position(id,ptd_info(position.0,position.Int2Nat(#position-1),lost,false)). Train()
+                     + s_emit_position(id,ptd_info(position.0,position.Int2Nat(#position-1),unknown,false)). Train()
+                     )
+;
+
+  Train_connect_disconnect(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat)
+= % if connected, we can disconnect or emit our position; if disconnected we can connect again
+   (is_connected) -> disconnect(id). Train(is_connected = false)
+                  <> connect(id). Train(is_connected = true)
+;
+
+
+  Train_break(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat)
+= % the train may break in smithereens
+    (train_integer) -> break(id). Train(barrier=if(position.0==ema,ema,next_vss(position.0)), train_integer = false)
+;
+
+  Train_move(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat)
+=
+  sum i:Nat. (i < #position && first_moveable(position,i) && (i == 0 => in_rear_vss(position.0,ema) ) ) ->
+  ( % we move onto the next VSS and TTD and autonomously emit a move actiopn
+     (VSS_to_TTD(page_number,instance)(position.i) != VSS_to_TTD(page_number,instance)(next_vss(position.i))) ->
+       ( % we are changing TTD
+         s_leave(VSS_to_TTD(page_number,instance)(position.i))|s_enter(VSS_to_TTD(page_number,instance)(next_vss(position.i)))
+       . s_move(id, update_position(position,i,next_vss(position.i)))
+       )
+      <>
+       ( % we remain on the TTD
+         s_move(id, update_position(position,i,next_vss(position.i)))
+       )
+  )
+  . Train(position = update_position(position,i,next_vss(position.i)))
+;
+
+  Train_move_notinteger(id:TRAIN_id, ema:VSS_id, barrier:VSS_id, is_connected,train_integer:Bool, train_comp:TRAIN_composition, position:List(VSS_id), page_number,instance:Nat)
+=
+  sum i:Nat. (i < #position && first_moveable(position,i) && (i == 0 => in_rear_vss(position.0,barrier) ) ) ->
+  ( % we move onto the next VSS and TTD and autonomously emit a move actiopn
+     (VSS_to_TTD(page_number,instance)(position.i) != VSS_to_TTD(page_number,instance)(next_vss(position.i))) ->
+       ( % we are changing TTD
+         s_leave(VSS_to_TTD(page_number,instance)(position.i))|s_enter(VSS_to_TTD(page_number,instance)(next_vss(position.i)))
+       . s_move(id, update_position(position,i,next_vss(position.i)))
+       )
+      <>
+       ( % we remain on the TTD
+         s_move(id, update_position(position,i,next_vss(position.i)))
+       )
+  )
+  . Train(position = update_position(position,i,next_vss(position.i)))
+;
+
+  
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Create the section of page 9; this requires:
+%%  - a mapping that assigns a list of VSSs to a TTD
+%%  - a configuration for a mapping of sort VSSs
+%%  - a mapping for sort TRAINs
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+sort 
+  Constants_sort = struct c(first_vss:VSS_id,last_vss:VSS_id,first_ttd:TTD_id,last_ttd:TTD_id,first_train:TRAIN_id,last_train:TRAIN_id);
+
+map
+  VSSs_config : Nat # Nat -> VSSs;
+  TTDs_config: Nat # Nat -> TTDs;
+  TRAINs_config: Nat # Nat -> TRAINs;
+  VSS_to_TTD: Nat#Nat -> VSS_id -> TTD_id;
+  Constants: Nat # Nat -> Constants_sort;
+  AXLES_on_TTD: Nat # Nat -> TTD_id -> Int;
+  count_axles: TRAIN_id # TTD_id # VSSs # TRAINs -> Int;
+  positions: TRAIN_id # TRAINs -> List(VSS_id);
+var 
+  n: VSS_id;
+  page,instance: Nat;
+  tr: TRAIN_id;
+  t: TTD_id;
+  vs: VSSs;
+  trs: TRAINs;
+eqn
+  VSS_to_TTD(page,instance)(n) = ttd(VSSs_config(page,instance)(n));
+  count_axles(tr,t,vs,trs)
+    = if(tr==LAST_TRAIN,
+         ( if(ttd(vs(front_pos(trs(tr))))==t,1,0)
+	 + if(ttd(vs(rear_pos(trs(tr))))==t,1,0)),
+         ( if(ttd(vs(front_pos(trs(tr))))==t,1,0)
+	 + if(ttd(vs(rear_pos(trs(tr))))==t,1,0)
+	 + count_axles(next_train(tr),t,vs,trs)));
+  AXLES_on_TTD(page,instance)(t) = count_axles(FIRST_TRAIN,t,VSSs_config(page,instance),TRAINs_config(page,instance));
+  positions(tr,trs)
+    = if(train_is_single(tr,trs),
+         [front_pos(trs(tr)),rear_pos(trs(tr))],
+	 if(tr==first(composition(trs(tr))),
+	    [front_pos(trs(tr)),rear_pos(trs(tr)),front_pos(trs(second(composition(trs(tr))))),rear_pos(trs(second(composition(trs(tr)))))],
+	    [front_pos(trs(first(composition(trs(tr))))),rear_pos(trs(first(composition(trs(tr))))),front_pos(trs(tr)),rear_pos(trs(tr))]));
+    
+  % section of page 9 (with the addition that there is an extra free VSS at the end of TTD 1)
+  VSSs_config(9,1)(0) = vss_info(free_vss,0,running,running);
+  VSSs_config(9,1)(1) = vss_info(unknown_vss,1,running,running);
+  VSSs_config(9,1)(2) = vss_info(ambiguous_vss,1,running,running);
+  VSSs_config(9,1)(3) = vss_info(occupied_vss,1,running,running);
+  VSSs_config(9,1)(4) = vss_info(free_vss,1,running,running);
+  TTDs_config(9,1)(0) = ttd_info(free_ttd, 0, 0, running, running, running);
+  TTDs_config(9,1)(1) = ttd_info(occupied_ttd, 1, 4, running, running, running);
+  TRAINs_config(9,1)(0) = train_info(2,2,2,confirmed,true,single,running,running);
+  TRAINs_config(9,1)(1) = train_info(3,3,3,confirmed,true,single,running,running);
+  Constants(9,1) = c(0,4,0,1,0,1);
+
+  % section of page 29, instance 1
+  VSSs_config(29,1)(0) = vss_info(occupied_vss,0,running,running); %VSS nr. 11
+  VSSs_config(29,1)(1) = vss_info(free_vss,0,running,running);     %VSS nr. 12
+  VSSs_config(29,1)(2) = vss_info(free_vss,1,running,running);     %VSS nr. 21
+  VSSs_config(29,1)(3) = vss_info(free_vss,1,running,running);     %VSS nr. 22
+  VSSs_config(29,1)(4) = vss_info(free_vss,1,running,running);     %VSS nr. 23
+  VSSs_config(29,1)(5) = vss_info(free_vss,2,running,running);     %VSS nr. 31
+  VSSs_config(29,1)(6) = vss_info(free_vss,2,running,running);     %VSS nr. 32
+  VSSs_config(29,1)(7) = vss_info(free_vss,2,running,running);     %VSS nr. 33
+  TTDs_config(29,1)(0) = ttd_info(occupied_ttd, 0, 1, running, running, running);
+  TTDs_config(29,1)(1) = ttd_info(free_ttd, 2, 4, running, running, running);
+  TTDs_config(29,1)(2) = ttd_info(free_ttd, 5, 8, running, running, running);
+  TRAINs_config(29,1)(0) = train_info(0,0,0,confirmed,true,single,running,running);
+  Constants(29,1) = c(0,7,0,2,0,0);
+
+  % section of page 29, instance 2 (fewer TTDs)
+  VSSs_config(29,2)(0) = vss_info(occupied_vss,0,running,running); %VSS nr. 11
+  VSSs_config(29,2)(1) = vss_info(free_vss,0,running,running);     %VSS nr. 12
+  VSSs_config(29,2)(2) = vss_info(free_vss,1,running,running);     %VSS nr. 21
+  VSSs_config(29,2)(3) = vss_info(free_vss,1,running,running);     %VSS nr. 22
+  VSSs_config(29,2)(4) = vss_info(free_vss,1,running,running);     %VSS nr. 23
+  TTDs_config(29,2)(0) = ttd_info(occupied_ttd, 0, 1, running, running, running);
+  TTDs_config(29,2)(1) = ttd_info(free_ttd, 2, 4, running, running, running);
+  TRAINs_config(29,2)(0) = train_info(0,0,0,confirmed,true,single,running,running);
+  Constants(29,2) = c(0,4,0,1,0,0);
+
+
+  % section of page 29, instance 3 (fewer TTDs, two trains)
+  VSSs_config(29,3)(0) = vss_info(occupied_vss,0,running,running); %VSS nr. 11
+  VSSs_config(29,3)(1) = vss_info(free_vss,0,running,running);     %VSS nr. 12
+  VSSs_config(29,3)(2) = vss_info(free_vss,1,running,running);     %VSS nr. 21
+  VSSs_config(29,3)(3) = vss_info(occupied_vss,1,running,running);     %VSS nr. 22
+  VSSs_config(29,3)(4) = vss_info(free_vss,1,running,running);     %VSS nr. 23
+  TTDs_config(29,3)(0) = ttd_info(occupied_ttd, 0, 1, running, running, running);
+  TTDs_config(29,3)(1) = ttd_info(occupied_ttd, 2, 4, running, running, running);
+  TRAINs_config(29,3)(0) = train_info(0,0,0,confirmed,true,single,running,running);
+  TRAINs_config(29,3)(1) = train_info(3,3,3,confirmed,true,single,running,running);
+  Constants(29,3) = c(0,4,0,1,0,1);
+
+  % section of page 29, instance 4 (like (29,2), but with one VSS extra)
+  VSSs_config(29,4)(0) = vss_info(occupied_vss,0,running,running); %VSS nr. 11
+  VSSs_config(29,4)(1) = vss_info(free_vss,0,running,running);     %VSS nr. 12
+  VSSs_config(29,4)(2) = vss_info(free_vss,1,running,running);     %VSS nr. 21
+  VSSs_config(29,4)(3) = vss_info(free_vss,1,running,running);     %VSS nr. 22
+  VSSs_config(29,4)(4) = vss_info(free_vss,1,running,running);     %VSS nr. 23
+  VSSs_config(29,4)(5) = vss_info(free_vss,1,running,running);     %VSS nr. 24
+  TTDs_config(29,4)(0) = ttd_info(occupied_ttd, 0, 1, running, running, running);
+  TTDs_config(29,4)(1) = ttd_info(free_ttd, 2, 5, running, running, running);
+  TRAINs_config(29,4)(0) = train_info(0,0,4,confirmed,true,single,running,running);
+  Constants(29,4) = c(0,5,0,1,0,0);
+
+  % section of page 31, instance 1
+  VSSs_config(31,1)(0) = vss_info(free_vss,0,running,running); %VSS nr. 11
+  VSSs_config(31,1)(1) = vss_info(occupied_vss,0,running,running);     %VSS nr. 12
+  VSSs_config(31,1)(2) = vss_info(free_vss,1,running,running);     %VSS nr. 21
+  VSSs_config(31,1)(3) = vss_info(free_vss,1,running,running);     %VSS nr. 22
+  VSSs_config(31,1)(4) = vss_info(free_vss,1,running,running);     %VSS nr. 23
+  VSSs_config(31,1)(5) = vss_info(free_vss,2,running,running);     %VSS nr. 31
+  VSSs_config(31,1)(6) = vss_info(free_vss,2,running,running);     %VSS nr. 32
+  VSSs_config(31,1)(7) = vss_info(free_vss,2,running,running);     %VSS nr. 33
+  TTDs_config(31,1)(0) = ttd_info(occupied_ttd, 0, 1, running, running, running);
+  TTDs_config(31,1)(1) = ttd_info(free_ttd, 2, 4, running, running, running);
+  TTDs_config(31,1)(2) = ttd_info(free_ttd, 5, 8, running, running, running);
+  TRAINs_config(31,1)(0) = train_info(1,1,5,confirmed,true,composite(0,1),running,running);
+  TRAINs_config(31,1)(1) = train_info(1,1,1,confirmed,false,composite(0,1),running,running);
+  Constants(31,1) = c(0,7,0,2,0,1);
+
+  % section of page 31, instance 2   (31_1 in the paper)
+  VSSs_config(31,2)(0) = vss_info(free_vss,0,running,running); %VSS nr. 11
+  VSSs_config(31,2)(1) = vss_info(occupied_vss,0,running,running);     %VSS nr. 12
+  VSSs_config(31,2)(2) = vss_info(free_vss,1,running,running);     %VSS nr. 21
+  VSSs_config(31,2)(3) = vss_info(free_vss,1,running,running);     %VSS nr. 22
+  VSSs_config(31,2)(4) = vss_info(free_vss,1,running,running);     %VSS nr. 23
+  TTDs_config(31,2)(0) = ttd_info(occupied_ttd, 0, 1, running, running, running);
+  TTDs_config(31,2)(1) = ttd_info(free_ttd, 2, 4, running, running, running);
+  TRAINs_config(31,2)(0) = train_info(1,1,1,confirmed,true,composite(0,1),running,running);
+  TRAINs_config(31,2)(1) = train_info(1,1,1,confirmed,false,composite(0,1),running,running);
+  Constants(31,2) = c(0,4,0,1,0,1);
+
+  % section of page 31, instance 3   (31_2 in the paper)
+  VSSs_config(31,3)(0) = vss_info(occupied_vss,0,running,running); %VSS nr. 11
+  VSSs_config(31,3)(1) = vss_info(occupied_vss,1,running,running);     %VSS nr. 21
+  VSSs_config(31,3)(2) = vss_info(occupied_vss,1,running,running);     %VSS nr. 22
+  VSSs_config(31,3)(3) = vss_info(free_vss,1,running,running);     %VSS nr. 23
+  TTDs_config(31,3)(0) = ttd_info(occupied_ttd, 0, 0, running, running, running);
+  TTDs_config(31,3)(1) = ttd_info(occupied_ttd, 1, 3, running, running, running);
+  TRAINs_config(31,3)(0) = train_info(2,1,2,confirmed,true,composite(0,1),running,running);
+  TRAINs_config(31,3)(1) = train_info(1,1,1,confirmed,false,composite(0,1),running,running);
+  TRAINs_config(31,3)(2) = train_info(0,0,0,confirmed,true,single,running,running);
+  Constants(31,3) = c(0,3,0,1,0,2);
+
+
+%% Generically define section-specific constants
+eqn
+  FIRST_VSS = first_vss(Constants(Page,Instance));
+  LAST_VSS = last_vss(Constants(Page,Instance));
+  FIRST_TTD = first_ttd(Constants(Page,Instance));
+  LAST_TTD = last_ttd(Constants(Page,Instance));
+  FIRST_TRAIN = first_train(Constants(Page,Instance));
+  LAST_TRAIN = last_train(Constants(Page,Instance)); 
+
+
+act 
+  r_move,s_move : TRAIN_id # List(VSS_id);
+  report_location : TRAIN_id # List(VSS_id);
+  l_start_mission : TRAIN_id # PTD;
+  
+
+proc Announce_location(trs:TRAINs)
+=
+  sum tr: TRAIN_id. legal_train(tr,trs) ->
+    sum l:List(VSS_id). r_move(tr, l). Announce_location(trs = train_rear_pos_update(tr,l.Int2Nat(#l-1),train_front_pos_update(tr,l.0,trs)))
+  +
+  sum tr: TRAIN_id. legal_train(tr,trs) ->
+    report_location(tr,[front_pos(trs(tr)),rear_pos(trs(tr))]). Announce_location()
+  +
+  sum tr: TRAIN_id. sum p:PTD.l_start_mission(tr,p).Announce_location(trs = ptd_train_update(tr,p,trs))
+;
+
+  
+proc
+  Layout(page_number,instance:Nat) = 
+  hide({enter,leave,break,move,connect,disconnect,ptd_stable,stable,change,emit_position,emit_status},
+  %hide({enter,leave,break,connect,disconnect,move,ptd_stable,change,stable},
+    allow({enter|leave,enter|leave|emit_status,emit_status,break,error,move,emit_position,start_mission,connect,disconnect,change,stable,ptd_stable,split_train,extend_EoA,report_location}, 
+      comm({r_enter|s_enter -> enter, 
+            r_leave|s_leave -> leave,
+            r_move |s_move  -> move,
+            r_split_train|s_split_train -> split_train,
+            r_emit_position|s_emit_position -> emit_position,
+            r_start_mission|s_start_mission|l_start_mission -> start_mission,
+            r_emit_status|s_emit_status -> emit_status,
+	    r_extend_EoA | s_extend_EoA -> extend_EoA}, 
+                 ( (0 <= LAST_TTD) -> TTD(0,AXLES_on_TTD(page_number,instance)(0)) )
+              || ( (1 <= LAST_TTD) -> TTD(1,AXLES_on_TTD(page_number,instance)(1)) )
+              || ( (2 <= LAST_TTD) -> TTD(2,AXLES_on_TTD(page_number,instance)(2)) )
+              || ( (3 <= LAST_TTD) -> TTD(3,AXLES_on_TTD(page_number,instance)(3)) )
+              || Announce_location(TRAINs_config(page_number,instance))
+              || ( (0 <= LAST_TRAIN) -> Train(0,eoa(TRAINs_config(page_number,instance)(0)),FIRST_VSS,true,true,composition(TRAINs_config(page_number,instance)(0)),positions(0,TRAINs_config(page_number,instance)),page_number,instance) )
+              || ( (1 <= LAST_TRAIN) -> Train(1,eoa(TRAINs_config(page_number,instance)(1)),FIRST_VSS,true,true,composition(TRAINs_config(page_number,instance)(1)),positions(1,TRAINs_config(page_number,instance)),page_number,instance) )
+              || ( (2 <= LAST_TRAIN) -> Train(2,eoa(TRAINs_config(page_number,instance)(2)),FIRST_VSS,true,true,composition(TRAINs_config(page_number,instance)(2)),positions(2,TRAINs_config(page_number,instance)),page_number,instance) )
+              || TS(VSSs_config(page_number,instance),VSSs_config(page_number,instance), TTDs_config(page_number,instance), TRAINs_config(page_number,instance))
+           )
+         )
+     );
+
+%%%%%%%%%%%%
+%% System %%
+%%%%%%%%%%%%
+
+map Page,Instance: Nat;
+eqn Page = 31; Instance = 3;
+
+init Layout(Page,Instance);

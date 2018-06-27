@@ -19,11 +19,7 @@ namespace core {
 
 namespace detail {
 
-std::vector<atermpp::function_symbol*> function_symbols_DataAppl;
-
-atermpp::function_symbol function_symbol_OpId_ = atermpp::function_symbol("OpId", 3);
-atermpp::function_symbol function_symbol_DataVarId_ = atermpp::function_symbol("DataVarId", 3);
-std::vector<atermpp::function_symbol> function_symbols_DataAppl_;
+std::vector<std::unique_ptr<atermpp::function_symbol>> function_symbols_DataAppl;
 
 } // namespace detail
 

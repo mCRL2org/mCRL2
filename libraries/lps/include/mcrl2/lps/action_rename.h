@@ -13,18 +13,22 @@
 #define MCRL2_LPS_ACTION_RENAME_H
 
 #include <regex>
+#include <algorithm>
 
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
+
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/lps/stochastic_specification.h"
+
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/process/translate_user_notation.h"
@@ -301,6 +305,69 @@ namespace lps
 /// \cond INTERNAL_DOCS
 namespace detail
 {
+// using namespace data;
+
+// Put the equalities t==u in the replacement map as u:=t.
+inline void fill_replacement_map(const data::data_expression& equalities_in_conjunction, 
+                                 std::map<data::data_expression, data::data_expression>& replacement_map)
+{
+  if (equalities_in_conjunction==data::sort_bool::true_())
+  {
+    return;
+  }
+  if (data::sort_bool::is_and_application(equalities_in_conjunction))
+  {
+    fill_replacement_map(data::sort_bool::left(equalities_in_conjunction),replacement_map);
+    fill_replacement_map(data::sort_bool::right(equalities_in_conjunction),replacement_map);
+    return;
+  }
+  if(is_equal_to_application(equalities_in_conjunction))
+  { 
+    const data::application a=atermpp::down_cast<data::application>(equalities_in_conjunction);
+    if (a[1]!=a[0])
+    {
+      replacement_map[a[1]]=a[0];
+    }
+  }
+}
+
+// Replace expressions in e according to the replacement map.
+// Assume that e only consists of and, not and equality applied to terms. 
+inline data::data_expression replace_expressions(const data::data_expression& e, 
+                                    const std::map<data::data_expression, data::data_expression>& replacement_map)
+{
+  if (data::sort_bool::is_and_application(e))
+  {
+    return data::sort_bool::and_(replace_expressions(data::sort_bool::left(e),replacement_map),
+                           replace_expressions(data::sort_bool::right(e),replacement_map));
+  }
+  if (data::sort_bool::is_not_application(e))
+  {
+    return data::sort_bool::not_(replace_expressions(data::sort_bool::arg(e),replacement_map));
+  }
+  if (is_equal_to_application(e))
+  {
+    const data::application a=atermpp::down_cast<data::application>(e);
+    return data::application(a.head(),
+                       replace_expressions(a[0],replacement_map),
+                       replace_expressions(a[1],replacement_map));
+  }
+  const std::map<data::data_expression, data::data_expression>::const_iterator i=replacement_map.find(e);
+  if (i!=replacement_map.end()) // found;
+  {
+    return i->second;
+  }
+  return e;
+}
+
+// Substitute the equalities in equalities_in_conjunction from right to left in e. 
+inline data::data_expression substitute_equalities(const data::data_expression& e, const data::data_expression& equalities_in_conjunction)
+{
+  std::map<data::data_expression, data::data_expression> replacement_map;
+  fill_replacement_map(equalities_in_conjunction, replacement_map);
+  return replace_expressions(e,replacement_map);
+}
+
 /// \brief Renames variables
 /// \param rcond A data expression
 /// \param rleft An action
@@ -488,8 +555,7 @@ lps::stochastic_specification action_rename(
 
       std::vector < variable_list >
       lps_new_sum_vars(1,lps_old_action_summand.summation_variables());
-      std::vector < data_expression >
-      lps_new_condition(1,lps_old_action_summand.condition());
+      std::vector < data_expression > lps_new_condition(1,lps_old_action_summand.condition());
       std::vector < process::action_list >
       lps_new_actions(1,process::action_list());
       std::vector < bool > lps_new_actions_is_delta(1,false);
@@ -626,22 +692,24 @@ lps::stochastic_specification action_rename(
 
             for (data_expression& d: lps_new_condition)
             {
-              d=lazy::and_(d,renamed_rule_condition);
+              // substitute the equalities in d in renamed_rule_condition. 
+              d=lazy::and_(renamed_rule_condition,detail::substitute_equalities(d,renamed_rule_condition));
             }
 
-            for (data_expression& d: lps_new_condition_temp)
+            for (const data_expression& d: lps_new_condition_temp)
             {
-              d=lazy::and_(d,sort_bool::not_(renamed_rule_condition));
+
+              lps_new_condition.push_back(lazy::and_(d,sort_bool::not_(renamed_rule_condition)));
             }
 
-            lps_new_condition.insert(lps_new_condition.end(),
-                                     lps_new_condition_temp.begin(),
-                                     lps_new_condition_temp.end());
-
-            std::vector < variable_list > lps_new_sum_vars_temp(lps_new_sum_vars);
-            lps_new_sum_vars.insert(lps_new_sum_vars.end(),
-                                    lps_new_sum_vars_temp.begin(),
-                                    lps_new_sum_vars_temp.end());
+            // Replace lps_new_sum_vars with two consecutive copies of itself. 
+            // The clumsily looking method below is required, to avoid problems with vector reallocation.
+            std::size_t size=lps_new_sum_vars.size();
+            lps_new_sum_vars.reserve(2*size);
+            for(std::size_t i=0; i<size; ++i)
+            {
+              lps_new_sum_vars.push_back(lps_new_sum_vars[i]);
+            }
           }
         }//end if(equal_signatures(...))
         else

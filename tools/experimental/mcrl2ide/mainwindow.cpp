@@ -40,9 +40,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
   /* make the toolbar buttons enabled or disabled depending on whether processes
    *   are running */
+  connect(processSystem->getProcessThread(ProcessType::Simulation),
+          SIGNAL(isRunning(bool)), simulateAction, SLOT(setDisabled(bool)));
   connect(processSystem->getProcessThread(ProcessType::LtsCreation),
-          SIGNAL(isRunning(bool)), createLtsAction,
-          SLOT(setDisabled(bool)));
+          SIGNAL(isRunning(bool)), createLtsAction, SLOT(setDisabled(bool)));
   connect(processSystem->getProcessThread(ProcessType::LtsCreation),
           SIGNAL(isRunning(bool)), createReducedLtsAction,
           SLOT(setDisabled(bool)));
@@ -242,64 +243,28 @@ void MainWindow::setupDocks()
 
 void MainWindow::actionNewProject()
 {
-  /* ask the user for a project name */
-  bool ok;
-  QString projectName = QInputDialog::getText(
-      this, "New project", "Project name:", QLineEdit::Normal, "", &ok,
-      Qt::WindowCloseButtonHint);
-
-  /* if user pressed ok, create the project and save the specification and
-   *   properties in it */
-  if (ok)
+  QString projectName = fileSystem->newProject();
+  if (!projectName.isEmpty())
   {
-    QString error = fileSystem->newProject(projectName);
-
-    if (error.isEmpty())
-    {
-      setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-    }
-    else
-    {
-      /* if there was an error, tell the user */
-      QMessageBox* msgBox =
-          new QMessageBox(QMessageBox::Information, "New Project", error,
-                          QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-      msgBox->exec();
-    }
+    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
   }
 }
 
 void MainWindow::actionOpenProject()
 {
-  QStringList projects = fileSystem->getAllProjects();
+  Project project = fileSystem->openProject();
 
-  if (projects.isEmpty())
+  /* if successful, put the properties in the properties dock and set the window
+   *   title */
+  if (!(project.projectName.isEmpty()))
   {
-    QMessageBox* msgBox = new QMessageBox(
-        QMessageBox::Information, "Open Project", "No projects found",
-        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox->exec();
-  }
-  else
-  {
-    bool ok;
-    QString projectName =
-        QInputDialog::getItem(this, "Open Project", "Project name:", projects,
-                              0, false, &ok, Qt::WindowCloseButtonHint);
-
-    /* if user pressed ok, open the project by setting the specification and the
-     * properties in the window */
-    if (ok)
+    propertiesDock->setToNoProperties();
+    for (Property* property : project.properties)
     {
-      std::list<Property*> properties = fileSystem->openProject(projectName);
-      propertiesDock->setToNoProperties();
-      for (Property* property : properties)
-      {
-        propertiesDock->addProperty(property);
-      }
-      saveProjectAction->setEnabled(false);
-      setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+      propertiesDock->addProperty(property);
     }
+    saveProjectAction->setEnabled(false);
+    setWindowTitle(QString("mCRL2 IDE - ").append(project.projectName));
   }
 }
 
@@ -308,62 +273,31 @@ void MainWindow::actionOpenExampleProject()
   /* Not yet implemented */
 }
 
-bool MainWindow::actionSaveProject()
+void MainWindow::actionSaveProject()
 {
-  /* if we have a project open, we have a location to save in so we can simply
-   *   save, else use save as */
-  if (fileSystem->projectOpened())
+  QString projectName = fileSystem->saveProject();
+  if (!projectName.isEmpty())
   {
-    fileSystem->saveSpecification();
-    propertiesDock->saveAllProperties();
+    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
     saveProjectAction->setEnabled(false);
-    return true;
-  }
-  else
-  {
-    return actionSaveProjectAs();
   }
 }
 
-bool MainWindow::actionSaveProjectAs()
+void MainWindow::actionSaveProjectAs()
 {
-  /* ask the user for a project name */
-  bool ok;
-  QString projectName = QInputDialog::getText(
-      this, "Save Project As", "Project name:", QLineEdit::Normal, "", &ok,
-      Qt::WindowCloseButtonHint);
-
-  /* if user pressed ok, create the project and save the specification and
-   *   properties in it */
-  if (ok)
+  QString projectName = fileSystem->saveProjectAs();
+  if (!projectName.isEmpty())
   {
-    QString error = fileSystem->newProject(projectName);
-    if (error.isEmpty())
-    {
-      setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-      return actionSaveProject();
-    }
-    else
-    {
-      /* if there was an error, tell the user */
-      QMessageBox* msgBox =
-          new QMessageBox(QMessageBox::Information, "Save Project As", error,
-                          QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-      msgBox->exec();
-    }
+    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+    saveProjectAction->setEnabled(false);
   }
-  return false;
 }
 
 void MainWindow::actionAddProperty()
 {
-  addPropertyDialog = new AddEditPropertyDialog(true, propertiesDock, this);
-  /* if adding was succesful (Add button was pressed), add the property to the
-   *   properties dock */
-  if (addPropertyDialog->exec())
+  Property* property = fileSystem->newProperty();
+  if (property != NULL)
   {
-    Property* property = new Property(addPropertyDialog->getPropertyName(),
-                                      addPropertyDialog->getPropertyText());
     propertiesDock->addProperty(property);
   }
 }
@@ -388,7 +322,7 @@ void MainWindow::actionParse()
 
 void MainWindow::actionSimulate()
 {
-  /* Not yet implemented */
+  simulationProcessid = processSystem->simulate();
 }
 
 void MainWindow::actionCreateLts()
@@ -398,12 +332,37 @@ void MainWindow::actionCreateLts()
 
 void MainWindow::actionCreateReducedLts()
 {
-  /* Not yet implemented */
+  QStringList reductionNames;
+  for (auto const item : LTSREDUCTIONNAMES)
+  {
+    reductionNames << item.second;
+  }
+
+  /* ask the user what reduciton to use */
+  bool ok;
+  QString reductionName = QInputDialog::getItem(
+      this, "Create reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
+      Qt::WindowCloseButtonHint);
+
+  /* if user pressed ok, create a reduced lts */
+  if (ok)
+  {
+    LtsReduction reduction = LtsReduction::None;
+    for (auto const item : LTSREDUCTIONNAMES)
+    {
+      if (item.second == reductionName)
+      {
+        reduction = item.first;
+      }
+    }
+
+    ltsCreationProcessid = processSystem->createLts(reduction);
+  }
 }
 
 void MainWindow::actionAbortLtsCreation()
 {
-  /* Not yet implemented */
+  processSystem->abortProcess(ltsCreationProcessid);
 }
 
 void MainWindow::actionVerifyAllProperties()
