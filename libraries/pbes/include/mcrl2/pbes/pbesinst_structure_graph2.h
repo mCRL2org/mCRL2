@@ -208,7 +208,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           U = compute_attractor_set(G, U, 0);
           for (auto v: U.vertices())
           {
-            S0.insert(v);
+            if (v != u)
+            {
+              S0.insert(v);
+            }
           }
 
           // Compute the attractor set of S0
@@ -233,7 +236,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           U = compute_attractor_set(G, U, 1);
           for (auto v: U.vertices())
           {
-            S0.insert(v);
+            if (v != u)
+            {
+              S1.insert(v);
+            }
           }
 
           // Compute the attractor set of S1
