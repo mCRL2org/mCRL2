@@ -144,6 +144,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
     }
 
+    bool solution_found(const propositional_variable_instantiation& init) const override
+    {
+      auto u = m_graph_builder.find_vertex(init);
+      return S0.contains(u) || S1.contains(u);
+    }
+
   public:
     typedef pbesinst_structure_graph_algorithm super;
 

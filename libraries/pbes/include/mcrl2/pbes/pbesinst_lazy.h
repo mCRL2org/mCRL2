@@ -619,6 +619,11 @@ class pbesinst_lazy_algorithm
       return psi;
     }
 
+    virtual bool solution_found(const propositional_variable_instantiation& init) const
+    {
+      return false;
+    }
+
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     virtual void run()
     {
@@ -675,6 +680,11 @@ class pbesinst_lazy_algorithm
 
         mCRL2log(log::status) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
+
+        if (solution_found(init))
+        {
+          break;
+        }
       }
     }
 
