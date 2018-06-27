@@ -34,15 +34,15 @@ enum lts_equivalence
   lts_eq_none,             /**< Unknown or no equivalence */
   lts_eq_bisim,            /**< Strong bisimulation equivalence using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017] */
   lts_eq_bisim_gv,         /**< Strong bisimulation equivalence using the O(mn) algorithm [Groote/Vaandrager 1990] */
-  lts_eq_bisim_tb,         /**< Strong bisimulation equivalence using the O(m log n) algorithm directly on LTS */
+  lts_eq_bisim_tb,         /**< Strong bisimulation equivalence using the O(m log n) algorithm directly on LTS; experimental. */
   lts_eq_bisim_sigref,     /**< Strong bisimulation equivalence using the signature refinement algorithm [Blom/Orzan 2003] */
   lts_eq_branching_bisim,  /**< Branching bisimulation equivalence using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017] */
   lts_eq_branching_bisim_gv,     /**< Branching bisimulation equivalence using the O(mn) algorithm [Groote/Vaandrager 1990] */
-  lts_eq_branching_bisim_tb,     /**< Branching bisimulation equivalence using the O(m log n) algorithm directly on LTS */
+  lts_eq_branching_bisim_tb,     /**< Branching bisimulation equivalence using the O(m log n) algorithm directly on LTS; experimental */
   lts_eq_branching_bisim_sigref, /**< Branching bisimulation equivalence using the signature refinement algorithm [Blom/Orzan 2003] */
   lts_eq_divergence_preserving_branching_bisim, /**< Divergence-preserving branching bisimulation equivalence using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017] */
   lts_eq_divergence_preserving_branching_bisim_gv,    /**< Divergence-preserving branching bisimulation equivalence using the O(mn) algorithm [Groote/Vaandrager 1990] */
-  lts_eq_divergence_preserving_branching_bisim_tb,    /**< Divergence-preserving branching bisimulation equivalence using the O(m log n) algorithm directly on LTS */
+  lts_eq_divergence_preserving_branching_bisim_tb,    /**< Divergence-preserving branching bisimulation equivalence using the O(m log n) algorithm directly on LTS; experimental */
   lts_eq_divergence_preserving_branching_bisim_sigref, /** Divergence-preserving branching bisimulation equivalence using the signature refinement algorithm [Blom/Orzan 2003] */
   lts_eq_weak_bisim,  /**< Weak bisimulation equivalence */
   lts_eq_divergence_preserving_weak_bisim, /**< Divergence-preserving weak bisimulation equivalence */
@@ -274,7 +274,7 @@ inline std::string description(const lts_equivalence eq)
     case lts_eq_bisim_gv:
       return "strong bisimilarity using the O(mn) algorithm [Groote/Vaandrager 1990]";
     case lts_eq_bisim_tb:
-      return "strong bisimilarity using the O(m log n) algorithm directly on LTS";
+      return "strong bisimilarity using the O(m log n) algorithm directly on LTS; experimental";
     case lts_eq_bisim_sigref:
       return "strong bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_branching_bisim:
@@ -282,7 +282,7 @@ inline std::string description(const lts_equivalence eq)
     case lts_eq_branching_bisim_gv:
       return "branching bisimilarity using the O(mn) algorithm [Groote/Vaandrager 1990]";
     case lts_eq_branching_bisim_tb:
-      return "branching bisimilarity using the O(m log n) algorithm directly on LTS";
+      return "branching bisimilarity using the O(m log n) algorithm directly on LTS; experimental";
     case lts_eq_branching_bisim_sigref:
       return "branching bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_divergence_preserving_branching_bisim:
@@ -290,7 +290,7 @@ inline std::string description(const lts_equivalence eq)
     case lts_eq_divergence_preserving_branching_bisim_gv:
       return "divergence-preserving branching bisimilarity using the O(mn) algorithm [Groote/Vaandrager 1990]";
     case lts_eq_divergence_preserving_branching_bisim_tb:
-      return "divergence-preserving branching bisimilarity using the O(m log n) algorithm directly on LTS";
+      return "divergence-preserving branching bisimilarity using the O(m log n) algorithm directly on LTS; experimental";
     case lts_eq_divergence_preserving_branching_bisim_sigref:
       return "divergence-preserving branching bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_weak_bisim:
