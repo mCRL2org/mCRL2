@@ -53,15 +53,11 @@ void ConsoleDock::logToVerificationConsole()
 
 void ConsoleDock::logToConsole(ProcessType processType, QProcess* process)
 {
-  /* print to console line by line */
-  process->setReadChannel(QProcess::StandardError);
-  while (process->canReadLine())
-  {
-    writeToConsole(processType, process->readLine());
-  }
+  QString output = process->readAllStandardError();
+  writeToConsole(processType, output);
 }
 
 void ConsoleDock::writeToConsole(ProcessType processType, QString output)
 {
-  consoles[processType]->appendPlainText(output);
+  consoles[processType]->insertPlainText(output);
 }
