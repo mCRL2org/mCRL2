@@ -216,6 +216,8 @@ void MainWindow::setDocksToDefault()
   rewriteDock->setFloating(false);
   solveDock->setFloating(false);
 
+  propertiesDock->show();
+  consoleDock->show();
   rewriteDock->hide();
   solveDock->hide();
 }
