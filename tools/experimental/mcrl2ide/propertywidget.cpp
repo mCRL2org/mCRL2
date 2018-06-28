@@ -142,12 +142,12 @@ void PropertyWidget::actionVerifyResult(int processid)
     if (result == "true")
     {
       verificationWidgets->setCurrentIndex(2);
-      this->setStyleSheet("background-color:rgb(153,255,153)");
+      this->setStyleSheet("*{background-color:rgb(153,255,153)}");
     }
     else if (result == "false")
     {
       verificationWidgets->setCurrentIndex(3);
-      this->setStyleSheet("background-color:rgb(255,153,153)");
+      this->setStyleSheet("*{background-color:rgb(255,153,153)}");
     }
     else
     {
