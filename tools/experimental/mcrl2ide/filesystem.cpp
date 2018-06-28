@@ -221,19 +221,21 @@ QString FileSystem::newProject(QString context)
     {
       error = "The project name may not be empty";
     }
-
-    /* create the folder for this project */
-    if (QDir(projectsFolderPath).mkdir(projectName))
-    {
-      /* if successful, create the properties folder too */
-      this->projectName = projectName;
-      QDir(projectFolderPath(projectName)).mkdir(propertiesFolderName);
-      projectOpen = true;
-    }
     else
     {
-      /* if unsuccessful, there already is a project folder with this name */
-      error = "A project with this name already exists";
+      /* create the folder for this project */
+      if (QDir(projectsFolderPath).mkdir(projectName))
+      {
+        /* if successful, create the properties folder too */
+        this->projectName = projectName;
+        QDir(projectFolderPath(projectName)).mkdir(propertiesFolderName);
+        projectOpen = true;
+      }
+      else
+      {
+        /* if unsuccessful, there already is a project folder with this name */
+        error = "A project with this name already exists";
+      }
     }
   }
 
