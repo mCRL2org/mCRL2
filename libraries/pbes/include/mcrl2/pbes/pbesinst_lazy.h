@@ -512,6 +512,7 @@ class pbesinst_lazy_algorithm
     {
       if (m_optimization >= 1)
       {
+        bool changed = false;
         pbes_expression value;
         if (symbol.is_mu())
         {
@@ -521,14 +522,24 @@ class pbesinst_lazy_algorithm
         {
           value = true_();
         }
-        return replace_propositional_variables(psi_e, [&](const propositional_variable_instantiation& Y) {
+        pbes_expression result = replace_propositional_variables(psi_e, [&](const propositional_variable_instantiation& Y) {
                                                    if (Y == X_e)
                                                    {
+                                                     changed = true;
                                                      return value;
                                                    }
                                                    return static_cast<const pbes_expression&>(Y);
                                                }
         );
+        if (changed)
+        {
+          simplify_rewriter R;
+          return R(result);
+        }
+        else
+        {
+          return result;
+        }
       }
       else
       {
