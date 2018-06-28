@@ -59,5 +59,6 @@ void ConsoleDock::logToConsole(ProcessType processType, QProcess* process)
 
 void ConsoleDock::writeToConsole(ProcessType processType, QString output)
 {
+  consoles[processType]->moveCursor(QTextCursor::End);
   consoles[processType]->insertPlainText(output);
 }
