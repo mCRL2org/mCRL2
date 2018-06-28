@@ -191,6 +191,15 @@ bool FileSystem::upToDatePbesFileExists(QString propertyName)
              QFileInfo(pbesFilePath(propertyName)).lastModified();
 }
 
+void FileSystem::setSpecificationEditorCursor(int row, int column)
+{
+  QTextCursor cursor = specificationEditor->textCursor();
+  cursor.movePosition(QTextCursor::Start);
+  cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, row-1);
+  cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+  specificationEditor->setTextCursor(cursor);
+}
+
 QString FileSystem::newProject(QString context)
 {
   makeSureProjectsFolderExists();

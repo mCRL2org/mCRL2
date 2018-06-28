@@ -51,16 +51,23 @@ class ConsoleDock : public QDockWidget
 
   /**
    * @brief setConsoleTab Set which tab should be visible
-   * @param tab The tab to make visible
+   * @param processType The tab to make visible
    */
   void setConsoleTab(ProcessType processType);
 
   /**
    * @brief writeToConsole Write something to the console
-   * @param tab Which console tab to write to
+   * @param processType Which console tab to write to
    * @param output What to write
    */
   void writeToConsole(ProcessType processType, QString output);
+
+  /**
+   * @brief getConsoleOutput Get the output currently in the console
+   * @param processType The tab to get the output from
+   * @return The console output
+   */
+  QString getConsoleOutput(ProcessType processType);
 
   public slots:
   /**

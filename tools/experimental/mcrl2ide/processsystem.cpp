@@ -433,16 +433,27 @@ void ProcessSystem::parseMcrl2(int processid)
 
 void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
 {
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  QProcess* mcrl2ParsingProcess = qobject_cast<QProcess*>(sender());
+  int processid = mcrl2ParsingProcess->property("pid").toInt();
   if (processTypes[processid] == ProcessType::Parsing)
   {
     emit processFinished(processid);
   }
-  
-  /* if parsing gave an error, move to the parsing tab */
+
+  /* if parsing gave an error, move to the parsing tab and move the cursor in
+   *   the code editor to the parsing error if possible */
   if (previousExitCode > 0)
   {
     consoleDock->setConsoleTab(ProcessType::Parsing);
+    QString parsingOutput = consoleDock->getConsoleOutput(ProcessType::Parsing);
+    QRegExp parsingError = QRegExp("Line (\\d+), column (\\d+): syntax error");
+    int parsingErrorIndex =
+        parsingOutput.indexOf(parsingError, parsingOutput.lastIndexOf("#####"));
+    if (parsingErrorIndex >= 0)
+    {
+      fileSystem->setSpecificationEditorCursor(parsingError.cap(1).toInt(),
+                                               parsingError.cap(2).toInt());
+    }
   }
 }
 

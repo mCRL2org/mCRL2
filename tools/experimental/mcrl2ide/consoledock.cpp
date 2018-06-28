@@ -62,3 +62,8 @@ void ConsoleDock::writeToConsole(ProcessType processType, QString output)
   consoles[processType]->moveCursor(QTextCursor::End);
   consoles[processType]->insertPlainText(output);
 }
+
+QString ConsoleDock::getConsoleOutput(ProcessType processType)
+{
+  return consoles[processType]->toPlainText();
+}

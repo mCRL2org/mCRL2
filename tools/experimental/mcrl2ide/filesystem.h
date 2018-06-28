@@ -192,6 +192,14 @@ class FileSystem : public QObject
   bool upToDatePbesFileExists(QString propertyName);
 
   /**
+   * @brief setSpecificationEditorCursor Puts the cursor in the specification
+   *   editor to the given location
+   * @param row The row to put the cursor in
+   * @param column The column to put the cursor in
+   */
+  void setSpecificationEditorCursor(int row, int column);
+
+  /**
    * @brief newProject Creates a new project with the corresponding file
    *   structure
    * @param context Whether this is done for "Create Project" or "Save Project
