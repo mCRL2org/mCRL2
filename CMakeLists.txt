@@ -65,7 +65,7 @@ if(MCRL2_ENABLE_GUI_TOOLS)
                         PROPERTIES MAP_IMPORTED_CONFIG_MAINTAINER "RELEASE")
 
   # The directories for components are derived from Qt5_DIR, as such they can be marked as advanced.
-  mark_as_advanced(Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
+  mark_as_advanced(Qt5_DIR Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
 endif()
 
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
