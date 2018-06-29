@@ -344,6 +344,14 @@ class interface_description
         }
 
         /**
+         * \brief Get the long name of the argument
+         **/
+        inline const std::string& get_long() const
+        {
+          return m_long;
+        }
+
+        /**
          * \brief Gets default
          **/
         inline std::string const& get_default() const
@@ -694,7 +702,7 @@ class interface_description
      * \brief Generates a human readable interface description (used for -h,--help)
      * \return string containing a description of the interface
      **/
-    std::string textual_description() const;
+    std::string textual_description(bool show_hidden) const;
 
     /**
      * \brief Returns the text of a man page

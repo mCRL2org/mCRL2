@@ -382,6 +382,7 @@ interface_description::interface_description(std::string const& path,
 
   // Add mandatory options
   add_hidden_option("help", "display help information", 'h');
+  add_hidden_option("help-all", "display help information, including hidden options");
   add_hidden_option("version", "display version information");
   add_hidden_option("quiet", "do not display warning messages", 'q');
   add_hidden_option("verbose", "display short intermediate messages", 'v');
@@ -405,7 +406,7 @@ std::string interface_description::version_information() const
          copyright_message() + "\nWritten by " + m_authors + ".\n";
 }
 
-std::string interface_description::textual_description() const
+std::string interface_description::textual_description(bool show_hidden) const
 {
   std::ostringstream s;
 
@@ -461,7 +462,11 @@ std::string interface_description::textual_description() const
         break;
       }
 
-      if (option->m_show)
+      if ((show_hidden && option->get_long() != "quiet"
+          && option->get_long() != "verbose" && option->get_long() != "debug"
+          && option->get_long() != "log-level" && option->get_long() != "help"
+          && option->get_long() != "help-all" && option->get_long() != "version")
+          || option->m_show)
       {
         s << option->textual_description(27, 53);
       }
@@ -1064,7 +1069,11 @@ void command_line_parser::process_default_options(interface_description& d)
 
   if (m_options.count("help"))
   {
-    std::cout << d.textual_description();
+    std::cout << d.textual_description(false);
+  }
+  else if (m_options.count("help-all"))
+  {
+    std::cout << d.textual_description(true);
   }
   else if (m_options.count("version"))
   {
