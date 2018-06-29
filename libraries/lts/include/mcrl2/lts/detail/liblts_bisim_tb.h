@@ -1163,6 +1163,7 @@ class bunch_t
         // must specify a default constructor for the union because the
         // iterator has a non-trivial default constructor:
         U()  {  null = nullptr;  }
+        ~U(void) {}  // Add a trivial destructor as it is being used. 
     } postprocess;
 
     /// \brief points to a slice in this bunch that contains transitions from
