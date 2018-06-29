@@ -8,7 +8,7 @@ endif()
 
 if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
   # Do not implicitly dereference variables or keywords when quoted in an if() command. 
-  cmake_policy(SET CMP0054 OLD)
+  cmake_policy(SET CMP0054 NEW)
 endif()
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS 3.10)
