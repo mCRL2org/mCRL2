@@ -1332,14 +1332,6 @@ namespace detail
           m_present_branch(present_branch),
           m_non_present_branch(non_present_branch)
       {}
-
-      /* ~inequality_inconsistency_cache_base()
-      {
-        // Destroy the subtrees. At the moment this is possible, because
-        // we do not use sharing of subtrees.
-        // delete &m_present_branch;
-        // delete &m_non_present_branch;
-      } */
   };
 
   class inequality_inconsistency_cache
@@ -1348,6 +1340,8 @@ namespace detail
       typedef inequality_inconsistency_cache_base<inequality_inconsistency_cache> cache_type;
 
       cache_type* m_cache;
+
+      inequality_inconsistency_cache& operator=(const inequality_consistency_cache& )=delete;
 
     public:
 
@@ -1372,7 +1366,6 @@ namespace detail
       {
         if (m_cache!=nullptr)
         {
-          m_cache->~cache_type();
           delete m_cache;
         }
       }
@@ -1469,8 +1462,7 @@ namespace detail
 
       cache_type* m_cache;
 
-      // inequality_consistency_cache(const inequality_consistency_cache& ); // Non construction copyable.
-      // inequality_consistency_cache& operator=(const inequality_consistency_cache& ); // Non copyable.
+      inequality_consistency_cache& operator=(const inequality_consistency_cache& )=delete;
 
     public:
 
@@ -1496,7 +1488,6 @@ namespace detail
       {
         if (m_cache!=nullptr)
         {
-          m_cache->~cache_type();
           delete m_cache;
         }
       }
