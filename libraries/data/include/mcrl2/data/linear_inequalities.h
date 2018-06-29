@@ -1304,25 +1304,6 @@ namespace detail
   class inequality_inconsistency_cache;
   class inequality_consistency_cache;
 
-  // Sort the contents of a vector, if necessary.
-  /* inline void conditional_sort(std::vector < linear_inequality >& v)
-  {
-    bool sorted=true;
-    for(std::vector < linear_inequality >::const_iterator i=v.begin(); i!=v.end() && (i+1)!=v.end();  ++i)
-    {
-      if (*i>=*(i+1))
-      {
-        sorted=false;
-      }
-    }
-    if (!sorted)
-    {
-      sort(v.begin(),v.end());
-    }
-  } */
-
-
-
   template <class CHILD>
   class inequality_inconsistency_cache_base
   {
@@ -1352,15 +1333,13 @@ namespace detail
           m_non_present_branch(non_present_branch)
       {}
 
-      ~inequality_inconsistency_cache_base()
+      /* ~inequality_inconsistency_cache_base()
       {
         // Destroy the subtrees. At the moment this is possible, because
         // we do not use sharing of subtrees.
         // delete &m_present_branch;
         // delete &m_non_present_branch;
-      }
-
-
+      } */
   };
 
   class inequality_inconsistency_cache
@@ -1369,7 +1348,6 @@ namespace detail
       typedef inequality_inconsistency_cache_base<inequality_inconsistency_cache> cache_type;
 
       cache_type* m_cache;
-
 
     public:
 
@@ -1381,7 +1359,7 @@ namespace detail
         : m_cache(new cache_type(node,inequality,present_branch,non_present_branch))
       {}
 
-      inequality_inconsistency_cache(const node_type node)
+      inequality_inconsistency_cache(const node_type& node)
         : m_cache(new cache_type(node))
       {
       }
@@ -1394,7 +1372,8 @@ namespace detail
       {
         if (m_cache!=nullptr)
         {
-          // delete m_cache;
+          m_cache->~cache_type();
+          delete m_cache;
         }
       }
 
@@ -1508,7 +1487,7 @@ namespace detail
         : m_cache(nullptr)
       {}
 
-      inequality_consistency_cache(const node_type node)
+      inequality_consistency_cache(const node_type& node)
         : m_cache(new cache_type(node))
       {
       }
@@ -1517,7 +1496,8 @@ namespace detail
       {
         if (m_cache!=nullptr)
         {
-          // delete m_cache;
+          m_cache->~cache_type();
+          delete m_cache;
         }
       }
 
