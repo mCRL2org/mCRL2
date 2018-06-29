@@ -15,6 +15,8 @@
 #include "mcrl2/pbes/detail/bqnf_quantifier_rewriter.h"
 #include "mcrl2/pbes/detail/bqnf_visitor.h"
 
+#include <memory>
+
 namespace mcrl2 {
 
 namespace pbes_system {
@@ -29,13 +31,10 @@ class bqnf_rewriter
     /// \brief The term type
     typedef pbes_expression term_type;
 
-    pbes_system::detail::bqnf_visitor* bqnf_checker;
-    pbes_system::detail::bqnf_quantifier_rewriter* bqnf_quantifier_rewriter;
-
     /// \brief Constructor
     bqnf_rewriter() {
-      this->bqnf_checker = new pbes_system::detail::bqnf_visitor();
-      this->bqnf_quantifier_rewriter = new pbes_system::detail::bqnf_quantifier_rewriter();
+      bqnf_checker = std::unique_ptr<pbes_system::detail::bqnf_visitor>(new pbes_system::detail::bqnf_visitor());
+      bqnf_quantifier_rewriter = std::unique_ptr<pbes_system::detail::bqnf_quantifier_rewriter>(new pbes_system::detail::bqnf_quantifier_rewriter());
     }
 
     /// \brief Rewrites a PBES expression in BQNF such that universal quantifier over conjuncts
@@ -46,7 +45,7 @@ class bqnf_rewriter
     {
       bool is_bqnf = false;
       try {
-        is_bqnf = this->bqnf_checker->visit_bqnf_expression(t);
+        is_bqnf = bqnf_checker->visit_bqnf_expression(t);
       } catch(std::runtime_error& e) {
         std::clog << e.what() << std::endl;
       }
@@ -54,7 +53,7 @@ class bqnf_rewriter
       {
         throw(std::runtime_error("Input expression not in BQNF."));
       }
-      term_type result = this->bqnf_quantifier_rewriter->rewrite_bqnf_expression(t);
+      term_type result = bqnf_quantifier_rewriter->rewrite_bqnf_expression(t);
       return result;
     }
 
@@ -67,6 +66,10 @@ class bqnf_rewriter
     {
       return sigma(this->operator()(x));
     }
+
+private:
+    std::unique_ptr<pbes_system::detail::bqnf_visitor> bqnf_checker;
+    std::unique_ptr<pbes_system::detail::bqnf_quantifier_rewriter> bqnf_quantifier_rewriter;
 };
 
 } // namespace pbes_system
