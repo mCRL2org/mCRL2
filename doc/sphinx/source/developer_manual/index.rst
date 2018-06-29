@@ -30,7 +30,6 @@ Contents
    - :doc:`packaging`
    - `Issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_
    - :doc:`testing`
-   - :doc:`testing_old`
    - :doc:`performance/index`
 ..   - `Performance measurements <http://www.mcrl2.org/performance>`_
 
