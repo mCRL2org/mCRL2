@@ -142,6 +142,8 @@ class state_info_entry
         // must specify a default constructor for this union because class
         // pred_iter_t has a non-trivial default constructor.
         UI()  {  count = 0;  }
+
+        ~UI(void) { } // A defunct destructor required at other places. 
     } state_in;
 
     union UO {
@@ -151,6 +153,8 @@ class state_info_entry
         succ_iter_t inert_begin;
 
         UO()  {  count = 0;  }
+ 
+        ~UO(void) {} // A defunct destructor required at other places. 
     } state_out;
 
     /// block where the state belongs
@@ -1163,7 +1167,7 @@ class bunch_t
         // must specify a default constructor for the union because the
         // iterator has a non-trivial default constructor:
         U()  {  null = nullptr;  }
-        ~U(void) {}  // Add a trivial destructor as it is being used. 
+        ~U(void) {}  // A trivial destructor as it is being used. 
     } postprocess;
 
     /// \brief points to a slice in this bunch that contains transitions from
