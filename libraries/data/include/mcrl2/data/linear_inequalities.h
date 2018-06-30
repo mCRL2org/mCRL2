@@ -1304,7 +1304,6 @@ namespace detail
   class inequality_inconsistency_cache;
   class inequality_consistency_cache;
 
-  template <class CHILD>
   class inequality_inconsistency_cache_base
   {
     friend inequality_inconsistency_cache;
@@ -1313,10 +1312,13 @@ namespace detail
     protected:
       node_type m_node;
       linear_inequality m_inequality;
-      CHILD m_present_branch;
-      CHILD m_non_present_branch;
+      inequality_inconsistency_cache_base* m_present_branch;
+      inequality_inconsistency_cache_base* m_non_present_branch;
 
     public:
+
+      inequality_inconsistency_cache_base(const inequality_inconsistency_cache_base& )=delete;
+      inequality_inconsistency_cache_base& operator=(const inequality_inconsistency_cache_base& )=delete;
 
       inequality_inconsistency_cache_base(const node_type node)
         : m_node(node), m_present_branch(), m_non_present_branch()
@@ -1325,42 +1327,40 @@ namespace detail
       inequality_inconsistency_cache_base(
                   const node_type node,
                   const linear_inequality& inequality,
-                  const CHILD& present_branch,
-                  const CHILD& non_present_branch)
+                  inequality_inconsistency_cache_base* present_branch,
+                  inequality_inconsistency_cache_base* non_present_branch)
         : m_node(node),
           m_inequality(inequality),
           m_present_branch(present_branch),
           m_non_present_branch(non_present_branch)
       {}
+
+      ~inequality_inconsistency_cache_base()
+      {
+        if (m_present_branch!=nullptr)
+        {
+          delete m_present_branch;
+        }
+        if (m_non_present_branch!=nullptr)
+        {
+          delete m_non_present_branch;
+        }
+      }
   };
 
   class inequality_inconsistency_cache
   {
     protected:
-      typedef inequality_inconsistency_cache_base<inequality_inconsistency_cache> cache_type;
+      inequality_inconsistency_cache_base* m_cache;
 
-      cache_type* m_cache;
-
+      inequality_inconsistency_cache(const inequality_inconsistency_cache& )=delete;
       inequality_inconsistency_cache& operator=(const inequality_consistency_cache& )=delete;
 
     public:
 
-      inequality_inconsistency_cache(
-                  const node_type node,
-                  const linear_inequality& inequality,
-                  const inequality_inconsistency_cache& present_branch,
-                  const inequality_inconsistency_cache& non_present_branch)
-        : m_cache(new cache_type(node,inequality,present_branch,non_present_branch))
-      {}
-
-      inequality_inconsistency_cache(const node_type& node)
-        : m_cache(new cache_type(node))
-      {
-      }
-
       inequality_inconsistency_cache()
-        : m_cache(nullptr)
-      {}
+        : m_cache(new inequality_inconsistency_cache_base(false_end_node))
+      {} 
 
       ~inequality_inconsistency_cache()
       {
@@ -1368,25 +1368,25 @@ namespace detail
         {
           delete m_cache;
         }
-      }
+      } 
 
       bool is_inconsistent(const std::vector < linear_inequality >& inequalities_in_) const
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-        cache_type* current_root=m_cache;
+        const inequality_inconsistency_cache_base* current_root=m_cache;
         for(const linear_inequality& l: inequalities_in)
         {
           /* First walk down the three until an endnode is found
              that with l<=current_root.m_inequality. */
           while (current_root->m_node==intermediate_node && l>current_root->m_inequality)
           {
-            current_root=current_root->m_non_present_branch.m_cache;
+            current_root=current_root->m_non_present_branch;
           }
           if (current_root->m_node==intermediate_node)
           {
             if (l==current_root->m_inequality)
             {
-              current_root=current_root->m_present_branch.m_cache;
+              current_root=current_root->m_present_branch;
             }
             assert(current_root->m_node!=intermediate_node || l<current_root->m_inequality);
           }
@@ -1401,29 +1401,29 @@ namespace detail
       void add_inconsistent_inequality_set(const std::vector < linear_inequality >& inequalities_in_)
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-        cache_type** current_root=&m_cache;
+        inequality_inconsistency_cache_base** current_root=&m_cache;
         for(const linear_inequality& l: inequalities_in)
         {
-          /* First walk down the three until an endnode is found
+          /* First walk down the tree until an endnode is found
                 that with l<=current_root->m_inequality. */
           while ((*current_root)->m_node==intermediate_node && l>(*current_root)->m_inequality)
           {
-            current_root=&((*current_root)->m_non_present_branch.m_cache);
+            current_root=&((*current_root)->m_non_present_branch);
           }
           if ((*current_root)->m_node==intermediate_node)
           {
             if (l==(*current_root)->m_inequality)
             {
-              current_root=&((*current_root)->m_present_branch.m_cache);
+              current_root=&((*current_root)->m_present_branch);
               assert((*current_root)->m_node!=intermediate_node || l<(*current_root)->m_inequality);
             }
             else
             {
               // Add the node.
-              inequality_inconsistency_cache new_false_node(false_end_node);
-              cache_type* new_node = inequality_inconsistency_cache(intermediate_node,l,new_false_node,*reinterpret_cast<inequality_inconsistency_cache*>(current_root)).m_cache;
+              inequality_inconsistency_cache_base* new_false_node = new inequality_inconsistency_cache_base(false_end_node);
+              inequality_inconsistency_cache_base* new_node = new inequality_inconsistency_cache_base(intermediate_node,l,new_false_node,*current_root);
               *current_root=new_node;
-              current_root = &(new_node->m_present_branch.m_cache);
+              current_root = &(new_node->m_present_branch);
             }
           }
           else
@@ -1438,11 +1438,10 @@ namespace detail
             else
             {
               // Add the remaining sequence.
-              inequality_inconsistency_cache new_false_node(false_end_node);
-              cache_type* new_node = inequality_inconsistency_cache(
-                                   intermediate_node,l,new_false_node,*reinterpret_cast<inequality_inconsistency_cache*>(current_root)).m_cache;
+              inequality_inconsistency_cache_base* new_false_node= new inequality_inconsistency_cache_base(false_end_node);
+              inequality_inconsistency_cache_base* new_node = new inequality_inconsistency_cache_base(intermediate_node,l,new_false_node,*current_root);
               *current_root=new_node;
-              current_root = &(new_node->m_present_branch.m_cache);
+              current_root = &(new_node->m_present_branch);
             }
           }
         }
@@ -1450,7 +1449,9 @@ namespace detail
         // We expect the current node to be a true_end_node. If not, we replace it by one.
         if ((*current_root)->m_node!=true_end_node)
         {
-          *current_root=inequality_inconsistency_cache(true_end_node).m_cache;
+          assert(*current_root==nullptr);
+          delete *current_root;
+          *current_root=new inequality_inconsistency_cache_base(true_end_node);
         }
       }
   };
@@ -1458,31 +1459,17 @@ namespace detail
   class inequality_consistency_cache
   {
     protected:
-      typedef inequality_inconsistency_cache_base<inequality_consistency_cache> cache_type;
+      inequality_inconsistency_cache_base* m_cache; 
 
-      cache_type* m_cache;
-
+      inequality_consistency_cache(const inequality_consistency_cache& )=delete;
       inequality_consistency_cache& operator=(const inequality_consistency_cache& )=delete;
 
     public:
 
-      inequality_consistency_cache(
-                  const node_type node,
-                  const linear_inequality& inequality,
-                  const inequality_consistency_cache& present_branch,
-                  const inequality_consistency_cache& non_present_branch)
-        : m_cache(new cache_type(node,inequality,present_branch,non_present_branch))
-      {
-      }
-
       inequality_consistency_cache()
-        : m_cache(nullptr)
-      {}
-
-      inequality_consistency_cache(const node_type& node)
-        : m_cache(new cache_type(node))
+        : m_cache(new inequality_inconsistency_cache_base(false_end_node))
       {
-      }
+      } 
 
       ~inequality_consistency_cache()
       {
@@ -1496,22 +1483,22 @@ namespace detail
       bool is_consistent(const std::vector < linear_inequality >& inequalities_in_) const
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-        cache_type* current_root=m_cache;
+        inequality_inconsistency_cache_base* current_root=m_cache;
         for(std::set < linear_inequality >::const_iterator i=inequalities_in.begin(); i!=inequalities_in.end(); ++i)
         {
           while (current_root->m_node==intermediate_node && *i>current_root->m_inequality)
           {
-            current_root=current_root->m_non_present_branch.m_cache;
+            current_root=current_root->m_non_present_branch;
           }
           if (current_root->m_node==intermediate_node)
           {
             if (*i==current_root->m_inequality)
             {
-              current_root=current_root->m_present_branch.m_cache;
+              current_root=current_root->m_present_branch;
             }
             else
             {
-              return false; // there are more inequalities than available in the tree. We know nothing about being consistent.
+              return false; // there are more inequalities than available in the tree. We know nothing about it being consistent.
             }
             assert(current_root->m_node!=intermediate_node || *i<current_root->m_inequality);
           }
@@ -1526,38 +1513,38 @@ namespace detail
       void add_consistent_inequality_set(const std::vector < linear_inequality >& inequalities_in_)
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-        cache_type** current_root=&m_cache;
+        inequality_inconsistency_cache_base** current_root=&m_cache;
         for(const linear_inequality& l: inequalities_in)
         {
           /* First walk down the three until an endnode is found
              with l<=current_root->m_inequality. */
           while ((*current_root)->m_node==intermediate_node && l>(*current_root)->m_inequality)
           {
-            current_root=&((*current_root)->m_non_present_branch.m_cache);
+            current_root=&((*current_root)->m_non_present_branch);
           }
           if ((*current_root)->m_node==intermediate_node)
           {
             if (l==(*current_root)->m_inequality)
             {
-              current_root=&((*current_root)->m_present_branch.m_cache);
+              current_root=&((*current_root)->m_present_branch);
               assert((*current_root)->m_node!=intermediate_node || l<(*current_root)->m_inequality);
             }
             else
             {
               // Add the node.
-              inequality_consistency_cache new_true_node(true_end_node);
-              cache_type* new_node = inequality_consistency_cache(intermediate_node,l,new_true_node,*reinterpret_cast<inequality_consistency_cache*>(current_root)).m_cache;
+              inequality_inconsistency_cache_base* new_true_node = new inequality_inconsistency_cache_base(true_end_node);
+              inequality_inconsistency_cache_base* new_node = new inequality_inconsistency_cache_base(intermediate_node,l,new_true_node,*current_root);
               *current_root=new_node;
-              current_root = &(new_node->m_present_branch.m_cache);
+              current_root = &(new_node->m_present_branch);
             }
           }
           else
           {
             // Add the remaining sequence.
-            inequality_consistency_cache new_true_node(true_end_node);
-            cache_type* new_node = inequality_consistency_cache(intermediate_node,l,new_true_node,*reinterpret_cast<inequality_consistency_cache*>(current_root)).m_cache;
+            inequality_inconsistency_cache_base* new_true_node=new inequality_inconsistency_cache_base(true_end_node);
+            inequality_inconsistency_cache_base* new_node = new inequality_inconsistency_cache_base(intermediate_node,l,new_true_node,*current_root);
             *current_root=new_node;
-            current_root = &(new_node->m_present_branch.m_cache);
+            current_root = &(new_node->m_present_branch);
           }
         }
       }
@@ -1595,8 +1582,8 @@ inline bool is_inconsistent(
 
   mCRL2log(log::debug2) << "Starting an inconsistency check on " + pp_vector(inequalities_in) << "\n";
 
-  static detail::inequality_inconsistency_cache inconsistency_cache(detail::false_end_node);
-  static detail::inequality_consistency_cache consistency_cache(detail::false_end_node);
+  static detail::inequality_inconsistency_cache inconsistency_cache;
+  static detail::inequality_consistency_cache consistency_cache;
 
   if (use_cache && consistency_cache.is_consistent(inequalities_in))
   {
