@@ -37,7 +37,7 @@ struct Block
 {
   struct Block* next_by_size;
   std::size_t* end;
-  std::size_t data[0x7fffffff]; 
+  std::size_t data[0x1fffffff]; 
                           // This is a block of arbitrary size. The indication data[]
                           // is not accepted by the visual C++ compiler. If a lower
                           // number would be selected, the compiler may
