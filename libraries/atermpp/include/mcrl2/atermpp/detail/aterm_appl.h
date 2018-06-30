@@ -33,7 +33,7 @@ template <class Term>
 class _aterm_appl:public _aterm
 {
   public:
-    Term        arg[std::numeric_limits<int>::max()];   /* This value std::numeric_limits<int>::max() is completely arbitrary, and should not be used
+    Term        arg[0x7fffffff];   /* This value 0x7fffffff is completely arbitrary, and should not be used
                                 (therefore it is excessive). Using mallocs an array of the appropriate length is declared, where it is possible that
                                 the array has size 0, i.e. is absent. If the value is small, the clang compiler and static analyser may provides warnings. */
 };
