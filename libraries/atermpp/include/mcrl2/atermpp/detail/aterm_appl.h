@@ -12,6 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
 
+
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
@@ -32,11 +33,9 @@ template <class Term>
 class _aterm_appl:public _aterm
 {
   public:
-    Term        arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
-                                (therefore it is excessive). Using mallocs an array of the
-                                appropriate length is declared, where it is possible that
-                                the array has size 0, i.e. is absent. If the value is small
-                                (it was 1), the clang compiler provides warnings. */
+    Term        arg[std::numeric_limits<int>::max()];   /* This value std::numeric_limits<int>::max() is completely arbitrary, and should not be used
+                                (therefore it is excessive). Using mallocs an array of the appropriate length is declared, where it is possible that
+                                the array has size 0, i.e. is absent. If the value is small, the clang compiler and static analyser may provides warnings. */
 };
 
 inline

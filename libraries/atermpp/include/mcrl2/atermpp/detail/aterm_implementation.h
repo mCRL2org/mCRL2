@@ -37,9 +37,10 @@ struct Block
 {
   struct Block* next_by_size;
   std::size_t* end;
-  std::size_t data[1000]; // This is a block of arbitrary size. The indication data[]
+  std::size_t data[std::numeric_limits<int>::max()]; 
+                          // This is a block of arbitrary size. The indication data[]
                           // is not accepted by the visual C++ compiler. If a lower
-                          // number than 1000 would be selected, the compiler may
+                          // number would be selected, the compiler may
                           // warn that there is an index out of bound error.
 
   private:
