@@ -1430,9 +1430,9 @@ namespace detail
           {
             if ((*current_root)->m_node==true_end_node)
             {
-              // A shorter sequence that the linear inequality set is already inconsistent.
+              // A shorter sequence than the linear inequality set is already inconsistent.
               // This should not occur, assuming that the linear inequality sequence is checked
-              // in this cache, before being proven inconsistent.
+              // in in this cache, before being proven inconsistent.
               assert(0);
             }
             else
@@ -1449,7 +1449,7 @@ namespace detail
         // We expect the current node to be a true_end_node. If not, we replace it by one.
         if ((*current_root)->m_node!=true_end_node)
         {
-          assert(*current_root==nullptr);
+          assert(*current_root!=nullptr);
           delete *current_root;
           *current_root=new inequality_inconsistency_cache_base(true_end_node);
         }
