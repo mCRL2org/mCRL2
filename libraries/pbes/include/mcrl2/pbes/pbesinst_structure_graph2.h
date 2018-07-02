@@ -40,6 +40,60 @@ class computation_guard
     }
 };
 
+inline
+bool find_loop(const simple_structure_graph& G,
+               const std::unordered_map<propositional_variable_instantiation, pbes_expression>& U,
+               structure_graph::index_type v,
+               structure_graph::index_type w,
+               std::size_t p,
+               std::unordered_map<structure_graph::index_type, bool>& visited
+              )
+{
+  using utilities::detail::contains;
+
+  const auto& w_ = G.find_vertex(w);
+  if (w_.decoration == structure_graph::d_true || w_.decoration == structure_graph::d_false)
+  {
+    return false;
+  }
+  if (w_.rank != data::undefined_index() && w_.rank != p)
+  {
+    return false;
+  }
+  auto i = visited.find(w);
+  if (i != visited.end())
+  {
+    return i->second;
+  }
+  if (is_propositional_variable_instantiation(w_.formula) && U.find(atermpp::down_cast<propositional_variable_instantiation>(w_.formula)) != U.end())
+  {
+    visited[w] = false;
+    if (w_.rank == data::undefined_index() || w_.decoration == structure_graph::d_true || w_.decoration == structure_graph::d_false)
+    {
+      for (structure_graph::index_type u: w_.successors)
+      {
+        if (u == v || find_loop(G, U, v, u, p, visited))
+        {
+          visited[w] = true;
+          return true;
+        }
+      }
+    }
+    else
+    {
+      for (structure_graph::index_type u: w_.successors)
+      {
+        if (u != v && !find_loop(G, U, v, u, p, visited))
+        {
+          visited[w] = false;
+          return false;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 } // namespace detail
 
 /// \brief Adds an optimization to pbesinst_structure_graph.
@@ -144,6 +198,40 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
     }
 
+    bool find_loops(const simple_structure_graph& G)
+    {
+      std::unordered_map<structure_graph::index_type, bool> visited;
+      for (const auto& q: equation)
+      {
+        structure_graph::index_type u = m_graph_builder.find_vertex(q.first);
+        const auto& u_ = G.find_vertex(u);
+        if (u_.rank == data::undefined_index())
+        {
+          continue;
+        }
+        auto i = visited.find(u);
+        if (i != visited.end())
+        {
+          visited[u] = false;
+        }
+        bool b = detail::find_loop(G, equation, u, u, u_.rank, visited);
+        visited[u] = b;
+        if (b)
+        {
+          if (u_.decoration == structure_graph::d_conjunction)
+          {
+            S1.insert(u);
+          }
+          else
+          {
+            S0.insert(u);
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+
     bool solution_found(const propositional_variable_instantiation& init) const override
     {
       auto u = m_graph_builder.find_vertex(init);
@@ -213,11 +301,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               S0.insert(v);
             }
           }
-
-          // Compute the attractor set of S0
-          if (S0_guard(S0.size()))
+          if (S0_guard(S0.size()) && (m_optimization == 3 || find_loops(G)))
           {
-            S0 = compute_attractor_set(G, S0, 0);
+            if (is_true(psi))
+            {
+              S0 = compute_attractor_set(G, S0, 0);
+            }
           }
         }
       }
@@ -241,11 +330,15 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               S1.insert(v);
             }
           }
-
-          // Compute the attractor set of S1
           if (S1_guard(S1.size()))
           {
-            S1 = compute_attractor_set(G, S1, 1);
+            if (m_optimization == 3 || find_loops(G))
+            {
+              if (is_false(psi))
+              {
+                S1 = compute_attractor_set(G, S1, 1);
+              }
+            }
           }
         }
       }

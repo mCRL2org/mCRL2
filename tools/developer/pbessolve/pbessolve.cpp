@@ -44,36 +44,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     // TODO: integrate these options with the search strategy?
     int m_optimization = false; // can be 0, 1, 2 or 3
 
-    void parse_options(const utilities::command_line_parser& parser) override
-    {
-      super::parse_options(parser);
-      m_check_strategy = parser.options.count("check-strategy") > 0;
-      if (parser.options.count("lpsfile") > 0 && parser.options.count("ltsfile") > 0)
-      {
-        throw mcrl2::runtime_error("It is not allowed to use both options --lpsfile and --ltsfile");
-      }
-      if (parser.options.count("lpsfile") > 0)
-      {
-        lpsfile = parser.option_argument("lpsfile");
-      }
-      if (parser.options.count("ltsfile") > 0)
-      {
-        ltsfile = parser.option_argument("ltsfile");
-        ltsspec.load(ltsfile);
-      }
-      m_transformation_strategy = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
-      m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
-      if ((parser.options.count("lpsfile") > 0 || parser.options.count("ltsfile") > 0) && m_transformation_strategy != lazy)
-      {
-        throw mcrl2::runtime_error("Counter example generation only works in combination with transformation strategy lazy");
-      }
-      m_optimization = parser.option_argument_as<int>("optimization-level");
-      if (m_optimization < 0 || m_optimization > 3)
-      {
-        throw mcrl2::runtime_error("An invalid value " + std::to_string(m_optimization) + " was specified for the optimization option.");
-      }
-    }
-
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
@@ -104,8 +74,39 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  'g');
       desc.add_option("optimization-level",
                   utilities::make_optional_argument("NUMBER", "0"),
-                  "Apply optimization level (0 .. 3)",
+                  "Apply optimization level (0 .. 4)",
                   'l');
+    }
+
+
+    void parse_options(const utilities::command_line_parser& parser) override
+    {
+      super::parse_options(parser);
+      m_check_strategy = parser.options.count("check-strategy") > 0;
+      if (parser.options.count("lpsfile") > 0 && parser.options.count("ltsfile") > 0)
+      {
+        throw mcrl2::runtime_error("It is not allowed to use both options --lpsfile and --ltsfile");
+      }
+      if (parser.options.count("lpsfile") > 0)
+      {
+        lpsfile = parser.option_argument("lpsfile");
+      }
+      if (parser.options.count("ltsfile") > 0)
+      {
+        ltsfile = parser.option_argument("ltsfile");
+        ltsspec.load(ltsfile);
+      }
+      m_transformation_strategy = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
+      m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
+      if ((parser.options.count("lpsfile") > 0 || parser.options.count("ltsfile") > 0) && m_transformation_strategy != lazy)
+      {
+        throw mcrl2::runtime_error("Counter example generation only works in combination with transformation strategy lazy");
+      }
+      m_optimization = parser.option_argument_as<int>("optimization-level");
+      if (m_optimization < 0 || m_optimization > 4)
+      {
+        throw mcrl2::runtime_error("An invalid value " + std::to_string(m_optimization) + " was specified for the optimization option.");
+      }
     }
 
   public:
