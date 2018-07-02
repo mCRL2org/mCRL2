@@ -12,7 +12,6 @@
 
 #include "propertiesdock.h"
 #include "processsystem.h"
-#include "propertywidget.h"
 
 #include <QLabel>
 #include <QHBoxLayout>
