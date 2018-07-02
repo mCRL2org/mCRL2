@@ -103,6 +103,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     pbes_expression b;
     detail::computation_guard S0_guard;
     detail::computation_guard S1_guard;
+    detail::computation_guard find_loops_guard;
 
     template<typename T>
     pbes_expression expr(const T& x) const
@@ -196,14 +197,21 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
     }
 
+    void compute_attractor_set_S0(const simple_structure_graph& G)
+    {
+      S0 = compute_attractor_set(G, S0, 0);
+    }
+
+    void compute_attractor_set_S1(const simple_structure_graph& G)
+    {
+      S0 = compute_attractor_set(G, S1, 1);
+    }
+
     bool find_loops(const simple_structure_graph& G)
     {
-      if (m_optimization <= 3)
-      {
-        return true;
-      }
-
       std::unordered_map<structure_graph::index_type, bool> visited;
+      bool b0 = false;
+      bool b1 = false;
       for (const auto& q: equation)
       {
         structure_graph::index_type u = m_graph_builder.find_vertex(q.first);
@@ -224,13 +232,22 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           if (u_.decoration == structure_graph::d_conjunction)
           {
             S1.insert(u);
+            b1 = true;
           }
           else
           {
             S0.insert(u);
+            b0 = true;
           }
-          return true;
         }
+      }
+      if (b0)
+      {
+        compute_attractor_set_S0(G);
+      }
+      if (b1)
+      {
+        compute_attractor_set_S1(G);
       }
       return false;
     }
@@ -284,14 +301,13 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
     {
       super::report_equation(X, psi, k);
+      simple_structure_graph G(m_graph_builder.m_vertices);
       if (is_true(b))
       {
         auto u = m_graph_builder.find_vertex(X);
         S0.insert(u);
         if (m_optimization > 2)
         {
-          simple_structure_graph G(m_graph_builder.m_vertices);
-
           // Compute the attractor set U of u, and add it to S0
           auto N = G.size();
           vertex_set U(N);
@@ -304,10 +320,14 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               S0.insert(v);
             }
           }
-          if (find_loops(G) && is_true(psi) && S0_guard(S0.size()))
-          {
-            S0 = compute_attractor_set(G, S0, 0);
-          }
+        }
+        if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
+        {
+          find_loops(G);
+        }
+        if (S0_guard(S0.size()))
+        {
+          compute_attractor_set_S0(G);
         }
       }
       else if (is_false(b))
@@ -316,8 +336,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         S1.insert(u);
         if (m_optimization > 2)
         {
-          simple_structure_graph G(m_graph_builder.m_vertices);
-
           // Compute the attractor set U of u, and add it to S1
           auto N = G.size();
           vertex_set U(N);
@@ -330,10 +348,14 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               S1.insert(v);
             }
           }
-          if (find_loops(G) && is_false(psi) && S1_guard(S1.size()))
-          {
-            S1 = compute_attractor_set(G, S1, 1);
-          }
+        }
+        if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
+        {
+          find_loops(G);
+        }
+        if (S1_guard(S1.size()))
+        {
+          compute_attractor_set_S1(G);
         }
       }
     }
