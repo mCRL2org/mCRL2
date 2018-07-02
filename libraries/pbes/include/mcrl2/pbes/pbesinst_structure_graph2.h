@@ -49,8 +49,6 @@ bool find_loop(const simple_structure_graph& G,
                std::unordered_map<structure_graph::index_type, bool>& visited
               )
 {
-  using utilities::detail::contains;
-
   const auto& w_ = G.find_vertex(w);
   if (w_.decoration == structure_graph::d_true || w_.decoration == structure_graph::d_false)
   {
@@ -200,6 +198,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     bool find_loops(const simple_structure_graph& G)
     {
+      if (m_optimization <= 3)
+      {
+        return true;
+      }
+
       std::unordered_map<structure_graph::index_type, bool> visited;
       for (const auto& q: equation)
       {
@@ -301,12 +304,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               S0.insert(v);
             }
           }
-          if (S0_guard(S0.size()) && (m_optimization == 3 || find_loops(G)))
+          if (find_loops(G) && is_true(psi) && S0_guard(S0.size()))
           {
-            if (is_true(psi))
-            {
-              S0 = compute_attractor_set(G, S0, 0);
-            }
+            S0 = compute_attractor_set(G, S0, 0);
           }
         }
       }
@@ -330,15 +330,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               S1.insert(v);
             }
           }
-          if (S1_guard(S1.size()))
+          if (find_loops(G) && is_false(psi) && S1_guard(S1.size()))
           {
-            if (m_optimization == 3 || find_loops(G))
-            {
-              if (is_false(psi))
-              {
-                S1 = compute_attractor_set(G, S1, 1);
-              }
-            }
+            S1 = compute_attractor_set(G, S1, 1);
           }
         }
       }
