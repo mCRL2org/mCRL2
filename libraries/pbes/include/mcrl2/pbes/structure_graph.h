@@ -387,10 +387,14 @@ struct structure_graph_builder
 
   void insert_edge(index_type ui, index_type vi)
   {
+    using utilities::detail::contains;
     auto& u = m_vertices[ui];
     auto& v = m_vertices[vi];
-    u.successors.push_back(vi);
-    v.predecessors.push_back(ui);
+    if (!contains(u.successors, vi))
+    {
+      u.successors.push_back(vi);
+      v.predecessors.push_back(ui);
+    }
   }
 
   void set_initial_state(const propositional_variable_instantiation& x)
