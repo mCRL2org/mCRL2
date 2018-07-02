@@ -24,8 +24,8 @@ enum class LtsReduction
 
 const std::map<LtsReduction, QString> LTSREDUCTIONNAMES = {
     {LtsReduction::None, "None"},
-    {LtsReduction::StrongBisimulation, "StrongBisimulation"},
-    {LtsReduction::BranchingBisimulation, "BranchingBisimulation"},
+    {LtsReduction::StrongBisimulation, "Strong Bisimulation"},
+    {LtsReduction::BranchingBisimulation, "Branching Bisimulation"},
 };
 
 class Property
@@ -59,7 +59,7 @@ class FileSystem : public QObject
   /**
    * @brief FileSystem Constructor
    * @param specificationEditor The specification editor in the main window
-   * @parent The main widget (main window)
+   * @param parent The main widget (main window)
    */
   explicit FileSystem(CodeEditor* specificationEditor, QWidget* parent);
 
