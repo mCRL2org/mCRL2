@@ -85,7 +85,8 @@ void lps2pbes(const std::string& input_filename,
               bool structured,
               bool unoptimized,
               bool preprocess_modal_operators,
-              bool generate_counter_example
+              bool generate_counter_example,
+              bool check_only
              );
 
 void complps2pbes(const std::string& input_filename,

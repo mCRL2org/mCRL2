@@ -32,6 +32,7 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
     bool unoptimized;
     bool preprocess_modal_operators;
     bool generate_counter_example;
+    bool check_only;
 
     std::string synopsis() const
     {
@@ -53,6 +54,8 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
                       "do not simplify boolean expressions", 'u');
       desc.add_option("counter-example",
                       "add counter example equations to the generated PBES", 'c');
+      desc.add_hidden_option("check_only",
+                             "check syntax and semantics of state formula; do not generate PBES", 'e');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -67,6 +70,7 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
       timed       = parser.options.count("timed") > 0;
       unoptimized = parser.options.count("unoptimized") > 0;
       generate_counter_example = parser.options.count("counter-example") > 0;
+      check_only = parser.options.count("check_only") > 0;
     }
 
   public:
@@ -90,7 +94,8 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
                structured,
                unoptimized,
                preprocess_modal_operators,
-               generate_counter_example
+               generate_counter_example,
+               check_only
              );
       return true;
     }
