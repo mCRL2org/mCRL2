@@ -48,14 +48,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {
       super::add_options(desc);
       desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'c');
-      desc.add_option("strategy",
-                 utilities::make_enum_argument<transformation_strategy>("STRAT")
-                   .add_value(lazy, true)
-                   .add_value(optimize)
-                   .add_value(on_the_fly)
-                   .add_value(on_the_fly_with_fixed_points),
-                 "use substitution strategy STRAT:",
-                 's');
       desc.add_option("search",
                  utilities::make_enum_argument<search_strategy>("SEARCH")
                    .add_value(breadth_first, true)
@@ -96,12 +88,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         ltsfile = parser.option_argument("ltsfile");
         ltsspec.load(ltsfile);
       }
-      m_transformation_strategy = parser.option_argument_as<mcrl2::pbes_system::transformation_strategy>("strategy");
-      m_search_strategy         = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
-      if ((parser.options.count("lpsfile") > 0 || parser.options.count("ltsfile") > 0) && m_transformation_strategy != lazy)
-      {
-        throw mcrl2::runtime_error("Counter example generation only works in combination with transformation strategy lazy");
-      }
+      m_search_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       m_optimization = parser.option_argument_as<int>("optimization-level");
       if (m_optimization < 0 || m_optimization > 4)
       {
@@ -117,7 +104,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
               "Solves (P)BES from INFILE. "
               "If INFILE is not present, stdin is used. "
              ),
-      m_transformation_strategy(lazy),
       m_search_strategy(breadth_first)
     {}
 
@@ -126,7 +112,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {
       structure_graph G;
 
-      PbesInstAlgorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_transformation_strategy, m_optimization);
+      PbesInstAlgorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_optimization);
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       timer().start("instantiation");
       algorithm.run();

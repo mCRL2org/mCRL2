@@ -40,9 +40,37 @@ class computation_guard
     }
 };
 
+struct resizable_bitset
+{
+  boost::dynamic_bitset<> v;
+
+  resizable_bitset()
+    : v(64)
+  { }
+
+  void insert(std::size_t i)
+  {
+    if (v.size() <= i)
+    {
+      auto size = v.size();
+      while (size <= i)
+      {
+        size *= 2;
+      }
+      v.resize(size);
+    }
+    v[i] = true;
+  }
+
+  bool contains(std::size_t i) const
+  {
+    return v[i];
+  }
+};
+
 inline
 bool find_loop(const simple_structure_graph& G,
-               const std::unordered_map<propositional_variable_instantiation, pbes_expression>& U,
+               const detail::resizable_bitset& U,
                structure_graph::index_type v,
                structure_graph::index_type w,
                std::size_t p,
@@ -63,7 +91,7 @@ bool find_loop(const simple_structure_graph& G,
   {
     return i->second;
   }
-  if (is_propositional_variable_instantiation(w_.formula) && U.find(atermpp::down_cast<propositional_variable_instantiation>(w_.formula)) != U.end())
+  if (is_propositional_variable_instantiation(w_.formula) && U.contains(w))
   {
     visited[w] = false;
     if (w_.rank == data::undefined_index() || w_.decoration == structure_graph::d_true || w_.decoration == structure_graph::d_false)
@@ -104,6 +132,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     detail::computation_guard S0_guard;
     detail::computation_guard S1_guard;
     detail::computation_guard find_loops_guard;
+
+    // Contains the vertices that have been reported.
+    detail::resizable_bitset done;
 
     template<typename T>
     pbes_expression expr(const T& x) const
@@ -204,7 +235,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void compute_attractor_set_S1(const simple_structure_graph& G)
     {
-      S0 = compute_attractor_set(G, S1, 1);
+      S1 = compute_attractor_set(G, S1, 1);
     }
 
     bool find_loops(const simple_structure_graph& G)
@@ -212,9 +243,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       std::unordered_map<structure_graph::index_type, bool> visited;
       bool b0 = false;
       bool b1 = false;
-      for (const auto& q: equation)
+      for (const propositional_variable_instantiation& X: discovered)
       {
-        structure_graph::index_type u = m_graph_builder.find_vertex(q.first);
+        structure_graph::index_type u = m_graph_builder.find_vertex(X);
         const auto& u_ = G.find_vertex(u);
         if (u_.rank == data::undefined_index())
         {
@@ -225,7 +256,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         {
           visited[u] = false;
         }
-        bool b = detail::find_loop(G, equation, u, u, u_.rank, visited);
+        bool b = detail::find_loop(G, done, u, u, u_.rank, visited);
         visited[u] = b;
         if (b)
         {
@@ -266,10 +297,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         structure_graph& G,
         data::rewriter::strategy rewrite_strategy = data::jitty,
         search_strategy search_strategy = breadth_first,
-        transformation_strategy transformation_strategy = lazy,
         int optimization = 0
     )
-      : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, transformation_strategy, optimization)
+      : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, optimization)
     {}
 
     pbes_expression rewrite_psi(const pbes_expression& psi) override
@@ -301,10 +331,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
     {
       super::report_equation(X, psi, k);
+      auto u = m_graph_builder.find_vertex(X);
+      done.insert(u);
       simple_structure_graph G(m_graph_builder.m_vertices);
+
       if (is_true(b))
       {
-        auto u = m_graph_builder.find_vertex(X);
         S0.insert(u);
         if (m_optimization > 2)
         {
@@ -332,7 +364,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       else if (is_false(b))
       {
-        auto u = m_graph_builder.find_vertex(X);
         S1.insert(u);
         if (m_optimization > 2)
         {
@@ -366,7 +397,6 @@ void pbesinst_structure_graph2(const pbes& p,
                                structure_graph& G,
                                data::rewriter::strategy rewrite_strategy = data::jitty,
                                search_strategy search_strategy = breadth_first,
-                               transformation_strategy transformation_strategy = lazy,
                                bool optimization1 = false
                               )
 {
@@ -383,7 +413,7 @@ void pbesinst_structure_graph2(const pbes& p,
   {
     algorithms::normalize(q);
   }
-  pbesinst_structure_graph_algorithm2 algorithm(q, G, rewrite_strategy, search_strategy, transformation_strategy, optimization1);
+  pbesinst_structure_graph_algorithm2 algorithm(q, G, rewrite_strategy, search_strategy, optimization1);
   algorithm.run();
 }
 
