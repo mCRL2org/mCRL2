@@ -268,7 +268,8 @@ class pbesinst_lazy_algorithm
           break;
         }
 
-        reset(init, todo, discovered);
+        // TODO: currently disabled, because of test failures
+        // reset(init, todo, discovered);
       }
     }
 
