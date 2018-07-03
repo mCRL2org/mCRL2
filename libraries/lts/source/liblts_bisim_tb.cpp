@@ -485,8 +485,11 @@ void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
                                         const bunch_t* const futureFromRedBu
                                         ONLY_IF_DEBUG( , const LTS_TYPE& aut) )
 {
-/*mCRL2log(log::debug,"bisim_tb") << "Handling " << old_pos->pred->debug_id(aut)
-                                                                       << '\n';
+/*
+    #ifndef NDEBUG
+        mCRL2log(log::debug,"bisim_tb") << "Handling "
+                                       << old_pos->pred->debug_id(aut) << '\n';
+    #endif
     // move the transition to the new slice in B_a_B
     state_info_ptr const source = old_pos->pred->source;
     state_info_ptr const target = old_pos->pred->succ->target;
@@ -569,8 +572,10 @@ mCRL2log(log::debug, "bisim_tb") << "5\n";
 
         B_a_B_iter_t const new_pos = old_B_a_B_slice->begin;
         B_a_B_desc_iter_t new_B_a_B_slice;
+#ifndef NDEBUG
 if (B_a_B.begin() != new_pos)  {  mCRL2log(log::debug, "bisim_tb")
 << "new_B_a_B_slice == " << new_pos[-1].B_a_B_slice->debug_id_short() << '\n';  }
+#endif
         if (B_a_B.begin() == new_pos ||
                 (new_B_a_B_slice = new_pos[-1].B_a_B_slice,
                  new_B_a_B_slice->from_block() != source->block ||
@@ -1398,7 +1403,10 @@ void bisim_partitioner_tb<LTS_TYPE>::
         /*------------------------- find a splitter -------------------------*/
 
         bisim_tb::bunch_t* const SpBu=bisim_tb::bunch_t::get_some_nontrivial();
-        mCRL2log(log::debug, "bisim_tb") <<"Refining "<<SpBu->debug_id()<<'\n';
+        #ifndef NDEBUG
+            mCRL2log(log::debug, "bisim_tb") << "Refining " << SpBu->debug_id()
+                                                                       << '\n';
+        #endif
         if (SpBu->begin->B_a_B_slice == SpBu->end[-1].B_a_B_slice)
         {
             mCRL2log(log::debug, "bisim_tb") << "Actually the bunch has "
@@ -1408,8 +1416,10 @@ void bisim_partitioner_tb<LTS_TYPE>::
         }
         // select a small B_a_B-slice SpSl in SpBu
         bisim_tb::B_a_B_desc_iter_t const SpSl = SpBu->split_off_small_B_a_B();
-        mCRL2log(log::debug, "bisim_tb") << "Splitting off "
+        #ifndef NDEBUG
+            mCRL2log(log::debug, "bisim_tb") << "Splitting off "
                                                    << SpSl->debug_id() << '\n';
+        #endif
         bisim_tb::block_t* const RfnB = SpSl->from_block();
         // select a B_a_B-slice that remains in SpBu as futureFromRed
         if (SpSl == RfnB->from_block.begin() ||
@@ -1616,11 +1626,13 @@ bisim_tb::block_t* bisim_partitioner_tb<LTS_TYPE>::refine(
                            const bisim_tb::bunch_t* const NewBu,
                            const bool unmarked_bottom_states_are_blue)
 {
-    mCRL2log(log::debug, "bisim_tb") << "refine(" << RfnB->debug_id() << ','
-    << (RfnB->from_block.end()==FromRed ? std::string("null")
-                                        : FromRed->debug_id())
-    << ',' << NewBu->debug_id_short()
-    << (unmarked_bottom_states_are_blue ? ",true)\n" : ",false)\n");
+    #ifndef NDEBUG
+        mCRL2log(log::debug, "bisim_tb") << "refine(" << RfnB->debug_id() <<','
+               << (RfnB->from_block.end()==FromRed ? std::string("null")
+                                                   : FromRed->debug_id())
+               << ',' << NewBu->debug_id_short()
+               << (unmarked_bottom_states_are_blue ? ",true)\n" : ",false)\n");
+    #endif
 
     bisim_tb::block_t* RedB;
     assert(RfnB->from_block.end()!=FromRed || unmarked_bottom_states_are_blue);
@@ -1681,7 +1693,9 @@ mCRL2log(log::debug, "bisim_tb") << "refine_blue started\n";
         {
             // 3.7l: Choose s in Test
             s = *visited_end;
+#ifndef NDEBUG
 mCRL2log(log::debug, "bisim_tb") << s->debug_id();
+#endif
             // 3.8l: if s --> SpBu then
             if (s->surely_has_transition_to(FromRed->bunch))
             {
@@ -1879,7 +1893,9 @@ mCRL2log(log::debug, "bisim_tb") << "refine_red started\n";
                     // 3.7r: Choose s --> t in FromRed
                     bisim_tb::state_info_ptr const s =
                                              fromred_visited_ptr->pred->source;
+#ifndef NDEBUG
 mCRL2log(log::debug, "bisim_tb") << s->debug_id() << " is red\n";
+#endif
                     assert(s->block == RfnB);
                     // 3.8r: Test := Test \ {s}
                     // and
