@@ -1844,7 +1844,11 @@ mCRL2log(log::debug, "bisim_tb") << "The blue subblock is smaller.\n";
     // and
     // 3.30l: Destroy all temporary data
     bisim_tb::block_t* const NewB = RfnB->split_off_blue(blue_nonbottom_end);
-    part_tr.new_block_created(RfnB, NewB, true, aut);
+#ifndef NDEBUG
+     part_tr.new_block_created(RfnB, NewB, true, aut);
+#else
+    part_tr.new_block_created(RfnB, NewB, true);
+#endif
 }
 END_COROUTINE
 
