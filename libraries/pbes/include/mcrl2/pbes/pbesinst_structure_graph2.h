@@ -238,11 +238,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       S1 = compute_attractor_set(G, S1, 1);
     }
 
-    bool find_loops(const simple_structure_graph& G)
+    void find_loops(const simple_structure_graph& G)
     {
       std::unordered_map<structure_graph::index_type, bool> visited;
-      bool b0 = false;
-      bool b1 = false;
       for (const propositional_variable_instantiation& X: discovered)
       {
         structure_graph::index_type u = m_graph_builder.find_vertex(X);
@@ -263,24 +261,13 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           if (u_.decoration == structure_graph::d_conjunction)
           {
             S1.insert(u);
-            b1 = true;
           }
           else
           {
             S0.insert(u);
-            b0 = true;
           }
         }
       }
-      if (b0)
-      {
-        compute_attractor_set_S0(G);
-      }
-      if (b1)
-      {
-        compute_attractor_set_S1(G);
-      }
-      return false;
     }
 
     bool solution_found(const propositional_variable_instantiation& init) const override
@@ -353,14 +340,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             }
           }
         }
-        if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
-        {
-          find_loops(G);
-        }
-        if (S0_guard(S0.size()))
-        {
-          compute_attractor_set_S0(G);
-        }
       }
       else if (is_false(b))
       {
@@ -380,14 +359,18 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             }
           }
         }
-        if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
-        {
-          find_loops(G);
-        }
-        if (S1_guard(S1.size()))
-        {
-          compute_attractor_set_S1(G);
-        }
+      }
+      if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
+      {
+        find_loops(G);
+      }
+      if (S0_guard(S0.size()))
+      {
+        compute_attractor_set_S0(G);
+      }
+      if (S1_guard(S1.size()))
+      {
+        compute_attractor_set_S1(G);
       }
     }
 };
