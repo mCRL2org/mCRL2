@@ -1474,8 +1474,8 @@ class part_trans_t
     new bunch does not have inert transitions.  It returns the boundary between
     transitions in OldBu and transitions in NewBu in the state's outgoing
     transition array. */
-    succ_iter_t move_to_new_bunch(B_a_B_iter_t s_iter, bunch_t* OldBu,
-                            bunch_t* NewBu, bool first_transition_of_state);
+    succ_iter_t move_to_new_bunch(B_a_B_iter_t s_iter,
+                                               bool first_transition_of_state);
 
     /* part_trans_t::make_noninert_pred_succ marks the transition identified by
     B_a_B_iter as noninert in the pred and succ arrays.  The caller should mark
@@ -1626,7 +1626,7 @@ class bisim_partitioner_tb
     // here by those of its bisimulation quotient.  However, it does not change
     // anything else; in particular, it does not change the number of states of
     // the LTS.
-    void replace_transition_system(bool branching, bool preserve_divergence);
+    void replace_transition_system();
 
     static state_type num_eq_classes()
     {
@@ -1750,7 +1750,7 @@ void bisimulation_reduce_tb(LTS_TYPE& l, bool const branching = false,
   //    << bisim_part.num_eq_classes()
   //    << "; initial state: originally state " << l.initial_state()
   //    <<" = lumped state "<<bisim_part.get_eq_class(l.initial_state())<<"\n";
-  bisim_part.replace_transition_system(branching, preserve_divergence);
+  bisim_part.replace_transition_system();
 }
 
 
@@ -1897,6 +1897,39 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* SpBu,
         assert(succ_end() == current_bunch ||
                         current_bunch[-1].B_a_B->B_a_B_slice->bunch !=
                                      current_bunch->B_a_B->B_a_B_slice->bunch);
+/*
+if (succ_begin() < current_bunch)
+{
+    mCRL2log(log::debug, "bisim_tb")
+                     << current_bunch[-1].B_a_B->pred->debug_id_short();
+    if (current_bunch[-1].B_a_B->B_a_B_slice->bunch == NewBu)
+    {
+        mCRL2log(log::debug, "bisim_tb") << " (in NewBu)\n";
+    }
+    else
+    {
+        mCRL2log(log::debug, "bisim_tb") << " (in "
+               << current_bunch[-1].B_a_B->B_a_B_slice->bunch->debug_id_short()
+                                                                      << ")\n";
+    }
+}
+else
+{
+    mCRL2log(log::debug, "bisim_tb") << "beginning of outgoing transitions of "
+                                                         << debug_id() << '\n';
+}
+mCRL2log(log::debug, "bisim_tb") << "<-- current_bunch points here between\n";
+if (current_bunch < succ_end())
+{
+    mCRL2log(log::debug, "bisim_tb")
+                    << current_bunch   ->B_a_B->pred->debug_id_short() << '\n';
+}
+else
+{
+    mCRL2log(log::debug, "bisim_tb") << "end of outgoing transitions of "
+                                                         << debug_id() << '\n';
+}
+*/
         return current_bunch[-1].B_a_B->B_a_B_slice->bunch == NewBu &&
                             (succ_end() == current_bunch ||
                              current_bunch->B_a_B->B_a_B_slice->bunch != SpBu);

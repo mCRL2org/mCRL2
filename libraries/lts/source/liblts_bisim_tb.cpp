@@ -372,19 +372,15 @@ void part_state_t::print_part() const
 /// It returns the boundary between transitions in OldBu and transitions in
 /// NewBu in the state's outgoing transition array.
 /// \param s_iter  transition that has to be changed
-/// \param OldBu   splitter bunch
-/// \param NewBu   new bunch, where the transition is now in
 /// \param first_transition_of_state  This is the first transition of the
 ///                                   state, so a new bunch_slice has to be
 ///                                   allocated.
 succ_iter_t part_trans_t::move_to_new_bunch(B_a_B_iter_t const s_iter,
-                bunch_t* OldBu, bunch_t* NewBu, bool first_transition_of_state)
+                                                bool first_transition_of_state)
 {
     // adapt the outgoing transition array:
-    // move the transition to the beginning (requires that the new bunch is
-    // ``smaller'' than / ordered before the old bunch!)
+    // move the transition to the beginning
     succ_iter_t const old_out_pos = s_iter->pred->succ;
-    // move to beginning
     succ_iter_t const new_out_pos = old_out_pos->bunch_slice->begin;
     out_descriptor* new_bunch_slice;
     if (first_transition_of_state)
@@ -669,8 +665,8 @@ mCRL2log(log::debug, "bisim_tb") << "8\n";
         }
         assert(OldB->inert_slice() != old_B_a_B_slice);
         assert(futureFromRed != old_B_a_B_slice);
-        if (old_B_a_B_slice->bunch->begin->slice ==
-                                         old_B_a_B_slice->bunch->end[-1].slice)
+        if (old_B_a_B_slice->bunch->begin->B_a_B_slice ==
+                                   old_B_a_B_slice->bunch->end[-1].B_a_B_slice)
         {
             // The bunch has become trivial, so we can remove it from the list
             // of nontrivial bunches.  In practice, this is not always
@@ -881,10 +877,11 @@ void part_trans_t::assert_stability(const bool branching,
                         if (source->block->bottom_begin() <= source->pos)
                         {
                             // It is a bottom state
-                            // check that every bottom state has a transition in
-                            // the bunch
+                            // check that every bottom state has a transition
+                            // in the bunch
                             bottom_states_with_transition[source->pos -
                                          source->block->bottom_begin()] = true;
+mCRL2log(log::debug, "bisim_tb") << source->debug_id() << " OK\n";
                         }
                     }
                 }
@@ -899,9 +896,18 @@ void part_trans_t::assert_stability(const bool branching,
                     // Now every bottom state needs to be in vector<bool>
                     if (contains_noninert_transition)
                     {
-                        assert(std::find(bottom_states_with_transition.begin(),
-                                 bottom_states_with_transition.end(), false) ==
-                                          bottom_states_with_transition.end());
+                        for (permutation_const_iter_t s_iter=B->bottom_begin();
+                                           B->bottom_end() != s_iter; ++s_iter)
+                        {
+                            if (!bottom_states_with_transition[s_iter -
+                                                            B->bottom_begin()])
+                            {
+                                mCRL2log(log::debug, "bisim_tb") << "No "
+                                    "transition from " << (*s_iter)->debug_id()
+                                    <<" in " << oldBu->debug_id_short() <<'\n';
+                                exit(EXIT_FAILURE);
+                            }
+                        }
                     }
                     // check that the old bunch hasn't yet appeared in
                     // from_block, and insert it in the set.
@@ -1313,8 +1319,7 @@ void bisim_partitioner_tb<LTS_TYPE>::
 // anything else; in particular, it does not change the number of states of
 // the LTS.
 template <class LTS_TYPE>
-void bisim_partitioner_tb<LTS_TYPE>::replace_transition_system(bool branching,
-                                                      bool preserve_divergence)
+void bisim_partitioner_tb<LTS_TYPE>::replace_transition_system()
 {
     for (bisim_tb::permutation_const_iter_t s_iter=part_st.permutation.begin();
                                          part_st.permutation.end() != s_iter; )
@@ -1405,44 +1410,45 @@ void bisim_partitioner_tb<LTS_TYPE>::
         bisim_tb::B_a_B_desc_iter_t const SpSl = SpBu->split_off_small_B_a_B();
         mCRL2log(log::debug, "bisim_tb") << "Splitting off "
                                                    << SpSl->debug_id() << '\n';
-        bisim_tb::block_t* const B = SpSl->from_block();
+        bisim_tb::block_t* const RfnB = SpSl->from_block();
         // select a B_a_B-slice that remains in SpBu as futureFromRed
-        if (SpSl == B->from_block.begin() ||
+        if (SpSl == RfnB->from_block.begin() ||
                                       (part_tr.futureFromRed = std::prev(SpSl),
                                        part_tr.futureFromRed->bunch != SpBu))
         {
             // the slice just before SpSl is not in SpBu.  Now try the slice
             // just after SpSl.
             part_tr.futureFromRed = std::next(SpSl);
-            if (B->from_block.end() != part_tr.futureFromRed &&
+            if (RfnB->from_block.end() != part_tr.futureFromRed &&
                                           part_tr.futureFromRed->bunch != SpBu)
             {
                 // the slice just after is not in SpBu either.  (This can
                 // happen if SpBu contains transitions from other blocks.)
-                part_tr.futureFromRed = B->from_block.end();
+                part_tr.futureFromRed = RfnB->from_block.end();
                 // // Possible simplification:  In this case, both splits
                 // // should be trivial.
                 // continue;
             }
         }
-        else if (std::next(SpSl) != B->from_block.end() &&
+        else if (std::next(SpSl) != RfnB->from_block.end() &&
                                                 std::next(SpSl)->bunch == SpBu)
         {
             // SpSl is somewhere in the middle of the list of B_a_B slices that
-            // emanate from B, and both its predecessor and successor in this
-            // list belong to that same bunch. Therefore we move SpSl to the
-            // beginning of the list so this list satisfies the constraint
+            // emanate from RfnB, and both its predecessor and successor in
+            // this list belong to that same bunch. Therefore we move SpSl to
+            // the beginning of the list so this list satisfies the constraint
             // ``B_a_B slices in the same bunch immediately follow each other''
             // again.
-            B->from_block.splice(B->from_block.begin(), B->from_block, SpSl);
-            assert(B->from_block.begin() == SpSl);
+            RfnB->from_block.splice(RfnB->from_block.begin(), RfnB->from_block,
+                                                                         SpSl);
+            assert(RfnB->from_block.begin() == SpSl);
         }
 
-        if (1 == B->size())  continue;
+        if (1 == RfnB->size())  continue;
 
         /*----------- special treatment for the inert transitions -----------*/
 
-        if (B->inert_slice() == SpSl)
+        if (RfnB->inert_slice() == SpSl)
         {
             // The split is trivial, but we have to adapt the data structures
             // for the outgoing transitions because there may be states that
@@ -1454,7 +1460,7 @@ void bisim_partitioner_tb<LTS_TYPE>::
                                                  SpSl->end != s_iter; ++s_iter)
             {
                 bisim_tb::state_info_entry* s = s_iter->pred->source;
-                assert(s->block == B);
+                assert(s->block == RfnB);
                 assert(s->inert_succ_begin() != s->inert_succ_end());
                 if (s->inert_succ_begin()->bunch_slice->begin !=
                                                          s->inert_succ_begin())
@@ -1486,20 +1492,39 @@ void bisim_partitioner_tb<LTS_TYPE>::
                                                  SpSl->end != s_iter; ++s_iter)
         {
             bisim_tb::state_info_entry* s = s_iter->pred->source;
-            assert(s->block == B);
+            assert(s->block == RfnB);
             // mark state s
-            bool const first_transition_of_state = B->mark(s);
+            bool const first_transition_of_state = RfnB->mark(s);
             // register whether state s still has transitions to SpBu
-            s->current_bunch = part_tr.move_to_new_bunch(s_iter, SpBu,
-                                       SpSl->bunch, first_transition_of_state);
+            s->current_bunch = part_tr.move_to_new_bunch(s_iter,
+                                                    first_transition_of_state);
+            assert(s->succ_begin() != s->current_bunch);
+            assert(s->current_bunch[-1].B_a_B == s_iter);
         // end for
         }
+
+for (bisim_tb::permutation_const_iter_t s_iter = RfnB->unmarked_bottom_begin();
+                               RfnB->unmarked_bottom_end() != s_iter; ++s_iter)
+{
+    bisim_tb::state_info_const_ptr s = *s_iter;
+    assert(s->succ_begin() == s->current_bunch ||
+                s->current_bunch[-1].B_a_B->B_a_B_slice->bunch != SpSl->bunch);
+}
+for (bisim_tb::permutation_const_iter_t s_iter = RfnB->marked_bottom_begin();
+                                 RfnB->marked_bottom_end() != s_iter; ++s_iter)
+{
+    bisim_tb::state_info_const_ptr s = *s_iter;
+    assert(s->succ_begin() != s->current_bunch);
+    assert(s->current_bunch[-1].B_a_B->B_a_B_slice == SpSl);
+    assert(s->succ_end() == s->current_bunch ||
+                   s->current_bunch->B_a_B->B_a_B_slice->bunch != SpSl->bunch);
+}
 
         /*------------------- stabilise the partition again -----------------*/
 
         // stabilise this block under SpSl (using the marked states)
-        assert(0 != B->marked_size());
-        bisim_tb::block_t* RedB = refine(B, B->from_block.end());
+        assert(0 != RfnB->marked_size());
+        bisim_tb::block_t* RedB = refine(RfnB, RfnB->from_block.end());
         // handle new bottom states resulting from the first refinement
         if (RedB->unmarked_bottom_begin() != RedB->unmarked_bottom_end())
         {
