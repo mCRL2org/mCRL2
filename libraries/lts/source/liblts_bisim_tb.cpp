@@ -22,7 +22,6 @@
 #include <iterator>
 
 #include "mcrl2/lts/detail/liblts_bisim_tb.h"
-#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/transition.h"
@@ -244,9 +243,11 @@ block_t* block_t::split_off_red(permutation_iter_t red_nonbottom_begin)
     //mCRL2log(log::debug, "bisim_gjkw") << "Created new " << NewB->debug_id()
     //                       << " for " << marked_size() << " red state(s).\n";
     // NewB->set_end(end());
+mCRL2log(log::debug, "bisim_tb") << "a\n";
     NewB->set_marked_bottom_begin(marked_bottom_begin());
     NewB->set_bottom_begin(marked_bottom_begin());
     NewB->set_marked_nonbottom_begin(marked_bottom_begin());
+mCRL2log(log::debug, "bisim_tb") << "b\n";
     // NewB->set_begin(splitpoint);
     // NewB->set_inert_begin(?);
     // NewB->set_inert_end(?);
@@ -257,13 +258,97 @@ block_t* block_t::split_off_red(permutation_iter_t red_nonbottom_begin)
 
     // adapt the old block: it only keeps the blue states
     // set_begin(begin());
+mCRL2log(log::debug, "bisim_tb") << "c\n";
     set_marked_nonbottom_begin(red_nonbottom_begin);
     set_bottom_begin(red_nonbottom_begin);
     set_marked_bottom_begin(splitpoint);
     set_end(splitpoint);
+mCRL2log(log::debug, "bisim_tb") << "d\n";
 
     return NewB;
 }
+
+
+#ifndef NDEBUG
+
+/// \brief print a slice of the partition (typically a block)
+/// \details If the slice indicated by the parameters is not empty, the states
+/// in this slice will be printed.
+/// \param message text printed as a title if the slice is not empty
+/// \param B       block that is being printed (it is checked whether states
+///                belong to this block)
+/// \param begin   iterator to the beginning of the slice
+/// \param end     iterator past the end of the slice
+void part_state_t::print_block(const char*const message, const block_t*const B,
+                                      permutation_const_iter_t begin,
+                                      permutation_const_iter_t const end) const
+{
+    if (0 == end - begin)  return;
+
+    mCRL2log(log::debug, "bisim_tb") << '\t' << message
+                                         << (1 < end - begin ? "s:\n" : ":\n");
+    do
+    {
+        mCRL2log(log::debug, "bisim_tb") << "\t\t" << (*begin)->debug_id();
+        if (B != (*begin)->block)
+        {
+            mCRL2log(log::debug,"bisim_tb") << ", inconsistent: points to "
+                                                << (*begin)->block->debug_id();
+        }
+        if (begin != (*begin)->pos)
+        {
+            mCRL2log(log::debug, "bisim_tb")
+                               << ", inconsistent pointer to state_info_entry";
+        }
+        mCRL2log(log::debug, "bisim_tb") << '\n';
+    }
+    while (++begin != end);
+}
+
+
+/// \brief print the partition as a tree (per constellation and block)
+/// \details The function prints all constellations (in order); for each
+/// constellation it prints the blocks it consists of; and for each block, it
+/// lists its states, separated into nonbottom and bottom states.
+/// \param part_tr partition for the transitions
+void part_state_t::print_part() const
+{
+    assert(permutation.begin() < permutation.end());
+    const block_t* B = (*permutation.begin())->block;
+    for (;;)
+    {
+        mCRL2log(log::debug, "bisim_tb") << B->debug_id() << ":\n";
+        print_block("Non-bottom state", B, B->nonbottom_begin(),
+                                                           B->nonbottom_end());
+        print_block("Bottom state", B, B->bottom_begin(), B->bottom_end());
+/*
+        mCRL2log(log::debug, "bisim_tb") << "\tThis block has ";
+        if (B->inert_end() == part_tr.B_to_C_begin())
+        {
+            mCRL2log(log::debug, "bisim_tb")
+                               << "no transitions to its own constellation.\n";
+            assert(B->inert_begin() == B->inert_end());
+        }
+        else
+        {
+            assert(B->inert_end() == B->inert_end()[-1].B_to_C_slice->end);
+            assert(B->inert_end()[-1].B_to_C_slice->from_block() == B);
+            assert(B->inert_end()[-1].B_to_C_slice->to_constln() == C);
+            mCRL2log(log::debug, "bisim_gjkw") << B->inert_end() -
+                                     B->inert_end()[-1].B_to_C_slice->begin
+                <<" transition(s) to its own constellation,\n\t\tof which "
+                                 << B->inert_end() - B->inert_begin()
+                                 << (1 == B->inert_end() - B->inert_begin()
+                                       ? " is inert.\n" : " are inert.\n");
+        }
+*/
+        // go to next block
+        if (permutation.end() == B->end())  break;
+        B = (*B->end())->block;
+    }
+}
+
+#endif // ifndef NDEBUG
 
 
 
@@ -364,7 +449,10 @@ inline B_a_B_desc_iter_t part_trans_t::create_new_slice_for_NewB(
     new_B_a_B_slice = NewB->from_block.emplace(new_B_a_B_slice, new_pos,
                                           new_pos, old_B_a_B_slice->label, Bu);
     Bu->new_slice_pos = new_B_a_B_slice;
-
+    if (Bu->is_trivial())
+    {
+        Bu->make_nontrivial();
+    }
     if (Bu == futureFromRedBu)
     {
         futureFromRed = new_B_a_B_slice;
@@ -379,49 +467,84 @@ inline B_a_B_desc_iter_t part_trans_t::create_new_slice_for_NewB(
 /// correct place in the B_a_B slice.  In addition, it also checks whether the
 /// transition has become non-inert and if necessary adapts pred and succ, and
 /// it makes the source state a new bottom state.
+///
+/// Transitions from OldB to OldB are a bit problematic:  They fall apart into
+/// four slices.  (The only case that cannot happen is that there is a tau
+/// transition from the blue block to the red block, but visible transitions
+/// may still happen.)  We put the slice NewB ==> NewB after OldB ==> OldB and
+/// the other two slices before in the following way:  The caller should ensure
+/// that first, all outgoing transitions of NewB are handled (including
+/// transitions from NewB to both OldB and NewB), and then all incoming
+/// transitions of NewB are handled (except the transitions within NewB).  This
+/// way, the transitions NewB ==> OldB will all move to one slice and the
+/// transitions OldB ==> NewB will all move to another slice.
+///
 /// It also maintains futureFromRed correct.  If the new block is the red
 /// block and the transition starts in the red block, `futureFromRedBu` should
 /// be set to the bunch of FromRed;  otherwise, `futureFromRedBu` should be
 /// `nullptr`.
+ONLY_IF_DEBUG( template<class LTS_TYPE> )
 void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
                                       block_t* const OldB, block_t* const NewB,
-                                          const bunch_t* const futureFromRedBu)
+                                        const bunch_t* const futureFromRedBu
+                                        ONLY_IF_DEBUG( , const LTS_TYPE& aut) )
 {
+mCRL2log(log::debug,"bisim_tb") << "Handling " << old_pos->pred->debug_id(aut)
+                                                                       << '\n';
     // move the transition to the new slice in B_a_B
     state_info_ptr const source = old_pos->pred->source;
     state_info_ptr const target = old_pos->pred->succ->target;
-    assert(NewB == source->block || nullptr == futureFromRedBu);
+    assert(NewB == source->block ||
+                        (nullptr == futureFromRedBu && NewB == target->block));
     B_a_B_desc_iter_t const old_B_a_B_slice = old_pos->B_a_B_slice;
-    if (source->block == NewB && target->block == NewB)
+    if (NewB == source->block && NewB == target->block)
     {
-        // the transition was inert and is still inert: the new
-        // position should be at the end of the slice.
-        assert(OldB->inert_slice() == old_B_a_B_slice);
+        // Both the source and the target have moved to the new block.  We move
+        // the transition to a new slice near the end of the old slice.
+        // Transitions that were inert and remain inert are handled here.  If
+        // such a transition is moved, the inert_slice() of the new block is
+        // filled!
         B_a_B_iter_t const after_new_pos = old_B_a_B_slice->end;
         B_a_B_desc_iter_t new_B_a_B_slice;
         if (B_a_B.end() == after_new_pos ||
                        (new_B_a_B_slice = after_new_pos->B_a_B_slice,
                         new_B_a_B_slice->from_block() != NewB ||
                         new_B_a_B_slice->to_block() != NewB ||
-                        new_B_a_B_slice->bunch != old_B_a_B_slice->bunch ||
                         new_B_a_B_slice->label != old_B_a_B_slice->label))
         {
             // there is not yet a slice for these transitions
+            if (1 == old_B_a_B_slice->end - old_B_a_B_slice->begin)
+            {
+                // the slice contains only one transition.  Later we will
+                // implement the following optimisation:  No need to create a
+                // new slice and then immediately delete the old one.
+            }
             new_B_a_B_slice = create_new_slice_for_NewB(old_B_a_B_slice, NewB,
                                                after_new_pos, futureFromRedBu);
 
-            assert(NewB->inert_slice() == NewB->from_block.end());
-            NewB->set_inert_slice(new_B_a_B_slice);
+            if (OldB->inert_slice() == old_B_a_B_slice)
+            {
+                // The transition was inert (and remains inert).
+                assert(NewB->inert_slice() == NewB->from_block.end());
+                NewB->set_inert_slice(new_B_a_B_slice);
+            }
         }
+        assert(new_B_a_B_slice->bunch == old_B_a_B_slice->bunch);
+        assert(OldB->inert_slice() != old_B_a_B_slice ||
+                                       NewB->inert_slice() == new_B_a_B_slice);
         assert(old_B_a_B_slice->begin==old_B_a_B_slice->begin_from_non_bottom);
+        old_pos->B_a_B_slice = new_B_a_B_slice;
         swap_B_a_B(old_pos, std::prev(after_new_pos));
         --old_B_a_B_slice->end;
         --new_B_a_B_slice->begin;
+        assert(old_B_a_B_slice->end == new_B_a_B_slice->begin);
         --new_B_a_B_slice->begin_from_non_bottom;
+        assert(new_B_a_B_slice->begin==new_B_a_B_slice->begin_from_non_bottom);
     }
     else
     {
-        // this is a non-inert transition
+mCRL2log(log::debug, "bisim_tb") << "2\n";
+        // One of source and target are in NewB, the other is not.
         if (OldB->inert_slice() == old_B_a_B_slice)
         {
             // The transition was inert but is no longer so.
@@ -429,44 +552,68 @@ void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
             assert(old_B_a_B_slice->begin ==
                                        old_B_a_B_slice->begin_from_non_bottom);
             assert(source->block == OldB || target->block == OldB);
+            assert(source->pos < source->block->nonbottom_end());
             // Make it non-inert.
             make_noninert_pred_succ(old_pos);
+mCRL2log(log::debug, "bisim_tb") << "3\n";
 
             if (source->inert_succ_begin() == source->inert_succ_end())
             {
+mCRL2log(log::debug, "bisim_tb") << "4\n";
                 // the source state is now a new bottom state.
-                OldB->set_marked_nonbottom_begin(OldB->marked_nonbottom_end() -
-                                                                            1);
-                OldB->set_bottom_begin(OldB->marked_nonbottom_begin());
-                swap_permutation(source->pos, OldB->bottom_begin());
+                source->block->set_marked_nonbottom_begin(
+                                    source->block->marked_nonbottom_end() - 1);
+                source->block->set_bottom_begin(
+                                      source->block->marked_nonbottom_begin());
+                swap_permutation(source->pos, source->block->bottom_begin());
+                assert(source->pos < source->block->unmarked_bottom_end());
             }
         }
+mCRL2log(log::debug, "bisim_tb") << "5\n";
 
         B_a_B_iter_t const new_pos = old_B_a_B_slice->begin;
         B_a_B_desc_iter_t new_B_a_B_slice;
+if (B_a_B.begin() != new_pos)  {  mCRL2log(log::debug, "bisim_tb")
+<< "new_B_a_B_slice == " << new_pos[-1].B_a_B_slice->debug_id_short() << '\n';  }
         if (B_a_B.begin() == new_pos ||
                 (new_B_a_B_slice = new_pos[-1].B_a_B_slice,
-                 new_B_a_B_slice->from_block() != NewB ||
+                 new_B_a_B_slice->from_block() != source->block ||
                  new_B_a_B_slice->to_block() != target->block ||
                  new_B_a_B_slice->bunch != old_B_a_B_slice->bunch ||
                  new_B_a_B_slice->label != old_B_a_B_slice->label))
         {
+mCRL2log(log::debug, "bisim_tb") << "6\n";
             // there is not yet a slice for these transitions
-            if (source->block == NewB)
+            if (1 == old_B_a_B_slice->end - old_B_a_B_slice->begin)
             {
+                // the slice contains only one transition.  Later we will
+                // implement the following optimisation:  No need to create a
+                // new slice and then immediately delete the old one.
+            }
+            if (NewB == source->block)
+            {
+mCRL2log(log::debug, "bisim_tb") << "6a\n";
+                assert(NewB != target->block);
                 new_B_a_B_slice = create_new_slice_for_NewB(old_B_a_B_slice,
                                                NewB, new_pos, futureFromRedBu);
             }
             else
             {
-                assert(target->block == NewB);
-                assert(nullptr == futureFromRedBu);
+mCRL2log(log::debug, "bisim_tb") << "6b\n";
+                assert(NewB == target->block);
+                // futureFromRedBu = nullptr;
                 new_B_a_B_slice = source->block->from_block.emplace(
                                old_B_a_B_slice, new_pos, new_pos,
                                old_B_a_B_slice->label, old_B_a_B_slice->bunch);
+                if (old_B_a_B_slice->bunch->is_trivial())
+                {
+                    old_B_a_B_slice->bunch->make_nontrivial();
+                }
             }
         }
-        if (old_B_a_B_slice->begin == old_B_a_B_slice->begin_from_non_bottom)
+mCRL2log(log::debug, "bisim_tb") << "7\n";
+        old_pos->B_a_B_slice = new_B_a_B_slice;
+        if (new_pos == old_B_a_B_slice->begin_from_non_bottom)
         {
             // the slice does not contain transitions from (new) bottom
             // states
@@ -496,6 +643,7 @@ void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
 
     if (old_B_a_B_slice->begin == old_B_a_B_slice->end)
     {
+mCRL2log(log::debug, "bisim_tb") << "8\n";
         // the old slice has become empty, delete it. But first make
         // sure other pointers to it are changed.
         if (OldB->inert_slice() == old_B_a_B_slice)
@@ -511,22 +659,27 @@ void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
             if (OldB->from_block.end() == futureFromRed ||
                         futureFromRed->bunch != old_B_a_B_slice->bunch)
             {
-                if (OldB->from_block.begin() == old_B_a_B_slice)
+                if (OldB->from_block.begin() == old_B_a_B_slice ||
+                              (futureFromRed = std::prev(old_B_a_B_slice),
+                               futureFromRed->bunch != old_B_a_B_slice->bunch))
                 {
                     futureFromRed = OldB->from_block.end();
-                }
-                else
-                {
-                    futureFromRed = std::prev(old_B_a_B_slice);
-                    if (futureFromRed->bunch != old_B_a_B_slice->bunch)
-                    {
-                        futureFromRed = OldB->from_block.end();
-                    }
                 }
             }
         }
         assert(OldB->inert_slice() != old_B_a_B_slice);
         assert(futureFromRed != old_B_a_B_slice);
+        if (old_B_a_B_slice->bunch->begin->slice ==
+                                         old_B_a_B_slice->bunch->end[-1].slice)
+        {
+            // The bunch has become trivial, so we can remove it from the list
+            // of nontrivial bunches.  In practice, this is not always
+            // possible, so it may be necessary to skip it later.
+            if (bunch_t::get_some_nontrivial() == old_B_a_B_slice->bunch)
+            {
+                old_B_a_B_slice->bunch->make_trivial();
+            }
+        }
         OldB->from_block.erase(old_B_a_B_slice);
     }
 }
@@ -545,39 +698,317 @@ void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
 /// - During postprocessing, transitions starting in (new) bottom states need
 ///   to be separated from those starting in non-bottom states.
 /// Its time complexity is O(1 + |in(NewB)| + |out(NewB)|).
-void part_trans_t::new_block_created(block_t* OldB, block_t* NewB,
-                                                             bool NewB_is_blue)
+ONLY_IF_DEBUG( template<class LTS_TYPE> )
+void part_trans_t::new_block_created(block_t* const OldB, block_t* const NewB,
+                    bool NewB_is_blue  ONLY_IF_DEBUG( , const LTS_TYPE& aut ) )
 {
     const bunch_t* const futureFromRedBu =
                NewB_is_blue || NewB->from_block.end() == futureFromRed
                                               ? nullptr : futureFromRed->bunch;
     if (!NewB_is_blue)  futureFromRed = NewB->from_block.end();
 
-    // for all outgoing non-inert (and possibly inert) transitions of NewB
+    // for all outgoing transitions of NewB
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
         state_info_ptr const s = *s_iter;
-        for (succ_iter_t succ_iter = NewB_is_blue ? s->noninert_succ_end()
-                                                  : s->succ_end();
-                                                s->succ_begin() != succ_iter; )
+        for (succ_iter_t succ_iter = s->succ_begin();
+                                       s->succ_end() != succ_iter; ++succ_iter)
         {
-            --succ_iter;
-            handle_transition(succ_iter->B_a_B, OldB, NewB, futureFromRedBu);
+            handle_transition(succ_iter->B_a_B, OldB, NewB, futureFromRedBu
+                        // perhaps here futureFromRedBu needs to be replaced
+                        // by nullptr sometimes...
+                                                      ONLY_IF_DEBUG( , aut ) );
     // end for
         }
+    }
 
-    // for all incoming non-inert (and possibly inert) transitions of NewB
+    // We cannot join the loop above with the one below because transitions
+    // from OldB ==> NewB and NewB ==> OldB may be interspersed but need to go
+    // to different new slices.
 
-        for (pred_iter_t pred_iter = NewB_is_blue ? s->pred_end()
-                                                  : s->noninert_pred_end();
-                                                s->pred_begin() != pred_iter; )
+    // for all incoming transitions of NewB (except transitions from NewB to
+    // NewB)
+    for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
+    {
+        state_info_ptr const s = *s_iter;
+        for (pred_iter_t pred_iter = s->pred_begin();
+                              s->noninert_pred_end() != pred_iter; ++pred_iter)
         {
-            --pred_iter;
-            handle_transition(pred_iter->succ->B_a_B, OldB, NewB, nullptr);
+            if (NewB != pred_iter->source->block) {
+                handle_transition(pred_iter->succ->B_a_B, OldB, NewB,
+                                             nullptr  ONLY_IF_DEBUG( , aut ) );
+            }
     // end for
         }
     }
 }
+
+#ifndef NDEBUG
+
+/// \brief print all transitions
+/// \details Transitions are printed organised into bunches.
+template <class LTS_TYPE>
+void part_trans_t::print_trans(const LTS_TYPE& aut) const
+{
+    if (B_a_B.begin() == B_a_B.end())
+    {
+        mCRL2log(log::debug, "bisim_tb") << "No transitions.\n";
+        return;
+    }
+    // for all bunches
+    const bunch_t* Bu = B_a_B.begin()->B_a_B_slice->bunch;
+    for (;;)
+    {
+        mCRL2log(log::debug, "bisim_tb") << Bu->debug_id_short() << ":\n";
+        assert(Bu->begin < Bu->end);
+        // for all transition sets in Bu
+        B_a_B_desc_const_iter_t Tr = Bu->begin->B_a_B_slice;
+        for (;;)
+        {
+            mCRL2log(log::debug,"bisim_tb")<<'\t'<<Tr->debug_id_short()<<":\n";
+            // for all transitions in Tr
+            for (B_a_B_const_iter_t tr_iter = Tr->begin; Tr->end != tr_iter;
+                                                                     ++tr_iter)
+            {
+                mCRL2log(log::debug, "bisim_tb") << "\t\t"
+                                       << tr_iter->pred->debug_id(aut) << '\n';
+            }
+            // go to next transition set
+            if (Bu->end == Tr->end)  break;
+            Tr = Tr->end->B_a_B_slice;
+        }
+        // go to next bunch
+        if (B_a_B.end() == Bu->end)  break;
+        Bu = Bu->end->B_a_B_slice->bunch;
+    }
+    return;
+}
+
+
+// \brief assert that the data structure is consistent and stable
+/// \details The data structure is tested against a large number of assertions
+/// to ensure that everything is consistent, e. g. pointers that should point
+/// to successors of state s actually point to a transition that starts in s.
+///
+/// Additionally, it is asserted that the partition is stable. i. e. every
+/// bottom state in every block can reach exactly the constellations in the
+/// list of constellations that should be reachable from it, and every
+/// nonbottom state can reach a subset of them.
+template <class LTS_TYPE>
+void part_trans_t::assert_stability(const bool branching,
+                         const bool preserve_divergence,
+                         const part_state_t&part_st, const LTS_TYPE& aut) const
+{
+    mCRL2log(log::debug, "bisim_tb") << "Checking stability of partition...\n";
+
+    // for all blocks do
+    const block_t* B = (*part_st.permutation.begin())->block;
+    assert(B->begin() == part_st.permutation.begin());
+    for (;;)
+    {
+        // some assertions on the block
+        assert(B->begin() <= B->marked_nonbottom_begin());
+        assert(B->marked_nonbottom_begin() <= B->bottom_begin());
+        assert(B->bottom_begin() <= B->marked_bottom_begin());
+        assert(B->marked_bottom_begin() <= B->end());
+        assert(B->bottom_begin() < B->bottom_end());
+        assert(B->seqnr < block_t::nr_of_blocks);
+
+        // for all states in the block
+        for (permutation_const_iter_t s_iter = B->begin(); B->end() != s_iter;
+                                                                      ++s_iter)
+        {
+            state_info_ptr s = *s_iter;
+            // check some conditions of the state
+            assert(s->pos == s_iter);
+            assert(s->block == B);
+            assert(s->pred_begin() <= s->inert_pred_begin());
+            assert(s->inert_pred_begin() <= s->inert_pred_end());
+            assert(s->inert_pred_end() == s->pred_end());
+            assert(s->succ_begin() <= s->inert_succ_begin());
+            assert(s->inert_succ_begin() <= s->inert_succ_end());
+            assert(s->inert_succ_end() <= s->succ_end());
+        }
+        // for all bunches in the list of transitions do
+        //     for all transition sets in the list of transitions do
+        B_a_B_desc_const_iter_t tr_iter = B->from_block.begin();
+        if (B->from_block.end() != tr_iter)
+        {
+            bool contains_noninert_transition = false;
+            std::vector<bool> bottom_states_with_transition =
+                                    std::vector<bool>(B->bottom_size(), false);
+            std::set<const bunch_t*> bunches_in_tr_list;
+            for (;;)
+            {
+                if (tr_iter->from_block()->inert_slice() == tr_iter)
+                {
+                    assert(branching);
+                    assert(aut.is_tau(aut.apply_hidden_label_map(
+                                                             tr_iter->label)));
+                    for (B_a_B_iter_t t = tr_iter->begin; t!=tr_iter->end; ++t)
+                    {
+                        state_info_const_ptr const source = t->pred->source;
+                        state_info_const_ptr const target =
+                                                         t->pred->succ->target;
+                        // assert some properties of this inert transition
+                        assert(source->block == target->block);
+                        assert(source != target);
+                        assert(target->inert_pred_begin() <= t->pred);
+                        assert(t->pred < target->inert_pred_end());
+                        assert(source->inert_succ_begin() <= t->pred->succ);
+                        assert(t->pred->succ < source->inert_succ_end());
+                        assert(source->block->bottom_begin() > source->pos);
+                    }
+                }
+                else
+                {
+                    contains_noninert_transition = true;
+                    for (B_a_B_iter_t t = tr_iter->begin; t!=tr_iter->end; ++t)
+                    {
+                        state_info_const_ptr const source = t->pred->source;
+                        state_info_const_ptr const target =
+                                                         t->pred->succ->target;
+                        contains_noninert_transition = true;
+                        assert(!branching ||
+                                (preserve_divergence && source == target) ||
+                                source->block != target->block ||
+                                !aut.is_tau(aut.apply_hidden_label_map(
+                                                             tr_iter->label)));
+                        assert(target->noninert_pred_begin() <= t->pred);
+                        assert(t->pred < target->noninert_pred_end());
+                        assert(source->noninert_succ_begin() <= t->pred->succ);
+                        assert(t->pred->succ < source->noninert_succ_end());
+                        if (source->block->bottom_begin() <= source->pos)
+                        {
+                            // It is a bottom state
+                            // check that every bottom state has a transition in
+                            // the bunch
+                            bottom_states_with_transition[source->pos -
+                                         source->block->bottom_begin()] = true;
+                        }
+                    }
+                }
+
+            // go to next transition set
+                const bunch_t* const oldBu = tr_iter->bunch;
+                ++tr_iter;
+                if (B->from_block.end() == tr_iter || oldBu != tr_iter->bunch)
+                {
+        // go to next bunch:
+
+                    // Now every bottom state needs to be in vector<bool>
+                    if (contains_noninert_transition)
+                    {
+                        assert(std::find(bottom_states_with_transition.begin(),
+                                 bottom_states_with_transition.end(), false) ==
+                                          bottom_states_with_transition.end());
+                    }
+                    // check that the old bunch hasn't yet appeared in
+                    // from_block, and insert it in the set.
+                    assert(bunches_in_tr_list.insert(oldBu).second);
+                    if (B->from_block.end() == tr_iter)  break;
+
+                    // then reset all transitions to false
+                    bottom_states_with_transition.assign(B->bottom_size(),
+                                                                        false);
+                }
+            }
+        }
+        // go to next block
+        if (B->end() == part_st.permutation.end())  break;
+        assert(B->end() < part_st.permutation.end());
+        assert(B->end() == (*B->end())->block->begin());
+        B = (*B->end())->block;
+    }
+
+    if (B_a_B.begin() == B_a_B.end())
+    {
+        assert(nullptr == bunch_t::get_some_nontrivial());
+        return;
+    }
+
+    // count the nontrivial bunches (to check later whether every nontrivial
+    // bunch is reachable from the first nontrivial bunch)
+    state_type nr_of_nontrivial_bunches = 0;
+    const bunch_t* Bu = bunch_t::get_some_nontrivial();
+    if (nullptr != Bu)
+    {
+        for (;;)
+        {
+            ++nr_of_nontrivial_bunches;
+            if (Bu->get_next_nontrivial() == Bu)  break;
+            Bu = Bu->get_next_nontrivial();
+            assert(nullptr != Bu);
+        }
+    }
+
+    // for all bunches Bu do
+    Bu = B_a_B.begin()->B_a_B_slice->bunch;
+    assert(Bu->begin == B_a_B.begin());
+    for (;;)
+    {
+        // assert some properties of the bunch Bu
+        assert(Bu->begin < Bu->end);
+        // for all transition sets Tr in Bu do
+        B_a_B_desc_const_iter_t Tr = Bu->begin->B_a_B_slice;
+        assert(Tr->begin == Bu->begin);
+        if (Bu->is_trivial())
+        {
+            // a trivial bunch only contains one transition set
+            assert(Tr->end == Bu->end);
+        }
+        else
+        {
+            // a nontrivial bunch contains at least two transition sets
+            // however, it may happen that some bunches are marked as
+            // nontrivial but have become trivial in the meantime.
+            assert(Tr->end <= Bu->end);
+            --nr_of_nontrivial_bunches;
+        }
+        for (;;)
+        {
+            // assert some properties of the transition set Tr
+            assert(Tr->begin < Tr->end);
+            assert(Tr->begin_from_non_bottom == Tr->begin);
+            assert(Tr->bunch == Bu);
+
+            B_a_B_const_iter_t t = Tr->begin;
+            const block_t* const start_block = t->pred->source->block;
+            const block_t* const target_block = t->pred->succ->target->block;
+            for (;;)
+            {
+                // assert some properties of the transition t
+                assert(t == t->pred->succ->B_a_B);
+                assert(t->B_a_B_slice == Tr);
+                assert(t->pred->source->succ_begin() <= t->pred->succ);
+                assert(t->pred->succ < t->pred->source->succ_end());
+                assert(t->pred->succ->target->pred_begin() <= t->pred);
+                assert(t->pred < t->pred->succ->target->pred_end());
+
+                ++t;
+                if (Tr->end == t)  break;
+                // Do all transitions start and end in the correct block?
+                assert(start_block == t->pred->source->block);
+                assert(target_block == t->pred->succ->target->block);
+            }
+
+            // go to next transition set
+            if (Tr->end == Bu->end)  break;
+            assert(Tr->end < Bu->end);
+            assert(Tr->end == Tr->end->B_a_B_slice->begin);
+            Tr = Tr->end->B_a_B_slice;
+        }
+        // go to next bunch
+        if (B_a_B.end() == Bu->end)  break;
+        assert(Bu->end < B_a_B.end());
+        assert(Bu->end == Bu->end->B_a_B_slice->bunch->begin);
+        Bu = Bu->end->B_a_B_slice->bunch;
+    }
+    assert(0 == nr_of_nontrivial_bunches);
+    return;
+}
+
+#endif
 
 } // end namespace bisim_tb
 
@@ -625,7 +1056,9 @@ template <class LTS_TYPE>
 void bisim_partitioner_tb<LTS_TYPE>::
           create_initial_partition_tb(bool branching, bool preserve_divergence)
 {
-    mCRL2log(log::verbose) << "Strictly O(m log n) "
+    log::mcrl2_logger::set_reporting_level(log::debug, "bisim_tb");
+
+    mCRL2log(log::verbose, "bisim_tb") << "Strictly O(m log n) "
                    << (branching ? (preserve_divergence
                                            ? "divergence-preserving branching "
                                            : "branching ")
@@ -736,10 +1169,6 @@ void bisim_partitioner_tb<LTS_TYPE>::
 
     bisim_tb::bunch_t* bunch =
              new bisim_tb::bunch_t(part_tr.B_a_B.begin(), part_tr.B_a_B.end());
-    if (trans_per_label.size() > 1)
-    {
-        bunch->make_nontrivial();
-    }
 
     // create slice descriptors in part_tr.B_a_B for each label
 
@@ -748,7 +1177,11 @@ void bisim_partitioner_tb<LTS_TYPE>::
     for (label_type i = 0; i < trans_per_label.size(); ++i)
     {
         if (0 == trans_per_label[i])  continue;
-        trans_per_label[i] += prev;
+        if (0 != prev)
+        {
+            bunch->make_nontrivial_during_init();
+            trans_per_label[i] += prev;
+        }
         // create a B_a_B slice for the transitions with label lbl_iter->first
         B->from_block.emplace_front(part_tr.B_a_B.begin() + prev,
                          part_tr.B_a_B.begin() + trans_per_label[i], i, bunch);
@@ -766,7 +1199,11 @@ void bisim_partitioner_tb<LTS_TYPE>::
     // create slice of inert transitions:
     if (0 != inert_transitions)
     {
-        inert_transitions += prev;
+        if (0 != prev)
+        {
+            bunch->make_nontrivial_during_init();
+            inert_transitions += prev;
+        }
         B->from_block.emplace_front(part_tr.B_a_B.begin() + prev,
                                     part_tr.B_a_B.begin() + inert_transitions,
                                                  aut.tau_label_index(), bunch);
@@ -886,11 +1323,13 @@ void bisim_partitioner_tb<LTS_TYPE>::replace_transition_system(bool branching,
         for(bisim_tb::B_a_B_desc_const_iter_t trans_iter=B->from_block.begin();
                                B->from_block.end() != trans_iter; ++trans_iter)
         {
+            if (B->inert_slice() == trans_iter)  continue;
             // add a transition from the source block to the goal block with
             // the indicated label.
             aut.add_transition(transition(B->seqnr, trans_iter->label,
                                                trans_iter->to_block()->seqnr));
         }
+    // go to next block
         s_iter = B->end();
     }
 
@@ -934,17 +1373,38 @@ void bisim_partitioner_tb<LTS_TYPE>::replace_transition_system(bool branching,
 
 template <class LTS_TYPE>
 void bisim_partitioner_tb<LTS_TYPE>::
-              refine_partition_until_it_becomes_stable_tb(const bool branching)
+              refine_partition_until_it_becomes_stable_tb(const bool branching,
+                                                const bool preserve_divergence)
 {
     // while there is a nontrivial bunch SpBu
     while (nullptr != bisim_tb::bunch_t::get_some_nontrivial())
     {
+        #ifndef NDEBUG
+            if (mCRL2logEnabled(log::debug, "bisim_tb"))
+            {
+                part_st.print_part();
+                part_tr.print_trans(aut);
+            }
+
+            part_tr.assert_stability(branching, preserve_divergence, part_st,
+                                                                          aut);
+        #endif
 
         /*------------------------- find a splitter -------------------------*/
 
         bisim_tb::bunch_t* const SpBu=bisim_tb::bunch_t::get_some_nontrivial();
+        mCRL2log(log::debug, "bisim_tb") <<"Refining "<<SpBu->debug_id()<<'\n';
+        if (SpBu->begin->B_a_B_slice == SpBu->end[-1].B_a_B_slice)
+        {
+            mCRL2log(log::debug, "bisim_tb") << "Actually the bunch has "
+                                                   "become trivial already.\n";
+            SpBu->make_trivial();
+            continue;
+        }
         // select a small B_a_B-slice SpSl in SpBu
         bisim_tb::B_a_B_desc_iter_t const SpSl = SpBu->split_off_small_B_a_B();
+        mCRL2log(log::debug, "bisim_tb") << "Splitting off "
+                                                   << SpSl->debug_id() << '\n';
         bisim_tb::block_t* const B = SpSl->from_block();
         // select a B_a_B-slice that remains in SpBu as futureFromRed
         if (SpSl == B->from_block.begin() ||
@@ -982,8 +1442,7 @@ void bisim_partitioner_tb<LTS_TYPE>::
 
         /*----------- special treatment for the inert transitions -----------*/
 
-        if (branching && aut.is_tau(aut.apply_hidden_label_map(SpSl->label)) &&
-                                                      B->inert_slice() == SpSl)
+        if (B->inert_slice() == SpSl)
         {
             // The split is trivial, but we have to adapt the data structures
             // for the outgoing transitions because there may be states that
@@ -1045,6 +1504,7 @@ void bisim_partitioner_tb<LTS_TYPE>::
         if (RedB->unmarked_bottom_begin() != RedB->unmarked_bottom_end())
         {
             RedB = postprocess_new_bottom(RedB);
+            if (nullptr == RedB)  continue;
         }
         else
         {
@@ -1055,7 +1515,7 @@ void bisim_partitioner_tb<LTS_TYPE>::
         assert(0 == RedB->marked_size());
         if (RedB->size() == 1)  continue;
         bisim_tb::B_a_B_desc_iter_t const FromRed = part_tr.futureFromRed;
-        if (B->from_block.end() == FromRed)  continue;
+        if (RedB->from_block.end() == FromRed)  continue;
         part_tr.futureFromRed = RedB->from_block.end();
         RedB = refine(RedB, FromRed, SpSl->bunch, false);
         // handle new bottom states resulting from the second refinement
@@ -1067,10 +1527,21 @@ void bisim_partitioner_tb<LTS_TYPE>::
         {
             RedB->set_marked_bottom_begin(RedB->marked_bottom_end());
         }
+mCRL2log(log::debug, "bisim_tb") << "9\n";
 
-        assert(0 == RedB->marked_size());
+        assert(nullptr == RedB || 0 == RedB->marked_size());
     // end while
     }
+mCRL2log(log::debug, "bisim_tb") << "10\n";
+    #ifndef NDEBUG
+        if (mCRL2logEnabled(log::debug, "bisim_tb"))
+        {
+            part_st.print_part();
+            part_tr.print_trans(aut);
+        }
+
+        part_tr.assert_stability(branching, preserve_divergence, part_st, aut);
+    #endif
     // return P
         // (this happens implicitly, through the bisim_partitioner_tb object
         // data)
@@ -1120,6 +1591,12 @@ bisim_tb::block_t* bisim_partitioner_tb<LTS_TYPE>::refine(
                            const bisim_tb::bunch_t* const NewBu,
                            const bool unmarked_bottom_states_are_blue)
 {
+    mCRL2log(log::debug, "bisim_tb") << "refine(" << RfnB->debug_id() << ','
+    << (RfnB->from_block.end()==FromRed ? std::string("null")
+                                        : FromRed->debug_id())
+    << ',' << NewBu->debug_id_short()
+    << (unmarked_bottom_states_are_blue ? ",true)\n" : ",false)\n");
+
     bisim_tb::block_t* RedB;
     assert(RfnB->from_block.end()!=FromRed || unmarked_bottom_states_are_blue);
 
@@ -1155,6 +1632,7 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_blue,
                             (REFINE_BLUE_STATE_HANDLED)
                             (REFINE_BLUE_COLLECT_BOTTOM))
 {
+mCRL2log(log::debug, "bisim_tb") << "refine_blue started\n";
     if (!unmarked_bottom_states_are_blue)
     {
         // we have to decide which unmarked bottom states are blue.  So we walk
@@ -1178,9 +1656,11 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_blue,
         {
             // 3.7l: Choose s in Test
             s = *visited_end;
+mCRL2log(log::debug, "bisim_tb") << s->debug_id();
             // 3.8l: if s --> SpBu then
             if (s->surely_has_transition_to(FromRed->bunch))
             {
+mCRL2log(log::debug, "bisim_tb") << " is not blue\n";
                 // 3.9l: Move s from Test to Red
                 // The state s is not blue.  Move it to the slice of non-blue
                 // bottom states.
@@ -1196,6 +1676,7 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_blue,
             }
             else
             {
+mCRL2log(log::debug, "bisim_tb") << " is blue\n";
                 assert(s->surely_has_no_transition_to(FromRed->bunch, NewBu));
                 // 3.11l: Move s from Test to Blue
                 ++visited_end;
@@ -1282,13 +1763,13 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_blue,
                     // the binary search in the previous version).
                     COROUTINE_FOR (REFINE_BLUE_TESTING,
                             succ_iter = s_prime->succ_begin(),
-                                    succ_iter != s_prime->succ_end() &&
+                                    s_prime->succ_end() != succ_iter &&
                                         succ_iter->B_a_B->B_a_B_slice->bunch !=
                                                                 FromRed->bunch,
                                     succ_iter = succ_iter->bunch_slice->end)
                     {  }
                     END_COROUTINE_FOR;
-                    if (succ_iter != s_prime->succ_end())  continue;
+                    if (s_prime->succ_end() != succ_iter)  continue;
                 }
             }
             // 3.24l: Blue := Blue union {s_prime}
@@ -1315,6 +1796,7 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_blue,
 
     /*  -  -  -  -  -  -  -  - split off blue block -  -  -  -  -  -  -  -  */
 
+mCRL2log(log::debug, "bisim_tb") << "The blue subblock is smaller.\n";
     // 3.28l: Abort the other coroutine
     ABORT_OTHER_COROUTINE();
     // From now on, we do no longer need the reentrant ``local'' variables.
@@ -1323,7 +1805,7 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_blue,
     // and
     // 3.30l: Destroy all temporary data
     bisim_tb::block_t* const NewB = RfnB->split_off_blue(blue_nonbottom_end);
-    part_tr.new_block_created(RfnB, NewB, true);
+    part_tr.new_block_created(RfnB, NewB, true, aut);
 }
 END_COROUTINE
 
@@ -1345,6 +1827,7 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_red,
                             (REFINE_RED_STATE_HANDLED)
                             (REFINE_RED_COLLECT_FROMRED_SLICE))
 {
+mCRL2log(log::debug, "bisim_tb") << "refine_red started\n";
     // 3.5r: whenever |Red| > |RfnB|/2 then  Abort this coroutine
     if (RfnB->marked_size() > RfnB->size() / 2)  ABORT_THIS_COROUTINE();
 
@@ -1356,12 +1839,14 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_red,
         // for all transitions in the bunch containing FromRed
         forward = true;
         slice = FromRed;
+        assert(RfnB->from_block.end() != slice);
         COROUTINE_WHILE(REFINE_RED_COLLECT_FROMRED_SLICE, true)
         {
-            fromred_visited_ptr = slice->begin;
-            if (!unmarked_bottom_states_are_blue ||
-                    (fromred_visited_ptr = slice->begin_from_non_bottom) !=
-                                                                    slice->end)
+            if (RfnB->inert_slice() != slice &&
+                       (fromred_visited_ptr = slice->begin,
+                        !unmarked_bottom_states_are_blue ||
+                        (fromred_visited_ptr = slice->begin_from_non_bottom,
+                                           fromred_visited_ptr != slice->end)))
             {
                 COROUTINE_DO_WHILE(REFINE_RED_COLLECT_FROMRED,
                                              fromred_visited_ptr != slice->end)
@@ -1369,6 +1854,8 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_red,
                     // 3.7r: Choose s --> t in FromRed
                     bisim_tb::state_info_ptr const s =
                                              fromred_visited_ptr->pred->source;
+mCRL2log(log::debug, "bisim_tb") << s->debug_id() << " is red\n";
+                    assert(s->block == RfnB);
                     // 3.8r: Test := Test \ {s}
                     // and
                     // 3.9r: Red := Red union {s}
@@ -1468,6 +1955,7 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_red,
 
     /*  -  -  -  -  -  -  -  - split off red block -  -  -  -  -  -  -  -  */
 
+mCRL2log(log::debug, "bisim_tb") << "The red subblock is smaller.\n";
     // 3.28r: Abort the other coroutine
     ABORT_OTHER_COROUTINE();
     // From now on, we do no longer need the reentrant ``local'' variables.
@@ -1477,7 +1965,7 @@ DEFINE_COROUTINE(bisim_partitioner_tb<LTS_TYPE>::, refine_red,
     // 3.30r: Destroy all temporary data
     bisim_tb::block_t* const NewB =
                            RfnB->split_off_red(RfnB->marked_nonbottom_begin());
-    part_tr.new_block_created(RfnB, NewB, false);
+    part_tr.new_block_created(RfnB, NewB, false ONLY_IF_DEBUG( , aut ) );
 }
 END_COROUTINE
 

@@ -29,6 +29,7 @@
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/coroutine.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
+#include "mcrl2/lts/lts_lts.h"
 
 namespace mcrl2
 {
@@ -142,8 +143,7 @@ class state_info_entry
         // must specify a default constructor for this union because class
         // pred_iter_t has a non-trivial default constructor.
         UI()  {  count = 0;  }
-
-        ~UI(void) { } // A defunct destructor required at other places. 
+        ~UI(void) { } // A defunct destructor required at other places.
     } state_in;
 
     union UO {
@@ -153,8 +153,7 @@ class state_info_entry
         succ_iter_t inert_begin;
 
         UO()  {  count = 0;  }
- 
-        ~UO(void) {} // A defunct destructor required at other places. 
+        ~UO(void) {} // A defunct destructor required at other places.
     } state_out;
 
     /// block where the state belongs
@@ -445,11 +444,11 @@ class block_t
     block_t(permutation_iter_t const begin_, permutation_iter_t const end_)
       : int_end(end_),
         int_begin(begin_),
-        int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
+        int_marked_nonbottom_begin(begin_),
         int_bottom_begin(begin_), // all states are bottom states
         int_marked_bottom_begin(end_), // no bottom state is marked
         from_block(),
-        // int_inert_slice -- is initialised by part_trans_t::create_new_block
+        int_inert_slice(from_block.end()), // there are no inert transitions
         postprocessing_this_bunch_next(nullptr),
         seqnr(nr_of_blocks++)
     {
@@ -459,10 +458,6 @@ class block_t
         // assert(int_bottom_begin <= int_marked_bottom_begin);
         // assert(int_marked_bottom_begin <= int_end);
         assert(int_bottom_begin < int_end);
-        // The following assertions cannot be tested because constln_t is not
-        // yet complete.
-        // assert(int_constln->begin() <= int_begin &&
-        //                                      int_end <= int_constln->end());
     }
 
     ~block_t()  {  }
@@ -511,6 +506,13 @@ class block_t
 
     /// provides the number of states in the block
     state_type size() const  {  return int_end - int_begin;  }
+
+    /// \brief provides the number of bottom states in the block
+    /// \details This size includes the old bottom states.
+    state_type bottom_size() const
+    {
+        return bottom_end() - bottom_begin();
+    }
 
     /// \brief provides the number of marked bottom states in the block
     /// \details This size includes the old bottom states.
@@ -881,20 +883,14 @@ class part_state_t
     /// \param begin   iterator to the beginning of the slice
     /// \param end     iterator past the end of the slice
     void print_block(const char* message, const block_t* B,
-        permutation_const_iter_t begin, permutation_const_iter_t end) const;
+           permutation_const_iter_t begin, permutation_const_iter_t end) const;
   public:
     /// \brief print the partition as a tree (per constellation and block)
     /// \details The function prints all constellations (in order); for each
     /// constellation it prints the blocks it consists of; and for each block,
     /// it lists its states, separated into nonbottom and bottom states.
     /// \param part_tr partition for the transitions
-    void print_part(const part_trans_t& part_tr) const;
-
-    /// \brief print all transitions
-    /// \details For each state (in order), its outgoing transitions are
-    /// listed, sorted by goal constellation.  The function also indicates
-    /// where the current constellation pointer of the state points at.
-    void print_trans() const;
+    void print_part() const;
 #endif
 };
 
@@ -973,10 +969,8 @@ class pred_entry
 
     /// \brief print a transition identification for debugging
     /// \details This function is only available if compiled in Debug mode.
-    std::string debug_id() const
-    {
-        return "transition " + debug_id_short();
-    }
+    template <class LTS_TYPE>
+    std::string debug_id(const LTS_TYPE& aut) const;
 #endif
 };
 
@@ -1111,6 +1105,13 @@ class B_a_B_slice_t
     }
 
 #ifndef NDEBUG
+    std::string debug_id_short() const
+    {
+        static char slice_address[sizeof(intptr_t) * 2 + 6];
+        snprintf(slice_address, sizeof slice_address, "%p", (const void*)this);
+        return std::string("B_a_B slice ") + slice_address;
+    }
+
     /// \brief print a B_a_B slice identification for debugging
     /// \details This function is only available if compiled in Debug mode.
     std::string debug_id() const
@@ -1167,7 +1168,7 @@ class bunch_t
         // must specify a default constructor for the union because the
         // iterator has a non-trivial default constructor:
         U()  {  null = nullptr;  }
-        ~U(void) {}  // A trivial destructor as it is being used. 
+        ~U(void) {}  // A trivial destructor as it is being used.
     } postprocess;
 
     /// \brief points to a slice in this bunch that contains transitions from
@@ -1195,6 +1196,14 @@ class bunch_t
 
     static bunch_t* get_some_nontrivial()  {  return first_nontrivial;  }
 
+    /// \brief provides the next non-trivial bunch
+    /// \details This (non-static!) function just returns the next non-trivial
+    /// bunch in the list.  Note: If this bunch is the last in
+    /// the list of non-trivial bunches, the convention is that the next
+    /// pointer points to this bunch self (to distinguish it from
+    /// nullptr).
+    const bunch_t* get_next_nontrivial() const  {  return next_nontrivial;  }
+
 
     void make_nontrivial()
     {
@@ -1210,6 +1219,27 @@ class bunch_t
         assert(first_nontrivial == this);
         first_nontrivial = this==next_nontrivial ? nullptr : next_nontrivial;
         next_nontrivial = nullptr;
+    }
+
+    /// \brief returns true iff the bunch is trivial
+    /// \details If this bunch is the last in the list of non-trivial
+    /// bunches, the convention is that the next pointer points to this
+    /// bunch itself (to distinguish it from nullptr).
+    bool is_trivial() const
+    {
+        return nullptr == next_nontrivial;
+    }
+
+    /// \brief mark the bunch as nontrivial (during initialisation)
+    /// \details During initialisation, the bunch may be marked as nontrivial
+    /// multiple times, but if it is, it is the only bunch that is marked as
+    /// nontrivial.  This function tests the condition with assert().
+    void make_nontrivial_during_init()
+    {
+        assert(next_nontrivial == first_nontrivial);
+        assert(next_nontrivial == nullptr || next_nontrivial == this);
+        next_nontrivial = this;
+        first_nontrivial = this;
     }
 
 
@@ -1239,7 +1269,8 @@ class bunch_t
         /// `part_tr.move_to_new_bunch()` is faster if the first block is selected to
         /// be split off.  `part_tr.split_s_inert_out()` is faster if the last
         /// block is selected.
-        if (FirstSl->size() > LastSl->size())
+        if (LastSl->from_block()->inert_slice() == LastSl ||
+                                              FirstSl->size() > LastSl->size())
         {
             // 2.6: ... and move SpB from SpC to NewC
             end = LastSl->begin;
@@ -1257,6 +1288,44 @@ class bunch_t
         }
     }
 
+#ifndef NDEBUG
+    std::string debug_id_short() const
+    {
+        static char bunch_address[sizeof(intptr_t) * 2 + 6];
+        snprintf(bunch_address, sizeof bunch_address, "%p", (const void*)this);
+        return std::string("bunch ") + bunch_address;
+    }
+
+    /// \brief print a bunch identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
+    std::string debug_id() const
+    {
+        assert(begin < end);
+        std::string result("bunch containing transition");
+        if (end - begin > 1)
+            result += "s ";
+        else
+            result += " ";
+        B_a_B_const_iter_t iter = begin;
+        assert(iter->pred->succ->B_a_B == iter);
+        result += iter->pred->debug_id_short();
+        if (end - iter > 4)
+        {
+            assert(iter[1].pred->succ->B_a_B == iter+1);
+            result += ", ";
+            result += iter[1].pred->debug_id_short();
+            result += ", ...";
+            iter = end - 3;
+        }
+        while (++iter != end)
+        {
+            assert(iter->pred->succ->B_a_B == iter);
+            result += ", ";
+            result += iter->pred->debug_id_short();
+        }
+        return result;
+    }
+#endif
 
 };
 
@@ -1408,7 +1477,7 @@ class part_trans_t
     succ_iter_t move_to_new_bunch(B_a_B_iter_t s_iter, bunch_t* OldBu,
                             bunch_t* NewBu, bool first_transition_of_state);
 
-    /* part_trans_t::make_noninert marks the transition identified by
+    /* part_trans_t::make_noninert_pred_succ marks the transition identified by
     B_a_B_iter as noninert in the pred and succ arrays.  The caller should mark
     it as noninert in the B_a_B array. */
     void make_noninert_pred_succ(B_a_B_iter_t const B_a_B_iter)
@@ -1452,15 +1521,19 @@ class part_trans_t
     /// block and the transition starts in the red block, `futureFromRedBu`
     /// should be set to the bunch of FromRed;  otherwise, `futureFromRedBu`
     /// should be `nullptr`.
+    ONLY_IF_DEBUG( template<class LTS_TYPE> )
     void handle_transition(B_a_B_iter_t const old_pos, block_t* OldB,
-                                block_t* NewB, const bunch_t* futureFromRedBu);
+                                  block_t* NewB, const bunch_t* futureFromRedBu
+                                      ONLY_IF_DEBUG( , const LTS_TYPE& aut ) );
   public:
     /* part_trans_t::new_block_created splits the B_a_B-slices to reflect that
     some transitions now start in the new block NewB.  They can no longer be in
     the same slice as the transitions that start in the old block.
     
     Its time complexity is O(1 + |in(NewB)| + |out(NewB)|). */
-    void new_block_created(block_t* OldB, block_t* NewB, bool NewB_is_blue);
+    ONLY_IF_DEBUG( template<class LTS_TYPE> )
+    void new_block_created(block_t* OldB, block_t* NewB, bool NewB_is_blue
+                                      ONLY_IF_DEBUG( , const LTS_TYPE& aut ) );
 
     B_a_B_const_iter_t B_a_B_begin() const  {  return B_a_B.begin();  }
     B_a_B_iter_t       B_a_B_end  ()        {  return B_a_B.end  ();  }
@@ -1468,8 +1541,17 @@ class part_trans_t
     succ_const_iter_t succ_end() const  {  return succ.end();  }
 
 #ifndef NDEBUG
+    /// \brief print all transitions
+    /// \details For each state (in order), its outgoing transitions are
+    /// listed, sorted by goal constellation.  The function also indicates
+    /// where the current constellation pointer of the state points at.
+    template<class LTS_TYPE>
+    void print_trans(const LTS_TYPE& aut) const;
+
     /// \brief assert that the data structure is consistent and stable
-    void assert_stability(const part_state_t& part_st) const;
+    template <class LTS_TYPE>
+    void assert_stability(bool branching, bool preserve_divergence,
+                         const part_state_t&part_st, const LTS_TYPE&aut) const;
 #endif
 };
 
@@ -1531,7 +1613,8 @@ class bisim_partitioner_tb
     {
       assert(branching || !preserve_divergence);
       create_initial_partition_tb(branching, preserve_divergence);
-      refine_partition_until_it_becomes_stable_tb(branching);
+      refine_partition_until_it_becomes_stable_tb(branching,
+                                                          preserve_divergence);
     }
     ~bisim_partitioner_tb()
     {
@@ -1565,7 +1648,8 @@ class bisim_partitioner_tb
     /*-------- dbStutteringEquivalence -- Algorithm 2 of [GJKW 2017] --------*/
 
     void create_initial_partition_tb(bool branching, bool preserve_divergence);
-    void refine_partition_until_it_becomes_stable_tb(bool branching);
+    void refine_partition_until_it_becomes_stable_tb(bool branching,
+                                                     bool preserve_divergence);
 
     /*----------------- Refine -- Algorithm 3 of [GJKW 2017] ----------------*/
 
@@ -1783,7 +1867,7 @@ inline bool state_info_entry::surely_has_transition_to(const bunch_t* const
                         current_bunch[-1].B_a_B->B_a_B_slice->bunch !=
                                      current_bunch->B_a_B->B_a_B_slice->bunch);
     }
-    return current_bunch != succ_end() &&
+    return succ_end() != current_bunch &&
                               current_bunch->B_a_B->B_a_B_slice->bunch == SpBu;
 }
 
@@ -1814,10 +1898,33 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* SpBu,
                         current_bunch[-1].B_a_B->B_a_B_slice->bunch !=
                                      current_bunch->B_a_B->B_a_B_slice->bunch);
         return current_bunch[-1].B_a_B->B_a_B_slice->bunch == NewBu &&
-                              current_bunch->B_a_B->B_a_B_slice->bunch != SpBu;
+                            (succ_end() == current_bunch ||
+                             current_bunch->B_a_B->B_a_B_slice->bunch != SpBu);
     }
 }
 
+
+#ifndef NDEBUG
+
+/// \brief print a transition identification for debugging
+/// \details This function is only available if compiled in Debug mode.
+template <class LTS_TYPE>
+inline std::string pred_entry::debug_id(const LTS_TYPE& aut) const
+{
+    return aut.action_label(aut.apply_hidden_label_map(
+         succ->B_a_B->B_a_B_slice->label)) + "-transition " + debug_id_short();
+}
+
+template <>
+inline std::string pred_entry::debug_id(const lts_lts_t& aut) const
+{
+    // class lts_lts_t uses a function pp() to transform the action label to
+    // a string.
+    return pp(aut.action_label(aut.apply_hidden_label_map(
+        succ->B_a_B->B_a_B_slice->label))) + "-transition " + debug_id_short();
+}
+
+#endif
 
 } // end namespace bisim_tb
 } // end namespace detail
