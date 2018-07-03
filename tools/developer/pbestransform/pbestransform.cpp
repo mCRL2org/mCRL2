@@ -197,20 +197,6 @@ struct rewrite_pbes_data2pbes_rewriter_command: public pbes_system::detail::pbes
   }
 };
 
-struct pbesinst_lazy_command: public pbes_system::detail::pbes_rewriter_command
-{
-  pbesinst_lazy_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_system::detail::pbes_rewriter_command("pbesinst-lazy", input_filename, output_filename, options, strategy)
-  {}
-
-  void execute()
-  {
-    pbes_system::detail::pbes_command::execute();
-    pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, lazy);
-    pbes_system::detail::save_pbes(pbesspec, output_filename);
-  }
-};
-
 /// \brief Computes a structure graph for a PBES and prints the result.
 struct pbesinst_structure_graph_command: public pbes_system::detail::pbes_rewriter_command
 {
@@ -226,48 +212,6 @@ struct pbesinst_structure_graph_command: public pbes_system::detail::pbes_rewrit
     std::ostringstream out;
     out << G.vertices();
     utilities::detail::write_text(output_filename, out.str());
-  }
-};
-
-struct pbesinst_optimize_command: public pbes_system::detail::pbes_rewriter_command
-{
-  pbesinst_optimize_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_system::detail::pbes_rewriter_command("pbesinst-optimize", input_filename, output_filename, options, strategy)
-  {}
-
-  void execute()
-  {
-    pbes_system::detail::pbes_command::execute();
-    pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, optimize);
-    pbes_system::detail::save_pbes(pbesspec, output_filename);
-  }
-};
-
-struct pbesinst_on_the_fly_command: public pbes_system::detail::pbes_rewriter_command
-{
-  pbesinst_on_the_fly_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_system::detail::pbes_rewriter_command("pbesinst-on-the-fly", input_filename, output_filename, options, strategy)
-  {}
-
-  void execute()
-  {
-    pbes_system::detail::pbes_command::execute();
-    pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, on_the_fly);
-    pbes_system::detail::save_pbes(pbesspec, output_filename);
-  }
-};
-
-struct pbesinst_on_the_fly_with_fixed_points_command: public pbes_system::detail::pbes_rewriter_command
-{
-  pbesinst_on_the_fly_with_fixed_points_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_system::detail::pbes_rewriter_command("pbesinst-on-the-fly-with-fixed-points", input_filename, output_filename, options, strategy)
-  {}
-
-  void execute()
-  {
-    pbes_system::detail::pbes_command::execute();
-    pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, on_the_fly_with_fixed_points);
-    pbes_system::detail::save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -320,11 +264,7 @@ class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>
     void add_commands(const std::vector<std::string>& options) override
     {
       add_command(std::make_shared<anonymize_pbes_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<pbesinst_lazy_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<pbesinst_structure_graph_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<pbesinst_on_the_fly_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<pbesinst_on_the_fly_with_fixed_points_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<pbesinst_optimize_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
