@@ -213,6 +213,13 @@ class pbesinst_lazy_algorithm
       return false;
     }
 
+    // recreates todo and discovered
+    virtual void reset(const propositional_variable_instantiation& /* init */,
+                       std::deque<propositional_variable_instantiation>& todo,
+                       std::unordered_set<propositional_variable_instantiation>& discovered
+                      )
+    { }
+
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     virtual void run()
     {
@@ -260,6 +267,8 @@ class pbesinst_lazy_algorithm
         {
           break;
         }
+
+        reset(init, todo, discovered);
       }
     }
 
