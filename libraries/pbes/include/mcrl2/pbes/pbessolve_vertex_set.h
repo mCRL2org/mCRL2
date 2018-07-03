@@ -120,9 +120,8 @@ struct vertex_set
     boost::dynamic_bitset<> m_include;
 
   public:
-    void self_check(const std::string& msg = "") const
+    bool self_check(const std::string& msg = "") const
     {
-#ifndef NDEBUG
       if (!msg.empty())
       {
         std::cout << "--- " << msg << " ---" << std::endl;
@@ -138,7 +137,7 @@ struct vertex_set
           throw mcrl2::runtime_error("Inconsistency detected with element " + std::to_string(v) + "!");
         }
       }
-#endif
+      return true;
     }
 
     vertex_set() = default;
@@ -146,7 +145,7 @@ struct vertex_set
     explicit vertex_set(std::size_t N)
             : m_include(N)
     {
-      self_check();
+      assert(self_check());
     }
 
     template <typename Iter>
@@ -157,7 +156,7 @@ struct vertex_set
       {
         insert(*i);
       }
-      self_check();
+      assert(self_check());
     }
 
     // resize to at least n elements
@@ -191,14 +190,14 @@ struct vertex_set
       assert(!m_include[u]);
       m_vertices.push_back(u);
       m_include[u] = true;
-      self_check();
+      assert(self_check());
     }
 
     void clear()
     {
       m_vertices.clear();
       m_include = boost::dynamic_bitset<>(m_include.size());
-      self_check();
+      assert(self_check());
     }
 
     std::size_t extent() const

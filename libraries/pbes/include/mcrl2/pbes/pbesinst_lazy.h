@@ -112,43 +112,38 @@ class pbesinst_lazy_algorithm
       return p;
     }
 
-    pbes_expression apply_optimization1(const pbes_expression& psi_e, const fixpoint_symbol& symbol,
-                                        const propositional_variable_instantiation& X_e) const
+    pbes_expression rewrite_true_false(const fixpoint_symbol& symbol,
+                                       const propositional_variable_instantiation& X,
+                                       const pbes_expression& psi
+                                      ) const
     {
-      if (m_optimization >= 1)
+      bool changed = false;
+      pbes_expression value;
+      if (symbol.is_mu())
       {
-        bool changed = false;
-        pbes_expression value;
-        if (symbol.is_mu())
-        {
-          value = false_();
-        }
-        else
-        {
-          value = true_();
-        }
-        pbes_expression result = replace_propositional_variables(psi_e, [&](const propositional_variable_instantiation& Y) {
-                                                                     if (Y == X_e)
-                                                                     {
-                                                                       changed = true;
-                                                                       return value;
-                                                                     }
-                                                                     return static_cast<const pbes_expression&>(Y);
-                                                                 }
-        );
-        if (changed)
-        {
-          simplify_rewriter R;
-          return R(result);
-        }
-        else
-        {
-          return result;
-        }
+        value = false_();
       }
       else
       {
-        return psi_e;
+        value = true_();
+      }
+      pbes_expression result = replace_propositional_variables(psi, [&](const propositional_variable_instantiation& Y) {
+                                                                   if (Y == X)
+                                                                   {
+                                                                     changed = true;
+                                                                     return value;
+                                                                   }
+                                                                   return static_cast<const pbes_expression&>(Y);
+                                                               }
+      );
+      if (changed)
+      {
+        simplify_rewriter R;
+        return R(result);
+      }
+      else
+      {
+        return result;
       }
     }
 
@@ -203,9 +198,13 @@ class pbesinst_lazy_algorithm
       return m_pbes.equations()[i].symbol();
     }
 
-    virtual pbes_expression rewrite_psi(const pbes_expression& psi)
+    // rewrite the right hand side of the equation X = psi
+    virtual pbes_expression rewrite_psi(const fixpoint_symbol& symbol,
+                                        const propositional_variable_instantiation& X,
+                                        const pbes_expression& psi
+                                       )
     {
-      return psi;
+      return m_optimization >= 1 ? rewrite_true_false(symbol, X, psi) : psi;
     }
 
     virtual bool solution_found(const propositional_variable_instantiation& init) const
@@ -242,11 +241,7 @@ class pbesinst_lazy_algorithm
         pbes_expression psi_e = R(phi, sigma);
 
         // optional step
-        psi_e = apply_optimization1(psi_e, eqn.symbol(), X_e);
-
-        // TODO: move all rewrite steps to the function rewrite_psi.
-        // optional step
-        psi_e = rewrite_psi(psi_e);
+        psi_e = rewrite_psi(eqn.symbol(), X_e, psi_e);
 
         // Store and report the new equation
         report_equation(X_e, psi_e, m_equation_index.rank(X_e.name()));

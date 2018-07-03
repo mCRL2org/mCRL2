@@ -394,7 +394,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, optimization)
     {}
 
-    pbes_expression rewrite_psi(const pbes_expression& psi) override
+    pbes_expression rewrite_psi(const fixpoint_symbol& symbol,
+                                const propositional_variable_instantiation& X,
+                                const pbes_expression& psi
+                               ) override
     {
       // N.B. The sets S0 and S1 need to be resized, because new vertices may have been added.
       S0.resize(m_graph_builder.m_vertices.size());
@@ -416,7 +419,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 //        }
 //      );
       pbes_expression x;
-      std::tie(b, x) = Rplus(psi);
+      std::tie(b, x) = Rplus(super::rewrite_psi(symbol, X, psi));
       return x;
     }
 
