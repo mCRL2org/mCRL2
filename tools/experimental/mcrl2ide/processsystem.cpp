@@ -128,6 +128,9 @@ QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
   /* connect to logger */
   switch (processType)
   {
+  case ProcessType::Parsing:
+    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+            SLOT(logToParsingConsole()));
   case ProcessType::Simulation:
     connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
             SLOT(logToSimulationConsole()));
@@ -218,6 +221,23 @@ QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction)
   ltsgraphProcess->setArguments({fileSystem->ltsFilePath(reduction)});
 
   return ltsgraphProcess;
+}
+
+QProcess* ProcessSystem::createPropertyParsingProcess(QString propertyName)
+{
+  QProcess* lps2pbesProcess = new QProcess();
+
+  /* create the process */
+  lps2pbesProcess->setProgram("lps2pbes");
+  lps2pbesProcess->setArguments(
+      {fileSystem->lpsFilePath(), fileSystem->pbesFilePath(propertyName),
+       "--formula=" + fileSystem->propertyFilePath(propertyName), "--out=pbes",
+       "--check_only", "--verbose"});
+
+  connect(lps2pbesProcess, SIGNAL(readyReadStandardError()), consoleDock,
+          SLOT(logToParsingConsole()));
+
+  return lps2pbesProcess;
 }
 
 QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
@@ -371,6 +391,44 @@ int ProcessSystem::createLts(LtsReduction reduction)
   return -1;
 }
 
+int ProcessSystem::parseProperty(Property* property)
+{
+  if (!fileSystem->saveProject().isEmpty())
+  {
+    /* create the subprocesses */
+    int processid = pid++;
+    ProcessType processType = ProcessType::Parsing;
+    consoleDock->setConsoleTab(processType);
+
+    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
+    mcrl2ParsingProcess->setProperty("pid", processid);
+    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(mcrl2ParsingResult(int)));
+    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(createLps(int)));
+
+    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
+    mcrl22lpsProcess->setProperty("pid", processid);
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
+            SLOT(parseMcf(int)));
+
+    QProcess* propertyParsingProcess =
+        createPropertyParsingProcess(property->name);
+    propertyParsingProcess->setProperty("pid", processid);
+    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(mcfParsingResult(int)));
+
+    processes[processid] = {mcrl2ParsingProcess, mcrl22lpsProcess,
+                            propertyParsingProcess};
+    processTypes[processid] = processType;
+    processQueues[processType]->enqueue(processid);
+    emit newProcessQueued(processType);
+
+    return processid;
+  }
+  return -1;
+}
+
 int ProcessSystem::verifyProperty(Property* property)
 {
   if (!fileSystem->saveProject().isEmpty())
@@ -435,7 +493,11 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
 {
   QProcess* mcrl2ParsingProcess = qobject_cast<QProcess*>(sender());
   int processid = mcrl2ParsingProcess->property("pid").toInt();
-  if (processTypes[processid] == ProcessType::Parsing)
+
+  /* if the full process was only for parsing the specification, signal that the
+   *   process has finished */
+  if (processTypes[processid] == ProcessType::Parsing &&
+      processes[processid].size() == 1)
   {
     emit processFinished(processid);
   }
@@ -596,6 +658,41 @@ void ProcessSystem::showLts(int previousExitCode)
     ltsgraphProcess->start();
     emit processFinished(processid);
   }
+}
+
+void ProcessSystem::parseMcf(int previousExitCode)
+{
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+
+  /* if the previous subprocess has failed, the process is discontinued */
+  if (previousExitCode > 0)
+  {
+    consoleDock->writeToConsole(ProcessType::Parsing,
+                                "Process finished with an error");
+    emit processFinished(processid);
+  }
+  else
+  {
+    consoleDock->writeToConsole(ProcessType::Parsing,
+                                "##### PARSING PROPERTY #####\n");
+
+    processes[processid][2]->start();
+  }
+}
+
+void ProcessSystem::mcfParsingResult(int previousExitCode)
+{
+  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+
+  if (previousExitCode == 0)
+  {
+    results[processid] = "valid";
+  }
+  else
+  {
+    results[processid] = "invalid";
+  }
+  emit processFinished(processid);
 }
 
 void ProcessSystem::createPbes(int previousExitCode)

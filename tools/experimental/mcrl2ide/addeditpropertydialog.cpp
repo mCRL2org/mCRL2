@@ -12,16 +12,17 @@
 
 #include <QMessageBox>
 
-AddEditPropertyDialog::AddEditPropertyDialog(bool add, FileSystem* fileSystem,
-                                             QWidget* parent,
-                                             QString propertyName,
-                                             QString propertyText)
+AddEditPropertyDialog::AddEditPropertyDialog(
+    bool add, ProcessSystem* processSystem, FileSystem* fileSystem,
+    QWidget* parent, QString propertyName, QString propertyText)
     : QDialog(parent), ui(new Ui::AddEditPropertyDialog)
 {
   ui->setupUi(this);
 
+  this->processSystem = processSystem;
   this->fileSystem = fileSystem;
   oldPropertyName = propertyName;
+  propertyParsingProcessid = -1;
 
   /* change the ui depending on whether this should be an add or edit property
    *   window */
@@ -41,21 +42,19 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add, FileSystem* fileSystem,
   setWindowTitle(windowTitle);
   setWindowFlags(Qt::Window);
 
-  connect(ui->addEditButton, SIGNAL(clicked()), this, SLOT(parseAndAccept()));
+  connect(ui->addEditButton, SIGNAL(clicked()), this, SLOT(checkInput()));
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+  connect(processSystem, SIGNAL(processFinished(int)), this,
+          SLOT(parseResults(int)));
 }
 
-QString AddEditPropertyDialog::getPropertyName()
+Property* AddEditPropertyDialog::getProperty()
 {
-  return ui->propertyNameField->text();
+  return new Property(ui->propertyNameField->text(),
+                      ui->propertyTextField->toPlainText());
 }
 
-QString AddEditPropertyDialog::getPropertyText()
-{
-  return ui->propertyTextField->toPlainText();
-}
-
-void AddEditPropertyDialog::parseAndAccept()
+void AddEditPropertyDialog::checkInput()
 {
   QString propertyName = ui->propertyNameField->text();
   /* show a message box if the property name field is empty */
@@ -92,8 +91,42 @@ void AddEditPropertyDialog::parseAndAccept()
     return;
   }
 
-  /* if everything is ok, accept the input */
-  accept();
+  /* save the property, then parse the formula and wait for a reply */
+  fileSystem->saveProperty(getProperty());
+  propertyParsingProcessid = processSystem->parseProperty(getProperty());
+}
+
+void AddEditPropertyDialog::parseResults(int processid)
+{
+  /* check if the process that has finished is the parsing process of this
+   *   dialog */
+  if (processid == propertyParsingProcessid)
+  {
+    /* if valid accept, else show message */
+    QString result = processSystem->getResult(processid);
+    if (result == "valid")
+    {
+      accept();
+    }
+    else if (result == "invalid")
+    {
+      QMessageBox* msgBox = new QMessageBox(
+          QMessageBox::Information, windowTitle,
+          "The entered formula is not a valid mu-calculus formula. See "
+          "the parsing console for more information",
+          QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+      msgBox->exec();
+    }
+    else
+    {
+      QMessageBox* msgBox =
+          new QMessageBox(QMessageBox::Information, windowTitle,
+                          "Could not parse the entered formula. See the "
+                          "parsing console for more information",
+                          QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+      msgBox->exec();
+    }
+  }
 }
 
 AddEditPropertyDialog::~AddEditPropertyDialog()

@@ -296,10 +296,20 @@ void MainWindow::actionSaveProjectAs()
 
 void MainWindow::actionAddProperty()
 {
-  Property* property = fileSystem->newProperty();
-  if (property != NULL)
+  /* we require a project to be made if no project has been opened */
+  if (!fileSystem->projectOpened())
   {
-    propertiesDock->addProperty(property);
+    actionNewProject();
+  }
+
+  /* if successful, allow a property to be added */
+  if (fileSystem->projectOpened())
+  {
+    Property* property = fileSystem->newProperty(processSystem);
+    if (property != NULL)
+    {
+      propertiesDock->addProperty(property);
+    }
   }
 }
 

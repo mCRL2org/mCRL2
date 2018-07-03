@@ -10,9 +10,12 @@
 #ifndef ADDEDITPROPERTYDIALOG_H
 #define ADDEDITPROPERTYDIALOG_H
 
-#include "propertiesdock.h"
+#include "processsystem.h"
 
 #include <QDialog>
+
+class ProcessSystem;
+class FileSystem;
 
 namespace Ui
 {
@@ -31,41 +34,44 @@ class AddEditPropertyDialog : public QDialog
   /**
    * @brief AddEditPropertyDialog Constructor
    * @param add Whether this should be an add (or else an edit) window
-   * @param propertiesDock The 
+   * @param processSystem The process system (to parse formulas)
+   * @param fileSystem The file system (to check property names)
    * @param parent The parent of this widget
    * @param propertyName The current name of the property (in case of edit)
    * @param propertyText The current text of the property (in case of edit)
    */
-  AddEditPropertyDialog(bool add, FileSystem* fileSystem,
-                        QWidget* parent = 0, QString propertyName = "",
-                        QString propertyText = "");
+  AddEditPropertyDialog(bool add, ProcessSystem* processSystem,
+                        FileSystem* fileSystem, QWidget* parent = 0,
+                        QString propertyName = "", QString propertyText = "");
   ~AddEditPropertyDialog();
 
   /**
-   * @brief getPropertyName Gets the string filled in as the property name
-   * @return The property name string
+   * @brief getProperty Gets the property as entered in the text fields
+   * @return The new or edited property
    */
-  QString getPropertyName();
-
-  /**
-   * @brief getPropertyText Gets the string filled in as the property text
-   * @return The preoperty text string
-   */
-  QString getPropertyText();
+  Property* getProperty();
 
   public slots:
   /**
-   * @brief parseAndAccept checks whether the fields are non-empty and the
-   *   property is valid before accepting (parsing has yet to be implemented)
+   * @brief checkInput Checks whether the fields are non-empty and the
+   *   property is valid before accepting
    */
-  void parseAndAccept();
+  void checkInput();
+
+  /**
+   * @brief parseResults Handles the result of parsing the property
+   * @param processid The id of a finished process
+   */
+  void parseResults(int processid);
 
   private:
   Ui::AddEditPropertyDialog* ui;
 
+  ProcessSystem* processSystem;
   FileSystem* fileSystem;
   QString windowTitle;
   QString oldPropertyName;
+  int propertyParsingProcessid;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

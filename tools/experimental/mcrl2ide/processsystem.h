@@ -95,6 +95,10 @@ class ProcessThread : public QThread
   int currentProcessid;
 };
 
+enum class LtsReduction;
+class Property;
+class FileSystem;
+
 /**
  * @brief The ProcessSystem class handles all processes related to mCRL2 tools
  */
@@ -143,6 +147,13 @@ class ProcessSystem : public QObject
    * @return The process id of the lts creation process
    */
   int createLts(LtsReduction reduction);
+
+  /**
+   * @brief parseProperty Parses the given property
+   * @param property The property to parse
+   * @return The id of the parsing process
+   */
+  int parseProperty(Property* property);
 
   /**
    * @brief verifyProperty Verifies a property using mcrl22lps, lps2pbes and
@@ -200,19 +211,19 @@ class ProcessSystem : public QObject
   std::map<ProcessType, ProcessThread*> processThreads;
 
   /**
+   * @brief createMcrl2ParsingProcess Creates a process to parse the current
+   *   mCRL2 specification using mcrl22lps
+   * @return The parsing process
+   */
+  QProcess* createMcrl2ParsingProcess();
+
+  /**
    * @brief createMcrl22lpsProcess Creates a process to execute mcrl22lps on the
    *   current specification
    * @param processType Determines what console dock tab to use to log to
    * @return The mcrl22lps process
    */
   QProcess* createMcrl22lpsProcess(ProcessType processType);
-
-  /**
-   * @brief createMcrl2ParsingProcess Creates a process to parse the current
-   *   mCRL2 specification using mcrl22lps
-   * @return The parsing process
-   */
-  QProcess* createMcrl2ParsingProcess();
 
   /**
    * @brief createLpsxsimProcess Creates a process to execute lpsxsim on the lps
@@ -245,6 +256,14 @@ class ProcessSystem : public QObject
   QProcess* createLtsgraphProcess(LtsReduction reduction);
 
   /**
+   * @brief createPropertyParsingProcess Creates a process to parse the given
+   *   property using lps2pbes
+   * @param property The property to parse
+   * @return The parsing process
+   */
+  QProcess* createPropertyParsingProcess(QString propertyName);
+
+  /**
    * @brief createLps2pbesProcess Creates a process to execute lps2pbes on the
    *   lps that corresponds to the current specification and a given property
    * @param propertyName The name of the property to create a pbes of
@@ -275,7 +294,7 @@ class ProcessSystem : public QObject
   void parseMcrl2(int processid);
 
   /**
-   * @brief parsingResult Handles the result of parsing a specification
+   * @brief mcrl2ParsingResult Handles the result of parsing a specification
    * @param previousExitCode The exit code of the previous subprocess
    */
   void mcrl2ParsingResult(int previousExitCode);
@@ -309,6 +328,18 @@ class ProcessSystem : public QObject
    * @param previousExitCode The exit code of the previous subprocess
    */
   void showLts(int previousExitCode);
+
+  /**
+   * @brief parseMcf Parses a mu-calculus formula (of a property)
+   * @param previousExitCode The exit code of the previous subprocess
+   */
+  void parseMcf(int previousExitCode);
+
+  /**
+   * @brief mcfParsingResult Handles the result of parsing a property
+   * @param previousExitCode The exit code of the previous subprocess
+   */
+  void mcfParsingResult(int previousExitCode);
 
   /**
    * @brief createPbes The second step of verification, creating the pbes

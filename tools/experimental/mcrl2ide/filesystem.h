@@ -11,6 +11,7 @@
 #define FILESYSTEM_H
 
 #include "codeeditor.h"
+#include "processsystem.h"
 
 #include <QObject>
 #include <QDir>
@@ -48,6 +49,8 @@ class Project
   Project(QString projectName, std::list<Property*> properties);
 };
 
+class ProcessSystem;
+
 /**
  * @brief The FileSystem class handles all file related operations
  */
@@ -78,18 +81,16 @@ class FileSystem : public QObject
   /**
    * @brief projectFolderPath Defines the file path of the current project
    *   folder
-   * @param projectName The name of the current project
    * @return The file path of the project folder
    */
-  QString projectFolderPath(QString projectName);
+  QString projectFolderPath();
 
   /**
    * @brief propertiesFolderPath Defines the file path of the current properties
    *   folder
-   * @param projectName The name of the current project
    * @return The file path of the properties folder
    */
-  QString propertiesFolderPath(QString projectName);
+  QString propertiesFolderPath();
 
   /**
    * @brief specificationFilePath Defines the file path of a specification
@@ -152,20 +153,6 @@ class FileSystem : public QObject
   bool propertyNameExists(QString propertyName);
 
   /**
-   * @brief propertyModified Checks whether the property has been modified since
-   *   it has been saved
-   * @param propertyName The property
-   * @return Whether the property has been modified since it has been saved
-   */
-  bool isPropertyModified(Property* property);
-
-  /**
-   * @brief setPropertyModified Sets the property to modified
-   * @param PropertyName The property
-   */
-  void setPropertyModified(Property* property);
-
-  /**
    * @brief upToDateLpsFileExists Checks whether an lps file exists that is
    *   created from the current specification
    * @return Whether an lps file exists that is created from the current
@@ -209,17 +196,34 @@ class FileSystem : public QObject
   QString newProject(QString context = "New Project");
 
   /**
+   * @brief deletePropertyFile Deletes the file of a property
+   * @param propertyName The name of the property
+   * @param showIfFailed Whether the suer should be told if deleting a property
+   *   file was unsuccessful
+   * @return Whether deleting the property file was successful
+   */
+  bool deletePropertyFile(QString propertyName, bool showIfFailed = true);
+
+  /**
+   * @brief deleteUnlistedPropertyFiles Deletes all property files for which there
+   *   is no entry in the "properties" list
+   */
+  void deleteUnlistedPropertyFiles();
+
+  /**
    * @brief newProperty Creates a new property
+   * @param processSystem The process system needed to parse the property
    * @return The new property, is NULL if failed
    */
-  Property* newProperty();
+  Property* newProperty(ProcessSystem* processSystem);
 
   /**
    * @brief editProperty Edits an existing property
    * @param oldProperty The property to be edited
+   * @param processSystem The process system needed to parse the property
    * @return The edited property, the old property if failed
    */
-  Property* editProperty(Property* oldProperty);
+  Property* editProperty(Property* oldProperty, ProcessSystem* processSystem);
 
   /**
    * @brief deleteProperty Deletes an existing property
@@ -247,6 +251,12 @@ class FileSystem : public QObject
    * @return The new project name, is empty if failed
    */
   QString saveProjectAs();
+
+  /**
+   * @brief saveProperty Saves a property to file
+   * @param property The property to save
+   */
+  void saveProperty(Property* property);
 
   public slots:
   /**

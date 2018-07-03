@@ -165,7 +165,7 @@ void PropertyWidget::actionAbortVerification()
 
 void PropertyWidget::actionEdit()
 {
-  property = fileSystem->editProperty(property);
+  property = fileSystem->editProperty(property, processSystem);
   propertyNameLabel->setText(property->name);
 }
 

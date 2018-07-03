@@ -58,50 +58,50 @@ void FileSystem::makeSureProjectsFolderExists()
 
 void FileSystem::makeSurePropertiesFolderExists()
 {
-  if (!QDir(propertiesFolderPath(projectName)).exists())
+  if (!QDir(propertiesFolderPath()).exists())
   {
-    QDir().mkpath(propertiesFolderPath(projectName));
+    QDir().mkpath(propertiesFolderPath());
   }
 }
 
-QString FileSystem::projectFolderPath(QString projectName)
+QString FileSystem::projectFolderPath()
 {
   return projectsFolderPath + QDir::separator() + projectName;
 }
 
-QString FileSystem::propertiesFolderPath(QString projectName)
+QString FileSystem::propertiesFolderPath()
 {
-  return projectFolderPath(projectName) + QDir::separator() +
+  return projectFolderPath() + QDir::separator() +
          propertiesFolderName;
 }
 
 QString FileSystem::specificationFilePath()
 {
-  return projectFolderPath(projectName) + QDir::separator() + projectName +
+  return projectFolderPath() + QDir::separator() + projectName +
          "_spec.mcrl";
 }
 
 QString FileSystem::lpsFilePath()
 {
-  return projectFolderPath(projectName) + QDir::separator() + projectName +
+  return projectFolderPath() + QDir::separator() + projectName +
          "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(LtsReduction reduction)
 {
-  return projectFolderPath(projectName) + QDir::separator() + projectName +
+  return projectFolderPath() + QDir::separator() + projectName +
          "_lts_" + LTSREDUCTIONNAMES.at(reduction) + ".lts";
 }
 
 QString FileSystem::propertyFilePath(QString propertyName)
 {
-  return propertiesFolderPath(projectName) + QDir::separator() + propertyName +
+  return propertiesFolderPath() + QDir::separator() + propertyName +
          ".mcf";
 }
 
 QString FileSystem::pbesFilePath(QString propertyName)
 {
-  return propertiesFolderPath(projectName) + QDir::separator() + projectName +
+  return propertiesFolderPath() + QDir::separator() + projectName +
          "_" + propertyName + "_pbes.pbes";
 }
 
@@ -136,17 +136,6 @@ bool FileSystem::propertyNameExists(QString propertyName)
     }
   }
   return false;
-}
-
-bool FileSystem::isPropertyModified(Property* property)
-{
-  return propertyModified[property->name];
-}
-
-void FileSystem::setPropertyModified(Property* property)
-{
-  propertyModified[property->name] = true;
-  emit hasChanges(true);
 }
 
 bool FileSystem::upToDateLpsFileExists()
@@ -195,7 +184,7 @@ void FileSystem::setSpecificationEditorCursor(int row, int column)
 {
   QTextCursor cursor = specificationEditor->textCursor();
   cursor.movePosition(QTextCursor::Start);
-  cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, row-1);
+  cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, row - 1);
   cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
   specificationEditor->setTextCursor(cursor);
 }
@@ -228,7 +217,7 @@ QString FileSystem::newProject(QString context)
       {
         /* if successful, create the properties folder too */
         this->projectName = projectName;
-        QDir(projectFolderPath(projectName)).mkdir(propertiesFolderName);
+        QDir(projectFolderPath()).mkdir(propertiesFolderName);
         projectOpen = true;
       }
       else
@@ -255,40 +244,82 @@ QString FileSystem::newProject(QString context)
   }
 }
 
-Property* FileSystem::newProperty()
+bool FileSystem::deletePropertyFile(QString propertyName, bool showIfFailed)
+{
+  QFile* propertyFile = new QFile(propertyFilePath(propertyName));
+  bool deleteSucceeded = true;
+  if (propertyFile->exists() && !propertyFile->remove())
+  {
+    /* if deleting the file failed, tell the user */
+    QMessageBox* msgBox = new QMessageBox(
+        QMessageBox::Information, "Delete property",
+        "Could not delete property file: " + propertyFile->errorString(),
+        QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
+    msgBox->exec();
+    deleteSucceeded = false;
+    delete msgBox;
+  }
+
+  delete propertyFile;
+  return deleteSucceeded;
+}
+
+void FileSystem::deleteUnlistedPropertyFiles()
+{
+  QDir propertiesFolder = QDir(propertiesFolderPath());
+  QStringList fileNames = propertiesFolder.entryList();
+  std::list<QString> testl = fileNames.toStdList();
+  for (QString fileName : fileNames)
+  {
+    std::string test1 = fileName.toStdString();
+    if (fileName.endsWith(".mcf"))
+    {
+      QString propertyName = fileName.left(fileName.length() - 4);
+      std::string test2 = propertyName.toStdString();
+      if (!propertyNameExists(propertyName))
+      {
+        deletePropertyFile(propertyName, false);
+      }
+    }
+  }
+}
+
+Property* FileSystem::newProperty(ProcessSystem* processSystem)
 {
   makeSurePropertiesFolderExists();
 
   Property* property = NULL;
   AddEditPropertyDialog* addPropertyDialog =
-      new AddEditPropertyDialog(true, this, parent);
+      new AddEditPropertyDialog(true, processSystem, this, parent);
 
-  /* if successful (Add button was pressed), create the new property */
+  /* if successful (Add button was pressed), create the new property
+   * we don't need to save to file as this is already done by the dialog */
   if (addPropertyDialog->exec())
   {
-    property = new Property(addPropertyDialog->getPropertyName(),
-                            addPropertyDialog->getPropertyText());
+    property = addPropertyDialog->getProperty();
     properties.push_back(property);
-    setPropertyModified(property);
   }
+  /* delete any obsolete property files generated by the dialog */
+  deleteUnlistedPropertyFiles();
 
   delete addPropertyDialog;
   return property;
 }
 
-Property* FileSystem::editProperty(Property* oldProperty)
+Property* FileSystem::editProperty(Property* oldProperty,
+                                   ProcessSystem* processSystem)
 {
   makeSurePropertiesFolderExists();
 
   Property* newProperty = oldProperty;
   AddEditPropertyDialog* editPropertyDialog = new AddEditPropertyDialog(
-      false, this, parent, oldProperty->name, oldProperty->text);
+      false, processSystem, this, parent, oldProperty->name, oldProperty->text);
 
-  /* if editing was successful (Edit button was pressed), change the property */
+  /* if editing was successful (Edit button was pressed), change the property
+   * we don't need to save to file as this is already done by the dialog */
   if (editPropertyDialog->exec())
   {
-    newProperty = new Property(editPropertyDialog->getPropertyName(),
-                               editPropertyDialog->getPropertyText());
+    newProperty = editPropertyDialog->getProperty();
 
     /* alter the properties list */
     for (Property* property : properties)
@@ -299,8 +330,11 @@ Property* FileSystem::editProperty(Property* oldProperty)
         break;
       }
     }
-    setPropertyModified(newProperty);
   }
+  /* delete any obsolete property files generated by the dialog
+   * this also deletes the original property file if the property name has
+   *   changed */
+  deleteUnlistedPropertyFiles();
 
   delete editPropertyDialog;
   return newProperty;
@@ -320,7 +354,7 @@ bool FileSystem::deleteProperty(Property* oldProperty)
   /* if the user agrees, delete the property */
   if (deleteIt)
   {
-    Property* toRemove;
+    Property* toRemove = NULL;
     for (Property* property : properties)
     {
       if (property->equals(oldProperty))
@@ -329,22 +363,16 @@ bool FileSystem::deleteProperty(Property* oldProperty)
         break;
       }
     }
-    properties.remove(toRemove);
+    if (toRemove != NULL)
+    {
+      properties.remove(toRemove);
+    }
 
     /* also delete the file if it exists */
-    QFile* propertyFile = new QFile(propertyFilePath(oldProperty->name));
-    if (propertyFile->exists() && !propertyFile->remove())
+    if (!deletePropertyFile(oldProperty->name))
     {
-      /* if deleting the file failed, tell the user */
-      QMessageBox* msgBox = new QMessageBox(
-          QMessageBox::Information, "New Project",
-          "Could not delete property file: " + propertyFile->errorString(),
-          QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-      msgBox->exec();
-      delete msgBox;
       deleteIt = false;
     }
-    delete propertyFile;
   }
 
   return deleteIt;
@@ -394,7 +422,7 @@ Project FileSystem::openProject()
       /* read all properties */
       properties.clear();
       QDirIterator* dirIterator =
-          new QDirIterator(QDir(propertiesFolderPath(projectName)));
+          new QDirIterator(QDir(propertiesFolderPath()));
 
       while (dirIterator->hasNext())
       {
@@ -447,19 +475,12 @@ QString FileSystem::saveProject(bool forceSave)
       delete saveStream;
     }
 
-    /* save all properties (when there are changes) */
-    for (Property* property : properties)
+    /* save all properties if necessary */
+    if (forceSave)
     {
-      if (isPropertyModified(property) || forceSave)
+      for (Property* property : properties)
       {
-        QFile* propertyFile = new QFile(propertyFilePath(property->name));
-        propertyFile->open(QIODevice::WriteOnly);
-        QTextStream* saveStream = new QTextStream(propertyFile);
-        *saveStream << property->text;
-        propertyFile->close();
-        propertyModified[property->name] = false;
-        delete propertyFile;
-        delete saveStream;
+        saveProperty(property);
       }
     }
 
@@ -487,4 +508,18 @@ QString FileSystem::saveProjectAs()
     saveProject(true);
     return projectName;
   }
+}
+
+void FileSystem::saveProperty(Property* property)
+{
+  makeSurePropertiesFolderExists();
+
+  QFile* propertyFile = new QFile(propertyFilePath(property->name));
+  propertyFile->open(QIODevice::WriteOnly);
+  QTextStream* saveStream = new QTextStream(propertyFile);
+  *saveStream << property->text;
+  propertyFile->close();
+  propertyModified[property->name] = false;
+  delete propertyFile;
+  delete saveStream;
 }
