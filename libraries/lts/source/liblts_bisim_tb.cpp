@@ -489,7 +489,7 @@ void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
                                         const bunch_t* const futureFromRedBu
                                         ONLY_IF_DEBUG( , const LTS_TYPE& aut) )
 {
-mCRL2log(log::debug,"bisim_tb") << "Handling " << old_pos->pred->debug_id(aut)
+/*mCRL2log(log::debug,"bisim_tb") << "Handling " << old_pos->pred->debug_id(aut)
                                                                        << '\n';
     // move the transition to the new slice in B_a_B
     state_info_ptr const source = old_pos->pred->source;
@@ -681,7 +681,7 @@ mCRL2log(log::debug, "bisim_tb") << "8\n";
             }
         }
         OldB->from_block.erase(old_B_a_B_slice);
-    }
+    }*/
 }
 
 
