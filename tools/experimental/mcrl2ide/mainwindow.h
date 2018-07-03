@@ -73,7 +73,7 @@ class MainWindow : public QMainWindow
 
   /**
    * @brief actionFindAndReplace Allows the user to find and replace strings in
-   * the text editor
+   *   the text editor
    */
   void actionFindAndReplace();
 
@@ -95,7 +95,7 @@ class MainWindow : public QMainWindow
 
   /**
    * @brief actionCreateReducedLts Allows the user to create a reduced lts of
-   * the current specification
+   *   the current specification
    */
   void actionCreateReducedLts();
 
@@ -106,7 +106,7 @@ class MainWindow : public QMainWindow
 
   /**
    * @brief actionVerifyAllProperties Allows the user to verify all defined
-   * properties on the current specification
+   *   properties on the current specification
    */
   void actionVerifyAllProperties();
 
@@ -123,7 +123,7 @@ class MainWindow : public QMainWindow
   private:
   /**
    * @brief setupMenuBar Creates the menubar, also creates the actions and their
-   * icons and shortcuts (if applicable)
+   *   icons and shortcuts (if applicable)
    */
   void setupMenuBar();
 

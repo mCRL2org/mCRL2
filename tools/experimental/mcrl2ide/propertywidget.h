@@ -33,8 +33,9 @@ class PropertyWidget : public QWidget
   public:
   /**
    * @brief PropertyWidget Constructor
-   * @param name The name of the property
-   * @param text The text of the property
+   * @param property The property of this widget
+   * @param processSystem The process system
+   * @param fileSystem The file system
    * @param parent The parent of this widget
    */
   PropertyWidget(Property* property, ProcessSystem* processSystem,
@@ -66,6 +67,7 @@ class PropertyWidget : public QWidget
 
   /**
    * @brief actionVerifyResult Applies the result of the verification
+   * @param processid The id of a finished process
    */
   void actionVerifyResult(int processid);
 

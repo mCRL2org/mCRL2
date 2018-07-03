@@ -30,6 +30,8 @@ class PropertiesDock : public QDockWidget
 
   /**
    * @brief PropertiesDock Constructor
+   * @param processSystem The process system
+   * @param fileSystem The file system
    * @param parent The parent of this widget
    */
   PropertiesDock(ProcessSystem* processSystem, FileSystem* fileSystem,
@@ -42,8 +44,7 @@ class PropertiesDock : public QDockWidget
 
   /**
    * @brief addProperty Adds a property to the dock
-   * @param propertyName The name of the property
-   * @param propertyText The body of the property
+   * @param property The property to add
    */
   void addProperty(Property* property);
 

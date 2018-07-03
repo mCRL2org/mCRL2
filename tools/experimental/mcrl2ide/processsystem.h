@@ -30,7 +30,7 @@ class ProcessThread : public QThread
   /**
    * @brief ProcessThread The constructor
    * @param processQueue The queue this thread needs to take the processes from
-   * @param verification Whether this thread is for verification processes
+   * @param processType What process type this thread is for
    */
   ProcessThread(QQueue<int>* processQueue, ProcessType processType);
 
@@ -48,16 +48,15 @@ class ProcessThread : public QThread
 
   public slots:
   /**
-   * @brief newProcessQueued Is called when a new process is added, emits
-   *   newProcessInQueue if this process has to be run by this thread
+   * @brief newProcessQueued Activates this thread if it is waiting for a new
+   *   process
    * @param processType The type of the newly added process
    */
   void newProcessQueued(ProcessType processType);
 
   /**
-   * @brief processFinished Is called when a process has finished, emits
-   *   currentProcessFinished if this process is the one that this thread is
-   *   running
+   * @brief processFinished Activates this thread if it is waiting for a process
+   *   to finish
    * @param processid The id of the process that has finished
    */
   void processFinished(int processid);
@@ -129,7 +128,7 @@ class ProcessSystem : public QObject
 
   /**
    * @brief parseSpecification Parses the current specification
-   * @return The id of the parsing process
+   * @return The process id of the parsing process
    */
   int parseSpecification();
 
@@ -151,7 +150,7 @@ class ProcessSystem : public QObject
   /**
    * @brief parseProperty Parses the given property
    * @param property The property to parse
-   * @return The id of the parsing process
+   * @return The process id of the parsing process
    */
   int parseProperty(Property* property);
 
@@ -213,7 +212,7 @@ class ProcessSystem : public QObject
   /**
    * @brief createMcrl2ParsingProcess Creates a process to parse the current
    *   mCRL2 specification using mcrl22lps
-   * @return The parsing process
+   * @return The mcrl2 parsing process
    */
   QProcess* createMcrl2ParsingProcess();
 
@@ -258,8 +257,8 @@ class ProcessSystem : public QObject
   /**
    * @brief createPropertyParsingProcess Creates a process to parse the given
    *   property using lps2pbes
-   * @param property The property to parse
-   * @return The parsing process
+   * @param propertyName The name of the property to parse
+   * @return The property parsing process
    */
   QProcess* createPropertyParsingProcess(QString propertyName);
 

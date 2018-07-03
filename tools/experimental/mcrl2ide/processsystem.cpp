@@ -486,7 +486,18 @@ void ProcessSystem::parseMcrl2(int processid)
                                 "##### PARSING SPECIFICATION #####\n");
   }
 
-  processes[processid][0]->start();
+  QProcess* mcrl2ParsingProcess = processes[processid][0];
+  /* check if we need to run this */
+  if (fileSystem->upToDateLpsFileExists())
+  {
+    consoleDock->writeToConsole(ProcessType::Parsing,
+                                "Parsing is not needed as specification has not changed\n");
+    emit mcrl2ParsingProcess->finished(0);
+  }
+  else
+  {
+    mcrl2ParsingProcess->start();
+  }
 }
 
 void ProcessSystem::mcrl2ParsingResult(int previousExitCode)

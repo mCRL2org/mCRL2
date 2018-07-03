@@ -84,6 +84,9 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
   propertyLayout->addWidget(deleteButton);
 
   this->setLayout(propertyLayout);
+
+  connect(processSystem, SIGNAL(processFinished(int)), this,
+          SLOT(actionVerifyResult(int)));
 }
 
 void PropertyWidget::paintEvent(QPaintEvent* pe)
@@ -117,8 +120,6 @@ void PropertyWidget::actionVerify()
   if (verificationWidgets->currentIndex() == 0)
   {
     /* start the verification process */
-    connect(processSystem, SIGNAL(processFinished(int)), this,
-            SLOT(actionVerifyResult(int)));
     verificationProcessId = processSystem->verifyProperty(property);
 
     /* if starting the process was successful, change the buttons */
@@ -133,7 +134,7 @@ void PropertyWidget::actionVerify()
 
 void PropertyWidget::actionVerifyResult(int processid)
 {
-  /* check if the process that is finished is the verification process of this
+  /* check if the process that has finished is the verification process of this
    *   property */
   if (processid == verificationProcessId)
   {
