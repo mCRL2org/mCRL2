@@ -296,7 +296,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return S0.contains(u) || S1.contains(u);
     }
 
-    bool successors_not_contained_in(const simple_structure_graph& G, const structure_graph::index_type u, const vertex_set& S) const
+    bool successors_disjoint(const simple_structure_graph& G, const structure_graph::index_type u, const vertex_set& S) const
     {
       for (auto v: G.successors(u))
       {
@@ -308,32 +308,61 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return true;
     }
 
+    // returns true if u has a successor that is not contained in the union of S0, S1 and done
+    bool has_successor_not_in(const simple_structure_graph& G,
+                              const structure_graph::index_type u,
+                              const structure_graph::vertex& u_,
+                              const vertex_set& S0,
+                              const vertex_set& S1,
+                              const std::unordered_set<pbes_expression>& done
+                             ) const
+    {
+      using utilities::detail::contains;
+
+      for (auto v: G.successors(u))
+      {
+        if (S0.contains(v))
+        {
+          return false;
+        }
+        if (S1.contains(v))
+        {
+          return false;
+        }
+        const auto& v_ = m_graph_builder.m_vertices[v];
+        if (contains(done, v_.formula))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     void reset(const propositional_variable_instantiation& init,
                std::deque<propositional_variable_instantiation>& todo,
-               std::unordered_set<propositional_variable_instantiation>& discovered
+               std::size_t regeneration_period
               ) override
     {
       using utilities::detail::contains;
 
-      auto next_period = (discovered.size() - todo.size()) / 2;
-      if (!reset_guard(next_period))
+      if (!reset_guard(regeneration_period))
       {
         return;
       }
 
       simple_structure_graph G(m_graph_builder.m_vertices);
-      std::unordered_set<propositional_variable_instantiation> todo1{init};
-      discovered.clear();
+      std::unordered_set<pbes_expression> todo1{init};
+      std::unordered_set<pbes_expression> done1;
 
       while (!todo1.empty())
       {
         auto X = *todo1.begin();
         todo1.erase(todo1.begin());
-        discovered.insert(X);
+        done1.insert(X);
         auto u = m_graph_builder.find_vertex(X);
         const auto& u_ = m_graph_builder.m_vertices[u];
 
-        if (u_.decoration == structure_graph::d_conjunction && successors_not_contained_in(G, u, S1))
+        if (u_.decoration == structure_graph::d_conjunction && successors_disjoint(G, u, S1))
         {
           for (auto v: G.successors(u))
           {
@@ -342,8 +371,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               continue;
             }
             const auto& v_ = m_graph_builder.m_vertices[v];
-            const auto& Y = atermpp::down_cast<propositional_variable_instantiation>(v_.formula);
-            if (contains(discovered, Y))
+            const auto& Y = v_.formula;
+            if (contains(done1, Y))
             {
               continue;
             }
@@ -351,7 +380,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
         }
 
-        if (u_.decoration == structure_graph::d_disjunction && successors_not_contained_in(G, u, S0))
+        if (u_.decoration == structure_graph::d_disjunction && successors_disjoint(G, u, S0))
         {
           for (auto v: G.successors(u))
           {
@@ -360,11 +389,21 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               continue;
             }
             const auto& v_ = m_graph_builder.m_vertices[v];
-            const auto& Y = atermpp::down_cast<propositional_variable_instantiation>(v_.formula);
-            if (contains(discovered, Y))
+            const auto& Y = v_.formula;
+            if (contains(done1, Y))
             {
               continue;
             }
+            todo1.insert(Y);
+          }
+        }
+
+        if (u_.decoration == structure_graph::d_none && has_successor_not_in(G, u, u_, S0, S1, done1))
+        {
+          for (auto v: G.successors(u))
+          {
+            const auto& v_ = m_graph_builder.m_vertices[v];
+            const auto& Y = v_.formula;
             todo1.insert(Y);
           }
         }
@@ -373,7 +412,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       std::deque<propositional_variable_instantiation> new_todo;
       for (const propositional_variable_instantiation& X: todo)
       {
-        if (contains(discovered, X))
+        if (contains(done1, X))
         {
           new_todo.push_back(X);
         }

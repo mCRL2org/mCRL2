@@ -215,7 +215,7 @@ class pbesinst_lazy_algorithm
     // recreates todo and discovered
     virtual void reset(const propositional_variable_instantiation& /* init */,
                        std::deque<propositional_variable_instantiation>& todo,
-                       std::unordered_set<propositional_variable_instantiation>& discovered
+                       std::size_t /* regeneration_period */
                       )
     { }
 
@@ -263,8 +263,7 @@ class pbesinst_lazy_algorithm
           break;
         }
 
-        // TODO: currently disabled, because of test failures
-        // reset(init, todo, discovered);
+        reset(init, todo, (discovered.size() - todo.size()) / 2);
       }
     }
 
