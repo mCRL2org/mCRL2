@@ -409,8 +409,7 @@ int ProcessSystem::parseProperty(Property* property)
 
     QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
-            SLOT(parseMcf(int)));
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
 
     QProcess* propertyParsingProcess =
         createPropertyParsingProcess(property->name);
@@ -490,8 +489,9 @@ void ProcessSystem::parseMcrl2(int processid)
   /* check if we need to run this */
   if (fileSystem->upToDateLpsFileExists())
   {
-    consoleDock->writeToConsole(ProcessType::Parsing,
-                                "Parsing is not needed as specification has not changed\n");
+    consoleDock->writeToConsole(
+        ProcessType::Parsing,
+        "Parsing is not needed as specification has not changed\n");
     emit mcrl2ParsingProcess->finished(0);
   }
   else
@@ -538,7 +538,8 @@ void ProcessSystem::createLps(int previousExitCode)
   /* if the previous subprocess has failed, the process is discontinued */
   if (previousExitCode > 0)
   {
-    consoleDock->writeToConsole(processType, "Process finished with an error");
+    consoleDock->writeToConsole(processType,
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -569,7 +570,7 @@ void ProcessSystem::simulateLps(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::Simulation,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -591,7 +592,7 @@ void ProcessSystem::createLts(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -605,7 +606,7 @@ void ProcessSystem::createLts(int previousExitCode)
     if (fileSystem->upToDateLtsFileExists(LtsReduction::None))
     {
       consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                  "Up to date LTS already exists");
+                                  "Up to date LTS already exists\n");
       emit lps2ltsProcess->finished(0);
     }
     else
@@ -623,7 +624,7 @@ void ProcessSystem::reduceLts(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -639,7 +640,7 @@ void ProcessSystem::reduceLts(int previousExitCode)
     if (fileSystem->upToDateLtsFileExists(reduction))
     {
       consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                  "Up to date LTS already exists");
+                                  "Up to date LTS already exists\n");
       emit ltsconvertProcess->finished(0);
     }
     else
@@ -657,7 +658,7 @@ void ProcessSystem::showLts(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -679,7 +680,7 @@ void ProcessSystem::parseMcf(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::Parsing,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -714,7 +715,7 @@ void ProcessSystem::createPbes(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::Verification,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -729,7 +730,7 @@ void ProcessSystem::createPbes(int previousExitCode)
             lps2pbesProcess->property("propertyName").toString()))
     {
       consoleDock->writeToConsole(ProcessType::Verification,
-                                  "Up to date PBES already exists");
+                                  "Up to date PBES already exists\n");
       emit lps2pbesProcess->finished(0);
     }
     else
@@ -747,7 +748,7 @@ void ProcessSystem::solvePbes(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::Verification,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -767,7 +768,7 @@ void ProcessSystem::verificationResult(int previousExitCode)
   if (previousExitCode > 0)
   {
     consoleDock->writeToConsole(ProcessType::Verification,
-                                "Process finished with an error");
+                                "Process finished with an error\n");
     emit processFinished(processid);
   }
   else
@@ -811,7 +812,7 @@ void ProcessSystem::abortProcess(int processid)
 
   emit processFinished(processid);
   consoleDock->writeToConsole(processTypes[processid],
-                              "##### PROCESS WAS ABORTED #####");
+                              "##### PROCESS WAS ABORTED #####\n");
 }
 
 void ProcessSystem::abortAllProcesses(ProcessType processType)
@@ -836,7 +837,8 @@ void ProcessSystem::abortAllProcesses(ProcessType processType)
   }
   emit processFinished(processid);
 
-  consoleDock->writeToConsole(processType, "##### ABORTED ALL PROCESSES #####");
+  consoleDock->writeToConsole(processType,
+                              "##### ABORTED ALL PROCESSES #####\n");
 }
 
 QString ProcessSystem::getResult(int processid)
