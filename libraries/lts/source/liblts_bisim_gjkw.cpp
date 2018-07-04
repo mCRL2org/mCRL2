@@ -115,9 +115,6 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
     {
         NewB->assign_seqnr();
     }
-    //mCRL2log(log::debug, "bisim_gjkw") << "Created new " << NewB->debug_id()
-    //          << " for " << blue_nonbottom_end - unmarked_nonbottom_begin() +
-    //                           unmarked_bottom_size() << " blue state(s).\n";
     // NewB->set_begin(begin());
     NewB->set_bottom_begin(blue_nonbottom_end);
     NewB->set_marked_nonbottom_begin(blue_nonbottom_end);
@@ -205,8 +202,6 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
     {
         NewB->assign_seqnr();
     }
-    //mCRL2log(log::debug, "bisim_gjkw") << "Created new " << NewB->debug_id()
-    //                       << " for " << marked_size() << " red state(s).\n";
     // NewB->set_end(end());
     NewB->set_marked_bottom_begin(marked_bottom_begin());
     NewB->set_bottom_begin(marked_bottom_begin());
@@ -444,8 +439,6 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
             // There are no more transitions from SpB to its own constellation
             SpB->set_inert_begin(B_to_C.begin());
             SpB->set_inert_end(B_to_C.begin());
-            //mCRL2log(log::debug, "bisim_gjkw") << SpB->debug_id()
-            // << " no longer has transitions to its own constellation (1).\n";
         }
         return;
     }
@@ -466,8 +459,6 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
         SpB->to_constln.emplace_front(slice->begin, SpB->inert_begin());
         new_slice = SpB->to_constln.begin();
         // SpB->SetFromRed(new_slice);
-        //mCRL2log(log::debug,"bisim_gjkw") << "FromRed of " << SpB->debug_id()
-        //                  << " set to " << new_slice->debug_id() << " (2)\n";
         assert(new_slice->from_block() == SpB);
         slice->begin = SpB->inert_begin();
         #ifndef NDEBUG
@@ -521,7 +512,7 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
 ///                                   block, so a new B_to_C slice has to be
 ///                                   allocated.
 succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
-    constln_t* const SpC, constln_t* const NewC,
+    ONLY_IF_DEBUG( constln_t* const SpC, constln_t* const NewC, )
     bool const first_transition_of_state, bool const first_transition_of_block)
 {
     assert(pred_iter<pred.end() && pred_iter->succ->B_to_C->pred == pred_iter);
@@ -555,7 +546,6 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
     if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
     {
         // this was the last transition from RfnB to SpC
-        //mCRL2log(log::debug, "bisim_gjkw") << " lb";
         block_t* const RfnB = pred_iter->source->block;
         if (RfnB->inert_end() == old_B_to_C_slice->begin)
         {
@@ -563,13 +553,9 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
             assert(RfnB->inert_begin() == RfnB->inert_end());
             RfnB->set_inert_begin(B_to_C.begin());
             RfnB->set_inert_end(B_to_C.begin());
-            //mCRL2log(log::debug, "bisim_gjkw") << RfnB->debug_id()
-            // << " no longer has transitions to its own constellation (2).\n";
         }
         assert(RfnB->to_constln.begin() == old_B_to_C_slice);
         RfnB->to_constln.erase(old_B_to_C_slice);
-        //mCRL2log(log::debug, "bisim_gjkw") <<"FromRed of " <<RfnB->debug_id()
-        //                                                 << " cleared (5)\n";
     }
     swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
     new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
@@ -757,8 +743,6 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s
 void part_trans_t::new_blue_block_created(block_t* const RfnB,
                                                            block_t* const NewB)
 {
-    //mCRL2log(log::debug, "bisim_gjkw") << "new_blue_block_created("
-    //                 << RfnB->debug_id() << "," << NewB->debug_id() << ")\n";
     assert(RfnB->constln() == NewB->constln());
     assert(NewB->end() == RfnB->begin());
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
@@ -780,8 +764,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
             assert(succ.end() > succ_iter &&
                                    succ_iter->B_to_C->pred->succ == succ_iter);
             // Move the transition to a new slice:
-            //mCRL2log(log::debug, "bisim_gjkw") << "Moving "
-            //                  << succ_iter->B_to_C->pred->debug_id() << ": ";
             B_to_C_iter_t const old_pos = succ_iter->B_to_C;
             B_to_C_desc_iter_t const old_B_to_C_slice = old_pos->B_to_C_slice;
             B_to_C_iter_t const after_new_pos = old_B_to_C_slice->end;
@@ -795,7 +777,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                         after_new_pos->pred->succ->target->constln() !=
                                             succ_iter->target->constln())
             {
-                //mCRL2log(log::debug, "bisim_gjkw") << "new slice, ";
                 // create a new B_to_C-slice
                 // this can only happen when the first transition from
                 // *s_iter to a new constellation is handled.
@@ -809,12 +790,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                     // the old_B_to_C_slice does not need postprocessing, so
                     // its corresponding new slice should be in a similar
                     // position near the beginning of the list of slices.
-                    //if (!postprocessing)
-                    //{
-                    //    mCRL2log(log::debug, "bisim_gjkw")<<"set FromRed to "
-                    //                            "slice that will contain "
-                    //                            << old_pos->pred->debug_id();
-                    //}
                     NewB->to_constln.emplace_front(after_new_pos,
                                                                 after_new_pos);
                     new_B_to_C_slice = NewB->to_constln.begin();
@@ -861,7 +836,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                 // RfnB and NewB.
                 if (RfnB->inert_begin() <= old_pos)
                 {
-                    //mCRL2log(log::debug, "bisim_gjkw")<<"inert transition\n";
                     // The transition is inert and has to be moved over the
                     // non-inert transitions of NewB.
                     NewB->set_inert_begin(NewB->inert_begin() - 1);
@@ -873,8 +847,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                 }
                 else
                 {
-                    //mCRL2log(log::debug, "bisim_gjkw")
-                    //         << "noninert transition to own constellation\n";
                     // The transition is non-inert, but it has to be moved
                     // over the inert transitions of RfnB.
                     RfnB->set_inert_begin(RfnB->inert_begin() - 1);
@@ -887,9 +859,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                 {
                     // This was the last transition from RfnB to its own
                     // constellation.
-                    //mCRL2log(log::debug, "bisim_gjkw") << RfnB->debug_id()
-                    //                      << " no longer has transitions to "
-                    //                          "its own constellation (3).\n";
                     RfnB->set_inert_begin(B_to_C.begin());
                     RfnB->set_inert_end(B_to_C.begin());
 
@@ -898,8 +867,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
             }
             else
             {
-                //mCRL2log(log::debug, "bisim_gjkw")
-                //           << "noninert transition to other constellation\n";
                 // The transition goes from NewB to a constellation that
                 // does not contain RfnB or NewB.  No special treatment is
                 // required.
@@ -962,9 +929,6 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
 void part_trans_t::new_red_block_created(block_t* const RfnB,
                                 block_t* const NewB, bool const postprocessing)
 {
-    //mCRL2log(log::debug, "bisim_gjkw") << "new_red_block_created("
-    //                          << RfnB->debug_id() << "," << NewB->debug_id()
-    //                          << (postprocessing ? ",true)\n" : ",false)\n");
     assert(RfnB->constln() == NewB->constln());
     assert(NewB->begin() == RfnB->end());
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
@@ -987,8 +951,6 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
             assert(succ.end() > succ_iter &&
                                    succ_iter->B_to_C->pred->succ == succ_iter);
             // Move the transition to a new slice:
-            //mCRL2log(log::debug, "bisim_gjkw") << "Moving "
-            //                  << succ_iter->B_to_C->pred->debug_id() << ": ";
             B_to_C_iter_t const old_pos = succ_iter->B_to_C;
             B_to_C_desc_iter_t const old_B_to_C_slice = old_pos->B_to_C_slice;
             B_to_C_iter_t new_pos = old_B_to_C_slice->begin;
@@ -1002,7 +964,6 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                         new_pos[-1].pred->succ->target->constln() !=
                                             succ_iter->target->constln())
             {
-                //mCRL2log(log::debug, "bisim_gjkw") << "new slice, ";
                 // create a new B_to_C-slice
                 // this can only happen when the first transition from
                 // *s_iter to a new constellation is handled.
@@ -1018,12 +979,6 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                     // The old_B_to_C_slice does not need postprocessing, so
                     // its corresponding new slice should be in a similar
                     // position near the beginning of the list of slices.
-                    //if (!postprocessing)
-                    //{
-                    //    mCRL2log(log::debug, "bisim_gjkw")<<"set FromRed to "
-                    //                            "slice that will contain "
-                    //                            << old_pos->pred->debug_id();
-                    //}
                     NewB->to_constln.emplace_front(new_pos, new_pos);
                     new_B_to_C_slice = NewB->to_constln.begin();
                     // new_B_to_C_slice is not yet fully initialised, therefore
@@ -1072,7 +1027,6 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                 NewB->set_inert_end(NewB->inert_end() + 1);
                 if (RfnB->inert_begin() <= old_pos)
                 {
-                    //mCRL2log(log::debug, "bisim_gjkw")<<"inert transition\n";
                     // The transition is inert and has to be moved over the
                     // non-inert transitions of RfnB.
                     // old_pos --> new_pos --> RfnB->inert_begin() --> old_pos
@@ -1082,8 +1036,6 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                 }
                 else
                 {
-                    //mCRL2log(log::debug, "bisim_gjkw")
-                    //         << "noninert transition to own constellation\n";
                     // The transition is non-inert, but it has to be moved
                     // over the inert transitions of NewB.
                     new_pos = NewB->inert_begin();
@@ -1096,9 +1048,6 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                 {
                     // This was the last transition from RfnB to its own
                     // constellation.
-                    //mCRL2log(log::debug, "bisim_gjkw") << RfnB->debug_id()
-                    //                      << " no longer has transitions to "
-                    //                          "its own constellation (3).\n";
                     RfnB->set_inert_begin(B_to_C.begin());
                     RfnB->set_inert_end(B_to_C.begin());
 
@@ -1112,8 +1061,6 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
             }
             else
             {
-                //mCRL2log(log::debug, "bisim_gjkw")
-                //           << "noninert transition to other constellation\n";
                 // The transition goes from NewB to a constellation that
                 // does not contain RfnB or NewB.  No special treatment is
                 // required.
@@ -1355,9 +1302,6 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
             }
             if (!to_own_constln)
             {
-                //mCRL2log(log::debug, "bisim_gjkw") << B->debug_id()
-                //            << " has transitions to " << B->to_constln.size()
-                //                               << " other constellations.\n";
                 assert(B->nonbottom_begin() == B->nonbottom_end());
                 assert(B->inert_begin() == B_to_C_begin());
                 assert(B->inert_end() == B_to_C_begin());
@@ -1368,7 +1312,6 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
             do
             {
                 state_info_const_ptr const s = *s_iter;
-                //mCRL2log(log::debug, "bisim_gjkw")<<s->debug_id_short()<<' ';
                 // assert some properties of state s
                 assert(s->pos == s_iter);
                 assert(s->block == B);
@@ -1743,12 +1686,11 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             --succ_end;
             for (; succ_iter < succ_end; ++succ_iter)
             {
-                succ_iter->set_slice_begin_or_before_end(succ_end
-                                                     ONLY_IF_DEBUG( , true ) );
+                succ_iter->set_slice_begin_or_before_end(succ_end);
             }
             assert(succ_iter == succ_end);
             succ_end->set_slice_begin_or_before_end(
-                  part_st.state_info[s].succ_begin() ONLY_IF_DEBUG( , true ) );
+                                           part_st.state_info[s].succ_begin());
         } else  assert(succ_end == succ_iter);
         if (s < aut.num_states())
         {
@@ -1903,7 +1845,7 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
 template <class LTS_TYPE>
 void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
          replace_transition_system(const part_state_t& part_st,
-                                   const bool branching,
+                                   ONLY_IF_DEBUG( const bool branching, )
                                    const bool preserve_divergence)
 {
     std::unordered_map <state_type, Key> to_lts_map;
@@ -2072,11 +2014,9 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         #ifndef NDEBUG
             unsigned char max_counter = bisim_gjkw::check_complexity::log_n -
                               bisim_gjkw::check_complexity::ilog2(SpB->size());
-        #endif
-        mCRL2complexity(SpB, add_work(bisim_gjkw::check_complexity::
+            mCRL2complexity(SpB, add_work(bisim_gjkw::check_complexity::
                 while_C_contains_a_nontrivial_constellation_2_4, max_counter));
-        //mCRL2log(log::debug, "bisim_gjkw") << "Splitting off "
-        //                                         << SpB->debug_id() << ".\n";
+        #endif
 
         /*-------------------- find predecessors of SpB ---------------------*/
 
@@ -2122,7 +2062,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 // and
                 // 2.15: Store whether s' still has some transition to SpC\SpB
                 s_prime->set_current_constln(part_tr.change_to_C(pred_iter,
-                                          SpC, NewC, first_transition_of_state,
+                         ONLY_IF_DEBUG( SpC, NewC, ) first_transition_of_state,
                                                    first_transition_of_block));
             // 2.16: end for
             }
@@ -2154,8 +2094,6 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                       pred_iter->source->current_constln() - 1;
                 if (succ != before_end)
                 {
-                    //mCRL2log(log::debug, "bisim_gjkw") << "second pass for "
-                    //               << succ->B_to_C->pred->debug_id() << '\n';
                     assert(succ < before_end);
                     assert(succ >= before_end->slice_begin_or_before_end());
                     assert(succ->slice_begin_or_before_end() ==
@@ -2164,7 +2102,6 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 }
             }
         }
-        //mCRL2log(log::debug, "bisim_gjkw") << '\n';
 
 #ifndef NDEBUG
         // The following tests cannot be executed during the above loops
@@ -2249,8 +2186,6 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         {
             bisim_gjkw::block_t* const RfnB =
                                      bisim_gjkw::block_t::get_some_refinable();
-            //mCRL2log(log::debug, "bisim_gjkw") << "Refining "
-            //                                    << RfnB->debug_id() << ".\n";
             // 2.21: Mark block RfnB as non-refinable
             RfnB->make_nonrefinable();
 
@@ -2387,11 +2322,6 @@ struct refine_shared_t {
     {
         assert(nullptr != RedB);
         assert(nullptr == BlueB || BlueB->size() <= RedB->size());
-        //mCRL2log(log::debug, "bisim_gjkw") << "blue_is_smaller("
-        //      << (nullptr == BlueB ? std::string("NULL") : BlueB->debug_id())
-        //      << ',' << RedB->debug_id() << ','
-        //      << (nullptr == NewC ? std::string("NULL") : NewC->debug_id())
-        //      << ")\n";
         if (nullptr != BlueB)
         {
             unsigned char max_NewB = nullptr == BlueB ? 0
@@ -2487,8 +2417,6 @@ struct refine_shared_t {
         assert(nullptr != BlueB);
         assert(nullptr != RedB);
         assert(BlueB->size() >= RedB->size());
-        //mCRL2log(log::debug, "bisim_gjkw") << "red_is_smaller("
-        //            << BlueB->debug_id() << ',' << RedB->debug_id() << ")\n";
         for (permutation_iter_t i = BlueB->begin(); BlueB->end() != i; ++i)
         {
             state_info_ptr s = *i;
@@ -2625,13 +2553,6 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
        bool const postprocessing
        ONLY_IF_DEBUG( , const bisim_gjkw::constln_t* NewC ) )
 {
-    //mCRL2log(log::debug, "bisim_gjkw") << "refine("
-    //      << RfnB->debug_id() << ','
-    //      << (nullptr != SpC ? SpC->debug_id() : std::string("NULL")) << ','
-    //      << (nullptr != FromRed ? FromRed->debug_id() : std::string("NULL"))
-    //      << (postprocessing ? ",true," : ",false,")
-    //      << (nullptr != NewC ? NewC->debug_id() : std::string("NULL"))
-    //      << ")\n";
     #ifndef NDEBUG
         if (nullptr != FromRed)
         {
@@ -2790,8 +2711,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             // 3.9l: Move s from Test to Red
             // The state s is not blue.  Move it to the slice of non-blue
             // bottom states.
-            //mCRL2log(log::debug, "bisim_gjkw") << s->debug_id()
-            //                                            << " is not blue.\n";
             RfnB->set_marked_bottom_begin(RfnB->marked_bottom_begin() - 1);
             bisim_gjkw::swap_permutation(visited_end,
                                                   RfnB->marked_bottom_begin());
@@ -2900,8 +2819,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             s_prime = pred_iter->source;
             if (s_prime->pos >= RfnB->marked_nonbottom_begin())
             {
-                //mCRL2log(log::debug, "bisim_gjkw") << s_prime->debug_id()
-                //                                     << " is already red.\n";
                 mCRL2complexity(pred_iter, add_work(
                              bisim_gjkw::check_complexity::
                              for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1));
@@ -2913,9 +2830,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                 // 3.20l: notblue(s_prime) := |inert_out(s_prime)|
                 s_prime->notblue = s_prime->inert_succ_end() -
                                                    s_prime->inert_succ_begin();
-                //mCRL2log(log::debug, "bisim_gjkw") << s_prime->debug_id()
-                //                       << " has " << s_prime->notblue
-                //                       << " outgoing inert transition(s).\n";
                 bisim_gjkw::swap_permutation(s_prime->pos,
                                           shared_data.notblue_initialised_end);
                 ++shared_data.notblue_initialised_end;
@@ -2978,8 +2892,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                     }
                 }
             }
-            //mCRL2log(log::debug, "bisim_gjkw") << "Non-bottom "
-            //                         << s_prime->debug_id() << " is blue.\n";
             // 3.24l: Blue := Blue union {s_prime}
             bisim_gjkw::swap_permutation(s_prime->pos, blue_nonbottom_end);
             ++blue_nonbottom_end;
@@ -3047,8 +2959,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             if (s_prime->inert_succ_begin() == s_prime->inert_succ_end())
             {
                 // 3.35l: s_prime is a new bottom state
-                //mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
-                //                              << s_prime->debug_id() << "\n";
                 RfnB->set_marked_nonbottom_begin(RfnB->bottom_begin() - 1);
                 RfnB->set_bottom_begin(RfnB->marked_nonbottom_begin());
                 swap_permutation(s_prime->pos, RfnB->bottom_begin());
@@ -3156,9 +3066,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                 bisim_gjkw::swap_permutation(s->pos,
                                         --shared_data.notblue_initialised_end);
             }
-            //mCRL2log(log::debug, "bisim_gjkw") << s->debug_id()
-            //            << " is red (FromRed: "
-            //            << fromred_visited_begin->pred->debug_id() << ").\n";
             if (RfnB->mark(s) &&
             // 3.5r: whenever |Red| > |RfnB|/2 do  Abort this coroutine
                                         RfnB->marked_size() > RfnB->size() / 2)
@@ -3213,9 +3120,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                 bisim_gjkw::swap_permutation(s_prime->pos,
                                         --shared_data.notblue_initialised_end);
             }
-            //mCRL2log(log::debug, "bisim_gjkw") << "non-bottom "
-            //                            << s_prime->debug_id() << " is red ("
-            //                              << pred_iter->debug_id() << ").\n";
             if (RfnB->mark_nonbottom(s_prime) &&
             // 3.5r: whenever |Red| > |RfnB|/2 do  Abort this coroutine
                                         RfnB->marked_size() > RfnB->size() / 2)
@@ -3284,8 +3188,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
         if (s->inert_succ_begin() == s->inert_succ_end())
         {
             // 3.36r: s is a new bottom state
-            //mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
-            //                                        << s->debug_id() << "\n";
             NewB->set_marked_nonbottom_begin(NewB->bottom_begin() - 1);
             NewB->set_bottom_begin(NewB->marked_nonbottom_begin());
             swap_permutation(s->pos, NewB->bottom_begin());
@@ -3345,8 +3247,6 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom(
                                             bisim_gjkw::block_t* RedB
                                             /* , bisim_gjkw::block_t* BlueB */)
 {
-    //mCRL2log(log::debug, "bisim_gjkw") << "Postprocessing "
-    //                                             << RedB->debug_id() << '\n';
     assert(0 != RedB->unmarked_bottom_size());
     assert(RedB->marked_nonbottom_begin() == RedB->marked_nonbottom_end());
 
@@ -3414,8 +3314,6 @@ Line_4_4:
         {
             assert(0 && "The constellation already was in R");
         }
-        //mCRL2log(log::debug, "bisim_gjkw") << "\tcan reach " << C->debug_id()
-        //                                                             << '\n';
         // 4.6: Register that the transitions from RfnB to C need
         //      postprocessing
         assert(C->postprocess_begin == C->postprocess_end);
@@ -3462,9 +3360,6 @@ Line_4_4:
                                          B_iter->pred->succ->B_to_C == B_iter);
             bisim_gjkw::block_t* const B = B_iter->pred->source->block;
             bisim_gjkw::B_to_C_desc_iter_t FromRed = B_iter->B_to_C_slice;
-            //mCRL2log(log::debug, "bisim_gjkw") << "Now postprocessing "
-            //                    << B->debug_id() << " w. r. t. "
-            //                    << FromRed->to_constln()->debug_id() << "\n";
             assert(FromRed->begin == B_iter);
             #ifndef NDEBUG
                 bool postproc_a_posteriori = !FromRed->
@@ -3631,7 +3526,6 @@ Line_4_4:
     // 4.26: Destroy all temporary data
     assert(R.empty());
 
-    //mCRL2log(log::debug, "bisim_gjkw") << "Finished postprocessing\n";
     return ResultB;
 }
 

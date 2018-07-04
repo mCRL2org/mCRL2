@@ -485,7 +485,6 @@ void part_trans_t::handle_transition(B_a_B_iter_t const old_pos,
                                         const bunch_t* const futureFromRedBu
                                         ONLY_IF_DEBUG( , const LTS_TYPE& aut) )
 {
-/*
     #ifndef NDEBUG
         mCRL2log(log::debug,"bisim_tb") << "Handling "
                                        << old_pos->pred->debug_id(aut) << '\n';
@@ -682,7 +681,7 @@ mCRL2log(log::debug, "bisim_tb") << "8\n";
             }
         }
         OldB->from_block.erase(old_B_a_B_slice);
-    }*/
+    }
 }
 
 
@@ -1383,8 +1382,8 @@ void bisim_partitioner_tb<LTS_TYPE>::replace_transition_system()
 
 template <class LTS_TYPE>
 void bisim_partitioner_tb<LTS_TYPE>::
-              refine_partition_until_it_becomes_stable_tb(const bool branching,
-                                                const bool preserve_divergence)
+    refine_partition_until_it_becomes_stable_tb(
+        ONLY_IF_DEBUG( const bool branching, const bool preserve_divergence ) )
 {
     // while there is a nontrivial bunch SpBu
     while (nullptr != bisim_tb::bunch_t::get_some_nontrivial())
@@ -1512,7 +1511,7 @@ void bisim_partitioner_tb<LTS_TYPE>::
             assert(s->current_bunch[-1].B_a_B == s_iter);
         // end for
         }
-
+#ifndef NDEBUG
 for (bisim_tb::permutation_const_iter_t s_iter = RfnB->unmarked_bottom_begin();
                                RfnB->unmarked_bottom_end() != s_iter; ++s_iter)
 {
@@ -1529,6 +1528,7 @@ for (bisim_tb::permutation_const_iter_t s_iter = RfnB->marked_bottom_begin();
     assert(s->succ_end() == s->current_bunch ||
                    s->current_bunch->B_a_B->B_a_B_slice->bunch != SpSl->bunch);
 }
+#endif
 
         /*------------------- stabilise the partition again -----------------*/
 
@@ -1844,11 +1844,7 @@ mCRL2log(log::debug, "bisim_tb") << "The blue subblock is smaller.\n";
     // and
     // 3.30l: Destroy all temporary data
     bisim_tb::block_t* const NewB = RfnB->split_off_blue(blue_nonbottom_end);
-#ifndef NDEBUG
-     part_tr.new_block_created(RfnB, NewB, true, aut);
-#else
-    part_tr.new_block_created(RfnB, NewB, true);
-#endif
+    part_tr.new_block_created(RfnB, NewB, true ONLY_IF_DEBUG( , aut ) );
 }
 END_COROUTINE
 

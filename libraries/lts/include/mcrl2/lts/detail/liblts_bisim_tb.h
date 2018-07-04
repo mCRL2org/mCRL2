@@ -1613,8 +1613,8 @@ class bisim_partitioner_tb
     {
       assert(branching || !preserve_divergence);
       create_initial_partition_tb(branching, preserve_divergence);
-      refine_partition_until_it_becomes_stable_tb(branching,
-                                                          preserve_divergence);
+      refine_partition_until_it_becomes_stable_tb(
+                             ONLY_IF_DEBUG( branching, preserve_divergence ) );
     }
     ~bisim_partitioner_tb()
     {
@@ -1648,8 +1648,8 @@ class bisim_partitioner_tb
     /*-------- dbStutteringEquivalence -- Algorithm 2 of [GJKW 2017] --------*/
 
     void create_initial_partition_tb(bool branching, bool preserve_divergence);
-    void refine_partition_until_it_becomes_stable_tb(bool branching,
-                                                     bool preserve_divergence);
+    void refine_partition_until_it_becomes_stable_tb(
+                   ONLY_IF_DEBUG( bool branching, bool preserve_divergence ) );
 
     /*----------------- Refine -- Algorithm 3 of [GJKW 2017] ----------------*/
 

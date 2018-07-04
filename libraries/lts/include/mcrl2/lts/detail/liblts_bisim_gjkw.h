@@ -1287,16 +1287,9 @@ class succ_entry
         return int_slice_begin_or_before_end;
     }
 
-    void set_slice_begin_or_before_end(succ_iter_t new_value
-                               ONLY_IF_DEBUG( , bool suppress_print = false ) )
+    void set_slice_begin_or_before_end(succ_iter_t new_value)
     {
         int_slice_begin_or_before_end = new_value;
-        #ifndef NDEBUG
-            if (suppress_print)  return;
-            //mCRL2log(log::debug, "bisim_gjkw") << "Set "
-            //      "slice_begin_or_before_end of " << B_to_C->pred->debug_id()
-            //      << " to " << new_value->B_to_C->pred->debug_id() << ".\n";
-        #endif
     }
 
 
@@ -1681,9 +1674,9 @@ class part_trans_t
     new constellation does not (yet) have inert incoming transitions.  It
     returns the boundary between transitions to OldC and transitions to NewC in
     the state's outgoing transition array. */
-    succ_iter_t change_to_C(pred_iter_t pred_iter, constln_t* OldC,
-                            constln_t* NewC, bool first_transition_of_state,
-                                            bool first_transition_of_block);
+    succ_iter_t change_to_C(pred_iter_t pred_iter,
+               ONLY_IF_DEBUG( constln_t* SpC, constln_t* NewC, )
+               bool first_transition_of_state, bool first_transition_of_block);
 
     /* split_s_inert_out splits the outgoing transitions from s to its own
     constellation into two:  the inert transitions become transitions to the
@@ -1847,7 +1840,7 @@ class bisim_partitioner_gjkw_initialise_helper
     // anything else; in particular, it does not change the number of states of
     // the LTS.
     void replace_transition_system(const part_state_t& part_st, 
-                                   bool branching,
+                                   ONLY_IF_DEBUG( bool branching, )
                                    bool preserve_divergence);
 
     /// provides the number of states in the Kripke structure
@@ -1904,7 +1897,9 @@ class bisim_partitioner_gjkw
     // the LTS.
     void replace_transition_system(bool branching, bool preserve_divergence)
     {
-      init_helper.replace_transition_system(part_st,branching,preserve_divergence);
+      (void) branching; // avoid warning about unused parameter.
+      init_helper.replace_transition_system(part_st,
+                              ONLY_IF_DEBUG( branching, ) preserve_divergence);
     }
 
     static state_type num_eq_classes()
@@ -2064,10 +2059,6 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool const branching /* = false */,
                                                           preserve_divergence);
 
   // Assign the reduced LTS
-  //mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped "
-  //    "chain: " << bisim_part.num_eq_classes()
-  //    << "; initial state: originally state " << l.initial_state()
-  //    <<" = lumped state "<<bisim_part.get_eq_class(l.initial_state())<<"\n";
   bisim_part.replace_transition_system(branching, preserve_divergence);
 }
 
