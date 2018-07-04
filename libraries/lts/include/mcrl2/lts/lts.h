@@ -342,6 +342,7 @@ class lts: public LTS_BASE
      * \return The label of the state. */
     bool is_probabilistic(const states_size_type state) const
     {
+      (void)state;  // Suppress an unused variable warning. 
       assert(state<m_nstates);
       return false;
     }
