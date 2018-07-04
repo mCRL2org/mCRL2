@@ -59,6 +59,13 @@ class PropertiesDock : public QDockWidget
    */
   void verifyAllProperties();
 
+  public slots:
+  /**
+   * @brief resetAllPropertyWidgets Resets all property widgets to unverified
+   *   state
+   */
+  void resetAllPropertyWidgets();
+
   private:
   ProcessSystem* processSystem;
   FileSystem* fileSystem;

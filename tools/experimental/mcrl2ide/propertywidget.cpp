@@ -114,6 +114,12 @@ void PropertyWidget::setPropertyText(QString text)
   this->property->text = text;
 }
 
+void PropertyWidget::resetWidget()
+{
+  verificationWidgets->setCurrentIndex(0);
+  this->setStyleSheet("");
+}
+
 void PropertyWidget::actionVerify()
 {
   /* check if the property isn't already being verified or has been verified */
@@ -168,6 +174,7 @@ void PropertyWidget::actionEdit()
 {
   property = fileSystem->editProperty(property, processSystem);
   propertyNameLabel->setText(property->name);
+  resetWidget();
 }
 
 void PropertyWidget::actionDelete()

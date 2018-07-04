@@ -473,6 +473,7 @@ QString FileSystem::saveProject(bool forceSave)
       specificationModified = false;
       delete specificationFile;
       delete saveStream;
+      emit changesSaved();
     }
 
     /* save all properties if necessary */

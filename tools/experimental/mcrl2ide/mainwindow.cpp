@@ -56,6 +56,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
           SIGNAL(isRunning(bool)), abortVerificationAction,
           SLOT(setEnabled(bool)));
 
+  /* reset the propertiesdock when the project is saved */
+  connect(fileSystem, SIGNAL(changesSaved()), propertiesDock,
+          SLOT(resetAllPropertyWidgets()));
+
   /* set the title of the main window */
   setWindowTitle("mCRL2 IDE - Unnamed project");
   resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,

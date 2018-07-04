@@ -79,3 +79,11 @@ void PropertiesDock::verifyAllProperties()
     propertyWidget->actionVerify();
   }
 }
+
+void PropertiesDock::resetAllPropertyWidgets()
+{
+  for (PropertyWidget* propertyWidget : propertyWidgets)
+  {
+    propertyWidget->resetWidget();
+  }
+}

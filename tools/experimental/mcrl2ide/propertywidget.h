@@ -59,6 +59,11 @@ class PropertyWidget : public QWidget
    */
   void setPropertyText(QString text);
 
+  /**
+   * @brief resetWidget Resets the widget to unverified state
+   */
+  void resetWidget();
+
   public slots:
   /**
    * @brief actionVerify Allows the user to verify this property

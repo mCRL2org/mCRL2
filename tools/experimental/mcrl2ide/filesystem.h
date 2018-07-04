@@ -205,8 +205,8 @@ class FileSystem : public QObject
   bool deletePropertyFile(QString propertyName, bool showIfFailed = true);
 
   /**
-   * @brief deleteUnlistedPropertyFiles Deletes all property files for which there
-   *   is no entry in the "properties" list
+   * @brief deleteUnlistedPropertyFiles Deletes all property files for which
+   *   there is no entry in the "properties" list
    */
   void deleteUnlistedPropertyFiles();
 
@@ -270,6 +270,12 @@ class FileSystem : public QObject
    *   changed
    */
   void hasChanges(bool changes);
+
+  /**
+   * @brief changesSaved Is emitted whenever changes in the specification have
+   *   been saved
+   */
+  void changesSaved();
 
   private:
   QString projectsFolderPath =
