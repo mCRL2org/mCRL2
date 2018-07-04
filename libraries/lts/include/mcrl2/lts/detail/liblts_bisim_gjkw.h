@@ -514,8 +514,8 @@ class block_t
         assert(int_bottom_begin < int_end);
         // The following assertions cannot be tested because constln_t is not
         // yet complete.
-        // assert(int_constln->begin() <= int_begin &&
-        //                                      int_end <= int_constln->end());
+        // assert(int_constln->begin() <= int_begin);
+        // assert(int_end <= int_constln->end());
     }
 
     ~block_t()  {  }
@@ -780,7 +780,8 @@ class block_t
     /// \returns true if the state was not marked before
     bool mark_nonbottom(state_info_ptr s)
     {
-        assert(s->pos < nonbottom_end() && nonbottom_begin() <= s->pos);
+        assert(s->pos < nonbottom_end());
+        assert(nonbottom_begin() <= s->pos);
 
         if (marked_nonbottom_begin() <= s->pos)  return false;
         set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
@@ -1547,8 +1548,10 @@ class part_trans_t
 
     void swap_in(B_to_C_iter_t const pos1, B_to_C_iter_t const pos2)
     {
-        assert(B_to_C.end() > pos1 && pos1->pred->succ->B_to_C == pos1);
-        assert(B_to_C.end() > pos2 && pos2->pred->succ->B_to_C == pos2);
+        assert(B_to_C.end() > pos1);
+        assert(pos1->pred->succ->B_to_C == pos1);
+        assert(B_to_C.end() > pos2);
+        assert(pos2->pred->succ->B_to_C == pos2);
 
         // swap contents
         pred_entry const temp_entry(*pos1->pred);
@@ -1559,14 +1562,18 @@ class part_trans_t
         pos1->pred = pos2->pred;
         pos2->pred = temp_iter;
 
-        assert(B_to_C.end() > pos1 && pos1->pred->succ->B_to_C == pos1);
-        assert(B_to_C.end() > pos2 && pos2->pred->succ->B_to_C == pos2);
+        assert(B_to_C.end() > pos1);
+        assert(pos1->pred->succ->B_to_C == pos1);
+        assert(B_to_C.end() > pos2);
+        assert(pos2->pred->succ->B_to_C == pos2);
     }
 
     void swap_out(pred_iter_t const pos1, pred_iter_t const pos2)
     {
-        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() > pos1);
+        assert(pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() > pos2);
+        assert(pos2->succ->B_to_C->pred == pos2);
         assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
         assert(succ_entry::slice_end(pos1->succ) ==
                                             succ_entry::slice_end(pos2->succ));
@@ -1583,8 +1590,10 @@ class part_trans_t
         pos1->succ = pos2->succ;
         pos2->succ = temp_iter;
 
-        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() > pos1);
+        assert(pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() > pos2);
+        assert(pos2->succ->B_to_C->pred == pos2);
         assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
         assert(succ_entry::slice_end(pos1->succ) ==
                                             succ_entry::slice_end(pos2->succ));
@@ -1592,8 +1601,10 @@ class part_trans_t
 
     void swap_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2)
     {
-        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos1);
+        assert(pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2);
+        assert(pos2->B_to_C->pred->succ == pos2);
 
         // swap contents
         B_to_C_entry const temp_entry(*pos1->B_to_C);
@@ -1604,17 +1615,22 @@ class part_trans_t
         pos1->B_to_C = pos2->B_to_C;
         pos2->B_to_C = temp_iter;
 
-        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos1);
+        assert(pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2);
+        assert(pos2->B_to_C->pred->succ == pos2);
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
     void swap3_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2,
                                                         succ_iter_t const pos3)
     {
-        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
-        assert(succ.end() > pos3 && pos3->B_to_C->pred->succ == pos3);
+        assert(succ.end() > pos1);
+        assert(pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2);
+        assert(pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos3);
+        assert(pos3->B_to_C->pred->succ == pos3);
 
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
@@ -1628,9 +1644,12 @@ class part_trans_t
         pos3->B_to_C = pos1->B_to_C;
         pos1->B_to_C = temp_iter;
 
-        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
-        assert(succ.end() > pos3 && pos3->B_to_C->pred->succ == pos3);
+        assert(succ.end() > pos1);
+        assert(pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2);
+        assert(pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos3);
+        assert(pos3->B_to_C->pred->succ == pos3);
     }
   public:
     part_trans_t(trans_type m)
@@ -1801,7 +1820,7 @@ class bisim_partitioner_gjkw_initialise_helper
 
         bool operator==(const Key &other) const 
         {
-            return (first == other.first && second == other.second);
+            return first == other.first && second == other.second;
         }
     };
 
@@ -2172,7 +2191,8 @@ inline void block_t::SetFromRed(B_to_C_desc_iter_t const new_fromred)
 inline bool state_info_entry::surely_has_transition_to(const constln_t* const
                                                                      SpC) const
 {
-    assert(succ_begin() <= current_constln() && current_constln()<=succ_end());
+    assert(succ_begin() <= current_constln());
+    assert(current_constln() <= succ_end());
     assert(succ_begin()==current_constln() || succ_end()==current_constln() ||
                             *current_constln()[-1].target->constln() <
                                         *current_constln()->target->constln());
@@ -2201,7 +2221,8 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* const
 inline bool state_info_entry::surely_has_no_transition_to(
                                               const constln_t* const SpC) const
 {
-    assert(succ_begin() <= current_constln() && current_constln()<=succ_end());
+    assert(succ_begin() <= current_constln());
+    assert(current_constln() <= succ_end());
     assert(succ_begin()==current_constln() || succ_end()==current_constln() ||
                             *current_constln()[-1].target->constln() <
                                         *current_constln()->target->constln());
