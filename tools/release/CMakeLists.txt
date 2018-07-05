@@ -39,6 +39,7 @@ set(MCRL2_TOOLS
   pbespgsolve
   pbespp
   pbesrewr
+  pbessolve
   pbesstategraph
   tracepp
   txt2lps
