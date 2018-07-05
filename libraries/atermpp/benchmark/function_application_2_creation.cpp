@@ -11,7 +11,7 @@
 
 using namespace atermpp;
 
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
   std::size_t size = 10000;
   std::size_t iterations = 10000;

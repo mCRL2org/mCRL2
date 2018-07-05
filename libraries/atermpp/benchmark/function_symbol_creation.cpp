@@ -15,7 +15,7 @@
 using namespace atermpp;
 
 /// \brief Benchmark the creation of function symbols
-int main()
+int main(int, char*[])
 {
   std::size_t amount = 10000;
   std::size_t iterations = 1000;
