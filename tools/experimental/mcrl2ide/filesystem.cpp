@@ -71,38 +71,34 @@ QString FileSystem::projectFolderPath()
 
 QString FileSystem::propertiesFolderPath()
 {
-  return projectFolderPath() + QDir::separator() +
-         propertiesFolderName;
+  return projectFolderPath() + QDir::separator() + propertiesFolderName;
 }
 
 QString FileSystem::specificationFilePath()
 {
-  return projectFolderPath() + QDir::separator() + projectName +
-         "_spec.mcrl";
+  return projectFolderPath() + QDir::separator() + projectName + "_spec.mcrl";
 }
 
 QString FileSystem::lpsFilePath()
 {
-  return projectFolderPath() + QDir::separator() + projectName +
-         "_lps.lps";
+  return projectFolderPath() + QDir::separator() + projectName + "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(LtsReduction reduction)
 {
-  return projectFolderPath() + QDir::separator() + projectName +
-         "_lts_" + LTSREDUCTIONNAMES.at(reduction) + ".lts";
+  return projectFolderPath() + QDir::separator() + projectName + "_lts_" +
+         LTSREDUCTIONNAMES.at(reduction) + ".lts";
 }
 
 QString FileSystem::propertyFilePath(QString propertyName)
 {
-  return propertiesFolderPath() + QDir::separator() + propertyName +
-         ".mcf";
+  return propertiesFolderPath() + QDir::separator() + propertyName + ".mcf";
 }
 
 QString FileSystem::pbesFilePath(QString propertyName)
 {
-  return propertiesFolderPath() + QDir::separator() + projectName +
-         "_" + propertyName + "_pbes.pbes";
+  return propertiesFolderPath() + QDir::separator() + projectName + "_" +
+         propertyName + "_pbes.pbes";
 }
 
 bool FileSystem::projectOpened()
@@ -326,7 +322,7 @@ Property* FileSystem::editProperty(Property* oldProperty,
     {
       if (property->equals(oldProperty))
       {
-        *property = *newProperty;
+        property = newProperty;
         break;
       }
     }

@@ -172,9 +172,15 @@ void PropertyWidget::actionAbortVerification()
 
 void PropertyWidget::actionEdit()
 {
-  property = fileSystem->editProperty(property, processSystem);
-  propertyNameLabel->setText(property->name);
-  resetWidget();
+  Property* newProperty = fileSystem->editProperty(property, processSystem);
+  /* only make changes if the property changed */
+  if (!property->equals(newProperty))
+  {
+    property = newProperty;
+    propertyNameLabel->setText(property->name);
+    resetWidget();
+  }
+  
 }
 
 void PropertyWidget::actionDelete()
