@@ -28,6 +28,18 @@ using mcrl2::bes::tools::pbes_input_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
 
+// TODO: put this code in the utilities library?
+inline
+std::string file_extension(const std::string& filename)
+{
+  auto pos = filename.find_last_of('.');
+  if (pos == std::string::npos)
+  {
+    return "";
+  }
+  return filename.substr(pos + 1);
+}
+
 class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 {
   protected:
@@ -53,14 +65,13 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                    .add_value(depth_first),
                  "use search strategy SEARCH:",
                  'z');
-      desc.add_option("lpsfile",
+      desc.add_option("file",
                  utilities::make_optional_argument("NAME", "name"),
-                 "The file containing the LPS that was used to generate the PBES. If this option is set, a counter example LPS will be generated.",
+                 "The file containing the LPS or LTS that was used to generate the PBES using lps2pbes -c. If this "
+                 "option is set, a counter example or witness for the encoded property will be generated. The "
+                 "extension of the file should be .lps in case of an LPS file, in all other cases it is assumed to "
+                 "be an LTS.",
                  'f');
-      desc.add_option("ltsfile",
-                 utilities::make_optional_argument("NAME", "name"),
-                 "The file containing the LTS that was used to generate the PBES. If this option is set, a counter example LTS will be generated.",
-                 'g');
       desc.add_option("strategy",
                   utilities::make_optional_argument("STRATEGY", "0"),
                       "use strategy STRATEGY:\n"
@@ -96,17 +107,17 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {
       super::parse_options(parser);
       m_check_strategy = parser.options.count("check-strategy") > 0;
-      if (parser.options.count("lpsfile") > 0 && parser.options.count("ltsfile") > 0)
+      if (parser.options.count("file") > 0)
       {
-        throw mcrl2::runtime_error("It is not allowed to use both options --lpsfile and --ltsfile");
-      }
-      if (parser.options.count("lpsfile") > 0)
-      {
-        lpsfile = parser.option_argument("lpsfile");
-      }
-      if (parser.options.count("ltsfile") > 0)
-      {
-        ltsfile = parser.option_argument("ltsfile");
+        std::string filename = parser.option_argument("file");
+        if (file_extension(filename) == "lps")
+        {
+          lpsfile = filename;
+        }
+        else
+        {
+          ltsfile = filename;
+        }
       }
       m_search_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       m_strategy = parser.option_argument_as<int>("strategy");
