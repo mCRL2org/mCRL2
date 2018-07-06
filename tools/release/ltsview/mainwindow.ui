@@ -31,7 +31,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -44,7 +44,6 @@
      </property>
      <addaction name="exportBitmap"/>
      <addaction name="exportText"/>
-     <addaction name="exportVector"/>
     </widget>
     <addaction name="open"/>
     <addaction name="openTrace"/>
@@ -142,11 +141,6 @@
   <action name="exportText">
    <property name="text">
     <string>&amp;Text...</string>
-   </property>
-  </action>
-  <action name="exportVector">
-   <property name="text">
-    <string>&amp;Vector...</string>
    </property>
   </action>
   <action name="resetViewpoint">

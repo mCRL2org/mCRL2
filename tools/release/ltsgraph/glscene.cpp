@@ -323,12 +323,6 @@ void CameraAnimation::setSize(const QVector3D& size, std::size_t animation)
 //
 
 inline
-bool gl2ps()
-{
-  return (gl2psEnable(GL2PS_BLEND) == GL2PS_SUCCESS);
-}
-
-inline
 void glStartName(GLuint objectType, GLuint index=0)
 {
   glLoadName(objectType);
@@ -361,7 +355,6 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
 {
   glPushAttrib(GL_LINE_BIT);
   glLineWidth(2.0);
-  gl2psLineWidth(0.25);
 
   if (probabilistic)
   {
@@ -389,7 +382,6 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   // see above
   glDepthMask(GL_TRUE);
   glPopAttrib();
-  gl2psLineWidth(0.25);
 }
 
 
@@ -557,23 +549,9 @@ void GLScene::renderTransitionLabel(GLuint i)
 
     Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
     glColor3fv(fill);
-    if (gl2ps())
-    {
-      QVector3D pos = label.pos();
-      glRasterPos3f(pos.x(), pos.y(), pos.z());
-      if (!m_graph.isTau(label.labelindex())) {
-        gl2psText(m_graph.transitionLabelstring(label.labelindex()).toUtf8(), "", 10);
-      }
-      else {
-        gl2psText("t", "Symbol", 10);
-      }
-    }
-    else
-    {
-      QVector3D eye = worldToEye(label.pos());
-      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-      drawCenteredText(eye.x(), eye.y(), labelstring);
-    }
+    QVector3D eye = worldToEye(label.pos());
+    const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
+    drawCenteredText(eye.x(), eye.y(), labelstring);
     glEndName();
   }
 }
@@ -585,17 +563,8 @@ void GLScene::renderStateLabel(GLuint i)
     glStartName(so_slabel, i);
     Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
     glColor3fv(fill);
-    if (gl2ps())
-    {
-      QVector3D pos = label.pos();
-      glRasterPos3f(pos.x(), pos.y(), pos.z());
-      gl2psText(m_graph.stateLabelstring(label.labelindex()).toUtf8(), "", 10);
-    }
-    else
-    {
-      QVector3D eye = worldToEye(label.pos());
-      drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()));
-    }
+    QVector3D eye = worldToEye(label.pos());
+    drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()));
     glEndName();
   }
 }
@@ -604,18 +573,9 @@ void GLScene::renderStateNumber(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
   glStartName(so_node, i);
-  if (gl2ps())
-  {
-    QVector3D pos = node.pos();
-    glRasterPos3f(pos.x(), pos.y(), pos.z());
-    gl2psText(QString::number(i).toUtf8(), "", 10);
-  }
-  else
-  {
-    QVector3D eye = worldToEye(node.pos());
-    drawCenteredText(eye.x(), eye.y(), QString::number(i));
-    glPushMatrix();
-  }
+  QVector3D eye = worldToEye(node.pos());
+  drawCenteredText(eye.x(), eye.y(), QString::number(i));
+  glPushMatrix();
   glEndName();
 }
 
@@ -676,9 +636,7 @@ void GLScene::init(const QColor& clear)
   glEnable(GL_POINT_SMOOTH);
   glEnable(GL_CULL_FACE);
   glEnable(GL_BLEND);
-  gl2psEnable(GL2PS_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   GLfloat fog_color[4] = {float(clear.redF()), float(clear.greenF()), float(clear.blueF()), 1.0f};
   glFogf(GL_FOG_MODE, GL_LINEAR);
@@ -1005,45 +963,6 @@ void GLScene::setTranslation(const QVector3D& translation, std::size_t animation
 void GLScene::setSize(const QVector3D& size, std::size_t animation)
 {
   m_camera.setSize(size, animation);
-}
-
-void GLScene::renderVectorGraphics(const char* filename, GLint format)
-{
-  FILE* outfile = fopen(filename, "wb+");
-  GLint viewport[4];
-  GLint buffersize = 1024*1024, state = GL2PS_OVERFLOW;
-
-  while (state == GL2PS_OVERFLOW) {
-    buffersize += 1024*1024;
-    gl2psBeginPage(filename,
-                   "mCRL2 toolset",
-                   viewport,
-                   format,
-                   GL2PS_BSP_SORT,
-                   GL2PS_SILENT |
-                   GL2PS_USE_CURRENT_VIEWPORT |
-                   GL2PS_OCCLUSION_CULL |
-                   GL2PS_BEST_ROOT |
-                   GL2PS_COMPRESS,
-                   GL_RGBA,
-                   0,
-                   nullptr,
-                   0, 0, 0,
-                   buffersize,
-                   outfile,
-                   filename
-                  );
-    render();
-    state = gl2psEndPage();
-  }
-  if (state != GL2PS_SUCCESS)
-  {
-    mCRL2log(mcrl2::log::error) << "Could not save file (gl2ps error)." << std::endl;
-  }
-  if (outfile != nullptr)
-  {
-    fclose(outfile);
-  }
 }
 
 void GLScene::renderLatexGraphics(const QString& filename, float aspectRatio)

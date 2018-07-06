@@ -531,35 +531,6 @@ void GLWidget::endPaint()
   m_painting = false;
 }
 
-void GLWidget::saveVector(const QString& filename)
-{
-  makeCurrent();
-  QString lcfn = filename.toLower();
-  if (lcfn.endsWith(".pdf"))
-  {
-  }
-  else if (lcfn.endsWith(".ps"))
-  {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PS);
-  }
-  else if (lcfn.endsWith(".eps"))
-  {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_EPS);
-  }
-  else if (lcfn.endsWith(".svg"))
-  {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_SVG);
-  }
-  else if (lcfn.endsWith(".tex"))
-  {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PGF);
-  }
-  else
-  {
-    mCRL2log(mcrl2::log::error) << "Unable to determine file type from extension." << std::endl;
-  }
-}
-
 void GLWidget::saveTikz(const QString& filename, float aspectRatio)
 {
   makeCurrent();

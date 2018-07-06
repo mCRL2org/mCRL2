@@ -19,12 +19,11 @@
 #ifndef GLSCENE_H
 #define GLSCENE_H
 
+#include "graph.h"
+
 #include <QColor>
 #include <QPainter>
-
-#include <gl2ps.h>
-
-#include "graph.h"
+#include <QQuaternion>
 
 struct Texture
 {
@@ -361,12 +360,6 @@ class GLScene
      * @returns true if an object was selected
      */
     bool selectObject(Selection& s, int x, int y, SelectableObject type);
-
-    /**
-     * @brief Renders the scene to a file using gl2ps.
-     */
-    void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
-
 
     /**
      * @brief Renders the scene to LaTeX using Tikz.

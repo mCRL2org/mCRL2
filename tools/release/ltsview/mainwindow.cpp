@@ -13,12 +13,10 @@
 #include <QPixmap>
 #include <QString>
 #include <QSettings>
-#include <gl2ps.h>
 
 #include "mcrl2/lts/lts_io.h"
 #include "mainwindow.h"
 #include "savepicturedialog.h"
-#include "savevectordialog.h"
 
 MainWindow::MainWindow(QThread *atermThread):
   m_fileDialog("", this)
@@ -56,7 +54,6 @@ MainWindow::MainWindow(QThread *atermThread):
   connect(m_ui.openTrace, SIGNAL(triggered()), this, SLOT(openTrace()));
   connect(m_ui.exportBitmap, SIGNAL(triggered()), this, SLOT(exportBitmap()));
   connect(m_ui.exportText, SIGNAL(triggered()), this, SLOT(exportText()));
-  connect(m_ui.exportVector, SIGNAL(triggered()), this, SLOT(exportVector()));
   connect(m_ui.exit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
 
   connect(m_ui.resetViewpoint, SIGNAL(triggered()), m_ltsCanvas, SLOT(resetView()));
@@ -190,51 +187,6 @@ void MainWindow::exportText()
     return;
   }
   m_ltsCanvas->exportToText(filename);
-}
-
-void MainWindow::exportVector()
-{
-  QString all = "All supported files (*.ps *.eps *.pdf *.svg)";
-  QString ps = "PostScript (*.ps)";
-  QString eps = "Encapsulated PostScript (*.eps)";
-  QString pdf = "Portable Document Format (*.pdf)";
-  QString svg = "Scalable Vector Graphics (*.svg)";
-
-  QString filter = all + ";;" + ps + ";;" + eps + ";;" + pdf + ";;" + svg;
-  QString selectedFilter = all;
-  QString filename = m_fileDialog.getSaveFileName("Save vector", filter, &selectedFilter);
-  if (filename.isNull())
-  {
-    return;
-  }
-
-  GLint format;
-  if (selectedFilter == ps || (selectedFilter == all && filename.right(3).toLower() == ".ps"))
-  {
-    format = GL2PS_PS;
-  }
-  else if (selectedFilter == eps || (selectedFilter == all && filename.right(4).toLower() == ".eps"))
-  {
-    format = GL2PS_EPS;
-  }
-  else if (selectedFilter == pdf || (selectedFilter == all && filename.right(4).toLower() == ".pdf"))
-  {
-    format = GL2PS_PDF;
-  }
-  else if (selectedFilter == svg || (selectedFilter == all && filename.right(4).toLower() == ".svg"))
-  {
-    format = GL2PS_SVG;
-  }
-  else
-  {
-    QMessageBox::critical(this, "Error writing file", "Saving picture failed: unsupported file format.");
-    return;
-  }
-
-  SaveVectorDialog dialog(this, m_ltsCanvas, filename, format);
-  connect(&dialog, SIGNAL(statusMessage(QString)), this, SLOT(setStatusBar(QString)));
-  dialog.exec();
-  clearStatusBar();
 }
 
 void MainWindow::setProgress(int phase, QString message)

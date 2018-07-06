@@ -159,15 +159,9 @@ class GLWidget : public QOpenGLWidget
     void saveBitmap(const QString& filename);
 
     /**
-         * @brief Renders the current visualisation to a vector graphics file using gl2ps.
-         * @param filename The filename for the output (extension determines file type).
-         */
-    void saveVector(const QString& filename);
-
-    /**
-         * @brief Renders the current visualisation to a LaTeX Tikz image.
-         * @param filename The filename for the output.
-         */
+     * @brief Renders the current visualisation to a LaTeX Tikz image.
+     * @param filename The filename for the output.
+     */
     void saveTikz(const QString& filename, float aspectRatio);
 
     /**

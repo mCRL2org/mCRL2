@@ -45,7 +45,6 @@ class MainWindow : public QMainWindow
     void openTrace();
     void exportBitmap();
     void exportText();
-    void exportVector();
     void setStatusBar(QString message) { m_ui.statusbar->showMessage(message); }
     void clearStatusBar() { m_ui.statusbar->clearMessage(); }
 

@@ -236,10 +236,9 @@ void MainWindow::onOpenFile()
 void MainWindow::onExportImage()
 {
   QString bitmap = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
-  QString vector = tr("Vector format (*.pdf *.ps *.eps *.svg *.pgf)");
   QString tikz = tr("LaTeX TikZ Image (*.tex)");
 
-  QString filter = bitmap + ";;" + vector + ";;" + tikz;
+  QString filter = bitmap + ";;" + tikz;
   QString selectedFilter = bitmap;
   QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
                    filter,
@@ -250,10 +249,6 @@ void MainWindow::onExportImage()
     if (selectedFilter == bitmap)
     {
       m_glwidget->saveBitmap(fileName);
-    }
-    else if (selectedFilter == vector)
-    {
-      m_glwidget->saveVector(fileName);
     }
     else
     {

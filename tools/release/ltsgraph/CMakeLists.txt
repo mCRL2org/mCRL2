@@ -30,8 +30,6 @@ add_mcrl2_tool(ltsgraph
     Qt5::Widgets
     Qt5::Xml
     ${OPENGL_LIBRARIES}
-    ${GL2PS_LIBRARIES}
   INCLUDE
     ${OPENGL_INCLUDE_DIR}
-    ${GL2PS_INCLUDE_DIR}
 )

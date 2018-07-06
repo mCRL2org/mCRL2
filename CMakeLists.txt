@@ -57,7 +57,6 @@ include(AddMCRL2Binary)
 
 if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
-  find_package(GL2PS      QUIET REQUIRED)
   find_package(TR         QUIET REQUIRED)
   find_package(CVC3       QUIET)
   find_package(Qt5 ${MCRL2_MIN_QT_VERSION} COMPONENTS Core OpenGL Widgets Xml Gui QUIET REQUIRED)

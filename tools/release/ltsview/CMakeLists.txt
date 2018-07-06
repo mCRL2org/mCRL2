@@ -12,7 +12,6 @@ add_mcrl2_tool(ltsview
     markdock.ui
     markstateruledialog.ui
     savepicturedialog.ui
-    savevectordialog.ui
     settingsdialog.ui
     settingsdock.ui
     simdock.ui
@@ -33,7 +32,6 @@ add_mcrl2_tool(ltsview
     primitives.cpp
     rtree.cpp
     savepicturedialog.cpp
-    savevectordialog.cpp
     settingsdialog.cpp
     settingsdock.cpp
     simdock.cpp
@@ -53,10 +51,8 @@ add_mcrl2_tool(ltsview
     Qt5::Widgets
     Qt5::Xml
     ${OPENGL_LIBRARIES}
-    ${GL2PS_LIBRARIES}
     ${TR_LIBRARIES}
   INCLUDE
     ${OPENGL_INCLUDE_DIR}
-    ${GL2PS_INCLUDE_DIR}
     ${TR_INCLUDE_DIR}
 )
