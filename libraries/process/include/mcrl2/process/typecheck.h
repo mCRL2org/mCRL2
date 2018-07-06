@@ -1,4 +1,5 @@
-// Author(s): Jan Friso Groote, Wieger Wesselink (2015)
+// Author(s): Jan Friso Groote
+//            Wieger Wesselink 2015 -
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -73,21 +74,6 @@ std::ostream& operator<<(std::ostream& out, const data::sorts_list& x)
   return out;
 }
 
-/// \brief
-inline
-core::identifier_string_list list_difference(const core::identifier_string_list& l, const core::identifier_string_list& m)
-{
-  core::identifier_string_list n;
-  for (const core::identifier_string& elem: l)
-  {
-    if (std::find(m.begin(), m.end(), elem) == m.end())
-    {
-      n.push_front(elem);
-    }
-  }
-  return atermpp::reverse(n);
-}
-
 namespace detail
 {
 
@@ -155,16 +141,19 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   data::detail::variable_context m_variable_context;
   const detail::process_context& m_process_context;
   const detail::action_context& m_action_context;
+  const process_equation* m_current_equation;
 
   typecheck_builder(data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variable_context,
                     const detail::process_context& process_context,
-                    const detail::action_context& action_context
+                    const detail::action_context& action_context,
+                    const process_equation* current_equation = nullptr
                    )
     : m_data_type_checker(data_typechecker),
       m_variable_context(variable_context),
       m_process_context(process_context),
-      m_action_context(action_context)
+      m_action_context(action_context),
+      m_current_equation(current_equation)
   {}
 
   data::sorts_list action_sorts(const core::identifier_string& name)
@@ -241,11 +230,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return result;
   }
 
-  action make_action(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
-  {
-    return action(action_label(name, formal_parameters), actual_parameters);
-  }
-
   bool is_action_name(const core::identifier_string& name)
   {
     return m_action_context.is_declared(name);
@@ -278,13 +262,20 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
 
     process_identifier P = m_process_context.match_untyped_process_instance_assignment(x);
+
+    // check if the process assignment matches with the current equation
+    if (m_current_equation && P != m_current_equation->identifier())
+    {
+      throw mcrl2::runtime_error("Non matching process assignment " + process::pp(x) + " detected in process equation " + process::pp(m_current_equation->identifier()) + ".");
+    }
+
     const data::variable_list& formal_parameters = P.variables();
 
     // This checks for duplicate left hand sides.
     std::map<core::identifier_string, data::data_expression> assignment_map = make_assignment_map(x.assignments());
 
     std::map<core::identifier_string, data::variable> formal_parameter_map;
-    for (const data::variable& v:formal_parameters)
+    for (const data::variable& v: formal_parameters)
     {
       formal_parameter_map[v.name()] = v;
     }
@@ -494,10 +485,11 @@ typecheck_builder make_typecheck_builder(
                     data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variables,
                     const detail::process_context& process_identifiers,
-                    const detail::action_context& action_context
+                    const detail::action_context& action_context,
+                    const process_equation* current_equation = nullptr
                    )
 {
-  return typecheck_builder(data_typechecker, variables, process_identifiers, action_context);
+  return typecheck_builder(data_typechecker, variables, process_identifiers, action_context, current_equation);
 }
 
 } // namespace detail
@@ -535,7 +527,7 @@ class process_type_checker
     }
 
     /// \brief Default constructor
-    process_type_checker(const data::data_specification& dataspec = data::data_specification())
+    explicit process_type_checker(const data::data_specification& dataspec = data::data_specification())
       : m_data_type_checker(dataspec)
     {}
 
@@ -571,7 +563,7 @@ class process_type_checker
       {
         data::detail::variable_context variable_context = m_variable_context;
         variable_context.add_context_variables(eqn.identifier().variables(), m_data_type_checker);
-        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(variable_context, eqn.expression()));
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(variable_context, eqn.expression(), &eqn));
       }
 
       // typecheck the initial state
@@ -584,9 +576,11 @@ class process_type_checker
     }
 
   protected:
-    process_expression typecheck_process_expression(const data::detail::variable_context& variables, const process_expression& x)
+    process_expression typecheck_process_expression(const data::detail::variable_context& variables,
+                                                    const process_expression& x,
+                                                    const process_equation* current_equation = nullptr)
     {
-      return detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context).apply(x);
+      return detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context, current_equation).apply(x);
     }
 };
 
