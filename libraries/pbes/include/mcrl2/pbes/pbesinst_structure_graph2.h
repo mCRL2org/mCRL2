@@ -29,6 +29,10 @@ class computation_guard
      std::size_t m_count = 64;
 
   public:
+    computation_guard(std::size_t initial_count = 64)
+      : m_count(initial_count)
+    {}
+
     bool operator()(std::size_t count)
     {
       bool result = count >= m_count;
@@ -59,37 +63,8 @@ class periodic_guard
     }
 };
 
-struct resizable_bitset
-{
-  boost::dynamic_bitset<> v;
-
-  resizable_bitset()
-    : v(64)
-  { }
-
-  void insert(std::size_t i)
-  {
-    if (v.size() <= i)
-    {
-      auto size = v.size();
-      while (size <= i)
-      {
-        size *= 2;
-      }
-      v.resize(size);
-    }
-    v[i] = true;
-  }
-
-  bool contains(std::size_t i) const
-  {
-    return v[i];
-  }
-};
-
 inline
 bool find_loop(const simple_structure_graph& G,
-               const detail::resizable_bitset& U,
                structure_graph::index_type v,
                structure_graph::index_type w,
                std::size_t p,
@@ -110,33 +85,38 @@ bool find_loop(const simple_structure_graph& G,
   {
     return i->second;
   }
-  if (is_propositional_variable_instantiation(w_.formula) && U.contains(w))
+
+  if (w_.decoration == data::undefined_index() ||
+      ((w_.rank % 2 == 0 && w_.decoration == structure_graph::d_disjunction) ||
+       (w_.rank % 2 != 0 && w_.decoration == structure_graph::d_conjunction))
+     )
   {
     visited[w] = false;
-    if (w_.decoration == data::undefined_index() ||
-                   ((w_.rank % 2 == 0 && w_.decoration == structure_graph::d_disjunction) ||
-                    (w_.rank % 2 != 0 && w_.decoration == structure_graph::d_conjunction))
-       )
+    for (structure_graph::index_type u: w_.successors)
     {
-      for (structure_graph::index_type u: w_.successors)
+      if (u == v || find_loop(G, v, u, p, visited))
       {
-        if (u == v || find_loop(G, U, v, u, p, visited))
-        {
-          visited[w] = true;
-          return true;
-        }
+        visited[w] = true;
+        return true;
       }
     }
-    else
+  }
+  else
+  {
+    visited[w] = true;
+    bool has_successors = false;
+    for (structure_graph::index_type u: w_.successors)
     {
-      for (structure_graph::index_type u: w_.successors)
+      has_successors = true;
+      if (u != v && !find_loop(G, v, u, p, visited))
       {
-        if (u != v && !find_loop(G, U, v, u, p, visited))
-        {
-          visited[w] = false;
-          return false;
-        }
+        visited[w] = false;
+        return false;
       }
+    }
+    if (!has_successors)
+    {
+      visited[w] = false;
     }
   }
   return false;
@@ -155,9 +135,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     detail::computation_guard S1_guard;
     detail::computation_guard find_loops_guard;
     detail::periodic_guard reset_guard;
-
-    // Contains the vertices that have been reported.
-    detail::resizable_bitset done;
 
     template<typename T>
     pbes_expression expr(const T& x) const
@@ -277,11 +254,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         {
           visited[u] = false;
         }
-        bool b = detail::find_loop(G, done, u, u, u_.rank, visited);
+        bool b = detail::find_loop(G, u, u, u_.rank, visited);
         visited[u] = b;
         if (b)
         {
-          if (u_.decoration == structure_graph::d_conjunction)
+          if (u_.rank % 2 == 1)
           {
             S1.insert(u);
           }
@@ -433,7 +410,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         search_strategy search_strategy = breadth_first,
         int optimization = 0
     )
-      : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, optimization)
+      : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, optimization),
+        find_loops_guard(2)
     {}
 
     pbes_expression rewrite_psi(const fixpoint_symbol& symbol,
@@ -469,7 +447,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       super::report_equation(X, psi, k);
       auto u = m_graph_builder.find_vertex(X);
-      done.insert(u);
       simple_structure_graph G(m_graph_builder.m_vertices);
 
       if (is_true(b))
