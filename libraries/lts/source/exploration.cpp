@@ -284,6 +284,17 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   return true;
 }
 
+void set_seed_random_generator()
+{
+  // In order to guarantee that time is different from a previous run to initialise
+  // the seed of a previous run and not get the same results, we wait until time gets
+  // a fresh value. It is better to replace this by c++11 random generators, as this
+  // is an awkward solution.
+  for(time_t t = time(nullptr); time(nullptr) == t; )
+  {}  ; // Wait until time changes.
+  srand((unsigned)time(nullptr));
+}
+
 bool lps2lts_algorithm::generate_lts()
 {
   // First generate a vector of initial states from the initial distribution.
@@ -353,6 +364,7 @@ bool lps2lts_algorithm::generate_lts()
       }
       else
       {
+        set_seed_random_generator();
         generate_lts_breadth_todo_max_is_not_npos(m_initial_states);
       }
     }
@@ -372,13 +384,7 @@ bool lps2lts_algorithm::generate_lts()
   }
   else if (m_options.expl_strat == es_random || m_options.expl_strat == es_value_random_prioritized)
   {
-    // In order to guarantee that time is different from a previous run to initialise
-    // the seed of a previous run and not get the same results, we wait until time gets
-    // a fresh value. It is better to replace this by c++11 random generators, as this
-    // is an awkward solution.
-    for(time_t t = time(nullptr); time(nullptr) == t; )
-      ; // Wait until time changes.
-    srand((unsigned)time(nullptr));
+    set_seed_random_generator();
 
     generate_lts_random(m_initial_states);
 
@@ -1075,7 +1081,6 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
   {
     value_prioritize(transitions);
   }
-
   if (m_options.detect_deadlock && transitions.empty())
   {
     save_deadlock(state);
