@@ -59,7 +59,7 @@ class Rewriter
     {
     }
 
-    /** \brief The copy assignment operator is deleted. Copying is not allowed. 
+    /** \brief The copy assignment operator is deleted. Copying is not allowed.
     **/
     Rewriter& operator=(const Rewriter& other)=delete;
 
@@ -97,7 +97,7 @@ class Rewriter
      **/
     /* virtual data_expression_list rewrite_list(const data_expression_list& terms, substitution_type& sigma); */
 
-    /** 
+    /**
      * \brief Provide the rewriter with a () operator, such that it can also
      *        rewrite terms using this operator.
      **/
@@ -157,9 +157,16 @@ class Rewriter
   protected:
 
     const mcrl2::data::data_specification m_data_specification_for_enumeration;
+
     data_expression quantifier_enumeration(
-         const data_expression& termInInnerFormat,
-         substitution_type& sigma);
+          const variable_list& vl,
+          const data_expression& t1,
+          const bool t1_is_normal_form,
+          substitution_type& sigma,
+          const binder_type& binder,
+          data_expression (*lazy_op)(const data_expression&, const data_expression&),
+          const data_expression& identity_element,
+          const data_expression& absorbing_element);
 
 };
 

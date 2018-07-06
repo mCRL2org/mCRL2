@@ -128,7 +128,7 @@ abstraction Rewriter::rewrite_single_lambda(
         new_variables[count]=data::variable(m_generator(), v.sort());
         assert(occur_check(v, new_variables[count]));
       }
-      else 
+      else
       {
         new_variables[count]=v;
       }
@@ -237,7 +237,7 @@ data_expression Rewriter::rewrite_lambda_application(
 
   // The variable vl_backup will be used to first store the values to be substituted
   // for the variables in vl. Subsequently, it will be used to temporarily save the values in sigma
-  // assigned to vl. 
+  // assigned to vl.
   data_expression* vl_backup = MCRL2_SPECIFIC_STACK_ALLOCATOR(data_expression,vl.size());
 
   // Calculate the values that must be substituted for the variables in vl and store these in vl_backup.
@@ -259,7 +259,7 @@ data_expression Rewriter::rewrite_lambda_application(
   const data_expression result=rewrite(lambda_body,sigma);
 
   // Reset variables in sigma and destroy the elements in vl_backup.
-  count=0; 
+  count=0;
   for(const variable& v: vl)
   {
     sigma[v]=vl_backup[count];
@@ -274,11 +274,11 @@ data_expression Rewriter::rewrite_lambda_application(
 
 
   // There are more arguments than bound variables.
-  // Rewrite the remaining arguments and apply the rewritten lambda term to them.  
-  return application(result, 
-                     t.begin()+vl.size(), 
-                     t.end(), 
-                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); }); 
+  // Rewrite the remaining arguments and apply the rewritten lambda term to them.
+  return application(result,
+                     t.begin()+vl.size(),
+                     t.end(),
+                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); });
 }
 
 data_expression Rewriter::existential_quantifier_enumeration(
@@ -289,7 +289,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   // in data types, i.e. without applying the implement function anymore.
 
   assert(is_exists(t));
-  return existential_quantifier_enumeration(t.variables(),t.body(),false,sigma);
+  return existential_quantifier_enumeration(t.variables(), t.body(), false, sigma);
 }
 
 // Generate a term equivalent to exists vl.t1.
@@ -300,6 +300,41 @@ data_expression Rewriter::existential_quantifier_enumeration(
       const data_expression& t1,
       const bool t1_is_normal_form,
       substitution_type& sigma)
+{
+  return quantifier_enumeration(vl, t1, t1_is_normal_form, sigma, exists_binder(), &lazy::or_, sort_bool::false_(), sort_bool::true_());
+}
+
+
+data_expression Rewriter::universal_quantifier_enumeration(
+     const abstraction& t,
+     substitution_type& sigma)
+{
+  assert(is_forall(t));
+  return universal_quantifier_enumeration(t.variables(),t.body(),false,sigma);
+}
+
+// Generate a term equivalent to forall vl.t1.
+// The variable t1_is_normal_form indicates whether t1 is in normal
+// form, but this information is not used as it stands.
+data_expression Rewriter::universal_quantifier_enumeration(
+      const variable_list& vl,
+      const data_expression& t1,
+      const bool t1_is_normal_form,
+      substitution_type& sigma)
+{
+  return quantifier_enumeration(vl, t1, t1_is_normal_form, sigma, forall_binder(), &lazy::and_, sort_bool::true_(), sort_bool::false_());
+}
+
+data_expression Rewriter::quantifier_enumeration(
+      const variable_list& vl,
+      const data_expression& t1,
+      const bool t1_is_normal_form,
+      substitution_type& sigma,
+      const binder_type& binder,
+      data_expression (*lazy_op)(const data_expression&, const data_expression&),
+      const data_expression& identity_element,
+      const data_expression& absorbing_element
+    )
 {
   // Rename the bound variables to unique
   // variables, to avoid naming conflicts.
@@ -348,44 +383,57 @@ data_expression Rewriter::existential_quantifier_enumeration(
   const bool throw_exceptions = true;
   const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
-  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
-                                             enumerator_list_element<>, 
-                                             data::is_not_false, 
-                                             rewriter_wrapper, 
+  struct is_not
+  {
+    data_expression m_expr;
+    is_not(const data_expression& expr)
+    : m_expr(expr)
+    {}
+
+    bool operator()(const data_expression& expr)
+    {
+      return expr != m_expr;
+    }
+  };
+
+  typedef enumerator_algorithm_with_iterator<rewriter_wrapper,
+                                             enumerator_list_element<>,
+                                             is_not,
+                                             rewriter_wrapper,
                                              rewriter_wrapper::substitution_type> enumerator_type;
   try
   {
     enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, m_generator, max_count, throw_exceptions);
-  
+
     /* Create a list to store solutions */
-    data_expression partial_result=sort_bool::false_();
+    data_expression partial_result = identity_element;
 
-    std::size_t loop_upperbound=(sorts_are_finite?npos():10);
+    std::size_t loop_upperbound = (sorts_are_finite ? npos() : 10);
     std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
 
-    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-    for( ; loop_upperbound>0 &&
-           partial_result!=sort_bool::true_() &&
-           sol!=enumerator.end();
+    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque, is_not(identity_element));
+    for( ; loop_upperbound > 0 &&
+           partial_result != absorbing_element &&
+           sol != enumerator.end(is_not(identity_element));
            ++sol)
     {
-      partial_result = lazy::or_(partial_result, sol->expression());
+      partial_result = lazy_op(partial_result, sol->expression());
       loop_upperbound--;
-      if(partial_result == sort_bool::true_())
+      if(partial_result == absorbing_element)
       {
         // We found a solution, so prevent the enumerator from doing any unnecessary work
         // Also prevents any further exceptions from the enumerator
-        return sort_bool::true_();
+        return absorbing_element;
       }
     }
 
-    if (sol==enumerator.end() && loop_upperbound>0)
+    if (sol == enumerator.end(is_not(identity_element)) && loop_upperbound > 0)
     {
       return partial_result;
     }
     // One can consider to replace the variables by their original, in order to not show
     // internally generated variables in the output.
-    assert(!sol->is_valid()||loop_upperbound==0);
+    assert(!sol->is_valid() || loop_upperbound == 0);
   }
   catch(const mcrl2::runtime_error&)
   {
@@ -393,120 +441,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
     // the simplified expression
   }
 
-  return abstraction(exists_binder(),vl_new_l,rewrite(t3,sigma));
-}
-
-
-data_expression Rewriter::universal_quantifier_enumeration(
-     const abstraction& t,
-     substitution_type& sigma)
-{
-  assert(is_forall(t));
-  return universal_quantifier_enumeration(t.variables(),t.body(),false,sigma);
-}
-
-// Generate a term equivalent to forall vl.t1.
-// The variable t1_is_normal_form indicates whether t1 is in normal
-// form, but this information is not used as it stands.
-data_expression Rewriter::universal_quantifier_enumeration(
-      const variable_list& vl,
-      const data_expression& t1,
-      const bool t1_is_normal_form,
-      substitution_type& sigma)
-{
-  // Rename the bound variables to unique
-  // variables, to avoid naming conflicts.
-
-  mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-  variable_vector vl_new_v;
-  for(const variable& v: vl)
-  {
-    if (sigma(v)!=v)  // Check whether sigma is defined on v. If not, renaming is not necessary.
-    {
-      const variable v_fresh(m_generator(), v.sort());
-      variable_renaming[v]=v_fresh;
-      vl_new_v.push_back(v_fresh);
-    }
-    else
-    {
-      vl_new_v.push_back(v);
-    }
-  }
-
-  const data_expression t2=replace_variables(t1,variable_renaming);
-  const data_expression t3=(t1_is_normal_form?t2:rewrite(t2,sigma));
-
-  // Check whether the bound variables occur free in the rewritten body.
-  std::set < variable > free_variables=find_free_variables(t3);
-  variable_list vl_new_l;
-
-  bool sorts_are_finite=true;
-  for(variable_vector::const_reverse_iterator i=vl_new_v.rbegin(); i!=vl_new_v.rend(); ++i)
-  {
-    const variable v= *i;
-    if (free_variables.count(v)>0)
-    {
-      vl_new_l.push_front(v);
-      sorts_are_finite=sorts_are_finite && m_data_specification_for_enumeration.is_certainly_finite(v.sort());
-    }
-  }
-
-  if (vl_new_l.empty())
-  {
-    return t3; // No quantified variables occur in the rewritten body.
-  }
-
-  /* Find A solution*/
-  rewriter_wrapper wrapped_rewriter(this);
-  const bool throw_exceptions = true;
-  const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
-
-  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
-                                             enumerator_list_element<>, 
-                                             data::is_not_true, 
-                                             rewriter_wrapper, 
-                                             rewriter_wrapper::substitution_type> enumerator_type;
-  try
-  {
-    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, m_generator, max_count, throw_exceptions);
-
-    /* Create lists to store solutions */
-    data_expression partial_result=sort_bool::true_();
-
-    std::size_t loop_upperbound=(sorts_are_finite?npos():10);
-    std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
-
-    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-    for( ; loop_upperbound>0 &&
-           partial_result!=sort_bool::false_() &&
-           sol!=enumerator.end();
-           ++sol)
-    {
-      partial_result = lazy::and_(partial_result, sol->expression());
-      loop_upperbound--;
-      if(partial_result == sort_bool::false_())
-      {
-        // We found a solution, so prevent the enumerator from doing any unnecessary work
-        // Also prevents any further exceptions from the enumerator
-        return sort_bool::false_();
-      }
-    }
-
-    if (sol==enumerator.end() && loop_upperbound>0)
-    {
-      return partial_result;
-    }
-    // One can consider to replace the variables by their original, in order to not show
-    // internally generated variables in the output.
-    assert(!sol->is_valid()||loop_upperbound==0);
-  }
-  catch(const mcrl2::runtime_error&)
-  {
-    // It is not possible to enumerate one of the bound variables, so we just return
-    // the simplified expression
-  }
-
-  return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
+  return abstraction(binder,vl_new_l,rewrite(t3,sigma));
 }
 
 
