@@ -157,7 +157,7 @@ protected:
    * \detail This functions searches for linear inequalities over
    * free real variables. It will replace each of them with a boolean
    * variable. A list of the new boolean variables is returned.
-   * The parameter [enumeration_condition] contains an expression 
+   * The parameter [enumeration_condition] contains an expression
    * that represents that relation between the replaced linear inequalities
    * and the booleans. It has the shape (b1 <=> (x1 < r2)) && (b1 <=> (x2 < r2))...
    * where b1 and b2 are boolean variables, x1 and x2 are real variables and r1 and
@@ -195,24 +195,23 @@ protected:
     return variable_list(replacements.begin(), replacements.end());
   }
 
-  /** 
+  /**
    * \brief For all evaluations of variables in vars for which parent_block holds,
    * add split_block to the partition
    * \param vars The set of free variables in split_block
-   */ 
-  void enumerate(const data_expression& parent_block, const variable_list& vars, const lambda& split_block, 
+   */
+  void enumerate(const data_expression& parent_block, const variable_list& vars, const lambda& split_block,
     const data_expression& lli, std::set< data_expression >& new_part)
   {
 
     typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerate_filter_print> enumerator_type;
     enumerator_identifier_generator id_generator;
-    enumerator_type enumerator(rewr, m_spec.data(), rewr, id_generator, (std::numeric_limits<std::size_t>::max)(), true);
+    enumerator_type enumerator(rewr, m_spec.data(), rewr, id_generator, (std::numeric_limits<std::size_t>::max)(), true, enumerate_filter_print(lli, rewr));
 
     data::mutable_indexed_substitution<> sigma;
     std::deque<enumerator_list_element_with_substitution<> >
          enumerator_deque(1, enumerator_list_element_with_substitution<>(vars, parent_block));
-    enumerate_filter_print filter(lli, rewr);
-    for (typename enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque, filter); i != enumerator.end(filter); ++i)
+    for (typename enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end(); ++i)
     {
       i->add_assignments(vars,sigma,rewr);
 
@@ -753,7 +752,7 @@ public:
       print_partition(partition);
       find_reachable_blocks();
       num_iterations++;
-      std::cout << "End of iteration " << num_iterations << 
+      std::cout << "End of iteration " << num_iterations <<
       ".\nRefinement cache entries/hits/misses " << refinement_cache.size() << "/" << refinement_cache_hits << "/" << refinement_cache_misses <<
       ".\nTransition cache entries/hits/misses " << transition_cache.size() << "/" << transition_cache_hits << "/" << transition_cache_misses <<
       ".\nLast minute transition check successes " << last_minute_transition_check <<

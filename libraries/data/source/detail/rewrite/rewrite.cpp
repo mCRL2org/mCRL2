@@ -380,7 +380,6 @@ data_expression Rewriter::quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  const bool throw_exceptions = true;
   const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   struct is_not
@@ -403,7 +402,8 @@ data_expression Rewriter::quantifier_enumeration(
                                              rewriter_wrapper::substitution_type> enumerator_type;
   try
   {
-    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, m_generator, max_count, throw_exceptions);
+    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration,
+      wrapped_rewriter, m_generator, max_count, true, is_not(identity_element));
 
     /* Create a list to store solutions */
     data_expression partial_result = identity_element;
@@ -411,10 +411,10 @@ data_expression Rewriter::quantifier_enumeration(
     std::size_t loop_upperbound = (sorts_are_finite ? npos() : 10);
     std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
 
-    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque, is_not(identity_element));
+    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
     for( ; loop_upperbound > 0 &&
            partial_result != absorbing_element &&
-           sol != enumerator.end(is_not(identity_element));
+           sol != enumerator.end();
            ++sol)
     {
       partial_result = lazy_op(partial_result, sol->expression());
@@ -427,7 +427,7 @@ data_expression Rewriter::quantifier_enumeration(
       }
     }
 
-    if (sol == enumerator.end(is_not(identity_element)) && loop_upperbound > 0)
+    if (sol == enumerator.end() && loop_upperbound > 0)
     {
       return partial_result;
     }
