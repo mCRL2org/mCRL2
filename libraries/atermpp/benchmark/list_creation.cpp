@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "create_nested_function.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 using namespace atermpp;
 
@@ -16,10 +16,16 @@ int main(int, char*[])
   std::size_t size = 10000;
   std::size_t iterations = 10000;
 
-  aterm_appl f;
+  function_symbol c("c", 0);
+  aterm_appl c_term(c);
+
   for (std::size_t i = 0; i < iterations; ++i)
   {
-    f = create_nested_function<2>(size);
+    aterm_list list;
+    for (std::size_t i = 0; i < size; ++i)
+    {
+      list.push_front(c_term);
+    }
   }
 
   return 0;
