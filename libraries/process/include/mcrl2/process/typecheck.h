@@ -146,14 +146,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   typecheck_builder(data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variable_context,
                     const detail::process_context& process_context,
-                    const detail::action_context& action_context,
-                    const process_equation* current_equation = nullptr
+                    const detail::action_context& action_context
                    )
     : m_data_type_checker(data_typechecker),
       m_variable_context(variable_context),
       m_process_context(process_context),
-      m_action_context(action_context),
-      m_current_equation(current_equation)
+      m_action_context(action_context)
   {}
 
   data::sorts_list action_sorts(const core::identifier_string& name)
@@ -262,13 +260,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
 
     process_identifier P = m_process_context.match_untyped_process_instance_assignment(x);
-
-    // check if the process assignment matches with the current equation
-    if (m_current_equation && P != m_current_equation->identifier())
-    {
-      throw mcrl2::runtime_error("Non matching process assignment " + process::pp(x) + " detected in process equation " + process::pp(m_current_equation->identifier()) + ".");
-    }
-
     const data::variable_list& formal_parameters = P.variables();
 
     // This checks for duplicate left hand sides.
@@ -485,11 +476,10 @@ typecheck_builder make_typecheck_builder(
                     data::data_type_checker& data_typechecker,
                     const data::detail::variable_context& variables,
                     const detail::process_context& process_identifiers,
-                    const detail::action_context& action_context,
-                    const process_equation* current_equation = nullptr
+                    const detail::action_context& action_context
                    )
 {
-  return typecheck_builder(data_typechecker, variables, process_identifiers, action_context, current_equation);
+  return typecheck_builder(data_typechecker, variables, process_identifiers, action_context);
 }
 
 } // namespace detail
@@ -563,7 +553,7 @@ class process_type_checker
       {
         data::detail::variable_context variable_context = m_variable_context;
         variable_context.add_context_variables(eqn.identifier().variables(), m_data_type_checker);
-        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(variable_context, eqn.expression(), &eqn));
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(variable_context, eqn.expression()));
       }
 
       // typecheck the initial state
@@ -576,11 +566,9 @@ class process_type_checker
     }
 
   protected:
-    process_expression typecheck_process_expression(const data::detail::variable_context& variables,
-                                                    const process_expression& x,
-                                                    const process_equation* current_equation = nullptr)
+    process_expression typecheck_process_expression(const data::detail::variable_context& variables, const process_expression& x)
     {
-      return detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context, current_equation).apply(x);
+      return detail::make_typecheck_builder(m_data_type_checker, variables, m_process_context, m_action_context).apply(x);
     }
 };
 
