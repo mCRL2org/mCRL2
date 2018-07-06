@@ -46,6 +46,11 @@ class AddEditPropertyDialog : public QDialog
   void resetFocus();
 
   /**
+   * @brief clearFields Empties the property name and text fields
+   */
+  void clearFields();
+
+  /**
    * @brief setProperty Sets the property in the text fields
    * @param property The property to fill in
    */

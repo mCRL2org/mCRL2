@@ -53,6 +53,12 @@ void AddEditPropertyDialog::resetFocus()
   ui->propertyNameField->setFocus();
 }
 
+void AddEditPropertyDialog::clearFields()
+{
+  ui->propertyNameField->clear();
+  ui->propertyTextField->clear();
+}
+
 void AddEditPropertyDialog::setProperty(Property* property)
 {
   ui->propertyNameField->setText(property->name);

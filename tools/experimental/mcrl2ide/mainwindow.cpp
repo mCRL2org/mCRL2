@@ -314,7 +314,7 @@ void MainWindow::actionAddProperty()
   }
 
   /* if successful, allow a property to be added */
-  addPropertyDialog->setProperty(&Property("", ""));
+  addPropertyDialog->clearFields();
   addPropertyDialog->resetFocus();
   if (fileSystem->projectOpened())
   {
