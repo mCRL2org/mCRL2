@@ -12,6 +12,7 @@
 
 #include "propertiesdock.h"
 #include "processsystem.h"
+#include "addeditpropertydialog.h"
 
 #include <QLabel>
 #include <QHBoxLayout>
@@ -87,6 +88,11 @@ class PropertyWidget : public QWidget
   void actionEdit();
 
   /**
+   * @brief actionEditResult Handles the result of editing a property
+   */
+  void actionEditResult();
+
+  /**
    * @brief actionDelete Allows the user to delete this property
    */
   void actionDelete();
@@ -99,11 +105,14 @@ class PropertyWidget : public QWidget
   FileSystem* fileSystem;
   PropertiesDock* parent;
   Property* property;
+
   QHBoxLayout* propertyLayout;
   QLabel* propertyNameLabel;
   QStackedWidget* verificationWidgets;
   QPushButton* editButton;
   QPushButton* deleteButton;
+
+  AddEditPropertyDialog* editPropertyDialog;
 
   int verificationProcessId;
 };

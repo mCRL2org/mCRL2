@@ -94,10 +94,6 @@ class ProcessThread : public QThread
   int currentProcessid;
 };
 
-enum class LtsReduction;
-class Property;
-class FileSystem;
-
 /**
  * @brief The ProcessSystem class handles all processes related to mCRL2 tools
  */

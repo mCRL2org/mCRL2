@@ -11,7 +11,6 @@
 #define FILESYSTEM_H
 
 #include "codeeditor.h"
-#include "processsystem.h"
 
 #include <QObject>
 #include <QDir>
@@ -48,8 +47,6 @@ class Project
 
   Project(QString projectName, std::list<Property*> properties);
 };
-
-class ProcessSystem;
 
 /**
  * @brief The FileSystem class handles all file related operations
@@ -205,25 +202,17 @@ class FileSystem : public QObject
   bool deletePropertyFile(QString propertyName, bool showIfFailed = true);
 
   /**
-   * @brief deleteUnlistedPropertyFiles Deletes all property files for which
-   *   there is no entry in the "properties" list
+   * @brief newProperty Adds a new property
+   * @param property The new property to add
    */
-  void deleteUnlistedPropertyFiles();
-
-  /**
-   * @brief newProperty Creates a new property
-   * @param processSystem The process system needed to parse the property
-   * @return The new property, is NULL if failed
-   */
-  Property* newProperty(ProcessSystem* processSystem);
+  void newProperty(Property* property);
 
   /**
    * @brief editProperty Edits an existing property
    * @param oldProperty The property to be edited
-   * @param processSystem The process system needed to parse the property
-   * @return The edited property, the old property if failed
+   * @param newProperty The property after editing
    */
-  Property* editProperty(Property* oldProperty, ProcessSystem* processSystem);
+  void editProperty(Property* oldProperty, Property* newProperty);
 
   /**
    * @brief deleteProperty Deletes an existing property
@@ -263,6 +252,12 @@ class FileSystem : public QObject
    * @brief setSpecificationModified Sets the specification to modified
    */
   void setSpecificationModified();
+
+  /**
+   * @brief deleteUnlistedPropertyFiles Deletes all property files for which
+   *   there is no entry in the "properties" list
+   */
+  void deleteUnlistedPropertyFiles();
 
   signals:
   /**

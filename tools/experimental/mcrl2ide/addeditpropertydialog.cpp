@@ -12,16 +12,17 @@
 
 #include <QMessageBox>
 
-AddEditPropertyDialog::AddEditPropertyDialog(
-    bool add, ProcessSystem* processSystem, FileSystem* fileSystem,
-    QWidget* parent, QString propertyName, QString propertyText)
+AddEditPropertyDialog::AddEditPropertyDialog(bool add,
+                                             ProcessSystem* processSystem,
+                                             FileSystem* fileSystem,
+                                             QWidget* parent)
     : QDialog(parent), ui(new Ui::AddEditPropertyDialog)
 {
   ui->setupUi(this);
 
   this->processSystem = processSystem;
   this->fileSystem = fileSystem;
-  oldPropertyName = propertyName;
+  oldPropertyName = "";
   propertyParsingProcessid = -1;
 
   /* change the ui depending on whether this should be an add or edit property
@@ -35,8 +36,6 @@ AddEditPropertyDialog::AddEditPropertyDialog(
   {
     windowTitle = "Edit Property";
     ui->addEditButton->setText("Edit");
-    ui->propertyNameField->setText(propertyName);
-    ui->propertyTextField->setPlainText(propertyText);
   }
 
   setWindowTitle(windowTitle);
@@ -48,10 +47,27 @@ AddEditPropertyDialog::AddEditPropertyDialog(
           SLOT(parseResults(int)));
 }
 
+void AddEditPropertyDialog::resetFocus()
+{
+  ui->addEditButton->setFocus();
+  ui->propertyNameField->setFocus();
+}
+
+void AddEditPropertyDialog::setProperty(Property* property)
+{
+  ui->propertyNameField->setText(property->name);
+  ui->propertyTextField->setPlainText(property->text);
+}
+
 Property* AddEditPropertyDialog::getProperty()
 {
   return new Property(ui->propertyNameField->text(),
                       ui->propertyTextField->toPlainText());
+}
+
+void AddEditPropertyDialog::setOldPropertyName(QString propertyName)
+{
+  oldPropertyName = propertyName;
 }
 
 void AddEditPropertyDialog::checkInput()

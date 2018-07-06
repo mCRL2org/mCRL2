@@ -14,9 +14,6 @@
 
 #include <QDialog>
 
-class ProcessSystem;
-class FileSystem;
-
 namespace Ui
 {
 class AddEditPropertyDialog;
@@ -37,19 +34,35 @@ class AddEditPropertyDialog : public QDialog
    * @param processSystem The process system (to parse formulas)
    * @param fileSystem The file system (to check property names)
    * @param parent The parent of this widget
-   * @param propertyName The current name of the property (in case of edit)
-   * @param propertyText The current text of the property (in case of edit)
    */
   AddEditPropertyDialog(bool add, ProcessSystem* processSystem,
-                        FileSystem* fileSystem, QWidget* parent = 0,
-                        QString propertyName = "", QString propertyText = "");
+                        FileSystem* fileSystem, QWidget* parent = 0);
   ~AddEditPropertyDialog();
+
+  /**
+   * @brief resetFocus Puts the focus on the add/edit button and the proeprty
+   *   name field
+   */
+  void resetFocus();
+
+  /**
+   * @brief setProperty Sets the property in the text fields
+   * @param property The property to fill in
+   */
+  void setProperty(Property* property);
 
   /**
    * @brief getProperty Gets the property as entered in the text fields
    * @return The new or edited property
    */
   Property* getProperty();
+
+  /**
+   * @brief setOldPropertyName Records the name the property had when editing
+   *   began
+   * @param propertyName The name the property had when editing began
+   */
+  void setOldPropertyName(QString propertyName);
 
   public slots:
   /**

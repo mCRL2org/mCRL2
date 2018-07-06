@@ -72,6 +72,11 @@ class MainWindow : public QMainWindow
   void actionAddProperty();
 
   /**
+   * @brief actionAddPropertyResult Handles the result of adding a property
+   */
+  void actionAddPropertyResult();
+
+  /**
    * @brief actionFindAndReplace Allows the user to find and replace strings in
    *   the text editor
    */
