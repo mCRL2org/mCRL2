@@ -113,7 +113,10 @@ bool find_loop(const simple_structure_graph& G,
   if (is_propositional_variable_instantiation(w_.formula) && U.contains(w))
   {
     visited[w] = false;
-    if (w_.rank == data::undefined_index() || w_.decoration == structure_graph::d_true || w_.decoration == structure_graph::d_false)
+    if (w_.decoration == data::undefined_index() ||
+                   ((w_.rank % 2 == 0 && w_.decoration == structure_graph::d_disjunction) ||
+                    (w_.rank % 2 != 0 && w_.decoration == structure_graph::d_conjunction))
+       )
     {
       for (structure_graph::index_type u: w_.successors)
       {
