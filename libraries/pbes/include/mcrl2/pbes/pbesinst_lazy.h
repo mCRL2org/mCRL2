@@ -207,14 +207,14 @@ class pbesinst_lazy_algorithm
       return m_optimization >= 1 ? rewrite_true_false(symbol, X, psi) : psi;
     }
 
-    virtual bool solution_found(const propositional_variable_instantiation& init) const
+    virtual bool solution_found(const propositional_variable_instantiation& /* init */) const
     {
       return false;
     }
 
-    // recreates todo and discovered
+    // recreates todo
     virtual void reset(const propositional_variable_instantiation& /* init */,
-                       std::deque<propositional_variable_instantiation>& todo,
+                       std::deque<propositional_variable_instantiation>& /* todo */,
                        std::size_t /* regeneration_period */
                       )
     { }
