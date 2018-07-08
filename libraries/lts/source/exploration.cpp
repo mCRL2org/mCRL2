@@ -1183,8 +1183,7 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_not_npos(const next_sta
     {
       if (add_transition(state, *i))
       {
-        lps::state removed = state_queue.add_to_queue(i->target_state());
-        if (removed != lps::state())
+        if (!state_queue.add_to_queue(i->target_state()))
         {
           m_num_states--;
         }

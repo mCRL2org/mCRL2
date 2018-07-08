@@ -9,9 +9,10 @@
 #ifndef MCRL2_LTS_DETAIL_QUEUE_H
 #define MCRL2_LTS_DETAIL_QUEUE_H
 
-#include <climits>
+#include <limits>
 #include <cassert>
 #include <deque>
+#include <unordered_set>
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -25,12 +26,11 @@ class queue
   private:
     std::deque <T> queue_get;
     std::deque <T> queue_put;
-    std::size_t queue_size_max;        // This is the maximal allowed size of a queue
+    std::size_t queue_size_max;        // This is the maximal allowed size of a queue.
     std::size_t queue_put_count_extra; // This represents the number of elements that
-    // did not fit in the queue.
-    bool queue_size_fixed;
+                                       // did not fit in the put queue.
 
-    T add_to_full_queue(T state)
+    bool add_to_full_queue(const T& state)
     {
       /* We wish that every state has equal chance of being in the queue.
        * Let N be the size of the queue and M the number of states from which
@@ -68,20 +68,15 @@ class queue
       if ((rand() % (queue_put.size() + queue_put_count_extra)) < queue_put.size())
       {
         std::size_t pos = rand() % queue_put.size();
-        T old_state = queue_put[pos];
-        queue_put[pos] = state;
-        return old_state;
+        queue_put[pos]=state;
       }
-      return state;
+      return false;
     }
 
   public:
     queue() :
-      queue_get(),
-      queue_put(),
-      queue_size_max(UINT_MAX),
-      queue_put_count_extra(0),
-      queue_size_fixed(false)
+      queue_size_max(std::numeric_limits<size_t>::max()),
+      queue_put_count_extra(0)
     {
     }
 
@@ -93,30 +88,33 @@ class queue
     void set_max_size(std::size_t max_size)
     {
       queue_size_max = max_size;
-      queue_size_fixed = true;
       if (queue_put.size() > queue_size_max)
       {
         queue_put.resize(queue_size_max);
-        mCRL2log(log::warning) << "resizing put queue loses elements" << std::endl;
+        mCRL2log(log::warning) << "Resizing put queue loses elements." << std::endl;
       }
       if (queue_get.size() > queue_size_max)
       {
         queue_get.resize(queue_size_max);
-        mCRL2log(log::warning) << "resizing get queue loses elements" << std::endl;
+        mCRL2log(log::warning) << "Resizing get queue loses elements." << std::endl;
       }
     }
 
-    T add_to_queue(T state)
+    /// \brief Add state to queue, if there is place. Return whether insertion led to an increase of the queue.
+    /// \details If the queue is full, it is randomly decided whether the element is inserted, and if so
+    ///          which element is replaced. This is done such that all elements have a uniform probability of
+    ///          being inserted. 
+    bool add_to_queue(const T& state)
     {
-      if ((queue_size_fixed) && queue_put.size() >= queue_size_max)
+      if (queue_put.size() >= queue_size_max)
       {
         assert(queue_put.size() == queue_size_max);
         return add_to_full_queue(state);
       }
 
+      assert(queue_put_count_extra==0);
       queue_put.push_back(state);
-
-      return T();
+      return true;
     }
 
     T get_from_queue()
@@ -141,6 +139,7 @@ class queue
     void swap_queues()
     {
       queue_get.swap(queue_put);
+      queue_put.clear();
       queue_put_count_extra = 0;
     }
 };
