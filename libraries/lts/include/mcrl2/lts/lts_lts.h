@@ -115,13 +115,13 @@ inline std::string pp(const state_label_lts& label)
     }
     first = false;
     s += "(";
-    for (std::size_t i=0; i<l.size(); ++i)
+    for (lps::state::iterator i=l.begin(); i!=l.end(); ++i)
     {
-      s += data::pp(l[i]);
-      if (i+1<l.size())
+      if (i!=l.begin())
       {
         s += ",";
       }
+      s += data::pp(*i);
     }
     s += ")";
   }
