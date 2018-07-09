@@ -190,14 +190,32 @@ QString FileSystem::newProject(QString context)
 
   QString error = "";
 
+  /* if there are changes in the current project, ask to save first */
+  if (isSpecificationModified())
+  {
+    QMessageBox::StandardButton result = QMessageBox::question(
+        parent, "New Project",
+        "There are changes in the current project, do you want to save?",
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    switch (result)
+    {
+    case QMessageBox::Yes:
+      saveProject();
+      break;
+    case QMessageBox::Cancel:
+      return "";
+    default:
+      break;
+    }
+  }
+
   /* ask the user for a project name */
   bool ok;
   QString projectName =
       QInputDialog::getText(parent, context, "Project name:", QLineEdit::Normal,
                             "", &ok, Qt::WindowCloseButtonHint);
 
-  /* if user pressed ok, create the project and save the specification and
-   *   properties in it */
+  /* if user pressed ok, create the new project*/
   if (ok)
   {
     /* the project name may not be empty */
@@ -214,6 +232,9 @@ QString FileSystem::newProject(QString context)
         this->projectName = projectName;
         QDir(projectFolderPath()).mkdir(propertiesFolderName);
         projectOpen = true;
+        /* also empty the editor and properties list */
+        specificationEditor->clear();
+        properties.clear();
       }
       else
       {

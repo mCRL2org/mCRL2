@@ -259,9 +259,11 @@ void MainWindow::setupDocks()
 void MainWindow::actionNewProject()
 {
   QString projectName = fileSystem->newProject();
+  /* if successful, change the title and empty the properties dock */
   if (!projectName.isEmpty())
   {
     setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+    propertiesDock->setToNoProperties();
   }
 }
 
