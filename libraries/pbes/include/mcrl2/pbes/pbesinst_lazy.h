@@ -95,19 +95,11 @@ class pbesinst_lazy_algorithm
     {
       pbes p = x;
       pbes_system::detail::instantiate_global_variables(p);
-
-      // simplify all right hand sides of p
-      //
-      // NOTE: This is not just an optimization. There are certain PBES
-      // equations for which applying enumerate_quantifiers_rewriter directly
-      // won't terminate, like:
-      //
-      // forall m: Nat . exists k: Nat . val(m == k)
       pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
-      for (pbes_equation& eq: p.equations())
+      for (pbes_equation& eqn: p.equations())
       {
-        eq.formula() = order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), p.data());
+        eqn.formula() = order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eqn.formula())), p.data());
       }
       return p;
     }
@@ -127,13 +119,13 @@ class pbesinst_lazy_algorithm
       {
         value = true_();
       }
-      pbes_expression result = replace_propositional_variables(psi, [&](const propositional_variable_instantiation& Y) {
+      pbes_expression result = replace_propositional_variables(psi, [&](const propositional_variable_instantiation& Y) -> pbes_expression {
                                                                    if (Y == X)
                                                                    {
                                                                      changed = true;
                                                                      return value;
                                                                    }
-                                                                   return static_cast<const pbes_expression&>(Y);
+                                                                   return Y;
                                                                }
       );
       if (changed)
@@ -160,22 +152,18 @@ class pbesinst_lazy_algorithm
             search_strategy search_strategy = breadth_first,
             int optimization = 0
     )
-            :
-            datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p),
-                                                              p.global_variables()), rewrite_strategy),
-            m_pbes(preprocess(p)),
-            m_equation_index(p),
-            R(datar, p.data()),
-            m_search_strategy(search_strategy),
-            m_optimization(optimization)
-    {
-    }
+     : datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
+       m_pbes(preprocess(p)),
+       m_equation_index(p),
+       R(datar, p.data()),
+       m_search_strategy(search_strategy),
+       m_optimization(optimization)
+    { }
 
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
     virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)
-    {
-    }
+    { }
 
     propositional_variable_instantiation next_todo()
     {

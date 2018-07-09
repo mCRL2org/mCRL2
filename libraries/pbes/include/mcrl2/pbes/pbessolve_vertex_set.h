@@ -273,21 +273,6 @@ vertex_set set_difference(const vertex_set& V, const vertex_set& W)
   return result;
 }
 
-// inline
-// vertex_set make_vertex_set(const structure_graph& G)
-// {
-//   std::size_t N = G.all_vertices().size();
-//   vertex_set result(N);
-//   for (std::size_t i = 0; i < N; i++)
-//   {
-//     if (G.contains(i))
-//     {
-//       result.insert(i);
-//     }
-//   }
-//   return result;
-// }
-
 template <typename StructureGraph>
 void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::string& name)
 {

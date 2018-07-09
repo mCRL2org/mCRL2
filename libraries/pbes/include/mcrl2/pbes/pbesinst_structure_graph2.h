@@ -421,22 +421,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       // N.B. The sets S0 and S1 need to be resized, because new vertices may have been added.
       S0.resize(m_graph_builder.m_vertices.size());
       S1.resize(m_graph_builder.m_vertices.size());
-//      return replace_propositional_variables(psi, [&](const propositional_variable_instantiation& x) {
-//          auto u = m_graph_builder.find_vertex(x);
-//          if (u != structure_graph::undefined_vertex)
-//          {
-//            if (S0.contains(u))
-//            {
-//              return expr(true_());
-//            }
-//            else if (S1.contains(u))
-//            {
-//              return expr(false_());
-//            }
-//          }
-//          return expr(x);
-//        }
-//      );
       pbes_expression x;
       std::tie(b, x) = Rplus(super::rewrite_psi(symbol, X, psi));
       return x;
