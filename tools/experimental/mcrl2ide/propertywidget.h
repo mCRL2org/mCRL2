@@ -98,7 +98,11 @@ class PropertyWidget : public QWidget
   void actionDelete();
 
   protected:
-  void paintEvent(QPaintEvent* pe);
+  /**
+   * @brief paintEvent Makes sure that the widget is painted correctly
+   * @param pe A paint event
+   */
+  void paintEvent(QPaintEvent* pe) override;
 
   private:
   ProcessSystem* processSystem;

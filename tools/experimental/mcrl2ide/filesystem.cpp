@@ -184,14 +184,15 @@ void FileSystem::setSpecificationEditorCursor(int row, int column)
   specificationEditor->setTextCursor(cursor);
 }
 
-QString FileSystem::newProject(QString context)
+QString FileSystem::newProject(bool askToSave, bool forNewProject)
 {
   makeSureProjectsFolderExists();
 
   QString error = "";
+  QString context = forNewProject ? "New Project" : "Save Project As";
 
   /* if there are changes in the current project, ask to save first */
-  if (isSpecificationModified())
+  if (askToSave && isSpecificationModified())
   {
     QMessageBox::StandardButton result = QMessageBox::question(
         parent, "New Project",
@@ -232,9 +233,12 @@ QString FileSystem::newProject(QString context)
         this->projectName = projectName;
         QDir(projectFolderPath()).mkdir(propertiesFolderName);
         projectOpen = true;
-        /* also empty the editor and properties list */
-        specificationEditor->clear();
-        properties.clear();
+        /* also empty the editor and properties list if we are not saving as */
+        if (forNewProject)
+        {
+          specificationEditor->clear();
+          properties.clear();
+        }
       }
       else
       {
@@ -481,7 +485,7 @@ QString FileSystem::saveProject(bool forceSave)
 QString FileSystem::saveProjectAs()
 {
   /* ask the user for a new project name */
-  QString projectName = newProject("Save Project As");
+  QString projectName = newProject(false, false);
 
   /* save if successful, else return the empty string */
   if (projectName.isEmpty())

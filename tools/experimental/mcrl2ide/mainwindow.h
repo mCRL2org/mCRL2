@@ -42,8 +42,10 @@ class MainWindow : public QMainWindow
   public slots:
   /**
    * @brief actionNewProject Allows the user to create a new project
+   * @param askToSave Whether the user should be asked to save before creating a
+   *   new project if the specification has been modified
    */
-  void actionNewProject();
+  void actionNewProject(bool askToSave = true);
 
   /**
    * @brief actionOpenProject Allows the user to open a project
@@ -124,6 +126,13 @@ class MainWindow : public QMainWindow
    * @brief setDocksToDefault Puts all docks in their default location
    */
   void setDocksToDefault();
+
+  protected:
+  /**
+   * @brief closeEvent On closing the main window, asks to save if there are
+   *   changes
+   */
+  void closeEvent(QCloseEvent* event) override;
 
   private:
   /**

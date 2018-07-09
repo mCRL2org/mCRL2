@@ -186,11 +186,13 @@ class FileSystem : public QObject
   /**
    * @brief newProject Creates a new project with the corresponding file
    *   structure
-   * @param context Whether this is done for "Create Project" or "Save Project
-   *   As"
+   * @param askToSave Whether the user should be asked to save before creating a
+   *   new project if the specification has been modified
+   * @param forNewProject Whether this is done for "New Project" or "Save
+   *   Project As"
    * @return The name of the new project, is "" if failed
    */
-  QString newProject(QString context = "New Project");
+  QString newProject(bool askToSave = true, bool forNewProject = true);
 
   /**
    * @brief deletePropertyFile Deletes the file of a property

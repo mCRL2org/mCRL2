@@ -85,7 +85,7 @@ void MainWindow::setupMenuBar()
   QMenu* fileMenu = menuBar()->addMenu("File");
 
   newProjectAction =
-      fileMenu->addAction("New Project", this, SLOT(actionNewProject()));
+      fileMenu->addAction("New Project", this, SLOT(actionNewProject(bool)));
   newProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
   newProjectAction->setIcon(QIcon(":/icons/new_project.png"));
 
@@ -256,9 +256,9 @@ void MainWindow::setupDocks()
                       SLOT(setDocksToDefault()));
 }
 
-void MainWindow::actionNewProject()
+void MainWindow::actionNewProject(bool askToSave)
 {
-  QString projectName = fileSystem->newProject();
+  QString projectName = fileSystem->newProject(askToSave);
   /* if successful, change the title and empty the properties dock */
   if (!projectName.isEmpty())
   {
@@ -312,7 +312,7 @@ void MainWindow::actionAddProperty()
   /* we require a project to be made if no project has been opened */
   if (!fileSystem->projectOpened())
   {
-    actionNewProject();
+    actionNewProject(false);
   }
 
   /* if successful, allow a property to be added */
@@ -412,4 +412,37 @@ void MainWindow::actionVerifyAllProperties()
 void MainWindow::actionAbortVerification()
 {
   processSystem->abortAllProcesses(ProcessType::Verification);
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+  /* if there are changes, ask the user to save the project first */
+  if (fileSystem->isSpecificationModified())
+  {
+    QMessageBox::StandardButton result = QMessageBox::question(
+        this, "mCRL2 IDE",
+        "There are changes in the current project, do you want to save?",
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    switch (result)
+    {
+    case QMessageBox::Yes:
+      if (fileSystem->saveProject().isEmpty())
+      {
+        event->ignore();
+      }
+      else
+      {
+        event->accept();
+      }
+      break;
+    case QMessageBox::No:
+      event->accept();
+      break;
+    case QMessageBox::Cancel:
+      event->ignore();
+      break;
+    default:
+      break;
+    }
+  }
 }
