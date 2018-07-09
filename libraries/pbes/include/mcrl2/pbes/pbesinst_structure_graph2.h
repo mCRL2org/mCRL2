@@ -29,7 +29,7 @@ class computation_guard
      std::size_t m_count = 64;
 
   public:
-    computation_guard(std::size_t initial_count = 64)
+    explicit computation_guard(std::size_t initial_count = 64)
       : m_count(initial_count)
     {}
 
@@ -291,7 +291,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     // returns true if u has a successor that is not contained in the union of S0, S1 and done
     bool has_successor_not_in(const simple_structure_graph& G,
                               const structure_graph::index_type u,
-                              const structure_graph::vertex& u_,
                               const vertex_set& S0,
                               const vertex_set& S1,
                               const std::unordered_set<pbes_expression>& done
@@ -378,7 +377,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
         }
 
-        if (u_.decoration == structure_graph::d_none && has_successor_not_in(G, u, u_, S0, S1, done1))
+        if (u_.decoration == structure_graph::d_none && has_successor_not_in(G, u, S0, S1, done1))
         {
           for (auto v: G.successors(u))
           {
