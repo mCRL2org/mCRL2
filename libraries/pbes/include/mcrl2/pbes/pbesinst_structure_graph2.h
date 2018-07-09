@@ -485,31 +485,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     }
 };
 
-inline
-void pbesinst_structure_graph2(const pbes& p,
-                               structure_graph& G,
-                               data::rewriter::strategy rewrite_strategy = data::jitty,
-                               search_strategy search_strategy = breadth_first,
-                               bool optimization1 = false
-                              )
-{
-  if (search_strategy == breadth_first_short)
-  {
-    throw mcrl2::runtime_error("The breadth_first_short option is not supported!");
-  }
-  if (search_strategy == depth_first_short)
-  {
-    throw mcrl2::runtime_error("The depth_first_short option is not supported!");
-  }
-  pbes q = p;
-  if (!algorithms::is_normalized(q))
-  {
-    algorithms::normalize(q);
-  }
-  pbesinst_structure_graph_algorithm2 algorithm(q, G, rewrite_strategy, search_strategy, optimization1);
-  algorithm.run();
-}
-
 } // namespace pbes_system
 
 } // namespace mcrl2

@@ -197,24 +197,6 @@ struct rewrite_pbes_data2pbes_rewriter_command: public pbes_system::detail::pbes
   }
 };
 
-/// \brief Computes a structure graph for a PBES and prints the result.
-struct pbesinst_structure_graph_command: public pbes_system::detail::pbes_rewriter_command
-{
-  pbesinst_structure_graph_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_system::detail::pbes_rewriter_command("pbesinst-structure-graph", input_filename, output_filename, options, strategy)
-  {}
-
-  void execute()
-  {
-    pbes_system::detail::pbes_command::execute();
-    structure_graph G;
-    pbesinst_structure_graph(pbesspec, G, strategy, breadth_first, lazy);
-    std::ostringstream out;
-    out << G.vertices();
-    utilities::detail::write_text(output_filename, out.str());
-  }
-};
-
 struct stategraph_local_command: public pbes_system::detail::pbes_command
 {
   stategraph_local_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
@@ -264,7 +246,6 @@ class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>
     void add_commands(const std::vector<std::string>& options) override
     {
       add_command(std::make_shared<anonymize_pbes_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<pbesinst_structure_graph_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
