@@ -360,22 +360,37 @@ data_expression Rewriter::quantifier_enumeration(
 
   // Check whether the bound variables occur free in the rewritten body
   std::set < variable > free_variables=find_free_variables(t3);
-  variable_list vl_new_l;
+  variable_list vl_new_l_enum;
+  variable_list vl_new_l_other;
 
   bool sorts_are_finite=true;
   for(variable_vector::const_reverse_iterator i=vl_new_v.rbegin(); i!=vl_new_v.rend(); ++i)
   {
-    const variable v= *i;
+    const variable v = *i;
     if (free_variables.count(v)>0)
     {
-      vl_new_l.push_front(v);
-      sorts_are_finite=sorts_are_finite && m_data_specification_for_enumeration.is_certainly_finite(v.sort());
+      if(enumerator_algorithm<rewriter_wrapper>::is_enumerable(m_data_specification_for_enumeration, rewriter_wrapper(this), v.sort()))
+      {
+        vl_new_l_enum.push_front(v);
+        sorts_are_finite = sorts_are_finite && m_data_specification_for_enumeration.is_certainly_finite(v.sort());
+      }
+      else
+      {
+        vl_new_l_other.push_front(v);
+      }
     }
   }
 
-  if (vl_new_l.empty())
+  if (vl_new_l_enum.empty())
   {
-    return t3; // No quantified variables are bound.
+    if(vl_new_l_other.empty())
+    {
+      return t3; // No quantified variables are bound.
+    }
+    else
+    {
+      return abstraction(binder, vl_new_l_other, t3);
+    }
   }
 
   /* Find A solution*/
@@ -409,7 +424,7 @@ data_expression Rewriter::quantifier_enumeration(
     data_expression partial_result = identity_element;
 
     std::size_t loop_upperbound = (sorts_are_finite ? npos() : 10);
-    std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
+    std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l_enum, t3));
 
     enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
     for( ; loop_upperbound > 0 &&
@@ -429,7 +444,14 @@ data_expression Rewriter::quantifier_enumeration(
 
     if (sol == enumerator.end() && loop_upperbound > 0)
     {
-      return partial_result;
+      if(vl_new_l_other.empty())
+      {
+        return partial_result;
+      }
+      else
+      {
+        return abstraction(binder, vl_new_l_other, partial_result);
+      }
     }
     // One can consider to replace the variables by their original, in order to not show
     // internally generated variables in the output.
@@ -441,7 +463,7 @@ data_expression Rewriter::quantifier_enumeration(
     // the simplified expression
   }
 
-  return abstraction(binder,vl_new_l,rewrite(t3,sigma));
+  return abstraction(binder,vl_new_l_enum+vl_new_l_other,rewrite(t3,sigma));
 }
 
 

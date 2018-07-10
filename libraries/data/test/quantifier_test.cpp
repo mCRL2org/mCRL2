@@ -54,7 +54,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   quantifier_expression_test("exists x: Bool. x == true || x==false", "true", dataspec, r);
   quantifier_expression_test("forall x:Bool.exists y: Bool. x == y", "true", dataspec, r);
   quantifier_expression_test("exists x: Bool.forall y:Bool.x == y", "false", dataspec, r);
-  quantifier_expression_test("forall b: Bool. b", "false", dataspec, r); 
+  quantifier_expression_test("forall b: Bool. b", "false", dataspec, r);
 
   // tests for Pos / Nat
   dataspec.add_context_sort(sort_nat::nat());
@@ -78,7 +78,7 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   /* Test 15. Test whether elimination of quantifiers also happens inside a term. */
   quantifier_expression_test("(exists x_0: Bool. false) && (forall x_0: Nat. true)", "false", dataspec, r);
   quantifier_expression_test("(forall x_0: Pos. true) || (exists x_0: Bool. false)", "true", dataspec, r);
-  
+
   // The four tests below may need to be changed when the implementation of the
   // rewriter/enumerator is improved to deal with them
   // The test below is too complex for the enumerator to solve.
@@ -176,6 +176,12 @@ void quantifier_in_rewrite_rules_test(mcrl2::data::rewrite_strategy s)
   quantifier_expression_test("f", "true", dataspec, r);
 }
 
+void test_mixed_enumeration()
+{
+  quantifier_expression_test("exists x:Real, p:Pos . p == 1 && x > 4", "exists x:Real . x > 4", data_specification(), data::rewriter(data_specification()));
+  quantifier_expression_test("exists x:Real, p:Pos . p == 1", "true", data_specification(), data::rewriter(data_specification()));
+  quantifier_expression_test("exists x:Real, p:Pos . x > 4", "exists x:Real . x > 4", data_specification(), data::rewriter(data_specification()));
+}
 
 int test_main(int argc, char** argv)
 {
@@ -186,6 +192,8 @@ int test_main(int argc, char** argv)
     quantifier_expression_test(strategy);
     quantifier_in_rewrite_rules_test(strategy);
   }
+
+  test_mixed_enumeration();
 
   return EXIT_SUCCESS;
 }
