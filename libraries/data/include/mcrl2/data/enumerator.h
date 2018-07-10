@@ -430,6 +430,55 @@ class enumerator_algorithm
       }
     }
 
+    static bool is_enumerable(const data_specification& dataspec, const Rewriter& rewr, const sort_expression& sort, std::list<sort_expression>& parents)
+    {
+      if(sort_bag::is_bag(sort) || sort_fbag::is_fbag(sort))
+      {
+        return false;
+      }
+      else if(is_function_sort(sort))
+      {
+        const function_sort& func = atermpp::down_cast<function_sort>(sort);
+        enumerator_identifier_generator id_gen;
+        data_expression_vector expr_vec;
+        variable_list var_list;
+        return dataspec.is_certainly_finite(func) &&
+          detail::compute_finite_function_sorts(func, id_gen, dataspec, rewr, expr_vec, var_list);
+      }
+      else if(sort_set::is_set(sort) || sort_fset::is_fset(sort))
+      {
+        enumerator_identifier_generator id_gen;
+        data_expression_vector expr_vec;
+        mutable_indexed_substitution<> mut_sub;
+        return dataspec.is_certainly_finite(atermpp::down_cast<container_sort>(sort).element_sort()) &&
+          (!sort_fset::is_fset(sort) || detail::compute_finite_set_elements(atermpp::down_cast<container_sort>(sort), dataspec, rewr, mut_sub, expr_vec, id_gen));
+      }
+      else
+      {
+        const function_symbol_vector& constructors = dataspec.constructors(sort);
+        if(constructors.empty())
+        {
+          return false;
+        }
+        else
+        {
+          if(std::find(parents.begin(), parents.end(), sort) != parents.end())
+          {
+            return true;
+          }
+          parents.push_back(sort);
+          bool result = std::all_of(constructors.begin(), constructors.end(), [&](const function_symbol& constructor)
+            {
+              return !is_function_sort(constructor.sort()) ||
+                std::all_of(atermpp::down_cast<function_sort>(constructor.sort()).domain().begin(), atermpp::down_cast<function_sort>(constructor.sort()).domain().end(),
+                  [&](const sort_expression& arg_sort){ return is_enumerable(dataspec, rewr, arg_sort, parents); });
+            });
+          parents.pop_back();
+          return result;
+        }
+      }
+    }
+
   public:
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
@@ -447,6 +496,13 @@ class enumerator_algorithm
     {}
 
   public:
+
+    static bool is_enumerable(const data_specification& dataspec, const Rewriter& rewr, const sort_expression& sort)
+    {
+      std::list<sort_expression> parentstack;
+      return is_enumerable(dataspec, rewr, sort, parentstack);
+    }
+
     /// \brief Enumerates the front element of the todo list P.
     /// \param P The todo list of the algorithm.
     /// \param sigma A mutable substitution that is applied by the rewriter.
