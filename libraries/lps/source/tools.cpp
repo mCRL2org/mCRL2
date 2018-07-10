@@ -146,8 +146,8 @@ bool lpsinvelm(const std::string& input_filename,
                                           dot_file_name);
 
     if (!v_invariant_checker.check_invariant(invariant))
-    { 
-      return false; // The invariant was checked and found invalid. 
+    {
+      return false; // The invariant was checked and found invalid.
     }
   }
 
@@ -282,13 +282,14 @@ void lpssuminst(const std::string& input_filename,
 void lpsuntime(const std::string& input_filename,
                const std::string& output_filename,
                const bool add_invariants,
+               const bool apply_fourier_motzkin,
                const data::rewriter::strategy rewrite_strategy
               )
 {
   stochastic_specification spec;
   load_lps(spec, input_filename);
   data::rewriter rewr(spec.data(),rewrite_strategy);
-  untime_algorithm<stochastic_specification>(spec, add_invariants, rewr).run();
+  untime_algorithm<stochastic_specification>(spec, add_invariants, apply_fourier_motzkin, rewr).run();
   save_lps(spec, output_filename);
 }
 

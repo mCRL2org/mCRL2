@@ -52,6 +52,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
     using super::m_spec;
 
     bool m_add_invariants;
+    bool m_apply_fm;
     const data::rewriter& m_rewriter;
 
   protected:
@@ -165,11 +166,29 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
           }
         }
 
-        variable_list remaining_variables;
-        data_expression new_condition;
-        fourier_motzkin(s.condition(), do_not_occur, new_condition, remaining_variables, m_rewriter);
-        s.condition()=new_condition;
-        s.summation_variables()=do_occur + remaining_variables;
+        // Only apply Fourier Motzkin elimination to the new condition if the user
+        // explicitly asked for it.
+        // The application of Fourier Motzkin can change the structure of the
+        // condition significantly. Therefore, its application hides the real
+        // outcome of the untime algorithm.
+        if(m_apply_fm)
+        {
+          try
+          {
+            variable_list remaining_variables;
+            data_expression new_condition;
+            fourier_motzkin(s.condition(), do_not_occur, new_condition, remaining_variables, m_rewriter);
+            s.condition() = new_condition;
+            s.summation_variables() = do_occur + remaining_variables;
+          }
+          catch(mcrl2::runtime_error& e)
+          {
+            // The application of Fourier Motzkin failed because of mixed Real and
+            // non-Real variables. We leave the original condition, but show a
+            // warning to the user
+            mCRL2log(log::debug) << "Application of Fourier Motzkin failed with the message\n" << e.what() << std::endl;
+          }
+        }
       }
       else
       {
@@ -195,9 +214,10 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
 
 
   public:
-    untime_algorithm(Specification& spec, bool add_invariants, const data::rewriter& r)
+    untime_algorithm(Specification& spec, bool add_invariants, bool apply_fourier_motzkin, const data::rewriter& r)
       : detail::lps_algorithm<Specification>(spec),
         m_add_invariants(add_invariants),
+        m_apply_fm(apply_fourier_motzkin),
         m_rewriter(r)
     {
       m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
@@ -224,16 +244,13 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
 
         m_spec.process().process_parameters()=push_back(m_spec.process().process_parameters(),m_last_action_time);
         data::assignment_list init = m_spec.initial_process().assignments();
-        init=push_back(init,data::assignment(m_last_action_time, data::sort_real::real_(0)));
+        init = push_back(init,data::assignment(m_last_action_time, data::sort_real::real_(0)));
         m_spec.initial_process() = detail::make_process_initializer(init,m_spec.initial_process());
 
         for(action_summand_type& s: m_spec.process().action_summands())
         {
           untime(s);
         }
-        /* std::for_each(m_spec.process().action_summands().begin(),
-                      m_spec.process().action_summands().end(),
-                      std::bind(&untime_algorithm::untime, this, std::placeholders::_1)); */
       }
     }
 };

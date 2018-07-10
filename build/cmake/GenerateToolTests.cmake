@@ -176,6 +176,8 @@ endfunction()
 # lpsuntime
 function(gen_lpsuntime_release_tests LPSFILE)
 	add_tool_test(lpsuntime ${tagIN} ${LPSFILE})
+	add_tool_test(lpsuntime -i ${tagIN} ${LPSFILE})
+	add_tool_test(lpsuntime -e ${tagIN} ${LPSFILE})
 endfunction()
 
 # lpsinvelm

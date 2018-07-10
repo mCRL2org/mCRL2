@@ -24,6 +24,7 @@ class untime_tool: public rewriter_tool< input_output_tool >
     typedef rewriter_tool < input_output_tool > super;
 
     bool add_invariants;
+    bool apply_fourier_motzkin;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
@@ -34,15 +35,23 @@ class untime_tool: public rewriter_tool< input_output_tool >
       {
         add_invariants = true;
       }
+      if (parser.options.count("eliminate-sumvars")>0)
+      {
+        apply_fourier_motzkin = true;
+      }
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.
-      add_option("invariant",
-                 "add invariants for parameters of type real to the output",
+      desc.add_option("invariant",
+                 "add invariants for parameters of type Real to the output",
                  'i');
+      desc.add_option("eliminate-sumvars",
+                 "when possible, eliminate summation variables of type Real "
+                 "using the Fourier Motzkin algorithm. This can significantly "
+                 "change the structure of the conditions.",
+                 'e');
     }
 
   public:
@@ -55,12 +64,13 @@ class untime_tool: public rewriter_tool< input_output_tool >
         "Remove time from the linear process specification (LPS) in INFILE and write the "
         "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not "
         "present, stdout is used."),
-      add_invariants(false)
+      add_invariants(false),
+      apply_fourier_motzkin(false)
     {}
 
     bool run()
     {
-      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename, add_invariants, m_rewrite_strategy);
+      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename, add_invariants, apply_fourier_motzkin, m_rewrite_strategy);
       return true;
     }
 
