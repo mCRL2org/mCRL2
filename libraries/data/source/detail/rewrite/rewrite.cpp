@@ -369,7 +369,7 @@ data_expression Rewriter::quantifier_enumeration(
     const variable v = *i;
     if (free_variables.count(v)>0)
     {
-      if(enumerator_algorithm<rewriter_wrapper>::is_enumerable(m_data_specification_for_enumeration, rewriter_wrapper(this), v.sort()))
+      if(is_enumerable(m_data_specification_for_enumeration, rewriter_wrapper(this), v.sort()))
       {
         vl_new_l_enum.push_front(v);
         sorts_are_finite = sorts_are_finite && m_data_specification_for_enumeration.is_certainly_finite(v.sort());
