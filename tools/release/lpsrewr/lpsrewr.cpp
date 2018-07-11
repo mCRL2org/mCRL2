@@ -7,19 +7,22 @@
 /// \file lpsrewr.cpp
 /// \brief Tool for rewriting a linear process specification.
 
-#include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/lps/lps_rewriter_tool.h"
+#include "mcrl2/lps/tools.h"
 
 using namespace mcrl2;
+using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::data::tools::rewriter_tool;
+using lps::tools::lps_rewriter_tool;
 
-class lps_rewriter_tool : public rewriter_tool< input_output_tool >
+class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool > >
 {
   protected:
-    typedef rewriter_tool< input_output_tool > super;
+    typedef lps_rewriter_tool<rewriter_tool< input_output_tool > > super;
 
     void add_options(utilities::interface_description& desc)
     {
@@ -33,7 +36,7 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
     }
 
   public:
-    lps_rewriter_tool()
+    lps_rewriter()
       : super(
         "lpsrewr",
         "Wieger Wesselink and Muck van Weerdenburg",
@@ -46,9 +49,18 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
 
     bool run()
     {
+      using namespace utilities;
+
+      mCRL2log(verbose) << "lpsrewr parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  lps rewriter:       " << m_lps_rewriter_type << std::endl;
+
+
       lps::lpsrewr(input_filename(),
                    output_filename(),
-                   rewrite_strategy()
+                   rewrite_strategy(),
+                   rewriter_type()
                  );
       return true;
     }
@@ -57,6 +69,6 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
 
 int main(int argc, char* argv[])
 {
-  return lps_rewriter_tool().execute(argc, argv);
+  return lps_rewriter().execute(argc, argv);
 }
 

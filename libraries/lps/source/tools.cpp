@@ -26,6 +26,7 @@
 #include "mcrl2/lps/suminst.h"
 #include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/untime.h"
+#include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -217,13 +218,26 @@ void lpspp(const std::string& input_filename,
 
 void lpsrewr(const std::string& input_filename,
              const std::string& output_filename,
-             const data::rewriter::strategy rewrite_strategy
+             const data::rewriter::strategy rewrite_strategy,
+             const lps_rewriter_type rewriter_type
             )
 {
   stochastic_specification spec;
   load_lps(spec, input_filename);
-  mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
-  lps::rewrite(spec, R);
+  switch (rewriter_type)
+  {
+    case simplify:
+    {
+      mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
+      lps::rewrite(spec, R);
+      break;
+    }
+    case quantifier_one_point:
+    {
+      one_point_rule_rewrite(spec);
+      break;
+    }
+  }
   lps::remove_trivial_summands(spec);
   lps::remove_redundant_assignments(spec);
   save_lps(spec, output_filename);

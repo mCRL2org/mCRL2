@@ -43,13 +43,7 @@ class lps_rewriter_tool: public Tool
     {
       std::set<lps::lps_rewriter_type> result;
       result.insert(lps::simplify);
-      result.insert(lps::quantifier_all);
-      result.insert(lps::quantifier_finite);
-      result.insert(lps::quantifier_inside);
       result.insert(lps::quantifier_one_point);
-      result.insert(lps::pfnf);
-      result.insert(lps::ppg);
-      result.insert(lps::bqnf_quantifier);
       return result;
     }
 
