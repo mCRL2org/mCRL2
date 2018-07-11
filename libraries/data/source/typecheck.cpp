@@ -4051,72 +4051,79 @@ void mcrl2::data::data_type_checker::add_function(const data::function_symbol& f
   }
 }
 
-void mcrl2::data::data_type_checker::read_sort(const sort_expression& SortExpr)
+void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
 {
-  if (is_basic_sort(SortExpr))
+  if (is_basic_sort(sort_expr))
   {
-    check_basic_sort_is_declared(down_cast<basic_sort>(SortExpr).name());
+    check_basic_sort_is_declared(down_cast<basic_sort>(sort_expr).name());
     return;
   }
 
-  if (is_container_sort(SortExpr))
+  if (is_container_sort(sort_expr))
   {
-    return read_sort(down_cast<container_sort>(SortExpr).element_sort());
+    return read_sort(down_cast<container_sort>(sort_expr).element_sort());
   }
 
-  if (is_function_sort(SortExpr))
+  if (is_function_sort(sort_expr))
   {
-    const function_sort& fs = atermpp::down_cast<function_sort>(SortExpr);
+    const function_sort& fs = atermpp::down_cast<function_sort>(sort_expr);
     read_sort(fs.codomain());
 
-    for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+    for (const sort_expression& s: fs.domain())
     {
-      read_sort(*i);
+      read_sort(s);
     }
     return;
   }
 
-  if (is_structured_sort(SortExpr))
+  if (is_structured_sort(sort_expr)) 
   {
-    const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(SortExpr);
-    for (structured_sort_constructor_list::const_iterator i=struct_sort.constructors().begin();
-               i!=struct_sort.constructors().end(); ++i)
+    // The map below is used to warn that there are projections with the same name
+    // in this structured sort. This hardly ever serves a purpose and gives rise confusion. 
+    std::map<core::identifier_string, sort_expression> duplicate_projections_warner;
+    const structured_sort& struct_sort = atermpp::down_cast<structured_sort>(sort_expr);
+    for (const structured_sort_constructor constr: struct_sort.constructors())
     {
-      const structured_sort_constructor& Constr(*i);
-
       // recognizer -- if present -- a function from SortExpr to Bool
-      core::identifier_string Name=Constr.recogniser();
+      core::identifier_string Name=constr.recogniser();
       if (Name!=core::empty_identifier_string())
       {
-        add_function(data::function_symbol(Name,function_sort(sort_expression_list({ SortExpr }),sort_bool::bool_())),"recognizer");
+        add_function(data::function_symbol(Name,function_sort(sort_expression_list({ sort_expr }),sort_bool::bool_())),"recognizer");
       }
 
       // constructor type and projections
-      const structured_sort_constructor_argument_list& Projs=Constr.arguments();
-      Name=Constr.name();
+      const structured_sort_constructor_argument_list& Projs=constr.arguments();
+      Name=constr.name();
       if (Projs.empty())
       {
-        add_constant(data::function_symbol(Name,SortExpr),"constructor constant");
+        add_constant(data::function_symbol(Name,sort_expr),"constructor constant");
         continue;
       }
 
       sort_expression_list ConstructorType;
-      for (structured_sort_constructor_argument_list::const_iterator j=Projs.begin(); j!=Projs.end(); ++j)
+      for (const structured_sort_constructor_argument&  proj: Projs)
       {
-        structured_sort_constructor_argument Proj= *j;
-        const sort_expression& ProjSort=Proj.sort();
-
-        // not to forget, recursive call for ProjSort ;-)
-        read_sort(ProjSort);
-
-        const core::identifier_string& ProjName=Proj.name();
-        if (ProjName!=core::empty_identifier_string())
+        if (duplicate_projections_warner.count(proj.name())>0 && duplicate_projections_warner[proj.name()]!=proj.sort())
         {
-          add_function(function_symbol(ProjName,function_sort(sort_expression_list({ SortExpr }),ProjSort)),"projection",true);
+          mCRL2log(warning) << "Warning. Projection function " << proj.name() << " occurs multiple times with different sorts in " << struct_sort << ". " << std::endl;
         }
-        ConstructorType.push_front(ProjSort);
+        else 
+        {
+          duplicate_projections_warner[proj.name()]=proj.sort();
+        }
+        const sort_expression& proj_sort=proj.sort();
+
+        // not to forget, recursive call for proj_sort ;-)
+        read_sort(proj_sort);
+
+        const core::identifier_string& proj_name=proj.name();
+        if (proj_name!=core::empty_identifier_string())
+        {
+          add_function(function_symbol(proj_name,function_sort(sort_expression_list({ sort_expr }),proj_sort)),"projection",true);
+        }
+        ConstructorType.push_front(proj_sort);
       }
-      add_function(data::function_symbol(Name,function_sort(reverse(ConstructorType),SortExpr)),"constructor");
+      add_function(data::function_symbol(Name,function_sort(reverse(ConstructorType),sort_expr)),"constructor");
     }
     return;
   }
