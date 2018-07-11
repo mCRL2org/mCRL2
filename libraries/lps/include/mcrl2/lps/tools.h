@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
+#include "mcrl2/lps/lps_rewriter_type.h"
 #include "mcrl2/data/rewriter.h"
 #include <string>
 
@@ -65,7 +66,8 @@ void lpspp(const std::string& input_filename,
 
 void lpsrewr(const std::string& input_filename,
              const std::string& output_filename,
-             const data::rewriter::strategy rewrite_strategy
+             const data::rewriter::strategy rewrite_strategy,
+             const lps::lps_rewriter_type rewriter_type
             );
 
 void lpssumelm(const std::string& input_filename,
