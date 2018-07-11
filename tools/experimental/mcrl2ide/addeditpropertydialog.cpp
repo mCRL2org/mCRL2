@@ -45,6 +45,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(parseResults(int)));
+  connect(this, SIGNAL(rejected()), this, SLOT(onRejected()));
 }
 
 void AddEditPropertyDialog::resetFocus()
@@ -74,6 +75,18 @@ Property* AddEditPropertyDialog::getProperty()
 void AddEditPropertyDialog::setOldPropertyName(QString propertyName)
 {
   oldPropertyName = propertyName;
+}
+
+void AddEditPropertyDialog::abortPropertyParsing()
+{
+  if (propertyParsingProcessid >= 0)
+  {
+    /* we first change propertyParsingProcessid so that parsingResult doesn't
+     *   get triggered */
+    int parsingid = propertyParsingProcessid;
+    propertyParsingProcessid = -1;
+    processSystem->abortProcess(parsingid);
+  }
 }
 
 void AddEditPropertyDialog::checkInput()
@@ -113,8 +126,10 @@ void AddEditPropertyDialog::checkInput()
     return;
   }
 
-  /* save the property, then parse the formula and wait for a reply */
+  /* save the property, abort the previous parsing process and parse the formula
+   *   and wait for a reply */
   fileSystem->saveProperty(getProperty());
+  abortPropertyParsing();
   propertyParsingProcessid = processSystem->parseProperty(getProperty());
 }
 
@@ -149,6 +164,12 @@ void AddEditPropertyDialog::parseResults(int processid)
       msgBox->exec();
     }
   }
+}
+
+void AddEditPropertyDialog::onRejected()
+{
+  /* abort the parsing process */
+   abortPropertyParsing();
 }
 
 AddEditPropertyDialog::~AddEditPropertyDialog()

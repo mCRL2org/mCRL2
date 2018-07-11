@@ -69,6 +69,11 @@ class AddEditPropertyDialog : public QDialog
    */
   void setOldPropertyName(QString propertyName);
 
+  /**
+   * @brief abortPropertyParsing Abort the current property parsing process
+   */
+  void abortPropertyParsing();
+
   public slots:
   /**
    * @brief checkInput Checks whether the fields are non-empty and the
@@ -81,6 +86,12 @@ class AddEditPropertyDialog : public QDialog
    * @param processid The id of a finished process
    */
   void parseResults(int processid);
+
+  /**
+   * @brief onRejected On rejected (Cancel, escape, "X"), abort the last parsing
+   *   process
+   */
+  void onRejected();
 
   private:
   Ui::AddEditPropertyDialog* ui;

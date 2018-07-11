@@ -52,6 +52,7 @@ void ProcessThread::run()
 
       /* wait until it has finished */
       finishLoop.exec();
+      currentProcessid = -1;
     }
     else
     {
@@ -794,6 +795,7 @@ void ProcessSystem::verificationResult(int previousExitCode)
 void ProcessSystem::abortProcess(int processid)
 {
   ProcessType processType = processTypes[processid];
+  bool aborted;
 
   /* if this process is running, terminate it */
   if (processThreads[processType]->getCurrentProcessId() == processid)
@@ -803,16 +805,20 @@ void ProcessSystem::abortProcess(int processid)
       process->blockSignals(true);
       process->kill();
     }
+    aborted = true;
   }
   else
   {
     /* if it is not running, simply remove it from the queue */
-    processQueues[processType]->removeOne(processid);
+    aborted = processQueues[processType]->removeOne(processid);
   }
 
-  emit processFinished(processid);
-  consoleDock->writeToConsole(processTypes[processid],
-                              "##### PROCESS WAS ABORTED #####\n");
+  if (aborted)
+  {
+    emit processFinished(processid);
+    consoleDock->writeToConsole(processTypes[processid],
+                                "##### PROCESS WAS ABORTED #####\n");
+  }
 }
 
 void ProcessSystem::abortAllProcesses(ProcessType processType)
