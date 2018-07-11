@@ -12,7 +12,6 @@
 #include <limits>
 #include <cassert>
 #include <deque>
-#include <unordered_set>
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -23,7 +22,7 @@ namespace lts
 template <class T>
 class queue
 {
-  private:
+  protected:
     std::deque <T> queue_get;
     std::deque <T> queue_put;
     std::size_t queue_size_max;        // This is the maximal allowed size of a queue.
