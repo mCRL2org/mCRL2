@@ -19,13 +19,15 @@ int main(int, char*[])
   function_symbol c("c", 0);
   aterm_appl c_term(c);
 
+  aterm_list list;
   for (std::size_t i = 0; i < iterations; ++i)
   {
-    aterm_list list;
-    for (std::size_t i = 0; i < size; ++i)
+    aterm_list tmp_list;
+    for (std::size_t j = 0; j < size; ++j)
     {
-      list.push_front(c_term);
+      tmp_list.push_front(c_term);
     }
+    list = tmp_list;
   }
 
   return 0;
