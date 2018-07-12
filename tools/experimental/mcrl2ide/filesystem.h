@@ -14,6 +14,7 @@
 
 #include <QObject>
 #include <QDir>
+#include <QFileDialog>
 
 enum class LtsReduction
 {
@@ -39,15 +40,6 @@ class Property
   bool equals(Property* property);
 };
 
-class Project
-{
-  public:
-  QString projectName;
-  std::list<Property*> properties;
-
-  Project(QString projectName, std::list<Property*> properties);
-};
-
 /**
  * @brief The FileSystem class handles all file related operations
  */
@@ -64,23 +56,18 @@ class FileSystem : public QObject
   explicit FileSystem(CodeEditor* specificationEditor, QWidget* parent);
 
   /**
-   * @brief makeSureProjectFolderExists Checks whether the projects folder
-   *   exists, if not creates it
-   */
-  void makeSureProjectsFolderExists();
-
-  /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder
    *   exists, if not creates it
    */
   void makeSurePropertiesFolderExists();
 
   /**
-   * @brief projectFolderPath Defines the file path of the current project
-   *   folder
-   * @return The file path of the project folder
+   * @brief projectFilePath Defines the file path for the project file,
+   *   which contains some info and indicates whether the parent folder is a
+   *   valid mcrl2 project folder
+   * @return The file path of the project file
    */
-  QString projectFolderPath();
+  QString projectFilePath();
 
   /**
    * @brief propertiesFolderPath Defines the file path of the current properties
@@ -88,6 +75,13 @@ class FileSystem : public QObject
    * @return The file path of the properties folder
    */
   QString propertiesFolderPath();
+
+  /**
+   * @brief defaultSpecificationFilePath Defines the default file path of a
+   *   specification
+   * @return The default file path of the specification
+   */
+  QString defaultSpecificationFilePath();
 
   /**
    * @brief specificationFilePath Defines the file path of a specification
@@ -184,6 +178,21 @@ class FileSystem : public QObject
   void setSpecificationEditorCursor(int row, int column);
 
   /**
+   * createFileDialog Creates a file dialog that can be used to ask the user for
+   *   a file (location)
+   * @param type What type of file window is needed
+   *  0 = new project, 1 = save project as, 2 = open project
+   * @return The file dialog
+   */
+  QFileDialog* createFileDialog(int type);
+
+  /**
+   * @brief createProjectFile Create a project file to store some info and to
+   *   indicate that the parent folder is a valid mcrl2 project folder
+   */
+  void createProjectFile();
+
+  /**
    * @brief newProject Creates a new project with the corresponding file
    *   structure
    * @param askToSave Whether the user should be asked to save before creating a
@@ -225,9 +234,13 @@ class FileSystem : public QObject
 
   /**
    * @brief openProject Opens the project with the given project name
-   * @return The opened project, is NULL if failed
+   * @param newProjectName A pointer to store the projectname of the opened
+   *   project
+   * @param newProperties A pointer to store the properties of the opened
+   *   project
    */
-  Project openProject();
+  void openProject(QString* newProjectName,
+                   std::list<Property*>* newProperties);
 
   /**
    * @brief saveProject Saves the project to file
@@ -275,8 +288,8 @@ class FileSystem : public QObject
   void changesSaved();
 
   private:
-  QString projectsFolderPath =
-      QDir::currentPath() + QDir::separator() + "projects";
+  QString projectFolderPath;
+  QString specFilePath;
   QString propertiesFolderName = "properties";
 
   QWidget* parent;

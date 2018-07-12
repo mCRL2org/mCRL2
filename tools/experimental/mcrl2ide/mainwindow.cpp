@@ -269,18 +269,20 @@ void MainWindow::actionNewProject(bool askToSave)
 
 void MainWindow::actionOpenProject()
 {
-  Project project = fileSystem->openProject();
+  QString projectName = "";
+  std::list<Property*> properties = {};
+  fileSystem->openProject(&projectName, &properties);
 
   /* if successful, put the properties in the properties dock and set the window
    *   title */
-  if (!(project.projectName.isEmpty()))
+  if (!(projectName.isEmpty()))
   {
     propertiesDock->setToNoProperties();
-    for (Property* property : project.properties)
+    for (Property* property : properties)
     {
       propertiesDock->addProperty(property);
     }
-    setWindowTitle(QString("mCRL2 IDE - ").append(project.projectName));
+    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
   }
 }
 
