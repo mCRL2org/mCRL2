@@ -9,7 +9,30 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 
+#include <vector>
+#include <thread>
+
 using namespace atermpp;
+
+template<typename F>
+void benchmark_threads(std::size_t number_of_threads, F f)
+{
+  // Initialize a number of threads.
+  std::vector<std::thread> threads(number_of_threads - 1);
+  for (auto& thread : threads)
+  {
+    thread = std::thread(f);
+  }
+
+  // Run the benchmark on the main thread as well.
+  f();
+
+  // Wait for all threads to complete.
+  for (auto& thread : threads)
+  {
+    thread.join();
+  }
+}
 
 /// \brief Create a nested function application f_depth. Where f_0 = c and f_i = f(f_i-1,...,f_i-1).
 aterm_appl create_nested_function(std::size_t number_of_arguments, std::size_t depth)
@@ -41,6 +64,8 @@ aterm_appl create_nested_function(std::size_t number_of_arguments, std::size_t d
   return f_term;
 }
 
+/// \brief Create a nested function application f_depth. Where f_0 = c and f_i = f(f_i-1,...,f_i-1).
+///        However, this function uses the fixed arity constructor of length N which should be faster.
 template<std::size_t N>
 aterm_appl create_nested_function(std::size_t depth)
 {

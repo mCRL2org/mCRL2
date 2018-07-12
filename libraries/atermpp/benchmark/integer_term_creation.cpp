@@ -7,21 +7,30 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "benchmark_shared.h"
+
 #include "mcrl2/atermpp/aterm_int.h"
 
 using namespace atermpp;
 
 int main(int, char*[])
 {
-  std::size_t amount = 100000000;
-  std::size_t iterations = 100000;
+  std::size_t amount = 200000000;
+  std::size_t iterations = 50000;
+  std::size_t number_of_threads = 1;
 
-  std::vector<aterm_int> integers(amount);
-
-  for (std::size_t i = 0; i < iterations; ++i)
+  auto create_integers = [amount,iterations,number_of_threads]()
   {
-    integers[i] = aterm_int(i);
-  }
+    // Store the integers in a vector to prevent them from being deleted.
+    std::vector<aterm_int> integers(amount);
+
+    for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
+    {
+      integers[i] = aterm_int(i);
+    }
+  };
+
+  benchmark_threads(number_of_threads, create_integers);
 
   return 0;
 }

@@ -7,6 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "benchmark_shared.h"
+
 #include "mcrl2/atermpp/function_symbol.h"
 
 #include <vector>
@@ -19,17 +21,23 @@ int main(int, char*[])
 {
   std::size_t amount = 10000;
   std::size_t iterations = 1000;
+  std::size_t number_of_threads = 1;
 
-  // Store them in a vector to prevent them from being deleted.
-  std::vector<function_symbol> symbols(amount);
-
-  std::string name("f");
-
-  for (std::size_t k = 0; k < iterations; ++k)
+  auto create_function_symbols = [amount,iterations,number_of_threads]()
   {
-    for (std::size_t i = 0; i < amount; ++i)
+    // Store them in a vector to prevent them from being deleted.
+    std::vector<function_symbol> symbols(amount);
+
+    // Generate function symbols f + suffix, where suffix from 0 to amount.
+    std::string name("f");
+    for (std::size_t k = 0; k < iterations / number_of_threads; ++k)
     {
-      symbols[i] = function_symbol(name + std::to_string(i), 0);
+      for (std::size_t i = 0; i < amount; ++i)
+      {
+        symbols[i] = function_symbol(name + std::to_string(i), 0);
+      }
     }
-  }
+  };
+
+  benchmark_threads(number_of_threads, create_function_symbols);
 }
