@@ -257,14 +257,6 @@ def run_yml_test(name, testfile, inputfiles, settings):
             print('- file {}\n{}\n'.format(filename, text))
     return result
 
-def run_pbes_test(name, testfile, p, settings):
-    filename = '{0}.txt'.format(name)
-    write_text(filename, str(p))
-    inputfiles = [filename]
-    result = run_yml_test(name, testfile, inputfiles, settings)
-    os.remove(filename)
-    return result
-
 class TestRunner(testrunner.TestRunner):
     def __init__(self):
         super(TestRunner, self).__init__()

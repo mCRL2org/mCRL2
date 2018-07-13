@@ -14,7 +14,6 @@ import random_state_formula_generator
 from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes
 import random_process_expression
-from testing import run_pbes_test
 from testcommand import YmlTest
 from text_utility import write_text
 
@@ -171,9 +170,11 @@ class PbesTest(RandomTest):
         self.propvar_count = 3
         self.use_quantifiers = True
 
-    def execute(self, runpath = '.'):
+    def create_inputfiles(self, runpath = '.'):
+        filename = '{0}.txt'.format(self.name)
         p = make_pbes(self.equation_count, self.atom_count, self.propvar_count, self.use_quantifiers)
-        run_pbes_test(self.name, self.ymlfile, p, self.settings)
+        write_text(filename, str(p))
+        self.inputfiles += [filename]
 
 # N.B. does not work yet due to unusable abstraction map
 class PbesabsintheTest(PbesTest):
