@@ -173,6 +173,13 @@ class Test:
                     if self.verbose:
                         print(e)
 
+    def dump_file_contents(self):
+        filenames = [node.filename() for node in self.nodes]
+        for file in filenames:
+            if os.path.exists(file) and (file.endswith('.mcrl2spec') or file.endswith('.pbesspec') or file.endswith('.statefrm')):
+                contents = read_text(file)
+                print('Contents of file {}:\n{}'.format(file, contents))
+
     def run(self):
         import popen
 
@@ -185,6 +192,7 @@ class Test:
                 commands.append(tool.command())
                 returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
                 if returncode != 0 and not self.allow_non_zero_return_values:
+                    self.dump_file_contents()
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
             except popen.MemoryExceededError as e:
                 if self.verbose:
