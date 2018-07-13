@@ -9,6 +9,8 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 
+#include "mcrl2/atermpp/detail/aterm_list.h"
+
 #include <vector>
 #include <thread>
 
@@ -35,6 +37,7 @@ void benchmark_threads(std::size_t number_of_threads, F f)
 }
 
 /// \brief Create a nested function application f_depth. Where f_0 = c and f_i = f(f_i-1,...,f_i-1).
+template<bool with_converter = false>
 aterm_appl create_nested_function(std::size_t number_of_arguments, std::size_t depth)
 {
   // Create a suitable function application.
@@ -58,7 +61,14 @@ aterm_appl create_nested_function(std::size_t number_of_arguments, std::size_t d
     {
       arguments[k] = f_term;
     }
-    f_term = aterm_appl(f, arguments.begin(), arguments.end());
+    if (with_converter)
+    {
+      f_term = aterm_appl(f, arguments.begin(), arguments.end(), detail::do_not_convert_term<aterm>());
+    }
+    else
+    {
+      f_term = aterm_appl(f, arguments.begin(), arguments.end());
+    }
   }
 
   return f_term;

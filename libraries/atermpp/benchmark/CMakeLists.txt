@@ -5,6 +5,7 @@ find_package(Threads)
 
 file(GLOB BENCHMARKS *.cpp)
 
+# Generate one target for each benchmark
 foreach (benchmark ${BENCHMARKS})
   get_filename_component(filename ${benchmark} NAME_WE)
 
