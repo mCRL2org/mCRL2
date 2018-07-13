@@ -3591,7 +3591,7 @@ bool mcrl2::data::data_type_checker::TypeMatchL(
 
 sort_expression mcrl2::data::data_type_checker::UnwindType(const sort_expression& Type) const
 {
-  return normalize_sorts(Type,get_sort_specification()); 
+  return normalize_sorts(Type,get_sort_specification());
 }
 
 variable mcrl2::data::data_type_checker::UnwindType(const variable& v) const
@@ -4043,7 +4043,7 @@ void mcrl2::data::data_type_checker::add_function(const data::function_symbol& f
       }
     }
     Types = Types + sort_expression_list({ UnwindType(Sort) });
-    user_functions[Name]=Types; 
+    user_functions[Name]=Types;
   }
   else
   {
@@ -4538,6 +4538,19 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
       }
     }
     new_specification.add_equation(data_equation(vars,cond,left,right));
+  }
+  std::map<std::pair<data_expression, data_expression>, data_equation> lhs_map;
+  for (const data_equation& eqn: new_specification.user_defined_equations())
+  {
+    const auto find_result = lhs_map.find(std::make_pair(eqn.condition(), eqn.lhs()));
+    if(find_result != lhs_map.end())
+    {
+      mCRL2log(warning) << "Warning: condition and left-hand side of equations " << find_result->second << " and " << eqn << " completely overlap." << std::endl;
+    }
+    else
+    {
+      lhs_map[std::make_pair(eqn.condition(), eqn.lhs())] = eqn;
+    }
   }
   data_spec=new_specification;
 }
