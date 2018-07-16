@@ -29,12 +29,12 @@ struct deque_vertex_set
     deque_vertex_set() = default;
 
     explicit deque_vertex_set(std::size_t N)
-            : m_include(N)
+     : m_include(N)
     {}
 
     template <typename Iter>
     deque_vertex_set(std::size_t N, Iter first, Iter last)
-            : m_include(N)
+     : m_include(N)
     {
       for (auto i = first; i != last; ++i)
       {
@@ -55,7 +55,10 @@ struct deque_vertex_set
     void insert(structure_graph::index_type u)
     {
       assert(u < m_include.size());
-      assert(!m_include[u]);
+      if (m_include[u])
+      {
+        return;
+      }
       m_vertices.push_back(u);
       m_include[u] = true;
     }
@@ -187,7 +190,10 @@ struct vertex_set
     void insert(structure_graph::index_type u)
     {
       assert(u < m_include.size());
-      assert(!m_include[u]);
+      if (m_include[u])
+      {
+        return;
+      }
       m_vertices.push_back(u);
       m_include[u] = true;
       assert(self_check());
@@ -251,10 +257,7 @@ vertex_set set_union(const vertex_set& V, const vertex_set& W)
   vertex_set result = V;
   for (structure_graph::index_type w: W.vertices())
   {
-    if (!result.contains(w))
-    {
-      result.insert(w);
-    }
+    result.insert(w);
   }
   return result;
 }
@@ -265,10 +268,7 @@ vertex_set set_difference(const vertex_set& V, const vertex_set& W)
   vertex_set result(V.extent());
   for (structure_graph::index_type v: V.vertices())
   {
-    if (!W.contains(v))
-    {
-      result.insert(v);
-    }
+    result.insert(v);
   }
   return result;
 }
@@ -325,7 +325,7 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, int alph
   {
     for (auto v: G.predecessors(u))
     {
-      if (!(A.contains(v)) && !todo.contains(v))
+      if (!A.contains(v))
       {
         todo.insert(v);
       }

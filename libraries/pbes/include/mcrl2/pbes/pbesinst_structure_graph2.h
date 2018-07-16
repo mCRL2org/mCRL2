@@ -444,7 +444,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           U = compute_attractor_set(G, U, 0);
           for (auto v: U.vertices())
           {
-            if (v != u && !S0.contains(v))
+            if (v != u)
             {
               S0.insert(v);
             }
@@ -463,7 +463,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           U = compute_attractor_set(G, U, 1);
           for (auto v: U.vertices())
           {
-            if (v != u && !S1.contains(v))
+            if (v != u)
             {
               S1.insert(v);
             }
