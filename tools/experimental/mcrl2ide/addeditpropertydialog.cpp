@@ -11,6 +11,7 @@
 #include "ui_addeditpropertydialog.h"
 
 #include <QMessageBox>
+#include <QRegExpValidator>
 
 AddEditPropertyDialog::AddEditPropertyDialog(bool add,
                                              ProcessSystem* processSystem,
@@ -24,6 +25,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   this->fileSystem = fileSystem;
   oldPropertyName = "";
   propertyParsingProcessid = -1;
+
+  ui->propertyNameField->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_]*")));
 
   /* change the ui depending on whether this should be an add or edit property
    *   window */
