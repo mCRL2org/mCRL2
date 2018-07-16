@@ -53,11 +53,6 @@ class MainWindow : public QMainWindow
   void actionOpenProject();
 
   /**
-   * @brief actionNewProject Allows the user to open an example project
-   */
-  void actionOpenExampleProject();
-
-  /**
    * @brief actionNewProject Allows the user to save a project
    */
   void actionSaveProject();
@@ -153,7 +148,6 @@ class MainWindow : public QMainWindow
 
   QAction* newProjectAction;
   QAction* openProjectAction;
-  QAction* openExampleProjectAction;
   QAction* saveProjectAction;
   QAction* saveProjectAsAction;
   QAction* addPropertyAction;

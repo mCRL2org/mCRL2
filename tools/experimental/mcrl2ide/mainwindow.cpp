@@ -96,9 +96,6 @@ void MainWindow::setupMenuBar()
   openProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
   openProjectAction->setIcon(QIcon(":/icons/open_project.png"));
 
-  openExampleProjectAction = fileMenu->addAction(
-      "Open Example Project", this, SLOT(actionOpenExampleProject()));
-
   fileMenu->addSeparator();
 
   saveProjectAction =
@@ -284,11 +281,6 @@ void MainWindow::actionOpenProject()
     }
     setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
   }
-}
-
-void MainWindow::actionOpenExampleProject()
-{
-  /* Not yet implemented */
 }
 
 void MainWindow::actionSaveProject()

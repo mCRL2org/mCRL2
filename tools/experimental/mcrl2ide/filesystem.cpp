@@ -266,8 +266,9 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
       QDir(projectFolderPath).mkdir(propertiesFolderName);
       projectOpen = true;
 
-      /* also empty the editor and properties list if we are not saving as */
-      if (forNewProject)
+      /* also empty the editor and properties list if we are not saving as and
+       *   if there was already a project open */
+      if (forNewProject && !projectOpened())
       {
         specificationEditor->clear();
         properties.clear();
@@ -435,8 +436,8 @@ void FileSystem::openProject(QString* newProjectName,
       projectFile->open(QIODevice::ReadOnly);
       QTextStream* projectOpenStream = new QTextStream(projectFile);
       QString projectInfo = projectOpenStream->readAll();
-      specFilePath = projectInfo.right(
-          projectInfo.length() - projectInfo.lastIndexOf("SPEC") - 5);
+      specFilePath = projectInfo.right(projectInfo.length() -
+                                       projectInfo.lastIndexOf("SPEC") - 5);
       std::string test = specFilePath.toStdString();
       projectFile->close();
       delete projectFile;
