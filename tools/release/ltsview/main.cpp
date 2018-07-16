@@ -1,3 +1,13 @@
+// Author(s): Bas Ploeger
+// Copyright: see the accompanying file COPYING or copy at
+// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
+
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/gui/qt_tool.h"
 #include "mainwindow.h"
