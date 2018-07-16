@@ -91,8 +91,8 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
 
   /* lay them out */
   propertyLayout = new QHBoxLayout();
-  propertyLayout->addWidget(propertyNameLabel);
   propertyLayout->addStretch();
+  propertyLayout->addWidget(propertyNameLabel);
   propertyLayout->addWidget(verificationWidgets);
   propertyLayout->addWidget(editButton);
   propertyLayout->addWidget(deleteButton);
