@@ -447,7 +447,14 @@ int ProcessSystem::verifyProperty(Property* property)
 
     QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
     mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
+
+    QProcess* propertyParsingProcess =
+        createPropertyParsingProcess(property->name);
+    propertyParsingProcess->setProperty("pid", processid);
+    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(mcfParsingResult(int)));
+    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
             SLOT(createPbes(int)));
 
     QProcess* lps2pbesProcess = createLps2pbesProcess(property->name);
@@ -460,7 +467,8 @@ int ProcessSystem::verifyProperty(Property* property)
             SLOT(verificationResult(int)));
 
     processes[processid] = {mcrl2ParsingProcess, mcrl22lpsProcess,
-                            lps2pbesProcess, pbes2boolProcess};
+                            propertyParsingProcess, lps2pbesProcess,
+                            pbes2boolProcess};
     processTypes[processid] = processType;
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
@@ -478,11 +486,13 @@ void ProcessSystem::startProcess(int processid)
 
 void ProcessSystem::parseMcrl2(int processid)
 {
+  ProcessType processType = processTypes[processid];
+
   consoleDock->writeToConsole(ProcessType::Parsing,
                               "##### PARSING SPECIFICATION #####\n");
-  if (processTypes[processid] != ProcessType::Parsing)
+  if (processType != ProcessType::Parsing)
   {
-    consoleDock->writeToConsole(processTypes[processid],
+    consoleDock->writeToConsole(processType,
                                 "##### PARSING SPECIFICATION #####\n");
   }
 
@@ -676,6 +686,7 @@ void ProcessSystem::showLts(int previousExitCode)
 void ProcessSystem::parseMcf(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  ProcessType processType = processTypes[processid];
 
   /* if the previous subprocess has failed, the process is discontinued */
   if (previousExitCode > 0)
@@ -688,6 +699,11 @@ void ProcessSystem::parseMcf(int previousExitCode)
   {
     consoleDock->writeToConsole(ProcessType::Parsing,
                                 "##### PARSING PROPERTY #####\n");
+    if (processType != ProcessType::Parsing)
+    {
+      consoleDock->writeToConsole(processType,
+                                  "##### PARSING PROPERTY #####\n");
+    }
 
     processes[processid][2]->start();
   }
@@ -696,15 +712,27 @@ void ProcessSystem::parseMcf(int previousExitCode)
 void ProcessSystem::mcfParsingResult(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  ProcessType processType = processTypes[processid];
 
-  if (previousExitCode == 0)
+  /* if parsing gave an error, move to parsing tab */
+  if (previousExitCode > 0)
   {
-    results[processid] = "valid";
+    consoleDock->setConsoleTab(ProcessType::Parsing);
   }
-  else
+
+  /* if this belonged to a parsing process, write the result */
+  if (processType == ProcessType::Parsing)
   {
-    results[processid] = "invalid";
+    if (previousExitCode == 0)
+    {
+      results[processid] = "valid";
+    }
+    else
+    {
+      results[processid] = "invalid";
+    }
   }
+
   emit processFinished(processid);
 }
 
@@ -721,7 +749,7 @@ void ProcessSystem::createPbes(int previousExitCode)
   }
   else
   {
-    QProcess* lps2pbesProcess = processes[processid][2];
+    QProcess* lps2pbesProcess = processes[processid][3];
 
     consoleDock->writeToConsole(ProcessType::Verification,
                                 "##### CREATING PBES #####\n");
@@ -757,7 +785,7 @@ void ProcessSystem::solvePbes(int previousExitCode)
     consoleDock->writeToConsole(ProcessType::Verification,
                                 "##### SOLVING PBES #####\n");
 
-    processes[processid][3]->start();
+    processes[processid][4]->start();
   }
 }
 
@@ -775,7 +803,7 @@ void ProcessSystem::verificationResult(int previousExitCode)
   else
   {
     std::string output =
-        processes[processid][3]->readAllStandardOutput().toStdString();
+        processes[processid][4]->readAllStandardOutput().toStdString();
     if (output.find("true") == 0)
     {
       results[processid] = "true";
