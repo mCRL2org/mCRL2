@@ -1183,22 +1183,16 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_not_npos(const next_sta
     {
       if (add_transition(state, *i))
       {
-        if (!state_queue.add_to_queue(i->target_state()))
-        {
-          m_num_states--;
-        }
+        state_queue.add_to_queue(i->target_state());
       }
     }
     transitions.clear();
 
+    current_state++;
     if (state_queue.remaining() == 0)
     {
       state_queue.swap_queues();
-    }
 
-    current_state++;
-    if (current_state == start_level_seen)
-    {
       if (!m_options.suppress_progress_messages)
       {
         mCRL2log(verbose) << "monitor: level " << m_level << " done."
