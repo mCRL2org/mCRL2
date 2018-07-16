@@ -16,7 +16,8 @@
 CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 {
   /* set the font used (monospaced) */
-  QFont font = QFont("Courier New", 10);
+  QFont font = QFont("Courier New");
+  font.setPixelSize(13);
   this->document()->setDefaultFont(font);
 
   /* set the tab width to 4 characters */
