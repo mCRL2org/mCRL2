@@ -39,14 +39,16 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
   QPushButton* verifyButton = new QPushButton();
   verifyButton->setIcon(QIcon(":/icons/verify.png"));
   verifyButton->setIconSize(QSize(24, 24));
-  verifyButton->setStyleSheet("border:none;");
+  verifyButton->setStyleSheet("QPushButton { border:none; }");
+  verifyButton->setToolTip("Verify");
   connect(verifyButton, SIGNAL(clicked()), this, SLOT(actionVerify()));
 
   /* create the abort button for when a property is being verified */
   QPushButton* abortButton = new QPushButton();
   abortButton->setIcon(QIcon(":/icons/abort.png"));
   abortButton->setIconSize(QSize(24, 24));
-  abortButton->setStyleSheet("border:none;");
+  abortButton->setStyleSheet("QPushButton { border:none; }");
+  abortButton->setToolTip("Abort verification");
   connect(abortButton, SIGNAL(clicked()), this,
           SLOT(actionAbortVerification()));
 
@@ -54,11 +56,13 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
   QPixmap* trueIcon = new QPixmap(":/icons/true.png");
   QLabel* trueLabel = new QLabel();
   trueLabel->setPixmap(trueIcon->scaled(QSize(24, 24)));
+  trueLabel->setToolTip("This property is true");
 
   /* create the label for when a property is false */
   QPixmap* falseIcon = new QPixmap(":/icons/false.png");
   QLabel* falseLabel = new QLabel();
   falseLabel->setPixmap(falseIcon->scaled(QSize(24, 24)));
+  falseLabel->setToolTip("This property is false");
 
   /* stack the verification widgets */
   verificationWidgets = new QStackedWidget(this);
@@ -73,14 +77,16 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
   editButton = new QPushButton();
   editButton->setIcon(QIcon(":/icons/edit.png"));
   editButton->setIconSize(QSize(24, 24));
-  editButton->setStyleSheet("border:none;");
+  editButton->setStyleSheet("QPushButton { border:none; }");
+  editButton->setToolTip("Edit property");
   connect(editButton, SIGNAL(clicked()), this, SLOT(actionEdit()));
 
   /* create the delete button */
   deleteButton = new QPushButton();
   deleteButton->setIcon(QIcon(":/icons/delete.png"));
   deleteButton->setIconSize(QSize(24, 24));
-  deleteButton->setStyleSheet("border:none;");
+  deleteButton->setStyleSheet("QPushButton { border:none; }");
+  deleteButton->setToolTip("Delete property");
   connect(deleteButton, SIGNAL(clicked()), this, SLOT(actionDelete()));
 
   /* lay them out */
