@@ -16,7 +16,6 @@
 #include <QDirIterator>
 #include <QMessageBox>
 #include <QInputDialog>
-#include <QStandardPaths>
 
 Property::Property(QString name, QString text)
 {
@@ -35,6 +34,11 @@ FileSystem::FileSystem(CodeEditor* specificationEditor, QWidget* parent)
   this->parent = parent;
   specificationModified = false;
   projectOpen = false;
+
+  if (!temporaryFolder.isValid())
+  {
+    qDebug("Warning: could not create temporary folder");
+  }
 
   connect(specificationEditor, SIGNAL(modificationChanged(bool)), this,
           SLOT(setSpecificationModified(bool)));
@@ -77,12 +81,12 @@ QString FileSystem::specificationFilePath()
 
 QString FileSystem::lpsFilePath()
 {
-  return projectFolderPath + QDir::separator() + projectName + "_lps.lps";
+  return temporaryFolder.path() + QDir::separator() + projectName + "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(LtsReduction reduction)
 {
-  return projectFolderPath + QDir::separator() + projectName + "_lts_" +
+  return temporaryFolder.path() + QDir::separator() + projectName + "_lts_" +
          LTSREDUCTIONNAMES.at(reduction) + ".lts";
 }
 
@@ -93,7 +97,7 @@ QString FileSystem::propertyFilePath(QString propertyName)
 
 QString FileSystem::pbesFilePath(QString propertyName)
 {
-  return propertiesFolderPath() + QDir::separator() + projectName + "_" +
+  return temporaryFolder.path() + QDir::separator() + projectName + "_" +
          propertyName + "_pbes.pbes";
 }
 
@@ -566,4 +570,9 @@ void FileSystem::saveProperty(Property* property)
   propertyModified[property->name] = false;
   delete propertyFile;
   delete saveStream;
+}
+
+void FileSystem::removeTemporaryFolder()
+{
+  temporaryFolder.remove();
 }

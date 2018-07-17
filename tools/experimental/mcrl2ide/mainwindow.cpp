@@ -452,4 +452,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
       break;
     }
   }
+
+  /* empty the temporary folder */
+  fileSystem->removeTemporaryFolder();
 }

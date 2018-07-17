@@ -15,6 +15,8 @@
 #include <QObject>
 #include <QDir>
 #include <QFileDialog>
+#include <QStandardPaths>
+#include <QTemporaryDir>
 
 enum class LtsReduction
 {
@@ -53,7 +55,7 @@ class FileSystem : public QObject
    * @param specificationEditor The specification editor in the main window
    * @param parent The main widget (main window)
    */
-  explicit FileSystem(CodeEditor* specificationEditor, QWidget* parent);
+  FileSystem(CodeEditor* specificationEditor, QWidget* parent);
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder
@@ -262,6 +264,11 @@ class FileSystem : public QObject
    */
   void saveProperty(Property* property);
 
+  /**
+   * @brief clearTemporaryFolder Removes the tomporary folder and its contents
+   */
+  void removeTemporaryFolder();
+
   public slots:
   /**
    * @brief setSpecificationModified Sets the specification to modified or
@@ -287,6 +294,7 @@ class FileSystem : public QObject
   QString projectFolderPath;
   QString specFilePath;
   QString propertiesFolderName = "properties";
+  QTemporaryDir temporaryFolder;
 
   QWidget* parent;
   CodeEditor* specificationEditor;
