@@ -106,7 +106,8 @@ void MainWindow::setupMenuBar()
 
   saveProjectAsAction =
       fileMenu->addAction("Save Project As", this, SLOT(actionSaveProjectAs()));
-  saveProjectAsAction->setShortcut(QKeySequence::SaveAs);
+  saveProjectAsAction->setShortcut(
+      QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
 
   fileMenu->addSeparator();
 

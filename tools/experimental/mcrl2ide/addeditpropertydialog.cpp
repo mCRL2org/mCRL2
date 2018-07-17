@@ -26,7 +26,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   oldPropertyName = "";
   propertyParsingProcessid = -1;
 
-  ui->propertyNameField->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_]*")));
+  ui->propertyNameField->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*")));
 
   /* change the ui depending on whether this should be an add or edit property
    *   window */
