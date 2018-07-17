@@ -34,10 +34,10 @@ FileSystem::FileSystem(CodeEditor* specificationEditor, QWidget* parent)
   this->specificationEditor = specificationEditor;
   this->parent = parent;
   specificationModified = false;
-  connect(specificationEditor, SIGNAL(textChanged()), this,
-          SLOT(setSpecificationModified()));
-
   projectOpen = false;
+
+  connect(specificationEditor, SIGNAL(modificationChanged(bool)), this,
+          SLOT(setSpecificationModified(bool)));
 }
 
 void FileSystem::makeSurePropertiesFolderExists()
@@ -112,10 +112,9 @@ bool FileSystem::isSpecificationModified()
   return specificationModified;
 }
 
-void FileSystem::setSpecificationModified()
+void FileSystem::setSpecificationModified(bool modified)
 {
-  specificationModified = true;
-  emit hasChanges(true);
+  specificationModified = modified;
 }
 
 bool FileSystem::propertyNameExists(QString propertyName)
@@ -484,7 +483,6 @@ void FileSystem::openProject(QString* newProjectName,
       this->properties = properties;
       *newProjectName = projectName;
       *newProperties = properties;
-      emit hasChanges(false);
     }
   }
 
@@ -530,7 +528,7 @@ QString FileSystem::saveProject(bool forceSave)
       }
     }
 
-    emit hasChanges(false);
+    specificationEditor->document()->setModified(false);
     return projectName;
   }
   else

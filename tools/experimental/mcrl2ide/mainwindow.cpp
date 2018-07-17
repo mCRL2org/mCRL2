@@ -42,8 +42,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
   /* make saving a project only enabled whenever there are changes */
   saveProjectAction->setEnabled(false);
-  connect(fileSystem, SIGNAL(hasChanges(bool)), saveProjectAction,
-          SLOT(setEnabled(bool)));
+  connect(specificationEditor, SIGNAL(modificationChanged(bool)),
+          saveProjectAction, SLOT(setEnabled(bool)));
 
   /* make the tool buttons enabled or disabled depending on whether processes
    *   are running */
@@ -73,6 +73,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
                QDesktopWidget().availableGeometry(this).height() * 0.75));
 
   ltsCreationProcessid = -1;
+  simulationProcessid = -1;
 }
 
 MainWindow::~MainWindow()
@@ -100,12 +101,12 @@ void MainWindow::setupMenuBar()
 
   saveProjectAction =
       fileMenu->addAction("Save Project", this, SLOT(actionSaveProject()));
-  saveProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+  saveProjectAction->setShortcut(QKeySequence::Save);
   saveProjectAction->setIcon(QIcon(":/icons/save_project.png"));
 
   saveProjectAsAction =
       fileMenu->addAction("Save Project As", this, SLOT(actionSaveProjectAs()));
-  saveProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_S));
+  saveProjectAsAction->setShortcut(QKeySequence::SaveAs);
 
   fileMenu->addSeparator();
 
@@ -151,10 +152,12 @@ void MainWindow::setupMenuBar()
   /* Create the View Menu (more actions are added in setupDocks())*/
   viewMenu = menuBar()->addMenu("View");
 
-  zoomInAction = viewMenu->addAction("Zoom in", specificationEditor, SLOT(zoomIn()));
+  zoomInAction =
+      viewMenu->addAction("Zoom in", specificationEditor, SLOT(zoomIn()));
   zoomInAction->setShortcut(QKeySequence::ZoomIn);
 
-  zoomOutAction = viewMenu->addAction("Zoom out", specificationEditor, SLOT(zoomOut()));
+  zoomOutAction =
+      viewMenu->addAction("Zoom out", specificationEditor, SLOT(zoomOut()));
   zoomOutAction->setShortcut(QKeySequence::ZoomOut);
 
   viewMenu->addSeparator();

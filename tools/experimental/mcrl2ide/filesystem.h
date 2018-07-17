@@ -206,7 +206,7 @@ class FileSystem : public QObject
   /**
    * @brief deletePropertyFile Deletes the file of a property
    * @param propertyName The name of the property
-   * @param showIfFailed Whether the suer should be told if deleting a property
+   * @param showIfFailed Whether the user should be told if deleting a property
    *   file was unsuccessful
    * @return Whether deleting the property file was successful
    */
@@ -264,9 +264,11 @@ class FileSystem : public QObject
 
   public slots:
   /**
-   * @brief setSpecificationModified Sets the specification to modified
+   * @brief setSpecificationModified Sets the specification to modified or
+   *   unmodified
+   * @param modified Whether the specification was modified
    */
-  void setSpecificationModified();
+  void setSpecificationModified(bool modified);
 
   /**
    * @brief deleteUnlistedPropertyFiles Deletes all property files for which
@@ -275,12 +277,6 @@ class FileSystem : public QObject
   void deleteUnlistedPropertyFiles();
 
   signals:
-  /**
-   * @brief modified Is emitted whenever the specification or a property is
-   *   changed
-   */
-  void hasChanges(bool changes);
-
   /**
    * @brief changesSaved Is emitted whenever changes in the specification have
    *   been saved
