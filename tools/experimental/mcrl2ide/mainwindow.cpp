@@ -86,14 +86,14 @@ void MainWindow::setupMenuBar()
 
   newProjectAction =
       fileMenu->addAction("New Project", this, SLOT(actionNewProject(bool)));
-  newProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+  newProjectAction->setShortcut(QKeySequence::New);
   newProjectAction->setIcon(QIcon(":/icons/new_project.png"));
 
   fileMenu->addSeparator();
 
   openProjectAction =
       fileMenu->addAction("Open Project", this, SLOT(actionOpenProject()));
-  openProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+  openProjectAction->setShortcut(QKeySequence::Open);
   openProjectAction->setIcon(QIcon(":/icons/open_project.png"));
 
   fileMenu->addSeparator();
@@ -105,6 +105,7 @@ void MainWindow::setupMenuBar()
 
   saveProjectAsAction =
       fileMenu->addAction("Save Project As", this, SLOT(actionSaveProjectAs()));
+  saveProjectAction->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_S));
 
   fileMenu->addSeparator();
 
@@ -116,39 +117,47 @@ void MainWindow::setupMenuBar()
   QMenu* editMenu = menuBar()->addMenu("Edit");
 
   undoAction = editMenu->addAction("Undo", specificationEditor, SLOT(undo()));
-  undoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
+  undoAction->setShortcut(QKeySequence::Undo);
 
   redoAction = editMenu->addAction("Redo", specificationEditor, SLOT(redo()));
-  redoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Y));
+  redoAction->setShortcut(QKeySequence::Redo);
 
   editMenu->addSeparator();
 
   findAndReplaceAction = editMenu->addAction("Find and Replace", this,
                                              SLOT(actionFindAndReplace()));
-  findAndReplaceAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+  findAndReplaceAction->setShortcut(QKeySequence::Find);
 
   editMenu->addSeparator();
 
   cutAction = editMenu->addAction("Cut", specificationEditor, SLOT(cut()));
-  cutAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
+  cutAction->setShortcut(QKeySequence::Cut);
 
   copyAction = editMenu->addAction("Copy", specificationEditor, SLOT(copy()));
-  copyAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+  copyAction->setShortcut(QKeySequence::Copy);
 
   pasteAction =
       editMenu->addAction("Paste", specificationEditor, SLOT(paste()));
-  pasteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+  pasteAction->setShortcut(QKeySequence::Paste);
 
   deleteAction =
       editMenu->addAction("Delete", specificationEditor, SLOT(deleteChar()));
-  deleteAction->setShortcut(QKeySequence(Qt::Key_Delete));
+  deleteAction->setShortcut(QKeySequence::Delete);
 
   selectAllAction =
       editMenu->addAction("Select All", specificationEditor, SLOT(selectAll()));
-  selectAllAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
+  selectAllAction->setShortcut(QKeySequence::SelectAll);
 
-  /* Create the View Menu (actions are added in setupDocks())*/
+  /* Create the View Menu (more actions are added in setupDocks())*/
   viewMenu = menuBar()->addMenu("View");
+
+  zoomInAction = viewMenu->addAction("Zoom in", specificationEditor, SLOT(zoomIn()));
+  zoomInAction->setShortcut(QKeySequence::ZoomIn);
+
+  zoomOutAction = viewMenu->addAction("Zoom out", specificationEditor, SLOT(zoomOut()));
+  zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+
+  viewMenu->addSeparator();
 
   /* Create the Actions menu */
   QMenu* actionsMenu = menuBar()->addMenu("Actions");

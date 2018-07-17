@@ -161,6 +161,9 @@ class MainWindow : public QMainWindow
   QAction* deleteAction;
   QAction* selectAllAction;
 
+  QAction* zoomInAction;
+  QAction* zoomOutAction;
+
   QAction* parseAction;
   QAction* simulateAction;
   QAction* createLtsAction;

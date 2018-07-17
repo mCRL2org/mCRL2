@@ -133,18 +133,52 @@ class CodeEditor : public QPlainTextEdit
    */
   void deleteChar();
 
+  /**
+   * @brief zoomIn Allows the user to zoom in on the text
+   */
+  void zoomIn();
+
+  /**
+   * @brief zoomOut Allows the user to zoom out from the text
+   */
+  void zoomOut();
+
   protected:
   /**
+   * @brief keyPressEvent Adds key events for aoom in and zoom out
+   * @brief event The key event
+   */
+  void keyPressEvent(QKeyEvent* event) override;
+
+  /**
    * @brief resizeEvent Resizes the line number area when the window is resized
-   * @param e The resize event
+   * @param event The resize event
    */
   void resizeEvent(QResizeEvent* event) override;
 
   private:
-  QWidget* lineNumberArea;
+  QFont codeFont;
+  QFont lineNumberFont;
+  LineNumbersArea* lineNumberArea;
   CodeHighlighter* highlighter;
 
+  QMenu* contextMenu;
+  QAction* zoomInAction;
+  QAction* zoomOutAction;
+
+  /**
+   * @brief setFontSize Sets the font size and tab width
+   * @param pixelSize The desired font size in pixels
+   */
+  void setFontSize(int pixelSize);
+
   private slots:
+  /**
+   * @brief showContextMenu Creates and shows a context menu
+   * @param position The position where to create the context menu
+   */
+  void showContextMenu(const QPoint& position);
+
   /**
    * @brief updateLineNumberAreaWidth Updates the width of the line number area
    */

@@ -12,6 +12,7 @@
 #include <QPainter>
 #include <QTextBlock>
 #include <QWidget>
+#include <QMenu>
 
 HighlightingRule::HighlightingRule(QRegExp pattern, QTextCharFormat format)
 {
@@ -23,7 +24,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
   /* identifiers */
-  identifierFormat.setFontWeight(QFont::DemiBold);
   identifierFormat.setForeground(Qt::black);
   highlightingRules.push_back(HighlightingRule(
       QRegExp("\\b[a-zA-Z_][a-zA-Z0-9_']*\\b"), identifierFormat));
@@ -33,7 +33,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
   {
     /* specification keywords */
     specificationKeywordFormat.setForeground(Qt::darkBlue);
-    specificationKeywordFormat.setFontWeight(QFont::Bold);
     QStringList specificationKeywordPatterns = {
         "\\bsort\\b", "\\bcons\\b", "\\bmap\\b",  "\\bvar\\b",   "\\beqn\\b",
         "\\bact\\b",  "\\bproc\\b", "\\binit\\b", "\\bstruct\\b"};
@@ -45,7 +44,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
     /* process keywords */
     processKeywordFormat.setForeground(Qt::darkCyan);
-    processKeywordFormat.setFontWeight(QFont::Light);
     QStringList processKeywordPatterns = {"\\bdelta\\b", "\\btau\\b"};
     for (const QString& pattern : processKeywordPatterns)
     {
@@ -55,7 +53,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
     /* process operator keywords */
     processOperatorKeywordFormat.setForeground(Qt::blue);
-    processOperatorKeywordFormat.setFontWeight(QFont::Bold);
     QStringList processOperatorKeywordPatterns = {
         "\\bsum\\b",  "\\bdist\\b",   "\\bblock\\b", "\\ballow\\b",
         "\\bhide\\b", "\\brename\\b", "\\bcomm\\b"};
@@ -70,7 +67,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
   {
     /* state formula operator keywords */
     stateFormulaOpertorKeywordFormat.setForeground(Qt::blue);
-    stateFormulaOpertorKeywordFormat.setFontWeight(QFont::Bold);
     QStringList processOperatorKeywordPatterns = {"\\bmu\\b", "\\bnu\\b",
                                                   "\\bdelay\\b", "\\byelad\\b"};
     for (const QString& pattern : processOperatorKeywordPatterns)
@@ -84,7 +80,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
   /* primitive type keywords */
   primitiveTypeKeywordFormat.setForeground(Qt::darkMagenta);
-  primitiveTypeKeywordFormat.setFontWeight(QFont::Bold);
   QStringList primitiveTypeKeywordPatterns = {
       "\\bBool\\b", "\\bPos\\b", "\\bNat\\b", "\\bInt\\b", "\\bReal\\b"};
   for (const QString& pattern : primitiveTypeKeywordPatterns)
@@ -95,7 +90,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
   /* container type keywords */
   containerTypeKeywordFormat.setForeground(Qt::darkGreen);
-  containerTypeKeywordFormat.setFontWeight(QFont::Bold);
   QStringList containerTypeKeywordPatterns = {
       "\\bList\\b", "\\bSet\\b", "\\bBag\\b", "\\bFSet\\b", "\\bFBag\\b"};
   for (const QString& pattern : containerTypeKeywordPatterns)
@@ -106,7 +100,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
   /* data keywords */
   dataKeywordFormat.setForeground(Qt::darkYellow);
-  dataKeywordFormat.setFontWeight(QFont::Bold);
   QStringList dataKeywordPatterns = {"\\btrue\\b", "\\bfalse\\b"};
   for (const QString& pattern : dataKeywordPatterns)
   {
@@ -116,7 +109,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
   /* data operator keywords */
   dataOperatorKeywordFormat.setForeground(Qt::darkRed);
-  dataOperatorKeywordFormat.setFontWeight(QFont::Light);
   QStringList dataOperatorKeywordPatterns = {
       "\\bwhr\\b",    "\\bend\\b", "\\blambda\\b", "\\bforall\\b",
       "\\bexists\\b", "\\bdiv\\b", "\\bmod\\b",    "\\bin\\b"};
@@ -128,7 +120,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
   /* todo keywords */
   todoKeywordFormat.setForeground(Qt::red);
-  todoKeywordFormat.setFontWeight(QFont::Bold);
   QStringList todoKeywordPatterns = {"\\bcontained\\b", "\\bTODO\\b",
                                      "\\bFIXME\\b", "\\bXXX\\b"};
   for (const QString& pattern : todoKeywordPatterns)
@@ -139,7 +130,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
 
   /* defined function keywords */
   functionKeywordFormat.setForeground(Qt::darkCyan);
-  functionKeywordFormat.setFontWeight(QFont::Bold);
   QStringList functionKeywordPatterns = {
       "\\bmin\\b",     "\\bmax\\b",     "\\bsucc\\b",   "\\bpred\\b",
       "\\babs\\b",     "\\bfloor\\b",   "\\bceil\\b",   "\\bround\\b",
@@ -153,7 +143,6 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
   }
 
   /* operators */
-  operatorFormat.setFontWeight(QFont::DemiBold);
   operatorFormat.setForeground(Qt::darkGreen);
   highlightingRules.push_back(HighlightingRule(
       QRegExp("[\\.\\+|&<>:;=@(){}\\[\\],\\!\\*/\\\\-]"), operatorFormat));
@@ -205,16 +194,26 @@ void LineNumbersArea::paintEvent(QPaintEvent* event)
 CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
 {
   /* set the font used (monospaced) */
-  QFont font = QFont("Courier New");
-  font.setPixelSize(13);
-  this->document()->setDefaultFont(font);
+  codeFont.setFamily("Monospace");
+  codeFont.setFixedPitch(true);
+  codeFont.setWeight(QFont::Light);
+  lineNumberFont = this->font();
 
-  /* set the tab width to 4 characters */
-  QFontMetrics fm = QFontMetrics(font);
-  this->setTabStopWidth(fm.width("1234"));
+  setFontSize(13);
 
   lineNumberArea = new LineNumbersArea(this);
   highlighter = new CodeHighlighter(spec, this->document());
+
+  /* set up the context menu*/
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
+          SLOT(showContextMenu(const QPoint&)));
+  contextMenu = this->createStandardContextMenu();
+  contextMenu->addSeparator();
+  zoomInAction = contextMenu->addAction("Zoom in", this, SLOT(zoomIn()));
+  zoomInAction->setShortcut(QKeySequence::ZoomIn);
+  zoomOutAction = contextMenu->addAction("Zoom out", this, SLOT(zoomOut()));
+  zoomOutAction->setShortcut(QKeySequence::ZoomOut);
 
   /* signals that need to change the line number area */
   connect(this, SIGNAL(blockCountChanged(int)), this,
@@ -225,9 +224,51 @@ CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
   updateLineNumberAreaWidth(0);
 }
 
+void CodeEditor::setFontSize(int pixelSize)
+{
+  codeFont.setPixelSize(pixelSize);
+  this->document()->setDefaultFont(codeFont);
+  lineNumberFont.setPixelSize(pixelSize);
+
+  /* set the tab width to 4 characters */
+  QFontMetrics codeFontMetrics = QFontMetrics(codeFont);
+  this->setTabStopWidth(codeFontMetrics.width("1234"));
+}
+
+void CodeEditor::showContextMenu(const QPoint& position)
+{
+  contextMenu->exec(mapToGlobal(position));
+}
+
+void CodeEditor::keyPressEvent(QKeyEvent* event)
+{
+  if (event->matches(QKeySequence::ZoomIn))
+  {
+    zoomIn();
+  }
+  else if (event->matches(QKeySequence::ZoomOut))
+  {
+    zoomOut();
+  }
+  else
+  {
+    QPlainTextEdit::keyPressEvent(event);
+  }
+}
+
 void CodeEditor::deleteChar()
 {
   this->textCursor().deleteChar();
+}
+
+void CodeEditor::zoomIn()
+{
+  setFontSize(codeFont.pixelSize() + 1);
+}
+
+void CodeEditor::zoomOut()
+{
+  setFontSize(codeFont.pixelSize() - 1);
 }
 
 int CodeEditor::lineNumberAreaWidth()
@@ -240,7 +281,7 @@ int CodeEditor::lineNumberAreaWidth()
     ++digits;
   }
 
-  return 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+  return 3 + QFontMetrics(lineNumberFont).width("9") * digits;
 }
 
 void CodeEditor::updateLineNumberAreaWidth(int)
@@ -283,6 +324,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
   int blockNumber = block.blockNumber();
   int top = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
   int bottom = top + (int)blockBoundingRect(block).height();
+  int lineNumberHeight = QFontMetrics(lineNumberFont).height();
 
   while (block.isValid() && top <= event->rect().bottom())
   {
@@ -290,8 +332,9 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
     {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(-2, top, lineNumberArea->width(), fontMetrics().height(),
-                       Qt::AlignRight, number);
+      painter.setFont(lineNumberFont);
+      painter.drawText(-2, top, lineNumberArea->width(), lineNumberHeight,
+                       Qt::AlignRight | Qt::AlignBottom, number);
     }
 
     block = block.next();
