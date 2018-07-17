@@ -355,10 +355,10 @@ class pbes_constelm_algorithm
     {
       protected:
         /// \brief The propositional variable at the source of the edge
-        propositional_variable m_source;
+        const propositional_variable m_source;
 
         /// \brief The propositional variable instantiation that determines the target of the edge
-        propositional_variable_instantiation m_target;
+        const propositional_variable_instantiation m_target;
 
       public:
         /// \brief Constructor
@@ -368,7 +368,7 @@ class pbes_constelm_algorithm
         /// \param src A propositional variable declaration
         /// \param tgt A propositional variable
         /// \param c A term
-        edge(propositional_variable src, propositional_variable_instantiation tgt, pbes_expression c = true_())
+        edge(const propositional_variable& src, const propositional_variable_instantiation& tgt, pbes_expression c = true_())
           : pbes_expression(c), m_source(src), m_target(tgt)
         {}
 
@@ -411,6 +411,23 @@ class pbes_constelm_algorithm
         /// variable, it means that it represents NaC ("not a constant").
         constraint_map m_constraints;
 
+        /// \brief Returns true if the data variable v has been assigned a constant expression.
+        /// \param v A variable
+        /// \return True if the data variable v has been assigned a constant expression.
+        bool is_constant(const data::variable& v) const
+        {
+          auto i = m_constraints.find(v);
+          return i != m_constraints.end() && !data::is_variable(i->second);
+        }
+
+        /// \brief Returns true if the expression x has the value undefined_data_expression or if x is a constant data expression.
+        /// \param x A
+        /// \return True if the data variable v has been assigned a constant expression.
+        bool is_constant_expression(const data::data_expression& x) const
+        {
+          return x == data::undefined_data_expression() || data::is_constant(x);
+        }
+
       public:
         /// \brief Constructor
         vertex() = default;
@@ -432,39 +449,6 @@ class pbes_constelm_algorithm
         const constraint_map& constraints() const
         {
           return m_constraints;
-        }
-
-        /// \brief Returns true if the data variable v has been assigned a constant expression.
-        /// \param v A variable
-        /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant(const data::variable& v) const
-        {
-          auto i = m_constraints.find(v);
-          return i != m_constraints.end() && !data::is_variable(i->second);
-        }
-
-        /// \brief Returns true if the expression x has the value undefined_data_expression or if x is a constant data expression.
-        /// \param x A
-        /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant_expression(const data::data_expression& x) const
-        {
-          return x == data::undefined_data_expression() || data::is_constant(x);
-        }
-
-        /// \brief Returns the constant parameters of this vertex.
-        /// \return The constant parameters of this vertex.
-        std::vector<data::variable> constant_parameters() const
-        {
-          std::vector<data::variable> result;
-          data::variable_list parameters(m_variable.parameters());
-          for (const auto & parameter : parameters)
-          {
-            if (is_constant(parameter))
-            {
-              result.push_back(parameter);
-            }
-          }
-          return result;
         }
 
         /// \brief Returns the indices of the constant parameters of this vertex.
@@ -666,19 +650,14 @@ class pbes_constelm_algorithm
     std::map<propositional_variable, std::vector<data::variable> > redundant_parameters() const
     {
       std::map<propositional_variable, std::vector<data::variable> > result;
-      for (auto i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
+      for (const std::pair<core::identifier_string, std::vector<std::size_t>>& red_pair: m_redundant_parameters)
       {
-        const vertex& v = m_vertices.find(i->first)->second;
+        const vertex& v = m_vertices.find(red_pair.first)->second;
         std::vector<data::variable>& variables = result[v.variable()];
-        for (auto j = i->second.begin(); j != i->second.end(); ++j)
+        for (const std::size_t par: red_pair.second)
         {
-          // std::advance doesn't work for aterm lists :-(
-          data::variable_list parameters(v.variable().parameters());
-          typename data::variable_list::iterator k = parameters.begin();
-          for (std::size_t i = 0; i < *j; i++)
-          {
-            ++k;
-          }
+          typename data::variable_list::iterator k = v.variable().parameters().begin();
+          std::advance(k, par);
           variables.push_back(*k);
         }
       }
@@ -714,7 +693,7 @@ class pbes_constelm_algorithm
             {
               propositional_variable_instantiation X = j->first;
               pbes_expression condition = ec.compute_condition(j->second);
-              edges.push_back(edge(eqn.variable(), X, condition));
+              edges.emplace_back(eqn.variable(), X, condition);
             }
           }
         }
@@ -722,13 +701,10 @@ class pbes_constelm_algorithm
         {
           // use find function to compute the edges
           std::set<propositional_variable_instantiation> inst = find_propositional_variable_instantiations(eqn.formula());
-          if (!inst.empty())
+          std::vector<edge>& edges = m_edges[name];
+          for (const auto & k : inst)
           {
-            std::vector<edge>& edges = m_edges[name];
-            for (const auto & k : inst)
-            {
-              edges.push_back(edge(eqn.variable(), k));
-            }
+            edges.emplace_back(eqn.variable(), k);
           }
         }
       }
@@ -754,7 +730,7 @@ class pbes_constelm_algorithm
         todo.erase(std::remove(todo.begin(), todo.end(), var), todo.end());
 
         const vertex& u = m_vertices[var.name()];
-        std::vector<edge>& u_edges = m_edges[var.name()];
+        const std::vector<edge>& u_edges = m_edges[var.name()];
 
         for (const edge& e: u_edges)
         {
@@ -794,7 +770,7 @@ class pbes_constelm_algorithm
       for (pbes_equation& eqn: p.equations())
       {
         core::identifier_string name = eqn.variable().name();
-        vertex& v = m_vertices[name];
+        const vertex& v = m_vertices[name];
         if (!v.constraints().empty())
         {
           std::vector<std::size_t> r = v.constant_parameter_indices();
@@ -809,7 +785,7 @@ class pbes_constelm_algorithm
       for (pbes_equation& eqn: p.equations())
       {
         core::identifier_string name = eqn.variable().name();
-        vertex& v = m_vertices[name];
+        const vertex& v = m_vertices[name];
 
         if (!v.constraints().empty())
         {
@@ -830,12 +806,11 @@ class pbes_constelm_algorithm
       if (mCRL2logEnabled(log::verbose))
       {
         mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
-        std::map<propositional_variable, std::vector<data::variable> > v = redundant_parameters();
-        for (auto & i : v)
+        for (const std::pair<propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
         {
-          for (typename std::vector<data::variable>::const_iterator j = i.second.begin(); j != i.second.end(); ++j)
+          for (const data::variable& var: i.second)
           {
-            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(*j) << ")" << std::endl;
+            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(var) << ")" << std::endl;
           }
         }
       }
