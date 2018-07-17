@@ -11,67 +11,61 @@
 #define CODEEDITOR_H
 
 #include <QPlainTextEdit>
+#include <QSyntaxHighlighter>
 
-class LineNumbersArea;
+class HighlightingRule
+{
+  public:
+  QRegExp pattern;
+  QTextCharFormat format;
+
+  HighlightingRule(QRegExp pattern, QTextCharFormat format);
+};
 
 /**
- * @brief The CodeEditor class defines a text editor for code (used for
- *   specification and properties)
+ * @brief The CodeHighlighter class defines a syntax highlioghrt for mCRL2
+ *   specifcations
  */
-class CodeEditor : public QPlainTextEdit
+class CodeHighlighter : public QSyntaxHighlighter
 {
   Q_OBJECT
 
   public:
   /**
-   * @brief CodeEditor Constructor
-   * @param parent The parent of this widget
+   * @brief CodeHighlighter Constructor
+   * @param spec Whether this code editor is for a mcrl2 specifcation or a mcf
+   *   formula
+   * @param parent The document on which the code highlighter should operate
    */
-  explicit CodeEditor(QWidget* parent = 0);
-
-  /**
-   * @brief lineNumberAreaPaintEvent Paints the line number area on the screen
-   * @param event A paint event
-   */
-  void lineNumberAreaPaintEvent(QPaintEvent* event);
-
-  /**
-   * @brief lineNumberAreaWidth Computes the width needed for the line number
-   *   area
-   * @return The width needed for the line number area
-   */
-  int lineNumberAreaWidth();
-
-  public slots:
-  /**
-   * @brief deleteChar Allows the user to delete text
-   */
-  void deleteChar();
+  CodeHighlighter(bool spec, QTextDocument* parent = 0);
 
   protected:
   /**
-   * @brief resizeEvent Resizes the line number area when the window is resized
-   * @param e The resize event
+   * @brief highlightBlock Highlights a single block of text
+   * @param text The text to highlight
    */
-  void resizeEvent(QResizeEvent* event) override;
+  void highlightBlock(const QString& text);
 
   private:
-  QWidget* lineNumberArea;
+  std::vector<HighlightingRule> highlightingRules;
 
-  private slots:
-  /**
-   * @brief updateLineNumberAreaWidth Updates the width of the line number area
-   */
-  void updateLineNumberAreaWidth(int);
-
-  /**
-   * @brief updateLineNumberArea Updates the line number area after the
-   *   scrollbar has been used
-   * @param rect The rectangle that covers the line number area
-   * @param dy The amount of pixels scrolled
-   */
-  void updateLineNumberArea(const QRect&, int);
+  QTextCharFormat identifierFormat;
+  QTextCharFormat specificationKeywordFormat;
+  QTextCharFormat processKeywordFormat;
+  QTextCharFormat processOperatorKeywordFormat;
+  QTextCharFormat stateFormulaOpertorKeywordFormat;
+  QTextCharFormat primitiveTypeKeywordFormat;
+  QTextCharFormat containerTypeKeywordFormat;
+  QTextCharFormat dataKeywordFormat;
+  QTextCharFormat dataOperatorKeywordFormat;
+  QTextCharFormat todoKeywordFormat;
+  QTextCharFormat functionKeywordFormat;
+  QTextCharFormat operatorFormat;
+  QTextCharFormat numberFormat;
+  QTextCharFormat commentFormat;
 };
+
+class CodeEditor;
 
 /**
  * @brief The LineNumberArea class defines the area with line numbers in the
@@ -101,6 +95,68 @@ class LineNumbersArea : public QWidget
 
   private:
   CodeEditor* codeEditor;
+};
+
+/**
+ * @brief The CodeEditor class defines a text editor for code (used for
+ *   specification and properties)
+ */
+class CodeEditor : public QPlainTextEdit
+{
+  Q_OBJECT
+
+  public:
+  /**
+   * @brief CodeEditor Constructor
+   * @param parent The parent of this widget
+   * @param spec Whether this code editor is for a mcrl2 specifcation or a mcf
+   *   formula
+   */
+  explicit CodeEditor(QWidget* parent = 0, bool spec = false);
+
+  /**
+   * @brief lineNumberAreaPaintEvent Paints the line number area on the screen
+   * @param event A paint event
+   */
+  void lineNumberAreaPaintEvent(QPaintEvent* event);
+
+  /**
+   * @brief lineNumberAreaWidth Computes the width needed for the line number
+   *   area
+   * @return The width needed for the line number area
+   */
+  int lineNumberAreaWidth();
+
+  public slots:
+  /**
+   * @brief deleteChar Allows the user to delete text
+   */
+  void deleteChar();
+
+  protected:
+  /**
+   * @brief resizeEvent Resizes the line number area when the window is resized
+   * @param e The resize event
+   */
+  void resizeEvent(QResizeEvent* event) override;
+
+  private:
+  QWidget* lineNumberArea;
+  CodeHighlighter* highlighter;
+
+  private slots:
+  /**
+   * @brief updateLineNumberAreaWidth Updates the width of the line number area
+   */
+  void updateLineNumberAreaWidth(int);
+
+  /**
+   * @brief updateLineNumberArea Updates the line number area after the
+   *   scrollbar has been used
+   * @param rect The rectangle that covers the line number area
+   * @param dy The amount of pixels scrolled
+   */
+  void updateLineNumberArea(const QRect&, int);
 };
 
 #endif // CODEEDITOR_H
