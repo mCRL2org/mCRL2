@@ -69,8 +69,8 @@ x\wedge true &\rightarrow &x \\
 \lnot false &\rightarrow &true \\
 ITE(true,x,y) &\rightarrow &x \\
 ITE(false,x,y) &\rightarrow &y \\
-x &=&x\rightarrow true \\
-y &=&x\rightarrow x=y,\text{ provided }y\succ x
+x=x &\rightarrow &true \\
+y=x &\rightarrow &x=y,\text{ provided }y\succ x
 \end{eqnarray*}
 
 \subsection{The predicate formula normal form (PFNF)}
@@ -359,7 +359,7 @@ R_{\forall}(V,\exists W.\phi)=
 R_{\forall}(V,\phi)&\textrm{if }W=\emptyset,\\
 \forall V.\exists W.\phi&\textrm{otherwise},
 \end{array}\right.\\
-R_{\forall}(V.\phi)=\forall V\cap \vars(\phi).\phi\textrm{ otherwise}.
+R_{\forall}(V,\phi)=\forall V\cap \vars(\phi).\phi\textrm{ otherwise}.
 \end{array}
 \]
 
@@ -380,7 +380,7 @@ R_{\exists}(V,\forall W.\phi)=
 R_{\exists}(V,\phi)&\textrm{if }W=\emptyset,\\
 \exists V.\forall W.\phi&\textrm{otherwise},
 \end{array}\right.\\
-R_{\exists}(V.\phi)=\exists V\cap\vars(\phi).\phi\textrm{ otherwise}.
+R_{\exists}(V,\phi)=\exists V\cap\vars(\phi).\phi\textrm{ otherwise}.
 \end{array}
 \]
 \newpage
