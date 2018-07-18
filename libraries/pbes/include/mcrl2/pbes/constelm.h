@@ -367,6 +367,9 @@ class pbes_constelm_algorithm
         /// variable, it means that it represents NaC ("not a constant").
         constraint_map m_constraints;
 
+        /// \brief Indicates whether this vertex has been visited at least once.
+        bool m_visited = false;
+
         /// \brief Returns true if the data variable v has been assigned a constant expression.
         /// \param v A variable
         /// \return True if the data variable v has been assigned a constant expression.
@@ -445,28 +448,22 @@ class pbes_constelm_algorithm
 
           data::variable_list params = m_variable.parameters();
 
-          if (m_constraints.empty())
+          if (!m_visited)
           {
-            if (e.empty())
+            m_visited = true;
+            auto j = params.begin();
+            for (auto i = e.begin(); i != e.end(); ++i, ++j)
             {
-              m_constraints[data::undefined_variable()] = data::undefined_data_expression();
-            }
-            else
-            {
-              auto j = params.begin();
-              for (auto i = e.begin(); i != e.end(); ++i, ++j)
+              data::rewriter::substitution_type sigma;
+              detail::make_constelm_substitution(e_constraints, sigma);
+              data::data_expression e1 = datar(*i, sigma);
+              if (is_constant_expression(e1))
               {
-                data::rewriter::substitution_type sigma;
-                detail::make_constelm_substitution(e_constraints, sigma);
-                data::data_expression e1 = datar(*i, sigma);
-                if (is_constant_expression(e1))
-                {
-                  m_constraints[*j] = e1;
-                }
-                else
-                {
-                  m_constraints[*j] = *j;
-                }
+                m_constraints[*j] = e1;
+              }
+              else
+              {
+                m_constraints[*j] = *j;
               }
             }
             changed = true;
@@ -494,16 +491,6 @@ class pbes_constelm_algorithm
             }
           }
           return changed;
-        }
-
-        // Removes assignments to undefined_variable() from constraints()
-        void remove_undefined_values()
-        {
-          auto i = m_constraints.find(data::undefined_variable());
-          if (i != m_constraints.end())
-          {
-            m_constraints.erase(i);
-          }
         }
     };
 
@@ -712,12 +699,6 @@ class pbes_constelm_algorithm
           }
           mCRL2log(log::debug) << "  <target vertex after >" << v.to_string() << "\n";
         }
-      }
-
-      // remove undefined values from constraints
-      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
-      {
-        i->second.remove_undefined_values();
       }
 
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
