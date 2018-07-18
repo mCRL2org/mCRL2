@@ -193,23 +193,25 @@ public:
     subblock pos_block(m_equation, block1, m_dm, m_cache);
     subblock neg_block(m_equation, block2, m_dm, m_cache);
 
+    // TODO temporarily disabled this, since it depends on whether we are using
+    // optimisations.
     // Update the cache
-    m_cache->replace_after_split(subblock_list.begin(), subblock_list.end(), *this, pos_block, neg_block);
-    for(const subblock& b: others)
-    {
-      m_cache->insert_refinement(pos_block, b);
-      m_cache->insert_refinement(neg_block, b);
-      m_cache->insert_transition(neg_block, b, false);
-    }
-    if(others.size() == 1)
-    {
-      // Optimization: if there is only only subblock in the list 'others', then
-      // the transition from 'pos_block' to 'others' has to lead to that one
-      // subblock.
-      // In general we cannot conclude that pos_block has a transition to every
-      // subblock in 'others'.
-      m_cache->insert_transition(pos_block, *others.begin(), true);
-    }
+    // m_cache->replace_after_split(subblock_list.begin(), subblock_list.end(), *this, pos_block, neg_block);
+    // for(const subblock& b: others)
+    // {
+    //   m_cache->insert_refinement(pos_block, b);
+    //   m_cache->insert_refinement(neg_block, b);
+    //   m_cache->insert_transition(neg_block, b, false);
+    // }
+    // if(others.size() == 1)
+    // {
+    //   // Optimization: if there is only only subblock in the list 'others', then
+    //   // the transition from 'pos_block' to 'others' has to lead to that one
+    //   // subblock.
+    //   // In general we cannot conclude that pos_block has a transition to every
+    //   // subblock in 'others'.
+    //   m_cache->insert_transition(pos_block, *others.begin(), true);
+    // }
     return std::make_pair(pos_block, neg_block);
   }
 

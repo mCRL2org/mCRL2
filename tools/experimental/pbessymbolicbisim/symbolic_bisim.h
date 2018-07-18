@@ -317,15 +317,22 @@ public:
          << " proof graph has size " << proof_graph.size()
          << ", total amount of blocks " << (m_partition.get_proof_blocks().size() + m_partition.get_other_blocks().size()) << "\n";
         total_pg_time += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start_pg_solver).count();
-      } while(!m_partition.refine_n_steps(m_num_refine_steps));
+      } while(!m_partition.refine_n_steps(m_num_refine_steps, latest_winner == PLAYER_EVEN));
       mCRL2log(log::info) << "Partition refinement completed in " <<
           std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
           " seconds.\n" <<
           "Time spent on PG solving: " << total_pg_time << " seconds" << std::endl;
+
+      ParityGame pg;
+      m_partition.get_reachable_pg(pg);
+      std::ofstream outfile;
+      outfile.open("out.pg");
+      pg.write_pgsolver(outfile);
+      outfile.close();
     }
     else
     {
-      m_partition.refine_n_steps(0);
+      m_partition.refine_n_steps(0, false);
       ParityGame pg;
       m_partition.get_reachable_pg(pg);
 

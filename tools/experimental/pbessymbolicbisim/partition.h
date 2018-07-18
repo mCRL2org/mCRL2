@@ -68,7 +68,12 @@ protected:
   split_cache<subblock>* m_subblock_cache;
   std::map< pbes_system::detail::ppg_equation, priority_t > m_rank_map;
 
-  bool is_in_strategy(const block_t& src, const block_t& dest)
+  bool is_valid_approximation(const block_t& src, bool is_positive_pg) const
+  {
+    return (src.is_conjunctive() && is_positive_pg) || (!src.is_conjunctive() && !is_positive_pg);
+  }
+
+  bool is_in_strategy(const block_t& src, const block_t& dest) const
   {
     auto find_result = m_strategy.find(src);
     // If there is no winning strategy in src, then m_strategy does not contain
@@ -79,9 +84,9 @@ protected:
   /**
    * \brief Split block phi_k on phi_l
    */
-  bool split_block(const block_t& phi_k, const block_t& phi_l, const std::vector<subblock>& subblocks)
+  bool split_block(const block_t& phi_k, const block_t& phi_l, const std::vector<subblock>& subblocks, bool use_optimisations)
   {
-    if(!is_in_strategy(phi_k, phi_l))
+    if(use_optimisations && !is_in_strategy(phi_k, phi_l))
     {
       // This edge is not part of the winning strategy in the parity game
       return false;
@@ -98,28 +103,31 @@ protected:
       return false;
     }
 
+    mCRL2log(log::verbose) << "Splitting\n" << phi_k << "\nwrt\n" << phi_l << std::endl;
+
     // Try to split
-    const std::pair<block, block> split_result = phi_k.split(phi_l, subblocks);
+    const std::pair<block, block> split_result = phi_k.split(phi_l, subblocks, use_optimisations);
     if(split_result.first.is_empty() || split_result.second.is_empty())
     {
       // Split failed
       return false;
     }
 
-    // mCRL2log(log::verbose) << "Split " << phi_k << "\nwrt " << phi_l << std::endl;
+    if(!use_optimisations)
+    {
+      // Update the caches and the partition
+      block_t phi_k_copy(phi_k);
+      block_t phi_l_copy(phi_l);
+      m_proof_blocks.remove(phi_k);
+      std::vector<std::list<block>> block_vec({m_proof_blocks, m_other_blocks});
+      elements_iterator< block, std::vector<std::list<block>>> block_it(block_vec);
+      m_block_cache->replace_after_split(block_it, block_it.end(), phi_k_copy, split_result.first, split_result.second);
+      m_block_cache->insert_transition(split_result.first, phi_l_copy, true);
+      m_block_cache->insert_transition(split_result.second, phi_l_copy, false);
 
-    // Update the caches and the partition
-    block_t phi_k_copy(phi_k);
-    block_t phi_l_copy(phi_l);
-    m_proof_blocks.remove(phi_k);
-    std::vector<std::list<block>> block_vec({m_proof_blocks, m_other_blocks});
-    elements_iterator< block, std::vector<std::list<block>>> block_it(block_vec);
-    m_block_cache->replace_after_split(block_it, block_it.end(), phi_k_copy, split_result.first, split_result.second);
-    m_block_cache->insert_transition(split_result.first, phi_l_copy, true);
-    m_block_cache->insert_transition(split_result.second, phi_l_copy, false);
-
-    m_proof_blocks.push_front(split_result.first);
-    m_proof_blocks.push_front(split_result.second);
+      m_proof_blocks.push_front(split_result.first);
+      m_proof_blocks.push_front(split_result.second);
+    }
     return true;
   }
 
@@ -138,17 +146,35 @@ protected:
   }
 
   /**
-   * \brief Try every combination of phi_k, phi_l and action summand to
+   * \brief Try every combination of blocks to
    * see whether the partition can be refined.
    */
-  bool refine_step()
+  bool refine_step(bool use_optimisations, bool is_positive_pg)
   {
     std::vector<subblock> subblocks = make_subblock_list();
-    for(const block_t phi_k: m_proof_blocks)
+    // Sorting the blocks within the BFS layers such that the following splits will be tried first:
+    // - In the case of a negative proof graph, conjunctive nodes are split first
+    // - In the case of a positive proof graph, disjunctive nodes are split first
+    m_proof_blocks.sort([is_positive_pg](const block_t& b1, const block_t& b2)
+                          {
+                            return b1.bfs_level < b2.bfs_level || (b1.bfs_level == b2.bfs_level && ((is_positive_pg && !b1.is_conjunctive() && b2.is_conjunctive()) || (!is_positive_pg && b1.is_conjunctive() && !b2.is_conjunctive())));
+                          });
+    for(const block_t& phi_k: m_proof_blocks)
     {
-      for(const block_t phi_l: m_proof_blocks)
+      if(use_optimisations && is_valid_approximation(phi_k, is_positive_pg))
       {
-        if(split_block(phi_k, phi_l, subblocks))
+        continue;
+      }
+      // Sort the blocks within their BFS layers such that edges present in the proof graph
+      // are tried as splitters first.
+      std::list<block_t> proof_blocks(m_proof_blocks);
+      proof_blocks.sort([&](const block_t& b1, const block_t& b2)
+                          {
+                            return b1.bfs_level < b2.bfs_level || (b1.bfs_level == b2.bfs_level && is_in_strategy(phi_k,b1) && !is_in_strategy(phi_k,b2));
+                          });
+      for(const block_t& phi_l: m_proof_blocks)
+      {
+        if(split_block(phi_k, phi_l, subblocks, use_optimisations))
         {
           return true;
         }
@@ -191,6 +217,7 @@ protected:
 
     // Search for the block that contains the initial state
     block_t initial_block = find_initial_block(unreachable);
+    initial_block.bfs_level = 0;
     unreachable.erase(std::find(unreachable.begin(), unreachable.end(), initial_block));
     open_set.push(initial_block);
     m_proof_blocks.clear();
@@ -207,10 +234,11 @@ protected:
       open_set.pop();
 
       // Look for possible successors of block in the set of unreachable blocks
-      for(std::list<block_t>::const_iterator i = unreachable.begin(); i != unreachable.end();)
+      for(std::list<block_t>::iterator i = unreachable.begin(); i != unreachable.end();)
       {
         if(block.has_transition(*i))
         {
+          i->bfs_level = block.bfs_level + 1;
           // A transition was found, so *i is reachable
           open_set.push(*i);
           m_proof_blocks.push_back(*i);
@@ -481,12 +509,19 @@ public:
    * terminates when the partition is stable.
    * \return true when the partition was already stable
    */
-  bool refine_n_steps(std::size_t num_steps)
+  bool refine_n_steps(std::size_t num_steps, bool is_positive_pg)
   {
     // mCRL2log(log::verbose) << "Initial partition:" << std::endl;
     // print_partition(m_proof_blocks);
+
+    // First check whether the current proof graph is stable under optimisations.
+    // This will not affect the cache.
+    if(!refine_step(true, is_positive_pg))
+    {
+      return true;
+    }
     std::size_t num_iterations = 0;
-    while(refine_step())
+    while(refine_step(false, is_positive_pg))
     {
       mCRL2log(log::verbose) << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
       print_partition(m_proof_blocks);

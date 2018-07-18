@@ -36,6 +36,8 @@ protected:
 
 public:
 
+  int bfs_level = 0;
+
   block()
   : m_subblocks(std::make_shared<std::list<subblock_t>>())
   , m_cache(nullptr)
@@ -64,7 +66,7 @@ public:
     return result;
   }
 
-  std::pair<block, block> split(const block& other, const std::vector<subblock>& subblock_list) const
+  std::pair<block, block> split(const block& other, const std::vector<subblock>& subblock_list, bool use_optimisations) const
   {
     if(!has_transition(other))
     {
@@ -91,7 +93,10 @@ public:
         neg_subblocks.push_back(sb_split.second);
       }
     }
-    m_cache->insert_refinement(*this, other);
+    if(!use_optimisations || pos_subblocks.empty() || neg_subblocks.empty())
+    {
+      m_cache->insert_refinement(*this, other);
+    }
     // If one of the two lists is empty, we just return this and an empty block
     if(pos_subblocks.empty())
     {

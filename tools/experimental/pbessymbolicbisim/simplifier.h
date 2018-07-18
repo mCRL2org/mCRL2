@@ -160,7 +160,7 @@ protected:
     }
     catch(const mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error("An exception occured while simplifying the expression " + pp(expr) + 
+      throw mcrl2::runtime_error("An exception occured while simplifying the expression " + pp(expr) +
         ".\nThe rewritten expression is " + pp(rewritten) + ".\nThe original exception is: " + e.what());
     }
 
