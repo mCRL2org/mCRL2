@@ -416,13 +416,13 @@ class pbes_constelm_algorithm
         {
           std::vector<std::size_t> result;
           std::size_t index = 0;
-          data::variable_list parameters(m_variable.parameters());
-          for (auto i = parameters.begin(); i != parameters.end(); ++i, index++)
+          for (const data::variable& parameter: m_variable.parameters())
           {
-            if (is_constant(*i))
+            if (is_constant(parameter))
             {
               result.push_back(index);
             }
+            index++;
           }
           return result;
         }
@@ -433,9 +433,9 @@ class pbes_constelm_algorithm
         {
           std::ostringstream out;
           out << m_variable << "  assertions = ";
-          for (auto i = m_constraints.begin(); i != m_constraints.end(); ++i)
+          for (const auto& constraint: m_constraints)
           {
-            out << "{" << i->first << " := " << i->second << "} ";
+            out << "{" << constraint.first << " := " << constraint.second << "} ";
           }
           return out.str();
         }
@@ -515,9 +515,9 @@ class pbes_constelm_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (const auto& v: m_vertices)
       {
-        out << i->second.to_string() << std::endl;
+        out << v.second.to_string() << std::endl;
       }
       return out.str();
     }
@@ -526,11 +526,11 @@ class pbes_constelm_algorithm
     std::string print_edges()
     {
       std::ostringstream out;
-      for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+      for (const auto& source: m_edges)
       {
-        for (auto j = i->second.begin(); j != i->second.end(); ++j)
+        for (const auto& e: source.second)
         {
-          out << j->to_string() << std::endl;
+          out << e.to_string() << std::endl;
         }
       }
       return out.str();
@@ -618,7 +618,7 @@ class pbes_constelm_algorithm
       m_redundant_parameters.clear();
 
       // compute the vertices and edges of the dependency graph
-      for (pbes_equation& eqn: p.equations())
+      for (const pbes_equation& eqn: p.equations())
       {
         core::identifier_string name = eqn.variable().name();
         m_vertices[name] = vertex(eqn.variable());
@@ -704,7 +704,7 @@ class pbes_constelm_algorithm
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
 
       // compute the redundant parameters and the redundant equations
-      for (pbes_equation& eqn: p.equations())
+      for (const pbes_equation& eqn: p.equations())
       {
         core::identifier_string name = eqn.variable().name();
         const vertex& v = m_vertices[name];
