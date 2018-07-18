@@ -273,50 +273,6 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   }
 };
 
-template <typename Container, typename Predicate>
-/// \brief Removes elements from a container
-/// \param container A container
-/// \param pred All elements that satisfy the predicate pred are removed
-/// Note: this implementation is very inefficient!
-void remove_elements(Container& container, Predicate pred)
-{
-  std::vector<typename Container::value_type> result;
-  for (typename Container::iterator i = container.begin(); i != container.end(); ++i)
-  {
-    if (!pred(*i))
-    {
-      result.push_back(*i);
-    }
-  }
-  container = Container(result.begin(), result.end());
-}
-
-template <typename Variable>
-struct equation_is_contained_in
-{
-  const std::set<Variable>& m_variables;
-
-  equation_is_contained_in(const std::set<Variable>& variables)
-    : m_variables(variables)
-  {}
-
-  template <typename Equation>
-  bool operator()(const Equation& e)
-  {
-    return m_variables.find(e.variable()) != m_variables.end();
-  }
-};
-
-template <typename MapContainer>
-void print_constraint_map(const MapContainer& constraints)
-{
-  for (typename MapContainer::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
-  {
-    std::string lhs = data::pp(i->first);
-    std::string rhs = data::pp(i->second);
-    std::cout << "{" << lhs << " := " << rhs << "} ";
-  }
-}
 
 } // namespace detail
 /// \endcond
