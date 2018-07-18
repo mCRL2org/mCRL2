@@ -40,6 +40,12 @@ class ProcessThread : public QThread
   void run() override;
 
   /**
+   * @brief isRunning Returns whether this thread is running
+   * @return Whether this thread is running
+   */
+  bool isRunning();
+
+  /**
    * @brief getCurrentProcessId Returns the id of the process this thread is
    *   currently running
    * @return The id of the process this thread is currently running
@@ -82,15 +88,17 @@ class ProcessThread : public QThread
   void currentProcessFinished();
 
   /**
-   * @brief isRunning Is emitted when this thread moves from running to
+   * @brief statusChanged Is emitted when this thread moves from running to
    *   waiting or vice versa
    * @param running Whether the thread is running (or waiting)
+   * @param processType The process type of this thread
    */
-  void isRunning(bool running);
+  void statusChanged(bool running, ProcessType processType);
 
   private:
   QQueue<int>* processQueue;
   ProcessType processType;
+  bool running;
   int currentProcessid;
 };
 
@@ -121,6 +129,14 @@ class ProcessSystem : public QObject
    * @return The process thread of type processType
    */
   ProcessThread* getProcessThread(ProcessType processType);
+
+  /**
+   * @brief isThreadRunning Returns whether the thread of the given process type
+   *   is running
+   * @param processType The process type of the thread
+   * @return Whether the thread of the given process type is running
+   */
+  bool isThreadRunning(ProcessType processType);
 
   /**
    * @brief parseSpecification Parses the current specification
@@ -190,7 +206,7 @@ class ProcessSystem : public QObject
   void newProcessQueued(ProcessType processType);
 
   /**
-   * @brief processFinished Is emitted when a process is finished
+   * @brief processFinished Is emitted when a process has finished
    * @param processid The id of the process that has finished
    */
   void processFinished(int processid);

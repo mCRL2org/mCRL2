@@ -23,6 +23,8 @@ enum class ProcessType
   Verification
 };
 
+Q_DECLARE_METATYPE(ProcessType)
+
 const std::vector<ProcessType> PROCESSTYPES = {
     ProcessType::Parsing, ProcessType::Simulation, ProcessType::LtsCreation,
     ProcessType::Verification};

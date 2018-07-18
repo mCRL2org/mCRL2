@@ -45,23 +45,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   connect(specificationEditor, SIGNAL(modificationChanged(bool)),
           saveProjectAction, SLOT(setEnabled(bool)));
 
-  /* make the tool buttons enabled or disabled depending on whether processes
-   *   are running */
-  connect(processSystem->getProcessThread(ProcessType::Parsing),
-          SIGNAL(isRunning(bool)), parseAction, SLOT(setDisabled(bool)));
-  connect(processSystem->getProcessThread(ProcessType::Simulation),
-          SIGNAL(isRunning(bool)), simulateAction, SLOT(setDisabled(bool)));
-  connect(processSystem->getProcessThread(ProcessType::LtsCreation),
-          SIGNAL(isRunning(bool)), createLtsAction, SLOT(setDisabled(bool)));
-  connect(processSystem->getProcessThread(ProcessType::LtsCreation),
-          SIGNAL(isRunning(bool)), createReducedLtsAction,
-          SLOT(setDisabled(bool)));
-  connect(processSystem->getProcessThread(ProcessType::LtsCreation),
-          SIGNAL(isRunning(bool)), abortLtsCreationAction,
-          SLOT(setEnabled(bool)));
-  connect(processSystem->getProcessThread(ProcessType::Verification),
-          SIGNAL(isRunning(bool)), abortVerificationAction,
-          SLOT(setEnabled(bool)));
+  /* change the tool buttons to start or abort a tool depending on whether
+   *   processes are running */
+  for (ProcessType processType : PROCESSTYPES)
+  {
+    connect(processSystem->getProcessThread(processType),
+            SIGNAL(statusChanged(bool, ProcessType)), this,
+            SLOT(changeToolButtons(bool, ProcessType)));
+  }
 
   /* reset the propertiesdock when the project is saved */
   connect(fileSystem, SIGNAL(changesSaved()), propertiesDock,
@@ -71,9 +62,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   setWindowTitle("mCRL2 IDE - Unnamed project");
   resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,
                QDesktopWidget().availableGeometry(this).height() * 0.75));
-
-  ltsCreationProcessid = -1;
-  simulationProcessid = -1;
 }
 
 MainWindow::~MainWindow()
@@ -86,23 +74,23 @@ void MainWindow::setupMenuBar()
   QMenu* fileMenu = menuBar()->addMenu("File");
 
   newProjectAction =
-      fileMenu->addAction("New Project", this, SLOT(actionNewProject(bool)));
+      fileMenu->addAction(QIcon(":/icons/new_project.png"), "New Project", this,
+                          SLOT(actionNewProject(bool)));
   newProjectAction->setShortcut(QKeySequence::New);
-  newProjectAction->setIcon(QIcon(":/icons/new_project.png"));
 
   fileMenu->addSeparator();
 
   openProjectAction =
-      fileMenu->addAction("Open Project", this, SLOT(actionOpenProject()));
+      fileMenu->addAction(QIcon(":/icons/open_project.png"), "Open Project",
+                          this, SLOT(actionOpenProject()));
   openProjectAction->setShortcut(QKeySequence::Open);
-  openProjectAction->setIcon(QIcon(":/icons/open_project.png"));
 
   fileMenu->addSeparator();
 
   saveProjectAction =
-      fileMenu->addAction("Save Project", this, SLOT(actionSaveProject()));
+      fileMenu->addAction(QIcon(":/icons/save_project.png"), "Save Project",
+                          this, SLOT(actionSaveProject()));
   saveProjectAction->setShortcut(QKeySequence::Save);
-  saveProjectAction->setIcon(QIcon(":/icons/save_project.png"));
 
   saveProjectAsAction =
       fileMenu->addAction("Save Project As", this, SLOT(actionSaveProjectAs()));
@@ -112,8 +100,8 @@ void MainWindow::setupMenuBar()
   fileMenu->addSeparator();
 
   addPropertyAction =
-      fileMenu->addAction("Add Property", this, SLOT(actionAddProperty()));
-  addPropertyAction->setIcon(QIcon(":/icons/add_property.png"));
+      fileMenu->addAction(QIcon(":/icons/add_property.png"), "Add Property",
+                          this, SLOT(actionAddProperty()));
 
   /* Create the Edit menu */
   QMenu* editMenu = menuBar()->addMenu("Edit");
@@ -163,44 +151,34 @@ void MainWindow::setupMenuBar()
 
   viewMenu->addSeparator();
 
-  /* Create the Actions menu */
-  QMenu* actionsMenu = menuBar()->addMenu("Actions");
+  /* Create the Tools menu */
+  QMenu* actionsMenu = menuBar()->addMenu("Tools");
 
-  parseAction = actionsMenu->addAction("Parse", this, SLOT(actionParse()));
-  parseAction->setIcon(QIcon(":/icons/parse_correct.png"));
+  parseAction = actionsMenu->addAction(parseStartIcon, parseStartText, this,
+                                       SLOT(actionParse()));
 
-  simulateAction =
-      actionsMenu->addAction("Simulate", this, SLOT(actionSimulate()));
-  simulateAction->setIcon(QIcon(":/icons/simulate.png"));
+  simulateAction = actionsMenu->addAction(simulateStartIcon, simulateStartText,
+                                          this, SLOT(actionSimulate()));
 
   actionsMenu->addSeparator();
 
-  createLtsAction =
-      actionsMenu->addAction("Create LTS", this, SLOT(actionCreateLts()));
-  createLtsAction->setIcon(QIcon(":/icons/create_LTS.png"));
+  createLtsAction = actionsMenu->addAction(
+      createLtsStartIcon, createLtsStartText, this, SLOT(actionCreateLts()));
 
   createReducedLtsAction = actionsMenu->addAction(
-      "Create reduced LTS", this, SLOT(actionCreateReducedLts()));
-  createReducedLtsAction->setIcon(QIcon(":/icons/create_reduced_LTS.png"));
-
-  abortLtsCreationAction = actionsMenu->addAction(
-      "Abort LTS creation", this, SLOT(actionAbortLtsCreation()));
-  abortLtsCreationAction->setIcon(QIcon(":/icons/abort_LTS_creation.png"));
+      createReducedLtsStartIcon, createReducedLtsStartText, this,
+      SLOT(actionCreateReducedLts()));
 
   actionsMenu->addSeparator();
 
   verifyAllPropertiesAction = actionsMenu->addAction(
-      "Verify all Properties", this, SLOT(actionVerifyAllProperties()));
-  verifyAllPropertiesAction->setIcon(QIcon(":/icons/verify_all.png"));
-
-  abortVerificationAction = actionsMenu->addAction(
-      "Abort verification", this, SLOT(actionAbortVerification()));
-  abortVerificationAction->setIcon(QIcon(":/icons/abort_verification.png"));
+      verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
+      SLOT(actionVerifyAllProperties()));
 }
 
 void MainWindow::setupToolbar()
 {
-  toolbar = addToolBar("Actions");
+  toolbar = addToolBar("Tools");
   toolbar->setIconSize(QSize(48, 48));
 
   /* create each toolbar item by adding the actions */
@@ -213,16 +191,9 @@ void MainWindow::setupToolbar()
   toolbar->addSeparator();
   toolbar->addAction(createLtsAction);
   toolbar->addAction(createReducedLtsAction);
-  toolbar->addAction(abortLtsCreationAction);
   toolbar->addSeparator();
   toolbar->addAction(addPropertyAction);
   toolbar->addAction(verifyAllPropertiesAction);
-  toolbar->addAction(abortVerificationAction);
-
-  /* disable the abort actions since they should only be used when something is
-   *   running */
-  abortLtsCreationAction->setEnabled(false);
-  abortVerificationAction->setEnabled(false);
 }
 
 void MainWindow::setDocksToDefault()
@@ -363,62 +334,160 @@ void MainWindow::actionFindAndReplace()
 
 void MainWindow::actionParse()
 {
-  processSystem->parseSpecification();
+  if (processSystem->isThreadRunning(ProcessType::Parsing))
+  {
+    processSystem->abortAllProcesses(ProcessType::Parsing);
+  }
+  else
+  {
+    processSystem->parseSpecification();
+  }
 }
 
 void MainWindow::actionSimulate()
 {
-  simulationProcessid = processSystem->simulate();
+  if (processSystem->isThreadRunning(ProcessType::Simulation))
+  {
+    processSystem->abortAllProcesses(ProcessType::Simulation);
+  }
+  else
+  {
+    processSystem->simulate();
+  }
 }
 
 void MainWindow::actionCreateLts()
 {
-  ltsCreationProcessid = processSystem->createLts(LtsReduction::None);
+  if (processSystem->isThreadRunning(ProcessType::LtsCreation))
+  {
+    processSystem->abortAllProcesses(ProcessType::LtsCreation);
+  }
+  else
+  {
+    ltsCreationHasReduction = false;
+    processSystem->createLts(LtsReduction::None);
+  }
 }
 
 void MainWindow::actionCreateReducedLts()
 {
-  QStringList reductionNames;
-  for (auto const item : LTSREDUCTIONNAMES)
+  if (processSystem->isThreadRunning(ProcessType::LtsCreation))
   {
-    reductionNames << item.second;
+    processSystem->abortAllProcesses(ProcessType::LtsCreation);
   }
-
-  /* ask the user what reduction to use */
-  bool ok;
-  QString reductionName = QInputDialog::getItem(
-      this, "Create reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
-      Qt::WindowCloseButtonHint);
-
-  /* if user pressed ok, create a reduced lts */
-  if (ok)
+  else
   {
-    LtsReduction reduction = LtsReduction::None;
+    QStringList reductionNames;
     for (auto const item : LTSREDUCTIONNAMES)
     {
-      if (item.second == reductionName)
-      {
-        reduction = item.first;
-      }
+      reductionNames << item.second;
     }
 
-    ltsCreationProcessid = processSystem->createLts(reduction);
-  }
-}
+    /* ask the user what reduction to use */
+    bool ok;
+    QString reductionName = QInputDialog::getItem(
+        this, "Create reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
+        Qt::WindowCloseButtonHint);
 
-void MainWindow::actionAbortLtsCreation()
-{
-  processSystem->abortProcess(ltsCreationProcessid);
+    /* if user pressed ok, create a reduced lts */
+    if (ok)
+    {
+      LtsReduction reduction = LtsReduction::None;
+      for (auto const item : LTSREDUCTIONNAMES)
+      {
+        if (item.second == reductionName)
+        {
+          reduction = item.first;
+        }
+      }
+
+      ltsCreationHasReduction = true;
+      processSystem->createLts(reduction);
+    }
+  }
 }
 
 void MainWindow::actionVerifyAllProperties()
 {
-  propertiesDock->verifyAllProperties();
+  if (processSystem->isThreadRunning(ProcessType::Verification))
+  {
+    processSystem->abortAllProcesses(ProcessType::Verification);
+  }
+  else
+  {
+    propertiesDock->verifyAllProperties();
+  }
 }
 
-void MainWindow::actionAbortVerification()
+void MainWindow::changeToolButtons(bool toAbort, ProcessType processType)
 {
-  processSystem->abortAllProcesses(ProcessType::Verification);
+  switch (processType)
+  {
+  case ProcessType::Parsing:
+    if (toAbort)
+    {
+      parseAction->setText(parseAbortText);
+      parseAction->setIcon(parseAbortIcon);
+    }
+    else
+    {
+      parseAction->setText(parseStartText);
+      parseAction->setIcon(parseStartIcon);
+    }
+    break;
+  case ProcessType::Simulation:
+    if (toAbort)
+    {
+      simulateAction->setText(simulateAbortText);
+      simulateAction->setIcon(simulateAbortIcon);
+    }
+    else
+    {
+      simulateAction->setText(simulateStartText);
+      simulateAction->setIcon(simulateStartIcon);
+    }
+    break;
+  case ProcessType::LtsCreation:
+    if (toAbort)
+    {
+      if (ltsCreationHasReduction)
+      {
+        createLtsAction->setEnabled(false);
+        createReducedLtsAction->setText(createReducedLtsAbortText);
+        createReducedLtsAction->setIcon(createReducedLtsAbortIcon);
+      }
+      else
+      {
+        createReducedLtsAction->setEnabled(false);
+        createLtsAction->setText(createLtsAbortText);
+        createLtsAction->setIcon(createLtsAbortIcon);
+      }
+    }
+    else
+    {
+      createLtsAction->setEnabled(true);
+      createLtsAction->setText(createLtsStartText);
+      createLtsAction->setIcon(createLtsStartIcon);
+      createReducedLtsAction->setEnabled(true);
+      createReducedLtsAction->setText(createReducedLtsStartText);
+      createReducedLtsAction->setIcon(createReducedLtsStartIcon);
+    }
+    break;
+  case ProcessType::Verification:
+    if (toAbort)
+    {
+      verifyAllPropertiesAction->setText(verifyAllPropertiesAbortText);
+      verifyAllPropertiesAction->setIcon(verifyAllPropertiesAbortIcon);
+    }
+    else
+    {
+      verifyAllPropertiesAction->setText(verifyAllPropertiesStartText);
+      verifyAllPropertiesAction->setIcon(verifyAllPropertiesStartIcon);
+    }
+    break;
+  default:
+    break;
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

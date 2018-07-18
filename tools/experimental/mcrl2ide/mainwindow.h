@@ -41,6 +41,11 @@ class MainWindow : public QMainWindow
 
   public slots:
   /**
+   * @brief setDocksToDefault Puts all docks in their default location
+   */
+  void setDocksToDefault();
+
+  /**
    * @brief actionNewProject Allows the user to create a new project
    * @param askToSave Whether the user should be asked to save before creating a
    *   new project if the specification has been modified
@@ -102,25 +107,19 @@ class MainWindow : public QMainWindow
   void actionCreateReducedLts();
 
   /**
-   * @brief actionAbortLtsCreation Allows the user to abort lts creation
-   */
-  void actionAbortLtsCreation();
-
-  /**
    * @brief actionVerifyAllProperties Allows the user to verify all defined
    *   properties on the current specification
    */
   void actionVerifyAllProperties();
 
   /**
-   * @brief actionAbortVerification Allows the user to abort verification
+   * @brief changeToolButtons Whenever a thread is running, change corresponding
+   *   actions from start to abort; vice versa when a thread has stopped running
+   * @param toAbort Whether actions should be changed from start to abort or
+   *   vice versa (whether a thread is running or not)
+   * @param processType The process type of the thread
    */
-  void actionAbortVerification();
-
-  /**
-   * @brief setDocksToDefault Puts all docks in their default location
-   */
-  void setDocksToDefault();
+  void changeToolButtons(bool toAbort, ProcessType processType);
 
   protected:
   /**
@@ -165,12 +164,36 @@ class MainWindow : public QMainWindow
   QAction* zoomOutAction;
 
   QAction* parseAction;
+  QString parseStartText = "Parse Specification";
+  QIcon parseStartIcon = QIcon(":/icons/parse_start.png");
+  QString parseAbortText = "Abort Parsing";
+  QIcon parseAbortIcon = QIcon(":/icons/parse_abort.png");
+
   QAction* simulateAction;
+  QString simulateStartText = "Simulate Specification";
+  QIcon simulateStartIcon = QIcon(":/icons/simulate_start.png");
+  QString simulateAbortText = "Abort creating Simulation";
+  QIcon simulateAbortIcon = QIcon(":/icons/simulate_abort.png");
+
   QAction* createLtsAction;
+  QString createLtsStartText = "Create LTS";
+  QIcon createLtsStartIcon = QIcon(":/icons/create_LTS_start.png");
+  QString createLtsAbortText = "Abort LTS creation";
+  QIcon createLtsAbortIcon = QIcon(":/icons/create_LTS_abort.png");
+
   QAction* createReducedLtsAction;
-  QAction* abortLtsCreationAction;
+  QString createReducedLtsStartText = "Create reduced LTS";
+  QIcon createReducedLtsStartIcon =
+      QIcon(":/icons/create_reduced_LTS_start.png");
+  QString createReducedLtsAbortText = "Abort reduced LTS creation";
+  QIcon createReducedLtsAbortIcon =
+      QIcon(":/icons/create_reduced_LTS_abort.png");
+
   QAction* verifyAllPropertiesAction;
-  QAction* abortVerificationAction;
+  QString verifyAllPropertiesStartText = "Verify all Properties";
+  QIcon verifyAllPropertiesStartIcon = QIcon(":/icons/verify_all_start.png");
+  QString verifyAllPropertiesAbortText = "Abort Verification";
+  QIcon verifyAllPropertiesAbortIcon = QIcon(":/icons/verify_all_abort.png");
 
   QMenu* viewMenu;
   QToolBar* toolbar;
@@ -186,8 +209,7 @@ class MainWindow : public QMainWindow
   FileSystem* fileSystem;
   ProcessSystem* processSystem;
 
-  int ltsCreationProcessid;
-  int simulationProcessid;
+  bool ltsCreationHasReduction;
 };
 
 #endif // MAINWINDOW_H

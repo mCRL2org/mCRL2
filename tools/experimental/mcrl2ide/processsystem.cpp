@@ -15,6 +15,7 @@ ProcessThread::ProcessThread(QQueue<int>* processQueue, ProcessType processType)
 {
   this->processQueue = processQueue;
   this->processType = processType;
+  running = false;
   currentProcessid = -1;
 }
 
@@ -48,7 +49,8 @@ void ProcessThread::run()
       /* start a new process */
       currentProcessid = processQueue->dequeue();
       emit startProcess(currentProcessid);
-      emit isRunning(true);
+      running = true;
+      emit statusChanged(true, processType);
 
       /* wait until it has finished */
       finishLoop.exec();
@@ -57,10 +59,16 @@ void ProcessThread::run()
     else
     {
       /* wait until a process is added to the queue */
-      emit isRunning(false);
+      running = false;
+      emit statusChanged(false, processType);
       queueLoop.exec();
     }
   }
+}
+
+bool ProcessThread::isRunning()
+{
+  return running;
 }
 
 int ProcessThread::getCurrentProcessId()
@@ -72,6 +80,8 @@ ProcessSystem::ProcessSystem(FileSystem* fileSystem)
 {
   this->fileSystem = fileSystem;
   pid = 0;
+
+  qRegisterMetaType<ProcessType>("ProcessType");
 
   for (ProcessType processType : PROCESSTYPES)
   {
@@ -97,6 +107,11 @@ void ProcessSystem::setConsoleDock(ConsoleDock* consoleDock)
 ProcessThread* ProcessSystem::getProcessThread(ProcessType processType)
 {
   return processThreads[processType];
+}
+
+bool ProcessSystem::isThreadRunning(ProcessType processType)
+{
+  return processThreads[processType]->isRunning();
 }
 
 QProcess* ProcessSystem::createMcrl2ParsingProcess()
