@@ -524,4 +524,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
   /* empty the temporary folder */
   fileSystem->removeTemporaryFolder();
+
+  /* abort all processes */
+  for (ProcessType processType : PROCESSTYPES)
+  {
+    processSystem->abortAllProcesses(processType);
+  }
 }
