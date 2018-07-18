@@ -735,7 +735,8 @@ void ProcessSystem::mcfParsingResult(int previousExitCode)
     consoleDock->setConsoleTab(ProcessType::Parsing);
   }
 
-  /* if this belonged to a parsing process, write the result */
+  /* if this belonged to a parsing process, write the result and emit that the
+   *   process has finished */
   if (processType == ProcessType::Parsing)
   {
     if (previousExitCode == 0)
@@ -746,9 +747,9 @@ void ProcessSystem::mcfParsingResult(int previousExitCode)
     {
       results[processid] = "invalid";
     }
-  }
 
-  emit processFinished(processid);
+    emit processFinished(processid);
+  }
 }
 
 void ProcessSystem::createPbes(int previousExitCode)
@@ -876,15 +877,18 @@ void ProcessSystem::abortAllProcesses(ProcessType processType)
 
   /* then stop the process run by the thread */
   int processid = processThreads[processType]->getCurrentProcessId();
-  if (processes.count(processid) > 0)
+  if (processid >= 0)
   {
-    for (QProcess* process : processes[processid])
+    if (processes.count(processid) > 0)
     {
-      process->blockSignals(true);
-      process->kill();
+      for (QProcess* process : processes[processid])
+      {
+        process->blockSignals(true);
+        process->kill();
+      }
     }
+    emit processFinished(processid);
   }
-  emit processFinished(processid);
 
   consoleDock->writeToConsole(processType,
                               "##### ABORTED ALL PROCESSES #####\n");

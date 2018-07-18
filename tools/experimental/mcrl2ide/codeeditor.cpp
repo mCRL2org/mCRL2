@@ -215,7 +215,12 @@ CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
   zoomOutAction = contextMenu->addAction("Zoom out", this, SLOT(zoomOut()));
   zoomOutAction->setShortcut(QKeySequence::ZoomOut);
 
-  /* signals that need to change the line number area */
+  /* highlight the line that the cursor is on */
+  highlightCurrentLine();
+  connect(this, SIGNAL(cursorPositionChanged()), this,
+          SLOT(highlightCurrentLine()));
+
+  /* change the line number area when needed */
   connect(this, SIGNAL(blockCountChanged(int)), this,
           SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this,
@@ -238,6 +243,22 @@ void CodeEditor::setFontSize(int pixelSize)
 void CodeEditor::showContextMenu(const QPoint& position)
 {
   contextMenu->exec(mapToGlobal(position));
+}
+
+void CodeEditor::highlightCurrentLine()
+{
+  QList<QTextEdit::ExtraSelection> extraSelections;
+  QTextEdit::ExtraSelection selection;
+
+  QColor lineColor = QColor(Qt::gray).lighter(140);
+
+  selection.format.setBackground(lineColor);
+  selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+  selection.cursor = textCursor();
+  selection.cursor.clearSelection();
+  extraSelections.append(selection);
+
+  setExtraSelections(extraSelections);
 }
 
 void CodeEditor::keyPressEvent(QKeyEvent* event)

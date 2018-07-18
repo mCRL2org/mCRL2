@@ -20,7 +20,15 @@ ConsoleDock::ConsoleDock(QWidget* parent) : QDockWidget("Console", parent)
   {
     consoles[processType] = new QPlainTextEdit();
     consoles[processType]->setReadOnly(true);
-    consoleTabs->addTab(consoles[processType], PROCESSTYPENAMES.at(processType));
+
+    QFont logFont;
+    logFont.setFamily("Monospace");
+    logFont.setFixedPitch(true);
+    logFont.setWeight(QFont::Light);
+    consoles[processType]->setFont(logFont);
+
+    consoleTabs->addTab(consoles[processType],
+                        PROCESSTYPENAMES.at(processType));
   }
 
   this->setWidget(consoleTabs);

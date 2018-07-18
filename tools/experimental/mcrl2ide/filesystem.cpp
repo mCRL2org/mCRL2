@@ -269,6 +269,13 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
       QDir(projectFolderPath).mkdir(propertiesFolderName);
       projectOpen = true;
 
+      /* if we are not saving as, create an empty specification file by saving
+       *   the project */
+      if (forNewProject)
+      {
+        saveProject(true);
+      }
+
       /* also empty the editor and properties list if we are not saving as and
        *   if there was already a project open */
       if (forNewProject && !projectOpened())

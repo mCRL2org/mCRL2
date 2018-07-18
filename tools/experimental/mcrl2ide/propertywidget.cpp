@@ -136,8 +136,8 @@ void PropertyWidget::resetWidget()
 
 void PropertyWidget::actionVerify()
 {
-  /* check if the property isn't already being verified or has been verified */
-  if (verificationWidgets->currentIndex() == 0)
+  /* check if the property isn't already being verified */
+  if (verificationWidgets->currentIndex() != 1)
   {
     /* start the verification process */
     verificationProcessId = processSystem->verifyProperty(property);

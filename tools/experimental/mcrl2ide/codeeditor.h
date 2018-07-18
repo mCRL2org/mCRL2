@@ -180,6 +180,11 @@ class CodeEditor : public QPlainTextEdit
   void showContextMenu(const QPoint& position);
 
   /**
+   * @brief highlightCurrentLine Highlights the line the cursor is on
+   */
+  void highlightCurrentLine();
+
+  /**
    * @brief updateLineNumberAreaWidth Updates the width of the line number area
    */
   void updateLineNumberAreaWidth(int);
