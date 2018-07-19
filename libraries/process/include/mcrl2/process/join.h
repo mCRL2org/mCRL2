@@ -24,30 +24,30 @@ namespace process {
 /// Given a process expression of the form p1 + p2 + .... + pn, this will yield a
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a + as main
 /// function symbol.
-/// \param expr A process expression
-/// \return A set of process expressions
+/// \param x A process expression.
+/// \return A set of process expressions.
 inline
-std::vector<process_expression> split_summands(const process_expression &x)
+std::vector<process_expression> split_summands(const process_expression& x)
 {
   std::vector<process_expression> result;
   utilities::detail::split(x,
                            std::back_inserter(result),
                            is_choice,
-                           [](const process_expression &x) { return atermpp::down_cast<choice>(x).left(); },
-                           [](const process_expression &x) { return atermpp::down_cast<choice>(x).right(); }
+                           [](const process_expression& x) { return atermpp::down_cast<choice>(x).left(); },
+                           [](const process_expression& x) { return atermpp::down_cast<choice>(x).right(); }
                           );
   return result;
 }
 
-/// \brief Returns or applied to the sequence of process expressions [first, last)
-/// \param first Start of a sequence of process expressions
-/// \param last End of a sequence of of process expressions
-/// \return The choice operator applied to the sequence of process expressions [first, last)
+/// \brief Returns or applied to the sequence of process expressions [first, last).
+/// \param first Start of a sequence of process expressions.
+/// \param last End of a sequence of of process expressions.
+/// \return The choice operator applied to the sequence of process expressions [first, last).
 template<typename FwdIt>
 process_expression join_summands(FwdIt first, FwdIt last)
 {
   process_expression delta_ = delta();
-  return utilities::detail::join(first, last, [](const process_expression &x, const process_expression &y) {
+  return utilities::detail::join(first, last, [](const process_expression& x, const process_expression& y) {
       return choice(x, y);
   }, delta_);
 }
