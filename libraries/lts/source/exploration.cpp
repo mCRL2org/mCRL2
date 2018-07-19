@@ -43,15 +43,15 @@ probabilistic_state<std::size_t, probabilistic_data_expression> lps2lts_algorith
 }
 
 probabilistic_state<std::size_t, probabilistic_data_expression> lps2lts_algorithm::create_a_probabilistic_state_from_target_distribution(
-               const std::size_t base_state_number, 
+               const std::size_t base_state_number,
                const next_state_generator::transition_t::state_probability_list& other_probabilities,
-               const lps::state& source_state) 
+               const lps::state& source_state)
 {
   if (other_probabilities.empty())
   {
     return probabilistic_state<std::size_t, probabilistic_data_expression>(base_state_number);
   }
-  
+
   std::vector <state_probability_pair<std::size_t, probabilistic_data_expression> > result;
 
   probabilistic_data_expression residual_probability=probabilistic_data_expression::one();
@@ -88,9 +88,9 @@ bool is_hidden_summand(const mcrl2::process::action_list& l,
   return true;
 }
 
-bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *options)
+void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& options)
 {
-  m_options=*options;
+  m_options = options;
 
   assert(!(m_options.bithashing && m_options.outformat != lts_aut && m_options.outformat != lts_none));
 
@@ -121,7 +121,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     if (!m_aut_file.is_open())
     {
       mCRL2log(error) << "cannot open '" << m_options.lts << "' for writing" << std::endl;
-      exit(EXIT_FAILURE);
+      std::exit(EXIT_FAILURE);
     }
   }
   else if (m_options.outformat == lts_none)
@@ -163,7 +163,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     rewriter = data::rewriter(specification.data(), m_options.strat);
   }
 
-  // Apply the one point rewriter to the linear process specification. 
+  // Apply the one point rewriter to the linear process specification.
   // This simplifies expressions of the shape exists x:X . (x == e) && phi to phi[x:=e], enabling
   // more lps's to generate lts's. The overhead of this rewriter is limited.
   one_point_rule_rewrite(specification);
@@ -203,7 +203,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
       mCRL2log(verbose) << ", " << a;
     }
     mCRL2log(verbose) << ".\n";
- 
+
     for (const stochastic_action_summand& s: specification.process().action_summands())
     {
       if (is_hidden_summand(s.multi_action().actions(),m_options.actions_internal_for_divergencies))
@@ -280,8 +280,6 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   {
     mCRL2log(verbose) << "Detect nondeterministic states.\n" ;
   }
-
-  return true;
 }
 
 void set_seed_random_generator()
@@ -295,8 +293,9 @@ void set_seed_random_generator()
   srand((unsigned)time(nullptr));
 }
 
-bool lps2lts_algorithm::generate_lts()
+bool lps2lts_algorithm::generate_lts(const lts_generation_options& options)
 {
+  initialise_lts_generation(options);
   // First generate a vector of initial states from the initial distribution.
   m_initial_states=m_generator->initial_states();
   assert(!m_initial_states.empty());
@@ -399,10 +398,11 @@ bool lps2lts_algorithm::generate_lts()
     return false;
   }
 
+  finalise_lts_generation();
   return true;
 }
 
-bool lps2lts_algorithm::finalise_lts_generation()
+void lps2lts_algorithm::finalise_lts_generation()
 {
   if (m_options.outformat == lts_aut)
   {
@@ -445,8 +445,6 @@ bool lps2lts_algorithm::finalise_lts_generation()
         assert(0);
     }
   }
-
-  return true;
 }
 
 void lps2lts_algorithm::set_prioritised_representatives(next_state_generator::transition_t::state_probability_list& states)
@@ -655,8 +653,8 @@ bool lps2lts_algorithm::save_trace(const lps::state& state1, const std::string& 
 }
 
 // Contruct a trace to state1, then add transition to it and store in in filename.
-bool lps2lts_algorithm::save_trace(const lps::state& state1, 
-                                   const next_state_generator::transition_t& transition, 
+bool lps2lts_algorithm::save_trace(const lps::state& state1,
+                                   const next_state_generator::transition_t& transition,
                                    const std::string& filename)
 {
   mcrl2::trace::Trace trace;
@@ -699,7 +697,7 @@ bool lps2lts_algorithm::search_divergence(
       static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
     }
 
-    if (non_divergent_states.count(j->target_state())==0) // This state is not shown to be non convergent. So, an investigation is in order. 
+    if (non_divergent_states.count(j->target_state())==0) // This state is not shown to be non convergent. So, an investigation is in order.
     {
       typename COUNTER_EXAMPLE_GENERATOR::index_type i=divergence_loop.add_transition(action_label_number.first,state_pair.index());
       if (visited.insert(j->target_state()).second)
@@ -708,9 +706,9 @@ bool lps2lts_algorithm::search_divergence(
       }
       else if (current_path.count(j->target_state()) != 0)
       {
-        mCRL2log(info) << "divergence-detect: divergence found." << std::endl; 
+        mCRL2log(info) << "divergence-detect: divergence found." << std::endl;
         divergence_loop.save_counter_example(i,m_output_lts);
-        return true; 
+        return true;
       }
     }
   }
@@ -730,7 +728,7 @@ bool lps2lts_algorithm::search_divergence(
 
 template <class COUNTER_EXAMPLE_GENERATOR>
 void lps2lts_algorithm::check_divergence(
-              const mcrl2::lts::detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair, 
+              const mcrl2::lts::detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair,
               COUNTER_EXAMPLE_GENERATOR divergence_loop)
 {
   std::set<lps::state> visited;
@@ -754,12 +752,12 @@ void lps2lts_algorithm::check_divergence(
     std::size_t state_number = m_state_numbers.index(state_pair.state());
     mCRL2log(info) << "State index of diverging state is " << state_number << "." << std::endl;
   }
-  else 
+  else
   {
-    // No divergence has been found. Register all states as being non divergent. 
+    // No divergence has been found. Register all states as being non divergent.
     for(const lps::state s: visited)
-    { 
-      assert(non_divergent_states.count(s)==0); 
+    {
+      assert(non_divergent_states.count(s)==0);
       non_divergent_states.insert(s);
     }
   }
@@ -792,7 +790,7 @@ void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_g
   mCRL2log(info) << std::endl;
 }
 
-void lps2lts_algorithm::save_nondeterministic_state(const lps::state& state, 
+void lps2lts_algorithm::save_nondeterministic_state(const lps::state& state,
                                                     const next_state_generator::transition_t& nondeterminist_transition)
 {
   std::size_t state_number = m_state_numbers.index(state);
@@ -1001,19 +999,19 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, const nex
 
 // The function below checks whether in the set of outgoing transitions,
 // there are two transitions with the same label, going to different states.
-// If this is the case, true is delivered and one nondeterministic transition 
+// If this is the case, true is delivered and one nondeterministic transition
 // is returned in the variable nondeterministic_transition.
 bool lps2lts_algorithm::is_nondeterministic(std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                                             lps2lts_algorithm::next_state_generator::transition_t& nondeterministic_transition)
 {
-  // Below a mapping from transition labels to target states is made. 
+  // Below a mapping from transition labels to target states is made.
   static std::map<lps::multi_action, lps::state> sorted_transitions; // The set is static to avoid repeated construction.
   assert(sorted_transitions.empty());
   for(const lps2lts_algorithm::next_state_generator::transition_t& t: transitions)
   {
     const std::map<lps::multi_action, lps::state>::const_iterator i=sorted_transitions.find(t.action());
     if (i!=sorted_transitions.end())
-    { 
+    {
       if (i->second!=t.target_state())
       {
         // Two transitions with the same label and different targets states have been found. This state is nondeterministic.
@@ -1022,8 +1020,8 @@ bool lps2lts_algorithm::is_nondeterministic(std::vector<lps2lts_algorithm::next_
         return true;
       }
     }
-    else 
-    { 
+    else
+    {
       sorted_transitions[t.action()]=t.target_state();
     }
   }
@@ -1039,10 +1037,10 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
   assert(transitions.empty());
   if (m_options.detect_divergence)
   {
-    if (non_divergent_states.count(state)==0)  // This state was not already investigated earlier. 
+    if (non_divergent_states.count(state)==0)  // This state was not already investigated earlier.
     { if (m_options.trace)
       {
-        // Onderstaande string generatie kan duur uitpakken. 
+        // Onderstaande string generatie kan duur uitpakken.
         std::string filename_divergence_loop = m_options.trace_prefix + "_divergence_loop" + std::to_string(m_traces_saved) + ".trc";
         check_divergence<detail::counter_example_constructor>(
                 detail::state_index_pair<detail::counter_example_constructor>(state,detail::counter_example_constructor::root_index()),
@@ -1091,7 +1089,7 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
     if (is_nondeterministic(transitions, nondeterministic_transition))
     {
       // save the trace to the nondeterministic state and one transition to indicate
-      // which transition is nondeterministic. 
+      // which transition is nondeterministic.
       save_nondeterministic_state(state, nondeterministic_transition);
     }
   }
@@ -1256,7 +1254,7 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(const next_state_generat
       {
         // It can be that a state is dropped in the queue, as the queue reached its todo-limit.
         // This is ignored in combination with bithashing. So, there might be states with outgoing
-        // transitions of which the outgoing transitions are not investigated. 
+        // transitions of which the outgoing transitions are not investigated.
         state_queue.add_to_queue(i->target_state());
       }
     }
@@ -1345,12 +1343,12 @@ void lps2lts_algorithm::generate_lts_depth(const next_state_generator::transitio
 
 void lps2lts_algorithm::generate_lts_random(const next_state_generator::transition_t::state_probability_list& initial_states)
 {
-  if (++initial_states.begin()!=initial_states.end())  // There is more than one element in the set of initial states. 
+  if (++initial_states.begin()!=initial_states.end())  // There is more than one element in the set of initial states.
   {
     mCRL2log(warning) << "The initial state is not selected at random, conform its distribution. One specific state is chosen.";
   }
   lps::state state = initial_states.front().state();
-  
+
   std::vector<next_state_generator::transition_t> transitions;
   std::size_t current_state = 0;
   next_state_generator::enumerator_queue_t enumeration_queue;

@@ -42,9 +42,7 @@ LTS_TYPE translate_lps_to_lts(const lps::stochastic_specification& specification
   LTS_TYPE result;
   options.outformat = result.type();
   lts::lps2lts_algorithm lps2lts;
-  lps2lts.initialise_lts_generation(&options);
-  lps2lts.generate_lts();
-  lps2lts.finalise_lts_generation();
+  lps2lts.generate_lts(options);
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
   return result;
@@ -156,4 +154,3 @@ boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return nullptr;
 }
-

@@ -74,7 +74,7 @@ class lps2lts_tool : public lps2lts_base
     std::string m_filename;
 
   public:
-    
+
     lps2lts_tool() :
       lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
@@ -120,23 +120,15 @@ class lps2lts_tool : public lps2lts_base
 
       m_options.validate_actions(); // Throws an exception if actions are not properly declared.
 
-      if (!m_lps2lts.initialise_lts_generation(&m_options))
-      {
-        return false;
-      }
-
       try
       {
-        m_lps2lts.generate_lts();
+        m_lps2lts.generate_lts(m_options);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (const mcrl2::runtime_error& e)
       {
         mCRL2log(error) << e.what() << std::endl;
-        m_lps2lts.finalise_lts_generation();
         return false;
       }
-
-      m_lps2lts.finalise_lts_generation();
 
       return true;
     }

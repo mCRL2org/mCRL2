@@ -51,9 +51,7 @@ LTS_TYPE translate_lps_to_lts(lps::stochastic_specification const& specification
   LTS_TYPE result;
   options.outformat = result.type();
   lts::lps2lts_algorithm lps2lts;
-  lps2lts.initialise_lts_generation(&options);
-  lps2lts.generate_lts();
-  lps2lts.finalise_lts_generation();
+  lps2lts.generate_lts(options);
 
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
@@ -414,9 +412,7 @@ BOOST_AUTO_TEST_CASE(test_max_states)
   lts::lts_aut_t result;
   options.outformat = result.type();
   lts::lps2lts_algorithm lps2lts;
-  lps2lts.initialise_lts_generation(&options);
-  lps2lts.generate_lts();
-  lps2lts.finalise_lts_generation();
+  lps2lts.generate_lts(options);
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
 
@@ -568,4 +564,3 @@ boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return nullptr;
 }
-
