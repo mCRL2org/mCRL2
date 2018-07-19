@@ -15,7 +15,7 @@
 #include <QPainter>
 
 PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
-                               FileSystem* fileSystem, PropertiesDock* parent)
+                               FileSystem* fileSystem, QWidget* parent)
     : QWidget(parent)
 {
   this->property = property;
@@ -53,15 +53,15 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
           SLOT(actionAbortVerification()));
 
   /* create the label for when a property is true */
-  QPixmap* trueIcon = new QPixmap(":/icons/true.png");
+  QPixmap trueIcon(":/icons/true.png");
   QLabel* trueLabel = new QLabel();
-  trueLabel->setPixmap(trueIcon->scaled(QSize(24, 24)));
+  trueLabel->setPixmap(trueIcon.scaled(QSize(24, 24)));
   trueLabel->setToolTip("This property is true");
 
   /* create the label for when a property is false */
-  QPixmap* falseIcon = new QPixmap(":/icons/false.png");
+  QPixmap falseIcon(":/icons/false.png");
   QLabel* falseLabel = new QLabel();
-  falseLabel->setPixmap(falseIcon->scaled(QSize(24, 24)));
+  falseLabel->setPixmap(falseIcon.scaled(QSize(24, 24)));
   falseLabel->setToolTip("This property is false");
 
   /* stack the verification widgets */
@@ -101,6 +101,20 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
 
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(actionVerifyResult(int)));
+}
+
+PropertyWidget::~PropertyWidget()
+{
+  delete editPropertyDialog;
+  delete propertyNameLabel;
+  for (int i = 0; i < verificationWidgets->count(); i++)
+  {
+    delete verificationWidgets->widget(i);
+  }
+  delete verificationWidgets;
+  delete editButton;
+  delete deleteButton;
+  delete propertyLayout;
 }
 
 void PropertyWidget::paintEvent(QPaintEvent* pe)
@@ -219,7 +233,6 @@ void PropertyWidget::actionDelete()
 {
   if (fileSystem->deleteProperty(property))
   {
-    parent->deleteProperty(this);
-    delete this;
+    emit deleteMe(this);
   }
 }

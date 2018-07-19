@@ -229,6 +229,12 @@ CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
   updateLineNumberAreaWidth(0);
 }
 
+CodeEditor::~CodeEditor()
+{
+  delete lineNumberArea;
+  delete highlighter;
+}
+
 void CodeEditor::setFontSize(int pixelSize)
 {
   codeFont.setPixelSize(pixelSize);

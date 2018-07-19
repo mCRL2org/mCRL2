@@ -18,8 +18,6 @@
 #include <QScrollArea>
 #include <QScrollBar>
 
-class PropertyWidget;
-
 /**
  * @brief The PropertiesDock class defines the dock that contains the properties
  */
@@ -38,6 +36,7 @@ class PropertiesDock : public QDockWidget
    */
   PropertiesDock(ProcessSystem* processSystem, FileSystem* fileSystem,
                  QWidget* parent);
+  ~PropertiesDock();
 
   /**
    * @brief setToNoProperties Empties the dock
@@ -51,12 +50,6 @@ class PropertiesDock : public QDockWidget
   void addProperty(Property* property);
 
   /**
-   * @brief deleteProperty Removes a property from the dock
-   * @param propertyWidget The property widget to remove
-   */
-  void deleteProperty(PropertyWidget* propertyWidget);
-
-  /**
    * @brief verifyAllProperties Verifies all properties in this dock
    */
   void verifyAllProperties();
@@ -68,6 +61,12 @@ class PropertiesDock : public QDockWidget
    *   horizontal scroll bar is needed
    */
   void keepContentsLeft(int min, int max);
+
+  /**
+   * @brief deleteProperty Removes a property from the dock
+   * @param propertyWidget The property widget to remove
+   */
+  void deletePropertyWidget(PropertyWidget* propertyWidget);
 
   /**
    * @brief resetAllPropertyWidgets Resets all property widgets to unverified

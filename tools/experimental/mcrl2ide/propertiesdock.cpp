@@ -40,9 +40,16 @@ PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
   this->setWidget(innerDockWidget);
 }
 
+PropertiesDock::~PropertiesDock()
+{
+  delete propertiesLayout;
+  delete hScrollBar;
+  delete innerDockWidget;
+}
+
 void PropertiesDock::setToNoProperties()
 {
-  /* empty the layout (is usually already empty) */
+  /* empty the layout */
   QLayoutItem* item;
   while ((item = propertiesLayout->takeAt(0)))
   {
@@ -83,9 +90,11 @@ void PropertiesDock::addProperty(Property* property)
       new PropertyWidget(property, processSystem, fileSystem, this);
   propertiesLayout->insertWidget(propertiesLayout->count() - 1, propertyWidget);
   propertyWidgets.push_back(propertyWidget);
+  connect(propertyWidget, SIGNAL(deleteMe(PropertyWidget*)), this,
+          SLOT(deletePropertyWidget(PropertyWidget*)));
 }
 
-void PropertiesDock::deleteProperty(PropertyWidget* propertyWidget)
+void PropertiesDock::deletePropertyWidget(PropertyWidget* propertyWidget)
 {
   propertiesLayout->removeWidget(propertyWidget);
   if (propertiesLayout->isEmpty())
@@ -93,6 +102,7 @@ void PropertiesDock::deleteProperty(PropertyWidget* propertyWidget)
     this->setToNoProperties();
   }
   propertyWidgets.remove(propertyWidget);
+  delete propertyWidget;
 }
 
 void PropertiesDock::verifyAllProperties()

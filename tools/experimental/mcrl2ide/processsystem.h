@@ -115,6 +115,7 @@ class ProcessSystem : public QObject
    * @param fileSystem The file system
    */
   ProcessSystem(FileSystem* fileSystem);
+  ~ProcessSystem();
 
   /**
    * @brief setConsoleDock Assigns the console dock to the file system for
@@ -188,6 +189,12 @@ class ProcessSystem : public QObject
    * @param processType The processType to abort all processes of
    */
   void abortAllProcesses(ProcessType processType);
+
+  /**
+   * @brief deleteProcess Deletes a process
+   * @param processid The id of the process to delete
+   */
+  void deleteProcess(int processid);
 
   /**
    * @brief getResult Gets the result of a process
@@ -290,6 +297,16 @@ class ProcessSystem : public QObject
    */
   QProcess* createPbes2boolProcess(QString propertyName);
 
+  /**
+   * @brief subpreviousProcessTerminated Checks whether a subprocess terminated
+   *   successfully. If not, kill the corresponding process
+   * @param previousExitCode The exit code of the subprocess that just
+   *   terminated
+   * @param processid The processid of the process that corresponds to the
+   *   subprocess
+   */
+  bool subprocessSuccessfullyTerminated(int previousExitCode, int processid);
+
   private slots:
 
   /**
@@ -370,6 +387,12 @@ class ProcessSystem : public QObject
    * @param previousExitCode The exit code of the previous subprocess
    */
   void verificationResult(int previousExitCode);
+
+  /**
+   * @brief afterClosingUiTool Deletes the process after a subprocess running a
+   *   ui tool (lpsxsim, ltsgraph) has finished
+   */
+  void afterClosingUiTool();
 };
 
 #endif // PROCESSSYSTEM_H

@@ -14,6 +14,8 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 /**
  * @brief The SolveDock class defines the dock where the user can solve data
@@ -31,9 +33,13 @@ class SolveDock : public QDockWidget
    * @param parent The parent of this widget
    */
   explicit SolveDock(QWidget* parent);
+  ~SolveDock();
 
   private:
+  QWidget* innerDockWidget;
+  QVBoxLayout* dockLayout;
   QLineEdit* expressionEntry;
+  QHBoxLayout* buttonLayout;
   QPushButton* solveButton;
   QPushButton* solveAbortButton;
   QPlainTextEdit* solveResult;

@@ -25,8 +25,10 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   this->fileSystem = fileSystem;
   oldPropertyName = "";
   propertyParsingProcessid = -1;
+  property = nullptr;
 
-  ui->propertyNameField->setValidator(new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*")));
+  ui->propertyNameField->setValidator(
+      new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*")));
 
   /* change the ui depending on whether this should be an add or edit property
    *   window */
@@ -71,8 +73,10 @@ void AddEditPropertyDialog::setProperty(Property* property)
 
 Property* AddEditPropertyDialog::getProperty()
 {
-  return new Property(ui->propertyNameField->text(),
-                      ui->propertyTextField->toPlainText());
+  delete property;
+  property = new Property(ui->propertyNameField->text(),
+                          ui->propertyTextField->toPlainText());
+  return property;
 }
 
 void AddEditPropertyDialog::setOldPropertyName(QString propertyName)
@@ -95,45 +99,38 @@ void AddEditPropertyDialog::abortPropertyParsing()
 void AddEditPropertyDialog::checkInput()
 {
   QString propertyName = ui->propertyNameField->text();
-  /* show a message box if the property name field is empty */
+  QString error = "";
+
+  /* both input fields may not be empty and the propertyname may not exist
+   * already */
   if (propertyName.count() == 0)
   {
-    QMessageBox* msgBox =
-        new QMessageBox(QMessageBox::Information, windowTitle,
-                        "The property name may not be empty", QMessageBox::Ok,
-                        this, Qt::WindowCloseButtonHint);
-    msgBox->exec();
-    return;
+    error = "The property name may not be empty";
   }
-
-  /* show a message box if this property name already exists */
-  if (oldPropertyName != propertyName &&
-      fileSystem->propertyNameExists(propertyName))
+  else if (oldPropertyName != propertyName &&
+           fileSystem->propertyNameExists(propertyName))
   {
-    QMessageBox* msgBox =
-        new QMessageBox(QMessageBox::Information, windowTitle,
-                        "A property with this name already exists",
-                        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox->exec();
-    return;
+    error = "A property with this name already exists";
   }
-
-  /* show a message box if the property text field is empty */
-  if (ui->propertyTextField->toPlainText().count() == 0)
+  else if (ui->propertyTextField->toPlainText().count() == 0)
   {
-    QMessageBox* msgBox =
-        new QMessageBox(QMessageBox::Information, windowTitle,
-                        "The property text may not be empty", QMessageBox::Ok,
-                        this, Qt::WindowCloseButtonHint);
-    msgBox->exec();
-    return;
+    error = "The property text may not be empty";
+  }
+  else
+  {
+    /* save the property, abort the previous parsing process and parse the
+     * formula and wait for a reply */
+    fileSystem->saveProperty(getProperty());
+    abortPropertyParsing();
+    propertyParsingProcessid = processSystem->parseProperty(getProperty());
   }
 
-  /* save the property, abort the previous parsing process and parse the formula
-   *   and wait for a reply */
-  fileSystem->saveProperty(getProperty());
-  abortPropertyParsing();
-  propertyParsingProcessid = processSystem->parseProperty(getProperty());
+  if (!error.isEmpty())
+  {
+    QMessageBox msgBox(QMessageBox::Information, windowTitle, error,
+                       QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+    msgBox.exec();
+  }
 }
 
 void AddEditPropertyDialog::parseResults(int processid)
@@ -143,28 +140,29 @@ void AddEditPropertyDialog::parseResults(int processid)
   if (processid == propertyParsingProcessid)
   {
     /* if valid accept, else show message */
+    QString error = "";
     QString result = processSystem->getResult(processid);
+
     if (result == "valid")
     {
       accept();
     }
     else if (result == "invalid")
     {
-      QMessageBox* msgBox = new QMessageBox(
-          QMessageBox::Information, windowTitle,
-          "The entered formula is not a valid mu-calculus formula. See "
-          "the parsing console for more information",
-          QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-      msgBox->exec();
+      error = "The entered formula is not a valid mu-calculus formula. See the "
+              "parsing console for more information";
     }
     else
     {
-      QMessageBox* msgBox =
-          new QMessageBox(QMessageBox::Information, windowTitle,
-                          "Could not parse the entered formula. See the "
-                          "parsing console for more information",
-                          QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-      msgBox->exec();
+      error = "Could not parse the entered formula. See the parsing console "
+              "for more information";
+    }
+
+    if (!error.isEmpty())
+    {
+      QMessageBox msgBox(QMessageBox::Information, windowTitle, error,
+                         QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+      msgBox.exec();
     }
   }
 }
@@ -172,7 +170,7 @@ void AddEditPropertyDialog::parseResults(int processid)
 void AddEditPropertyDialog::onRejected()
 {
   /* abort the parsing process */
-   abortPropertyParsing();
+  abortPropertyParsing();
 }
 
 AddEditPropertyDialog::~AddEditPropertyDialog()

@@ -50,6 +50,7 @@ class ConsoleDock : public QDockWidget
    * @param parent The parent of this widget
    */
   explicit ConsoleDock(QWidget* parent);
+  ~ConsoleDock();
 
   /**
    * @brief setConsoleTab Set which tab should be visible

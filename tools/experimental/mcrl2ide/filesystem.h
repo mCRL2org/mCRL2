@@ -58,12 +58,6 @@ class FileSystem : public QObject
   FileSystem(CodeEditor* specificationEditor, QWidget* parent);
 
   /**
-   * @brief makeSureProjectFolderExists Checks whether the properties folder
-   *   exists, if not creates it
-   */
-  void makeSurePropertiesFolderExists();
-
-  /**
    * @brief projectFilePath Defines the file path for the project file,
    *   which contains some info and indicates whether the parent folder is a
    *   valid mcrl2 project folder
@@ -124,13 +118,6 @@ class FileSystem : public QObject
   bool projectOpened();
 
   /**
-   * @brief getCurrentSpecification Gets the specification that is in the
-   *   specification editor
-   * @return the current specification ion the specification editor
-   */
-  QString getCurrentSpecification();
-
-  /**
    * @brief specificationModified Checks whether the specification has been
    *   modified since it has been saved
    * @return Whether the specification has been modified since it has been saved
@@ -180,21 +167,6 @@ class FileSystem : public QObject
   void setSpecificationEditorCursor(int row, int column);
 
   /**
-   * createFileDialog Creates a file dialog that can be used to ask the user for
-   *   a file (location)
-   * @param type What type of file window is needed
-   *  0 = new project, 1 = save project as, 2 = open project
-   * @return The file dialog
-   */
-  QFileDialog* createFileDialog(int type);
-
-  /**
-   * @brief createProjectFile Create a project file to store some info and to
-   *   indicate that the parent folder is a valid mcrl2 project folder
-   */
-  void createProjectFile();
-
-  /**
    * @brief newProject Creates a new project with the corresponding file
    *   structure
    * @param askToSave Whether the user should be asked to save before creating a
@@ -204,15 +176,6 @@ class FileSystem : public QObject
    * @return The name of the new project, is "" if failed
    */
   QString newProject(bool askToSave = true, bool forNewProject = true);
-
-  /**
-   * @brief deletePropertyFile Deletes the file of a property
-   * @param propertyName The name of the property
-   * @param showIfFailed Whether the user should be told if deleting a property
-   *   file was unsuccessful
-   * @return Whether deleting the property file was successful
-   */
-  bool deletePropertyFile(QString propertyName, bool showIfFailed = true);
 
   /**
    * @brief newProperty Adds a new property
@@ -317,6 +280,41 @@ class FileSystem : public QObject
 
   bool specificationModified;
   std::map<QString, bool> propertyModified;
+
+  /**
+   * @brief makeSureProjectFolderExists Checks whether the properties folder
+   *   exists, if not creates it
+   */
+  void makeSurePropertiesFolderExists();
+
+  /**
+   * @brief clearProperties Clears the list of properties
+   */
+  void clearProperties();
+
+  /**
+   * createFileDialog Creates a file dialog that can be used to ask the user for
+   *   a file (location)
+   * @param type What type of file window is needed
+   *  0 = new project, 1 = save project as, 2 = open project
+   * @return The file dialog
+   */
+  QFileDialog* createFileDialog(int type);
+
+  /**
+   * @brief createProjectFile Create a project file to store some info and to
+   *   indicate that the parent folder is a valid mcrl2 project folder
+   */
+  void createProjectFile();
+
+  /**
+   * @brief deletePropertyFile Deletes the file of a property
+   * @param propertyName The name of the property
+   * @param showIfFailed Whether the user should be told if deleting a property
+   *   file was unsuccessful
+   * @return Whether deleting the property file was successful
+   */
+  bool deletePropertyFile(QString propertyName, bool showIfFailed = true);
 };
 
 #endif // FILESYSTEM_H

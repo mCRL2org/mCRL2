@@ -20,15 +20,15 @@ FindAndReplaceDialog::FindAndReplaceDialog(CodeEditor* codeEditor,
 
   setWindowFlags(Qt::Window);
 
-  connect(ui->textToFind, SIGNAL(textChanged(QString)),
-          this, SLOT(setFindEnabled()));
-  connect(codeEditor, SIGNAL(selectionChanged()),
-          this, SLOT(setReplaceEnabled()));
+  connect(ui->textToFind, SIGNAL(textChanged(QString)), this,
+          SLOT(setFindEnabled()));
+  connect(codeEditor, SIGNAL(selectionChanged()), this,
+          SLOT(setReplaceEnabled()));
 
   connect(ui->findButton, SIGNAL(clicked()), this, SLOT(actionFind()));
   connect(ui->replaceButton, SIGNAL(clicked()), this, SLOT(actionReplace()));
-  connect(ui->replaceAllButton, SIGNAL(clicked()),
-          this, SLOT(actionReplaceAll()));
+  connect(ui->replaceAllButton, SIGNAL(clicked()), this,
+          SLOT(actionReplaceAll()));
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 }
 

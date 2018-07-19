@@ -14,6 +14,8 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 /**
  * @brief The RewriteDock class defines the dock where the user can rewrite data
@@ -31,9 +33,13 @@ class RewriteDock : public QDockWidget
    * @param parent The parent of this widget
    */
   explicit RewriteDock(QWidget* parent);
+  ~RewriteDock();
 
   private:
+  QWidget* innerDockWidget;
+  QVBoxLayout* dockLayout;
   QLineEdit* expressionEntry;
+  QHBoxLayout* buttonLayout;
   QPushButton* rewriteButton;
   QPushButton* rewriteAbortButton;
   QPlainTextEdit* rewriteResult;

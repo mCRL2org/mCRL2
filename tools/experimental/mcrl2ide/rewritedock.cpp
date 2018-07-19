@@ -10,8 +10,6 @@
 #include "rewritedock.h"
 
 #include <QMainWindow>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 
 RewriteDock::RewriteDock(QWidget* parent)
     : QDockWidget("Rewrite data expression", parent)
@@ -26,17 +24,28 @@ RewriteDock::RewriteDock(QWidget* parent)
   rewriteResult->setReadOnly(true);
 
   /* lay them out */
-  QHBoxLayout* buttonLayout = new QHBoxLayout();
+  buttonLayout = new QHBoxLayout();
   buttonLayout->addWidget(rewriteButton);
   buttonLayout->addWidget(rewriteAbortButton);
 
-  QVBoxLayout* dockLayout = new QVBoxLayout();
+  dockLayout = new QVBoxLayout();
   dockLayout->addWidget(expressionEntry);
   dockLayout->addLayout(buttonLayout);
   dockLayout->addWidget(rewriteResult);
 
-  QWidget* innerDockWidget = new QWidget();
+  innerDockWidget = new QWidget();
   innerDockWidget->setLayout(dockLayout);
 
   this->setWidget(innerDockWidget);
+}
+
+RewriteDock::~RewriteDock()
+{
+  delete rewriteResult;
+  delete rewriteButton;
+  delete rewriteAbortButton;
+  delete buttonLayout;
+  delete expressionEntry;
+  delete dockLayout;
+  delete innerDockWidget;
 }

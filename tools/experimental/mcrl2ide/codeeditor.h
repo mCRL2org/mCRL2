@@ -113,6 +113,7 @@ class CodeEditor : public QPlainTextEdit
    *   formula
    */
   explicit CodeEditor(QWidget* parent = 0, bool spec = false);
+  ~CodeEditor();
 
   /**
    * @brief lineNumberAreaPaintEvent Paints the line number area on the screen

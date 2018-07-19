@@ -107,11 +107,6 @@ bool FileSystem::projectOpened()
   return projectOpen;
 }
 
-QString FileSystem::getCurrentSpecification()
-{
-  return specificationEditor->toPlainText();
-}
-
 bool FileSystem::isSpecificationModified()
 {
   return specificationModified;
@@ -120,6 +115,15 @@ bool FileSystem::isSpecificationModified()
 void FileSystem::setSpecificationModified(bool modified)
 {
   specificationModified = modified;
+}
+
+void FileSystem::clearProperties()
+{
+  for (Property* property : properties)
+  {
+    delete property;
+  }
+  properties.clear();
 }
 
 bool FileSystem::propertyNameExists(QString propertyName)
@@ -274,7 +278,7 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
       if (forNewProject && projectOpened())
       {
         specificationEditor->clear();
-        properties.clear();
+        clearProperties();
       }
 
       projectOpen = true;
@@ -385,7 +389,7 @@ bool FileSystem::deleteProperty(Property* oldProperty)
   /* if the user agrees, delete the property */
   if (deleteIt)
   {
-    Property* toRemove = NULL;
+    Property* toRemove = nullptr;
     for (Property* property : properties)
     {
       if (property->equals(oldProperty))
@@ -394,10 +398,11 @@ bool FileSystem::deleteProperty(Property* oldProperty)
         break;
       }
     }
-    if (toRemove != NULL)
+    if (toRemove != nullptr)
     {
       properties.remove(toRemove);
     }
+    delete toRemove;
 
     /* also delete the file if it exists */
     if (!deletePropertyFile(oldProperty->name))
@@ -466,7 +471,7 @@ void FileSystem::openProjectFromFile(QString newProjectFilePath,
         this->projectName = QFileInfo(newProjectFilePath).baseName();
 
         /* read all properties */
-        properties.clear();
+        clearProperties();
         QDirIterator* dirIterator =
             new QDirIterator(QDir(propertiesFolderPath()));
 

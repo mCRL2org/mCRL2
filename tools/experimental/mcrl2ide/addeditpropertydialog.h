@@ -101,6 +101,7 @@ class AddEditPropertyDialog : public QDialog
   QString windowTitle;
   QString oldPropertyName;
   int propertyParsingProcessid;
+  Property* property;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

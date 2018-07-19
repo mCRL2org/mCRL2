@@ -10,7 +10,6 @@
 #ifndef PROPERTYWIDGET_H
 #define PROPERTYWIDGET_H
 
-#include "propertiesdock.h"
 #include "processsystem.h"
 #include "addeditpropertydialog.h"
 
@@ -20,8 +19,6 @@
 #include <QPushButton>
 #include <QProcess>
 #include <QStackedWidget>
-
-class PropertiesDock;
 
 /**
  * @brief The PropertyWidget class defines a widget for a single property in the
@@ -40,7 +37,8 @@ class PropertyWidget : public QWidget
    * @param parent The parent of this widget
    */
   PropertyWidget(Property* property, ProcessSystem* processSystem,
-                 FileSystem* fileSystem, PropertiesDock* parent);
+                 FileSystem* fileSystem, QWidget* parent);
+  ~PropertyWidget();
 
   /**
    * @brief getPropertyName Gets the property of this widget
@@ -97,6 +95,14 @@ class PropertyWidget : public QWidget
    */
   void actionDelete();
 
+  signals:
+  /**
+   * @brief deleteMe Signals the properties dock that this widgets needs to be
+   *   deleted
+   * @param propertyWidget This widget
+   */
+  void deleteMe(PropertyWidget* thisWidget);
+
   protected:
   /**
    * @brief paintEvent Makes sure that the widget is painted correctly
@@ -107,7 +113,7 @@ class PropertyWidget : public QWidget
   private:
   ProcessSystem* processSystem;
   FileSystem* fileSystem;
-  PropertiesDock* parent;
+  QWidget* parent;
   Property* property;
 
   QHBoxLayout* propertyLayout;

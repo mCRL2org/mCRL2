@@ -33,7 +33,8 @@ class mcrl2ide_tool : public mcrl2ide_base
 
   bool run()
   {
-    MainWindow* window = new MainWindow(QString::fromStdString(m_input_filename));
+    MainWindow* window =
+        new MainWindow(QString::fromStdString(m_input_filename));
     return show_main_window(window);
   }
 };

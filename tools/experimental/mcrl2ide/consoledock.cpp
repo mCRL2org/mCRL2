@@ -34,6 +34,14 @@ ConsoleDock::ConsoleDock(QWidget* parent) : QDockWidget("Console", parent)
   this->setWidget(consoleTabs);
 }
 
+ConsoleDock::~ConsoleDock()
+{
+  for (ProcessType processType : PROCESSTYPES)
+  {
+    delete consoles[processType];
+  }
+}
+
 void ConsoleDock::setConsoleTab(ProcessType processType)
 {
   consoleTabs->setCurrentWidget(consoles[processType]);
@@ -61,8 +69,7 @@ void ConsoleDock::logToVerificationConsole()
 
 void ConsoleDock::logToConsole(ProcessType processType, QProcess* process)
 {
-  QString output = process->readAllStandardError();
-  writeToConsole(processType, output);
+  writeToConsole(processType, process->readAllStandardError());
 }
 
 void ConsoleDock::writeToConsole(ProcessType processType, QString output)
