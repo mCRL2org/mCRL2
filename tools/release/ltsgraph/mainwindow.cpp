@@ -74,7 +74,6 @@ MainWindow::MainWindow(QWidget* parent) :
   restoreState(settings.value("windowState").toByteArray());
   springlayoutui->setSettings(settings.value("settings").toByteArray());
   glwidgetui->setSettings(settings.value("visualisation").toByteArray());
-  m_ui.actExplorationMode->setChecked(settings.value("explore", 0).toInt() != 0);
   connect(m_ui.actFullscreen, SIGNAL(triggered()), this, SLOT(onFullscreen()));
 
   m_ui.actLayoutControl->setChecked(!springlayoutui->isHidden());
@@ -112,7 +111,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("windowState", saveState());
   settings.setValue("settings", m_layout->ui()->settings());
   settings.setValue("visualisation", m_glwidget->ui()->settings());
-  settings.setValue("explore", m_graph.hasSelection() ? 1 : 0);
   QMainWindow::closeEvent(event);
 }
 
