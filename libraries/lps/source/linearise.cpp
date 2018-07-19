@@ -1843,7 +1843,7 @@ class specification_basic_type
          occuring in the parameterlist no assignment is present, whereas
          this variable occurs in vars, an assignment for it is added.
 
-         It is not possible to use standard substitution functions to replace substitute_assignmentlis
+         It is not possible to use standard substitution functions to replace substitute_assignmentlist
          because they do not take the parameters of processes into account.
          For instance consider a process P(b:D)=... of which an instance P() exists.
          If the substitution sigma(b)=t is applied to P() the result should be P(b=t).
@@ -1978,157 +1978,6 @@ class specification_basic_type
       }
       return true;
     }
-
-    /* The function below calculates sigma(p) and replaces
-       all variables that are bound by a sum in p by unique
-       variables */
-
-    process_expression substitute_pCRLproc(
-      const process_expression& p,
-      mutable_map_substitution<>& sigma,
-      const std::set< variable >& rhs_variables_in_sigma)
-    {
-      // mutable_map_substitution<> sigma_aux(sigma);
-      // return process::replace_variables_capture_avoiding(p,sigma_aux,rhs_variables_in_sigma);
-      if (is_choice(p))
-      {
-        return choice(
-                 substitute_pCRLproc(choice(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(choice(p).right(),sigma,rhs_variables_in_sigma));
-      }
-      if (is_seq(p))
-      {
-        return seq(
-                 substitute_pCRLproc(seq(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(seq(p).right(),sigma,rhs_variables_in_sigma));
-      }
-      if (is_sync(p))
-      {
-        return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
-      }
-      if (is_if_then(p))
-      {
-        data_expression condition=data::replace_variables_capture_avoiding(if_then(p).condition(), sigma,rhs_variables_in_sigma);
-        if (condition==sort_bool::false_())
-        {
-          return delta_at_zero();
-        }
-        if (condition==sort_bool::true_())
-        {
-          return substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma);
-        }
-        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma));
-      }
-      if (is_if_then_else(p))
-      {
-        data_expression condition=data::replace_variables_capture_avoiding(if_then_else(p).condition(), sigma,rhs_variables_in_sigma);
-        if (condition==sort_bool::false_())
-        {
-          return substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma);
-        }
-        if (condition==sort_bool::true_())
-        {
-          return substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma);
-        }
-        return if_then_else(
-                 condition,
-                 substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma));
-      }
-
-      if (is_sum(p))
-      {
-        variable_list sumargs=sum(p).variables();
-        variable_list vars;
-        data_expression_list terms;
-
-        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-        {
-          vars=push_back(vars,i->first);
-          terms=push_back(terms,i->second);
-        }
-
-        mutable_map_substitution<> local_sigma=sigma;
-        std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
-
-        return sum(sumargs,
-                   substitute_pCRLproc(sum(p).operand(),local_sigma,local_rhs_variables_in_sigma));
-      }
-
-      if (is_stochastic_operator(p))
-      {
-        const stochastic_operator& sto=down_cast<const stochastic_operator>(p);
-        variable_list sumargs=sto.variables();
-        variable_list vars;
-        data_expression_list terms;
-
-        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-        {
-          vars=push_back(vars,i->first);
-          terms=push_back(terms,i->second);
-        }
-
-        mutable_map_substitution<> local_sigma=sigma;
-        std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
-
-        return stochastic_operator(
-                            sumargs,
-                            data::replace_variables_capture_avoiding(sto.distribution(),sigma,rhs_variables_in_sigma),
-                            substitute_pCRLproc(sto.operand(),local_sigma,local_rhs_variables_in_sigma));
-      }
-
-      if (is_process_instance(p))
-      {
-        assert(0);
-      }
-
-      if (is_process_instance_assignment(p))
-      {
-        const process_instance_assignment q(p);
-        std::size_t n=objectIndex(q.identifier());
-        const variable_list parameters=objectdata[n].parameters;
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma);
-        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
-        return process_instance_assignment(q.identifier(),new_assignments);
-      }
-
-      if (is_action(p))
-      {
-        return action(action(p).label(),
-                      data::replace_variables_capture_avoiding(action(p).arguments(), sigma,rhs_variables_in_sigma));
-      }
-
-      if (is_at(p))
-      {
-        return at(substitute_pCRLproc(at(p).operand(),sigma,rhs_variables_in_sigma),
-                  data::replace_variables_capture_avoiding(at(p).time_stamp(),sigma,rhs_variables_in_sigma));
-      }
-
-      if (is_delta(p))
-      {
-        return p;
-      }
-
-      if (is_tau(p))
-      {
-        return p;
-      }
-
-      if (is_sync(p))
-      {
-        return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
-      }
-
-      throw mcrl2::runtime_error("Internal error: expect a pCRL process (2) " + process::pp(p));
-      return process_expression();
-    }
-
 
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
@@ -2272,7 +2121,7 @@ class specification_basic_type
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
+        body1=process::replace_variables_capture_avoiding(body1, sigma,variables_occurring_in_rhs_of_sigma);
         mutable_map_substitution<> sigma_aux(sigma);
         const data_expression time1=data::replace_variables_capture_avoiding(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
         body1=wraptime(body1,time1,sumvars+freevars);
@@ -2288,7 +2137,7 @@ class specification_basic_type
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
+        body1=process::replace_variables_capture_avoiding(body1, sigma,variables_occurring_in_rhs_of_sigma);
         const data_expression new_distribution=data::replace_variables_capture_avoiding(sto.distribution(), sigma,variables_occurring_in_rhs_of_sigma);
         mutable_map_substitution<> sigma_aux(sigma);
         const data_expression time1=data::replace_variables_capture_avoiding(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
@@ -2512,7 +2361,7 @@ class specification_basic_type
           mutable_map_substitution<> sigma;
           std::set<variable> variables_occurring_in_rhs_of_sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-          body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
+          body1=process::replace_variables_capture_avoiding(body1,sigma,variables_occurring_in_rhs_of_sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
           body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first,variables_bound_in_sum1);
@@ -2547,7 +2396,7 @@ class specification_basic_type
           std::set<variable> variables_occurring_in_rhs_of_sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
           distribution=data::replace_variables_capture_avoiding(distribution,sigma,variables_occurring_in_rhs_of_sigma);
-          body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
+          body1=process::replace_variables_capture_avoiding(body1,sigma,variables_occurring_in_rhs_of_sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
           body1=bodytovarheadGNF(body1,seq_state,sumvars+freevars,v,variables_bound_in_sum1);
@@ -2875,9 +2724,7 @@ class specification_basic_type
         mutable_map_substitution<> sigma;
         std::set < variable > lhs_variables_in_sigma;
         alphaconvertprocess(sumvars,sigma,body2,lhs_variables_in_sigma);
-        return sum(sumvars,
-                   putbehind(substitute_pCRLproc(sum(body1).operand(), sigma,lhs_variables_in_sigma),
-                             body2));
+        return sum(sumvars, putbehind(process::replace_variables_capture_avoiding(sum(body1).operand(), sigma,lhs_variables_in_sigma), body2));
       }
 
       if (is_stochastic_operator(body1))
@@ -2892,9 +2739,7 @@ class specification_basic_type
         return stochastic_operator(
                  stochvars,
                  sto.distribution(),
-                 putbehind(
-                       substitute_pCRLproc(sto.operand(),sigma,lhs_variables_in_sigma),
-                       body2));
+                 putbehind( process::replace_variables_capture_avoiding(sto.operand(),sigma,lhs_variables_in_sigma), body2));
       }
 
 
@@ -2967,7 +2812,7 @@ class specification_basic_type
         return sum(
                  sumvars,
                  distribute_condition(
-                   substitute_pCRLproc(sum(body1).operand(),sigma,variables_occurring_in_rhs_of_sigma),
+                   process::replace_variables_capture_avoiding(sum(body1).operand(),sigma,variables_occurring_in_rhs_of_sigma),
                    condition));
       }
 
@@ -2987,7 +2832,7 @@ class specification_basic_type
                                                sigma,
                                                variables_occurring_in_rhs_of_sigma),
                  distribute_condition(
-                       substitute_pCRLproc(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma),
+                       process::replace_variables_capture_avoiding(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma),
                        condition));
       }
 
@@ -3033,7 +2878,7 @@ class specification_basic_type
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         variable_list inner_sumvars=sum(body1).variables();
         alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const process_expression new_body1=substitute_pCRLproc(sum(body1).operand(), sigma, variables_occurring_in_rhs_of_sigma);
+        const process_expression new_body1=process::replace_variables_capture_avoiding(sum(body1).operand(), sigma, variables_occurring_in_rhs_of_sigma);
         return sum(sumvars+inner_sumvars,new_body1);
       }
 
@@ -3044,7 +2889,7 @@ class specification_basic_type
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         variable_list inner_sumvars=sto.variables();
         alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const process_expression new_body1=substitute_pCRLproc(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
+        const process_expression new_body1=process::replace_variables_capture_avoiding(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
         const data_expression new_distribution=data::replace_variables_capture_avoiding(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
         return stochastic_operator(sumvars+inner_sumvars,new_distribution,new_body1);
       }
@@ -3411,7 +3256,7 @@ class specification_basic_type
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma, variables_occurring_in_rhs_of_sigma);
+        const process_expression body=process::replace_variables_capture_avoiding(sum(t).operand(), sigma, variables_occurring_in_rhs_of_sigma);
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -3435,7 +3280,7 @@ class specification_basic_type
                                                sto.distribution(),
                                                sigma,
                                                variables_occurring_in_rhs_of_sigma);
-        const process_expression body=substitute_pCRLproc(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma);
+        const process_expression body=process::replace_variables_capture_avoiding(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma);
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -3478,7 +3323,7 @@ class specification_basic_type
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        body1=substitute_pCRLproc(body1, sigma, variables_occurring_in_rhs_of_sigma);
+        body1=process::replace_variables_capture_avoiding(body1, sigma, variables_occurring_in_rhs_of_sigma);
         mutable_map_substitution<> sigma_aux(sigma);
         const data_expression time1=data::replace_variables_capture_avoiding(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
         body1=distributeTime(body1,time1,sumvars+freevars,timecondition);
@@ -3492,7 +3337,7 @@ class specification_basic_type
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        process_expression new_body=substitute_pCRLproc(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
+        process_expression new_body=process::replace_variables_capture_avoiding(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
         data_expression new_distribution=data::replace_variables_capture_avoiding(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
         mutable_map_substitution<> sigma_aux(sigma);
         const data_expression time1=data::replace_variables_capture_avoiding(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
@@ -3680,7 +3525,7 @@ class specification_basic_type
           const std::set<variable> varset=find_free_variables(i->rhs());
           variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
         }
-        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma,variables_occurring_in_rhs_of_sigma);
+        process_expression t3=process::replace_variables_capture_avoiding(objectdata[n].processbody,sigma,variables_occurring_in_rhs_of_sigma);
         if (regular)
         {
           t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
@@ -3831,58 +3676,6 @@ class specification_basic_type
     /*                                                              */
     /*                                                              */
     /****************************************************************/
-
-    /* substitute process_identifiers in a pCRL process. This code should be replaced.
-       Can be removed.
-
-    process_expression substitute_pCRL_procs(const process_expression& t,
-                         const std::map<process_identifier, process_identifier>& substitution)
-    {
-      if (is_choice(t))
-      {
-        return choice(substitute_pCRL_procs(atermpp::down_cast<choice>(t).left(),substitution),
-                      substitute_pCRL_procs(atermpp::down_cast<choice>(t).right(),substitution));
-      }
-
-      if (is_seq(t))
-      {
-        return seq(substitute_pCRL_procs(atermpp::down_cast<seq>(t).left(),substitution),
-                   substitute_pCRL_procs(atermpp::down_cast<seq>(t).right(),substitution));
-      }
-
-      if (is_if_then(t))
-      {
-        return if_then(substitute_pCRL_procs(atermpp::down_cast<if_then>(t).then_case(),substitution));
-      }
-
-      if (is_sum(t))
-      {
-        const sum& t1=atermpp::down_cast<sum>(t);
-        return sum(t1.variables(),substitute_pCRL_procs(t1.operand(),substitution));
-      }
-
-      if (is_stochastic_operator(t))
-      {
-        const stochastic_operator& t1=atermpp::down_cast<stochastic_operator>(t);
-        return stochastic_operator(t1.variables(),t1.distribution(), substitute_pCRL_procs(t1.operand(),substitution));
-      }
-
-      if (is_process_instance_assignment(t))
-      {
-        const process_instance_assignment t1=atermpp::down_cast<process_instance_assignment>(t);
-        const std::map<process_identifier,process_identifier>::const_iterator i=substitution.find(t1.identifier());
-        const process_identifier new_id= (i==substitution.end())?t1.identifier():i->second;
-        return process_instance_assignment(new_id,t1.assignments());
-      }
-
-      if (is_sync(t)||is_action(t)||is_tau(t)||is_delta(t)||is_at(t))
-      {
-        return t;
-      }
-
-      throw mcrl2::runtime_error("unexpected process format " + process::pp(t) + " in make_pCRL_procs");
-    } */
-
 
 
     /**************** Make pCRL procs  ******************************/
@@ -5317,7 +5110,7 @@ class specification_basic_type
       mutable_map_substitution<> local_sigma;
       std::set<variable> local_rhs_variables_in_sigma;
       alphaconvert(sumvars,local_sigma,process_parameters,data_expression_list(),local_rhs_variables_in_sigma);
-      summandterm=substitute_pCRLproc(summandterm, local_sigma, local_rhs_variables_in_sigma);
+      summandterm=process::replace_variables_capture_avoiding(summandterm, local_sigma, local_rhs_variables_in_sigma);
 
 
       /* translate the condition */
@@ -10021,7 +9814,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             mutable_map_substitution<> local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            new_body2=process::replace_variables_capture_avoiding(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
 
@@ -10087,7 +9880,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             mutable_map_substitution<> local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            new_body2=process::replace_variables_capture_avoiding(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
 
@@ -10219,7 +10012,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             mutable_map_substitution<> local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            new_body2=process::replace_variables_capture_avoiding(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
 
@@ -10283,7 +10076,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             mutable_map_substitution<> local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            new_body2=process::replace_variables_capture_avoiding(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
 
