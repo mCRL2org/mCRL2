@@ -1,5 +1,7 @@
 .. index:: lpsinvelm
 
+.. _tool-lpsinvelm:
+
 .. math::
    :nowrap: 
  
