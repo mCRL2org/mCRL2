@@ -3,7 +3,7 @@
 .. _tool-lpsbisim2pbes:
 
 lpsbisim2pbes
-===========
+=============
 
 Construct a PBES that expresses whether the two LPSs given as input are equal
 modulo some behavioural equivalence relation specified with option :option:`-b/--bisimulation`.

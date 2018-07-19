@@ -55,12 +55,12 @@ class aterm_int: public aterm
      : aterm(detail::aterm_int(value))
     {}
 
-    /// \brief Assignment operator.
-    /// \param t A term representing an integer.
+    /// \brief Default assignment operator.
+    // \param t A term representing an integer.
     aterm_int& operator=(const aterm_int&) = default;
 
-    /// \brief Move assignment operator.
-    /// \param t A term representing an integer.
+    /// \brief Default move assignment operator.
+    // \param t A term representing an integer.
     aterm_int& operator=(aterm_int&&) noexcept = default;
 
     /// \brief Get the integer value of the aterm_int.
