@@ -7,13 +7,13 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/utilities/tool.h"
+#include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/gui/qt_tool.h"
 #include "mainwindow.h"
 
 using namespace mcrl2;
 
-typedef gui::qt::qt_tool<utilities::tools::tool> mcrl2ide_base;
+typedef gui::qt::qt_tool<utilities::tools::input_tool> mcrl2ide_base;
 
 class mcrl2ide_tool : public mcrl2ide_base
 {
@@ -33,7 +33,7 @@ class mcrl2ide_tool : public mcrl2ide_base
 
   bool run()
   {
-    MainWindow* window = new MainWindow();
+    MainWindow* window = new MainWindow(QString::fromStdString(m_input_filename));
     return show_main_window(window);
   }
 };

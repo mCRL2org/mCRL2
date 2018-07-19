@@ -17,7 +17,8 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
+MainWindow::MainWindow(QString inputProjectFilePath, QWidget* parent)
+    : QMainWindow(parent)
 {
   specificationEditor = new CodeEditor(this, true);
   setCentralWidget(specificationEditor);
@@ -62,6 +63,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   setWindowTitle("mCRL2 IDE - Unnamed project");
   resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,
                QDesktopWidget().availableGeometry(this).height() * 0.75));
+
+  /* open a project if a project file is given */
+  if (!inputProjectFilePath.isEmpty())
+  {
+    actionOpenProject(inputProjectFilePath);
+  }
 }
 
 MainWindow::~MainWindow()
@@ -248,11 +255,19 @@ void MainWindow::actionNewProject(bool askToSave)
   }
 }
 
-void MainWindow::actionOpenProject()
+void MainWindow::actionOpenProject(QString inputProjectFilePath)
 {
   QString projectName = "";
   std::list<Property*> properties = {};
-  fileSystem->openProject(&projectName, &properties);
+  if (inputProjectFilePath.isEmpty())
+  {
+    fileSystem->openProject(&projectName, &properties);
+  }
+  else
+  {
+    fileSystem->openProjectFromFile(inputProjectFilePath, &projectName,
+                                    &properties);
+  }
 
   /* if successful, put the properties in the properties dock and set the window
    *   title */

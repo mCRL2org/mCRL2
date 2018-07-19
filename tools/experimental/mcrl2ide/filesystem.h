@@ -235,7 +235,18 @@ class FileSystem : public QObject
   bool deleteProperty(Property* property);
 
   /**
-   * @brief openProject Opens the project with the given project name
+   * @brief openProjectFromFile Opens a project from the project file   *
+   * @param newProjectFilePath The path to the project file
+   * @param newProjectName A pointer to store the projectname of the opened
+   *   project
+   * @param newProperties A pointer to store the properties of the opened
+   *   project
+   */
+  void openProjectFromFile(QString newProjectFilePath, QString* newProjectName,
+                           std::list<Property*>* newProperties);
+
+  /**
+   * @brief openProject Opens a project chosen by the user
    * @param newProjectName A pointer to store the projectname of the opened
    *   project
    * @param newProperties A pointer to store the properties of the opened
@@ -291,6 +302,7 @@ class FileSystem : public QObject
   void changesSaved();
 
   private:
+  QString projectFileExtension = ".mcrl2proj";
   QString projectFolderPath;
   QString specFilePath;
   QString propertiesFolderName = "properties";

@@ -34,9 +34,10 @@ class MainWindow : public QMainWindow
   public:
   /**
    * @brief MainWindow Constructor
+   * @param inputProjectFilePath The file path to a project file to open
    * @param parent The parent of this widget
    */
-  MainWindow(QWidget* parent = 0);
+  explicit MainWindow(QString inputProjectFilePath, QWidget* parent = 0);
   ~MainWindow();
 
   public slots:
@@ -54,8 +55,9 @@ class MainWindow : public QMainWindow
 
   /**
    * @brief actionOpenProject Allows the user to open a project
+   * @param inputProjectFilePath An optional project file to open the project of
    */
-  void actionOpenProject();
+  void actionOpenProject(QString inputProjectFilePath = "");
 
   /**
    * @brief actionNewProject Allows the user to save a project
