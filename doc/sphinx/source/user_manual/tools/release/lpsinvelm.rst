@@ -1,11 +1,11 @@
 .. index:: lpsinvelm
 
-.. _tool-lpsinvelm:
-
 .. math::
    :nowrap: 
  
     \renewcommand{\implies}{\mathop{\Rightarrow}}
+
+.. _tool-lpsinvelm:
 
 lpsinvelm
 =========
@@ -53,7 +53,7 @@ the SMT solver `Ario <http://www.eecs.umich.edu/~ario>`_ or `CVC3
 <http://www.cs.nyu.edu/acsys/cvc3>`_ can be used. To use one of these solvers,
 the directory containing the corresponding executable must be in the path.
 
-Without using the option :option:`--no-check`, :ref:`tool-lpsinvelm` will
+Without using the option :option:`--no-check`, :ref:`lpsinvelm <tool-lpsinvelm>` will
 first check if the given expression is an invariant of the LPS. If this is not
 the case, no elimination or simplification will be done. In some cases the
 invariant may hold even though the prover is unable to determine this fact. In
@@ -181,7 +181,7 @@ the result becomes
 
 Note that the ``c`` summand is now still present.
 
-The usage of :ref:`tool-lpsinvelm` can be useful as a preprocessing step for
+The usage of :ref:`lpsinvelm <tool-lpsinvelm>` can be useful as a preprocessing step for
 symbolic reduction tools such as :ref:`tool-lpsconfcheck` and
 :ref:`tool-lpsrealelm`.
 

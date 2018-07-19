@@ -452,7 +452,11 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
   public:
     lps_solve_structure_graph_algorithm() = default;
 
+    /// \brief Solve a pbes for some equation, while constructing a counter example or wittness based on the accompanying linear process.
     /// \param lpsspec The original LPS that was used to create the PBES.
+    /// \param p       The pbes to be solved. 
+    /// \param p_index The index of the pbes equation to be solved.
+    /// \return A boolean indicating the solution and a linear process that represents the counter example. 
     std::pair<bool, lps::specification> solve_with_counter_example(structure_graph& G, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;

@@ -84,10 +84,10 @@ inline bool is_variable(const atermpp::aterm_appl& x)
 }
 
 /// \brief Returns true if the term t is an application
-/// \detail This function is inefficient as the arity of a term must 
-///         be determined and an inspection must take place in an 
-///         array of function symbols. Therefore, there is an more efficient overload
-///         is_application(const data_expression& x).
+/// \details This function is inefficient as the arity of a term must 
+///          be determined and an inspection must take place in an 
+///          array of function symbols. Therefore, there is an more efficient overload
+///          is_application(const data_expression& x).
 inline bool is_application(const atermpp::aterm_appl& x)
 {
   return core::detail::gsIsDataAppl(x);

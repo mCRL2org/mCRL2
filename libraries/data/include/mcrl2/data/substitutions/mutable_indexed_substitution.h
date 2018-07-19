@@ -173,9 +173,10 @@ public:
   };
 
   /// \brief Application operator; applies substitution to v.
-  /// \detail This must deliver an expression, and not a reference
-  ///         to an expression, as the expressions are stored in 
-  ///         a vector that can be resized and moved. 
+  /// \details This must deliver an expression, and not a reference
+  ///          to an expression, as the expressions are stored in 
+  ///          a vector that can be resized and moved. 
+ 
   const expression_type operator()(const variable_type& v) const
   {
     const std::size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);

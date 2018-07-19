@@ -1003,6 +1003,7 @@ data::function_symbol parse_function_symbol(const std::string& text, const std::
 
 /// \brief Parses a variable declaration list.
 /// \param[in] text The input text.
+/// \param[in] dataspec The data specification used to type normalize the sorts of the variables.
 /// \return The parsed variable declaration list.
 inline
 variable_list parse_variable_declaration_list(const std::string& text, const data_specification& dataspec = detail::default_specification())

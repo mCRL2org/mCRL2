@@ -242,6 +242,11 @@ class data_specification: public sort_specification
     ///        to this specification, and marks them as system defined.
     ///
     /// \param[in] sort A sort expression that is representing the structured sort.
+    /// \param[out] constructors To this set the new constructors are added.
+    /// \param[out] mappings     New mappings are added to this set.
+    /// \param[out] equations    New equations for the structured sort are added to this set.
+    /// \param[in]  skip_equations This boolean indicates whether equations are added.
+
     void insert_mappings_constructors_for_structured_sort(
                        const structured_sort& sort,
                        std::set < function_symbol >& constructors,
