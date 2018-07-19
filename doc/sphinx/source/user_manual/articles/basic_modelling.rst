@@ -963,9 +963,11 @@ the following process:
 .. _trees:
 .. list-table:: A transition system with nested trees.
 
-  act num: Nat;
-  proc P(n: Nat) = sum m: Nat . (m < n) -> num(m) . P(m);
-  init sum m: Nat . P(m);
+   * - :: 
+
+          act num: Nat;
+          proc P(n: Nat) = sum m: Nat . (m < n) -> num(m) . P(m);
+          init sum m: Nat . P(m);
 
 Each ``num(v)`` action leads to a state with branching degree `v`, in which the
 only actions ``num(w)`` possible are those with ``w < v``. Using Hennessy-Milner

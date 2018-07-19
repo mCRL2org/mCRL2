@@ -453,6 +453,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
     lps_solve_structure_graph_algorithm() = default;
 
     /// \brief Solve a pbes for some equation, while constructing a counter example or wittness based on the accompanying linear process.
+    /// \param G       A structure graph.
     /// \param lpsspec The original LPS that was used to create the PBES.
     /// \param p       The pbes to be solved. 
     /// \param p_index The index of the pbes equation to be solved.
@@ -527,6 +528,8 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
   public:
     lts_solve_structure_graph_algorithm() = default;
 
+    /// \brief Solve a boolean equation system while generating a counter example.
+    /// \param G       A structure graph. 
     /// \param ltsspec The original LTS that was used to create the PBES.
     inline
     bool solve_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec)
@@ -569,6 +572,8 @@ std::pair<bool, lps::specification> solve_structure_graph_with_counter_example(s
   return algorithm.solve_with_counter_example(G, lpsspec, p, p_index);
 }
 
+/// \brief Solve this pbes_system using a structure graph generating a counter example.
+/// \param G       The structure graph. 
 /// \param ltsspec The original LTS that was used to create the PBES.
 inline
 bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts_t& ltsspec)

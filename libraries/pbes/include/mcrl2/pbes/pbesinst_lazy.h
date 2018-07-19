@@ -145,7 +145,7 @@ class pbesinst_lazy_algorithm
     /// \param p The pbes used in the exploration algorithm.
     /// \param rewrite_strategy A strategy for the data rewriter.
     /// \param search_strategy The search strategy used to explore the pbes, typically depth or breadth first.
-    /// \param transformation_strategy The strategy that determines to which extent the generated bes is simplified while being generated.
+    /// \param optimization An indication of the optimisation level. 
     explicit pbesinst_lazy_algorithm(
             const pbes& p,
             data::rewriter::strategy rewrite_strategy = data::jitty,

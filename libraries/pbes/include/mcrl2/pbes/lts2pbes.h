@@ -58,6 +58,7 @@ class lts2pbes_algorithm
     /// \param formspec A state formula specification.
     /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed
     //                                    for a more compact translation.
+    /// \param generate_counter_example A boolean indicating whether a counterexample must be generated.
     /// \return The result of the translation
     pbes run(const state_formulas::state_formula_specification& formspec,
              bool preprocess_modal_operators = false,
@@ -100,8 +101,10 @@ class lts2pbes_algorithm
 
 /// \brief Translates an LTS and a modal formula into a PBES that represents the corresponding
 /// model checking problem.
-/// \param l A labelled transition system
-/// \param formspec A modal formula specification
+/// \param l A labelled transition system.
+/// \param formspec A modal formula specification.
+/// \param preprocess_modal_operators A boolean indicating that modal operators must be preprocessed.
+/// \param generate_counter_example A boolean indicating that a counter example must be generated.
 inline
 pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula_specification& formspec, bool preprocess_modal_operators = false, bool generate_counter_example = false)
 {
