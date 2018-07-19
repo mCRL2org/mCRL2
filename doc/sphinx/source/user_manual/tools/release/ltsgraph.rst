@@ -5,8 +5,11 @@
 ltsgraph
 ========
 
-Draws a labelled transition system (LTS). A convential graph drawing is provided
-either in 2D or 3D.
+This tool draws a labelled transition system (LTS). It can read graphs in .aut, .lts 
+and .fsm format. Graphs can be drawn in 2D and 3D format. 
+
+.. figure:: ltsgraph.png
+   :align: center
 
 The main window of the tool shows the labelled transition system described by
 the input file as a directed, labelled graph. The graph can be layed out
@@ -26,9 +29,11 @@ initial state and its successors are displayed. When clicking one of the
 successors, it is expanded. It is also possible to collapse states for which
 no successor has been expanded.
 
-.. warning::
+.. note::
 
-   This tool is only usable for small state spaces of up to about 200 states.
-   For visualising larger state spaces it is recommended to use
-   :ref:`tool-ltsview`.
+   This normal mode ltsgraph is only usable for small state spaces of up to about 200 states.
+   In exploration mode small parts of large graphs can be explored. 
+   For visualising larger state spaces it is also recommended to use
+   :ref:`tool-ltsview` to visualise the structure of large graphs. The tool :ref:`tool-diagraphica`
+   is especially designed to inspect the structure of the data occurring in large graphs. 
 
