@@ -83,7 +83,7 @@ function(_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_FILES)
     endif()
     set(ORIGFILENAME ${TARGET_NAME}.exe)
     set(RC_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_icon.rc)
-    
+
     string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 VERSION_HIHI)
     string(SUBSTRING ${MCRL2_MAJOR_VERSION} 4 -1 VERSION_HILO)
     string(LENGTH ${VERSION_HILO} _vlen)
@@ -112,10 +112,16 @@ endfunction()
 
 function(_prepare_desktop_application TARGET_NAME TOOLNAME DESCRIPTION ICON)
   if(MSVC)
-    # N.B. using WIN32_EXECUTABLE instead of WIN32 leads to linker errors in the maintainer build:
-    # error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '0' doesn't match value '2'
-    set_target_properties(${TARGET_NAME} PROPERTIES
-      WIN32 TRUE)
+    if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+      # N.B. using WIN32_EXECUTABLE leads to linker errors in the maintainer build:
+      # error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '0' doesn't match value '2'
+      # It is desirable to have the WIN32_EXECUTABLE property in a release build,
+      # since this prevents the opening of a console even when opening one of the
+      # graphical tools via explorer or the start menu. Always having this console
+      # window open doesn't look nice.
+      set_target_properties(${TARGET_NAME} PROPERTIES
+        WIN32_EXECUTABLE TRUE)
+    endif()
   elseif(UNIX AND NOT APPLE)
     set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
     set(COMMANDLINE ${TARGET_NAME})
@@ -157,14 +163,14 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       set(ARG_COMPONENT "Stable")
     endif()
   endif()
-  
+
   foreach(DEP ${ARG_DEPENDS})
-    if(${DEP} MATCHES "Qt.*") 
+    if(${DEP} MATCHES "Qt.*")
       # This variable is true iff one dependency starts with Qt.*.
       set(HAS_QT_DEPENDENCY TRUE)
     endif()
 
-    if(${DEP} STREQUAL "Qt5::Widgets") 
+    if(${DEP} STREQUAL "Qt5::Widgets")
       # This mCRL2 binary depends on Qt5::Widgets, so it is a gui binary.
       set(IS_GUI_BINARY TRUE)
     endif()
@@ -209,7 +215,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       set(SRC_ABS ${PARSER_CODE})
       set(DEPENDS ${DEPENDS} dparser)
       set(INCLUDE ${INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
-    # TODO: In CMake 3.0.0 these could be replaced by enabling the AUTOUIC and AUTORCC 
+    # TODO: In CMake 3.0.0 these could be replaced by enabling the AUTOUIC and AUTORCC
     # properties for the target.
     elseif("${SRC_EXT}" STREQUAL ".ui")
       qt5_wrap_ui(SRC_ABS ${SRC_ABS})
@@ -224,8 +230,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       # This is a header-only library. We're still going to make a static library
       # (exporting nothing) out of it, so we can use CMake's dependency handling
       # mechanisms.
-      # We are adding an empty file here so CMake does not complain that it does 
-      # not know what linker to use. We could have used the LINKER_LANGUAGE CXX 
+      # We are adding an empty file here so CMake does not complain that it does
+      # not know what linker to use. We could have used the LINKER_LANGUAGE CXX
       # property, but then that breaks the RPATH handling at install time on *nix
       # systems...
       if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/empty.cpp)
@@ -268,7 +274,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
 
   if(HAS_QT_DEPENDENCY)
     if(${TARGET_TYPE} STREQUAL "EXECUTABLE")
-      # The variable ${MCRL2_QT_APPS} contains a list of mCRL2 executables that use Qt. 
+      # The variable ${MCRL2_QT_APPS} contains a list of mCRL2 executables that use Qt.
       if(MCRL2_QT_APPS)
         set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
       else()
