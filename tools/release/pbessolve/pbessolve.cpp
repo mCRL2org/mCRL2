@@ -52,6 +52,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 
     std::string lpsfile;
     std::string ltsfile;
+    std::string evidence_file;
 
     int m_strategy = 0; // can be 0, 1, 2, 3 or 4
 
@@ -72,6 +73,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  "extension of the file should be .lps in case of an LPS file, in all other cases it is assumed to "
                  "be an LTS.",
                  'f');
+      desc.add_option("evidence-file",
+                      utilities::make_optional_argument("NAME", "name"),
+                      "The file to which the evidence is written. If not set, a default name will be chosen.");
       desc.add_option("strategy",
                   utilities::make_optional_argument("STRATEGY", "0"),
                       "use strategy STRATEGY:\n"
@@ -118,6 +122,10 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         {
           ltsfile = filename;
         }
+      }
+      if (parser.options.count("evidence-file") > 0)
+      {
+        evidence_file = parser.option_argument("evidence-file");
       }
       m_search_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       m_strategy = parser.option_argument_as<int>("strategy");
@@ -170,9 +178,12 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         std::tie(result, evidence) = solve_structure_graph_with_counter_example(G, lpsspec, pbesspec, algorithm.equation_index());
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
-        std::string output_filename = input_filename() + ".evidence.lps";
-        lps::detail::save_lps(evidence, output_filename);
-        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << output_filename << std::endl;
+        if (evidence_file.empty())
+        {
+          evidence_file = input_filename() + ".evidence.lps";
+        }
+        lps::detail::save_lps(evidence, evidence_file);
+        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << evidence_file << std::endl;
       }
       else if (!ltsfile.empty())
       {
@@ -183,9 +194,12 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         bool result = solve_structure_graph_with_counter_example(G, ltsspec);
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
-        std::string output_filename = input_filename() + ".evidence.lts";
-        ltsspec.save(output_filename);
-        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << output_filename << std::endl;
+        if (evidence_file.empty())
+        {
+          evidence_file = input_filename() + ".evidence.lts";
+        }
+        ltsspec.save(evidence_file);
+        mCRL2log(log::verbose) << "Saved " << (result ? "witness" : "counter example") << " in " << evidence_file << std::endl;
       }
       else
       {
