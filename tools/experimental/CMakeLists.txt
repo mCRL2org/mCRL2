@@ -2,7 +2,6 @@ set(MCRL2_TOOLS
   besconvert
   complps2pbes
   lpsrealelm
-  lpsrealzone
   lpssymbolicbisim
   mcrl2ide
   pbesabsinthe
