@@ -154,7 +154,8 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         "Interpreter for the mCRL2 data language",
         "Evaluate mCRL2 data expressions via a text-based interface. "
         "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used. "
-        "If no input file is given, only the standard numeric datatypes are available. Stdin is ignored."
+        "If no input file is given, only the standard numeric datatypes are available. "
+        "Commands are read from stdin. "
         + help_text
       )
     {}
@@ -404,4 +405,3 @@ int main(int argc, char** argv)
 {
   return mcrl2i_tool().execute(argc, argv);
 }
-
