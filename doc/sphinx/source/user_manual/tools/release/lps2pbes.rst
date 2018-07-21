@@ -31,7 +31,7 @@ shape ``[a.b]...`` or ``<a.b>...``.
 
 The tool :ref:`tool-pbessolve` is capable of generating a counter example in the form of labelled transition systems, 
 provided the PBES is generated
-using lps2pbes (or :ref:`lts2pbes`) using the ``--counter-example`` flag. The generated PBES is 
+using lps2pbes (or :ref:`tool-lts2pbes`) using the ``--counter-example`` flag. The generated PBES is 
 more complicated
 and may be harder to solve. Yet, these counter examples are very helpful in determining whether formulas do
 not hold. If formulas are valid, this flag can also be used to determine witnesses, i.e., evidence when formulas
