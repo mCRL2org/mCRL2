@@ -1,5 +1,7 @@
 .. index:: lpsparelm
 
+.. highlight:: mcrl2
+
 .. _tool-lpsparelm:
 
 lpsparelm
