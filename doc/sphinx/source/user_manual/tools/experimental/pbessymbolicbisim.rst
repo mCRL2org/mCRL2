@@ -21,3 +21,6 @@ To track the progress of the tool, one can use the option
 algorithm to start off with a finer partition. In general, this will lead to
 a longer runtimes. However, in certain cases, it drastically speeds up the
 algorithm.
+
+To run this tool, the Z3 SMT-solver should be installed and its bin-directory
+has to be added to the PATH variable.
