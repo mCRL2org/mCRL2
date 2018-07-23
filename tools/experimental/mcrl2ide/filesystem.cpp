@@ -80,14 +80,17 @@ QString FileSystem::specificationFilePath()
   }
 }
 
-QString FileSystem::lpsFilePath()
+QString FileSystem::lpsFilePath(bool evidence, QString propertyName)
 {
-  return temporaryFolder.path() + QDir::separator() + projectName + "_lps.lps";
+  return temporaryFolder.path() + QDir::separator() + projectName +
+         (evidence ? "_" + propertyName + "_evidence" : "") + "_lps.lps";
 }
 
-QString FileSystem::ltsFilePath(LtsReduction reduction)
+QString FileSystem::ltsFilePath(LtsReduction reduction, bool evidence,
+                                QString propertyName)
 {
-  return temporaryFolder.path() + QDir::separator() + projectName + "_lts_" +
+  return temporaryFolder.path() + QDir::separator() + projectName +
+         (evidence ? "_" + propertyName + "_evidence" : "") + "_lts_" +
          LTSREDUCTIONNAMES.at(reduction) + ".lts";
 }
 
@@ -96,10 +99,10 @@ QString FileSystem::propertyFilePath(QString propertyName)
   return propertiesFolderPath() + QDir::separator() + propertyName + ".mcf";
 }
 
-QString FileSystem::pbesFilePath(QString propertyName)
+QString FileSystem::pbesFilePath(QString propertyName, bool evidence)
 {
   return temporaryFolder.path() + QDir::separator() + projectName + "_" +
-         propertyName + "_pbes.pbes";
+         propertyName + (evidence ? "_evidence" : "") + "_pbes.pbes";
 }
 
 bool FileSystem::projectOpened()
@@ -138,27 +141,42 @@ bool FileSystem::propertyNameExists(QString propertyName)
   return false;
 }
 
-bool FileSystem::upToDateLpsFileExists()
+bool FileSystem::upToDateLpsFileExists(bool evidence, QString propertyName)
 {
-  /* an lps file is up to date if the lps file exists and the lps file is
-   *   created after the the last time the specification file was modified */
-  return QFile(lpsFilePath()).exists() &&
-         QFileInfo(specificationFilePath()).lastModified() <=
-             QFileInfo(lpsFilePath()).lastModified();
+  /* in case not evidence lps, an lps file is up to date if the lps file exists
+   *   and the lps file is created after the last time the specification file
+   *   was modified
+   * in case evidence lps, an lps file is up to date if the lps file exists and
+   *   the lps file is created after the the last time the evidence pbes was
+   *   modified */
+  if (!evidence)
+  {
+    return QFile(lpsFilePath(evidence, propertyName)).exists() &&
+           QFileInfo(specificationFilePath()).lastModified() <=
+               QFileInfo(lpsFilePath(evidence, propertyName)).lastModified();
+  }
+  else
+  {
+    return QFile(lpsFilePath(evidence, propertyName)).exists() &&
+           QFileInfo(pbesFilePath(propertyName, evidence)).lastModified() <=
+               QFileInfo(lpsFilePath(evidence, propertyName)).lastModified();
+  }
 }
 
-bool FileSystem::upToDateLtsFileExists(LtsReduction reduction)
+bool FileSystem::upToDateLtsFileExists(LtsReduction reduction, bool evidence,
+                                       QString propertyName)
 {
-  /* in case not reduced, an lts file is up to date if the lts file exists and
-   *   the lts file is created after the the last time the lps file was modified
-   * in case reduced, an lts file is up to date if the lts file exists and
-   *   the lts file is created after the the last time the unreduced lts file
-   *   was modified */
+  /* in case not reduced lts, an lts file is up to date if the lts file exists
+   *   and the lts file is created after the last time the lps file was modified
+   * in case reduced lts, an lts file is up to date if the lts file exists and
+   *   the lts file is created after the last time the unreduced lts file was
+   *   modified */
   if (reduction == LtsReduction::None)
   {
-    return QFile(ltsFilePath(reduction)).exists() &&
-           QFileInfo(lpsFilePath()).lastModified() <=
-               QFileInfo(ltsFilePath(reduction)).lastModified();
+    return QFile(ltsFilePath(reduction, evidence, propertyName)).exists() &&
+           QFileInfo(lpsFilePath(evidence, propertyName)).lastModified() <=
+               QFileInfo(ltsFilePath(reduction, evidence, propertyName))
+                   .lastModified();
   }
   else
   {
@@ -168,16 +186,16 @@ bool FileSystem::upToDateLtsFileExists(LtsReduction reduction)
   }
 }
 
-bool FileSystem::upToDatePbesFileExists(QString propertyName)
+bool FileSystem::upToDatePbesFileExists(QString propertyName, bool evidence)
 {
   /* a pbes file is up to date if the pbes file exists and the pbes file is
    *   created after the last time both the lps and the property files were
    *   modified */
-  return QFile(pbesFilePath(propertyName)).exists() &&
+  return QFile(pbesFilePath(propertyName, evidence)).exists() &&
          QFileInfo(lpsFilePath()).lastModified() <=
-             QFileInfo(pbesFilePath(propertyName)).lastModified() &&
+             QFileInfo(pbesFilePath(propertyName, evidence)).lastModified() &&
          QFileInfo(propertyFilePath(propertyName)).lastModified() <=
-             QFileInfo(pbesFilePath(propertyName)).lastModified();
+             QFileInfo(pbesFilePath(propertyName, evidence)).lastModified();
 }
 
 void FileSystem::setSpecificationEditorCursor(int row, int column)

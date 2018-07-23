@@ -187,19 +187,31 @@ QProcess* ProcessSystem::createLpsxsimProcess()
   return lpsxsimProcess;
 }
 
-QProcess* ProcessSystem::createLps2ltsProcess()
+QProcess* ProcessSystem::createLps2ltsProcess(bool evidence,
+                                              QString propertyName)
 {
   QProcess* lps2ltsProcess = new QProcess();
 
   /* create the process */
   lps2ltsProcess->setProgram("lps2lts");
   lps2ltsProcess->setArguments(
-      {fileSystem->lpsFilePath(), fileSystem->ltsFilePath(LtsReduction::None),
+      {fileSystem->lpsFilePath(evidence, propertyName),
+       fileSystem->ltsFilePath(LtsReduction::None, evidence, propertyName),
        "--rewriter=jitty", "--strategy=breadth", "--verbose"});
+  lps2ltsProcess->setProperty("evidence", evidence);
+  lps2ltsProcess->setProperty("propertyName", propertyName);
 
   /* connect to logger */
-  connect(lps2ltsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-          SLOT(logToLtsCreationConsole()));
+  if (evidence)
+  {
+    connect(lps2ltsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+            SLOT(logToVerificationConsole()));
+  }
+  else
+  {
+    connect(lps2ltsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+            SLOT(logToLtsCreationConsole()));
+  }
 
   return lps2ltsProcess;
 }
@@ -238,13 +250,16 @@ QProcess* ProcessSystem::createLtsconvertProcess(LtsReduction reduction)
   return ltsconvertProcess;
 }
 
-QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction)
+QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction,
+                                               bool evidence,
+                                               QString propertyName)
 {
   QProcess* ltsgraphProcess = new QProcess();
 
   /* create the process */
   ltsgraphProcess->setProgram("ltsgraph");
-  ltsgraphProcess->setArguments({fileSystem->ltsFilePath(reduction)});
+  ltsgraphProcess->setArguments(
+      {fileSystem->ltsFilePath(reduction, evidence, propertyName)});
 
   return ltsgraphProcess;
 }
@@ -266,17 +281,25 @@ QProcess* ProcessSystem::createPropertyParsingProcess(QString propertyName)
   return lps2pbesProcess;
 }
 
-QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
+QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName,
+                                               bool evidence)
 {
   QProcess* lps2pbesProcess = new QProcess();
 
   /* create the process */
   lps2pbesProcess->setProgram("lps2pbes");
-  lps2pbesProcess->setArguments(
-      {fileSystem->lpsFilePath(), fileSystem->pbesFilePath(propertyName),
-       "--formula=" + fileSystem->propertyFilePath(propertyName), "--out=pbes",
-       "--verbose"});
+  QStringList arguments = {fileSystem->lpsFilePath(),
+                           fileSystem->pbesFilePath(propertyName, evidence),
+                           "--formula=" +
+                               fileSystem->propertyFilePath(propertyName),
+                           "--out=pbes", "--verbose"};
+  if (evidence)
+  {
+    arguments << "--counter-example";
+  }
+  lps2pbesProcess->setArguments(arguments);
   lps2pbesProcess->setProperty("propertyName", propertyName);
+  lps2pbesProcess->setProperty("evidence", evidence);
 
   /* connect to logger */
   connect(lps2pbesProcess, SIGNAL(readyReadStandardError()), consoleDock,
@@ -285,15 +308,27 @@ QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
   return lps2pbesProcess;
 }
 
-QProcess* ProcessSystem::createPbessolveProcess(QString propertyName)
+QProcess* ProcessSystem::createPbessolveProcess(QString propertyName,
+                                                bool evidence)
 {
   /* create the process */
   QProcess* pbessolveProcess = new QProcess();
   pbessolveProcess->setProgram("pbessolve");
-  pbessolveProcess->setArguments(
-      {fileSystem->pbesFilePath(propertyName), "--in=pbes", "--rewriter=jitty",
-       "--search=breadth-first", "--strategy=0", "--verbose"});
+  QStringList arguments = {fileSystem->pbesFilePath(propertyName, evidence),
+                           "--in=pbes",
+                           "--rewriter=jitty",
+                           "--search=breadth-first",
+                           "--strategy=0",
+                           "--verbose"};
+  if (evidence)
+  {
+    arguments << "--file=" + fileSystem->lpsFilePath(false, "")
+              << "--evidence-file=" +
+                     fileSystem->lpsFilePath(evidence, propertyName);
+  }
+  pbessolveProcess->setArguments(arguments);
   pbessolveProcess->setProperty("propertyName", propertyName);
+  pbessolveProcess->setProperty("evidence", evidence);
 
   /* connect to logger */
   connect(pbessolveProcess, SIGNAL(readyReadStandardError()), consoleDock,
@@ -506,6 +541,66 @@ int ProcessSystem::verifyProperty(Property* property)
   return -1;
 }
 
+int ProcessSystem::createEvidence(Property* property)
+{
+  if (!fileSystem->saveProject().isEmpty())
+  {
+    /* create the subprocesses */
+    int processid = pid++;
+    ProcessType processType = ProcessType::Verification;
+    consoleDock->setConsoleTab(processType);
+
+    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
+    mcrl2ParsingProcess->setProperty("pid", processid);
+    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(mcrl2ParsingResult(int)));
+    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(createLps(int)));
+
+    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
+    mcrl22lpsProcess->setProperty("pid", processid);
+    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
+
+    QProcess* propertyParsingProcess =
+        createPropertyParsingProcess(property->name);
+    propertyParsingProcess->setProperty("pid", processid);
+    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(mcfParsingResult(int)));
+    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
+            SLOT(createPbes(int)));
+
+    QProcess* lps2pbesProcess = createLps2pbesProcess(property->name, true);
+    lps2pbesProcess->setProperty("pid", processid);
+    connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes(int)));
+
+    QProcess* pbessolveProcess = createPbessolveProcess(property->name, true);
+    pbessolveProcess->setProperty("pid", processid);
+    connect(pbessolveProcess, SIGNAL(finished(int)), this,
+            SLOT(createLts(int)));
+
+    QProcess* lps2ltsProcess = createLps2ltsProcess(true, property->name);
+    lps2ltsProcess->setProperty("pid", processid);
+    connect(lps2ltsProcess, SIGNAL(finished(int)), this, SLOT(showLts(int)));
+
+    QProcess* ltsgraphProcess =
+        createLtsgraphProcess(LtsReduction::None, true, property->name);
+    ltsgraphProcess->setProperty("id", processid);
+    connect(ltsgraphProcess, SIGNAL(finished(int)), this,
+            SLOT(afterClosingUiTool()));
+
+    processes[processid] = {mcrl2ParsingProcess,    mcrl22lpsProcess,
+                            propertyParsingProcess, lps2pbesProcess,
+                            pbessolveProcess,       lps2ltsProcess,
+                            ltsgraphProcess};
+    processTypes[processid] = processType;
+    processQueues[processType]->enqueue(processid);
+    emit newProcessQueued(processType);
+
+    return processid;
+  }
+  return -1;
+}
+
 void ProcessSystem::startProcess(int processid)
 {
   /* all processes start with parsing the specification */
@@ -628,19 +723,24 @@ void ProcessSystem::simulateLps(int previousExitCode)
 void ProcessSystem::createLts(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  ProcessType processType = processTypes[processid];
 
   if (subprocessSuccessfullyTerminated(previousExitCode, processid))
   {
-    QProcess* lps2ltsProcess = processes[processid][2];
+    QProcess* lps2ltsProcess =
+        processes[processid][processes[processid].size() - 2];
 
-    consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                "##### CREATING LTS #####\n");
+    consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
 
     /* check if we need to run this */
-    if (fileSystem->upToDateLtsFileExists(LtsReduction::None))
+    bool evidence = lps2ltsProcess->property("evidence").toBool();
+    if (fileSystem->upToDateLtsFileExists(
+            LtsReduction::None, evidence,
+            lps2ltsProcess->property("propertyName").toString()))
     {
-      consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                  "Up to date LTS already exists\n");
+      consoleDock->writeToConsole(
+          processType, "Up to date" + QString(evidence ? " evidence" : "") +
+                           " LTS already exists\n");
       emit lps2ltsProcess->finished(0);
     }
     else
@@ -685,7 +785,7 @@ void ProcessSystem::showLts(int previousExitCode)
   {
     QProcess* ltsgraphProcess = processes[processid].back();
 
-    consoleDock->writeToConsole(ProcessType::LtsCreation,
+    consoleDock->writeToConsole(processTypes[processid],
                                 "##### SHOWING LTS #####\n");
     ltsgraphProcess->start();
     emit processFinished(processid);
@@ -753,7 +853,8 @@ void ProcessSystem::createPbes(int previousExitCode)
 
     /* check if we need to run this */
     if (fileSystem->upToDatePbesFileExists(
-            lps2pbesProcess->property("propertyName").toString()))
+            lps2pbesProcess->property("propertyName").toString(),
+            lps2pbesProcess->property("evidence").toBool()))
     {
       consoleDock->writeToConsole(ProcessType::Verification,
                                   "Up to date PBES already exists\n");
@@ -769,13 +870,33 @@ void ProcessSystem::createPbes(int previousExitCode)
 void ProcessSystem::solvePbes(int previousExitCode)
 {
   int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  QProcess* pbessolveProcess = processes[processid][4];
 
   if (subprocessSuccessfullyTerminated(previousExitCode, processid))
   {
     consoleDock->writeToConsole(ProcessType::Verification,
                                 "##### SOLVING PBES #####\n");
 
-    processes[processid][4]->start();
+    /* in case of generating evidence, check if we need to run this */
+    bool evidence = pbessolveProcess->property("evidence").toBool();
+    if (evidence)
+    {
+      if (fileSystem->upToDateLpsFileExists(
+              evidence, pbessolveProcess->property("propertyName").toString()))
+      {
+        consoleDock->writeToConsole(ProcessType::Verification,
+                                    "Up to date evidence LPS already exists\n");
+        emit pbessolveProcess->finished(0);
+      }
+      else
+      {
+        pbessolveProcess->start();
+      }
+    }
+    else
+    {
+      pbessolveProcess->start();
+    }
   }
 }
 

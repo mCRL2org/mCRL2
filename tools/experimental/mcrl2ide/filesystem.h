@@ -87,15 +87,21 @@ class FileSystem : public QObject
 
   /**
    * @brief lpsFilePath Defines the file path of a lps
+   * @param evidence Whether this is an evidence lps
+   * @param propertyName The property name in case this is an evindence lps
    * @return The file path of the lps
    */
-  QString lpsFilePath();
+  QString lpsFilePath(bool evidence = false, QString propertyName = "");
 
   /**
    * @brief ltsFilePath Defines the file path of a lts
+   * @param reduction The reduction applied to the lts
+   * @param evidence Whether this is an evidence lts
+   * @param propertyName The property name in case this is an evindence lts
    * @return The file path of the lts
    */
-  QString ltsFilePath(LtsReduction reduction);
+  QString ltsFilePath(LtsReduction reduction, bool evidence = false,
+                      QString propertyName = "");
 
   /**
    * @brief propertyFilePath Defines the file path of a property
@@ -107,9 +113,10 @@ class FileSystem : public QObject
   /**
    * @brief pbesFilePath Defines the file path of a pbes
    * @param propertyName The name of the property this pbes correspeonds to
+   * @param evidence Whether the pbes has evidence info
    * @return The file path of the pbes
    */
-  QString pbesFilePath(QString propertyName);
+  QString pbesFilePath(QString propertyName, bool evidence = false);
 
   /**
    * @brief projectOpened Checks whether a project is opened
@@ -135,28 +142,34 @@ class FileSystem : public QObject
   /**
    * @brief upToDateLpsFileExists Checks whether an lps file exists that is
    *   created from the current specification
+   * @param evidence Whether this is an evidence lps
+   * @param propertyName The property name in case this is an evidence lps
    * @return Whether an lps file exists that is created from the current
    *   specification
    */
-  bool upToDateLpsFileExists();
+  bool upToDateLpsFileExists(bool evidence = false, QString propertyName = "");
 
   /**
    * @brief upToDateLtsFileExists Checks whether an lts file exists with a given
    *   reduction that is created from the current specification
    * @param reduction The reduction that was applied to the lts
+   * @param evidence Whether this is an evidence lts
+   * @param propertyName The property name in case this is an evidence lts
    * @return Whether an lts file exists that is created from the current
    *   specification
    */
-  bool upToDateLtsFileExists(LtsReduction reduction);
+  bool upToDateLtsFileExists(LtsReduction reduction, bool evidence = false,
+                             QString propertyName = "");
 
   /**
    * @brief upToDatePbesFileExists Checks whether a pbes file exists that is
    *   created from the current specification and property
    * @param propertyName The name of the property
+   * @param evidence Whether the pbes has evidence info
    * @return Whether a pbes file exists that is created from the current
    *   specification and property
    */
-  bool upToDatePbesFileExists(QString propertyName);
+  bool upToDatePbesFileExists(QString propertyName, bool evidence = false);
 
   /**
    * @brief setSpecificationEditorCursor Puts the cursor in the specification

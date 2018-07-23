@@ -176,6 +176,15 @@ class ProcessSystem : public QObject
   int verifyProperty(Property* property);
 
   /**
+   * @brief createEvidence Creates and shows evidence for a (verified) property;
+   *   a witness if the property is true, a counterexample if the property is
+   *   false. Uses mcrl22lps, lps2pbes, pbessolve, lps2lts and ltsgraph.
+   * @param property The property to create evidence for
+   * @return the process id of the evidence creation process
+   */
+  int createEvidence(Property* property);
+
+  /**
    * @brief abortProcess Aborts a process by making the running subprocess
    *   terminate if it is running, else by removing it from the queue
    * @param processid The process id of the process to abort
@@ -253,9 +262,13 @@ class ProcessSystem : public QObject
   /**
    * @brief createLps2ltsProcess Creates a process to execute lps2lts on the lps
    *   that corresponds to the current specification
+   * @param evidence Whether we want to create an evidence lts
+   * @param propertyName The property name in case we want to create an evidence
+   *   lts
    * @return The lps2lts process
    */
-  QProcess* createLps2ltsProcess();
+  QProcess* createLps2ltsProcess(bool evidence = false,
+                                 QString propertyName = "");
 
   /**
    * @brief createLtsconvertProcess Creates a process to execute ltsconvert on
@@ -268,10 +281,14 @@ class ProcessSystem : public QObject
   /**
    * @brief createLtsgraphProcess Creates a process to execute ltsgraph on the
    *   lts that corresponds to the current specification and the given reduction
+   * @param evidence Whether we want to show an evidence lts
+   * @param propertyName The property name in case we want to show an evidence
+   *   lts
    * @param reduction The reduction that was applied
    * @return The ltsgraph process
    */
-  QProcess* createLtsgraphProcess(LtsReduction reduction);
+  QProcess* createLtsgraphProcess(LtsReduction reduction, bool evidence = false,
+                                  QString propertyName = "");
 
   /**
    * @brief createPropertyParsingProcess Creates a process to parse the given
@@ -285,17 +302,19 @@ class ProcessSystem : public QObject
    * @brief createLps2pbesProcess Creates a process to execute lps2pbes on the
    *   lps that corresponds to the current specification and a given property
    * @param propertyName The name of the property to create a pbes of
+   * @paran evidence Whether we want to generate evidence info
    * @return The lps2pbes process
    */
-  QProcess* createLps2pbesProcess(QString propertyName);
+  QProcess* createLps2pbesProcess(QString propertyName, bool evidence = false);
 
   /**
    * @brief createPbessolveProcess Creates a process to execute pbessolve on the
    *   pbes that corresponds to the current specification and a given property
    * @param propertyName The name of the property that corresponds to the pbes
+   * @param evidence Whether we want to generate the evidence
    * @return The pbessolve process
    */
-  QProcess* createPbessolveProcess(QString propertyName);
+  QProcess* createPbessolveProcess(QString propertyName, bool evidence = false);
 
   /**
    * @brief subpreviousProcessTerminated Checks whether a subprocess terminated

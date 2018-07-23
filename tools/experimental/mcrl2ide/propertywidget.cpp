@@ -22,7 +22,7 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
   this->processSystem = processSystem;
   this->fileSystem = fileSystem;
   this->parent = parent;
-  verificationProcessId = -1;
+  lastRunningProcessId = -1;
 
   editPropertyDialog =
       new AddEditPropertyDialog(false, processSystem, fileSystem, this);
@@ -52,25 +52,30 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
   connect(abortButton, SIGNAL(clicked()), this,
           SLOT(actionAbortVerification()));
 
-  /* create the label for when a property is true */
-  QPixmap trueIcon(":/icons/true.png");
-  QLabel* trueLabel = new QLabel();
-  trueLabel->setPixmap(trueIcon.scaled(QSize(24, 24)));
-  trueLabel->setToolTip("This property is true");
+  /* create the witness button for when a property is true */
+  QPushButton* witnessButton = new QPushButton();
+  witnessButton->setIcon(QIcon(":/icons/witness.png"));
+  witnessButton->setIconSize(QSize(24, 24));
+  witnessButton->setStyleSheet("QPushButton { border:none; }");
+  witnessButton->setToolTip("Create witness");
+  connect(witnessButton, SIGNAL(clicked()), this, SLOT(actionCreateEvidence()));
 
-  /* create the label for when a property is false */
-  QPixmap falseIcon(":/icons/false.png");
-  QLabel* falseLabel = new QLabel();
-  falseLabel->setPixmap(falseIcon.scaled(QSize(24, 24)));
-  falseLabel->setToolTip("This property is false");
+  /* create the counterexample button for when a property is false */
+  QPushButton* counterexampleButton = new QPushButton();
+  counterexampleButton->setIcon(QIcon(":/icons/counterexample.png"));
+  counterexampleButton->setIconSize(QSize(24, 24));
+  counterexampleButton->setStyleSheet("QPushButton { border:none; }");
+  counterexampleButton->setToolTip("Create counterexample");
+  connect(counterexampleButton, SIGNAL(clicked()), this,
+          SLOT(actionCreateEvidence()));
 
   /* stack the verification widgets */
   verificationWidgets = new QStackedWidget(this);
   verificationWidgets->setMaximumSize(QSize(30, 30));
-  verificationWidgets->addWidget(verifyButton); /* index = 0 */
-  verificationWidgets->addWidget(abortButton);  /* index = 1 */
-  verificationWidgets->addWidget(trueLabel);    /* index = 2 */
-  verificationWidgets->addWidget(falseLabel);   /* index = 3 */
+  verificationWidgets->addWidget(verifyButton);         /* index = 0 */
+  verificationWidgets->addWidget(abortButton);          /* index = 1 */
+  verificationWidgets->addWidget(witnessButton);        /* index = 2 */
+  verificationWidgets->addWidget(counterexampleButton); /* index = 3 */
   verificationWidgets->setCurrentIndex(0);
 
   /* create the edit button */
@@ -101,6 +106,8 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
 
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(actionVerifyResult(int)));
+  connect(processSystem, SIGNAL(processFinished(int)), this,
+          SLOT(actionCreateEvidenceResult(int)));
 }
 
 PropertyWidget::~PropertyWidget()
@@ -154,11 +161,12 @@ void PropertyWidget::actionVerify()
   if (verificationWidgets->currentIndex() != 1)
   {
     /* start the verification process */
-    verificationProcessId = processSystem->verifyProperty(property);
+    lastRunningProcessId = processSystem->verifyProperty(property);
 
     /* if starting the process was successful, change the buttons */
-    if (verificationProcessId >= 0)
+    if (lastRunningProcessId >= 0)
     {
+      lastProcessIsVerification = true;
       verificationWidgets->setCurrentIndex(1);
       editButton->setEnabled(false);
       deleteButton->setEnabled(false);
@@ -170,10 +178,10 @@ void PropertyWidget::actionVerifyResult(int processid)
 {
   /* check if the process that has finished is the verification process of this
    *   property */
-  if (processid == verificationProcessId)
+  if (processid == lastRunningProcessId && lastProcessIsVerification)
   {
     /* get the result and apply it to the widget */
-    QString result = processSystem->getResult(verificationProcessId);
+    QString result = processSystem->getResult(lastRunningProcessId);
     if (result == "true")
     {
       verificationWidgets->setCurrentIndex(2);
@@ -193,9 +201,41 @@ void PropertyWidget::actionVerifyResult(int processid)
   }
 }
 
+void PropertyWidget::actionCreateEvidence()
+{
+  /* check if the property has veen verified */
+  if (verificationWidgets->currentIndex() > 1)
+  {
+    /* start the evidence creation process */
+    lastRunningProcessId = processSystem->createEvidence(property);
+    trueBeforeEvidenceCreation = verificationWidgets->currentIndex() == 2;
+
+    /* if starting the process was successful, change the buttons */
+    if (lastRunningProcessId >= 0)
+    {
+      lastProcessIsVerification = false;
+      verificationWidgets->setCurrentIndex(1);
+      editButton->setEnabled(false);
+      deleteButton->setEnabled(false);
+    }
+  }
+}
+
+void PropertyWidget::actionCreateEvidenceResult(int processid)
+{
+  /* check if the process that has finished is the verification process of this
+   *   property */
+  if (processid == lastRunningProcessId && !lastProcessIsVerification)
+  {
+    verificationWidgets->setCurrentIndex(trueBeforeEvidenceCreation ? 2 : 3);
+    editButton->setEnabled(true);
+    deleteButton->setEnabled(true);
+  }
+}
+
 void PropertyWidget::actionAbortVerification()
 {
-  processSystem->abortProcess(verificationProcessId);
+  processSystem->abortProcess(lastRunningProcessId);
 }
 
 void PropertyWidget::actionEdit()

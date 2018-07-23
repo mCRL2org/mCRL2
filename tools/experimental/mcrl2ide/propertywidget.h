@@ -76,6 +76,17 @@ class PropertyWidget : public QWidget
   void actionVerifyResult(int processid);
 
   /**
+   * @brief actionCreateEvidence Allows the user to create evidence for this property
+   */
+  void actionCreateEvidence();
+
+  /**
+   * @brief actionCreateEvidenceResult Changes widget when creating evidence has finished
+   * @param processid The id of a finished process
+   */
+  void actionCreateEvidenceResult(int processid);
+
+  /**
    * @brief actionAbortVerification Allows the user to abort the verification
    */
   void actionAbortVerification();
@@ -124,7 +135,9 @@ class PropertyWidget : public QWidget
 
   AddEditPropertyDialog* editPropertyDialog;
 
-  int verificationProcessId;
+  int lastRunningProcessId;
+  bool lastProcessIsVerification;
+  bool trueBeforeEvidenceCreation;
 };
 
 #endif // PROPERTYWIDGET_H
