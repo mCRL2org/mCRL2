@@ -112,7 +112,7 @@ endfunction()
 
 function(_prepare_desktop_application TARGET_NAME TOOLNAME DESCRIPTION ICON)
   if(MSVC)
-    if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
       # N.B. using WIN32_EXECUTABLE leads to linker errors in the maintainer build:
       # error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '0' doesn't match value '2'
       # It is desirable to have the WIN32_EXECUTABLE property in a release build,
