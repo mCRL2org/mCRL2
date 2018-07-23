@@ -1,8 +1,8 @@
 .. index:: lpsinvelm
 
 .. math::
-   :nowrap: 
- 
+   :nowrap:
+
     \renewcommand{\implies}{\mathop{\Rightarrow}}
 
 .. _tool-lpsinvelm:
@@ -15,7 +15,7 @@ Given an LPS:
 .. math::
 
    P(d:D) = \ldots + \sum_{e_i:E_i} c_i(d,e_i) \to a_i(f_i(d,e_i)) \cdot P(g_i(d,e_i)) + \ldots
-    
+
 a formula of the form
 
 .. math::
@@ -27,7 +27,7 @@ passed using the option :option:`--invariant`. This expression is an invariant
 of the LPS if it holds in the initial state and all the generated formulas are
 tautologies.
 
-The invariant is used to eliminate summands as follows. A formula of the form 
+The invariant is used to eliminate summands as follows. A formula of the form
 
 .. math::
 
@@ -53,7 +53,7 @@ the SMT solver `Ario <http://www.eecs.umich.edu/~ario>`_ or `CVC3
 <http://www.cs.nyu.edu/acsys/cvc3>`_ can be used. To use one of these solvers,
 the directory containing the corresponding executable must be in the path.
 
-Without using the option :option:`--no-check`, :ref:`lpsinvelm <tool-lpsinvelm>` will
+Without using the option :option:`--no-check`, :ref:`tool-lpsinvelm` will
 first check if the given expression is an invariant of the LPS. If this is not
 the case, no elimination or simplification will be done. In some cases the
 invariant may hold even though the prover is unable to determine this fact. In
@@ -107,18 +107,18 @@ the resulting LPS looks like
 Inspection of this linear process shows that ``b1_X`` and ``b2_X``
 cannot both be true at the same time. So, we can define this in a file
 :file:`invariant.inv`. This linear process specification has as an invariant
-that 
+that
 
 .. code-block:: mcrl2
 
    !(b1_X && b2_X)
 
-See below for a detailed definition of an invariant. 
+See below for a detailed definition of an invariant.
 
 Using::
 
   $ lpsinvelm -v -iinvariant.inv outfile.lps outfile1.lps
-  
+
 it is possible to check the invariant. Moreover, by default the summand with
 conditions that in conjunction with the invariant are ``false`` are
 removed. In the example above, the summand with action ``c`` is removed.
@@ -127,7 +127,7 @@ each summand, and the resulting condition is simplified using the eq-BDD prover.
 So, applying::
 
   $ lpsinvelm -v -l -iinvariant.inv outfile.lps outfile1.lps
-  
+
 yields the following:
 
 .. code-block:: mcrl2
@@ -147,7 +147,7 @@ yields the following:
    init P(false, true);
 
 Note that the conditions now have an if-then-else structure, due to the eq-BDD
-prover. Also note that the summand with action ``c`` has been removed. 
+prover. Also note that the summand with action ``c`` has been removed.
 
 Sometimes, this result is unreadable or the simplifications of the conditions in
 conjunction with the invariant is extremely time consuming. This is for instance
@@ -157,7 +157,7 @@ by boolean data domains. Using the :option:`-e` flag it is possible to add the
 invariants to the summands, without simplifying the summands. So, by applying::
 
   $ lpsinvelm -v -e -iinvariant.inv outfile.lps outfile1.lps
-  
+
 the result becomes
 
 .. code-block:: mcrl2
@@ -181,7 +181,7 @@ the result becomes
 
 Note that the ``c`` summand is now still present.
 
-The usage of :ref:`lpsinvelm <tool-lpsinvelm>` can be useful as a preprocessing step for
+The usage of :ref:`tool-lpsinvelm` can be useful as a preprocessing step for
 symbolic reduction tools such as :ref:`tool-lpsconfcheck` and
 :ref:`tool-lpsrealelm`.
 
