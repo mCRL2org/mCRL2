@@ -285,22 +285,21 @@ QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName)
   return lps2pbesProcess;
 }
 
-QProcess* ProcessSystem::createPbes2boolProcess(QString propertyName)
+QProcess* ProcessSystem::createPbessolveProcess(QString propertyName)
 {
   /* create the process */
-  QProcess* pbes2boolProcess = new QProcess();
-  pbes2boolProcess->setProgram("pbes2bool");
-  pbes2boolProcess->setArguments({fileSystem->pbesFilePath(propertyName),
-                                  "--erase=none", "--in=pbes",
-                                  "--rewriter=jitty", "--search=breadth-first",
-                                  "--solver=lf", "--strategy=0", "--verbose"});
-  pbes2boolProcess->setProperty("propertyName", propertyName);
+  QProcess* pbessolveProcess = new QProcess();
+  pbessolveProcess->setProgram("pbessolve");
+  pbessolveProcess->setArguments(
+      {fileSystem->pbesFilePath(propertyName), "--in=pbes", "--rewriter=jitty",
+       "--search=breadth-first", "--strategy=0", "--verbose"});
+  pbessolveProcess->setProperty("propertyName", propertyName);
 
   /* connect to logger */
-  connect(pbes2boolProcess, SIGNAL(readyReadStandardError()), consoleDock,
+  connect(pbessolveProcess, SIGNAL(readyReadStandardError()), consoleDock,
           SLOT(logToVerificationConsole()));
 
-  return pbes2boolProcess;
+  return pbessolveProcess;
 }
 
 int ProcessSystem::parseSpecification()
@@ -490,14 +489,14 @@ int ProcessSystem::verifyProperty(Property* property)
     lps2pbesProcess->setProperty("pid", processid);
     connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes(int)));
 
-    QProcess* pbes2boolProcess = createPbes2boolProcess(property->name);
-    pbes2boolProcess->setProperty("pid", processid);
-    connect(pbes2boolProcess, SIGNAL(finished(int)), this,
+    QProcess* pbessolveProcess = createPbessolveProcess(property->name);
+    pbessolveProcess->setProperty("pid", processid);
+    connect(pbessolveProcess, SIGNAL(finished(int)), this,
             SLOT(verificationResult(int)));
 
     processes[processid] = {mcrl2ParsingProcess, mcrl22lpsProcess,
                             propertyParsingProcess, lps2pbesProcess,
-                            pbes2boolProcess};
+                            pbessolveProcess};
     processTypes[processid] = processType;
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);

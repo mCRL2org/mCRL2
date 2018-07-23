@@ -169,7 +169,7 @@ class ProcessSystem : public QObject
 
   /**
    * @brief verifyProperty Verifies a property using mcrl22lps, lps2pbes and
-   *   pbes2bool
+   *   pbessolve
    * @param property The property to verify
    * @return The process id of the verification process
    */
@@ -290,12 +290,12 @@ class ProcessSystem : public QObject
   QProcess* createLps2pbesProcess(QString propertyName);
 
   /**
-   * @brief createPbes2boolProcess Creates a process to execute pbes2bool on the
+   * @brief createPbessolveProcess Creates a process to execute pbessolve on the
    *   pbes that corresponds to the current specification and a given property
    * @param propertyName The name of the property that corresponds to the pbes
-   * @return The pbes2bool process
+   * @return The pbessolve process
    */
-  QProcess* createPbes2boolProcess(QString propertyName);
+  QProcess* createPbessolveProcess(QString propertyName);
 
   /**
    * @brief subpreviousProcessTerminated Checks whether a subprocess terminated
