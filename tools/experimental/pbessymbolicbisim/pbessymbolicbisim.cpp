@@ -83,10 +83,10 @@ public:
     : super(
       TOOLNAME,
       AUTHORS,
-      "Output the minimal LTS under strong bisimulation",
-      "Performs partition refinement on "
-      "INFILE and outputs the resulting LTS. "
-      "This tool is highly experimental. "),
+      "Symbolically compute the solution of the given PBES",
+      "Computes the solution to the given PBES using symbolic bismulation techniques. "
+      "Mostly useful for PBESs of low complexity with an infinite underlying BES. "
+      "This tool is experimental. "),
       m_num_refine_steps(1),
       m_fine_initial_partition(false)
   {}
