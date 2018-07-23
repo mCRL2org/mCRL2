@@ -13,7 +13,7 @@ include(InstallRequiredSystemLibraries)
 # ----------------------------------------
 
 configure_file(${CMAKE_SOURCE_DIR}/COPYING ${CMAKE_BINARY_DIR}/COPYING.txt COPYONLY)
-configure_file(${CMAKE_SOURCE_DIR}/README ${CMAKE_BINARY_DIR}/README.txt COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/README.md ${CMAKE_BINARY_DIR}/README.txt COPYONLY)
 
 set(CPACK_PACKAGE_NAME "mcrl2")
 set(CPACK_PACKAGE_VENDOR "TUe")
