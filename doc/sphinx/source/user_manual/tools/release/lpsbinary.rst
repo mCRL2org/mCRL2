@@ -1,4 +1,6 @@
 .. index:: lpsbinary
+
+.. highlight:: mcrl2
   
 .. _tool-lpsbinary:
 

@@ -9,9 +9,9 @@ This tool draws a labelled transition system (LTS). It can read graphs in .aut, 
 and .fsm format. Graphs can be drawn in 2D and 3D format. 
 
 .. figure:: ltsgraph.png
-   :width: 200px
+   :width: 400px
    :align: center
-   :height: 100px
+   :height: 200px
    :alt: The alternating bit protocol visualised in ltsgraph.
    :figclass: align-center
 
