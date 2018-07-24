@@ -97,16 +97,16 @@ class MainWindow : public QMainWindow
   void actionSimulate();
 
   /**
-   * @brief actionCreateLts Allows the user to create the lts of the current
-   * specification
+   * @brief actionShowLts Allows the user to create the lts of the current
+   *   specification
    */
-  void actionCreateLts();
+  void actionShowLts();
 
   /**
-   * @brief actionCreateReducedLts Allows the user to create a reduced lts of
+   * @brief actionShowReducedLts Allows the user to create a reduced lts of
    *   the current specification
    */
-  void actionCreateReducedLts();
+  void actionShowReducedLts();
 
   /**
    * @brief actionVerifyAllProperties Allows the user to verify all defined
@@ -177,19 +177,17 @@ class MainWindow : public QMainWindow
   QString simulateAbortText = "Abort creating Simulation";
   QIcon simulateAbortIcon = QIcon(":/icons/simulate_abort.png");
 
-  QAction* createLtsAction;
-  QString createLtsStartText = "Create LTS";
-  QIcon createLtsStartIcon = QIcon(":/icons/create_LTS_start.png");
-  QString createLtsAbortText = "Abort LTS creation";
-  QIcon createLtsAbortIcon = QIcon(":/icons/create_LTS_abort.png");
+  QAction* showLtsAction;
+  QString showLtsStartText = "Show LTS";
+  QIcon showLtsStartIcon = QIcon(":/icons/create_LTS_start.png");
+  QString showLtsAbortText = "Abort LTS creation";
+  QIcon showLtsAbortIcon = QIcon(":/icons/create_LTS_abort.png");
 
-  QAction* createReducedLtsAction;
-  QString createReducedLtsStartText = "Create reduced LTS";
-  QIcon createReducedLtsStartIcon =
-      QIcon(":/icons/create_reduced_LTS_start.png");
-  QString createReducedLtsAbortText = "Abort reduced LTS creation";
-  QIcon createReducedLtsAbortIcon =
-      QIcon(":/icons/create_reduced_LTS_abort.png");
+  QAction* showReducedLtsAction;
+  QString showReducedLtsStartText = "Show reduced LTS";
+  QIcon showReducedLtsStartIcon = QIcon(":/icons/create_reduced_LTS_start.png");
+  QString showReducedLtsAbortText = "Abort reduced LTS creation";
+  QIcon showReducedLtsAbortIcon = QIcon(":/icons/create_reduced_LTS_abort.png");
 
   QAction* verifyAllPropertiesAction;
   QString verifyAllPropertiesStartText = "Verify all Properties";
@@ -211,7 +209,7 @@ class MainWindow : public QMainWindow
   FileSystem* fileSystem;
   ProcessSystem* processSystem;
 
-  bool ltsCreationHasReduction;
+  bool lastLtsHasReduction;
 };
 
 #endif // MAINWINDOW_H

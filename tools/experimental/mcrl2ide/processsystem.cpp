@@ -398,7 +398,7 @@ int ProcessSystem::simulate()
   return -1;
 }
 
-int ProcessSystem::createLts(LtsReduction reduction)
+int ProcessSystem::showLts(LtsReduction reduction)
 {
   if (!fileSystem->saveProject().isEmpty())
   {
@@ -541,7 +541,7 @@ int ProcessSystem::verifyProperty(Property property)
   return -1;
 }
 
-int ProcessSystem::createEvidence(Property property)
+int ProcessSystem::showEvidence(Property property)
 {
   if (!fileSystem->saveProject().isEmpty())
   {

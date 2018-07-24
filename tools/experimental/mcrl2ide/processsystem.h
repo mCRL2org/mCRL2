@@ -153,12 +153,12 @@ class ProcessSystem : public QObject
   int simulate();
 
   /**
-   * @brief createLts Create and visualizes the lts of the current specification
+   * @brief showLts Create and visualizes the lts of the current specification
    *   using mcrl22lps, lps2lts, optionally ltsconvert and ltsgraph
    * @param reduction What reduction to apply
    * @return The process id of the lts creation process
    */
-  int createLts(LtsReduction reduction);
+  int showLts(LtsReduction reduction);
 
   /**
    * @brief parseProperty Parses the given property
@@ -176,13 +176,13 @@ class ProcessSystem : public QObject
   int verifyProperty(Property property);
 
   /**
-   * @brief createEvidence Creates and shows evidence for a (verified) property;
+   * @brief showEvidence Creates and shows evidence for a (verified) property;
    *   a witness if the property is true, a counterexample if the property is
    *   false. Uses mcrl22lps, lps2pbes, pbessolve, lps2lts and ltsgraph.
    * @param property The property to create evidence for
    * @return the process id of the evidence creation process
    */
-  int createEvidence(Property property);
+  int showEvidence(Property property);
 
   /**
    * @brief abortProcess Aborts a process by making the running subprocess
@@ -359,7 +359,7 @@ class ProcessSystem : public QObject
   void simulateLps(int previousExitCode);
 
   /**
-   * @brief createLts The second step of lts creation, creating the lts
+   * @brief showLts The second step of lts creation, creating the lts
    * @param previousExitCode The exit code of the previous subprocess
    */
   void createLts(int previousExitCode);

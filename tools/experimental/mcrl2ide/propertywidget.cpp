@@ -57,17 +57,17 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   witnessButton->setIcon(QIcon(":/icons/witness.png"));
   witnessButton->setIconSize(QSize(24, 24));
   witnessButton->setStyleSheet("QPushButton { border:none; }");
-  witnessButton->setToolTip("Create witness");
-  connect(witnessButton, SIGNAL(clicked()), this, SLOT(actionCreateEvidence()));
+  witnessButton->setToolTip("Show witness");
+  connect(witnessButton, SIGNAL(clicked()), this, SLOT(actionShowEvidence()));
 
   /* create the counterexample button for when a property is false */
   QPushButton* counterexampleButton = new QPushButton();
   counterexampleButton->setIcon(QIcon(":/icons/counterexample.png"));
   counterexampleButton->setIconSize(QSize(24, 24));
   counterexampleButton->setStyleSheet("QPushButton { border:none; }");
-  counterexampleButton->setToolTip("Create counterexample");
+  counterexampleButton->setToolTip("Show counterexample");
   connect(counterexampleButton, SIGNAL(clicked()), this,
-          SLOT(actionCreateEvidence()));
+          SLOT(actionShowEvidence()));
 
   /* stack the verification widgets */
   verificationWidgets = new QStackedWidget(this);
@@ -107,7 +107,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(actionVerifyResult(int)));
   connect(processSystem, SIGNAL(processFinished(int)), this,
-          SLOT(actionCreateEvidenceResult(int)));
+          SLOT(actionShowEvidenceResult(int)));
 }
 
 PropertyWidget::~PropertyWidget()
@@ -201,14 +201,14 @@ void PropertyWidget::actionVerifyResult(int processid)
   }
 }
 
-void PropertyWidget::actionCreateEvidence()
+void PropertyWidget::actionShowEvidence()
 {
   /* check if the property has veen verified */
   if (verificationWidgets->currentIndex() > 1)
   {
     /* start the evidence creation process */
-    lastRunningProcessId = processSystem->createEvidence(property);
-    trueBeforeEvidenceCreation = verificationWidgets->currentIndex() == 2;
+    lastRunningProcessId = processSystem->showEvidence(property);
+    evidenceIsWitness = verificationWidgets->currentIndex() == 2;
 
     /* if starting the process was successful, change the buttons */
     if (lastRunningProcessId >= 0)
@@ -221,13 +221,13 @@ void PropertyWidget::actionCreateEvidence()
   }
 }
 
-void PropertyWidget::actionCreateEvidenceResult(int processid)
+void PropertyWidget::actionShowEvidenceResult(int processid)
 {
   /* check if the process that has finished is the verification process of this
    *   property */
   if (processid == lastRunningProcessId && !lastProcessIsVerification)
   {
-    verificationWidgets->setCurrentIndex(trueBeforeEvidenceCreation ? 2 : 3);
+    verificationWidgets->setCurrentIndex(evidenceIsWitness ? 2 : 3);
     editButton->setEnabled(true);
     deleteButton->setEnabled(true);
   }

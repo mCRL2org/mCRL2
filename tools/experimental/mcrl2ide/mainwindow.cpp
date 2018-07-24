@@ -169,12 +169,12 @@ void MainWindow::setupMenuBar()
 
   actionsMenu->addSeparator();
 
-  createLtsAction = actionsMenu->addAction(
-      createLtsStartIcon, createLtsStartText, this, SLOT(actionCreateLts()));
+  showLtsAction = actionsMenu->addAction(
+      showLtsStartIcon, showLtsStartText, this, SLOT(actionShowLts()));
 
-  createReducedLtsAction = actionsMenu->addAction(
-      createReducedLtsStartIcon, createReducedLtsStartText, this,
-      SLOT(actionCreateReducedLts()));
+  showReducedLtsAction = actionsMenu->addAction(
+      showReducedLtsStartIcon, showReducedLtsStartText, this,
+      SLOT(actionShowReducedLts()));
 
   actionsMenu->addSeparator();
 
@@ -196,8 +196,8 @@ void MainWindow::setupToolbar()
   toolbar->addAction(parseAction);
   toolbar->addAction(simulateAction);
   toolbar->addSeparator();
-  toolbar->addAction(createLtsAction);
-  toolbar->addAction(createReducedLtsAction);
+  toolbar->addAction(showLtsAction);
+  toolbar->addAction(showReducedLtsAction);
   toolbar->addSeparator();
   toolbar->addAction(addPropertyAction);
   toolbar->addAction(verifyAllPropertiesAction);
@@ -371,7 +371,7 @@ void MainWindow::actionSimulate()
   }
 }
 
-void MainWindow::actionCreateLts()
+void MainWindow::actionShowLts()
 {
   if (processSystem->isThreadRunning(ProcessType::LtsCreation))
   {
@@ -379,12 +379,12 @@ void MainWindow::actionCreateLts()
   }
   else
   {
-    ltsCreationHasReduction = false;
-    processSystem->createLts(LtsReduction::None);
+    lastLtsHasReduction = false;
+    processSystem->showLts(LtsReduction::None);
   }
 }
 
-void MainWindow::actionCreateReducedLts()
+void MainWindow::actionShowReducedLts()
 {
   if (processSystem->isThreadRunning(ProcessType::LtsCreation))
   {
@@ -404,7 +404,7 @@ void MainWindow::actionCreateReducedLts()
     /* ask the user what reduction to use */
     bool ok;
     QString reductionName = QInputDialog::getItem(
-        this, "Create reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
+        this, "Show reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
         Qt::WindowCloseButtonHint);
 
     /* if user pressed ok, create a reduced lts */
@@ -419,8 +419,8 @@ void MainWindow::actionCreateReducedLts()
         }
       }
 
-      ltsCreationHasReduction = true;
-      processSystem->createLts(reduction);
+      lastLtsHasReduction = true;
+      processSystem->showLts(reduction);
     }
   }
 }
@@ -468,27 +468,27 @@ void MainWindow::changeToolButtons(bool toAbort, ProcessType processType)
   case ProcessType::LtsCreation:
     if (toAbort)
     {
-      if (ltsCreationHasReduction)
+      if (lastLtsHasReduction)
       {
-        createLtsAction->setEnabled(false);
-        createReducedLtsAction->setText(createReducedLtsAbortText);
-        createReducedLtsAction->setIcon(createReducedLtsAbortIcon);
+        showLtsAction->setEnabled(false);
+        showReducedLtsAction->setText(showReducedLtsAbortText);
+        showReducedLtsAction->setIcon(showReducedLtsAbortIcon);
       }
       else
       {
-        createReducedLtsAction->setEnabled(false);
-        createLtsAction->setText(createLtsAbortText);
-        createLtsAction->setIcon(createLtsAbortIcon);
+        showReducedLtsAction->setEnabled(false);
+        showLtsAction->setText(showLtsAbortText);
+        showLtsAction->setIcon(showLtsAbortIcon);
       }
     }
     else
     {
-      createLtsAction->setEnabled(true);
-      createLtsAction->setText(createLtsStartText);
-      createLtsAction->setIcon(createLtsStartIcon);
-      createReducedLtsAction->setEnabled(true);
-      createReducedLtsAction->setText(createReducedLtsStartText);
-      createReducedLtsAction->setIcon(createReducedLtsStartIcon);
+      showLtsAction->setEnabled(true);
+      showLtsAction->setText(showLtsStartText);
+      showLtsAction->setIcon(showLtsStartIcon);
+      showReducedLtsAction->setEnabled(true);
+      showReducedLtsAction->setText(showReducedLtsStartText);
+      showReducedLtsAction->setIcon(showReducedLtsStartIcon);
     }
     break;
   case ProcessType::Verification:

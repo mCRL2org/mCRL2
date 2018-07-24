@@ -76,15 +76,17 @@ class PropertyWidget : public QWidget
   void actionVerifyResult(int processid);
 
   /**
-   * @brief actionCreateEvidence Allows the user to create evidence for this property
+   * @brief actionShowEvidence Allows the user to show evidence for this
+   *   property
    */
-  void actionCreateEvidence();
+  void actionShowEvidence();
 
   /**
-   * @brief actionCreateEvidenceResult Changes widget when creating evidence has finished
+   * @brief actionShowEvidenceResult Changes widget when showing evidence has
+   *   finished
    * @param processid The id of a finished process
    */
-  void actionCreateEvidenceResult(int processid);
+  void actionShowEvidenceResult(int processid);
 
   /**
    * @brief actionAbortVerification Allows the user to abort the verification
@@ -137,7 +139,7 @@ class PropertyWidget : public QWidget
 
   int lastRunningProcessId;
   bool lastProcessIsVerification;
-  bool trueBeforeEvidenceCreation;
+  bool evidenceIsWitness;
 };
 
 #endif // PROPERTYWIDGET_H
