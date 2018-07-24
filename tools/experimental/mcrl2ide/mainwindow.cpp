@@ -393,9 +393,12 @@ void MainWindow::actionCreateReducedLts()
   else
   {
     QStringList reductionNames;
-    for (auto const item : LTSREDUCTIONNAMES)
+    for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
     {
-      reductionNames << item.second;
+      if (item.first != LtsReduction::None)
+      {
+        reductionNames << item.second;
+      }
     }
 
     /* ask the user what reduction to use */
@@ -408,7 +411,7 @@ void MainWindow::actionCreateReducedLts()
     if (ok)
     {
       LtsReduction reduction = LtsReduction::None;
-      for (auto const item : LTSREDUCTIONNAMES)
+      for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
       {
         if (item.second == reductionName)
         {

@@ -727,8 +727,15 @@ void ProcessSystem::createLts(int previousExitCode)
 
   if (subprocessSuccessfullyTerminated(previousExitCode, processid))
   {
-    QProcess* lps2ltsProcess =
-        processes[processid][processes[processid].size() - 2];
+    QProcess* lps2ltsProcess;
+    if (processType == ProcessType::LtsCreation)
+    {
+      lps2ltsProcess = processes[processid][2];
+    }
+    else
+    {
+      lps2ltsProcess = processes[processid][5];
+    }
 
     consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
 
