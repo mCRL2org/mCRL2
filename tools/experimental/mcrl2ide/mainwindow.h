@@ -14,8 +14,6 @@
 #include "processsystem.h"
 #include "propertiesdock.h"
 #include "consoledock.h"
-#include "rewritedock.h"
-#include "solvedock.h"
 #include "addeditpropertydialog.h"
 #include "findandreplacedialog.h"
 #include "codeeditor.h"
@@ -200,8 +198,6 @@ class MainWindow : public QMainWindow
   CodeEditor* specificationEditor;
   PropertiesDock* propertiesDock;
   ConsoleDock* consoleDock;
-  RewriteDock* rewriteDock;
-  SolveDock* solveDock;
 
   FindAndReplaceDialog* findAndReplaceDialog;
   AddEditPropertyDialog* addPropertyDialog;

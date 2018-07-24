@@ -207,18 +207,12 @@ void MainWindow::setDocksToDefault()
 {
   addDockWidget(propertiesDock->defaultArea, propertiesDock);
   addDockWidget(consoleDock->defaultArea, consoleDock);
-  addDockWidget(rewriteDock->defaultArea, rewriteDock);
-  addDockWidget(solveDock->defaultArea, solveDock);
 
   propertiesDock->setFloating(false);
   consoleDock->setFloating(false);
-  rewriteDock->setFloating(false);
-  solveDock->setFloating(false);
 
   propertiesDock->show();
   consoleDock->show();
-  rewriteDock->hide();
-  solveDock->hide();
 }
 
 void MainWindow::setupDocks()
@@ -226,14 +220,10 @@ void MainWindow::setupDocks()
   /* instantiate the docks */
   propertiesDock = new PropertiesDock(processSystem, fileSystem, this);
   consoleDock = new ConsoleDock(this);
-  rewriteDock = new RewriteDock(this);
-  solveDock = new SolveDock(this);
 
   /* add toggleable option in the view menu for each dock */
   viewMenu->addAction(propertiesDock->toggleViewAction());
   viewMenu->addAction(consoleDock->toggleViewAction());
-  viewMenu->addAction(rewriteDock->toggleViewAction());
-  viewMenu->addAction(solveDock->toggleViewAction());
 
   /* place the docks in the default dock layout */
   setDocksToDefault();
