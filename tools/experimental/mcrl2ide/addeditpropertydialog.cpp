@@ -25,7 +25,6 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   this->fileSystem = fileSystem;
   oldPropertyName = "";
   propertyParsingProcessid = -1;
-  property = nullptr;
 
   ui->propertyNameField->setValidator(
       new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*")));
@@ -65,18 +64,16 @@ void AddEditPropertyDialog::clearFields()
   ui->propertyTextField->clear();
 }
 
-void AddEditPropertyDialog::setProperty(Property* property)
+void AddEditPropertyDialog::setProperty(Property property)
 {
-  ui->propertyNameField->setText(property->name);
-  ui->propertyTextField->setPlainText(property->text);
+  ui->propertyNameField->setText(property.name);
+  ui->propertyTextField->setPlainText(property.text);
 }
 
-Property* AddEditPropertyDialog::getProperty()
+Property AddEditPropertyDialog::getProperty()
 {
-  delete property;
-  property = new Property(ui->propertyNameField->text(),
-                          ui->propertyTextField->toPlainText());
-  return property;
+  return Property(ui->propertyNameField->text(),
+                  ui->propertyTextField->toPlainText());
 }
 
 void AddEditPropertyDialog::setOldPropertyName(QString propertyName)

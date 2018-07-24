@@ -258,7 +258,7 @@ void MainWindow::actionNewProject(bool askToSave)
 void MainWindow::actionOpenProject(QString inputProjectFilePath)
 {
   QString projectName = "";
-  std::list<Property*> properties = {};
+  std::list<Property> properties = {};
   if (inputProjectFilePath.isEmpty())
   {
     fileSystem->openProject(&projectName, &properties);
@@ -274,7 +274,7 @@ void MainWindow::actionOpenProject(QString inputProjectFilePath)
   if (!(projectName.isEmpty()))
   {
     propertiesDock->setToNoProperties();
-    for (Property* property : properties)
+    for (Property property : properties)
     {
       propertiesDock->addProperty(property);
     }
@@ -329,7 +329,7 @@ void MainWindow::actionAddPropertyResult()
 {
   /* if successful (Add button was pressed), create the new property
    * we don't need to save to file as this is already done by the dialog */
-  Property* property = addPropertyDialog->getProperty();
+  Property property = addPropertyDialog->getProperty();
   fileSystem->newProperty(property);
   propertiesDock->addProperty(property);
 }

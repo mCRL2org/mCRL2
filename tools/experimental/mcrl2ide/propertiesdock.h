@@ -47,7 +47,7 @@ class PropertiesDock : public QDockWidget
    * @brief addProperty Adds a property to the dock
    * @param property The property to add
    */
-  void addProperty(Property* property);
+  void addProperty(Property property);
 
   /**
    * @brief verifyAllProperties Verifies all properties in this dock

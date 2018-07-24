@@ -14,7 +14,7 @@
 #include <QStyleOption>
 #include <QPainter>
 
-PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
+PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
                                FileSystem* fileSystem, QWidget* parent)
     : QWidget(parent)
 {
@@ -33,7 +33,7 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
           SLOT(deleteUnlistedPropertyFiles()));
 
   /* create the label for the property name */
-  propertyNameLabel = new QLabel(property->name);
+  propertyNameLabel = new QLabel(property.name);
 
   /* create the verify button */
   QPushButton* verifyButton = new QPushButton();
@@ -133,20 +133,20 @@ void PropertyWidget::paintEvent(QPaintEvent* pe)
   style()->drawPrimitive(QStyle::PE_Widget, &o, &p, this);
 }
 
-Property* PropertyWidget::getProperty()
+Property PropertyWidget::getProperty()
 {
   return this->property;
 }
 
 void PropertyWidget::setPropertyName(QString name)
 {
-  this->property->name = name;
+  this->property.name = name;
   propertyNameLabel->setText(name);
 }
 
 void PropertyWidget::setPropertyText(QString text)
 {
-  this->property->text = text;
+  this->property.text = text;
 }
 
 void PropertyWidget::resetWidget()
@@ -241,7 +241,7 @@ void PropertyWidget::actionAbortVerification()
 void PropertyWidget::actionEdit()
 {
   editPropertyDialog->setProperty(property);
-  editPropertyDialog->setOldPropertyName(property->name);
+  editPropertyDialog->setOldPropertyName(property.name);
   editPropertyDialog->resetFocus();
   if (editPropertyDialog->isVisible())
   {
@@ -258,13 +258,13 @@ void PropertyWidget::actionEditResult()
 {
   /* if editing was successful (Edit button was pressed), change the property
    * we don't need to save to file as this is already done by the dialog */
-  Property* newProperty = editPropertyDialog->getProperty();
+  Property newProperty = editPropertyDialog->getProperty();
   fileSystem->editProperty(property, newProperty);
   /* only make changes if the property changed */
-  if (!property->equals(newProperty))
+  if (property != newProperty)
   {
     property = newProperty;
-    propertyNameLabel->setText(property->name);
+    propertyNameLabel->setText(property.name);
     resetWidget();
   }
 }

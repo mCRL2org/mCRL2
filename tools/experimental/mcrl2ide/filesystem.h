@@ -37,9 +37,11 @@ class Property
   QString name;
   QString text;
 
+  Property();
   Property(QString name, QString text);
 
-  bool equals(Property* property);
+  bool operator==(Property property);
+  bool operator!=(Property property);
 };
 
 /**
@@ -194,21 +196,21 @@ class FileSystem : public QObject
    * @brief newProperty Adds a new property
    * @param property The new property to add
    */
-  void newProperty(Property* property);
+  void newProperty(Property property);
 
   /**
    * @brief editProperty Edits an existing property
    * @param oldProperty The property to be edited
    * @param newProperty The property after editing
    */
-  void editProperty(Property* oldProperty, Property* newProperty);
+  void editProperty(Property oldProperty, Property newProperty);
 
   /**
    * @brief deleteProperty Deletes an existing property
    * @param property The property to delete
    * @return Whether the property has been deleted
    */
-  bool deleteProperty(Property* property);
+  bool deleteProperty(Property property);
 
   /**
    * @brief openProjectFromFile Opens a project from the project file
@@ -220,7 +222,7 @@ class FileSystem : public QObject
    *   project
    */
   void openProjectFromFile(QString newProjectFilePath, QString* newProjectName,
-                           std::list<Property*>* newProperties);
+                           std::list<Property>* newProperties);
 
   /**
    * @brief openProject Opens a project chosen by the user
@@ -229,8 +231,7 @@ class FileSystem : public QObject
    * @param newProperties A pointer to store the properties of the opened
    *   project
    */
-  void openProject(QString* newProjectName,
-                   std::list<Property*>* newProperties);
+  void openProject(QString* newProjectName, std::list<Property>* newProperties);
 
   /**
    * @brief saveProject Saves the project to file
@@ -250,7 +251,7 @@ class FileSystem : public QObject
    * @brief saveProperty Saves a property to file
    * @param property The property to save
    */
-  void saveProperty(Property* property);
+  void saveProperty(Property property);
 
   /**
    * @brief clearTemporaryFolder Removes the tomporary folder and its contents
@@ -289,7 +290,7 @@ class FileSystem : public QObject
   CodeEditor* specificationEditor;
   QString projectName;
   bool projectOpen;
-  std::list<Property*> properties;
+  std::list<Property> properties;
 
   bool specificationModified;
   std::map<QString, bool> propertyModified;
@@ -299,11 +300,6 @@ class FileSystem : public QObject
    *   exists, if not creates it
    */
   void makeSurePropertiesFolderExists();
-
-  /**
-   * @brief clearProperties Clears the list of properties
-   */
-  void clearProperties();
 
   /**
    * createFileDialog Creates a file dialog that can be used to ask the user for

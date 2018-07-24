@@ -54,13 +54,13 @@ class AddEditPropertyDialog : public QDialog
    * @brief setProperty Sets the property in the text fields
    * @param property The property to fill in
    */
-  void setProperty(Property* property);
+  void setProperty(Property property);
 
   /**
    * @brief getProperty Gets the property as entered in the text fields
    * @return The new or edited property
    */
-  Property* getProperty();
+  Property getProperty();
 
   /**
    * @brief setOldPropertyName Records the name the property had when editing
@@ -101,7 +101,6 @@ class AddEditPropertyDialog : public QDialog
   QString windowTitle;
   QString oldPropertyName;
   int propertyParsingProcessid;
-  Property* property;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

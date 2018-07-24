@@ -36,7 +36,7 @@ class PropertyWidget : public QWidget
    * @param fileSystem The file system
    * @param parent The parent of this widget
    */
-  PropertyWidget(Property* property, ProcessSystem* processSystem,
+  PropertyWidget(Property property, ProcessSystem* processSystem,
                  FileSystem* fileSystem, QWidget* parent);
   ~PropertyWidget();
 
@@ -44,7 +44,7 @@ class PropertyWidget : public QWidget
    * @brief getPropertyName Gets the property of this widget
    * @return The property
    */
-  Property* getProperty();
+  Property getProperty();
 
   /**
    * @brief setPropertyName Set the name of the property of this widget
@@ -125,7 +125,7 @@ class PropertyWidget : public QWidget
   ProcessSystem* processSystem;
   FileSystem* fileSystem;
   QWidget* parent;
-  Property* property;
+  Property property;
 
   QHBoxLayout* propertyLayout;
   QLabel* propertyNameLabel;

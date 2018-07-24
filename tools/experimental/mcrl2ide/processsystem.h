@@ -165,7 +165,7 @@ class ProcessSystem : public QObject
    * @param property The property to parse
    * @return The process id of the parsing process
    */
-  int parseProperty(Property* property);
+  int parseProperty(Property property);
 
   /**
    * @brief verifyProperty Verifies a property using mcrl22lps, lps2pbes and
@@ -173,7 +173,7 @@ class ProcessSystem : public QObject
    * @param property The property to verify
    * @return The process id of the verification process
    */
-  int verifyProperty(Property* property);
+  int verifyProperty(Property property);
 
   /**
    * @brief createEvidence Creates and shows evidence for a (verified) property;
@@ -182,7 +182,7 @@ class ProcessSystem : public QObject
    * @param property The property to create evidence for
    * @return the process id of the evidence creation process
    */
-  int createEvidence(Property* property);
+  int createEvidence(Property property);
 
   /**
    * @brief abortProcess Aborts a process by making the running subprocess

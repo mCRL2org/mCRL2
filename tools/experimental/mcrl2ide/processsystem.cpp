@@ -455,7 +455,7 @@ int ProcessSystem::createLts(LtsReduction reduction)
   return -1;
 }
 
-int ProcessSystem::parseProperty(Property* property)
+int ProcessSystem::parseProperty(Property property)
 {
   if (!fileSystem->saveProject().isEmpty())
   {
@@ -476,7 +476,7 @@ int ProcessSystem::parseProperty(Property* property)
     connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
 
     QProcess* propertyParsingProcess =
-        createPropertyParsingProcess(property->name);
+        createPropertyParsingProcess(property.name);
     propertyParsingProcess->setProperty("pid", processid);
     connect(propertyParsingProcess, SIGNAL(finished(int)), this,
             SLOT(mcfParsingResult(int)));
@@ -492,7 +492,7 @@ int ProcessSystem::parseProperty(Property* property)
   return -1;
 }
 
-int ProcessSystem::verifyProperty(Property* property)
+int ProcessSystem::verifyProperty(Property property)
 {
   if (!fileSystem->saveProject().isEmpty())
   {
@@ -513,18 +513,18 @@ int ProcessSystem::verifyProperty(Property* property)
     connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
 
     QProcess* propertyParsingProcess =
-        createPropertyParsingProcess(property->name);
+        createPropertyParsingProcess(property.name);
     propertyParsingProcess->setProperty("pid", processid);
     connect(propertyParsingProcess, SIGNAL(finished(int)), this,
             SLOT(mcfParsingResult(int)));
     connect(propertyParsingProcess, SIGNAL(finished(int)), this,
             SLOT(createPbes(int)));
 
-    QProcess* lps2pbesProcess = createLps2pbesProcess(property->name);
+    QProcess* lps2pbesProcess = createLps2pbesProcess(property.name);
     lps2pbesProcess->setProperty("pid", processid);
     connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes(int)));
 
-    QProcess* pbessolveProcess = createPbessolveProcess(property->name);
+    QProcess* pbessolveProcess = createPbessolveProcess(property.name);
     pbessolveProcess->setProperty("pid", processid);
     connect(pbessolveProcess, SIGNAL(finished(int)), this,
             SLOT(verificationResult(int)));
@@ -541,7 +541,7 @@ int ProcessSystem::verifyProperty(Property* property)
   return -1;
 }
 
-int ProcessSystem::createEvidence(Property* property)
+int ProcessSystem::createEvidence(Property property)
 {
   if (!fileSystem->saveProject().isEmpty())
   {
@@ -562,28 +562,28 @@ int ProcessSystem::createEvidence(Property* property)
     connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
 
     QProcess* propertyParsingProcess =
-        createPropertyParsingProcess(property->name);
+        createPropertyParsingProcess(property.name);
     propertyParsingProcess->setProperty("pid", processid);
     connect(propertyParsingProcess, SIGNAL(finished(int)), this,
             SLOT(mcfParsingResult(int)));
     connect(propertyParsingProcess, SIGNAL(finished(int)), this,
             SLOT(createPbes(int)));
 
-    QProcess* lps2pbesProcess = createLps2pbesProcess(property->name, true);
+    QProcess* lps2pbesProcess = createLps2pbesProcess(property.name, true);
     lps2pbesProcess->setProperty("pid", processid);
     connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes(int)));
 
-    QProcess* pbessolveProcess = createPbessolveProcess(property->name, true);
+    QProcess* pbessolveProcess = createPbessolveProcess(property.name, true);
     pbessolveProcess->setProperty("pid", processid);
     connect(pbessolveProcess, SIGNAL(finished(int)), this,
             SLOT(createLts(int)));
 
-    QProcess* lps2ltsProcess = createLps2ltsProcess(true, property->name);
+    QProcess* lps2ltsProcess = createLps2ltsProcess(true, property.name);
     lps2ltsProcess->setProperty("pid", processid);
     connect(lps2ltsProcess, SIGNAL(finished(int)), this, SLOT(showLts(int)));
 
     QProcess* ltsgraphProcess =
-        createLtsgraphProcess(LtsReduction::None, true, property->name);
+        createLtsgraphProcess(LtsReduction::None, true, property.name);
     ltsgraphProcess->setProperty("id", processid);
     connect(ltsgraphProcess, SIGNAL(finished(int)), this,
             SLOT(afterClosingUiTool()));
