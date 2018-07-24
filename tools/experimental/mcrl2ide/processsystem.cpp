@@ -105,7 +105,7 @@ ProcessSystem::~ProcessSystem()
   for (ProcessType processType : PROCESSTYPES)
   {
     delete processQueues[processType];
-    delete processThreads[processType];
+    processThreads[processType]->deleteLater();
   }
 }
 
@@ -996,7 +996,7 @@ void ProcessSystem::deleteProcess(int processid)
 {
   for (QProcess* subprocess : processes[processid])
   {
-    delete subprocess;
+    subprocess->deleteLater();
   }
   processes.erase(processid);
   processTypes.erase(processid);

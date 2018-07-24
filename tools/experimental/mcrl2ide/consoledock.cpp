@@ -38,7 +38,7 @@ ConsoleDock::~ConsoleDock()
 {
   for (ProcessType processType : PROCESSTYPES)
   {
-    delete consoles[processType];
+    consoles[processType]->deleteLater();
   }
 }
 

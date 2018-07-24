@@ -41,11 +41,11 @@ SolveDock::SolveDock(QWidget* parent)
 
 SolveDock::~SolveDock()
 {
-  delete solveResult;
-  delete solveButton;
-  delete solveAbortButton;
-  delete buttonLayout;
-  delete expressionEntry;
-  delete dockLayout;
-  delete innerDockWidget;
+  solveResult->deleteLater();
+  solveButton->deleteLater();
+  solveAbortButton->deleteLater();
+  buttonLayout->deleteLater();
+  expressionEntry->deleteLater();
+  dockLayout->deleteLater();
+  innerDockWidget->deleteLater();
 }

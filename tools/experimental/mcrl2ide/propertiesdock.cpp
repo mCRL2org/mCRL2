@@ -42,9 +42,9 @@ PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
 
 PropertiesDock::~PropertiesDock()
 {
-  delete propertiesLayout;
-  delete hScrollBar;
-  delete innerDockWidget;
+  propertiesLayout->deleteLater();
+  hScrollBar->deleteLater();
+  innerDockWidget->deleteLater();
 }
 
 void PropertiesDock::setToNoProperties()
@@ -54,7 +54,7 @@ void PropertiesDock::setToNoProperties()
   while ((item = propertiesLayout->takeAt(0)))
   {
     propertiesLayout->removeWidget(item->widget());
-    delete item->widget();
+    item->widget()->deleteLater();
   }
   /* show a QLabel that tells the user that no properties have been defined */
   QLabel* noPropertiesLabel = new QLabel("No properties have been defined");
@@ -81,7 +81,7 @@ void PropertiesDock::addProperty(Property* property)
     /* remove the QLabel */
     QWidget* label = propertiesLayout->takeAt(0)->widget();
     propertiesLayout->removeWidget(label);
-    delete label;
+    label->deleteLater();
     propertiesLayout->addStretch(1);
   }
 
@@ -102,7 +102,7 @@ void PropertiesDock::deletePropertyWidget(PropertyWidget* propertyWidget)
     this->setToNoProperties();
   }
   propertyWidgets.remove(propertyWidget);
-  delete propertyWidget;
+  propertyWidget->deleteLater();
 }
 
 void PropertiesDock::verifyAllProperties()

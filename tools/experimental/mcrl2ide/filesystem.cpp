@@ -314,7 +314,7 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
       error = "Could not create project";
     }
   }
-  delete newProjectDialog;
+  newProjectDialog->deleteLater();
 
   if (error.isEmpty())
   {
@@ -345,7 +345,7 @@ bool FileSystem::deletePropertyFile(QString propertyName, bool showIfFailed)
     deleteSucceeded = false;
   }
 
-  delete propertyFile;
+  propertyFile->deleteLater();
   return deleteSucceeded;
 }
 
@@ -540,7 +540,7 @@ void FileSystem::openProject(QString* newProjectName,
     QString newProjectFilePath = openProjectDialog->selectedFiles().first();
     openProjectFromFile(newProjectFilePath, newProjectName, newProperties);
   }
-  delete openProjectDialog;
+  openProjectDialog->deleteLater();
 }
 
 QString FileSystem::saveProject(bool forceSave)

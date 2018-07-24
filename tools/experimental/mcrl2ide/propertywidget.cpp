@@ -112,16 +112,16 @@ PropertyWidget::PropertyWidget(Property* property, ProcessSystem* processSystem,
 
 PropertyWidget::~PropertyWidget()
 {
-  delete editPropertyDialog;
-  delete propertyNameLabel;
+  editPropertyDialog->deleteLater();
+  propertyNameLabel->deleteLater();
   for (int i = 0; i < verificationWidgets->count(); i++)
   {
-    delete verificationWidgets->widget(i);
+    verificationWidgets->widget(i)->deleteLater();
   }
-  delete verificationWidgets;
-  delete editButton;
-  delete deleteButton;
-  delete propertyLayout;
+  verificationWidgets->deleteLater();
+  editButton->deleteLater();
+  deleteButton->deleteLater();
+  propertyLayout->deleteLater();
 }
 
 void PropertyWidget::paintEvent(QPaintEvent* pe)

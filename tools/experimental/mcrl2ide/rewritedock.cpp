@@ -41,11 +41,11 @@ RewriteDock::RewriteDock(QWidget* parent)
 
 RewriteDock::~RewriteDock()
 {
-  delete rewriteResult;
-  delete rewriteButton;
-  delete rewriteAbortButton;
-  delete buttonLayout;
-  delete expressionEntry;
-  delete dockLayout;
-  delete innerDockWidget;
+  rewriteResult->deleteLater();
+  rewriteButton->deleteLater();
+  rewriteAbortButton->deleteLater();
+  buttonLayout->deleteLater();
+  expressionEntry->deleteLater();
+  dockLayout->deleteLater();
+  innerDockWidget->deleteLater();
 }
