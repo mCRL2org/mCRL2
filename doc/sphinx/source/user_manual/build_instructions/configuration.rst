@@ -10,37 +10,37 @@ configure CMake:
 
 *Graphically*
   A graphical user interface is available on all platforms, either as
-  ``CMakeSetup.exe`` in Windows (should be in the start menu), or as 
+  ``CMakeSetup.exe`` in Windows (should be in the start menu), or as
   ``cmake-gui`` in Linux (you may have to install it separately, it is, e.g., currently
   in the ``cmake-qt-gui`` package in the PPA for Ubuntu installations).
   Use of this user interface is mostly self-explanatory.
 
 *CCMake*
-  A user-friendly command-line interface is provided by the ``ccmake`` 
+  A user-friendly command-line interface is provided by the ``ccmake``
   executable. Example usage is as follows (from the directory
   ``<mcrl2>/build``)::
-  
+
     ccmake <mcrl2>/src
-    
+
   From the interface you are presented with, you can choose the options
-  explained below.  
+  explained below.
 
 *Command-line*
   CMake can also be run directly from the command line. This is recommended only
   for experienced users who need to configure the build from a script. To set
   a configuration variable, use the ``-D<FLAG=option>`` command-line option.
-  
+
   Example usage is as follows (from the directory
   ``<mcrl2>/build``)::
-  
+
     cmake <mcrl2>/src -DFLAG=option
-    
+
   To install mCRL2 to <installdir>, with all default settings, you can
   issue the command::
-  
+
     cmake <mcrl2>/src -DCMAKE_INSTALL_PREFIX=<installdir>
 
-All three methods allow you to change the value of CMake configuration 
+All three methods allow you to change the value of CMake configuration
 variables. Below, we describe the meaning of these variables. Note that in the
 graphical user interfaces, some advanced settings are initially hidden.
 
@@ -53,11 +53,11 @@ graphical user interfaces, some advanced settings are initially hidden.
    meaning of detailed configuration settings, you can safely skip to
    :ref:`build-compilation`.
 
-.. note:: 
+.. note::
 
    Values of the flags are cached and are case insensitive. This implies that
-   when changing a single value, all other flags remain the same. 
-   
+   when changing a single value, all other flags remain the same.
+
 ``BOOST_ROOT``
   *Default*:: Automatically detected
 
@@ -83,7 +83,7 @@ graphical user interfaces, some advanced settings are initially hidden.
   ``Debug``          Compile with extra checks, less optimisation and with
                      generation of debug symbols.
   ------------------ ---------------------------------------------------------
-  ``RelwithDebInfo`` Same as ``Release``, except that debug information is 
+  ``RelwithDebInfo`` Same as ``Release``, except that debug information is
                      also generated.
 
                      .. warning::
@@ -112,7 +112,7 @@ graphical user interfaces, some advanced settings are initially hidden.
   .. index:: BUILD_SHARED_LIBS
 
   ======= ======================================================================
-  ``ON``  Generate shared libraries, to which the executables link. 
+  ``ON``  Generate shared libraries, to which the executables link.
   ------- ----------------------------------------------------------------------
   ``OFF`` Generate static libraries, which are linked into the executables. This
           increases the size of executables dramatically.
@@ -151,7 +151,7 @@ graphical user interfaces, some advanced settings are initially hidden.
   *Default*: ``OFF``
 
   ======= ======================================================================
-  ``ON``  Generate test targets. This option needs to be enabled in combination 
+  ``ON``  Generate test targets. This option needs to be enabled in combination
           with ``BUILD_TESTING`` to execute library tests. If not enabled, only
           tool tests are executed when ``BUILD_TESTING`` is enabled.
   ------- ----------------------------------------------------------------------
@@ -183,7 +183,7 @@ graphical user interfaces, some advanced settings are initially hidden.
 
   ======= ======================================================================
   ``ON``  Execute tests after successful build. The tests that are exeuted are
-          determined by the ``MCRL2_ENABLE_TEST_TARGETS`` configuration 
+          determined by the ``MCRL2_ENABLE_TEST_TARGETS`` configuration
           variable.
   ------- ----------------------------------------------------------------------
   ``OFF`` Do not execute tests.
@@ -192,14 +192,6 @@ graphical user interfaces, some advanced settings are initially hidden.
 ``CTAGS``
   *Default*: ``/PATH/WITH/FILE/ctags``
 
-  This variable specifies the location where Ctags can be found. Ctags is a 
+  This variable specifies the location where Ctags can be found. Ctags is a
   program that generates an index (or tag) file of names found in source and
   header files of various programming languages.
-
-``SVNVERSION``
-  *Default*: ``/PATH/WITH/FILE/svnversion``
-
-  This variable specifies the location where ``svnversion`` can be found. 
-  ``svnversion`` is a program for summarizing the revision mixture of a working
-  copy. The program is used to generate the version information that the tools
-  report.
