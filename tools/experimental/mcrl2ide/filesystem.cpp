@@ -29,12 +29,12 @@ Property::Property(QString name, QString text)
   this->text = text;
 }
 
-bool Property::operator==(Property property)
+bool Property::operator==(const Property& property) const
 {
   return this->name == property.name && this->text == property.text;
 }
 
-bool Property::operator!=(Property property)
+bool Property::operator!=(const Property& property) const
 {
   return !operator==(property);
 }
@@ -373,7 +373,7 @@ void FileSystem::newProperty(Property property)
   deleteUnlistedPropertyFiles();
 }
 
-void FileSystem::editProperty(Property oldProperty, Property newProperty)
+void FileSystem::editProperty(const Property& oldProperty, const Property& newProperty)
 {
   /* alter the properties list */
   properties.remove(oldProperty);

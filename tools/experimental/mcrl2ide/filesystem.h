@@ -40,8 +40,9 @@ class Property
   Property();
   Property(QString name, QString text);
 
-  bool operator==(Property property);
-  bool operator!=(Property property);
+  bool operator==(const Property& property) const;
+  bool operator!=(const Property& property) const;
+
 };
 
 /**
@@ -203,7 +204,7 @@ class FileSystem : public QObject
    * @param oldProperty The property to be edited
    * @param newProperty The property after editing
    */
-  void editProperty(Property oldProperty, Property newProperty);
+  void editProperty(const Property& oldProperty, const Property& newProperty);
 
   /**
    * @brief deleteProperty Deletes an existing property
