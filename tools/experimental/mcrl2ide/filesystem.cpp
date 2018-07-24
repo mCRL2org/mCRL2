@@ -214,26 +214,23 @@ QFileDialog* FileSystem::createFileDialog(int type)
   QFileDialog* fileDialog = new QFileDialog(parent, Qt::WindowCloseButtonHint);
   fileDialog->setDirectory(
       QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-  fileDialog->setOption(QFileDialog::DontUseNativeDialog);
   fileDialog->setLabelText(QFileDialog::FileName, "Project name:");
+  fileDialog->setNameFilters(QStringList({"Directory"}));
   switch (type)
   {
-  case 0:
-    fileDialog->setNameFilters(QStringList({"Directory"}));
+  case 0: /* New Project */
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
     fileDialog->setWindowTitle("New Project");
     fileDialog->setLabelText(QFileDialog::Accept, "Create");
     break;
-  case 1:
-    fileDialog->setNameFilters(QStringList({"Directory"}));
+  case 1: /* Save Project As */
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
     fileDialog->setWindowTitle("Save Project As");
     fileDialog->setLabelText(QFileDialog::Accept, "Save as");
     break;
-  case 2:
-    fileDialog->setNameFilters(
-        QStringList({"mCRL2 project file (*" + projectFileExtension + ")"}));
+  case 2: /* Open Project */
     fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog->setFileMode(QFileDialog::Directory);
     fileDialog->setWindowTitle("Open Project");
     fileDialog->setLabelText(QFileDialog::Accept, "Open");
   }
@@ -379,7 +376,6 @@ void FileSystem::newProperty(Property property)
 void FileSystem::editProperty(Property oldProperty, Property newProperty)
 {
   /* alter the properties list */
-  std::list<Property>::iterator it;
   properties.remove(oldProperty);
   properties.push_back(newProperty);
 
@@ -417,84 +413,103 @@ bool FileSystem::deleteProperty(Property oldProperty)
   return deleteIt;
 }
 
-void FileSystem::openProjectFromFile(QString newProjectFilePath,
-                                     QString* newProjectName,
-                                     std::list<Property>* newProperties)
+void FileSystem::openProjectFromFolder(QString newProjectFolderPath,
+                                       QString* newProjectName,
+                                       std::list<Property>* newProperties)
 {
   QString error = "";
-  QFile projectFile(newProjectFilePath);
+  QDir projectFolder(newProjectFolderPath);
 
-  if (!projectFile.exists())
+  if (!projectFolder.exists())
   {
-    error = "Could not find provided project file";
-  }
-  else if (!newProjectFilePath.endsWith(projectFileExtension))
-  {
-    error =
-        "Provided file is not a mcrl2 project file (does not have extension " +
-        projectFileExtension + ")";
+    error = "Could not find provided project folder";
   }
   else
   {
-    /* read the project file to get the specification path */
-    projectFile.open(QIODevice::ReadOnly);
-    QTextStream projectOpenStream(&projectFile);
-    QString projectInfo = projectOpenStream.readAll();
-    int specLineIndex = projectInfo.lastIndexOf("SPEC");
-    if (specLineIndex < 0)
+    /* find the project file */
+    QStringList projectFiles;
+    for (QString fileName : projectFolder.entryList())
     {
-      error = "Provided project file does not contain the specification "
-              "(should contain SPEC <path_to_spec>).";
+      if (fileName.endsWith(projectFileExtension))
+      {
+        projectFiles << fileName;
+      }
+    }
+
+    if (projectFiles.length() == 0)
+    {
+      error = "Provided folder does not contain a project file (ending with " +
+              projectFileExtension + ")";
+    }
+    else if (projectFiles.length() > 1)
+    {
+      error = "Provided folder contains more than one project file";
     }
     else
     {
-      specFilePath =
-          projectInfo.right(projectInfo.length() - specLineIndex - 5);
-      std::string test = specFilePath.toStdString();
-      projectFile.close();
-
-      /* read the specification and put it in the specification editor */
-      QFile specificationFile(specFilePath);
-      if (!specificationFile.exists())
+      /* read the project file to get the specification path */
+      QString newProjectFilePath =
+          newProjectFolderPath + QDir::separator() + projectFiles.first();
+      QFile projectFile(newProjectFilePath);
+      projectFile.open(QIODevice::ReadOnly);
+      QTextStream projectOpenStream(&projectFile);
+      QString projectInfo = projectOpenStream.readAll();
+      int specLineIndex = projectInfo.lastIndexOf("SPEC");
+      if (specLineIndex < 0)
       {
-        error = "Specification file given in the provided project file does "
-                "not exist";
+        error = "Project file in provided project folder does not contain a "
+                "specification (should contain SPEC <path_to_spec>).";
       }
       else
       {
-        specificationFile.open(QIODevice::ReadOnly);
-        QTextStream specificationOpenStream(&specificationFile);
-        QString spec = specificationOpenStream.readAll();
-        specificationEditor->setPlainText(spec);
-        specificationFile.close();
-        specificationModified = false;
+        specFilePath =
+            projectInfo.right(projectInfo.length() - specLineIndex - 5);
+        std::string test = specFilePath.toStdString();
+        projectFile.close();
 
-        /* set propject folder and project name */
-        projectFolderPath = QFileInfo(newProjectFilePath).path();
-        this->projectName = QFileInfo(newProjectFilePath).baseName();
-
-        /* read all properties */
-        properties.clear();
-        QDirIterator* dirIterator =
-            new QDirIterator(QDir(propertiesFolderPath()));
-
-        while (dirIterator->hasNext())
+        /* read the specification and put it in the specification editor */
+        QFile specificationFile(specFilePath);
+        if (!specificationFile.exists())
         {
-          QFile propertyFile(dirIterator->next());
-          QFileInfo propertyFileInfo(propertyFile);
-          QString fileName = propertyFileInfo.fileName();
-
-          if (propertyFileInfo.isFile() && fileName.endsWith(".mcf"))
-          {
-            fileName.chop(4);
-            propertyFile.open(QIODevice::ReadOnly);
-            QTextStream propertyOpenStream(&propertyFile);
-            QString propertyText = propertyOpenStream.readAll();
-            properties.push_back(Property(fileName, propertyText));
-            propertyFile.close();
-          }
+          error = "Specification file given in the project file in the "
+                  "provided project folder does not exist";
         }
-        delete dirIterator;
+        else
+        {
+          specificationFile.open(QIODevice::ReadOnly);
+          QTextStream specificationOpenStream(&specificationFile);
+          QString spec = specificationOpenStream.readAll();
+          specificationEditor->setPlainText(spec);
+          specificationFile.close();
+          specificationModified = false;
+
+          /* set propject folder and project name */
+          projectFolderPath = QFileInfo(newProjectFilePath).path();
+          this->projectName = QFileInfo(newProjectFilePath).baseName();
+
+          /* read all properties */
+          properties.clear();
+          QDirIterator* dirIterator =
+              new QDirIterator(QDir(propertiesFolderPath()));
+
+          while (dirIterator->hasNext())
+          {
+            QFile propertyFile(dirIterator->next());
+            QFileInfo propertyFileInfo(propertyFile);
+            QString fileName = propertyFileInfo.fileName();
+
+            if (propertyFileInfo.isFile() && fileName.endsWith(".mcf"))
+            {
+              fileName.chop(4);
+              propertyFile.open(QIODevice::ReadOnly);
+              QTextStream propertyOpenStream(&propertyFile);
+              QString propertyText = propertyOpenStream.readAll();
+              properties.push_back(Property(fileName, propertyText));
+              propertyFile.close();
+            }
+          }
+          delete dirIterator;
+        }
       }
     }
   }
@@ -518,12 +533,12 @@ void FileSystem::openProjectFromFile(QString newProjectFilePath,
 void FileSystem::openProject(QString* newProjectName,
                              std::list<Property>* newProperties)
 {
-  /* ask the user for a project */
+  /* ask the user for a project folder */
   QFileDialog* openProjectDialog = createFileDialog(2);
   if (openProjectDialog->exec() == QDialog::Accepted)
   {
-    QString newProjectFilePath = openProjectDialog->selectedFiles().first();
-    openProjectFromFile(newProjectFilePath, newProjectName, newProperties);
+    QString newProjectFolderPath = openProjectDialog->selectedFiles().first();
+    openProjectFromFolder(newProjectFolderPath, newProjectName, newProperties);
   }
   openProjectDialog->deleteLater();
 }

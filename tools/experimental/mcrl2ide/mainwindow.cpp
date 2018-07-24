@@ -265,7 +265,7 @@ void MainWindow::actionOpenProject(QString inputProjectFilePath)
   }
   else
   {
-    fileSystem->openProjectFromFile(inputProjectFilePath, &projectName,
+    fileSystem->openProjectFromFolder(inputProjectFilePath, &projectName,
                                     &properties);
   }
 

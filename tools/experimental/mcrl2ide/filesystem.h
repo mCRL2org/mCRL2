@@ -213,16 +213,16 @@ class FileSystem : public QObject
   bool deleteProperty(Property property);
 
   /**
-   * @brief openProjectFromFile Opens a project from the project file
-   *
-   * @param newProjectFilePath The path to the project file
+   * @brief openProjectFromFolder Opens a project from a given project folder
+   * @param newProjectFolderPath The path to the project folder
    * @param newProjectName A pointer to store the projectname of the opened
    *   project
    * @param newProperties A pointer to store the properties of the opened
    *   project
    */
-  void openProjectFromFile(QString newProjectFilePath, QString* newProjectName,
-                           std::list<Property>* newProperties);
+  void openProjectFromFolder(QString newProjectFolderPath,
+                             QString* newProjectName,
+                             std::list<Property>* newProperties);
 
   /**
    * @brief openProject Opens a project chosen by the user

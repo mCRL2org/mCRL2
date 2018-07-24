@@ -53,8 +53,12 @@ void PropertiesDock::setToNoProperties()
   QLayoutItem* item;
   while ((item = propertiesLayout->takeAt(0)))
   {
-    propertiesLayout->removeWidget(item->widget());
-    item->widget()->deleteLater();
+    QWidget* propertyWidget = item->widget();
+    propertiesLayout->removeWidget(propertyWidget);
+    if (propertyWidget != nullptr)
+    {
+      propertyWidget->deleteLater();
+    }
   }
   /* show a QLabel that tells the user that no properties have been defined */
   QLabel* noPropertiesLabel = new QLabel("No properties have been defined");
