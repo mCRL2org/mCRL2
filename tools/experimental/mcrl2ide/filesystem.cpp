@@ -560,7 +560,6 @@ QString FileSystem::saveProject(bool forceSave)
       saveStream << specificationEditor->toPlainText();
       specificationFile.close();
       specificationModified = false;
-      emit changesSaved();
     }
 
     /* save all properties if necessary */

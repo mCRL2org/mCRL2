@@ -55,9 +55,9 @@ MainWindow::MainWindow(QString inputProjectFilePath, QWidget* parent)
             SLOT(changeToolButtons(bool, ProcessType)));
   }
 
-  /* reset the propertiesdock when the project is saved */
-  connect(fileSystem, SIGNAL(changesSaved()), propertiesDock,
-          SLOT(resetAllPropertyWidgets()));
+  /* reset the propertiesdock when the specification changes */
+  connect(specificationEditor->document(), SIGNAL(modificationChanged(bool)),
+          propertiesDock, SLOT(resetAllPropertyWidgets()));
 
   /* set the title of the main window */
   setWindowTitle("mCRL2 IDE - Unnamed project");
@@ -169,12 +169,12 @@ void MainWindow::setupMenuBar()
 
   actionsMenu->addSeparator();
 
-  showLtsAction = actionsMenu->addAction(
-      showLtsStartIcon, showLtsStartText, this, SLOT(actionShowLts()));
+  showLtsAction = actionsMenu->addAction(showLtsStartIcon, showLtsStartText,
+                                         this, SLOT(actionShowLts()));
 
-  showReducedLtsAction = actionsMenu->addAction(
-      showReducedLtsStartIcon, showReducedLtsStartText, this,
-      SLOT(actionShowReducedLts()));
+  showReducedLtsAction =
+      actionsMenu->addAction(showReducedLtsStartIcon, showReducedLtsStartText,
+                             this, SLOT(actionShowReducedLts()));
 
   actionsMenu->addSeparator();
 
@@ -266,7 +266,7 @@ void MainWindow::actionOpenProject(QString inputProjectFilePath)
   else
   {
     fileSystem->openProjectFromFolder(inputProjectFilePath, &projectName,
-                                    &properties);
+                                      &properties);
   }
 
   /* if successful, put the properties in the properties dock and set the window

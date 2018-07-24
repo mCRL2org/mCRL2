@@ -273,11 +273,6 @@ class FileSystem : public QObject
   void deleteUnlistedPropertyFiles();
 
   signals:
-  /**
-   * @brief changesSaved Is emitted whenever changes in the specification have
-   *   been saved
-   */
-  void changesSaved();
 
   private:
   QString projectFileExtension = ".mcrl2proj";
