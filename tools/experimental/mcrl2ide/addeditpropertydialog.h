@@ -40,7 +40,7 @@ class AddEditPropertyDialog : public QDialog
   ~AddEditPropertyDialog();
 
   /**
-   * @brief resetFocus Puts the focus on the add/edit button and the proeprty
+   * @brief resetFocus Puts the focus on the add/edit button and the property
    *   name field
    */
   void resetFocus();
@@ -54,7 +54,7 @@ class AddEditPropertyDialog : public QDialog
    * @brief setProperty Sets the property in the text fields
    * @param property The property to fill in
    */
-  void setProperty(Property property);
+  void setProperty(const Property& property);
 
   /**
    * @brief getProperty Gets the property as entered in the text fields
@@ -67,7 +67,7 @@ class AddEditPropertyDialog : public QDialog
    *   began
    * @param propertyName The name the property had when editing began
    */
-  void setOldPropertyName(QString propertyName);
+  void setOldPropertyName(const QString& propertyName);
 
   /**
    * @brief abortPropertyParsing Abort the current property parsing process

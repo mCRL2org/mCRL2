@@ -38,10 +38,30 @@ class Property
   QString name;
   QString text;
 
+  /**
+   * @brief Property Default constructor
+   */
   Property();
+
+  /**
+   * @brief Property Constructor
+   * @param name The name of the property
+   * @param text The text of the property
+   */
   Property(QString name, QString text);
 
+  /**
+   * @brief operator== Defines equality on two properties
+   * @param property The property to compare to
+   * @return Whether this property and the given property are equal
+   */
   bool operator==(const Property& property) const;
+
+  /**
+   * @brief operator!= Defines inequality on two properties
+   * @param property The property to compare to
+   * @return Whether this property and the given property are not equal
+   */
   bool operator!=(const Property& property) const;
 };
 
@@ -96,7 +116,7 @@ class FileSystem : public QObject
    * @param propertyName The property name in case this is an evindence lps
    * @return The file path of the lps
    */
-  QString lpsFilePath(bool evidence = false, QString propertyName = "");
+  QString lpsFilePath(bool evidence = false, const QString& propertyName = "");
 
   /**
    * @brief ltsFilePath Defines the file path of a lts
@@ -106,14 +126,14 @@ class FileSystem : public QObject
    * @return The file path of the lts
    */
   QString ltsFilePath(LtsReduction reduction, bool evidence = false,
-                      QString propertyName = "");
+                      const QString& propertyName = "");
 
   /**
    * @brief propertyFilePath Defines the file path of a property
    * @param propertyName The name of the property
    * @return The file path of the property
    */
-  QString propertyFilePath(QString propertyName);
+  QString propertyFilePath(const QString& propertyName);
 
   /**
    * @brief pbesFilePath Defines the file path of a pbes
@@ -121,7 +141,7 @@ class FileSystem : public QObject
    * @param evidence Whether the pbes has evidence info
    * @return The file path of the pbes
    */
-  QString pbesFilePath(QString propertyName, bool evidence = false);
+  QString pbesFilePath(const QString& propertyName, bool evidence = false);
 
   /**
    * @brief parentFolderPath Returns the path the the folder that is the parent
@@ -129,7 +149,7 @@ class FileSystem : public QObject
    * @param folderPath The folder to get the parent of
    * @return The path the the folder that is the parent of the given folder
    */
-  QString parentFolderPath(QString folderPath);
+  QString parentFolderPath(const QString& folderPath);
 
   /**
    * @brief projectOpened Checks whether a project is opened
@@ -150,7 +170,7 @@ class FileSystem : public QObject
    * @param propertyName The property name to check for
    * @return Whether the given property name already exists
    */
-  bool propertyNameExists(QString propertyName);
+  bool propertyNameExists(const QString& propertyName);
 
   /**
    * @brief upToDateLpsFileExists Checks whether an lps file exists that is
@@ -160,7 +180,8 @@ class FileSystem : public QObject
    * @return Whether an lps file exists that is created from the current
    *   specification
    */
-  bool upToDateLpsFileExists(bool evidence = false, QString propertyName = "");
+  bool upToDateLpsFileExists(bool evidence = false,
+                             const QString& propertyName = "");
 
   /**
    * @brief upToDateLtsFileExists Checks whether an lts file exists with a given
@@ -172,7 +193,7 @@ class FileSystem : public QObject
    *   specification
    */
   bool upToDateLtsFileExists(LtsReduction reduction, bool evidence = false,
-                             QString propertyName = "");
+                             const QString& propertyName = "");
 
   /**
    * @brief upToDatePbesFileExists Checks whether a pbes file exists that is
@@ -182,7 +203,8 @@ class FileSystem : public QObject
    * @return Whether a pbes file exists that is created from the current
    *   specification and property
    */
-  bool upToDatePbesFileExists(QString propertyName, bool evidence = false);
+  bool upToDatePbesFileExists(const QString& propertyName,
+                              bool evidence = false);
 
   /**
    * @brief setSpecificationEditorCursor Puts the cursor in the specification
@@ -207,7 +229,7 @@ class FileSystem : public QObject
    * @brief newProperty Adds a new property
    * @param property The new property to add
    */
-  void newProperty(Property property);
+  void newProperty(const Property& property);
 
   /**
    * @brief editProperty Edits an existing property
@@ -221,7 +243,7 @@ class FileSystem : public QObject
    * @param property The property to delete
    * @return Whether the property has been deleted
    */
-  bool deleteProperty(Property property);
+  bool deleteProperty(const Property& property);
 
   /**
    * @brief openProjectFromFolder Opens a project from a given project folder
@@ -231,7 +253,7 @@ class FileSystem : public QObject
    * @param newProperties A pointer to store the properties of the opened
    *   project
    */
-  void openProjectFromFolder(QString newProjectFolderPath,
+  void openProjectFromFolder(const QString& newProjectFolderPath,
                              QString* newProjectName,
                              std::list<Property>* newProperties);
 
@@ -262,7 +284,7 @@ class FileSystem : public QObject
    * @brief saveProperty Saves a property to file
    * @param property The property to save
    */
-  void saveProperty(Property property);
+  void saveProperty(const Property& property);
 
   /**
    * @brief clearTemporaryFolder Removes the tomporary folder and its contents
@@ -329,7 +351,8 @@ class FileSystem : public QObject
    *   file was unsuccessful
    * @return Whether deleting the property file was successful
    */
-  bool deletePropertyFile(QString propertyName, bool showIfFailed = true);
+  bool deletePropertyFile(const QString& propertyName,
+                          bool showIfFailed = true);
 };
 
 #endif // FILESYSTEM_H

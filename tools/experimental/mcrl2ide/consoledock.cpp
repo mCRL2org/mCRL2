@@ -72,7 +72,7 @@ void ConsoleDock::logToConsole(ProcessType processType, QProcess* process)
   writeToConsole(processType, process->readAllStandardError());
 }
 
-void ConsoleDock::writeToConsole(ProcessType processType, QString output)
+void ConsoleDock::writeToConsole(ProcessType processType, const QString& output)
 {
   consoles[processType]->moveCursor(QTextCursor::End);
   consoles[processType]->insertPlainText(output);

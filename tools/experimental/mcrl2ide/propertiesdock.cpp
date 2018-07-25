@@ -78,7 +78,7 @@ void PropertiesDock::keepContentsLeft(int min, int max)
   previousHorizontalScrollbarMaximum = max;
 }
 
-void PropertiesDock::addProperty(Property property)
+void PropertiesDock::addProperty(const Property& property)
 {
   if (propertyWidgets.empty())
   {

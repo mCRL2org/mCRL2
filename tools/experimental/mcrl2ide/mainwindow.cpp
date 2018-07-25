@@ -17,7 +17,7 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QString inputProjectFilePath, QWidget* parent)
+MainWindow::MainWindow(const QString& inputProjectFilePath, QWidget* parent)
     : QMainWindow(parent)
 {
   specificationEditor = new CodeEditor(this, true);
@@ -254,7 +254,7 @@ void MainWindow::actionNewProject(bool askToSave)
   }
 }
 
-void MainWindow::actionOpenProject(QString inputProjectFilePath)
+void MainWindow::actionOpenProject(const QString& inputProjectFilePath)
 {
   QString projectName = "";
   std::list<Property> properties = {};

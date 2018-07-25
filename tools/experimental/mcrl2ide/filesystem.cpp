@@ -93,32 +93,32 @@ QString FileSystem::specificationFilePath()
   }
 }
 
-QString FileSystem::lpsFilePath(bool evidence, QString propertyName)
+QString FileSystem::lpsFilePath(bool evidence, const QString& propertyName)
 {
   return temporaryFolder.path() + QDir::separator() + projectName +
          (evidence ? "_" + propertyName + "_evidence" : "") + "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(LtsReduction reduction, bool evidence,
-                                QString propertyName)
+                                const QString& propertyName)
 {
   return temporaryFolder.path() + QDir::separator() + projectName +
          (evidence ? "_" + propertyName + "_evidence" : "") + "_lts_" +
          LTSREDUCTIONNAMES.at(reduction) + ".lts";
 }
 
-QString FileSystem::propertyFilePath(QString propertyName)
+QString FileSystem::propertyFilePath(const QString& propertyName)
 {
   return propertiesFolderPath() + QDir::separator() + propertyName + ".mcf";
 }
 
-QString FileSystem::pbesFilePath(QString propertyName, bool evidence)
+QString FileSystem::pbesFilePath(const QString& propertyName, bool evidence)
 {
   return temporaryFolder.path() + QDir::separator() + projectName + "_" +
          propertyName + (evidence ? "_evidence" : "") + "_pbes.pbes";
 }
 
-QString FileSystem::parentFolderPath(QString folderPath)
+QString FileSystem::parentFolderPath(const QString& folderPath)
 {
   QDir folder(folderPath);
   folder.cdUp();
@@ -140,7 +140,7 @@ void FileSystem::setSpecificationModified(bool modified)
   specificationModified = modified;
 }
 
-bool FileSystem::propertyNameExists(QString propertyName)
+bool FileSystem::propertyNameExists(const QString& propertyName)
 {
   for (Property property : properties)
   {
@@ -152,7 +152,8 @@ bool FileSystem::propertyNameExists(QString propertyName)
   return false;
 }
 
-bool FileSystem::upToDateLpsFileExists(bool evidence, QString propertyName)
+bool FileSystem::upToDateLpsFileExists(bool evidence,
+                                       const QString& propertyName)
 {
   /* in case not evidence lps, an lps file is up to date if the lps file exists
    *   and the lps file is created after the last time the specification file
@@ -175,7 +176,7 @@ bool FileSystem::upToDateLpsFileExists(bool evidence, QString propertyName)
 }
 
 bool FileSystem::upToDateLtsFileExists(LtsReduction reduction, bool evidence,
-                                       QString propertyName)
+                                       const QString& propertyName)
 {
   /* in case not reduced lts, an lts file is up to date if the lts file exists
    *   and the lts file is created after the last time the lps file was modified
@@ -197,7 +198,8 @@ bool FileSystem::upToDateLtsFileExists(LtsReduction reduction, bool evidence,
   }
 }
 
-bool FileSystem::upToDatePbesFileExists(QString propertyName, bool evidence)
+bool FileSystem::upToDatePbesFileExists(const QString& propertyName,
+                                        bool evidence)
 {
   /* a pbes file is up to date if the pbes file exists and the pbes file is
    *   created after the last time both the lps and the property files were
@@ -343,7 +345,8 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
   }
 }
 
-bool FileSystem::deletePropertyFile(QString propertyName, bool showIfFailed)
+bool FileSystem::deletePropertyFile(const QString& propertyName,
+                                    bool showIfFailed)
 {
   QFile* propertyFile = new QFile(propertyFilePath(propertyName));
   bool deleteSucceeded = true;
@@ -379,7 +382,7 @@ void FileSystem::deleteUnlistedPropertyFiles()
   }
 }
 
-void FileSystem::newProperty(Property property)
+void FileSystem::newProperty(const Property& property)
 {
   /* add to the properties list */
   properties.push_back(property);
@@ -400,7 +403,7 @@ void FileSystem::editProperty(const Property& oldProperty,
   deleteUnlistedPropertyFiles();
 }
 
-bool FileSystem::deleteProperty(Property oldProperty)
+bool FileSystem::deleteProperty(const Property& oldProperty)
 {
   /* show a message box to ask the user whether he is sure to delete the
    *   property */
@@ -428,7 +431,7 @@ bool FileSystem::deleteProperty(Property oldProperty)
   return deleteIt;
 }
 
-void FileSystem::openProjectFromFolder(QString newProjectFolderPath,
+void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath,
                                        QString* newProjectName,
                                        std::list<Property>* newProperties)
 {
@@ -615,7 +618,7 @@ QString FileSystem::saveProjectAs()
   }
 }
 
-void FileSystem::saveProperty(Property property)
+void FileSystem::saveProperty(const Property& property)
 {
   makeSurePropertiesFolderExists();
 

@@ -188,7 +188,7 @@ QProcess* ProcessSystem::createLpsxsimProcess()
 }
 
 QProcess* ProcessSystem::createLps2ltsProcess(bool evidence,
-                                              QString propertyName)
+                                              const QString& propertyName)
 {
   QProcess* lps2ltsProcess = new QProcess();
 
@@ -252,7 +252,7 @@ QProcess* ProcessSystem::createLtsconvertProcess(LtsReduction reduction)
 
 QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction,
                                                bool evidence,
-                                               QString propertyName)
+                                               const QString& propertyName)
 {
   QProcess* ltsgraphProcess = new QProcess();
 
@@ -264,7 +264,7 @@ QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction,
   return ltsgraphProcess;
 }
 
-QProcess* ProcessSystem::createPropertyParsingProcess(QString propertyName)
+QProcess* ProcessSystem::createPropertyParsingProcess(const QString& propertyName)
 {
   QProcess* lps2pbesProcess = new QProcess();
 
@@ -281,7 +281,7 @@ QProcess* ProcessSystem::createPropertyParsingProcess(QString propertyName)
   return lps2pbesProcess;
 }
 
-QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName,
+QProcess* ProcessSystem::createLps2pbesProcess(const QString& propertyName,
                                                bool evidence)
 {
   QProcess* lps2pbesProcess = new QProcess();
@@ -308,7 +308,7 @@ QProcess* ProcessSystem::createLps2pbesProcess(QString propertyName,
   return lps2pbesProcess;
 }
 
-QProcess* ProcessSystem::createPbessolveProcess(QString propertyName,
+QProcess* ProcessSystem::createPbessolveProcess(const QString& propertyName,
                                                 bool evidence)
 {
   /* create the process */
@@ -455,7 +455,7 @@ int ProcessSystem::showLts(LtsReduction reduction)
   return -1;
 }
 
-int ProcessSystem::parseProperty(Property property)
+int ProcessSystem::parseProperty(const Property& property)
 {
   if (!fileSystem->saveProject().isEmpty())
   {
@@ -492,7 +492,7 @@ int ProcessSystem::parseProperty(Property property)
   return -1;
 }
 
-int ProcessSystem::verifyProperty(Property property)
+int ProcessSystem::verifyProperty(const Property& property)
 {
   if (!fileSystem->saveProject().isEmpty())
   {
@@ -541,7 +541,7 @@ int ProcessSystem::verifyProperty(Property property)
   return -1;
 }
 
-int ProcessSystem::showEvidence(Property property)
+int ProcessSystem::showEvidence(const Property& property)
 {
   if (!fileSystem->saveProject().isEmpty())
   {
@@ -972,7 +972,7 @@ void ProcessSystem::abortAllProcesses(ProcessType processType)
 {
   /* first empty the queue */
   QQueue<int>* processQueue = processQueues[processType];
-  foreach (int processid, *processQueue)
+  for (int processid : *processQueue)
   {
     emit processFinished(processid);
     deleteProcess(processid);

@@ -65,7 +65,12 @@ class FindAndReplaceDialog : public QDialog
 
   CodeEditor* codeEditor;
 
-  void showMessage(QString message, bool error = false);
+  /**
+   * @brief showMessage Shows a message on the dialog
+   * @param message The message to show
+   * @param error Whether the message is an error message
+   */
+  void showMessage(const QString& message, bool error = false);
 };
 
 #endif // FINDANDREPLACEDIALOG_H

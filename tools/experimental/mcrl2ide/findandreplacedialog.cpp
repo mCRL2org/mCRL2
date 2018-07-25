@@ -32,7 +32,7 @@ FindAndReplaceDialog::FindAndReplaceDialog(CodeEditor* codeEditor,
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
-void FindAndReplaceDialog::showMessage(QString message, bool error)
+void FindAndReplaceDialog::showMessage(const QString& message, bool error)
 {
   if (error)
   {

@@ -64,7 +64,7 @@ void AddEditPropertyDialog::clearFields()
   ui->propertyTextField->clear();
 }
 
-void AddEditPropertyDialog::setProperty(Property property)
+void AddEditPropertyDialog::setProperty(const Property& property)
 {
   ui->propertyNameField->setText(property.name);
   ui->propertyTextField->setPlainText(property.text);
@@ -76,7 +76,7 @@ Property AddEditPropertyDialog::getProperty()
                   ui->propertyTextField->toPlainText());
 }
 
-void AddEditPropertyDialog::setOldPropertyName(QString propertyName)
+void AddEditPropertyDialog::setOldPropertyName(const QString& propertyName)
 {
   oldPropertyName = propertyName;
 }

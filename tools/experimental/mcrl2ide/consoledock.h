@@ -63,7 +63,7 @@ class ConsoleDock : public QDockWidget
    * @param processType Which console tab to write to
    * @param output What to write
    */
-  void writeToConsole(ProcessType processType, QString output);
+  void writeToConsole(ProcessType processType, const QString& output);
 
   /**
    * @brief getConsoleOutput Get the output currently in the console
