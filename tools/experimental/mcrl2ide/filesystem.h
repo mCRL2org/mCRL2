@@ -17,6 +17,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QTemporaryDir>
+#include <QSettings>
 
 enum class LtsReduction
 {
@@ -42,7 +43,6 @@ class Property
 
   bool operator==(const Property& property) const;
   bool operator!=(const Property& property) const;
-
 };
 
 /**
@@ -56,9 +56,11 @@ class FileSystem : public QObject
   /**
    * @brief FileSystem Constructor
    * @param specificationEditor The specification editor in the main window
+   * @param settings The application settings
    * @param parent The main widget (main window)
    */
-  FileSystem(CodeEditor* specificationEditor, QWidget* parent);
+  FileSystem(CodeEditor* specificationEditor, QSettings* settings,
+             QWidget* parent);
 
   /**
    * @brief projectFilePath Defines the file path for the project file,
@@ -120,6 +122,14 @@ class FileSystem : public QObject
    * @return The file path of the pbes
    */
   QString pbesFilePath(QString propertyName, bool evidence = false);
+
+  /**
+   * @brief parentFolderPath Returns the path the the folder that is the parent
+   *   of the given folder
+   * @param folderPath The folder to get the parent of
+   * @return The path the the folder that is the parent of the given folder
+   */
+  QString parentFolderPath(QString folderPath);
 
   /**
    * @brief projectOpened Checks whether a project is opened
@@ -284,12 +294,12 @@ class FileSystem : public QObject
 
   QWidget* parent;
   CodeEditor* specificationEditor;
+  QSettings* settings;
+
   QString projectName;
   bool projectOpen;
   std::list<Property> properties;
-
   bool specificationModified;
-  std::map<QString, bool> propertyModified;
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder

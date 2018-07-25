@@ -19,6 +19,7 @@
 #include "codeeditor.h"
 
 #include <QMainWindow>
+#include <QSettings>
 
 class FileSystem;
 
@@ -129,22 +130,6 @@ class MainWindow : public QMainWindow
   void closeEvent(QCloseEvent* event) override;
 
   private:
-  /**
-   * @brief setupMenuBar Creates the menubar, also creates the actions and their
-   *   icons and shortcuts (if applicable)
-   */
-  void setupMenuBar();
-
-  /**
-   * @brief setupToolbar Creates the toolbar
-   */
-  void setupToolbar();
-
-  /**
-   * @brief setupDocks Creates the docks
-   */
-  void setupDocks();
-
   QAction* newProjectAction;
   QAction* openProjectAction;
   QAction* saveProjectAction;
@@ -205,7 +190,25 @@ class MainWindow : public QMainWindow
   FileSystem* fileSystem;
   ProcessSystem* processSystem;
 
+  QSettings* settings;
+
   bool lastLtsHasReduction;
+  
+  /**
+   * @brief setupMenuBar Creates the menubar, also creates the actions and their
+   *   icons and shortcuts (if applicable)
+   */
+  void setupMenuBar();
+
+  /**
+   * @brief setupToolbar Creates the toolbar
+   */
+  void setupToolbar();
+
+  /**
+   * @brief setupDocks Creates the docks
+   */
+  void setupDocks();
 };
 
 #endif // MAINWINDOW_H

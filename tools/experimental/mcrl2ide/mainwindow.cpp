@@ -23,7 +23,9 @@ MainWindow::MainWindow(QString inputProjectFilePath, QWidget* parent)
   specificationEditor = new CodeEditor(this, true);
   setCentralWidget(specificationEditor);
 
-  fileSystem = new FileSystem(specificationEditor, this);
+  settings = new QSettings("mCRL2", "mcrl2ide");
+
+  fileSystem = new FileSystem(specificationEditor, settings, this);
   processSystem = new ProcessSystem(fileSystem);
 
   setupMenuBar();
@@ -61,8 +63,15 @@ MainWindow::MainWindow(QString inputProjectFilePath, QWidget* parent)
 
   /* set the title of the main window */
   setWindowTitle("mCRL2 IDE - Unnamed project");
-  resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,
-               QDesktopWidget().availableGeometry(this).height() * 0.75));
+  if (settings->contains("geometry"))
+  {
+    restoreGeometry(settings->value("geometry").toByteArray());
+  }
+  else
+  {
+    resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,
+                 QDesktopWidget().availableGeometry(this).height() * 0.75));
+  }
 
   /* open a project if a project file is given */
   if (!inputProjectFilePath.isEmpty())
@@ -535,7 +544,10 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
   }
 
-  /* empty the temporary folder */
+  /* save the settings for the main window */
+  settings->setValue("geometry", saveGeometry());
+
+  /* remove the temporary folder */
   fileSystem->removeTemporaryFolder();
 
   /* abort all processes */

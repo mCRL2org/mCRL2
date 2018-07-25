@@ -39,9 +39,11 @@ bool Property::operator!=(const Property& property) const
   return !operator==(property);
 }
 
-FileSystem::FileSystem(CodeEditor* specificationEditor, QWidget* parent)
+FileSystem::FileSystem(CodeEditor* specificationEditor, QSettings* settings,
+                       QWidget* parent)
 {
   this->specificationEditor = specificationEditor;
+  this->settings = settings;
   this->parent = parent;
   specificationModified = false;
   projectOpen = false;
@@ -114,6 +116,13 @@ QString FileSystem::pbesFilePath(QString propertyName, bool evidence)
 {
   return temporaryFolder.path() + QDir::separator() + projectName + "_" +
          propertyName + (evidence ? "_evidence" : "") + "_pbes.pbes";
+}
+
+QString FileSystem::parentFolderPath(QString folderPath)
+{
+  QDir folder(folderPath);
+  folder.cdUp();
+  return folder.path();
 }
 
 bool FileSystem::projectOpened()
@@ -211,9 +220,13 @@ void FileSystem::setSpecificationEditorCursor(int row, int column)
 
 QFileDialog* FileSystem::createFileDialog(int type)
 {
+  QString fileDialogLocation =
+      settings
+          ->value("fileDialogLocation", QStandardPaths::writableLocation(
+                                            QStandardPaths::DocumentsLocation))
+          .toString();
   QFileDialog* fileDialog = new QFileDialog(parent, Qt::WindowCloseButtonHint);
-  fileDialog->setDirectory(
-      QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+  fileDialog->setDirectory(fileDialogLocation);
   fileDialog->setLabelText(QFileDialog::FileName, "Project name:");
   switch (type)
   {
@@ -282,6 +295,8 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
     {
       /* if successful, set the current projectFolder and create the project
        *   file and properties folder */
+      settings->setValue("fileDialogLocation",
+                         parentFolderPath(newProjectFolderPath));
       projectFolderPath = newProjectFolderPath;
       projectName = newProjectName;
       specFilePath = defaultSpecificationFilePath();
@@ -372,7 +387,8 @@ void FileSystem::newProperty(Property property)
   deleteUnlistedPropertyFiles();
 }
 
-void FileSystem::editProperty(const Property& oldProperty, const Property& newProperty)
+void FileSystem::editProperty(const Property& oldProperty,
+                              const Property& newProperty)
 {
   /* alter the properties list */
   properties.remove(oldProperty);
@@ -425,6 +441,9 @@ void FileSystem::openProjectFromFolder(QString newProjectFolderPath,
   }
   else
   {
+    settings->setValue("fileDialogLocation",
+                       parentFolderPath(newProjectFolderPath));
+
     /* find the project file */
     QStringList projectFiles;
     for (QString fileName : projectFolder.entryList())
@@ -605,7 +624,6 @@ void FileSystem::saveProperty(Property property)
   QTextStream saveStream(&propertyFile);
   saveStream << property.text;
   propertyFile.close();
-  propertyModified[property.name] = false;
 }
 
 void FileSystem::removeTemporaryFolder()
