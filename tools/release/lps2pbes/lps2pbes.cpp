@@ -70,7 +70,7 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
       timed       = parser.options.count("timed") > 0;
       unoptimized = parser.options.count("unoptimized") > 0;
       generate_counter_example = parser.options.count("counter-example") > 0;
-      check_only = parser.options.count("check_only") > 0;
+      check_only = parser.options.count("check-only") > 0;
     }
 
   public:
