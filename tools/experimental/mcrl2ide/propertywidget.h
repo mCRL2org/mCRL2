@@ -47,18 +47,6 @@ class PropertyWidget : public QWidget
   Property getProperty();
 
   /**
-   * @brief setPropertyName Set the name of the property of this widget
-   * @param name The new name of the property
-   */
-  void setPropertyName(QString name);
-
-  /**
-   * @brief setPropertyText Set the text of the property of this widget
-   * @param text The new text of the property
-   */
-  void setPropertyText(QString text);
-
-  /**
    * @brief resetWidget Resets the widget to unverified state
    */
   void resetWidget();

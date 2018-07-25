@@ -138,17 +138,6 @@ Property PropertyWidget::getProperty()
   return this->property;
 }
 
-void PropertyWidget::setPropertyName(QString name)
-{
-  this->property.name = name;
-  propertyNameLabel->setText(name);
-}
-
-void PropertyWidget::setPropertyText(QString text)
-{
-  this->property.text = text;
-}
-
 void PropertyWidget::resetWidget()
 {
   verificationWidgets->setCurrentIndex(0);
