@@ -4103,7 +4103,7 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
       sort_expression_list ConstructorType;
       for (const structured_sort_constructor_argument&  proj: Projs)
       {
-        if (duplicate_projections_warner.count(proj.name())>0 && duplicate_projections_warner[proj.name()]!=proj.sort())
+        if (!proj.name().empty() && duplicate_projections_warner.count(proj.name())>0 && duplicate_projections_warner[proj.name()]!=proj.sort())
         {
           mCRL2log(warning) << "Warning. Projection function " << proj.name() << " occurs multiple times with different sorts in " << struct_sort << ". " << std::endl;
         }
