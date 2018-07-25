@@ -215,7 +215,6 @@ QFileDialog* FileSystem::createFileDialog(int type)
   fileDialog->setDirectory(
       QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
   fileDialog->setLabelText(QFileDialog::FileName, "Project name:");
-  fileDialog->setNameFilters(QStringList({"Directory"}));
   switch (type)
   {
   case 0: /* New Project */

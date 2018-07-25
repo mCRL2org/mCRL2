@@ -295,6 +295,11 @@ void MainWindow::actionAddProperty()
   /* we require a project to be made if no project has been opened */
   if (!fileSystem->projectOpened())
   {
+    QMessageBox msgBox(
+        QMessageBox::Information, "Add property",
+        "To add a property, it is required to create a project first",
+        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+    msgBox.exec();
     actionNewProject(false);
   }
 
