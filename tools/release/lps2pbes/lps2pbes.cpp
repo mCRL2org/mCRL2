@@ -54,7 +54,7 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
                       "do not simplify boolean expressions", 'u');
       desc.add_option("counter-example",
                       "add counter example equations to the generated PBES", 'c');
-      desc.add_hidden_option("check_only",
+      desc.add_hidden_option("check-only",
                              "check syntax and semantics of state formula; do not generate PBES", 'e');
     }
 
