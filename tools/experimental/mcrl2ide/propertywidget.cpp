@@ -149,6 +149,7 @@ void PropertyWidget::actionVerify()
   /* check if the property isn't already being verified */
   if (verificationWidgets->currentIndex() != 1)
   {
+    resetWidget();
     /* start the verification process */
     lastRunningProcessId = processSystem->verifyProperty(property);
 

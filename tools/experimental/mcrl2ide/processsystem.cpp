@@ -704,7 +704,10 @@ void ProcessSystem::abortProcess(int processid)
   {
     /* if it is not running, simply remove it from the queue */
     aborted = processQueues[processType]->removeOne(processid);
-    deleteProcess(processid);
+    if (aborted)
+    {
+      deleteProcess(processid);
+    }
   }
 
   if (aborted)
