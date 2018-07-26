@@ -124,217 +124,162 @@ bool ProcessSystem::isThreadRunning(ProcessType processType)
   return processThreads[processType]->isRunning();
 }
 
-QProcess* ProcessSystem::createMcrl2ParsingProcess()
+QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
+                                          int processid, int subprocessIndex,
+                                          const QString& propertyName,
+                                          bool evidence, LtsReduction reduction)
 {
-  QProcess* mcrl22lpsProcess = new QProcess();
-
-  /* create the process */
-  mcrl22lpsProcess->setProgram("mcrl22lps");
-  mcrl22lpsProcess->setArguments({fileSystem->specificationFilePath(),
-                                  fileSystem->lpsFilePath(), "--check-only",
-                                  "--lin-method=regular", "--rewriter=jitty",
-                                  "--verbose"});
-
-  connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-          SLOT(logToParsingConsole()));
-
-  return mcrl22lpsProcess;
-}
-
-QProcess* ProcessSystem::createMcrl22lpsProcess(ProcessType processType)
-{
-  QProcess* mcrl22lpsProcess = new QProcess();
-
-  /* create the process */
-  mcrl22lpsProcess->setProgram("mcrl22lps");
-  mcrl22lpsProcess->setArguments(
-      {fileSystem->specificationFilePath(), fileSystem->lpsFilePath(),
-       "--lin-method=regular", "--rewriter=jitty", "--verbose"});
+  QProcess* subprocess = new QProcess();
+  ProcessType processType = processTypes[processid];
 
   /* connect to logger */
-  switch (processType)
+  if (subprocessType == SubprocessType::ParseMcrl2 ||
+      subprocessType == SubprocessType::ParseMcf)
   {
-  case ProcessType::Parsing:
-    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
+    connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
             SLOT(logToParsingConsole()));
-  case ProcessType::Simulation:
-    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-            SLOT(logToSimulationConsole()));
-    break;
-  case ProcessType::LtsCreation:
-    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-            SLOT(logToLtsCreationConsole()));
-    break;
-  case ProcessType::Verification:
-    connect(mcrl22lpsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-            SLOT(logToVerificationConsole()));
-    break;
-  default:
-    break;
-  }
-
-  return mcrl22lpsProcess;
-}
-
-QProcess* ProcessSystem::createLpsxsimProcess()
-{
-  QProcess* lpsxsimProcess = new QProcess();
-
-  /* create the process */
-  lpsxsimProcess->setProgram("lpsxsim");
-  lpsxsimProcess->setArguments({fileSystem->lpsFilePath(), "--rewriter=jitty"});
-
-  return lpsxsimProcess;
-}
-
-QProcess* ProcessSystem::createLps2ltsProcess(bool evidence,
-                                              const QString& propertyName)
-{
-  QProcess* lps2ltsProcess = new QProcess();
-
-  /* create the process */
-  lps2ltsProcess->setProgram("lps2lts");
-  lps2ltsProcess->setArguments(
-      {fileSystem->lpsFilePath(evidence, propertyName),
-       fileSystem->ltsFilePath(LtsReduction::None, evidence, propertyName),
-       "--rewriter=jitty", "--strategy=breadth", "--verbose"});
-  lps2ltsProcess->setProperty("evidence", evidence);
-  lps2ltsProcess->setProperty("propertyName", propertyName);
-
-  /* connect to logger */
-  if (evidence)
-  {
-    connect(lps2ltsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-            SLOT(logToVerificationConsole()));
   }
   else
   {
-    connect(lps2ltsProcess, SIGNAL(readyReadStandardError()), consoleDock,
-            SLOT(logToLtsCreationConsole()));
+    switch (processType)
+    {
+    case ProcessType::Parsing:
+      connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
+              SLOT(logToParsingConsole()));
+    case ProcessType::Simulation:
+      connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
+              SLOT(logToSimulationConsole()));
+      break;
+    case ProcessType::LtsCreation:
+      connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
+              SLOT(logToLtsCreationConsole()));
+      break;
+    case ProcessType::Verification:
+      connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
+              SLOT(logToVerificationConsole()));
+      break;
+    default:
+      break;
+    }
   }
 
-  return lps2ltsProcess;
-}
+  /* connect the subprocess to the subprocess handler to execute the next one
+   *   when finished */
+  connect(subprocess, SIGNAL(finished(int)), this,
+          SLOT(executeNextSubprocess(int)));
 
-QProcess* ProcessSystem::createLtsconvertProcess(LtsReduction reduction)
-{
-  QProcess* ltsconvertProcess = new QProcess();
+  /* the subprocess should delete itself when finished */
+  connect(subprocess, SIGNAL(finished(int)), subprocess, SLOT(deleteLater()));
 
-  /* create the process */
-  ltsconvertProcess->setProgram("ltsconvert");
+  /* add properties we might need */
+  subprocess->setProperty("processid", processid);
+  subprocess->setProperty("subprocessType", int(subprocessType));
+  subprocess->setProperty("subprocessIndex", subprocessIndex);
+  subprocess->setProperty("propertyName", propertyName);
+  subprocess->setProperty("evidence", evidence);
+  subprocess->setProperty("reduction", int(reduction));
 
-  QString equivalence = "--equivalence=";
-  switch (reduction)
+  QString program = "";
+  QStringList arguments = {};
+
+  /* set program, arguments and more connects depending on the type of the
+   *   subprocess */
+  switch (subprocessType)
   {
-  case LtsReduction::StrongBisimulation:
-    equivalence += "bisim";
+  case SubprocessType::ParseMcrl2:
+    arguments << "--check-only";
+    connect(subprocess, SIGNAL(finished(int)), this,
+            SLOT(mcrl2ParsingResult(int)));
+
+  case SubprocessType::Mcrl22lps:
+    program = "mcrl22lps";
+    arguments << fileSystem->specificationFilePath()
+              << fileSystem->lpsFilePath() << "--lin-method=regular"
+              << "--rewriter=jitty"
+              << "--verbose";
     break;
-  case LtsReduction::BranchingBisimulation:
-    equivalence += "branching-bisim";
+
+  case SubprocessType::Lpsxsim:
+    program = "lpsxsim";
+    arguments << fileSystem->lpsFilePath() << "--rewriter=jitty";
     break;
-  case LtsReduction::None:
-    equivalence += "none";
+
+  case SubprocessType::Lps2lts:
+    program = "lps2lts";
+    arguments << fileSystem->lpsFilePath(evidence, propertyName)
+              << fileSystem->ltsFilePath(LtsReduction::None, evidence,
+                                         propertyName)
+              << "--rewriter=jitty"
+              << "--strategy=breadth"
+              << "--verbose";
+    break;
+
+  case SubprocessType::Ltsconvert:
+    program = "ltsconvert";
+    arguments << fileSystem->ltsFilePath(LtsReduction::None)
+              << fileSystem->ltsFilePath(reduction) << "--verbose";
+    switch (reduction)
+    {
+    case LtsReduction::None:
+      arguments << "--equivalence=none";
+      break;
+    case LtsReduction::StrongBisimulation:
+      arguments << "--equivalence=bisim";
+      break;
+    case LtsReduction::BranchingBisimulation:
+      arguments << "--equivalence=branching-bisim";
+      break;
+    }
+    break;
+
+  case SubprocessType::Ltsgraph:
+    program = "ltsgraph";
+    arguments << fileSystem->ltsFilePath(reduction, evidence, propertyName);
+    break;
+
+  case SubprocessType::ParseMcf:
+    arguments << "--check-only";
+    connect(subprocess, SIGNAL(finished(int)), this,
+            SLOT(mcfParsingResult(int)));
+
+  case SubprocessType::Lps2pbes:
+    program = "lps2pbes";
+    arguments << fileSystem->lpsFilePath()
+              << fileSystem->pbesFilePath(propertyName, evidence)
+              << "--formula=" + fileSystem->propertyFilePath(propertyName)
+              << "--out=pbes"
+              << "--verbose";
+    if (evidence)
+    {
+      arguments << "--counter-example";
+    }
+    break;
+
+  case SubprocessType::Pbessolve:
+    program = "pbessolve";
+    arguments << fileSystem->pbesFilePath(propertyName, evidence) << "--in=pbes"
+              << "--rewriter=jitty"
+              << "--search=breadth-first"
+              << "--strategy=0"
+              << "--verbose";
+    if (evidence)
+    {
+      arguments << "--file=" + fileSystem->lpsFilePath(false, "")
+                << "--evidence-file=" +
+                       fileSystem->lpsFilePath(evidence, propertyName);
+    }
+    else
+    {
+      connect(subprocess, SIGNAL(finished(int)), this,
+              SLOT(verificationResult(int)));
+    }
     break;
   }
 
-  ltsconvertProcess->setArguments({fileSystem->ltsFilePath(LtsReduction::None),
-                                   fileSystem->ltsFilePath(reduction),
-                                   equivalence, "--verbose"});
+  subprocess->setProgram(program);
+  subprocess->setArguments(arguments);
 
-  ltsconvertProcess->setProperty("reduction", int(reduction));
-
-  /* connect to logger */
-  connect(ltsconvertProcess, SIGNAL(readyReadStandardError()), consoleDock,
-          SLOT(logToLtsCreationConsole()));
-
-  return ltsconvertProcess;
-}
-
-QProcess* ProcessSystem::createLtsgraphProcess(LtsReduction reduction,
-                                               bool evidence,
-                                               const QString& propertyName)
-{
-  QProcess* ltsgraphProcess = new QProcess();
-
-  /* create the process */
-  ltsgraphProcess->setProgram("ltsgraph");
-  ltsgraphProcess->setArguments(
-      {fileSystem->ltsFilePath(reduction, evidence, propertyName)});
-
-  return ltsgraphProcess;
-}
-
-QProcess* ProcessSystem::createPropertyParsingProcess(const QString& propertyName)
-{
-  QProcess* lps2pbesProcess = new QProcess();
-
-  /* create the process */
-  lps2pbesProcess->setProgram("lps2pbes");
-  lps2pbesProcess->setArguments(
-      {fileSystem->lpsFilePath(), fileSystem->pbesFilePath(propertyName),
-       "--formula=" + fileSystem->propertyFilePath(propertyName), "--out=pbes",
-       "--check_only", "--verbose"});
-
-  connect(lps2pbesProcess, SIGNAL(readyReadStandardError()), consoleDock,
-          SLOT(logToParsingConsole()));
-
-  return lps2pbesProcess;
-}
-
-QProcess* ProcessSystem::createLps2pbesProcess(const QString& propertyName,
-                                               bool evidence)
-{
-  QProcess* lps2pbesProcess = new QProcess();
-
-  /* create the process */
-  lps2pbesProcess->setProgram("lps2pbes");
-  QStringList arguments = {fileSystem->lpsFilePath(),
-                           fileSystem->pbesFilePath(propertyName, evidence),
-                           "--formula=" +
-                               fileSystem->propertyFilePath(propertyName),
-                           "--out=pbes", "--verbose"};
-  if (evidence)
-  {
-    arguments << "--counter-example";
-  }
-  lps2pbesProcess->setArguments(arguments);
-  lps2pbesProcess->setProperty("propertyName", propertyName);
-  lps2pbesProcess->setProperty("evidence", evidence);
-
-  /* connect to logger */
-  connect(lps2pbesProcess, SIGNAL(readyReadStandardError()), consoleDock,
-          SLOT(logToVerificationConsole()));
-
-  return lps2pbesProcess;
-}
-
-QProcess* ProcessSystem::createPbessolveProcess(const QString& propertyName,
-                                                bool evidence)
-{
-  /* create the process */
-  QProcess* pbessolveProcess = new QProcess();
-  pbessolveProcess->setProgram("pbessolve");
-  QStringList arguments = {fileSystem->pbesFilePath(propertyName, evidence),
-                           "--in=pbes",
-                           "--rewriter=jitty",
-                           "--search=breadth-first",
-                           "--strategy=0",
-                           "--verbose"};
-  if (evidence)
-  {
-    arguments << "--file=" + fileSystem->lpsFilePath(false, "")
-              << "--evidence-file=" +
-                     fileSystem->lpsFilePath(evidence, propertyName);
-  }
-  pbessolveProcess->setArguments(arguments);
-  pbessolveProcess->setProperty("propertyName", propertyName);
-  pbessolveProcess->setProperty("evidence", evidence);
-
-  /* connect to logger */
-  connect(pbessolveProcess, SIGNAL(readyReadStandardError()), consoleDock,
-          SLOT(logToVerificationConsole()));
-
-  return pbessolveProcess;
+  return subprocess;
 }
 
 int ProcessSystem::parseSpecification()
@@ -344,15 +289,11 @@ int ProcessSystem::parseSpecification()
     /* create the subprocesses */
     int processid = pid++;
     ProcessType processType = ProcessType::Parsing;
+    processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
 
-    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
-    mcrl2ParsingProcess->setProperty("pid", processid);
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcrl2ParsingResult(int)));
-
-    processes[processid] = {mcrl2ParsingProcess};
-    processTypes[processid] = processType;
+    processes[processid] = {
+        createSubprocess(SubprocessType::ParseMcrl2, processid, 0)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -368,28 +309,13 @@ int ProcessSystem::simulate()
     /* create the subprocesses */
     int processid = pid++;
     ProcessType processType = ProcessType::Simulation;
+    processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
 
-    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
-    mcrl2ParsingProcess->setProperty("pid", processid);
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcrl2ParsingResult(int)));
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(createLps(int)));
-
-    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
-    mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
-            SLOT(simulateLps(int)));
-
-    QProcess* lpsxsimProcess = createLpsxsimProcess();
-    lpsxsimProcess->setProperty("pid", processid);
-    connect(lpsxsimProcess, SIGNAL(finished(int)), this,
-            SLOT(afterClosingUiTool()));
-
-    processes[processid] = {mcrl2ParsingProcess, mcrl22lpsProcess,
-                            lpsxsimProcess};
-    processTypes[processid] = processType;
+    processes[processid] = {
+        createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+        createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
+        createSubprocess(SubprocessType::Lpsxsim, processid, 2)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -403,50 +329,30 @@ int ProcessSystem::showLts(LtsReduction reduction)
   if (!fileSystem->saveProject().isEmpty())
   {
     /* create the subprocesses */
-    std::vector<QProcess*> ltsCreationProcesses = {};
+    std::vector<QProcess*> showLtsProcesses = {};
     int processid = pid++;
     ProcessType processType = ProcessType::LtsCreation;
-    consoleDock->setConsoleTab(processType);
-
-    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
-    mcrl2ParsingProcess->setProperty("pid", processid);
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcrl2ParsingResult(int)));
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(createLps(int)));
-    ltsCreationProcesses.push_back(mcrl2ParsingProcess);
-
-    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
-    mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this,
-            SLOT(createLts(int)));
-    ltsCreationProcesses.push_back(mcrl22lpsProcess);
-
-    QProcess* lps2ltsProcess = createLps2ltsProcess();
-    lps2ltsProcess->setProperty("pid", processid);
-    connect(lps2ltsProcess, SIGNAL(finished(int)), this,
-            reduction == LtsReduction::None ? SLOT(showLts(int))
-                                            : SLOT(reduceLts(int)));
-    ltsCreationProcesses.push_back(lps2ltsProcess);
-
-    /* create the ltsconvert process if we need to reduce */
-    if (!(reduction == LtsReduction::None))
-    {
-      QProcess* ltsconvertProcess = createLtsconvertProcess(reduction);
-      ltsconvertProcess->setProperty("pid", processid);
-      connect(ltsconvertProcess, SIGNAL(finished(int)), this,
-              SLOT(showLts(int)));
-      ltsCreationProcesses.push_back(ltsconvertProcess);
-    }
-
-    QProcess* ltsgraphProcess = createLtsgraphProcess(reduction);
-    ltsgraphProcess->setProperty("pid", processid);
-    connect(ltsgraphProcess, SIGNAL(finished(int)), this,
-            SLOT(afterClosingUiTool()));
-    ltsCreationProcesses.push_back(ltsgraphProcess);
-
-    processes[processid] = ltsCreationProcesses;
     processTypes[processid] = processType;
+    consoleDock->setConsoleTab(processType);
+    bool noReduction = reduction == LtsReduction::None;
+
+    showLtsProcesses.push_back(
+        createSubprocess(SubprocessType::ParseMcrl2, processid, 0));
+    showLtsProcesses.push_back(
+        createSubprocess(SubprocessType::Mcrl22lps, processid, 1));
+    showLtsProcesses.push_back(
+        createSubprocess(SubprocessType::Lps2lts, processid, 2));
+    /* create the ltsconvert process if we need to reduce */
+    if (!noReduction)
+    {
+      showLtsProcesses.push_back(createSubprocess(
+          SubprocessType::Ltsconvert, processid, 3, "", false, reduction));
+    }
+    showLtsProcesses.push_back(createSubprocess(SubprocessType::Ltsgraph,
+                                                processid, noReduction ? 3 : 4,
+                                                "", false, reduction));
+
+    processes[processid] = showLtsProcesses;
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -462,28 +368,14 @@ int ProcessSystem::parseProperty(const Property& property)
     /* create the subprocesses */
     int processid = pid++;
     ProcessType processType = ProcessType::Parsing;
+    processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
 
-    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
-    mcrl2ParsingProcess->setProperty("pid", processid);
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcrl2ParsingResult(int)));
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(createLps(int)));
-
-    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
-    mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
-
-    QProcess* propertyParsingProcess =
-        createPropertyParsingProcess(property.name);
-    propertyParsingProcess->setProperty("pid", processid);
-    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcfParsingResult(int)));
-
-    processes[processid] = {mcrl2ParsingProcess, mcrl22lpsProcess,
-                            propertyParsingProcess};
-    processTypes[processid] = processType;
+    processes[processid] = {
+        createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+        createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
+        createSubprocess(SubprocessType::ParseMcf, processid, 2,
+                         property.name)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -499,40 +391,16 @@ int ProcessSystem::verifyProperty(const Property& property)
     /* create the subprocesses */
     int processid = pid++;
     ProcessType processType = ProcessType::Verification;
+    processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
 
-    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
-    mcrl2ParsingProcess->setProperty("pid", processid);
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcrl2ParsingResult(int)));
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(createLps(int)));
-
-    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
-    mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
-
-    QProcess* propertyParsingProcess =
-        createPropertyParsingProcess(property.name);
-    propertyParsingProcess->setProperty("pid", processid);
-    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcfParsingResult(int)));
-    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(createPbes(int)));
-
-    QProcess* lps2pbesProcess = createLps2pbesProcess(property.name);
-    lps2pbesProcess->setProperty("pid", processid);
-    connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes(int)));
-
-    QProcess* pbessolveProcess = createPbessolveProcess(property.name);
-    pbessolveProcess->setProperty("pid", processid);
-    connect(pbessolveProcess, SIGNAL(finished(int)), this,
-            SLOT(verificationResult(int)));
-
-    processes[processid] = {mcrl2ParsingProcess, mcrl22lpsProcess,
-                            propertyParsingProcess, lps2pbesProcess,
-                            pbessolveProcess};
-    processTypes[processid] = processType;
+    processes[processid] = {
+        createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+        createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
+        createSubprocess(SubprocessType::ParseMcf, processid, 2, property.name),
+        createSubprocess(SubprocessType::Lps2pbes, processid, 3, property.name),
+        createSubprocess(SubprocessType::Pbessolve, processid, 4,
+                         property.name)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -548,51 +416,21 @@ int ProcessSystem::showEvidence(const Property& property)
     /* create the subprocesses */
     int processid = pid++;
     ProcessType processType = ProcessType::Verification;
+    processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
 
-    QProcess* mcrl2ParsingProcess = createMcrl2ParsingProcess();
-    mcrl2ParsingProcess->setProperty("pid", processid);
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcrl2ParsingResult(int)));
-    connect(mcrl2ParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(createLps(int)));
-
-    QProcess* mcrl22lpsProcess = createMcrl22lpsProcess(processType);
-    mcrl22lpsProcess->setProperty("pid", processid);
-    connect(mcrl22lpsProcess, SIGNAL(finished(int)), this, SLOT(parseMcf(int)));
-
-    QProcess* propertyParsingProcess =
-        createPropertyParsingProcess(property.name);
-    propertyParsingProcess->setProperty("pid", processid);
-    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(mcfParsingResult(int)));
-    connect(propertyParsingProcess, SIGNAL(finished(int)), this,
-            SLOT(createPbes(int)));
-
-    QProcess* lps2pbesProcess = createLps2pbesProcess(property.name, true);
-    lps2pbesProcess->setProperty("pid", processid);
-    connect(lps2pbesProcess, SIGNAL(finished(int)), this, SLOT(solvePbes(int)));
-
-    QProcess* pbessolveProcess = createPbessolveProcess(property.name, true);
-    pbessolveProcess->setProperty("pid", processid);
-    connect(pbessolveProcess, SIGNAL(finished(int)), this,
-            SLOT(createLts(int)));
-
-    QProcess* lps2ltsProcess = createLps2ltsProcess(true, property.name);
-    lps2ltsProcess->setProperty("pid", processid);
-    connect(lps2ltsProcess, SIGNAL(finished(int)), this, SLOT(showLts(int)));
-
-    QProcess* ltsgraphProcess =
-        createLtsgraphProcess(LtsReduction::None, true, property.name);
-    ltsgraphProcess->setProperty("id", processid);
-    connect(ltsgraphProcess, SIGNAL(finished(int)), this,
-            SLOT(afterClosingUiTool()));
-
-    processes[processid] = {mcrl2ParsingProcess,    mcrl22lpsProcess,
-                            propertyParsingProcess, lps2pbesProcess,
-                            pbessolveProcess,       lps2ltsProcess,
-                            ltsgraphProcess};
-    processTypes[processid] = processType;
+    processes[processid] = {
+        createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+        createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
+        createSubprocess(SubprocessType::ParseMcf, processid, 2, property.name),
+        createSubprocess(SubprocessType::Lps2pbes, processid, 3, property.name,
+                         true),
+        createSubprocess(SubprocessType::Pbessolve, processid, 4, property.name,
+                         true),
+        createSubprocess(SubprocessType::Lps2lts, processid, 5, property.name,
+                         true),
+        createSubprocess(SubprocessType::Ltsgraph, processid, 6, property.name,
+                         true)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -603,56 +441,175 @@ int ProcessSystem::showEvidence(const Property& property)
 
 void ProcessSystem::startProcess(int processid)
 {
-  /* all processes start with parsing the specification */
-  parseMcrl2(processid);
+  executeNextSubprocess(0, processid);
 }
 
-bool ProcessSystem::subprocessSuccessfullyTerminated(int previousExitCode,
-                                                     int processid)
+void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
 {
-  /* if the subprocess terminated unsuccessfully, tell everyone and delete the
-   *   corresponding process */
-  if (previousExitCode > 0)
+  int nextSubprocessIndex;
+  /* if the processid is set we need to run the first subprocess, else get info
+   *   from the previous process */
+  if (processid >= 0)
   {
-    consoleDock->writeToConsole(processTypes[processid],
-                                "Process finished with an error\n");
-    emit processFinished(processid);
-    deleteProcess(processid);
-  }
-  return previousExitCode == 0;
-}
-
-void ProcessSystem::parseMcrl2(int processid)
-{
-  ProcessType processType = processTypes[processid];
-
-  consoleDock->writeToConsole(ProcessType::Parsing,
-                              "##### PARSING SPECIFICATION #####\n");
-  if (processType != ProcessType::Parsing)
-  {
-    consoleDock->writeToConsole(processType,
-                                "##### PARSING SPECIFICATION #####\n");
-  }
-
-  QProcess* mcrl2ParsingProcess = processes[processid][0];
-  /* check if we need to run this */
-  if (fileSystem->upToDateLpsFileExists())
-  {
-    consoleDock->writeToConsole(
-        ProcessType::Parsing,
-        "Parsing is not needed as specification has not changed\n");
-    emit mcrl2ParsingProcess->finished(0);
+    nextSubprocessIndex = 0;
   }
   else
   {
-    mcrl2ParsingProcess->start();
+    QProcess* previousProcess = qobject_cast<QProcess*>(sender());
+    processid = previousProcess->property("processid").toInt();
+    nextSubprocessIndex =
+        previousProcess->property("subprocessIndex").toInt() + 1;
+  }
+
+  /* if the previous process was the last process, we are done */
+  if (nextSubprocessIndex < processes[processid].size())
+  {
+    /* check if the previous process terminated successfully */
+    if (previousExitCode > 0)
+    {
+      /* if not, abort the process */
+      consoleDock->writeToConsole(processTypes[processid],
+                                  "Process finished unsuccessfully\n");
+      emit processFinished(processid);
+      deleteProcess(processid, nextSubprocessIndex);
+    }
+    else
+    {
+      /* get the process and its properties */
+      ProcessType processType = processTypes[processid];
+      QProcess* subprocess = processes[processid][nextSubprocessIndex];
+
+      SubprocessType subprocessType = static_cast<SubprocessType>(
+          subprocess->property("subprocessType").toInt());
+      QString propertyName = subprocess->property("propertyName").toString();
+      bool evidence = subprocess->property("evidence").toBool();
+      LtsReduction reduction =
+          static_cast<LtsReduction>(subprocess->property("reduction").toInt());
+
+      bool noNeedToRun = false;
+
+      /* prepare for execution (mention in console, check if the subprocess can
+       *   be skipped, emit processFinished when executing a UI tool) */
+      switch (subprocessType)
+      {
+      case SubprocessType::ParseMcrl2:
+        consoleDock->writeToConsole(ProcessType::Parsing,
+                                    "##### PARSING SPECIFICATION #####\n");
+        if (processType != ProcessType::Parsing)
+        {
+          consoleDock->writeToConsole(processType,
+                                      "##### PARSING SPECIFICATION #####\n");
+        }
+
+        if (fileSystem->upToDateLpsFileExists())
+        {
+          noNeedToRun = true;
+          consoleDock->writeToConsole(
+              ProcessType::Parsing,
+              "Parsing is not needed as specification has not changed\n");
+        }
+        break;
+
+      case SubprocessType::Mcrl22lps:
+        consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
+
+        if (fileSystem->upToDateLpsFileExists())
+        {
+          noNeedToRun = true;
+          consoleDock->writeToConsole(processType,
+                                      "Up to date LPS already exists\n");
+        }
+        break;
+
+      case SubprocessType::Lpsxsim:
+        consoleDock->writeToConsole(processType,
+                                    "##### SHOWING SIMULATION #####\n");
+
+        emit processFinished(processid);
+        break;
+
+      case SubprocessType::Lps2lts:
+        consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
+
+        if (fileSystem->upToDateLtsFileExists(LtsReduction::None, evidence,
+                                              propertyName))
+        {
+          noNeedToRun = true;
+          consoleDock->writeToConsole(
+              processType, "Up to date" + QString(evidence ? " evidence" : "") +
+                               " LTS already exists\n");
+        }
+        break;
+
+      case SubprocessType::Ltsconvert:
+        consoleDock->writeToConsole(processType, "##### REDUCING LTS #####\n");
+
+        if (fileSystem->upToDateLtsFileExists(reduction))
+        {
+          noNeedToRun = true;
+          consoleDock->writeToConsole(processType,
+                                      "Up to date LTS already exists\n");
+        }
+        break;
+
+      case SubprocessType::Ltsgraph:
+        consoleDock->writeToConsole(processType, "##### SHOWING LTS #####\n");
+
+        emit processFinished(processid);
+        break;
+
+      case SubprocessType::ParseMcf:
+        consoleDock->writeToConsole(ProcessType::Parsing,
+                                    "##### PARSING PROPERTY #####\n");
+        if (processType != ProcessType::Parsing)
+        {
+          consoleDock->writeToConsole(processType,
+                                      "##### PARSING PROPERTY #####\n");
+        }
+        break;
+
+      case SubprocessType::Lps2pbes:
+        consoleDock->writeToConsole(processType, "##### CREATING PBES #####\n");
+
+        if (fileSystem->upToDatePbesFileExists(propertyName, evidence))
+        {
+          noNeedToRun = true;
+          consoleDock->writeToConsole(processType,
+                                      "Up to date PBES already exists\n");
+        }
+        break;
+
+      case SubprocessType::Pbessolve:
+        consoleDock->writeToConsole(processType, "##### SOLVING PBES #####\n");
+
+        if (evidence &&
+            fileSystem->upToDateLpsFileExists(evidence, propertyName))
+        {
+          noNeedToRun = true;
+          consoleDock->writeToConsole(
+              ProcessType::Verification,
+              "Up to date evidence LPS already exists\n");
+        }
+      }
+
+      /* if we can skip this subprocess act like it has finished, else execute
+       *   it */
+      if (noNeedToRun)
+      {
+        emit subprocess->finished(0);
+      }
+      else
+      {
+        subprocess->start();
+      }
+    }
   }
 }
 
 void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
 {
   QProcess* mcrl2ParsingProcess = qobject_cast<QProcess*>(sender());
-  int processid = mcrl2ParsingProcess->property("pid").toInt();
+  int processid = mcrl2ParsingProcess->property("processid").toInt();
 
   /* if the full process was only for parsing the specification, signal that the
    *   process has finished */
@@ -660,7 +617,6 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
       processes[processid].size() == 1)
   {
     emit processFinished(processid);
-    deleteProcess(processid);
   }
 
   /* if parsing gave an error, move to the parsing tab and move the cursor in
@@ -680,147 +636,10 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
   }
 }
 
-void ProcessSystem::createLps(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  ProcessType processType = processTypes[processid];
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    QProcess* mcrl22lpsProcess = processes[processid][1];
-
-    consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
-
-    /* check if we need to run this */
-    if (fileSystem->upToDateLpsFileExists())
-    {
-      consoleDock->writeToConsole(processType,
-                                  "Up to date LPS already exists\n");
-      emit mcrl22lpsProcess->finished(0);
-    }
-    else
-    {
-      mcrl22lpsProcess->start();
-    }
-  }
-}
-
-void ProcessSystem::simulateLps(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    QProcess* lpsxsimProcess = processes[processid][2];
-
-    consoleDock->writeToConsole(ProcessType::Simulation,
-                                "##### SHOWING SIMULATION #####\n");
-    lpsxsimProcess->start();
-    emit processFinished(processid);
-  }
-}
-
-void ProcessSystem::createLts(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  ProcessType processType = processTypes[processid];
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    QProcess* lps2ltsProcess;
-    if (processType == ProcessType::LtsCreation)
-    {
-      lps2ltsProcess = processes[processid][2];
-    }
-    else
-    {
-      lps2ltsProcess = processes[processid][5];
-    }
-
-    consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
-
-    /* check if we need to run this */
-    bool evidence = lps2ltsProcess->property("evidence").toBool();
-    if (fileSystem->upToDateLtsFileExists(
-            LtsReduction::None, evidence,
-            lps2ltsProcess->property("propertyName").toString()))
-    {
-      consoleDock->writeToConsole(
-          processType, "Up to date" + QString(evidence ? " evidence" : "") +
-                           " LTS already exists\n");
-      emit lps2ltsProcess->finished(0);
-    }
-    else
-    {
-      lps2ltsProcess->start();
-    }
-  }
-}
-
-void ProcessSystem::reduceLts(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    QProcess* ltsconvertProcess = processes[processid][3];
-    LtsReduction reduction = static_cast<LtsReduction>(
-        ltsconvertProcess->property("reduction").toInt());
-
-    consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                "##### REDUCING LTS #####\n");
-
-    /* check if we need to run this */
-    if (fileSystem->upToDateLtsFileExists(reduction))
-    {
-      consoleDock->writeToConsole(ProcessType::LtsCreation,
-                                  "Up to date LTS already exists\n");
-      emit ltsconvertProcess->finished(0);
-    }
-    else
-    {
-      ltsconvertProcess->start();
-    }
-  }
-}
-
-void ProcessSystem::showLts(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    QProcess* ltsgraphProcess = processes[processid].back();
-
-    consoleDock->writeToConsole(processTypes[processid],
-                                "##### SHOWING LTS #####\n");
-    ltsgraphProcess->start();
-    emit processFinished(processid);
-  }
-}
-
-void ProcessSystem::parseMcf(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  ProcessType processType = processTypes[processid];
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    consoleDock->writeToConsole(ProcessType::Parsing,
-                                "##### PARSING PROPERTY #####\n");
-    if (processType != ProcessType::Parsing)
-    {
-      consoleDock->writeToConsole(processType,
-                                  "##### PARSING PROPERTY #####\n");
-    }
-
-    processes[processid][2]->start();
-  }
-}
-
 void ProcessSystem::mcfParsingResult(int previousExitCode)
 {
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  int processid =
+      qobject_cast<QProcess*>(sender())->property("processid").toInt();
   ProcessType processType = processTypes[processid];
 
   /* if parsing gave an error, move to parsing tab */
@@ -843,83 +662,22 @@ void ProcessSystem::mcfParsingResult(int previousExitCode)
     }
 
     emit processFinished(processid);
-    deleteProcess(processid);
-  }
-}
-
-void ProcessSystem::createPbes(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    QProcess* lps2pbesProcess = processes[processid][3];
-
-    consoleDock->writeToConsole(ProcessType::Verification,
-                                "##### CREATING PBES #####\n");
-
-    /* check if we need to run this */
-    if (fileSystem->upToDatePbesFileExists(
-            lps2pbesProcess->property("propertyName").toString(),
-            lps2pbesProcess->property("evidence").toBool()))
-    {
-      consoleDock->writeToConsole(ProcessType::Verification,
-                                  "Up to date PBES already exists\n");
-      emit lps2pbesProcess->finished(0);
-    }
-    else
-    {
-      lps2pbesProcess->start();
-    }
-  }
-}
-
-void ProcessSystem::solvePbes(int previousExitCode)
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  QProcess* pbessolveProcess = processes[processid][4];
-
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
-  {
-    consoleDock->writeToConsole(ProcessType::Verification,
-                                "##### SOLVING PBES #####\n");
-
-    /* in case of generating evidence, check if we need to run this */
-    bool evidence = pbessolveProcess->property("evidence").toBool();
-    if (evidence)
-    {
-      if (fileSystem->upToDateLpsFileExists(
-              evidence, pbessolveProcess->property("propertyName").toString()))
-      {
-        consoleDock->writeToConsole(ProcessType::Verification,
-                                    "Up to date evidence LPS already exists\n");
-        emit pbessolveProcess->finished(0);
-      }
-      else
-      {
-        pbessolveProcess->start();
-      }
-    }
-    else
-    {
-      pbessolveProcess->start();
-    }
   }
 }
 
 void ProcessSystem::verificationResult(int previousExitCode)
 {
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
+  QProcess* previousProcess = qobject_cast<QProcess*>(sender());
+  int processid = previousProcess->property("processid").toInt();
 
-  if (subprocessSuccessfullyTerminated(previousExitCode, processid))
+  if (previousExitCode == 0)
   {
-    std::string output =
-        processes[processid][4]->readAllStandardOutput().toStdString();
-    if (output.find("true") == 0)
+    QString output = QString(previousProcess->readAllStandardOutput());
+    if (output.startsWith("true"))
     {
       results[processid] = "true";
     }
-    else if (output.find("false") == 0)
+    else if (output.startsWith("false"))
     {
       results[processid] = "false";
     }
@@ -928,14 +686,7 @@ void ProcessSystem::verificationResult(int previousExitCode)
       results[processid] = "";
     }
     emit processFinished(processid);
-    deleteProcess(processid);
   }
-}
-
-void ProcessSystem::afterClosingUiTool()
-{
-  int processid = qobject_cast<QProcess*>(sender())->property("pid").toInt();
-  deleteProcess(processid);
 }
 
 void ProcessSystem::abortProcess(int processid)
@@ -946,25 +697,21 @@ void ProcessSystem::abortProcess(int processid)
   /* if this process is running, terminate it */
   if (processThreads[processType]->getCurrentProcessId() == processid)
   {
-    for (QProcess* process : processes[processid])
-    {
-      process->blockSignals(true);
-      process->kill();
-    }
+    killProcess(processid);
     aborted = true;
   }
   else
   {
     /* if it is not running, simply remove it from the queue */
     aborted = processQueues[processType]->removeOne(processid);
+    deleteProcess(processid);
   }
 
   if (aborted)
   {
     emit processFinished(processid);
-    deleteProcess(processid);
     consoleDock->writeToConsole(processTypes[processid],
-                                "##### PROCESS WAS ABORTED #####\n");
+                                "##### ABORTING PROCESS #####\n");
   }
 }
 
@@ -977,7 +724,7 @@ void ProcessSystem::abortAllProcesses(ProcessType processType)
     emit processFinished(processid);
     deleteProcess(processid);
   }
-  processQueues[processType]->clear();
+  processQueue->clear();
 
   /* then stop the process run by the thread */
   int processid = processThreads[processType]->getCurrentProcessId();
@@ -985,28 +732,46 @@ void ProcessSystem::abortAllProcesses(ProcessType processType)
   {
     if (processes.count(processid) > 0)
     {
-      for (QProcess* process : processes[processid])
-      {
-        process->blockSignals(true);
-        process->kill();
-      }
+      killProcess(processid);
+      emit processFinished(processid);
     }
-    emit processFinished(processid);
-    deleteProcess(processid);
   }
 
   consoleDock->writeToConsole(processType,
-                              "##### ABORTED ALL PROCESSES #####\n");
+                              "##### ABORTING ALL PROCESSES #####\n");
 }
 
-void ProcessSystem::deleteProcess(int processid)
+void ProcessSystem::killProcess(int processid)
 {
-  for (QProcess* subprocess : processes[processid])
+  std::vector<QProcess*> subprocesses = processes[processid];
+  int numSubprocesses = int(subprocesses.size());
+
+  /* we kill the process by simply killing its running subprocess and deleting
+   *   the subprocesses that come after it */
+  int i;
+  for (i = numSubprocesses - 1; i >= 0; i--)
   {
-    subprocess->deleteLater();
+    QProcess* subprocess = subprocesses[i];
+    if (subprocess->state() == QProcess::Running)
+    {
+      subprocess->blockSignals(true);
+      subprocess->kill();
+      break;
+    }
   }
-  processes.erase(processid);
-  processTypes.erase(processid);
+  if (i < numSubprocesses - 1)
+  {
+    deleteProcess(processid, i + 1);
+  }
+}
+
+void ProcessSystem::deleteProcess(int processid, int fromSubprocessIndex)
+{
+  std::vector<QProcess*> subprocesses = processes[processid];
+  for (int i = fromSubprocessIndex; i < subprocesses.size(); i++)
+  {
+    subprocesses[i]->deleteLater();
+  }
 }
 
 QString ProcessSystem::getResult(int processid)

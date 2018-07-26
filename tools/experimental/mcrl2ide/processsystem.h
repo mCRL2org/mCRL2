@@ -18,6 +18,19 @@
 #include <QQueue>
 #include <QThread>
 
+enum class SubprocessType
+{
+  ParseMcrl2 = 0,
+  Mcrl22lps = 1,
+  Lpsxsim = 2,
+  Lps2lts = 3,
+  Ltsconvert = 4,
+  Ltsgraph = 5,
+  ParseMcf = 6,
+  Lps2pbes = 7,
+  Pbessolve = 8
+};
+
 /**
  * @brief The ProcessThread class defines a thread that makes sure that
  *   processes of certain types (such as verification) happen after each other
@@ -200,10 +213,18 @@ class ProcessSystem : public QObject
   void abortAllProcesses(ProcessType processType);
 
   /**
-   * @brief deleteProcess Deletes a process
-   * @param processid The id of the process to delete
+   * @brief killProcess Kills a process by killing all it's subprocesses
+   * @param processid The id of the process to kill
    */
-  void deleteProcess(int processid);
+  void killProcess(int processid);
+
+  /**
+   * @brief deleteProcess Deletes a process by deleting its subprocesses
+   * @param processid The id of the process to delete
+   * @param fromSubprocessIndex The subprocess index from which we need to
+   *   delete the subprocesses
+   */
+  void deleteProcess(int processid, int fromSubprocessIndex = 0);
 
   /**
    * @brief getResult Gets the result of a process
@@ -238,98 +259,22 @@ class ProcessSystem : public QObject
   std::map<ProcessType, ProcessThread*> processThreads;
 
   /**
-   * @brief createMcrl2ParsingProcess Creates a process to parse the current
-   *   mCRL2 specification using mcrl22lps
-   * @return The mcrl2 parsing process
+   * @brief createSubprocess Creates a subprocess
+   * @param subprocessType The subprocess type of the subprocess
+   * @param processid The id of the process corresponding to this subprocess
+   * @param subprocessIndex The index of this subprocess in the corresponding
+   *   process
+   * @param propertyName The name of a property (if needed)
+   * @param evidence Whether the subprocess is for creating evidence
+   * @param reduction The reduction on the lts (if needed)
    */
-  QProcess* createMcrl2ParsingProcess();
-
-  /**
-   * @brief createMcrl22lpsProcess Creates a process to execute mcrl22lps on the
-   *   current specification
-   * @param processType Determines what console dock tab to use to log to
-   * @return The mcrl22lps process
-   */
-  QProcess* createMcrl22lpsProcess(ProcessType processType);
-
-  /**
-   * @brief createLpsxsimProcess Creates a process to execute lpsxsim on the lps
-   *   that corresponds to the current specification
-   * @return The lpsxsim process
-   */
-  QProcess* createLpsxsimProcess();
-
-  /**
-   * @brief createLps2ltsProcess Creates a process to execute lps2lts on the lps
-   *   that corresponds to the current specification
-   * @param evidence Whether we want to create an evidence lts
-   * @param propertyName The property name in case we want to create an evidence
-   *   lts
-   * @return The lps2lts process
-   */
-  QProcess* createLps2ltsProcess(bool evidence = false,
-                                 const QString& propertyName = "");
-
-  /**
-   * @brief createLtsconvertProcess Creates a process to execute ltsconvert on
-   *   the lts that corresponds to the current specification
-   * @param reduction The reduction to apply
-   * @return The ltsconvert process
-   */
-  QProcess* createLtsconvertProcess(LtsReduction reduction);
-
-  /**
-   * @brief createLtsgraphProcess Creates a process to execute ltsgraph on the
-   *   lts that corresponds to the current specification and the given reduction
-   * @param evidence Whether we want to show an evidence lts
-   * @param propertyName The property name in case we want to show an evidence
-   *   lts
-   * @param reduction The reduction that was applied
-   * @return The ltsgraph process
-   */
-  QProcess* createLtsgraphProcess(LtsReduction reduction, bool evidence = false,
-                                  const QString& propertyName = "");
-
-  /**
-   * @brief createPropertyParsingProcess Creates a process to parse the given
-   *   property using lps2pbes
-   * @param propertyName The name of the property to parse
-   * @return The property parsing process
-   */
-  QProcess* createPropertyParsingProcess(const QString& propertyName);
-
-  /**
-   * @brief createLps2pbesProcess Creates a process to execute lps2pbes on the
-   *   lps that corresponds to the current specification and a given property
-   * @param propertyName The name of the property to create a pbes of
-   * @paran evidence Whether we want to generate evidence info
-   * @return The lps2pbes process
-   */
-  QProcess* createLps2pbesProcess(const QString& propertyName,
-                                  bool evidence = false);
-
-  /**
-   * @brief createPbessolveProcess Creates a process to execute pbessolve on the
-   *   pbes that corresponds to the current specification and a given property
-   * @param propertyName The name of the property that corresponds to the pbes
-   * @param evidence Whether we want to generate the evidence
-   * @return The pbessolve process
-   */
-  QProcess* createPbessolveProcess(const QString& propertyName,
-                                   bool evidence = false);
-
-  /**
-   * @brief subpreviousProcessTerminated Checks whether a subprocess terminated
-   *   successfully. If not, kill the corresponding process
-   * @param previousExitCode The exit code of the subprocess that just
-   *   terminated
-   * @param processid The processid of the process that corresponds to the
-   *   subprocess
-   */
-  bool subprocessSuccessfullyTerminated(int previousExitCode, int processid);
+  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
+                             int subprocessIndex,
+                             const QString& propertyName = "",
+                             bool evidence = false,
+                             LtsReduction reduction = LtsReduction::None);
 
   private slots:
-
   /**
    * @brief startProcess Starts a process
    * @param processid The id of the process to run
@@ -337,10 +282,12 @@ class ProcessSystem : public QObject
   void startProcess(int processid);
 
   /**
-   * @brief parseMcrl2 Parses an mCRL2 specification
-   * @param processid The id of the process to run
+   * @brief executeNextSubprocess Executes the next subprocess
+   * @param previousExitCode The exit code of the previous subprocess
+   * @param processid The id of the process to run. This is only set when we
+   *   want to execute the first subprocess
    */
-  void parseMcrl2(int processid);
+  void executeNextSubprocess(int previousExitCode, int processid = -1);
 
   /**
    * @brief mcrl2ParsingResult Handles the result of parsing a specification
@@ -349,58 +296,10 @@ class ProcessSystem : public QObject
   void mcrl2ParsingResult(int previousExitCode);
 
   /**
-   * @brief createLps The first step of any process, creating the lps
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void createLps(int previousExitCode);
-
-  /**
-   * @brief simulateLps The last step of simulation, visualizing the simulation
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void simulateLps(int previousExitCode);
-
-  /**
-   * @brief showLts The second step of lts creation, creating the lts
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void createLts(int previousExitCode);
-
-  /**
-   * @brief reduceLts An optional step of lts creation, reducing the lts
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void reduceLts(int previousExitCode);
-
-  /**
-   * @brief showLts The last step of lts creation, visualizing the lts
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void showLts(int previousExitCode);
-
-  /**
-   * @brief parseMcf Parses a mu-calculus formula (of a property)
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void parseMcf(int previousExitCode);
-
-  /**
    * @brief mcfParsingResult Handles the result of parsing a property
    * @param previousExitCode The exit code of the previous subprocess
    */
   void mcfParsingResult(int previousExitCode);
-
-  /**
-   * @brief createPbes The second step of verification, creating the pbes
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void createPbes(int previousExitCode);
-
-  /**
-   * @brief solvePbes The third step of verification, solving the pbes
-   * @param previousExitCode The exit code of the previous subprocess
-   */
-  void solvePbes(int previousExitCode);
 
   /**
    * @brief verificationResult Extracts and stores the result of the
@@ -408,12 +307,6 @@ class ProcessSystem : public QObject
    * @param previousExitCode The exit code of the previous subprocess
    */
   void verificationResult(int previousExitCode);
-
-  /**
-   * @brief afterClosingUiTool Deletes the process after a subprocess running a
-   *   ui tool (lpsxsim, ltsgraph) has finished
-   */
-  void afterClosingUiTool();
 };
 
 #endif // PROCESSSYSTEM_H

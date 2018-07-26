@@ -21,9 +21,9 @@
 
 enum class LtsReduction
 {
-  None,
-  StrongBisimulation,
-  BranchingBisimulation
+  None = 0,
+  StrongBisimulation = 1,
+  BranchingBisimulation = 2
 };
 
 const std::map<LtsReduction, QString> LTSREDUCTIONNAMES = {
