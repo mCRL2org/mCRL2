@@ -681,12 +681,8 @@ void ProcessSystem::verificationResult(int previousExitCode)
     {
       results[processid] = "false";
     }
-    else
-    {
-      results[processid] = "";
-    }
-    emit processFinished(processid);
   }
+  emit processFinished(processid);
 }
 
 void ProcessSystem::abortProcess(int processid)
