@@ -39,7 +39,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   QPushButton* verifyButton = new QPushButton();
   verifyButton->setIcon(QIcon(":/icons/verify.png"));
   verifyButton->setIconSize(QSize(24, 24));
-  verifyButton->setStyleSheet("QPushButton { border:none; }");
+  verifyButton->setStyleSheet("QPushButton { padding:5px; }");
   verifyButton->setToolTip("Verify");
   connect(verifyButton, SIGNAL(clicked()), this, SLOT(actionVerify()));
 
@@ -47,7 +47,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   QPushButton* abortButton = new QPushButton();
   abortButton->setIcon(QIcon(":/icons/abort.png"));
   abortButton->setIconSize(QSize(24, 24));
-  abortButton->setStyleSheet("QPushButton { border:none; }");
+  abortButton->setStyleSheet("QPushButton { padding:5px; }");
   abortButton->setToolTip("Abort verification");
   connect(abortButton, SIGNAL(clicked()), this,
           SLOT(actionAbortVerification()));
@@ -56,7 +56,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   QPushButton* witnessButton = new QPushButton();
   witnessButton->setIcon(QIcon(":/icons/witness.png"));
   witnessButton->setIconSize(QSize(24, 24));
-  witnessButton->setStyleSheet("QPushButton { border:none; }");
+  witnessButton->setStyleSheet("QPushButton { padding:5px; }");
   witnessButton->setToolTip("Show witness");
   connect(witnessButton, SIGNAL(clicked()), this, SLOT(actionShowEvidence()));
 
@@ -64,14 +64,14 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   QPushButton* counterexampleButton = new QPushButton();
   counterexampleButton->setIcon(QIcon(":/icons/counterexample.png"));
   counterexampleButton->setIconSize(QSize(24, 24));
-  counterexampleButton->setStyleSheet("QPushButton { border:none; }");
+  counterexampleButton->setStyleSheet("QPushButton { padding:5px; }");
   counterexampleButton->setToolTip("Show counterexample");
   connect(counterexampleButton, SIGNAL(clicked()), this,
           SLOT(actionShowEvidence()));
 
   /* stack the verification widgets */
   verificationWidgets = new QStackedWidget(this);
-  verificationWidgets->setMaximumSize(QSize(30, 30));
+  verificationWidgets->setMaximumWidth(40);
   verificationWidgets->addWidget(verifyButton);         /* index = 0 */
   verificationWidgets->addWidget(abortButton);          /* index = 1 */
   verificationWidgets->addWidget(witnessButton);        /* index = 2 */
@@ -82,7 +82,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   editButton = new QPushButton();
   editButton->setIcon(QIcon(":/icons/edit.png"));
   editButton->setIconSize(QSize(24, 24));
-  editButton->setStyleSheet("QPushButton { border:none; }");
+  editButton->setStyleSheet("QPushButton { padding:5px; }");
   editButton->setToolTip("Edit property");
   connect(editButton, SIGNAL(clicked()), this, SLOT(actionEdit()));
 
@@ -90,14 +90,14 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   deleteButton = new QPushButton();
   deleteButton->setIcon(QIcon(":/icons/delete.png"));
   deleteButton->setIconSize(QSize(24, 24));
-  deleteButton->setStyleSheet("QPushButton { border:none; }");
+  deleteButton->setStyleSheet("QPushButton { padding:5px; }");
   deleteButton->setToolTip("Delete property");
   connect(deleteButton, SIGNAL(clicked()), this, SLOT(actionDelete()));
 
   /* lay them out */
   propertyLayout = new QHBoxLayout();
-  propertyLayout->addStretch();
   propertyLayout->addWidget(propertyNameLabel);
+  propertyLayout->addStretch();
   propertyLayout->addWidget(verificationWidgets);
   propertyLayout->addWidget(editButton);
   propertyLayout->addWidget(deleteButton);
