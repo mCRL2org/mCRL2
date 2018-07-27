@@ -32,7 +32,14 @@ enable_testing()
 # TODO: Remove trace library (to LPS? or LTS?)
 include_directories(build/workarounds)
 
-set(MCRL2_MIN_QT_VERSION 5.5.0)
+if(APPLE)
+# Lower versions of Qt do not support native menu's correctly on Apple.
+# To use a lower version replace set window->menuBar()->setNativeMenuBar(true)
+# by window->menuBar()->setNativeMenuBar(false) in line 138 of libraries/gui/include/mcrl2/gui/qt_tool.h.
+   set(MCRL2_MIN_QT_VERSION 5.10.0)
+else()
+   set(MCRL2_MIN_QT_VERSION 5.5.0)
+endif()
 set(MCRL2_MIN_BOOST_VERSION 1.48.0)
 
 option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
