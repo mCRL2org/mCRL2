@@ -23,13 +23,20 @@ Contents
    :class: toctree-wrapper
 
    - :doc:`developer`
-   - :doc:`guidelines`
-   - :doc:`code_generation`
-   - :doc:`cronjobs`
    - :doc:`repository`
-   - :doc:`packaging`
    - `Issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_
    - :doc:`testing`
+   - :doc:`guidelines`
+   - :doc:`code_generation`
+   - :doc:`packaging`
+
+Old pages
+=========
+
+.. compound::
+   :class: toctree-wrapper
+
+   - :doc:`cronjobs`
    - :doc:`performance/index`
 ..   - `Performance measurements <http://www.mcrl2.org/performance>`_
 
@@ -37,10 +44,8 @@ Contents
    :hidden:
 
    developer
+   repository
+   testing
    guidelines
    code_generation
-   cronjobs
-   repository
    packaging
-   testing
-   performance/index
