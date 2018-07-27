@@ -13,8 +13,7 @@ analysed.
 
 The mCRL2 toolset is developed at the department of Mathematics and Computer
 Science of the [Technische Universiteit Eindhoven](https://fsa.win.tue.nl/), in
-collaboration with [CWI](http://www.cwi.nl) and the [University of
-Twente](http://fmt.cs.utwente.nl).
+collaboration with the [University of Twente](http://fmt.cs.utwente.nl).
 
 See our [website](https://mcrl2.org) for extensive documentation on the usage of
 the toolset and downloads of the release and nightly versions.
@@ -37,8 +36,9 @@ make -j4
 
 When compilation is finished, the binaries can be found in `stage/bin/`.
 Convenient front-ends for cmake are ccmake (macOS/Linux) and cmake-gui. Under
-Windows, it is usually necessary to set the variables `Boost_INCLUDE_DIR` and
-`Qt5_DIR` manually. More build instructions can be found in the
+Windows and macOS, it is usually necessary to set the variables
+`Boost_INCLUDE_DIR` and `Qt5_DIR` manually. More build instructions can be found
+in the
 [documentation](https://mcrl2.org/web/user_manual/build_instructions/index.html).
 
 ## Contributing

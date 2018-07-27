@@ -34,13 +34,12 @@
        The mCRL2 toolset is developed at the department of Mathematics and
        Computer Science of the `Technische Universiteit Eindhoven
        <http://www.tue.nl>`_, in collaboration with
-       `CWI <http://www.cwi.nl>`_ and the `University
-       of Twente <http://fmt.cs.utwente.nl>`_.
+       the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
 
    We switched from svn to git. The mCRL2 toolset is downloadable at `github <https://github.com/mCRL2org/mCRL2>`_. The latest
-   svn commit is revision 15385 from June 4, 2018. 
+   svn commit is revision 15385 from June 4, 2018.
 
 .. note::
 
@@ -54,7 +53,7 @@
    - `Modelling software, protocols, and other behaviour <https://www.coursera.org/learn/system-validation-software-protocols>`_.
 
    The slides used to make these courses are available by contacting J.F.Groote@tue.nl. They can also
-   be downloaded from `MIT Press <http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`_. 
+   be downloaded from `MIT Press <http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`_.
 
 .. note::
 
