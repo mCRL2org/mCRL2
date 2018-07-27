@@ -1,4 +1,7 @@
-# mCRL2
+<p align="center">
+  <img src="https://mcrl2.org/web/user_manual/_static/mcrl2.png" >
+</p>
+
 mCRL2 is a formal specification language with an associated toolset. The toolset
 can be used for modelling, validation and verification of concurrent systems and
 protocols. It can be run on Windows, Linux and macOS.
