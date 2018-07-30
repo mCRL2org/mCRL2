@@ -353,43 +353,48 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
 
 
   std::list<pbes_expression> quantified_context;
-  const constraints_map_t constraints_map;
-  const variable_map_t var_map;
+  const constraints_map_t& constraints_map;
+  variable_map_t& var_map;
 
   data::set_identifier_generator& id_gen;
   std::map<core::identifier_string, pbes_equation> new_equations;
   std::map<core::identifier_string, pbes_equation> new_equations_rec;
+  std::list<core::identifier_string> eqn_stack;
 
-  constelm_quantifiers_inside_builder(const constraints_map_t& cm, const variable_map_t& vm, data::set_identifier_generator& ig)
+  constelm_quantifiers_inside_builder(const constraints_map_t& cm, variable_map_t& vm, data::set_identifier_generator& ig)
   : constraints_map(cm)
   , var_map(vm)
   , id_gen(ig)
   {}
 
-  constelm_quantifiers_inside_builder(const constraints_map_t& cm, const variable_map_t& vm, data::set_identifier_generator& ig,
-    const std::map<core::identifier_string, pbes_equation>& ne, const std::map<core::identifier_string, pbes_equation>& nec)
-  : constraints_map(cm)
-  , var_map(vm)
-  , id_gen(ig)
-  , new_equations(ne)
-  , new_equations_rec(nec)
+  constelm_quantifiers_inside_builder(constelm_quantifiers_inside_builder& other)
+  : constraints_map(other.constraints_map)
+  , var_map(other.var_map)
+  , id_gen(other.id_gen)
+  , new_equations(other.new_equations)
+  , new_equations_rec(other.new_equations_rec)
+  , eqn_stack(other.eqn_stack)
   {}
 
   pbes_expression apply(const forall& x)
   {
     quantified_context.push_back(x);
     pbes_expression result = apply(x.body());
-    if(quantified_context.back() == x)
+    if(quantified_context.empty())
     {
-      quantified_context.pop_back();
-    }
-    if(result == x.body())
-    {
-      return x;
+      return forall(x.variables(), result);
     }
     else
     {
-      return result;
+      quantified_context.pop_back();
+      if(result == x.body())
+      {
+        return x;
+      }
+      else
+      {
+        return result;
+      }
     }
   }
 
@@ -397,17 +402,21 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
   {
     quantified_context.push_back(x);
     pbes_expression result = apply(x.body());
-    if(quantified_context.back() == x)
+    if(quantified_context.empty())
     {
-      quantified_context.pop_back();
-    }
-    if(result == x.body())
-    {
-      return x;
+      return exists(x.variables(), result);
     }
     else
     {
-      return result;
+      quantified_context.pop_back();
+      if(result == x.body())
+      {
+        return x;
+      }
+      else
+      {
+        return result;
+      }
     }
   }
 
@@ -522,6 +531,20 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
       }
     }
 
+    if(independent_pars.empty())
+    {
+      if(std::find(eqn_stack.begin(), eqn_stack.end(), x.name()) == eqn_stack.end())
+      {
+        eqn_stack.push_back(x.name());
+        constelm_quantifiers_inside_builder r(*this);
+        r.update(var_map.at(x.name()).formula());
+        new_equations = r.new_equations;
+        new_equations_rec = r.new_equations_rec;
+        eqn_stack.pop_back();
+      }
+      return x;
+    }
+
     data::variable_list new_parameter_list;
     data::data_expression_list new_update_list;
     i = 0;
@@ -587,7 +610,7 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
     new_equations.insert(std::make_pair(x.name(), new_eqn));
 
     new_eqn.formula() = quantifiers_inside(new_eqn.formula());
-    constelm_quantifiers_inside_builder r(constraints_map, var_map, id_gen, new_equations, new_equations_rec);
+    constelm_quantifiers_inside_builder r(*this);
     r.update(new_eqn.formula());
     new_equations = r.new_equations;
     new_equations_rec = r.new_equations_rec;
