@@ -3,10 +3,11 @@
 .. _tool-pbesinfo:
 
 pbesinfo
-========
+=======
 
-By default, the following information about the PBES is shown: 
-
-* information if the PBES is closed and well-formed;
-* number of equations, µs and νs.
-
+This tool prints some basic information about a file containing
+a parameterised boolean equation system. It indicates the number
+of minimal and maximal fixed point equations, as well as the alternation
+depth of the pbes. Optionally, the parameterised variables of the 
+PBES can also be listed. 
+ 
