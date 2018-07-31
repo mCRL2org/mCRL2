@@ -134,7 +134,6 @@ class MainWindow : public QMainWindow
   QAction* openProjectAction;
   QAction* saveProjectAction;
   QAction* saveProjectAsAction;
-  QAction* addPropertyAction;
 
   QAction* undoAction;
   QAction* redoAction;
@@ -161,16 +160,18 @@ class MainWindow : public QMainWindow
   QIcon simulateAbortIcon = QIcon(":/icons/simulate_abort.png");
 
   QAction* showLtsAction;
-  QString showLtsStartText = "Show LTS";
+  QString showLtsStartText = "Show State Space";
   QIcon showLtsStartIcon = QIcon(":/icons/create_LTS_start.png");
-  QString showLtsAbortText = "Abort LTS creation";
+  QString showLtsAbortText = "Abort State Space generation";
   QIcon showLtsAbortIcon = QIcon(":/icons/create_LTS_abort.png");
 
   QAction* showReducedLtsAction;
-  QString showReducedLtsStartText = "Show reduced LTS";
+  QString showReducedLtsStartText = "Show reduced State Space";
   QIcon showReducedLtsStartIcon = QIcon(":/icons/create_reduced_LTS_start.png");
-  QString showReducedLtsAbortText = "Abort reduced LTS creation";
+  QString showReducedLtsAbortText = "Abort reduced State Space generation";
   QIcon showReducedLtsAbortIcon = QIcon(":/icons/create_reduced_LTS_abort.png");
+
+  QAction* addPropertyAction;
 
   QAction* verifyAllPropertiesAction;
   QString verifyAllPropertiesStartText = "Verify all Properties";

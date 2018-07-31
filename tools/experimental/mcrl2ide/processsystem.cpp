@@ -462,7 +462,7 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
   }
 
   /* if the previous process was the last process, we are done */
-  if (nextSubprocessIndex < processes[processid].size())
+  if (nextSubprocessIndex < int(processes[processid].size()))
   {
     /* check if the previous process terminated successfully */
     if (previousExitCode > 0)
@@ -560,11 +560,13 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
 
       case SubprocessType::ParseMcf:
         consoleDock->writeToConsole(ProcessType::Parsing,
-                                    "##### PARSING PROPERTY #####\n");
+                                    "##### PARSING PROPERTY " +
+                                        propertyName.toUpper() + " #####\n");
         if (processType != ProcessType::Parsing)
         {
-          consoleDock->writeToConsole(processType,
-                                      "##### PARSING PROPERTY #####\n");
+          consoleDock->writeToConsole(processType, "##### PARSING PROPERTY " +
+                                                       propertyName.toUpper() +
+                                                       " #####\n");
         }
         break;
 
@@ -669,6 +671,7 @@ void ProcessSystem::verificationResult(int previousExitCode)
 {
   QProcess* previousProcess = qobject_cast<QProcess*>(sender());
   int processid = previousProcess->property("processid").toInt();
+  QString propertyName = previousProcess->property("propertyName").toString();
 
   if (previousExitCode == 0)
   {
@@ -676,10 +679,18 @@ void ProcessSystem::verificationResult(int previousExitCode)
     if (output.startsWith("true"))
     {
       results[processid] = "true";
+      consoleDock->writeToConsole(
+          ProcessType::Verification,
+          "The property " + propertyName +
+              " on this specification evaluates to true");
     }
     else if (output.startsWith("false"))
     {
       results[processid] = "false";
+      consoleDock->writeToConsole(
+          ProcessType::Verification,
+          "The property " + propertyName +
+              " on this specification evaluates to false");
     }
   }
   emit processFinished(processid);
@@ -737,7 +748,9 @@ void ProcessSystem::abortAllProcesses(ProcessType processType)
   }
 
   consoleDock->writeToConsole(processType,
-                              "##### ABORTING ALL PROCESSES #####\n");
+                              "##### ABORTING ALL " +
+                                  PROCESSTYPENAMES.at(processType).toUpper() +
+                                  " PROCESSES #####\n");
 }
 
 void ProcessSystem::killProcess(int processid)

@@ -32,7 +32,7 @@ const std::vector<ProcessType> PROCESSTYPES = {
 const std::map<ProcessType, QString> PROCESSTYPENAMES = {
     {ProcessType::Parsing, "Parsing"},
     {ProcessType::Simulation, "Simulation"},
-    {ProcessType::LtsCreation, "LTS Creation"},
+    {ProcessType::LtsCreation, "State Space Generation"},
     {ProcessType::Verification, "Verification"}};
 
 /**

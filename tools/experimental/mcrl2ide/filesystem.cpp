@@ -356,7 +356,7 @@ bool FileSystem::deletePropertyFile(const QString& propertyName,
 {
   QFile* propertyFile = new QFile(propertyFilePath(propertyName));
   bool deleteSucceeded = true;
-  if (propertyFile->exists() && !propertyFile->remove())
+  if (showIfFailed && propertyFile->exists() && !propertyFile->remove())
   {
     /* if deleting the file failed, tell the user */
     QMessageBox msgBox(QMessageBox::Information, "Delete property",

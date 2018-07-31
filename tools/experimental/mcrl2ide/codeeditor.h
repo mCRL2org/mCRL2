@@ -136,20 +136,28 @@ class CodeEditor : public QPlainTextEdit
 
   /**
    * @brief zoomIn Allows the user to zoom in on the text
+   * @param range How much to zoom in
    */
-  void zoomIn();
+  void zoomIn(int range = 1);
 
   /**
    * @brief zoomOut Allows the user to zoom out from the text
+   * @param range How much to zoom out
    */
-  void zoomOut();
+  void zoomOut(int range = 1);
 
   protected:
   /**
-   * @brief keyPressEvent Adds key events for aoom in and zoom out
-   * @brief event The key event
+   * @brief keyPressEvent Adds key events for zooming
+   * @param event The key event
    */
   void keyPressEvent(QKeyEvent* event) override;
+
+  /**
+   * @brief wheelEvent Adds mouse wheel events for zooming
+   * @param event The mouse wheel event
+   */
+  void wheelEvent(QWheelEvent* event) override;
 
   /**
    * @brief resizeEvent Resizes the line number area when the window is resized

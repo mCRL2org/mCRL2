@@ -36,7 +36,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Property:</string>
+         <string>Mu-calculus formula:</string>
         </property>
        </widget>
       </item>

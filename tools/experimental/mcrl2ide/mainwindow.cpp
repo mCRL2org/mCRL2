@@ -113,12 +113,6 @@ void MainWindow::setupMenuBar()
   saveProjectAsAction->setShortcut(
       QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
 
-  fileMenu->addSeparator();
-
-  addPropertyAction =
-      fileMenu->addAction(QIcon(":/icons/add_property.png"), "Add Property",
-                          this, SLOT(actionAddProperty()));
-
   /* Create the Edit menu */
   QMenu* editMenu = menuBar()->addMenu("Edit");
 
@@ -159,7 +153,7 @@ void MainWindow::setupMenuBar()
 
   zoomInAction =
       viewMenu->addAction("Zoom in", specificationEditor, SLOT(zoomIn()));
-  zoomInAction->setShortcut(QKeySequence::ZoomIn);
+  zoomInAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal));
 
   zoomOutAction =
       viewMenu->addAction("Zoom out", specificationEditor, SLOT(zoomOut()));
@@ -168,26 +162,30 @@ void MainWindow::setupMenuBar()
   viewMenu->addSeparator();
 
   /* Create the Tools menu */
-  QMenu* actionsMenu = menuBar()->addMenu("Tools");
+  QMenu* toolsMenu = menuBar()->addMenu("Tools");
 
-  parseAction = actionsMenu->addAction(parseStartIcon, parseStartText, this,
-                                       SLOT(actionParse()));
+  parseAction = toolsMenu->addAction(parseStartIcon, parseStartText, this,
+                                     SLOT(actionParse()));
 
-  simulateAction = actionsMenu->addAction(simulateStartIcon, simulateStartText,
-                                          this, SLOT(actionSimulate()));
+  simulateAction = toolsMenu->addAction(simulateStartIcon, simulateStartText,
+                                        this, SLOT(actionSimulate()));
 
-  actionsMenu->addSeparator();
+  toolsMenu->addSeparator();
 
-  showLtsAction = actionsMenu->addAction(showLtsStartIcon, showLtsStartText,
-                                         this, SLOT(actionShowLts()));
+  showLtsAction = toolsMenu->addAction(showLtsStartIcon, showLtsStartText, this,
+                                       SLOT(actionShowLts()));
 
   showReducedLtsAction =
-      actionsMenu->addAction(showReducedLtsStartIcon, showReducedLtsStartText,
-                             this, SLOT(actionShowReducedLts()));
+      toolsMenu->addAction(showReducedLtsStartIcon, showReducedLtsStartText,
+                           this, SLOT(actionShowReducedLts()));
 
-  actionsMenu->addSeparator();
+  toolsMenu->addSeparator();
 
-  verifyAllPropertiesAction = actionsMenu->addAction(
+  addPropertyAction =
+      toolsMenu->addAction(QIcon(":/icons/add_property.png"), "Add Property",
+                           this, SLOT(actionAddProperty()));
+
+  verifyAllPropertiesAction = toolsMenu->addAction(
       verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
       SLOT(actionVerifyAllProperties()));
 }

@@ -269,7 +269,10 @@ void CodeEditor::highlightCurrentLine()
 
 void CodeEditor::keyPressEvent(QKeyEvent* event)
 {
-  if (event->matches(QKeySequence::ZoomIn))
+  /* zoom in in case of Ctrl++ or Ctrl+=, zoom out in case of Ctrl +- */
+  if (event->matches(QKeySequence::ZoomIn) ||
+      (event->modifiers() == Qt::ControlModifier &&
+       event->key() == Qt::Key_Equal))
   {
     zoomIn();
   }
@@ -283,19 +286,40 @@ void CodeEditor::keyPressEvent(QKeyEvent* event)
   }
 }
 
+void CodeEditor::wheelEvent(QWheelEvent* event)
+{
+  /* zoom in in case of Ctrl+scrollup, zoom out in case of Ctrl+scrolldown */
+  if (event->modifiers() == Qt::ControlModifier)
+  {
+    int numZooms = event->angleDelta().ry() / 120;
+    if (numZooms > 0)
+    {
+      zoomIn(numZooms);
+    }
+    else if (numZooms < 0)
+    {
+      zoomOut(-numZooms);
+    }
+  }
+  else
+  {
+    QPlainTextEdit::wheelEvent(event);
+  }
+}
+
 void CodeEditor::deleteChar()
 {
   this->textCursor().deleteChar();
 }
 
-void CodeEditor::zoomIn()
+void CodeEditor::zoomIn(int range)
 {
-  setFontSize(codeFont.pixelSize() + 1);
+  setFontSize(codeFont.pixelSize() + range);
 }
 
-void CodeEditor::zoomOut()
+void CodeEditor::zoomOut(int range)
 {
-  setFontSize(codeFont.pixelSize() - 1);
+  setFontSize(codeFont.pixelSize() - range);
 }
 
 int CodeEditor::lineNumberAreaWidth()
