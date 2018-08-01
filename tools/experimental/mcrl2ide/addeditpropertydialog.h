@@ -13,6 +13,7 @@
 #include "processsystem.h"
 
 #include <QDialog>
+#include <QRegExpValidator>
 
 namespace Ui
 {
@@ -101,6 +102,7 @@ class AddEditPropertyDialog : public QDialog
   QString windowTitle;
   QString oldPropertyName;
   int propertyParsingProcessid;
+  QRegExpValidator* propertyNameValidator;
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H

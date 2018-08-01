@@ -122,6 +122,7 @@ PropertyWidget::~PropertyWidget()
   editButton->deleteLater();
   deleteButton->deleteLater();
   propertyLayout->deleteLater();
+  editPropertyDialog->deleteLater();
 }
 
 void PropertyWidget::paintEvent(QPaintEvent* pe)

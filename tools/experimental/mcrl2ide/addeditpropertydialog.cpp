@@ -11,7 +11,6 @@
 #include "ui_addeditpropertydialog.h"
 
 #include <QMessageBox>
-#include <QRegExpValidator>
 
 AddEditPropertyDialog::AddEditPropertyDialog(bool add,
                                              ProcessSystem* processSystem,
@@ -26,8 +25,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   oldPropertyName = "";
   propertyParsingProcessid = -1;
 
-  ui->propertyNameField->setValidator(
-      new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*")));
+  propertyNameValidator = new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*"));
+  ui->propertyNameField->setValidator(propertyNameValidator);
 
   /* change the ui depending on whether this should be an add or edit property
    *   window */
@@ -50,6 +49,12 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(parseResults(int)));
   connect(this, SIGNAL(rejected()), this, SLOT(onRejected()));
+}
+
+AddEditPropertyDialog::~AddEditPropertyDialog()
+{
+  delete ui;
+  propertyNameValidator->deleteLater();
 }
 
 void AddEditPropertyDialog::resetFocus()
@@ -168,9 +173,4 @@ void AddEditPropertyDialog::onRejected()
 {
   /* abort the parsing process */
   abortPropertyParsing();
-}
-
-AddEditPropertyDialog::~AddEditPropertyDialog()
-{
-  delete ui;
 }
