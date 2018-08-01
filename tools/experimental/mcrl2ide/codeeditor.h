@@ -148,6 +148,12 @@ class CodeEditor : public QPlainTextEdit
 
   protected:
   /**
+   * @brief paintEvent Adds placeholder text
+   * @param event The paint event
+   */
+  void paintEvent(QPaintEvent* event) override;
+
+  /**
    * @brief keyPressEvent Adds key events for zooming
    * @param event The key event
    */
@@ -170,6 +176,7 @@ class CodeEditor : public QPlainTextEdit
   QFont lineNumberFont;
   LineNumbersArea* lineNumberArea;
   CodeHighlighter* highlighter;
+  QString placeholderText;
 
   QMenu* contextMenu;
   QAction* zoomInAction;

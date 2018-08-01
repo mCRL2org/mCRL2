@@ -201,6 +201,10 @@ CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
 
   setFontSize(13);
 
+  placeholderText =
+      "Type your " +
+      QString(spec ? "mCRL2 specification" : "mu-calculus formula") + " here";
+
   lineNumberArea = new LineNumbersArea(this);
   highlighter = new CodeHighlighter(spec, this->document());
 
@@ -214,11 +218,6 @@ CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
   zoomInAction->setShortcut(QKeySequence::ZoomIn);
   zoomOutAction = contextMenu->addAction("Zoom out", this, SLOT(zoomOut()));
   zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-
-  /* highlight the line that the cursor is on */
-  highlightCurrentLine();
-  connect(this, SIGNAL(cursorPositionChanged()), this,
-          SLOT(highlightCurrentLine()));
 
   /* change the line number area when needed */
   connect(this, SIGNAL(blockCountChanged(int)), this,
@@ -265,6 +264,28 @@ void CodeEditor::highlightCurrentLine()
   extraSelections.append(selection);
 
   setExtraSelections(extraSelections);
+}
+
+void CodeEditor::paintEvent(QPaintEvent* event)
+{
+  /* add placeholder text if the code editor is out of focus and empty, else
+   *   highlight the line the cursor is on */
+  if (!this->hasFocus() && this->toPlainText().isEmpty())
+  {
+    /* first remove the line highlighting */
+    this->setExtraSelections({});
+
+    QPainter painter(this->viewport());
+    painter.setFont(codeFont);
+    painter.setPen(Qt::gray);
+    QRect rect(4, 4, event->rect().width(), event->rect().height());
+    painter.drawText(rect, placeholderText);
+  }
+  else
+  {
+    highlightCurrentLine();
+  }
+  QPlainTextEdit::paintEvent(event);
 }
 
 void CodeEditor::keyPressEvent(QKeyEvent* event)
