@@ -780,7 +780,7 @@ void ProcessSystem::killProcess(int processid)
 void ProcessSystem::deleteProcess(int processid, int fromSubprocessIndex)
 {
   std::vector<QProcess*> subprocesses = processes[processid];
-  for (int i = fromSubprocessIndex; i < subprocesses.size(); i++)
+  for (int i = fromSubprocessIndex; i < int(subprocesses.size()); i++)
   {
     subprocesses[i]->deleteLater();
   }
