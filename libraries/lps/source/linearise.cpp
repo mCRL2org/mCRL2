@@ -53,8 +53,9 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/substitutions/map_substitution.h"
+// #include "mcrl2/data/substitutions/map_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
 
 //mCRL2 processes
@@ -324,6 +325,17 @@ class specification_basic_type
         return false;
       }
       return RewriteTerm(at(t).time_stamp())==data::sort_real::real_(0);
+    }
+
+    /***************** temporary helper function to compare substitutions ******************/
+
+    template <class Expression, class Substitution>
+    Expression replace_variables_capture_avoiding_alt(const Expression& e,
+                                                           Substitution& sigma,
+                                                           const std::set<variable>& variables_in_rhs_of_sigma)
+    {
+      // return data::replace_variables_capture_avoiding(e, sigma, variables_in_rhs_of_sigma);
+      return data::replace_variables_capture_avoiding_with_an_identifier_generator(e, sigma, fresh_identifier_generator);
     }
 
 
@@ -1876,7 +1888,7 @@ class specification_basic_type
           }
           if (replacerhs)
           {
-            rhs=data::replace_variables_capture_avoiding(rhs,sigma,variables_in_rhs_of_sigma);
+            rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma,variables_in_rhs_of_sigma);
           }
 
           assignment_list result=
@@ -1907,7 +1919,7 @@ class specification_basic_type
       }
       if (replacerhs)
       {
-        rhs=data::replace_variables_capture_avoiding(rhs,sigma,variables_in_rhs_of_sigma);
+        rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma,variables_in_rhs_of_sigma);
       }
 
       if (lhs==rhs)
@@ -1987,12 +1999,13 @@ class specification_basic_type
     /* The function below cannot be replace by replace_variables_capture_avoiding although
      * the interfaces are the same. As yet it is unclear why, but the difference shows itself
      * for instance when linearising lift3_final.mcrl2 and lift3_init.mcrl2 */
+    template <class Substitution>
     process_expression substitute_pCRLproc(
       const process_expression& p,
-      mutable_map_substitution<>& sigma,
+      Substitution& sigma,
       const std::set< variable >& rhs_variables_in_sigma)
     {
-      // mutable_map_substitution<> sigma_aux(sigma);
+      // Substitution sigma_aux(sigma);
       // return process::replace_variables_capture_avoiding(p,sigma_aux,rhs_variables_in_sigma);
       if (is_choice(p))
       {
@@ -2014,7 +2027,7 @@ class specification_basic_type
       }
       if (is_if_then(p))
       {
-        data_expression condition=data::replace_variables_capture_avoiding(if_then(p).condition(), sigma,rhs_variables_in_sigma);
+        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma,rhs_variables_in_sigma);
         if (condition==sort_bool::false_())
         {
           return delta_at_zero();
@@ -2027,7 +2040,7 @@ class specification_basic_type
       }
       if (is_if_then_else(p))
       {
-        data_expression condition=data::replace_variables_capture_avoiding(if_then_else(p).condition(), sigma,rhs_variables_in_sigma);
+        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma,rhs_variables_in_sigma);
         if (condition==sort_bool::false_())
         {
           return substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma);
@@ -2054,7 +2067,7 @@ class specification_basic_type
           terms=push_back(terms,i->second);
         }
 
-        mutable_map_substitution<> local_sigma=sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma=sigma;
         std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
         alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
 
@@ -2075,13 +2088,13 @@ class specification_basic_type
           terms=push_back(terms,i->second);
         }
 
-        mutable_map_substitution<> local_sigma=sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma=sigma;
         std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
         alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
 
         return stochastic_operator(
                             sumargs,
-                            data::replace_variables_capture_avoiding(sto.distribution(),sigma,rhs_variables_in_sigma),
+                            /* data::*/replace_variables_capture_avoiding_alt(sto.distribution(),sigma,rhs_variables_in_sigma),
                             substitute_pCRLproc(sto.operand(),local_sigma,local_rhs_variables_in_sigma));
       }
 
@@ -2103,13 +2116,13 @@ class specification_basic_type
       if (is_action(p))
       {
         return action(action(p).label(),
-                      data::replace_variables_capture_avoiding(action(p).arguments(), sigma,rhs_variables_in_sigma));
+                      /* data::*/replace_variables_capture_avoiding_alt(action(p).arguments(), sigma,rhs_variables_in_sigma));
       }
 
       if (is_at(p))
       {
         return at(substitute_pCRLproc(at(p).operand(),sigma,rhs_variables_in_sigma),
-                  data::replace_variables_capture_avoiding(at(p).time_stamp(),sigma,rhs_variables_in_sigma));
+                  /* data::*/replace_variables_capture_avoiding_alt(at(p).time_stamp(),sigma,rhs_variables_in_sigma));
       }
 
       if (is_delta(p))
@@ -2273,12 +2286,12 @@ class specification_basic_type
         variable_list sumvars=sum(body).variables();
         process_expression body1=sum(body).operand();
 
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
-        mutable_map_substitution<> sigma_aux(sigma);
-        const data_expression time1=data::replace_variables_capture_avoiding(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
+        maintain_variables_in_rhs< mutable_map_substitution<> >  sigma_aux(sigma);
+        const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
         body1=wraptime(body1,time1,sumvars+freevars);
         return sum(sumvars,body1);
       }
@@ -2289,13 +2302,13 @@ class specification_basic_type
         variable_list sumvars=sto.variables();
         process_expression body1=sto.operand();
 
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
-        const data_expression new_distribution=data::replace_variables_capture_avoiding(sto.distribution(), sigma,variables_occurring_in_rhs_of_sigma);
-        mutable_map_substitution<> sigma_aux(sigma);
-        const data_expression time1=data::replace_variables_capture_avoiding(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
+        const data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma,variables_occurring_in_rhs_of_sigma);
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
+        const data_expression time1=/* data::*/replace_variables_capture_avoiding_alt(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
         body1=wraptime(body1,time1,sumvars+freevars);
         return stochastic_operator(sumvars,new_distribution,body1);
       }
@@ -2513,7 +2526,7 @@ class specification_basic_type
           variable_list sumvars=sum(body).variables();
           process_expression body1=sum(body).operand();
 
-          mutable_map_substitution<> sigma;
+          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           std::set<variable> variables_occurring_in_rhs_of_sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
           body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
@@ -2547,10 +2560,10 @@ class specification_basic_type
           data_expression distribution=sto.distribution();
           process_expression body1=sto.operand();
 
-          mutable_map_substitution<> sigma;
+          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           std::set<variable> variables_occurring_in_rhs_of_sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-          distribution=data::replace_variables_capture_avoiding(distribution,sigma,variables_occurring_in_rhs_of_sigma);
+          distribution=/* data::*/replace_variables_capture_avoiding_alt(distribution,sigma,variables_occurring_in_rhs_of_sigma);
           body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -2876,7 +2889,7 @@ class specification_basic_type
             inadvertently bound */
         variable_list sumvars=sum(body1).variables();
 
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set < variable > lhs_variables_in_sigma;
         alphaconvertprocess(sumvars,sigma,body2,lhs_variables_in_sigma);
         return sum(sumvars,
@@ -2890,7 +2903,7 @@ class specification_basic_type
         variable_list stochvars=sto.variables();
 
         // See explanation at sum operator above.
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set < variable > lhs_variables_in_sigma;
         alphaconvertprocess(stochvars,sigma,body2,lhs_variables_in_sigma);
         return stochastic_operator(
@@ -2965,7 +2978,7 @@ class specification_basic_type
         /* we must take care that no variables in condition are
             inadvertently bound */
         variable_list sumvars=sum(body1).variables();
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> >  sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,variable_list(), data_expression_list({ condition }),variables_occurring_in_rhs_of_sigma);
         return sum(
@@ -2981,12 +2994,12 @@ class specification_basic_type
             inadvertently bound */
         const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body1);
         variable_list stochvars=sto.variables();
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(stochvars,sigma,variable_list(), data_expression_list({ condition }),variables_occurring_in_rhs_of_sigma);
         return stochastic_operator(
                  stochvars,
-                 data::replace_variables_capture_avoiding(
+                 /* data::*/replace_variables_capture_avoiding_alt(
                                                sto.distribution(),
                                                sigma,
                                                variables_occurring_in_rhs_of_sigma),
@@ -3033,7 +3046,7 @@ class specification_basic_type
 
       if (is_sum(body1))
       {
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         variable_list inner_sumvars=sum(body1).variables();
         alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
@@ -3044,12 +3057,12 @@ class specification_basic_type
       if (is_stochastic_operator(body1))
       {
         const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body1);
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         variable_list inner_sumvars=sto.variables();
         alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         const process_expression new_body1=substitute_pCRLproc(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
-        const data_expression new_distribution=data::replace_variables_capture_avoiding(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
+        const data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
         return stochastic_operator(sumvars+inner_sumvars,new_distribution,new_body1);
       }
 
@@ -3412,7 +3425,7 @@ class specification_basic_type
       {
         variable_list sumvars=sum(t).variables();
 
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma, variables_occurring_in_rhs_of_sigma);
@@ -3432,10 +3445,10 @@ class specification_basic_type
         const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
         variable_list sumvars=sto.variables();
 
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const data_expression distribution=data::replace_variables_capture_avoiding(
+        const data_expression distribution=/* data::*/replace_variables_capture_avoiding_alt(
                                                sto.distribution(),
                                                sigma,
                                                variables_occurring_in_rhs_of_sigma);
@@ -3479,12 +3492,12 @@ class specification_basic_type
       {
         variable_list sumvars=sum(body).variables();
         process_expression body1=sum(body).operand();
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         body1=substitute_pCRLproc(body1, sigma, variables_occurring_in_rhs_of_sigma);
-        mutable_map_substitution<> sigma_aux(sigma);
-        const data_expression time1=data::replace_variables_capture_avoiding(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
+        const data_expression time1=/* data::*/replace_variables_capture_avoiding_alt(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
         body1=distributeTime(body1,time1,sumvars+freevars,timecondition);
         return sum(sumvars,body1);
       }
@@ -3493,13 +3506,13 @@ class specification_basic_type
       {
         const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
         variable_list sumvars=sto.variables();
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
         process_expression new_body=substitute_pCRLproc(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
-        data_expression new_distribution=data::replace_variables_capture_avoiding(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
-        mutable_map_substitution<> sigma_aux(sigma);
-        const data_expression time1=data::replace_variables_capture_avoiding(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
+        data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
+        const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
         new_body=distributeTime(new_body,time1,sumvars+freevars,timecondition);
         return stochastic_operator(sumvars,new_distribution,new_body);
       }
@@ -3675,7 +3688,7 @@ class specification_basic_type
 
         const assignment_list& dl= process_instance_assignment(body).assignments();
 
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
 
         for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
@@ -4131,15 +4144,15 @@ class specification_basic_type
           assert(!is_process_instance_assignment(proc.operand()));
           const std::size_t n=objectIndex(p);
           std::set<variable> variables_occurring_in_rhs_of_sigma;
-          mutable_map_substitution<> local_sigma;
+          maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
           variable_list vars=proc.variables();
           alphaconvert(vars,local_sigma, vars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
 
           const process_identifier newproc=newprocess(
                                            vars + objectdata[n].parameters,
-                                           process::replace_variables_capture_avoiding(proc.operand(),
+                                           process::replace_variables_capture_avoiding_with_an_identifier_generator(proc.operand(),
                                                                                        local_sigma,
-                                                                                       variables_occurring_in_rhs_of_sigma),
+                                                                                       fresh_identifier_generator),
                                            pCRL,
                                            canterminatebody(proc.operand()),
                                            containstimebody(proc.operand()));
@@ -4150,9 +4163,9 @@ class specification_basic_type
                                  (p,
                                   process_pid_pair(stochastic_operator(
                                                         vars,
-                                                        data::replace_variables_capture_avoiding(proc.distribution(),
-                                                                                                 local_sigma,
-                                                                                                 variables_occurring_in_rhs_of_sigma),
+                                                        /* data::*/replace_variables_capture_avoiding_alt(proc.distribution(),
+                                                                                                          local_sigma,
+                                                                                                          variables_occurring_in_rhs_of_sigma),
                                                         proc.operand()),
                                                    newproc)));
           result.insert(newproc);
@@ -5266,7 +5279,7 @@ class specification_basic_type
 
       // Check whether the variables in sumvars clash with the parameter list,
       // and rename the summandterm accordingly.
-      mutable_map_substitution<> local_sigma;
+      maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
       std::set<variable> local_rhs_variables_in_sigma;
       alphaconvert(sumvars,local_sigma,process_parameters,data_expression_list(),local_rhs_variables_in_sigma);
       summandterm=substitute_pCRLproc(summandterm, local_sigma, local_rhs_variables_in_sigma);
@@ -6162,23 +6175,23 @@ class specification_basic_type
         ++auxrename_list_pars;
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
-        std::map<variable,data_expression> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_in_rhs_of_sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
         {
           /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma.count(*i)==0)
+          if (sigma(*i)==*i)  // sigma *i is undefined. 
           {
             sigma[*i]=*j;
             const std::set<variable> varset=find_free_variables(*j);
             variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
           }
         }
-        mutable_map_substitution<> mutable_sigma(sigma);
+        maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-        const data_expression auxresult1=data::replace_variables_capture_avoiding(condition,mutable_sigma,variables_in_rhs_of_sigma);
+        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition,mutable_sigma,variables_in_rhs_of_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -6291,14 +6304,14 @@ class specification_basic_type
             data_expression_list::const_iterator d1=(a1->arguments()).begin();
             for (std::size_t i=1; i<fcnt; ++i, ++d1) {};
             f= *d1;
-            std::map<variable,data_expression> sigma;
+            maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
             std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
             {
               /* Substitutions are carried out from left to right. The first applicable substitution counts */
-              if (sigma.count(*i)==0)
+              if (sigma(*i)==*i)  // *i is not assigned in sigma. 
               {
                 sigma[*i]=*j;
                 std::set<variable> varset=find_free_variables(*j);
@@ -6306,8 +6319,8 @@ class specification_basic_type
               }
             }
 
-            mutable_map_substitution<> mutable_sigma(sigma);
-            const data_expression auxresult1=data::replace_variables_capture_avoiding(f,mutable_sigma,variables_in_rhs_sigma);
+            maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
+            const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(f,mutable_sigma,variables_in_rhs_sigma);
 
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
@@ -6398,14 +6411,14 @@ class specification_basic_type
             const data_expression_list auxargs= *auxrename_list_args;
             ++auxrename_list_args;
 
-            std::map < variable, data_expression > sigma;
+            maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
             std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
             {
               /* Substitutions are carried out from left to right. The first applicable substitution counts */
-              if (sigma.count(*i)==0)
+              if (sigma(*i)==*i)   // sigma is not defined for *i.
               {
                 sigma[*i]=*j;
                 std::set<variable> varset=find_free_variables(*j);
@@ -6413,8 +6426,8 @@ class specification_basic_type
               }
             }
 
-            mutable_map_substitution<> mutable_sigma(sigma);
-            const data_expression auxresult1=data::replace_variables_capture_avoiding(actiontime, mutable_sigma,variables_in_rhs_sigma);
+            maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
+            const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma,variables_in_rhs_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -6500,14 +6513,14 @@ class specification_basic_type
           ++stochastic_auxrename_list_pars;
           const data_expression_list stochastic_auxargs= *stochastic_auxrename_list_args;
           ++stochastic_auxrename_list_args;
-          std::map<variable,data_expression> sigma;
+          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           std::set<variable> variables_in_rhs_of_sigma;
           data_expression_list::const_iterator j=stochastic_auxargs.begin();
           for (variable_list::const_iterator i=stochastic_auxpars.begin();
                i!=stochastic_auxpars.end(); ++i, ++j)
           {
             /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma.count(*i)==0)
+            if (sigma(*i)==*i)  // sigma is not defined for *i.
             {
               sigma[*i]=*j;
               const std::set<variable> varset=find_free_variables(*j);
@@ -6519,16 +6532,16 @@ class specification_basic_type
                i!=auxpars.end(); ++i, ++j)
           {
             /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma.count(*i)==0)
+            if (sigma(*i)==*i) // sigma is not defined for *i.
             {
               sigma[*i]=*j;
               const std::set<variable> varset=find_free_variables(*j);
               variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
             }
           }
-          mutable_map_substitution<> mutable_sigma(sigma);
+          maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-          const data_expression auxresult1=data::replace_variables_capture_avoiding(dist,mutable_sigma,variables_in_rhs_of_sigma);
+          const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(dist,mutable_sigma,variables_in_rhs_of_sigma);
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
             equalterm=auxresult1;
@@ -6651,14 +6664,14 @@ class specification_basic_type
           data_expression nextstateparameter;
           nextstateparameter=getRHSassignment(*var_it,nextstate);
 
-          std::map < variable, data_expression > sigma;
+          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           std::set<variable> variables_in_rhs_sigma;
           data_expression_list::const_iterator j=stochastic_auxargs.begin();
           for (variable_list::const_iterator i=stochastic_auxpars.begin();
                  i!=stochastic_auxpars.end(); ++i, ++j)
           {
             /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma.count(*i)==0)
+            if (sigma(*i)==*i)  // sigma is not defined for *i.
             {
               sigma[*i]=*j;
               std::set<variable> varset=find_free_variables(*j);
@@ -6670,7 +6683,7 @@ class specification_basic_type
                  i!=auxpars.end(); ++i, ++j)
           {
             /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma.count(*i)==0)
+            if (sigma(*i)==*i)  // sigma is not defined for *i. 
             {
               sigma[*i]=*j;
               std::set<variable> varset=find_free_variables(*j);
@@ -6678,8 +6691,8 @@ class specification_basic_type
             }
           }
 
-          mutable_map_substitution<> mutable_sigma(sigma);
-          data_expression auxresult1=data::replace_variables_capture_avoiding(nextstateparameter, mutable_sigma,variables_in_rhs_sigma);
+          maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
+          data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(nextstateparameter, mutable_sigma,variables_in_rhs_sigma);
           if (equalterm==data_expression()) // ||is_global_variable(equalterm)) Adding this last part leads to smaller case functions,
                                             // but bigger and less structured state spaces, as parameters are less often put to default
                                             // values. Constant elimination can less often be applied as constant eliminiation does not
@@ -6805,14 +6818,14 @@ class specification_basic_type
         ++auxrename_list_pars;
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
-        std::map < variable, data_expression > sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_in_rhs_sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
         {
           /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma.count(*i)==0)
+          if (sigma(*i)== *i) // sigma is not defined for *i. 
           {
             sigma[*i]=*j;
             std::set<variable> varset=find_free_variables(*j);
@@ -6820,8 +6833,8 @@ class specification_basic_type
           }
         }
 
-        mutable_map_substitution<> mutable_sigma(sigma);
-        const data_expression auxresult1=data::replace_variables_capture_avoiding(condition, mutable_sigma,variables_in_rhs_sigma);
+        maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
+        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition, mutable_sigma,variables_in_rhs_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -6940,14 +6953,14 @@ class specification_basic_type
             const data_expression_list auxargs= *auxrename_list_args;
             ++auxrename_list_args;
 
-            std::map < variable, data_expression > sigma;
+            maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
             std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
             {
               /* Substitutions are carried out from left to right. The first applicable substitution counts */
-              if (sigma.count(*i)==0)
+              if (sigma(*i)==*i)  // sigma is not defined for *i.
               {
                 sigma[*i]=*j;
                 std::set<variable> varset=find_free_variables(*j);
@@ -6955,8 +6968,8 @@ class specification_basic_type
               }
             }
 
-            mutable_map_substitution<> mutable_sigma(sigma);
-            const data_expression auxresult1=data::replace_variables_capture_avoiding(actiontime, mutable_sigma,variables_in_rhs_sigma);
+            maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
+            const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma,variables_in_rhs_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -8550,14 +8563,14 @@ class specification_basic_type
         const variable_list& auxpars=*renamings_par;
         const data_expression_list& auxargs=*renamings_arg;
 
-        std::map < variable, data_expression > sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
         std::set<variable> variables_in_rhs_sigma;
         data_expression_list::const_iterator j1=auxargs.begin();
         for (variable_list::const_iterator i1=auxpars.begin();
              i1!=auxpars.end(); ++i1, ++j1)
         {
           /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma.count(*i1)==0)
+          if (sigma(*i1)==*i1)
           {
             sigma[*i1]=*j1;
             std::set<variable> varset=find_free_variables(*j);
@@ -8566,8 +8579,8 @@ class specification_basic_type
           }
         }
 
-        mutable_map_substitution<> mutable_sigma(sigma);
-        result=lazy::or_(result,data::replace_variables_capture_avoiding(lazy::and_(*i,*j), mutable_sigma, variables_in_rhs_sigma));
+        maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
+        result=lazy::or_(result,/* data::*/replace_variables_capture_avoiding_alt(lazy::and_(*i,*j), mutable_sigma, variables_in_rhs_sigma));
       }
       return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, RewriteTerm(result));
     }
@@ -8575,7 +8588,7 @@ class specification_basic_type
 
     /******** make_unique_variables **********************/
 
-    data::mutable_map_substitution<> make_unique_variables(
+    data::maintain_variables_in_rhs< data::mutable_map_substitution<> >  make_unique_variables(
       const variable_list& var_list,
       const std::string& hint,
       std::set<data::variable>& rhs_variables)
@@ -8583,7 +8596,7 @@ class specification_basic_type
       /* This function generates a list of variables with the same sorts
          as in variable_list, where all names are unique */
 
-      data::mutable_map_substitution<> sigma;
+      data::maintain_variables_in_rhs< data::mutable_map_substitution<> >  sigma;
 
       for(variable_list::const_iterator i=var_list.begin(); i!=var_list.end(); ++i)
       {
@@ -8607,7 +8620,7 @@ class specification_basic_type
       stochastic_action_summand_vector result_action_summands;
 
       std::set<data::variable> rhs_variables_sigma;
-      data::mutable_map_substitution<> sigma=make_unique_variables(pars, hint, rhs_variables_sigma);
+      data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma=make_unique_variables(pars, hint, rhs_variables_sigma);
       const variable_list unique_pars=data::replace_variables(pars, sigma);
 
       init=substitute_assignmentlist(init,pars,true,false, sigma,rhs_variables_sigma);  // Only substitute the variables in the lhs.
@@ -8615,12 +8628,12 @@ class specification_basic_type
       if (!options.ignore_time)
       {
         // Remove variables locally bound in the ultimate_delay_condition
-        data::mutable_map_substitution<> local_sigma=sigma;
+        maintain_variables_in_rhs< data::mutable_map_substitution<> > local_sigma=sigma;
         for(const variable& v: ultimate_delay_condition.variables())
         {
           local_sigma[v]=v;
         }
-        ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
+        ultimate_delay_condition.constraint()=/*data::*/replace_variables_capture_avoiding_alt(
                                                        ultimate_delay_condition.constraint(),
                                                        local_sigma,
                                                        rhs_variables_sigma);  // Only substitute the variables in the lhs.
@@ -8631,13 +8644,14 @@ class specification_basic_type
 
         std::set<data::variable> rhs_variables_sumvars;
         const variable_list& sumvars=smmnd.summation_variables();
-        data::mutable_map_substitution<> sigma_sumvars=make_unique_variables(sumvars,hint,rhs_variables_sumvars);
+        data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint,rhs_variables_sumvars);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         stochastic_distribution distribution=smmnd.distribution();
         std::set<data::variable> rhs_variables_stochastic_vars;
         const variable_list stochastic_vars=distribution.variables();
-        data::mutable_map_substitution<> sigma_stochastic_vars=make_unique_variables(stochastic_vars,hint,rhs_variables_stochastic_vars);
+        data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_stochastic_vars=
+                                          make_unique_variables(stochastic_vars,hint,rhs_variables_stochastic_vars);
         const variable_list unique_stochastic_vars=data::replace_variables(stochastic_vars, sigma_stochastic_vars);
 
         data_expression condition=smmnd.condition();
@@ -8645,23 +8659,23 @@ class specification_basic_type
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-        condition=data::replace_variables_capture_avoiding(condition, sigma_sumvars, rhs_variables_sumvars);
-        condition=data::replace_variables_capture_avoiding(condition, sigma, rhs_variables_sigma);
+        condition=/* data::*/replace_variables_capture_avoiding_alt(condition, sigma_sumvars, rhs_variables_sumvars);
+        condition=/* data::*/replace_variables_capture_avoiding_alt(condition, sigma, rhs_variables_sigma);
 
-        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma_sumvars, rhs_variables_sumvars);
-        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma, rhs_variables_sigma);
-        multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma_sumvars, rhs_variables_sumvars);
-        multiaction=lps::replace_variables_capture_avoiding(multiaction, sigma, rhs_variables_sigma);
+        actiontime=/*data::*/replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars, rhs_variables_sumvars);
+        actiontime=/*data::*/replace_variables_capture_avoiding_alt(actiontime, sigma, rhs_variables_sigma);
+        multiaction=lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction, sigma_sumvars, fresh_identifier_generator);
+        multiaction=lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction, sigma, fresh_identifier_generator);
 
         distribution=stochastic_distribution(
                        unique_stochastic_vars,
-                       data::replace_variables_capture_avoiding(distribution.distribution(), sigma_sumvars, rhs_variables_sumvars));
+                       /*data::*/replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_sumvars, rhs_variables_sumvars));
         distribution=stochastic_distribution(
                        unique_stochastic_vars,
-                       data::replace_variables_capture_avoiding(distribution.distribution(), sigma_stochastic_vars, rhs_variables_stochastic_vars));
+                       /*data::*/replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_stochastic_vars, rhs_variables_stochastic_vars));
         distribution=stochastic_distribution(
                        distribution.variables(),
-                       data::replace_variables_capture_avoiding(distribution.distribution(), sigma, rhs_variables_sigma));
+                       /*data::*/replace_variables_capture_avoiding_alt(distribution.distribution(), sigma, rhs_variables_sigma));
 
         nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars,rhs_variables_sumvars);
         nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_stochastic_vars,rhs_variables_stochastic_vars);
@@ -8686,18 +8700,18 @@ class specification_basic_type
         std::set<data::variable> rhs_variables_sumvars;
         const deadlock_summand smmnd= *s;
         const variable_list& sumvars=smmnd.summation_variables();
-        data::mutable_map_substitution<> sigma_sumvars=make_unique_variables(sumvars,hint, rhs_variables_sumvars);
+        maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint, rhs_variables_sumvars);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         assert(unique_sumvars.size()==sumvars.size());
         data_expression condition=smmnd.condition();
         data_expression actiontime=smmnd.deadlock().time();
 
-        condition=data::replace_variables_capture_avoiding(condition, sigma_sumvars, rhs_variables_sumvars);
-        condition=data::replace_variables_capture_avoiding(condition, sigma, rhs_variables_sigma);
+        condition=/*data::*/replace_variables_capture_avoiding_alt(condition, sigma_sumvars, rhs_variables_sumvars);
+        condition=/*data::*/replace_variables_capture_avoiding_alt(condition, sigma, rhs_variables_sigma);
 
-        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma_sumvars, rhs_variables_sumvars);
-        actiontime=data::replace_variables_capture_avoiding(actiontime, sigma, rhs_variables_sigma);
+        actiontime=/*data::*/replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars, rhs_variables_sumvars);
+        actiontime=/*data::i*/replace_variables_capture_avoiding_alt(actiontime, sigma, rhs_variables_sigma);
 
         result_deadlock_summands.push_back(deadlock_summand(unique_sumvars,
                                                             condition,
@@ -8723,14 +8737,14 @@ class specification_basic_type
     {
       // Make the bound variables of the second ultimate delay different from those in the first.
       variable_list renameable_variables=delay2.variables();
-      mutable_map_substitution<> sigma;
+      maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
       std::set<variable> rhs_variables_in_sigma;
       alphaconvert(renameable_variables, sigma, delay1.variables(), data_expression_list(), rhs_variables_in_sigma);
       // Additionally map the time variable of the second ultimate delay to that of the first.
       sigma[delay2.time_var()]=delay1.time_var();
       rhs_variables_in_sigma.insert(delay2.time_var());
       data_expression new_constraint = optimized_and(delay1.constraint(),
-                                          data::replace_variables_capture_avoiding(delay2.constraint(),sigma, rhs_variables_in_sigma));
+                                          /*data::*/replace_variables_capture_avoiding_alt(delay2.constraint(),sigma, rhs_variables_in_sigma));
       variable_list new_existential_variables = delay1.variables()+renameable_variables;
 
       // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged.
@@ -8751,7 +8765,7 @@ class specification_basic_type
       for (const stochastic_action_summand& summand1: action_summands1)
       {
         variable_list sumvars=ultimate_delay_condition.variables();
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         std::set<variable> variables_in_rhs_of_sigma;
         alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list(),variables_in_rhs_of_sigma);
 
@@ -8783,7 +8797,7 @@ class specification_basic_type
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
                 condition1=lazy::and_(condition1,
-                                      data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
+                                      /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
                                                                                sigma,
                                                                                variables_in_rhs_of_sigma));
                 has_time=true;
@@ -8797,7 +8811,7 @@ class specification_basic_type
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
               variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
               const data_expression intermediateultimatedelaycondition=
-                         data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
               condition1=optimized_and(condition1, intermediateultimatedelaycondition);
             }
 
@@ -8832,7 +8846,7 @@ class specification_basic_type
         for (const deadlock_summand& summand1: deadlock_summands1)
         {
           variable_list sumvars=ultimate_delay_condition.variables();
-          mutable_map_substitution<> sigma;
+          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           std::set<variable> variables_in_rhs_of_sigma;
           alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list(),variables_in_rhs_of_sigma);
 
@@ -8850,7 +8864,7 @@ class specification_basic_type
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
                 condition1=optimized_and(condition1,
-                                         data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
+                                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
                                                                                   sigma,
                                                                                   variables_in_rhs_of_sigma));
                 has_time=true;
@@ -8864,7 +8878,7 @@ class specification_basic_type
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
               variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
               const data_expression intermediateultimatedelaycondition=
-                         data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
               condition1=optimized_and(condition1, intermediateultimatedelaycondition);
             }
 
@@ -9269,7 +9283,7 @@ class specification_basic_type
         std::size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
-        mutable_map_substitution<> sigma;
+        maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
         std::set<variable> variables_occurring_in_rhs_sigma;
         for (assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
         {
@@ -9546,7 +9560,7 @@ class specification_basic_type
     process_expression alphaconversionterm(
       const process_expression& t,
       const variable_list& parameters,
-      mutable_map_substitution<> sigma,
+      maintain_variables_in_rhs<mutable_map_substitution<> > sigma,
       const std::set < variable >& variables_occurring_in_rhs_of_sigma)
     {
       if (is_choice(t))
@@ -9594,20 +9608,20 @@ class specification_basic_type
       if (is_at(t))
       {
         return at(alphaconversionterm(at(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                  data::replace_variables_capture_avoiding(at(t).time_stamp(),sigma,variables_occurring_in_rhs_of_sigma));
+                  /*data::*/replace_variables_capture_avoiding_alt(at(t).time_stamp(),sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_if_then(t))
       {
         return if_then(
-                 data::replace_variables_capture_avoiding(if_then(t).condition(), sigma, variables_occurring_in_rhs_of_sigma),
+                 /*data::*/replace_variables_capture_avoiding_alt(if_then(t).condition(), sigma, variables_occurring_in_rhs_of_sigma),
                  alphaconversionterm(if_then(t).then_case(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_sum(t))
       {
         variable_list sumvars=sum(t).variables();
-        mutable_map_substitution<> local_sigma=sigma;
+        maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
         std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
 
         alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters),variables_occurring_in_rhs_of_local_sigma);
@@ -9619,13 +9633,13 @@ class specification_basic_type
       {
         const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
         variable_list sumvars=sto.variables();
-        mutable_map_substitution<> local_sigma=sigma;
+        maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
         std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
 
         alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters),variables_occurring_in_rhs_of_local_sigma);
         return stochastic_operator(
                        sumvars,
-                       data::replace_variables_capture_avoiding(sto.distribution(),
+                       /*data::*/replace_variables_capture_avoiding_alt(sto.distribution(),
                                                                 sigma, variables_occurring_in_rhs_of_sigma),
                        alphaconversionterm(sto.operand(), sumvars+parameters,
                                                    local_sigma,variables_occurring_in_rhs_of_local_sigma));
@@ -9648,7 +9662,7 @@ class specification_basic_type
 
       if (is_action(t))
       {
-        return action(action(t).label(), data::replace_variables_capture_avoiding(action(t).arguments(), sigma, variables_occurring_in_rhs_of_sigma));
+        return action(action(t).label(), /*data::*/replace_variables_capture_avoiding_alt(action(t).arguments(), sigma, variables_occurring_in_rhs_of_sigma));
       }
 
       if (is_delta(t)||
@@ -9696,13 +9710,13 @@ class specification_basic_type
         objectdata[n].processstatus=GNFalpha;
         // tempvar below is needed as objectdata may be reallocated
         // during a call to alphaconversionterm.
-        std::map < variable, data_expression > sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,sigma,std::set<variable>());
         objectdata[n].processbody=tempvar;
       }
       else if (objectdata[n].processstatus==mCRLdone)
       {
-        std::map < variable, data_expression > sigma;
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconversionterm(objectdata[n].processbody,parameters,sigma,std::set<variable>());
 
       }
@@ -9939,7 +9953,7 @@ class specification_basic_type
           // Furthermore, the old assignment must be applied to the distribution, when it is moved
           // outside of the process body.
           std::set<variable> variables_occurring_in_rhs_of_sigma;
-          mutable_map_substitution<> local_sigma;
+          maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
           for(const assignment& a:u.assignments())
           {
             local_sigma[a.lhs()]=a.rhs();
@@ -9947,7 +9961,7 @@ class specification_basic_type
             variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
           }
           return stochastic_operator(sto.variables(),
-                                     data::replace_variables_capture_avoiding(sto.distribution(),
+                                     /*data::*/replace_variables_capture_avoiding_alt(sto.distribution(),
                                                                               local_sigma,
                                                                               variables_occurring_in_rhs_of_sigma),
                                      process_instance_assignment(new_identifier,new_assignments));
@@ -9971,11 +9985,11 @@ class specification_basic_type
             process_expression new_body2=r2.operand();
             std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
-            mutable_map_substitution<> local_sigma;
+            maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
             new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
-                   process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
+                   process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
             return stochastic_operator(r1.variables() + stochvars,
                                        real_times_optimized(r1.distribution(),new_distribution),
@@ -10037,11 +10051,11 @@ class specification_basic_type
             process_expression new_body2=r2.operand();
             std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
-            mutable_map_substitution<> local_sigma;
+            maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
             new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
-                   process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
+                   process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
             return stochastic_operator(r1.variables() + stochvars,
                                        if_(t_.condition(),
@@ -10169,11 +10183,11 @@ class specification_basic_type
             process_expression new_body2=r2.operand();
             std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
-            mutable_map_substitution<> local_sigma;
+            maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
             new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
-                   process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
+                   process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
             return stochastic_operator(r1.variables() + stochvars,
                                        real_times_optimized(r1.distribution(),new_distribution),
@@ -10233,11 +10247,11 @@ class specification_basic_type
             process_expression new_body2=r2.operand();
             std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
-            mutable_map_substitution<> local_sigma;
+            maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
             new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
             const data_expression new_distribution=
-                   process::replace_variables_capture_avoiding(r2.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma);
+                   process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
             return stochastic_operator(r1.variables() + stochvars,
                                        if_(if_then_else(t).condition(),
@@ -10749,7 +10763,7 @@ class specification_basic_type
             const process_identifier& procId,
             std::set<process_identifier>& visited_processes,
             std::set<identifier_string>& used_variable_names,
-            mutable_map_substitution<>& parameter_mapping,
+            maintain_variables_in_rhs<mutable_map_substitution<> >& parameter_mapping,
             std::set<variable>& variables_in_lhs_of_parameter_mapping,
             std::set<variable>& variables_in_rhs_of_parameter_mapping)
     {
@@ -10797,7 +10811,7 @@ class specification_basic_type
     {
       std::set<process_identifier> visited_processes;
       std::set<identifier_string> used_variable_names;
-      mutable_map_substitution<> parameter_mapping;
+      maintain_variables_in_rhs< mutable_map_substitution<> > parameter_mapping;
       std::set<variable> variables_in_lhs_of_parameter_mapping;
       std::set<variable> variables_in_rhs_of_parameter_mapping;
       guarantee_that_parameters_have_unique_type(procId,
@@ -10812,7 +10826,7 @@ class specification_basic_type
       const process_expression& t, // intentionally not a reference.
       std::set<process_identifier>& visited_processes,
       std::set<identifier_string>& used_variable_names,
-      mutable_map_substitution<>& parameter_mapping,
+      maintain_variables_in_rhs<mutable_map_substitution<> >& parameter_mapping,
       std::set<variable>& variables_in_lhs_of_parameter_mapping,
       std::set<variable>& variables_in_rhs_of_parameter_mapping)
     {
@@ -10874,14 +10888,14 @@ class specification_basic_type
       if (is_if_then_else(t))
       {
         return if_then_else(
-                 data::replace_variables_capture_avoiding(if_then_else(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 /* data::*/replace_variables_capture_avoiding_alt(if_then_else(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
                  guarantee_that_parameters_have_unique_type_body(if_then_else(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
                  guarantee_that_parameters_have_unique_type_body(if_then_else(t).else_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
       }
       if (is_if_then(t))
       {
         return if_then(
-                 data::replace_variables_capture_avoiding(if_then(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                 /*data::*/replace_variables_capture_avoiding_alt(if_then(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
                  guarantee_that_parameters_have_unique_type_body(if_then(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
       }
       if (is_sum(t))
@@ -10919,7 +10933,7 @@ class specification_basic_type
       }
       if (is_action(t))
       {
-        return lps::replace_variables_capture_avoiding(action(t),parameter_mapping,variables_in_rhs_of_parameter_mapping);
+        return lps::replace_variables_capture_avoiding_with_an_identifier_generator(action(t),parameter_mapping,fresh_identifier_generator);
       }
       if (is_delta(t))
       {
@@ -10933,7 +10947,7 @@ class specification_basic_type
       {
         return at(
                  guarantee_that_parameters_have_unique_type_body(at(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 data::replace_variables_capture_avoiding(at(t).time_stamp(),parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 /*data::*/replace_variables_capture_avoiding_alt(at(t).time_stamp(),parameter_mapping,variables_in_rhs_of_parameter_mapping));
       }
       if (is_sync(t))
       {
@@ -10973,7 +10987,7 @@ class specification_basic_type
         }
         return stochastic_operator(
                    data::replace_variables(sto.variables(),parameter_mapping),
-                   data::replace_variables_capture_avoiding(sto.distribution(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                   /* data::*/replace_variables_capture_avoiding_alt(sto.distribution(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
                    guarantee_that_parameters_have_unique_type_body(sto.operand(),visited_processes,
                            used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
       }

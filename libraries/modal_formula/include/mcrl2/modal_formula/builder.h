@@ -198,6 +198,10 @@ template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<lps::sort_expression_builder, Derived>
 {
   typedef add_sort_expressions<lps::sort_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated action_formulas::add_sort_expressions code ---//
 
@@ -358,6 +362,10 @@ template <typename Derived>
 struct data_expression_builder: public add_data_expressions<lps::data_expression_builder, Derived>
 {
   typedef add_data_expressions<lps::data_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated action_formulas::add_data_expressions code ---//
 
@@ -518,6 +526,10 @@ template <typename Derived>
 struct variable_builder: public add_variables<lps::data_expression_builder, Derived>
 {
   typedef add_variables<lps::data_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated action_formulas::add_variables code ---//
 
@@ -678,6 +690,10 @@ template <typename Derived>
 struct action_formula_builder: public add_action_formula_expressions<action_formulas::action_formula_builder_base, Derived>
 {
   typedef add_action_formula_expressions<action_formulas::action_formula_builder_base, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated action_formulas::add_action_formula_expressions code ---//
 
@@ -795,6 +811,10 @@ template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<action_formulas::sort_expression_builder, Derived>
 {
   typedef add_sort_expressions<action_formulas::sort_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated regular_formulas::add_sort_expressions code ---//
 
@@ -891,6 +911,10 @@ template <typename Derived>
 struct data_expression_builder: public add_data_expressions<action_formulas::data_expression_builder, Derived>
 {
   typedef add_data_expressions<action_formulas::data_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated regular_formulas::add_data_expressions code ---//
 
@@ -987,6 +1011,10 @@ template <typename Derived>
 struct variable_builder: public add_variables<action_formulas::data_expression_builder, Derived>
 {
   typedef add_variables<action_formulas::data_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated regular_formulas::add_variables code ---//
 
@@ -1083,6 +1111,10 @@ template <typename Derived>
 struct regular_formula_builder: public add_regular_formula_expressions<regular_formulas::regular_formula_builder_base, Derived>
 {
   typedef add_regular_formula_expressions<regular_formulas::regular_formula_builder_base, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated regular_formulas::add_regular_formula_expressions code ---//
 
@@ -1352,6 +1384,10 @@ template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<regular_formulas::sort_expression_builder, Derived>
 {
   typedef add_sort_expressions<regular_formulas::sort_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated state_formulas::add_sort_expressions code ---//
 
@@ -1599,6 +1635,10 @@ template <typename Derived>
 struct data_expression_builder: public add_data_expressions<regular_formulas::data_expression_builder, Derived>
 {
   typedef add_data_expressions<regular_formulas::data_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated state_formulas::add_data_expressions code ---//
 
@@ -1846,6 +1886,10 @@ template <typename Derived>
 struct variable_builder: public add_variables<regular_formulas::data_expression_builder, Derived>
 {
   typedef add_variables<regular_formulas::data_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated state_formulas::add_variables code ---//
 
@@ -2093,6 +2137,10 @@ template <typename Derived>
 struct state_formula_builder: public add_state_formula_expressions<state_formulas::state_formula_builder_base, Derived>
 {
   typedef add_state_formula_expressions<state_formulas::state_formula_builder_base, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
 };
 //--- end generated state_formulas::add_state_formula_expressions code ---//
 
