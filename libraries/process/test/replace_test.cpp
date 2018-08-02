@@ -159,7 +159,9 @@ void test_process_instance_assignment()
 void test_replace_process_identifiers()
 {
   std::string text =
-    "proc P(b: Bool, c: Bool) = P(c = true) . P(false, false); \n"
+    "aproc P(b: Bool, c: Bool) = P(c = true) . P(false, false); \n"  // Intentionally replaced proc by aproc to let this test fail.
+                                                                     // It appears that the boost testing framework is not working,
+                                                                     // at least not on the mac with boost 1.52.
     "proc Q(b: Bool, c: Bool) = P(c = true);                   \n"
     "proc R(b: Bool, c: Bool) = Q(c = true) . Q(false, false); \n"
     "                                                          \n"
