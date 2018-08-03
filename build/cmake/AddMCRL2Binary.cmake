@@ -22,11 +22,11 @@ function(_add_library_tests TARGET_NAME)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
 
-      if(TARGET_NAME STREQUAL "mcrl2_pbes")
+      if("${TARGET_NAME}" STREQUAL "mcrl2_pbes")
         target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
       endif()
 
-      if(${category} STREQUAL "librarytest")
+      if("${category}" STREQUAL "librarytest")
         add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
            --build-and-test
            "${CMAKE_SOURCE_DIR}"
@@ -61,7 +61,7 @@ function(_add_header_tests TARGET_NAME EXCLUDE_FILES)
       if(NOT TARGET ${testname})
         add_executable(${testname} EXCLUDE_FROM_ALL "${CMAKE_SOURCE_DIR}/build/cmake/test.cpp")
         target_link_libraries(${testname} ${TARGET_NAME})
-        if(TARGET_NAME STREQUAL "mcrl2_pbes")
+        if("${TARGET_NAME}" STREQUAL "mcrl2_pbes")
           target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
         endif()
         set_target_properties(${testname} PROPERTIES COMPILE_DEFINITIONS "BOOST_UNITS_HEADER_NAME=${cppname}")
@@ -157,7 +157,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
 
   if(NOT ARG_COMPONENT)
-    if(${TARGET_TYPE} STREQUAL "LIBRARY")
+    if("${TARGET_TYPE}" STREQUAL "LIBRARY")
       set(ARG_COMPONENT "Libraries")
     else()
       set(ARG_COMPONENT "Stable")
@@ -165,12 +165,12 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   endif()
 
   foreach(DEP ${ARG_DEPENDS})
-    if(${DEP} MATCHES "Qt.*")
+    if("${DEP}" MATCHES "Qt.*")
       # This variable is true iff one dependency starts with Qt.*.
       set(HAS_QT_DEPENDENCY TRUE)
     endif()
 
-    if(${DEP} STREQUAL "Qt5::Widgets")
+    if("${DEP}" STREQUAL "Qt5::Widgets")
       # This mCRL2 binary depends on Qt5::Widgets, so it is a gui binary.
       set(IS_GUI_BINARY TRUE)
     endif()
@@ -178,10 +178,10 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   set(DEPENDS ${ARG_DEPENDS})
 
   string(TOLOWER ${ARG_COMPONENT} COMPONENT_LC)
-  if((${COMPONENT_LC} STREQUAL "experimental" AND NOT MCRL2_ENABLE_EXPERIMENTAL) OR
-     (${COMPONENT_LC} STREQUAL "deprecated" AND NOT MCRL2_ENABLE_DEPRECATED) OR
-     (${COMPONENT_LC} STREQUAL "developer" AND NOT MCRL2_ENABLE_DEVELOPER) OR
-     (${COMPONENT_LC} STREQUAL "stable" AND NOT MCRL2_ENABLE_STABLE) OR
+  if(("${COMPONENT_LC}" STREQUAL "experimental" AND NOT MCRL2_ENABLE_EXPERIMENTAL) OR
+     ("${COMPONENT_LC}" STREQUAL "deprecated" AND NOT MCRL2_ENABLE_DEPRECATED) OR
+     ("${COMPONENT_LC}" STREQUAL "developer" AND NOT MCRL2_ENABLE_DEVELOPER) OR
+     ("${COMPONENT_LC}" STREQUAL "stable" AND NOT MCRL2_ENABLE_STABLE) OR
      (IS_GUI_BINARY AND NOT MCRL2_ENABLE_GUI_TOOLS))
     return()
   endif()
@@ -194,7 +194,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
 
   foreach(SRC ${ARG_SOURCES})
     get_filename_component(SRC_ABS ${SRC} ABSOLUTE)
-    if(NOT ${SRC_ABS} STREQUAL ${SRC})
+    if(NOT "${SRC_ABS}" STREQUAL "${SRC}")
       get_filename_component(SRC_ABS ${ARG_SOURCEDIR}/${SRC} ABSOLUTE)
     endif()
     get_filename_component(SRC_EXT ${SRC_ABS} EXT)
@@ -225,7 +225,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     set(SOURCES ${SRC_ABS} ${SOURCES})
   endforeach()
 
-  if(${TARGET_TYPE} STREQUAL "LIBRARY")
+  if("${TARGET_TYPE}" STREQUAL "LIBRARY")
     if(NOT SOURCES)
       # This is a header-only library. We're still going to make a static library
       # (exporting nothing) out of it, so we can use CMake's dependency handling
@@ -273,7 +273,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   endif()
 
   if(HAS_QT_DEPENDENCY)
-    if(${TARGET_TYPE} STREQUAL "EXECUTABLE")
+    if("${TARGET_TYPE}" STREQUAL "EXECUTABLE")
       # The variable ${MCRL2_QT_APPS} contains a list of mCRL2 executables that use Qt.
       if(MCRL2_QT_APPS)
         set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")

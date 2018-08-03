@@ -55,7 +55,7 @@ execute_process(
 )
 
 # When the files changed are empty it was not modified.
-if(GIT_FILES_CHANGED STREQUAL "")
+if("${GIT_FILES_CHANGED}" STREQUAL "")
   set(MCRL2_MINOR_VERSION "${GIT_COMMIT_HASH}")
 else()
   set(MCRL2_MINOR_VERSION "${GIT_COMMIT_HASH}M")
@@ -65,7 +65,7 @@ else()
 endif()
 
 # Try to read build/SourceVersion, and set that version
-if(MCRL2_MINOR_VERSION STREQUAL "Unknown" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion")
+if("${MCRL2_MINOR_VERSION}" STREQUAL "Unknown" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion")
   include(${CMAKE_CURRENT_SOURCE_DIR}/build/SourceVersion)
   if(MCRL2_SOURCE_PACKAGE_REVISION)
     message(WARNING "You are building from a source package; assuming no local modifications.")
@@ -77,17 +77,17 @@ else()
 endif()
 
 if(MCRL2_PACKAGE_RELEASE)
-  if(MCRL2_MINOR_VERSION STREQUAL "Unknown")
+  if("${MCRL2_MINOR_VERSION}" STREQUAL "Unknown")
     # Allow packaging release from an exported version; this is apparently needed
     # for some linux distros.
     message(STATUS "WARNING! You are packaging a release without any version information being available!")
-  endif(MCRL2_MINOR_VERSION STREQUAL "Unknown")
+  endif()
   set(MCRL2_VERSION "${MCRL2_MAJOR_VERSION}")
 else()
   set(MCRL2_VERSION "${MCRL2_MAJOR_VERSION}.${MCRL2_MINOR_VERSION}")
 endif()
 
-if(CMAKE_CFG_INTDIR STREQUAL ".")
+if("${CMAKE_CFG_INTDIR}" STREQUAL ".")
   add_definitions(-DMCRL2_BUILD_TYPE=${CMAKE_BUILD_TYPE})
 else()
   add_definitions(-DMCRL2_BUILD_TYPE=${CMAKE_CFG_INTDIR})
