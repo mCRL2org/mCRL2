@@ -22,10 +22,6 @@ function(_add_library_tests TARGET_NAME)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
 
-      if("${TARGET_NAME}" STREQUAL "mcrl2_pbes")
-        target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
-      endif()
-
       if("${category}" STREQUAL "librarytest")
         add_test(NAME ${testname} COMMAND ${CMAKE_CTEST_COMMAND}
            --build-and-test
@@ -61,9 +57,6 @@ function(_add_header_tests TARGET_NAME EXCLUDE_FILES)
       if(NOT TARGET ${testname})
         add_executable(${testname} EXCLUDE_FROM_ALL "${CMAKE_SOURCE_DIR}/build/cmake/test.cpp")
         target_link_libraries(${testname} ${TARGET_NAME})
-        if("${TARGET_NAME}" STREQUAL "mcrl2_pbes")
-          target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
-        endif()
         set_target_properties(${testname} PROPERTIES COMPILE_DEFINITIONS "BOOST_UNITS_HEADER_NAME=${cppname}")
         add_test(NAME ${testname} COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${testname})
         set_tests_properties(${testname} PROPERTIES LABELS headertest)
