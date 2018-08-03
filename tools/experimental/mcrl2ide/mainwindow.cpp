@@ -536,7 +536,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
       break;
     case QMessageBox::Cancel:
       event->ignore();
-      break;
+      return;
     default:
       break;
     }
