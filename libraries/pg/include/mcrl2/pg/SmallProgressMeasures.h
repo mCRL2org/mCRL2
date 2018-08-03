@@ -242,7 +242,7 @@ private:
     /*! Returns the minimum or maximum successor for vertex `v` depending on
         whether it is owned by player `p_` or not. */
     inline verti get_ext_succ(verti v) const;
-    
+
     /*! Returns the minimum successor for vertex `v`. */
     inline verti get_min_succ(verti v) const { return get_ext_succ(v, false); }
 
@@ -334,12 +334,11 @@ protected:
 
 public:
     SmallProgressMeasuresSolver( const ParityGame &game,
-                                 LiftingStrategyFactory *lsf,
+                                 std::shared_ptr<LiftingStrategyFactory> lsf,
                                  bool alternate = false,
                                  LiftingStatistics *stats = 0,
                                  const verti *vmap = 0,
                                  verti vmap_size = 0 );
-    virtual ~SmallProgressMeasuresSolver();
 
     ParityGame::Strategy solve();
 
@@ -369,7 +368,7 @@ private:
     SmallProgressMeasuresSolver &operator=(const SmallProgressMeasuresSolver&);
 
 protected:
-    LiftingStrategyFactory *lsf_;   //!< factory used to create lifting strategy
+    std::shared_ptr<LiftingStrategyFactory> lsf_;   //!< factory used to create lifting strategy
     bool alternate_;                //!< whether to use the alternate algorithm
     LiftingStatistics *stats_;      //!< object to record lifting statistics
     const verti *vmap_;             //!< current vertex map
@@ -383,12 +382,11 @@ class SmallProgressMeasuresSolver2 : public SmallProgressMeasuresSolver
 {
 public:
     SmallProgressMeasuresSolver2( const ParityGame &game,
-                                  LiftingStrategyFactory *lsf,
+                                  std::shared_ptr<LiftingStrategyFactory> lsf,
                                   bool alternate = false,
                                   LiftingStatistics *stats = 0,
                                   const verti *vmap = 0,
                                   verti vmap_size = 0 );
-    ~SmallProgressMeasuresSolver2();
 
     ParityGame::Strategy solve_normal();
     ParityGame::Strategy solve_alternate();
@@ -404,16 +402,15 @@ private:
 class SmallProgressMeasuresSolverFactory : public ParityGameSolverFactory
 {
 public:
-    SmallProgressMeasuresSolverFactory( LiftingStrategyFactory *lsf,
+    SmallProgressMeasuresSolverFactory(std::shared_ptr<LiftingStrategyFactory> lsf,
         int version = 1, bool alt = false, LiftingStatistics *stats = 0 );
-    ~SmallProgressMeasuresSolverFactory();
 
     ParityGameSolver *create( const ParityGame &game,
                               const verti *vmap,
                               verti vmap_size );
 
 private:
-    LiftingStrategyFactory  *lsf_;
+    std::shared_ptr<LiftingStrategyFactory>  lsf_;
     int                     version_;
     bool                    alt_;
     LiftingStatistics       *stats_;

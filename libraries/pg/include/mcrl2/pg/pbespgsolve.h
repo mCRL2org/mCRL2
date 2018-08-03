@@ -27,7 +27,7 @@
 namespace mcrl2 {
 
 namespace pbes_system {
-	
+
 enum pbespg_solver_type
 {
   spm_solver,
@@ -171,7 +171,7 @@ class pbespgsolve_algorithm
         // Create a SPM solver factory:
         solver_factory.reset(
           new SmallProgressMeasuresSolverFactory
-                (new PredecessorLiftingStrategyFactory, 2, alternative_solver)
+                (std::make_shared<PredecessorLiftingStrategyFactory>(), 2, alternative_solver)
         );
       }
       else if (options.solver_type == recursive_solver)
@@ -179,7 +179,7 @@ class pbespgsolve_algorithm
         // Create a recursive solver factory:
         solver_factory.reset(new RecursiveSolverFactory);
       }
-      else if (options.solver_type == priority_promotion) 
+      else if (options.solver_type == priority_promotion)
       {
         solver_factory.reset(new PriorityPromotionSolverFactory);
       }

@@ -162,7 +162,7 @@ verti SmallProgressMeasures::solve_one(LiftingStrategy2 &ls)
 
     #ifndef NDEBUG
     bool success =
-    #endif // NDEBUG 
+    #endif // NDEBUG
     lift_to(v, vec(get_successor(v)), compare_strict(v));
     assert(success);
     dirty_[v] = false;
@@ -359,18 +359,11 @@ bool SmallProgressMeasures::verify_solution()
 //
 
 SmallProgressMeasuresSolver::SmallProgressMeasuresSolver(
-    const ParityGame &game, LiftingStrategyFactory *lsf, bool alternate,
+    const ParityGame &game, std::shared_ptr<LiftingStrategyFactory> lsf, bool alternate,
     LiftingStatistics *stats, const verti *vmap, verti vmap_size )
         : ParityGameSolver(game), lsf_(lsf), alternate_(alternate),
           stats_(stats), vmap_(vmap), vmap_size_(vmap_size)
-{
-    lsf_->ref();
-}
-
-SmallProgressMeasuresSolver::~SmallProgressMeasuresSolver()
-{
-    lsf_->deref();
-}
+{}
 
 ParityGame::Strategy SmallProgressMeasuresSolver::solve()
 {
@@ -529,14 +522,10 @@ void SmallProgressMeasuresSolver::preprocess_game(ParityGame &game)
 //
 
 SmallProgressMeasuresSolver2::SmallProgressMeasuresSolver2(
-    const ParityGame &game, LiftingStrategyFactory *lsf, bool alternate,
+    const ParityGame &game, std::shared_ptr<LiftingStrategyFactory> lsf, bool alternate,
     LiftingStatistics *stats, const verti *vmap, verti vmap_size )
         : SmallProgressMeasuresSolver( game, lsf, alternate,
                                        stats, vmap, vmap_size)
-{
-}
-
-SmallProgressMeasuresSolver2::~SmallProgressMeasuresSolver2()
 {
 }
 
@@ -660,17 +649,10 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
 //
 
 SmallProgressMeasuresSolverFactory::SmallProgressMeasuresSolverFactory(
-        LiftingStrategyFactory *lsf, int version, bool alt,
+        std::shared_ptr<LiftingStrategyFactory> lsf, int version, bool alt,
         LiftingStatistics *stats )
     : lsf_(lsf), version_(version), alt_(alt), stats_(stats)
-{
-    lsf_->ref();
-}
-
-SmallProgressMeasuresSolverFactory::~SmallProgressMeasuresSolverFactory()
-{
-    lsf_->deref();
-}
+{}
 
 ParityGameSolver *SmallProgressMeasuresSolverFactory::create(
     const ParityGame &game, const verti *vmap, verti vmap_size )
