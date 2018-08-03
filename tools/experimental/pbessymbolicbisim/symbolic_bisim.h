@@ -49,7 +49,7 @@ protected:
   {
     std::unique_ptr<ParityGameSolverFactory> solver_factory;
     solver_factory.reset(new SmallProgressMeasuresSolverFactory
-              (new PredecessorLiftingStrategyFactory, 2, false));
+              (std::make_shared<PredecessorLiftingStrategyFactory>(), 2, false));
     std::unique_ptr<ParityGameSolver> solver(solver_factory->create(pg));
 
     ParityGame::Strategy solution = solver->solve();
