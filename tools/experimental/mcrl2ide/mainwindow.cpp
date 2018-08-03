@@ -525,12 +525,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
       if (fileSystem->saveProject().isEmpty())
       {
         event->ignore();
+        return;
       }
       else
       {
         event->accept();
+        break;
       }
-      break;
     case QMessageBox::No:
       event->accept();
       break;
