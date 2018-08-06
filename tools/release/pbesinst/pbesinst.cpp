@@ -61,10 +61,20 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
+
+      m_strategy = parser.option_argument_as<pbesinst_strategy>("strategy");
+      m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
+      m_search_strategy = parser.option_argument_as<search_strategy>("search");
+      m_transformation_strategy = parser.option_argument_as<transformation_strategy>("transformation");
+
       if (parser.options.count("select") > 0)
       {
         m_finite_parameter_selection = parser.option_argument("select");
         boost::trim(m_finite_parameter_selection);
+        if(m_strategy != pbesinst_finite_strategy)
+        {
+          mCRL2log(log::warning) << "Warning: the option --select only has an effect when used together with --strategy=finite." << std::endl;
+        }
       }
 
       if (parser.options.count("equation_limit") > 0)
@@ -72,11 +82,6 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         int limit = parser.option_argument_as<int>("equation_limit");
         pbes_system::detail::set_bes_equation_limit(limit);
       }
-
-      m_strategy = parser.option_argument_as<pbesinst_strategy>("strategy");
-      m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
-      m_search_strategy = parser.option_argument_as<search_strategy>("search");
-      m_transformation_strategy = parser.option_argument_as<transformation_strategy>("transformation");
     }
 
     void add_options(interface_description& desc)
@@ -106,7 +111,8 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       add_option("select",
                  make_optional_argument("PARAMS", ""),
                  "select finite parameters that need to be expanded. "
-                 "Examples: --select=X1(b:Bool,c:Bool);X2(b:Bool) or --select=*(*:Bool)",
+                 "Examples: --select=X1(b:Bool,c:Bool);X2(b:Bool) or --select=*(*:Bool). "
+                 "Note: this option only has effect when used together with --strategy=finite.",
                  'f');
       desc.add_hidden_option("equation_limit",
                              make_optional_argument("NAME", "-1"),
