@@ -267,7 +267,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     return process::rename(R, push_block(B1, x.operand(), equations, W, id_generator));
   }
 
-  bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
+  bool restrict_(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
     using utilities::detail::contains;
     for (const communication_expression& i: C)
@@ -287,7 +287,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     std::set<core::identifier_string> result;
     for (auto i = B.begin(); i != B.end(); ++i)
     {
-      if (!restrict(*i, B, C))
+      if (!restrict_(*i, B, C))
       {
         result.insert(*i);
       }
