@@ -80,7 +80,7 @@ eqn % Directions to search in, as (n,m) vectors
 
     % Calculate outcome of board
     outcome(b) = if(i == j, draw, if(i > j, win(red), win(white)))
-                 whr i = ccount(b, red), j = ccount(b, white) end;
+                 whr i = Nat2Int(ccount(b, red)), j = Nat2Int(ccount(b, white)) end;
     ccount(r |> b, P) = ccount(r, P) + ccount(b, P);
     b == [] -> ccount(b, P) = 0;
     s == piece(P) -> ccount(s |> r, P) = ccount(r, P) + 1;
