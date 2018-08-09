@@ -93,6 +93,10 @@ add_subdirectory(tools)
 add_subdirectory(doc)
 add_subdirectory(tests)
 
+if (${MCRL2_ENABLE_BENCHMARKS})
+  add_subdirectory(benchmarks)
+endif()
+
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
 # Add the packaging as a subdirectory to assure that CMake only performs install
