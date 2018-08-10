@@ -115,7 +115,9 @@ add_custom_target(${coverage_target}
   COMMAND ${LCOV_PATH} -c -i -d . -o ${coverage_target}.base
 
   # Run tests
-  COMMAND ctest ${PROCESSOR_ARG} -L librarytest
+  # ctest exits with a non-zero exit code when at least one test fails. To make
+  # sure that the rest of the commands are also executed, we use || true.
+  COMMAND ctest --output-on-failure ${PROCESSOR_ARG} -L librarytest || true
 
   # Capturing lcov counters and generating report
   COMMAND ${LCOV_PATH} --directory . --capture --output-file ${coverage_target}.info

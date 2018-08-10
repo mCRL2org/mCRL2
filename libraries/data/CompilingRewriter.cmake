@@ -23,7 +23,7 @@ endif()
 
 # Add compiler flags to allow to compile rewritercode with a large number
 # of recursively used templates. The value 2000 is taken
-# rather arbitrarily, and may need to be increased for more complex 
+# rather arbitrarily, and may need to be increased for more complex
 # rewriters. The default on some compilers appears to be 900.
 
 check_cxx_compiler_flag(-ftemplate-depth=2000 CXX_ACCEPTS_TEMPLATE_DEPTH )
@@ -42,6 +42,10 @@ if(NOT APPLE)
   set(R_LDFLAGS "-shared")
 else()
   set(R_LDFLAGS "-bundle -undefined dynamic_lookup")
+endif()
+
+if(MCRL2_ENABLE_CODE_COVERAGE)
+  set(R_LDFLAGS "${R_LDFLAGS} -fprofile-arcs")
 endif()
 
 # Set MacOS-X specific compile flags
