@@ -5,7 +5,7 @@ function(_add_library_tests TARGET_NAME)
   file(GLOB libraryexample "example/*.cpp")
 
   if(MCRL2_SKIP_LONG_TESTS)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMCRL2_SKIP_LONG_TESTS")
+    add_definitions(-DMCRL2_SKIP_LONG_TESTS)
   endif(MCRL2_SKIP_LONG_TESTS)
 
   foreach(category "librarytest" "libraryexample")
