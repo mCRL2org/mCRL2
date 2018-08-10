@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(mCRL2)
-  
+
 if(NOT ${CMAKE_VERSION} VERSION_LESS 3.0)
   # Ignore variable COMPILE_DEFINITIONS_<CONFIG>
   cmake_policy(SET CMP0043 NEW)
 endif()
 
 if (NOT ${CMAKE_VERSION} VERSION_LESS 3.1)
-  # Do not implicitly dereference variables or keywords when quoted in an if() command. 
+  # Do not implicitly dereference variables or keywords when quoted in an if() command.
   cmake_policy(SET CMP0054 NEW)
 endif()
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS 3.10)
   # From CMake 3.10 onwards the AUTOMOC and AUTOUIC properties apply to GENERATED files.
   cmake_policy(SET CMP0071 OLD)
-endif()  
+endif()
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS 3.11)
   # Choose the GLVND (GL Vendor Neutral Dispatch library) over OpenGL legacy if both are available.
@@ -49,13 +49,17 @@ option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OF
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
 option(MCRL2_ENABLE_TESTS           "Enable generation of test targets." OFF)
 option(MCRL2_ENABLE_BENCHMARKS      "Enable generation of benchmark targets." OFF)
+option(MCRL2_ENABLE_CODE_COVERAGE   "Enable generation of code coverage statistics." OFF)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
-mark_as_advanced(MCRL2_ENABLE_STABLE)
-mark_as_advanced(MCRL2_SKIP_LONG_TESTS)
+mark_as_advanced(
+  MCRL2_ENABLE_CODE_COVERAGE
+  MCRL2_ENABLE_STABLE
+  MCRL2_SKIP_LONG_TESTS
+)
 
 include(ConfigurePlatform)
 include(ConfigureCompiler)
@@ -73,6 +77,10 @@ if(MCRL2_ENABLE_GUI_TOOLS)
 
   # The directories for components are derived from Qt5_DIR, as such they can be marked as advanced.
   mark_as_advanced(Qt5_DIR Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
+endif()
+
+if(MCRL2_ENABLE_CODE_COVERAGE)
+  include(CodeCoverage)
 endif()
 
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
