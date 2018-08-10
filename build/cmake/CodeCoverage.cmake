@@ -110,12 +110,12 @@ set(COVERAGE_LCOV_EXCLUDES '*.g' '/usr/*' '*/3rd-party/*' '*toolset_version_cons
 add_custom_target(${coverage_target}
 
   # Cleanup lcov
-  # COMMAND ${LCOV_PATH} --directory . --zerocounters
-  # # Create baseline to make sure untouched files show up in the report
-  # COMMAND ${LCOV_PATH} -c -i -d . -o ${coverage_target}.base
+  COMMAND ${LCOV_PATH} --directory . --zerocounters
+  # Create baseline to make sure untouched files show up in the report
+  COMMAND ${LCOV_PATH} -c -i -d . -o ${coverage_target}.base
 
   # Run tests
-  COMMAND ctest ${PROCESSOR_ARG} -R librarytest_mcrl2_data
+  COMMAND ctest ${PROCESSOR_ARG} -L librarytest
 
   # Capturing lcov counters and generating report
   COMMAND ${LCOV_PATH} --directory . --capture --output-file ${coverage_target}.info
