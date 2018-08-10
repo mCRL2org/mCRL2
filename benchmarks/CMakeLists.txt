@@ -1,19 +1,13 @@
-# Add a target to measure the time to generate the statespace of a given mcrl2 specification.
-function(add_benchmark NAME INPUT_MCRL2 INTERMEDIATE_LPS LPS2LTS_ARGUMENTS)
-  set(MCRL22LPS_TARGET "benchmark_target_mcrl22lps_${NAME}")
-  set(LPS2LTS_TARGET "benchmark_target_lps2lts_${NAME}")
+# Add a benchmarked named NAME that uses TOOL on the given INPUT.
+function(add_tool_benchmark NAME TOOL INPUT)
+  set(TARGET "benchmark_target_${TOOL}_${NAME}")
 
-  add_custom_target(${MCRL22LPS_TARGET}
-    COMMAND mcrl22lps "${INPUT_MCRL2}" "${INTERMEDIATE_LPS}"
+  add_custom_target(${TARGET}
+    COMMAND ${TOOL} ${ARGN} "${INPUT}"
   )
 
-  add_custom_target(${LPS2LTS_TARGET}
-    COMMAND lps2lts "${LPS2LTS_ARGUMENTS}" "${INTERMEDIATE_LPS}"
-    DEPENDS "${MCRL22LPS_TARGET}"
-  )
-
-  add_test(NAME benchmark_lps2lts_${NAME}
-    COMMAND ${CMAKE_COMMAND} "--build" ${CMAKE_BINARY_DIR} "--target" "${LPS2LTS_TARGET}")
+  add_test(NAME benchmark_${TOOL}_${NAME}
+    COMMAND ${CMAKE_COMMAND} "--build" ${CMAKE_BINARY_DIR} "--target" "${TARGET}")
 endfunction()
 
 set(BENCHMARK_WORKSPACE ${CMAKE_BINARY_DIR}/benchmarks)
@@ -33,14 +27,40 @@ set(STATESPACE_BENCHMARKS
   "examples/industrial/lift/lift3-init.mcrl2"
   )
 
+# This target is used to generate all intermediate files required for benchmarks. 
+# In this case to linearise all the given mcrl2 specifications at once and generate a nodeadlock
+# pbes.
+add_custom_target(prepare_benchmarks)
+add_dependencies(prepare_benchmarks lps2lts pbes2bool pbessolve)
+
 foreach(benchmark ${STATESPACE_BENCHMARKS})
   # Obtain just <name>.mcrl2, split off <name> for the benchmark name and output lps <name>.lps
   get_filename_component(MCRL2_FILENAME ${benchmark} NAME)
-
   string(REPLACE ".mcrl2" "" NAME ${MCRL2_FILENAME})
+
+  set(LPS_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.lps")
+  set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
+
+  # Generate the lps for this benchmark.
+  add_custom_command(TARGET prepare_benchmarks 
+    COMMAND mcrl22lps "${CMAKE_SOURCE_DIR}/${benchmark}" ${LPS_FILENAME}
+    )
+
+  # Generate a pbes for the nodeadlock property for this benchmark
+  add_custom_command(TARGET prepare_benchmarks
+    COMMAND lps2pbes -f "${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf" ${LPS_FILENAME} ${NODEADLOCK_PBES_FILENAME}
+    )
+
+  # Add all the benchmarks for the given mcrl2 specification
+  add_tool_benchmark("${NAME}" mcrl22lps "${CMAKE_SOURCE_DIR}/${benchmark}")
   
-  # Add a benchmark target for each statespace benchmark.
-  add_benchmark("${NAME}" "${CMAKE_SOURCE_DIR}/${benchmark}" "${BENCHMARK_WORKSPACE}/${NAME}.lps" "")
-  add_benchmark("${NAME}_cached" "${CMAKE_SOURCE_DIR}/${benchmark}" "${BENCHMARK_WORKSPACE}/${NAME}.lps" "--cached")
-  # add_benchmark("${NAME}_jittyc" "${CMAKE_SOURCE_DIR}/${benchmark}" "${BENCHMARK_WORKSPACE}/${NAME}.lps" "--cached --rjittyc --prune")
+  add_tool_benchmark("${NAME}" lps2lts ${LPS_FILENAME} "")
+  add_tool_benchmark("${NAME}_cached" lps2lts ${LPS_FILENAME} "--cached")
+  add_tool_benchmark("${NAME}_jittyc" lps2lts "${BENCHMARK_WORKSPACE}/${NAME}.lps" "--cached" "-rjittyc" "--prune")
+
+  add_tool_benchmark("${NAME}" pbes2bool ${NODEADLOCK_PBES_FILENAME})
+  add_tool_benchmark("${NAME}_jittyc" pbes2bool ${NODEADLOCK_PBES_FILENAME} "-rjittyc")
+
+  add_tool_benchmark("${NAME}" pbessolve ${NODEADLOCK_PBES_FILENAME})
+  add_tool_benchmark("${NAME}_jittyc" pbessolve ${NODEADLOCK_PBES_FILENAME} "-rjittyc")
 endforeach()
