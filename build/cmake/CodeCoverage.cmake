@@ -104,7 +104,7 @@ if(NOT NumProc EQUAL 0)
 endif()
 
 set(coverage_target mcrl2_coverage)
-set(COVERAGE_LCOV_EXCLUDES '*.g' '/usr/*' '*/3rd-party/*' '*toolset_version_const.h')
+set(COVERAGE_LCOV_EXCLUDES '*.g' '/usr/*' '*/3rd-party/*' '*toolset_version_const.h' '${PROJECT_BINARY_DIR}/jittyc_*.cpp')
 
 # Setup target
 add_custom_target(${coverage_target}
