@@ -11,6 +11,8 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
+#ifndef MCRL2_SKIP_LONG_TESTS
+
 #include <iostream>
 #include <string>
 
@@ -51,8 +53,8 @@ data::data_expression ultimate_delay(const deadlock_summand_vector& l)
   return result;
 }
 
-void run_linearisation_instance(const std::string& spec, 
-                                const t_lin_options& options, 
+void run_linearisation_instance(const std::string& spec,
+                                const t_lin_options& options,
                                 const bool expect_success,
                                 const data::data_expression max_expected_action_ultimate_delay,
                                 const bool check_max_expected_deadlock_ultimate_delay,
@@ -89,17 +91,17 @@ void run_linearisation_instance(const std::string& spec,
 }
 
 // The ultimate delays are the maximum of the ultimate delays over all actions resp. deadlocks
-// not looking at the conditions of the actions or deadlocks. 
-void run_linearisation_test_case(const std::string& spec, 
-                                 const bool expect_success, 
-                                 const std::size_t max_expected_action_ultimate_delay_, 
+// not looking at the conditions of the actions or deadlocks.
+void run_linearisation_test_case(const std::string& spec,
+                                 const bool expect_success,
+                                 const std::size_t max_expected_action_ultimate_delay_,
                                  const bool check_max_expected_deadlock_ultimate_delay,
                                  const std::size_t max_expected_deadlock_ultimate_delay_)
 {
   // Set various rewrite strategies
   rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);
-  const data::data_expression max_expected_action_ultimate_delay=data::sort_real::real_(max_expected_action_ultimate_delay_); 
-  const data::data_expression max_expected_deadlock_ultimate_delay=data::sort_real::real_(max_expected_deadlock_ultimate_delay_); 
+  const data::data_expression max_expected_action_ultimate_delay=data::sort_real::real_(max_expected_action_ultimate_delay_);
+  const data::data_expression max_expected_deadlock_ultimate_delay=data::sort_real::real_(max_expected_deadlock_ultimate_delay_);
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {
@@ -285,9 +287,15 @@ BOOST_AUTO_TEST_CASE(Check_terminate_and_synchrony_and_deadlock)
   run_linearisation_test_case(spec,true,0,false,0);
 }
 
+#else // ndef MCRL2_SKIP_LONG_TESTS
+
+BOOST_AUTO_TEST_CASE(skip_test)
+{
+}
+
+#endif // ndef MCRL2_SKIP_LONG_TESTS
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
 {
   return nullptr;
 }
-

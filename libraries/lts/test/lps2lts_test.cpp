@@ -13,11 +13,14 @@
 #define MCRL2_WITH_GARBAGE_COLLECTION
 #endif
 
+#include <boost/test/included/unit_test_framework.hpp>
+
+#ifndef MCRL2_SKIP_LONG_TESTS
+
 #include <ctime>
 #include <iostream>
 #include <sstream>
 #include <cstdio>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
@@ -558,7 +561,13 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
   check_lps2lts_specification(spec, 1, 8, 9);
 }
 
+#else // ndef MCRL2_SKIP_LONG_TESTS
 
+BOOST_AUTO_TEST_CASE(skip_test)
+{
+}
+
+#endif // ndef MCRL2_SKIP_LONG_TESTS
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

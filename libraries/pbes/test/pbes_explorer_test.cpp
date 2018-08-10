@@ -9,6 +9,10 @@
 /// \file pbes_explorer_test.cpp
 /// \brief Test for the PBES_Explorer interface.
 
+#include <boost/test/included/unit_test_framework.hpp>
+
+#ifndef MCRL2_SKIP_LONG_TESTS
+
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/io.h"
@@ -16,7 +20,6 @@
 #include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/test_utilities.h"
-#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -167,7 +170,7 @@ void explorer::bfs()
     fresh.push_back(initial_state_vector);
     // int state[state_length]; N.B. This is not portable C++
     int* state = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
-    while (!fresh.empty()) 
+    while (!fresh.empty())
     {
         std::vector<int> state_vector = fresh.front();
         fresh.pop_front();
@@ -329,6 +332,14 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
   // clean up
   std::remove(pbes_filename.c_str());
 }
+
+#else // ndef MCRL2_SKIP_LONG_TESTS
+
+BOOST_AUTO_TEST_CASE(skip_test)
+{
+}
+
+#endif // ndef MCRL2_SKIP_LONG_TESTS
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

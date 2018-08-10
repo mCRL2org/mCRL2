@@ -13,6 +13,9 @@
 
 #define BOOST_TEST_MODULE find_test
 #include <boost/test/included/unit_test_framework.hpp>
+
+#ifndef MCRL2_SKIP_LONG_TESTS
+
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
@@ -781,3 +784,12 @@ BOOST_AUTO_TEST_CASE(test_counter_example)
   generate_counter_example = true;
   test_lps2pbes_and_solve(lps_spec, mcf_formula, expected_solution, timed, rewrite, generate_counter_example);
 }
+
+
+#else // ndef MCRL2_SKIP_LONG_TESTS
+
+BOOST_AUTO_TEST_CASE(skip_test)
+{
+}
+
+#endif // ndef MCRL2_SKIP_LONG_TESTS
