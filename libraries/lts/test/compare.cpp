@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2)
   BOOST_CHECK(compare(l2,l1,lts_eq_trace));
   BOOST_CHECK(!compare(l2,l1,lts_eq_bisim));
   BOOST_CHECK(!compare(l2,l1,lts_eq_bisim_gv));
-  // BOOST_CHECK(!compare(l2,l1,lts_eq_bisim_tb)); Only enable if this algorithm is finished and correct.
+  BOOST_CHECK(!compare(l2,l1,lts_eq_bisim_dnj));
   BOOST_CHECK(preorder_compare(l1,l2,lts_pre_trace));
   BOOST_CHECK(preorder_compare(l2,l1,lts_pre_trace));
   BOOST_CHECK(preorder_compare(l1,l2,lts_pre_trace_anti_chain));
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2a)
   BOOST_CHECK(compare(l2a,l2,lts_eq_trace));
   BOOST_CHECK(!compare(l2a,l2,lts_eq_bisim));
   BOOST_CHECK(!compare(l2a,l2,lts_eq_bisim_gv));
-  // BOOST_CHECK(!compare(l2a,l2,lts_eq_bisim_tb)); Only enable if this algorithm is finished and correct. 
+  BOOST_CHECK(!compare(l2a,l2,lts_eq_bisim_dnj));
   BOOST_CHECK(preorder_compare(l2,l2a,lts_pre_trace));
   BOOST_CHECK(preorder_compare(l2a,l2,lts_pre_trace));
   BOOST_CHECK(preorder_compare(l2,l2a,lts_pre_trace_anti_chain));
