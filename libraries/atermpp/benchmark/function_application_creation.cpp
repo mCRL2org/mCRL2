@@ -13,7 +13,7 @@ using namespace atermpp;
 
 int main(int argc, char* argv[])
 {
-  std::size_t number_of_arguments = 10;
+  std::size_t number_of_arguments = 0;
   std::size_t size = 10000;
   std::size_t iterations = 10000;
   std::size_t number_of_threads = 1;
