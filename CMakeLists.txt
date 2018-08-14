@@ -83,6 +83,10 @@ if(MCRL2_ENABLE_CODE_COVERAGE)
   include(CodeCoverage)
 endif()
 
+if (${MCRL2_ENABLE_BENCHMARKS})
+  add_subdirectory(benchmarks)
+endif()
+
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
@@ -92,10 +96,6 @@ add_subdirectory(libraries)
 add_subdirectory(tools)
 add_subdirectory(doc)
 add_subdirectory(tests)
-
-if (${MCRL2_ENABLE_BENCHMARKS})
-  add_subdirectory(benchmarks)
-endif()
 
 install(DIRECTORY examples DESTINATION ${MCRL2_RESOURCE_PATH} COMPONENT Examples)
 
