@@ -33,7 +33,7 @@ pbes_expression stategraph_not(const pbes_expression& x)
     {
       return data::unary_operand1(x1);
     }
-    else if (data::is_not(x1))
+    else if (data::is_not_equal_to(x1))
     {
       auto const& left  = data::binary_left1(x1);
       auto const& right = data::binary_right1(x1);
