@@ -235,23 +235,25 @@ QFileDialog* FileSystem::createFileDialog(int type)
           .toString();
   QFileDialog* fileDialog = new QFileDialog(parent, Qt::WindowCloseButtonHint);
   fileDialog->setDirectory(fileDialogLocation);
-  fileDialog->setLabelText(QFileDialog::FileName, "Project name:");
   switch (type)
   {
   case 0: /* New Project */
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
     fileDialog->setWindowTitle("New Project");
+    fileDialog->setLabelText(QFileDialog::FileName, "Project name:");
     fileDialog->setLabelText(QFileDialog::Accept, "Create");
     break;
   case 1: /* Save Project As */
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
     fileDialog->setWindowTitle("Save Project As");
+    fileDialog->setLabelText(QFileDialog::FileName, "Project name:");
     fileDialog->setLabelText(QFileDialog::Accept, "Save as");
     break;
   case 2: /* Open Project */
     fileDialog->setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog->setFileMode(QFileDialog::Directory);
     fileDialog->setWindowTitle("Open Project");
+    fileDialog->setLabelText(QFileDialog::FileName, "Project folder:");
     fileDialog->setLabelText(QFileDialog::Accept, "Open");
   }
   return fileDialog;
