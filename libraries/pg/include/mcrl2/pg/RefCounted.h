@@ -29,7 +29,7 @@ class RefCounted
 {
 public:
     //! Construct and initialize the reference count to `init_refcount`.
-    RefCounted(std::size_t init_refcount = 1)
+    RefCounted(std::size_t init_refcount = 0)
         : refs_(init_refcount) { }
 
     //! Increment reference count.
