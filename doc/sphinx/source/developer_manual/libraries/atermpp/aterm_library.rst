@@ -275,6 +275,7 @@ For a function_symbol the function :cpp:func:`name() <atermpp::aterm_int::name>`
 as a string and the function :cpp:func:`arity() <atermpp::function_symbol::arity>` gives its arity.
 
 .. code-block:: c++
+
      #include <atermpp::function_symbol>
      using atermpp;
      function_symbol f("FUNCTION",5);
@@ -284,6 +285,7 @@ as a string and the function :cpp:func:`arity() <atermpp::function_symbol::arity
 The value in an aterm_int can be obtained using the function :cpp:func:`value() <atermpp::aterm_int::value>`.
 
 .. code-block:: c++
+
      #include <atermpp::aterm_int>
      using atermpp;
      aterm_int n(12);
@@ -297,6 +299,7 @@ The first argument has number 0. Using const iterators it is possible to iterata
 For this purpose the functions :cpp:func:`begin() <atermpp::term_appl::begin>` and :cpp:func:`end() <atermpp::term_appl::end>` are defined.
 
 .. code-block:: c++
+
      #include <atermpp::aterm_appl.h>
      using atermpp;
      function_symbol f("f",3);
@@ -322,6 +325,7 @@ a list is empty. It is possible to iterate over the elements of a list using
 :cpp:func:`begin() <atermpp::term_list::begin>` and :cpp:func:`end() <atermpp::term_list::end>`.
 
 .. code-block:: c++
+
      #include <atermpp::aterm_list.h>
      #include <atermpp::aterm_io.h>
      using atermpp;
