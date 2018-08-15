@@ -12,6 +12,7 @@ function(add_benchmark NAME TARGET)
   add_test(NAME "${BENCHMARK}" COMMAND "benchmark_target_${TARGET}" 
      ${ARGN}
      )
+   set_property(TEST ${BENCHMARK} PROPERTY LABELS "benchmark_atermpp")
 endfunction()
 
 # Add a benchmark target given the sources.

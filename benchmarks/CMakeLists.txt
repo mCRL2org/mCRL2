@@ -1,13 +1,15 @@
 # Add a benchmarked named NAME that uses TOOL on the given INPUT.
 function(add_tool_benchmark NAME TOOL INPUT)
   set(TARGET "benchmark_target_${TOOL}_${NAME}")
+  set(TEST "benchmark_${TOOL}_${NAME}")
 
   add_custom_target(${TARGET}
     COMMAND ${TOOL} ${ARGN} "${INPUT}"
   )
 
-  add_test(NAME benchmark_${TOOL}_${NAME}
+  add_test(NAME ${TEST} 
     COMMAND ${CMAKE_COMMAND} "--build" ${CMAKE_BINARY_DIR} "--target" "${TARGET}")
+  set_property(TEST ${TEST} PROPERTY LABELS "benchmark_tool")
 endfunction()
 
 set(BENCHMARK_WORKSPACE ${CMAKE_BINARY_DIR}/benchmarks)
