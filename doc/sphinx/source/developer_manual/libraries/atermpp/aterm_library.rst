@@ -213,6 +213,7 @@ Using iterators ranging over a term type `T`, aterm_appl's with more arguments a
 longer lists can be constructed;
 
 .. code-block:: c++
+
     #include <vector>
     #include <atermpp::aterm_appl>
     #include <atermpp::aterm_list>
@@ -230,6 +231,7 @@ elements over which the iterator ranges. The operator () in the conversion class
 before it becomes an argument or a list element. This conversion class can also be a lambda term.
 
 .. code-block:: c++
+
     #include <vector>
     #include <atermpp::aterm_appl>
     #include <atermpp::aterm_list>
@@ -250,6 +252,7 @@ In the code fragment below the list of aterm_lists l is constructed by taking ea
 than 4 with the aterm y put in front of it.
 
 .. code-block:: c++
+
     #include <vector>
     #include <atermpp::aterm_list>
 
