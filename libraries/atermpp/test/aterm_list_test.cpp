@@ -145,7 +145,7 @@ void test_list_with_apply_filter()
                                 result1.end(),
                                 [](aterm_list l)->aterm_list{l.pop_front(); return l;},
                                 [](const aterm_list& l)->bool{return l.size()>2;});
-  BOOST_CHECK(result1.size()==2);
+  BOOST_CHECK(result2.size()==2);
 }
 
 void test_concatenation()
@@ -155,11 +155,12 @@ void test_concatenation()
   BOOST_CHECK(l2+l1 == l1+l2);
 }
 
-int test_main(int argc, char* argv[])
+int test_main(int, char*[])
 {
   test_aterm_list();
   test_set_operations();
   test_initializer_list();
+  test_list_with_apply_filter();
   test_concatenation();
 
   return 0;
