@@ -44,6 +44,7 @@ protected:
   simplifier_mode m_mode;
   std::size_t m_num_refine_steps;
   bool m_fine_initial_partition;
+  bool m_early_termination;
 
   /// Parse the non-default options.
   void parse_options(const command_line_parser& parser)
@@ -56,6 +57,7 @@ protected:
       m_num_refine_steps = parser.option_argument_as<std::size_t>("refine-steps");
     }
     m_fine_initial_partition = parser.options.count("fine-initial") > 0;
+    m_early_termination = parser.options.count("no-early-termination") == 0;
   }
 
   void add_options(interface_description& desc)
@@ -76,6 +78,11 @@ protected:
                'n');
     desc.add_option("fine-initial",
                "use a fine initial partition, such that each block contains only one PBES variable");
+    desc.add_option("no-early-termination",
+               "do not use knowledge of simulation relations to perform early termination detection. "
+               "Using this option might lead to a larger proof graph, although the runtime might become "
+               "lower since the overhead of early termination checking is avoided.",
+               't');
   }
 
 public:
@@ -106,7 +113,7 @@ public:
     spec.load(in);
     in.close();
 
-    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode, m_fine_initial_partition).run();
+    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode, m_fine_initial_partition, m_early_termination).run();
 
     return true;
   }

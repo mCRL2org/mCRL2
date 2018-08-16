@@ -59,6 +59,7 @@ protected:
   const pbes_system::detail::ppg_pbes m_spec;
 
   data_manipulators m_dm;
+  bool m_early_termination;
 
   std::list< block_t >      m_proof_blocks;
   std::list< block_t >      m_other_blocks;
@@ -422,9 +423,10 @@ protected:
 
 public:
 
-  dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode, bool fine_initial)
+  dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode, bool fine_initial, bool early_termination)
   : m_spec(spec)
   , m_dm(r, pr, spec.data())
+  , m_early_termination(early_termination)
   {
     m_dm.contains_reals = false;
     for(const equation_type_t& eq: m_spec.equations())
@@ -520,7 +522,7 @@ public:
 
     // First check whether the current proof graph is stable under optimisations.
     // This will not affect the cache.
-    if(!refine_step(true, is_positive_pg))
+    if(m_early_termination && !refine_step(true, is_positive_pg))
     {
       return true;
     }
