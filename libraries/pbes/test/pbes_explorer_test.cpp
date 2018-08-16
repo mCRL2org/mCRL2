@@ -10,10 +10,10 @@
 /// \brief Test for the PBES_Explorer interface.
 
 #include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/utilities/logger.h"
 
 #ifndef MCRL2_SKIP_LONG_TESTS
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
