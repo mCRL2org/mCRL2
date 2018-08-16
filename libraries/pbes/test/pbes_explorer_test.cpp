@@ -344,6 +344,6 @@ BOOST_AUTO_TEST_CASE(skip_test)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  log::mcrl2_logger::set_reporting_level(log::debug);
+  mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug);
   return nullptr;
 }
