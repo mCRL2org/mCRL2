@@ -53,14 +53,14 @@ protected:
   data_expression make_mdd(const data_expression& expr)
   {
     std::set<variable> free_vars = find_free_variables(expr);
-    if(free_vars.empty() || !std::all_of(free_vars.begin(), free_vars.end(), [this](const variable& v){ return dataspec.is_certainly_finite(v.sort()); }))
+    if(free_vars.empty() || !std::any_of(free_vars.begin(), free_vars.end(), [this](const variable& v){ return dataspec.is_certainly_finite(v.sort()); }))
     {
-      //TODO change this to also deal with natural numbers
       return expr;
     }
 
     std::map< data_expression, std::list<data_expression> > remaining_map;
-    const variable& smallest_var = *free_vars.begin();
+    //TODO improve this to also deal with natural numbers
+    const variable& smallest_var = *std::find_if(free_vars.begin(), free_vars.end(), [this](const variable& v){ return dataspec.is_certainly_finite(v.sort()); });
     // Gather possible values for smallest_var and the resulting expressions
     // if we substitute each of those values for smallest_var.
     // A reverse mapping (from resulting expression to value for smallest_var)
@@ -94,11 +94,11 @@ protected:
         auto pos_it = mdd_edge.second.cbegin();
         for(const data_expression& d: enumerate_sort(smallest_var.sort()))
         {
-          if(pos_it != mdd_edge.second.cend() && d != *pos_it)
+          if(pos_it == mdd_edge.second.cend() || d != *pos_it)
           {
             minimal_edge = lazy::and_(minimal_edge, not_equal_to(d, smallest_var));
           }
-          else if(d == *pos_it)
+          else if(pos_it != mdd_edge.second.cend())
           {
             ++pos_it;
           }
