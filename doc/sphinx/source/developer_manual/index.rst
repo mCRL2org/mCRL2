@@ -26,7 +26,7 @@ Contents
    - `Git repository <https://github.com/mCRL2org/mCRL2>`_
    - :doc:`repository`
    - `Issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_
-   - `Code coverage <http://mcrl2build1.win.tue.nl:8111/project.html?projectId=mcrl2&tab=preport_project1_Code_Coverage&branch_mcrl2=__all_branches__>`_
+   - `Code coverage <https://mcrl2.org/web/coverage/>`_
    - :doc:`testing`
    - :doc:`guidelines`
    - :doc:`code_generation`
