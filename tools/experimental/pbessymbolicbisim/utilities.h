@@ -265,7 +265,7 @@ public:
    * Returns true if b1 is certainly stable wrt b2
    * Returns false otherwise
    */
-  bool check_refinement(const BLOCK& b1, const BLOCK& b2)
+  bool check_refinement(const BLOCK& b1, const BLOCK& b2) const
   {
     return m_refinement_cache.find(std::make_pair(b1,b2)) != m_refinement_cache.end();
   }
@@ -275,17 +275,17 @@ public:
     m_transition_cache.insert(std::make_pair(std::make_pair(b1,b2), is_present));
   }
 
-  typename transition_cache_t::const_iterator check_transition(const BLOCK& b1, const BLOCK& b2)
+  typename transition_cache_t::const_iterator check_transition(const BLOCK& b1, const BLOCK& b2) const
   {
     return m_transition_cache.find(std::make_pair(b1,b2));
   }
 
-  typename transition_cache_t::const_iterator transition_end()
+  typename transition_cache_t::const_iterator transition_end() const
   {
     return m_transition_cache.cend();
   }
 
-  void print_size()
+  void print_size() const
   {
     std::cout << "Refinement cache size " << m_refinement_cache.size() << " trans cache size " << m_transition_cache.size() << std::endl;
   }

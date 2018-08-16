@@ -103,7 +103,7 @@ protected:
       return false;
     }
 
-    mCRL2log(log::verbose) << "Splitting\n" << phi_k << "\nwrt\n" << phi_l << std::endl;
+    mCRL2log(log::verbose) << "Splitting\n" << phi_k << "wrt\n" << phi_l << std::endl;
 
     // Try to split
     const std::pair<block, block> split_result = phi_k.split(phi_l, subblocks, use_optimisations);
@@ -131,7 +131,7 @@ protected:
     return true;
   }
 
-  std::vector<subblock> make_subblock_list()
+  std::vector<subblock> make_subblock_list() const
   {
     std::vector<subblock> result;
     for(const block_t& b: m_proof_blocks)
@@ -187,7 +187,7 @@ protected:
    * \brief Finds the block in blocks that contains the initial state
    */
   template <typename Container>
-  block_t find_initial_block(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr)
+  block_t find_initial_block(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr) const
   {
     for(const block_t& block: blocks)
     {
@@ -268,7 +268,7 @@ protected:
         m_other_blocks.push_front(block);
       }
       // split_logger->mark_deleted(rewr(block));
-      mCRL2log(log::verbose) << "  block " << i << "\n" << pp(block) << std::endl;
+      mCRL2log(log::verbose) << "  block " << i << "\n" << pp(block);
       i++;
     }
   }
@@ -420,10 +420,6 @@ protected:
     }
   }
 
-  void make_fine_initial_partition()
-  {
-  }
-
 public:
 
   dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode, bool fine_initial)
@@ -494,6 +490,14 @@ public:
     make_pg(pg, m_proof_blocks);
   }
 
+  void print()
+  {
+    mCRL2log(log::verbose) << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
+    print_partition(m_proof_blocks);
+    mCRL2log(log::verbose) << GREEN(THIN) << "Partition other blocks:" << NORMAL << std::endl;
+    print_partition(m_other_blocks);
+  }
+
   // void save_bes()
   // {
   //   const bes::boolean_equation_system& bes = make_bes(m_proof_blocks);
@@ -523,10 +527,7 @@ public:
     std::size_t num_iterations = 0;
     while(refine_step(false, is_positive_pg))
     {
-      mCRL2log(log::verbose) << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
-      print_partition(m_proof_blocks);
-      mCRL2log(log::verbose) << GREEN(THIN) << "Partition other blocks:" << NORMAL << std::endl;
-      print_partition(m_other_blocks);
+      print();
       num_iterations++;
       if(num_steps != 0 && num_iterations >= num_steps)
       {
