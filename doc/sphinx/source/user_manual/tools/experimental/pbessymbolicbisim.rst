@@ -22,5 +22,16 @@ algorithm to start off with a finer partition. In general, this will lead to
 a longer runtimes. However, in certain cases, it drastically speeds up the
 algorithm.
 
+The option :option:`--no-early-termination/-t` in some cases also speeds up the
+algorithm. When this option is supplied, no early termination checks are done
+at the start of every iteration. This can lead to a speed up of at most a factor
+two. However, the resulting proof graph may be much larger, negating the
+speed-up.
+
+If the tool spends a lot of time on parity game generation, it might help to
+set the option :option:`--refine-steps/-n` to 2 or 3. It saves some overhead by
+generating a parity game less often, but it may easily lead to a larger proof
+graph.
+
 To run this tool, the Z3 SMT-solver should be installed and its bin-directory
 has to be added to the PATH variable.
