@@ -113,7 +113,7 @@ public:
     return m_char_func == sort_bool::false_();
   }
 
-  std::pair<subblock,subblock> split(const std::list<subblock>& others, const std::vector<subblock>& subblock_list) const
+  std::pair<subblock,subblock> split(const std::list<subblock>& others, const std::vector<subblock>& /*subblock_list*/) const
   {
     if(!has_transition(others))
     {

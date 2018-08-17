@@ -93,6 +93,10 @@ public:
         neg_subblocks.push_back(sb_split.second);
       }
     }
+    // When not applying optimisations, always insert in the cache (on a
+    // succesful split *this will be replace by the new blocks).
+    // When applying optimisations, only insert in the cache when *this was
+    // stable wrt other (ie one of pos_subblocks or neg_subblocks is empty).
     if(!use_optimisations || pos_subblocks.empty() || neg_subblocks.empty())
     {
       m_cache->insert_refinement(*this, other);

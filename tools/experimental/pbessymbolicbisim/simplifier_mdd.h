@@ -52,15 +52,16 @@ protected:
 
   data_expression make_mdd(const data_expression& expr)
   {
-    std::set<variable> free_vars = find_free_variables(expr);
-    if(free_vars.empty() || !std::any_of(free_vars.begin(), free_vars.end(), [this](const variable& v){ return dataspec.is_certainly_finite(v.sort()); }))
+    const std::set<variable> free_vars = find_free_variables(expr);
+    const auto smallest_var_it = std::find_if(free_vars.begin(), free_vars.end(), [this](const variable& v){ return dataspec.is_certainly_finite(v.sort()); });
+    if(free_vars.empty() || smallest_var_it == free_vars.end())
     {
       return expr;
     }
 
     std::map< data_expression, std::list<data_expression> > remaining_map;
     //TODO improve this to also deal with natural numbers
-    const variable& smallest_var = *std::find_if(free_vars.begin(), free_vars.end(), [this](const variable& v){ return dataspec.is_certainly_finite(v.sort()); });
+    const variable& smallest_var = *smallest_var_it;
     // Gather possible values for smallest_var and the resulting expressions
     // if we substitute each of those values for smallest_var.
     // A reverse mapping (from resulting expression to value for smallest_var)

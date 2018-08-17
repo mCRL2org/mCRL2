@@ -251,6 +251,7 @@ class split_cache
   typedef std::unordered_map< std::pair< BLOCK, BLOCK >, bool> transition_cache_t;
 
 protected:
+  /// If a pair of blocks is present here, it means that the first is stable wrt to the second
   refinement_cache_t m_refinement_cache;
   transition_cache_t m_transition_cache;
 
