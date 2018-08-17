@@ -428,7 +428,6 @@ data_expression Rewriter::quantifier_enumeration(
 
     enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
     for( ; loop_upperbound > 0 &&
-           partial_result != absorbing_element &&
            sol != enumerator.end();
            ++sol)
     {
@@ -442,7 +441,7 @@ data_expression Rewriter::quantifier_enumeration(
       }
     }
 
-    if (sol == enumerator.end() && loop_upperbound > 0)
+    if (sol == enumerator.end())
     {
       if(vl_new_l_other.empty())
       {
