@@ -745,7 +745,9 @@ bool part_trans_t::make_noninert(pred_iter_t const old_pred_pos,
     // new_block_bunch_pos->slice = ...; -- see below
 
     if (nullptr != *new_noninert_bunch)
-    {                                                                           assert(new_action_block_pos == (*new_noninert_bunch)->end);
+    {                                                                           assert(new_action_block_pos == (*new_noninert_bunch)->end ||
+                                                                                            (new_action_block_pos == (*new_noninert_bunch)->end + 1 &&
+                                                                                                                  (*new_noninert_bunch)->end->succ.is_null()));
         (*new_noninert_bunch)->end = action_block_inert_begin;                  assert((*new_noninert_bunch)->begin < new_action_block_pos);
                                                                                 assert(action_block.begin() < new_action_block_pos);
         // even if there is a bunch, it may be necessary to create a new
@@ -756,8 +758,13 @@ bool part_trans_t::make_noninert(pred_iter_t const old_pred_pos,
         {
             // create a new action_block-slice
             new_action_block_pos->begin_or_before_end.set(
-                                                         new_action_block_pos); assert((*new_noninert_bunch)->is_trivial());
-            (*new_noninert_bunch)->make_nontrivial();
+                                                         new_action_block_pos);
+            if ((*new_noninert_bunch)->is_trivial())
+            {
+                // During initialisation, it may happen that we add new
+                // noninert transitions to a nontrivial bunch.
+                (*new_noninert_bunch)->make_nontrivial();
+            }                                                                   // else  assert(There is only one bunch);
         }
         else
         {
@@ -1409,19 +1416,23 @@ void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
     state_iter->pred.begin = next_pred_begin;
     state_iter->succ.begin = next_succ_begin;
 
-    // create a single bunch containing all transitions
+    // create a single bunch containing all non-inert transitions
 
     part_tr.action_block_inert_begin =
                                 part_tr.action_block.end() - inert_transitions;
     part_tr.block_bunch_inert_begin =
                                  part_tr.block_bunch.end() - inert_transitions;
 
-    bisim_dnj::bunch_t* const bunch = new bisim_dnj::bunch_t(
-            part_tr.action_block.begin(), part_tr.action_block_inert_begin, 0);
+    bisim_dnj::bunch_t* bunch = nullptr;
 
     // create a single block_bunch entry for all non-inert transitions
-    B->stable_block_bunch.emplace_front(part_tr.block_bunch_inert_begin, bunch,
-                                                                         true);
+    if (part_tr.action_block.begin() < part_tr.action_block_inert_begin)
+    {
+        bunch = new bisim_dnj::bunch_t(part_tr.action_block.begin(),
+                                          part_tr.action_block_inert_begin, 0);
+        B->stable_block_bunch.emplace_front(part_tr.block_bunch_inert_begin,
+                                                                  bunch, true);
+    }
 
     // create slice descriptors in part_tr.action_block for each label
 
@@ -1520,13 +1531,16 @@ void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
     // new transitions at the end of minimisation.
     aut.clear_transitions();
 
-    while (bunch->begin->succ.is_null())
+    if (nullptr != bunch)
     {
-        ++bunch->begin;                                                         assert(bunch->begin < bunch->end);
-    }
-    while (bunch->end[-1].succ.is_null())
-    {
-        --bunch->end;                                                           assert(bunch->begin < bunch->end);
+        while (bunch->begin->succ.is_null())
+        {
+            ++bunch->begin;                                                     assert(bunch->begin < bunch->end);
+        }
+        while (bunch->end[-1].succ.is_null())
+        {
+            --bunch->end;                                                       assert(bunch->begin < bunch->end);
+        }
     }
 
     mCRL2log(log::verbose, "bisim_dnj") << " transitions\n";
@@ -1537,6 +1551,8 @@ void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
     {
         if (1 < B->size())
         {
+part_st.print_part();
+part_tr.print_trans(*this);
             B = refine(B,
                 /* splitter block_bunch */ B->stable_block_bunch.begin(),
                 /* bunch for new non-inert transitions == */ bunch,

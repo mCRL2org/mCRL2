@@ -806,7 +806,7 @@ class action_block_entry
                                                                                 //               result->succ()->block_bunch->pred->target->block);
                                                                                 assert(succ()->bunch() == result->succ()->bunch());
                                                                                 assert(result == action_block_begin || result[-1].succ.is_null() ||
-                                                                                                action_block_orig_inert_begin < result ||
+                                                                                                action_block_orig_inert_begin <= result ||
                                                                                                 result[-1].succ()->block_bunch->pred->target->block !=
                                                                                                              result->succ()->block_bunch->pred->target->block);
                                                                                 #endif
@@ -1527,8 +1527,8 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
 {
   if (generate_counter_examples)
   {
-    mCRL2log(log::warning) << "The GJKW branching bisimulation algorithm does "
-                                            "not generate counterexamples.\n";
+    mCRL2log(log::warning) << "The DNJ branching bisimulation algorithm does "
+                                             "not generate counterexamples.\n";
   }
   size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1, l2);
