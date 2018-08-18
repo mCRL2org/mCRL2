@@ -23,14 +23,12 @@ Contents
    :class: toctree-wrapper
 
    - :doc:`developer`
-   - `Git repository <https://github.com/mCRL2org/mCRL2>`_
-   - :doc:`repository`
+   - `Git repository <https://github.com/mCRL2org/mCRL2>`_ (explanation: :doc:`repository`)
    - `Issue tracker <https://github.com/mCRL2org/mCRL2/issues>`_
    - `Code coverage <https://mcrl2.org/web/coverage/>`_
-   - :doc:`testing`
+   - `Resuts of regression testing <http://mcrl2build1.win.tue.nl:8111>`_ (explanation: :doc:`testing`)
    - :doc:`guidelines`
    - :doc:`code_generation`
-   - :doc:`packaging`
 
 Old pages
 =========
@@ -38,6 +36,7 @@ Old pages
 .. compound::
    :class: toctree-wrapper
 
+   - :doc:`packaging`
    - :doc:`cronjobs`
    - :doc:`performance/index`
 ..   - `Performance measurements <http://www.mcrl2.org/performance>`_
