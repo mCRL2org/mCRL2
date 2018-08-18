@@ -28,9 +28,9 @@ namespace data
 // predeclare
 namespace sort_bool
 {
-basic_sort const& bool_();
-function_symbol const& false_();
-function_symbol const& true_();
+const basic_sort& bool_();
+const function_symbol& false_();
+const function_symbol& true_();
 application and_(const data_expression&,const data_expression&);
 application not_(const data_expression&);
 bool is_bool(const sort_expression&);
@@ -44,22 +44,22 @@ namespace detail
 template < typename Derived >
 struct symbol : public core::detail::singleton_identifier< Derived >
 {
-  static bool is_application(data_expression const& e)
+  static bool is_application(const data_expression& e)
   {
-    return data::is_application(e) ? is_application(application(e)) : false;
+    return data::is_application(e) ? is_application(atermpp::down_cast<application>(e)) : false;
   }
 
-  static bool is_application(application const& e)
+  static bool is_application(const application& e)
   {
     return is_function_symbol(e.head());
   }
 
-  static bool is_function_symbol(data_expression const& e)
+  static bool is_function_symbol(const data_expression& e)
   {
-    return data::is_function_symbol(e) ? is_function_symbol(function_symbol(e)) : false;
+    return data::is_function_symbol(e) ? is_function_symbol(atermpp::down_cast<function_symbol>(e)) : false;
   }
 
-  static bool is_function_symbol(function_symbol const& e)
+  static bool is_function_symbol(const function_symbol& e)
   {
     return e.name() == core::detail::singleton_identifier< Derived >();
   }
