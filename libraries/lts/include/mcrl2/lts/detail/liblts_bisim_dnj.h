@@ -38,19 +38,17 @@ namespace lts
 {
 namespace detail
 {
-
-#ifndef NDEBUG
-    /// \brief include something in Debug mode
-    /// \details In a few places, we have to include an additional parameter to
-    /// a function in Debug mode.  While it is in principle possible to use
-    /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
-    /// over many code lines.  This macro expands to its arguments in Debug
-    /// mode and to nothing otherwise.
-    #define ONLY_IF_DEBUG(...) __VA_ARGS__
-#else
-    #define ONLY_IF_DEBUG(...)
-#endif
-
+                                                                                #ifndef NDEBUG
+                                                                                    /// \brief include something in Debug mode
+                                                                                    /// \details In a few places, we have to include an additional parameter to
+                                                                                    /// a function in Debug mode.  While it is in principle possible to use
+                                                                                    /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
+                                                                                    /// over many code lines.  This macro expands to its arguments in Debug
+                                                                                    /// mode and to nothing otherwise.
+                                                                                    #define ONLY_IF_DEBUG(...) __VA_ARGS__
+                                                                                #else
+                                                                                    #define ONLY_IF_DEBUG(...)
+                                                                                #endif
 // state_type and trans_type are defined in check_complexity.h.
 typedef std::size_t state_type;
 typedef std::size_t trans_type;
@@ -72,14 +70,12 @@ union iterator_or_counter
     ~iterator_or_counter()  {  }
 
     const iterator_or_counter& operator=(const iterator_or_counter& other)
-    {
-        assert(sizeof(count) == sizeof(begin));
+    {                                                                           assert(sizeof(count) == sizeof(begin));
         begin = other.begin;
         return *this;
     }
     bool operator==(const iterator_or_counter& other) const
-    {
-        assert(sizeof(count) == sizeof(begin));
+    {                                                                           assert(sizeof(count) == sizeof(begin));
         return begin == other.begin;
     }
     bool operator!=(const iterator_or_counter& other) const
@@ -91,26 +87,27 @@ union iterator_or_counter
 template <class Iterator>
 union iterator_or_null
 {
+  private:
     const void* null;
+    // sometimes we also need a third type, a label.
+    label_type label;
+  public:
     Iterator iter;
 
     iterator_or_null()  {  }
     explicit iterator_or_null(std::nullptr_t new_null)
-    {
-        assert(nullptr == new_null);
+    {                                                                           assert(nullptr == new_null);
         null = nullptr;
     }
     ~iterator_or_null()  {  }
 
     const iterator_or_null& operator=(const iterator_or_null& other)
-    {
-        assert(sizeof(null) == sizeof(iter));
+    {                                                                           assert(sizeof(null) == sizeof(iter));  assert(sizeof(null) >= sizeof(label));
         iter = other.iter;
         return *this;
     }
     bool operator==(const iterator_or_null& other) const
-    {
-        assert(sizeof(null) == sizeof(iter));
+    {                                                                           assert(sizeof(null) == sizeof(iter));  assert(sizeof(null) >= sizeof(label));
         return iter == other.iter;
     }
     bool operator!=(const iterator_or_null& other) const
@@ -120,6 +117,17 @@ union iterator_or_null
 
     bool is_null() const  {  return nullptr == null;  }
     void clear()  {  null = nullptr;  }
+    void set(Iterator new_iter)
+    {
+        iter = new_iter;                                                        assert(!is_null());
+    }
+    const Iterator& operator()() const
+    {                                                                           assert(!is_null());
+        return iter;
+    }
+
+    void set_label(label_type new_label)  {  label = new_label;  }
+    label_type get_label() const  {  return label;  }
 };
 
 class block_bunch_entry;
@@ -227,74 +235,54 @@ class state_info_entry
 
     /// iterator past the last incoming transition
     pred_const_iter_t pred_cend() const
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].pred.begin;
     }
     pred_iter_t pred_end()
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].pred.begin;
     }
 
     /// iterator past the last outgoing transition
     succ_const_iter_t succ_cend() const
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].succ.begin;
     }
     succ_iter_t succ_end()
-    {
-        assert(s_i_begin <= this);
-        assert(this < s_i_end);
+    {                                                                           assert(s_i_begin <= this);  assert(this < s_i_end);
         return this[1].succ.begin;
     }
 
     bool surely_has_transition_to(const bunch_t* SpBu) const;
     bool surely_has_no_transition_to(const bunch_t* SpBu) const;
+                                                                                #ifndef NDEBUG
+                                                                                /// \brief print a short state identification for debugging
+                                                                                /// \details This function is only available if compiled in Debug mode.
+                                                                                std::string debug_id_short() const
+                                                                                {
+                                                                                    assert(s_i_begin <= this);
+                                                                                    assert(this < s_i_end);
+                                                                                    return std::to_string(this - s_i_begin);
+                                                                                }
 
-    #ifndef NDEBUG
-        /// \brief print a short state identification for debugging
-        /// \details This function is only available if compiled in Debug mode.
-        std::string debug_id_short() const
-        {
-            assert(s_i_begin <= this);
-            assert(this < s_i_end);
-            return std::to_string(this - s_i_begin);
-        }
+                                                                                /// \brief print a state identification for debugging
+                                                                                /// \details This function is only available if compiled in Debug mode.
+                                                                                std::string debug_id() const
+                                                                                {
+                                                                                    return "state " + debug_id_short();
+                                                                                }
 
-        /// \brief print a state identification for debugging
-        /// \details This function is only available if compiled in Debug mode.
-        std::string debug_id() const
-        {
-            return "state " + debug_id_short();
-        }
+                                                                                /// \brief pointer at the first entry in the `state_info` array
+                                                                                static state_info_const_ptr s_i_begin;
 
-        /// \brief pointer at the first entry in the `state_info` array
-        static state_info_const_ptr s_i_begin;
-
-        /// \brief pointer past the last actual entry in the `state_info` array
-        /// \details `state_info` actually contains an additional entry that is
-        /// only used partially, namely to store pointers to the end of the
-        /// transition slices of the last state.  In other words, `s_i_end`
-        /// points at this additional, partially used entry.
-        static state_info_const_ptr s_i_end;
-    #endif
+                                                                                /// \brief pointer past the last actual entry in the `state_info` array
+                                                                                /// \details `state_info` actually contains an additional entry that is only
+                                                                                /// used partially, namely to store pointers to the end of the transition
+                                                                                /// slices of the last state.  In other words, `s_i_end` points at this
+                                                                                /// additional, partially used entry.
+                                                                                static state_info_const_ptr s_i_end;
+                                                                                #endif
 };
-
-
-/// swap two permutations
-static inline void swap(permutation_iter_t s1, permutation_iter_t s2)
-{
-    permutation_iter_t temp = s1;
-    s1 = s2;
-    (*s1)->pos = s1;
-    s2 = temp;
-    (*s2)->pos = s2;
-}
 
 
 /// \class block_t
@@ -402,7 +390,6 @@ class block_t
     /// of blocks must be zero.
     static state_type nr_of_blocks;
 
-  public:
     /// \brief constructor
     /// \details The constructor initialises the block to: all states are
     /// bottom states, no state is marked.
@@ -416,24 +403,35 @@ class block_t
         begin(new_begin),
         stable_block_bunch(),
         seqnr(nr_of_blocks++)
-    {
-        assert(new_begin < new_end);
+    {                                                                           assert(new_begin < new_end);
     }
 
     ~block_t()  {  }
 
     /// provides the number of states in the block
-    state_type size() const  {  return end - begin;  }
+    state_type size() const
+    {                                                                           assert(begin <= marked_bottom_begin);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+                                                                                assert(marked_nonbottom_begin <= end);
+        return end - begin;
+    }
 
     /// \brief provides the number of bottom states in the block
     state_type bottom_size() const
-    {
+    {                                                                           assert(begin <= marked_bottom_begin);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+                                                                                assert(marked_nonbottom_begin <= end);
         return nonbottom_begin - begin;
     }
 
     /// \brief provides the number of marked bottom states in the block
     state_type marked_bottom_size() const
-    {
+    {                                                                           assert(begin <= marked_bottom_begin);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+                                                                                assert(marked_nonbottom_begin <= end);
         return nonbottom_begin - marked_bottom_begin;
     }
 
@@ -445,13 +443,19 @@ class block_t
 
     /// provides the number of unmarked bottom states in the block
     state_type unmarked_bottom_size() const
-    {
+    {                                                                           assert(begin <= marked_bottom_begin);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+                                                                                assert(marked_nonbottom_begin <= end);
         return marked_bottom_begin - begin;
     }
 
     /// provides the number of unmarked nonbottom states in the block
     state_type unmarked_nonbottom_size() const
-    {
+    {                                                                           assert(begin <= marked_bottom_begin);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+                                                                                assert(marked_nonbottom_begin <= end);
         return marked_nonbottom_begin - nonbottom_begin;
     }
 
@@ -460,15 +464,7 @@ class block_t
     /// non-bottom states of the block.
     /// \param s the non-bottom state that has to be marked
     /// \returns true if the state was not marked before
-    bool mark_nonbottom(state_info_ptr s)
-    {
-        assert(nonbottom_begin <= s->pos);
-        assert(s->pos < end);
-
-        if (marked_nonbottom_begin <= s->pos)  return false;
-        swap(s->pos, --marked_nonbottom_begin);
-        return true;
-    }
+    bool mark_nonbottom(state_info_ptr s);
 
     /// \brief mark a state
     /// \details Marking is done by moving the state to the slice of the marked
@@ -476,18 +472,7 @@ class block_t
     /// state, it is treated as if it already were marked.
     /// \param s the state that has to be marked
     /// \returns true if the state was not marked before
-    bool mark(state_info_ptr s)
-    {
-        assert(begin <= s->pos);
-
-        if (s->pos < nonbottom_begin)
-        {
-            if (marked_bottom_begin <= s->pos)  return false;
-            swap(s->pos, --marked_bottom_begin);
-            return true;
-        }
-        return mark_nonbottom(s);
-    }
+    bool mark(state_info_ptr s);
 
     /// \brief refine the block
     /// \details This function is called after a refinement function has found
@@ -497,27 +482,76 @@ class block_t
     ///          should be the new one.
     /// \returns pointer to the new block
     block_t* split_off_block(enum new_block_mode_t new_block_mode);
+                                                                                #ifndef NDEBUG
+                                                                                /// \brief print a block identification for debugging
+                                                                                /// \details This function is only available if compiled in Debug mode.
+                                                                                std::string debug_id() const
+                                                                                {
+                                                                                    assert(perm_begin <= begin);
+                                                                                    assert(begin < end);
+                                                                                    assert(end <= perm_end);
+                                                                                    return "block [" + std::to_string(begin - perm_begin) + "," +
+                                                                                       std::to_string(end - perm_begin) + ") (#" + std::to_string(seqnr) + ")";
+                                                                                }
 
-    #ifndef NDEBUG
-        /// \brief print a block identification for debugging
-        /// \details This function is only available if compiled in Debug mode.
-        std::string debug_id() const
-        {
-            assert(perm_begin <= begin);
-            assert(begin < end);
-            assert(end <= perm_end);
-            return "block [" + std::to_string(begin - perm_begin) + "," +
-                                          std::to_string(end - perm_begin) +
-                                          ") (#" + std::to_string(seqnr) + ")";
-        }
-
-        /// \brief provide an iterator to the beginning of the permutation array
-        /// \details This iterator is required to be able to print identifications
-        /// for debugging.  It is only available if compiled in Debug mode.
-        static permutation_const_iter_t perm_begin;
-        static permutation_const_iter_t perm_end;
-    #endif
+                                                                                /// \brief provide an iterator to the beginning of the permutation array
+                                                                                /// \details This iterator is required to be able to print identifications
+                                                                                /// for debugging.  It is only available if compiled in Debug mode.
+                                                                                static permutation_iter_t perm_begin;
+                                                                                static permutation_const_iter_t perm_end;
+                                                                                #endif
 };
+
+
+/// swap two permutations
+/// \details Note that the two permutation array entries are given as
+/// references, not as iterators.  We have to jump through a hoop to turn
+/// those pointers into iterators again...
+static inline void swap(state_info_ptr& s1, state_info_ptr& s2)
+{                                                                               assert(&*s1->pos == &s1);  assert(&*block_t::perm_begin <= &s1);
+                                                                                assert(&s1 < &*block_t::perm_end);  assert(&*s2->pos == &s2);
+                                                                                assert(&*block_t::perm_begin <= &s2);  assert(&s2 < &*block_t::perm_end);
+    state_info_ptr temp = s1;
+    s1 = s2;
+    s2 = temp;
+    s1->pos = block_t::perm_begin + (&s1 - &*block_t::perm_begin);
+    s2->pos = block_t::perm_begin + (&s2 - &*block_t::perm_begin);
+}
+
+
+/// \brief mark a non-bottom state
+/// \details Marking is done by moving the state to the slice of the marked
+/// non-bottom states of the block.
+/// \param s the non-bottom state that has to be marked
+/// \returns true if the state was not marked before
+inline bool block_t::mark_nonbottom(state_info_ptr s)
+{                                                                               assert(nonbottom_begin <= s->pos);  assert(s->pos < end);
+    if (marked_nonbottom_begin <= s->pos)  return false;
+    swap(*s->pos, *--marked_nonbottom_begin);                                   assert(nonbottom_begin <= marked_nonbottom_begin);
+    return true;
+}
+
+
+/// \brief mark a state
+/// \details Marking is done by moving the state to the slice of the marked
+/// bottom or non-bottom states of the block.  If `s` is an old bottom
+/// state, it is treated as if it already were marked.
+/// \param s the state that has to be marked
+/// \returns true if the state was not marked before
+inline bool block_t::mark(state_info_ptr s)
+{                                                                               assert(begin <= s->pos);  assert(begin <= marked_bottom_begin);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+                                                                                assert(marked_nonbottom_begin <= end);
+    if (s->pos < nonbottom_begin)
+    {
+        if (marked_bottom_begin <= s->pos)  return false;
+        swap(*s->pos, *--marked_bottom_begin);                                  assert(begin <= marked_bottom_begin);
+        return true;
+    }
+    return mark_nonbottom(s);
+}
+
 
 
 /// \class part_state_t
@@ -547,14 +581,13 @@ class part_state_t
     part_state_t(state_type num_states)
       : permutation(num_states),
         state_info(num_states + 1)
-    {
-        assert(0 == block_t::nr_of_blocks);
-        #ifndef NDEBUG
-            block_t::perm_begin = permutation.begin();
-            block_t::perm_end = permutation.end();
-            state_info_entry::s_i_begin = state_info.data();
-            state_info_entry::s_i_end = state_info_entry::s_i_begin+num_states;
-        #endif
+    {                                                                           assert(0 == block_t::nr_of_blocks);
+                                                                                #ifndef NDEBUG
+                                                                                block_t::perm_begin = permutation.begin();
+                                                                                block_t::perm_end = permutation.end();
+                                                                                state_info_entry::s_i_begin = state_info.data();
+                                                                                state_info_entry::s_i_end = state_info_entry::s_i_begin+num_states;
+                                                                                #endif
         permutation_iter_t perm_iter = permutation.begin();
         state_info_ptr state_iter = &*state_info.begin();
         for (; permutation.end() != perm_iter; ++perm_iter, ++state_iter)
@@ -569,21 +602,13 @@ class part_state_t
     /// directly referenced from anywhere.
     ~part_state_t()
     {
-        permutation_iter_t permutation_iter = permutation.end();
-        #ifndef NDEBUG
-            state_type deleted_blocks = 0;
-        #endif
+        permutation_iter_t permutation_iter = permutation.end();                ONLY_IF_DEBUG( state_type deleted_blocks = 0; )
         while (permutation.begin() != permutation_iter)
         {
-            block_t* const B = permutation_iter[-1]->block;
-            assert(B->end == permutation_iter);
-            permutation_iter = B->begin;
-            #ifndef NDEBUG
-                ++deleted_blocks;
-            #endif
+            block_t* const B = permutation_iter[-1]->block;                     assert(B->end == permutation_iter);
+            permutation_iter = B->begin;                                        ONLY_IF_DEBUG( ++deleted_blocks; )
             delete B;
-        }
-        assert(deleted_blocks == block_t::nr_of_blocks);
+        }                                                                       assert(deleted_blocks == block_t::nr_of_blocks);
         block_t::nr_of_blocks = 0;
     }
 
@@ -598,26 +623,28 @@ class part_state_t
     {
         return state_info[s].block;
     }
+                                                                                #ifndef NDEBUG
+                                                                                private:
+                                                                                /// \brief print a slice of the partition (typically a block)
+                                                                                /// \details If the slice indicated by the parameters is not empty, the states
+                                                                                /// in this slice will be printed.
+                                                                                /// \param message text printed as a title if the slice is not empty
+                                                                                /// \param B       block that is being printed (it is checked whether states
+                                                                                ///                belong to this block)
+                                                                                /// \param begin   iterator to the beginning of the slice
+                                                                                /// \param end     iterator past the end of the slice
+                                                                                void print_block(const char* message, const block_t* B,
+                                                                                           permutation_const_iter_t begin, permutation_const_iter_t end) const;
+                                                                                public:
+                                                                                /// \brief print the partition per block
+                                                                                /// \details The function prints all blocks in order.  For each block, it lists
+                                                                                /// its states, separated into nonbottom and bottom states.
+                                                                                /// \param part_tr partition for the transitions
+                                                                                void print_part() const;
 
-    #ifndef NDEBUG
-      private:
-        /// \brief print a slice of the partition (typically a block)
-        /// \details If the slice indicated by the parameters is not empty, the
-        /// states in this slice will be printed.
-        /// \param message text printed as a title if the slice is not empty
-        /// \param B       block that is being printed (it is checked whether
-        ///                states belong to this block)
-        /// \param begin   iterator to the beginning of the slice
-        /// \param end     iterator past the end of the slice
-        void print_block(const char* message, const block_t* B,
-           permutation_const_iter_t begin, permutation_const_iter_t end) const;
-      public:
-        /// \brief print the partition per block
-        /// \details The function prints all blocks in order.  For each block,
-        /// it lists its states, separated into nonbottom and bottom states.
-        /// \param part_tr partition for the transitions
-        void print_part() const;
-    #endif
+                                                                                /// \brief asserts that the partition of states is consistent
+                                                                                void assert_consistency(bool branching) const;
+                                                                                #endif
 };
 
 ///@} (end of group part_state)
@@ -723,22 +750,19 @@ class pred_entry
     /// \details Because pred_entry is moved seldomly, we put this information
     /// here so it is easier to move other entries.
     state_info_ptr target;
+                                                                                #ifndef NDEBUG
+                                                                                /// \brief print a short transition identification for debugging
+                                                                                /// \details This function is only available if compiled in Debug mode.
+                                                                                std::string debug_id_short() const
+                                                                                {
+                                                                                    return "from " +source->debug_id_short() +" to " +target->debug_id_short();
+                                                                                }
 
-    #ifndef NDEBUG
-        /// \brief print a short transition identification for debugging
-        /// \details This function is only available if compiled in Debug mode.
-        std::string debug_id_short() const
-        {
-            return "from " + source->debug_id_short() + " to " +
-                                                      target->debug_id_short();
-        }
-
-        /// \brief print a transition identification for debugging
-        /// \details This function is only available if compiled in Debug mode.
-        template <class LTS_TYPE>
-        std::string debug_id(
-                     const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const;
-    #endif
+                                                                                /// \brief print a transition identification for debugging
+                                                                                /// \details This function is only available if compiled in Debug mode.
+                                                                                template <class LTS_TYPE>
+                                                                                std::string debug_id(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const;
+                                                                                #endif
 };
 
 
@@ -767,53 +791,49 @@ class action_block_entry
     /// \brief find the beginning of the action_block-slice
     action_block_iter_t action_block_slice_begin() const
     {
-        assert(!succ.is_null());
-        assert(!begin_or_before_end.is_null());
-        action_block_iter_t result = begin_or_before_end.iter;
+        action_block_iter_t result = begin_or_before_end();
         if (this < &*result)
-        {
-            assert(this == &*result->begin_or_before_end.iter);
-            result += this - &*result;
+        {                                                                       assert(this == &*result->begin_or_before_end());
+            result += this - &*result; // result = iterator(this);
         }
-        assert(!result->succ.is_null());
-        // assert(this has the same action as result);
-        assert(succ.iter->block_bunch->pred->target->block ==
-                          result->succ.iter->block_bunch->pred->target->block);
-        assert(succ.iter->bunch() == result->succ.iter->bunch());
-        assert(result == action_block_begin ||
-                      result[-1].succ.is_null() ||
-                      result[-1].succ.iter->block_bunch->pred->target->block !=
-                         result->succ.iter->block_bunch->pred->target->block);
+                                                                                #ifndef NDEBUG
+                                                                                // assert(this has the same action as result);
+                                                                                // The following assertion does not always hold: the function is
+                                                                                // called immediately after a block is refined, so it may be the
+                                                                                // case that the transitions are still to be moved to different
+                                                                                // slices.
+                                                                                // assert(succ()->block_bunch->pred->target->block ==
+                                                                                //               result->succ()->block_bunch->pred->target->block);
+                                                                                assert(succ()->bunch() == result->succ()->bunch());
+                                                                                assert(result == action_block_begin || result[-1].succ.is_null() ||
+                                                                                                action_block_orig_inert_begin < result ||
+                                                                                                result[-1].succ()->block_bunch->pred->target->block !=
+                                                                                                             result->succ()->block_bunch->pred->target->block);
+                                                                                #endif
         return result;
     }
 
     /// \brief find the end of the action_block-slice
     action_block_iter_t action_block_slice_before_end() const
     {
-        assert(!succ.is_null());
-        assert(!begin_or_before_end.is_null());
-        action_block_iter_t result = begin_or_before_end.iter;
+        action_block_iter_t result = begin_or_before_end();
         if (&*result < this)
         {
-            result = result->begin_or_before_end.iter;
-            assert(this <= &*result);
-        }
-        assert(!result->succ.is_null());
-        // assert(this has the same action as result);
-        assert(succ.iter->block_bunch->pred->target->block ==
-                          result->succ.iter->block_bunch->pred->target->block);
-        assert(succ.iter->bunch() == result->succ.iter->bunch());
-        assert(result + 1 == *action_block_end ||
-                       result[1].succ.is_null() ||
-                       result[1].succ.iter->block_bunch->pred->target->block !=
-                         result->succ.iter->block_bunch->pred->target->block);
+            result = result->begin_or_before_end();                             assert(this <= &*result);
+        }                                                                       // assert(this has the same action as result);
+                                                                                assert(succ()->block_bunch->pred->target->block ==
+                                                                                                             result->succ()->block_bunch->pred->target->block);
+                                                                                assert(succ()->bunch() == result->succ()->bunch());
+                                                                                assert(result + 1 == *action_block_end || result[1].succ.is_null() ||
+                                                                                                result[1].succ()->block_bunch->pred->target->block !=
+                                                                                                             result->succ()->block_bunch->pred->target->block);
         return result;
     }
-
-    #ifndef NDEBUG
-        static action_block_const_iter_t action_block_begin;
-        static const action_block_iter_t* action_block_end;
-    #endif
+                                                                                #ifndef NDEBUG
+                                                                                static action_block_const_iter_t action_block_begin;
+                                                                                static const action_block_iter_t* action_block_end;
+                                                                                static action_block_const_iter_t action_block_orig_inert_begin;
+                                                                                #endif
 };
 
 
@@ -841,14 +861,12 @@ class block_bunch_slice_t
       public:
         bunch_stability_t(bunch_t* new_bunch, bool is_stable)
           : data(reinterpret_cast<intptr_t>(new_bunch) | is_stable)
-        {
-            assert(sizeof(bunch_t*) == sizeof(intptr_t));
+        {                                                                       assert(sizeof(bunch_t*) == sizeof(intptr_t));
         }
         ~bunch_stability_t()  {  }
 
         const bunch_t* operator=(const bunch_t* new_bunch)
-        {
-            assert(0 == (reinterpret_cast<intptr_t>(new_bunch) & 3));
+        {                                                                       assert(0 == (reinterpret_cast<intptr_t>(new_bunch) & 3));
             data = reinterpret_cast<intptr_t>(new_bunch) | (data & 3);
             return new_bunch;
         }
@@ -882,16 +900,13 @@ class block_bunch_slice_t
         bunch(new_bunch, is_stable)
     {  }
 
-    static block_bunch_const_iter_t block_bunch_begin;
-    #ifndef NDEBUG
-        static block_bunch_const_iter_t block_bunch_end;
-    #endif
-
     bool empty() const;
 
-    #ifndef NDEBUG
-        std::string debug_id() const;
-    #endif
+    static block_bunch_const_iter_t block_bunch_begin;
+                                                                                #ifndef NDEBUG
+                                                                                static const block_bunch_iter_t* block_bunch_end;
+                                                                                std::string debug_id() const;
+                                                                                #endif
 };
 
 
@@ -913,7 +928,7 @@ class bunch_t
     action_block_iter_t begin;
 
     trans_type const sort_id;
-  private:
+//  private:
     static bunch_t* first_nontrivial;
     bunch_t* next_nontrivial;
   public:
@@ -928,26 +943,18 @@ class bunch_t
     static bunch_t* get_some_nontrivial()  {  return first_nontrivial;  }
 
     void make_nontrivial()
-    {
-        assert(1 < end - begin);
-        assert(is_trivial());
-        assert(!begin->begin_or_before_end.is_null());
-        assert(begin <= begin->begin_or_before_end.iter);
-        assert(!end[-1].begin_or_before_end.is_null());
-        assert(end[-1].begin_or_before_end.iter <= end);
-        assert(begin->begin_or_before_end.iter <
-                                             end[-1].begin_or_before_end.iter);
+    {                                                                           assert(1 < end - begin);  assert(is_trivial());
+                                                                                // The following assertions do not necessarily hold during initialisation:
+                                                                                //assert(begin <= begin->begin_or_before_end());
+                                                                                //assert(begin->begin_or_before_end() < end[-1].begin_or_before_end());
+                                                                                //assert(end[-1].begin_or_before_end() <= end);
         next_nontrivial = nullptr==first_nontrivial ? this : first_nontrivial;
         first_nontrivial = this;
     }
     void make_trivial()
-    {
-        assert(!is_trivial());
-        assert(first_nontrivial == this);
-        assert(!begin->begin_or_before_end.is_null());
-        assert(end - 1 == begin->begin_or_before_end.iter);
-        assert(!end[-1].begin_or_before_end.is_null());
-        assert(begin == end[-1].begin_or_before_end.iter);
+    {                                                                           assert(!is_trivial());  assert(first_nontrivial == this);
+                                                                                assert(end - 1 == begin->begin_or_before_end());
+                                                                                assert(begin == end[-1].begin_or_before_end());
         first_nontrivial = this == next_nontrivial ? nullptr : next_nontrivial;
         next_nontrivial = nullptr;
     }
@@ -968,20 +975,11 @@ class bunch_t
     /// a new bunch for the split-off slice and returns a pointer to the
     /// new bunch.  The caller has to adapt the block_bunch-slices.
     bunch_t* split_off_small_action_block_slice()
-    {
-        assert(begin < end);
-        assert(!begin->succ.is_null());
-        assert(!end[-1].succ.is_null());
-        assert(!begin->begin_or_before_end.is_null());
-        assert(!end[-1].begin_or_before_end.is_null());
-        action_block_iter_t first_slice_end=begin->begin_or_before_end.iter+1;
-        action_block_iter_t last_slice_begin=end[-1].begin_or_before_end.iter;
-        assert(begin < first_slice_end);
-        assert(first_slice_end <= last_slice_begin);
-        assert(last_slice_begin < end);
-        assert(!first_slice_end[-1].succ.is_null());
-        assert(!last_slice_begin->succ.is_null());
-
+    {                                                                           assert(begin < end);  assert(!begin->succ.is_null());
+        action_block_iter_t first_slice_end = begin->begin_or_before_end() + 1; assert(!end[-1].succ.is_null());
+        action_block_iter_t last_slice_begin = end[-1].begin_or_before_end();   assert(begin < first_slice_end);  assert(first_slice_end <= last_slice_begin);
+                                                                                assert(last_slice_begin < end);  assert(!first_slice_end[-1].succ.is_null());
+                                                                                assert(!last_slice_begin->succ.is_null());
         // 2.6: Create a new bunch NewBu and ...
         bunch_t* new_bunch;
 
@@ -996,9 +994,7 @@ class bunch_t
             end = last_slice_begin;
             while (end[-1].succ.is_null())
             {
-                --end;
-                assert(first_slice_end <= end);
-                assert(end->begin_or_before_end.is_null());
+                --end;                                                          assert(first_slice_end <= end);  assert(end->begin_or_before_end.is_null());
             }
             if (first_slice_end == end)  make_trivial();
         }
@@ -1009,10 +1005,8 @@ class bunch_t
             // 2.6: ... and move SpB from SpC to NewC
             begin = first_slice_end;
             while (begin->succ.is_null())
-            {
-                assert(begin->begin_or_before_end.is_null());
-                ++begin;
-                assert(begin <= last_slice_begin);
+            {                                                                   assert(begin->begin_or_before_end.is_null());
+                ++begin;                                                        assert(begin <= last_slice_begin);
             }
             if (begin == last_slice_begin)  make_trivial();
         }
@@ -1023,59 +1017,48 @@ class bunch_t
     bool operator>(const bunch_t& el) const  {  return el.operator<(*this);  }
     bool operator<=(const bunch_t& el) const  {  return !operator>(el);  }
     bool operator>=(const bunch_t& el) const  {  return !operator<(el);  }
+                                                                                #ifndef NDEBUG
+                                                                                std::string debug_id_short() const
+                                                                                {   assert(action_block_entry::action_block_begin <= begin);
+                                                                                    assert(begin < end);  assert(end <= *action_block_entry::action_block_end);
+                                                                                    return "bunch [" +
+                                                                                         std::to_string(begin - action_block_entry::action_block_begin) + "," +
+                                                                                         std::to_string(end - action_block_entry::action_block_begin) + ")";
+                                                                                }
 
-    #ifndef NDEBUG
-        std::string debug_id_short() const
-        {
-            assert(action_block_entry::action_block_begin <= begin);
-            assert(begin < end);
-            assert(end <= *action_block_entry::action_block_end);
-            return "bunch [" +
-                 std::to_string(begin-action_block_entry::action_block_begin) +
-                 "," +
-                 std::to_string(end - action_block_entry::action_block_begin) +
-                 ")";
-        }
-
-        /// \brief print a bunch identification for debugging
-        /// \details This function is only available if compiled in Debug mode.
-        std::string debug_id() const
-        {
-            action_block_const_iter_t iter = begin;
-            assert(!iter->succ.is_null());
-            assert(iter == iter->succ.iter->block_bunch->pred->action_block);
-            assert(!end[-1].succ.is_null());
-            std::string result = debug_id_short() + " containing transition";
-            if (iter < end - 1)  result += "s ";
-            else                 result += " ";
-            result += iter->succ.iter->block_bunch->pred->debug_id_short();
-            do
-            {
-                ++iter;
-                if (end <= iter)  return result;
-            }
-            while (iter->succ.is_null());
-            if (iter < end - 3)
-            {
-                assert(iter==iter->succ.iter->block_bunch->pred->action_block);
-                result += ", ";
-                result += iter->succ.iter->block_bunch->pred->debug_id_short();
-                result += ", ...";
-                iter = end - 3;
-            }
-            while (++iter < end)
-            {
-                assert(iter==iter->succ.iter->block_bunch->pred->action_block);
-                if (!iter->succ.is_null())
-                {
-                    result += ", ";
-                    result +=
-                          iter->succ.iter->block_bunch->pred->debug_id_short();
-                }
-            }
-            return result;
-        }
-    #endif
+                                                                                /// \brief print a bunch identification for debugging
+                                                                                /// \details This function is only available if compiled in Debug mode.
+                                                                                std::string debug_id() const
+                                                                                {   assert(!end[-1].succ.is_null());
+                                                                                    action_block_const_iter_t iter = begin;
+                                                                                    assert(iter == iter->succ()->block_bunch->pred->action_block);
+                                                                                    std::string result = debug_id_short();
+                                                                                    result += " containing transition";
+                                                                                    result += iter < end - 1 ? "s " : " ";
+                                                                                    result += iter->succ()->block_bunch->pred->debug_id_short();
+                                                                                    ++iter;
+                                                                                    if (end <= iter)  return result;
+                                                                                    while (iter->succ.is_null())  ++iter;
+                                                                                    assert(iter < end);
+                                                                                    assert(iter == iter->succ()->block_bunch->pred->action_block);
+                                                                                    result += ", ";
+                                                                                    result += iter->succ()->block_bunch->pred->debug_id_short();
+                                                                                    if (iter < end - 3)
+                                                                                    {
+                                                                                        result += ", ...";
+                                                                                        iter = end - 3;
+                                                                                    }
+                                                                                    while (++iter < end)
+                                                                                    {
+                                                                                        if (!iter->succ.is_null())
+                                                                                        {   assert(iter == iter->succ()->block_bunch->pred->action_block);
+                                                                                            result += ", ";
+                                                                                            result += iter->succ()->block_bunch->pred->debug_id_short();
+                                                                                        }
+                                                                                    }
+                                                                                    return result;
+                                                                                }
+                                                                                #endif
 };
 
 
@@ -1172,24 +1155,20 @@ it may take too much time to walk through the out-slices of the old block.
     }
 
     block_bunch_slice_t& operator*()
-    {
-        assert(nullptr != next);
+    {                                                                           assert(nullptr != next);
         return *next;
     }
     block_bunch_slice_t* operator->()
-    {
-        assert(nullptr != next);
+    {                                                                           assert(nullptr != next);
         return next;
     }
     block_bunch_slice_iter_t& operator++()
-    {
-        assert(nullptr != next);
+    {                                                                           assert(nullptr != next);
         next = next->next;
         return *this;
     }
     block_bunch_slice_iter_t operator++(int)
-    {
-        assert(nullptr != next);
+    {                                                                           assert(nullptr != next);
         block_bunch_slice_iter_t result(*this);
         next = next->next;
         return result;
@@ -1219,9 +1198,9 @@ class part_trans_t
     block_bunch_slice_iter_t unstable_block_bunch_postprocess_end;
 
     part_trans_t(trans_type num_transitions, trans_type num_actions)
-      : succ(num_transitions),
+      : succ(num_transitions + 1),
         block_bunch(num_transitions),
-        pred(num_transitions),
+        pred(num_transitions + 1),
         action_block(num_transitions + num_actions - 1),
         block_bunch_inert_begin(block_bunch.end()),
         action_block_inert_begin(action_block.end()),
@@ -1229,11 +1208,11 @@ class part_trans_t
         unstable_block_bunch_postprocess_end(unstable_block_bunch.end())
     {
         block_bunch_slice_t::block_bunch_begin = block_bunch.begin();
-        #ifndef NDEBUG
-            block_bunch_slice_t::block_bunch_end = block_bunch.end();
-            action_block_entry::action_block_begin = action_block.begin();
-            action_block_entry::action_block_end = &action_block_inert_begin;
-        #endif
+                                                                                #ifndef NDEBUG
+                                                                                block_bunch_slice_t::block_bunch_end = &block_bunch_inert_begin;
+                                                                                action_block_entry::action_block_begin = action_block.begin();
+                                                                                action_block_entry::action_block_end = &action_block_inert_begin;
+                                                                                #endif
     }
 
     /// \brief destructor
@@ -1242,23 +1221,19 @@ class part_trans_t
     ~part_trans_t()
     {
         action_block_iter_t action_block_iter = action_block.begin();
-        if (action_block_iter < action_block_inert_begin)
+        for (;;)
         {
-            assert(!action_block_iter->succ.is_null());
-            do
+            for (;;)
             {
-                bunch_t* const bunch = action_block_iter->succ.iter->bunch();
-                assert(bunch->begin == action_block_iter);
-                action_block_iter = bunch->end;
-                delete bunch;
-                while (action_block_iter < action_block_inert_begin &&
-                                             action_block_iter->succ.is_null())
-                {
-                    ++action_block_iter;
-                }
+                if (action_block_inert_begin <= action_block_iter)  return;
+                if (!action_block_iter->succ.is_null())  break;                 assert(action_block_iter->begin_or_before_end.is_null());
+                ++action_block_iter;
             }
-            while (action_block_iter < action_block_inert_begin);
+            bunch_t* const bunch = action_block_iter->succ()->bunch();          assert(bunch->begin == action_block_iter);
+            action_block_iter = bunch->end;
+            delete bunch;
         }
+        // unreachable
     }
 
     /// \brief correct transition data structure after splitting a bunch
@@ -1271,7 +1246,7 @@ class part_trans_t
   private:
     /// \brief Adapt the non-inert transitions in an out-slice to a new block
     succ_iter_t move_out_slice_to_new_block(succ_iter_t out_slice_end,
-                                                           block_t* old_block);
+             block_t* old_block, block_bunch_slice_const_iter_t last_splitter);
 
     /// \brief handle one transition after a block has been split
     /// \details The main task of this method is to move the transition to the
@@ -1293,42 +1268,33 @@ class part_trans_t
     ///
     /// Its time complexity is O(1 + |in(NewB)| + |out(NewB)|).
     void adapt_transitions_for_new_block(block_t* new_block,block_t* old_block,
-            bunch_t* new_noninert_bunch, enum new_block_mode_t new_block_mode);
-
-    #ifndef NDEBUG
-        /// \brief print all transitions
-        /// \details For each state (in order), its outgoing transitions are
-        /// listed, sorted by goal constellation.  The function also indicates
-        /// where the current constellation pointer of the state points at.
-        template <class LTS_TYPE>
-        void print_trans(
-                     const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const;
-
-        /// \brief assert that the data structure is consistent and stable
-        template <class LTS_TYPE>
-        void assert_stability(bool branching, bool preserve_divergence,
-                         const part_state_t&part_st, const LTS_TYPE&aut) const;
-    #endif
+                            bunch_t* new_noninert_bunch,
+                                block_bunch_slice_const_iter_t last_splitter,
+                                         enum new_block_mode_t new_block_mode);
+                                                                                #ifndef NDEBUG
+                                                                                /// \brief print all transitions
+                                                                                /// \details For each state (in order), its outgoing transitions are listed,
+                                                                                /// sorted by goal constellation.  The function also indicates where the
+                                                                                /// current out-slice pointer of the state points at.
+                                                                                template <class LTS_TYPE>
+                                                                                void print_trans(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const;
+                                                                                #endif
 };
 
 
 /// \brief find the beginning of the out-slice
 inline succ_iter_t succ_entry::out_slice_begin() const
 {
-    assert(!begin_or_before_end.is_null());
-    succ_iter_t result = begin_or_before_end.iter;
+    succ_iter_t result = begin_or_before_end();
     if (this < &*result)
-    {
-        assert(this == &*result->begin_or_before_end.iter);
+    {                                                                           assert(this == &*result->begin_or_before_end());
         result += this - &*result;
-    }
-    assert(block_bunch->pred->source->succ.begin <= result);
-    // assert(this <= result); //< holds always, based on the if() above
-    assert(this <= &*result->begin_or_before_end.iter);
-    assert(!result->block_bunch->slice.is_null());
-    assert(block_bunch->slice == result->block_bunch->slice);
-    assert(block_bunch->pred->source->succ.begin == result ||
-                block_bunch->slice.iter != result[-1].block_bunch->slice.iter);
+    }                                                                           assert(block_bunch->pred->source->succ.begin <= result);
+                                                                                // assert(this <= result); //< holds always, based on the if() above
+                                                                                assert(this <= &*result->begin_or_before_end());
+                                                                                assert(block_bunch->slice() == result->block_bunch->slice());
+                                                                                assert(block_bunch->pred->source->succ.begin == result ||
+                                                                                                      block_bunch->slice() != result[-1].block_bunch->slice());
     return result;
 }
 
@@ -1336,76 +1302,51 @@ inline succ_iter_t succ_entry::out_slice_begin() const
 /// \brief find the end of the out-slice
 inline succ_iter_t succ_entry::out_slice_before_end() const
 {
-    assert(!begin_or_before_end.is_null());
-    succ_iter_t result = begin_or_before_end.iter;
+    succ_iter_t result = begin_or_before_end();
     if (&*result < this)
     {
-        assert(!result->begin_or_before_end.is_null());
-        result = result->begin_or_before_end.iter;
-        assert(this <= &*result);
-    }
-    assert(result < block_bunch->pred->source->succ_inert.begin);
-    assert(block_bunch->slice == result->block_bunch->slice);
-    assert(result + 1 == block_bunch->pred->source->succ_inert.begin ||
-                 block_bunch->slice.iter != result[1].block_bunch->slice.iter);
+        result = result->begin_or_before_end();                                 assert(this <= &*result);
+    }                                                                           assert(result < block_bunch->pred->source->succ_inert.begin);
+                                                                                assert(block_bunch->slice() == result->block_bunch->slice());
+                                                                                assert(result + 1 == block_bunch->pred->source->succ_inert.begin ||
+                                                                                                       block_bunch->slice() != result[1].block_bunch->slice());
     return result;
 }
 
 
 inline bunch_t* succ_entry::bunch() const
 {
-    assert(!block_bunch->slice.is_null());
-    return (bunch_t*) block_bunch->slice.iter->bunch;
+    return (bunch_t*) block_bunch->slice()->bunch;
 }
 
 
 inline bool block_bunch_slice_t::empty() const
-{
-    assert(block_bunch_begin == end || !end[-1].slice.is_null());
-    return block_bunch_begin < end && this == &*end[-1].slice.iter;
+{                                                                               assert(block_bunch_begin <= end);  assert(end <= *block_bunch_end);
+    return block_bunch_begin == end || this != &*end[-1].slice();
 }
 
 
 inline block_t* block_bunch_slice_t::source_block() const
-{
-    assert(!empty());
+{                                                                               assert(!empty());
     return end[-1].pred->source->block;
 }
 
-
-#ifndef NDEBUG
-    inline std::string block_bunch_slice_t::debug_id() const
-    {
-        assert(block_bunch_begin <= end);
-        assert(end <= block_bunch_end);
-        assert(!empty());  /* Probably the following empty case is superfluous.
-        if empty()
-        {
-            std::string index = std::to_string(end - block_bunch_begin);
-            return "empty block_bunch_slice [" + index + "," + index + ")";
-        }  // */
-        return "block_bunch-slice containing transitions from " +
-                        source_block()->debug_id() + " in " +
-                                          ((bunch_t*) bunch)->debug_id_short();
-    }
-#endif
-
 ///@} (end of group part_trans)
-
-
-
-
-
-/* ************************************************************************* */
-/*                                                                           */
-/*                            A L G O R I T H M S                            */
-/*                                                                           */
-/* ************************************************************************* */
-
-
-
-
-
+                                                                                #ifndef NDEBUG
+                                                                                inline std::string block_bunch_slice_t::debug_id() const
+                                                                                {   assert(block_bunch_begin <= end);  assert(end <= *block_bunch_end);
+                                                                                    std::string index_string = std::to_string(end - block_bunch_begin);
+                                                                                    assert(!empty());  // Probably the following empty case is superfluous.
+/* ************************************************************************* */     // if empty()
+/*                                                                           */     // {
+/*                            A L G O R I T H M S                            */     //     return "empty block_bunch_slice [" + index_string + "," +
+/*                                                                           */     //                                                      index_string + ")";
+/* ************************************************************************* */     // }
+                                                                                    return "block_bunch-slice [_," + index_string +
+                                                                                        ") containing transitions from " + source_block()->debug_id() +
+                                                                                                                 " in " + ((bunch_t*) bunch)->debug_id_short();
+                                                                                }
+                                                                                #endif
 /// \defgroup part_refine
 /// \brief classes to calculate the stutter equivalence quotient of a LTS
 ///@{
@@ -1439,23 +1380,27 @@ class bisim_partitioner_dnj
                                 bisim_dnj::action_block_iter_t> > action_label;
     bool const branching;
     bool const preserve_divergence;
-
-    friend class bisim_dnj::pred_entry;
+                                                                                #ifndef NDEBUG
+                                                                                friend class bisim_dnj::pred_entry;
+                                                                                #endif
   public:
     // The constructor constructs the data structures and immediately
     // calculates the bisimulation quotient.  However, it does not change the
     // LTS.
-    bisim_partitioner_dnj(LTS_TYPE& l, bool new_branching = false,
+    bisim_partitioner_dnj(LTS_TYPE& new_aut, bool new_branching = false,
                                           bool new_preserve_divergence = false)
-      : aut(l),
-        part_st(l.num_states()),
-        part_tr(l.num_transitions(), l.num_action_labels()),
-        action_label(l.num_action_labels()),
+      : aut(new_aut),
+        part_st(new_aut.num_states()),
+        part_tr(new_aut.num_transitions(), new_aut.num_action_labels()),
+        action_label(new_aut.num_action_labels()),
         branching(new_branching),
         preserve_divergence(new_preserve_divergence)
-    {
-      assert(branching || !preserve_divergence);
+    {                                                                           assert(branching || !preserve_divergence);
       create_initial_partition();
+                                                                                #ifndef NDEBUG
+                                                                                bisim_dnj::action_block_entry::action_block_orig_inert_begin =
+                                                                                                                              part_tr.action_block_inert_begin;
+                                                                                #endif
       refine_partition_until_it_becomes_stable();
     }
     ~bisim_partitioner_dnj()  {  }
@@ -1505,6 +1450,10 @@ class bisim_partitioner_dnj
     bisim_dnj::block_t* postprocess_new_noninert(
                             bisim_dnj::block_t* refine_block,
                             bisim_dnj::block_bunch_slice_iter_t last_splitter);
+                                                                                #ifndef NDEBUG
+                                                                                /// \brief assert that the data structure is consistent and stable
+                                                                                void assert_stability() const;
+                                                                                #endif
 };
 
 ///@} (end of group part_refine)
@@ -1554,10 +1503,6 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
                                                           preserve_divergence);
 
   // Assign the reduced LTS
-  //mCRL2log(log::debug, "bisim_dnj")<<"number of states in the lumped chain: "
-  //    << bisim_part.num_eq_classes()
-  //    << "; initial state: originally state " << l.initial_state()
-  //    <<" = lumped state "<<bisim_part.get_eq_class(l.initial_state())<<"\n";
   bisim_part.replace_transition_system();
 }
 
@@ -1660,12 +1605,10 @@ namespace bisim_dnj
 /// \memberof state_info_entry
 inline bool state_info_entry::surely_has_transition_to(const bunch_t* const
                                                                     SpBu) const
-{
-    assert(succ.begin <= current_out_slice);
-    assert(current_out_slice <= succ_inert.begin);
-    assert(succ.begin == current_out_slice ||
-           current_out_slice == succ_inert.begin ||
-                 *current_out_slice[-1].bunch() < *current_out_slice->bunch());
+{                                                                               assert(succ.begin <= current_out_slice);
+                                                                                assert(current_out_slice <= succ_inert.begin);
+                                                                                assert(succ.begin==current_out_slice || current_out_slice==succ_inert.begin ||
+                                                                                                 *current_out_slice[-1].bunch() < *current_out_slice->bunch());
     if(current_out_slice<succ_inert.begin && SpBu==current_out_slice->bunch())
     {
         return true;
@@ -1689,12 +1632,10 @@ inline bool state_info_entry::surely_has_transition_to(const bunch_t* const
 /// \memberof state_info_entry
 inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                     SpBu) const
-{
-    assert(succ.begin <= current_out_slice);
-    assert(current_out_slice <= succ_inert.begin);
-    assert(succ.begin == current_out_slice ||
-           current_out_slice == succ_inert.begin ||
-                 *current_out_slice[-1].bunch() < *current_out_slice->bunch());
+{                                                                               assert(succ.begin <= current_out_slice);
+                                                                                assert(current_out_slice <= succ_inert.begin);
+                                                                                assert(succ.begin==current_out_slice || current_out_slice==succ_inert.begin ||
+                                                                                                 *current_out_slice[-1].bunch() < *current_out_slice->bunch());
     if (current_out_slice < succ_inert.begin &&
                                           *current_out_slice->bunch() <= *SpBu)
     {
@@ -1707,48 +1648,32 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
     }
     return true;
 }
+                                                                                #ifndef NDEBUG
+                                                                                static struct {
+                                                                                    bool operator()(iterator_or_counter<action_block_iter_t> p1,
+                                                                                                                              action_block_iter_t action_block)
+                                                                                    {
+                                                                                        return p1.begin > action_block;
+                                                                                    }
+                                                                                } action_label_greater;
 
-
-#ifndef NDEBUG
-    static struct {
-        bool operator()(action_block_iter_t p1,
-                                   iterator_or_counter<action_block_iter_t> p2)
-        {
-            return p1 < p2.begin;
-        }
-    } action_label_less;
-
-    /// \brief print a transition identification for debugging
-    /// \details This function is only available if compiled in Debug mode.
-    template <class LTS_TYPE>
-    inline std::string pred_entry::debug_id(
-                      const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
-    {
-        label_type label = 0;
-        if (!partitioner.branching ||
-                            (assert(partitioner.aut.is_tau(0)),
-                             action_block < partitioner.action_label[0].begin))
-        {
-            // The transition label is not the label of the inert transitions.
-            // Search for the action label in partitioner.action_label
-            label = std::upper_bound(partitioner.action_label.begin() +
-                (int) partitioner.branching, partitioner.action_label.end(),
-                                             action_block, action_label_less) -
-                                          partitioner.action_label.begin() - 1;
-            // The final ``- 1'' corrects for the fact that std::upper_bound
-            // actually returns the iterator that points to the beginning of
-            // the next action label slice.
-        }
-        // class lts_lts_t uses a function pp() to transform the action label to
-        // a string.
-        return pp(partitioner.aut.action_label(label)) + "-transition " +
-                                                              debug_id_short();
-    }
-#endif
-
-
-
-
+                                                                                /// \brief print a transition identification for debugging
+                                                                                /// \details This function is only available if compiled in Debug mode.
+                                                                                template <class LTS_TYPE>
+                                                                                inline std::string pred_entry::debug_id(
+                                                                                                      const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
+                                                                                {
+                                                                                    // Search for the action label in partitioner.action_label
+                                                                                    label_type const label = std::lower_bound(
+                                                                                          partitioner.action_label.begin(), partitioner.action_label.end(),
+                                                                                                                      action_block, action_label_greater) -
+                                                                                                                              partitioner.action_label.begin();
+                                                                                    // class lts_lts_t uses a function pp() to transform the action label to a
+                                                                                    // string.
+                                                                                    return pp(partitioner.aut.action_label(label)) + "-transition " +
+                                                                                                                                              debug_id_short();
+                                                                                }
+                                                                                #endif
 } // end namespace bisim_dnj
 } // end namespace detail
 } // end namespace lts
