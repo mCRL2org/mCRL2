@@ -572,7 +572,7 @@ ${cases}
       {
         if (is_application(e))
         {
-          return is_${functionname}_function_symbol(application(e).head());
+          return is_${functionname}_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }

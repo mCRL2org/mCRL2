@@ -186,7 +186,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_not_function_symbol(application(e).head());
+          return is_not_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -243,7 +243,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_and_function_symbol(application(e).head());
+          return is_and_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -300,7 +300,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_or_function_symbol(application(e).head());
+          return is_or_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -357,7 +357,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_implies_function_symbol(application(e).head());
+          return is_implies_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }

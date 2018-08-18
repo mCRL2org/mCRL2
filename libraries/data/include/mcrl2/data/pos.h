@@ -145,7 +145,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cdub_function_symbol(application(e).head());
+          return is_cdub_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -213,7 +213,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_maximum_function_symbol(application(e).head());
+          return is_maximum_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -270,7 +270,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_minimum_function_symbol(application(e).head());
+          return is_minimum_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -326,7 +326,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_succ_function_symbol(application(e).head());
+          return is_succ_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -382,7 +382,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_pos_predecessor_function_symbol(application(e).head());
+          return is_pos_predecessor_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -439,7 +439,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_plus_function_symbol(application(e).head());
+          return is_plus_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -497,7 +497,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_add_with_carry_function_symbol(application(e).head());
+          return is_add_with_carry_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -554,7 +554,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_times_function_symbol(application(e).head());
+          return is_times_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -610,7 +610,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_powerlog2_pos_function_symbol(application(e).head());
+          return is_powerlog2_pos_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }

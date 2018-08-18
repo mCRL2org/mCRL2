@@ -95,8 +95,8 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
 
         if (is_equal_to_application(conjunct)) // v == e
         {
-          left = data::binary_left(application(conjunct));
-          right = data::binary_right(application(conjunct));
+          left = data::binary_left(atermpp::down_cast<application>(conjunct));
+          right = data::binary_right(atermpp::down_cast<application>(conjunct));
         }
         else if (is_variable(conjunct) && sort_bool::is_bool(conjunct.sort())) // v equal to v == true
         {

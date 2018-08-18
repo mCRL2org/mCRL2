@@ -83,7 +83,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_function_update_function_symbol(application(e).head());
+          return is_function_update_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }

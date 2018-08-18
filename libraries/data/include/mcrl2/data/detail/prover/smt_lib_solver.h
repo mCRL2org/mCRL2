@@ -638,7 +638,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void translate_unknown_operator(const data_expression &a_clause)
     {
-      data_expression h = application(a_clause).head();
+      data_expression h = atermpp::down_cast<application>(a_clause).head();
       const function_symbol& v_operator = atermpp::down_cast<function_symbol>(h);
       std::map < function_symbol, std::size_t >::const_iterator i=f_operators.find(v_operator);
 

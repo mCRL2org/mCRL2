@@ -752,8 +752,8 @@ class linear_inequality: public atermpp::aterm_appl
         throw mcrl2::runtime_error("Unexpected equality or inequality: " + pp(e) + "\n") ;
       }
 
-      data_expression lhs=data::binary_left(application(e));
-      data_expression rhs=data::binary_right(application(e));
+      data_expression lhs=data::binary_left(atermpp::down_cast<application>(e));
+      data_expression rhs=data::binary_right(atermpp::down_cast<application>(e));
       *this=linear_inequality(lhs,rhs,comparison,r,negate);
 
     }

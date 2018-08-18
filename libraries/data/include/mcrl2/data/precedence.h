@@ -334,7 +334,7 @@ int left_precedence(const data_expression& x)
 {
   if (is_application(x))
   {
-    return left_precedence(application(x));
+    return left_precedence(atermpp::down_cast<application>(x));
   }
   else if (is_abstraction(x))
   {

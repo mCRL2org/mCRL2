@@ -145,7 +145,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_insert_function_symbol(application(e).head());
+          return is_insert_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -215,7 +215,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cons_function_symbol(application(e).head());
+          return is_cons_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -273,7 +273,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cinsert_function_symbol(application(e).head());
+          return is_cinsert_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -330,7 +330,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_count_function_symbol(application(e).head());
+          return is_count_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -387,7 +387,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_in_function_symbol(application(e).head());
+          return is_in_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -446,7 +446,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_join_function_symbol(application(e).head());
+          return is_join_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -505,7 +505,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fbag_intersect_function_symbol(application(e).head());
+          return is_fbag_intersect_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -564,7 +564,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fbag_difference_function_symbol(application(e).head());
+          return is_fbag_difference_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -621,7 +621,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fbag2fset_function_symbol(application(e).head());
+          return is_fbag2fset_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -677,7 +677,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fset2fbag_function_symbol(application(e).head());
+          return is_fset2fbag_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -734,7 +734,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_union_function_symbol(application(e).head());
+          return is_union_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -791,7 +791,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_intersection_function_symbol(application(e).head());
+          return is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -848,7 +848,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_difference_function_symbol(application(e).head());
+          return is_difference_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -904,7 +904,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_count_all_function_symbol(application(e).head());
+          return is_count_all_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
