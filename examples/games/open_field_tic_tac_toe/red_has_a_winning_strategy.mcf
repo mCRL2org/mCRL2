@@ -1,0 +1,6 @@
+% The formula below states that player red has a winning strategy in the open field game of tic-tac-toe.
+% Player yellow starts. 
+
+mu X.(<true>true && (forall k,l:Pos.(val(k<=6 && l<=6) => ([YellowMoves(k,l)]
+                ([YellowWins]false && exists i,j:Pos.val(i<=6 && j<=6) && (<RedMoves(i,j)>(<RedWins>true || X)))))))
+

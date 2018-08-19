@@ -1,0 +1,6 @@
+% The formula below that player yellow, who starts the open field game of tic-tac-toe
+% has a finite winning strategy.
+
+mu X.exists i,j:Pos.val(i<=6 && j<=6) && (<YellowMoves(i,j)>(<YellowWins>true || 
+                        (<true>true && forall k,l:Pos.(val(k<=6 && l<=6) => [RedMoves(k,l)]X))))
+
