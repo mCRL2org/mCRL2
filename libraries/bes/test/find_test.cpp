@@ -85,38 +85,6 @@ void test_my_search()
 
 }
 
-void test_search()
-{
-  std::string bes1 =
-    "pbes              \n"
-    "                  \n"
-    "nu X1 = X2 && X1; \n"
-    "mu X2 = X1 || X2; \n"
-    "                  \n"
-    "init X1;          \n"
-    ;
-  boolean_equation_system b;
-  std::stringstream from(bes1);
-  from >> b;
-
-  std::set<boolean_variable> v;
-
-  BOOST_CHECK(search_boolean_variable(b, boolean_variable("X1")));
-  BOOST_CHECK(search_boolean_variable(b, boolean_variable("X2")));
-  BOOST_CHECK(!search_boolean_variable(b, boolean_variable("X3")));
-
-  boolean_equation eq = b.equations().front();
-  BOOST_CHECK(search_boolean_variable(eq, boolean_variable("X1")));
-  BOOST_CHECK(search_boolean_variable(eq, boolean_variable("X2")));
-  BOOST_CHECK(!search_boolean_variable(eq, boolean_variable("X3")));
-
-  boolean_expression x = eq.formula();
-  BOOST_CHECK(search_boolean_variable(x, boolean_variable("X1")));
-  BOOST_CHECK(search_boolean_variable(x, boolean_variable("X2")));
-  BOOST_CHECK(!search_boolean_variable(x, boolean_variable("X3")));
-
-}
-
 void test_my_find()
 {
   std::string bes1 =

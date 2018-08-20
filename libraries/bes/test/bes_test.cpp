@@ -170,6 +170,7 @@ int test_main(int argc, char* argv[])
   test_expressions();
   test_boolean_equation();
   test_join();
+  test_bes();
 
   return 0;
 }
