@@ -264,7 +264,9 @@ void FileSystem::createProjectFile()
   QFile projectFile(projectFilePath());
   projectFile.open(QIODevice::WriteOnly);
   QTextStream saveStream(&projectFile);
-  saveStream << "SPEC " + defaultSpecificationFilePath();
+  /* we add the relative path to the specication, which is simply the name of
+   *   the specification file */
+  saveStream << "SPEC " + QFileInfo(specificationFilePath()).fileName();
   projectFile.close();
 }
 
@@ -495,6 +497,10 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath,
             projectInfo.right(projectInfo.length() - specLineIndex - 5);
         std::string test = specFilePath.toStdString();
         projectFile.close();
+        if (QFileInfo(specFilePath).isRelative())
+        {
+          specFilePath = newProjectFolderPath + QDir::separator() + specFilePath;
+        }
 
         /* read the specification and put it in the specification editor */
         QFile specificationFile(specFilePath);
