@@ -3,7 +3,6 @@ set(MCRL2_TOOLS
   complps2pbes
   lpsrealelm
   lpssymbolicbisim
-  mcrl2ide
   pbesabsinthe
   pbespareqelm
   pbessymbolicbisim

@@ -30,6 +30,7 @@ set(MCRL2_TOOLS
   mcrl2-gui
   mcrl22lps
   mcrl2i
+  mcrl2ide
   mcrl2xi
   pbes2bes
   pbes2bool
