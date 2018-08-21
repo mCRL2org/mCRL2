@@ -47,6 +47,7 @@ bool call_dynamic_bitset_all(const T& t)
 }
 
 struct structure_graph_builder;
+struct manual_structure_graph_builder;
 
 } // namespace detail
 
@@ -55,6 +56,7 @@ struct structure_graph_builder;
 class structure_graph
 {
   friend struct detail::structure_graph_builder;
+  friend struct detail::manual_structure_graph_builder;
 
   public:
     enum decoration_type
@@ -96,6 +98,11 @@ class structure_graph
       void remove_predecessor(index_type u)
       {
         predecessors.erase(std::remove(predecessors.begin(), predecessors.end(), u), predecessors.end());
+      }
+
+      void remove_successor(index_type u)
+      {
+        successors.erase(std::remove(successors.begin(), successors.end(), u), successors.end());
       }
     };
 
@@ -424,6 +431,62 @@ struct structure_graph_builder
       return structure_graph::undefined_vertex;
     }
     return i->second;
+  }
+};
+
+struct manual_structure_graph_builder
+{
+  typedef structure_graph::index_type index_type;
+
+  structure_graph& m_graph;
+  std::vector<structure_graph::vertex> m_vertices;
+  index_type m_initial_state; // The initial state.
+
+  explicit manual_structure_graph_builder(structure_graph& G)
+    : m_graph(G)
+  {}
+
+  /// \brief Create a vertex, returns the index of the new vertex
+  index_type insert_vertex(bool is_conjunctive, std::size_t rank)
+  {
+    m_vertices.emplace_back(pbes_expression(), is_conjunctive ? structure_graph::d_conjunction : structure_graph::d_disjunction, rank);
+    return m_vertices.size() - 1;
+  }
+
+  void insert_edge(index_type ui, index_type vi)
+  {
+    using utilities::detail::contains;
+    auto& u = m_vertices[ui];
+    auto& v = m_vertices[vi];
+    if (!contains(u.successors, vi))
+    {
+      u.successors.push_back(vi);
+      v.predecessors.push_back(ui);
+    }
+  }
+
+  void remove_edge(index_type ui, index_type vi)
+  {
+    auto& u = m_vertices[ui];
+    auto& v = m_vertices[vi];
+    u.remove_successor(vi);
+    v.remove_predecessor(ui);
+  }
+
+  void set_initial_state(const index_type i)
+  {
+    m_initial_state = i;
+  }
+
+  /// \brief call at the end, to put the results into m_graph
+  /// \detail May be called more than once. Does not invalidate this builder.
+  void finalize()
+  {
+    m_graph.m_vertices = m_vertices;
+    m_graph.m_initial_vertex = m_initial_state;
+
+    std::size_t N = m_vertices.size();
+    m_graph.m_exclude = boost::dynamic_bitset<>(N);
   }
 };
 
