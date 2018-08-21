@@ -347,7 +347,7 @@ struct constelm_quantifiers_inside_builder: public pbes_expression_builder<const
   typedef pbes_expression_builder<constelm_quantifiers_inside_builder> super;
   typedef std::pair<std::list<quantified_variable>, std::map<data::variable, data::data_expression>> constraints_t;
   typedef std::map<core::identifier_string, constraints_t> constraints_map_t;
-  typedef std::map<core::identifier_string, pbes_equation> variable_map_t;
+  typedef std::map<core::identifier_string, pbes_equation&> variable_map_t;
   using super::apply;
   using super::enter;
 
@@ -642,9 +642,9 @@ void rewrite_constelm_quantifiers_inside(pbes& p,
   const typename detail::constelm_quantifiers_inside_builder::constraints_map_t& cm)
 {
   typename detail::constelm_quantifiers_inside_builder::variable_map_t vm;
-  for(const pbes_equation& e: p.equations())
+  for(pbes_equation& e: p.equations())
   {
-    vm[e.variable().name()] = e;
+    vm.insert(std::pair<core::identifier_string, pbes_equation&>(e.variable().name(),e));
   }
   data::set_identifier_generator id_gen;
   for(const pbes_equation& eq: p.equations())
@@ -652,8 +652,9 @@ void rewrite_constelm_quantifiers_inside(pbes& p,
     id_gen.add_identifier(eq.variable().name());
   }
   detail::constelm_quantifiers_inside_builder r(cm, vm, id_gen);
-  pbes_expression new_init_state = r.apply(p.initial_state());
-  p.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(new_init_state);
+  pbes_expression initial_state(p.initial_state());
+  r.update(initial_state);
+  p.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(initial_state);
   std::vector<pbes_equation> new_eqns;
   for(const pbes_equation& eq: p.equations())
   {
@@ -1060,10 +1061,11 @@ class pbes_constelm_algorithm
       m_redundant_parameters.clear();
 
       // compute the vertices and edges of the dependency graph
-      for (const pbes_equation& eqn: p.equations())
+      for (pbes_equation& eqn: p.equations())
       {
         core::identifier_string name = eqn.variable().name();
         m_vertices[name] = vertex(eqn.variable());
+        eqn.formula() = detail::quantifiers_inside(eqn.formula());
 
         if (compute_conditions)
         {
