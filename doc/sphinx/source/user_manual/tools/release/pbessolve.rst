@@ -28,9 +28,7 @@ can be generated as follows::
 Note that ``lps2pbes`` is called with the option :option:`-c` to include counter example
 information in the generated PBES. Also note that the specification ``abp.lps`` that was used
 to create the PBES is passed as an argument to pbessolve with the option :option:`--file`. It
-is needed to construct the counter example. The tool ``pbessolve`` stores the counter example in a
-file with the extension ``<<pbesfile>>.evidence.lps``. A different name can be specified using the
-command line option :option:`--evidence-file`.
+is needed to construct the counter example.
 
 Similarly it can be done starting from an LTS instead of an LPS::
 
