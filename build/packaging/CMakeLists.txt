@@ -25,7 +25,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "Tools for modelling, validation and verification of concurrent systems")
 set(CPACK_PACKAGE_EXECUTABLES # exename/displayname to create start menu shortcuts
     "ltsgraph;LTSGraph" "ltsview;LTSView" "diagraphica;DiaGraphica" "lpsxsim;LPS XSim"
-    "mcrl2-gui;mCRL2 GUI" "mcrl2xi;mCRL2 XI")
+    "mcrl2-gui;mCRL2 GUI" "mcrl2xi;mCRL2 XI" "mcrl2ide;mCRL2 IDE")
 set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 set(CPACK_PACKAGE_CONTACT "mCRL2 Development team <mcrl2-users@listserver.tue.nl>")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2)
