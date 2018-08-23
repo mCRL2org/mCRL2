@@ -50,6 +50,14 @@ class ToolNotFoundError(Exception):
         return 'Tool {} does not exist!'.format(self.name)
 
 
+class ToolRuntimeError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class Popen(subprocess.Popen):
     def __init__(self, *args, **kwargs):
         self.__maxVirtLimit = kwargs.setdefault('maxVirtLimit', 100000000)

@@ -79,7 +79,7 @@ class Tool(object):
         if platform.system() == 'Linux' and returncode == -11:
             raise popen.SegmentationFault(self.name)
         if self.stderr and 'error' in self.stderr:
-            raise RuntimeError('Tool {} failed: {}'.format(self.name, self.stderr))
+            raise popen.ToolRuntimeError('Tool {} failed: {}'.format(self.name, self.stderr))
 
     def arguments(self, runpath = None):
         if not runpath:

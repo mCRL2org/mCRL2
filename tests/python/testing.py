@@ -209,6 +209,10 @@ class Test:
                     print('Stack overflow detected during execution of the tool ' + tool.name)
                 self.cleanup()
                 return None
+            except (popen.ToolRuntimeError, popen.SegmentationFault) as e:
+                self.dump_file_contents()
+                self.cleanup()
+                raise e
             tasks = self.remaining_tasks()
 
         if not all(tool.executed for tool in self.tools):
@@ -260,9 +264,8 @@ def run_yml_test(name, testfile, inputfiles, settings):
     result = t.run()
     print('{} {}'.format(name, result))
     if result == False:
-        for filename in inputfiles:
-            text = read_text(filename)
-            print('- file {}\n{}\n'.format(filename, text))
+        t.dump_file_contents()
+        raise RuntimeError('The result expression evaluated to False. The output of the tools likely does not match.')
     return result
 
 class TestRunner(testrunner.TestRunner):
