@@ -178,10 +178,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<data::sort_expression_traverser, Derived>
 {
-  typedef add_traverser_sort_expressions<data::sort_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_sort_expressions code ---//
 
@@ -313,10 +309,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<data::data_expression_traverser, Derived>
 {
-  typedef add_traverser_data_expressions<data::data_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_data_expressions code ---//
 
@@ -447,10 +439,6 @@ struct add_traverser_pbes_expressions: public Traverser<Derived>
 template <typename Derived>
 struct pbes_expression_traverser: public add_traverser_pbes_expressions<pbes_system::pbes_expression_traverser_base, Derived>
 {
-  typedef add_traverser_pbes_expressions<pbes_system::pbes_expression_traverser_base, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_pbes_expressions code ---//
 
@@ -593,10 +581,6 @@ struct add_traverser_variables: public Traverser<Derived>
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<data::variable_traverser, Derived>
 {
-  typedef add_traverser_variables<data::variable_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_variables code ---//
 
@@ -741,10 +725,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<data::identifier_string_traverser, Derived>
 {
-  typedef add_traverser_identifier_strings<data::identifier_string_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_identifier_strings code ---//
 

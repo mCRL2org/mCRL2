@@ -156,10 +156,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<process::sort_expression_traverser, Derived>
 {
-  typedef add_traverser_sort_expressions<process::sort_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_sort_expressions code ---//
 
@@ -280,10 +276,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<process::data_expression_traverser, Derived>
 {
-  typedef add_traverser_data_expressions<process::data_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_data_expressions code ---//
 
@@ -412,10 +404,6 @@ struct add_traverser_variables: public Traverser<Derived>
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<process::variable_traverser, Derived>
 {
-  typedef add_traverser_variables<process::variable_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_variables code ---//
 
@@ -546,10 +534,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<process::identifier_string_traverser, Derived>
 {
-  typedef add_traverser_identifier_strings<process::identifier_string_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_identifier_strings code ---//
 
@@ -619,10 +603,6 @@ struct add_traverser_action_labels: public Traverser<Derived>
 template <typename Derived>
 struct action_label_traverser: public add_traverser_action_labels<process::action_label_traverser, Derived>
 {
-  typedef add_traverser_action_labels<process::action_label_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_action_labels code ---//
 

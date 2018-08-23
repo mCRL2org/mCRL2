@@ -155,7 +155,6 @@ struct add_sort_expressions: public Builder<Derived>
 template <typename Derived>
 struct sort_expression_builder: public add_sort_expressions<process::sort_expression_builder, Derived>
 {
-  typedef add_sort_expressions<process::sort_expression_builder, Derived> super;
 };
 //--- end generated add_sort_expressions code ---//
 
@@ -280,7 +279,6 @@ struct add_data_expressions: public Builder<Derived>
 template <typename Derived>
 struct data_expression_builder: public add_data_expressions<process::data_expression_builder, Derived>
 {
-  typedef add_data_expressions<process::data_expression_builder, Derived> super;
 };
 //--- end generated add_data_expressions code ---//
 
@@ -411,7 +409,6 @@ struct add_variables: public Builder<Derived>
 template <typename Derived>
 struct variable_builder: public add_variables<process::data_expression_builder, Derived>
 {
-  typedef add_variables<process::data_expression_builder, Derived> super;
 };
 //--- end generated add_variables code ---//
 

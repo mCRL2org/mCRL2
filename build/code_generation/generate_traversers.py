@@ -33,10 +33,6 @@ struct <ADD_TRAVERSER>: public Traverser<Derived>
 template <typename Derived>
 struct <TRAVERSER>: public <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived>
 {
-  typedef <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 '''
     classnames = parse_classnames(class_map[namespace], namespace)
@@ -88,11 +84,6 @@ struct <ADD_BUILDER>: public Builder<Derived>
 template <typename Derived>
 struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
 {
-  typedef <ADD_BUILDER><<PARENT_BUILDER>, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
-  using super::apply;
 };
 '''
 

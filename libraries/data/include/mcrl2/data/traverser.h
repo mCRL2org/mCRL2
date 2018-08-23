@@ -348,10 +348,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<core::traverser, Derived>
 {
-  typedef add_traverser_sort_expressions<core::traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_sort_expressions code ---//
 
@@ -553,10 +549,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<core::traverser, Derived>
 {
-  typedef add_traverser_data_expressions<core::traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_data_expressions code ---//
 
@@ -766,10 +758,6 @@ struct add_traverser_variables: public Traverser<Derived>
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<core::traverser, Derived>
 {
-  typedef add_traverser_variables<core::traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_variables code ---//
 
@@ -1092,10 +1080,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<core::traverser, Derived>
 {
-  typedef add_traverser_identifier_strings<core::traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated add_traverser_identifier_strings code ---//
 

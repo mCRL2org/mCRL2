@@ -189,10 +189,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<lps::sort_expression_traverser, Derived>
 {
-  typedef add_traverser_sort_expressions<lps::sort_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated action_formulas::add_traverser_sort_expressions code ---//
 
@@ -343,10 +339,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<lps::data_expression_traverser, Derived>
 {
-  typedef add_traverser_data_expressions<lps::data_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated action_formulas::add_traverser_data_expressions code ---//
 
@@ -496,10 +488,6 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
 template <typename Derived>
 struct action_formula_traverser: public add_traverser_action_formula_expressions<action_formulas::action_formula_traverser_base, Derived>
 {
-  typedef add_traverser_action_formula_expressions<action_formulas::action_formula_traverser_base, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated action_formulas::add_traverser_action_formula_expressions code ---//
 
@@ -652,10 +640,6 @@ struct add_traverser_variables: public Traverser<Derived>
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<lps::variable_traverser, Derived>
 {
-  typedef add_traverser_variables<lps::variable_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated action_formulas::add_traverser_variables code ---//
 
@@ -808,10 +792,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<lps::identifier_string_traverser, Derived>
 {
-  typedef add_traverser_identifier_strings<lps::identifier_string_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated action_formulas::add_traverser_identifier_strings code ---//
 
@@ -931,10 +911,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<action_formulas::sort_expression_traverser, Derived>
 {
-  typedef add_traverser_sort_expressions<action_formulas::sort_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated regular_formulas::add_traverser_sort_expressions code ---//
 
@@ -1025,10 +1001,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<action_formulas::data_expression_traverser, Derived>
 {
-  typedef add_traverser_data_expressions<action_formulas::data_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated regular_formulas::add_traverser_data_expressions code ---//
 
@@ -1119,10 +1091,6 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
 template <typename Derived>
 struct regular_formula_traverser: public add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser_base, Derived>
 {
-  typedef add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser_base, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated regular_formulas::add_traverser_regular_formula_expressions code ---//
 
@@ -1213,10 +1181,6 @@ struct add_traverser_variables: public Traverser<Derived>
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<action_formulas::variable_traverser, Derived>
 {
-  typedef add_traverser_variables<action_formulas::variable_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated regular_formulas::add_traverser_variables code ---//
 
@@ -1308,10 +1272,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<action_formulas::identifier_string_traverser, Derived>
 {
-  typedef add_traverser_identifier_strings<action_formulas::identifier_string_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated regular_formulas::add_traverser_identifier_strings code ---//
 
@@ -1570,10 +1530,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
 template <typename Derived>
 struct sort_expression_traverser: public add_traverser_sort_expressions<regular_formulas::sort_expression_traverser, Derived>
 {
-  typedef add_traverser_sort_expressions<regular_formulas::sort_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated state_formulas::add_traverser_sort_expressions code ---//
 
@@ -1807,10 +1763,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
 template <typename Derived>
 struct data_expression_traverser: public add_traverser_data_expressions<regular_formulas::data_expression_traverser, Derived>
 {
-  typedef add_traverser_data_expressions<regular_formulas::data_expression_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated state_formulas::add_traverser_data_expressions code ---//
 
@@ -2040,10 +1992,6 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
 template <typename Derived>
 struct state_formula_traverser: public add_traverser_state_formula_expressions<state_formulas::state_formula_traverser_base, Derived>
 {
-  typedef add_traverser_state_formula_expressions<state_formulas::state_formula_traverser_base, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated state_formulas::add_traverser_state_formula_expressions code ---//
 
@@ -2279,10 +2227,6 @@ struct add_traverser_variables: public Traverser<Derived>
 template <typename Derived>
 struct variable_traverser: public add_traverser_variables<regular_formulas::variable_traverser, Derived>
 {
-  typedef add_traverser_variables<regular_formulas::variable_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated state_formulas::add_traverser_variables code ---//
 
@@ -2512,10 +2456,6 @@ struct add_traverser_state_variables: public Traverser<Derived>
 template <typename Derived>
 struct state_variable_traverser: public add_traverser_state_variables<state_formulas::state_formula_traverser_base, Derived>
 {
-  typedef add_traverser_state_variables<state_formulas::state_formula_traverser_base, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated state_formulas::add_traverser_state_variables code ---//
 
@@ -2755,10 +2695,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
 template <typename Derived>
 struct identifier_string_traverser: public add_traverser_identifier_strings<regular_formulas::identifier_string_traverser, Derived>
 {
-  typedef add_traverser_identifier_strings<regular_formulas::identifier_string_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated state_formulas::add_traverser_identifier_strings code ---//
 
@@ -2990,10 +2926,6 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
 template <typename Derived>
 struct regular_formula_traverser: public add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser, Derived>
 {
-  typedef add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
 };
 //--- end generated state_formulas::add_traverser_regular_formula_expressions code ---//
 
