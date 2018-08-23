@@ -134,6 +134,7 @@ class MainWindow : public QMainWindow
   QAction* openProjectAction;
   QAction* saveProjectAction;
   QAction* saveProjectAsAction;
+  QAction* exitAction;
 
   QAction* undoAction;
   QAction* redoAction;

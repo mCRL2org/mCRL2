@@ -113,6 +113,11 @@ void MainWindow::setupMenuBar()
   saveProjectAsAction->setShortcut(
       QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
 
+  fileMenu->addSeparator();
+
+  exitAction = fileMenu->addAction("Exit", this, SLOT(close()));
+  exitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+
   /* Create the Edit menu */
   QMenu* editMenu = menuBar()->addMenu("Edit");
 
