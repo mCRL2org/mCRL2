@@ -224,6 +224,11 @@ class Test:
                     raise RuntimeError('Error in test {}: output file {} is missing!'.format(self.name, node.filename()))
             write_text('commands', '\n'.join(commands))
             result = self.result()
+            if result == False:
+                self.dump_file_contents()
+                for tool in self.tools:
+                    if tool.value != {}:
+                        print('Output of {} {}: {}'.format(tool.name, ' '.join(tool.args), tool.value))
             self.cleanup()
             return result
 
@@ -264,7 +269,6 @@ def run_yml_test(name, testfile, inputfiles, settings):
     result = t.run()
     print('{} {}'.format(name, result))
     if result == False:
-        t.dump_file_contents()
         raise RuntimeError('The result expression evaluated to False. The output of the tools likely does not match.')
     return result
 
