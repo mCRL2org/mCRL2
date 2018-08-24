@@ -247,7 +247,6 @@ process_expression parse_process_expression_new(const std::string& text)
   core::warn_and_or(node);
   core::warn_left_merge_merge(node);
   process_expression result = process_actions(p).parse_ProcExpr(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -262,7 +261,6 @@ process_specification parse_process_specification_new(const std::string& text)
   core::warn_left_merge_merge(node);
   untyped_process_specification untyped_procspec = process_actions(p).parse_mCRL2Spec(node);
   process_specification result = untyped_procspec.construct_process_specification();
-  p.destroy_parse_node(node);
   return result;
 }
 

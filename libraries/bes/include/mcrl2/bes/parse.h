@@ -92,7 +92,6 @@ boolean_expression parse_boolean_expression_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   boolean_expression result = bes_actions(p).parse_BesExpr(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -105,7 +104,6 @@ boolean_equation_system parse_boolean_equation_system_new(const std::string& tex
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   boolean_equation_system result = bes_actions(p).parse_BesSpec(node);
-  p.destroy_parse_node(node);
   return result;
 }
 

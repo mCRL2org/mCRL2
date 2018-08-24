@@ -57,7 +57,6 @@ process::untyped_multi_action parse_multi_action_new(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   process::untyped_multi_action result = multi_action_actions(p).parse_MultAct(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -167,7 +166,6 @@ action_rename_specification parse_action_rename_specification_new(const std::str
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   action_rename_specification result = action_rename_actions(p).parse_ActionRenameSpec(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -232,7 +230,7 @@ action_rename_specification parse_action_rename_specification(std::istream& in, 
 /// \return An action rename specification
 inline
 action_rename_specification parse_action_rename_specification(
-           const std::string& spec_string, 
+           const std::string& spec_string,
            const lps::stochastic_specification& spec)
 {
   std::istringstream in(spec_string);
@@ -293,7 +291,7 @@ void parse_lps<specification>(std::istream& from, specification& result)
 
 /// \brief Parses a stochastic linear process specification from an input stream.
 /// \param from An input stream containing a linear process specification.
-/// \param result An output parameter in which the parsed stochastic process is put. 
+/// \param result An output parameter in which the parsed stochastic process is put.
 /// \return The parsed specification.
 /// \exception non_linear_process if a non-linear sub-expression is encountered.
 /// \exception mcrl2::runtime_error in the following cases:

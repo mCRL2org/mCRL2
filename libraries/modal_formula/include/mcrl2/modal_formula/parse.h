@@ -68,7 +68,6 @@ action_formula parse_action_formula(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   action_formula result = action_formula_actions(p).parse_ActFrm(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -127,7 +126,6 @@ regular_formula parse_regular_formula(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   regular_formula result = regular_formula_actions(p).parse_RegFrm(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -296,7 +294,6 @@ state_formula parse_state_formula(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   state_formula result = state_formula_actions(p).parse_StateFrm(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -312,7 +309,6 @@ state_formula_specification parse_state_formula_specification(const std::string&
 
   untyped_state_formula_specification untyped_statespec = state_formula_actions(p).parse_StateFrmSpec(node);
   state_formula_specification result = untyped_statespec.construct_state_formula_specification();
-  p.destroy_parse_node(node);
   return result;
 }
 

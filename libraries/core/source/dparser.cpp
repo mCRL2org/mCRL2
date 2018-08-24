@@ -92,6 +92,14 @@ std::string parse_node::pathname() const
   return std::string(node->start_loc.pathname);
 }
 
+parse_node::~parse_node()
+{
+  if (parser)
+  {
+    free_D_ParseNode(parser, node);
+  }
+}
+
 // Prints a tree of
 std::string parser_table::tree(const core::parse_node& node) const
 {
@@ -220,7 +228,7 @@ parse_node parser::parse(const std::string& text, unsigned int start_symbol_inde
   {
     throw mcrl2::runtime_error("syntax error");
   }
-  return parse_node(result);
+  return parse_node(result, m_parser);
 }
 
 void parser::print_symbol_table() const

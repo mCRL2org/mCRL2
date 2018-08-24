@@ -253,7 +253,7 @@ struct default_parser_actions: public parser_actions
     return parse_list<core::identifier_string>(node, "Id", [&](const core::parse_node& node) { return parse_Id(node); });
 #else
     return parse_list<core::identifier_string>(node, "Id", std::bind(&default_parser_actions::parse_Id, this, std::placeholders::_1));
-#endif    
+#endif
   }
 };
 
@@ -278,7 +278,6 @@ identifier_string parse_identifier(const std::string& text)
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   identifier_string result = default_parser_actions(p).parse_Id(node);
-  p.destroy_parse_node(node);
   return result;
 }
 

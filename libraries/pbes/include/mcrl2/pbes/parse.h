@@ -136,7 +136,6 @@ pbes_expression parse_pbes_expression_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   pbes_expression result = pbes_actions(p).parse_PbesExpr(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -149,7 +148,6 @@ untyped_pbes parse_pbes_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   untyped_pbes result = pbes_actions(p).parse_PbesSpec(node);
-  p.destroy_parse_node(node);
   return result;
 }
 
@@ -202,7 +200,6 @@ propositional_variable parse_propositional_variable(const std::string& text,
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   propositional_variable result = detail::pbes_actions(p).parse_PropVarDecl(node);
-  p.destroy_parse_node(node);
   return typecheck_propositional_variable(result, variables, dataspec);
 }
 
@@ -229,7 +226,6 @@ pbes_expression parse_pbes_expression(const std::string& text,
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   pbes_expression x = detail::pbes_actions(p).parse_PbesExpr(node);
-  p.destroy_parse_node(node);
   if (type_check)
   {
     x = pbes_system::typecheck_pbes_expression(x, variables, propositional_variables, dataspec);

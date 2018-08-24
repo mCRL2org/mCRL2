@@ -86,7 +86,6 @@ process::action_label_list parse_action_declaration(const std::string& text, con
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   action_label_vector result;
   detail::action_actions(p).callback_ActDecl(node, result);
-  p.destroy_parse_node(node);
   process::action_label_list v(result.begin(), result.end());
   v = process::normalize_sorts(v, data_spec);
   return v;

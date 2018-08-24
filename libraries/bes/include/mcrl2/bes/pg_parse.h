@@ -221,7 +221,6 @@ void parse_pgsolver_string(const std::string& text, boolean_equation_system& res
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   pg_actions(p).parse_ParityGame(node, result, maxpg);
-  p.destroy_parse_node(node);
 }
 
 /// \brief Reads a parity game from an input stream, and stores it as a BES.

@@ -85,9 +85,10 @@ void set_dparser_max_error_message_count(std::size_t n)
 struct parse_node
 {
   D_ParseNode* node;
+  D_Parser* parser = nullptr;
 
-  parse_node(D_ParseNode* n)
-    : node(n)
+  explicit parse_node(D_ParseNode* n, D_Parser* parser_ = nullptr)
+    : node(n), parser(parser_)
   {}
 
   int symbol() const;
@@ -103,10 +104,12 @@ struct parse_node
   std::string pathname() const;
   std::string add_context(const std::string& message) const;
 
-  operator bool() const
+  explicit operator bool() const
   {
     return node != nullptr;
   }
+
+  ~parse_node();
 };
 
 /// \brief Wrapper for D_ParserTables
@@ -114,7 +117,7 @@ struct parser_table
 {
   D_ParserTables& m_table;
 
-  parser_table(D_ParserTables& table)
+  explicit parser_table(D_ParserTables& table)
     : m_table(table)
   { }
 

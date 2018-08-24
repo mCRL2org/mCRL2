@@ -43,7 +43,6 @@ void test_data_expression(const std::string& text, const std::string& variable_c
   tnode->set_constraint(context);
   data::print_node(tnode);
   context.remove_context_variables(variables);
-  p.destroy_parse_node(node);
 }
 
 void test_data_expression_fail(const std::string& text, const std::string& variable_context = "", const std::string& expected_sort = "")
