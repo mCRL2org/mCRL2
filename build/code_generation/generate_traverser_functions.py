@@ -230,6 +230,45 @@ T replace_variables_capture_avoiding(const T& x,
 }
 '''
 
+REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT = ''' /// \\\\brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+/// \\\\details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \\\\param x The object to which the subsitution is applied.
+/// \\\\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \\\\param id_generator A generator that generates unique strings, not yet used as variable names.
+
+template <typename T, typename Substitution, typename IdentifierGenerator>
+void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
+                       Substitution& sigma,
+                       IdentifierGenerator& id_generator,
+                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                      )
+{
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
+}
+
+/// \\\\brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
+/// \\\\details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \\\\param x The object to which the substiution is applied.
+/// \\\\param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \\\\param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \\\\return The result is the term x to which sigma has been applied. 
+template <typename T, typename Substitution, typename IdentifierGenerator>
+T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
+                    Substitution& sigma,
+                    IdentifierGenerator& id_generator,
+                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                   )
+{
+  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+}
+'''
+
 FIND_VARIABLES_FUNCTION_TEXT = '''/// \\\\brief Returns all variables that occur in an object
 /// \param[in] x an object containing variables
 /// \param[in,out] o an output iterator to which all variables occurring in x are written.
@@ -396,6 +435,17 @@ def generate_replace_capture_avoiding_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     return result
 
+def generate_replace_capture_avoiding_with_identifier_generator_functions():
+    result = True
+    result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace.h'                  , 'data'            , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace.h'                    , 'lps'             , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace.h'                  , 'pbes_system'     , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace.h'            , 'process'         , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    return result
+
 def generate_find_functions():
     result = True
     result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/find.h'                  , 'data'            , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
@@ -412,5 +462,6 @@ if __name__ == "__main__":
     result = generate_rewrite_functions() and result
     result = generate_replace_functions() and result
     result = generate_replace_capture_avoiding_functions() and result
+    result = generate_replace_capture_avoiding_with_identifier_generator_functions() and result
     result = generate_find_functions() and result
     sys.exit(not result) # 0 result indicates successful execution

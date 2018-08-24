@@ -57,6 +57,38 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
     : super(sigma, V)
   { }
 };
+
+// Below the functions to do a capture avoiding replacement with an identifier generator are given. 
+template <template <class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
+struct add_capture_avoiding_replacement_with_an_identifier_generator: public lps::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
+{
+  typedef lps::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
+  using super::update_sigma;
+
+  action_formula apply(const forall& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    action_formula result = forall(v, apply(x.body()));
+    update_sigma.pop(v);
+    return result;
+  }
+
+  action_formula apply(const exists& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    action_formula result = exists(v, apply(x.body()));
+    update_sigma.pop(v);
+    return result;
+  }
+
+  add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
+    : super(sigma, id_generator)
+  { }
+};
 /// \endcond
 
 } // namespace detail
@@ -227,6 +259,46 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated action_formulas replace_capture_avoiding code ---//
 
+//--- start generated action_formulas replace_capture_avoiding_with_identifier_generator code ---//
+/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \param x The object to which the subsitution is applied.
+/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+
+template <typename T, typename Substitution, typename IdentifierGenerator>
+void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
+                       Substitution& sigma,
+                       IdentifierGenerator& id_generator,
+                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                      )
+{
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
+/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \param x The object to which the substiution is applied.
+/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \return The result is the term x to which sigma has been applied. 
+template <typename T, typename Substitution, typename IdentifierGenerator>
+T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
+                    Substitution& sigma,
+                    IdentifierGenerator& id_generator,
+                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                   )
+{
+  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+}
+//--- end generated action_formulas replace_capture_avoiding_with_identifier_generator code ---//
+
 } // namespace action_formulas
 
 namespace regular_formulas
@@ -258,6 +330,31 @@ make_add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::v
 {
   return add_capture_avoiding_replacement<Builder, Derived, Substitution>(sigma, V);
 }
+
+// Below the code is provided for a capture avoiding replacement with an identifier generator.
+template <template <class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
+struct add_capture_avoiding_replacement_with_an_identifier_generator: public action_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
+{
+  typedef action_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
+  using super::update_sigma;
+
+  add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
+    : super(sigma, id_generator)
+  { }
+};
+
+template <template <class> class Builder, class Substitution, class IdentifierGenerator>
+add_capture_avoiding_replacement_with_an_identifier_generator<Builder, class Derived, Substitution, IdentifierGenerator>
+make_add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
+{
+  return add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>(sigma, id_generator);
+}
+
+
 /// \endcond
 
 } // namespace detail
@@ -428,6 +525,46 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated regular_formulas replace_capture_avoiding code ---//
 
+//--- start generated regular_formulas replace_capture_avoiding_with_identifier_generator code ---//
+/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \param x The object to which the subsitution is applied.
+/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+
+template <typename T, typename Substitution, typename IdentifierGenerator>
+void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
+                       Substitution& sigma,
+                       IdentifierGenerator& id_generator,
+                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                      )
+{
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
+/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \param x The object to which the substiution is applied.
+/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \return The result is the term x to which sigma has been applied. 
+template <typename T, typename Substitution, typename IdentifierGenerator>
+T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
+                    Substitution& sigma,
+                    IdentifierGenerator& id_generator,
+                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                   )
+{
+  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+}
+//--- end generated regular_formulas replace_capture_avoiding_with_identifier_generator code ---//
+
 } // namespace regular_formulas
 
 namespace state_formulas
@@ -475,6 +612,49 @@ make_add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::v
 {
   return add_capture_avoiding_replacement<Builder, Derived, Substitution>(sigma, V);
 }
+
+// Below the code for add capture avoiding replacment with an identifier generator is provided. 
+
+template <template <class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
+struct add_capture_avoiding_replacement_with_an_identifier_generator: public data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
+{
+  typedef data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator> super;
+  using super::enter;
+  using super::leave;
+  using super::update;
+  using super::apply;
+  using super::sigma;
+  using super::update_sigma;
+
+  state_formula operator()(const forall& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    state_formula result = forall(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
+  }
+
+  state_formula operator()(const exists& x)
+  {
+    data::variable_list v = update_sigma.push(x.variables());
+    state_formula result = exists(v, (*this)(x.body()));
+    update_sigma.pop(v);
+    return result;
+  }
+
+  add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
+    : super(sigma, id_generator)
+  { }
+};
+
+template <template <class> class Builder, class Substitution, class IdentifierGenerator>
+add_capture_avoiding_replacement_with_an_identifier_generator<Builder, class Derived, Substitution, IdentifierGenerator>
+make_add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
+{
+  return add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>(sigma, id_generator);
+}
+
+
 /// \endcond
 
 } // namespace detail
@@ -644,6 +824,48 @@ T replace_variables_capture_avoiding(const T& x,
   return data::detail::apply_replace_capture_avoiding_variables_builder<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement>(sigma, V).apply(x);
 }
 //--- end generated state_formulas replace_capture_avoiding code ---//
+
+//--- start generated state_formulas replace_capture_avoiding_with_identifier_generator code ---//
+/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \param x The object to which the subsitution is applied.
+/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+
+template <typename T, typename Substitution, typename IdentifierGenerator>
+void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
+                       Substitution& sigma,
+                       IdentifierGenerator& id_generator,
+                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                      )
+{
+  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
+}
+
+/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
+/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
+///          it requires an identifier generator that generates strings for fresh variables. These 
+///          strings must be unique in the sense that they have not been used for other variables.
+/// \param x The object to which the substiution is applied.
+/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its 
+///              right hand side. The class maintain_variables_in_rhs is useful for this purpose. 
+/// \param id_generator A generator that generates unique strings, not yet used as variable names.
+/// \return The result is the term x to which sigma has been applied. 
+template <typename T, typename Substitution, typename IdentifierGenerator>
+T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
+                    Substitution& sigma,
+                    IdentifierGenerator& id_generator,
+                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                   )
+{
+  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
+}
+//--- end generated state_formulas replace_capture_avoiding_with_identifier_generator code ---//
+//
+//--- end generated lps replace_capture_avoiding_with_identifier_generator code ---//
 
 namespace detail
 {

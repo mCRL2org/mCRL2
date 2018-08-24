@@ -36,6 +36,8 @@
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 \input{include/tcilatex}
+\newcommand{\Bool}{\mathbb{B}}
+
 
 \begin{document}
 
@@ -73,6 +75,7 @@ v^{\prime }\text{ if }w=v \\
 \]
 
 \subsection{Capture avoiding substitutions}
+\label{captavoid}
 
 Let $\sigma $ be a substitution that maps variables to data expressions, and
 let $x$ be an arbitrary data expression. Let $FV(x)$ be the free variables
@@ -112,7 +115,9 @@ otherwise,}%
 where $\Lambda \in \{\forall ,\exists ,\lambda \}$, where $v^{\prime }$ is
 an arbitrary variable such that $\sigma (v^{\prime })=v^{\prime }$ and $%
 v^{\prime }\notin V$, and where $\sigma ^{\prime }=\sigma \lbrack
-v:=v^{\prime }]$. The function $C$ can be extended to assignments as follows:%
+v:=v^{\prime }]$. The function $C$ can be extended to assignments as follows\footnote{The 
+definition of $C$ to assignments is not correct and not how they have been implemented.}:
+%
 \[
 \begin{array}{lll}
 C(v=x,\sigma ,V) & = & \left\{
@@ -126,10 +131,74 @@ v^{\prime }=C(x,\sigma ^{\prime },V\cup \{v^{\prime }\})\text{ otherwise}%
 
 \paragraph{Example}
 
-\newcommand{\ap}{{:}}
-Let $x=\forall b\ap\mathbb{B}. b\Rightarrow \forall c\ap\mathbb{B}.c\Rightarrow d$
+Let $x=\forall b{:}\mathbb{B}. b\Rightarrow \forall c{:}\mathbb{B}.c\Rightarrow d$
 and let $\sigma =[d:=b]$. Then $C(x,\sigma ,FV(x)\cup FV(\sigma ))=\forall
-b^{\prime }\ap\mathbb{B}.b^{\prime }\Rightarrow \forall c\ap\mathbb{B}%
+b^{\prime }{:}\mathbb{B}.b^{\prime }\Rightarrow \forall c{:}\mathbb{B}%
 .c\Rightarrow b$.
 
+\subsubsection{Capture avoiding substitutions with an identifier generator}
+Let $\sigma$ be a subsitution that maps variables to data expressions.
+In this section a substitution is defined that is more efficient than the capture avoiding substitution
+of section \ref{captavoid} because it does not require the calculation of a set $V$ of variables.
+
+It does require that $\sigma$ can indicate efficiently whether a variable occurs in the $\sigma(y)$
+(with $\sigma(y)\not=y$) for some variable $y$. Furthermore, it requires a identifier generator, that
+can generate variable names that are guaranteed to be fresh in the sense that they do not occur in any
+term. 
+
+This substitution has been implemented as \texttt{replace\_variables\_capture\_avoiding\_with\_an\_identifier\_generator}.
+We use $\mathit{FV}(x)$, $\mathit{FV}(\sigma)$ and $\sigma[v:=v']$ as defined in the previous section. 
+\vspace{2ex}\\
+The substitution is defined as $\hat{C}$ that calculates $\sigma(x)$ using $\hat{C}(x,\sigma)$ recursively 
+as follows:
+\[
+\begin{array}{lll}
+\hat{C}(v,\sigma) & = & \sigma (v) \\
+\hat{C}(f,\sigma) & = & f \\
+\hat{C}(x(x_{1}),\sigma) & = & \hat{C}(x,\sigma)(\hat{C}(x_{1},\sigma)) \\
+&  &  \\
+\hat{C}(x\text{ whr }v=x_{1},\sigma) & = & \left\{
+\begin{array}{ll}
+\hat{C}(x,\sigma[v:=v])\text{ whr }v=\hat{C}(x_{1},\sigma)&\text{if }%
+v\notin \mathit{FV}(\sigma), \\
+\hat{C}(x,\sigma[v:=v'] )\text{ whr }v'=\hat{C}(x_{1},\sigma'\})&\text{otherwise}.%
+\end{array}%
+\right.  \\
+&  &  \\
+\hat{C}(\Lambda v.x,\sigma ,V) & = & \left\{
+\begin{array}{ll}
+\Lambda v.\hat{C}(x,\sigma[v:=v] )&\text{if }v\notin \mathit{FV}(\sigma), \\
+\Lambda v'.\hat{C}(x,\sigma',V\cup \{v'\})&\text{otherwise,}%
+\end{array}%
+\right.
+\end{array}%
+\]%
+where $\Lambda \in \{\forall ,\exists ,\lambda \}$, where $v'$ is
+a fresh variable such that $\sigma (v')=v'$ and $%
+v'\notin \mathit{FV}(\sigma)\cup\mathit{FV}(x)$. The identifier generator is
+used to generate the name for $v'$.
+
+In the examples below $[]$ is the substitution mapping each variable onto itself and $[w:=v']$ is the subsitution
+mapping all variables onto itself, except that $w$ is mapped to $v'$.
+
+\paragraph{Example}
+Let $x=\forall b{:} \Bool.b\Rightarrow \forall c{:}\Bool.c\Rightarrow d$ and let $\sigma=[d:=b]$. Then
+$\hat{C}(x,\sigma)=\forall b'{:}\Bool.b'\Rightarrow\forall c{:}\Bool.c\Rightarrow b$ where $b'$ is a fresh 
+variable.
+
+\paragraph{Example}
+It is necessary that $v'$ above is chosen such that $v'\notin \mathit{FV}(\sigma)\cup\mathit{FV}(x)$.
+We provide two examples to show what goes wrong if this condition is not satisfied. 
+\begin{enumerate}
+\item
+If $v'\notin \mathit{FV}(\sigma)$ is not required, the following is possible: $\hat{C}(\forall v.w,[w:=v'])=\forall
+v'.\hat{C}(w,[w:=v'])=\forall v'.v'$.
+\item
+If $v'\notin \mathit{FV}(x)$ is not required, it is possible that: $\hat{C}(\forall v,v',[])=\forall v'.\hat{C}(v',[])=\forall v'.v$. 
+\end{enumerate}
+\paragraph{Example}
+In a where clause the substitutions applied to the equations after the where can remain unchanged.
+E.g., $\hat{C}(f(u,v)\text{ whr }v=v,[u:=v])=\hat{C}(f(u,v),[u:=v,v:=v'])\text{ whr }v'=\hat{C}(v,[u:=v])=f(v,v')\text{ whr }
+v'=v$. In an expression $f(u,v)\text{ whr }v=v$ the variable $v$ at the lhs of the `$=$' is a local variable,
+whereas the $v$ at the rhs is globally bound. 
 \end{document}
