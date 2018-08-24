@@ -93,14 +93,52 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       name_generator(equations)
   {}
 
-  void enter(const not_&)
+  void apply(const not_& x)
   {
-    throw std::runtime_error("operation not should not occur");
+    const pbes_expression& body = x.operand();
+    if(is_not(body))
+    {
+      const not_& x2 = atermpp::down_cast<not_>(body);
+      this->apply(x2.operand());
+    }
+    else if(is_and(body))
+    {
+      const and_& x2 = atermpp::down_cast<and_>(body);
+      this->apply(or_(not_(x2.left()), not_(x2.right())));
+    }
+    else if(is_or(body))
+    {
+      const or_& x2 = atermpp::down_cast<or_>(body);
+      this->apply(and_(not_(x2.left()), not_(x2.right())));
+    }
+    else if(is_imp(body))
+    {
+      const imp& x2 = atermpp::down_cast<imp>(body);
+      this->apply(and_(x2.left(), not_(x2.right())));
+    }
+    else if(is_exists(body))
+    {
+      const exists& x2 = atermpp::down_cast<exists>(body);
+      this->apply(forall(x2.variables(), not_(x2.body())));
+    }
+    else if(is_forall(body))
+    {
+      const forall& x2 = atermpp::down_cast<forall>(body);
+      this->apply(exists(x2.variables(), not_(x2.body())));
+    }
+    else if(is_data(body))
+    {
+      this->enter(data::data_expression(data::sort_bool::not_(atermpp::down_cast<data::data_expression>(body))));
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Unexpected expression " + pp(x));
+    }
   }
 
-  void enter(const imp& /*x*/)
+  void apply(const imp& x)
   {
-    throw std::runtime_error("operation imp should not occur");
+    this->apply(or_(not_(x.left()), x.right()));
   }
 
   void enter(const data::data_expression& x)
