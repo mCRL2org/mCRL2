@@ -58,16 +58,43 @@ public:
       m_quantification_domain = accessors::var(e);
       expr = accessors::arg(expr);
     }
-    m_condition = data::sort_bool::true_();
-    if(is_or(expr) || is_and(expr))
+    if(is_or(expr))
     {
-      const pbes_expression& lhs = accessors::left(expr);
-      m_condition = atermpp::down_cast<data::data_expression>(pbes2data(lhs));
-      if(is_or(expr))
+      pbes_expression cond = false_();
+      for(const pbes_expression& disj: split_disjuncts(expr))
       {
-        m_condition = data::sort_bool::not_(m_condition);
+        if(is_simple_expression(disj))
+        {
+          cond = optimized_or(cond, disj);
+        }
+        else
+        {
+          assert(is_or(expr));
+          expr = disj;
+        }
       }
-      expr = accessors::right(expr);
+      m_condition = data::sort_bool::not_(atermpp::down_cast<data::data_expression>(pbes2data(cond)));
+    }
+    else if(is_and(expr))
+    {
+      pbes_expression cond = true_();
+      for(const pbes_expression& conj: split_conjuncts(expr))
+      {
+        if(is_simple_expression(conj))
+        {
+          cond = optimized_and(cond, conj);
+        }
+        else
+        {
+          assert(is_and(expr));
+          expr = conj;
+        }
+      }
+      m_condition = atermpp::down_cast<data::data_expression>(pbes2data(cond));
+    }
+    else
+    {
+      m_condition = data::sort_bool::true_();
     }
     assert(is_propositional_variable_instantiation(expr));
     m_new_state = atermpp::down_cast<propositional_variable_instantiation>(expr);
