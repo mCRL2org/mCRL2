@@ -39,24 +39,7 @@ setup:
 .. admonition:: Windows
    :class: platform-specific win
 
-   - The following components of *Windows SDK 7.0 SP1*:
-
-     - Compilers
-     - Headers
-     - Win32 development tools
-
-     Alternatively, one can install *Microsoft Visual C++ Express 2010* or a
-     more recent or complete version of Visual Studio.
-   - |cmake|_ or higher.
-
-   We will assume that there is a command prompt available that performs the
-   necessary configuration to make the ``nmake`` executable available in the
-   path. This command prompt can be found as a batch file in
-   ``C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin`` for Windows
-   SDK 7.0 SP1. In the start menu, look for either of the following:
-
-    - 32bit: Visual Studio 2008 Command Prompt
-    - 64bit: Visual Studio 2008 x64 Win64 Command Prompt
+   Visual Studio 2015 or higher with C++ development
 
 .. admonition:: Mac OS X
    :class: platform-specific mac
@@ -101,11 +84,8 @@ link to any boost libraries.
 .. admonition:: Windows
    :class: platform-specific win
 
-   To install a binary version of *Boost*, follow the steps below.
-
-   - Download *BoostPro* from https://dl.bintray.com/boostorg/release/1.67.0/binaries/
-   - Install file after downloading.
-   - Install all header files.
+   To install a binary version of *Boost*, download *Boost* from https://www.boost.org,
+   unzip and then :doc:`compile the Boost libraries yourself <boost>`.
 
 .. _osx-boost:
 
@@ -148,10 +128,10 @@ link to any boost libraries.
 QT
 --
 
-.. |qt| replace:: *QT 5*
-.. _qt: https://qt.io
+.. |qt| replace:: *QT 5.5*
+.. _qt: https://www.qt.io
 
-The mCRL2 toolset requires |qt|_ for compilation of the graphical tools
+The mCRL2 toolset requires |qt|_ or higher for compilation of the graphical tools
 (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
 :ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`, :ref:`tool-mcrl2xi`).
 

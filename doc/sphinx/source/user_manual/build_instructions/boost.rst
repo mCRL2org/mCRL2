@@ -14,36 +14,13 @@ call ``<BOOSTROOT>``.
 
 .. admonition:: Windows
    :class: platform-specific win
-
-   - Open the appropriate Visual Studio command prompt. This prompt can be found
-     in ``C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin`` for Windows
-     SDK 7.0 SP1.
-     
-     - 32bit: Visual Studio 2008 Command Prompt
-     - 64bit: Visual Studio 2008 x64 Win64 Command Prompt
-
+   
    - In the command prompt, build *Boost* as follows (to install to C:\Boost) ::
 
        cd <BOOSTROOT> 
        bootstrap.bat 
-       bjam address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex --with-test
-       bjam install address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex --with-test
-
-   .. warning::
-
-      The ``bjam`` build system is compiled by ``bootstrap.bat``, but the 
-      bootstrapping system seems to have problems getting the x64 build to work
-      (it unnecessarily calls ``vcvars32.bat``, which does not work in a command
-      prompt that was configured for x64 development. To get around it, open a
-      regular command prompt, and run
-      ::
-
-        "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.Cmd" /x86
-        cd <BOOSTROOT>
-        bootstrap.bat
-
-      This should build ``bjam.exe``. You can now run the ``bjam`` command-line
-      above from an x64 development command prompt.
+       b2 address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex --with-test
+       b2 install address-model=64 architecture=x86 --with-filesystem --with-serialization --with-signals --with-regex --with-test
 
 .. admonition:: Mac OS X
    :class: platform-specific mac

@@ -11,12 +11,9 @@ system can be generated and used to build the binaries.
 .. admonition:: Windows
    :class: platform-specific win
 
-   To compile using ``nmake``, execute the following in the Visual Studio/
-   Windows SDK command prompt::
-
-     cd <mcrl2>/build 
-     cmake <mcrl2/src> -G "NMake Makefiles" 
-     nmake Makefile all 
+   To compile the toolset, open the generated ``mCRL2.sln`` located in the 
+   build directory with Visual Studio (or click *open project* in cmake-gui)
+   and press *build solution*.
 
 .. admonition:: Linux & Mac OS X
    :class: platform-specific linux mac
