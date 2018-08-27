@@ -1,0 +1,21 @@
+This directory contains the mCRL2 toolset.
+
+See our website <https://mcrl2.org> for extensive documentation on the usage of
+the toolset.
+
+Report bugs at our issue tracker <https://github.com/mCRL2org/mCRL2/issues>. 
+Please include the version number from `mcrl22lps --version', and a complete, 
+self-contained test case in each bug report.
+
+Contributions can be made by means of a pull request to the Github repository 
+at <https://github.com/mCRL2org/mCRL2>. For detailed information on this 
+procedure see the documentation.
+
+If you have questions about using the mCRL2 toolset which the documentation
+does not answer, send a mail to <mcrl2-users@listserver.tue.nl>.
+
+-----
+
+Copyright (C) 2005-2018 Eindhoven University of Technology
+
+See the file COPYING for license information.
