@@ -26,7 +26,7 @@ class mcrl2ide_tool : public mcrl2ide_base
                       "and verifying mCRL2 specifications.",
                       "A graphical IDE for creating, analyzing, visualizing "
                       "and verifying mCRL2 specifications.",
-                      "http://www.mcrl2.org/web/user_manual/tools/experimental/"
+                      "http://www.mcrl2.org/web/user_manual/tools/release/"
                       "mcrl2ide.html")
   {
   }
