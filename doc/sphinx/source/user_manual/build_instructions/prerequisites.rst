@@ -40,6 +40,10 @@ setup:
    :class: platform-specific win
 
    Visual Studio 2015 or higher with C++ development
+   
+   .. note::
+   
+      The tool ltsview fails to build when using Visual Studio 2017
 
 .. admonition:: Mac OS X
    :class: platform-specific mac
@@ -139,10 +143,6 @@ The mCRL2 toolset requires |qt|_ or higher for compilation of the graphical tool
    :class: platform-specific win
 
    Download and install Qt from https://www.qt.io/download-qt-installer.
-
-   When installed correctly, and the binary directory for Qt has been added to
-   your ``PATH``, CMake should be able to automatically find your
-   installation.
 
 .. admonition:: Mac OS X
    :class: platform-specific mac

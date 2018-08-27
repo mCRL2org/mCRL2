@@ -202,8 +202,8 @@ graphical user interfaces, some advanced settings are initially hidden.
   .. admonition:: Windows
      :class: platform-specific win
 
-     It should be set to ``<path_to_Qt_dir>\<Qt_version>\msvc<*>\lib\cmake\Qt5``
-	 where ``<*>`` is the version of visual studio used for compilation (2015 or
+     It should be set to ``<path_to_Qt_dir>\<Qt_version>\msvc<X>\lib\cmake\Qt5``
+	 where ``<X>`` is the version of visual studio used for compilation (2015 or
 	 higher), appended by ``_64`` in case of a 64-bit system.
 	 
   .. admonition:: Mac OS X

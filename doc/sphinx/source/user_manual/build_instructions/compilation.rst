@@ -13,10 +13,25 @@ system can be generated and used to build the binaries.
 
    To compile the toolset, open the generated ``mCRL2.sln`` located in the 
    build directory with Visual Studio (or click *open project* in cmake-gui)
-   and press *build solution*.
+   and choose *build solution*.
+   
+   .. note::
 
-.. admonition:: Linux & Mac OS X
-   :class: platform-specific linux mac
+      Windows has difficulty finding the Qt dll's, even when Qt is added
+      to PATH, which prevents the GUI tools from running. To repair this, copy
+      the following files from ``<path_to_Qt_dir>\<Qt_version>\msvc<X>\bin`` 
+      (where ``<X>`` is the version of visual studio used for compilation (2015
+      or higher), appended by ``_64`` in case of a 64-bit system) to
+      ``<path_to_build_dir>\stage\bin\Release``::
+   
+        Qt5Core.dll
+        Qt5Gui.dll
+        Qt5Widgets.dll
+        Qt5Xml.dll
+   
+
+.. admonition:: Mac OS X & Linux
+   :class: platform-specific mac linux
 
    The toolset can be compiled using the following command line::
 
