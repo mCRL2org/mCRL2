@@ -1,75 +1,115 @@
 ===============================================================================
+Changes between toolset releases 201707.0 and 201808.0:
+===============================================================================
+
+This release sees the introduction of two new tools that should increase the
+usability of the toolset significantly. First, pbessolve is a new tool for
+solving parameterised Boolean equation systems (PBESs). Together with the new
+option --counter-example in lps2pbes, this tool can generate counter-examples.
+See the documentation on the website for more instructions.
+
+The other new tool is mcrl2ide, which is an integrated editor for mCLR2
+specifications and properties. With this tool, generating a state space and
+checking properties is much easier, since no knowledge about the other tools and
+their options is required. For new users, mcrl2ide is the ideal tool to write
+small specifications. Advanced functionality is still available via mcrl2-gui or
+the command line.
+
+Finally, the development of mCRL2 moved to Github
+(https://github.com/mCRL2org/mCRL2). Issues can be submitted there.
+
+56 issues were closed since the last release.
+List of other changes:
+- The minimal GCC version has been raised to 4.9. The minmal version of Sphinx
+  required to build the documentation is now 1.3.6.
+- The minimal Qt version on macOS is now 5.10. Older versions contain a bug that
+  leads to strange behaviour of the menu bar in graphical tools.
+- The performance of refinement checking for LTSs has been drastically improved.
+- Linearising specifications containing time is more scalable and leads to
+  smaller specifications.
+- The implementation for weak bisimulation reduction has been improved,
+  which decreases the number of transitions in the output.
+- An experimental implementation of the Groote/Jansen/Keiren/Wijs algorithm for
+  branching bisimulation that works directly on LTSs was added to ltsconvert and
+  ltscompare. This avoids the translation to Kripke structures, which can be
+  expensive for large transition systems.
+- lpsactionrename can now rename actions based on a regular expression given
+  with the command line option --regex. The existing algorithms in
+  lpsactionrename have also been tweaked to yield a more compact result in some
+  cases.
+
+===============================================================================
 Changes between toolset releases 201409.0 and 201707.0:
 ===============================================================================
 
-153 tickets were closed in this period. 
+153 tickets were closed in this period.
 
-- The support for 32 bit machines is dropped. The minimal compiler versions that 
-  can be used are GCC 4.8, Clang 3.2 and MSVC 14.0. Use of C++11 is now fully 
+- The support for 32 bit machines is dropped. The minimal compiler versions that
+  can be used are GCC 4.8, Clang 3.2 and MSVC 14.0. Use of C++11 is now fully
   supported.
 - The graphical tools now use Qt5.5 or higher instead of Qt4. Numerous changes
   were made to the graphical tools. In particular ltsgraph can now be used
-  to explore large transition systems. 
+  to explore large transition systems.
 - There is a new and faster algorithm for (branching) bisimulation (Groote/Jansen/
   Keiren/Wijs). There is a new algorithm for weak bisimulation (upon request by
-  Matthew Hennessy). There are new equivalence checking algorithms for (weak) failure 
-  (divergence) equivalence and inclusion with counter examples. There is a 
-  new algorithm to apply ready simulation reduction and comparison (thanks to 
-  Rafael Martinez Torres, Luis LLana and Carlos Gregorio-Rodriguez). 
+  Matthew Hennessy). There are new equivalence checking algorithms for (weak) failure
+  (divergence) equivalence and inclusion with counter examples. There is a
+  new algorithm to apply ready simulation reduction and comparison (thanks to
+  Rafael Martinez Torres, Luis LLana and Carlos Gregorio-Rodriguez).
 - Storing and loading of .lts transition systems is much faster. The format is
-  not compatible with the .lts format of the previous release. 
+  not compatible with the .lts format of the previous release.
 - The states of .aut files are not renumbered anymore when loading. Each state
-  number must now be smaller than the total number of states. 
+  number must now be smaller than the total number of states.
 - Support for labelled transition systems in .dot format is partially dropped.
-  Support for .bcg files is dropped completely. 
+  Support for .bcg files is dropped completely.
 - It is now possible to declare additional data types in a modal formula.
 - Probabilities can now be used in mCRL2 specifications using the
   dist keyword. Probabilistic transition systems can be generated in .aut, .lts and
-  .fsm format. These can be visualized in ltsgraph and reduced modulo strong 
-  bisimulation using the new tool ltspbisim. All probabilities are calculated 
-  using exact arithmetic. 
+  .fsm format. These can be visualized in ltsgraph and reduced modulo strong
+  bisimulation using the new tool ltspbisim. All probabilities are calculated
+  using exact arithmetic.
 - Saving of .pbes, .lps, .lts and .bes files is improved. Unfortunately, this format
   is not compatible with the previous format and these files need to be regenerated.
 - The bisimulation and trace reduction tools preserve state labels in .lts files
-  by joining them for equivalent states. 
-- Timed linearisation now uses Gauss- and Fourier-Motzkin elimination and the 
+  by joining them for equivalent states.
+- Timed linearisation now uses Gauss- and Fourier-Motzkin elimination and the
   simplex algorithm to simplify timed conditions. All these algorithms use exact
-  arithmetic. 
-- Typechecking is strengthened by not allowing variables with the same name as 
-  (predefined) function symbols. The type checking code is largely refactored. 
+  arithmetic.
+- Typechecking is strengthened by not allowing variables with the same name as
+  (predefined) function symbols. The type checking code is largely refactored.
 - The meaning of <= and < on finite sets and bags have changed. It represented
   the ordering generated by struct data types. Now it reflects the subset and strict
   subset operations. This also influences >= and >.
 - Printing of progress information is adapted. Under normal circumstances no time
-  tags and log statuses are printed anymore. This is only done when the debug 
-  flag or the --timings flags are set, or when the status is error. 
-- The dependence of the compiling rewriter on BOOST is removed. Rewriters can be 
-  compiled on Linux and the mac without the BOOST library present. 
-- The status of the tools bessolve, txt2bes, pbesinst and lpsbisim2pbes is set to 
-  release. lps2torx and pbesabstract are now deprecated. 
+  tags and log statuses are printed anymore. This is only done when the debug
+  flag or the --timings flags are set, or when the status is error.
+- The dependence of the compiling rewriter on BOOST is removed. Rewriters can be
+  compiled on Linux and the mac without the BOOST library present.
+- The status of the tools bessolve, txt2bes, pbesinst and lpsbisim2pbes is set to
+  release. lps2torx and pbesabstract are now deprecated.
 
 Known bugs:
-- Rewriting of nested function updates does not work properly. 
+- Rewriting of nested function updates does not work properly.
 
 ===============================================================================
 Changes between toolset releases 201310.0 and 201409.0:
 ===============================================================================
 
-54 tickets were closed since the previous release. The changes in this release 
-are for the greatest part refactoring efforts to prepare for coming changes. 
+54 tickets were closed since the previous release. The changes in this release
+are for the greatest part refactoring efforts to prepare for coming changes.
 
 - Enumeration of finite set sorts and finite function sorts has been added.
-- PBES tools can now handle PBESs containing negations and implications. The 
+- PBES tools can now handle PBESs containing negations and implications. The
   txt2pbes tool no longer eliminates these operators by default.
 - PBES tools can now use textual representation as in- and output format.
-- The implementation of the pbesstategraph has been thoroughly revised. A more 
+- The implementation of the pbesstategraph has been thoroughly revised. A more
   efficient local variant of the algorithm is now used by default.
 - The internal ATerm format of mCRL2 data types has been changed. Variables
-  and function symbols now store a unique number, to make table lookups more 
+  and function symbols now store a unique number, to make table lookups more
   efficient. This change has no effect on the disk format.
 - Stricter ATerm casting mechanism to prevent casts between incompatible Aterm
   structures.
-- A new, more generic implementation of the enumerator was made that also 
+- A new, more generic implementation of the enumerator was made that also
   operates on PBES expressions. It has been used to improve the performance of
   some PBES rewriters.
 - The dependencies between the mCRL2 libraries were minimized.
@@ -109,7 +149,7 @@ Libraries:
   - Implemented capture avoiding substitutions, such that variables do not
     need to be renamed a-priori.
   - Improved one-point rule elimination in rewriters.
-  - Extend parser of PGSolver format to accept games produced by MLSolver 
+  - Extend parser of PGSolver format to accept games produced by MLSolver
     (r11637).
   - Support for loading labelled transition systems from files in the DOT
     file format was dropped.
@@ -188,7 +228,7 @@ Libraries:
    - Added an interface to the LTSmin toolset for the PBES library.
    - Cleaned up the ATerm library to remove unused functionality.
    - Improved performance of parsers.
-   
+
 Tool changes:
    - The graphical tools mcrl2-gui, ltsgraph, ltsview, diagraphica, lpsxsim
      and mcrl2xi have been ported to QT, the wxWidgets versions have been
@@ -265,11 +305,11 @@ Tool changes:
 New experimental tools:
    - mcrl2parse: parsing of expressions adhering to the mCRL2 syntax.
    - pbesabsinthe: abstract interpretation of PBESes.
-   
+
 The following tools have become deprecated as of this release:
    - chi2mcrl2
    - lysa2mcrl2
-   
+
 ===============================================================================
 Changes between toolset releases March 2011 and July 2011:
 ===============================================================================
@@ -347,8 +387,8 @@ Changes between toolset releases July 2010 and March 2011:
    - bessolve can be used to solve a BES using small progress measures or the
      recursive algorith due to Zielonka. For efficient solving the use of
      pbespgsolve is recommended.
-   - pbesabstract provides a form of abstract interpretation for pbesses. 
-     Parameters of pbes equations can be removed underapproximating or 
+   - pbesabstract provides a form of abstract interpretation for pbesses.
+     Parameters of pbes equations can be removed underapproximating or
      overapproximating the solution of the PBES. This can dramatically reduce
      the number of BES variables generated from a PBES.
 
@@ -399,14 +439,14 @@ Changes between toolset releases January 2009 and January 2010:
 ===============================================================================
 
  General:
-   - developed a new data and process library and adapted most tools and 
+   - developed a new data and process library and adapted most tools and
      libraries to use it. Ultimately the classes in core will all be replaced
      such that core will become obsolete.
    - introduced new tool classes and adapted all tools to it, leading to uniform
      command line interfaces for all tools.
    - adapted the user interface of mcrl2i.
    - bisimulation reduction algorithms are much faster.
-   
+
  New functionality:
    - divergence preserving branching bisimulation has been implemented.
    - lps2lts can search for divergences, and generated traces to divergent
@@ -418,7 +458,7 @@ Changes between toolset releases January 2009 and January 2010:
    - ltsgraph can display transition systems in 3d.
    - lps2pbes now properly supports the use of sorts in the modal formula that
      were defined under alias in the lps.
- 
+
  The following tools have been marked stable:
    - grape: a graphical process editor.
    - mcrl2i: an mCRL2 interpreter that can be used for evaluating data
@@ -430,7 +470,7 @@ Changes between toolset releases January 2009 and January 2010:
    - lysa2mcrl2: convert a security protocol specified in Typed LySa to mCRL2.
    - txt2lps: read a textual description of a linear process into a binary lps
      file. Rejects anything that is not linear.
- 
+
  The following tools have been added (but are marked experimental):
    - lpsbisim2pbes: encode process equivalences of two linear processes into a
      pbes.
@@ -449,7 +489,7 @@ The following tools have been removed:
        to do this manually remove .squadt/tool_catalog in the home directory.
    - the CMake build system is provided as an alternative to boost build, but
      it is still experimental.
-       
+
  Known issues:
    - ltsview and ltsgraph do not work when started from SQuADT in Windows 7 and
      Windows Vista; if started directly they do function properly.
