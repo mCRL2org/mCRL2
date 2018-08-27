@@ -10,14 +10,13 @@ Build-Depends: debhelper (>= 5),
  libgl1-mesa-dev,
  python-psutil,
  python-yaml,
- qt5-default,
  qtbase5-dev,
  libqt5opengl5-dev,
- subversion
+ git
 Standards-Version: 3.9.5
 Homepage: http://www.mcrl2.org/
-Vcs-Browser: https://svn.win.tue.nl/viewcvs/MCRL2/packaging/mcrl2/trunk/
-Vcs-Svn: https://svn.win.tue.nl/repos/MCRL2/packaging/mcrl2/trunk/
+Vcs-Browser: https://github.com/mCRL2org/mCRL2
+Vcs-Git: https://github.com/mCRL2org/mCRL2/tree/master/build/packaging
 
 Package: mcrl2
 Architecture: any
