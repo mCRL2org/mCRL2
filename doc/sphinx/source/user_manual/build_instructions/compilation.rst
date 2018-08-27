@@ -5,30 +5,30 @@ Compilation
 
 .. include:: toggle-platform.inc
 
-After :doc:`configuring <configuration>` CMake, build files for your build 
+After :doc:`configuring <configuration>` CMake, build files for your build
 system can be generated and used to build the binaries.
- 
+
 .. admonition:: Windows
    :class: platform-specific win
 
-   To compile the toolset, open the generated ``mCRL2.sln`` located in the 
+   To compile the toolset, open the generated ``mCRL2.sln`` located in the
    build directory with Visual Studio (or click *open project* in cmake-gui)
    and choose *build solution*.
-   
+
    .. note::
 
       Windows has difficulty finding the Qt dll's, even when Qt is added
       to PATH, which prevents the GUI tools from running. To repair this, copy
-      the following files from ``<path_to_Qt_dir>\<Qt_version>\msvc<X>\bin`` 
+      the following files from ``<path_to_Qt_dir>\<Qt_version>\msvc<X>\bin``
       (where ``<X>`` is the version of visual studio used for compilation (2015
       or higher), appended by ``_64`` in case of a 64-bit system) to
       ``<path_to_build_dir>\stage\bin\Release``::
-   
+
         Qt5Core.dll
         Qt5Gui.dll
         Qt5Widgets.dll
         Qt5Xml.dll
-   
+
 
 .. admonition:: Mac OS X & Linux
    :class: platform-specific mac linux
@@ -46,13 +46,13 @@ system can be generated and used to build the binaries.
 
 .. note::
 
-   For every tool, an individual make target is defined. To compile only 
+   For every tool, an individual make target is defined. To compile only
    ``mcrl22lps``, for instance, use::
 
      make mcrl22lps
 
-   Substitute ``nmake Makefile`` for ``make`` when using the Microsoft compiler. 
-   If you are developing a tool, and have made only changes to the tool code, 
+   Substitute ``nmake Makefile`` for ``make`` when using the Microsoft compiler.
+   If you are developing a tool, and have made only changes to the tool code,
    and not to any of the libraries, consider using::
 
      make mcrl22lps/fast
@@ -68,26 +68,25 @@ The toolset may be installed by executing making the ``install`` target::
 
   make install
 
-Substitute ``nmake Makefile`` for ``make`` when using the Microsoft compiler. 
+Substitute ``nmake Makefile`` for ``make`` when using the Microsoft compiler.
 
-Note that you may need administrative rights to install into the default 
+Note that you may need administrative rights to install into the default
 location. You can install into a different location by configuring CMake
 appropriately.
 
 Flags
 =====
 
-The command ``ccmake .`` executed in the build directory allows to set compilation 
-and installation flags. 
+The command ``ccmake .`` executed in the build directory allows to set compilation
+and installation flags.
 
 .. admonition:: Mac OS X
    :class: platform-specific mac
 
    The Apple clang compiler versions 7.2 and 8.0 have a problem compiling the toolset
    in MAINTAINER and DEBUG mode. This leads to problems with asserts. A solution is to add the
-   flag ``-fsanitize=address`` to the compiler flags in CMAKE_CXX_FLAGS_MAINTAINER, 
-   CMAKE_C_FLAGS_MAINTAINER, CMAKE_EXE_LINKER_FLAGS_MAINTAINER, CMAKE_CXX_FLAGS_DEBUG, 
+   flag ``-fsanitize=address`` to the compiler flags in CMAKE_CXX_FLAGS_MAINTAINER,
+   CMAKE_C_FLAGS_MAINTAINER, CMAKE_EXE_LINKER_FLAGS_MAINTAINER, CMAKE_CXX_FLAGS_DEBUG,
    CMAKE_C_FLAGS_DEBUG and CMAKE_EXE_LINKER_FLAGS_DEBUG. The problem does
    not occur when no -DNDEBUG is used. Also other compilers or platform do not appear
-   to have this issue. 
-
+   to have this issue.

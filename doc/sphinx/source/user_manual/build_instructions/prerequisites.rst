@@ -40,9 +40,9 @@ setup:
    :class: platform-specific win
 
    Visual Studio 2015 or higher with C++ development
-   
+
    .. note::
-   
+
       The tool ltsview fails to build when using Visual Studio 2017
 
 .. admonition:: Mac OS X
