@@ -27,6 +27,7 @@ system can be generated and used to build the binaries.
 
         Qt5Core.dll
         Qt5Gui.dll
+        Qt5OpenGL.dll
         Qt5Widgets.dll
         Qt5Xml.dll
 
