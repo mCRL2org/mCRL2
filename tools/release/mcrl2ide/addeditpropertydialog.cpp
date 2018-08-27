@@ -44,7 +44,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   setWindowTitle(windowTitle);
   setWindowFlags(Qt::Window);
 
-  connect(ui->addEditButton, SIGNAL(clicked()), this, SLOT(checkInput()));
+  connect(ui->parseButton, SIGNAL(clicked()), this, SLOT(parseProperty()));
+  connect(ui->addEditButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(parseResults(int)));
@@ -86,19 +87,7 @@ void AddEditPropertyDialog::setOldPropertyName(const QString& propertyName)
   oldPropertyName = propertyName;
 }
 
-void AddEditPropertyDialog::abortPropertyParsing()
-{
-  if (propertyParsingProcessid >= 0)
-  {
-    /* we first change propertyParsingProcessid so that parsingResult doesn't
-     *   get triggered */
-    int parsingid = propertyParsingProcessid;
-    propertyParsingProcessid = -1;
-    processSystem->abortProcess(parsingid);
-  }
-}
-
-void AddEditPropertyDialog::checkInput()
+bool AddEditPropertyDialog::checkInput()
 {
   QString propertyName = ui->propertyNameField->text();
   QString error = "";
@@ -118,54 +107,83 @@ void AddEditPropertyDialog::checkInput()
   {
     error = "The property text may not be empty";
   }
-  else
-  {
-    /* save the property, abort the previous parsing process and parse the
-     * formula and wait for a reply */
-    fileSystem->saveProperty(getProperty());
-    abortPropertyParsing();
-    propertyParsingProcessid = processSystem->parseProperty(getProperty());
-  }
 
   if (!error.isEmpty())
   {
     QMessageBox msgBox(QMessageBox::Information, windowTitle, error,
                        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
     msgBox.exec();
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+void AddEditPropertyDialog::abortPropertyParsing()
+{
+  if (propertyParsingProcessid >= 0)
+  {
+    /* we first change propertyParsingProcessid so that parsingResult doesn't
+     *   get triggered */
+    int parsingid = propertyParsingProcessid;
+    propertyParsingProcessid = -1;
+    processSystem->abortProcess(parsingid);
+  }
+}
+
+void AddEditPropertyDialog::parseProperty()
+{
+  if (checkInput())
+  {
+    /* save the property, abort the previous parsing process and parse the
+     *   formula and wait for a reply */
+    ui->parseButton->setEnabled(false);
+    Property property = getProperty();
+    fileSystem->saveProperty(property);
+    abortPropertyParsing();
+    propertyParsingProcessid = processSystem->parseProperty(property);
   }
 }
 
 void AddEditPropertyDialog::parseResults(int processid)
 {
+  ui->parseButton->setEnabled(true);
   /* check if the process that has finished is the parsing process of this
    *   dialog */
   if (processid == propertyParsingProcessid)
   {
     /* if valid accept, else show message */
-    QString error = "";
+    QString text = "";
     QString result = processSystem->getResult(processid);
 
     if (result == "valid")
     {
-      accept();
+      text = "The entered formula is a valid mu-calculus formula.";
     }
     else if (result == "invalid")
     {
-      error = "The entered formula is not a valid mu-calculus formula. See the "
+      text = "The entered formula is not a valid mu-calculus formula. See the "
               "parsing console for more information";
     }
     else
     {
-      error = "Could not parse the entered formula. See the parsing console "
+      text = "Could not parse the entered formula. See the parsing console "
               "for more information";
     }
 
-    if (!error.isEmpty())
-    {
-      QMessageBox msgBox(QMessageBox::Information, windowTitle, error,
-                         QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-      msgBox.exec();
-    }
+    QMessageBox msgBox(QMessageBox::Information, windowTitle, text,
+                        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+    msgBox.exec();
+  }
+}
+
+void AddEditPropertyDialog::addEditProperty()
+{
+  if (checkInput())
+  {
+    accept();
   }
 }
 

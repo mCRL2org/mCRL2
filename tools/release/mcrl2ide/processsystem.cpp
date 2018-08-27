@@ -625,6 +625,9 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
    *   the code editor to the parsing error if possible */
   if (previousExitCode > 0)
   {
+    consoleDock->writeToConsole(
+        ProcessType::Parsing,
+        "The given specification is not a valid mCRL2 specification");
     consoleDock->setConsoleTab(ProcessType::Parsing);
     QString parsingOutput = consoleDock->getConsoleOutput(ProcessType::Parsing);
     QRegExp parsingError = QRegExp("Line (\\d+), column (\\d+): syntax error");
