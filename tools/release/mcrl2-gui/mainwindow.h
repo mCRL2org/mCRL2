@@ -82,6 +82,8 @@ class MainWindow : public QMainWindow
      */
     void createFileInformation(QString filename);
 
+    void onOpenIDE();
+
     void onResetPerspective();
 
   protected:
