@@ -18,16 +18,20 @@ system can be generated and used to build the binaries.
    .. note::
 
       Windows has difficulty finding the Qt dll's, even when Qt is added
-      to PATH, which prevents the GUI tools from running. To repair this, copy
-      the following files from ``<path_to_Qt_dir>\<Qt_version>\msvc<X>\bin``
-      (where ``<X>`` is the version of visual studio used for compilation (2015
-      or higher), appended by ``_64`` in case of a 64-bit system) to
+      to PATH, which prevents the GUI tools from running. To repair this for the
+      release build, copy the following files from
+      ``<path_to_Qt_dir>\<Qt_version>\msvc<X>\bin`` (where ``<X>`` is the
+      version of visual studio used for compilation (2015 or higher), appended
+      by ``_64`` in case of a 64-bit system) to
       ``<path_to_build_dir>\stage\bin\Release``::
 
         Qt5Core.dll
         Qt5Gui.dll
         Qt5Widgets.dll
         Qt5Xml.dll
+
+      In case of the debug build do the same, except with the dll file names
+      appended with a `d`.
 
 
 .. admonition:: Mac OS X & Linux
