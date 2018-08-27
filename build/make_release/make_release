@@ -31,7 +31,7 @@
 # do_ppa_upload. If these steps fail, it makes no sense to do an upload. After
 # every failed upload attempt the version number needs to be updated.
 
-MCRL2_VERSION="201707.1"
+MCRL2_VERSION="201808.0"
 UBUNTU_VERSION="1ubuntu1ppa2"
 DEBEMAIL="j.w.wesselink@tue.nl"
 DEBFULLNAME="Wieger Wesselink"
