@@ -185,7 +185,7 @@ bool has_name_clashes(const state_formula& x)
   {
     check_name_clashes(x);
   }
-  catch (mcrl2::runtime_error)
+  catch (const mcrl2::runtime_error&)
   {
     return true;
   }
@@ -208,7 +208,7 @@ bool has_parameter_name_clashes(const state_formula& x)
   {
     check_parameter_name_clashes(x);
   }
-  catch (mcrl2::runtime_error)
+  catch (const mcrl2::runtime_error&)
   {
     return true;
   }

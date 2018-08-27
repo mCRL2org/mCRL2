@@ -216,8 +216,6 @@ unsigned int parser::start_symbol_index(const std::string& name) const
   return m_table.start_symbol_index(name);
 }
 
-/// \brief Parses a string. N.B. The user is responsible for destruction of the returned
-/// value by calling destroy_parse_node!!!
 parse_node parser::parse(const std::string& text, unsigned int start_symbol_index, bool partial_parses)
 {
   detail::reset_dparser_error_message_count();
