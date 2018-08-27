@@ -495,11 +495,11 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath,
       {
         specFilePath =
             projectInfo.right(projectInfo.length() - specLineIndex - 5);
-        std::string test = specFilePath.toStdString();
         projectFile.close();
         if (QFileInfo(specFilePath).isRelative())
         {
-          specFilePath = newProjectFolderPath + QDir::separator() + specFilePath;
+          specFilePath =
+              newProjectFolderPath + QDir::separator() + specFilePath;
         }
 
         /* read the specification and put it in the specification editor */

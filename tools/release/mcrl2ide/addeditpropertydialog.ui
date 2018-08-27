@@ -63,6 +63,13 @@
        </spacer>
       </item>
       <item>
+       <widget class="QPushButton" name="parseButton">
+        <property name="text">
+         <string>Parse</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="addEditButton">
         <property name="text">
          <string>AddEdit</string>

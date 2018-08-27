@@ -70,23 +70,23 @@ class AddEditPropertyDialog : public QDialog
    */
   void setOldPropertyName(const QString& propertyName);
 
-  /**
-   * @brief abortPropertyParsing Abort the current property parsing process
-   */
-  void abortPropertyParsing();
-
   public slots:
   /**
-   * @brief checkInput Checks whether the fields are non-empty and the
-   *   property is valid before accepting
+   * @brief parseProperty Parse the filled in property
    */
-  void checkInput();
+  void parseProperty();
 
   /**
    * @brief parseResults Handles the result of parsing the property
    * @param processid The id of a finished process
    */
   void parseResults(int processid);
+
+  /**
+   * @brief addEditProperty Finishes adding/editing the property by saving the
+   *   property (if the input is ok)
+   */
+  void addEditProperty();
 
   /**
    * @brief onRejected On rejected (Cancel, escape, "X"), abort the last parsing
@@ -103,6 +103,19 @@ class AddEditPropertyDialog : public QDialog
   QString oldPropertyName;
   int propertyParsingProcessid;
   QRegExpValidator* propertyNameValidator;
+
+  /**
+   * @brief checkInput Checks whether the fields are non-empty and whether the
+   *   property name isn't already in use
+   * @return Whether the fields are non-empty and whether the property name
+   *   isn't already in use
+   */
+  bool checkInput();
+
+  /**
+   * @brief abortPropertyParsing Abort the current property parsing process
+   */
+  void abortPropertyParsing();
 };
 
 #endif // ADDEDITPROPERTYDIALOG_H
