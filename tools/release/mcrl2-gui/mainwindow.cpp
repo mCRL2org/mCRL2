@@ -43,11 +43,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
   createToolMenu();
 
+  m_ui.mnuMain->addAction(QString("Open mcrl2ide"), this, SLOT(onOpenIDE()));
+
   m_state = saveState();
   QSettings settings("mCRL2", "mCRL2-gui");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
   m_ui.treeFiles->restore(settings);
+}
+
+void MainWindow::onOpenIDE()
+{
+  QProcess::startDetached("mcrl2ide");
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
