@@ -4,9 +4,6 @@ Priority: extra
 Maintainer: Wieger Wesselink <j.w.wesselink@tue.nl>
 Uploaders: Paul van Tilburg <paulvt@debian.org>
 Build-Depends: debhelper (>= 5),
- gcc,
- g++,
- make,
  cmake,
  libboost-dev,
  libgl1-mesa-dev,
