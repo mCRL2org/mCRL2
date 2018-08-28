@@ -35,7 +35,6 @@
 <tool name="ltsview"            input_format="lts"                        category="Analysis" gui="true" />
 
 <tool name="mcrl22lps"          input_format="mcrl2" output_format="lps"  category="Transformation"/>
-<tool name="mcrl2ide"           input_format="mcrl2proj"                  category="Open Project" gui="true"/>
 <tool name="mcrl2xi"            input_format="mcrl2"                      category="Editing" gui="true"/>
 
 <tool name="pbes2bes"           input_format="pbes" output_format="bes"   category="Transformation"/>
