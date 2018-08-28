@@ -69,6 +69,16 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     : result(true)
   {}
 
+  void enter(const not_& x)
+  {
+    result = result && is_simple_expression(x);
+  }
+
+  void enter(const imp& x)
+  {
+    result = result && is_simple_expression(x);
+  }
+
   void enter(const pbes_system::forall& x)
   {
     expression_mode mode = mode_stack.top();
