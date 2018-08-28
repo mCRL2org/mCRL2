@@ -262,17 +262,6 @@ vertex_set set_union(const vertex_set& V, const vertex_set& W)
   return result;
 }
 
-inline
-vertex_set set_difference(const vertex_set& V, const vertex_set& W)
-{
-  vertex_set result(V.extent());
-  for (structure_graph::index_type v: V.vertices())
-  {
-    result.insert(v);
-  }
-  return result;
-}
-
 template <typename StructureGraph>
 void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::string& name)
 {
