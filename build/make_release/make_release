@@ -194,20 +194,6 @@ function test_ltsmin
 }
 
 #-----------------------------------------------------------#
-# Tag the release
-#-----------------------------------------------------------#
-# TODO: update the command to git
-function tag_release
-{
-  echo "-------------------------------------------------------------------------------------------------------------------"
-  echo "* Tag the release using the following command:"
-  echo ""
-  echo "svn copy https://svn.win.tue.nl/repos/MCRL2/branches/release https://svn.win.tue.nl/repos/MCRL2/tags/mcrl2-$MCRL2_VERSION"
-  echo "-------------------------------------------------------------------------------------------------------------------"
-  exit
-}
-
-#-----------------------------------------------------------#
 # Build and upload the source package
 #-----------------------------------------------------------#
 function build_source_package
@@ -241,7 +227,7 @@ function build_debian_package
   fi
   cd $DEBIAN_PACKAGING_DIR/mcrl2
   VERSION="$MCRL2_VERSION-$UBUNTU_VERSION~$1"
-  dch -v $VERSION -D $1
+  dch -v $VERSION -D unstable "New upstream release."
   debuild -S -sa
 }
 
@@ -261,7 +247,7 @@ function test_debian_package
   fi
   cd $DEBIAN_PACKAGING_DIR/mcrl2
   VERSION="$MCRL2_VERSION-$UBUNTU_VERSION~$1"
-  dch -v $VERSION -D $1
+  dch -v $VERSION -D unstable "New upstream release."
   debuild -S -sa
   cd ..
   pbuilder-dist $1 build mcrl2_$VERSION.dsc --buildresult .
@@ -282,22 +268,30 @@ function test_debian_package
 #build_ltsmin
 #test_ltsmin
 
+# N.B. Either run build_debian_package or test_debian_package. Otherwise in a
+#      later step GPG errors may occur!
+
 #--- Build ppa packages
 #prepare_debian_packaging
 #build_debian_package xenial
-#test_debian_package xenial    # N.B. Do not run this together with build_debian_package
-#                              #      because it introduces GPG errors!
-#simulate_ppa_upload xenial    # optional
+#test_debian_package xenial    
+#simulate_ppa_upload xenial
 #do_ppa_upload xenial
 
 #prepare_debian_packaging
-#build_debian_package yakkety
-#test_debian_package yakkety   # optional
-#simulate_ppa_upload yakkety   # optional
-#do_ppa_upload yakkety
+#build_debian_package bionic
+#test_debian_package bionic
+#simulate_ppa_upload bionic
+#do_ppa_upload bionic
 
 #prepare_debian_packaging
-#build_debian_package zesty
-#test_debian_package zesty     # optional
-#simulate_ppa_upload zesty     # optional
-#do_ppa_upload zesty
+#build_debian_package artful
+#test_debian_package artful
+#simulate_ppa_upload artful
+#do_ppa_upload artful
+
+#prepare_debian_packaging
+#build_debian_package trusty
+#test_debian_package trusty
+#simulate_ppa_upload trusty
+#do_ppa_upload trusty
