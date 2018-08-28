@@ -97,8 +97,8 @@ DataExpr
   | 'exists' VarsDeclList '.' DataExpr       $unary_right  1     // Existential quantifier
   | 'lambda' VarsDeclList '.' DataExpr       $unary_right  1     // Lambda abstraction
   | DataExpr ('=>' $binary_op_right 2) DataExpr                  // Implication
-  | DataExpr ('||' $binary_op_right 3) DataExpr                  // Conjunction
-  | DataExpr ('&&' $binary_op_right 4) DataExpr                  // Disjunction
+  | DataExpr ('||' $binary_op_right 3) DataExpr                  // Disjunction
+  | DataExpr ('&&' $binary_op_right 4) DataExpr                  // Conjunction
   | DataExpr ('==' $binary_op_left 5) DataExpr                   // Equality
   | DataExpr ('!=' $binary_op_left 5) DataExpr                   // Inequality
   | DataExpr ('<' $binary_op_left 6) DataExpr                    // Smaller
