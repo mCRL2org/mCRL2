@@ -43,7 +43,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
   createToolMenu();
 
-  m_ui.mnuMain->addAction(QString("Open mcrl2ide"), this, SLOT(onOpenIDE()));
+  fileMenu->addSeparator();
+  fileMenu->addAction(QString("Open mcrl2ide"), this, SLOT(onOpenIDE()));
 
   m_state = saveState();
   QSettings settings("mCRL2", "mCRL2-gui");
