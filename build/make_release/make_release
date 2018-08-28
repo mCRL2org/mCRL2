@@ -43,7 +43,6 @@ set +x
 MYPWD=`pwd`
 MCRL2_ROOT=$MYPWD/mcrl2
 LTSMIN_DIR=$MYPWD/ltsmin
-MCRL2_DIR=$MYPWD/mcrl2
 MCRL2_RELEASE_DIR=$MYPWD/mcrl2-release
 MCRL2_TEST_DIR=$MYPWD/mcrl2-test
 MCRL2_LTSMIN_DIR=$MYPWD/mcrl2-ltsmin
@@ -60,8 +59,8 @@ function clear_path
 function download_mcrl2_release
 {
   cd $MYPWD
-  rm -rf $MCRL2_DIR
-  git clone -b release-$MCRL2_VERSION git://github.com/mcrl2org/mcrl2.git mcrl2
+  rm -rf $MCRL2_ROOT
+  git clone -b release-$MCRL2_VERSION https://github.com/mcrl2org/mcrl2.git mcrl2
 }
 
 #-----------------------------------------------------------#
