@@ -15,7 +15,7 @@ call ``<BOOSTROOT>``.
 .. admonition:: Windows
    :class: platform-specific win
 
-   - In the command prompt, build *Boost* as follows (to install to C:\Boost) ::
+   - In the command prompt, build *Boost* as follows::
 
        cd <BOOSTROOT>
        bootstrap.bat
