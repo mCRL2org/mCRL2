@@ -199,21 +199,21 @@ graphical user interfaces, some advanced settings are initially hidden.
 ``Qt5_DIR``
   This variable specifies the location where Qt can be found.
 
-  .. admonition:: Windows
-     :class: platform-specific win
+.. admonition:: Windows
+   :class: platform-specific win
 
-     It should be set to ``<path_to_Qt_dir>\<Qt_version>\msvc<*>\lib\cmake\Qt5``
-	 where ``<*>`` is the version of visual studio used for compilation (2015 or
-	 higher), appended by ``_64`` in case of a 64-bit system.
+   It should be set to ``<path_to_Qt_dir>\<Qt_version>\msvc<X>\lib\cmake\Qt5``
+   where ``<X>`` is the version of visual studio used for compilation (2015 or
+   higher), appended by ``_64`` in case of a 64-bit system.
 
-  .. admonition:: Mac OS X
-     :class: platform-specific mac
+.. admonition:: Mac OS X
+   :class: platform-specific mac
 
- 	   On Mac, this variable shoudl have the value
-  ``<Qt_dir>/qtbase/lib/cmake/Qt5``, ``<Qt_dir>`` is the path to the directory
-  where Qt was installed.
+   On Mac, this variable should have the value
+   ``<Qt_dir>/qtbase/lib/cmake/Qt5``, ``<Qt_dir>`` is the path to the directory
+   where Qt was installed.
 
-  .. admonition:: Linux
-     :class: platform-specific linux
+.. admonition:: Linux
+   :class: platform-specific linux
 
- 	   On Linux, the right path is generally automatically detected.
+   On Linux, the right path is generally automatically detected.
