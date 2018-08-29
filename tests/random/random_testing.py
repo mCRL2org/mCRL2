@@ -221,6 +221,10 @@ class PbesstategraphTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(PbesstategraphTest, self).__init__(name, ymlfile('pbesstategraph'), settings)
 
+class PbessymbolicbisimTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbessymbolicbisimTest, self).__init__(name, ymlfile('pbessymbolicbisim'), settings)
+
 class PbessolveTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(PbessolveTest, self).__init__(name, ymlfile('pbessolve'), settings)
@@ -310,6 +314,7 @@ available_tests = {
     'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                               ,
     'pbessolve-counter-example'                   : lambda name, settings: Pbessolve_counter_exampleTest(name, settings)                               ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
+    'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       ,
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
 }
 

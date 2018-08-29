@@ -316,6 +316,6 @@ class ToolFactory(object):
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['pbespgsolve', 'pbes2bool', 'bessolve']:
             return SolveTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name in ['pbessolve']:
+        elif name in ['pbessolve', 'pbessymbolicbisim']:
             return PbesSolveTool(label, name, toolpath, input_nodes, output_nodes, args)
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)
