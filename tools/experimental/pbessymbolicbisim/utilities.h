@@ -288,7 +288,7 @@ public:
 
   void print_size() const
   {
-    std::cout << "Refinement cache size " << m_refinement_cache.size() << " trans cache size " << m_transition_cache.size() << std::endl;
+    mCRL2log(log::verbose) << "Refinement cache size " << m_refinement_cache.size() << " transition cache size " << m_transition_cache.size() << std::endl;
   }
 
   template <typename Iterator>
@@ -305,8 +305,8 @@ public:
       {
         // original has no transition to other.
         // We add the new blocks to the transition cache
-        m_transition_cache.insert(std::make_pair(std::make_pair(new_block1, other), false));
-        m_transition_cache.insert(std::make_pair(std::make_pair(new_block2, other), false));
+        insert_transition(new_block1, other, false);
+        insert_transition(new_block2, other, false);
       }
       m_transition_cache.erase(std::make_pair(original, other));
 
@@ -316,8 +316,8 @@ public:
       {
         // other has no transitions to original.
         // We add the new blocks to the transition cache
-        m_transition_cache.insert(std::make_pair(std::make_pair(other, new_block1), false));
-        m_transition_cache.insert(std::make_pair(std::make_pair(other, new_block2), false));
+        insert_transition(other, new_block1, false);
+        insert_transition(other, new_block2, false);
       }
       m_transition_cache.erase(std::make_pair(other, original));
 
@@ -326,8 +326,8 @@ public:
         // original is stable wrt other, so new blocks (which are contained in original)
         // are also stable wrt other.
         // We add the new blocks to the refinement cache
-        m_refinement_cache.insert(std::make_pair(new_block1, other));
-        m_refinement_cache.insert(std::make_pair(new_block2, other));
+        insert_refinement(new_block1, other);
+        insert_refinement(new_block2, other);
         m_refinement_cache.erase(std::make_pair(original, other));
       }
       m_refinement_cache.erase(std::make_pair(other, original));
