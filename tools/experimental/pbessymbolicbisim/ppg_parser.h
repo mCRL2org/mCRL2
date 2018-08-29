@@ -32,6 +32,15 @@ namespace pbes_system
 namespace detail
 {
 
+class ppg_summand;
+class ppg_equation;
+class ppg_pbes;
+std::string pp(const ppg_summand& summ, bool is_conjunctive);
+std::string pp(const ppg_equation& eq);
+std::string pp(const ppg_pbes& x);
+inline std::ostream& operator<<(std::ostream& out, const ppg_equation& x);
+inline std::ostream& operator<<(std::ostream& out, const ppg_pbes& x);
+
 class ppg_summand
 {
 protected:
@@ -280,7 +289,11 @@ public:
     result.m_is_conjunctive = m_is_conjunctive;
     for(const ppg_summand& summ: m_summands)
     {
-      result.m_summands.push_back(summ.simplify(rewr));
+      ppg_summand new_summ = summ.simplify(rewr);
+      if(!is_false(new_summ.condition()))
+      {
+        result.m_summands.push_back(new_summ);
+      }
     }
     return result;
   }
@@ -386,19 +399,6 @@ public:
     // PBES
     m_equations.emplace_back("X_false", fixpoint_symbol::mu(), true);
     m_equations.emplace_back("X_true", fixpoint_symbol::nu(), true);
-
-    // m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::nu(); }).base(),
-    //   ppg_equation(pbes_equation(
-    //     fixpoint_symbol::nu(),
-    //     propositional_variable(x_true_name, data::variable_list()),
-    //     propositional_variable_instantiation(x_true_name, data::data_expression_list())),
-    //   x_false_name, x_true_name));
-    // m_equations.insert(std::find_if(m_equations.rbegin(), m_equations.rend(), [](const ppg_equation& eq){ return eq.symbol() == fixpoint_symbol::mu(); }).base(),
-    //   ppg_equation(pbes_equation(
-    //     fixpoint_symbol::mu(),
-    //     propositional_variable(x_false_name, data::variable_list()),
-    //     propositional_variable_instantiation(x_false_name, data::data_expression_list())),
-    //   x_false_name, x_true_name));
   }
 
   const std::vector<ppg_equation>& equations() const
@@ -435,10 +435,6 @@ public:
   }
 };
 
-std::string pp(const ppg_summand& summ, bool is_conjunctive);
-std::string pp(const ppg_equation& eq);
-std::string pp(const ppg_pbes& x);
-
 std::string pp(const ppg_summand& summ, bool is_conjunctive)
 {
   std::string connecting_operator = is_conjunctive ? "=>" : "&&";
@@ -463,7 +459,7 @@ std::string pp(const ppg_summand& summ, bool is_conjunctive)
     }
     out << " . ";
   }
-  if(!is_false(summ.condition()) && !is_true(summ.condition()))
+  if(!is_true(summ.condition()))
   {
     out << "val(" << summ.condition() << ") " << connecting_operator << " ";
   }
