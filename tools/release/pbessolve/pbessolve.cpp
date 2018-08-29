@@ -67,28 +67,27 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  "use search strategy SEARCH:",
                  'z');
       desc.add_option("file",
-                 utilities::make_optional_argument("NAME", "name"),
+                 utilities::make_file_argument("NAME"),
                  "The file containing the LPS or LTS that was used to generate the PBES using lps2pbes -c. If this "
                  "option is set, a counter example or witness for the encoded property will be generated. The "
                  "extension of the file should be .lps in case of an LPS file, in all other cases it is assumed to "
                  "be an LTS.",
                  'f');
       desc.add_option("evidence-file",
-                      utilities::make_optional_argument("NAME", "name"),
+                      utilities::make_file_argument("NAME"),
                       "The file to which the evidence is written. If not set, a default name will be chosen.");
       desc.add_option("strategy",
-                  utilities::make_optional_argument("STRATEGY", "0"),
-                      "use strategy STRATEGY:\n"
-                      "  '0' Compute all boolean equations which can be"
+                  utilities::make_enum_argument<int>("STRATEGY")
+                    .add_value_desc(0, "Compute all boolean equations which can be"
                       " reached from the initial state, without"
                       " optimization. This is is the most data efficient"
-                      " option per generated equation. (default)\n"
-                      "  '1' In addition to 0, remove self loops.\n"
-                      "  '2' Optimize by immediately substituting the right"
+                      " option per generated equation.", true)
+                    .add_value_desc(1, "In addition to 0, remove self loops.")
+                    .add_value_desc(2, "Optimize by immediately substituting the right"
                       " hand sides for already investigated variables that"
                       " are true or false when generating an expression."
-                      " This is as memory efficient as 0.\n"
-                      "  '3' In addition to 2, also substitute variables that"
+                      " This is as memory efficient as 0.")
+                    .add_value_desc(3, "In addition to 2, also substitute variables that"
                       " are true or false into an already generated right"
                       " hand side. This can mean that certain variables"
                       " become unreachable (e.g. X0 in X0 and X1, when X1"
@@ -97,12 +96,13 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       " unreachable as these do not have to be investigated."
                       " Depending on the PBES, this can reduce the size of"
                       " the generated BES substantially but requires a"
-                      " larger memory footprint.\n"
-                      "  '4' In addition to 3, investigate for generated"
+                      " larger memory footprint.")
+                    .add_value_desc(4, "In addition to 3, investigate for generated"
                       " variables whether they occur on a loop, such that"
                       " they can be set to true or false, depending on the"
                       " fixed point symbol. This can increase the time"
-                      " needed to generate an equation substantially.",
+                      " needed to generate an equation substantially."),
+                        "use strategy STRATEGY",
                  's');
     }
 
@@ -129,10 +129,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       }
       m_search_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       m_strategy = parser.option_argument_as<int>("strategy");
-      if (m_strategy < 0 || m_strategy > 4)
-      {
-        throw mcrl2::runtime_error("An invalid value " + std::to_string(m_strategy) + " was specified for the strategy option.");
-      }
     }
 
     std::set<utilities::file_format> available_input_formats() const override
