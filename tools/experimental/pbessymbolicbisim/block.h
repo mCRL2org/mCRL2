@@ -14,6 +14,7 @@
 #include <list>
 
 #include "mcrl2/utilities/hash_utility.h"
+#include "mcrl2/pbes/structure_graph.h"
 
 #include "subblock.h"
 
@@ -26,6 +27,7 @@ namespace data
 class block
 {
   typedef subblock subblock_t;
+  typedef pbes_system::structure_graph::index_type sg_index_t;
 
 protected:
   // const pbes_type_t m_spec;
@@ -36,6 +38,7 @@ protected:
 
 public:
 
+  sg_index_t index = pbes_system::structure_graph::undefined_vertex;
   int bfs_level = 0;
 
   block()
@@ -43,9 +46,10 @@ public:
   , m_cache(nullptr)
   {}
 
-  block(const std::list< subblock >& subblocks, split_cache<block>* cache)
+  block(const std::list< subblock_t >& subblocks, split_cache<block>* cache, sg_index_t i = pbes_system::structure_graph::undefined_vertex)
   : m_subblocks(std::make_shared<std::list<subblock_t>>(subblocks.begin(), subblocks.end()))
   , m_cache(cache)
+  , index(i)
   {}
 
   /// Move semantics
@@ -110,7 +114,7 @@ public:
     {
       return std::make_pair(*this, block());
     }
-    return std::make_pair(block(pos_subblocks, m_cache), block(neg_subblocks, m_cache));
+    return std::make_pair(block(pos_subblocks, m_cache, this->index), block(neg_subblocks, m_cache));
   }
 
   const std::list<subblock>& subblocks() const

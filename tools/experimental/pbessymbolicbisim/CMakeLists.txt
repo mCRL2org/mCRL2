@@ -3,7 +3,6 @@ add_mcrl2_tool(pbessymbolicbisim
     pbessymbolicbisim.cpp
     simplifier.cpp
   DEPENDS
-    mcrl2_pg
     mcrl2_atermpp
     mcrl2_pbes
     mcrl2_lts
