@@ -232,6 +232,12 @@ class FileSystem : public QObject
   void newProperty(const Property& property);
 
   /**
+   * @brief importProperties Imports properties from file
+   * @return The imported properties
+   */
+  std::list<Property> importProperties();
+
+  /**
    * @brief editProperty Edits an existing property
    * @param oldProperty The property to be edited
    * @param newProperty The property after editing
@@ -332,8 +338,8 @@ class FileSystem : public QObject
   /**
    * createFileDialog Creates a file dialog that can be used to ask the user for
    *   a file (location)
-   * @param type What type of file window is needed
-   *  0 = new project, 1 = save project as, 2 = open project
+   * @param type What type of file window is needed: 0 = new project, 1 = save
+   *   project as, 2 = open project, 3 = import property
    * @return The file dialog
    */
   QFileDialog* createFileDialog(int type);
@@ -343,6 +349,13 @@ class FileSystem : public QObject
    *   indicate that the parent folder is a valid mcrl2 project folder
    */
   void createProjectFile();
+
+  /**
+   * @brief readPropertyFromFile Reads a property from a file
+   * @param propertyFilePath The path to the property file
+   * @return The property read from the file
+   */
+  Property readPropertyFromFile(const QString& propertyFilePath);
 
   /**
    * @brief deletePropertyFile Deletes the file of a property

@@ -186,6 +186,10 @@ void MainWindow::setupMenuBar()
       QIcon(":/icons/add_property.png"), "Add Property", this,
       SLOT(actionAddProperty()), QKeySequence(Qt::ALT + Qt::Key_A));
 
+  importPropertyAction = toolsMenu->addAction(
+      "Import Property", this, SLOT(actionImportProperty()),
+      QKeySequence(Qt::ALT + Qt::Key_I));
+
   verifyAllPropertiesAction = toolsMenu->addAction(
       verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
       SLOT(actionVerifyAllProperties()), QKeySequence(Qt::ALT + Qt::Key_V));
@@ -298,36 +302,6 @@ void MainWindow::actionSaveProjectAs()
   }
 }
 
-void MainWindow::actionAddProperty()
-{
-  /* we require a project to be made if no project has been opened */
-  if (!fileSystem->projectOpened())
-  {
-    QMessageBox msgBox(
-        QMessageBox::Information, "Add property",
-        "To add a property, it is required to create a project first",
-        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox.exec();
-    actionNewProject(false);
-  }
-
-  /* if successful, allow a property to be added */
-  addPropertyDialog->clearFields();
-  addPropertyDialog->resetFocus();
-  if (fileSystem->projectOpened())
-  {
-    if (addPropertyDialog->isVisible())
-    {
-      addPropertyDialog->activateWindow();
-      addPropertyDialog->setFocus();
-    }
-    else
-    {
-      addPropertyDialog->show();
-    }
-  }
-}
-
 void MainWindow::actionAddPropertyResult()
 {
   /* if successful (Add button was pressed), create the new property
@@ -425,6 +399,45 @@ void MainWindow::actionShowReducedLts()
       lastLtsHasReduction = true;
       processSystem->showLts(reduction);
     }
+  }
+}
+
+void MainWindow::actionAddProperty()
+{
+  /* we require a project to be made if no project has been opened */
+  if (!fileSystem->projectOpened())
+  {
+    QMessageBox msgBox(
+        QMessageBox::Information, "Add property",
+        "To add a property, it is required to create a project first",
+        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+    msgBox.exec();
+    actionNewProject(false);
+  }
+
+  /* if successful, allow a property to be added */
+  addPropertyDialog->clearFields();
+  addPropertyDialog->resetFocus();
+  if (fileSystem->projectOpened())
+  {
+    if (addPropertyDialog->isVisible())
+    {
+      addPropertyDialog->activateWindow();
+      addPropertyDialog->setFocus();
+    }
+    else
+    {
+      addPropertyDialog->show();
+    }
+  }
+}
+
+void MainWindow::actionImportProperty()
+{
+  std::list<Property> importedProperties = fileSystem->importProperties();
+  for (Property property : importedProperties)
+  {
+    propertiesDock->addProperty(property);
   }
 }
 

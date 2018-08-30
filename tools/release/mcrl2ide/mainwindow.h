@@ -70,11 +70,6 @@ class MainWindow : public QMainWindow
   void actionSaveProjectAs();
 
   /**
-   * @brief actionAddProperty Allows the user to add a property
-   */
-  void actionAddProperty();
-
-  /**
    * @brief actionAddPropertyResult Handles the result of adding a property
    */
   void actionAddPropertyResult();
@@ -106,6 +101,16 @@ class MainWindow : public QMainWindow
    *   the current specification
    */
   void actionShowReducedLts();
+
+  /**
+   * @brief actionAddProperty Allows the user to add a property
+   */
+  void actionAddProperty();
+
+  /**
+   * @brief actionImportProperty Allows the user to import a property from file
+   */
+  void actionImportProperty();
 
   /**
    * @brief actionVerifyAllProperties Allows the user to verify all defined
@@ -173,6 +178,7 @@ class MainWindow : public QMainWindow
   QIcon showReducedLtsAbortIcon = QIcon(":/icons/create_reduced_LTS_abort.png");
 
   QAction* addPropertyAction;
+  QAction* importPropertyAction;
 
   QAction* verifyAllPropertiesAction;
   QString verifyAllPropertiesStartText = "Verify all Properties";
