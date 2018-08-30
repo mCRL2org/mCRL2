@@ -91,78 +91,71 @@ void MainWindow::setupMenuBar()
 
   newProjectAction =
       fileMenu->addAction(QIcon(":/icons/new_project.png"), "New Project", this,
-                          SLOT(actionNewProject(bool)));
-  newProjectAction->setShortcut(QKeySequence::New);
+                          SLOT(actionNewProject(bool)), QKeySequence::New);
 
   fileMenu->addSeparator();
 
   openProjectAction =
       fileMenu->addAction(QIcon(":/icons/open_project.png"), "Open Project",
-                          this, SLOT(actionOpenProject()));
-  openProjectAction->setShortcut(QKeySequence::Open);
+                          this, SLOT(actionOpenProject()), QKeySequence::Open);
 
   fileMenu->addSeparator();
 
   saveProjectAction =
       fileMenu->addAction(QIcon(":/icons/save_project.png"), "Save Project",
-                          this, SLOT(actionSaveProject()));
-  saveProjectAction->setShortcut(QKeySequence::Save);
+                          this, SLOT(actionSaveProject()), QKeySequence::Save);
 
   saveProjectAsAction =
-      fileMenu->addAction("Save Project As", this, SLOT(actionSaveProjectAs()));
-  saveProjectAsAction->setShortcut(
-      QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
+      fileMenu->addAction("Save Project As", this, SLOT(actionSaveProjectAs()),
+                          QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
 
   fileMenu->addSeparator();
 
-  exitAction = fileMenu->addAction("Exit", this, SLOT(close()));
-  exitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+  exitAction = fileMenu->addAction("Exit", this, SLOT(close()),
+                                   QKeySequence(Qt::CTRL + Qt::Key_Q));
 
   /* Create the Edit menu */
   QMenu* editMenu = menuBar()->addMenu("Edit");
 
-  undoAction = editMenu->addAction("Undo", specificationEditor, SLOT(undo()));
-  undoAction->setShortcut(QKeySequence::Undo);
+  undoAction = editMenu->addAction("Undo", specificationEditor, SLOT(undo()),
+                                   QKeySequence::Undo);
 
-  redoAction = editMenu->addAction("Redo", specificationEditor, SLOT(redo()));
-  redoAction->setShortcut(QKeySequence::Redo);
-
-  editMenu->addSeparator();
-
-  findAndReplaceAction = editMenu->addAction("Find and Replace", this,
-                                             SLOT(actionFindAndReplace()));
-  findAndReplaceAction->setShortcut(QKeySequence::Find);
+  redoAction = editMenu->addAction("Redo", specificationEditor, SLOT(redo()),
+                                   QKeySequence::Redo);
 
   editMenu->addSeparator();
 
-  cutAction = editMenu->addAction("Cut", specificationEditor, SLOT(cut()));
-  cutAction->setShortcut(QKeySequence::Cut);
+  findAndReplaceAction =
+      editMenu->addAction("Find and Replace", this,
+                          SLOT(actionFindAndReplace()), QKeySequence::Find);
+
+  editMenu->addSeparator();
+
+  cutAction = editMenu->addAction("Cut", specificationEditor, SLOT(cut()),
+                                  QKeySequence::Cut);
 
   copyAction = editMenu->addAction("Copy", specificationEditor, SLOT(copy()));
   copyAction->setShortcut(QKeySequence::Copy);
 
-  pasteAction =
-      editMenu->addAction("Paste", specificationEditor, SLOT(paste()));
-  pasteAction->setShortcut(QKeySequence::Paste);
+  pasteAction = editMenu->addAction("Paste", specificationEditor, SLOT(paste()),
+                                    QKeySequence::Paste);
 
-  deleteAction =
-      editMenu->addAction("Delete", specificationEditor, SLOT(deleteChar()));
-  deleteAction->setShortcut(QKeySequence::Delete);
+  deleteAction = editMenu->addAction("Delete", specificationEditor,
+                                     SLOT(deleteChar()), QKeySequence::Delete);
 
   selectAllAction =
-      editMenu->addAction("Select All", specificationEditor, SLOT(selectAll()));
-  selectAllAction->setShortcut(QKeySequence::SelectAll);
+      editMenu->addAction("Select All", specificationEditor, SLOT(selectAll()),
+                          QKeySequence::SelectAll);
 
   /* Create the View Menu (more actions are added in setupDocks())*/
   viewMenu = menuBar()->addMenu("View");
 
   zoomInAction =
-      viewMenu->addAction("Zoom in", specificationEditor, SLOT(zoomIn()));
-  zoomInAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal));
+      viewMenu->addAction("Zoom in", specificationEditor, SLOT(zoomIn()),
+                          QKeySequence(Qt::CTRL + Qt::Key_Equal));
 
-  zoomOutAction =
-      viewMenu->addAction("Zoom out", specificationEditor, SLOT(zoomOut()));
-  zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+  zoomOutAction = viewMenu->addAction("Zoom out", specificationEditor,
+                                      SLOT(zoomOut()), QKeySequence::ZoomOut);
 
   viewMenu->addSeparator();
 
@@ -170,29 +163,32 @@ void MainWindow::setupMenuBar()
   QMenu* toolsMenu = menuBar()->addMenu("Tools");
 
   parseAction = toolsMenu->addAction(parseStartIcon, parseStartText, this,
-                                     SLOT(actionParse()));
+                                     SLOT(actionParse()),
+                                     QKeySequence(Qt::ALT + Qt::Key_P));
 
   simulateAction = toolsMenu->addAction(simulateStartIcon, simulateStartText,
-                                        this, SLOT(actionSimulate()));
+                                        this, SLOT(actionSimulate()),
+                                        QKeySequence(Qt::ALT + Qt::Key_S));
 
   toolsMenu->addSeparator();
 
   showLtsAction = toolsMenu->addAction(showLtsStartIcon, showLtsStartText, this,
-                                       SLOT(actionShowLts()));
+                                       SLOT(actionShowLts()),
+                                       QKeySequence(Qt::ALT + Qt::Key_T));
 
-  showReducedLtsAction =
-      toolsMenu->addAction(showReducedLtsStartIcon, showReducedLtsStartText,
-                           this, SLOT(actionShowReducedLts()));
+  showReducedLtsAction = toolsMenu->addAction(
+      showReducedLtsStartIcon, showReducedLtsStartText, this,
+      SLOT(actionShowReducedLts()), QKeySequence(Qt::ALT + Qt::Key_R));
 
   toolsMenu->addSeparator();
 
-  addPropertyAction =
-      toolsMenu->addAction(QIcon(":/icons/add_property.png"), "Add Property",
-                           this, SLOT(actionAddProperty()));
+  addPropertyAction = toolsMenu->addAction(
+      QIcon(":/icons/add_property.png"), "Add Property", this,
+      SLOT(actionAddProperty()), QKeySequence(Qt::ALT + Qt::Key_A));
 
   verifyAllPropertiesAction = toolsMenu->addAction(
       verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
-      SLOT(actionVerifyAllProperties()));
+      SLOT(actionVerifyAllProperties()), QKeySequence(Qt::ALT + Qt::Key_V));
 }
 
 void MainWindow::setupToolbar()
