@@ -145,6 +145,12 @@ class structure_graph
   public:
     structure_graph() = default;
 
+    structure_graph(const std::vector<vertex>& vertices, index_type initial_vertex, const boost::dynamic_bitset<>& exclude)
+      : m_vertices(vertices),
+        m_initial_vertex(initial_vertex),
+        m_exclude(exclude)
+    {}
+
     index_type initial_vertex() const
     {
       return m_initial_vertex;
