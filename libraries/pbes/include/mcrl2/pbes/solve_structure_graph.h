@@ -70,6 +70,8 @@ class solve_structure_graph_algorithm
     // do a sanity check on the computed strategy
     bool check_strategy = false;
 
+    bool use_toms_optimization = false;
+
     // find a successor of u
     structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u)
     {
@@ -108,6 +110,9 @@ class solve_structure_graph_algorithm
     }
 
     // pre: G does not contain nodes with decoration true or false.
+    //
+    // N.B. If use_toms_optimization is true, then the oomputed strategy may be incorrect.
+    // So this flag should only be used to compute the solution.
     inline
     std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
     {
@@ -158,35 +163,41 @@ class solve_structure_graph_algorithm
       vertex_set W[2]   = { vertex_set(N), vertex_set(N) };
       vertex_set W_1[2];
 
-      vertex_set A = compute_attractor_set(G, U, alpha);
-      std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
-      vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
-      if (W_1[1 - alpha].size() == B.size())
+      if (use_toms_optimization)
       {
-        W[alpha] = set_union(A, W_1[alpha]);
-        W[1 - alpha] = B;
+        // More efficient than Zielonka, because some recursive calls are skipped.
+        // As a consequence, the computed strategy may be wrong.
+        vertex_set A = compute_attractor_set(G, U, alpha);
+        std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
+        vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
+        if (W_1[1 - alpha].size() == B.size())
+        {
+          W[alpha] = set_union(A, W_1[alpha]);
+          W[1 - alpha] = B;
+        }
+        else
+        {
+          std::tie(W[0], W[1]) = solve_recursive(G, B);
+          W[1 - alpha] = set_union(W[1 - alpha], B);
+        }
       }
       else
       {
-        std::tie(W[0], W[1]) = solve_recursive(G, B);
-        W[1 - alpha] = set_union(W[1 - alpha], B);
+         // Original Zielonka version
+         vertex_set A = compute_attractor_set(G, U, alpha);
+         std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
+         if (W_1[1 - alpha].is_empty())
+         {
+           W[alpha] = set_union(A, W_1[alpha]);
+           W[1 - alpha].clear();
+         }
+         else
+         {
+           vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
+           std::tie(W[0], W[1]) = solve_recursive(G, B);
+           W[1 - alpha] = set_union(W[1 - alpha], B);
+         }
       }
-
-      // Original Zielonka version
-      //
-      // vertex_set A = compute_attractor_set(G, U, alpha);
-      // std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
-      // if (W_1[1 - alpha].is_empty())
-      // {
-      //   W[alpha] = set_union(A, W_1[alpha]);
-      //   W[1 - alpha].clear();
-      // }
-      // else
-      // {
-      //   vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
-      //   std::tie(W[0], W[1]) = solve_recursive(G, B);
-      //   W[1 - alpha] = set_union(W[1 - alpha], B);
-      // }
 
       mCRL2log(log::debug) << "\n--- solution for solve_recursive input ---\n" << G;
       mCRL2log(log::debug) << "   W0 = " << W[0] << std::endl;
@@ -197,7 +208,7 @@ class solve_structure_graph_algorithm
 
     // Handles nodes with decoration true or false.
     inline
-    std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
+    std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G, bool use_toms_optimization = false)
     {
       mCRL2log(log::debug) << "\n--- solve_recursive_extended input ---\n" << G << std::endl;
 
@@ -339,8 +350,9 @@ class solve_structure_graph_algorithm
     }
 
   public:
-    explicit solve_structure_graph_algorithm(bool check_strategy_ = false)
-      : check_strategy(check_strategy_)
+    explicit solve_structure_graph_algorithm(bool check_strategy_ = false, bool use_toms_optimization_ = false)
+      : check_strategy(check_strategy_),
+        use_toms_optimization(use_toms_optimization_)
     {}
 
     inline
@@ -582,7 +594,8 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
 inline
 bool solve_structure_graph(structure_graph& G, bool check_strategy = false)
 {
-  solve_structure_graph_algorithm algorithm(check_strategy);
+  bool use_toms_optimization = !check_strategy;
+  solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
   return algorithm.solve(G);
 }
 
