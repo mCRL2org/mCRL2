@@ -101,7 +101,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       " variables whether they occur on a loop, such that"
                       " they can be set to true or false, depending on the"
                       " fixed point symbol. This can increase the time"
-                      " needed to generate an equation substantially."),
+                      " needed to generate an equation substantially. N.B. This"
+                      " optimization may cause stack overflow issues."),
                         "use strategy STRATEGY",
                  's');
     }
