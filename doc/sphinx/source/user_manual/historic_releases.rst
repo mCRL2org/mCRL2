@@ -7,6 +7,40 @@ Previous releases of mCRL2
 
 This page shows a list of historic releases of mCRL2.
 
+Release 201707.1
+----------------
+
+.. |bin_w64_201707.1| replace:: Windows Installer (64-bit)
+.. _bin_w64_201707.1: http://www.mcrl2.org/download/release/mcrl2-201707.1_x86_64.exe
+
+.. |bin_osx_201707.1| replace:: Mac OS X package (64-bit)
+.. _bin_osx_201707.1: http://www.mcrl2.org/download/release/mcrl2-201707.1_x86_64.dmg
+
+.. |bin_ppa_201707.1| replace:: PPA release
+.. _bin_ppa_201707.1: https://launchpad.net/~mcrl2/+archive/release-ppa
+
+.. |bin_fedora64_201707.1| replace:: Fedora RPM (64-bit)
+.. _bin_fedora64_201707.1: http://www.mcrl2.org/download/release/mcrl2-201707.1_x86_64.rpm
+
+.. |src_tgz_201707.1| replace:: GZipped Tarball
+.. _src_tgz_201707.1: http://www.mcrl2.org/download/release/mcrl2-201707.1.tar.gz
+
+   +------------------------+--------------------------+
+   |Operating system        | Release (201707.1)       |
+   +========================+==========================+
+   |Windows                 | |bin_w32_201707.1|_      |
+   |                        +--------------------------+
+   |                        | |bin_w64_201707.1|_      |
+   +------------------------+--------------------------+
+   |Mac OS X                | |bin_osx_201707.1|_      |
+   +------------------------+--------------------------+
+   |Ubuntu                  | |bin_ppa_201707.1|_      |
+   +------------------------+--------------------------+
+   |Fedora                  | |bin_fedora64_201707.1|_ |
+   +------------------------+--------------------------+
+   |Source                  | |src_tgz_201707.1|_      |
+   +------------------------+--------------------------+
+
 Release 201409.1
 ----------------
 
@@ -503,4 +537,3 @@ Release March 2011 (SVN revision 9030)
       +------------------------+--------------------------------------+
       |Source                  ||src_tgz_200707|_                     |
       +------------------------+--------------------------------------+
-

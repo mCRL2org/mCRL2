@@ -38,8 +38,9 @@
 
 .. note::
 
-   We switched from svn to git. The mCRL2 toolset is downloadable at `github <https://github.com/mCRL2org/mCRL2>`_. The latest
-   svn commit is revision 15385 from June 4, 2018.
+   The latest release (mCRL2-201808.0) is now available. Major new features are a user-friendly
+   GUI to develop specifications (mcrl2ide) and the possibility to generate counter-examples
+   with the new tool pbessolve. See the respective tool pages for more information.
 
 .. note::
 
