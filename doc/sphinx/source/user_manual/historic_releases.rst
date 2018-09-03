@@ -13,6 +13,9 @@ Release 201707.1
 .. |bin_w64_201707.1| replace:: Windows Installer (64-bit)
 .. _bin_w64_201707.1: http://www.mcrl2.org/download/release/mcrl2-201707.1_x86_64.exe
 
+.. |zip_w64_201707.1| replace:: Windows ZIP (64-bit)
+.. _zip_w64_201707.1: http://www.mcrl2.org/download/release/mcrl2-201707.1_x86_64.zip
+
 .. |bin_osx_201707.1| replace:: Mac OS X package (64-bit)
 .. _bin_osx_201707.1: http://www.mcrl2.org/download/release/mcrl2-201707.1_x86_64.dmg
 
@@ -28,9 +31,9 @@ Release 201707.1
    +------------------------+--------------------------+
    |Operating system        | Release (201707.1)       |
    +========================+==========================+
-   |Windows                 | |bin_w32_201707.1|_      |
+   |Windows                 | |bin_w64_201707.1|_      |
    |                        +--------------------------+
-   |                        | |bin_w64_201707.1|_      |
+   |                        | |zip_w64_201707.1|_      |
    +------------------------+--------------------------+
    |Mac OS X                | |bin_osx_201707.1|_      |
    +------------------------+--------------------------+
