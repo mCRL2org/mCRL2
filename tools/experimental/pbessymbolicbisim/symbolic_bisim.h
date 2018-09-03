@@ -65,44 +65,6 @@ protected:
     return rewriter(dataspec, used_data_equation_selector(dataspec, used_functions, spec.global_variables()), st);
   }
 
-  void to_dot(const pbes_system::structure_graph& G)
-  {
-    typedef pbes_system::structure_graph::vertex vertex;
-    std::size_t N = G.all_vertices().size();
-
-    std::ofstream out;
-    out.open("structure_graph.dot");
-    out << "digraph G {" << std::endl;
-
-    // draw vertices
-    for(unsigned int i = 0; i < N; i++)
-    {
-      const vertex& v = G.find_vertex(i);
-      std::string shape = (v.decoration == pbes_system::structure_graph::d_disjunction) ? "diamond" : "box";
-      std::string label = "r = " + std::to_string(v.rank) + "<br/>id = " + std::to_string(i);
-      out << "  l" << std::to_string(i) << " [label=<" << label << "> shape=" << shape << "];" << std::endl;
-    }
-
-    // draw edges
-    for(unsigned int i = 0; i < N; i++)
-    {
-      for(auto v: G.all_successors(i))
-      {
-        out << "  l" << i << " -> l" << v;
-        if(G.strategy(i) == v)
-        {
-          out << " [color=red]";
-        }
-        out << ";" << std::endl;
-      }
-    }
-
-    out << "}" << std::endl;
-    out.close();
-  }
-
-
-
 public:
   symbolic_bisim_algorithm(const pbes_system::pbes& spec, const std::size_t& refine_steps,
     const rewrite_strategy& st = jitty, const simplifier_mode& mode = simplify_auto,
@@ -133,23 +95,26 @@ public:
       // refining and searching for proof graphs
       std::size_t num_iterations = 0;
       double total_pg_time = 0.0;
+      pbes_system::solve_structure_graph_algorithm sg_solver(false, false);
       do
       {
         const std::chrono::time_point<std::chrono::high_resolution_clock> t_start_pg_solver =
           std::chrono::high_resolution_clock::now();
 
-        latest_solution = pbes_system::solve_structure_graph(m_structure_graph);
-        mCRL2log(log::verbose) << m_structure_graph;
-        mCRL2log(log::verbose) << "initial state: " << m_structure_graph.initial_vertex() << std::endl;
-        mCRL2log(log::verbose) << "solution " << (latest_solution ? "true" : "false") << std::endl;
-        to_dot(m_structure_graph);
+        latest_solution = sg_solver.solve(m_structure_graph);
         std::set<sg_index_t> proof_graph = find_counter_example_nodes(m_structure_graph, m_structure_graph.initial_vertex(), latest_solution);
-        mCRL2log(log::verbose) << "Proof graph contains nodes ";
-        for(const sg_index_t& v: proof_graph)
+        if(mCRL2logEnabled(log::verbose))
         {
-          mCRL2log(log::verbose) << v << ", ";
+          mCRL2log(log::verbose) << m_structure_graph;
+          mCRL2log(log::verbose) << "initial state: " << m_structure_graph.initial_vertex() << std::endl;
+          mCRL2log(log::verbose) << "solution " << (latest_solution ? "true" : "false") << std::endl;
+          mCRL2log(log::verbose) << "Proof graph contains nodes ";
+          for(const sg_index_t& v: proof_graph)
+          {
+            mCRL2log(log::verbose) << v << ", ";
+          }
+          mCRL2log(log::verbose) << std::endl;
         }
-        mCRL2log(log::verbose) << std::endl;
         m_partition.set_proof(proof_graph);
 
         num_iterations++;
@@ -166,17 +131,14 @@ public:
     }
     else
     {
-      // m_partition.refine_n_steps(0, false);
-      // ParityGame pg;
-      // m_partition.get_reachable_pg(pg);
-      //
-      // const ParityGame::Strategy& solution = compute_pg_solution(pg);
-      // latest_solution = pg.winner(solution,0);
-      //
-      // mCRL2log(log::status) << "Amount of blocks " << m_partition.get_proof_blocks().size() << "\n";
-      // mCRL2log(log::info) << "Partition refinement completed in " <<
-      //     std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
-      //     " seconds.\n" << std::endl;
+      m_partition.refine_n_steps(0, false);
+
+      latest_solution = pbes_system::solve_structure_graph(m_structure_graph);
+
+      mCRL2log(log::status) << "Amount of blocks " << m_partition.get_proof_blocks().size() << "\n";
+      mCRL2log(log::info) << "Partition refinement completed in " <<
+          std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
+          " seconds.\n" << std::endl;
     }
 
     // m_partition.save_bes();

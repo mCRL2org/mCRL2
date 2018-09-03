@@ -70,7 +70,7 @@ protected:
 
   pbes_system::structure_graph& m_structure_graph;
   pbes_system::detail::manual_structure_graph_builder m_sg_builder;
-  std::unordered_map<sg_index_t, block_t> m_block_index;
+  std::vector<block_t> m_block_index;
 
   bool m_early_termination;
 
@@ -144,6 +144,7 @@ protected:
   void update_structure_graph(block_t& new_pos_block, block_t& new_neg_block)
   {
     new_neg_block.index = m_sg_builder.insert_vertex(new_neg_block.is_conjunctive(), new_neg_block.rank(m_rank_map));
+    m_block_index.resize(new_neg_block.index + 1);
     m_block_index[new_neg_block.index] = new_neg_block;
     m_block_index[new_pos_block.index] = new_pos_block;
     // Investigate the predecessors of the parent block
@@ -181,34 +182,6 @@ protected:
       m_sg_builder.set_initial_state(new_neg_block.index);
     }
     m_sg_builder.finalize();
-    if(new_pos_block.has_transition(new_pos_block))
-    {
-      auto& succ = m_structure_graph.all_successors(new_pos_block.index);
-      if(std::find(succ.begin(), succ.end(), new_pos_block.index) == succ.end())
-      {
-        throw mcrl2::runtime_error("A transition is missing from pos to pos");
-      }
-      // m_sg_builder.insert_edge(new_pos_block.index, new_neg_block.index);
-    }
-    // Check for transitions between the pos block and the neg block
-    if(new_pos_block.has_transition(new_neg_block))
-    {
-      auto& succ = m_structure_graph.all_successors(new_pos_block.index);
-      if(std::find(succ.begin(), succ.end(), new_neg_block.index) == succ.end())
-      {
-        throw mcrl2::runtime_error("A transition is missing from pos to neg");
-      }
-      // m_sg_builder.insert_edge(new_pos_block.index, new_neg_block.index);
-    }
-    if(new_neg_block.has_transition(new_pos_block))
-    {
-      auto& succ = m_structure_graph.all_successors(new_neg_block.index);
-      if(std::find(succ.begin(), succ.end(), new_pos_block.index) == succ.end())
-      {
-        throw mcrl2::runtime_error("A transition is missing from neg to pos");
-      }
-      // m_sg_builder.insert_edge(new_neg_block.index, new_pos_block.index);
-    }
   }
 
   std::vector<subblock> make_subblock_list() const
@@ -412,6 +385,7 @@ protected:
   inline
   void make_initial_structure_graph()
   {
+    m_block_index.resize(m_proof_blocks.size());
     for(block& b: m_proof_blocks)
     {
       b.index = m_sg_builder.insert_vertex(b.is_conjunctive(), b.rank(m_rank_map));
@@ -532,7 +506,7 @@ public:
 
   void set_proof(const std::set< sg_index_t >& proof_nodes)
   {
-    // Move all the blocks to the other set while keeping the order m_proof_block ++ m_other_blocks
+    // Move all the blocks to the other set while keeping the order m_proof_blocks ++ m_other_blocks
     std::vector< block_t > all_blocks(m_proof_blocks.begin(), m_proof_blocks.end());
     // all_blocks.swap(m_proof_blocks);
     all_blocks.insert(all_blocks.end(), m_other_blocks.begin(), m_other_blocks.end());
