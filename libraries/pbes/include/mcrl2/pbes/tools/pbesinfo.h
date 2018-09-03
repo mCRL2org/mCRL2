@@ -33,20 +33,23 @@ void pbesinfo(const std::string& input_filename,
   // Show file from which PBES was read
   std::cout << input_file_message << "\n\n";
 
-  // Show if PBES is closed and well formed
-  std::cout << "The PBES is " << (p.is_closed() ? "" : "not ") << "closed and " << (p.is_well_typed() ? "" : "not ") << "well formed" << std::endl;
-
   // Show number of equations
-  std::cout << "Number of equations: " << p.equations().size() << std::endl;
+  std::cout << "Number of equations:     " << p.equations().size() << std::endl;
 
   // Show number of mu's with the predicate variables from the mu's
-  std::cout << "Number of mu's:      " << info["mu_equation_count"] << std::endl;
+  std::cout << "Number of mu's:          " << info["mu_equation_count"] << std::endl;
 
   // Show number of nu's with the predicate variables from the nu's
-  std::cout << "Number of nu's:      " << info["nu_equation_count"] << std::endl;
+  std::cout << "Number of nu's:          " << info["nu_equation_count"] << std::endl;
 
   // Show number of nu's with the predicate variables from the nu's
-  std::cout << "Block nesting depth: " << info["block_nesting_depth"] << std::endl;
+  std::cout << "Block nesting depth:     " << info["block_nesting_depth"] << std::endl;
+
+  // Show if PBES is closed and well formed
+  std::cout << "The PBES is closed:      " << std::flush;
+  std::cout << (p.is_closed() ? "yes" : "no ") << std::endl;
+  std::cout << "The PBES is well formed: " << std::flush;
+  std::cout << (p.is_well_typed() ? "yes" : "no ") << std::endl;
 
   // Show binding variables with their signature
   if (opt_full)
