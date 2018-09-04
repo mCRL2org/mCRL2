@@ -314,7 +314,7 @@ available_tests = {
     'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                               ,
     'pbessolve-counter-example'                   : lambda name, settings: Pbessolve_counter_exampleTest(name, settings)                               ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
-    'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       ,
+    # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
 }
 
