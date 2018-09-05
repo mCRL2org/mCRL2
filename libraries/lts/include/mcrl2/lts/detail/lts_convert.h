@@ -239,9 +239,9 @@ inline void convert_core_lts(CONVERTOR& c,
 
 // =========================================================================   REWRITTEN CODE ==============
 
-inline action_label_lts translate_label_aux(const action_label_string& l1, 
-                                            const data::data_specification& data, 
-                                            const process::action_label_list& action_labels)
+inline action_label_lts translate_label_aux(const action_label_string& l1,
+                                            const data::data_specification& data,
+                                            lps::multi_action_type_checker& typechecker)
 {
   std::string l(l1);
   action_label_lts al;
@@ -255,7 +255,7 @@ inline action_label_lts translate_label_aux(const action_label_string& l1,
 
   try
   {
-    al=parse_lts_action(l,data,action_labels);
+    al=parse_lts_action(l,data,typechecker);
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -469,9 +469,11 @@ class convertor<lts_fsm_base, lts_lts_base>
   public:
     const lts_fsm_base& m_lts_in;
     const lts_lts_base& m_lts_out;
+    lps::multi_action_type_checker m_typechecker;
 
     convertor(const lts_fsm_base& lts_base_in, lts_lts_base& lts_base_out):
-      m_lts_in(lts_base_in), m_lts_out(lts_base_out)
+      m_lts_in(lts_base_in), m_lts_out(lts_base_out),
+      m_typechecker(lts_base_out.data(), data::variable_list(), lts_base_out.action_label_declarations())
     {
     }
 };
@@ -502,7 +504,7 @@ inline void lts_convert_base_class(const lts_fsm_base& base_in,
 
 inline action_label_lts lts_convert_translate_label(const action_label_string& l1, convertor<lts_fsm_base, lts_lts_base>& c) 
 {
-  return translate_label_aux(l1, c.m_lts_out.data(), c.m_lts_out.action_label_declarations());
+  return translate_label_aux(l1, c.m_lts_out.data(), c.m_typechecker);
 }
 
 inline void lts_convert_translate_state(const state_label_fsm& state_label_in, 
@@ -677,11 +679,11 @@ class convertor<lts_aut_base, lts_lts_base>
 {
   public:
     const data::data_specification& m_data;
-    const process::action_label_list& m_action_labels;
+    lps::multi_action_type_checker m_typechecker;
 
     convertor(const lts_aut_base& /* lts_base_in*/, const lts_lts_base& lts_base_out)
       : m_data(lts_base_out.data()),
-        m_action_labels(lts_base_out.action_label_declarations())
+        m_typechecker(m_data, data::variable_list(), lts_base_out.action_label_declarations())
     {
     }
 };
@@ -712,7 +714,7 @@ inline void lts_convert_base_class(const lts_aut_base& base_in,
 
 inline action_label_lts lts_convert_translate_label(const action_label_string& l_in, convertor<lts_aut_base, lts_lts_base>& c)
 {
-  return translate_label_aux(l_in, c.m_data, c.m_action_labels);
+  return translate_label_aux(l_in, c.m_data, c.m_typechecker);
 }
 
 inline void lts_convert_translate_state(const state_label_empty& /* state_label_in */, state_label_lts& state_label_out, convertor<lts_aut_base, lts_lts_base>& /* c */)

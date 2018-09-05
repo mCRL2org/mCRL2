@@ -200,9 +200,9 @@ inline std::string pp(const action_label_lts& l)
 inline action_label_lts parse_lts_action(
   const std::string& multi_action_string,
   const data::data_specification& data_spec,
-  const process::action_label_list& act_decls)
+  lps::multi_action_type_checker& typechecker)
 {
-  return action_label_lts(lps::parse_multi_action(multi_action_string, act_decls, data_spec));
+  return action_label_lts(lps::parse_multi_action(multi_action_string, typechecker, data_spec));
 }
 
 namespace detail

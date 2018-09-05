@@ -61,6 +61,15 @@ process::untyped_multi_action parse_multi_action_new(const std::string& text)
 }
 
 inline
+multi_action complete_multi_action(process::untyped_multi_action& x, multi_action_type_checker& typechecker, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  multi_action result = lps::typecheck_multi_action(x, typechecker);
+  lps::translate_user_notation(result);
+  lps::normalize_sorts(result, data_spec);
+  return result;
+}
+
+inline
 multi_action complete_multi_action(process::untyped_multi_action& x, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
   multi_action result = lps::typecheck_multi_action(x, data_spec, action_decls);
@@ -195,6 +204,20 @@ multi_action parse_multi_action(std::stringstream& in, const process::action_lab
   return detail::complete_multi_action(u, action_decls, data_spec);
 }
 
+/// \brief Parses a multi_action from an input stream
+/// \param in An input stream containing a multi_action
+/// \param[in] typechecker Typechecker used to check the action.
+/// \param[in] data_spec The data specification that is used for type checking.
+/// \return The parsed multi_action
+/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
+inline
+multi_action parse_multi_action(std::stringstream& in, multi_action_type_checker& typechecker, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  std::string text = utilities::read_text(in);
+  process::untyped_multi_action u = detail::parse_multi_action_new(text);
+  return detail::complete_multi_action(u, typechecker, data_spec);
+}
+
 /// \brief Parses a multi_action from a string
 /// \param text A string containing a multi_action
 /// \param[in] action_decls A list of allowed action labels that is used for type checking.
@@ -206,6 +229,19 @@ multi_action parse_multi_action(const std::string& text, const process::action_l
 {
   std::stringstream ma_stream(text);
   return parse_multi_action(ma_stream, action_decls, data_spec);
+}
+
+/// \brief Parses a multi_action from a string
+/// \param text A string containing a multi_action
+/// \param[in] typechecker Typechecker used to check the action.
+/// \param[in] data_spec The data specification that is used for type checking.
+/// \return The parsed multi_action
+/// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
+inline
+multi_action parse_multi_action(const std::string& text, multi_action_type_checker& typechecker, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  std::stringstream ma_stream(text);
+  return parse_multi_action(ma_stream, typechecker, data_spec);
 }
 
 /// \brief Parses a process specification from an input stream
