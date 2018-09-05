@@ -135,6 +135,20 @@ multi_action typecheck_multi_action(process::untyped_multi_action& mult_act,
   return typechecker(mult_act);
 }
 
+/** \brief     Type check a multi action
+ *  Throws an exception if something went wrong.
+ *  \param[in] mult_act A multi action that has not been type checked.
+ *  \param[in] typechecker Checker that will be used to check multi_act
+ *  \post      mult_action is type checked and sorts have been added when necessary.
+ **/
+inline
+multi_action typecheck_multi_action(process::untyped_multi_action& mult_act,
+                                     multi_action_type_checker& typechecker
+                                    )
+{
+  return typechecker(mult_act);
+}
+
 /// \brief Type checks an action rename specification.
 /// \param arspec An action rename specifition.
 /// \param lpsspec A linear process specification, used for the datatypes and action declarations.
