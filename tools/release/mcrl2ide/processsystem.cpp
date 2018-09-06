@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2\utilities\toolset_version.h"
+#include "mcrl2/utilities/toolset_version.h"
 #include "processsystem.h"
 
 #include <QEventLoop>
