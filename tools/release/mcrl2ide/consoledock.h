@@ -66,6 +66,12 @@ class ConsoleDock : public QDockWidget
   void writeToConsole(ProcessType processType, const QString& output);
 
   /**
+   * @brief broadcast Writes a message to all consoles
+   * @param output The message to write
+   */
+  void broadcast(const QString& output);
+
+  /**
    * @brief getConsoleOutput Get the output currently in the console
    * @param processType The tab to get the output from
    * @return The console output

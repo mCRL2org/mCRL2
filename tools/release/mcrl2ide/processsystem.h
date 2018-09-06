@@ -138,6 +138,12 @@ class ProcessSystem : public QObject
   void setConsoleDock(ConsoleDock* consoleDock);
 
   /**
+   * @brief testExecutableExistence Tests whether the needed tool executables
+   *   can be found and warns the user if any cannot be found
+   */
+  void testExecutableExistence();
+
+  /**
    * @brief getProcessThread Returns gets the process thread of type processType
    * @param processType The type of the processThread
    * @return The process thread of type processType

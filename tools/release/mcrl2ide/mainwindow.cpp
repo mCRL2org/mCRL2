@@ -73,6 +73,8 @@ MainWindow::MainWindow(const QString& inputProjectFilePath, QWidget* parent)
                  QDesktopWidget().availableGeometry(this).height() * 0.75));
   }
 
+  processSystem->testExecutableExistence();
+
   /* open a project if a project file is given */
   if (!inputProjectFilePath.isEmpty())
   {

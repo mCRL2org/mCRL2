@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "mcrl2\utilities\toolset_version.h"
 #include "processsystem.h"
 
 #include <QEventLoop>
@@ -112,6 +113,50 @@ ProcessSystem::~ProcessSystem()
 void ProcessSystem::setConsoleDock(ConsoleDock* consoleDock)
 {
   this->consoleDock = consoleDock;
+}
+
+void ProcessSystem::testExecutableExistence()
+{
+  /* get this tool's version */
+  QString mcrl2ideVersion =
+      QString::fromStdString(mcrl2::utilities::get_toolset_version());
+
+  QStringList tools = {"mcrl22lps", "lpsxsim",  "lps2lts",  "ltsconvert",
+                       "ltsgraph",  "lps2pbes", "pbessolve"};
+
+  /* for each necessary executable, check if it exists by trying to run it and
+   *   compare its version with mcrl2ide's version */
+  for (QString tool : tools)
+  {
+    /* try to run the tool */
+    QProcess process;
+    process.start(tool, {"--version"});
+    bool started = process.waitForStarted();
+
+    if (started)
+    {
+      /* if found, get the tool version from the output
+       * the version is the fourth plus the fifth word in the output */
+      process.waitForFinished();
+      QString output = process.readAllStandardOutput();
+      QStringList splittedOutput = output.split(QRegExp("[ \r\n]"));
+      QString version = splittedOutput[3] + " " + splittedOutput[4];
+      if (version != mcrl2ideVersion)
+      {
+        consoleDock->broadcast("WARNING: Tool " + tool +
+                               " does not have the same version as mCRL2 IDE: "
+                               "mCRL2 IDE has version " +
+                               mcrl2ideVersion + " whereas " + tool +
+                               " has version " + version + ".\n");
+      }
+    }
+    else
+    {
+      consoleDock->broadcast("WARNING: The executable of tool " + tool +
+                             " could not be found! Make sure it is in the "
+                             "running directory or in PATH.\n");
+    }
+  }
 }
 
 ProcessThread* ProcessSystem::getProcessThread(ProcessType processType)

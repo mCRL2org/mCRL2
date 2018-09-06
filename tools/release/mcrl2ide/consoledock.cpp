@@ -79,6 +79,14 @@ void ConsoleDock::writeToConsole(ProcessType processType, const QString& output)
   consoles[processType]->ensureCursorVisible();
 }
 
+void ConsoleDock::broadcast(const QString& output)
+{
+  for (ProcessType processType : PROCESSTYPES)
+  {
+    writeToConsole(processType, output);
+  }
+}
+
 QString ConsoleDock::getConsoleOutput(ProcessType processType)
 {
   return consoles[processType]->toPlainText();
