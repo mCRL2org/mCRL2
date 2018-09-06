@@ -812,7 +812,8 @@ void ProcessSystem::killProcess(int processid)
   for (i = numSubprocesses - 1; i >= 0; i--)
   {
     QProcess* subprocess = subprocesses[i];
-    if (subprocess->state() == QProcess::Running)
+    if (subprocess->state() == QProcess::Running ||
+        subprocess->error() != QProcess::UnknownError)
     {
       subprocess->blockSignals(true);
       subprocess->kill();
