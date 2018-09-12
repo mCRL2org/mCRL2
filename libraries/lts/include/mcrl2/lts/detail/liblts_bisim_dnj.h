@@ -95,9 +95,13 @@ union iterator_or_null
     Iterator iter;
 
     iterator_or_null()  {  }
+    explicit iterator_or_null(Iterator new_iter)
+    {
+        iter = new_iter;                                                        assert(nullptr != null);
+    }
     explicit iterator_or_null(std::nullptr_t new_null)
     {                                                                           assert(nullptr == new_null);
-        null = nullptr;
+        null = new_null;
     }
     ~iterator_or_null()  {  }
 
@@ -257,16 +261,12 @@ class state_info_entry
     bool surely_has_no_transition_to(const bunch_t* SpBu) const;
                                                                                 #ifndef NDEBUG
                                                                                 /// \brief print a short state identification for debugging
-                                                                                /// \details This function is only available if compiled in Debug mode.
                                                                                 std::string debug_id_short() const
-                                                                                {
-                                                                                    assert(s_i_begin <= this);
-                                                                                    assert(this < s_i_end);
+                                                                                {   assert(s_i_begin <= this);  assert(this < s_i_end);
                                                                                     return std::to_string(this - s_i_begin);
                                                                                 }
 
                                                                                 /// \brief print a state identification for debugging
-                                                                                /// \details This function is only available if compiled in Debug mode.
                                                                                 std::string debug_id() const
                                                                                 {
                                                                                     return "state " + debug_id_short();
@@ -410,28 +410,25 @@ class block_t
 
     /// provides the number of states in the block
     state_type size() const
-    {                                                                           assert(begin <= marked_bottom_begin);
+    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
                                                                                 assert(marked_bottom_begin <= nonbottom_begin);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
-                                                                                assert(marked_nonbottom_begin <= end);
         return end - begin;
     }
 
     /// \brief provides the number of bottom states in the block
     state_type bottom_size() const
-    {                                                                           assert(begin <= marked_bottom_begin);
+    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
                                                                                 assert(marked_bottom_begin <= nonbottom_begin);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
-                                                                                assert(marked_nonbottom_begin <= end);
         return nonbottom_begin - begin;
     }
 
     /// \brief provides the number of marked bottom states in the block
     state_type marked_bottom_size() const
-    {                                                                           assert(begin <= marked_bottom_begin);
+    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
                                                                                 assert(marked_bottom_begin <= nonbottom_begin);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
-                                                                                assert(marked_nonbottom_begin <= end);
         return nonbottom_begin - marked_bottom_begin;
     }
 
@@ -443,19 +440,17 @@ class block_t
 
     /// provides the number of unmarked bottom states in the block
     state_type unmarked_bottom_size() const
-    {                                                                           assert(begin <= marked_bottom_begin);
+    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
                                                                                 assert(marked_bottom_begin <= nonbottom_begin);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
-                                                                                assert(marked_nonbottom_begin <= end);
         return marked_bottom_begin - begin;
     }
 
     /// provides the number of unmarked nonbottom states in the block
     state_type unmarked_nonbottom_size() const
-    {                                                                           assert(begin <= marked_bottom_begin);
+    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
                                                                                 assert(marked_bottom_begin <= nonbottom_begin);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
-                                                                                assert(marked_nonbottom_begin <= end);
         return marked_nonbottom_begin - nonbottom_begin;
     }
 
@@ -484,19 +479,15 @@ class block_t
     block_t* split_off_block(enum new_block_mode_t new_block_mode);
                                                                                 #ifndef NDEBUG
                                                                                 /// \brief print a block identification for debugging
-                                                                                /// \details This function is only available if compiled in Debug mode.
                                                                                 std::string debug_id() const
-                                                                                {
-                                                                                    assert(perm_begin <= begin);
-                                                                                    assert(begin < end);
-                                                                                    assert(end <= perm_end);
+                                                                                {   assert(perm_begin <= begin); assert(begin < end); assert(end <= perm_end);
                                                                                     return "block [" + std::to_string(begin - perm_begin) + "," +
                                                                                        std::to_string(end - perm_begin) + ") (#" + std::to_string(seqnr) + ")";
                                                                                 }
 
                                                                                 /// \brief provide an iterator to the beginning of the permutation array
                                                                                 /// \details This iterator is required to be able to print identifications
-                                                                                /// for debugging.  It is only available if compiled in Debug mode.
+                                                                                /// for debugging.
                                                                                 static permutation_iter_t perm_begin;
                                                                                 static permutation_const_iter_t perm_end;
                                                                                 #endif
@@ -504,18 +495,29 @@ class block_t
 
 
 /// swap two permutations
+/*
 /// \details Note that the two permutation array entries are given as
 /// references, not as iterators.  We have to jump through a hoop to turn
-/// those pointers into iterators again...
+/// those pointers into iterators again...  We hope that the compiler optimizes
+/// the calculation away.
+///
+/// We need the function with this signature because we sometimes sort the
+/// entries in the permutation array using `std::sort()`.  However, this only
+/// works if state_info_ptr is a class (not a pointer).
 static inline void swap(state_info_ptr& s1, state_info_ptr& s2)
-{                                                                               assert(&*s1->pos == &s1);  assert(&*block_t::perm_begin <= &s1);
-                                                                                assert(&s1 < &*block_t::perm_end);  assert(&*s2->pos == &s2);
+{                                                                               assert(&*block_t::perm_begin <= &s1);  assert(&s1 < &*block_t::perm_end);
                                                                                 assert(&*block_t::perm_begin <= &s2);  assert(&s2 < &*block_t::perm_end);
-    state_info_ptr temp = s1;
-    s1 = s2;
-    s2 = temp;
-    s1->pos = block_t::perm_begin + (&s1 - &*block_t::perm_begin);
-    s2->pos = block_t::perm_begin + (&s2 - &*block_t::perm_begin);
+    iter_swap(block_t::perm_begin + (&s1 - &*block_t::perm_begin),
+                          block_t::perm_begin + (&s2 - &*block_t::perm_begin));
+}
+*/
+static inline void iter_swap(permutation_iter_t s1, permutation_iter_t s2)
+{                                                                               assert((*s1)->pos == s1);  assert((*s2)->pos == s2);
+    state_info_ptr temp = *s1;                                                  assert(block_t::perm_begin <= s1);  assert(s1 < block_t::perm_end);
+    *s1 = *s2;                                                                  assert(block_t::perm_begin <= s2);  assert(s2 < block_t::perm_end);
+    *s2 = temp;
+    (*s1)->pos = s1;
+    (*s2)->pos = s2;
 }
 
 
@@ -525,9 +527,12 @@ static inline void swap(state_info_ptr& s1, state_info_ptr& s2)
 /// \param s the non-bottom state that has to be marked
 /// \returns true if the state was not marked before
 inline bool block_t::mark_nonbottom(state_info_ptr s)
-{                                                                               assert(nonbottom_begin <= s->pos);  assert(s->pos < end);
-    if (marked_nonbottom_begin <= s->pos)  return false;
-    swap(*s->pos, *--marked_nonbottom_begin);                                   assert(nonbottom_begin <= marked_nonbottom_begin);
+{                                                                               assert(this==s->block);  assert(nonbottom_begin<=s->pos);  assert(s->pos<end);
+                                                                                assert(begin <= marked_bottom_begin);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+    if (marked_nonbottom_begin <= s->pos)  return false;                        assert(marked_nonbottom_begin <= end);
+    iter_swap(s->pos, --marked_nonbottom_begin);                                assert(nonbottom_begin <= marked_nonbottom_begin);
     return true;
 }
 
@@ -539,14 +544,12 @@ inline bool block_t::mark_nonbottom(state_info_ptr s)
 /// \param s the state that has to be marked
 /// \returns true if the state was not marked before
 inline bool block_t::mark(state_info_ptr s)
-{                                                                               assert(begin <= s->pos);  assert(begin <= marked_bottom_begin);
-                                                                                assert(marked_bottom_begin <= nonbottom_begin);
-                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
-                                                                                assert(marked_nonbottom_begin <= end);
+{                                                                               assert(this == s->block);  assert(begin <= s->pos);
     if (s->pos < nonbottom_begin)
-    {
-        if (marked_bottom_begin <= s->pos)  return false;
-        swap(*s->pos, *--marked_bottom_begin);                                  assert(begin <= marked_bottom_begin);
+    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+        if (marked_bottom_begin <= s->pos)  return false;                       assert(marked_bottom_begin <= nonbottom_begin);
+        iter_swap(s->pos, --marked_bottom_begin);                               assert(begin <= marked_bottom_begin);
         return true;
     }
     return mark_nonbottom(s);
@@ -583,8 +586,7 @@ class part_state_t
         state_info(num_states + 1)
     {                                                                           assert(0 == block_t::nr_of_blocks);
                                                                                 #ifndef NDEBUG
-                                                                                block_t::perm_begin = permutation.begin();
-                                                                                block_t::perm_end = permutation.end();
+                                                                                block_t::perm_begin=permutation.begin();  block_t::perm_end=permutation.end();
                                                                                 state_info_entry::s_i_begin = state_info.data();
                                                                                 state_info_entry::s_i_end = state_info_entry::s_i_begin+num_states;
                                                                                 #endif
@@ -752,14 +754,12 @@ class pred_entry
     state_info_ptr target;
                                                                                 #ifndef NDEBUG
                                                                                 /// \brief print a short transition identification for debugging
-                                                                                /// \details This function is only available if compiled in Debug mode.
                                                                                 std::string debug_id_short() const
                                                                                 {
                                                                                     return "from " +source->debug_id_short() +" to " +target->debug_id_short();
                                                                                 }
 
                                                                                 /// \brief print a transition identification for debugging
-                                                                                /// \details This function is only available if compiled in Debug mode.
                                                                                 template <class LTS_TYPE>
                                                                                 std::string debug_id(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const;
                                                                                 #endif
@@ -798,10 +798,9 @@ class action_block_entry
         }
                                                                                 #ifndef NDEBUG
                                                                                 // assert(this has the same action as result);
-                                                                                // The following assertion does not always hold: the function is
-                                                                                // called immediately after a block is refined, so it may be the
-                                                                                // case that the transitions are still to be moved to different
-                                                                                // slices.
+                                                                                // The following assertion does not always hold: the function is called
+                                                                                // immediately after a block is refined, so it may be the case that the
+                                                                                // transitions are still to be moved to different slices.
                                                                                 // assert(succ()->block_bunch->pred->target->block ==
                                                                                 //               result->succ()->block_bunch->pred->target->block);
                                                                                 assert(succ()->bunch() == result->succ()->bunch());
@@ -813,6 +812,7 @@ class action_block_entry
         return result;
     }
 
+/*
     /// \brief find the end of the action_block-slice
     action_block_iter_t action_block_slice_before_end() const
     {
@@ -829,6 +829,7 @@ class action_block_entry
                                                                                                              result->succ()->block_bunch->pred->target->block);
         return result;
     }
+*/
                                                                                 #ifndef NDEBUG
                                                                                 static action_block_const_iter_t action_block_begin;
                                                                                 static const action_block_iter_t* action_block_end;
@@ -865,12 +866,11 @@ class block_bunch_slice_t
         }
         ~bunch_stability_t()  {  }
 
-        const bunch_t* operator=(const bunch_t* new_bunch)
+        void operator=(const bunch_t* new_bunch)
         {                                                                       assert(0 == (reinterpret_cast<intptr_t>(new_bunch) & 3));
             data = reinterpret_cast<intptr_t>(new_bunch) | (data & 3);
-            return new_bunch;
         }
-        operator bunch_t*() const
+        bunch_t* operator()() const
         {
             return reinterpret_cast<bunch_t*>(data & ~(intptr_t) 3);
         }
@@ -946,17 +946,13 @@ class bunch_t
     {                                                                           assert(1 < end - begin);  assert(is_trivial());
                                                                                 // The following assertions do not necessarily hold during initialisation:
                                                                                 //assert(begin <= begin->begin_or_before_end());
-                                                                                //assert(begin->begin_or_before_end() < end[-1].begin_or_before_end());
-                                                                                //assert(end[-1].begin_or_before_end() <= end);
-        next_nontrivial = nullptr==first_nontrivial ? this : first_nontrivial;
-        first_nontrivial = this;
+        next_nontrivial = nullptr==first_nontrivial ? this : first_nontrivial;  //assert(begin->begin_or_before_end() < end[-1].begin_or_before_end());
+        first_nontrivial = this;                                                //assert(end[-1].begin_or_before_end() <= end);
     }
     void make_trivial()
     {                                                                           assert(!is_trivial());  assert(first_nontrivial == this);
-                                                                                assert(end - 1 == begin->begin_or_before_end());
-                                                                                assert(begin == end[-1].begin_or_before_end());
-        first_nontrivial = this == next_nontrivial ? nullptr : next_nontrivial;
-        next_nontrivial = nullptr;
+        first_nontrivial = this == next_nontrivial ? nullptr : next_nontrivial; assert(end - 1 == begin->begin_or_before_end());
+        next_nontrivial = nullptr;                                              assert(begin == end[-1].begin_or_before_end());
     }
 
     /// \brief returns true iff the bunch is trivial
@@ -979,8 +975,7 @@ class bunch_t
         action_block_iter_t first_slice_end = begin->begin_or_before_end() + 1; assert(!end[-1].succ.is_null());
         action_block_iter_t last_slice_begin = end[-1].begin_or_before_end();   assert(begin < first_slice_end);  assert(first_slice_end <= last_slice_begin);
                                                                                 assert(last_slice_begin < end);  assert(!first_slice_end[-1].succ.is_null());
-                                                                                assert(!last_slice_begin->succ.is_null());
-        // 2.6: Create a new bunch NewBu and ...
+        /* 2.6: Create a new bunch NewBu and ... */                             assert(!last_slice_begin->succ.is_null());
         bunch_t* new_bunch;
 
         // 2.5: Choose a small splitter B_a_B slice SpSl subset of SpBu,
@@ -1027,7 +1022,6 @@ class bunch_t
                                                                                 }
 
                                                                                 /// \brief print a bunch identification for debugging
-                                                                                /// \details This function is only available if compiled in Debug mode.
                                                                                 std::string debug_id() const
                                                                                 {   assert(!end[-1].succ.is_null());
                                                                                     action_block_const_iter_t iter = begin;
@@ -1060,127 +1054,6 @@ class bunch_t
                                                                                 }
                                                                                 #endif
 };
-
-
-/*
-{
-  protected:
-    /// \brief pointer to the next block_bunch-slice in the respective
-    /// single-linked list
-    /// \details Stable block_bunch-slices are stored (in bunch order) with the
-    /// source block; unstable block_bunch-slices are stored (unsorted) in the
-    /// partition.  In both cases, a single-linked list is enough.
-    ///
-    /// The last element in the list has the next-pointer set to nullptr.  With
-    /// each block, pointers to the begin and before_end elements of the list
-    /// are stored; the latter allows to append additional elements at the end
-    /// of the list.
-    ///
-    /// The list of stable block_bunch-slices needs to be sorted to allow
-    /// finding the predecessor of the from_red block_bunch-slice, which
-    /// changes from stable to unstable when the bunch is being split.  Then,
-    /// we have to change the next-pointer of the predecessor of the from_red
-    /// slice.
-    ///
-    /// During postprocessing, the stable block_bunch-slices are those before
-    /// the current_out_slice pointers of the bottom states;  they have been
-    /// stabilised in this order.  Therefore, we need to sort the unstable
-    /// block_bunch-slices as well, or at least stabilise first w. r. t. the
-    /// first unstable block_bunch-slice (in bunch order) having a transition
-    /// from some bottom state.
-    /// To enable this, we sort the bottom states according to the bunch of
-    /// their current_out_slice.  This will take time O(log(n)) per time that
-    /// a new bottom state is sorted.
-
-
-
-
-    at least as far as there are bottom states
-    /// that have a transition in them.  The list of unstable
-    /// block_bunch-slices is
-    /// constructed by ordering the bottom states according to the current
-    /// bunch they can reach, then going through them in their order to
-    /// find the block_bunch-slices in this order, then adding the other
-    /// block_bunch-slices (which have no transitions from bottom states, or at
-    /// least not a transition in the first bunch the bottom state can reach).
-    ///
-
-However, then still we need a way to extract a block_bunch-slice from the
-unstable block_bunch-slice list, which does not allow an order -- we will need
-the backpointers.
-
-Or we first place those slices pointed at by any current_out_slice-pointer in
-the unstable block_bunch-slices and after that any other block_bunch-slices.
-Then we will have to reorder for the red subblock after splitting, as that
-subblock may now have other slices pointed at.  How do we do this?  First walk
-through the new bottom states and mark all unstable block_bunch-slices with a
-transition in the current_out_slice of some bottom state;  then collect the
-unmarked block_bunch-slices (in any order);  then collect the marked
-block_bunch-slices, unmark them and prepend them (in the order required).
-
-Other approach:  New block_bunch-slices of a block without old bottom states
-only appear if a block with bottom states is split into two parts.  So, after
-every block_bunch-slice of the old block there will be the corresponding slice
-of the new block (if it's not empty).  We can (re)generate the two lists of
-block_bunch-slices at the same time by walking through the out-slices of an old
-bottom state, collect its block_bunch-slice, and if the other block
-has a corresponding block_bunch-slice, collect that slice in the list of the
-other block.  Problem:  If the new block is the one without old bottom states,
-it may take too much time to walk through the out-slices of the old block.
-
-    block_bunch_slice_t* next;
-
-  public:
-    block_bunch_slice_iter_t()
-      : next(nullptr)
-    {  }
-    explicit block_bunch_slice_iter_t(block_bunch_slice_t* new_next)
-       : next(new_next)
-    {  }
-    block_bunch_slice_iter_t(const block_bunch_slice_iter_t& other)
-      : next(other.next)
-    {  }
-    block_bunch_slice_iter_t& operator=(const block_bunch_slice_iter_t& other)
-    {
-        next = other.next;
-    }
-
-    bool operator==(const block_bunch_slice_iter_t& other) const
-    {
-        return next == other.next;
-    }
-    bool operator!=(const block_bunch_slice_iter_t& other) const
-    {
-        return !operator==(other);
-    }
-
-    block_bunch_slice_t& operator*()
-    {                                                                           assert(nullptr != next);
-        return *next;
-    }
-    block_bunch_slice_t* operator->()
-    {                                                                           assert(nullptr != next);
-        return next;
-    }
-    block_bunch_slice_iter_t& operator++()
-    {                                                                           assert(nullptr != next);
-        next = next->next;
-        return *this;
-    }
-    block_bunch_slice_iter_t operator++(int)
-    {                                                                           assert(nullptr != next);
-        block_bunch_slice_iter_t result(*this);
-        next = next->next;
-        return result;
-    }
-
-    static block_bunch_slice_t end()
-    {
-        return block_bunch_slice_t();
-    }
-}
-
-*/
 
 
 class part_trans_t
@@ -1256,9 +1129,10 @@ class part_trans_t
     void second_move_transition_to_new_action_block(pred_iter_t pred_iter);
 
     /// \brief adapt data structures for a transition that has become non-inert
-    bool make_noninert(pred_iter_t old_pred_pos, bunch_t** new_noninert_bunch);
+    bool make_noninert(pred_iter_t old_pred_pos,
+         iterator_or_null<block_bunch_slice_iter_t>* new_noninert_block_bunch);
 
-  public:
+  public:                                                                
     /// \brief Split all data structures after a new block has been created
     /// \details This function splits the block_bunch- and action_block-slices
     /// to reflect that some transitions now start or end in the new block.
@@ -1268,7 +1142,7 @@ class part_trans_t
     ///
     /// Its time complexity is O(1 + |in(NewB)| + |out(NewB)|).
     void adapt_transitions_for_new_block(block_t* new_block,block_t* old_block,
-                            bunch_t* new_noninert_bunch,
+        iterator_or_null<block_bunch_slice_iter_t> new_noninert_block_bunch,
                                 block_bunch_slice_const_iter_t last_splitter,
                                          enum new_block_mode_t new_block_mode);
                                                                                 #ifndef NDEBUG
@@ -1316,7 +1190,7 @@ inline succ_iter_t succ_entry::out_slice_before_end() const
 
 inline bunch_t* succ_entry::bunch() const
 {
-    return (bunch_t*) block_bunch->slice()->bunch;
+    return block_bunch->slice()->bunch();
 }
 
 
@@ -1344,7 +1218,7 @@ inline block_t* block_bunch_slice_t::source_block() const
 /* ************************************************************************* */     // }
                                                                                     return "block_bunch-slice [_," + index_string +
                                                                                         ") containing transitions from " + source_block()->debug_id() +
-                                                                                                                 " in " + ((bunch_t*) bunch)->debug_id_short();
+                                                                                                                            " in " + bunch()->debug_id_short();
                                                                                 }
                                                                                 #endif
 /// \defgroup part_refine
@@ -1362,8 +1236,9 @@ inline block_t* block_bunch_slice_t::source_block() const
 
 
 enum refine_mode_t { extend_from_state_markings_only,
-                   extend_from_FromRed_only,
-                   extend_from_bottom_state_markings_and_FromRed };
+                     extend_from_state_markings_for_postprocessing,
+                     extend_from_FromRed_only,
+                     extend_from_bottom_state_markings_and_FromRed };
 
 } // end namespace bisim_dnj
 
@@ -1405,10 +1280,17 @@ class bisim_partitioner_dnj
     }
     ~bisim_partitioner_dnj()  {  }
 
-    // replace_transition_system() replaces the transitions of the LTS stored
-    // here by those of its bisimulation quotient.  However, it does not change
-    // anything else; in particular, it does not change the number of states of
-    // the LTS.
+
+    /// \brief Adapt the LTS after minimisation
+    /// \details After the efficient branching bisimulation minimisation, the
+    /// information about the quotient LTS is only stored in the partition data
+    /// structure of the partitioner object.  This function exports the
+    /// information back to the LTS by adapting its states and transitions:  it
+    /// updates the number of states and adds those transitions that are
+    /// mandated by the partition data structure.
+    ///
+    /// The parameter and return value are implicit with this function: a
+    /// reference to the LTS was stored in the object by the constructor.
     void replace_transition_system();
 
     static state_type num_eq_classes()
@@ -1416,11 +1298,19 @@ class bisim_partitioner_dnj
         return bisim_dnj::block_t::nr_of_blocks;
     }
 
+
+    /// \brief Get the equivalence class of a state
+    /// \details After running the minimisation algorithm, this function
+    /// produces the number of the equivalence class of a state.  This number
+    /// is the same as the number of the state in the minimised LTS to which
+    /// the original state is mapped.
     state_type get_eq_class(state_type s) const
     {
         return part_st.block(s)->seqnr;
     }
 
+
+    /// \brief Check whether two states are in the same equivalence class
     bool in_same_class(state_type s, state_type t) const
     {
         return part_st.block(s) == part_st.block(t);
@@ -1429,24 +1319,144 @@ class bisim_partitioner_dnj
 
     /*-------- dbStutteringEquivalence -- Algorithm 2 of [GJKW 2017] --------*/
 
+    /// \brief Create a partition satisfying the main invariant
+    /// \details Before the actual bisimulation minimisation can start, this
+    /// function needs to be called to create a partition that satisfies the
+    /// main invariant of the efficient O(m log n) branching bisimulation
+    /// minimisation.
+    ///
+    /// It puts all non-inert transitions into a single bunch, containing one
+    /// action_block-slice for each action label.  It creates a single block
+    /// (or possibly two, if there are states that never will do any visible
+    /// action).  As a side effect, it deletes all transitions from the LTS
+    /// that is stored with the partitioner;  information about the transitions
+    /// is kept in data structures that are suitable for the efficient
+    /// algorithm.
+    ///
+    /// For divergence-preserving branching bisimulation, we only need to treat
+    /// tau-self-loops as non-inert transitions.  In other texts, this is
+    /// sometimes described as temporarily renaming the tau-self-loops to
+    /// self-loops with a special label.  However, as there are no other
+    /// non-inert tau transitions, we can simply put them in their own
+    /// action_block-slice, separate from the inert tau transitions.  (It would
+    /// be an error to mix the inert transitions with the self-loops in the
+    /// same slice.)
     void create_initial_partition();
+
+    /// \brief Run (branching) bisimulation minimisation in time O(m log n)
+    /// \details This function assumes that the partitioner object stores a LTS
+    /// with a partition satisfying the invariant:
+    ///
+    /// If a state contains a transition in a bunch, then every bottom state in
+    /// the same block contains a transition in that bunch.
+    ///
+    /// The function runs the efficient O(m log n) algorithm for branching
+    /// bisimulation minimisation on the LTS that has been stored in the
+    /// partitioner:  As long as there are nontrivial bunches, it selects one,
+    /// subdivides it into two bunches and then stabilises the partition for
+    /// these bunches.  As a result, the partition stored in the partitioner
+    /// will become stable.
+    ///
+    /// Parameters and return value are implicit with this function:  the LTS,
+    /// the partition and the flags of the bisimulation algorithm are all
+    /// stored in the partitioner object.
     void refine_partition_until_it_becomes_stable();
 
     /*----------------- Refine -- Algorithm 3 of [GJKW 2017] ----------------*/
 
+    /// \brief Split a block according to a splitter
+    /// \details The function splits `refine_block` into the red part (states
+    /// with a transition in `splitter`) and the blue part (states without a
+    /// transition in `splitter`).  Depending on `mode`, the states are primed
+    /// as follows:
+    ///
+    /// - If `mode == extend_from_state_markings_only`, then all states with a
+    ///   transition must have been marked already.
+    /// - If `mode == extend_from_state_markings_for_postprocessing`, states
+    ///   are marked as above.  The only difference is the handling of new
+    ///   non-inert transitions.
+    /// - If `mode == extend_from_FromRed_only`, then no states must be marked;
+    ///   the initial states with a transition in `splitter` are searched by
+    ///   `refine()` itself.
+    /// - If `mode == extend_from_bottom_state_markings_and_FromRed`, then
+    ///   bottom states with a transition must have been marked already, but
+    ///   there may be non-bottom states that also have a transition, which are
+    ///   searched by `refine()`.
+    ///
+    /// The  function  will  also  adapt  all  data  structures  and  determine
+    /// which  transitions  have  changed  from  inert  to  non-inert.   States
+    /// with  a  new  non-inert  transition  will  be  marked  upon  returning.
+    /// Normally,  the  new  non-inert  transitions  are  moved  to  a  new
+    /// bunch,  which  will  be  specially  created.   However,  if  `mode ==
+    /// extend_from_state_markings_for_postprocessing`, then the new non-inert
+    /// transitions will be added to `splitter` (which must hold transitions
+    /// that have just become non-inert before this call to `refine()`).  If
+    /// the resulting block contains marked states, the caller has to call
+    /// `postprocess_new_noninert()` to stabilise the block because the new
+    /// bunch may make the block unstable.
+    /// \param refine_block  block that needs to be refined
+    /// \param splitter      transition set that makes the block unstable
+    /// \param mode          indicates how to find states with a transition in
+    ///                      `splitter`, as described above
+    /// \returns (a pointer to) the red subblock.  It is an error to call the
+    /// function with settings that lead to an empty red subblock.  (An empty
+    /// blue subblock is ok.)
     bisim_dnj::block_t* refine(
           bisim_dnj::block_t* const refine_block,
           bisim_dnj::block_bunch_slice_iter_t const splitter,
-          bisim_dnj::bunch_t* new_noninert_bunch,
           enum bisim_dnj::refine_mode_t const mode);
 
     /*--------- PostprocessNewBottom -- Algorithm 4 of [GJKW 2017] ----------*/
 
+    /// \brief Prepare a block for postprocesing
+    /// \details When this function starts, it assumes that the states with a
+    /// new non-inert transition in refine_block are marked.  It is an error if
+    /// it does not contain any marked states.
+    ///
+    /// The function separates the states with new non-inert transitions from
+    /// those without;  as a result, the red subblock (which contains states
+    /// with new non-inert transitions) will contain at least one new bottom
+    /// state (and no old bottom states).  It then sorts the new bottom states
+    /// according to the first bunch in which they have transitions and marks
+    /// all block_bunch-slices of refine_block as unstable.
+    /// \param refine_block   block containing states with new non-inert
+    ///                       transitions that need to be stabilised
+    /// \param last_splitter  splitter of the last separation before, i. e. the
+    ///                       splitter that made these transitions non-inert
+    ///                       (refine_block should already be stable w. r. t.
+    ///                       last_splitter).
+    /// \param first_preparation  If true, then the function also makes sure
+    ///                           that all unstable block_bunch-slice of
+    ///                           refine_block are before
+    ///                           unstable_block_bunch_postprocess_end.
+    /// \returns the block containing the old bottom states (and every state in
+    ///          refine_block that cannot reach any new non-inert transition),
+    ///          i. e. the blue subblock of the separation
     bisim_dnj::block_t* prepare_for_postprocessing(
                             bisim_dnj::block_t* refine_block,
                             bisim_dnj::block_bunch_slice_iter_t last_splitter,
                                                        bool first_preparation);
 
+    /// \brief Split a block with new non-inert transitions as needed
+    /// \details The function splits refine_block by stabilising for all
+    /// bunches in which it contains transitions.
+    ///
+    /// When this function starts, it assumes that the states with a new
+    /// non-inert transition in refine_block are marked.  It is an error if it
+    /// does not contain any marked states.
+    ///
+    /// The function first calls prepare_for_postprocessing() for refine_block.
+    /// Then it walks through all the bunches that can be reached from the
+    /// subblock that contains new bottom states to separate it into smaller,
+    /// stable subblocks.
+    /// \param refine_block   block containing states with new non-inert
+    ///                       transitions that need to be stabilised
+    /// \param last_splitter  splitter of the last separation before, i. e. the
+    ///                       splitter that made these transitions non-inert
+    ///                       (refine_block should already be stable w. r. t.
+    ///                       last_splitter).
+    /// \returns the block containing the old bottom states (and every state in
+    ///          refine_block that cannot reach any new non-inert transition)
     bisim_dnj::block_t* postprocess_new_noninert(
                             bisim_dnj::block_t* refine_block,
                             bisim_dnj::block_bunch_slice_iter_t last_splitter);
@@ -1658,7 +1668,6 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                                 } action_label_greater;
 
                                                                                 /// \brief print a transition identification for debugging
-                                                                                /// \details This function is only available if compiled in Debug mode.
                                                                                 template <class LTS_TYPE>
                                                                                 inline std::string pred_entry::debug_id(
                                                                                                       const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
