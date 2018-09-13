@@ -284,12 +284,12 @@ void MainWindow::actionOpenProject(const QString& inputProjectFilePath)
 
 void MainWindow::actionSaveProject()
 {
-  QString projectName = fileSystem->saveProject();
+  fileSystem->saveProject();
 }
 
 void MainWindow::actionSaveProjectAs()
 {
-  QString projectName = fileSystem->saveProjectAs();
+  fileSystem->saveProjectAs();
 }
 
 void MainWindow::actionAddPropertyResult()
