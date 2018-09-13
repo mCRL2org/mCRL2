@@ -46,6 +46,12 @@ class MainWindow : public QMainWindow
   void setDocksToDefault();
 
   /**
+   * @brief onNewProjectOpened Changes the user interface wheneever a new
+   *   project has been opened
+   */
+  void onNewProjectOpened();
+
+  /**
    * @brief actionNewProject Allows the user to create a new project
    * @param askToSave Whether the user should be asked to save before creating a
    *   new project if the specification has been modified

@@ -43,6 +43,10 @@ MainWindow::MainWindow(const QString& inputProjectFilePath, QWidget* parent)
   connect(addPropertyDialog, SIGNAL(rejected()), fileSystem,
           SLOT(deleteUnlistedPropertyFiles()));
 
+  /* change the UI whenever a new project has opened */
+  connect(fileSystem, SIGNAL(newProjectOpened()), this,
+          SLOT(onNewProjectOpened()));
+
   /* make saving a project only enabled whenever there are changes */
   saveProjectAction->setEnabled(false);
   connect(specificationEditor, SIGNAL(modificationChanged(bool)),
@@ -248,60 +252,44 @@ void MainWindow::setupDocks()
                       SLOT(setDocksToDefault()));
 }
 
+void MainWindow::onNewProjectOpened()
+{
+  /* change the title */
+  setWindowTitle(QString("mCRL2 IDE - ").append(fileSystem->getProjectName()));
+
+  /* add the properties to the dock */
+  propertiesDock->setToNoProperties();
+  for (Property property : fileSystem->getProperties())
+  {
+    propertiesDock->addProperty(property);
+  }
+}
+
 void MainWindow::actionNewProject(bool askToSave)
 {
-  QString projectName = fileSystem->newProject(askToSave);
-  /* if successful, change the title and empty the properties dock */
-  if (!projectName.isEmpty())
-  {
-    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-    propertiesDock->setToNoProperties();
-  }
+  fileSystem->newProject(askToSave);
 }
 
 void MainWindow::actionOpenProject(const QString& inputProjectFilePath)
 {
-  QString projectName = "";
-  std::list<Property> properties = {};
   if (inputProjectFilePath.isEmpty())
   {
-    fileSystem->openProject(&projectName, &properties);
+    fileSystem->openProject();
   }
   else
   {
-    fileSystem->openProjectFromFolder(inputProjectFilePath, &projectName,
-                                      &properties);
-  }
-
-  /* if successful, put the properties in the properties dock and set the window
-   *   title */
-  if (!(projectName.isEmpty()))
-  {
-    propertiesDock->setToNoProperties();
-    for (Property property : properties)
-    {
-      propertiesDock->addProperty(property);
-    }
-    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
+    fileSystem->openProjectFromFolder(inputProjectFilePath);
   }
 }
 
 void MainWindow::actionSaveProject()
 {
   QString projectName = fileSystem->saveProject();
-  if (!projectName.isEmpty())
-  {
-    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-  }
 }
 
 void MainWindow::actionSaveProjectAs()
 {
   QString projectName = fileSystem->saveProjectAs();
-  if (!projectName.isEmpty())
-  {
-    setWindowTitle(QString("mCRL2 IDE - ").append(projectName));
-  }
 }
 
 void MainWindow::actionAddPropertyResult()
@@ -538,15 +526,15 @@ void MainWindow::closeEvent(QCloseEvent* event)
     switch (result)
     {
     case QMessageBox::Yes:
-      if (fileSystem->saveProject().isEmpty())
-      {
-        event->ignore();
-        return;
-      }
-      else
+      if (fileSystem->saveProject())
       {
         event->accept();
         break;
+      }
+      else
+      {
+        event->ignore();
+        return;
       }
     case QMessageBox::No:
       event->accept();

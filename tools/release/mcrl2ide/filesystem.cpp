@@ -125,6 +125,23 @@ QString FileSystem::parentFolderPath(const QString& folderPath)
   return folder.path();
 }
 
+QString FileSystem::getProjectName()
+{
+  if (projectOpened())
+  {
+    return projectName;
+  }
+  else
+  {
+    return "";
+  }
+}
+
+std::list<Property> FileSystem::getProperties()
+{
+  return properties;
+}
+
 bool FileSystem::projectOpened()
 {
   return projectOpen;
@@ -281,8 +298,9 @@ void FileSystem::createProjectFile()
   projectFile.close();
 }
 
-QString FileSystem::newProject(bool askToSave, bool forNewProject)
+bool FileSystem::newProject(bool askToSave, bool forNewProject)
 {
+  bool success = false;
   QString error = "";
   QString context = forNewProject ? "New Project" : "Save Project As";
 
@@ -336,6 +354,8 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
       }
 
       projectOpen = true;
+      emit newProjectOpened();
+      success = true;
 
       /* if we are not saving as, create an empty specification file by saving
        *   the project */
@@ -352,18 +372,14 @@ QString FileSystem::newProject(bool askToSave, bool forNewProject)
   }
   newProjectDialog->deleteLater();
 
-  if (error.isEmpty())
-  {
-    return projectName;
-  }
-  else
+  if (!error.isEmpty())
   {
     /* if there was an error, tell the user */
     QMessageBox msgBox(QMessageBox::Information, context, error,
                        QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
     msgBox.exec();
-    return "";
   }
+  return success;
 }
 
 Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
@@ -490,9 +506,7 @@ bool FileSystem::deleteProperty(const Property& oldProperty)
   return deleteIt;
 }
 
-void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath,
-                                       QString* newProjectName,
-                                       std::list<Property>* newProperties)
+void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
 {
   QString error = "";
   QDir projectFolder(newProjectFolderPath);
@@ -585,20 +599,16 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath,
             }
           }
           delete dirIterator;
+
+          projectOpen = true;
+          emit newProjectOpened();
         }
       }
     }
   }
 
-  /* if successful, set variables to the opened project, else tell the user */
-  if (error.isEmpty())
-  {
-    projectOpen = true;
-    this->properties = properties;
-    *newProjectName = projectName;
-    *newProperties = properties;
-  }
-  else
+  /* if unsuccessful, tell the user */
+  if (!error.isEmpty())
   {
     QMessageBox msgBox(QMessageBox::Information, "Open Project", error,
                        QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
@@ -606,20 +616,19 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath,
   }
 }
 
-void FileSystem::openProject(QString* newProjectName,
-                             std::list<Property>* newProperties)
+void FileSystem::openProject()
 {
   /* ask the user for a project folder */
   QFileDialog* openProjectDialog = createFileDialog(2);
   if (openProjectDialog->exec() == QDialog::Accepted)
   {
     QString newProjectFolderPath = openProjectDialog->selectedFiles().first();
-    openProjectFromFolder(newProjectFolderPath, newProjectName, newProperties);
+    openProjectFromFolder(newProjectFolderPath);
   }
   openProjectDialog->deleteLater();
 }
 
-QString FileSystem::saveProject(bool forceSave)
+bool FileSystem::saveProject(bool forceSave)
 {
   makeSurePropertiesFolderExists();
 
@@ -648,7 +657,7 @@ QString FileSystem::saveProject(bool forceSave)
     }
 
     specificationEditor->document()->setModified(false);
-    return projectName;
+    return true;
   }
   else
   {
@@ -656,20 +665,19 @@ QString FileSystem::saveProject(bool forceSave)
   }
 }
 
-QString FileSystem::saveProjectAs()
+bool FileSystem::saveProjectAs()
 {
   /* ask the user for a new project name */
   QString projectName = newProject(false, false);
 
-  /* save if successful, else return the empty string */
+  /* save if successful */
   if (projectName.isEmpty())
   {
-    return "";
+    return false;
   }
   else
   {
-    saveProject(true);
-    return projectName;
+    return saveProject(true);
   }
 }
 

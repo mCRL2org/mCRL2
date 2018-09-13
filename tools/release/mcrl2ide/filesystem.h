@@ -152,6 +152,19 @@ class FileSystem : public QObject
   QString parentFolderPath(const QString& folderPath);
 
   /**
+   * @brief getProjectName Gets the name of the current project
+   * @returns The name of the current project or the empty string if no project
+   *   is opened
+   */
+  QString getProjectName();
+
+  /**
+   * @brief getProperties Gets the properties of the current project
+   * @return The properties of the current project
+   */
+  std::list<Property> getProperties();
+
+  /**
    * @brief projectOpened Checks whether a project is opened
    * @return Whether a project is opened
    */
@@ -221,9 +234,9 @@ class FileSystem : public QObject
    *   new project if the specification has been modified
    * @param forNewProject Whether this is done for "New Project" or "Save
    *   Project As"
-   * @return The name of the new project, is "" if failed
+   * @return Whether creating a new project was successfull
    */
-  QString newProject(bool askToSave = true, bool forNewProject = true);
+  bool newProject(bool askToSave = true, bool forNewProject = true);
 
   /**
    * @brief newProperty Adds a new property
@@ -254,37 +267,27 @@ class FileSystem : public QObject
   /**
    * @brief openProjectFromFolder Opens a project from a given project folder
    * @param newProjectFolderPath The path to the project folder
-   * @param newProjectName A pointer to store the projectname of the opened
-   *   project
-   * @param newProperties A pointer to store the properties of the opened
-   *   project
    */
-  void openProjectFromFolder(const QString& newProjectFolderPath,
-                             QString* newProjectName,
-                             std::list<Property>* newProperties);
+  void openProjectFromFolder(const QString& newProjectFolderPath);
 
   /**
    * @brief openProject Opens a project chosen by the user
-   * @param newProjectName A pointer to store the projectname of the opened
-   *   project
-   * @param newProperties A pointer to store the properties of the opened
-   *   project
    */
-  void openProject(QString* newProjectName, std::list<Property>* newProperties);
+  void openProject();
 
   /**
    * @brief saveProject Saves the project to file
    * @param forceSave Whether the files should be saved even if they have not
    *   been modified
-   * @return The new project name, is empty if failed
+   * @return Whether saving was successfull
    */
-  QString saveProject(bool forceSave = false);
+  bool saveProject(bool forceSave = false);
 
   /**
    * @brief saveProjectAs Saves the project to file under a new name
-   * @return The new project name, is empty if failed
+   * @return Whether saving was successfull
    */
-  QString saveProjectAs();
+  bool saveProjectAs();
 
   /**
    * @brief saveProperty Saves a property to file
@@ -312,6 +315,10 @@ class FileSystem : public QObject
   void deleteUnlistedPropertyFiles();
 
   signals:
+  /**
+   * @brief newProjectOpened Is emitted whenever a new project has been openend
+   */
+  void newProjectOpened();
 
   private:
   QString projectFileExtension = ".mcrl2proj";
