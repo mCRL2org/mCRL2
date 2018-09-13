@@ -667,17 +667,14 @@ bool FileSystem::saveProject(bool forceSave)
 
 bool FileSystem::saveProjectAs()
 {
-  /* ask the user for a new project name */
-  QString projectName = newProject(false, false);
-
-  /* save if successful */
-  if (projectName.isEmpty())
+  /* create a new project to save the current as, save if successful */
+  if (newProject(false, false))
   {
-    return false;
+    return saveProject(true);
   }
   else
   {
-    return saveProject(true);
+    return false;
   }
 }
 
