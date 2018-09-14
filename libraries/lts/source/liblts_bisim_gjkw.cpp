@@ -78,7 +78,7 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
     #ifndef NDEBUG
         assert(splitpoint < end());
         assert(begin() < splitpoint);
-        unsigned char max_counter = check_complexity::log_n -
+        unsigned const max_counter = check_complexity::log_n -
                   check_complexity::ilog2((state_type) (splitpoint - begin()));
         assert((state_type) (splitpoint - begin()) <= size()/2);
     #endif
@@ -95,7 +95,7 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
         {
             --pos2;
             mCRL2complexity(*pos2, add_work(check_complexity::
-                 Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29, max_counter));
+               Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29, max_counter), );
             *pos1 = *pos2;
             (*pos1)->pos = pos1;
             ++pos1;
@@ -125,7 +125,7 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
     // NewB->set_inert_end(?);
     assert(NewB->to_constln.empty());
     mCRL2complexity(NewB, add_work(check_complexity::
-              Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29, max_counter));
+            Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29, max_counter), );
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
         // mCRL2complexity(*s_iter, ...) -- optimized to the above call.
@@ -168,7 +168,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
     #ifndef NDEBUG
         assert(begin() < splitpoint);
         assert(splitpoint < end());
-        unsigned char max_counter = check_complexity::log_n -
+        unsigned const max_counter = check_complexity::log_n -
                     check_complexity::ilog2((state_type) (end() - splitpoint));
         assert((state_type) (end() - splitpoint) <= size() / 2);
     #endif
@@ -184,7 +184,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
         for (;;)
         {
             mCRL2complexity(*pos1, add_work(check_complexity::
-                 Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29, max_counter));
+               Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29, max_counter), );
             *pos1 = *--pos2;
             (*pos1)->pos = pos1;
             ++pos1;
@@ -213,7 +213,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
     // NewB->set_inert_end(?);
     assert(NewB->to_constln.empty());
     mCRL2complexity(NewB, add_work(check_complexity::
-              Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29, max_counter));
+            Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29, max_counter), );
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
         // mCRL2complexity(*s_iter, ...) -- optimized to the above call.
@@ -470,8 +470,8 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
             // of them; however, we still have to assign this work to the
             // inert transitions.
             mCRL2complexity(slice, add_work(check_complexity::
-                Register_that_inert_transitions_from_s_go_to_NewC_B_to_C_2_17,
-                check_complexity::log_n-check_complexity::ilog2(SpB->size())));
+              Register_that_inert_transitions_from_s_go_to_NewC_B_to_C_2_17,
+              check_complexity::log_n-check_complexity::ilog2(SpB->size())), );
         #endif
     }
     else
@@ -484,8 +484,8 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
         #ifndef NDEBUG
             new_slice->work_counter = slice->work_counter;
             mCRL2complexity(new_slice, add_work(check_complexity::
-                Register_that_inert_transitions_from_s_go_to_NewC_B_to_C_2_17,
-                check_complexity::log_n-check_complexity::ilog2(SpB->size())));
+              Register_that_inert_transitions_from_s_go_to_NewC_B_to_C_2_17,
+              check_complexity::log_n-check_complexity::ilog2(SpB->size())), );
         #endif
     }
     // set the slice pointers of the smaller part to the new slice:
@@ -638,7 +638,7 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s
     {
         // s has both inert and non-inert transitions
         #ifndef NDEBUG
-            unsigned char max_counter = check_complexity::log_n -
+            unsigned const max_counter = check_complexity::log_n -
                                          check_complexity::ilog2(NewC->size());
             assert(*NewC < *OldC);
         #endif
@@ -657,7 +657,7 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s
             --pos2;
             mCRL2complexity(pos2->B_to_C->pred, add_work(check_complexity::
                    Register_that_inert_transitions_from_s_go_to_NewC_swap_2_17,
-                                                                 max_counter));
+                                                               max_counter), );
             pos1->target = pos2->target;
             pos1->B_to_C = pos2->B_to_C;
             pos1->B_to_C->pred->succ = pos1;
@@ -688,7 +688,7 @@ bool part_trans_t::split_s_inert_out(state_info_ptr s
             mCRL2complexity(succ_iter->B_to_C->pred,
                add_work(bisim_gjkw::check_complexity::
                    Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17,
-                                                                 max_counter));
+                                                               max_counter), );
             assert(succ.end() > succ_iter);
             assert(succ_iter->B_to_C->pred->succ == succ_iter);
             succ_iter->set_slice_begin_or_before_end(split - 1);
@@ -750,10 +750,10 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
     assert(NewB->end() == RfnB->begin());
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
     #ifndef NDEBUG
-        unsigned char max_counter = check_complexity::log_n -
+        unsigned const max_counter = check_complexity::log_n -
                                          check_complexity::ilog2(NewB->size());
         mCRL2complexity(NewB, add_work(check_complexity::
-                    Move_Blue_or_Red_to_a_new_block_states_3_29, max_counter));
+                  Move_Blue_or_Red_to_a_new_block_states_3_29, max_counter), );
     #endif
     // for all outgoing transitions of NewB
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
@@ -763,7 +763,7 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                                (*s_iter)->succ_end() != succ_iter; ++succ_iter)
         {
             mCRL2complexity(succ_iter->B_to_C->pred,add_work(check_complexity::
-                      Move_Blue_or_Red_to_a_new_block_succ_3_29, max_counter));
+                    Move_Blue_or_Red_to_a_new_block_succ_3_29, max_counter), );
             assert(succ.end() > succ_iter);
             assert(succ_iter->B_to_C->pred->succ == succ_iter);
             // Move the transition to a new slice:
@@ -937,10 +937,10 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
     bool old_fromred_invalid = false;
     #ifndef NDEBUG
-        unsigned char max_counter = check_complexity::log_n -
+        unsigned const max_counter = check_complexity::log_n -
                                          check_complexity::ilog2(NewB->size());
         mCRL2complexity(NewB, add_work(check_complexity::
-                    Move_Blue_or_Red_to_a_new_block_states_3_29, max_counter));
+                  Move_Blue_or_Red_to_a_new_block_states_3_29, max_counter), );
     #endif
     // for all outgoing transitions of NewB
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
@@ -950,7 +950,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                                (*s_iter)->succ_end() != succ_iter; ++succ_iter)
         {
             mCRL2complexity(succ_iter->B_to_C->pred,add_work(check_complexity::
-                      Move_Blue_or_Red_to_a_new_block_succ_3_29, max_counter));
+                    Move_Blue_or_Red_to_a_new_block_succ_3_29, max_counter), );
             assert(succ.end() > succ_iter);
             assert(succ_iter->B_to_C->pred->succ == succ_iter);
             // Move the transition to a new slice:
@@ -1153,7 +1153,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
         // assert some properties of constellation C
         assert(C->begin() < C->end());
         assert(C->postprocess_begin == C->postprocess_end);
-        const unsigned char max_C = check_complexity::log_n -
+        unsigned const max_C = check_complexity::log_n -
                                             check_complexity::ilog2(C->size());
         const block_t* B = (*C->begin())->block;
         assert(C->begin() == B->begin());
@@ -1179,9 +1179,9 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
             assert(B->marked_bottom_begin() == B->marked_bottom_end());
             assert(!B->is_refinable());
             assert(B->inert_begin() <= B->inert_end());
-            const unsigned char max_B = check_complexity::log_n -
+            unsigned const max_B = check_complexity::log_n -
                                             check_complexity::ilog2(B->size());
-            mCRL2complexity(B, no_temporary_work(max_C, max_B));
+            mCRL2complexity(B, no_temporary_work(max_C, max_B), );
             // count inert transitions in block
             state_type nr_of_inert_successors=B->inert_end()-B->inert_begin();
             permutation_const_iter_t s_iter;
@@ -1294,7 +1294,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
             {
                 assert(iter->from_block() == B);
                 mCRL2complexity(iter,no_temporary_work(check_complexity::log_n-
-                         check_complexity::ilog2(iter->to_constln()->size())));
+                       check_complexity::ilog2(iter->to_constln()->size())), );
                 if (iter->to_constln() == C)
                 {
                     assert(!to_own_constln);
@@ -1329,7 +1329,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                                   *s->current_constln()[-1].target->constln() <
                                      *s->current_constln()->target->constln());
                 mCRL2complexity(s, no_temporary_work(max_B,
-                                                 s_iter >= B->bottom_begin()));
+                                               s_iter >= B->bottom_begin()), );
                 // count reachable constellations
                 state_type nr_of_reachable_constlns = B->to_constln.size();
 
@@ -1378,7 +1378,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                                          succ_iter->target->constln()->size()),
                                    check_complexity::log_n - check_complexity::
                                        ilog2(succ_iter->target->block->size()),
-                                                 s_iter >= B->bottom_begin()));
+                                               s_iter >= B->bottom_begin()), );
                         // end for
                         }
                         // if we have reached the inert transitions then
@@ -1406,7 +1406,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                                                                     succ_iter);
                                 assert(succ_iter->B_to_C->pred->source == s);
                                 mCRL2complexity(succ_iter->B_to_C->pred,
-                                   no_temporary_work(max_B,max_C,max_B,false));
+                                 no_temporary_work(max_B,max_C,max_B,false), );
                             // end for
                             }
                         // end if
@@ -2015,10 +2015,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         bisim_gjkw::block_t* const SpB = SpC->split_off_small_block();
         bisim_gjkw::constln_t* const NewC = SpB->constln();
         #ifndef NDEBUG
-            unsigned char max_counter = bisim_gjkw::check_complexity::log_n -
+            unsigned const max_counter = bisim_gjkw::check_complexity::log_n -
                               bisim_gjkw::check_complexity::ilog2(SpB->size());
             mCRL2complexity(SpB, add_work(bisim_gjkw::check_complexity::
-                while_C_contains_a_nontrivial_constellation_2_4, max_counter));
+              while_C_contains_a_nontrivial_constellation_2_4, max_counter), );
         #endif
 
         /*-------------------- find predecessors of SpB ---------------------*/
@@ -2035,7 +2035,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         part_tr.split_inert_to_C(SpB);
         // 2.10: for all s in SpB do
         mCRL2complexity(SpB, add_work(bisim_gjkw::check_complexity::
-                                          for_all_s_in_SpB_2_10, max_counter));
+                                        for_all_s_in_SpB_2_10, max_counter), );
             // We have to walk through the states from end to beginning so
             // we can mark state s if necessary.  Marking will move s to a
             // position that has already been visited.
@@ -2051,7 +2051,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             {
                 mCRL2complexity(pred_iter, add_work(bisim_gjkw::
                               check_complexity::for_all_s_prime_in_pred_s_2_11,
-                                                                 max_counter));
+                                                               max_counter), );
                 assert(part_tr.pred_end() > pred_iter);
                 assert(pred_iter->succ->B_to_C->pred == pred_iter);
                 bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
@@ -2211,8 +2211,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 assert((*s_mark_iter)->succ_begin() <= to_NewC);
                 assert(to_NewC->target->constln() == NewC);
                 mCRL2complexity(to_NewC->B_to_C->B_to_C_slice, add_work(
-                             bisim_gjkw::check_complexity::
-                             for_all_refinable_blocks_RfnB_2_20, max_counter));
+                           bisim_gjkw::check_complexity::
+                           for_all_refinable_blocks_RfnB_2_20, max_counter), );
             #endif
 
             if (1 == RfnB->size())
@@ -2327,7 +2327,7 @@ struct refine_shared_t {
         assert(nullptr == BlueB || BlueB->size() <= RedB->size());
         if (nullptr != BlueB)
         {
-            unsigned char max_NewB = nullptr == BlueB ? 0
+            unsigned const max_NewB = nullptr == BlueB ? 0
               : check_complexity::log_n-check_complexity::ilog2(BlueB->size());
             for (permutation_iter_t i = BlueB->begin(); BlueB->end() != i; ++i)
             {
@@ -2335,19 +2335,19 @@ struct refine_shared_t {
                 mCRL2complexity(s, finalise_work(check_complexity::
                                   while_Test_is_not_empty_3_6l_s_is_blue_3_11l,
                                   check_complexity::refine_bottom_state_3_6l,
-                                  max_NewB));
+                                  max_NewB), );
                 mCRL2complexity(s, finalise_work(check_complexity::
                                    while_Blue_contains_unvisited_states_3_15l,
                                    check_complexity::refine_visited_state_3_15,
-                                   max_NewB));
+                                   max_NewB), );
                 for (succ_iter_t succ = s->succ_begin(); s->succ_end() != succ;
                                                                         ++succ)
                 {
                     mCRL2complexity(succ->B_to_C->pred,finalise_work(
-                             check_complexity::
-                             if___s_prime_has_transition_to_SpC_3_23l,
-                             check_complexity::
-                             refine_outgoing_transition_3_6_or_23l, max_NewB));
+                           check_complexity::
+                           if___s_prime_has_transition_to_SpC_3_23l,
+                           check_complexity::
+                           refine_outgoing_transition_3_6_or_23l, max_NewB), );
                 }
                 for (pred_iter_t pred = s->pred_begin(); s->pred_end() != pred;
                                                                         ++pred)
@@ -2355,32 +2355,32 @@ struct refine_shared_t {
                     mCRL2complexity(pred, finalise_work(check_complexity::
                              for_all_s_prime_in_pred_s_setminus_Red_3_18l,
                              check_complexity::refine_incoming_transition_3_18,
-                             max_NewB));
+                             max_NewB), );
                 }
             }
         }
         // cancel work counters for the red states, and also measure the work
         // done in the blue coroutine on states that turned out to be red.
-        unsigned char max_NewC = nullptr == NewC ? 0
+        unsigned const max_NewC = nullptr == NewC ? 0
              : check_complexity::log_n - check_complexity::ilog2(NewC->size());
         for (permutation_iter_t i = RedB->begin(); RedB->end() != i; ++i)
         {
             state_info_ptr s = *i;
             mCRL2complexity(s, cancel_work(check_complexity::
-                                   while_Red_contains_unvisited_states_3_15r));
+                                 while_Red_contains_unvisited_states_3_15r), );
             for (succ_iter_t succ=s->succ_begin(); s->succ_end()!=succ; ++succ)
             {
                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
-                           check_complexity::while_FromRed_is_not_empty_3_6r));
+                         check_complexity::while_FromRed_is_not_empty_3_6r), );
                 // the following counter should only be set for transitions to
                 // the splitter constellation.  For others transitions, no
                 // (temporary) work should have been done.
                 mCRL2complexity(succ->B_to_C->pred, finalise_work(
-                              check_complexity::
-                              while_Test_is_not_empty_3_6l_s_is_red_3_9l,
-                              check_complexity::
-                              refine_outgoing_transition_to_marked_state_3_6l,
-                              succ->target->constln() == NewC ? max_NewC : 0));
+                            check_complexity::
+                            while_Test_is_not_empty_3_6l_s_is_red_3_9l,
+                            check_complexity::
+                            refine_outgoing_transition_to_marked_state_3_6l,
+                            succ->target->constln() == NewC ? max_NewC : 0), );
                 // the following counter only gets 1 during postprocessing, at
                 // a time when state s is already stored as bottom state.
                 mCRL2complexity(succ->B_to_C->pred, finalise_work(
@@ -2388,19 +2388,19 @@ struct refine_shared_t {
                      while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing,
                      check_complexity::
                      refine_outgoing_transition_postprocess_new_bottom_3_6l,
-                     1));
+                     1), );
                 // the following counter only gets 1 before postprocessing, at
                 // the same time as when it is discovered to be a new bottom
                 // state
                 mCRL2complexity(succ->B_to_C->pred, finalise_work(
                     check_complexity::if___s_prime_has_transition_to_SpC_3_23l,
                     check_complexity::
-                    refine_outgoing_transition_from_new_bottom_3_23l, 1));
+                    refine_outgoing_transition_from_new_bottom_3_23l, 1), );
             }
             for (pred_iter_t pred=s->pred_begin(); s->pred_end()!=pred; ++pred)
             {
                 mCRL2complexity(pred, cancel_work(check_complexity::
-                                             for_all_s_prime_in_pred_s_3_18r));
+                                           for_all_s_prime_in_pred_s_3_18r), );
             }
         }
         // check the balance between useful and cancelled work:
@@ -2424,51 +2424,51 @@ struct refine_shared_t {
         {
             state_info_ptr s = *i;
             mCRL2complexity(s, cancel_work(check_complexity::
-                                while_Test_is_not_empty_3_6l_s_is_blue_3_11l));
+                              while_Test_is_not_empty_3_6l_s_is_blue_3_11l), );
             mCRL2complexity(s, cancel_work(check_complexity::
-                                  while_Blue_contains_unvisited_states_3_15l));
+                                while_Blue_contains_unvisited_states_3_15l), );
             for (succ_iter_t succ=s->succ_begin(); s->succ_end()!=succ; ++succ)
             {
                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
-                                 check_complexity::
-                                 if___s_prime_has_transition_to_SpC_3_23l));
+                                  check_complexity::
+                                  if___s_prime_has_transition_to_SpC_3_23l), );
             }
             for (pred_iter_t pred=s->pred_begin(); s->pred_end()!=pred; ++pred)
             {
                 mCRL2complexity(pred, cancel_work(check_complexity::
-                                for_all_s_prime_in_pred_s_setminus_Red_3_18l));
+                              for_all_s_prime_in_pred_s_setminus_Red_3_18l), );
             }
         }
-        unsigned char max_NewB = check_complexity::log_n -
+        unsigned const max_NewB = check_complexity::log_n -
                                          check_complexity::ilog2(RedB->size());
         for (permutation_iter_t i = RedB->begin(); RedB->end() != i; ++i)
         {
             state_info_ptr s = *i;
             mCRL2complexity(s, finalise_work(check_complexity::
-                       while_Red_contains_unvisited_states_3_15r,
-                       check_complexity::refine_visited_state_3_15, max_NewB));
+                     while_Red_contains_unvisited_states_3_15r,
+                     check_complexity::refine_visited_state_3_15, max_NewB), );
             for (succ_iter_t succ=s->succ_begin(); s->succ_end()!=succ; ++succ)
             {
                 mCRL2complexity(succ->B_to_C->pred, finalise_work(
-                             check_complexity::while_FromRed_is_not_empty_3_6r,
-                             check_complexity::
-                             refine_outgoing_transition_3_6_or_23l, max_NewB));
+                           check_complexity::while_FromRed_is_not_empty_3_6r,
+                           check_complexity::
+                           refine_outgoing_transition_3_6_or_23l, max_NewB), );
+                mCRL2complexity(succ->B_to_C->pred, cancel_work(
+                                check_complexity::
+                                while_Test_is_not_empty_3_6l_s_is_red_3_9l), );
+                mCRL2complexity(succ->B_to_C->pred, cancel_work(
+                 check_complexity::
+                 while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing), );
                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
                                   check_complexity::
-                                  while_Test_is_not_empty_3_6l_s_is_red_3_9l));
-                mCRL2complexity(succ->B_to_C->pred, cancel_work(
-                   check_complexity::
-                   while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing));
-                mCRL2complexity(succ->B_to_C->pred, cancel_work(
-                                    check_complexity::
-                                    if___s_prime_has_transition_to_SpC_3_23l));
+                                  if___s_prime_has_transition_to_SpC_3_23l), );
             }
             for (pred_iter_t pred=s->pred_begin(); s->pred_end()!=pred; ++pred)
             {
                 mCRL2complexity(pred, finalise_work(check_complexity::
                              for_all_s_prime_in_pred_s_3_18r,
                              check_complexity::refine_incoming_transition_3_18,
-                             max_NewB));
+                             max_NewB), );
             }
         }
         check_complexity::check_temporary_work();
@@ -2779,7 +2779,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                 ABORT_THIS_COROUTINE();
             }
             mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                             while_Test_is_not_empty_3_6l_s_is_blue_3_11l, 1));
+                           while_Test_is_not_empty_3_6l_s_is_blue_3_11l, 1), );
         // 3.12l: end if
         }
     // 3.13l: end while
@@ -2823,8 +2823,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             if (s_prime->pos >= RfnB->marked_nonbottom_begin())
             {
                 mCRL2complexity(pred_iter, add_work(
-                             bisim_gjkw::check_complexity::
-                             for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1));
+                           bisim_gjkw::check_complexity::
+                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                 continue;
             }
             // 3.19l: if notblue(s_prime) undefined then
@@ -2844,8 +2844,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             if (0 != s_prime->notblue)
             {
                 mCRL2complexity(pred_iter, add_work(
-                             bisim_gjkw::check_complexity::
-                             for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1));
+                           bisim_gjkw::check_complexity::
+                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                 continue;
             }
             // 3.23l: ... && (FromRed == {} ||
@@ -2855,8 +2855,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                 if (s_prime->surely_has_transition_to(SpC))
                 {
                     mCRL2complexity(pred_iter, add_work(
-                             bisim_gjkw::check_complexity::
-                             for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1));
+                           bisim_gjkw::check_complexity::
+                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                     continue;
                 }
                 if (!s_prime->surely_has_no_transition_to(SpC))
@@ -2889,8 +2889,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                     if (begin != end)
                     {
                         mCRL2complexity(pred_iter, add_work(
-                             bisim_gjkw::check_complexity::
-                             for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1));
+                           bisim_gjkw::check_complexity::
+                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
                         continue;
                     }
                 }
@@ -2908,12 +2908,12 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                 // this is implicit in the `continue` statements above.
         // 3.26l: end for
             mCRL2complexity(pred_iter, add_work(bisim_gjkw::check_complexity::
-                             for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1));
+                           for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1), );
         }
         END_COROUTINE_FOR;
     // 3.27l: end while
         mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                               while_Blue_contains_unvisited_states_3_15l, 1));
+                             while_Blue_contains_unvisited_states_3_15l, 1), );
         if (RfnB->unmarked_bottom_end() == visited_end)
         {
             visited_end = RfnB->unmarked_nonbottom_begin();
@@ -2934,10 +2934,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
     part_tr.new_blue_block_created(RfnB, NewB);
 
     #ifndef NDEBUG
-        unsigned char max_counter = bisim_gjkw::check_complexity::log_n -
+        unsigned const max_counter = bisim_gjkw::check_complexity::log_n -
                              bisim_gjkw::check_complexity::ilog2(NewB->size());
         mCRL2complexity(NewB, add_work(bisim_gjkw::check_complexity::
-                                         for_all_s_in_NewB_3_31, max_counter));
+                                       for_all_s_in_NewB_3_31, max_counter), );
     #endif
     // 3.31l: for all s in NewB do
     for (bisim_gjkw::permutation_iter_t s_iter = NewB->begin();
@@ -2950,7 +2950,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                                  s->inert_pred_end() != pred_iter; ++pred_iter)
         {
             mCRL2complexity(pred_iter, add_work(bisim_gjkw::check_complexity::
-                                for_all_s_prime_in_pred_s_3_32l, max_counter));
+                              for_all_s_prime_in_pred_s_3_32l, max_counter), );
             assert(part_tr.pred_end() > pred_iter);
             assert(pred_iter->succ->B_to_C->pred == pred_iter);
             bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
@@ -3078,7 +3078,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
             }
         // 3.13r: end while
             mCRL2complexity(fromred_visited_begin->pred, add_work(bisim_gjkw::
-                        check_complexity::while_FromRed_is_not_empty_3_6r, 1));
+                      check_complexity::while_FromRed_is_not_empty_3_6r, 1), );
         }
         END_COROUTINE_WHILE;
 
@@ -3132,12 +3132,12 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
             }
         // 3.26r: end for
             mCRL2complexity(pred_iter, add_work(bisim_gjkw::check_complexity::
-                                          for_all_s_prime_in_pred_s_3_18r, 1));
+                                        for_all_s_prime_in_pred_s_3_18r, 1), );
         }
         END_COROUTINE_FOR;
     // 3.27r: end while
         mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                                while_Red_contains_unvisited_states_3_15r, 1));
+                              while_Red_contains_unvisited_states_3_15r, 1), );
         if (RfnB->marked_bottom_begin() == visited_begin)
         {
             visited_begin = RfnB->marked_nonbottom_end();
@@ -3159,10 +3159,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
     part_tr.new_red_block_created(RfnB, NewB, postprocessing);
 
     #ifndef NDEBUG
-        unsigned char max_counter = bisim_gjkw::check_complexity::log_n -
+        unsigned const max_counter = bisim_gjkw::check_complexity::log_n -
                              bisim_gjkw::check_complexity::ilog2(NewB->size());
         mCRL2complexity(NewB, add_work(bisim_gjkw::check_complexity::
-                                         for_all_s_in_NewB_3_31, max_counter));
+                                       for_all_s_in_NewB_3_31, max_counter), );
     #endif
     // 3.31r: for all non-bottom s in NewB do
         // we have to run through the states backwards because otherwise, we
@@ -3178,7 +3178,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                                    s->inert_succ_end()!=succ_iter; ++succ_iter)
         {
             mCRL2complexity(succ_iter->B_to_C->pred, add_work(bisim_gjkw::
-               check_complexity::for_all_s_prime_in_succ_s_3_32r,max_counter));
+             check_complexity::for_all_s_prime_in_succ_s_3_32r,max_counter), );
             assert(part_tr.succ_end() > succ_iter);
             assert(succ_iter->B_to_C->pred->succ == succ_iter);
             bisim_gjkw::state_info_ptr const s_prime = succ_iter->target;
@@ -3308,8 +3308,8 @@ Line_4_4:
                 // It didn't work out -- now assign it temporarily to the
                 // B_to_C slice itself.
                 mCRL2complexity(new_slice, add_work(
-                          bisim_gjkw::check_complexity::
-                          for_all_constellations_C_not_in_R_from_RfnB_4_4, 1));
+                        bisim_gjkw::check_complexity::
+                        for_all_constellations_C_not_in_R_from_RfnB_4_4, 1), );
             }
         #endif
         bisim_gjkw::constln_t* const C = new_slice->to_constln();
@@ -3335,7 +3335,7 @@ Line_4_4:
     {
         bisim_gjkw::state_info_ptr const s = *s_iter;
         mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                                      for_all_bottom_states_s_in_RfnB_4_8, 1));
+                                    for_all_bottom_states_s_in_RfnB_4_8, 1), );
         // 4.9: Set the current constellation pointer of s to the first
         //      constellation it can reach
         s->set_current_constln(s->succ_begin());
@@ -3457,7 +3457,7 @@ Line_4_4:
                 else
                 {
                     mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                        for_all_old_bottom_states_s_in_RedB_selfloop_4_15, 1));
+                      for_all_old_bottom_states_s_in_RedB_selfloop_4_15, 1), );
                     assert(B == RedB /* we should test: BlueB is empty */);
                     assert(B->constln() == SpC);
                 }

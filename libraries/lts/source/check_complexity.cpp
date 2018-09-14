@@ -96,7 +96,7 @@ signed_state_type check_complexity::sensible_work = 0;
 /// in the pseudocode in the article [Groote/Jansen/Keiren/Wijs: An O(m log n)
 /// algorithm for computing stuttering equivalence and branching bisimulation.
 /// Accepted for publication in ACM TOCL 2017].
-const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
+const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
 {
     // block counters
     "2.4: while C contains a nontrivial constellation",
@@ -160,13 +160,51 @@ const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
                                                                   "(a priori)",
     "4.12: for all blocks B with transitions to SpC that need postprocessing "
                                                               "(a posteriori)",
-    "4.15: for all old bottom states s in RedB"
+    "4.15: for all old bottom states s in RedB",
+
+    /*---------------- counters for the bisim_dnj algorithm ----------------*/
+
+    // block counters
+    "split_off_block()",
+    "adapt_transitions_for_new_block()",
+    "create_initial_partition()",
+
+    // state counters
+    "refine(), found a blue bottom state",
+    "refine(), find predecessors of a red or blue state",
+    "refine(), while blue coroutine runs, found a blue bottom state",
+    "refine(), while blue coroutine runs, find predecessors of a blue state",
+    "refine(), while red coroutine runs, find predecessors of a red state",
+    "prepare_for_postprocessing()",
+
+    // bunch counters (only for small bunches, i. e. bunches that have been
+    // split off from a large bunch)
+    "refine_partition_until_it_becomes_stable(), find predecessors",
+
+    // block_bunch-slice counters (only for block_bunch-slices that are
+    // part of a small bunch)
+    "refine_partition_until_it_becomes_stable(), stabilize",
+    "second_move_transition_to_new_bunch()",
+
+    // transition counters
+    "move_out_slice_to_new_block()",
+    "refine(), handle a transition from a red or blue state",
+    "refine(), handle a transition to a red or blue state",
+    "refine(), handle a transition in the small splitter",
+    "refine(), while blue coroutine runs, found a red bottom state",
+    "refine(), while blue coroutine runs, handle a transition to a blue state",
+    "refine(), while blue coroutine runs, slow test",
+    "refine(), while red coroutine runs, handle a transition from a red state",
+    "refine(), while red coroutine runs, handle a transition to a red state",
+    "refine(), the slow test found a red state",
+    "postprocess_new_noninert(), sort",
+    "postprocess_new_noninert(), advance current out-slice"
 };
 
 
 #if 0
 /// \brief helper macro for check_complexity::test_work_names()
-#define test_work_name(var,ctr)                                               \
+#define test_work_name(var, ctr)                                              \
         do                                                                    \
         {                                                                     \
             assert((var) == ctr);                                             \
@@ -243,7 +281,7 @@ void check_complexity::test_work_names()
     test_work_name(i, for_all_s_prime_in_pred_s_3_32l);
 
     // temporary transition counters (blue):
-    assert(check_complexity::TRANS_MIN_TEMPORARY == i);
+    assert(check_complexity::TRANS_MIN_TEMP == i);
     test_work_name(i, while_Test_is_not_empty_3_6l_s_is_red_3_9l);
     test_work_name(i,
                     while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing);
@@ -253,7 +291,7 @@ void check_complexity::test_work_names()
     // temporary transition counters (red):
     test_work_name(i, while_FromRed_is_not_empty_3_6r);
     test_work_name(i, for_all_s_prime_in_pred_s_3_18r);
-    assert(check_complexity::TRANS_MAX_TEMPORARY + 1 == i);
+    assert(check_complexity::TRANS_MAX_TEMP + 1 == i);
 
     // new bottom transition counters
     test_work_name(i, refine_outgoing_transition_postprocess_new_bottom_3_6l);
@@ -264,6 +302,58 @@ void check_complexity::test_work_names()
     test_work_name(i,for_all_transitions_that_need_postproc_a_posteriori_4_12);
     test_work_name(i, for_all_old_bottom_states_s_in_RedB_4_15);
     assert(check_complexity::TRANS_MAX + 1 == i);
+
+    /*---------------- counters for the bisim_dnj algorithm ----------------*/
+
+    // block counters
+    assert(check_complexity::BLOCK_dnj_MIN == i);
+    test_work_name(i, split_off_block);
+    test_work_name(i, adapt_transitions_for_new_block);
+    test_work_name(i, create_initial_partition);
+    assert(check_complexity::BLOCK_dnj_MAX + 1 == i);
+
+    // state counters
+    assert(check_complexity::STATE_dnj_MIN == i);
+    test_work_name(i, refine__found_blue_bottom_state);
+    test_work_name(i, refine__find_predecessors_of_red_or_blue_state);
+    assert(check_complexity::STATE_dnj_MIN_TEMP == i);
+    test_work_name(i, refine_blue__found_blue_bottom_state);
+    test_work_name(i, refine_blue__find_predecessors_of_blue_state);
+    test_work_name(i, refine_red__find_predecessors_of_red_state);
+    assert(check_complexity::STATE_dnj_MAX_TEMP + 1 == i);
+    test_work_name(i, prepare_for_postprocessing);
+    assert(check_complexity::STATE_dnj_MAX + 1 == i);
+
+    // bunch counters (only for small bunches, i. e. bunches that have been
+    // split off from a large bunch)
+    assert(check_complexity::BUNCH_dnj_MIN == i);
+    test_work_name(i, refine_partition_until_it_becomes_stable__find_pred);
+    assert(check_complexity::BUNCH_dnj_MAX + 1 == i);
+
+    // block_bunch-slice counters (only for block_bunch-slices that are
+    // part of a small bunch)
+    assert(check_complexity::BLOCK_BUNCH_dnj_MIN == i);
+    test_work_name(i, refine_partition_until_it_becomes_stable__stabilize);
+    test_work_name(i, second_move_transition_to_new_bunch);
+    assert(check_complexity::BLOCK_BUNCH_dnj_MAX + 1 == i);
+
+    // transition counters
+    assert(check_complexity::TRANS_dnj_MIN == i);
+    test_work_name(i, move_out_slice_to_new_block);
+    test_work_name(i, refine__handle_transition_from_red_or_blue_state);
+    test_work_name(i, refine__handle_transition_to_red_or_blue_state);
+    test_work_name(i, refine__handle_transition_in_FromRed);
+    assert(check_complexity::TRANS_dnj_MIN_TEMP == i);
+    test_work_name(i, refine_blue__found_red_bottom_state);
+    test_work_name(i, refine_blue__handle_transition_to_blue_state);
+    test_work_name(i, refine_blue__slow_test);
+    test_work_name(i, refine_red__handle_transition_from_red_state);
+    test_work_name(i, refine_red__handle_transition_to_red_state);
+    assert(check_complexity::TRANS_dnj_MAX_TEMP + 1 == i);
+    test_work_name(i, refine__slow_test_found_red_state);
+    test_work_name(i, postprocess_new_noninert__sort);
+    test_work_name(i, postprocess_new_noninert__advance_current_out_slice);
+    assert(check_complexity::TRANS_dnj_MAX + 1 == i);
 
     exit(EXIT_SUCCESS);
 }

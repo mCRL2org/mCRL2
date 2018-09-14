@@ -200,14 +200,21 @@ that is generally smaller in such a way that the initial state is
 still equivalent to the old initial state. The equivalencies that
 have been implemented are:
 
-  * :cpp:member:`lts_eq_none`:            No reduction
-  * :cpp:member:`lts_eq_bisim`:            Strong bisimulation equivalence 
-  * :cpp:member:`lts_eq_branching_bisim`:  Branching bisimulation equivalence, using the traditional O(mn) algorithm
-  * :cpp:member:`lts_eq_branching_bisim_gw`: Branching bisimulation equivalence, using an almost-O(m log n) algorithm [TACAS 2016]
-  * :cpp:member:`lts_eq_branching_bisim_gjkw`: Branching bisimulation equivalence, using an O(m log n) algorithm [Groote/Jansen/Keiren/Wijs, publication planned in 2017]
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim`: Divergence preserving branching bisimulation equivalence, using the traditional O(mn) algorithm
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_gw`: Divergence preserving branching bisimulation equivalence, using an almost-O(m log n) algorithm [TACAS 2016]
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_gjkw`: Divergence preserving branching bisimulation equivalence, using an O(m log n) algorithm [Groote/Jansen/Keiren/Wijs, publication planned in 2017]
+  * :cpp:member:`lts_eq_none`:             No reduction
+  * :cpp:member:`lts_eq_bisim`:            Strong bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
+  * :cpp:member:`lts_eq_bisim_gv`:         Strong bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
+  * :cpp:member:`lts_eq_bisim_dnj`:        Strong bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
+  * :cpp:member:`lts_eq_bisim_sigref`:     Strong bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
+  * :cpp:member:`lts_eq_branching_bisim`:  Branching bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
+  * :cpp:member:`lts_eq_branching_bisim_gv`: Branching bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
+  * :cpp:member:`lts_eq_branching_bisim_dnj`: Branching bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
+  * :cpp:member:`lts_eq_branching_bisim_sigref`: Branching bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
+  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim`: Divergence-preserving branching bisimulation equivalence, using an O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017]
+  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_gv`: Divergence-preserving branching bisimulation equivalence, using the traditional O(mn) algorithm [Groote/Vaandrager 1990]
+  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_dnj`: Divergence-preserving branching bisimulation equivalence, using an experimental O(m log n) algorithm (Jansen, not yet published)
+  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_sigref`: Divergence-preserving branching bisimulation equivalence, using the signature refinement algorithm [Blom/Orzan 2003]
+  * :cpp:member:`lts_eq_weak_bisim`:       Weak bisimulation equivalence
+  * :cpp:member:`lts_eq_divergence_preserving_weak_bisim`: Divergence-preserving weak bisimulation equivalence
   * :cpp:member:`lts_eq_sim`:              Strong simulation equivalence
   * :cpp:member:`lts_eq_ready_sim`:        Strong ready simulation equivalence     
   * :cpp:member:`lts_eq_trace`:            Strong trace equivalence

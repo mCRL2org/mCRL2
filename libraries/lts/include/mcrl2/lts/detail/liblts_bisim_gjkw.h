@@ -1358,7 +1358,7 @@ class succ_entry
     /// adds work (for time complexity measurement) to every transition in the
     /// slice to which `this_` belongs.
     static void slice_add_work_to_transns(succ_const_iter_t this_,
-             enum check_complexity::counter_type ctr, unsigned char max_value);
+                  enum check_complexity::counter_type ctr, unsigned max_value);
 #endif
 };
 
@@ -1402,17 +1402,17 @@ class B_to_C_entry
     /// adds work (for time complexity measurement) to every transition in the
     /// slice.
     inline void succ_entry::slice_add_work_to_transns(succ_const_iter_t this_,
-              enum check_complexity::counter_type ctr, unsigned char max_value)
+                   enum check_complexity::counter_type ctr, unsigned max_value)
     {
         succ_const_iter_t iter = this_->slice_begin();
         succ_const_iter_t end = slice_end(this_);
         assert(iter < end);
-        mCRL2complexity(iter->B_to_C->pred, add_work(ctr, max_value));
+        mCRL2complexity(iter->B_to_C->pred, add_work(ctr, max_value), );
         while (++iter != end)
         {
             // treat temporary counters specially
             mCRL2complexity(iter->B_to_C->pred,
-                                         add_work_notemporary(ctr, max_value));
+                                       add_work_notemporary(ctr, max_value), );
         }
     }
 #endif
@@ -1512,7 +1512,7 @@ class B_to_C_descriptor
     /// be transferred later (but if there is no later transfer, it should be
     /// tested that the function returns true).
     bool add_work_to_bottom_transns(enum check_complexity::counter_type ctr,
-                                                       unsigned char max_value)
+                                                            unsigned max_value)
     {
         bool added = false;
 
@@ -1522,7 +1522,7 @@ class B_to_C_descriptor
                                      iter->pred->source->block->bottom_begin())
             {
                 // source state of the transition is a bottom state
-                mCRL2complexity(iter->pred, add_work(ctr, max_value));
+                mCRL2complexity(iter->pred, add_work(ctr, max_value), );
                 added = true;
             }
         }

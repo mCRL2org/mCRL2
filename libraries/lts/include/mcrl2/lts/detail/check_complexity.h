@@ -129,7 +129,7 @@ class check_complexity
         // this way, every state is ``visited'' O(log n) times.
         // Invariant: block->constln()->size() << (counter value) <= n
         while_C_contains_a_nontrivial_constellation_2_4 = 0,
-        BLOCK_MIN = while_C_contains_a_nontrivial_constellation_2_4,
+                BLOCK_MIN = while_C_contains_a_nontrivial_constellation_2_4,
 
         // If a loop runs over every state of a block exactly once, we simplify
         // the task of updating the counters by making the corresponding loop
@@ -140,12 +140,12 @@ class check_complexity
         Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29,
         Move_Blue_or_Red_to_a_new_block_states_3_29,
         for_all_s_in_NewB_3_31,
-        BLOCK_MAX = for_all_s_in_NewB_3_31,
+                BLOCK_MAX = for_all_s_in_NewB_3_31,
 
         // state counters: every state is visited O(log n) times
         // Invariant: s->block->size() << (counter value) <= n
         Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29,
-        STATE_MIN = Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29,
+                STATE_MIN = Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29,
 
         // The following counters are used when one refines a block:  the first
         // group is used to store the amount of work that (a posteriori) turns
@@ -156,10 +156,12 @@ class check_complexity
 
         // temporary state counters (blue):
         while_Test_is_not_empty_3_6l_s_is_blue_3_11l,
+                STATE_MIN_TEMP = while_Test_is_not_empty_3_6l_s_is_blue_3_11l,
         while_Blue_contains_unvisited_states_3_15l,
 
         // temporary state counters (red):
         while_Red_contains_unvisited_states_3_15r,
+                STATE_MAX_TEMP = while_Red_contains_unvisited_states_3_15r,
 
         // new bottom state counters: every state is visited once
         // Invariant: if s is a non-bottom state, the counter is 0;
@@ -170,14 +172,14 @@ class check_complexity
             // because it is in the splitter, but there is no transition to the
             // splitter).
         for_all_old_bottom_states_s_in_RedB_selfloop_4_15,
-        STATE_MAX = for_all_old_bottom_states_s_in_RedB_selfloop_4_15,
+                STATE_MAX = for_all_old_bottom_states_s_in_RedB_selfloop_4_15,
 
         // B_to_C_descriptor counters: every transition in the B_to_C-slice is
         // regarded as visited.  In this way, every transition is ``visited''
         // O(log n) times.
         // Invariant: to_constln()->size() << (counter value) <= n
         for_all_refinable_blocks_RfnB_2_20,
-        B_TO_C_MIN = for_all_refinable_blocks_RfnB_2_20,
+                B_TO_C_MIN = for_all_refinable_blocks_RfnB_2_20,
 
         // If a loop runs over every transition in a B_to_C slice exactly once,
         // we simplify the task of updating the counters by making the
@@ -191,13 +193,15 @@ class check_complexity
         // state.  Then, the work is assigned temporarily to the B_to_C slice,
         // until some new bottom state is found to which to assign it.
         for_all_constellations_C_not_in_R_from_RfnB_4_4,
-        B_TO_C_MAX = for_all_constellations_C_not_in_R_from_RfnB_4_4,
+               B_TO_C_MIN_TEMP=for_all_constellations_C_not_in_R_from_RfnB_4_4,
+               B_TO_C_MAX_TEMP=for_all_constellations_C_not_in_R_from_RfnB_4_4,
+               B_TO_C_MAX = for_all_constellations_C_not_in_R_from_RfnB_4_4,
 
         // transition counters: every transition is visited O(log n) times
             // counters for transitions into the splitter NewC
             // Invariant: target->constln()->size() << (counter value) <= n
         for_all_s_prime_in_pred_s_2_11,
-        TRANS_MIN = for_all_s_prime_in_pred_s_2_11,
+                TRANS_MIN = for_all_s_prime_in_pred_s_2_11,
         Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17,
         Register_that_inert_transitions_from_s_go_to_NewC_swap_2_17,
         refine_outgoing_transition_to_marked_state_3_6l,
@@ -226,7 +230,7 @@ class check_complexity
 
         // temporary transition counters (blue):
         while_Test_is_not_empty_3_6l_s_is_red_3_9l,
-        TRANS_MIN_TEMPORARY = while_Test_is_not_empty_3_6l_s_is_red_3_9l,
+                TRANS_MIN_TEMP = while_Test_is_not_empty_3_6l_s_is_red_3_9l,
         while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing,
         for_all_s_prime_in_pred_s_setminus_Red_3_18l,
             // The work in the following counter is assigned to red (new
@@ -236,7 +240,7 @@ class check_complexity
         // temporary transition counters (red):
         while_FromRed_is_not_empty_3_6r,
         for_all_s_prime_in_pred_s_3_18r,
-        TRANS_MAX_TEMPORARY = for_all_s_prime_in_pred_s_3_18r,
+                TRANS_MAX_TEMP = for_all_s_prime_in_pred_s_3_18r,
 
         // new bottom transition counters: every transition is visited once
         // Invariant: If source is a non-bottom state, the counter is 0;
@@ -257,7 +261,78 @@ class check_complexity
         for_all_transitions_that_need_postproc_a_priori_4_12,
         for_all_transitions_that_need_postproc_a_posteriori_4_12,
         for_all_old_bottom_states_s_in_RedB_4_15,
-        TRANS_MAX = for_all_old_bottom_states_s_in_RedB_4_15
+                TRANS_MAX = for_all_old_bottom_states_s_in_RedB_4_15,
+
+        /*-------------- counters for the bisim_dnj algorithm --------------*/
+
+        // block counters
+            // Block counters are used to assign some work to each state in the
+            // block (and possibly, by transitivity, each incoming or outgoing
+            // transition of the block).
+        split_off_block,
+                    BLOCK_dnj_MIN = split_off_block,
+        adapt_transitions_for_new_block,
+        create_initial_partition,
+                    BLOCK_dnj_MAX = create_initial_partition,
+
+        // state counters
+            // If every state of a block is handled by some loop, we
+            // abbreviate the counter to a block counter.
+        refine__found_blue_bottom_state,
+                    STATE_dnj_MIN = refine__found_blue_bottom_state,
+        refine__find_predecessors_of_red_or_blue_state,
+
+        // temporary state counters (blue):
+        refine_blue__found_blue_bottom_state,
+                STATE_dnj_MIN_TEMP = refine_blue__found_blue_bottom_state,
+        refine_blue__find_predecessors_of_blue_state,
+
+        // temporary state counters (red):
+        refine_red__find_predecessors_of_red_state,
+                 STATE_dnj_MAX_TEMP=refine_red__find_predecessors_of_red_state,
+        prepare_for_postprocessing,
+                 STATE_dnj_MAX = prepare_for_postprocessing,
+
+        // bunch counters (only for small bunches, i. e. bunches that have been
+        // split off from a large bunch)
+        refine_partition_until_it_becomes_stable__find_pred,
+           BUNCH_dnj_MIN = refine_partition_until_it_becomes_stable__find_pred,
+           BUNCH_dnj_MAX = refine_partition_until_it_becomes_stable__find_pred,
+
+        // block_bunch-slice counters (only for block_bunch-slices that are
+        // part of a small bunch)
+        refine_partition_until_it_becomes_stable__stabilize,
+                    BLOCK_BUNCH_dnj_MIN =
+                           refine_partition_until_it_becomes_stable__stabilize,
+        second_move_transition_to_new_bunch,
+                    BLOCK_BUNCH_dnj_MAX = second_move_transition_to_new_bunch,
+
+        // transition counters
+            // If every transition of a state is handled by some loop, we
+            // abbreviate the counter to a state counter (and possibly, by
+            // transitivity, to a block counter).
+        move_out_slice_to_new_block, // source block size
+                    TRANS_dnj_MIN = move_out_slice_to_new_block,
+        refine__handle_transition_from_red_or_blue_state, // source block size
+        refine__handle_transition_to_red_or_blue_state, // target block size
+        refine__handle_transition_in_FromRed, // bunch size
+
+        // temporary transition counters (blue):
+        refine_blue__found_red_bottom_state, // bunch size
+                   TRANS_dnj_MIN_TEMP = refine_blue__found_red_bottom_state,
+        refine_blue__handle_transition_to_blue_state, // target block size
+        refine_blue__slow_test, // red: new bottom; blue (inert): block size
+
+        // temporary transition counters (red):
+        refine_red__handle_transition_from_red_state, // bunch size
+        refine_red__handle_transition_to_red_state, // target block size
+            TRANS_dnj_MAX_TEMP = refine_red__handle_transition_to_red_state,
+
+        // transition counters for new bottom states:
+        refine__slow_test_found_red_state,
+        postprocess_new_noninert__sort,
+        postprocess_new_noninert__advance_current_out_slice,
+            TRANS_dnj_MAX = postprocess_new_noninert__advance_current_out_slice
     };
 
     /// \brief special value for temporary work without changing the balance
@@ -297,7 +372,7 @@ class check_complexity
 
   public:
     /// \brief printable names of the counter types (for error messages)
-    static const char *work_names[TRANS_MAX - BLOCK_MIN + 1];
+    static const char *work_names[TRANS_dnj_MAX - BLOCK_MIN + 1];
 
     /// \brief check that not too much superfluous work has been done
     /// \details After having moved all temporary work counters to the normal
@@ -310,7 +385,10 @@ class check_complexity
     }
 
     /// \brief subset of counters (to be associated with a state or transition)
-    template <enum counter_type FirstCounter, enum counter_type LastCounter>
+    template <enum counter_type FirstCounter, enum counter_type LastCounter,
+                  enum counter_type FirstTempCounter =
+                                         (enum counter_type) (LastCounter + 1),
+                  enum counter_type FirstPostprocessCounter = FirstTempCounter>
     class counter_t
     {
       protected:
@@ -327,13 +405,16 @@ class check_complexity
         ///                 the beginning of an error message is printed.
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
-        ///                 the remainder of the error message is needed.
-        bool cancel_work(enum counter_type ctr)
+        ///                 the remainder of the error message as needed.
+        bool cancel_work(enum counter_type const ctr)
         {
-            assert(FirstCounter <= ctr && ctr <= LastCounter);
-            if (ctr < TRANS_MIN_TEMPORARY || ctr > TRANS_MAX_TEMPORARY ||
+            assert(FirstTempCounter <= ctr);
+            assert(ctr < FirstPostprocessCounter);
+            if ((FirstTempCounter != TRANS_MIN_TEMP &&
+                 FirstTempCounter != TRANS_dnj_MIN_TEMP) ||
                           DONT_COUNT_TEMPORARY != counters[ctr - FirstCounter])
             {
+                assert(counters[ctr - FirstCounter] <= 1);
                 sensible_work -= counters[ctr - FirstCounter];
             }
             counters[ctr - FirstCounter] = 0;
@@ -354,14 +435,13 @@ class check_complexity
         ///                 the beginning of an error message is printed.
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
-        ///                 the remainder of the error message is needed.
-        bool finalise_work(enum counter_type from, enum counter_type to,
-                                                       unsigned char max_value)
+        ///                 the remainder of the error message as needed.
+        bool finalise_work(enum counter_type const from,
+                          enum counter_type const to, unsigned const max_value)
         {
             // assert(...) -- see move_work().
-            if (LastCounter < TRANS_MIN_TEMPORARY ||
-                    FirstCounter > TRANS_MAX_TEMPORARY ||
-                    from < TRANS_MIN_TEMPORARY || from > TRANS_MAX_TEMPORARY ||
+            if ((FirstTempCounter != TRANS_MIN_TEMP &&
+                 FirstTempCounter != TRANS_dnj_MIN_TEMP) ||
                          DONT_COUNT_TEMPORARY != counters[from - FirstCounter])
             {
                 sensible_work += counters[from - FirstCounter];
@@ -375,7 +455,14 @@ class check_complexity
 
 
         /// \brief constructor, initializes all counters to 0
-        counter_t()  {  std::memset(counters, '\0', sizeof(counters));  }
+        counter_t()
+        {
+            assert(FirstCounter < FirstTempCounter);
+            assert(FirstTempCounter <= FirstPostprocessCounter);
+            assert(FirstPostprocessCounter <=
+                                        (enum counter_type) (LastCounter + 1));
+            std::memset(counters, '\0', sizeof(counters));
+        }
 
 
         /// \brief register work with some counter
@@ -390,16 +477,17 @@ class check_complexity
         ///                 the beginning of an error message is printed.
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
-        ///                 the remainder of the error message is needed.
-        bool add_work(enum counter_type ctr, unsigned char max_value)
+        ///                 the remainder of the error message as needed.
+        bool add_work(enum counter_type const ctr, unsigned const max_value)
         {
-            assert(FirstCounter <= ctr && ctr <= LastCounter);
-            assert(max_value <= log_n);
+            assert(FirstCounter <= ctr);
+            assert(ctr <= LastCounter);
+            assert(max_value <= (ctr < FirstTempCounter ? log_n : 1));
             if (counters[ctr - FirstCounter] >= max_value)
             {
                 mCRL2log(log::error) << "Error 1: counter \"" <<work_names[ctr]
                                            << "\" exceeded maximum value ("
-                                           << (unsigned) max_value << ") for ";
+                                                      << max_value << ") for ";
                 return false;
             }
             counters[ctr - FirstCounter] = max_value;
@@ -423,25 +511,27 @@ class check_complexity
         ///                 also the beginning of an error message is printed.
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
-        ///                 the remainder of the error message is needed.
-        bool move_work(enum counter_type from, enum counter_type to,
-                                                       unsigned char max_value)
+        ///                 the remainder of the error message as needed.
+        bool move_work(enum counter_type const from,
+                          enum counter_type const to, unsigned const max_value)
         {
-            assert(FirstCounter <= from && from <= LastCounter);
-            assert(FirstCounter <= to && to <= LastCounter);
-            assert(max_value <= log_n);
+            assert(FirstTempCounter <= from);
+            assert(from < FirstPostprocessCounter);
+            assert(FirstCounter <= to);
+            assert(to <= LastCounter);
+            assert(max_value <= (to < FirstTempCounter ? log_n : 1));
             if (0 == counters[from - FirstCounter])  return true;
             if (counters[to - FirstCounter] >= max_value)
             {
                 mCRL2log(log::error) << "Error 2: counter \"" << work_names[to]
                                            << "\" exceeded maximum value ("
-                                           << (unsigned) max_value << ") for ";
+                                                      << max_value << ") for ";
                 return false;
             }
-            if (FirstCounter <= TRANS_MIN_TEMPORARY &&
-                    TRANS_MAX_TEMPORARY <= LastCounter &&
-                    from>= TRANS_MIN_TEMPORARY && from<= TRANS_MAX_TEMPORARY &&
-                    to  >= TRANS_MIN_TEMPORARY && to  <= TRANS_MAX_TEMPORARY &&
+            /*
+            if ((FirstTempCounter == TRANS_MIN_TEMP ||
+                 FirstTempCounter == TRANS_dnj_MIN_TEMP) &&
+                    FirstTempCounter <= to && to < FirstPostprocessCounter &&
                          DONT_COUNT_TEMPORARY == counters[from - FirstCounter])
             {
                 assert(1 == max_value);
@@ -450,13 +540,11 @@ class check_complexity
                 counters[to - FirstCounter] = DONT_COUNT_TEMPORARY;
             }
             else
+            */
             {
                 counters[to - FirstCounter] = max_value;
                 assert(1 == counters[from - FirstCounter]);
             }
-            //mCRL2log(log::debug, "bisim_gjkw")<<". counters["<<work_names[to]
-            //            << "] = " << (trans_type) counters[to - FirstCounter]
-            //                   << " <- counters[" << work_names[from] << "]";
             counters[from - FirstCounter] = 0;
             return true;
         }
@@ -494,8 +582,8 @@ class check_complexity
         ///                 case, also the beginning of an error message is
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
-        ///                 print the remainder of the error message is needed.
-        bool no_temporary_work(unsigned char max_C, unsigned char max_B)
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_C, unsigned const max_B)
         {
             assert(max_C <= max_B);
             for (enum counter_type ctr = BLOCK_MIN;
@@ -505,6 +593,7 @@ class check_complexity
                 assert(counters[ctr - BLOCK_MIN] <= max_C);
                 counters[ctr - BLOCK_MIN] = max_C;
             }
+            assert(max_B <= log_n);
             for (enum counter_type ctr =
                          Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29;
                          ctr <= BLOCK_MAX; ctr = (enum counter_type) (ctr + 1))
@@ -520,7 +609,8 @@ class check_complexity
     /// \details The counters stored with a B_to_C slice are meant to be
     /// assigned to each transition in the slice.  This means that the counter
     /// values need to be copied when the slice is split.
-    class B_to_C_counter_t : public counter_t<B_TO_C_MIN, B_TO_C_MAX>
+    class B_to_C_counter_t : public counter_t<B_TO_C_MIN, B_TO_C_MAX,
+                    B_TO_C_MIN_TEMP, (enum counter_type) (B_TO_C_MAX_TEMP + 1)>
     {
       public:
         /// \brief ensures there is no orphaned temporary work counter
@@ -535,26 +625,28 @@ class check_complexity
         ///                 case, also the beginning of an error message is
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
-        ///                 print the remainder of the error message is needed.
-        bool no_temporary_work(unsigned char max_targetC)
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_targetC)
         {
+            assert(max_targetC <= log_n);
             for (enum counter_type ctr = B_TO_C_MIN;
-                         ctr < for_all_constellations_C_not_in_R_from_RfnB_4_4;
-                                           ctr = (enum counter_type) (ctr + 1))
+                    ctr < B_TO_C_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - B_TO_C_MIN] <= max_targetC);
                 counters[ctr - B_TO_C_MIN] = max_targetC;
             }
-            if (counters[for_all_constellations_C_not_in_R_from_RfnB_4_4 -
-                                                               B_TO_C_MIN] > 0)
+            for (enum counter_type ctr = B_TO_C_MIN_TEMP;
+                   ctr <= B_TO_C_MAX_TEMP; ctr = (enum counter_type) (ctr + 1))
             {
-                mCRL2log(log::error) << "Error 3: counter \"" << work_names[
-                             for_all_constellations_C_not_in_R_from_RfnB_4_4]
+                if (counters[ctr - B_TO_C_MIN] > 0)
+                {
+                    mCRL2log(log::error)
+                             << "Error 3: counter \"" << work_names[ctr]
                              << "\" exceeded maximum value (" << 0 << ") for ";
-                return false;
+                    return false;
+                }
             }
-            assert(for_all_constellations_C_not_in_R_from_RfnB_4_4 ==
-                                                                   B_TO_C_MAX);
+            assert(B_TO_C_MAX_TEMP == B_TO_C_MAX);
             return true;
         }
 
@@ -602,7 +694,8 @@ class check_complexity
                                                                B_TO_C_MIN] = 0;
         }
     };
-    class state_counter_t : public counter_t<STATE_MIN, STATE_MAX>
+    class state_counter_t : public counter_t<STATE_MIN, STATE_MAX,
+                      STATE_MIN_TEMP, (enum counter_type) (STATE_MAX_TEMP + 1)>
     {
       public:
         /// \brief ensures there is no orphaned temporary work counter
@@ -625,22 +718,20 @@ class check_complexity
         ///                 case, also the beginning of an error message is
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
-        ///                 print the remainder of the error message is needed.
-        bool no_temporary_work(unsigned char max_B, bool bottom)
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_B, bool const bottom)
         {
+            assert(max_B <= log_n);
             for (enum counter_type ctr = STATE_MIN;
-                            ctr < while_Test_is_not_empty_3_6l_s_is_blue_3_11l;
-                                           ctr = (enum counter_type) (ctr + 1))
+                     ctr < STATE_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - STATE_MIN] <= max_B);
                 counters[ctr - STATE_MIN] = max_B;
             }
 
             // temporary state counters must be zero:
-            for (enum counter_type ctr =
-                                  while_Test_is_not_empty_3_6l_s_is_blue_3_11l;
-                                     ctr < for_all_bottom_states_s_in_RfnB_4_8;
-                                           ctr = (enum counter_type) (ctr + 1))
+            for (enum counter_type ctr = STATE_MIN_TEMP;
+                    ctr <= STATE_MAX_TEMP; ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - STATE_MIN] > 0)
                 {
@@ -652,23 +743,24 @@ class check_complexity
             }
             // bottom state counters must be 0 for non-bottom states and 1 for
             // bottom states:
-            unsigned char max_bot = bottom ? 1 : 0;
-            for (enum counter_type ctr = for_all_bottom_states_s_in_RfnB_4_8;
+            assert((unsigned) bottom <= 1);
+            for(enum counter_type ctr = (enum counter_type) (STATE_MAX_TEMP+1);
                         ctr <= STATE_MAX ; ctr = (enum counter_type) (ctr + 1))
             {
-                if (counters[ctr - STATE_MIN] > max_bot)
+                if (counters[ctr - STATE_MIN] > (unsigned) bottom)
                 {
                     mCRL2log(log::error) << "Error 5: counter \""
                             << work_names[ctr] << "\" exceeded maximum value ("
-                            << (unsigned) max_bot << ") for ";
+                            << (unsigned) bottom << ") for ";
                     return false;
                 }
-                counters[ctr - STATE_MIN] = max_bot;
+                counters[ctr - STATE_MIN] = (unsigned) bottom;
             }
             return true;
         }
     };
-    class trans_counter_t : public counter_t<TRANS_MIN, TRANS_MAX>
+    class trans_counter_t : public counter_t<TRANS_MIN, TRANS_MAX,
+                      TRANS_MIN_TEMP, (enum counter_type) (TRANS_MAX_TEMP + 1)>
     {
       public:
         /// \brief ensures there is no orphaned temporary work counter
@@ -702,10 +794,10 @@ class check_complexity
         ///                 error message is printed.  The function should be
         ///                 called through the macro `mCRL2complexity()`,
         ///                 because that macro will print the remainder of the
-        ///                 error message is needed.
-        bool no_temporary_work(unsigned char max_sourceB,
-                          unsigned char max_targetC, unsigned char max_targetB,
-                          bool source_bottom)
+        ///                 error message as needed.
+        bool no_temporary_work(unsigned const max_sourceB,
+                          unsigned const max_targetC,
+                          unsigned const max_targetB, bool const source_bottom)
         {
             assert(max_targetC <= max_targetB);
             for (enum counter_type ctr = TRANS_MIN;
@@ -715,6 +807,7 @@ class check_complexity
                 assert(counters[ctr - TRANS_MIN] <= max_targetC);
                 counters[ctr - TRANS_MIN] = max_targetC;
             }
+            assert(max_sourceB <= log_n);
             for (enum counter_type ctr = refine_outgoing_transition_3_6_or_23l;
                                          ctr < refine_incoming_transition_3_18;
                                            ctr = (enum counter_type) (ctr + 1))
@@ -722,15 +815,16 @@ class check_complexity
                 assert(counters[ctr - TRANS_MIN] <= max_sourceB);
                 counters[ctr - TRANS_MIN] = max_sourceB;
             }
+            assert(max_targetB <= log_n);
             for (enum counter_type ctr = refine_incoming_transition_3_18;
-                ctr < TRANS_MIN_TEMPORARY; ctr = (enum counter_type) (ctr + 1))
+                     ctr < TRANS_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - TRANS_MIN] <= max_targetB);
                 counters[ctr - TRANS_MIN] = max_targetB;
             }
             // temporary transition counters must be zero
-            for (enum counter_type ctr = TRANS_MIN_TEMPORARY;
-                ctr <= TRANS_MAX_TEMPORARY; ctr = (enum counter_type)(ctr + 1))
+            for (enum counter_type ctr = TRANS_MIN_TEMP;
+                     ctr <= TRANS_MAX_TEMP; ctr = (enum counter_type)(ctr + 1))
             {
                 if (counters[ctr - TRANS_MIN] > 0)
                 {
@@ -742,19 +836,18 @@ class check_complexity
             }
             // bottom state counters must be 0 for transitions from non-bottom
             // states and 1 for other transitions
-            unsigned char max_bot = source_bottom ? 1 : 0;
-            for (enum counter_type ctr =
-                        (enum counter_type) (TRANS_MAX_TEMPORARY + 1);
+            assert((unsigned) source_bottom <= 1);
+            for(enum counter_type ctr = (enum counter_type) (TRANS_MAX_TEMP+1);
                         ctr <= TRANS_MAX ; ctr = (enum counter_type) (ctr + 1))
             {
-                if (counters[ctr - TRANS_MIN] > max_bot)
+                if (counters[ctr - TRANS_MIN] > (unsigned) source_bottom)
                 {
                     mCRL2log(log::error) << "Error 7: counter \""
                             << work_names[ctr] << "\" exceeded maximum value ("
-                            << (unsigned) max_bot << ") for ";
+                            << (unsigned) source_bottom << ") for ";
                     return false;
                 }
-                counters[ctr - TRANS_MIN] = max_bot;
+                counters[ctr - TRANS_MIN] = (unsigned) source_bottom;
             }
             return true;
         }
@@ -777,11 +870,11 @@ class check_complexity
         ///                 the beginning of an error message is printed.
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
-        ///                 the remainder of the error message is needed.
-        bool add_work_notemporary(enum counter_type ctr,
-                                                       unsigned char max_value)
+        ///                 the remainder of the error message as needed.
+        bool add_work_notemporary(enum counter_type const ctr,
+                                                      unsigned const max_value)
         {
-            if (TRANS_MIN_TEMPORARY > ctr || ctr > TRANS_MAX_TEMPORARY)
+            if (TRANS_MIN_TEMP > ctr || ctr > TRANS_MAX_TEMP)
             {
                 return add_work(ctr, max_value);
             }
@@ -800,6 +893,277 @@ class check_complexity
         }
     };
 
+    /*----------------- class specialisations for bisim_dnj -----------------*/
+
+    class block_dnj_counter_t : public counter_t<BLOCK_dnj_MIN, BLOCK_dnj_MAX,
+                                                      create_initial_partition>
+    {
+      public:
+        /// \brief ensures there is no orphaned temporary work counter
+        /// \details When a refinement has finished, all work registered with
+        /// temporary counters should have been moved to normal counters.  This
+        /// function verifies this property.
+        /// The function additionally ensures that no work counter exceeds its
+        /// maximal allowed value, based on the size of the block or its
+        /// constellation.  (The size of the constellation is the unit used for
+        /// counters related to [blocks in the] splitter constellation;  the
+        /// size of the block is used for other counters.)
+        /// \param max_block ilog2(n^2) - ilog2(size of block)
+        /// \returns false  iff some temporary counter was nonzero.  In that
+        ///                 case, also the beginning of an error message is
+        ///                 printed.  The function should be called through the
+        ///                 macro `mCRL2complexity()`, because that macro will
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_block)
+        {
+            assert((log_n + 1) / 2 <= max_block);
+            assert(max_block <= log_n);
+            for (enum counter_type ctr = BLOCK_dnj_MIN;
+                                ctr < create_initial_partition;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLOCK_dnj_MIN] <= max_block);
+                counters[ctr - BLOCK_dnj_MIN] = max_block;
+            }
+            for (enum counter_type ctr = create_initial_partition;
+                     ctr <= BLOCK_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLOCK_dnj_MIN] <= 1);
+                counters[ctr - BLOCK_dnj_MIN] = 1;
+            }
+            return true;
+        }
+    };
+
+    class state_dnj_counter_t : public counter_t<STATE_dnj_MIN, STATE_dnj_MAX,
+              STATE_dnj_MIN_TEMP, (enum counter_type) (STATE_dnj_MAX_TEMP + 1)>
+    {
+      public:
+        /// \brief ensures there is no orphaned temporary work counter
+        /// \details When a refinement has finished, all work registered with
+        /// temporary counters should have been moved to normal counters.  This
+        /// function verifies this property.
+        /// The function additionally ensures that no work counter exceeds its
+        /// maximal allowed value, based on the size of the block or its
+        /// constellation.  (The size of the constellation is the unit used for
+        /// counters related to [blocks in the] splitter constellation;  the
+        /// size of the block is used for other counters.)
+        /// \param max_block ilog2(n^2) - ilog2(size of block)
+        /// \returns false  iff some temporary counter was nonzero.  In that
+        ///                 case, also the beginning of an error message is
+        ///                 printed.  The function should be called through the
+        ///                 macro `mCRL2complexity()`, because that macro will
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_block, bool const bottom)
+        {
+            assert((log_n + 1) / 2 <= max_block);
+            assert(max_block <= log_n);
+            for (enum counter_type ctr = STATE_dnj_MIN;
+                 ctr < STATE_dnj_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - STATE_dnj_MIN] <= max_block);
+                counters[ctr - STATE_dnj_MIN] = max_block;
+            }
+            for (enum counter_type ctr = STATE_dnj_MIN_TEMP;
+                ctr <= STATE_dnj_MAX_TEMP; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - STATE_dnj_MIN] <= 0);
+            }
+            assert((unsigned) bottom <= 1);
+            for (enum counter_type ctr =
+                    (enum counter_type) (STATE_dnj_MAX_TEMP + 1);
+                     ctr <= STATE_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - STATE_dnj_MIN] <= (unsigned) bottom);
+                counters[ctr - STATE_dnj_MIN] = (unsigned) bottom;
+            }
+            return true;
+        }
+    };
+
+    class bunch_dnj_counter_t : public counter_t<BUNCH_dnj_MIN, BUNCH_dnj_MAX>
+    {
+      public:
+        /// \brief ensures there is no orphaned temporary work counter
+        /// \details When a refinement has finished, all work registered with
+        /// temporary counters should have been moved to normal counters.  This
+        /// function verifies this property.
+        /// The function additionally ensures that no work counter exceeds its
+        /// maximal allowed value, based on the size of the block or its
+        /// constellation.  (The size of the constellation is the unit used for
+        /// counters related to [blocks in the] splitter constellation;  the
+        /// size of the block is used for other counters.)
+        /// \param max_bunch ilog2(n^2) - ilog2(size of bunch)
+        /// \returns false  iff some temporary counter was nonzero.  In that
+        ///                 case, also the beginning of an error message is
+        ///                 printed.  The function should be called through the
+        ///                 macro `mCRL2complexity()`, because that macro will
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_bunch)
+        {
+            assert(max_bunch <= log_n);
+            for (enum counter_type ctr = BUNCH_dnj_MIN;
+                     ctr <= BUNCH_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BUNCH_dnj_MIN] <= max_bunch);
+                counters[ctr - BUNCH_dnj_MIN] = max_bunch;
+            }
+            return true;
+        }
+    };
+
+    class block_bunch_dnj_counter_t : public counter_t<BLOCK_BUNCH_dnj_MIN,
+                                                           BLOCK_BUNCH_dnj_MAX>
+    {
+      public:
+        /// \brief ensures there is no orphaned temporary work counter
+        /// \details When a refinement has finished, all work registered with
+        /// temporary counters should have been moved to normal counters.  This
+        /// function verifies this property.
+        /// The function additionally ensures that no work counter exceeds its
+        /// maximal allowed value, based on the size of the block or its
+        /// constellation.  (The size of the constellation is the unit used for
+        /// counters related to [blocks in the] splitter constellation;  the
+        /// size of the block is used for other counters.)
+        /// \param max_bunch ilog2(n^2) - ilog2(size of bunch)
+        /// \returns false  iff some temporary counter was nonzero.  In that
+        ///                 case, also the beginning of an error message is
+        ///                 printed.  The function should be called through the
+        ///                 macro `mCRL2complexity()`, because that macro will
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_bunch)
+        {
+            assert(max_bunch <= log_n);
+            for (enum counter_type ctr = BLOCK_BUNCH_dnj_MIN;
+               ctr <= BLOCK_BUNCH_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= max_bunch);
+                counters[ctr - BLOCK_BUNCH_dnj_MIN] = max_bunch;
+            }
+            return true;
+        }
+    };
+
+    class trans_dnj_counter_t : public counter_t<TRANS_dnj_MIN, TRANS_dnj_MAX,
+              TRANS_dnj_MIN_TEMP, (enum counter_type) (TRANS_dnj_MAX_TEMP + 1)>
+    {
+      public:
+        /// \brief ensures there is no orphaned temporary work counter
+        /// \details When a refinement has finished, all work registered with
+        /// temporary counters should have been moved to normal counters.  This
+        /// function verifies this property.
+        /// The function additionally ensures that no work counter exceeds its
+        /// maximal allowed value, based on the size of the block or its
+        /// constellation.  (The size of the constellation is the unit used for
+        /// counters related to [blocks in the] splitter constellation;  the
+        /// size of the block is used for other counters.)
+        /// \param max_source_block  ilog2(n) - ilog2(size of source block)
+        /// \param max_target_block  ilog2(n) - ilog2(size of target block)
+        /// \param max_bunch  ilog2(n^2) - ilog2(size of bunch)
+        /// \param bottom true iff the transition source is a bottom state
+        /// \returns false  iff some temporary counter was nonzero.  In that
+        ///                 case, also the beginning of an error message is
+        ///                 printed.  The function should be called through the
+        ///                 macro `mCRL2complexity()`, because that macro will
+        ///                 print the remainder of the error message as needed.
+        bool no_temporary_work(unsigned const max_source_block,
+                unsigned const max_target_block, unsigned const max_bunch,
+                                                             bool const bottom)
+        {
+            assert((log_n + 1) / 2 <= max_source_block);
+            assert(max_source_block <= log_n);
+            for (enum counter_type ctr = TRANS_dnj_MIN;
+                        ctr < refine__handle_transition_to_red_or_blue_state;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - TRANS_dnj_MIN] <= max_source_block);
+                counters[ctr - TRANS_dnj_MIN] = max_source_block;
+            }
+            assert((log_n + 1) / 2 <= max_target_block);
+            assert(max_target_block <= log_n);
+            for (enum counter_type ctr =
+                                refine__handle_transition_to_red_or_blue_state;
+                        ctr < refine__handle_transition_in_FromRed;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - TRANS_dnj_MIN] <= max_target_block);
+                counters[ctr - TRANS_dnj_MIN] = max_target_block;
+            }
+            assert(max_bunch <= log_n);
+            for (enum counter_type ctr = refine__handle_transition_in_FromRed;
+                 ctr < TRANS_dnj_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
+            {
+
+                if (counters[ctr - TRANS_dnj_MIN] > max_bunch)
+                {
+                    mCRL2log(log::error) << "Error 10: counter \""
+                            << work_names[ctr] << "\" exceeded maximum value ("
+                                                      << max_bunch << ") for ";
+                    return false;
+                }
+                counters[ctr - TRANS_dnj_MIN] = max_bunch;
+            }
+            for (enum counter_type ctr = TRANS_dnj_MIN_TEMP;
+                ctr <= TRANS_dnj_MAX_TEMP; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - TRANS_dnj_MIN] <= 0);
+            }
+            assert((unsigned) bottom <= 1);
+            for (enum counter_type ctr =
+                    (enum counter_type) (TRANS_dnj_MAX_TEMP + 1);
+                     ctr <= TRANS_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
+            {
+                if (counters[ctr - TRANS_dnj_MIN] > (unsigned) bottom)
+                {
+                    mCRL2log(log::error) << "Error 11: counter \""
+                            << work_names[ctr] << "\" exceeded maximum value ("
+                                              << (unsigned) bottom << ") for ";
+                    return false;
+                }
+                counters[ctr - TRANS_dnj_MIN] = (unsigned) bottom;
+            }
+            return true;
+        }
+
+        /// \brief register work with some temporary counter without changing
+        /// the balance between sensible and superfluous work
+        /// \details The function increases a temporary work counter.  It is
+        /// also checked that the counter does not get too large.  This variant
+        /// of `add_work()` should be used if one wants to assign a single step
+        /// of work to multiple temporary counters of transitions:  for one of
+        /// them, the normal `add_work()` is called, and for the others
+        /// `add_work_notemporary()`.
+        /// \param ctr        counter with which work is registered
+        /// \param max_value  maximal allowed value of the counter.  The old
+        ///                   value of the counter should be strictly smaller.
+        ///                   (Because it is a temporary counter, only `1` is
+        ///                   sensible.)
+        /// \returns false  iff the counter was too large.  In that case, also
+        ///                 the beginning of an error message is printed.
+        ///                 The function should be called through the macro
+        ///                 `mCRL2complexity()`, because that macro will print
+        ///                 the remainder of the error message as needed.
+        bool add_work_notemporary(enum counter_type const ctr,
+                                                      unsigned const max_value)
+        {
+            if (TRANS_dnj_MIN_TEMP > ctr || ctr > TRANS_dnj_MAX_TEMP)
+            {
+                return add_work(ctr, max_value);
+            }
+
+            assert(1 == max_value);
+            if (0 == counters[ctr - TRANS_dnj_MIN])
+            {
+                counters[ctr - TRANS_dnj_MIN] = DONT_COUNT_TEMPORARY;
+                return true;
+            }
+
+            mCRL2log(log::error) << "Error 9: counter \"" << work_names[ctr]
+                                         << "\" exceeded maximum value ("
+                                         << (trans_type) max_value << ") for ";
+            return false;
+        }
+    };
 
     #if 0
         /// \brief prints a message for each counter, for debugging purposes
@@ -838,14 +1202,19 @@ class check_complexity
     /// If debugging is off, the macro is translated to do nothing.
     /// \param unit   the unit to which work is assigned
     /// \param call   a function call that assigns work to a counter of `unit`
-    #define mCRL2complexity(unit,call)                                        \
+    #define mCRL2complexity(unit, call, ...)                                  \
             do                                                                \
             {                                                                 \
                 if (!((unit)->work_counter. call ))                           \
                 {                                                             \
-                    mCRL2log(log::error) << (unit)->debug_id() << '\n';       \
+                    mCRL2log(log::error)<<(unit)->debug_id(__VA_ARGS__)<<'\n';\
                     exit(EXIT_FAILURE);                                       \
                 }                                                             \
+                /* else                                                       \
+                {                                                             \
+                    mCRL2log(log::debug, "bisim_dnj") << "mCRL2complexity("   \
+                         << (unit)->debug_id(__VA_ARGS__) << ", " #call ")\n";\
+                } */                                                          \
             }                                                                 \
             while (0)
 
@@ -855,7 +1224,7 @@ class check_complexity
 
 #else // ifndef NDEBUG
 
-    #define mCRL2complexity(unit,call) /* ignore unit and call */
+    #define mCRL2complexity(unit, call, ...) /* ignore unit and call */
 
 #endif // ifndef NDEBUG
 
