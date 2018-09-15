@@ -163,7 +163,7 @@ The mCRL2 toolset requires |qt|_ or higher for compilation of the graphical tool
    :class: platform-specific linux
 
    Binary development versions are available in the package manager in most
-   distributions (for instance the ``libqt5-dev`` PPA package in Ubuntu).
+   distributions (for instance the ``qtbase5-dev`` package in Ubuntu).
 
    On Linux it is also required to install OpenGL related development packages.
    The exact package to be installed depends on your distribution. For Ubuntu
