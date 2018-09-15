@@ -9,7 +9,7 @@
 /// \file atermpp/source/aterm_io_binary.cpp
 /// \brief This file allows to read and write terms in compact binary aterm`
 ///        format. This code stems largely from the ATerm library designed by
-///        Paul Klint cs.
+///        Paul Klint cs. 
 
 
 /* includes */
@@ -49,13 +49,13 @@ using detail::writeInt;
 
 using namespace std;
 
-static void aterm_io_init(std::ios&
+static void aterm_io_init(std::ios& 
 #ifdef WIN32 // This suppresses a compiler warning.
 stream
 #endif
 )
 {
-#ifdef WIN32
+#ifdef WIN32 
   std::string name;
   FILE* handle;
   if (stream.rdbuf() == std::cin.rdbuf())
@@ -91,6 +91,68 @@ stream
 #endif
 }
 
+// Count the total number of occurrences of function symbols t where 
+// t is viewed as a shared term. The result is stored in the unordered_map count. 
+// Visited is used to avoid visiting terms too often. 
+static std::unordered_map<function_symbol, std::size_t> count_the_number_of_unique_function_symbols_in_a_term(
+                  const aterm& t)
+{
+  std::stack<aterm> todo_stack({t});
+  std::unordered_set<aterm> visited({t});
+  std::unordered_map<function_symbol, std::size_t> count;
+
+  while (!todo_stack.empty())
+  {
+    const aterm t=todo_stack.top();
+    todo_stack.pop();
+    assert(visited.count(t)>0);
+    
+    if (t.type_is_int())
+    {
+      count[detail::function_adm.AS_INT]++;
+    }
+    else if (t.type_is_list())
+    {
+      const aterm_list& list = down_cast<const aterm_list>(t);
+      if (list==aterm_list())
+      {
+        count[detail::function_adm.AS_EMPTY_LIST]++;
+      }
+      else 
+      { 
+        count[detail::function_adm.AS_LIST]++;
+        if (visited.count(list.tail())==0) 
+        {
+          visited.insert(list.tail());
+          todo_stack.push(list.tail());
+        }
+        if (visited.count(list.front())==0)
+        {
+          visited.insert(list.front());
+          todo_stack.push(list.front());
+        }
+      }
+    }
+    else
+    {
+      const aterm_appl& ta=down_cast<aterm_appl>(t);
+      function_symbol sym = ta.function();
+      count[sym]++;
+      for (std::size_t i=ta.size(); i>0; )
+      {
+        --i;
+        if (visited.count(ta[i])==0)
+        {
+          visited.insert(ta[i]);
+          todo_stack.push(ta[i]);
+        }
+      }
+    }
+  }
+  return count;
+}
+
+
 static const std::size_t BAF_MAGIC = 0xbaf;
 
 // The BAF_VERSION constant is the version number of the ATerms written in BAF
@@ -110,9 +172,7 @@ static const std::size_t BAF_VERSION = 0x0304;
 
 struct top_symbol
 {
-  /// \brief index into the vector with all sym_write_entries
   std::size_t index;
-  /// \brief Identification number of this function symbol in the output
   std::size_t code;
 
   top_symbol(std::size_t index_, std::size_t code_)
@@ -123,44 +183,32 @@ struct top_symbol
 class top_symbols_t
 {
   public:
-    std::size_t code_width;          /* This is the log of the number of symbols both for "symbols" and "index_into_symbols". */
-    std::vector<top_symbol> symbols; /* The set of symbols that occur directly below the top symbol.
+    std::size_t code_width;               /* This is the log of the number of symbols both "symbols" and "index_into_symbols". */
+    std::vector<top_symbol> symbols; /* The set of symbols that occur directly below the top symbol. 
                                         The order of the symbols in this vector is important. */
-    unordered_map<function_symbol, std::size_t> index_into_symbols;
-                                     /* This mapping helps to find the entry in symbols with the given
+    unordered_map<function_symbol, std::size_t> index_into_symbols; 
+                                     /* This mapping helps to find the entry in symbols with the given 
                                         function symbol */
 };
 
 class sym_write_entry
 {
   public:
-    /// \brief The function symbol that this write entry is about
-    const function_symbol id;
-    /// \brief The log2 of the number of unique terms with the function symbol id
+    function_symbol id;
     std::size_t term_width;
-    /* \brief A map from each occurring term with the function symbol id
-     * to the index it should get in the output
-     * \detail Collect the terms with this id as top symbol,
-     * and maintain a consecutive index for each term.
-     * This set can be restricted to those terms that occur
-     * at least twice in the term. This can effectively be
-     * seen by inspecting the reference count of terms.
-     */
-    unordered_map<aterm, std::size_t> write_terms;
-    /**
-     * \brief Maps each argument index to a table with function symbols that may
-     * occur at that index
-     * top_symbols.size() == id.arity()
-     */
-    std::vector<top_symbols_t> top_symbols;
-    /**
-     *
-     */
+    unordered_map<aterm, std::size_t> write_terms; /* Collect the terms with this id as top symbol, 
+                                                 and maintain a consecutive index for each term. 
+                                                 This set can be restricted to those terms that occur
+                                                 at least twice in the term. This can effectively be
+                                                 seen by inspecting the reference count of terms. */
+
+    std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
+
     std::size_t cur_index;
 
-    sym_write_entry(const function_symbol& id_,
+    sym_write_entry(const function_symbol& id_, 
                     std::size_t term_width_)
-     : id(id_),
+     : id(id_), 
        term_width(term_width_),
        cur_index(0)
     {}
@@ -292,6 +340,7 @@ static std::size_t readString(istream& is)
 /**
  * Write a symbol to file.
  */
+
 static void write_symbol(const function_symbol& sym, ostream& os)
 {
   writeString(sym.name(), os);
@@ -302,22 +351,33 @@ static void write_symbol(const function_symbol& sym, ostream& os)
  * Retrieve the sym_write_entry belonging to the top symbol of a term. Could be a special symbol
  * (AS_INT, etc) when the term is not an application.
  */
+
 static sym_write_entry* get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, std::vector<sym_write_entry>& sym_entries)
 {
-  assert(t.type_is_int() || t.type_is_list() || t.type_is_appl());
-  const function_symbol& sym =
-            t.type_is_int()  ? detail::function_adm.AS_INT :
-            t.type_is_list() ? (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST) :
-            down_cast<aterm_appl>(t).function();
+  function_symbol sym;
+
+  if (t.type_is_int())
+  {
+      sym = detail::function_adm.AS_INT;
+  }
+  else if (t.type_is_list())
+  {
+    sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST);
+  }
+  else if (t.type_is_appl())
+  {
+    sym = down_cast<aterm_appl>(t).function();
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Internal error. Illegal term encountered (" + pp(t) + ")");
+  }
   assert(index.count(sym)>0);
   return &sym_entries[index.at(sym)];
 }
 
 
-/**
- * How many bits are needed to represent <val>
- * Basically, this function is equal to log2(val), except that it maps 0 to 0
- */
+/* How many bits are needed to represent <val> */
 static std::size_t bit_width(std::size_t val)
 {
   std::size_t nr_bits = 0;
@@ -337,91 +397,13 @@ static std::size_t bit_width(std::size_t val)
 }
 
 
-// Count the total number of occurrences of function symbols t where
-// t is viewed as a shared term. The result is stored in the unordered_map count.
-// Visited is used to avoid visiting terms more than once.
-static std::unordered_map<function_symbol, std::size_t> count_the_number_of_unique_function_symbols_in_a_term(
-                  const aterm& t)
-{
-  std::stack<aterm> todo_stack({t});
-  std::unordered_set<aterm> visited({t});
-  std::unordered_map<function_symbol, std::size_t> count;
-
-  while (!todo_stack.empty())
-  {
-    const aterm t=todo_stack.top();
-    todo_stack.pop();
-    assert(visited.count(t)>0);
-
-    if (t.type_is_int())
-    {
-      count[detail::function_adm.AS_INT]++;
-    }
-    else if (t.type_is_list())
-    {
-      const aterm_list& list = down_cast<const aterm_list>(t);
-      if (list==aterm_list())
-      {
-        count[detail::function_adm.AS_EMPTY_LIST]++;
-      }
-      else
-      {
-        count[detail::function_adm.AS_LIST]++;
-        if (visited.count(list.tail())==0)
-        {
-          visited.insert(list.tail());
-          todo_stack.push(list.tail());
-        }
-        if (visited.count(list.front())==0)
-        {
-          visited.insert(list.front());
-          todo_stack.push(list.front());
-        }
-      }
-    }
-    else
-    {
-      const aterm_appl& ta = down_cast<const aterm_appl>(t);
-      function_symbol sym = ta.function();
-      count[sym]++;
-      for (std::size_t i=ta.size(); i>0; )
-      {
-        --i;
-        if (visited.count(ta[i])==0)
-        {
-          visited.insert(ta[i]);
-          todo_stack.push(ta[i]);
-        }
-      }
-    }
-  }
-  return count;
-}
-
-/**
- * \brief Get argument number i (zero indexed) from term t.
- */
-static const aterm& subterm(const aterm& t, std::size_t i)
-{
-  if (t.type_is_appl())
-  {
-    assert(i < down_cast<const aterm_appl>(t).function().arity());
-    return atermpp::down_cast<const aterm_appl>(t)[i];
-  }
-  else
-  {
-    assert(t.type_is_list() && t != aterm_list());
-    assert(i < 2);
-    return i == 0 ? atermpp::down_cast<const aterm_list>(t).front()
-                  : atermpp::down_cast<const aterm_list>(t).tail();
-  }
-}
-
 /**
   * Build argument tables given the fact that the
   * terms have been sorted by symbol.
   */
-static void build_arg_tables(const std::unordered_map<function_symbol, std::size_t>& index,
+
+
+static void build_arg_tables(const std::unordered_map<function_symbol, std::size_t>& index, 
                              std::vector<sym_write_entry>& sym_entries)
 {
   for (sym_write_entry& cur_entry: sym_entries)
@@ -437,10 +419,32 @@ static void build_arg_tables(const std::unordered_map<function_symbol, std::size
         std::size_t total_top_symbols = 0;
         for(const pair<aterm, std::size_t>& p: cur_entry.write_terms)
         {
-          const aterm& term = p.first;
-          const aterm& arg = subterm(term, cur_arg);
+          aterm term = p.first;
+          aterm arg;
+          if (term.type_is_list())
+          {
+            aterm_list list(term);
+            assert(list!=aterm_list());
+            assert(arity == 2);
+            if (cur_arg == 0)
+            {
+              arg = list.front();
+            }
+            else
+            {
+              arg = list.tail();
+            }
+          }
+          else if (term.type_is_appl())
+          {
+            arg = down_cast<const aterm_appl>(term)[cur_arg];
+          }
+          else
+          {
+            throw mcrl2::runtime_error("Internal inconsistency found in internal data structure. Illegal term.");
+          }
           sym_write_entry* topsym = get_top_symbol(arg, index, sym_entries);
-
+          
           if (tss.index_into_symbols.count(topsym->id)==0)
           {
             total_top_symbols++;
@@ -462,16 +466,36 @@ static void build_arg_tables(const std::unordered_map<function_symbol, std::size
 static void add_term(sym_write_entry* entry, const aterm& t)
 {
   const std::size_t oldsize=entry->write_terms.size(); /* Do not combine with the next line,
-                                                     as write_terms.size() may be calculated after
+                                                     as write_terms.size() may be calculated after 
                                                      write_terms[t] has been executed */
   entry->write_terms[t]=oldsize;
 }
 
-struct write_todo
+/**
+ * Collect all terms in the appropriate symbol table.
+ */
+
+static const aterm& subterm(const aterm& t, std::size_t i)
 {
-  aterm term;
-  sym_write_entry* entry;
-  std::size_t arg;
+  if (t.type_is_appl())
+  {
+    assert(i < down_cast<const aterm_appl>(t).function().arity());
+    return atermpp::down_cast<const aterm_appl>(t)[i];
+  }
+  else
+  {
+    assert(t.type_is_list() && t != aterm_list());
+    assert(i < 2);
+    return i == 0 ? atermpp::down_cast<const aterm_list>(t).front()
+                  : atermpp::down_cast<const aterm_list>(t).tail();
+  }
+}
+
+struct write_todo
+{ 
+  aterm term; 
+  sym_write_entry* entry; 
+  std::size_t arg; 
 
   write_todo(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, std::vector<sym_write_entry>& sym_entries)
    :  term(t),
@@ -480,35 +504,34 @@ struct write_todo
   {}
 };
 
-/**
- * \brief Collect all terms in the term tables of each symbol
- */
 static void collect_terms(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
   std::unordered_set<aterm> visited;
   stack.emplace(t, index, sym_entries);
 
-  // Traverse the term in a postfix order: for every term, we first process each
-  // of its arguments, before processing the term itself
   do
   {
     write_todo& current=stack.top();
-    if (current.term.type_is_int() || current.arg >= current.entry->id.arity())
+    if (current.term.type_is_int())
     {
-      // Process the term, pop it from the stack
       add_term(current.entry, current.term);
       visited.insert(current.term);
       stack.pop();
     }
-    else
+    else if (current.arg < current.entry->id.arity())
     {
-      // Take the argument according to current.arg
       const aterm t = subterm(current.term, current.arg++);
       if (visited.count(t) == 0)
       {
         stack.emplace(t, index, sym_entries);
       }
+    }
+    else
+    {
+      add_term(current.entry, current.term);
+      visited.insert(current.term);
+      stack.pop();
     }
   }
   while (!stack.empty());
@@ -566,14 +589,15 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
       // If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
       writeBits(aterm_int(current.term).value(), INT_SIZE_IN_BAF, os);
     }
-    else if (current.arg < current.entry->id.arity())
+    else
+    if (current.arg < current.entry->id.arity())
     {
       write_todo item(subterm(current.term, current.arg), index, sym_entries);
 
       const top_symbol& ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
       writeBits(ts.code, current.entry->top_symbols[current.arg].code_width, os);
       sym_write_entry& arg_sym = sym_entries[ts.index];
-      std::size_t arg_trm_idx = arg_sym.write_terms.at(item.term);
+      std::size_t arg_trm_idx = arg_sym.write_terms.at(item.term); 
       writeBits(arg_trm_idx, arg_sym.term_width, os);
 
       ++current.arg;
@@ -582,12 +606,11 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
       {
         stack.push(item);
       }
+      continue;
     }
-    else
-    {
-      ++current.entry->cur_index;
-      stack.pop();
-    }
+
+    ++current.entry->cur_index;
+    stack.pop();
   }
   while (!stack.empty());
   flushBitsToWriter(os);
@@ -600,7 +623,7 @@ static void write_baf(const aterm& t, ostream& os)
   bit_buffer     = '\0';
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-  std::unordered_map<function_symbol, std::size_t> index;
+  std::unordered_map<function_symbol, std::size_t> index; 
   std::unordered_map<function_symbol, std::size_t> count=count_the_number_of_unique_function_symbols_in_a_term(t);
   std::size_t nr_unique_symbols = count.size();
 
@@ -612,8 +635,8 @@ static void write_baf(const aterm& t, ostream& os)
   std::size_t cur=0;
   for(const pair<const function_symbol, std::size_t>& p: count)
   {
-    const function_symbol& sym = p.first;
-    const std::size_t nr_of_occurrences = p.second;
+    const function_symbol sym=p.first;
+    const std::size_t nr_of_occurrences=p.second;
 
     sym_entries.emplace_back(sym, bit_width(nr_of_occurrences));
     index[sym] = cur;
@@ -686,14 +709,14 @@ static void read_all_symbols(istream& is, std::size_t nr_unique_symbols, std::ve
     read_symbols[i].terms = std::vector<aterm>(val);
 
     /*  Allocate space for topsymbol information */
-    read_symbols[i].sym_width = std::vector<std::size_t>(sym.arity());
-    read_symbols[i].topsyms = std::vector< vector <std::size_t> > (sym.arity());
+    read_symbols[i].sym_width = std::vector<std::size_t>(sym.arity()); 
+    read_symbols[i].topsyms = std::vector< vector <std::size_t> > (sym.arity()); 
 
     for (std::size_t j=0; j<sym.arity(); j++)
     {
       val = readInt(is);
       read_symbols[i].sym_width[j] = bit_width(val);
-      read_symbols[i].topsyms[j] = std::vector<std::size_t>(val);
+      read_symbols[i].topsyms[j] = std::vector<std::size_t>(val); 
 
       for (std::size_t k=0; k<read_symbols[i].topsyms[j].size(); k++)
       {
@@ -705,14 +728,14 @@ static void read_all_symbols(istream& is, std::size_t nr_unique_symbols, std::ve
   return;
 }
 
-struct read_todo
-{
-  sym_read_entry* sym;
-  std::vector<aterm> args;
-  aterm* result;
-  aterm* callresult;
+struct read_todo 
+{ 
+  sym_read_entry* sym; 
+  std::vector<aterm> args; 
+  aterm* result; 
+  aterm* callresult; 
 
-  read_todo(sym_read_entry* s, aterm* r)
+  read_todo(sym_read_entry* s, aterm* r) 
    : sym(s), result(r), callresult(nullptr)
   {
     args.reserve(sym->sym.arity());
@@ -724,7 +747,7 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
   aterm result;
   std::size_t value;
   std::stack<read_todo> stack;
-  stack.emplace(sym, &result);
+  stack.emplace(sym, &result); 
 
   do
   {
@@ -748,7 +771,7 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
           current.callresult = &arg_sym->terms[value];
           if (!current.callresult->defined())
           {
-            stack.emplace(arg_sym, current.callresult);
+            stack.emplace(arg_sym, current.callresult); 
           }
           continue;
         }
@@ -809,7 +832,7 @@ aterm read_baf(istream& is)
   std::size_t version = readInt(is);
   if (version != BAF_VERSION)
   {
-    throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) +
+    throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) + 
                                ") of this tool. The input file must be regenerated. ");
   }
 
