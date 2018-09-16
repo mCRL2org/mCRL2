@@ -542,6 +542,33 @@ BOOST_AUTO_TEST_CASE(test_precedence)
   BOOST_CHECK(py == "-(a + b)");
 }
 
+// The test case below tests whether an excessive amount of
+// memory is required when printing terms. 
+BOOST_AUTO_TEST_CASE(printing_terms_takes_a_lot_of_memory)
+{
+   const std::string text(
+    "sort S;\n"
+    "cons d0:S;\n"
+    "     f:S -> S;\n"
+  );
+
+  data::data_specification spec(data::parse_data_specification(text));
+
+  data_expression f = parse_function_symbol("f: S -> S",text);
+  std::cerr << f << "\n";
+  data_expression t = parse_data_expression("d0",spec);
+  std::cerr << t << "\n";
+
+  for(size_t i=0; i<40; ++i)
+  // for(size_t i=0; i<40000000; ++i)
+  {
+    t=application(f,t);
+    std::cerr << t << "\n";
+  }
+  std::cerr << "Print term " << data::pp(t) << "\n";;
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return nullptr;
