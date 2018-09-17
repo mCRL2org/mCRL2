@@ -55,7 +55,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::onOpenIDE()
 {
-  QProcess::startDetached("mcrl2ide");
+  QDir appDir = QDir(QCoreApplication::applicationDirPath());
+  QString path = appDir.absoluteFilePath("mcrl2ide");
+  QProcess::startDetached(path);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
