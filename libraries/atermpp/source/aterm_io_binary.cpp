@@ -305,24 +305,11 @@ static void write_symbol(const function_symbol& sym, ostream& os)
  */
 static sym_write_entry* get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, std::vector<sym_write_entry>& sym_entries)
 {
-  function_symbol sym;
-
-  if (t.type_is_int())
-  {
-      sym = detail::function_adm.AS_INT;
-  }
-  else if (t.type_is_list())
-  {
-    sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST);
-  }
-  else if (t.type_is_appl())
-  {
-    sym = down_cast<aterm_appl>(t).function();
-  }
-  else
-  {
-    throw mcrl2::runtime_error("Internal error. Illegal term encountered (" + pp(t) + ")");
-  }
+  assert(t.type_is_int() || t.type_is_list() || t.type_is_appl());
+  const function_symbol& sym =
+            t.type_is_int()  ? detail::function_adm.AS_INT :
+            t.type_is_list() ? (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST) :
+            down_cast<aterm_appl>(t).function();
   assert(index.count(sym)>0);
   return &sym_entries[index.at(sym)];
 }
@@ -451,32 +438,10 @@ static void build_arg_tables(const std::unordered_map<function_symbol, std::size
         std::size_t total_top_symbols = 0;
         for(const pair<aterm, std::size_t>& p: cur_entry.write_terms)
         {
-          aterm term = p.first;
-          aterm arg;
-          if (term.type_is_list())
-          {
-            aterm_list list(term);
-            assert(list!=aterm_list());
-            assert(arity == 2);
-            if (cur_arg == 0)
-            {
-              arg = list.front();
-            }
-            else
-            {
-              arg = list.tail();
-            }
-          }
-          else if (term.type_is_appl())
-          {
-            arg = down_cast<const aterm_appl>(term)[cur_arg];
-          }
-          else
-          {
-            throw mcrl2::runtime_error("Internal inconsistency found in internal data structure. Illegal term.");
-          }
+          const aterm& term = p.first;
+          const aterm& arg = subterm(term, cur_arg);
           sym_write_entry* topsym = get_top_symbol(arg, index, sym_entries);
-          
+
           if (tss.index_into_symbols.count(topsym->id)==0)
           {
             total_top_symbols++;
@@ -530,25 +495,21 @@ static void collect_terms(const aterm& t, const std::unordered_map<function_symb
   do
   {
     write_todo& current=stack.top();
-    if (current.term.type_is_int())
+    if (current.term.type_is_int() || current.arg >= current.entry->id.arity())
     {
+      // This term is an int or we are finished processing its arguments (arg >= arity)
       add_term(current.entry, current.term);
       visited.insert(current.term);
       stack.pop();
     }
-    else if (current.arg < current.entry->id.arity())
+    else
     {
-      const aterm t = subterm(current.term, current.arg++);
+      // Take the argument according to current.arg and increase the counter
+      const aterm& t = subterm(current.term, current.arg++);
       if (visited.count(t) == 0)
       {
         stack.emplace(t, index, sym_entries);
       }
-    }
-    else
-    {
-      add_term(current.entry, current.term);
-      visited.insert(current.term);
-      stack.pop();
     }
   }
   while (!stack.empty());
@@ -651,8 +612,8 @@ static void write_baf(const aterm& t, ostream& os)
   std::size_t cur=0;
   for(const pair<const function_symbol, std::size_t>& p: count)
   {
-    const function_symbol sym=p.first;
-    const std::size_t nr_of_occurrences=p.second;
+    const function_symbol& sym = p.first;
+    const std::size_t nr_of_occurrences = p.second;
 
     sym_entries.emplace_back(sym, bit_width(nr_of_occurrences));
     index[sym] = cur;
