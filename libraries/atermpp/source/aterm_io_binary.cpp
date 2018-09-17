@@ -300,10 +300,11 @@ static void write_symbol(const function_symbol& sym, ostream& os)
 }
 
 /**
- * Retrieve the sym_write_entry belonging to the top symbol of a term. Could be a special symbol
- * (AS_INT, etc) when the term is not an application.
+ * \brief Retrieve the index into the sym_write_entry table belonging to the top symbol
+ * of a term. Could be a special symbol (AS_INT, etc) when the term is not an application.
+ * \detail sym_entries[result].id == t.function()
  */
-static sym_write_entry* get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, std::vector<sym_write_entry>& sym_entries)
+static std::size_t get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index)
 {
   assert(t.type_is_int() || t.type_is_list() || t.type_is_appl());
   const function_symbol& sym =
@@ -311,7 +312,7 @@ static sym_write_entry* get_top_symbol(const aterm& t, const std::unordered_map<
             t.type_is_list() ? (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST) :
             down_cast<aterm_appl>(t).function();
   assert(index.count(sym)>0);
-  return &sym_entries[index.at(sym)];
+  return index.at(sym);
 }
 
 
@@ -440,14 +441,15 @@ static void build_arg_tables(const std::unordered_map<function_symbol, std::size
         {
           const aterm& term = p.first;
           const aterm& arg = subterm(term, cur_arg);
-          sym_write_entry* topsym = get_top_symbol(arg, index, sym_entries);
+          std::size_t top_symbol_index = get_top_symbol(arg, index);
+          const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
 
-          if (tss.index_into_symbols.count(topsym->id)==0)
+          if (tss.index_into_symbols.count(top_symbol)==0)
           {
             total_top_symbols++;
-            std::size_t index=tss.symbols.size();
-            tss.symbols.emplace_back(topsym-&sym_entries[0], index);
-            tss.index_into_symbols[topsym->id]=index;
+            std::size_t num_symbols = tss.symbols.size();
+            tss.symbols.emplace_back(top_symbol_index, num_symbols);
+            tss.index_into_symbols[top_symbol] = num_symbols;
           }
         }
         tss.code_width=bit_width(total_top_symbols);
@@ -460,23 +462,23 @@ static void build_arg_tables(const std::unordered_map<function_symbol, std::size
 /**
   * Add a term to the termtable of a symbol.
   */
-static void add_term(sym_write_entry* entry, const aterm& t)
+static void add_term(sym_write_entry& entry, const aterm& t)
 {
-  const std::size_t oldsize=entry->write_terms.size(); /* Do not combine with the next line,
+  const std::size_t oldsize = entry.write_terms.size(); /* Do not combine with the next line,
                                                      as write_terms.size() may be calculated after
                                                      write_terms[t] has been executed */
-  entry->write_terms[t]=oldsize;
+  entry.write_terms[t] = oldsize;
 }
 
 struct write_todo
 {
   aterm term;
-  sym_write_entry* entry;
+  sym_write_entry& entry;
   std::size_t arg;
 
   write_todo(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, std::vector<sym_write_entry>& sym_entries)
    :  term(t),
-      entry(get_top_symbol(t, index, sym_entries)),
+      entry(sym_entries[get_top_symbol(t, index)]),
       arg(0)
   {}
 };
@@ -495,7 +497,7 @@ static void collect_terms(const aterm& t, const std::unordered_map<function_symb
   do
   {
     write_todo& current=stack.top();
-    if (current.term.type_is_int() || current.arg >= current.entry->id.arity())
+    if (current.term.type_is_int() || current.arg >= current.entry.id.arity())
     {
       // This term is an int or we are finished processing its arguments (arg >= arity)
       add_term(current.entry, current.term);
@@ -539,20 +541,9 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
   }
 }
 
-
 /**
- * Find a top symbol in a topsymbol table.
+ * \brief Write the term t to os in BAF
  */
-
-static const top_symbol& find_top_symbol(top_symbols_t* syms, const function_symbol& sym)
-{
-  return syms->symbols[syms->index_into_symbols[sym]];
-}
-
-/**
- * Write a term using a writer.
- */
-
 static void write_term(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, ostream& os, std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
@@ -567,13 +558,14 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
       // If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
       writeBits(aterm_int(current.term).value(), INT_SIZE_IN_BAF, os);
     }
-    else if (current.arg < current.entry->id.arity())
+    else if (current.arg < current.entry.id.arity())
     {
       write_todo item(subterm(current.term, current.arg), index, sym_entries);
 
-      const top_symbol& ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
-      writeBits(ts.code, current.entry->top_symbols[current.arg].code_width, os);
-      sym_write_entry& arg_sym = sym_entries[ts.index];
+      const top_symbols_t& symbol_table = current.entry.top_symbols.at(current.arg);
+      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item.entry.id));
+      writeBits(ts.code, symbol_table.code_width, os);
+      const sym_write_entry& arg_sym = sym_entries.at(ts.index);
       std::size_t arg_trm_idx = arg_sym.write_terms.at(item.term);
       writeBits(arg_trm_idx, arg_sym.term_width, os);
 
@@ -586,7 +578,7 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
       continue;
     }
 
-    ++current.entry->cur_index;
+    ++current.entry.cur_index;
     stack.pop();
   }
   while (!stack.empty());
@@ -635,7 +627,7 @@ static void write_baf(const aterm& t, ostream& os)
   write_all_symbols(os, sym_entries);
 
   /* Write the top symbol */
-  writeInt(get_top_symbol(t,index,sym_entries)-&sym_entries[0], os);
+  writeInt(get_top_symbol(t,index), os);
 
   write_term(t, index, os, sym_entries);
 }
