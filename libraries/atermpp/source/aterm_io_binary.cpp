@@ -91,68 +91,6 @@ stream
 #endif
 }
 
-// Count the total number of occurrences of function symbols t where 
-// t is viewed as a shared term. The result is stored in the unordered_map count. 
-// Visited is used to avoid visiting terms too often. 
-static std::unordered_map<function_symbol, std::size_t> count_the_number_of_unique_function_symbols_in_a_term(
-                  const aterm& t)
-{
-  std::stack<aterm> todo_stack({t});
-  std::unordered_set<aterm> visited({t});
-  std::unordered_map<function_symbol, std::size_t> count;
-
-  while (!todo_stack.empty())
-  {
-    const aterm t=todo_stack.top();
-    todo_stack.pop();
-    assert(visited.count(t)>0);
-    
-    if (t.type_is_int())
-    {
-      count[detail::function_adm.AS_INT]++;
-    }
-    else if (t.type_is_list())
-    {
-      const aterm_list& list = down_cast<const aterm_list>(t);
-      if (list==aterm_list())
-      {
-        count[detail::function_adm.AS_EMPTY_LIST]++;
-      }
-      else 
-      { 
-        count[detail::function_adm.AS_LIST]++;
-        if (visited.count(list.tail())==0) 
-        {
-          visited.insert(list.tail());
-          todo_stack.push(list.tail());
-        }
-        if (visited.count(list.front())==0)
-        {
-          visited.insert(list.front());
-          todo_stack.push(list.front());
-        }
-      }
-    }
-    else
-    {
-      const aterm_appl& ta=down_cast<aterm_appl>(t);
-      function_symbol sym = ta.function();
-      count[sym]++;
-      for (std::size_t i=ta.size(); i>0; )
-      {
-        --i;
-        if (visited.count(ta[i])==0)
-        {
-          visited.insert(ta[i]);
-          todo_stack.push(ta[i]);
-        }
-      }
-    }
-  }
-  return count;
-}
-
-
 static const std::size_t BAF_MAGIC = 0xbaf;
 
 // The BAF_VERSION constant is the version number of the ATerms written in BAF
@@ -413,6 +351,86 @@ static std::size_t bit_width(std::size_t val)
 }
 
 
+// Count the total number of occurrences of function symbols t where
+// t is viewed as a shared term. The result is stored in the unordered_map count.
+// Visited is used to avoid visiting terms more than once.
+static std::unordered_map<function_symbol, std::size_t> count_the_number_of_unique_function_symbols_in_a_term(
+                  const aterm& t)
+{
+  std::stack<aterm> todo_stack({t});
+  std::unordered_set<aterm> visited({t});
+  std::unordered_map<function_symbol, std::size_t> count;
+
+  while (!todo_stack.empty())
+  {
+    const aterm t=todo_stack.top();
+    todo_stack.pop();
+    assert(visited.count(t)>0);
+
+    if (t.type_is_int())
+    {
+      count[detail::function_adm.AS_INT]++;
+    }
+    else if (t.type_is_list())
+    {
+      const aterm_list& list = down_cast<const aterm_list>(t);
+      if (list==aterm_list())
+      {
+        count[detail::function_adm.AS_EMPTY_LIST]++;
+      }
+      else
+      {
+        count[detail::function_adm.AS_LIST]++;
+        if (visited.count(list.tail())==0)
+        {
+          visited.insert(list.tail());
+          todo_stack.push(list.tail());
+        }
+        if (visited.count(list.front())==0)
+        {
+          visited.insert(list.front());
+          todo_stack.push(list.front());
+        }
+      }
+    }
+    else
+    {
+      const aterm_appl& ta = down_cast<const aterm_appl>(t);
+      function_symbol sym = ta.function();
+      count[sym]++;
+      for (std::size_t i=ta.size(); i>0; )
+      {
+        --i;
+        if (visited.count(ta[i])==0)
+        {
+          visited.insert(ta[i]);
+          todo_stack.push(ta[i]);
+        }
+      }
+    }
+  }
+  return count;
+}
+
+/**
+ * \brief Get argument number i (zero indexed) from term t.
+ */
+static const aterm& subterm(const aterm& t, std::size_t i)
+{
+  if (t.type_is_appl())
+  {
+    assert(i < down_cast<const aterm_appl>(t).function().arity());
+    return atermpp::down_cast<const aterm_appl>(t)[i];
+  }
+  else
+  {
+    assert(t.type_is_list() && t != aterm_list());
+    assert(i < 2);
+    return i == 0 ? atermpp::down_cast<const aterm_list>(t).front()
+                  : atermpp::down_cast<const aterm_list>(t).tail();
+  }
+}
+
 /**
   * Build argument tables given the fact that the
   * terms have been sorted by symbol.
@@ -483,26 +501,6 @@ static void add_term(sym_write_entry* entry, const aterm& t)
                                                      as write_terms.size() may be calculated after
                                                      write_terms[t] has been executed */
   entry->write_terms[t]=oldsize;
-}
-
-/**
- * Collect all terms in the appropriate symbol table.
- */
-
-static const aterm& subterm(const aterm& t, std::size_t i)
-{
-  if (t.type_is_appl())
-  {
-    assert(i < down_cast<const aterm_appl>(t).function().arity());
-    return atermpp::down_cast<const aterm_appl>(t)[i];
-  }
-  else
-  {
-    assert(t.type_is_list() && t != aterm_list());
-    assert(i < 2);
-    return i == 0 ? atermpp::down_cast<const aterm_list>(t).front()
-                  : atermpp::down_cast<const aterm_list>(t).tail();
-  }
 }
 
 struct write_todo
