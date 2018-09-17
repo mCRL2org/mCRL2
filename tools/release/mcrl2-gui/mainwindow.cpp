@@ -57,7 +57,11 @@ void MainWindow::onOpenIDE()
 {
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
   QString path = appDir.absoluteFilePath("mcrl2ide");
-  QProcess::startDetached(path);
+  if (!QProcess::startDetached(path))
+  {
+    QMessageBox::warning(this, "mCRL2-gui", "Failed to start mrl2ide: could "
+      "not find its executable");
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
