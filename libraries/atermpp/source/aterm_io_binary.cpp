@@ -420,46 +420,6 @@ static const aterm& subterm(const aterm& t, std::size_t i)
 }
 
 /**
-  * Build argument tables given the fact that the
-  * terms have been sorted by symbol.
-  */
-static void build_arg_tables(const std::unordered_map<function_symbol, std::size_t>& index,
-                             std::vector<sym_write_entry>& sym_entries)
-{
-  for (sym_write_entry& cur_entry: sym_entries)
-  {
-    std::size_t arity = cur_entry.id.arity();
-    cur_entry.top_symbols = std::vector<top_symbols_t>(arity);
-
-    if (cur_entry.id!=detail::function_adm.AS_INT)
-    {
-      for (std::size_t cur_arg=0; cur_arg<arity; cur_arg++)
-      {
-        top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
-        std::size_t total_top_symbols = 0;
-        for(const pair<aterm, std::size_t>& p: cur_entry.write_terms)
-        {
-          const aterm& term = p.first;
-          const aterm& arg = subterm(term, cur_arg);
-          std::size_t top_symbol_index = get_top_symbol(arg, index);
-          const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
-
-          if (tss.index_into_symbols.count(top_symbol)==0)
-          {
-            total_top_symbols++;
-            std::size_t num_symbols = tss.symbols.size();
-            tss.symbols.emplace_back(top_symbol_index, num_symbols);
-            tss.index_into_symbols[top_symbol] = num_symbols;
-          }
-        }
-        tss.code_width=bit_width(total_top_symbols);
-      }
-    }
-  }
-}
-
-
-/**
   * Add a term to the termtable of a symbol.
   */
 static void add_term(sym_write_entry& entry, const aterm& t)
@@ -472,7 +432,7 @@ static void add_term(sym_write_entry& entry, const aterm& t)
 
 struct write_todo
 {
-  aterm term;
+  const aterm& term;
   sym_write_entry& entry;
   std::size_t arg;
 
@@ -518,9 +478,47 @@ static void collect_terms(const aterm& t, const std::unordered_map<function_symb
 }
 
 /**
+  * Build argument tables given the fact that the
+  * terms have been sorted by symbol.
+  */
+static void build_arg_tables(const std::unordered_map<function_symbol, std::size_t>& index,
+                             std::vector<sym_write_entry>& sym_entries)
+{
+  for (sym_write_entry& cur_entry: sym_entries)
+  {
+    std::size_t arity = cur_entry.id.arity();
+    cur_entry.top_symbols = std::vector<top_symbols_t>(arity);
+
+    if (cur_entry.id!=detail::function_adm.AS_INT)
+    {
+      for (std::size_t cur_arg=0; cur_arg<arity; cur_arg++)
+      {
+        top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
+        std::size_t total_top_symbols = 0;
+        for(const pair<aterm, std::size_t>& p: cur_entry.write_terms)
+        {
+          const aterm& term = p.first;
+          const aterm& arg = subterm(term, cur_arg);
+          std::size_t top_symbol_index = get_top_symbol(arg, index);
+          const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
+
+          if (tss.index_into_symbols.count(top_symbol)==0)
+          {
+            total_top_symbols++;
+            std::size_t num_symbols = tss.symbols.size();
+            tss.symbols.emplace_back(top_symbol_index, num_symbols);
+            tss.index_into_symbols[top_symbol] = num_symbols;
+          }
+        }
+        tss.code_width=bit_width(total_top_symbols);
+      }
+    }
+  }
+}
+
+/**
  * Write all symbols in a term to file.
  */
-
 static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& sym_entries)
 {
   for(const sym_write_entry& cur_sym: sym_entries)
