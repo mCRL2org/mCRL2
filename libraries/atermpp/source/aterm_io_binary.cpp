@@ -421,12 +421,39 @@ static const aterm& subterm(const aterm& t, std::size_t i)
 }
 
 /**
-  * Add a term to the termtable of a symbol.
-  */
-static void add_term(sym_write_entry& entry, const aterm& t,
-  std::unordered_map<aterm, std::size_t>& term_index_map)
+ * \brief Add a term to the global term table. Update the symbol tables.
+ */
+static void add_term(sym_write_entry& entry, const aterm& term,
+  const std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
+  std::unordered_map<aterm, std::size_t>& term_index_map,
+  std::vector<sym_write_entry>& sym_entries)
 {
-  term_index_map[t] = entry.num_terms++;
+  term_index_map[term] = entry.num_terms++;
+  std::size_t arity = entry.id.arity();
+  // Initialize the vector if necessary
+  if(entry.top_symbols.size() != arity)
+  {
+    entry.top_symbols = std::vector<top_symbols_t>(arity);
+  }
+
+  if (entry.id != detail::function_adm.AS_INT)
+  {
+    // For every argument, check whether the term should be added to the table
+    for (std::size_t cur_arg=0; cur_arg<arity; cur_arg++)
+    {
+      const aterm& arg = subterm(term, cur_arg);
+      top_symbols_t& tss = entry.top_symbols[cur_arg];
+      std::size_t top_symbol_index = get_top_symbol(arg, symbol_index_map);
+      const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
+
+      if (tss.index_into_symbols.count(top_symbol)==0)
+      {
+        std::size_t num_symbols = tss.symbols.size();
+        tss.symbols.emplace_back(top_symbol_index, num_symbols);
+        tss.index_into_symbols[top_symbol] = num_symbols;
+      }
+    }
+  }
 }
 
 struct write_todo
@@ -451,7 +478,6 @@ static void collect_terms(const aterm& t,
   std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
-  std::unordered_set<aterm> visited;
   stack.emplace(t, symbol_index_map, sym_entries);
 
   // Traverse the term in a postfix order: for every term, we first process each
@@ -462,15 +488,14 @@ static void collect_terms(const aterm& t,
     if (current.term.type_is_int() || current.arg >= current.entry.id.arity())
     {
       // This term is an int or we are finished processing its arguments (arg >= arity)
-      add_term(current.entry, current.term, term_index_map);
-      visited.insert(current.term);
+      add_term(current.entry, current.term, symbol_index_map, term_index_map, sym_entries);
       stack.pop();
     }
     else
     {
       // Take the argument according to current.arg and increase the counter
       const aterm& t = subterm(current.term, current.arg++);
-      if (visited.count(t) == 0)
+      if (term_index_map.count(t) == 0)
       {
         stack.emplace(t, symbol_index_map, sym_entries);
       }
@@ -480,42 +505,11 @@ static void collect_terms(const aterm& t,
 }
 
 /**
-  * Build argument tables given the fact that the
-  * terms have been sorted by symbol.
-  */
-static void build_arg_tables(const std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
-  const std::unordered_map<aterm, std::size_t>& term_index_map,
-  std::vector<sym_write_entry>& sym_entries)
+ * \brief Calculate the amount of bits required to store the top symbol for every
+ * argument of every function symbol.
+ */
+static void compute_arg_bits(std::vector<sym_write_entry>& sym_entries)
 {
-  for(const pair<aterm, std::size_t>& p: term_index_map)
-  {
-    const aterm& term = p.first;
-    sym_write_entry& cur_entry = sym_entries.at(get_top_symbol(term, symbol_index_map));
-    std::size_t arity = cur_entry.id.arity();
-    // Initialize the vector if necessary
-    if(cur_entry.top_symbols.size() != arity)
-    {
-      cur_entry.top_symbols = std::vector<top_symbols_t>(arity);
-    }
-
-    if (cur_entry.id != detail::function_adm.AS_INT)
-    {
-      for (std::size_t cur_arg=0; cur_arg<arity; cur_arg++)
-      {
-        const aterm& arg = subterm(term, cur_arg);
-        top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
-        std::size_t top_symbol_index = get_top_symbol(arg, symbol_index_map);
-        const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
-
-        if (tss.index_into_symbols.count(top_symbol)==0)
-        {
-          std::size_t num_symbols = tss.symbols.size();
-          tss.symbols.emplace_back(top_symbol_index, num_symbols);
-          tss.index_into_symbols[top_symbol] = num_symbols;
-        }
-      }
-    }
-  }
   for(sym_write_entry& cur_entry: sym_entries)
   {
     for(std::size_t cur_arg = 0; cur_arg < cur_entry.id.arity(); cur_arg++)
@@ -628,7 +622,7 @@ static void write_baf(const aterm& t, ostream& os)
 
   std::unordered_map<aterm, std::size_t> term_index_map;
   collect_terms(t, symbol_index_map, term_index_map, sym_entries);
-  build_arg_tables(symbol_index_map, term_index_map, sym_entries);
+  compute_arg_bits(sym_entries);
 
   /* write header */
 
