@@ -304,9 +304,7 @@ static void write_symbol(const function_symbol& sym, ostream& os)
 static const function_symbol& get_function_symbol(const aterm& t)
 {
   assert(t.type_is_int() || t.type_is_list() || t.type_is_appl());
-  return t.type_is_int()  ? detail::function_adm.AS_INT :
-         t.type_is_list() ? (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST) :
-         down_cast<aterm_appl>(t).function();
+  return detail::address(t)->function();
 }
 
 /**
