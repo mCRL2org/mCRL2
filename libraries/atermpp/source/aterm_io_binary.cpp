@@ -136,16 +136,14 @@ class sym_write_entry
   public:
     /// \brief The function symbol that this write entry is about
     const function_symbol id;
-    /// \brief The log2 of the number of unique terms with the function symbol id
+    /**
+     * \brief After executing compute_num_bits, this stores the number of bits required
+     * to uniquely identify each occurrence of id.
+     */
     std::size_t term_width;
     /**
-     * \brief A map from each occurring term with the function symbol id
-     * to the index it should get in the output
-     * \detail Collect the terms with this id as top symbol,
-     * and maintain a consecutive index for each term.
-     * This set can be restricted to those terms that occur
-     * at least twice in the term. This can effectively be
-     * seen by inspecting the reference count of terms.
+     * \brief The number of unique occurrences of id, i.e. the number of term that
+     * have id as their function symbol.
      */
     std::size_t num_terms;
     /**
@@ -159,10 +157,9 @@ class sym_write_entry
      */
     std::size_t cur_index;
 
-    sym_write_entry(const function_symbol& id_,
-                    std::size_t term_width_)
+    sym_write_entry(const function_symbol& id_)
      : id(id_),
-       term_width(term_width_),
+       term_width(0),
        num_terms(0),
        cur_index(0)
     {}
@@ -301,17 +298,25 @@ static void write_symbol(const function_symbol& sym, ostream& os)
 }
 
 /**
+ * \brief Get the function symbol from an aterm
+ * \detail This function is necessary only becuase aterm::function() is protected
+ */
+static const function_symbol& get_function_symbol(const aterm& t)
+{
+  assert(t.type_is_int() || t.type_is_list() || t.type_is_appl());
+  return t.type_is_int()  ? detail::function_adm.AS_INT :
+         t.type_is_list() ? (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST) :
+         down_cast<aterm_appl>(t).function();
+}
+
+/**
  * \brief Retrieve the index into the sym_write_entry table belonging to the top symbol
  * of a term. Could be a special symbol (AS_INT, etc) when the term is not an application.
  * \detail sym_entries[result].id == t.function()
  */
-static std::size_t get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index)
+static std::size_t get_fn_symbol_index(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index)
 {
-  assert(t.type_is_int() || t.type_is_list() || t.type_is_appl());
-  const function_symbol& sym =
-            t.type_is_int()  ? detail::function_adm.AS_INT :
-            t.type_is_list() ? (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST) :
-            down_cast<aterm_appl>(t).function();
+  const function_symbol& sym = get_function_symbol(t);
   assert(index.count(sym)>0);
   return index.at(sym);
 }
@@ -337,68 +342,6 @@ static std::size_t bit_width(std::size_t val)
   }
 
   return nr_bits;
-}
-
-
-// Count the total number of occurrences of function symbols t where
-// t is viewed as a shared term. The result is stored in the unordered_map count.
-// Visited is used to avoid visiting terms more than once.
-static std::unordered_map<function_symbol, std::size_t> count_the_number_of_unique_function_symbols_in_a_term(
-                  const aterm& t)
-{
-  std::stack<aterm> todo_stack({t});
-  std::unordered_set<aterm> visited({t});
-  std::unordered_map<function_symbol, std::size_t> count;
-
-  while (!todo_stack.empty())
-  {
-    const aterm t=todo_stack.top();
-    todo_stack.pop();
-    assert(visited.count(t)>0);
-
-    if (t.type_is_int())
-    {
-      count[detail::function_adm.AS_INT]++;
-    }
-    else if (t.type_is_list())
-    {
-      const aterm_list& list = down_cast<const aterm_list>(t);
-      if (list==aterm_list())
-      {
-        count[detail::function_adm.AS_EMPTY_LIST]++;
-      }
-      else
-      {
-        count[detail::function_adm.AS_LIST]++;
-        if (visited.count(list.tail())==0)
-        {
-          visited.insert(list.tail());
-          todo_stack.push(list.tail());
-        }
-        if (visited.count(list.front())==0)
-        {
-          visited.insert(list.front());
-          todo_stack.push(list.front());
-        }
-      }
-    }
-    else
-    {
-      const aterm_appl& ta = down_cast<const aterm_appl>(t);
-      function_symbol sym = ta.function();
-      count[sym]++;
-      for (std::size_t i=ta.size(); i>0; )
-      {
-        --i;
-        if (visited.count(ta[i])==0)
-        {
-          visited.insert(ta[i]);
-          todo_stack.push(ta[i]);
-        }
-      }
-    }
-  }
-  return count;
 }
 
 /**
@@ -443,7 +386,7 @@ static void add_term(sym_write_entry& entry, const aterm& term,
     {
       const aterm& arg = subterm(term, cur_arg);
       top_symbols_t& tss = entry.top_symbols[cur_arg];
-      std::size_t top_symbol_index = get_top_symbol(arg, symbol_index_map);
+      std::size_t top_symbol_index = get_fn_symbol_index(arg, symbol_index_map);
       const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
 
       if (tss.index_into_symbols.count(top_symbol)==0)
@@ -459,36 +402,53 @@ static void add_term(sym_write_entry& entry, const aterm& term,
 struct write_todo
 {
   const aterm& term;
-  sym_write_entry& entry;
   std::size_t arg;
 
-  write_todo(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index, std::vector<sym_write_entry>& sym_entries)
+  write_todo(const aterm& t)
    :  term(t),
-      entry(sym_entries[get_top_symbol(t, index)]),
       arg(0)
   {}
 };
 
 /**
+ * \brief If we see this function symbol for the first time, we initialize data
+ * for it in symbol_index_map and sym_entries.
+ * \return The sym_write_entry belonging to func.
+ */
+static sym_write_entry& initialize_function_symbol(const function_symbol& func,
+  std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
+  std::vector<sym_write_entry>& sym_entries)
+{
+  auto insert_result = symbol_index_map.insert(std::make_pair(func, sym_entries.size()));
+  if(insert_result.second)
+  {
+    // We just found a new function symbol, it has 1 occurrence so far
+    sym_entries.emplace_back(func);
+  }
+  return sym_entries[insert_result.first->second];
+}
+
+/**
  * \brief Collect all terms in the term tables of each symbol
  */
 static void collect_terms(const aterm& t,
-  const std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
+  std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
   std::unordered_map<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
-  stack.emplace(t, symbol_index_map, sym_entries);
+  stack.emplace(t);
 
   // Traverse the term in a postfix order: for every term, we first process each
   // of its arguments, before processing the term itself
   do
   {
-    write_todo& current=stack.top();
-    if (current.term.type_is_int() || current.arg >= current.entry.id.arity())
+    write_todo& current = stack.top();
+    if (current.term.type_is_int() || current.arg >= get_function_symbol(current.term).arity())
     {
       // This term is an int or we are finished processing its arguments (arg >= arity)
-      add_term(current.entry, current.term, symbol_index_map, term_index_map, sym_entries);
+      sym_write_entry& we = initialize_function_symbol(get_function_symbol(current.term), symbol_index_map, sym_entries);
+      add_term(we, current.term, symbol_index_map, term_index_map, sym_entries);
       stack.pop();
     }
     else
@@ -497,7 +457,7 @@ static void collect_terms(const aterm& t,
       const aterm& t = subterm(current.term, current.arg++);
       if (term_index_map.count(t) == 0)
       {
-        stack.emplace(t, symbol_index_map, sym_entries);
+        stack.emplace(t);
       }
     }
   }
@@ -506,9 +466,9 @@ static void collect_terms(const aterm& t,
 
 /**
  * \brief Calculate the amount of bits required to store the top symbol for every
- * argument of every function symbol.
+ * argument of every function symbol and the term for every function symbol.
  */
-static void compute_arg_bits(std::vector<sym_write_entry>& sym_entries)
+static void compute_num_bits(std::vector<sym_write_entry>& sym_entries)
 {
   for(sym_write_entry& cur_entry: sym_entries)
   {
@@ -517,6 +477,7 @@ static void compute_arg_bits(std::vector<sym_write_entry>& sym_entries)
       top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
       tss.code_width = bit_width(tss.symbols.size());
     }
+    cur_entry.term_width = bit_width(cur_entry.num_terms);
   }
 }
 
@@ -552,23 +513,25 @@ static void write_term(const aterm& t, ostream& os,
   std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
-  stack.emplace(t, symbol_index_map, sym_entries);
+  stack.emplace(t);
 
   do
   {
     write_todo& current = stack.top();
+    sym_write_entry& cur_entry = sym_entries[symbol_index_map.at(get_function_symbol(current.term))];
 
     if (current.term.type_is_int())
     {
       // If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
       writeBits(aterm_int(current.term).value(), INT_SIZE_IN_BAF, os);
     }
-    else if (current.arg < current.entry.id.arity())
+    else if (current.arg < get_function_symbol(current.term).arity())
     {
-      write_todo item(subterm(current.term, current.arg), symbol_index_map, sym_entries);
+      write_todo item(subterm(current.term, current.arg));
+      sym_write_entry& item_entry = sym_entries[symbol_index_map.at(get_function_symbol(item.term))];
 
-      const top_symbols_t& symbol_table = current.entry.top_symbols.at(current.arg);
-      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item.entry.id));
+      const top_symbols_t& symbol_table = cur_entry.top_symbols.at(current.arg);
+      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item_entry.id));
       writeBits(ts.code, symbol_table.code_width, os);
       const sym_write_entry& arg_sym = sym_entries.at(ts.index);
       std::size_t arg_trm_idx = term_index_map.at(item.term);
@@ -583,7 +546,7 @@ static void write_term(const aterm& t, ostream& os,
       continue;
     }
 
-    ++current.entry.cur_index;
+    ++cur_entry.cur_index;
     stack.pop();
   }
   while (!stack.empty());
@@ -598,42 +561,21 @@ static void write_baf(const aterm& t, ostream& os)
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
   std::unordered_map<function_symbol, std::size_t> symbol_index_map;
-  std::unordered_map<function_symbol, std::size_t> count=count_the_number_of_unique_function_symbols_in_a_term(t);
-  std::size_t nr_unique_symbols = count.size();
-
-  std::vector<sym_write_entry> sym_entries;
-  sym_entries.reserve(nr_unique_symbols);
-
-  /* Collect all unique symbols in the input term */
-
-  std::size_t cur=0;
-  for(const pair<const function_symbol, std::size_t>& p: count)
-  {
-    const function_symbol& sym = p.first;
-    const std::size_t nr_of_occurrences = p.second;
-
-    sym_entries.emplace_back(sym, bit_width(nr_of_occurrences));
-    symbol_index_map[sym] = cur;
-
-    cur++;
-  }
-
-  assert(cur == nr_unique_symbols);
-
   std::unordered_map<aterm, std::size_t> term_index_map;
+  std::vector<sym_write_entry> sym_entries;
+
   collect_terms(t, symbol_index_map, term_index_map, sym_entries);
-  compute_arg_bits(sym_entries);
+  compute_num_bits(sym_entries);
 
   /* write header */
-
   writeInt(0, os);
   writeInt(BAF_MAGIC, os);
   writeInt(BAF_VERSION, os);
-  writeInt(nr_unique_symbols, os);
+  writeInt(sym_entries.size(), os);
   write_all_symbols(os, sym_entries);
 
   /* Write the top symbol */
-  writeInt(get_top_symbol(t,symbol_index_map), os);
+  writeInt(get_fn_symbol_index(t,symbol_index_map), os);
 
   write_term(t, os, symbol_index_map, term_index_map, sym_entries);
 }
