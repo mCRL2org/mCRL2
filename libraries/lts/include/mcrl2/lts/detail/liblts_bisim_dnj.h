@@ -923,7 +923,6 @@ class block_bunch_slice_t
                                                                                        enum bisim_gjkw::check_complexity::counter_type ctr, unsigned max_value,
                                                                                                             const bisim_partitioner_dnj<LTS_TYPE>& partitioner)
                                                                                     {   assert(!empty());
-mCRL2log(log::debug, "bisim_dnj") << debug_id() << ": add_work_to_bottom_transns(" << bisim_gjkw::check_complexity::work_names[ctr - bisim_gjkw::check_complexity::BLOCK_MIN];
                                                                                         assert(1U == max_value);
                                                                                         const block_t* block = source_block();
                                                                                         bool result = false;
@@ -935,7 +934,6 @@ mCRL2log(log::debug, "bisim_dnj") << debug_id() << ": add_work_to_bottom_transns
                                                                                             assert(source->block == block);
                                                                                             if (source->pos < block->nonbottom_begin)
                                                                                             {
-mCRL2log(log::debug, "bisim_dnj") << (result ? ", " : ", 1, ...): ") << block_bunch->pred->debug_id(partitioner);
                                                                                                 // the transition starts in a (new) bottom state
                                                                                                 mCRL2complexity(block_bunch->pred, add_work(ctr, max_value),
                                                                                                                                                   partitioner);
@@ -944,7 +942,6 @@ mCRL2log(log::debug, "bisim_dnj") << (result ? ", " : ", 1, ...): ") << block_bu
                                                                                         }
                                                                                         while (block_bunch_begin < block_bunch &&
                                                                                                                             &*block_bunch[-1].slice() == this);
-mCRL2log(log::debug, "bisim_dnj") << (result ? "\n" : ", 1, ...): no transitions from bottom states\n");
                                                                                         return result;
                                                                                     }
 

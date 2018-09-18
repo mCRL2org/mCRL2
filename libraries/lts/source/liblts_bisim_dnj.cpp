@@ -756,7 +756,6 @@ iterator_or_null<block_bunch_slice_iter_t>* const new_noninert_block_bunch_ptr)
             iter_swap(source->pos, source_block->marked_nonbottom_begin++);
         }                                                                       assert(source->pos < source->block->marked_nonbottom_begin);
         iter_swap(source->pos, source_block->nonbottom_begin++);
-mCRL2log(log::debug, "bisim_dnj") << source->debug_id() << " is now a bottom state.\n";
         became_bottom = true;
     }
 
@@ -1356,7 +1355,7 @@ void part_trans_t::adapt_transitions_for_new_block(
 template <class LTS_TYPE>
 void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
 {
-    log::mcrl2_logger::set_reporting_level(log::debug, "bisim_dnj");
+    // log::mcrl2_logger::set_reporting_level(log::debug, "bisim_dnj");
 
     mCRL2log(log::verbose, "bisim_dnj") << "Strictly O(m log n) "
              << (branching ? (preserve_divergence
@@ -2574,8 +2573,6 @@ bisim_dnj::block_t*bisim_partitioner_dnj<LTS_TYPE>::prepare_for_postprocessing(
                             bisim_dnj::block_bunch_slice_iter_t last_splitter,
                                                         bool first_preparation)
 {                                                                               assert(refine_block == last_splitter->source_block());
-mCRL2log(log::debug, "bisim_dnj") << "prepare_for_postprocessing(" << refine_block->debug_id() << ", "
-<< last_splitter->debug_id() << (first_preparation ? ", true)\n" : ", false)\n");
     bisim_dnj::block_t* blue_block;                                             assert(last_splitter->is_stable());
                                                                                 assert(part_tr.block_bunch.begin() < part_tr.block_bunch_inert_begin);
     bisim_dnj::block_bunch_slice_iter_t new_noninert_block_bunch =
