@@ -3389,14 +3389,10 @@ Line_4_4:
                     assert(!postproc_a_posteriori);
                     if (0 != FromRed->work_counter.get_work_counter_4_4())
                     {
-                        if (!FromRed->add_work_to_bottom_transns(
+                        assert(FromRed->add_work_to_bottom_transns(
                         bisim_gjkw::check_complexity::
                         for_all_transitions_from_bottom_states_a_posteriori_4_4
-                                                                           ,1))
-                        {
-                            assert(0 &&
-                                     "no new bottom states to assign work to");
-                        }
+                                                                         , 1));
                         FromRed->work_counter.reset_work_counter_4_4();
                     }
                 #endif

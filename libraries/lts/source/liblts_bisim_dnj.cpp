@@ -104,10 +104,8 @@ block_t* block_t::split_off_block(enum new_block_mode_t const new_block_mode)
         // adapt the old block: it only keeps the blue states
         end = splitpoint;
         nonbottom_begin = marked_bottom_begin;
-    }
-                                                                                #ifndef NDEBUG
-                                                                                    new_block->work_counter = work_counter;
-                                                                                #endif
+    }                                                                           ONLY_IF_DEBUG( new_block->work_counter = work_counter; )
+
     if (0 < swapcount)
     {
         // vector swap the states:
@@ -365,7 +363,7 @@ void part_trans_t::first_move_transition_to_new_bunch(action_block_iter_t const
 /// block_bunch-slices are registered as stable.
 void part_trans_t::second_move_transition_to_new_bunch(                         ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
          action_block_iter_t const action_block_iter, bunch_t* const new_bunch)
-{
+{                                                                               assert(nullptr != new_bunch);
 
     /*  -  -  -  -  -  -  -  -  adapt part_tr.succ  -  -  -  -  -  -  -  -  */
 
@@ -578,7 +576,7 @@ succ_iter_t part_trans_t::move_out_slice_to_new_block(                          
             old_block->stable_block_bunch.erase(old_block_bunch_slice);
         }
         else
-        {                                                                       assert(unstable_block_bunch_postprocess_end != old_block_bunch_slice);
+        {
             unstable_block_bunch.erase(old_block_bunch_slice);
         }
     }
@@ -758,6 +756,7 @@ iterator_or_null<block_bunch_slice_iter_t>* const new_noninert_block_bunch_ptr)
             iter_swap(source->pos, source_block->marked_nonbottom_begin++);
         }                                                                       assert(source->pos < source->block->marked_nonbottom_begin);
         iter_swap(source->pos, source_block->nonbottom_begin++);
+mCRL2log(log::debug, "bisim_dnj") << source->debug_id() << " is now a bottom state.\n";
         became_bottom = true;
     }
 
@@ -1182,8 +1181,9 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                                             assert(succ_iter!=state->current_out_slice),true));
                                                                                                     }
                                                                                                     while (out_slice_end < state->succ_inert.begin &&
-                                                                                                      (assert(bunch->end - bunch->begin + bunch->sort_id <=
-                                                                                                       out_slice_end->block_bunch->slice()->bunch()->sort_id),
+                                                                                                    (assert(bunch->end - bunch->begin + bunch->
+                                                                                                      sort_key_and_label.sort_key<=out_slice_end->block_bunch->
+                                                                                                             slice()->bunch()->sort_key_and_label.sort_key),
                                                                                                                        out_slice_begin = out_slice_end, true));
                                                                                                     assert(out_slice_end == state->succ_inert.begin);
                                                                                                 }
@@ -1356,15 +1356,15 @@ void part_trans_t::adapt_transitions_for_new_block(
 template <class LTS_TYPE>
 void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
 {
-    // log::mcrl2_logger::set_reporting_level(log::debug, "bisim_dnj");
+    log::mcrl2_logger::set_reporting_level(log::debug, "bisim_dnj");
 
     mCRL2log(log::verbose, "bisim_dnj") << "Strictly O(m log n) "
-                   << (branching ? (preserve_divergence
+             << (branching ? (preserve_divergence
                                            ? "divergence-preserving branching "
                                            : "branching ")
                                  : "")
-                 << "bisimulation partitioner created for " << aut.num_states()
-                 << " states and " << aut.num_transitions();
+             << "bisimulation partitioner created for " << part_st.state_size()
+             << " states and " << aut.num_transitions();
 
     // create one block for all states
 
@@ -1618,29 +1618,12 @@ void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
 /// reference to the LTS was stored in the object by the constructor.
 template <class LTS_TYPE>
 void bisim_partitioner_dnj<LTS_TYPE>::replace_transition_system()
-{                                                                               assert(sizeof(label_type) <= sizeof(const void*));
-    // store the labels with the action_block-slices
-    // We misuse the field succ()->begin_or_before_end of the first entry
-    // of each action_block-slice for this purpose.
-    bisim_dnj::action_block_const_iter_t action_block_iter_end =
-                                              part_tr.action_block_inert_begin;
-    label_type label = 0;
-    do
-    {
-        for (bisim_dnj::action_block_iter_t
-              action_block_iter = action_label[label].begin;
-              action_block_iter < action_block_iter_end;
-              action_block_iter = action_block_iter->begin_or_before_end() + 1)
-        {                                                                       assert(action_block_iter->succ()->block_bunch->pred->action_block ==
-                                                                                                                                            action_block_iter);
-            action_block_iter->succ()->begin_or_before_end.set_label(label);    assert(action_block_iter <= action_block_iter->begin_or_before_end());
-        }
-    }
-    while (++label < action_label.size() &&
-            (action_block_iter_end = action_label[label - 1].begin - 1, true));
+{
+    // The labels have already been stored in sort_key_and_label.label by
+    // refine_partition_until_it_becomes_stable().
 
     // for all blocks
-    bisim_dnj::permutation_const_iter_t s_iter = part_st.permutation.begin();
+    bisim_dnj::permutation_const_iter_t s_iter = part_st.permutation.begin();   assert(s_iter < part_st.permutation.end());
     do
     {
         const bisim_dnj::block_t* const B = (*s_iter)->block;
@@ -1649,11 +1632,10 @@ void bisim_partitioner_dnj<LTS_TYPE>::replace_transition_system()
                     trans_iter = B->stable_block_bunch.begin();
                        B->stable_block_bunch.end() != trans_iter; ++trans_iter)
         {                                                                       assert(trans_iter->is_stable());  assert(!trans_iter->empty());
-            bisim_dnj::pred_const_iter_t const pred = trans_iter->end[-1].pred;
-            // add a transition from the source block to the goal block with
-            // the indicated label.
-            label_type label = pred->action_block->action_block_slice_begin()->
-                                       succ()->begin_or_before_end.get_label(); assert(0 <= label);  assert(label < action_label.size());
+            bisim_dnj::pred_const_iter_t const pred = trans_iter->end[-1].pred; assert(pred->source->block == B);
+            /* add a transition from the source block to the goal block with */ assert(pred->action_block->succ()->block_bunch->pred == pred);
+            /* the indicated label. */                                          assert(pred->action_block->succ()->block_bunch->slice() == trans_iter);
+            label_type label = trans_iter->bunch()->sort_key_and_label.label;   assert(0 <= label);  assert(label < action_label.size());
             aut.add_transition(transition(B->seqnr, label,
                                                   pred->target->block->seqnr));
         }
@@ -1667,31 +1649,30 @@ void bisim_partitioner_dnj<LTS_TYPE>::replace_transition_system()
     if (aut.has_state_info())   /* If there are no state labels
                                                     this step can be ignored */
     {
-      /* Create a vector for the new labels */
-      bisim_gjkw::fixed_vector<typename LTS_TYPE::state_label_t> new_labels(
-                                             bisim_dnj::block_t::nr_of_blocks);
+        /* Create a vector for the new labels */
+        bisim_gjkw::fixed_vector<typename LTS_TYPE::state_label_t>
+                                                  new_labels(num_eq_classes());
 
-      for(std::size_t i=aut.num_states(); i>0; )
-      {
-        --i;
-        const std::size_t new_index = part_st.state_info[i].block->seqnr;
-        /* i. e. new_index = get_eq_class(i) */
-        new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
-      }
+        for (state_type i = aut.num_states(); i > 0; )
+        {
+            --i;
+            const state_type new_index = get_eq_class(i);
+            /* i. e. new_index = get_eq_class(i) */
+            new_labels[new_index] = aut.state_label(i) + new_labels[new_index];
+        }
 
-      aut.set_num_states(bisim_dnj::block_t::nr_of_blocks);
-      for(std::size_t i=0; i < bisim_dnj::block_t::nr_of_blocks; ++i)
-      {
-        aut.set_state_label(i,new_labels[i]);
-      }
+        aut.set_num_states(num_eq_classes());
+        for (state_type i = 0; i < num_eq_classes(); ++i)
+        {
+            aut.set_state_label(i, new_labels[i]);
+        }
     }
     else
     {
-      aut.set_num_states(bisim_dnj::block_t::nr_of_blocks);
+        aut.set_num_states(num_eq_classes());
     }
 
-    aut.set_initial_state(part_st.state_info[aut.initial_state()].
-                                                                 block->seqnr);
+    aut.set_initial_state(get_eq_class(aut.initial_state()));
 }
 
 
@@ -1849,6 +1830,27 @@ void bisim_partitioner_dnj<LTS_TYPE>::
     // return P
         // (this happens implicitly, through the bisim_partitioner_dnj object
         // data)
+
+    // store the labels with the action_block-slices
+    // As every action_block-slice is a (trivial) bunch at the same time, we
+    // can reuse the field sort_key_and_label.label (instead of
+    // sort_key_and_label.sort_key) to store the label.
+    bisim_dnj::action_block_const_iter_t action_block_iter_end =
+                                              part_tr.action_block_inert_begin;
+    label_type label = 0;                                                       assert(label < action_label.size());
+    do
+    {
+        for (bisim_dnj::action_block_iter_t
+              action_block_iter = action_label[label].begin;
+              action_block_iter < action_block_iter_end;
+              action_block_iter = action_block_iter->begin_or_before_end() + 1)
+        {                                                                       assert(action_block_iter->succ()->block_bunch->pred->action_block ==
+                                                                                                                                            action_block_iter);
+            action_block_iter->succ()->bunch()->sort_key_and_label.label=label; assert(action_block_iter <= action_block_iter->begin_or_before_end());
+        }
+    }
+    while (++label < action_label.size() &&
+            (action_block_iter_end = action_label[label - 1].begin - 1, true));
 }
                                                                                 #ifndef NDEBUG
                                                                                     // \brief moves temporary work counters to normal ones if the blue block is
@@ -2073,7 +2075,7 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::refine(
                                                                                                  : ",UNKNOWN MODE,"))))
                                                                                         << (nullptr == new_bunch ? std::string("nullptr")
                                                                                                                              : new_bunch->debug_id()) << ")\n";
-/* {
+/* { // This code section tests whether all temporary work counters are reset.
     unsigned const max_block = bisim_gjkw::check_complexity::log_n - bisim_gjkw::check_complexity::ilog2(refine_block->size());
     mCRL2complexity(refine_block, no_temporary_work(max_block), );
     for (bisim_dnj::permutation_iter_t s_iter = refine_block->begin; s_iter < refine_block->end; ++s_iter)
@@ -2572,6 +2574,8 @@ bisim_dnj::block_t*bisim_partitioner_dnj<LTS_TYPE>::prepare_for_postprocessing(
                             bisim_dnj::block_bunch_slice_iter_t last_splitter,
                                                         bool first_preparation)
 {                                                                               assert(refine_block == last_splitter->source_block());
+mCRL2log(log::debug, "bisim_dnj") << "prepare_for_postprocessing(" << refine_block->debug_id() << ", "
+<< last_splitter->debug_id() << (first_preparation ? ", true)\n" : ", false)\n");
     bisim_dnj::block_t* blue_block;                                             assert(last_splitter->is_stable());
                                                                                 assert(part_tr.block_bunch.begin() < part_tr.block_bunch_inert_begin);
     bisim_dnj::block_bunch_slice_iter_t new_noninert_block_bunch =
@@ -2635,6 +2639,13 @@ bisim_dnj::block_t*bisim_partitioner_dnj<LTS_TYPE>::prepare_for_postprocessing(
                                                                                     // assert that the remainder of the unstable block_bunch slice list after
                                                                                     // part_tr.unstable_block_bunch_postprocess_end does not contain any
                                                                                     // block_bunch slice whose source_block() is refine_block.
+                                                                                    for (bisim_dnj::block_bunch_slice_const_iter_t block_bunch_iter =
+                                                                                                                part_tr.unstable_block_bunch_postprocess_end;
+                                                                                                       block_bunch_iter != part_tr.unstable_block_bunch.end();
+                                                                                                                                            ++block_bunch_iter)
+                                                                                    {
+                                                                                        assert(block_bunch_iter->source_block() != refine_block);
+                                                                                    }
                                                                                 #endif
     if (1 >= refine_block->size())  return blue_block;
 
@@ -2681,6 +2692,16 @@ bisim_dnj::block_t*bisim_partitioner_dnj<LTS_TYPE>::prepare_for_postprocessing(
                                                                                     // If that does not succeed, temporarily assign it to the block_bunch
                                                                                     // itself.  Later, we shall find a bottom state to which this work can be
                                                                                     // assigned.
+                                                                                    assert(!block_bunch_iter->work_counter.has_temporary_work());
+                                                                                    if (!block_bunch_iter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                          check_complexity::prepare_for_postprocessing__make_unstable_a_priori,
+                                                                                                                                                     1, *this))
+                                                                                    {
+                                                                                        mCRL2complexity(block_bunch_iter, add_work(bisim_gjkw::
+                                                                                                         check_complexity::
+                                                                                                         prepare_for_postprocessing__make_unstable_temp, 1), );
+                                                                                        assert(block_bunch_iter->work_counter.has_temporary_work());
+                                                                                    }
                                                                                 #endif
         block_bunch_iter = next_block_bunch_iter;
     }
@@ -2737,6 +2758,18 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::postprocess_new_noninert(
                             refine_block->stable_block_bunch.end(),
                                        part_tr.unstable_block_bunch, splitter);
             splitter->make_stable();
+                                                                                #ifndef NDEBUG
+                                                                                    // now splitter must have some transitions that start in bottom states:
+                                                                                    if (splitter->work_counter.has_temporary_work())
+                                                                                    {
+                                                                                        assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                            check_complexity::
+                                                                                            prepare_for_postprocessing__make_unstable_a_posteriori, 1, *this));
+                                                                                        splitter->work_counter.reset_temporary_work();
+                                                                                    }
+                                                                                    assert(splitter->add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+                                                                                                               postprocess_new_noninert__stabilize, 1, *this));
+                                                                                #endif
             continue;
         }
         // check if we first have to split w. r. t. the splitter suggested
@@ -2763,18 +2796,47 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::postprocess_new_noninert(
 
             refine_block = refine(refine_block, splitter,
                      bisim_dnj::extend_from_bottom_state_markings_and_FromRed);
-            // check whether there are even more new non-inert transitions
+                                                                                #ifndef NDEBUG
+                                                                                    // now splitter must have some transitions that start in bottom states:
+                                                                                    if (splitter->work_counter.has_temporary_work())
+                                                                                    {
+                                                                                        assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                            check_complexity::
+                                                                                            prepare_for_postprocessing__make_unstable_a_posteriori, 1, *this));
+                                                                                        splitter->work_counter.reset_temporary_work();
+                                                                                    }
+                                                                                    // account for the work a bit early, so as to avoid trouble if `splitter`
+                                                                                    // is divided later:
+                                                                                    assert(splitter->add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+            /* check whether there are even more new non-inert transitions */                                  postprocess_new_noninert__stabilize, 1, *this));
+                                                                                #endif
             if (0 < refine_block->marked_size())
             {
-                // Prepare the slices of outgoing transitions of RedB similar
+                /* Prepare the slices of outgoing transitions of RedB similar*/ ONLY_IF_DEBUG(bisim_dnj::block_bunch_iter_t const splitter_end=splitter->end;)
                 // to Lines 4.4-4...
                 refine_block = prepare_for_postprocessing(refine_block,
                                                               splitter, false);
-                if (nullptr == refine_block)  continue;
+                if (nullptr == refine_block)  continue;                         ONLY_IF_DEBUG( splitter = splitter_end[-1].slice(); )
             }
         }
-        // advance the current_out_slice pointers of the (remaining) red
-        // subblock
+                                                                                #ifndef NDEBUG
+                                                                                    else
+                                                                                    {
+                                                                                        // now splitter must have some transitions that start in bottom states:
+                                                                                        if (splitter->work_counter.has_temporary_work())
+                                                                                        {
+                                                                                            assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                                        check_complexity::
+                                                                                                        prepare_for_postprocessing__make_unstable_a_posteriori,
+                                                                                                                                                    1, *this));
+                                                                                            splitter->work_counter.reset_temporary_work();
+                                                                                        }
+                                                                                        // account for the work a bit early, so as to avoid trouble if
+                                                                                        // `splitter` is divided later:
+                                                                                        assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+        /* advance the current_out_slice pointers of the (remaining) red */                  check_complexity::postprocess_new_noninert__already_stabilized, 1, *this));
+        /* subblock */                                                              }
+                                                                                #endif
         bisim_dnj::permutation_iter_t s_iter = refine_block->begin;             assert(s_iter < refine_block->nonbottom_begin);
         do
         {
@@ -2802,12 +2864,14 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::postprocess_new_noninert(
                                                                                               bisim_gjkw::check_complexity::postprocess_new_noninert__sort, 1);
                                                                                 #endif
         }
-        while (++s_iter < refine_block->nonbottom_begin);
+        while (++s_iter < refine_block->nonbottom_begin);                       // assert(splitter->add_work_to_bottom_transns(...)) -- see above
     // 4.25: end for
     }
     // 4.26: Destroy all temporary data
 //        We somewhere need to reset:
 //            SpSl->begin_from_non_bottom = SpSl->begin;
+    part_tr.unstable_block_bunch_postprocess_end =
+                                            part_tr.unstable_block_bunch.end();
     return result_block;
 }
 

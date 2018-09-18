@@ -185,6 +185,8 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     // part of a small bunch)
     "refine_partition_until_it_becomes_stable(), stabilize",
     "second_move_transition_to_new_bunch()",
+    "prepare_for_postprocessing(), make block_bunch-slice without bottom "
+                                         "states unstable (temporary counter)",
 
     // transition counters
     "move_out_slice_to_new_block()",
@@ -197,8 +199,13 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "refine(), while red coroutine runs, handle a transition from a red state",
     "refine(), while red coroutine runs, handle a transition to a red state",
     "refine(), the slow test found a red state",
+    "prepare_for_postprocessing(), make block_bunch-slice with bottom states "
+                                                                    "unstable",
+    "prepare_for_postprocessing(), make block_bunch-slice without bottom "
+                                             "states unstable (final counter)",
     "postprocess_new_noninert(), sort",
-    "postprocess_new_noninert(), advance current out-slice"
+    "postprocess_new_noninert(), stabilize",
+    "postprocess_new_noninert(), block is already stabilized"
 };
 
 
@@ -335,6 +342,9 @@ void check_complexity::test_work_names()
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN == i);
     test_work_name(i, refine_partition_until_it_becomes_stable__stabilize);
     test_work_name(i, second_move_transition_to_new_bunch);
+    assert(check_complexity::BLOCK_BUNCH_dnj_MIN_TEMP == i);
+    test_work_name(i, prepare_for_postprocessing__make_unstable_temp);
+    assert(check_complexity::BLOCK_BUNCH_dnj_MAX_TEMP + 1 == i);
     assert(check_complexity::BLOCK_BUNCH_dnj_MAX + 1 == i);
 
     // transition counters
@@ -351,8 +361,11 @@ void check_complexity::test_work_names()
     test_work_name(i, refine_red__handle_transition_to_red_state);
     assert(check_complexity::TRANS_dnj_MAX_TEMP + 1 == i);
     test_work_name(i, refine__slow_test_found_red_state);
+    test_work_name(i, prepare_for_postprocessing__make_unstable_a_priori);
+    test_work_name(i, prepare_for_postprocessing__make_unstable_a_posteriori);
     test_work_name(i, postprocess_new_noninert__sort);
-    test_work_name(i, postprocess_new_noninert__advance_current_out_slice);
+    test_work_name(i, postprocess_new_noninert__stabilize);
+    test_work_name(i, postprocess_new_noninert__already_stabilized);
     assert(check_complexity::TRANS_dnj_MAX + 1 == i);
 
     exit(EXIT_SUCCESS);

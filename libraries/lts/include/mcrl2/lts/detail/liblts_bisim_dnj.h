@@ -14,11 +14,10 @@
 ///
 /// \details This file implements an efficient partition refinement algorithm
 /// for labelled transition systems inspired by Groote / Jansen / Keiren / Wijs
-/// and Valmari (2009) to calculate the branching bisimulation classes of a
-/// labelled transition system.
-///
-/// Different from that article, it does not translate a LTS to a Kripke
-/// structure but works on the LTS directly.
+/// (2017) and Valmari (2009) to calculate the branching bisimulation classes
+/// of a labelled transition system.  Different from the 2017 article, it does
+/// not translate the LTS to a Kripke structure, but works on the LTS directly.
+/// We hope that in this way the memory use can be reduced.
 ///
 /// \author David N. Jansen, Institute of Software, Chinese Academy of
 /// Sciences, Beijing, PR China
@@ -45,10 +44,9 @@ namespace detail
                                                                                     /// a function in Debug mode.  While it is in principle possible to use
                                                                                     /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
                                                                                     /// over many code lines.  This macro expands to its arguments in Debug
-                                                                                    /// mode and to nothing otherwise.
+// state_type and trans_type are defined in check_complexity.h.                     /// mode and to nothing otherwise.
                                                                                     #define ONLY_IF_DEBUG(...) __VA_ARGS__
                                                                                 #else
-// state_type and trans_type are defined in check_complexity.h.
                                                                                     #define ONLY_IF_DEBUG(...)
                                                                                 #endif
 /// \brief type used to store label numbers and counts
@@ -67,6 +65,10 @@ union iterator_or_counter
     Iterator begin;
 
     iterator_or_counter()  {  count = 0;  }
+    iterator_or_counter(const iterator_or_counter& other)
+    {                                                                           assert(sizeof(count) == sizeof(begin));
+        begin = other.begin;
+    }
     ~iterator_or_counter()  {  }
 
     const iterator_or_counter& operator=(const iterator_or_counter& other)
@@ -89,8 +91,6 @@ union iterator_or_null
 {
   private:
     const void* null;
-    // sometimes we also need a third type, a label.
-    label_type label;
   public:
     Iterator iter;
 
@@ -103,15 +103,19 @@ union iterator_or_null
     {                                                                           assert(nullptr == new_null);
         null = new_null;
     }
+    iterator_or_null(const iterator_or_null& other)
+    {                                                                           assert(sizeof(null) == sizeof(iter));
+        iter = other.iter;
+    }
     ~iterator_or_null()  {  }
 
     const iterator_or_null& operator=(const iterator_or_null& other)
-    {                                                                           assert(sizeof(null) == sizeof(iter));  assert(sizeof(null) >= sizeof(label));
+    {                                                                           assert(sizeof(null) == sizeof(iter));
         iter = other.iter;
         return *this;
     }
     bool operator==(const iterator_or_null& other) const
-    {                                                                           assert(sizeof(null) == sizeof(iter));  assert(sizeof(null) >= sizeof(label));
+    {                                                                           assert(sizeof(null) == sizeof(iter));
         return iter == other.iter;
     }
     bool operator!=(const iterator_or_null& other) const
@@ -129,9 +133,6 @@ union iterator_or_null
     {                                                                           assert(!is_null());
         return iter;
     }
-
-    void set_label(label_type new_label)  {  label = new_label;  }
-    label_type get_label() const  {  return label;  }
 };
 
 class block_bunch_entry;
@@ -376,9 +377,6 @@ class block_t
     /// stabilize w. r. t. all block_bunch-slices anyway, and we have time to
     /// walk through them after stabilisation and sort them by going over the
     /// out-slices of a (new, stabilized) bottom state.
-    ///
-    /// It is probably possible to remove stable_block_bunch_before_end if one
-    /// handles new bottom states in the right way.
 
     std::list<block_bunch_slice_t> stable_block_bunch;
 
@@ -747,14 +745,6 @@ class block_bunch_entry
 };
 
 
-} // end namespace bisim_dnj
-
-// forward declaration:
-template <class LTS_TYPE> class bisim_partitioner_dnj;
-
-namespace bisim_dnj
-{
-
 /// \brief (non-inert and inert) predecessors sorted per state
 class pred_entry
 {
@@ -927,6 +917,37 @@ class block_bunch_slice_t
                                                                                     static const block_bunch_iter_t* block_bunch_end;
                                                                                     std::string debug_id() const;
 
+                                                                                    // \brief add work to
+                                                                                    template <class LTS_TYPE>
+                                                                                    bool add_work_to_bottom_transns(
+                                                                                       enum bisim_gjkw::check_complexity::counter_type ctr, unsigned max_value,
+                                                                                                            const bisim_partitioner_dnj<LTS_TYPE>& partitioner)
+                                                                                    {   assert(!empty());
+mCRL2log(log::debug, "bisim_dnj") << debug_id() << ": add_work_to_bottom_transns(" << bisim_gjkw::check_complexity::work_names[ctr - bisim_gjkw::check_complexity::BLOCK_MIN];
+                                                                                        assert(1U == max_value);
+                                                                                        const block_t* block = source_block();
+                                                                                        bool result = false;
+                                                                                        block_bunch_iter_t block_bunch = end;
+                                                                                        do
+                                                                                        {
+                                                                                            --block_bunch;
+                                                                                            state_info_ptr source = block_bunch->pred->source;
+                                                                                            assert(source->block == block);
+                                                                                            if (source->pos < block->nonbottom_begin)
+                                                                                            {
+mCRL2log(log::debug, "bisim_dnj") << (result ? ", " : ", 1, ...): ") << block_bunch->pred->debug_id(partitioner);
+                                                                                                // the transition starts in a (new) bottom state
+                                                                                                mCRL2complexity(block_bunch->pred, add_work(ctr, max_value),
+                                                                                                                                                  partitioner);
+                                                                                                result = true;
+                                                                                            }
+                                                                                        }
+                                                                                        while (block_bunch_begin < block_bunch &&
+                                                                                                                            &*block_bunch[-1].slice() == this);
+mCRL2log(log::debug, "bisim_dnj") << (result ? "\n" : ", 1, ...): no transitions from bottom states\n");
+                                                                                        return result;
+                                                                                    }
+
                                                                                     mutable bisim_gjkw::check_complexity::block_bunch_dnj_counter_t
                                                                                                                                                   work_counter;
                                                                                 #endif
@@ -950,16 +971,30 @@ class bunch_t
     action_block_iter_t end;
     action_block_iter_t begin;
 
-    trans_type const sort_id;
+    union sort_key_and_label_t
+    {
+        // During refinement, this field stores the sort key.
+        // After refinement, it is set to the label.
+        trans_type sort_key;
+        label_type label;
+
+        sort_key_and_label_t(trans_type new_sort_key)
+        {
+            sort_key = new_sort_key;
+        }
+        ~sort_key_and_label_t()  {  }
+        sort_key_and_label_t(const sort_key_and_label_t&) = delete;
+        void operator=(const sort_key_and_label_t&) = delete;
+    } sort_key_and_label;
 //  private:
     static bunch_t* first_nontrivial;
     bunch_t* next_nontrivial;
   public:
     bunch_t(action_block_iter_t new_begin, action_block_iter_t new_end,
-                                                        trans_type new_sort_id)
+                                                       trans_type new_sort_key)
       : end(new_end),
         begin(new_begin),
-        sort_id(new_sort_id),
+        sort_key_and_label(new_sort_key),
         next_nontrivial(nullptr)
     {  }
 
@@ -1007,7 +1042,7 @@ class bunch_t
         if (first_slice_end - begin > end - last_slice_begin)
         {
             new_bunch = new bunch_t(last_slice_begin, end,
-                                         sort_id + (last_slice_begin - begin));
+                     sort_key_and_label.sort_key + (last_slice_begin - begin));
             // 2.6: ... and move SpB from SpC to NewC
             end = last_slice_begin;
             if (end[-1].succ.is_null())
@@ -1019,7 +1054,7 @@ class bunch_t
         else
         {
             new_bunch = new bunch_t(begin, first_slice_end,
-                                            sort_id + (end - first_slice_end));
+                        sort_key_and_label.sort_key + (end - first_slice_end));
             // 2.6: ... and move SpB from SpC to NewC
             begin = first_slice_end;
             if (begin->succ.is_null())
@@ -1034,7 +1069,10 @@ class bunch_t
         return new_bunch;
     }
 
-    bool operator<(const bunch_t& el) const  {  return sort_id < el.sort_id;  }
+    bool operator<(const bunch_t& el) const
+    {
+        return sort_key_and_label.sort_key < el.sort_key_and_label.sort_key;
+    }
     bool operator>(const bunch_t& el) const  {  return el.operator<(*this);  }
     bool operator<=(const bunch_t& el) const  {  return !operator>(el);  }
     bool operator>=(const bunch_t& el) const  {  return !operator<(el);  }
@@ -1245,18 +1283,33 @@ inline block_t* block_bunch_slice_t::source_block() const
 
 ///@} (end of group part_trans)
                                                                                 #ifndef NDEBUG
+                                                                                    static struct {
+                                                                                        inline bool operator()(const block_bunch_entry& p1,
+                                                                                                                                 const block_bunch_slice_t* p2)
+                                                                                        {
+                                                                                            return &*p1.slice.iter != p2;
+                                                                                        }
+                                                                                    } block_bunch_not_equal;
+
                                                                                     inline std::string block_bunch_slice_t::debug_id() const
                                                                                     {   assert(block_bunch_begin <= end);  assert(end <= *block_bunch_end);
                                                                                         std::string index_string = std::to_string(end - block_bunch_begin);
-                                                                                        assert(!empty());  // Probably the following empty case is superfluous.
-/* ************************************************************************* */         // if empty()
-/*                                                                           */         // {
-/*                            A L G O R I T H M S                            */         //     return "empty block_bunch_slice [" + index_string + "," +
-/*                                                                           */         //                                                  index_string + ")";
-/* ************************************************************************* */         // }
-                                                                                        return "block_bunch-slice [_," + index_string +
-                                                                                            ") containing transitions from " + source_block()->debug_id() +
-                                                                                                                            " in " + bunch()->debug_id_short();
+                                                                                        if (empty())
+                                                                                        {
+                                                                                            return "empty block_bunch_slice [" + index_string + "," +
+                                                                                                                                            index_string + ")";
+                                                                                        }
+/* ************************************************************************* */         block_bunch_const_iter_t begin = block_bunch_begin;
+/*                                                                           */         trans_type bunch_size = bunch()->end - bunch()->begin;
+/*                            A L G O R I T H M S                            */         if ((trans_type) (end - begin) > bunch_size)  begin = end - bunch_size;
+/*                                                                           */         begin = std::lower_bound(begin, (block_bunch_const_iter_t) end - 1,
+/* ************************************************************************* */                                                   this, block_bunch_not_equal);
+                                                                                        assert(&*begin->slice() == this);
+                                                                                        assert(begin == block_bunch_begin || begin[-1].slice.is_null() ||
+                                                                                                                                  &*begin[-1].slice() != this);
+                                                                                        return "block_bunch-slice [" + std::to_string(begin-block_bunch_begin)+
+                                                                                               "," + index_string + ") containing transitions from " +
+                                                                                               source_block()->debug_id() + " in " + bunch()->debug_id_short();
                                                                                     }
                                                                                 #endif
 /// \defgroup part_refine
@@ -1311,7 +1364,10 @@ class bisim_partitioner_dnj
         preserve_divergence(new_preserve_divergence)
     {                                                                           assert(branching || !preserve_divergence);
                                                                                 #ifndef NDEBUG
-                                                                                    bisim_gjkw::check_complexity::init(aut.num_states() * aut.num_states());
+                                                                                    // If the automaton has only one state, we still need to walk through the
+                                                                                    // action_block-slices once to split up the bunch.
+                                                                                    bisim_gjkw::check_complexity::init(1 >= aut.num_states() ? 2
+                                                                                                                        : aut.num_states() * aut.num_states());
                                                                                 #endif
       create_initial_partition();
                                                                                 #ifndef NDEBUG
@@ -1544,19 +1600,19 @@ template <class LTS_TYPE>
 void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
                                         bool const preserve_divergence = false)
 {
-  // First, remove tau loops in case of branching bisimulation.
-  if (branching)
-  {
-    scc_reduce(l, preserve_divergence);
-  }
+    // First, remove tau loops in case of branching bisimulation.
+    if (branching)
+    {
+        scc_reduce(l, preserve_divergence);
+    }
 
-  // Second, apply the branching bisimulation reduction algorithm. If there are
-  // no taus, this will automatically yield strong bisimulation.
-  detail::bisim_partitioner_dnj<LTS_TYPE> bisim_part(l, branching,
+    // Second, apply the branching bisimulation reduction algorithm. If there
+    // are no taus, this will automatically yield strong bisimulation.
+    detail::bisim_partitioner_dnj<LTS_TYPE> bisim_part(l, branching,
                                                           preserve_divergence);
 
-  // Assign the reduced LTS
-  bisim_part.replace_transition_system();
+    // Assign the reduced LTS
+    bisim_part.replace_transition_system();
 }
 
 
@@ -1578,26 +1634,27 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
           bool const branching = false, bool const preserve_divergence = false,
                                   bool const generate_counter_examples = false)
 {
-  if (generate_counter_examples)
-  {
-    mCRL2log(log::warning) << "The DNJ branching bisimulation algorithm does "
-                                             "not generate counterexamples.\n";
-  }
-  size_t init_l2 = l2.initial_state() + l1.num_states();
-  mcrl2::lts::detail::merge(l1, l2);
-  l2.clear(); // No use for l2 anymore.
+    if (generate_counter_examples)
+    {
+        mCRL2log(log::warning) << "The DNJ branching bisimulation "
+                          "algorithm does not generate counterexamples.\n";
+    }
+    size_t init_l2 = l2.initial_state() + l1.num_states();
+    mcrl2::lts::detail::merge(l1, l2);
+    l2.clear(); // No use for l2 anymore.
 
-  // First remove tau loops in case of branching bisimulation.
-  if (branching)
-  {
-    detail::scc_partitioner<LTS_TYPE> scc_part(l1);
-    scc_part.replace_transition_system(preserve_divergence);
-    init_l2 = scc_part.get_eq_class(init_l2);
-  }
+    // First remove tau loops in case of branching bisimulation.
+    if (branching)
+    {
+        detail::scc_partitioner<LTS_TYPE> scc_part(l1);
+        scc_part.replace_transition_system(preserve_divergence);
+        init_l2 = scc_part.get_eq_class(init_l2);
+    }
 
-  detail::bisim_partitioner_dnj<LTS_TYPE> bisim_part(l1, branching,
+    detail::bisim_partitioner_dnj<LTS_TYPE> bisim_part(l1, branching,
                                                           preserve_divergence);
-  return bisim_part.in_same_class(l1.initial_state(), init_l2);
+
+    return bisim_part.in_same_class(l1.initial_state(), init_l2);
 }
 
 
@@ -1620,9 +1677,9 @@ template <class LTS_TYPE>
 inline bool bisimulation_compare_dnj(const LTS_TYPE& l1, const LTS_TYPE& l2,
           bool const branching = false, bool const preserve_divergence = false)
 {
-  LTS_TYPE l1_copy(l1);
-  LTS_TYPE l2_copy(l2);
-  return destructive_bisimulation_compare_dnj(l1_copy, l2_copy, branching,
+    LTS_TYPE l1_copy(l1);
+    LTS_TYPE l2_copy(l2);
+    return destructive_bisimulation_compare_dnj(l1_copy, l2_copy, branching,
                                                           preserve_divergence);
 }
 
@@ -1722,8 +1779,8 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                                     }
 
                                                                                     static struct {
-                                                                                        bool operator()(iterator_or_counter<action_block_iter_t> const p1,
-                                                                                                                        action_block_iter_t const action_block)
+                                                                                        inline bool operator()(iterator_or_counter<action_block_iter_t>
+                                                                                                            const& p1, action_block_iter_t const& action_block)
                                                                                         {
                                                                                             return p1.begin > action_block;
                                                                                         }

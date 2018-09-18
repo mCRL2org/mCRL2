@@ -305,7 +305,13 @@ class check_complexity
                     BLOCK_BUNCH_dnj_MIN =
                            refine_partition_until_it_becomes_stable__stabilize,
         second_move_transition_to_new_bunch,
-                    BLOCK_BUNCH_dnj_MAX = second_move_transition_to_new_bunch,
+        prepare_for_postprocessing__make_unstable_temp,
+                    BLOCK_BUNCH_dnj_MIN_TEMP =
+                                prepare_for_postprocessing__make_unstable_temp,
+                    BLOCK_BUNCH_dnj_MAX_TEMP =
+                                prepare_for_postprocessing__make_unstable_temp,
+                    BLOCK_BUNCH_dnj_MAX =
+                                prepare_for_postprocessing__make_unstable_temp,
 
         // transition counters
             // If every transition of a state is handled by some loop, we
@@ -330,9 +336,12 @@ class check_complexity
 
         // transition counters for new bottom states:
         refine__slow_test_found_red_state,
+        prepare_for_postprocessing__make_unstable_a_priori,
+        prepare_for_postprocessing__make_unstable_a_posteriori,
         postprocess_new_noninert__sort,
-        postprocess_new_noninert__advance_current_out_slice,
-            TRANS_dnj_MAX = postprocess_new_noninert__advance_current_out_slice
+        postprocess_new_noninert__stabilize,
+        postprocess_new_noninert__already_stabilized,
+            TRANS_dnj_MAX = postprocess_new_noninert__already_stabilized
     };
 
     /// \brief special value for temporary work without changing the balance
@@ -485,9 +494,9 @@ class check_complexity
             assert(max_value <= (ctr < FirstTempCounter ? log_n : 1));
             if (counters[ctr - FirstCounter] >= max_value)
             {
-                mCRL2log(log::error) << "Error 1: counter \"" <<work_names[ctr]
-                                           << "\" exceeded maximum value ("
-                                                      << max_value << ") for ";
+                mCRL2log(log::error) << "Error 1: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                    "maximum value (" << max_value << ") for ";
                 return false;
             }
             counters[ctr - FirstCounter] = max_value;
@@ -523,9 +532,9 @@ class check_complexity
             if (0 == counters[from - FirstCounter])  return true;
             if (counters[to - FirstCounter] >= max_value)
             {
-                mCRL2log(log::error) << "Error 2: counter \"" << work_names[to]
-                                           << "\" exceeded maximum value ("
-                                                      << max_value << ") for ";
+                mCRL2log(log::error) << "Error 2: counter \""
+                        << work_names[to - BLOCK_MIN] << "\" exceeded "
+                                    "maximum value (" << max_value << ") for ";
                 return false;
             }
             /*
@@ -640,9 +649,9 @@ class check_complexity
             {
                 if (counters[ctr - B_TO_C_MIN] > 0)
                 {
-                    mCRL2log(log::error)
-                             << "Error 3: counter \"" << work_names[ctr]
-                             << "\" exceeded maximum value (" << 0 << ") for ";
+                    mCRL2log(log::error) << "Error 3: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                            "maximum value (" << 0 << ") for ";
                     return false;
                 }
             }
@@ -736,22 +745,22 @@ class check_complexity
                 if (counters[ctr - STATE_MIN] > 0)
                 {
                     mCRL2log(log::error) << "Error 4: counter \""
-                            << work_names[ctr] << "\" exceeded maximum value ("
-                            << 0 << ") for ";
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                            "maximum value (" << 0 << ") for ";
                     return false;
                 }
             }
             // bottom state counters must be 0 for non-bottom states and 1 for
             // bottom states:
-            assert((unsigned) bottom <= 1);
+            // assert((unsigned) bottom <= 1);
             for(enum counter_type ctr = (enum counter_type) (STATE_MAX_TEMP+1);
                         ctr <= STATE_MAX ; ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - STATE_MIN] > (unsigned) bottom)
                 {
                     mCRL2log(log::error) << "Error 5: counter \""
-                            << work_names[ctr] << "\" exceeded maximum value ("
-                            << (unsigned) bottom << ") for ";
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                            "maximum value (" << (unsigned) bottom << ") for ";
                     return false;
                 }
                 counters[ctr - STATE_MIN] = (unsigned) bottom;
@@ -829,8 +838,8 @@ class check_complexity
                 if (counters[ctr - TRANS_MIN] > 0)
                 {
                     mCRL2log(log::error) << "Error 6: counter \""
-                            << work_names[ctr] << "\" exceeded maximum value ("
-                            << 0 << ") for ";
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                            "maximum value (" << 0 << ") for ";
                     return false;
                 }
             }
@@ -843,8 +852,8 @@ class check_complexity
                 if (counters[ctr - TRANS_MIN] > (unsigned) source_bottom)
                 {
                     mCRL2log(log::error) << "Error 7: counter \""
-                            << work_names[ctr] << "\" exceeded maximum value ("
-                            << (unsigned) source_bottom << ") for ";
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                     "maximum value (" << (unsigned) source_bottom << ") for ";
                     return false;
                 }
                 counters[ctr - TRANS_MIN] = (unsigned) source_bottom;
@@ -886,9 +895,9 @@ class check_complexity
                 return true;
             }
 
-            mCRL2log(log::error) << "Error 8: counter \"" << work_names[ctr]
-                                         << "\" exceeded maximum value ("
-                                         << (trans_type) max_value << ") for ";
+            mCRL2log(log::error) << "Error 8: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                    "maximum value (" << max_value << ") for ";
             return false;
         }
     };
@@ -916,7 +925,7 @@ class check_complexity
         ///                 print the remainder of the error message as needed.
         bool no_temporary_work(unsigned const max_block)
         {
-            assert((log_n + 1) / 2 <= max_block);
+            assert((log_n + 1U) / 2U <= max_block);
             assert(max_block <= log_n);
             for (enum counter_type ctr = BLOCK_dnj_MIN;
                                 ctr < create_initial_partition;
@@ -956,7 +965,7 @@ class check_complexity
         ///                 print the remainder of the error message as needed.
         bool no_temporary_work(unsigned const max_block, bool const bottom)
         {
-            assert((log_n + 1) / 2 <= max_block);
+            assert((log_n + 1U) / 2U <= max_block);
             assert(max_block <= log_n);
             for (enum counter_type ctr = STATE_dnj_MIN;
                  ctr < STATE_dnj_MIN_TEMP; ctr = (enum counter_type) (ctr + 1))
@@ -969,7 +978,7 @@ class check_complexity
             {
                 assert(counters[ctr - STATE_dnj_MIN] <= 0);
             }
-            assert((unsigned) bottom <= 1);
+            // assert((unsigned) bottom <= 1);
             for (enum counter_type ctr =
                     (enum counter_type) (STATE_dnj_MAX_TEMP + 1);
                      ctr <= STATE_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
@@ -1013,7 +1022,8 @@ class check_complexity
     };
 
     class block_bunch_dnj_counter_t : public counter_t<BLOCK_BUNCH_dnj_MIN,
-                                                           BLOCK_BUNCH_dnj_MAX>
+                        BLOCK_BUNCH_dnj_MAX, BLOCK_BUNCH_dnj_MIN_TEMP,
+                            (enum counter_type) (BLOCK_BUNCH_dnj_MAX_TEMP + 1)>
     {
       public:
         /// \brief ensures there is no orphaned temporary work counter
@@ -1035,12 +1045,30 @@ class check_complexity
         {
             assert(max_bunch <= log_n);
             for (enum counter_type ctr = BLOCK_BUNCH_dnj_MIN;
-               ctr <= BLOCK_BUNCH_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
+                            ctr < BLOCK_BUNCH_dnj_MIN_TEMP;
+                                           ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= max_bunch);
                 counters[ctr - BLOCK_BUNCH_dnj_MIN] = max_bunch;
             }
+            for (enum counter_type ctr = BLOCK_BUNCH_dnj_MIN_TEMP;
+               ctr <= BLOCK_BUNCH_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= 0);
+            }
+            assert(BLOCK_BUNCH_dnj_MAX_TEMP == BLOCK_BUNCH_dnj_MAX);
             return true;
+        }
+
+        bool has_temporary_work()
+        {
+            assert(BLOCK_BUNCH_dnj_MIN_TEMP == BLOCK_BUNCH_dnj_MAX_TEMP);
+            return counters[BLOCK_BUNCH_dnj_MIN_TEMP-BLOCK_BUNCH_dnj_MIN] > 0;
+        }
+        void reset_temporary_work()
+        {
+            assert(BLOCK_BUNCH_dnj_MIN_TEMP == BLOCK_BUNCH_dnj_MAX_TEMP);
+            counters[BLOCK_BUNCH_dnj_MIN_TEMP - BLOCK_BUNCH_dnj_MIN] = 0;
         }
     };
 
@@ -1070,7 +1098,7 @@ class check_complexity
                 unsigned const max_target_block, unsigned const max_bunch,
                                                              bool const bottom)
         {
-            assert((log_n + 1) / 2 <= max_source_block);
+            assert((log_n + 1U) / 2U <= max_source_block);
             assert(max_source_block <= log_n);
             for (enum counter_type ctr = TRANS_dnj_MIN;
                         ctr < refine__handle_transition_to_red_or_blue_state;
@@ -1079,7 +1107,7 @@ class check_complexity
                 assert(counters[ctr - TRANS_dnj_MIN] <= max_source_block);
                 counters[ctr - TRANS_dnj_MIN] = max_source_block;
             }
-            assert((log_n + 1) / 2 <= max_target_block);
+            assert((log_n + 1U) / 2U <= max_target_block);
             assert(max_target_block <= log_n);
             for (enum counter_type ctr =
                                 refine__handle_transition_to_red_or_blue_state;
@@ -1097,8 +1125,8 @@ class check_complexity
                 if (counters[ctr - TRANS_dnj_MIN] > max_bunch)
                 {
                     mCRL2log(log::error) << "Error 10: counter \""
-                            << work_names[ctr] << "\" exceeded maximum value ("
-                                                      << max_bunch << ") for ";
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                    "maximum value (" << max_bunch << ") for ";
                     return false;
                 }
                 counters[ctr - TRANS_dnj_MIN] = max_bunch;
@@ -1108,7 +1136,7 @@ class check_complexity
             {
                 assert(counters[ctr - TRANS_dnj_MIN] <= 0);
             }
-            assert((unsigned) bottom <= 1);
+            // assert((unsigned) bottom <= 1);
             for (enum counter_type ctr =
                     (enum counter_type) (TRANS_dnj_MAX_TEMP + 1);
                      ctr <= TRANS_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
@@ -1116,8 +1144,8 @@ class check_complexity
                 if (counters[ctr - TRANS_dnj_MIN] > (unsigned) bottom)
                 {
                     mCRL2log(log::error) << "Error 11: counter \""
-                            << work_names[ctr] << "\" exceeded maximum value ("
-                                              << (unsigned) bottom << ") for ";
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                            "maximum value (" << (unsigned) bottom << ") for ";
                     return false;
                 }
                 counters[ctr - TRANS_dnj_MIN] = (unsigned) bottom;
@@ -1158,9 +1186,9 @@ class check_complexity
                 return true;
             }
 
-            mCRL2log(log::error) << "Error 9: counter \"" << work_names[ctr]
-                                         << "\" exceeded maximum value ("
-                                         << (trans_type) max_value << ") for ";
+            mCRL2log(log::error) << "Error 9: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                                    "maximum value (" << max_value << ") for ";
             return false;
         }
     };
