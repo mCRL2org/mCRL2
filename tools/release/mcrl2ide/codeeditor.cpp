@@ -208,16 +208,9 @@ CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
   lineNumberArea = new LineNumbersArea(this);
   highlighter = new CodeHighlighter(spec, this->document());
 
-  /* set up the context menu*/
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
           SLOT(showContextMenu(const QPoint&)));
-  contextMenu = this->createStandardContextMenu();
-  contextMenu->addSeparator();
-  zoomInAction = contextMenu->addAction("Zoom in", this, SLOT(zoomIn()));
-  zoomInAction->setShortcut(QKeySequence::ZoomIn);
-  zoomOutAction = contextMenu->addAction("Zoom out", this, SLOT(zoomOut()));
-  zoomOutAction->setShortcut(QKeySequence::ZoomOut);
 
   /* change the line number area when needed */
   connect(this, SIGNAL(blockCountChanged(int)), this,
@@ -247,7 +240,12 @@ void CodeEditor::setFontSize(int pixelSize)
 
 void CodeEditor::showContextMenu(const QPoint& position)
 {
+  QMenu* contextMenu = this->createStandardContextMenu();
+  contextMenu->addSeparator();
+  zoomInAction = contextMenu->addAction("Zoom in", this, SLOT(zoomIn()));
+  zoomOutAction = contextMenu->addAction("Zoom out", this, SLOT(zoomOut()));
   contextMenu->exec(mapToGlobal(position));
+  delete contextMenu;
 }
 
 void CodeEditor::highlightCurrentLine()

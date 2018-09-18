@@ -10,6 +10,36 @@
 #include "consoledock.h"
 
 #include <QMainWindow>
+#include <QMenu>
+
+ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
+{
+  this->setReadOnly(true);
+
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
+          SLOT(showContextMenu(const QPoint&)));
+
+  /* set the font */
+  QFont logFont;
+  logFont.setFamily("Monospace");
+  logFont.setFixedPitch(true);
+  logFont.setWeight(QFont::Light);
+  this->setFont(logFont);
+}
+
+ConsoleWidget::~ConsoleWidget()
+{
+}
+
+void ConsoleWidget::showContextMenu(const QPoint& position)
+{
+  QMenu* contextMenu = this->createStandardContextMenu();
+  contextMenu->addSeparator();
+  contextMenu->addAction("Clear", this, SLOT(clear()));
+  contextMenu->exec(mapToGlobal(position));
+  delete contextMenu;
+}
 
 ConsoleDock::ConsoleDock(QWidget* parent) : QDockWidget("Console", parent)
 {
@@ -18,17 +48,9 @@ ConsoleDock::ConsoleDock(QWidget* parent) : QDockWidget("Console", parent)
   /* define the console widgets and set them to read only */
   for (ProcessType processType : PROCESSTYPES)
   {
-    consoles[processType] = new QPlainTextEdit();
-    consoles[processType]->setReadOnly(true);
-
-    QFont logFont;
-    logFont.setFamily("Monospace");
-    logFont.setFixedPitch(true);
-    logFont.setWeight(QFont::Light);
-    consoles[processType]->setFont(logFont);
-
-    consoleTabs->addTab(consoles[processType],
-                        PROCESSTYPENAMES.at(processType));
+    ConsoleWidget* console = new ConsoleWidget(this);
+    consoles[processType] = console;
+    consoleTabs->addTab(console, PROCESSTYPENAMES.at(processType));
   }
 
   this->setWidget(consoleTabs);

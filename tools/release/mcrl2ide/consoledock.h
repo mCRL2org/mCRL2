@@ -35,6 +35,26 @@ const std::map<ProcessType, QString> PROCESSTYPENAMES = {
     {ProcessType::LtsCreation, "State Space Generation"},
     {ProcessType::Verification, "Verification"}};
 
+class ConsoleWidget : public QPlainTextEdit
+{
+  Q_OBJECT
+
+  public:
+  /**
+   * @brief ConsoleDock Constructor
+   * @param parent The parent of this widget
+   */
+  explicit ConsoleWidget(QWidget* parent);
+  ~ConsoleWidget();
+
+  private slots:
+  /**
+   * @brief showContextMenu Creates and shows a context menu
+   * @param position The position where to create the context menu
+   */
+  void showContextMenu(const QPoint& position);
+};
+
 /**
  * @brief The ConsoleDock class defines the dock that shows console output
  */
@@ -101,7 +121,7 @@ class ConsoleDock : public QDockWidget
 
   private:
   QTabWidget* consoleTabs;
-  std::map<ProcessType, QPlainTextEdit*> consoles;
+  std::map<ProcessType, ConsoleWidget*> consoles;
 
   /**
    * @brief logToConsole Write output in the console

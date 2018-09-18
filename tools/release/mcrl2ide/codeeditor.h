@@ -178,7 +178,6 @@ class CodeEditor : public QPlainTextEdit
   CodeHighlighter* highlighter;
   QString placeholderText;
 
-  QMenu* contextMenu;
   QAction* zoomInAction;
   QAction* zoomOutAction;
 
