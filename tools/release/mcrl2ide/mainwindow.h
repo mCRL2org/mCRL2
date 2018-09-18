@@ -76,9 +76,10 @@ class MainWindow : public QMainWindow
   void actionSaveProjectAs();
 
   /**
-   * @brief actionAddPropertyResult Handles the result of adding a property
+   * @brief actionOpenProjectFolderInExplorer Allows the user to open the
+   *   project folder in the native file explorer
    */
-  void actionAddPropertyResult();
+  void actionOpenProjectFolderInExplorer();
 
   /**
    * @brief actionFindAndReplace Allows the user to find and replace strings in
@@ -114,6 +115,11 @@ class MainWindow : public QMainWindow
   void actionAddProperty();
 
   /**
+   * @brief actionAddPropertyResult Handles the result of adding a property
+   */
+  void actionAddPropertyResult();
+
+  /**
    * @brief actionImportProperty Allows the user to import a property from file
    */
   void actionImportProperty();
@@ -145,6 +151,7 @@ class MainWindow : public QMainWindow
   QAction* openProjectAction;
   QAction* saveProjectAction;
   QAction* saveProjectAsAction;
+  QAction* openProjectFolderInExplorerAction;
   QAction* exitAction;
 
   QAction* undoAction;

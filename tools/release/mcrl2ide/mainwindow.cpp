@@ -117,6 +117,13 @@ void MainWindow::setupMenuBar()
 
   fileMenu->addSeparator();
 
+  openProjectFolderInExplorerAction =
+      fileMenu->addAction("Open Project Folder in Explorer", this,
+                          SLOT(actionOpenProjectFolderInExplorer()));
+  openProjectFolderInExplorerAction->setEnabled(false);
+
+  fileMenu->addSeparator();
+
   exitAction = fileMenu->addAction("Exit", this, SLOT(close()),
                                    QKeySequence(Qt::CTRL + Qt::Key_Q));
 
@@ -263,6 +270,9 @@ void MainWindow::onNewProjectOpened()
   {
     propertiesDock->addProperty(property);
   }
+
+  /* enable opening the project in explorer */
+  openProjectFolderInExplorerAction->setEnabled(true);
 }
 
 void MainWindow::actionNewProject(bool askToSave)
@@ -292,13 +302,9 @@ void MainWindow::actionSaveProjectAs()
   fileSystem->saveProjectAs();
 }
 
-void MainWindow::actionAddPropertyResult()
+void MainWindow::actionOpenProjectFolderInExplorer()
 {
-  /* if successful (Add button was pressed), create the new property
-   * we don't need to save to file as this is already done by the dialog */
-  Property property = addPropertyDialog->getProperty();
-  fileSystem->newProperty(property);
-  propertiesDock->addProperty(property);
+  fileSystem->openProjectFolderInExplorer();
 }
 
 void MainWindow::actionFindAndReplace()
@@ -420,6 +426,15 @@ void MainWindow::actionAddProperty()
       addPropertyDialog->show();
     }
   }
+}
+
+void MainWindow::actionAddPropertyResult()
+{
+  /* if successful (Add button was pressed), create the new property
+   *   we don't need to save to file as this is already done by the dialog */
+  Property property = addPropertyDialog->getProperty();
+  fileSystem->newProperty(property);
+  propertiesDock->addProperty(property);
 }
 
 void MainWindow::actionImportProperty()

@@ -16,6 +16,7 @@
 #include <QDirIterator>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QDesktopServices>
 
 Property::Property()
 {
@@ -687,6 +688,11 @@ void FileSystem::saveProperty(const Property& property)
   QTextStream saveStream(&propertyFile);
   saveStream << property.text;
   propertyFile.close();
+}
+
+void FileSystem::openProjectFolderInExplorer()
+{
+  QDesktopServices::openUrl(projectFolderPath);
 }
 
 void FileSystem::removeTemporaryFolder()

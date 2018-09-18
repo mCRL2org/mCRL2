@@ -294,6 +294,12 @@ class FileSystem : public QObject
    * @param property The property to save
    */
   void saveProperty(const Property& property);
+  
+  /**
+   * @brief actionOpenProjectFolderInExplorer Allows the user to open the
+   *   project folder in the native file explorer
+   */
+  void openProjectFolderInExplorer();
 
   /**
    * @brief clearTemporaryFolder Removes the tomporary folder and its contents
