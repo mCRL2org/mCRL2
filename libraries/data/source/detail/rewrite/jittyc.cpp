@@ -1596,7 +1596,7 @@ class RewriterCompilingJitty::ImplementTree
 
       m_stream << m_padding 
                << "const data_expression& result" << auxiliary_method_name_index << "= auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "("
-               << brackets.current_data_arguments.top() << ");\n";
+               << brackets.current_data_arguments.top() << ",this_rewriter);\n";
       m_stream << m_padding 
                << "if (result" << auxiliary_method_name_index << " != data_expression()) { return result" << auxiliary_method_name_index << "; }\n";
 
