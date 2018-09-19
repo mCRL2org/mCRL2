@@ -20,6 +20,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <unordered_set>
+#include <bitset>
 
 #ifdef WIN32
 #include <io.h>
@@ -185,22 +186,35 @@ static std::size_t text_buffer_size = 0;
 
 static unsigned char bit_buffer = '\0';
 static std::size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
+static std::bitset<128> write_buffer(0);
 
 static void writeBits(std::size_t val, const std::size_t nr_bits, ostream& os)
 {
-  for (std::size_t cur_bit=0; cur_bit<nr_bits; cur_bit++)
+  if(nr_bits == 0)
   {
-    bit_buffer <<= 1;
-    bit_buffer |= (val & 0x01);
-    val >>= 1;
-    if (++bits_in_buffer == 8)
+    return;
+  }
+  // Reverse the order of bits in val
+  val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
+  val = ((val << 16) & 0xFFFF0000FFFF0000) | ((val >> 16) & 0x0000FFFF0000FFFF);
+  val = ((val << 8)  & 0xFF00FF00FF00FF00) | ((val >> 8)  & 0x00FF00FF00FF00FF);
+  val = ((val << 4)  & 0xF0F0F0F0F0F0F0F0) | ((val >> 4)  & 0x0F0F0F0F0F0F0F0F);
+  val = ((val << 2)  & 0xCCCCCCCCCCCCCCCC) | ((val >> 2)  & 0x3333333333333333);
+  val = ((val << 1)  & 0xAAAAAAAAAAAAAAAA) | ((val >> 1)  & 0x5555555555555555);
+  // Add val to the buffer
+  write_buffer |= std::bitset<128>(val) << (64 - bits_in_buffer);
+  bits_in_buffer += nr_bits;
+  // Write 8 bytes if available
+  if(bits_in_buffer >= 64)
+  {
+    unsigned long long write_value = (write_buffer >> 64).to_ullong();
+    write_buffer <<= 64;
+    bits_in_buffer -= 64;
+    for(uint32_t i = 8; i > 0; --i)
     {
-      os.put(bit_buffer);
-      bits_in_buffer = 0;
-      bit_buffer = '\0';
+      os.put((write_value >> (8*(i-1))) & 0xFF);
     }
   }
-  assert(val==0);
 }
 
 
@@ -208,15 +222,17 @@ static void flushBitsToWriter(ostream& os)
 {
   if (bits_in_buffer > 0)
   {
-    std::size_t left = 8-bits_in_buffer;
-    bit_buffer <<= left;
-    os.put(bit_buffer);
+    unsigned long long write_value = (write_buffer >> 64).to_ullong();
+    for(uint32_t i = 8; i > 7 - bits_in_buffer / 8; --i)
+    {
+      os.put((write_value >> (8*(i-1))) & 0xFF);
+    }
     if (os.fail())
     {
       throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
     }
+    write_buffer = std::bitset<128>(0);
     bits_in_buffer = 0;
-    bit_buffer = '\0';
   }
 }
 
@@ -555,7 +571,7 @@ static void write_term(const aterm& t, ostream& os,
 static void write_baf(const aterm& t, ostream& os)
 {
   /* Initialize bit buffer */
-  bit_buffer     = '\0';
+  write_buffer = std::bitset<128>(0);
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
   std::unordered_map<function_symbol, std::size_t> symbol_index_map;
