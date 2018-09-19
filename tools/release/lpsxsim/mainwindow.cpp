@@ -280,18 +280,29 @@ void MainWindow::setTauPrioritization()
 
 void MainWindow::openSpecification(QString filename)
 {
-  Simulation *simulation = new Simulation(filename, m_atermThread, m_strategy, m_do_not_use_dummies);
-  if (!simulation->initialized())
+  if (m_newSimulation && !m_newSimulation->initialized())
   {
-    simulation->deleteLater();
-    return;
+    /* refresh the thread to allow running a new simulation */
+    m_atermThread->terminate();
+    m_atermThread->deleteLater();
+    m_atermThread = new QThread;
+    m_atermThread->start();
+    m_newSimulation->deleteLater();
   }
+  m_newSimulation = new Simulation(filename, m_strategy);
+  m_newSimulation->moveToThread(m_atermThread);
+  connect(m_newSimulation, SIGNAL(initialisationDone()), this, SLOT(onInitializedSimulation()));
+  QMetaObject::invokeMethod(m_newSimulation, "init", Qt::QueuedConnection, Q_ARG(QString, filename), Q_ARG(bool, m_do_not_use_dummies));
+  m_ui.statusBar->showMessage("Initializing simulation...");
+}
 
+void MainWindow::onInitializedSimulation()
+{
   if (m_simulation)
   {
     m_simulation->deleteLater();
   }
-  m_simulation = simulation;
+  m_simulation = m_newSimulation;
   m_selectedState = 0;
 
   QStringList parameters = m_simulation->parameters();
@@ -314,6 +325,8 @@ void MainWindow::openSpecification(QString filename)
   m_ui.actionPlayTrace->setEnabled(true);
   m_ui.actionRandomPlay->setEnabled(true);
   m_ui.actionStop->setEnabled(false);
+
+  m_ui.statusBar->clearMessage();
 }
 
 void MainWindow::selectState(int state)

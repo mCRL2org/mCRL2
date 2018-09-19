@@ -46,6 +46,7 @@ class MainWindow : public QMainWindow
 
   public slots:
     void openSpecification(QString filename);
+    void onInitializedSimulation();
     void selectState(int state);
     void truncateTrace(int state);
     void selectTransition(int transition);
@@ -72,6 +73,7 @@ class MainWindow : public QMainWindow
     QThread *m_atermThread;
     mcrl2::data::rewrite_strategy m_strategy;
     Simulation *m_simulation;
+    Simulation *m_newSimulation = nullptr;
     Simulation::Trace m_trace;
     int m_selectedState;
     QTimer *m_animationTimer;

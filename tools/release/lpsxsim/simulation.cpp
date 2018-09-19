@@ -12,15 +12,6 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
-Simulation::Simulation(QString filename, QThread *atermThread, mcrl2::data::rewrite_strategy strategy, const bool do_not_use_dummies)
-  : m_strategy(strategy),
-    m_initialized(false),
-    m_simulation(NULL)
-{
-  moveToThread(atermThread);
-  QMetaObject::invokeMethod(this, "init", Qt::BlockingQueuedConnection, Q_ARG(QString, filename), Q_ARG(bool, do_not_use_dummies));
-}
-
 void Simulation::init(const QString& filename, bool do_not_use_dummies)
 {
   mcrl2::lps::stochastic_specification spec;
@@ -53,6 +44,7 @@ void Simulation::init(const QString& filename, bool do_not_use_dummies)
 
   updateTrace(0);
   m_initialized = true;
+  emit initialisationDone();
 }
 
 void Simulation::updateTrace(unsigned int firstChangedState)
