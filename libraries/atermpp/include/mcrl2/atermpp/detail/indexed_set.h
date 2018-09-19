@@ -23,7 +23,7 @@ namespace detail
 {
 
 static const std::size_t STEP = 1; /* The position on which the next hash entry //searched */
-
+static const std::size_t PRIME_NUMBER = 999953;
 
 /* in the hashtable we use the following constants to
    indicate designated positions */
@@ -67,7 +67,7 @@ std::size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, std::size
      and find whether key already exists */
 
   std::size_t deleted_position=detail::EMPTY; // This variable recalls a proper deleted position to insert n. EMPTY means not yet found.
-  std::size_t start = std::hash<aterm>()(key) & sizeMinus1;
+  std::size_t start = (std::hash<aterm>()(key)*detail::PRIME_NUMBER) & sizeMinus1;
   std::size_t c = start;
 
   while (true)
@@ -170,7 +170,7 @@ inline indexed_set<ELEMENT>::indexed_set(std::size_t initial_size /* = 100 */, u
 template <class ELEMENT>
 inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 {
-  std::size_t start = std::hash<aterm>()(elem) & sizeMinus1;
+  std::size_t start = (std::hash<aterm>()(elem)*detail::PRIME_NUMBER) & sizeMinus1;
   std::size_t c = start;
   do
   {
@@ -196,7 +196,7 @@ inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 template <class ELEMENT>
 bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 {
-  std::size_t start = std::hash<aterm>()(key) & sizeMinus1;
+  std::size_t start = (std::hash<aterm>()(key)*detail::PRIME_NUMBER) & sizeMinus1;
   std::size_t c = start;
   std::size_t v;
   while (true)
