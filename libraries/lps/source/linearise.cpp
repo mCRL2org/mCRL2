@@ -330,11 +330,8 @@ class specification_basic_type
     /***************** temporary helper function to compare substitutions ******************/
 
     template <class Expression, class Substitution>
-    Expression replace_variables_capture_avoiding_alt(const Expression& e,
-                                                           Substitution& sigma,
-                                                           const std::set<variable>& variables_in_rhs_of_sigma)
+    Expression replace_variables_capture_avoiding_alt(const Expression& e, Substitution& sigma)
     {
-      // return data::replace_variables_capture_avoiding(e, sigma, variables_in_rhs_of_sigma);
       return data::replace_variables_capture_avoiding_with_an_identifier_generator(e, sigma, fresh_identifier_generator);
     }
 
@@ -1530,8 +1527,7 @@ class specification_basic_type
     void alphaconvertprocess(
       variable_list& sumvars,
       MutableSubstitution& sigma,
-      const process_expression& p,
-      std::set < variable >& lhs_variables_in_sigma)
+      const process_expression& p)
     {
       /* This function replaces the variables in sumvars
          by unique ones if these variables occur in occurvars
@@ -1548,7 +1544,6 @@ class specification_basic_type
           const variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars.push_front(newvar);
           sigma[var]=newvar;
-          lhs_variables_in_sigma.insert(newvar);
         }
         else
         {
@@ -1563,8 +1558,7 @@ class specification_basic_type
       variable_list& sumvars,
       MutableSubstitution& sigma,
       const variable_list& occurvars,
-      const data_expression_list& occurterms,
-      std::set<variable>& variables_occurring_in_rhs_of_sigma)
+      const data_expression_list& occurterms)
     {
       /* This function replaces the variables in sumvars
          by unique ones if these variables occur in occurvars
@@ -1583,7 +1577,6 @@ class specification_basic_type
           /* rename_vars.push_front(var);
              rename_terms.push_front(data_expression(newvar)); */
           sigma[var]=newvar;
-          variables_occurring_in_rhs_of_sigma.insert(newvar);
         }
         else
         {
@@ -1841,8 +1834,7 @@ class specification_basic_type
       const variable_list& parameters,
       const bool replacelhs,
       const bool replacerhs,
-      Substitution& sigma,
-      const std::set<variable>& variables_in_rhs_of_sigma)
+      Substitution& sigma)
     {
       assert(check_assignment_list(assignments, parameters));
       /* precondition: the variables in the assignment occur in
@@ -1888,7 +1880,7 @@ class specification_basic_type
           }
           if (replacerhs)
           {
-            rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma,variables_in_rhs_of_sigma);
+            rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma);
           }
 
           assignment_list result=
@@ -1897,8 +1889,7 @@ class specification_basic_type
                      parameters.tail(),
                      replacelhs,
                      replacerhs,
-                     sigma,
-                     variables_in_rhs_of_sigma);
+                     sigma);
           result.push_front(assignment(lhs,rhs));
           return result;
         }
@@ -1919,7 +1910,7 @@ class specification_basic_type
       }
       if (replacerhs)
       {
-        rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma,variables_in_rhs_of_sigma);
+        rhs=/* data::*/replace_variables_capture_avoiding_alt(rhs,sigma);
       }
 
       if (lhs==rhs)
@@ -1929,8 +1920,7 @@ class specification_basic_type
                  parameters.tail(),
                  replacelhs,
                  replacerhs,
-                 sigma,
-                 variables_in_rhs_of_sigma);
+                 sigma);
       }
       assignment_list result=
                substitute_assignmentlist(
@@ -1938,8 +1928,7 @@ class specification_basic_type
                  parameters.tail(),
                  replacelhs,
                  replacerhs,
-                 sigma,
-                 variables_in_rhs_of_sigma);
+                 sigma);
       result.push_front(assignment(lhs,rhs));
       return result;
     }
@@ -2002,57 +1991,54 @@ class specification_basic_type
     template <class Substitution>
     process_expression substitute_pCRLproc(
       const process_expression& p,
-      Substitution& sigma,
-      const std::set< variable >& rhs_variables_in_sigma)
+      Substitution& sigma)
     {
-      // Substitution sigma_aux(sigma);
-      // return process::replace_variables_capture_avoiding(p,sigma_aux,rhs_variables_in_sigma);
       if (is_choice(p))
       {
         return choice(
-                 substitute_pCRLproc(choice(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(choice(p).right(),sigma,rhs_variables_in_sigma));
+                 substitute_pCRLproc(choice(p).left(),sigma),
+                 substitute_pCRLproc(choice(p).right(),sigma));
       }
       if (is_seq(p))
       {
         return seq(
-                 substitute_pCRLproc(seq(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(seq(p).right(),sigma,rhs_variables_in_sigma));
+                 substitute_pCRLproc(seq(p).left(),sigma),
+                 substitute_pCRLproc(seq(p).right(),sigma));
       }
       if (is_sync(p))
       {
         return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
+                 substitute_pCRLproc(process::sync(p).left(),sigma),
+                 substitute_pCRLproc(process::sync(p).right(),sigma));
       }
       if (is_if_then(p))
       {
-        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma,rhs_variables_in_sigma);
+        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma);
         if (condition==sort_bool::false_())
         {
           return delta_at_zero();
         }
         if (condition==sort_bool::true_())
         {
-          return substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma);
+          return substitute_pCRLproc(if_then(p).then_case(),sigma);
         }
-        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma,rhs_variables_in_sigma));
+        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma));
       }
       if (is_if_then_else(p))
       {
-        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma,rhs_variables_in_sigma);
+        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma);
         if (condition==sort_bool::false_())
         {
-          return substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma);
+          return substitute_pCRLproc(if_then_else(p).else_case(),sigma);
         }
         if (condition==sort_bool::true_())
         {
-          return substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma);
+          return substitute_pCRLproc(if_then_else(p).then_case(),sigma);
         }
         return if_then_else(
                  condition,
-                 substitute_pCRLproc(if_then_else(p).then_case(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(if_then_else(p).else_case(),sigma,rhs_variables_in_sigma));
+                 substitute_pCRLproc(if_then_else(p).then_case(),sigma),
+                 substitute_pCRLproc(if_then_else(p).else_case(),sigma));
       }
 
       if (is_sum(p))
@@ -2068,11 +2054,10 @@ class specification_basic_type
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma=sigma;
-        std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
+        alphaconvert(sumargs,local_sigma,vars,terms);
 
         return sum(sumargs,
-                   substitute_pCRLproc(sum(p).operand(),local_sigma,local_rhs_variables_in_sigma));
+                   substitute_pCRLproc(sum(p).operand(),local_sigma));
       }
 
       if (is_stochastic_operator(p))
@@ -2089,13 +2074,12 @@ class specification_basic_type
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma=sigma;
-        std::set<variable> local_rhs_variables_in_sigma=rhs_variables_in_sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms,local_rhs_variables_in_sigma);
+        alphaconvert(sumargs,local_sigma,vars,terms);
 
         return stochastic_operator(
                             sumargs,
-                            /* data::*/replace_variables_capture_avoiding_alt(sto.distribution(),sigma,rhs_variables_in_sigma),
-                            substitute_pCRLproc(sto.operand(),local_sigma,local_rhs_variables_in_sigma));
+                            replace_variables_capture_avoiding_alt(sto.distribution(),sigma),
+                            substitute_pCRLproc(sto.operand(),local_sigma));
       }
 
       if (is_process_instance(p))
@@ -2108,7 +2092,7 @@ class specification_basic_type
         const process_instance_assignment q(p);
         std::size_t n=objectIndex(q.identifier());
         const variable_list parameters=objectdata[n].parameters;
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma);
+        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma);
         assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
         return process_instance_assignment(q.identifier(),new_assignments);
       }
@@ -2116,13 +2100,13 @@ class specification_basic_type
       if (is_action(p))
       {
         return action(action(p).label(),
-                      /* data::*/replace_variables_capture_avoiding_alt(action(p).arguments(), sigma,rhs_variables_in_sigma));
+                      /* data::*/replace_variables_capture_avoiding_alt(action(p).arguments(), sigma));
       }
 
       if (is_at(p))
       {
-        return at(substitute_pCRLproc(at(p).operand(),sigma,rhs_variables_in_sigma),
-                  /* data::*/replace_variables_capture_avoiding_alt(at(p).time_stamp(),sigma,rhs_variables_in_sigma));
+        return at(substitute_pCRLproc(at(p).operand(),sigma),
+                  /* data::*/replace_variables_capture_avoiding_alt(at(p).time_stamp(),sigma));
       }
 
       if (is_delta(p))
@@ -2138,8 +2122,8 @@ class specification_basic_type
       if (is_sync(p))
       {
         return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma,rhs_variables_in_sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
+                 substitute_pCRLproc(process::sync(p).left(),sigma),
+                 substitute_pCRLproc(process::sync(p).right(),sigma));
       }
 
       throw mcrl2::runtime_error("Internal error: expect a pCRL process (2) " + process::pp(p));
@@ -2287,11 +2271,10 @@ class specification_basic_type
         process_expression body1=sum(body).operand();
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        body1=substitute_pCRLproc(body1, sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> >  sigma_aux(sigma);
-        const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
+        const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time, sigma_aux);
         body1=wraptime(body1,time1,sumvars+freevars);
         return sum(sumvars,body1);
       }
@@ -2303,12 +2286,11 @@ class specification_basic_type
         process_expression body1=sto.operand();
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        body1=substitute_pCRLproc(body1, sigma,variables_occurring_in_rhs_of_sigma);
-        const data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma,variables_occurring_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        body1=substitute_pCRLproc(body1, sigma);
+        const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
-        const data_expression time1=/* data::*/replace_variables_capture_avoiding_alt(time, sigma_aux,variables_occurring_in_rhs_of_sigma);
+        const data_expression time1=replace_variables_capture_avoiding_alt(time, sigma_aux);
         body1=wraptime(body1,time1,sumvars+freevars);
         return stochastic_operator(sumvars,new_distribution,body1);
       }
@@ -2527,9 +2509,8 @@ class specification_basic_type
           process_expression body1=sum(body).operand();
 
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          std::set<variable> variables_occurring_in_rhs_of_sigma;
-          alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-          body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
+          alphaconvert(sumvars,sigma,freevars,data_expression_list());
+          body1=substitute_pCRLproc(body1,sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
           body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first,variables_bound_in_sum1);
@@ -2561,10 +2542,9 @@ class specification_basic_type
           process_expression body1=sto.operand();
 
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          std::set<variable> variables_occurring_in_rhs_of_sigma;
-          alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-          distribution=/* data::*/replace_variables_capture_avoiding_alt(distribution,sigma,variables_occurring_in_rhs_of_sigma);
-          body1=substitute_pCRLproc(body1,sigma,variables_occurring_in_rhs_of_sigma);
+          alphaconvert(sumvars,sigma,freevars,data_expression_list());
+          distribution=/* data::*/replace_variables_capture_avoiding_alt(distribution,sigma);
+          body1=substitute_pCRLproc(body1,sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
           body1=bodytovarheadGNF(body1,seq_state,sumvars+freevars,v,variables_bound_in_sum1);
@@ -2890,10 +2870,9 @@ class specification_basic_type
         variable_list sumvars=sum(body1).variables();
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set < variable > lhs_variables_in_sigma;
-        alphaconvertprocess(sumvars,sigma,body2,lhs_variables_in_sigma);
+        alphaconvertprocess(sumvars,sigma,body2);
         return sum(sumvars,
-                   putbehind(substitute_pCRLproc(sum(body1).operand(), sigma,lhs_variables_in_sigma),
+                   putbehind(substitute_pCRLproc(sum(body1).operand(), sigma),
                              body2));
       }
 
@@ -2904,13 +2883,12 @@ class specification_basic_type
 
         // See explanation at sum operator above.
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set < variable > lhs_variables_in_sigma;
-        alphaconvertprocess(stochvars,sigma,body2,lhs_variables_in_sigma);
+        alphaconvertprocess(stochvars,sigma,body2);
         return stochastic_operator(
                  stochvars,
                  sto.distribution(),
                  putbehind(
-                       substitute_pCRLproc(sto.operand(),sigma,lhs_variables_in_sigma),
+                       substitute_pCRLproc(sto.operand(),sigma),
                        body2));
       }
 
@@ -2979,12 +2957,11 @@ class specification_basic_type
             inadvertently bound */
         variable_list sumvars=sum(body1).variables();
         maintain_variables_in_rhs< mutable_map_substitution<> >  sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,variable_list(), data_expression_list({ condition }),variables_occurring_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,variable_list(), data_expression_list({ condition }));
         return sum(
                  sumvars,
                  distribute_condition(
-                   substitute_pCRLproc(sum(body1).operand(),sigma,variables_occurring_in_rhs_of_sigma),
+                   substitute_pCRLproc(sum(body1).operand(),sigma),
                    condition));
       }
 
@@ -2995,16 +2972,14 @@ class specification_basic_type
         const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body1);
         variable_list stochvars=sto.variables();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(stochvars,sigma,variable_list(), data_expression_list({ condition }),variables_occurring_in_rhs_of_sigma);
+        alphaconvert(stochvars,sigma,variable_list(), data_expression_list({ condition }));
         return stochastic_operator(
                  stochvars,
                  /* data::*/replace_variables_capture_avoiding_alt(
                                                sto.distribution(),
-                                               sigma,
-                                               variables_occurring_in_rhs_of_sigma),
+                                               sigma),
                  distribute_condition(
-                       substitute_pCRLproc(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma),
+                       substitute_pCRLproc(sto.operand(),sigma),
                        condition));
       }
 
@@ -3047,10 +3022,9 @@ class specification_basic_type
       if (is_sum(body1))
       {
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
         variable_list inner_sumvars=sum(body1).variables();
-        alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const process_expression new_body1=substitute_pCRLproc(sum(body1).operand(), sigma, variables_occurring_in_rhs_of_sigma);
+        alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list());
+        const process_expression new_body1=substitute_pCRLproc(sum(body1).operand(), sigma);
         return sum(sumvars+inner_sumvars,new_body1);
       }
 
@@ -3058,11 +3032,10 @@ class specification_basic_type
       {
         const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body1);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
         variable_list inner_sumvars=sto.variables();
-        alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const process_expression new_body1=substitute_pCRLproc(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
-        const data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
+        alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list());
+        const process_expression new_body1=substitute_pCRLproc(sto.operand(), sigma);
+        const data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         return stochastic_operator(sumvars+inner_sumvars,new_distribution,new_body1);
       }
 
@@ -3426,9 +3399,8 @@ class specification_basic_type
         variable_list sumvars=sum(t).variables();
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma, variables_occurring_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma);
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -3446,13 +3418,11 @@ class specification_basic_type
         variable_list sumvars=sto.variables();
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        const data_expression distribution=/* data::*/replace_variables_capture_avoiding_alt(
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        const data_expression distribution=replace_variables_capture_avoiding_alt(
                                                sto.distribution(),
-                                               sigma,
-                                               variables_occurring_in_rhs_of_sigma);
-        const process_expression body=substitute_pCRLproc(sto.operand(),sigma,variables_occurring_in_rhs_of_sigma);
+                                               sigma);
+        const process_expression body=substitute_pCRLproc(sto.operand(),sigma);
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -3493,11 +3463,10 @@ class specification_basic_type
         variable_list sumvars=sum(body).variables();
         process_expression body1=sum(body).operand();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        body1=substitute_pCRLproc(body1, sigma, variables_occurring_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        body1=substitute_pCRLproc(body1, sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
-        const data_expression time1=/* data::*/replace_variables_capture_avoiding_alt(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
+        const data_expression time1=replace_variables_capture_avoiding_alt(time,sigma_aux);
         body1=distributeTime(body1,time1,sumvars+freevars,timecondition);
         return sum(sumvars,body1);
       }
@@ -3507,12 +3476,11 @@ class specification_basic_type
         const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
         variable_list sumvars=sto.variables();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,freevars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
-        process_expression new_body=substitute_pCRLproc(sto.operand(), sigma, variables_occurring_in_rhs_of_sigma);
-        data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma, variables_occurring_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,freevars,data_expression_list());
+        process_expression new_body=substitute_pCRLproc(sto.operand(), sigma);
+        data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
-        const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time,sigma_aux,variables_occurring_in_rhs_of_sigma);
+        const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time,sigma_aux);
         new_body=distributeTime(new_body,time1,sumvars+freevars,timecondition);
         return stochastic_operator(sumvars,new_distribution,new_body);
       }
@@ -3689,15 +3657,13 @@ class specification_basic_type
         const assignment_list& dl= process_instance_assignment(body).assignments();
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_of_sigma;
 
         for(assignment_list::const_iterator i=dl.begin(); i!=dl.end(); ++i)
         {
           sigma[i->lhs()]=i->rhs();
           const std::set<variable> varset=find_free_variables(i->rhs());
-          variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
         }
-        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma,variables_occurring_in_rhs_of_sigma);
+        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma);
         if (regular)
         {
           t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
@@ -4143,10 +4109,9 @@ class specification_basic_type
           const stochastic_operator& proc=down_cast<const stochastic_operator>(proc_);
           assert(!is_process_instance_assignment(proc.operand()));
           const std::size_t n=objectIndex(p);
-          std::set<variable> variables_occurring_in_rhs_of_sigma;
           maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
           variable_list vars=proc.variables();
-          alphaconvert(vars,local_sigma, vars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+          alphaconvert(vars,local_sigma, vars,data_expression_list());
 
           const process_identifier newproc=newprocess(
                                            vars + objectdata[n].parameters,
@@ -4164,8 +4129,7 @@ class specification_basic_type
                                   process_pid_pair(stochastic_operator(
                                                         vars,
                                                         /* data::*/replace_variables_capture_avoiding_alt(proc.distribution(),
-                                                                                                          local_sigma,
-                                                                                                          variables_occurring_in_rhs_of_sigma),
+                                                                                                          local_sigma),
                                                         proc.operand()),
                                                    newproc)));
           result.insert(newproc);
@@ -5280,9 +5244,8 @@ class specification_basic_type
       // Check whether the variables in sumvars clash with the parameter list,
       // and rename the summandterm accordingly.
       maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
-      std::set<variable> local_rhs_variables_in_sigma;
-      alphaconvert(sumvars,local_sigma,process_parameters,data_expression_list(),local_rhs_variables_in_sigma);
-      summandterm=substitute_pCRLproc(summandterm, local_sigma, local_rhs_variables_in_sigma);
+      alphaconvert(sumvars,local_sigma,process_parameters,data_expression_list());
+      summandterm=substitute_pCRLproc(summandterm, local_sigma);
 
 
       /* translate the condition */
@@ -6176,7 +6139,6 @@ class specification_basic_type
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_in_rhs_of_sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
@@ -6186,12 +6148,11 @@ class specification_basic_type
           {
             sigma[*i]=*j;
             const std::set<variable> varset=find_free_variables(*j);
-            variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
           }
         }
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition,mutable_sigma,variables_in_rhs_of_sigma);
+        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition,mutable_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -6305,7 +6266,6 @@ class specification_basic_type
             for (std::size_t i=1; i<fcnt; ++i, ++d1) {};
             f= *d1;
             maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
-            std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -6315,12 +6275,11 @@ class specification_basic_type
               {
                 sigma[*i]=*j;
                 std::set<variable> varset=find_free_variables(*j);
-                variables_in_rhs_sigma.insert(varset.begin(),varset.end());
               }
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(f,mutable_sigma,variables_in_rhs_sigma);
+            const data_expression auxresult1=replace_variables_capture_avoiding_alt(f,mutable_sigma);
 
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
@@ -6412,7 +6371,6 @@ class specification_basic_type
             ++auxrename_list_args;
 
             maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-            std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -6422,12 +6380,11 @@ class specification_basic_type
               {
                 sigma[*i]=*j;
                 std::set<variable> varset=find_free_variables(*j);
-                variables_in_rhs_sigma.insert(varset.begin(),varset.end());
               }
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma,variables_in_rhs_sigma);
+            const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -6514,7 +6471,6 @@ class specification_basic_type
           const data_expression_list stochastic_auxargs= *stochastic_auxrename_list_args;
           ++stochastic_auxrename_list_args;
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          std::set<variable> variables_in_rhs_of_sigma;
           data_expression_list::const_iterator j=stochastic_auxargs.begin();
           for (variable_list::const_iterator i=stochastic_auxpars.begin();
                i!=stochastic_auxpars.end(); ++i, ++j)
@@ -6524,7 +6480,6 @@ class specification_basic_type
             {
               sigma[*i]=*j;
               const std::set<variable> varset=find_free_variables(*j);
-              variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
             }
           }
           j=auxargs.begin();
@@ -6536,12 +6491,11 @@ class specification_basic_type
             {
               sigma[*i]=*j;
               const std::set<variable> varset=find_free_variables(*j);
-              variables_in_rhs_of_sigma.insert(varset.begin(),varset.end());
             }
           }
           maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-          const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(dist,mutable_sigma,variables_in_rhs_of_sigma);
+          const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(dist,mutable_sigma);
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
             equalterm=auxresult1;
@@ -6665,7 +6619,6 @@ class specification_basic_type
           nextstateparameter=getRHSassignment(*var_it,nextstate);
 
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          std::set<variable> variables_in_rhs_sigma;
           data_expression_list::const_iterator j=stochastic_auxargs.begin();
           for (variable_list::const_iterator i=stochastic_auxpars.begin();
                  i!=stochastic_auxpars.end(); ++i, ++j)
@@ -6675,7 +6628,6 @@ class specification_basic_type
             {
               sigma[*i]=*j;
               std::set<variable> varset=find_free_variables(*j);
-              variables_in_rhs_sigma.insert(varset.begin(),varset.end());
             }
           }
           j=auxargs.begin();
@@ -6687,12 +6639,11 @@ class specification_basic_type
             {
               sigma[*i]=*j;
               std::set<variable> varset=find_free_variables(*j);
-              variables_in_rhs_sigma.insert(varset.begin(),varset.end());
             }
           }
 
           maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-          data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(nextstateparameter, mutable_sigma,variables_in_rhs_sigma);
+          data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(nextstateparameter, mutable_sigma);
           if (equalterm==data_expression()) // ||is_global_variable(equalterm)) Adding this last part leads to smaller case functions,
                                             // but bigger and less structured state spaces, as parameters are less often put to default
                                             // values. Constant elimination can less often be applied as constant eliminiation does not
@@ -6819,7 +6770,6 @@ class specification_basic_type
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_in_rhs_sigma;
         data_expression_list::const_iterator j=auxargs.begin();
         for (variable_list::const_iterator i=auxpars.begin();
              i!=auxpars.end(); ++i, ++j)
@@ -6829,12 +6779,11 @@ class specification_basic_type
           {
             sigma[*i]=*j;
             std::set<variable> varset=find_free_variables(*j);
-            variables_in_rhs_sigma.insert(varset.begin(),varset.end());
           }
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition, mutable_sigma,variables_in_rhs_sigma);
+        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition, mutable_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -6954,7 +6903,6 @@ class specification_basic_type
             ++auxrename_list_args;
 
             maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
-            std::set<variable> variables_in_rhs_sigma;
             data_expression_list::const_iterator j=auxargs.begin();
             for (variable_list::const_iterator i=auxpars.begin();
                  i!=auxpars.end(); ++i, ++j)
@@ -6964,12 +6912,11 @@ class specification_basic_type
               {
                 sigma[*i]=*j;
                 std::set<variable> varset=find_free_variables(*j);
-                variables_in_rhs_sigma.insert(varset.begin(),varset.end());
               }
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma,variables_in_rhs_sigma);
+            const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -8564,7 +8511,6 @@ class specification_basic_type
         const data_expression_list& auxargs=*renamings_arg;
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma; 
-        std::set<variable> variables_in_rhs_sigma;
         data_expression_list::const_iterator j1=auxargs.begin();
         for (variable_list::const_iterator i1=auxpars.begin();
              i1!=auxpars.end(); ++i1, ++j1)
@@ -8574,13 +8520,12 @@ class specification_basic_type
           {
             sigma[*i1]=*j1;
             std::set<variable> varset=find_free_variables(*j);
-            variables_in_rhs_sigma.insert(varset.begin(),varset.end());
 
           }
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        result=lazy::or_(result,/* data::*/replace_variables_capture_avoiding_alt(lazy::and_(*i,*j), mutable_sigma, variables_in_rhs_sigma));
+        result=lazy::or_(result,/* data::*/replace_variables_capture_avoiding_alt(lazy::and_(*i,*j), mutable_sigma));
       }
       return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, RewriteTerm(result));
     }
@@ -8590,8 +8535,7 @@ class specification_basic_type
 
     data::maintain_variables_in_rhs< data::mutable_map_substitution<> >  make_unique_variables(
       const variable_list& var_list,
-      const std::string& hint,
-      std::set<data::variable>& rhs_variables)
+      const std::string& hint)
     {
       /* This function generates a list of variables with the same sorts
          as in variable_list, where all names are unique */
@@ -8602,7 +8546,6 @@ class specification_basic_type
       {
         const data::variable v = get_fresh_variable(std::string(i->name()) + ((hint.empty())?"":"_") + hint, i->sort());
         sigma[*i] = v;
-        rhs_variables.insert(v);
       }
       return sigma;
     }
@@ -8619,11 +8562,10 @@ class specification_basic_type
     {
       stochastic_action_summand_vector result_action_summands;
 
-      std::set<data::variable> rhs_variables_sigma;
-      data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma=make_unique_variables(pars, hint, rhs_variables_sigma);
+      data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma=make_unique_variables(pars, hint);
       const variable_list unique_pars=data::replace_variables(pars, sigma);
 
-      init=substitute_assignmentlist(init,pars,true,false, sigma,rhs_variables_sigma);  // Only substitute the variables in the lhs.
+      init=substitute_assignmentlist(init,pars,true,false, sigma);  // Only substitute the variables in the lhs.
 
       if (!options.ignore_time)
       {
@@ -8633,25 +8575,22 @@ class specification_basic_type
         {
           local_sigma[v]=v;
         }
-        ultimate_delay_condition.constraint()=/*data::*/replace_variables_capture_avoiding_alt(
+        ultimate_delay_condition.constraint()=replace_variables_capture_avoiding_alt(
                                                        ultimate_delay_condition.constraint(),
-                                                       local_sigma,
-                                                       rhs_variables_sigma);  // Only substitute the variables in the lhs.
+                                                       local_sigma);  // Only substitute the variables in the lhs.
       }
       for (stochastic_action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
         const stochastic_action_summand smmnd= *s;
 
-        std::set<data::variable> rhs_variables_sumvars;
         const variable_list& sumvars=smmnd.summation_variables();
-        data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint,rhs_variables_sumvars);
+        data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         stochastic_distribution distribution=smmnd.distribution();
-        std::set<data::variable> rhs_variables_stochastic_vars;
         const variable_list stochastic_vars=distribution.variables();
         data::maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_stochastic_vars=
-                                          make_unique_variables(stochastic_vars,hint,rhs_variables_stochastic_vars);
+                                          make_unique_variables(stochastic_vars,hint);
         const variable_list unique_stochastic_vars=data::replace_variables(stochastic_vars, sigma_stochastic_vars);
 
         data_expression condition=smmnd.condition();
@@ -8659,27 +8598,27 @@ class specification_basic_type
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-        condition=/* data::*/replace_variables_capture_avoiding_alt(condition, sigma_sumvars, rhs_variables_sumvars);
-        condition=/* data::*/replace_variables_capture_avoiding_alt(condition, sigma, rhs_variables_sigma);
+        condition=replace_variables_capture_avoiding_alt(condition, sigma_sumvars);
+        condition=replace_variables_capture_avoiding_alt(condition, sigma);
 
-        actiontime=/*data::*/replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars, rhs_variables_sumvars);
-        actiontime=/*data::*/replace_variables_capture_avoiding_alt(actiontime, sigma, rhs_variables_sigma);
+        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars);
+        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma);
         multiaction=lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction, sigma_sumvars, fresh_identifier_generator);
         multiaction=lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction, sigma, fresh_identifier_generator);
 
         distribution=stochastic_distribution(
                        unique_stochastic_vars,
-                       /*data::*/replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_sumvars, rhs_variables_sumvars));
+                       replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_sumvars));
         distribution=stochastic_distribution(
                        unique_stochastic_vars,
-                       /*data::*/replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_stochastic_vars, rhs_variables_stochastic_vars));
+                       replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_stochastic_vars));
         distribution=stochastic_distribution(
                        distribution.variables(),
-                       /*data::*/replace_variables_capture_avoiding_alt(distribution.distribution(), sigma, rhs_variables_sigma));
+                       replace_variables_capture_avoiding_alt(distribution.distribution(), sigma));
 
-        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars,rhs_variables_sumvars);
-        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_stochastic_vars,rhs_variables_stochastic_vars);
-        nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma,rhs_variables_sigma);
+        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars);
+        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_stochastic_vars);
+        nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma);
 
         result_action_summands.push_back(stochastic_action_summand(
                                                         unique_sumvars,
@@ -8697,21 +8636,20 @@ class specification_basic_type
 
       for (deadlock_summand_vector::const_iterator s=deadlock_summands.begin(); s!=deadlock_summands.end(); ++s)
       {
-        std::set<data::variable> rhs_variables_sumvars;
         const deadlock_summand smmnd= *s;
         const variable_list& sumvars=smmnd.summation_variables();
-        maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint, rhs_variables_sumvars);
+        maintain_variables_in_rhs<data::mutable_map_substitution<> > sigma_sumvars=make_unique_variables(sumvars,hint);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         assert(unique_sumvars.size()==sumvars.size());
         data_expression condition=smmnd.condition();
         data_expression actiontime=smmnd.deadlock().time();
 
-        condition=/*data::*/replace_variables_capture_avoiding_alt(condition, sigma_sumvars, rhs_variables_sumvars);
-        condition=/*data::*/replace_variables_capture_avoiding_alt(condition, sigma, rhs_variables_sigma);
+        condition=replace_variables_capture_avoiding_alt(condition, sigma_sumvars);
+        condition=replace_variables_capture_avoiding_alt(condition, sigma);
 
-        actiontime=/*data::*/replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars, rhs_variables_sumvars);
-        actiontime=/*data::i*/replace_variables_capture_avoiding_alt(actiontime, sigma, rhs_variables_sigma);
+        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars);
+        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma);
 
         result_deadlock_summands.push_back(deadlock_summand(unique_sumvars,
                                                             condition,
@@ -8738,13 +8676,11 @@ class specification_basic_type
       // Make the bound variables of the second ultimate delay different from those in the first.
       variable_list renameable_variables=delay2.variables();
       maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-      std::set<variable> rhs_variables_in_sigma;
-      alphaconvert(renameable_variables, sigma, delay1.variables(), data_expression_list(), rhs_variables_in_sigma);
+      alphaconvert(renameable_variables, sigma, delay1.variables(), data_expression_list());
       // Additionally map the time variable of the second ultimate delay to that of the first.
       sigma[delay2.time_var()]=delay1.time_var();
-      rhs_variables_in_sigma.insert(delay2.time_var());
       data_expression new_constraint = optimized_and(delay1.constraint(),
-                                          /*data::*/replace_variables_capture_avoiding_alt(delay2.constraint(),sigma, rhs_variables_in_sigma));
+                                                     replace_variables_capture_avoiding_alt(delay2.constraint(),sigma));
       variable_list new_existential_variables = delay1.variables()+renameable_variables;
 
       // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged.
@@ -8766,8 +8702,7 @@ class specification_basic_type
       {
         variable_list sumvars=ultimate_delay_condition.variables();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        std::set<variable> variables_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list(),variables_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list());
 
         variable_list sumvars1=summand1.summation_variables() + sumvars;
         action_list multiaction1=summand1.multi_action().actions();
@@ -8797,9 +8732,7 @@ class specification_basic_type
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
                 condition1=lazy::and_(condition1,
-                                      /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
-                                                                               sigma,
-                                                                               variables_in_rhs_of_sigma));
+                                      replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(), sigma));
                 has_time=true;
               }
             }
@@ -8809,9 +8742,8 @@ class specification_basic_type
                  timevar in ultimate_delay_condition, and extend the condition */
               const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
-              variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
               const data_expression intermediateultimatedelaycondition=
-                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+                         replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
               condition1=optimized_and(condition1, intermediateultimatedelaycondition);
             }
 
@@ -8847,8 +8779,7 @@ class specification_basic_type
         {
           variable_list sumvars=ultimate_delay_condition.variables();
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          std::set<variable> variables_in_rhs_of_sigma;
-          alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list(),variables_in_rhs_of_sigma);
+          alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list());
 
           variable_list sumvars1=summand1.summation_variables() + sumvars;
           data_expression actiontime1=summand1.deadlock().time();
@@ -8865,8 +8796,7 @@ class specification_basic_type
                 sumvars1.push_front(ultimate_delay_condition.time_var());
                 condition1=optimized_and(condition1,
                                          /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
-                                                                                  sigma,
-                                                                                  variables_in_rhs_of_sigma));
+                                                                                  sigma));
                 has_time=true;
               }
             }
@@ -8876,9 +8806,8 @@ class specification_basic_type
                  timevar in ultimate_delay_condition, and extend the condition */
               const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
-              variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
               const data_expression intermediateultimatedelaycondition=
-                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
               condition1=optimized_and(condition1, intermediateultimatedelaycondition);
             }
 
@@ -9284,15 +9213,13 @@ class specification_basic_type
         const assignment_list ass=process_instance_assignment(t).assignments();
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
-        std::set<variable> variables_occurring_in_rhs_sigma;
         for (assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
         {
           sigma[i->lhs()]=i->rhs();
           const std::set<variable> varset=find_free_variables(i->rhs());
-          variables_occurring_in_rhs_sigma.insert(varset.begin(),varset.end());
         }
 
-        init=substitute_assignmentlist(init,pars,false,true,sigma,variables_occurring_in_rhs_sigma);
+        init=substitute_assignmentlist(init,pars,false,true,sigma);
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9560,73 +9487,70 @@ class specification_basic_type
     process_expression alphaconversionterm(
       const process_expression& t,
       const variable_list& parameters,
-      maintain_variables_in_rhs<mutable_map_substitution<> > sigma,
-      const std::set < variable >& variables_occurring_in_rhs_of_sigma)
+      maintain_variables_in_rhs<mutable_map_substitution<> > sigma)
     {
       if (is_choice(t))
       {
         return choice(
-                 alphaconversionterm(choice(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                 alphaconversionterm(choice(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
+                 alphaconversionterm(choice(t).left(),parameters,sigma),
+                 alphaconversionterm(choice(t).right(),parameters,sigma));
       }
 
       if (is_seq(t))
       {
         return seq(
-                 alphaconversionterm(seq(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                 alphaconversionterm(seq(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
+                 alphaconversionterm(seq(t).left(),parameters,sigma),
+                 alphaconversionterm(seq(t).right(),parameters,sigma));
       }
 
       if (is_sync(t))
       {
         return process::sync(
-                 alphaconversionterm(process::sync(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                 alphaconversionterm(process::sync(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
+                 alphaconversionterm(process::sync(t).left(),parameters,sigma),
+                 alphaconversionterm(process::sync(t).right(),parameters,sigma));
       }
 
       if (is_bounded_init(t))
       {
         return bounded_init(
-                 alphaconversionterm(bounded_init(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                 alphaconversionterm(bounded_init(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
+                 alphaconversionterm(bounded_init(t).left(),parameters,sigma),
+                 alphaconversionterm(bounded_init(t).right(),parameters,sigma));
       }
 
       if (is_merge(t))
       {
         return process::merge(
-                 alphaconversionterm(process::merge(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                 alphaconversionterm(process::merge(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
+                 alphaconversionterm(process::merge(t).left(),parameters,sigma),
+                 alphaconversionterm(process::merge(t).right(),parameters,sigma));
       }
 
       if (is_left_merge(t))
       {
         return left_merge(
-                 alphaconversionterm(left_merge(t).left(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                 alphaconversionterm(left_merge(t).right(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
+                 alphaconversionterm(left_merge(t).left(),parameters,sigma),
+                 alphaconversionterm(left_merge(t).right(),parameters,sigma));
       }
 
       if (is_at(t))
       {
-        return at(alphaconversionterm(at(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma),
-                  /*data::*/replace_variables_capture_avoiding_alt(at(t).time_stamp(),sigma,variables_occurring_in_rhs_of_sigma));
+        return at(alphaconversionterm(at(t).operand(),parameters,sigma),
+                  replace_variables_capture_avoiding_alt(at(t).time_stamp(),sigma));
       }
 
       if (is_if_then(t))
       {
         return if_then(
-                 /*data::*/replace_variables_capture_avoiding_alt(if_then(t).condition(), sigma, variables_occurring_in_rhs_of_sigma),
-                 alphaconversionterm(if_then(t).then_case(),parameters,sigma,variables_occurring_in_rhs_of_sigma));
+                 replace_variables_capture_avoiding_alt(if_then(t).condition(), sigma),
+                 alphaconversionterm(if_then(t).then_case(),parameters,sigma));
       }
 
       if (is_sum(t))
       {
         variable_list sumvars=sum(t).variables();
         maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
-        std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
 
-        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters),variables_occurring_in_rhs_of_local_sigma);
-        return sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,
-                                                   local_sigma,variables_occurring_in_rhs_of_local_sigma));
+        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
+        return sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters, local_sigma));
       }
 
       if (is_stochastic_operator(t))
@@ -9634,15 +9558,12 @@ class specification_basic_type
         const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
         variable_list sumvars=sto.variables();
         maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
-        std::set<variable> variables_occurring_in_rhs_of_local_sigma=variables_occurring_in_rhs_of_sigma;
 
-        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters),variables_occurring_in_rhs_of_local_sigma);
+        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
         return stochastic_operator(
                        sumvars,
-                       /*data::*/replace_variables_capture_avoiding_alt(sto.distribution(),
-                                                                sigma, variables_occurring_in_rhs_of_sigma),
-                       alphaconversionterm(sto.operand(), sumvars+parameters,
-                                                   local_sigma,variables_occurring_in_rhs_of_local_sigma));
+                       replace_variables_capture_avoiding_alt(sto.distribution(), sigma),
+                       alphaconversionterm(sto.operand(), sumvars+parameters, local_sigma));
       }
 
       if (is_process_instance_assignment(t))
@@ -9655,14 +9576,14 @@ class specification_basic_type
 
         const process_instance_assignment result(procId,
                                                  substitute_assignmentlist(process_instance_assignment(t).assignments(),
-                                                                           instance_parameters,false, true,sigma,variables_occurring_in_rhs_of_sigma));
+                                                                           instance_parameters,false, true,sigma));
         assert(check_valid_process_instance_assignment(result.identifier(),result.assignments()));
         return result;
       }
 
       if (is_action(t))
       {
-        return action(action(t).label(), /*data::*/replace_variables_capture_avoiding_alt(action(t).arguments(), sigma, variables_occurring_in_rhs_of_sigma));
+        return action(action(t).label(), replace_variables_capture_avoiding_alt(action(t).arguments(), sigma));
       }
 
       if (is_delta(t)||
@@ -9673,27 +9594,27 @@ class specification_basic_type
 
       if (is_hide(t))
       {
-        return alphaconversionterm(hide(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
+        return alphaconversionterm(hide(t).operand(),parameters,sigma);
       }
 
       if (is_rename(t))
       {
-        return alphaconversionterm(process::rename(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
+        return alphaconversionterm(process::rename(t).operand(),parameters,sigma);
       }
 
       if (is_comm(t))
       {
-        return alphaconversionterm(comm(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
+        return alphaconversionterm(comm(t).operand(),parameters,sigma);
       }
 
       if (is_allow(t))
       {
-        return alphaconversionterm(allow(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
+        return alphaconversionterm(allow(t).operand(),parameters,sigma);
       }
 
       if (is_block(t))
       {
-        return alphaconversionterm(block(t).operand(),parameters,sigma,variables_occurring_in_rhs_of_sigma);
+        return alphaconversionterm(block(t).operand(),parameters,sigma);
       }
 
       throw mcrl2::runtime_error("unexpected process format in alphaconversionterm " + process::pp(t) +".");
@@ -9711,13 +9632,13 @@ class specification_basic_type
         // tempvar below is needed as objectdata may be reallocated
         // during a call to alphaconversionterm.
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,sigma,std::set<variable>());
+        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,sigma);
         objectdata[n].processbody=tempvar;
       }
       else if (objectdata[n].processstatus==mCRLdone)
       {
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        alphaconversionterm(objectdata[n].processbody,parameters,sigma,std::set<variable>());
+        alphaconversionterm(objectdata[n].processbody,parameters,sigma);
 
       }
       else if (objectdata[n].processstatus==GNFalpha)
@@ -9952,18 +9873,15 @@ class specification_basic_type
 
           // Furthermore, the old assignment must be applied to the distribution, when it is moved
           // outside of the process body.
-          std::set<variable> variables_occurring_in_rhs_of_sigma;
           maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
           for(const assignment& a:u.assignments())
           {
             local_sigma[a.lhs()]=a.rhs();
             const std::set<variable> varset=find_free_variables(a.rhs());
-            variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
           }
           return stochastic_operator(sto.variables(),
-                                     /*data::*/replace_variables_capture_avoiding_alt(sto.distribution(),
-                                                                              local_sigma,
-                                                                              variables_occurring_in_rhs_of_sigma),
+                                     replace_variables_capture_avoiding_alt(sto.distribution(),
+                                                                              local_sigma),
                                      process_instance_assignment(new_identifier,new_assignments));
         }
         return t;
@@ -9983,11 +9901,10 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             process_expression new_body2=r2.operand();
-            std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
-            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
+            new_body2=substitute_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
@@ -10049,11 +9966,10 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             process_expression new_body2=r2.operand();
-            std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
-            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
+            new_body2=substitute_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
@@ -10181,11 +10097,10 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             process_expression new_body2=r2.operand();
-            std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
-            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
+            new_body2=substitute_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
@@ -10245,11 +10160,10 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             process_expression new_body2=r2.operand();
-            std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
-            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list(),variables_occurring_in_rhs_of_sigma);
-            new_body2=substitute_pCRLproc(new_body2, local_sigma, variables_occurring_in_rhs_of_sigma);
+            alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
+            new_body2=substitute_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
@@ -10764,8 +10678,7 @@ class specification_basic_type
             std::set<process_identifier>& visited_processes,
             std::set<identifier_string>& used_variable_names,
             maintain_variables_in_rhs<mutable_map_substitution<> >& parameter_mapping,
-            std::set<variable>& variables_in_lhs_of_parameter_mapping,
-            std::set<variable>& variables_in_rhs_of_parameter_mapping)
+            std::set<variable>& variables_in_lhs_of_parameter_mapping)
     {
       if (visited_processes.count(procId)==0)
       {
@@ -10779,7 +10692,6 @@ class specification_basic_type
             used_variable_names.insert(i->name());
             parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
             variables_in_lhs_of_parameter_mapping.insert(*i);
-            variables_in_rhs_of_parameter_mapping.insert(*i);
           }
           else
           {
@@ -10791,7 +10703,6 @@ class specification_basic_type
               const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
               parameter_mapping[*i]=fresh_var;
               variables_in_lhs_of_parameter_mapping.insert(*i);
-              variables_in_rhs_of_parameter_mapping.insert(fresh_var);
             }
           }
         }
@@ -10802,8 +10713,7 @@ class specification_basic_type
                                          visited_processes,
                                          used_variable_names,
                                          parameter_mapping,
-                                         variables_in_lhs_of_parameter_mapping,
-                                         variables_in_rhs_of_parameter_mapping);
+                                         variables_in_lhs_of_parameter_mapping);
       }
     }
 
@@ -10813,90 +10723,87 @@ class specification_basic_type
       std::set<identifier_string> used_variable_names;
       maintain_variables_in_rhs< mutable_map_substitution<> > parameter_mapping;
       std::set<variable> variables_in_lhs_of_parameter_mapping;
-      std::set<variable> variables_in_rhs_of_parameter_mapping;
       guarantee_that_parameters_have_unique_type(procId,
                                                  visited_processes,
                                                  used_variable_names,
                                                  parameter_mapping,
-                                                 variables_in_lhs_of_parameter_mapping,
-                                                 variables_in_rhs_of_parameter_mapping);
+                                                 variables_in_lhs_of_parameter_mapping);
     }
 
     process_expression guarantee_that_parameters_have_unique_type_body(
-      const process_expression& t, // intentionally not a reference.
+      const process_expression& t, 
       std::set<process_identifier>& visited_processes,
       std::set<identifier_string>& used_variable_names,
       maintain_variables_in_rhs<mutable_map_substitution<> >& parameter_mapping,
-      std::set<variable>& variables_in_lhs_of_parameter_mapping,
-      std::set<variable>& variables_in_rhs_of_parameter_mapping)
+      std::set<variable>& variables_in_lhs_of_parameter_mapping)
     {
       if (is_process_instance_assignment(t))
       {
-        guarantee_that_parameters_have_unique_type(process_instance_assignment(t).identifier(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping);
+        guarantee_that_parameters_have_unique_type(process_instance_assignment(t).identifier(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping);
         const process_instance_assignment u(t);
         std::size_t n=objectIndex(u.identifier());
         assert(check_valid_process_instance_assignment(u.identifier(),
-                 substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping,variables_in_rhs_of_parameter_mapping)));
+                 substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping)));
         return process_instance_assignment(
                      u.identifier(),
-                     substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                     substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping));
       }
       if (is_hide(t))
       {
         return hide(hide(t).hide_set(),
-                    guarantee_that_parameters_have_unique_type_body(hide(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                    guarantee_that_parameters_have_unique_type_body(hide(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_rename(t))
       {
         return process::rename(
                  process::rename(t).rename_set(),
-                 guarantee_that_parameters_have_unique_type_body(process::rename(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 guarantee_that_parameters_have_unique_type_body(process::rename(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_allow(t))
       {
         return allow(allow(t).allow_set(),
-                     guarantee_that_parameters_have_unique_type_body(allow(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                     guarantee_that_parameters_have_unique_type_body(allow(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_block(t))
       {
         return block(block(t).block_set(),
-                     guarantee_that_parameters_have_unique_type_body(block(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                     guarantee_that_parameters_have_unique_type_body(block(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_comm(t))
       {
         return comm(comm(t).comm_set(),
-                    guarantee_that_parameters_have_unique_type_body(comm(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                    guarantee_that_parameters_have_unique_type_body(comm(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_merge(t))
       {
         return merge(
-                 guarantee_that_parameters_have_unique_type_body(merge(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(merge(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 guarantee_that_parameters_have_unique_type_body(merge(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(merge(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_choice(t))
       {
         return choice(
-                 guarantee_that_parameters_have_unique_type_body(choice(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(choice(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 guarantee_that_parameters_have_unique_type_body(choice(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(choice(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_seq(t))
       {
         return seq(
-                 guarantee_that_parameters_have_unique_type_body(seq(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(seq(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 guarantee_that_parameters_have_unique_type_body(seq(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(seq(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_if_then_else(t))
       {
         return if_then_else(
-                 /* data::*/replace_variables_capture_avoiding_alt(if_then_else(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).else_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 replace_variables_capture_avoiding_alt(if_then_else(t).condition(),parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(if_then_else(t).else_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_if_then(t))
       {
         return if_then(
-                 /*data::*/replace_variables_capture_avoiding_alt(if_then(t).condition(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(if_then(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 replace_variables_capture_avoiding_alt(if_then(t).condition(),parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(if_then(t).then_case(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_sum(t))
       {
@@ -10911,7 +10818,6 @@ class specification_basic_type
             used_variable_names.insert(i->name());
             parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
             variables_in_lhs_of_parameter_mapping.insert(*i);
-            variables_in_rhs_of_parameter_mapping.insert(*i);
           }
           else
           {
@@ -10923,13 +10829,12 @@ class specification_basic_type
               const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
               parameter_mapping[*i]=fresh_var;
               variables_in_lhs_of_parameter_mapping.insert(*i);
-              variables_in_rhs_of_parameter_mapping.insert(fresh_var);
             }
           }
         }
         return sum(
                  data::replace_variables(sum(t).variables(),parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(sum(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 guarantee_that_parameters_have_unique_type_body(sum(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_action(t))
       {
@@ -10946,14 +10851,14 @@ class specification_basic_type
       if (is_at(t))
       {
         return at(
-                 guarantee_that_parameters_have_unique_type_body(at(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 /*data::*/replace_variables_capture_avoiding_alt(at(t).time_stamp(),parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 guarantee_that_parameters_have_unique_type_body(at(t).operand(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
+                 replace_variables_capture_avoiding_alt(at(t).time_stamp(),parameter_mapping));
       }
       if (is_sync(t))
       {
         return process::sync(
-                 guarantee_that_parameters_have_unique_type_body(process::sync(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping),
-                 guarantee_that_parameters_have_unique_type_body(process::sync(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                 guarantee_that_parameters_have_unique_type_body(process::sync(t).left(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping),
+                 guarantee_that_parameters_have_unique_type_body(process::sync(t).right(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       if (is_stochastic_operator(t))
       {
@@ -10969,7 +10874,6 @@ class specification_basic_type
             used_variable_names.insert(i->name());
             parameter_mapping[*i]=*i;  // This is the first parameter with this name. Map it to itself.
             variables_in_lhs_of_parameter_mapping.insert(*i);
-            variables_in_rhs_of_parameter_mapping.insert(*i);
           }
           else
           {
@@ -10981,15 +10885,14 @@ class specification_basic_type
               const variable fresh_var(fresh_identifier_generator(i->name()),i->sort());
               parameter_mapping[*i]=fresh_var;
               variables_in_lhs_of_parameter_mapping.insert(*i);
-              variables_in_rhs_of_parameter_mapping.insert(fresh_var);
             }
           }
         }
         return stochastic_operator(
                    data::replace_variables(sto.variables(),parameter_mapping),
-                   /* data::*/replace_variables_capture_avoiding_alt(sto.distribution(),parameter_mapping,variables_in_rhs_of_parameter_mapping),
+                   replace_variables_capture_avoiding_alt(sto.distribution(),parameter_mapping),
                    guarantee_that_parameters_have_unique_type_body(sto.operand(),visited_processes,
-                           used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping,variables_in_rhs_of_parameter_mapping));
+                           used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping));
       }
       throw mcrl2::runtime_error("unexpected process format in guarantee_that_parameters_have_unique_type_body " + process::pp(t) +".");
     }
