@@ -208,7 +208,7 @@ class solve_structure_graph_algorithm
 
     // Handles nodes with decoration true or false.
     inline
-    std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G, bool use_toms_optimization = false)
+    std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
     {
       mCRL2log(log::debug) << "\n--- solve_recursive_extended input ---\n" << G << std::endl;
 

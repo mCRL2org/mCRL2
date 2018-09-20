@@ -49,7 +49,7 @@ struct anonymize_pbes_command: public pbes_system::detail::pbes_command
     : pbes_system::detail::pbes_command("anonymize", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbes_system::anonymize(pbesspec);
@@ -64,7 +64,7 @@ struct rewrite_pbes_data_rewriter_command: public pbes_system::detail::pbes_rewr
     : pbes_system::detail::pbes_rewriter_command("pbes-data-rewriter", input_filename, output_filename, options, strategy)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     data::rewriter r(pbesspec.data(), strategy);
@@ -80,7 +80,7 @@ struct rewrite_pbes_enumerate_quantifiers_rewriter_command: public pbes_system::
     : pbes_system::detail::pbes_rewriter_command("pbes-enumerate-quantifiers-rewriter", input_filename, output_filename, options, strategy)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     data::rewriter r(pbesspec.data(), strategy);
@@ -96,7 +96,7 @@ struct rewrite_pbes_simplify_rewriter_command: public pbes_system::detail::pbes_
     : pbes_system::detail::pbes_command("pbes-simplify-rewriter", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbes_system::simplify_rewriter R;
@@ -111,7 +111,7 @@ struct rewrite_pbes_simplify_data_rewriter_command: public pbes_system::detail::
     : pbes_system::detail::pbes_rewriter_command("pbes-simplify-data-rewriter", input_filename, output_filename, options, strategy)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     data::rewriter r(pbesspec.data(), strategy);
@@ -127,7 +127,7 @@ struct rewrite_pbes_simplify_quantifiers_rewriter_command: public pbes_system::d
     : pbes_system::detail::pbes_command("pbes-simplify-quantifiers-rewriter", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbes_system::simplify_quantifiers_rewriter R;
@@ -142,7 +142,7 @@ struct rewrite_pbes_simplify_quantifiers_data_rewriter_command: public pbes_syst
     : pbes_system::detail::pbes_rewriter_command("pbes-simplify-quantifiers-data-rewriter", input_filename, output_filename, options, strategy)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     data::rewriter r(pbesspec.data(), strategy);
@@ -158,7 +158,7 @@ struct rewrite_pbes_one_point_rule_rewriter_command: public pbes_system::detail:
     : pbes_system::detail::pbes_command("pbes-one-point-rule-rewriter", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbes_system::one_point_rule_rewriter R;
@@ -173,7 +173,7 @@ struct rewrite_pbes_quantifiers_inside_rewriter_command: public pbes_system::det
     : pbes_system::detail::pbes_command("pbes-quantifiers-inside-rewriter", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbes_system::quantifiers_inside_rewriter R;
@@ -188,7 +188,7 @@ struct rewrite_pbes_data2pbes_rewriter_command: public pbes_system::detail::pbes
     : pbes_system::detail::pbes_command("data-to-pbes-rewriter", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbes_system::data2pbes_rewriter R;
@@ -203,7 +203,7 @@ struct stategraph_local_command: public pbes_system::detail::pbes_command
     : pbes_system::detail::pbes_command("stategraph-local", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbesstategraph_options options;
@@ -219,7 +219,7 @@ struct stategraph_global_command: public pbes_system::detail::pbes_command
     : pbes_system::detail::pbes_command("stategraph-global", input_filename, output_filename, options)
   {}
 
-  void execute()
+  void execute() override
   {
     pbes_system::detail::pbes_command::execute();
     pbesstategraph_options options;

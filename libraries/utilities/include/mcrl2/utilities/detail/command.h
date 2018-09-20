@@ -41,6 +41,7 @@ struct command
   {}
 
   virtual void execute() = 0;
+  virtual ~command() = default;
 };
 
 } // namespace detail
