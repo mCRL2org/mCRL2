@@ -234,6 +234,12 @@ class MainWindow : public QMainWindow
    * @brief setupDocks Creates the docks
    */
   void setupDocks();
+
+  /**
+   * @brief mentionNeedOfProject Forces the user to make a project
+   * @return Whether a project has been succesfully made
+   */
+  bool assertProjectOpened();
 };
 
 #endif // MAINWINDOW_H

@@ -320,102 +320,119 @@ void MainWindow::actionFindAndReplace()
   }
 }
 
-void MainWindow::actionParse()
+bool MainWindow::assertProjectOpened()
 {
-  if (processSystem->isThreadRunning(ProcessType::Parsing))
+  if (!fileSystem->projectOpened())
   {
-    processSystem->abortAllProcesses(ProcessType::Parsing);
+    QMessageBox msgBox(
+        QMessageBox::Information, "mCRL2 IDE",
+        "To use this tool it is required to create a project first",
+        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+    msgBox.exec();
+    return fileSystem->newProject(false);
   }
   else
   {
-    processSystem->parseSpecification();
+    return true;
+  }
+}
+
+void MainWindow::actionParse()
+{
+  if (assertProjectOpened())
+  {
+    if (processSystem->isThreadRunning(ProcessType::Parsing))
+    {
+      processSystem->abortAllProcesses(ProcessType::Parsing);
+    }
+    else
+    {
+      processSystem->parseSpecification();
+    }
   }
 }
 
 void MainWindow::actionSimulate()
 {
-  if (processSystem->isThreadRunning(ProcessType::Simulation))
+  if (assertProjectOpened())
   {
-    processSystem->abortAllProcesses(ProcessType::Simulation);
-  }
-  else
-  {
-    processSystem->simulate();
+    if (processSystem->isThreadRunning(ProcessType::Simulation))
+    {
+      processSystem->abortAllProcesses(ProcessType::Simulation);
+    }
+    else
+    {
+      processSystem->simulate();
+    }
   }
 }
 
 void MainWindow::actionShowLts()
 {
-  if (processSystem->isThreadRunning(ProcessType::LtsCreation))
+  if (assertProjectOpened())
   {
-    processSystem->abortAllProcesses(ProcessType::LtsCreation);
-  }
-  else
-  {
-    lastLtsHasReduction = false;
-    processSystem->showLts(LtsReduction::None);
+    if (processSystem->isThreadRunning(ProcessType::LtsCreation))
+    {
+      processSystem->abortAllProcesses(ProcessType::LtsCreation);
+    }
+    else
+    {
+      lastLtsHasReduction = false;
+      processSystem->showLts(LtsReduction::None);
+    }
   }
 }
 
 void MainWindow::actionShowReducedLts()
 {
-  if (processSystem->isThreadRunning(ProcessType::LtsCreation))
+  if (assertProjectOpened)
   {
-    processSystem->abortAllProcesses(ProcessType::LtsCreation);
-  }
-  else
-  {
-    QStringList reductionNames;
-    for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
+    if (processSystem->isThreadRunning(ProcessType::LtsCreation))
     {
-      if (item.first != LtsReduction::None)
-      {
-        reductionNames << item.second;
-      }
+      processSystem->abortAllProcesses(ProcessType::LtsCreation);
     }
-
-    /* ask the user what reduction to use */
-    bool ok;
-    QString reductionName = QInputDialog::getItem(
-        this, "Show reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
-        Qt::WindowCloseButtonHint);
-
-    /* if user pressed ok, create a reduced lts */
-    if (ok)
+    else
     {
-      LtsReduction reduction = LtsReduction::None;
+      QStringList reductionNames;
       for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
       {
-        if (item.second == reductionName)
+        if (item.first != LtsReduction::None)
         {
-          reduction = item.first;
+          reductionNames << item.second;
         }
       }
 
-      lastLtsHasReduction = true;
-      processSystem->showLts(reduction);
+      /* ask the user what reduction to use */
+      bool ok;
+      QString reductionName = QInputDialog::getItem(
+          this, "Show reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
+          Qt::WindowCloseButtonHint);
+
+      /* if user pressed ok, create a reduced lts */
+      if (ok)
+      {
+        LtsReduction reduction = LtsReduction::None;
+        for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
+        {
+          if (item.second == reductionName)
+          {
+            reduction = item.first;
+          }
+        }
+
+        lastLtsHasReduction = true;
+        processSystem->showLts(reduction);
+      }
     }
   }
 }
 
 void MainWindow::actionAddProperty()
 {
-  /* we require a project to be made if no project has been opened */
-  if (!fileSystem->projectOpened())
+  if (assertProjectOpened())
   {
-    QMessageBox msgBox(
-        QMessageBox::Information, "Add property",
-        "To add a property, it is required to create a project first",
-        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox.exec();
-    actionNewProject(false);
-  }
-
-  /* if successful, allow a property to be added */
-  addPropertyDialog->clearFields();
-  addPropertyDialog->resetFocus();
-  if (fileSystem->projectOpened())
-  {
+    addPropertyDialog->clearFields();
+    addPropertyDialog->resetFocus();
     if (addPropertyDialog->isVisible())
     {
       addPropertyDialog->activateWindow();
@@ -439,22 +456,28 @@ void MainWindow::actionAddPropertyResult()
 
 void MainWindow::actionImportProperty()
 {
-  std::list<Property> importedProperties = fileSystem->importProperties();
-  for (Property property : importedProperties)
+  if (assertProjectOpened())
   {
-    propertiesDock->addProperty(property);
+    std::list<Property> importedProperties = fileSystem->importProperties();
+    for (Property property : importedProperties)
+    {
+      propertiesDock->addProperty(property);
+    }
   }
 }
 
 void MainWindow::actionVerifyAllProperties()
 {
-  if (processSystem->isThreadRunning(ProcessType::Verification))
+  if (assertProjectOpened())
   {
-    processSystem->abortAllProcesses(ProcessType::Verification);
-  }
-  else
-  {
-    propertiesDock->verifyAllProperties();
+    if (processSystem->isThreadRunning(ProcessType::Verification))
+    {
+      processSystem->abortAllProcesses(ProcessType::Verification);
+    }
+    else
+    {
+      propertiesDock->verifyAllProperties();
+    }
   }
 }
 
