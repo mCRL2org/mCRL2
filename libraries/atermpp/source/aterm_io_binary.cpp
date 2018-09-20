@@ -184,9 +184,18 @@ class sym_read_entry
 static char* text_buffer = nullptr;
 static std::size_t text_buffer_size = 0;
 
-static unsigned char bit_buffer = '\0';
 static std::size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
-static std::bitset<128> write_buffer(0);
+static std::bitset<128> read_write_buffer(0);
+
+static void reverse_bit_order(std::size_t& val)
+{
+  val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
+  val = ((val << 16) & 0xFFFF0000FFFF0000) | ((val >> 16) & 0x0000FFFF0000FFFF);
+  val = ((val << 8)  & 0xFF00FF00FF00FF00) | ((val >> 8)  & 0x00FF00FF00FF00FF);
+  val = ((val << 4)  & 0xF0F0F0F0F0F0F0F0) | ((val >> 4)  & 0x0F0F0F0F0F0F0F0F);
+  val = ((val << 2)  & 0xCCCCCCCCCCCCCCCC) | ((val >> 2)  & 0x3333333333333333);
+  val = ((val << 1)  & 0xAAAAAAAAAAAAAAAA) | ((val >> 1)  & 0x5555555555555555);
+}
 
 static void writeBits(std::size_t val, const std::size_t nr_bits, ostream& os)
 {
@@ -194,21 +203,15 @@ static void writeBits(std::size_t val, const std::size_t nr_bits, ostream& os)
   {
     return;
   }
-  // Reverse the order of bits in val
-  val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
-  val = ((val << 16) & 0xFFFF0000FFFF0000) | ((val >> 16) & 0x0000FFFF0000FFFF);
-  val = ((val << 8)  & 0xFF00FF00FF00FF00) | ((val >> 8)  & 0x00FF00FF00FF00FF);
-  val = ((val << 4)  & 0xF0F0F0F0F0F0F0F0) | ((val >> 4)  & 0x0F0F0F0F0F0F0F0F);
-  val = ((val << 2)  & 0xCCCCCCCCCCCCCCCC) | ((val >> 2)  & 0x3333333333333333);
-  val = ((val << 1)  & 0xAAAAAAAAAAAAAAAA) | ((val >> 1)  & 0x5555555555555555);
+  reverse_bit_order(val);
   // Add val to the buffer
-  write_buffer |= std::bitset<128>(val) << (64 - bits_in_buffer);
+  read_write_buffer |= std::bitset<128>(val) << (64 - bits_in_buffer);
   bits_in_buffer += nr_bits;
   // Write 8 bytes if available
   if(bits_in_buffer >= 64)
   {
-    unsigned long long write_value = (write_buffer >> 64).to_ullong();
-    write_buffer <<= 64;
+    unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
+    read_write_buffer <<= 64;
     bits_in_buffer -= 64;
     for(uint32_t i = 8; i > 0; --i)
     {
@@ -222,7 +225,7 @@ static void flushBitsToWriter(ostream& os)
 {
   if (bits_in_buffer > 0)
   {
-    unsigned long long write_value = (write_buffer >> 64).to_ullong();
+    unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
     for(uint32_t i = 8; i > 7 - bits_in_buffer / 8; --i)
     {
       os.put((write_value >> (8*(i-1))) & 0xFF);
@@ -231,7 +234,7 @@ static void flushBitsToWriter(ostream& os)
     {
       throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
     }
-    write_buffer = std::bitset<128>(0);
+    read_write_buffer = std::bitset<128>(0);
     bits_in_buffer = 0;
   }
 }
@@ -246,26 +249,25 @@ static void flushBitsToWriter(ostream& os)
 static
 bool readBits(std::size_t& val, const std::size_t nr_bits, istream& is)
 {
-  std::size_t cur_bit, mask = 1;
-
   val = 0;
-  for (cur_bit=0; cur_bit<nr_bits; cur_bit++)
+  if(nr_bits == 0)
   {
-    if (bits_in_buffer == 0)
-    {
-      int byte = is.get();
-      if (is.fail())
-      {
-        return false;
-      }
-      bit_buffer = (unsigned char)byte;
-      bits_in_buffer = 8;
-    }
-    val |= (bit_buffer & 0x80 ? mask : 0);
-    mask <<= 1;
-    bit_buffer <<= 1;
-    bits_in_buffer--;
+    return true;
   }
+  while(bits_in_buffer < nr_bits)
+  {
+    int byte = is.get();
+    if(is.fail())
+    {
+      return false;
+    }
+    read_write_buffer |= std::bitset<128>(byte) << (56 + 64 - bits_in_buffer);
+    bits_in_buffer += 8;
+  }
+  val = (read_write_buffer >> 64).to_ullong() & (0xFFFFFFFFFFFFFFFF << (64 - nr_bits));
+  bits_in_buffer -= nr_bits;
+  read_write_buffer <<= nr_bits;
+  reverse_bit_order(val);
   return true;
 }
 
@@ -571,7 +573,7 @@ static void write_term(const aterm& t, ostream& os,
 static void write_baf(const aterm& t, ostream& os)
 {
   /* Initialize bit buffer */
-  write_buffer = std::bitset<128>(0);
+  read_write_buffer = std::bitset<128>(0);
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
   std::unordered_map<function_symbol, std::size_t> symbol_index_map;
@@ -746,7 +748,7 @@ static
 aterm read_baf(istream& is)
 {
   // Initialize bit buffer
-  bit_buffer     = '\0';
+  read_write_buffer = std::bitset<128>(0);
   bits_in_buffer = 0; // how many bits in bit_buffer are used
 
   // Read header
