@@ -385,7 +385,7 @@ void MainWindow::actionShowLts()
 
 void MainWindow::actionShowReducedLts()
 {
-  if (assertProjectOpened)
+  if (assertProjectOpened())
   {
     if (processSystem->isThreadRunning(ProcessType::LtsCreation))
     {
