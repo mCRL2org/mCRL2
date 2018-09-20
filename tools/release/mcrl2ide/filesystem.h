@@ -145,6 +145,13 @@ class FileSystem : public QObject
   QString pbesFilePath(const QString& propertyName, bool evidence = false);
 
   /**
+   * @brief toolPath Defines the path of a tool executable
+   * @param tool The name of the tool
+   * @return The path of a tool executable
+   */
+  QString toolPath(const QString& tool);
+
+  /**
    * @brief parentFolderPath Returns the path the the folder that is the parent
    *   of the given folder
    * @param folderPath The folder to get the parent of

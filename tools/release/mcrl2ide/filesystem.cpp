@@ -17,6 +17,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QDesktopServices>
+#include <QCoreApplication>
 
 Property::Property()
 {
@@ -117,6 +118,12 @@ QString FileSystem::pbesFilePath(const QString& propertyName, bool evidence)
 {
   return temporaryFolder.path() + QDir::separator() + projectName + "_" +
          propertyName + (evidence ? "_evidence" : "") + "_pbes.pbes";
+}
+
+QString FileSystem::toolPath(const QString& tool)
+{
+  QDir toolDir = QDir(QCoreApplication::applicationDirPath());
+  return toolDir.absoluteFilePath(tool);
 }
 
 QString FileSystem::parentFolderPath(const QString& folderPath)

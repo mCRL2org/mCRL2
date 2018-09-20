@@ -321,7 +321,7 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
     break;
   }
 
-  subprocess->setProgram(program);
+  subprocess->setProgram(fileSystem->toolPath(program));
   subprocess->setArguments(arguments);
 
   return subprocess;
