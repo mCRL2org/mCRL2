@@ -101,7 +101,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
       new_index=it.first->second; // Old index to which i is mapped.
 
       // If label i occurred in l1 and was not mapped to the same hidden label, raise an exception.
-      if (l1.is_tau(l1.apply_hidden_label_map(new_index) != l2.is_tau(l2.apply_hidden_label_map(i))))
+      if (l1.is_tau(l1.apply_hidden_label_map(new_index)) != l2.is_tau(l2.apply_hidden_label_map(i)))
       {
         throw mcrl2::runtime_error("The action " + pp(l2.action_label(i)) + " has incompatible hidden actions " +
                                        pp(l1.action_label(l1.apply_hidden_label_map(new_index))) + " and " + 
