@@ -529,48 +529,79 @@ void MainWindow::changeToolButtons(bool toAbort, ProcessType processType)
   }
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+bool MainWindow::event(QEvent* event)
 {
-  /* if there are changes, ask the user to save the project first */
-  if (fileSystem->isSpecificationModified())
+  switch (event->type())
   {
-    QMessageBox::StandardButton result = QMessageBox::question(
-        this, "mCRL2 IDE",
-        "There are changes in the current project, do you want to save?",
-        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    switch (result)
+  case QEvent::WindowActivate:
+    /* if the specification has been modified outside of the IDE, ask to
+     *   update the editor */
+    if (!reloadIsBeingHandled && fileSystem->projectOpened() &&
+        fileSystem->isSpecificationNewlyModifiedFromOutside())
     {
-    case QMessageBox::Yes:
-      if (fileSystem->saveProject())
+      reloadIsBeingHandled = true;
+      QMessageBox::StandardButton result =
+          QMessageBox::question(this, "mCRL2 IDE",
+                                "The specification has been modified from "
+                                "outside of the IDE, do you want to reload it?",
+                                QMessageBox::Yes | QMessageBox::No);
+      switch (result)
       {
-        event->accept();
+      case QMessageBox::Yes:
+        fileSystem->loadSpecification();
+        break;
+      case QMessageBox::No:
+        specificationEditor->document()->setModified();
         break;
       }
-      else
-      {
-        event->ignore();
-        return;
-      }
-    case QMessageBox::No:
-      event->accept();
-      break;
-    case QMessageBox::Cancel:
-      event->ignore();
-      return;
-    default:
-      break;
+
+      reloadIsBeingHandled = false;
     }
+
+    break;
+
+  case QEvent::Close:
+    /* if there are changes, ask the user to save the project first */
+    if (fileSystem->isSpecificationModified())
+    {
+      QMessageBox::StandardButton result = QMessageBox::question(
+          this, "mCRL2 IDE",
+          "There are changes in the current project, do you want to save?",
+          QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+      switch (result)
+      {
+      case QMessageBox::Yes:
+        if (!fileSystem->saveProject())
+        {
+          event->ignore();
+          return false;
+        }
+        break;
+      case QMessageBox::Cancel:
+        event->ignore();
+        return false;
+      default:
+        break;
+      }
+    }
+
+    /* save the settings for the main window */
+    settings->setValue("geometry", saveGeometry());
+
+    /* remove the temporary folder */
+    fileSystem->removeTemporaryFolder();
+
+    /* abort all processes */
+    for (ProcessType processType : PROCESSTYPES)
+    {
+      processSystem->abortAllProcesses(processType);
+    }
+
+    break;
+
+  default:
+    break;
   }
 
-  /* save the settings for the main window */
-  settings->setValue("geometry", saveGeometry());
-
-  /* remove the temporary folder */
-  fileSystem->removeTemporaryFolder();
-
-  /* abort all processes */
-  for (ProcessType processType : PROCESSTYPES)
-  {
-    processSystem->abortAllProcesses(processType);
-  }
+  return QWidget::event(event);
 }

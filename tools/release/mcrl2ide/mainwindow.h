@@ -141,10 +141,13 @@ class MainWindow : public QMainWindow
 
   protected:
   /**
-   * @brief closeEvent On closing the main window, asks to save if there are
-   *   changes
+   * @brief event Handles events
+   * - On gaining focus, ask to reload the specification if it was modified
+   *     outside the IDE
+   * - On closing, ask to save if there are changes and do cleanup
+   * @return Whether the event is accepted
    */
-  void closeEvent(QCloseEvent* event) override;
+  bool event(QEvent* event) override;
 
   private:
   QAction* newProjectAction;
@@ -214,6 +217,7 @@ class MainWindow : public QMainWindow
   QSettings* settings;
 
   bool lastLtsHasReduction;
+  bool reloadIsBeingHandled = false;
 
   /**
    * @brief setupMenuBar Creates the menubar, also creates the actions and their

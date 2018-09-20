@@ -18,6 +18,7 @@
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QSettings>
+#include <QDateTime>
 
 enum class LtsReduction
 {
@@ -178,6 +179,14 @@ class FileSystem : public QObject
   bool isSpecificationModified();
 
   /**
+   * @brief isSpecificationModifiedFromOutside Checks whether the specification
+   *   has been modified from outside the IDE since it was saved using the IDE
+   *   or since it was last modified from outside
+   * @return Whether the specification has been modified from outside
+   */
+  bool isSpecificationNewlyModifiedFromOutside();
+
+  /**
    * @brief propertyNameExists Checks whether the given property name already
    *   exists
    * @param propertyName The property name to check for
@@ -265,6 +274,13 @@ class FileSystem : public QObject
   bool deleteProperty(const Property& property);
 
   /**
+   * @brief loadSpecification Loads the specification from its file and puts it
+   *   in the editor
+   * @return Whether the specification file could be found
+   */
+  bool loadSpecification();
+
+  /**
    * @brief openProjectFromFolder Opens a project from a given project folder
    * @param newProjectFolderPath The path to the project folder
    */
@@ -294,7 +310,7 @@ class FileSystem : public QObject
    * @param property The property to save
    */
   void saveProperty(const Property& property);
-  
+
   /**
    * @brief actionOpenProjectFolderInExplorer Allows the user to open the
    *   project folder in the native file explorer
@@ -341,12 +357,19 @@ class FileSystem : public QObject
   bool projectOpen;
   std::list<Property> properties;
   bool specificationModified;
+  QDateTime lastKnownSpecificationModificationTime;
 
   /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder
    *   exists, if not creates it
    */
   void makeSurePropertiesFolderExists();
+
+  /**
+   * @brief updateSpecificationModificationTime Updates the specification
+   *   modification time to what it is according to the OS
+   */
+  void updateSpecificationModificationTime();
 
   /**
    * createFileDialog Creates a file dialog that can be used to ask the user for

@@ -158,6 +158,22 @@ void FileSystem::setSpecificationModified(bool modified)
   specificationModified = modified;
 }
 
+void FileSystem::updateSpecificationModificationTime()
+{
+  lastKnownSpecificationModificationTime =
+      QFileInfo(specificationFilePath()).lastModified();
+}
+
+bool FileSystem::isSpecificationNewlyModifiedFromOutside()
+{
+  QDateTime newestModificationTime =
+      QFileInfo(specificationFilePath()).lastModified();
+  bool newlyModified =
+      lastKnownSpecificationModificationTime != newestModificationTime;
+  lastKnownSpecificationModificationTime = newestModificationTime;
+  return newlyModified;
+}
+
 bool FileSystem::propertyNameExists(const QString& propertyName)
 {
   for (Property property : properties)
@@ -507,6 +523,26 @@ bool FileSystem::deleteProperty(const Property& oldProperty)
   return deleteIt;
 }
 
+bool FileSystem::loadSpecification()
+{
+  QFile specificationFile(specificationFilePath());
+  if (specificationFile.exists())
+  {
+    specificationFile.open(QIODevice::ReadOnly);
+    QTextStream specificationOpenStream(&specificationFile);
+    QString spec = specificationOpenStream.readAll();
+    specificationEditor->setPlainText(spec);
+    specificationFile.close();
+    specificationModified = false;
+    updateSpecificationModificationTime();
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
 {
   QString error = "";
@@ -567,21 +603,13 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
         }
 
         /* read the specification and put it in the specification editor */
-        QFile specificationFile(specFilePath);
-        if (!specificationFile.exists())
+        if (!loadSpecification())
         {
           error = "Specification file given in the project file in the "
                   "provided project folder does not exist";
         }
         else
         {
-          specificationFile.open(QIODevice::ReadOnly);
-          QTextStream specificationOpenStream(&specificationFile);
-          QString spec = specificationOpenStream.readAll();
-          specificationEditor->setPlainText(spec);
-          specificationFile.close();
-          specificationModified = false;
-
           /* set propject folder and project name */
           projectFolderPath = QFileInfo(newProjectFilePath).path();
           this->projectName = QFileInfo(newProjectFilePath).baseName();
@@ -646,6 +674,7 @@ bool FileSystem::saveProject(bool forceSave)
       saveStream << specificationEditor->toPlainText();
       specificationFile.close();
       specificationModified = false;
+      updateSpecificationModificationTime();
     }
 
     /* save all properties if necessary */
