@@ -553,6 +553,8 @@ bool MainWindow::event(QEvent* event)
       case QMessageBox::No:
         specificationEditor->document()->setModified();
         break;
+      default:
+        break;
       }
 
       reloadIsBeingHandled = false;
