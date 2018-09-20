@@ -289,7 +289,7 @@ void MainWindow::openSpecification(QString filename)
     m_atermThread->start();
     m_newSimulation->deleteLater();
   }
-  m_newSimulation = new Simulation(filename, m_strategy);
+  m_newSimulation = new Simulation(m_strategy);
   m_newSimulation->moveToThread(m_atermThread);
   connect(m_newSimulation, SIGNAL(initialisationDone()), this, SLOT(onInitializedSimulation()));
   QMetaObject::invokeMethod(m_newSimulation, "init", Qt::QueuedConnection, Q_ARG(QString, filename), Q_ARG(bool, m_do_not_use_dummies));

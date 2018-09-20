@@ -42,7 +42,7 @@ class Simulation : public QObject
     typedef QList<TracePosition> Trace;
 
   public:
-    Simulation(QString filename, mcrl2::data::rewrite_strategy strategy)
+    Simulation(mcrl2::data::rewrite_strategy strategy)
         : m_strategy(strategy), m_initialized(false), m_simulation(NULL) {}
     ~Simulation() { delete m_simulation; }
     bool initialized() const { return m_initialized; }
