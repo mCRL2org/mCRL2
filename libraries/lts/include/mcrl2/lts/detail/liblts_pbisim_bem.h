@@ -252,7 +252,7 @@ class prob_bisim_partitioner_bem
 
     // create tree structure to group action states based on the outgoing transitions
     std::size_t max_block_size = 0;
-    tree_type* max_block;
+    tree_type* max_block = nullptr;
     std::deque<tree_type> tree_nodes;
     std::vector<tree_type*> leaves;
     tree_type v0;
