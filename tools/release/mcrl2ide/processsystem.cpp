@@ -130,7 +130,7 @@ void ProcessSystem::testExecutableExistence()
   {
     /* try to run the tool */
     QProcess process;
-    process.start(tool, {"--version"});
+    process.start(fileSystem->toolPath(tool), {"--version"});
     bool started = process.waitForStarted();
 
     if (started)
