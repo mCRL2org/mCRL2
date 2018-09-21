@@ -495,11 +495,11 @@ static data_expression subst_values(
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
-    for(std::size_t i=0; i<assignment_size; ++i)
+    for(std::size_t i=0; i<assignments.size; ++i)
     {
       for(const assignment_expression& a: local_assignments)
       {
-        assert(a[0]!= atermpp::aterm(assignments.assignment[i].vars));
+        assert(a[0]!= atermpp::aterm(assignments.assignment[i].var));
       }
     }
 #endif
@@ -743,7 +743,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
 
-        assert(no_assignments==0);
+        assert(assignments.size==0);
 
         bool matches = true;
         for (std::size_t i=0; i<rule_arity; i++)
