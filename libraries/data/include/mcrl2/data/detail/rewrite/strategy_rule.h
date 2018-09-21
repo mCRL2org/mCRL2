@@ -21,7 +21,7 @@ namespace data
 namespace detail
 {
 
-class strategy_rule:public atermpp::aterm
+class strategy_rule: public atermpp::aterm
 {
   public:
     strategy_rule(const std::size_t n)
@@ -55,7 +55,20 @@ class strategy_rule:public atermpp::aterm
     }
 };
 
-typedef atermpp::term_list<strategy_rule> strategy;
+struct strategy
+{
+  size_t number_of_variables;
+  atermpp::term_list<strategy_rule> rules;
+
+  strategy(size_t n, const atermpp::term_list<strategy_rule>& r)
+   : number_of_variables(n),
+     rules(r)
+  {}
+ 
+  strategy()
+   : number_of_variables(0)
+  {}
+};
 
 } // namespace detail
 } // namespace data

@@ -46,6 +46,26 @@ namespace detail
 typedef atermpp::detail::_aterm* unprotected_variable;           // Variable that is not protected (so a copy should exist at some other place)
 typedef atermpp::detail::_aterm* unprotected_data_expression;    // Idem, but now a data expression.
 
+struct jitty_variable_assignment_for_a_rewrite_rule
+{
+  unprotected_variable var;
+  unprotected_data_expression term;
+  bool variable_is_a_normal_form;
+};
+
+struct jitty_assignments_for_a_rewrite_rule
+{
+  std::size_t size;
+  jitty_variable_assignment_for_a_rewrite_rule* assignment;
+
+  jitty_assignments_for_a_rewrite_rule(jitty_variable_assignment_for_a_rewrite_rule* a)
+   : size(0),
+     assignment(a)
+  {}
+
+};
+
+
 // The function symbol below is used to administrate that a term is in normal form. It is put around a term.
 // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
 
@@ -94,7 +114,7 @@ data_expression remove_normal_form_function(const data_expression& t)
     const data_expression& body=t1.body();
 
     assignment_vector new_assignments;
-    for(const assignment_expression& ae:assignments)
+    for(const assignment_expression& ae: assignments)
     {
       const assignment& assignment_expr = atermpp::down_cast<assignment>(ae);
       new_assignments.push_back(assignment(assignment_expr.lhs(), remove_normal_form_function(assignment_expr.rhs())));
@@ -166,6 +186,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
   std::vector <bool> used;
 
   std::size_t arity = 0;
+  std::size_t max_number_of_variables = 0;
   while (!rules.empty())
   {
     data_equation_list l;
@@ -176,6 +197,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
     for (data_equation_list::const_iterator i=rules.begin(); i!=rules.end(); ++i)
     {
       const data_equation& this_rule = *i;
+      max_number_of_variables=std::max(this_rule.variables().size(),max_number_of_variables);
       const data_expression& this_rule_lhs = this_rule.lhs();
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
       {
@@ -332,7 +354,8 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
     rules = reverse(l);
     arity++;
   }
-  return strategy(strat.begin(),strat.end());
+  
+  return strategy(max_number_of_variables,atermpp::term_list<data::detail::strategy_rule>(strat.begin(),strat.end()));   
 }
 
 void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
@@ -361,16 +384,14 @@ RewriterJitty::RewriterJitty(
         Rewriter(data_spec,equation_selector)
 {
   MAX_LEN=0;
-  max_vars = 0;
 
-  const std::vector< data_equation >& l = data_spec.equations();
-  for (std::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+  for (const data_equation& eq: data_spec.equations())
   {
-    if (equation_selector(*j))
+    if (equation_selector(eq))
     {
       try
       {
-        CheckRewriteRule(*j);
+        CheckRewriteRule(eq);
       }
       catch (std::runtime_error& e)
       {
@@ -378,7 +399,7 @@ RewriterJitty::RewriterJitty(
         continue;
       }
 
-      const function_symbol& lhs_head_index=atermpp::down_cast<function_symbol>(get_nested_head(j->lhs()));
+      const function_symbol& lhs_head_index=atermpp::down_cast<function_symbol>(get_nested_head(eq.lhs()));
 
       data_equation_list n;
       std::map< function_symbol, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
@@ -386,11 +407,7 @@ RewriterJitty::RewriterJitty(
       {
         n = it->second;
       }
-      if (j->variables().size() > max_vars)
-      {
-        max_vars = j->variables().size();
-      }
-      n.push_front(*j);
+      n.push_front(eq);
       jitty_eqns[lhs_head_index] = n;
     }
   }
@@ -403,46 +420,7 @@ RewriterJitty::~RewriterJitty()
 }
 
 static data_expression subst_values(
-            const unprotected_variable* vars,
-            const unprotected_data_expression* terms,
-            const bool* variable_is_a_normal_form,
-            const std::size_t assignment_size,
-            const data_expression& t,
-            data::enumerator_identifier_generator& generator); // prototype;
-
-class subst_values_argument
-{
-  private:
-    const unprotected_variable* m_vars;
-    const unprotected_data_expression* m_terms;
-    const bool* m_variable_is_a_normal_form;
-    const std::size_t m_assignment_size;
-    data::enumerator_identifier_generator& m_generator;
-
-  public:
-    subst_values_argument(const unprotected_variable* vars,
-                          const unprotected_data_expression* terms,
-                          const bool* variable_is_a_normal_form,
-                          const std::size_t assignment_size,
-                          data::enumerator_identifier_generator& generator)
-      : m_vars(vars),
-        m_terms(terms),
-        m_variable_is_a_normal_form(variable_is_a_normal_form),
-        m_assignment_size(assignment_size),
-        m_generator(generator)
-    {}
-
-    data_expression operator()(const data_expression& t) const
-    {
-      return subst_values(m_vars,m_terms,m_variable_is_a_normal_form,m_assignment_size,t,m_generator);
-    }
-};
-
-static data_expression subst_values(
-            const unprotected_variable* vars,
-            const unprotected_data_expression* terms,
-            const bool* variable_is_a_normal_form,
-            const std::size_t assignment_size,
+            const jitty_assignments_for_a_rewrite_rule& assignments,
             const data_expression& t,
             data::enumerator_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
 {
@@ -452,16 +430,16 @@ static data_expression subst_values(
   }
   else if (is_variable(t))
   {
-    for (std::size_t i=0; i<assignment_size; i++)
+    for (std::size_t i=0; i<assignments.size; i++)
     {
-      if (atermpp::detail::address(t)==vars[i])
+      if (atermpp::detail::address(t)==assignments.assignment[i].var)
       {
-        if (variable_is_a_normal_form[i])
+        if (assignments.assignment[i].variable_is_a_normal_form)
         {
           // Variables that are in normal form get a tag that they are in normal form.
-          return application(this_term_is_in_normal_form(),atermpp::down_cast<data_expression>(atermpp::aterm(terms[i])));  
+          return application(this_term_is_in_normal_form(),atermpp::down_cast<data_expression>(atermpp::aterm(assignments.assignment[i].term)));  
         }
-        return atermpp::down_cast<data_expression>(atermpp::aterm(terms[i]));
+        return atermpp::down_cast<data_expression>(atermpp::aterm(assignments.assignment[i].term));
       }
     }
     return t;
@@ -473,11 +451,11 @@ static data_expression subst_values(
     const variable_list& bound_variables=t1.variables();
     // Check that variables in the left and right hand sides of equations do not clash with bound variables.
     std::set<variable> variables_in_substitution;
-    for(std::size_t i=0; i<assignment_size; ++i)
+    for(std::size_t i=0; i<assignments.size; ++i)
     {
-      std::set<variable> s=find_free_variables(atermpp::down_cast<data_expression>(atermpp::aterm(terms[i])));
+      std::set<variable> s=find_free_variables(atermpp::down_cast<data_expression>(atermpp::aterm(assignments.assignment[i].term)));
       variables_in_substitution.insert(s.begin(),s.end());
-      variables_in_substitution.insert(atermpp::down_cast<variable>(atermpp::aterm(vars[i])));
+      variables_in_substitution.insert(atermpp::down_cast<variable>(atermpp::aterm(assignments.assignment[i].var)));
     }
 
     variable_vector new_variables;
@@ -506,52 +484,52 @@ static data_expression subst_values(
 
     return abstraction(binder,
                        variable_list(new_variables.begin(),new_variables.end()),
-                       subst_values(vars,terms,variable_is_a_normal_form,assignment_size,body,generator));
+                       subst_values(assignments,body,generator));
 
   }
   else if (is_where_clause(t))
   {
     const where_clause& t1=atermpp::down_cast<where_clause>(t);
-    const assignment_expression_list& assignments=t1.declarations();
+    const assignment_expression_list& local_assignments=t1.declarations();
     const data_expression& body=t1.body();
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
     for(std::size_t i=0; i<assignment_size; ++i)
     {
-      for(assignment_expression_list::const_iterator it=assignments.begin(); it!=assignments.end(); ++it)
+      for(const assignment_expression& a: local_assignments)
       {
-        assert((*it)[0]!= atermpp::aterm(vars[i]));
+        assert(a[0]!= atermpp::aterm(assignments.assignment[i].vars));
       }
     }
 #endif
 
     assignment_vector new_assignments;
 
-    for(assignment_expression_list::const_iterator it=assignments.begin(); it!=assignments.end(); ++it)
+    for(const assignment_expression& a: local_assignments)
     {
-      const assignment& assignment_expr = atermpp::down_cast<assignment>(*it);
-      new_assignments.push_back(assignment(assignment_expr.lhs(), subst_values(vars,terms,variable_is_a_normal_form,assignment_size,assignment_expr.rhs(),generator)));
+      const assignment& assignment_expr = atermpp::down_cast<assignment>(a);
+      new_assignments.push_back(assignment(assignment_expr.lhs(), subst_values(assignments,assignment_expr.rhs(),generator)));
     }
-    return where_clause(subst_values(vars,terms,variable_is_a_normal_form,assignment_size,body,generator),assignment_list(new_assignments.begin(),new_assignments.end()));
+    return where_clause(subst_values(assignments,body,generator),assignment_list(new_assignments.begin(),new_assignments.end()));
   }
   else
   {
     const application& t1 = atermpp::down_cast<application>(t);
-    const subst_values_argument substitute_values_in_arguments(vars,terms,variable_is_a_normal_form,assignment_size,generator);
-    return application(subst_values(vars,terms,variable_is_a_normal_form,assignment_size,t1.head(),generator),t1.begin(),t1.end(),substitute_values_in_arguments);
+    return application(subst_values(assignments,
+                                    t1.head(),
+                                    generator),
+                       t1.begin(),
+                       t1.end(),
+                       [&](const data_expression& t){ return subst_values(assignments,t,generator);});
   }
 }
 
 // Match term t with the lhs p of an equation.
-
 static bool match_jitty(
                     const data_expression& t,
                     const data_expression& p,
-                    unprotected_variable* vars,
-                    unprotected_data_expression* terms,
-                    bool* variable_is_in_normal_form,
-                    std::size_t& assignment_size,
+                    jitty_assignments_for_a_rewrite_rule& assignments,
                     const bool term_context_guarantees_normal_form)
 {
   if (is_function_symbol(p))
@@ -561,20 +539,18 @@ static bool match_jitty(
   else if (is_variable(p))
   {
 
-    for (std::size_t i=0; i<assignment_size; i++)
+    for (std::size_t i=0; i<assignments.size; i++)
     {
-      if (atermpp::detail::address(p)==vars[i])
+      if (atermpp::detail::address(p)==assignments.assignment[i].var)
       {
-        return atermpp::detail::address(t)==terms[i];
+        return atermpp::detail::address(t)==assignments.assignment[i].term;
       }
     }
 
-    /* new (&vars[assignment_size]) variable(atermpp::down_cast<variable>(p));
-    new (&terms[assignment_size]) data_expression(t); */
-    vars[assignment_size]=atermpp::detail::address(p);
-    terms[assignment_size]=atermpp::detail::address(t);
-    variable_is_in_normal_form[assignment_size]=term_context_guarantees_normal_form;
-    assignment_size++;
+    assignments.assignment[assignments.size].var=atermpp::detail::address(p);
+    assignments.assignment[assignments.size].term=atermpp::detail::address(t);
+    assignments.assignment[assignments.size].variable_is_a_normal_form=term_context_guarantees_normal_form;
+    assignments.size++;
     return true;
   }
   else
@@ -595,7 +571,7 @@ static bool match_jitty(
 
 
     if (!match_jitty(ta.head(),
-                     pa.head(),vars,terms,variable_is_in_normal_form,assignment_size,true))
+                     pa.head(),assignments,true))
     {
       return false;
     }
@@ -603,7 +579,7 @@ static bool match_jitty(
     std::size_t arity = pa.size();
     for (std::size_t i=0; i<arity; i++)
     {
-      if (!match_jitty(ta[i], pa[i],vars,terms,variable_is_in_normal_form,assignment_size,true))
+      if (!match_jitty(ta[i], pa[i],assignments,true))
       {
         return false;
       }
@@ -731,14 +707,12 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     make_jitty_strat_sufficiently_larger(op_value);
   }
 
-  const strategy strat=jitty_strat[op_value];
-  if (!strat.empty())
+  const strategy& strat=jitty_strat[op_value];
+  if (!strat.rules.empty())
   {
-    unprotected_variable* vars=MCRL2_SPECIFIC_STACK_ALLOCATOR(unprotected_variable,max_vars);
-    unprotected_data_expression* terms = MCRL2_SPECIFIC_STACK_ALLOCATOR(unprotected_data_expression,max_vars);
-    bool* variable_is_in_normal_form = MCRL2_SPECIFIC_STACK_ALLOCATOR(bool,max_vars);
-    std::size_t no_assignments=0;
-    for (const strategy_rule& rule: strat)
+    jitty_assignments_for_a_rewrite_rule assignments(MCRL2_SPECIFIC_STACK_ALLOCATOR(jitty_variable_assignment_for_a_rewrite_rule,strat.number_of_variables));
+
+    for (const strategy_rule& rule: strat.rules)
     {
       if (rule.is_rewrite_index())
       {
@@ -760,7 +734,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       }
       else
       {
-        const data_equation rule1=rule.equation();
+        const data_equation& rule1=rule.equation();
         const data_expression& lhs=rule1.lhs();
         std::size_t rule_arity = (is_function_symbol(lhs)?0:detail::recursive_number_of_args(lhs));
 
@@ -777,7 +751,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           assert(i<arity);
           if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),
                            detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(lhs),i),
-                           vars,terms,variable_is_in_normal_form,no_assignments,rewritten_defined[i]))
+                           assignments,rewritten_defined[i]))
           {
             matches = false;
             break;
@@ -786,13 +760,13 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         if (matches)
         {
           if (rule1.condition()==sort_bool::true_() || rewrite_aux(
-                   subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rule1.condition(),m_generator),sigma)==sort_bool::true_())
+                   subst_values(assignments,rule1.condition(),m_generator),sigma)==sort_bool::true_())
           {
             const data_expression& rhs=rule1.rhs();
 
             if (arity == rule_arity)
             {
-              const data_expression result=rewrite_aux(subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,m_generator),sigma);
+              const data_expression result=rewrite_aux(subst_values(assignments,rhs,m_generator),sigma);
               for (std::size_t i=0; i<arity; i++)
               {
                 if (rewritten_defined[i])
@@ -809,7 +783,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
               // There are more arguments than those that have been rewritten.
               // Get those, put them in rewritten.
 
-              data_expression result=subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,m_generator);
+              data_expression result=subst_values(assignments,rhs,m_generator);
 
               for(std::size_t i=rule_arity; i<arity; ++i)
               {
@@ -846,7 +820,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
             }
           }
         }
-        no_assignments=0;
+        assignments.size=0;
       }
     }
   }

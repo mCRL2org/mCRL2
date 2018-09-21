@@ -37,8 +37,6 @@ class RewriterJitty: public Rewriter
     RewriterJitty& operator=(const RewriterJitty& other)=delete;
 
   private:
-    std::size_t max_vars;
-
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
     std::size_t MAX_LEN; 
