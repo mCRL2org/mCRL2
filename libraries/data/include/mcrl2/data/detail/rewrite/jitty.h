@@ -48,6 +48,10 @@ class RewriterJitty: public Rewriter
                       const data_expression& term,
                       substitution_type& sigma);
 
+    data_expression rewrite_aux_const_function_symbol(
+                      const function_symbol& op,
+                      substitution_type& sigma);
+
     /* Auxiliary function to take care that the array jitty_strat is sufficiently large
        to access element i */
     void make_jitty_strat_sufficiently_larger(const std::size_t i);

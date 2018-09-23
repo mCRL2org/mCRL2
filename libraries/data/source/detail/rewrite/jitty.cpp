@@ -644,7 +644,7 @@ data_expression RewriterJitty::rewrite_aux(
   if (is_function_symbol(term))
   {
     assert(term!=this_term_is_in_normal_form());
-    return rewrite_aux_function_symbol(atermpp::down_cast<const function_symbol>(term),term,sigma);
+    return rewrite_aux_const_function_symbol(atermpp::down_cast<const function_symbol>(term),sigma);
   }
   if (is_variable(term))
   {
@@ -841,6 +841,45 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   } 
   return result; 
 }
+
+data_expression RewriterJitty::rewrite_aux_const_function_symbol(
+                      const function_symbol& op,
+                      substitution_type& sigma)
+{
+  // This is special code to rewrite a function symbol. Note that the function symbol can be higher order,
+  // e.g., it can be a function symbol f for which a rewrite rule f(n)=... exists. 
+
+  const std::size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
+  make_jitty_strat_sufficiently_larger(op_value);
+  const strategy& strat=jitty_strat[op_value];
+
+  for (const strategy_rule& rule: strat.rules)
+  {
+    if (rule.is_rewrite_index())
+    {
+      break;
+    }
+    else
+    {
+      const data_equation& rule1=rule.equation();
+      const data_expression& lhs=rule1.lhs();
+      std::size_t rule_arity = (is_function_symbol(lhs)?0:detail::recursive_number_of_args(lhs));
+
+      if (rule_arity > 0)
+      {
+        break;
+      }
+
+      if (rule1.condition()==sort_bool::true_() || rewrite_aux(rule1.condition(),sigma)==sort_bool::true_())
+      {
+        return rewrite_aux(rule1.rhs(),sigma);
+      }
+    }
+  }
+
+  return op; 
+}
+
 
 data_expression RewriterJitty::rewrite(
      const data_expression& term,
