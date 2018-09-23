@@ -127,15 +127,7 @@ data_expression remove_normal_form_function(const data_expression& t)
   const abstraction& t1=atermpp::down_cast<abstraction>(t);
   const binder_type& binder=t1.binding_operator();
   const variable_list& bound_variables=t1.variables();
-
-  variable_vector new_variables;
-  mutable_map_substitution<> sigma;
-  bool sigma_trivial=true;
-  data_expression body=t1.body();
-  if (!sigma_trivial)
-  {
-    body=replace_variables(body,sigma);
-  }
+  const data_expression& body=t1.body();
 
   return abstraction(binder, bound_variables, remove_normal_form_function(body));
 }
@@ -291,11 +283,11 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
     while (!m.empty())
     {
       std::vector<dependencies_rewrite_rule_pair> m2;
-      for (std::vector<dependencies_rewrite_rule_pair>::const_iterator i=m.begin(); i!=m.end(); ++i)
+      for (const dependencies_rewrite_rule_pair& p: m)
       {
-        if (i->dependencies().empty())
+        if (p.dependencies().empty())
         {
-          const data_equation rule = i->equation();
+          const data_equation rule = p.equation();
           strat.push_back(strategy_rule(rule));
           std::size_t len = rule.variables().size();
           if (len>MAX_LEN)
@@ -305,7 +297,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
         }
         else
         {
-          m2.push_back(*i);
+          m2.push_back(p);
         }
       }
       m = m2;
@@ -340,10 +332,10 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
         const std::size_t k(maxidx-1);
         strat.push_back(strategy_rule(k));
         m2.clear();
-        for (std::vector<dependencies_rewrite_rule_pair>::const_iterator i=m.begin(); i!=m.end(); ++i)
+        for (const dependencies_rewrite_rule_pair& p: m)
         {
-          const data_equation eq=i->equation();
-          std::set<std::size_t> dependencies=i->dependencies();
+          const data_equation eq=p.equation();
+          std::set<std::size_t> dependencies=p.dependencies();
           dependencies.erase(k);
           m2.push_back(dependencies_rewrite_rule_pair(dependencies,eq));
         }
@@ -461,31 +453,26 @@ static data_expression subst_values(
     variable_vector new_variables;
     mutable_map_substitution<> sigma;
     bool sigma_trivial=true;
-    for(variable_list::const_iterator it=bound_variables.begin(); it!=bound_variables.end(); ++it)
+    for(const variable& v: bound_variables)
     {
-      if (variables_in_substitution.count(*it)>0)
+      if (variables_in_substitution.count(v)>0)
       {
-        // Replace *it in the list and in the body by a new variable name.
-        const variable fresh_variable(generator(),it->sort());
+        // Replace v in the list and in the body by a new variable name.
+        const variable fresh_variable(generator(),v.sort());
         new_variables.push_back(fresh_variable);
-        sigma[*it]=fresh_variable;
+        sigma[v]=fresh_variable;
         sigma_trivial=false;
       }
       else
       {
-        new_variables.push_back(*it);
+        new_variables.push_back(v);
       }
     }
-    data_expression body=t1.body();
-    if (!sigma_trivial)
-    {
-      body=replace_variables(body,sigma);
-    }
-
     return abstraction(binder,
                        variable_list(new_variables.begin(),new_variables.end()),
-                       subst_values(assignments,body,generator));
-
+                       subst_values(assignments,
+                                    (sigma_trivial?t1.body():replace_variables(t1.body(),sigma)),
+                                    generator));
   }
   else if (is_where_clause(t))
   {
@@ -576,8 +563,7 @@ static bool match_jitty(
       return false;
     }
 
-    std::size_t arity = pa.size();
-    for (std::size_t i=0; i<arity; i++)
+    for (std::size_t i=0; i<pa.size(); i++)
     {
       if (!match_jitty(ta[i], pa[i],assignments,true))
       {
@@ -602,7 +588,59 @@ data_expression RewriterJitty::rewrite_aux(
       assert(remove_normal_form_function(terma[0])==terma[0]);
       return terma[0];
     }
+
+    // The variable term has the shape appl(t,t1,...,tn);
+  
+    // First check whether t has the shape appl(appl...appl(f,u1,...,un)(...)(...) where f is a function symbol.
+    // In this case rewrite that function symbol. This is an optimisation. If this does not apply t is rewritten,
+    // including all its subterms. But this is costly, as not all subterms will be rewritten again
+    // in rewrite_aux_function_symbol.
+  
+    const data_expression& head=get_nested_head(term);
+  
+    if (is_function_symbol(head) && head!=this_term_is_in_normal_form())
+    {
+      return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head),term,sigma);
+    }
+  
+    const application& tapp=atermpp::down_cast<application>(term);
+    
+    const data_expression& t = rewrite_aux(tapp.head(),sigma);
+    // Here t has the shape f(u1,....,un)(u1',...,um')....: f applied several times to arguments,
+    // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
+    // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
+  
+    const data_expression& head1 = get_nested_head(t);
+    if (is_function_symbol(head1))
+    {
+      // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
+      // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
+      const data_expression& result=application(t,tapp.begin(), tapp.end()); 
+      return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head1),result,sigma);
+    }
+    else if (is_variable(head1))
+    {
+      // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
+      jitty_argument_rewriter r(sigma,*this);
+      return application(t,tapp.begin(),tapp.end(),r); // Replacing r by a lambda term requires 16 more bytes on the stack. 
+    }
+    assert(is_abstraction(t));
+    const abstraction& ta=atermpp::down_cast<abstraction>(t);
+    const binder_type& binder(ta.binding_operator());
+    if (is_lambda_binder(binder))
+    {
+      return rewrite_lambda_application(t,tapp,sigma);
+    }
+    if (is_exists_binder(binder))
+    {
+      assert(term.size()==1);
+      return existential_quantifier_enumeration(t,sigma);
+    }
+    assert(is_forall_binder(binder));
+    assert(term.size()==1);
+    return universal_quantifier_enumeration(head1,sigma);
   }
+  // Here term does not have the shape appl(t1,...,tn)
   if (is_function_symbol(term))
   {
     assert(term!=this_term_is_in_normal_form());
@@ -617,8 +655,9 @@ data_expression RewriterJitty::rewrite_aux(
     const where_clause& w = atermpp::down_cast<where_clause>(term);
     return rewrite_where(w,sigma);
   }
-  if (is_abstraction(term))
-  {
+
+  { 
+    assert(is_abstraction(term));
     const abstraction& ta(term);
     if (is_exists(ta))
     {
@@ -631,57 +670,6 @@ data_expression RewriterJitty::rewrite_aux(
     assert(is_lambda(ta));
     return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
   }
-
-  // The variable term has the shape appl(t,t1,...,tn);
-
-  // First check whether t has the shape appl(appl...appl(f,u1,...,un)(...)(...) where f is a function symbol.
-  // In this case rewrite that function symbol. This is an optimisation. If this does not apply t is rewritten,
-  // including all its subterms. But this is costly, as not all subterms will be rewritten again
-  // in rewrite_aux_function_symbol.
-
-  const data_expression& head=get_nested_head(term);
-
-  if (is_function_symbol(head) && head!=this_term_is_in_normal_form())
-  {
-    return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head),term,sigma);
-  }
-
-  const application& tapp=atermpp::down_cast<application>(term);
-  
-  data_expression t = rewrite_aux(tapp.head(),sigma);
-  // Here t has the shape f(u1,....,un)(u1',...,um')....: f applied several times to arguments,
-  // x(u1,....,un)(u1',...,um')....: x applied several times to arguments, or
-  // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
-
-  const data_expression& head1 = get_nested_head(t);
-  if (is_function_symbol(head1))
-  {
-    // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
-    // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
-    const data_expression result=application(t,tapp.begin(), tapp.end()); 
-    return rewrite_aux_function_symbol(atermpp::down_cast<function_symbol>(head1),result,sigma);
-  }
-  else if (is_variable(head1))
-  {
-    // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
-    jitty_argument_rewriter r(sigma,*this);
-    return application(t,tapp.begin(),tapp.end(),r);
-  }
-  assert(is_abstraction(t));
-  const abstraction& ta(t);
-  const binder_type& binder(ta.binding_operator());
-  if (is_lambda_binder(binder))
-  {
-    return rewrite_lambda_application(t,tapp,sigma);
-  }
-  if (is_exists_binder(binder))
-  {
-    assert(term.size()==1);
-    return existential_quantifier_enumeration(t,sigma);
-  }
-  assert(is_forall_binder(binder));
-  assert(term.size()==1);
-  return universal_quantifier_enumeration(head1,sigma);
 }
 
 data_expression RewriterJitty::rewrite_aux_function_symbol(
@@ -702,12 +690,9 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   }
 
   const std::size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
-  if (op_value>=jitty_strat.size())
-  {
-    make_jitty_strat_sufficiently_larger(op_value);
-  }
-
+  make_jitty_strat_sufficiently_larger(op_value);
   const strategy& strat=jitty_strat[op_value];
+
   if (!strat.rules.empty())
   {
     jitty_assignments_for_a_rewrite_rule assignments(MCRL2_SPECIFIC_STACK_ALLOCATOR(jitty_variable_assignment_for_a_rewrite_rule,strat.number_of_variables));
@@ -766,7 +751,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
             if (arity == rule_arity)
             {
-              const data_expression result=rewrite_aux(subst_values(assignments,rhs,m_generator),sigma);
+              const data_expression& result=rewrite_aux(subst_values(assignments,rhs,m_generator),sigma);
               for (std::size_t i=0; i<arity; i++)
               {
                 if (rewritten_defined[i])
@@ -853,8 +838,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   for (std::size_t i=0; i<arity; i++)
   {
     rewritten[i].~data_expression();
-  }
-  return result;
+  } 
+  return result; 
 }
 
 data_expression RewriterJitty::rewrite(

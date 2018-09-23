@@ -141,8 +141,7 @@ inline std::size_t recursive_number_of_args(const data_expression& t)
   assert(is_application(t));
   
   const application& ta = atermpp::down_cast<application>(t);
-  const std::size_t result=ta.size()+recursive_number_of_args(ta.head());
-  return result;
+  return ta.size()+recursive_number_of_args(ta.head());
 }
 
 // Return the head symbol, nested within applications.
