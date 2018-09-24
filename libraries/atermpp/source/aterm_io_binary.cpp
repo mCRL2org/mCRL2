@@ -197,7 +197,10 @@ static std::bitset<128> read_write_buffer(0);
  */
 static void reverse_bit_order(std::size_t& val)
 {
-  val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
+  if(std::numeric_limits<std::size_t>::digits == 64)
+  {
+    val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
+  }
   val = ((val << 16) & 0xFFFF0000FFFF0000) | ((val >> 16) & 0x0000FFFF0000FFFF);
   val = ((val << 8)  & 0xFF00FF00FF00FF00) | ((val >> 8)  & 0x00FF00FF00FF00FF);
   val = ((val << 4)  & 0xF0F0F0F0F0F0F0F0) | ((val >> 4)  & 0x0F0F0F0F0F0F0F0F);
@@ -216,7 +219,7 @@ static void writeBits(std::size_t val, const std::size_t nr_bits, ostream& os)
   }
   reverse_bit_order(val);
   // Add val to the buffer
-  read_write_buffer |= std::bitset<128>(val) << (64 - bits_in_buffer);
+  read_write_buffer |= std::bitset<128>(val) << (128 - std::numeric_limits<std::size_t>::digits - bits_in_buffer);
   bits_in_buffer += nr_bits;
   // Write 8 bytes if available
   if(bits_in_buffer >= 64)
@@ -260,7 +263,7 @@ static void flushBitsToWriter(ostream& os)
  * @return true on success, false on failure (EOF).
  */
 static
-bool readBits(std::size_t& val, const std::size_t nr_bits, istream& is)
+bool readBits(std::size_t& val, const unsigned int nr_bits, istream& is)
 {
   val = 0;
   if(nr_bits == 0)
@@ -278,7 +281,9 @@ bool readBits(std::size_t& val, const std::size_t nr_bits, istream& is)
     read_write_buffer |= std::bitset<128>(byte) << (56 + 64 - bits_in_buffer);
     bits_in_buffer += 8;
   }
-  val = (read_write_buffer >> 64).to_ullong() & (0xFFFFFFFFFFFFFFFF << (64 - nr_bits));
+  val = (read_write_buffer >> (128 - std::numeric_limits<std::size_t>::digits)).to_ullong() &
+      (std::numeric_limits<std::size_t>::max() <<
+         (std::numeric_limits<std::size_t>::digits - std::min(nr_bits, static_cast<unsigned int>(std::numeric_limits<std::size_t>::digits))));
   bits_in_buffer -= nr_bits;
   read_write_buffer <<= nr_bits;
   reverse_bit_order(val);
