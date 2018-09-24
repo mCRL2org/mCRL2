@@ -73,7 +73,7 @@
 #include <cstring>       // for std::size_t and std::memset()
 #include <cassert>
 #include <cmath>         // for std::log2()
-#include <climits>       // for CHAR_BIT
+#include <climits>       // for CHAR_BIT and SIZE_MAX
 
 #include "mcrl2/utilities/logger.h"
 
@@ -99,6 +99,8 @@ typedef std::ptrdiff_t signed_state_type;
 /// \details defined here because this is the most basic #include header that
 /// uses it.
 typedef std::size_t trans_type;
+#define TRANS_TYPE_MIN ((trans_type) 0)
+#define TRANS_TYPE_MAX SIZE_MAX
 
 #ifndef NDEBUG
 

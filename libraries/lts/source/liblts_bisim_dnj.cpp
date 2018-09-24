@@ -827,8 +827,8 @@ iterator_or_null<block_bunch_slice_iter_t>* const new_noninert_block_bunch_ptr)
     {
         // create a new bunch for noninert transitions
         new_noninert_bunch = new bunch_t(new_action_block_pos,
-                                  action_block_inert_begin,
-                                  new_action_block_pos - action_block.begin());
+                   action_block_inert_begin,
+                   new_action_block_pos - action_block.end() + TRANS_TYPE_MAX);
 
         // create a new block_bunch-slice
         // (While it's technically unstable, we immediately stabilise for it
@@ -1253,6 +1253,9 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                                               action_block_slice_end[-1].begin_or_before_end();
                                                                                                 assert(action_block_slice_begin < action_block_slice_end);
                                                                                                 assert(action_block_slice_end <= action_slice_end);
+                                                                                                assert((trans_type) (action_block_slice_end -
+                                                                                                            action_block_slice_begin) <= part_st.state_size() *
+                                                                                                                            (trans_type) part_st.state_size());
                                                                                                 const bisim_dnj::block_t* const target_block =
                                                                                                                 action_block_slice_begin->succ()->
                                                                                                                               block_bunch->pred->target->block;
@@ -1264,6 +1267,8 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                                     assert(nullptr == previous_bunch);
                                                                                                     previous_bunch = bunch;
                                                                                                     assert(bunch->end == action_block_slice_end);
+                                                                                                    assert(TRANS_TYPE_MAX - part_tr.action_block.size() <=
+                                                                                                                           bunch->sort_key_and_label.sort_key);
                                                                                                     if (bunch->begin == action_block_slice_begin)
                                                                                                     {
                                                                                                         // Perhaps this does not always hold; sometimes, an
@@ -1467,7 +1472,8 @@ void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
     if (part_tr.action_block.begin() < part_tr.action_block_inert_begin)
     {
         bunch = new bisim_dnj::bunch_t(part_tr.action_block.begin(),
-                                          part_tr.action_block_inert_begin, 0);
+                                 part_tr.action_block_inert_begin,
+                                 TRANS_TYPE_MAX - part_tr.action_block.size());
         B->stable_block_bunch.emplace_front(part_tr.block_bunch_inert_begin,
                                                                   bunch, true);
     }

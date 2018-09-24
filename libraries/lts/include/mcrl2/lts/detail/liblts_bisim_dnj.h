@@ -973,6 +973,9 @@ class bunch_t
     {
         // During refinement, this field stores the sort key.
         // After refinement, it is set to the label.
+        // To distinguish the two, we will use large numbers for sort keys and
+        // small ones for labels; then the probability that an error message is
+        // generated if someone mixes up the two is high.
         trans_type sort_key;
         label_type label;
 
@@ -1818,8 +1821,8 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                                         if (0 == label || end < partitioner.action_label[label - 1].begin)
                                                                                         {
                                                                                             assert((trans_type) (end - begin) <=
-                                                                                                    partitioner.part_st.permutation.size() *
-                                                                                                          (trans_type) partitioner.part_st.permutation.size());
+                                                                                                        partitioner.part_st.state_size() *
+                                                                                                                (trans_type) partitioner.part_st.state_size());
                                                                                             return bisim_gjkw::check_complexity::log_n -
                                                                                                               bisim_gjkw::check_complexity::ilog2(end - begin);
                                                                                         }
