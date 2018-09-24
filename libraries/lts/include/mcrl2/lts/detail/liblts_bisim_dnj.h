@@ -476,7 +476,7 @@ class block_t
     /// \param   new_block_mode indicates whether the blue or the red block
     ///          should be the new one.
     /// \returns pointer to the new block
-    block_t* split_off_block(enum new_block_mode_t new_block_mode);
+    block_t* split_off_block(enum new_block_mode_t const new_block_mode);
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief print a block identification for debugging
                                                                                     std::string debug_id() const
@@ -492,7 +492,7 @@ class block_t
                                                                                     /// \brief provide an iterator to the beginning of the permutation array
                                                                                     /// \details This iterator is required to be able to print identifications
                                                                                     /// for debugging.
-                                                                                    static permutation_iter_t perm_begin;
+                                                                                    static permutation_const_iter_t perm_begin;
                                                                                     static permutation_const_iter_t perm_end;
 
                                                                                     mutable bisim_gjkw::check_complexity::block_dnj_counter_t work_counter;
@@ -592,8 +592,8 @@ class part_state_t
         state_info(num_states + 1)
     {                                                                           assert(0 == block_t::nr_of_blocks);
                                                                                 #ifndef NDEBUG
-                                                                                    block_t::perm_begin = permutation.begin();
-                                                                                    block_t::perm_end = permutation.end();
+                                                                                    block_t::perm_begin = permutation.cbegin();
+                                                                                    block_t::perm_end = permutation.cend();
                                                                                     state_info_entry::s_i_begin = state_info.data();
                                                                                     state_info_entry::s_i_end = state_info_entry::s_i_begin+num_states;
                                                                                 #endif
@@ -729,7 +729,7 @@ class succ_entry
                                                                                     static inline void add_work_to_out_slice(
                                                                                         const bisim_partitioner_dnj<LTS_TYPE>& partitioner,
                                                                                         succ_iter_t out_slice_begin, enum bisim_gjkw::check_complexity::
-                                                                                                        counter_type const ctr, unsigned char const max_value);
+                                                                                                             counter_type const ctr, unsigned const max_value);
                                                                                 #endif
 };
 
@@ -871,8 +871,9 @@ class block_bunch_slice_t
         intptr_t data;
       public:
         bunch_stability_t(bunch_t* new_bunch, bool is_stable)
-          : data(reinterpret_cast<intptr_t>(new_bunch) | is_stable)
+          : data(reinterpret_cast<intptr_t>(new_bunch) | (intptr_t) is_stable)
         {                                                                       assert(sizeof(bunch_t*) == sizeof(intptr_t));
+                                                                                assert(0 == (reinterpret_cast<intptr_t>(new_bunch) & 3));
         }
         ~bunch_stability_t()  {  }
 
@@ -1059,10 +1060,7 @@ class bunch_t
                 ++begin;                                                        assert(begin <= last_slice_begin);
             }                                                                   assert(!begin->succ.is_null());
             if (begin == last_slice_begin)  make_trivial();
-        }
-                                                                                #ifndef NDEBUG
-                                                                                    new_bunch->work_counter = work_counter;
-                                                                                #endif
+        }                                                                       ONLY_IF_DEBUG( new_bunch->work_counter = work_counter; )
         return new_bunch;
     }
 
@@ -1152,10 +1150,10 @@ class part_trans_t
         unstable_block_bunch(),
         unstable_block_bunch_postprocess_end(unstable_block_bunch.end())
     {
-        block_bunch_slice_t::block_bunch_begin = block_bunch.begin();
+        block_bunch_slice_t::block_bunch_begin = block_bunch.cbegin();
                                                                                 #ifndef NDEBUG
                                                                                     block_bunch_slice_t::block_bunch_end = &block_bunch_inert_begin;
-                                                                                    action_block_entry::action_block_begin = action_block.begin();
+                                                                                    action_block_entry::action_block_begin = action_block.cbegin();
                                                                                     action_block_entry::action_block_end = &action_block_inert_begin;
                                                                                 #endif
     }
@@ -1366,11 +1364,8 @@ class bisim_partitioner_dnj
                                                                                     bisim_gjkw::check_complexity::init(1 >= aut.num_states() ? 2
                                                                                                                         : aut.num_states() * aut.num_states());
                                                                                 #endif
-      create_initial_partition();
-                                                                                #ifndef NDEBUG
-                                                                                    bisim_dnj::action_block_entry::action_block_orig_inert_begin =
-                                                                                                                              part_tr.action_block_inert_begin;
-                                                                                #endif
+      create_initial_partition();                                               ONLY_IF_DEBUG( bisim_dnj::action_block_entry::action_block_orig_inert_begin =
+                                                                                                                            part_tr.action_block_inert_begin; )
       refine_partition_until_it_becomes_stable();
     }
     ~bisim_partitioner_dnj()  {  }
@@ -1634,7 +1629,7 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
     if (generate_counter_examples)
     {
         mCRL2log(log::warning) << "The DNJ branching bisimulation "
-                          "algorithm does not generate counterexamples.\n";
+                              "algorithm does not generate counterexamples.\n";
     }
     size_t init_l2 = l2.initial_state() + l1.num_states();
     mcrl2::lts::detail::merge(l1, l2);
@@ -1760,7 +1755,7 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                                     /* static */ inline void succ_entry::add_work_to_out_slice(
                                                                                         const bisim_partitioner_dnj<LTS_TYPE>& partitioner,
                                                                                         succ_iter_t out_slice_begin, enum bisim_gjkw::check_complexity::
-                                                                                                         counter_type const ctr, unsigned char const max_value)
+                                                                                                              counter_type const ctr, unsigned const max_value)
                                                                                     {
                                                                                         succ_const_iter_t const out_slice_before_end =
                                                                                                                         out_slice_begin->begin_or_before_end();
@@ -1790,9 +1785,9 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                                     {
                                                                                         // Search for the action label in partitioner.action_label
                                                                                         label_type const label = std::lower_bound(
-                                                                                            partitioner.action_label.begin(), partitioner.action_label.end(),
+                                                                                            partitioner.action_label.cbegin(), partitioner.action_label.cend(),
                                                                                                                       action_block, action_label_greater) -
-                                                                                                                              partitioner.action_label.begin();
+                                                                                                                             partitioner.action_label.cbegin();
                                                                                         assert(0 <= label && label < partitioner.action_label.size());
                                                                                         assert(partitioner.action_label[label].begin <= action_block);
                                                                                         assert(0==label||action_block<partitioner.action_label[label-1].begin);
@@ -1814,9 +1809,9 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                                         // verify that the bunch only has a single action label.
                                                                                         // Search for the action label in partitioner.action_label
                                                                                         label_type const label = std::lower_bound(
-                                                                                            partitioner.action_label.begin(), partitioner.action_label.end(),
+                                                                                            partitioner.action_label.cbegin(), partitioner.action_label.cend(),
                                                                                                                                 begin, action_label_greater) -
-                                                                                                                              partitioner.action_label.begin();
+                                                                                                                             partitioner.action_label.cbegin();
                                                                                         assert(0 <= label && label < partitioner.action_label.size());
                                                                                         assert(partitioner.action_label[label].begin <= begin);
                                                                                         assert(0 == label || begin < partitioner.action_label[label-1].begin);

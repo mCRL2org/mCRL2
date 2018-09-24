@@ -50,7 +50,7 @@ bunch_t* bunch_t::first_nontrivial;
                                                                                 #ifndef NDEBUG
                                                                                     state_info_const_ptr state_info_entry::s_i_begin;
                                                                                     state_info_const_ptr state_info_entry::s_i_end;
-                                                                                    permutation_iter_t block_t::perm_begin;
+                                                                                    permutation_const_iter_t block_t::perm_begin;
                                                                                     permutation_const_iter_t block_t::perm_end;
 /* ************************************************************************* */     action_block_const_iter_t action_block_entry::action_block_begin;
 /*                                                                           */     const action_block_iter_t* action_block_entry::action_block_end;
@@ -187,8 +187,9 @@ block_t* block_t::split_off_block(enum new_block_mode_t const new_block_mode)
                                                                                     /// it lists its states, separated into nonbottom and bottom states.
                                                                                     /// \param part_tr partition for the transitions
                                                                                     void part_state_t::print_part() const
-                                                                                    {   assert(permutation.begin() < permutation.end());
-                                                                                        const block_t* B = (*permutation.begin())->block;
+                                                                                    {   assert(permutation.cbegin() < permutation.cend());
+                                                                                        if (!mCRL2logEnabled(log::debug, "bisim_dnj"))  return;
+                                                                                        const block_t* B = (*permutation.cbegin())->block;
                                                                                         do
                                                                                         {
                                                                                             mCRL2log(log::debug, "bisim_dnj") << B->debug_id() << ":\n";
@@ -201,15 +202,15 @@ block_t* block_t::split_off_block(enum new_block_mode_t const new_block_mode)
                                                                                                                             B->marked_nonbottom_begin, B->end);
                                                                                         // go to next block
                                                                                         }
-                                                                                        while (B->end < permutation.end() && (B = (*B->end)->block, true));
+                                                                                        while (B->end < permutation.cend() && (B = (*B->end)->block, true));
                                                                                     }
 
                                                                                     /// \brief asserts that the partition of states is consistent
                                                                                     /// \details It also requires that no states are marked.
                                                                                     void part_state_t::assert_consistency(bool const branching) const
                                                                                     {
-                                                                                        permutation_const_iter_t block_begin = permutation.begin();
-                                                                                        while (block_begin < permutation.end())
+                                                                                        permutation_const_iter_t block_begin = permutation.cbegin();
+                                                                                        while (block_begin < permutation.cend())
                                                                                         {
                                                                                             const block_t* const block = (*block_begin)->block;
                                                                                             // block is consistent:
@@ -249,7 +250,7 @@ block_t* block_t::split_off_block(enum new_block_mode_t const new_block_mode)
 /* ************************************************************************* */             }
                                                                                             block_begin = block->end;
                                                                                         }
-                                                                                        assert(permutation.end() == block_begin);
+                                                                                        assert(permutation.cend() == block_begin);
                                                                                     }
                                                                                 #endif // ifndef NDEBUG
 /// \brief transition is moved to a new bunch
@@ -534,15 +535,10 @@ succ_iter_t part_trans_t::move_out_slice_to_new_block(                          
             new_block_bunch_slice = unstable_block_bunch.emplace(
                std::next(old_block_bunch_slice), old_block_bunch_slice->end,
                                         old_block_bunch_slice->bunch(), false);
-        }
-                                                                                #ifndef NDEBUG
-                                                                                    new_block_bunch_slice->work_counter = old_block_bunch_slice->work_counter;
-                                                                                #endif
-    }
-                                                                                #ifndef NDEBUG
-                                                                                    unsigned const max_counter = bisim_gjkw::check_complexity::log_n -
-    /* move all transitions in this out-slice to the new block_bunch */                                 bisim_gjkw::check_complexity::ilog2(new_block->size());
-                                                                                #endif
+        }                                                                       ONLY_IF_DEBUG( new_block_bunch_slice->work_counter =
+                                                                                                                         old_block_bunch_slice->work_counter; )
+    }                                                                           ONLY_IF_DEBUG( unsigned const max_counter=bisim_gjkw::check_complexity::log_n-
+    /* move all transitions in this out-slice to the new block_bunch */                               bisim_gjkw::check_complexity::ilog2(new_block->size()); )
     do
     {
         --out_slice_end;
@@ -984,11 +980,12 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                     void bisim_dnj::part_trans_t::print_trans(
                                                                                                       const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
+                                                                                        if (!mCRL2logEnabled(log::debug, "bisim_dnj"))  return;
                                                                                         // for all bunches
-                                                                                        action_block_const_iter_t bunch_begin = action_block.begin();
+                                                                                        action_block_const_iter_t bunch_begin = action_block.cbegin();
                                                                                         do
                                                                                         {
-                                                                                            if (bunch_begin >= action_block.end())
+                                                                                            if (bunch_begin >= action_block.cend())
                                                                                             {
                                                                                                 mCRL2log(log::debug, "bisim_dnj") << "No transitions.\n";
                                                                                                 return;
@@ -1003,7 +1000,7 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                             if (bunch_begin->succ()->block_bunch->slice.is_null())
                                                                                             {
                                                                                                 mCRL2log(log::debug, "bisim_dnj") <<"Inert transition slice [";
-                                                                                                action_block_slice_end = bunch_end = action_block.end();
+                                                                                                action_block_slice_end = bunch_end = action_block.cend();
                                                                                             }
                                                                                             else
                                                                                             {
@@ -1052,13 +1049,13 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                             while (true);
                                                                                             // go to next bunch
                                                                                             bunch_begin = bunch_end;
-                                                                                            while (bunch_begin<action_block.end()&&bunch_begin->succ.is_null())
+                                                                                            while(bunch_begin<action_block.cend()&&bunch_begin->succ.is_null())
                                                                                             {
                                                                                                 assert(bunch_begin->begin_or_before_end.is_null());
                                                                                                 ++bunch_begin;
                                                                                             }
                                                                                         }
-                                                                                        while (bunch_begin < action_block.end());
+                                                                                        while (bunch_begin < action_block.cend());
                                                                                     }
 
                                                                                     /// \brief assert that the data structure is consistent and stable
@@ -1083,17 +1080,17 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                         if (part_tr.block_bunch.empty())  return;
 
                                                                                         assert(part_tr.unstable_block_bunch.empty());
-                                                                                        for (bisim_dnj::block_bunch_slice_const_iter_t block_bunch =
-                                                                                                                          part_tr.unstable_block_bunch.begin();
-                                                                                              part_tr.unstable_block_bunch.end() != block_bunch; ++block_bunch)
+                                                                                        /* for (bisim_dnj::block_bunch_slice_const_iter_t block_bunch =
+                                                                                                                         part_tr.unstable_block_bunch.cbegin();
+                                                                                             part_tr.unstable_block_bunch.cend() != block_bunch; ++block_bunch)
                                                                                         {
                                                                                             assert(!block_bunch->is_stable());
-                                                                                        }
+                                                                                        } */
 
                                                                                         // for all blocks
                                                                                         for (bisim_dnj::permutation_const_iter_t block_begin =
-                                                                                                                part_st.permutation.begin();
-                                                                                                                     block_begin < part_st.permutation.end(); )
+                                                                                                                part_st.permutation.cbegin();
+                                                                                                                    block_begin < part_st.permutation.cend(); )
                                                                                         {
                                                                                             const bisim_dnj::block_t* const block = (*block_begin)->block;
                                                                                             unsigned const max_block = bisim_gjkw::check_complexity::log_n -
@@ -1105,8 +1102,8 @@ void part_trans_t::adapt_transitions_for_new_block(
 
                                                                                             // for all stable block_bunch-slices of the block
                                                                                             for (bisim_dnj::block_bunch_slice_const_iter_t block_bunch =
-                                                                                                                             block->stable_block_bunch.begin();
-                                                                                                 block_bunch != block->stable_block_bunch.end(); ++block_bunch)
+                                                                                                                            block->stable_block_bunch.cbegin();
+                                                                                                block_bunch != block->stable_block_bunch.cend(); ++block_bunch)
                                                                                             {
                                                                                                 assert(block_bunch->source_block() == block);
                                                                                                 assert(block_bunch->is_stable());
@@ -1206,7 +1203,7 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                             // for all inert transitions
                                                                                             for (bisim_dnj::action_block_const_iter_t action_block =
                                                                                                                               part_tr.action_block_inert_begin;
-                                                                                                     action_block < part_tr.action_block.end(); ++action_block)
+                                                                                                    action_block < part_tr.action_block.cend(); ++action_block)
                                                                                             {
                                                                                                 assert(action_block->begin_or_before_end.is_null());
                                                                                                 assert(action_block->succ()->block_bunch->slice.is_null());
@@ -1270,8 +1267,8 @@ void part_trans_t::adapt_transitions_for_new_block(
                                                                                                     if (bunch->begin == action_block_slice_begin)
                                                                                                     {
                                                                                                         // Perhaps this does not always hold; sometimes, an
-                                                                                                        // action_block slice disappears but the bunch cannot be
-                                                                                                        // made trivial.
+                                                                                                        // action_block slice disappears but the bunch cannot
+                                                                                                        // be made trivial.
                                                                                                         assert(bunch->is_trivial());
                                                                                                     }
                                                                                                     else  assert(!bunch->is_trivial());
@@ -1589,10 +1586,7 @@ void bisim_partitioner_dnj<LTS_TYPE>::create_initial_partition()
     if (0 < B->marked_size())
     {
         if (1 < B->size())
-        {
-                                                                                #ifndef NDEBUG
-                                                                                    part_st.print_part();  part_tr.print_trans(*this);
-                                                                                #endif
+        {                                                                       ONLY_IF_DEBUG( part_st.print_part();  part_tr.print_trans(*this); )
             B = refine(B,
                 /* splitter block_bunch */ B->stable_block_bunch.begin(),
                      bisim_dnj::extend_from_state_markings_for_postprocessing);
@@ -1622,14 +1616,14 @@ void bisim_partitioner_dnj<LTS_TYPE>::replace_transition_system()
     // refine_partition_until_it_becomes_stable().
 
     // for all blocks
-    bisim_dnj::permutation_const_iter_t s_iter = part_st.permutation.begin();   assert(s_iter < part_st.permutation.end());
+    bisim_dnj::permutation_const_iter_t s_iter = part_st.permutation.cbegin();  assert(s_iter < part_st.permutation.cend());
     do
     {
         const bisim_dnj::block_t* const B = (*s_iter)->block;
         // for all block_bunch-slices of the block
         for(bisim_dnj::block_bunch_slice_const_iter_t
-                    trans_iter = B->stable_block_bunch.begin();
-                       B->stable_block_bunch.end() != trans_iter; ++trans_iter)
+                    trans_iter = B->stable_block_bunch.cbegin();
+                      B->stable_block_bunch.cend() != trans_iter; ++trans_iter)
         {                                                                       assert(trans_iter->is_stable());  assert(!trans_iter->empty());
             bisim_dnj::pred_const_iter_t const pred = trans_iter->end[-1].pred; assert(pred->source->block == B);
             /* add a transition from the source block to the goal block with */ assert(pred->action_block->succ()->block_bunch->pred == pred);
@@ -1640,7 +1634,7 @@ void bisim_partitioner_dnj<LTS_TYPE>::replace_transition_system()
         }
         s_iter = B->end;
     }
-    while (s_iter < part_st.permutation.end());
+    while (s_iter < part_st.permutation.cend());
 
     // Merge the states, by setting the state labels of each state to the
     // concatenation of the state labels of its equivalence class.
@@ -1707,18 +1701,15 @@ void bisim_partitioner_dnj<LTS_TYPE>::
     for (;;)
     {                                                                           // mCRL2complexity(...) -- this loop will be ascribed to (the transitions in)
                                                                                 // the new bunch below.
-                                                                                #ifndef NDEBUG
-        /*------------------------- find a splitter -------------------------*/     if (mCRL2logEnabled(log::debug, "bisim_dnj"))
-                                                                                    {   part_st.print_part();  part_tr.print_trans(*this);  }
-        /* select a nontrivial bunch splitter_bunch */                              assert_stability();
-                                                                                #endif
+        /*------------------------- find a splitter -------------------------*/ ONLY_IF_DEBUG( part_st.print_part();  part_tr.print_trans(*this);
+                                                                                                                                          assert_stability(); )
+        // select a nontrivial bunch splitter_bunch
         bisim_dnj::bunch_t* const splitter_bunch =
                                      bisim_dnj::bunch_t::get_some_nontrivial();
         if (nullptr == splitter_bunch)  break;
-                                                                                #ifndef NDEBUG
-        /* select a small action_block-slice splitter_slice in splitter_bunch*/     mCRL2log(log::debug, "bisim_dnj") << "Refining "
-        /* move splitter_slice from splitter_bunch to a new bunch */                                                     << splitter_bunch->debug_id() << '\n';
-                                                                                #endif
+
+        /* select a small action_block-slice in splitter_bunch*/                ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_dnj") << "Refining "
+        /* move this slice from splitter_bunch to a new bunch */                                                       << splitter_bunch->debug_id() << '\n'; )
         bisim_dnj::bunch_t* const new_bunch =
                           splitter_bunch->split_off_small_action_block_slice();
                                                                                 #ifndef NDEBUG
@@ -2232,10 +2223,7 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::refine(
                 // have become non-inert.
                 refine_block->marked_nonbottom_begin = refine_block->end;
                 refine_block->marked_bottom_begin =
-                                                 refine_block->nonbottom_begin;
-                                                                                #ifndef NDEBUG
-                                                                                    finalise_blue_is_smaller(nullptr, refine_block, new_bunch, *this);
-                                                                                #endif
+                                                 refine_block->nonbottom_begin; ONLY_IF_DEBUG(finalise_blue_is_smaller(nullptr,refine_block,new_bunch,*this);)
                 red_block = refine_block;
                 TERMINATE_COROUTINE_SUCCESSFULLY();
             }
@@ -2312,11 +2300,8 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::refine(
                                 if (*mid->bunch() <= *splitter->bunch())
                                 {
                                     blue_begin = mid->out_slice_before_end()+1;
-                                }
-                                                                                #ifndef NDEBUG
-                                                                                    bisim_dnj::succ_entry::add_work_to_out_slice(*this,mid->out_slice_begin(),
-                                                                                                      bisim_gjkw::check_complexity::refine_blue__slow_test, 1);
-                                                                                #endif
+                                }                                               ONLY_IF_DEBUG( bisim_dnj::succ_entry::add_work_to_out_slice(*this, mid->
+                                                                                    out_slice_begin(),bisim_gjkw::check_complexity::refine_blue__slow_test,1);)
                             }
                             END_COROUTINE_WHILE;
                             if (blue_begin > blue_end)
@@ -2367,10 +2352,7 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::refine(
                                 <bisim_dnj::block_bunch_slice_iter_t>(splitter)
                         : bisim_dnj::iterator_or_null
                                 <bisim_dnj::block_bunch_slice_iter_t>(nullptr),
-                                       splitter, bisim_dnj::new_block_is_blue);
-                                                                                #ifndef NDEBUG
-                                                                                    finalise_blue_is_smaller(blue_block, red_block, new_bunch, *this);
-                                                                                #endif
+                                       splitter, bisim_dnj::new_block_is_blue); ONLY_IF_DEBUG(finalise_blue_is_smaller(blue_block,red_block,new_bunch,*this);)
         END_COROUTINE
 
         /*------------------------- find red states -------------------------*/
@@ -2491,10 +2473,7 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::refine(
                                 <bisim_dnj::block_bunch_slice_iter_t>(splitter)
                         : bisim_dnj::iterator_or_null
                                 <bisim_dnj::block_bunch_slice_iter_t>(nullptr),
-                                        splitter, bisim_dnj::new_block_is_red);
-                                                                                #ifndef NDEBUG
-                                                                                    finalise_red_is_smaller(refine_block, red_block, *this);
-                                                                                #endif
+                                        splitter, bisim_dnj::new_block_is_red); ONLY_IF_DEBUG( finalise_red_is_smaller(refine_block, red_block, *this); )
         END_COROUTINE
     END_COROUTINES_SECTION
     return red_block;
@@ -2573,13 +2552,12 @@ bisim_dnj::block_t*bisim_partitioner_dnj<LTS_TYPE>::prepare_for_postprocessing(
                             bisim_dnj::block_bunch_slice_iter_t last_splitter,
                                                         bool first_preparation)
 {                                                                               assert(refine_block == last_splitter->source_block());
-    bisim_dnj::block_t* blue_block;                                             assert(last_splitter->is_stable());
-                                                                                assert(part_tr.block_bunch.begin() < part_tr.block_bunch_inert_begin);
+    bisim_dnj::block_t* blue_block;                                             assert(part_tr.block_bunch.begin() < part_tr.block_bunch_inert_begin);
     bisim_dnj::block_bunch_slice_iter_t new_noninert_block_bunch =
-                                   part_tr.block_bunch_inert_begin[-1].slice(); assert(refine_block == new_noninert_block_bunch->source_block());
+                                   part_tr.block_bunch_inert_begin[-1].slice(); assert(last_splitter->is_stable());
     // The noninert block_bunch-slice is already stable, so we do not need to
-    /* move it to the stable block_bunch-slices. */                             assert(new_noninert_block_bunch->is_stable());
-    // First, split into the states that have a new noninert transition and
+    /* move it to the stable block_bunch-slices. */                             assert(refine_block == new_noninert_block_bunch->source_block());
+    /* First, split into the states that have a new noninert transition and */  assert(new_noninert_block_bunch->is_stable());
     /* those that haven't. */                                                   assert(0 < refine_block->marked_size());
     if (0 < refine_block->unmarked_bottom_size())
     {
@@ -2638,7 +2616,7 @@ bisim_dnj::block_t*bisim_partitioner_dnj<LTS_TYPE>::prepare_for_postprocessing(
                                                                                     // block_bunch slice whose source_block() is refine_block.
                                                                                     for (bisim_dnj::block_bunch_slice_const_iter_t block_bunch_iter =
                                                                                                                 part_tr.unstable_block_bunch_postprocess_end;
-                                                                                                       block_bunch_iter != part_tr.unstable_block_bunch.end();
+                                                                                                      block_bunch_iter != part_tr.unstable_block_bunch.cend();
                                                                                                                                             ++block_bunch_iter)
                                                                                     {
                                                                                         assert(block_bunch_iter->source_block() != refine_block);
@@ -2765,7 +2743,7 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::postprocess_new_noninert(
                                                                                         splitter->work_counter.reset_temporary_work();
                                                                                     }
                                                                                     assert(splitter->add_work_to_bottom_transns(bisim_gjkw::check_complexity::
-                                                                                                               postprocess_new_noninert__stabilize, 1, *this));
+                                                                                                      postprocess_new_noninert__stabilize_a_priori, 1, *this));
                                                                                 #endif
             continue;
         }
@@ -2790,7 +2768,11 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::postprocess_new_noninert(
                             refine_block->stable_block_bunch.end(),
                                        part_tr.unstable_block_bunch, splitter);
             splitter->make_stable();
-
+                                                                                #ifndef NDEBUG
+                                                                                    bool stabilize_a_priori_succeeded = splitter->add_work_to_bottom_transns(
+                                                                                                       bisim_gjkw::check_complexity::
+                                                                                                       postprocess_new_noninert__stabilize_a_priori, 1, *this);
+                                                                                #endif
             refine_block = refine(refine_block, splitter,
                      bisim_dnj::extend_from_bottom_state_markings_and_FromRed);
                                                                                 #ifndef NDEBUG
@@ -2804,41 +2786,46 @@ bisim_dnj::block_t* bisim_partitioner_dnj<LTS_TYPE>::postprocess_new_noninert(
                                                                                     }
                                                                                     // account for the work a bit early, so as to avoid trouble if `splitter`
                                                                                     // is divided later:
-                                                                                    assert(splitter->add_work_to_bottom_transns(bisim_gjkw::check_complexity::
-            /* check whether there are even more new non-inert transitions */                                  postprocess_new_noninert__stabilize, 1, *this));
+                                                                                    if (!stabilize_a_priori_succeeded)
+                                                                                    {
+                                                                                        assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                                  check_complexity::
+                                                                                                  postprocess_new_noninert__stabilize_a_posteriori, 1, *this));
+            /* check whether there are even more new non-inert transitions */       }
                                                                                 #endif
             if (0 < refine_block->marked_size())
             {
-                /* Prepare the slices of outgoing transitions of RedB similar*/ ONLY_IF_DEBUG(bisim_dnj::block_bunch_iter_t const splitter_end=splitter->end;)
+                // Prepare the slices of outgoing transitions of RedB similar
                 // to Lines 4.4-4...
                 refine_block = prepare_for_postprocessing(refine_block,
                                                               splitter, false);
-                if (nullptr == refine_block)  continue;                         ONLY_IF_DEBUG( splitter = splitter_end[-1].slice(); )
+                if (nullptr == refine_block)  continue;
             }
         }
                                                                                 #ifndef NDEBUG
                                                                                     else
-                                                                                    {
+                                                                                    {   // If the following assertion does not hold, uncomment the if below.
+                                                                                        assert(!splitter->work_counter.has_temporary_work());
                                                                                         // now splitter must have some transitions that start in bottom states:
-                                                                                        if (splitter->work_counter.has_temporary_work())
-                                                                                        {
-                                                                                            assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
-                                                                                                        check_complexity::
-                                                                                                        prepare_for_postprocessing__make_unstable_a_posteriori,
-                                                                                                                                                    1, *this));
-                                                                                            splitter->work_counter.reset_temporary_work();
-                                                                                        }
+                                                                                        // if (splitter->work_counter.has_temporary_work())
+                                                                                        // {
+                                                                                        //     assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                        //                 check_complexity::
+                                                                                        //              prepare_for_postprocessing__make_unstable_a_posteriori,
+                                                                                        //                                                          1, *this));
+                                                                                        //     splitter->work_counter.reset_temporary_work();
+                                                                                        // }
                                                                                         // account for the work a bit early, so as to avoid trouble if
                                                                                         // `splitter` is divided later:
                                                                                         assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
-        /* advance the current_out_slice pointers of the (remaining) red */                  check_complexity::postprocess_new_noninert__already_stabilized, 1, *this));
+                                                                                            check_complexity::postprocess_new_noninert__stabilize_a_priori,
+        /* advance the current_out_slice pointers of the (remaining) red */                                                                         1, *this));
         /* subblock */                                                              }
                                                                                 #endif
         bisim_dnj::permutation_iter_t s_iter = refine_block->begin;             assert(s_iter < refine_block->nonbottom_begin);
         do
         {
-            bisim_dnj::state_info_ptr s = *s_iter;                              assert(s->current_out_slice->block_bunch->slice() == splitter);
-                                                                                assert(s->pos == s_iter);
+            bisim_dnj::state_info_ptr s = *s_iter;                              assert(s->pos == s_iter);
                                                                                 assert(s->succ.begin <= s->current_out_slice);
                                                                                 assert(s->current_out_slice <= s->current_out_slice->begin_or_before_end());
                                                                                 assert(s->current_out_slice->begin_or_before_end() < s->succ_inert.begin);

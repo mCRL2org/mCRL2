@@ -45,6 +45,8 @@ public:
     using typename std::vector<T>::const_iterator;
     using typename std::vector<T>::size_type;
     using std::vector<T>::begin;
+    using std::vector<T>::cbegin;
+    using std::vector<T>::cend;
     using std::vector<T>::end;
     using std::vector<T>::size;
     using std::vector<T>::clear;

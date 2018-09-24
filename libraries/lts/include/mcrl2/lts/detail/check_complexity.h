@@ -339,9 +339,9 @@ class check_complexity
         prepare_for_postprocessing__make_unstable_a_priori,
         prepare_for_postprocessing__make_unstable_a_posteriori,
         postprocess_new_noninert__sort,
-        postprocess_new_noninert__stabilize,
-        postprocess_new_noninert__already_stabilized,
-            TRANS_dnj_MAX = postprocess_new_noninert__already_stabilized
+        postprocess_new_noninert__stabilize_a_priori,
+        postprocess_new_noninert__stabilize_a_posteriori,
+            TRANS_dnj_MAX = postprocess_new_noninert__stabilize_a_posteriori
     };
 
     /// \brief special value for temporary work without changing the balance
@@ -491,7 +491,7 @@ class check_complexity
         {
             assert(FirstCounter <= ctr);
             assert(ctr <= LastCounter);
-            assert(max_value <= (ctr < FirstTempCounter ? log_n : 1));
+            assert(max_value <= (ctr < FirstTempCounter ? log_n : 1U));
             if (counters[ctr - FirstCounter] >= max_value)
             {
                 mCRL2log(log::error) << "Error 1: counter \""

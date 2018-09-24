@@ -204,8 +204,8 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "prepare_for_postprocessing(), make block_bunch-slice without bottom "
                                              "states unstable (final counter)",
     "postprocess_new_noninert(), sort",
-    "postprocess_new_noninert(), stabilize",
-    "postprocess_new_noninert(), block is already stabilized"
+    "postprocess_new_noninert(), stabilize block with bottom states",
+    "postprocess_new_noninert(), stabilize block without bottom states"
 };
 
 
@@ -364,8 +364,8 @@ void check_complexity::test_work_names()
     test_work_name(i, prepare_for_postprocessing__make_unstable_a_priori);
     test_work_name(i, prepare_for_postprocessing__make_unstable_a_posteriori);
     test_work_name(i, postprocess_new_noninert__sort);
-    test_work_name(i, postprocess_new_noninert__stabilize);
-    test_work_name(i, postprocess_new_noninert__already_stabilized);
+    test_work_name(i, postprocess_new_noninert__stabilize_a_priori);
+    test_work_name(i, postprocess_new_noninert__stabilize_a_posteriori);
     assert(check_complexity::TRANS_dnj_MAX + 1 == i);
 
     exit(EXIT_SUCCESS);
