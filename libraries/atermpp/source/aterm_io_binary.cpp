@@ -185,8 +185,16 @@ static char* text_buffer = nullptr;
 static std::size_t text_buffer_size = 0;
 
 static std::size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
+/**
+ * \brief Buffer that is filled starting from bit 127 when reading or writing
+ */
 static std::bitset<128> read_write_buffer(0);
 
+/**
+ * \brief Reverse the order of bits in val.
+ * \detail In BAF version 0x0304 the bits are written in reverse order. When bumping
+ * the version number, one should also consider to remove this reversal.
+ */
 static void reverse_bit_order(std::size_t& val)
 {
   val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
@@ -197,6 +205,9 @@ static void reverse_bit_order(std::size_t& val)
   val = ((val << 1)  & 0xAAAAAAAAAAAAAAAA) | ((val >> 1)  & 0x5555555555555555);
 }
 
+/**
+ * \brief Write the nr_bits least significant bits from val to os
+ */
 static void writeBits(std::size_t val, const std::size_t nr_bits, ostream& os)
 {
   if(nr_bits == 0)
@@ -220,7 +231,9 @@ static void writeBits(std::size_t val, const std::size_t nr_bits, ostream& os)
   }
 }
 
-
+/**
+ * \brief Flush the remaining bits in the buffer to os.
+ */
 static void flushBitsToWriter(ostream& os)
 {
   if (bits_in_buffer > 0)
@@ -256,6 +269,7 @@ bool readBits(std::size_t& val, const std::size_t nr_bits, istream& is)
   }
   while(bits_in_buffer < nr_bits)
   {
+    // Read bytes until the buffer is sufficiently full
     int byte = is.get();
     if(is.fail())
     {
