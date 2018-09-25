@@ -1,11 +1,11 @@
 // Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
-// 
+//
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-// 
+//
 /// \file atermpp/detail/indexed_set.cpp
 /// \brief This file contains some constants and functions shared
 ///        between indexed_sets and tables.
@@ -67,7 +67,7 @@ std::size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, std::size
      and find whether key already exists */
 
   std::size_t deleted_position=detail::EMPTY; // This variable recalls a proper deleted position to insert n. EMPTY means not yet found.
-  std::size_t start = (std::hash<aterm>()(key)*detail::PRIME_NUMBER) & sizeMinus1;
+  std::size_t start = (std::hash<ELEMENT>()(key)*detail::PRIME_NUMBER) & sizeMinus1;
   std::size_t c = start;
 
   while (true)
@@ -77,16 +77,16 @@ std::size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, std::size
     assert(v==detail::EMPTY || v == detail::DELETED || v<m_keys.size());
     if (v == detail::EMPTY)
     {
-      /* Found an empty spot, insert a new index belonging to key, 
+      /* Found an empty spot, insert a new index belonging to key,
          preferably at a deleted position, if that has been encountered. */
       if (deleted_position==detail::EMPTY)
-      { 
+      {
         --nr_of_insertions_until_next_rehash;
         assert(nr_of_insertions_until_next_rehash!=npos);
         hashtable[c] = n;
       }
       else
-      { 
+      {
         hashtable[deleted_position] = n;
       }
       return n;
@@ -96,7 +96,7 @@ std::size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, std::size
     {
       /* Recall this position to be used, in case the element is not found. */
       if (deleted_position==detail::EMPTY)
-      { 
+      {
         deleted_position=c;
       }
     }
@@ -130,7 +130,7 @@ inline void indexed_set<ELEMENT>::resize_hashtable()
   std::size_t newsizeMinus1 = detail::calculateNewSize(sizeMinus1,largest_used_index, max_load);
 
   hashtable.clear();
-  hashtable.resize(newsizeMinus1+1,detail::EMPTY); 
+  hashtable.resize(newsizeMinus1+1,detail::EMPTY);
 
   sizeMinus1=newsizeMinus1;
   nr_of_insertions_until_next_rehash = ((sizeMinus1/100)*max_load);
@@ -140,7 +140,7 @@ inline void indexed_set<ELEMENT>::resize_hashtable()
 
   free_positions=std::stack < std::size_t >();
   /* rebuild the hashtable again, and put free indices in the free_position stack.
-     Count down, such that the lowest indices are highest in the stack, to be 
+     Count down, such that the lowest indices are highest in the stack, to be
      re-used first. */
   for (std::size_t i=m_keys.size(); i>0 ; )
   {
@@ -170,7 +170,7 @@ inline indexed_set<ELEMENT>::indexed_set(std::size_t initial_size /* = 100 */, u
 template <class ELEMENT>
 inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 {
-  std::size_t start = (std::hash<aterm>()(elem)*detail::PRIME_NUMBER) & sizeMinus1;
+  std::size_t start = (std::hash<ELEMENT>()(elem)*detail::PRIME_NUMBER) & sizeMinus1;
   std::size_t c = start;
   do
   {
@@ -196,7 +196,7 @@ inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 template <class ELEMENT>
 bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 {
-  std::size_t start = (std::hash<aterm>()(key)*detail::PRIME_NUMBER) & sizeMinus1;
+  std::size_t start = (std::hash<ELEMENT>()(key)*detail::PRIME_NUMBER) & sizeMinus1;
   std::size_t c = start;
   std::size_t v;
   while (true)
@@ -263,7 +263,7 @@ inline std::pair<std::size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key
   {
     return std::make_pair(n,false);
   }
-  
+
   if (!free_positions.empty())
   {
     free_positions.pop();
@@ -276,13 +276,13 @@ inline std::pair<std::size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key
   m_keys[n]=key;
   if (nr_of_insertions_until_next_rehash==0)
   {
-    resize_hashtable(); 
+    resize_hashtable();
   }
 
   return std::make_pair(n, true);
 }
 
 
-} // namespace atermpp 
+} // namespace atermpp
 
 #endif // MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
