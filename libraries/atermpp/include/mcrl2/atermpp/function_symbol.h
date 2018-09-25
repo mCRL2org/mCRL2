@@ -173,6 +173,12 @@ class function_symbol
       }
     }
 
+    bool defined() const
+    {
+      assert(is_valid());
+      return *this != AS_DEFAULT;
+    }
+
     /// \brief Return the name of the function_symbol.
     /// \return The name of the function symbol.
     const std::string& name() const

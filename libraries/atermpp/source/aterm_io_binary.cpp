@@ -32,6 +32,7 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_io_implementation.h"
+#include "mcrl2/atermpp/indexed_set.h"
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
@@ -127,7 +128,7 @@ class top_symbols_t
     std::size_t code_width;          /* This is the log of the number of symbols both for "symbols" and "index_into_symbols". */
     std::vector<top_symbol> symbols; /* The set of symbols that occur directly below the top symbol.
                                         The order of the symbols in this vector is important. */
-    unordered_map<function_symbol, std::size_t> index_into_symbols;
+    indexed_set<function_symbol> index_into_symbols;
                                      /* This mapping helps to find the entry in symbols with the given
                                         function symbol */
 };
@@ -349,11 +350,12 @@ static const function_symbol& get_function_symbol(const aterm& t)
  * of a term. Could be a special symbol (AS_INT, etc) when the term is not an application.
  * \detail sym_entries[result].id == t.function()
  */
-static std::size_t get_fn_symbol_index(const aterm& t, const std::unordered_map<function_symbol, std::size_t>& index)
+static std::size_t get_fn_symbol_index(const aterm& t, const indexed_set<function_symbol>& index)
 {
   const function_symbol& sym = get_function_symbol(t);
-  assert(index.count(sym)>0);
-  return index.at(sym);
+  std::size_t result = index.index(sym);
+  assert(result != indexed_set<function_symbol>::npos);
+  return result;
 }
 
 
@@ -402,7 +404,7 @@ static const aterm& subterm(const aterm& t, std::size_t i)
  * \brief Add a term to the global term table. Update the symbol tables.
  */
 static void add_term(sym_write_entry& entry, const aterm& term,
-  const std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
+  const indexed_set<function_symbol>& symbol_index_map,
   std::unordered_map<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -424,11 +426,10 @@ static void add_term(sym_write_entry& entry, const aterm& term,
       std::size_t top_symbol_index = get_fn_symbol_index(arg, symbol_index_map);
       const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
 
-      if (tss.index_into_symbols.count(top_symbol)==0)
+      auto put_result = tss.index_into_symbols.put(top_symbol);
+      if (put_result.second)
       {
-        std::size_t num_symbols = tss.symbols.size();
-        tss.symbols.emplace_back(top_symbol_index, num_symbols);
-        tss.index_into_symbols[top_symbol] = num_symbols;
+        tss.symbols.emplace_back(top_symbol_index, put_result.first);
       }
     }
   }
@@ -451,23 +452,23 @@ struct write_todo
  * \return The sym_write_entry belonging to func.
  */
 static sym_write_entry& initialize_function_symbol(const function_symbol& func,
-  std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
+  indexed_set<function_symbol>& symbol_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
-  auto insert_result = symbol_index_map.insert(std::make_pair(func, sym_entries.size()));
+  auto insert_result = symbol_index_map.put(func);
   if(insert_result.second)
   {
     // We just found a new function symbol, it has 1 occurrence so far
     sym_entries.emplace_back(func);
   }
-  return sym_entries[insert_result.first->second];
+  return sym_entries[insert_result.first];
 }
 
 /**
  * \brief Collect all terms in the term tables of each symbol
  */
 static void collect_terms(const aterm& t,
-  std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
+  indexed_set<function_symbol>& symbol_index_map,
   std::unordered_map<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -543,7 +544,7 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
  * \brief Write the term t to os in BAF
  */
 static void write_term(const aterm& t, ostream& os,
-  const std::unordered_map<function_symbol, std::size_t>& symbol_index_map,
+  const indexed_set<function_symbol>& symbol_index_map,
   const std::unordered_map<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -553,7 +554,7 @@ static void write_term(const aterm& t, ostream& os,
   do
   {
     write_todo& current = stack.top();
-    sym_write_entry& cur_entry = sym_entries[symbol_index_map.at(get_function_symbol(current.term))];
+    sym_write_entry& cur_entry = sym_entries[symbol_index_map.index(get_function_symbol(current.term))];
 
     if (current.term.type_is_int())
     {
@@ -563,10 +564,10 @@ static void write_term(const aterm& t, ostream& os,
     else if (current.arg < get_function_symbol(current.term).arity())
     {
       write_todo item(subterm(current.term, current.arg));
-      sym_write_entry& item_entry = sym_entries[symbol_index_map.at(get_function_symbol(item.term))];
+      sym_write_entry& item_entry = sym_entries[symbol_index_map.index(get_function_symbol(item.term))];
 
       const top_symbols_t& symbol_table = cur_entry.top_symbols.at(current.arg);
-      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item_entry.id));
+      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.index(item_entry.id));
       writeBits(ts.code, symbol_table.code_width, os);
       const sym_write_entry& arg_sym = sym_entries.at(ts.index);
       std::size_t arg_trm_idx = term_index_map.at(item.term);
@@ -595,7 +596,7 @@ static void write_baf(const aterm& t, ostream& os)
   read_write_buffer = std::bitset<128>(0);
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-  std::unordered_map<function_symbol, std::size_t> symbol_index_map;
+  indexed_set<function_symbol> symbol_index_map;
   std::unordered_map<aterm, std::size_t> term_index_map;
   std::vector<sym_write_entry> sym_entries;
 
