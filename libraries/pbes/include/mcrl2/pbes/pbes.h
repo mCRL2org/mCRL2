@@ -280,8 +280,13 @@ class pbes
     /// much more compact than the ascii representation.
     void save(std::ostream& stream, bool binary = true) const
     {
-      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-      atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this), cache);
+      atermpp::aterm term;
+      {
+        std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+        term = pbes_system::detail::remove_index(pbes_to_aterm(*this), cache);
+        // cache goes out of scope here to save memory. cache and 
+        // write_term_to_binary_stream can both consume a lot of memory.
+      }
       if (binary)
       {
         write_term_to_binary_stream(term, stream);
