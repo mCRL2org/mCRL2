@@ -33,7 +33,7 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 \qquad \text{\textbf{choose }}u\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
 \qquad \text{\textbf{if} }attr_{\alpha }(A,u)\text{ \textbf{then}} \\ 
-\qquad \qquad \text{\textbf{if} }d(u)\neq \alpha \text{ \textbf{then }}\tau
+\qquad \qquad \text{\textbf{if} }d(u)\neq 1 - \alpha \text{ \textbf{then }}\tau
 \lbrack u]:=v\text{ \textbf{with} }v\in A\cap succ(u) \\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
