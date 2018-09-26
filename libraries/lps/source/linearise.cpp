@@ -4509,7 +4509,7 @@ class specification_basic_type
       }
 
       i=i-1; /* below we count from 0 instead from 1 as done in the
-                first version of the prover */
+                first version of the linearizer */
 
       if (!options.binary)
       {
@@ -4545,6 +4545,62 @@ class specification_basic_type
       }
     }
 
+    // Generate an expression of the form equal_to_i(v), 
+    // and generate the rewrite rules if necessary. 
+    data_expression is_equal_to_expression(const variable& v, const size_t i)
+    {
+      static std::vector<data::function_symbol> equal_to_functions;
+
+      assert(i>0);
+      if (i>=equal_to_functions.size())
+      {
+        for(size_t j=equal_to_functions.size(); j<=i; ++j)
+        {
+          const data::function_symbol f(fresh_identifier_generator("equal_to" + std::to_string(i) + "_"), 
+                                        function_sort({ sort_pos::pos() }, sort_bool::bool_()));
+          equal_to_functions.push_back(f);
+          data.add_mapping(f);
+          if (j==0)
+          {
+            // There is no function for index 0. Do nothing. 
+          }
+          else if (j==1)
+          {
+            // Add equations f(1) = true; f(@cDub(b,x)) = false
+            const data_equation e1({},sort_bool::true_(),application(f,sort_pos::c1()),sort_bool::true_());
+            const variable b("b",sort_bool::bool_());
+            const variable x("x",sort_pos::pos());
+            data_equation e2({ b, x },
+                             sort_bool::true_(),
+                             application(f,sort_pos::cdub(b,x)),
+                             sort_bool::false_());
+            data.add_equation(e1);
+            data.add_equation(e2);
+          }
+          else 
+          {
+            // If j is even, add equations f(1) = false; f(@cDub(false,x)) = f_div_2(x); f(@cDub(true,x)) = false;
+            // If j is odd,  add equations f(1) = false; f(@cDub(false,x)) = false; f(@cDub(true,x)) = f_div_2(x);
+            const data_equation e1({},sort_bool::true_(),application(f,sort_pos::c1()),sort_bool::false_());
+            const variable x("x",sort_pos::pos());
+            data_equation e2({ x },
+                             sort_bool::true_(),
+                             application(f,sort_pos::cdub((j%2?sort_bool::true_():sort_bool::false_()),x)),
+                             application(equal_to_functions.at(j/2),x));
+            data_equation e3({ x },
+                             sort_bool::true_(),
+                             application(f,sort_pos::cdub((j%2?sort_bool::false_():sort_bool::true_()),x)),
+                             sort_bool::false_());
+            data.add_equation(e1);
+            data.add_equation(e2);
+            data.add_equation(e3);
+
+          }
+        }
+      }
+      return application(equal_to_functions.at(i),v);
+    }
+
     data_expression correctstatecond(
       const process_identifier& procId,
       const std::set < process_identifier >& pCRLproc,
@@ -4566,6 +4622,7 @@ class specification_basic_type
       {
         if (regular)
         {
+          // return is_equal_to_expression(stack.stackvar,i);
           return equal_to(stack.stackvar, processencoding(i,assignment_list(),stack).front().rhs());
         }
         return equal_to(
@@ -4574,7 +4631,7 @@ class specification_basic_type
       }
 
       if (!options.binary) /* Here a state encoding using enumerated types
-                        must be declared */
+                              must be declared */
       {
         create_enumeratedtype(stack.no_of_states);
         if (regular)
@@ -4594,16 +4651,16 @@ class specification_basic_type
 
       i=i-1; /* start counting from 0, instead from 1 */
       data_expression t3(sort_bool::true_());
-      for (variable_list::const_iterator v=vars.begin(); v!=vars.end(); ++v)
+      for (const variable& v: vars)
       {
         if ((i % 2)==0)
         {
-          t3=lazy::and_(lazy::not_(*v),t3);
+          t3=lazy::and_(lazy::not_(v),t3);
           i=i/2;
         }
         else
         {
-          t3=lazy::and_(*v,t3);
+          t3=lazy::and_(v,t3);
           i=(i-1)/2;
         }
 
@@ -6152,7 +6209,7 @@ class specification_basic_type
         }
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition,mutable_sigma);
+        const data_expression auxresult1=replace_variables_capture_avoiding_alt(condition,mutable_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -6384,7 +6441,7 @@ class specification_basic_type
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
+            const data_expression auxresult1=replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -6495,7 +6552,7 @@ class specification_basic_type
           }
           maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-          const data_expression auxresult1=/* data::*/replace_variables_capture_avoiding_alt(dist,mutable_sigma);
+          const data_expression auxresult1=replace_variables_capture_avoiding_alt(dist,mutable_sigma);
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
             equalterm=auxresult1;
@@ -6643,7 +6700,7 @@ class specification_basic_type
           }
 
           maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-          data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(nextstateparameter, mutable_sigma);
+          data_expression auxresult1=replace_variables_capture_avoiding_alt(nextstateparameter, mutable_sigma);
           if (equalterm==data_expression()) // ||is_global_variable(equalterm)) Adding this last part leads to smaller case functions,
                                             // but bigger and less structured state spaces, as parameters are less often put to default
                                             // values. Constant elimination can less often be applied as constant eliminiation does not
@@ -6783,7 +6840,7 @@ class specification_basic_type
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(condition, mutable_sigma);
+        const data_expression auxresult1=replace_variables_capture_avoiding_alt(condition, mutable_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -6916,7 +6973,7 @@ class specification_basic_type
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=/*data::*/replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
+            const data_expression auxresult1=replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -8525,7 +8582,7 @@ class specification_basic_type
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        result=lazy::or_(result,/* data::*/replace_variables_capture_avoiding_alt(lazy::and_(*i,*j), mutable_sigma));
+        result=lazy::or_(result,replace_variables_capture_avoiding_alt(lazy::and_(*i,*j), mutable_sigma));
       }
       return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, RewriteTerm(result));
     }
@@ -8795,7 +8852,7 @@ class specification_basic_type
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
                 condition1=optimized_and(condition1,
-                                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
+                                         replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
                                                                                   sigma));
                 has_time=true;
               }
@@ -8807,7 +8864,7 @@ class specification_basic_type
               const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
               const data_expression intermediateultimatedelaycondition=
-                         /*data::*/replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
+                         replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
               condition1=optimized_and(condition1, intermediateultimatedelaycondition);
             }
 
