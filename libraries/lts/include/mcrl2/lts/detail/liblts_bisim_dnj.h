@@ -246,8 +246,8 @@ class state_info_entry
     /// the first outgoing transition that already has been initialised.
     iterator_or_counter<succ_iter_t> current_out_slice;
 
-    bool surely_has_transition_to(const bunch_t* SpBu) const;
-    bool surely_has_no_transition_to(const bunch_t* SpBu) const;
+    bool surely_has_transition_in(const bunch_t* SpBu) const;
+    bool surely_has_no_transition_in(const bunch_t* SpBu) const;
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief print a short state identification for debugging
                                                                                     std::string debug_id_short() const
@@ -973,18 +973,16 @@ class bunch_t
     {                                                                           assert(begin < end);  assert(!begin->succ.is_null());
         action_block_iter_t first_slice_end = begin->begin_or_before_end() + 1; assert(!end[-1].succ.is_null());
         action_block_iter_t last_slice_begin = end[-1].begin_or_before_end();   assert(begin < first_slice_end);  assert(first_slice_end <= last_slice_begin);
-                                                                                assert(last_slice_begin < end);  assert(!first_slice_end[-1].succ.is_null());
-        /* 2.6: Create a new bunch NewBu and ...                             */ assert(!last_slice_begin->succ.is_null());
-        bunch_t* new_bunch;
-
-        // 2.5: Choose a small splitter B_a_B slice SpSl subset of SpBu,
-        //      i.e. |SpSl| <= 1/2*|SpBu|
-        /// It doesn't matter very much how ties are resolved here:
+        bunch_t* new_bunch;                                                     assert(last_slice_begin < end);  assert(!first_slice_end[-1].succ.is_null());
+        /* Line 1.11: Select a small action_block-slice in splitter_bunch    */ assert(!last_slice_begin->succ.is_null());
+        //            i.e. |new_bunch| <= 1/2*|splitter_bunch|
+            // It doesn't matter very much how ties are resolved here:
         if (first_slice_end - begin > end - last_slice_begin)
         {
+            // Line 1.12: Create a new bunch new_bunch that consists of the
+            //            selected action_block-slice
             new_bunch = new bunch_t(last_slice_begin, end,
                      sort_key_and_label.sort_key + (last_slice_begin - begin));
-            // 2.6: ... and move SpB from SpC to NewC
             end = last_slice_begin;
             if (end[-1].succ.is_null())
             {
@@ -994,9 +992,10 @@ class bunch_t
         }
         else
         {
+            // Line 1.12: Create a new bunch new_bunch that consists of the
+            //            selected action_block-slice
             new_bunch = new bunch_t(begin, first_slice_end,
                         sort_key_and_label.sort_key + (end - first_slice_end));
-            // 2.6: ... and move SpB from SpC to NewC
             begin = first_slice_end;
             if (begin->succ.is_null())
             {                                                                   assert(begin->begin_or_before_end.is_null());
@@ -1298,10 +1297,10 @@ inline block_t* block_bunch_slice_t::source_block() const
 
 
 
-enum refine_mode_t { extend_from_state_markings_only,
-                     extend_from_state_markings_for_postprocessing,
-                     extend_from_FromRed_only,
-                     extend_from_bottom_state_markings_and_FromRed };
+enum refine_mode_t { extend_from_marked_states,
+                     extend_from_marked_states_for_init_and_postprocess,
+                     extend_from_splitter,
+                     extend_from_bottom_state_markings_and_splitter };
 
 } // end namespace bisim_dnj
 
@@ -1335,8 +1334,6 @@ class bisim_partitioner_dnj
         branching(new_branching),
         preserve_divergence(new_preserve_divergence)
     {                                                                           assert(branching || !preserve_divergence);
-                                                                                ONLY_IF_DEBUG( bisim_gjkw::check_complexity::init(aut.num_states() *
-                                                                                                                                           aut.num_states()); )
       create_initial_partition();                                               ONLY_IF_DEBUG( bisim_dnj::action_block_entry::action_block_orig_inert_begin =
                                                                                                                             part_tr.action_block_inert_begin; )
       refine_partition_until_it_becomes_stable();
@@ -1433,15 +1430,15 @@ class bisim_partitioner_dnj
     /// transition in `splitter`).  Depending on `mode`, the states are primed
     /// as follows:
     ///
-    /// - If `mode == extend_from_state_markings_only`, then all states with a
+    /// - If `mode == extend_from_marked_states`, then all states with a
     ///   transition must have been marked already.
-    /// - If `mode == extend_from_state_markings_for_postprocessing`, states
-    ///   are marked as above.  The only difference is the handling of new
-    ///   non-inert transitions.
-    /// - If `mode == extend_from_FromRed_only`, then no states must be marked;
+    /// - If `mode == extend_from_marked_states_for_init_and_postprocess`,
+    ///   states are marked as above.  The only difference is the handling of
+    ///   new non-inert transitions.
+    /// - If `mode == extend_from_splitter`, then no states must be marked;
     ///   the initial states with a transition in `splitter` are searched by
     ///   `refine()` itself.
-    /// - If `mode == extend_from_bottom_state_markings_and_FromRed`, then
+    /// - If `mode == extend_from_bottom_state_markings_and_splitter`, then
     ///   bottom states with a transition must have been marked already, but
     ///   there may be non-bottom states that also have a transition, which are
     ///   searched by `refine()`.
@@ -1451,12 +1448,12 @@ class bisim_partitioner_dnj
     /// with  a  new  non-inert  transition  will  be  marked  upon  returning.
     /// Normally,  the  new  non-inert  transitions  are  moved  to  a  new
     /// bunch,  which  will  be  specially  created.   However,  if  `mode ==
-    /// extend_from_state_markings_for_postprocessing`, then the new non-inert
-    /// transitions will be added to `splitter` (which must hold transitions
-    /// that have just become non-inert before this call to `refine()`).  If
-    /// the resulting block contains marked states, the caller has to call
-    /// `postprocess_new_noninert()` to stabilise the block because the new
-    /// bunch may make the block unstable.
+    /// extend_from_marked_states_for_init_and_postprocess`, then the new
+    /// non-inert transitions will be added to `splitter` (which must hold
+    /// transitions that have just become non-inert before this call to
+    /// `refine()`).  If the resulting block contains marked states, the caller
+    /// has to call `postprocess_new_noninert()` to stabilise the block because
+    /// the new bunch may make the block unstable.
     /// \param refine_block  block that needs to be refined
     /// \param splitter      transition set that makes the block unstable
     /// \param mode          indicates how to find states with a transition in
@@ -1683,7 +1680,7 @@ namespace bisim_dnj
 /// \param SpBu bunch of interest
 /// \returns true if the state is known to have a transition in `SpBu`
 /// \memberof state_info_entry
-inline bool state_info_entry::surely_has_transition_to(const bunch_t* const
+inline bool state_info_entry::surely_has_transition_in(const bunch_t* const
                                                                     SpBu) const
 {                                                                               assert(this == &*current_out_slice.begin->block_bunch->pred->source);
                                                                                 assert(current_out_slice.begin <= succ_inert.begin);
@@ -1705,7 +1702,7 @@ inline bool state_info_entry::surely_has_transition_to(const bunch_t* const
 /// \param SpBu bunch of interest
 /// \returns true if the state is known to have _no_ transition in `SpBu`
 /// \memberof state_info_entry
-inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
+inline bool state_info_entry::surely_has_no_transition_in(const bunch_t* const
                                                                     SpBu) const
 {                                                                               assert(this == &*current_out_slice.begin->block_bunch->pred->source);
                                                                                 assert(current_out_slice.begin <= succ_inert.begin);
@@ -1785,9 +1782,8 @@ inline bool state_info_entry::surely_has_no_transition_to(const bunch_t* const
                                                                                         assert(0 == label || begin < partitioner.action_label[label-1].begin);
                                                                                         if (0 == label || end < partitioner.action_label[label - 1].begin)
                                                                                         {
-                                                                                            assert((trans_type) (end - begin) <=
-                                                                                                        partitioner.part_st.state_size() *
-                                                                                                                (trans_type) partitioner.part_st.state_size());
+                                                                                            assert(bisim_gjkw::check_complexity::ilog2(end - begin) <=
+                                                                                                                          bisim_gjkw::check_complexity::log_n);
                                                                                             return bisim_gjkw::check_complexity::log_n -
                                                                                                               bisim_gjkw::check_complexity::ilog2(end - begin);
                                                                                         }
