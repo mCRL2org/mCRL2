@@ -88,8 +88,10 @@ void move_constants_to_substitution_helper(lps::stochastic_specification& spec,
 /// \details This operation is useful when terms in the lps are very often rewritten. Constant expressions in the lps are 
 ///          brought to normal form whenever they are encountered. This happens very often when generating a state space.
 ///          In the substitution they are considered a normal form, and not rewritten. This can save more than 50% of the time
-///          to generate a state space
-/// \param lpsspec A linear process specification
+///          to generate a state space.
+/// \param lpsspec A linear process specification.
+/// \param r The rewriter used to calculate a normal form.
+/// \param sigma The substitution into which it is stored which variables represent which terms. 
 template <class SUBSTITUTION>
 void move_constants_to_substitution(lps::stochastic_specification& spec,
                                     data::rewriter& r,

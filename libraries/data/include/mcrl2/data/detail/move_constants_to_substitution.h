@@ -35,10 +35,16 @@ namespace detail
 /// \brief This function first splits the given condition e into real conditions and
 ///        non real conditions.
 /// \detail This function first uses split_condition_aux to split the condition e. Then
-//          it merges equal real conditions by merging the non-real conditions. No further
-//          calculations take place with the non-real conditions, but if the non-real conditions
-//          lead to unnecessary copying, this may lead to a huge overhead in removing the
-//          real conditions.
+///         it merges equal real conditions by merging the non-real conditions. No further
+///         calculations take place with the non-real conditions, but if the non-real conditions
+///         lead to unnecessary copying, this may lead to a huge overhead in removing the
+///         real conditions.
+/// \param  t The data expression in which closed expressions are replaced by variables.
+/// \param  r The rewriter used to rewrite closed expressions to normal form. 
+/// \param  sigma The substitution into which the mapping from variables to expressions are inserted.
+/// \param  expression_to_variable_map A map used to recall which expressions are replaced by which variables.
+/// \param  identifier_generator An identifier generator, used to generate fresh variable names. 
+/// \return The data expression t in which closed expressions are replaced by variables. 
 template <class SUBSTITUTION>
 data_expression move_constants_to_substitution(const data_expression& t,
                                                rewriter& r,
@@ -48,18 +54,24 @@ data_expression move_constants_to_substitution(const data_expression& t,
 {
   if (is_application(t))
   {
+    // The line below where all variables are obtained from an expression to find out that it is closed 
+    // is not particularly efficient, as it is quadratic in the size of the term. If need be, this can be
+    // replaced by one pass through the term, determining whether it is closed, and replacing variables at
+    // the same time. 
     if (find_free_variables(t).size()==0)
     {
       std::unordered_map<data_expression, variable>::const_iterator i=expression_to_variable_map.find(t);
-      if (i==expression_to_variable_map.end()) // expression is not found.
+      if (i==expression_to_variable_map.end()) 
       {
+        // expression is not found.
         const variable v(identifier_generator("@rewr_var"),t.sort()); 
         sigma[v]=r(t,sigma);  // sigma is here not necessary. 
         expression_to_variable_map[t]=v;
         return v;
       }
-      else
+      else 
       {
+        // A variable for the current expression already exists. 
         return i->second;
       }
     }
