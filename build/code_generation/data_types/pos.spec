@@ -32,7 +32,10 @@ var b:Bool;
     q1:Pos;
 eqn ==(@c1, @cDub(b,p)) = false;
     ==(@cDub(b,p), @c1) = false;
-    ==(@cDub(b,p), @cDub(c, q)) = &&(==(b,c), ==(p,q));
+% The tools run 10% faster with the rules below, compared to the rules in the book of 2014. 
+    ==(@cDub(b,p), @cDub(b, q)) =  ==(p,q);
+    ==(@cDub(false,p), @cDub(true, q)) = false;
+    ==(@cDub(true,p), @cDub(false, q)) = false;
     ==(succ(p),@c1) = false;
     ==(@c1,succ(q)) = false;
     ==(succ(p),@cDub(c,q)) = ==(p,@pospred(@cDub(c,q)));

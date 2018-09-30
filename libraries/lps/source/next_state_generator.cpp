@@ -58,10 +58,12 @@ class state_applier
 next_state_generator::next_state_generator(
   const stochastic_specification& spec,
   const data::rewriter& rewriter,
+  const substitution_t& base_substitution,
   bool use_enumeration_caching,
   bool use_summand_pruning)
   : m_specification(spec),
     m_rewriter(rewriter),
+    m_substitution(base_substitution),
     m_enumerator(m_rewriter, m_specification.data(), m_rewriter, m_id_generator, (std::numeric_limits<std::size_t>::max)(),true),  // Generate exceptions.
     m_use_enumeration_caching(use_enumeration_caching)
 {

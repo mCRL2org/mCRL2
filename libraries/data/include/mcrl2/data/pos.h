@@ -717,7 +717,9 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list({vb, vp}), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vb, vp}), equal_to(cdub(vb, vp), c1()), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vb, vc, vp, vq}), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool::and_(equal_to(vb, vc), equal_to(vp, vq))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), equal_to(cdub(vb, vp), cdub(vb, vq)), equal_to(vp, vq)));
+        result.push_back(data_equation(variable_list({vp, vq}), equal_to(cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vp, vq}), equal_to(cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vp}), equal_to(succ(vp), c1()), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vq}), equal_to(c1(), succ(vq)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vc, vp, vq}), equal_to(succ(vp), cdub(vc, vq)), equal_to(vp, pos_predecessor(cdub(vc, vq)))));

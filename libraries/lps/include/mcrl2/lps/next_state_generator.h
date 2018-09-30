@@ -242,13 +242,18 @@ class next_state_generator
     summand_subset_t m_all_summands;
 
   public:
-    /// \brief Constructor
-    /// \param spec The process specification
-    /// \param rewriter The rewriter used
-    /// \param use_enumeration_caching Cache intermediate enumeration results
+    /// \brief Constructor.
+    /// \param spec The process specification.
+    /// \param rewriter The rewriter used.
+    /// \param base_substitution A substitution from variables to terms in normal form, used to replace variables occurring the in 
+    ///        the specification. The rhs's in the substitution are assumed to be in normal form. It can be useful to replace closed 
+    ///        expressions in the lps by variables, and put there rhs's in the base_substitution to avoid rewriting these expressions
+    ///        repeatedly. 
+    /// \param use_enumeration_caching Cache intermediate enumeration results.
     /// \param use_summand_pruning Preprocess summands using pruning strategy.
     next_state_generator(const stochastic_specification& spec,
                          const data::rewriter& rewriter,
+                         const substitution_t& base_substitution = data::mutable_indexed_substitution<>(),
                          bool use_enumeration_caching = false,
                          bool use_summand_pruning = false);
 

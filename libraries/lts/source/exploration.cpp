@@ -14,6 +14,7 @@
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
+#include "mcrl2/lps/detail/move_constants_to_substitution.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/detail/counter_example.h"
 #include "mcrl2/lts/lts_io.h"
@@ -144,6 +145,7 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
   }
 
   data::rewriter rewriter;
+
   if (m_options.removeunused)
   {
     mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
@@ -168,22 +170,28 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
   // more lps's to generate lts's. The overhead of this rewriter is limited.
   one_point_rule_rewrite(specification);
 
+  // Replace all constant expressions t in a specification by a variable x, and set base_substitution(x)=u where u is the normal form of t.
+  // This avoids having to rewrite the constant expressions each time they are encountered. This typically saves more than 50% of the total
+  // time to generate a state space. 
+  data::mutable_indexed_substitution<> base_substitution;  // This is the substitution used as base in the state space generation. 
+  move_constants_to_substitution(specification, rewriter, base_substitution);
+
   stochastic_action_summand_vector prioritised_summands;
   stochastic_action_summand_vector nonprioritised_summands;
   if (m_options.priority_action != "")
   {
     mCRL2log(verbose) << "applying confluence reduction with tau action '" << m_options.priority_action << "'..." << std::endl;
 
-    for (stochastic_action_summand_vector::iterator i = specification.process().action_summands().begin(); i != specification.process().action_summands().end(); i++)
+    for(const stochastic_action_summand& s: specification.process().action_summands())
     {
-      if ((m_options.priority_action == "tau" && i->is_tau()) ||
-          (i->multi_action().actions().size() == 1 && m_options.priority_action == (std::string)i->multi_action().actions().front().label().name()))
+      if ((m_options.priority_action == "tau" && s.is_tau()) ||
+          (s.multi_action().actions().size() == 1 && m_options.priority_action == static_cast<std::string>(s.multi_action().actions().front().label().name())))
       {
-        prioritised_summands.push_back(*i);
+        prioritised_summands.push_back(s);
       }
       else
       {
-        nonprioritised_summands.push_back(*i);
+        nonprioritised_summands.push_back(s);
       }
     }
 
@@ -253,7 +261,7 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
       }
     }
   }
-  m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
+  m_generator = new next_state_generator(specification, rewriter, base_substitution, m_options.use_enumeration_caching, m_options.use_summand_pruning);  
 
   if (m_use_confluence_reduction)
   {

@@ -4545,62 +4545,6 @@ class specification_basic_type
       }
     }
 
-    // Generate an expression of the form equal_to_i(v), 
-    // and generate the rewrite rules if necessary. 
-    data_expression is_equal_to_expression(const variable& v, const size_t i)
-    {
-      static std::vector<data::function_symbol> equal_to_functions;
-
-      assert(i>0);
-      if (i>=equal_to_functions.size())
-      {
-        for(size_t j=equal_to_functions.size(); j<=i; ++j)
-        {
-          const data::function_symbol f(fresh_identifier_generator("equal_to" + std::to_string(i) + "_"), 
-                                        function_sort({ sort_pos::pos() }, sort_bool::bool_()));
-          equal_to_functions.push_back(f);
-          data.add_mapping(f);
-          if (j==0)
-          {
-            // There is no function for index 0. Do nothing. 
-          }
-          else if (j==1)
-          {
-            // Add equations f(1) = true; f(@cDub(b,x)) = false
-            const data_equation e1({},sort_bool::true_(),application(f,sort_pos::c1()),sort_bool::true_());
-            const variable b("b",sort_bool::bool_());
-            const variable x("x",sort_pos::pos());
-            data_equation e2({ b, x },
-                             sort_bool::true_(),
-                             application(f,sort_pos::cdub(b,x)),
-                             sort_bool::false_());
-            data.add_equation(e1);
-            data.add_equation(e2);
-          }
-          else 
-          {
-            // If j is even, add equations f(1) = false; f(@cDub(false,x)) = f_div_2(x); f(@cDub(true,x)) = false;
-            // If j is odd,  add equations f(1) = false; f(@cDub(false,x)) = false; f(@cDub(true,x)) = f_div_2(x);
-            const data_equation e1({},sort_bool::true_(),application(f,sort_pos::c1()),sort_bool::false_());
-            const variable x("x",sort_pos::pos());
-            data_equation e2({ x },
-                             sort_bool::true_(),
-                             application(f,sort_pos::cdub((j%2?sort_bool::true_():sort_bool::false_()),x)),
-                             application(equal_to_functions.at(j/2),x));
-            data_equation e3({ x },
-                             sort_bool::true_(),
-                             application(f,sort_pos::cdub((j%2?sort_bool::false_():sort_bool::true_()),x)),
-                             sort_bool::false_());
-            data.add_equation(e1);
-            data.add_equation(e2);
-            data.add_equation(e3);
-
-          }
-        }
-      }
-      return application(equal_to_functions.at(i),v);
-    }
-
     data_expression correctstatecond(
       const process_identifier& procId,
       const std::set < process_identifier >& pCRLproc,
@@ -4622,7 +4566,6 @@ class specification_basic_type
       {
         if (regular)
         {
-          // return is_equal_to_expression(stack.stackvar,i);
           return equal_to(stack.stackvar, processencoding(i,assignment_list(),stack).front().rhs());
         }
         return equal_to(
