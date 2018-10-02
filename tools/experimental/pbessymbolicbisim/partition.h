@@ -320,52 +320,10 @@ protected:
         // we can really throw away the unreachable blocks.
         m_other_blocks.push_front(block);
       }
-      // split_logger->mark_deleted(rewr(block));
       mCRL2log(log::verbose) << "  block " << i << "\n" << pp(block);
       i++;
     }
   }
-
-  /**
-   * \brief Build the BES that follows from the current
-   * partition.
-   * \detail Build the BES that contains one variable for each
-   * block in the partition. If the partition is stable,
-   * then this BES is bisimilar to the original PBES.
-   */
-  // template <typename Container>
-  // bes::boolean_equation_system make_bes(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr)
-  // {
-  //   //TODO fix bug where variables are sorted according to BFS layer and not according
-  //   // to the order in the original PBES.
-  //   // This may result in a BES with a different solution.
-  //   set_identifier_generator id_gen;
-  //   std::map< block_t, bes::boolean_variable > var_map;
-  //   for(const block_t& block: blocks)
-  //   {
-  //     var_map.insert(std::make_pair(block, bes::boolean_variable(id_gen(std::string(block.name())))));
-  //   }
-  //
-  //   std::vector< bes::boolean_equation > equations;
-  //   for(const block_t& src: blocks)
-  //   {
-  //     std::set<bes::boolean_expression> right_hand_side;
-  //     for(const block_t& dest: blocks)
-  //     {
-  //       if(src.has_transition(dest))
-  //       {
-  //         right_hand_side.insert(var_map[dest]);
-  //       }
-  //     }
-  //
-  //     bes::boolean_expression rhs_expr = src.is_conjunctive() ? bes::join_and(right_hand_side.begin(), right_hand_side.end()) : bes::join_or(right_hand_side.begin(), right_hand_side.end());
-  //     equations.emplace_back(src.fixpoint_symbol(), var_map[src], rhs_expr);
-  //   }
-  //
-  //   // Search for the initial block
-  //   const block_t& initial_block = find_initial_block(blocks);
-  //   return bes::boolean_equation_system(equations, var_map[initial_block]);
-  // }
 
   void make_rank_map()
   {
@@ -535,15 +493,6 @@ public:
     print_partition(m_other_blocks);
   }
 
-  // void save_bes()
-  // {
-  //   const bes::boolean_equation_system& bes = make_bes(m_proof_blocks);
-  //   std::ofstream out;
-  //   out.open("out.bes");
-  //   bes.save(out);
-  //   out.close();
-  // }
-
   /**
    * Refine the partition num_steps times
    * When num_steps is 0, the algorithm only
@@ -570,10 +519,6 @@ public:
       {
         break;
       }
-      // if(num_steps == 0)
-      // {
-      //   make_bes(m_proof_blocks);
-      // }
       // Check reachability only in m_proof_blocks.
       // Blocks that are not reachable in there will
       // be moved to m_other_blocks, because it is not

@@ -94,13 +94,9 @@ public:
       // while the (sub) partition is stable, we have to keep
       // refining and searching for proof graphs
       std::size_t num_iterations = 0;
-      double total_pg_time = 0.0;
       pbes_system::solve_structure_graph_algorithm sg_solver(false, false);
       do
       {
-        const std::chrono::time_point<std::chrono::high_resolution_clock> t_start_pg_solver =
-          std::chrono::high_resolution_clock::now();
-
         latest_solution = sg_solver.solve(m_structure_graph);
         std::set<sg_index_t> proof_graph = find_counter_example_nodes(m_structure_graph, m_structure_graph.initial_vertex(), latest_solution);
         if(mCRL2logEnabled(log::verbose))
@@ -121,12 +117,10 @@ public:
         mCRL2log(log::status) << "End of iteration " << num_iterations << ", " << (latest_solution ? "positive" : "negative")
          << " proof graph has size " << proof_graph.size()
          << ", total amount of blocks " << (m_partition.get_proof_blocks().size() + m_partition.get_other_blocks().size()) << "\n";
-        total_pg_time += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start_pg_solver).count();
       } while(!m_partition.refine_n_steps(m_num_refine_steps, latest_solution));
       mCRL2log(log::info) << "Partition refinement completed in " <<
           std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
-          " seconds.\n" <<
-          "Time spent on PG solving: " << total_pg_time << " seconds" << std::endl;
+          " seconds." << std::endl;
 
     }
     else
