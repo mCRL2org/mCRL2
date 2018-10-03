@@ -59,7 +59,7 @@ struct state_callback_function
   }
 };
 
-static void test_data_type(lps::pins_data_type& type)
+void test_data_type(lps::pins_data_type& type)
 {
   std::cout << "test_data_type(" << type.name() << ")" << std::endl;
 
@@ -90,14 +90,9 @@ static void test_data_type(lps::pins_data_type& type)
   }
 }
 
-static void test_ltsmin(const std::string& rewriter_strategy)
+void test_ltsmin(const lps::specification& lpsspec, const std::string& filename, const std::string& rewriter_strategy)
 {
-  // create an input file
-  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
-  std::string abp_filename = "temporary_abp.lps";
-  save_lps(spec, abp_filename);
-
-  lps::pins p(abp_filename, rewriter_strategy);
+  lps::pins p(filename, rewriter_strategy);
   std::size_t N = p.process_parameter_count();
 
   BOOST_CHECK(p.process_parameter_count() == 11);
@@ -109,7 +104,7 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   BOOST_CHECK(p.guard_info(5).size() == 2);
   // Check below is removed as the result is unpredictable, since processes are put into a set instead of
   // a vector. The result below depends on the ordering in which process identifiers are stored in memory.
-  // BOOST_CHECK(p.guard_name(0) == "s1_S == 2" || p.guard_name(0) == "s1_S == 1");  
+  // BOOST_CHECK(p.guard_name(0) == "s1_S == 2" || p.guard_name(0) == "s1_S == 1");
 
   BOOST_CHECK(p.edge_label_count() == 1);
   for (std::size_t i = 0; i < p.edge_label_count(); i++)
@@ -118,18 +113,18 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   }
 
   std::set<data::sort_expression> params;
-  for (const auto & i : spec.process().process_parameters())
+  for (const data::variable& v: lpsspec.process().process_parameters())
   {
-    params.insert(i.sort());
+    params.insert(v.sort());
   }
   BOOST_CHECK(p.datatype_count() == params.size() + 1);
   BOOST_CHECK(p.group_count() == 10);
 
   std::size_t index = 0;
-  for (data::variable_list::const_iterator i = spec.process().process_parameters().begin(); i != spec.process().process_parameters().end(); ++i)
+  for (const data::variable& v: lpsspec.process().process_parameters())
   {
   	const lps::pins_data_type& type = p.data_type(p.process_parameter_type(index++));
-  	BOOST_CHECK(type.name() == data::pp(i->sort()));
+  	BOOST_CHECK(type.name() == data::pp(v.sort()));
   }
 
   // get the initial state
@@ -177,9 +172,6 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   lps::pins_data_type& action_label_type = p.data_type(p.datatype_count() - 1);
   test_data_type(action_label_type);
 
-  // cleanup temporary files
-  std::remove(abp_filename.c_str());
-
   delete[] initial_state;
   delete[] dest_state;
   delete[] labels;
@@ -192,7 +184,7 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   {
     std::cout << i << " {";
     std::set<std::string> s = p.summand_action_names(i);
-    for (std::set<std::string>::iterator j = s.begin(); j != s.end(); ++j)
+    for (auto j = s.begin(); j != s.end(); ++j)
     {
       if (j != s.begin())
       {
@@ -202,10 +194,18 @@ static void test_ltsmin(const std::string& rewriter_strategy)
     }
     std::cout << "}" << std::endl;
   }
+}
 
-#ifdef MCRL2_FORCE_LTSMIN_TEST_FAILURE
-  BOOST_CHECK(false);
-#endif
+void test_ltsmin()
+{
+  lps::specification abp_spec = remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
+  std::string abp_filename = "temporary_abp.lps";
+  save_lps(abp_spec, abp_filename);
+  test_ltsmin(abp_spec, abp_filename, "jitty");
+#ifdef MCRL2_JITTYC_AVAILABLE
+  test_ltsmin(abp_spec, abp_filename, "jittyc");
+#endif // MCRL2_JITTYC_AVAILABLE
+  std::remove(abp_filename.c_str());
 }
 
 template <typename Iter>
@@ -337,18 +337,15 @@ void test_serialisation()
     std::cout << "result:     " << d2 << std::endl;
     BOOST_CHECK(d1==d2);
   }
+
+  // cleanup temporary files
+  std::remove(filename.c_str());
 }
 
 int test_main(int, char**)
 {
-  log::mcrl2_logger::set_reporting_level(log::debug);
-
   test_dependency_matrix();
   test_serialisation();
-  test_ltsmin("jitty");
-#ifdef MCRL2_JITTYC_AVAILABLE
-  test_ltsmin("jittyc");
-#endif // MCRL2_JITTYC_AVAILABLE
-
+  test_ltsmin();
   return 0;
 }
