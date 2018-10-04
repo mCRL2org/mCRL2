@@ -165,16 +165,16 @@ void AddEditPropertyDialog::parseResults(int processid)
     else if (result == "invalid")
     {
       text = "The entered formula is not a valid mu-calculus formula. See the "
-              "parsing console for more information";
+             "parsing console for more information";
     }
     else
     {
       text = "Could not parse the entered formula. See the parsing console "
-              "for more information";
+             "for more information";
     }
 
     QMessageBox msgBox(QMessageBox::Information, windowTitle, text,
-                        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+                       QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
     msgBox.exec();
   }
 }
