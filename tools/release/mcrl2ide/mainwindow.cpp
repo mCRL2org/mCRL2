@@ -628,5 +628,5 @@ bool MainWindow::event(QEvent* event)
     break;
   }
 
-  return QWidget::event(event);
+  return QMainWindow::event(event);
 }
