@@ -92,6 +92,11 @@ inline
 // Returns true if A contains an x such that includes(x, y)
 bool includes(const multi_action_name_set& A, const multi_action_name& y)
 {
+  // degenerate case
+  if (A.empty() && y.empty())
+  {
+    return true;
+  }
   for (const multi_action_name& alpha: A)
   {
     if (includes(alpha, y))
