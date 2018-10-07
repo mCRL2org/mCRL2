@@ -39,10 +39,10 @@ class data_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     data_equation()
-      : atermpp::aterm_appl(core::detail::default_values::DataEqn)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::DataEqn)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit data_equation(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -55,7 +55,7 @@ class data_equation: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)

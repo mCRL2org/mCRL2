@@ -36,10 +36,10 @@ class state_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     state_formula()
-      : atermpp::aterm_appl(core::detail::default_values::StateFrm)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateFrm)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit state_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -47,12 +47,12 @@ class state_formula: public atermpp::aterm_appl
       assert(core::detail::check_rule_StateFrm(*this));
     }
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::data_expression.
     state_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::untyped_data_parameter.
     state_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
@@ -147,10 +147,10 @@ class true_: public state_formula
   public:
     /// \brief Default constructor.
     true_()
-      : state_formula(core::detail::default_values::StateTrue)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateTrue)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
       : state_formula(term)
@@ -200,10 +200,10 @@ class false_: public state_formula
   public:
     /// \brief Default constructor.
     false_()
-      : state_formula(core::detail::default_values::StateFalse)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateFalse)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
       : state_formula(term)
@@ -253,10 +253,10 @@ class not_: public state_formula
   public:
     /// \brief Default constructor.
     not_()
-      : state_formula(core::detail::default_values::StateNot)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateNot)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
       : state_formula(term)
@@ -316,10 +316,10 @@ class and_: public state_formula
   public:
     /// \brief Default constructor.
     and_()
-      : state_formula(core::detail::default_values::StateAnd)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateAnd)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
       : state_formula(term)
@@ -384,10 +384,10 @@ class or_: public state_formula
   public:
     /// \brief Default constructor.
     or_()
-      : state_formula(core::detail::default_values::StateOr)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateOr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
       : state_formula(term)
@@ -452,10 +452,10 @@ class imp: public state_formula
   public:
     /// \brief Default constructor.
     imp()
-      : state_formula(core::detail::default_values::StateImp)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateImp)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
       : state_formula(term)
@@ -520,10 +520,10 @@ class forall: public state_formula
   public:
     /// \brief Default constructor.
     forall()
-      : state_formula(core::detail::default_values::StateForall)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateForall)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit forall(const atermpp::aterm& term)
       : state_formula(term)
@@ -588,10 +588,10 @@ class exists: public state_formula
   public:
     /// \brief Default constructor.
     exists()
-      : state_formula(core::detail::default_values::StateExists)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateExists)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit exists(const atermpp::aterm& term)
       : state_formula(term)
@@ -656,10 +656,10 @@ class must: public state_formula
   public:
     /// \brief Default constructor.
     must()
-      : state_formula(core::detail::default_values::StateMust)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateMust)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit must(const atermpp::aterm& term)
       : state_formula(term)
@@ -724,10 +724,10 @@ class may: public state_formula
   public:
     /// \brief Default constructor.
     may()
-      : state_formula(core::detail::default_values::StateMay)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateMay)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit may(const atermpp::aterm& term)
       : state_formula(term)
@@ -792,10 +792,10 @@ class yaled: public state_formula
   public:
     /// \brief Default constructor.
     yaled()
-      : state_formula(core::detail::default_values::StateYaled)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateYaled)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit yaled(const atermpp::aterm& term)
       : state_formula(term)
@@ -845,10 +845,10 @@ class yaled_timed: public state_formula
   public:
     /// \brief Default constructor.
     yaled_timed()
-      : state_formula(core::detail::default_values::StateYaledTimed)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateYaledTimed)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit yaled_timed(const atermpp::aterm& term)
       : state_formula(term)
@@ -908,10 +908,10 @@ class delay: public state_formula
   public:
     /// \brief Default constructor.
     delay()
-      : state_formula(core::detail::default_values::StateDelay)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateDelay)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit delay(const atermpp::aterm& term)
       : state_formula(term)
@@ -961,10 +961,10 @@ class delay_timed: public state_formula
   public:
     /// \brief Default constructor.
     delay_timed()
-      : state_formula(core::detail::default_values::StateDelayTimed)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateDelayTimed)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit delay_timed(const atermpp::aterm& term)
       : state_formula(term)
@@ -1024,10 +1024,10 @@ class variable: public state_formula
   public:
     /// \brief Default constructor.
     variable()
-      : state_formula(core::detail::default_values::StateVar)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateVar)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit variable(const atermpp::aterm& term)
       : state_formula(term)
@@ -1040,7 +1040,7 @@ class variable: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), name, arguments))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     variable(const std::string& name, const data::data_expression_list& arguments)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), core::identifier_string(name), arguments))
     {}
@@ -1097,10 +1097,10 @@ class nu: public state_formula
   public:
     /// \brief Default constructor.
     nu()
-      : state_formula(core::detail::default_values::StateNu)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateNu)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit nu(const atermpp::aterm& term)
       : state_formula(term)
@@ -1113,7 +1113,7 @@ class nu: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), name, assignments, operand))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), core::identifier_string(name), assignments, operand))
     {}
@@ -1175,10 +1175,10 @@ class mu: public state_formula
   public:
     /// \brief Default constructor.
     mu()
-      : state_formula(core::detail::default_values::StateMu)
+      : state_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateMu)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit mu(const atermpp::aterm& term)
       : state_formula(term)
@@ -1191,7 +1191,7 @@ class mu: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), name, assignments, operand))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), core::identifier_string(name), assignments, operand))
     {}

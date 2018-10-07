@@ -35,10 +35,10 @@ class assignment_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     assignment_expression()
-      : atermpp::aterm_appl(core::detail::default_values::WhrDecl)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::WhrDecl)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit assignment_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -99,10 +99,10 @@ class assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     assignment()
-      : assignment_expression(core::detail::default_values::DataVarIdInit)
+      : assignment_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::DataVarIdInit)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit assignment(const atermpp::aterm& term)
       : assignment_expression(term)
@@ -191,10 +191,10 @@ class untyped_identifier_assignment: public assignment_expression
   public:
     /// \brief Default constructor.
     untyped_identifier_assignment()
-      : assignment_expression(core::detail::default_values::UntypedIdentifierAssignment)
+      : assignment_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedIdentifierAssignment)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_identifier_assignment(const atermpp::aterm& term)
       : assignment_expression(term)
@@ -207,7 +207,7 @@ class untyped_identifier_assignment: public assignment_expression
       : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), lhs, rhs))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
     {}

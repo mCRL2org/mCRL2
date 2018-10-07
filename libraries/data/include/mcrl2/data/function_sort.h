@@ -34,10 +34,10 @@ class function_sort: public sort_expression
   public:
     /// \brief Default constructor.
     function_sort()
-      : sort_expression(core::detail::default_values::SortArrow)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortArrow)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit function_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -50,7 +50,7 @@ class function_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), domain, codomain))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))

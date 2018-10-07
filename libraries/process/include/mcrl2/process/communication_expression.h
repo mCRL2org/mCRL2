@@ -31,10 +31,10 @@ class communication_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     communication_expression()
-      : atermpp::aterm_appl(core::detail::default_values::CommExpr)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::CommExpr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit communication_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -47,7 +47,7 @@ class communication_expression: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, name)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     communication_expression(const action_name_multiset& action_name, const std::string& name)
       : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, core::identifier_string(name))
     {}

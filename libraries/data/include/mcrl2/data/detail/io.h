@@ -28,15 +28,19 @@ namespace detail {
 // transforms OpId to OpIdNoIndex
 struct index_remover
 {
-  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
-    if (x.function() == core::detail::function_symbol_DataVarId())
+    if (x.type_is_appl())
     {
-      return atermpp::aterm_appl(core::detail::function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
-    }
-    else if (x.function() == core::detail::function_symbol_OpId())
-    {
-      return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+      const atermpp::aterm_appl& xa=atermpp::down_cast<atermpp::aterm_appl>(x);
+      if (xa.function() == core::detail::function_symbol_DataVarId())
+      {
+        return atermpp::aterm_appl(core::detail::function_symbol_DataVarIdNoIndex(), xa.begin(), --xa.end());
+      }
+      else if (xa.function() == core::detail::function_symbol_OpId())
+      {
+        return atermpp::aterm_appl(core::detail::function_symbol_OpIdNoIndex(), xa.begin(), --xa.end());
+      }
     }
     return x;
   }
@@ -46,19 +50,23 @@ struct index_remover
 // transforms OpIdNoIndex to OpId
 struct index_adder
 {
-  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
-    if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())
+    if (x.type_is_appl())
     {
-      const data::variable& y = atermpp::down_cast<const data::variable>(x);
-      std::size_t index = core::index_traits<data::variable, data::variable_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
-      return atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), x[0], x[1], atermpp::aterm_int(index));
-    }
-    else if (x.function() == core::detail::function_symbol_OpIdNoIndex())
-    {
-      const data::function_symbol& y = atermpp::down_cast<const data::function_symbol>(x);
-      std::size_t index = core::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
-      return atermpp::aterm_appl(core::detail::function_symbol_OpId(), x[0], x[1], atermpp::aterm_int(index));
+      const atermpp::aterm_appl& xa=atermpp::down_cast<atermpp::aterm_appl>(x);
+      if (xa.function() == core::detail::function_symbol_DataVarIdNoIndex())
+      {
+        const data::variable& y = atermpp::down_cast<const data::variable>(x);
+        std::size_t index = core::index_traits<data::variable, data::variable_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
+        return atermpp::aterm_appl(core::detail::function_symbol_DataVarId(), xa[0], xa[1], atermpp::aterm_int(index));
+      }
+      else if (xa.function() == core::detail::function_symbol_OpIdNoIndex())
+      {
+        const data::function_symbol& y = atermpp::down_cast<const data::function_symbol>(x);
+        std::size_t index = core::index_traits<data::function_symbol, data::function_symbol_key_type, 2>::insert(std::make_pair(y.name(), y.sort()));
+        return atermpp::aterm_appl(core::detail::function_symbol_OpId(), xa[0], xa[1], atermpp::aterm_int(index));
+      }
     }
     return x;
   }

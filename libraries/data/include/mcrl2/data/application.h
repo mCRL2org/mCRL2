@@ -422,7 +422,8 @@ class application: public data_expression
     // forbid the use of iterator, which is silently inherited from
     // aterm_appl. Modifying the arguments of an application through the iterator
     // is not allowed!
-    typedef data_expression::iterator iterator;
+    // Not necessary anymore when data_expression is a superclass of an aterm.
+    // typedef data_expression::iterator iterator;
 
   public:
 
@@ -492,35 +493,35 @@ class application: public data_expression
     /// \brief Get the function at the head of this expression.
     const data_expression& head() const
     {
-      return atermpp::down_cast<const data_expression>(atermpp::aterm_appl::operator[](0));
+      return atermpp::down_cast<const data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     /// \brief Get the i-th argument of this expression.
     const data_expression& operator[](std::size_t index) const
     {
       assert(index<size());
-      return atermpp::down_cast<const data_expression>(atermpp::aterm_appl::operator[](index+1));
+      return atermpp::down_cast<const data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[index+1]);
     }
 
     /// \brief Returns an iterator pointing to the first argument of the
     ///        application.
     const_iterator begin() const
     {
-      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm_appl::begin()+1);
+      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this)).begin()+1);
     }
 
     /// \brief Returns an iterator pointing past the last argument of the
     ///        application.
     const_iterator end() const
     {
-      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm_appl::end());
+      return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this)).end());
     }
 
     /// \brief Returns an iterator pointing past the last argument of the
     ///        application.
     std::size_t size() const
     {
-      return atermpp::aterm_appl::size() - 1;
+      return atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this)).size() - 1;
     }
 };
 

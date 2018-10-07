@@ -33,10 +33,10 @@ class action_label: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_label()
-      : atermpp::aterm_appl(core::detail::default_values::ActId)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActId)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit action_label(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -49,7 +49,7 @@ class action_label: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_ActId(), name, sorts)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     action_label(const std::string& name, const data::sort_expression_list& sorts)
       : atermpp::aterm_appl(core::detail::function_symbol_ActId(), core::identifier_string(name), sorts)
     {}

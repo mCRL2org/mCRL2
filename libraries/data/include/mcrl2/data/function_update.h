@@ -52,7 +52,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching \@func_update
       inline
-      bool is_function_update_function_symbol(const atermpp::aterm_appl& e)
+      bool is_function_update_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
@@ -79,7 +79,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol function_update to a
       ///     number of arguments
       inline
-      bool is_function_update_application(const atermpp::aterm_appl& e)
+      bool is_function_update_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {

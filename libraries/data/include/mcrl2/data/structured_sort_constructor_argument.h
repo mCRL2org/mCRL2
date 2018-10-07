@@ -34,10 +34,10 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     structured_sort_constructor_argument()
-      : atermpp::aterm_appl(core::detail::default_values::StructProj)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StructProj)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit structured_sort_constructor_argument(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -50,7 +50,7 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), name, sort)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     structured_sort_constructor_argument(const std::string& name, const sort_expression& sort)
       : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), core::identifier_string(name), sort)
     {}

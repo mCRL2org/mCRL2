@@ -45,10 +45,10 @@ class boolean_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     boolean_expression()
-      : atermpp::aterm_appl(core::detail::default_values::BooleanExpression)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BooleanExpression)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit boolean_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -119,10 +119,10 @@ class true_: public boolean_expression
   public:
     /// \brief Default constructor.
     true_()
-      : boolean_expression(core::detail::default_values::BooleanTrue)
+      : boolean_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BooleanTrue)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
       : boolean_expression(term)
@@ -172,10 +172,10 @@ class false_: public boolean_expression
   public:
     /// \brief Default constructor.
     false_()
-      : boolean_expression(core::detail::default_values::BooleanFalse)
+      : boolean_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BooleanFalse)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
       : boolean_expression(term)
@@ -225,10 +225,10 @@ class not_: public boolean_expression
   public:
     /// \brief Default constructor.
     not_()
-      : boolean_expression(core::detail::default_values::BooleanNot)
+      : boolean_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BooleanNot)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
       : boolean_expression(term)
@@ -288,10 +288,10 @@ class and_: public boolean_expression
   public:
     /// \brief Default constructor.
     and_()
-      : boolean_expression(core::detail::default_values::BooleanAnd)
+      : boolean_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BooleanAnd)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
       : boolean_expression(term)
@@ -356,10 +356,10 @@ class or_: public boolean_expression
   public:
     /// \brief Default constructor.
     or_()
-      : boolean_expression(core::detail::default_values::BooleanOr)
+      : boolean_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BooleanOr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
       : boolean_expression(term)
@@ -424,10 +424,10 @@ class imp: public boolean_expression
   public:
     /// \brief Default constructor.
     imp()
-      : boolean_expression(core::detail::default_values::BooleanImp)
+      : boolean_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BooleanImp)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
       : boolean_expression(term)

@@ -32,10 +32,10 @@ class action_name_multiset: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_name_multiset()
-      : atermpp::aterm_appl(core::detail::default_values::MultActName)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::MultActName)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit action_name_multiset(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)

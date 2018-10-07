@@ -142,7 +142,7 @@ struct pfnf_traverser_expression
       implications(implications_)
   {}
 
-  pfnf_traverser_expression(const atermpp::aterm_appl& x)
+  pfnf_traverser_expression(const atermpp::aterm& x)
     : expr(x)
   {}
 

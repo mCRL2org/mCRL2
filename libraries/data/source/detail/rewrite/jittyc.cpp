@@ -1711,9 +1711,9 @@ class RewriterCompilingJitty::ImplementTree
       }
       else
       {
-        m_stream << "down_cast<data_expression>("
-                 << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]"
-                 << "); // S2\n";
+        m_stream << "down_cast<application>("
+                 << (level == 1 ? "arg" : "t") << parent << ")[" << cur_arg-1 << "]"
+                 << "; // S2\n";
       }
     }
     implement_tree(m_stream, tree.subtree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
@@ -1743,7 +1743,7 @@ class RewriterCompilingJitty::ImplementTree
     }
     else
     {
-      m_stream << (level == 1 ? "arg" : "t") << parent << "[" << cur_arg << "]";
+      m_stream << "down_cast<application>(" << (level == 1 ? "arg" : "t") << parent << ")[" << cur_arg-1 << "]";
     }
     m_stream << ") // M\n" << m_padding
              << "{\n";
@@ -1790,7 +1790,7 @@ class RewriterCompilingJitty::ImplementTree
       }
       else
       {
-        m_stream << "if (uint_address((is_function_symbol(arg" << cur_arg <<  ") ? arg" << cur_arg << " : arg" << cur_arg << "[0])) == "
+        m_stream << "if (uint_address((is_function_symbol(arg" << cur_arg <<  ") ? arg" << cur_arg << " : down_cast<application>(arg" << cur_arg << ").head())) == "
                  << func << ") // F1\n" << m_padding
                  << "{\n";
       }
@@ -1800,18 +1800,18 @@ class RewriterCompilingJitty::ImplementTree
       const char* arg_or_t = level == 1 ? "arg" : "t";
       if (!is_function_sort(tree.function().sort()))
       {
-        m_stream << "if (uint_address(" << arg_or_t << parent << "[" << cur_arg << "]) == "
+        m_stream << "if (uint_address(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]) == "
                  << func << ") // F2a " << tree.function().name() << "\n" << m_padding
                  << "{\n" << m_padding
-                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "]);\n";
+                 << "  const data_expression& t" << cnt << " = down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "];\n";
       }
       else
       {
-        m_stream << "if (is_application_no_check(down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "])) && "
-                 <<     "uint_address(down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "])[0]) == "
+        m_stream << "if (is_application_no_check(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]) && "
+                 <<     "uint_address(down_cast<application>(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg << "]).head()) == "
                  << func << ") // F2b " << tree.function().name() << "\n" << m_padding
                  << "{\n" << m_padding
-                 << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "]);\n";
+                 << "  const data_expression& t" << cnt << " = down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "];\n";
       }
       const std::string parameters = brackets.current_data_parameters.top();
       brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& t" + to_string(cnt));

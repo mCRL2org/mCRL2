@@ -69,10 +69,10 @@ class sort_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     sort_expression()
-      : atermpp::aterm_appl(core::detail::default_values::SortExpr)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortExpr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit sort_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)

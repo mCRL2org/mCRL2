@@ -30,10 +30,10 @@ class bdd_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     bdd_expression()
-      : atermpp::aterm_appl(core::detail::default_values::BddExpression)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddExpression)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit bdd_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -96,10 +96,10 @@ class true_: public bdd_expression
   public:
     /// \brief Default constructor.
     true_()
-      : bdd_expression(core::detail::default_values::BddTrue)
+      : bdd_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddTrue)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
       : bdd_expression(term)
@@ -149,10 +149,10 @@ class false_: public bdd_expression
   public:
     /// \brief Default constructor.
     false_()
-      : bdd_expression(core::detail::default_values::BddFalse)
+      : bdd_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddFalse)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
       : bdd_expression(term)
@@ -202,10 +202,10 @@ class if_: public bdd_expression
   public:
     /// \brief Default constructor.
     if_()
-      : bdd_expression(core::detail::default_values::BddIf)
+      : bdd_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddIf)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit if_(const atermpp::aterm& term)
       : bdd_expression(term)
@@ -218,7 +218,7 @@ class if_: public bdd_expression
       : bdd_expression(atermpp::aterm_appl(core::detail::function_symbol_BddIf(), name, left, right))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     if_(const std::string& name, const bdd_expression& left, const bdd_expression& right)
       : bdd_expression(atermpp::aterm_appl(core::detail::function_symbol_BddIf(), core::identifier_string(name), left, right))
     {}

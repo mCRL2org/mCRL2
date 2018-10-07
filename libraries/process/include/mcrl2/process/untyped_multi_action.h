@@ -26,10 +26,10 @@ class untyped_multi_action: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     untyped_multi_action()
-      : atermpp::aterm_appl(core::detail::default_values::UntypedMultiAction)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedMultiAction)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_multi_action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)

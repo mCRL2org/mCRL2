@@ -29,10 +29,10 @@ class alias: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     alias()
-      : atermpp::aterm_appl(core::detail::default_values::SortRef)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortRef)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit alias(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)

@@ -25,10 +25,10 @@ class untyped_data_parameter: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     untyped_data_parameter()
-      : atermpp::aterm_appl(core::detail::default_values::UntypedDataParameter)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedDataParameter)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_data_parameter(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -41,7 +41,7 @@ class untyped_data_parameter: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedDataParameter(), name, arguments)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     untyped_data_parameter(const std::string& name, const data_expression_list& arguments)
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedDataParameter(), core::identifier_string(name), arguments)
     {}

@@ -13,6 +13,7 @@
 #define MCRL2_DATA_DETAIL_PROVER_INFO_H
 
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/data/machine_number.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 #include "mcrl2/data/rewriter.h"
 
@@ -219,9 +220,9 @@ class Info
     ///         The number of arguments of the main operator, otherwise.
     std::size_t get_number_of_arguments(const data_expression& a_term) const
     {
-      if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term))
+      if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term) && !is_machine_number(a_term))
       {
-        return a_term.size() - 1;
+        return atermpp::down_cast<application>(a_term).size();
       }
       else
       {
@@ -247,7 +248,7 @@ class Info
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
     data_expression get_argument(const data_expression& a_term, const std::size_t a_number) const
     {
-      return data_expression(a_term[a_number + 1]);
+      return data_expression(atermpp::down_cast<application>(a_term)[a_number]);
     }
 };
 

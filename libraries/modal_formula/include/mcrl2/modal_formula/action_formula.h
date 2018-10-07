@@ -36,10 +36,10 @@ class action_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_formula()
-      : atermpp::aterm_appl(core::detail::default_values::ActFrm)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActFrm)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit action_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -47,17 +47,17 @@ class action_formula: public atermpp::aterm_appl
       assert(core::detail::check_rule_ActFrm(*this));
     }
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::data_expression.
     action_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::untyped_data_parameter.
     action_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on process::untyped_multi_action.
     action_formula(const process::untyped_multi_action& x)
       : atermpp::aterm_appl(x)
     {}
@@ -134,10 +134,10 @@ class true_: public action_formula
   public:
     /// \brief Default constructor.
     true_()
-      : action_formula(core::detail::default_values::ActTrue)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActTrue)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
       : action_formula(term)
@@ -187,10 +187,10 @@ class false_: public action_formula
   public:
     /// \brief Default constructor.
     false_()
-      : action_formula(core::detail::default_values::ActFalse)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActFalse)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
       : action_formula(term)
@@ -240,10 +240,10 @@ class not_: public action_formula
   public:
     /// \brief Default constructor.
     not_()
-      : action_formula(core::detail::default_values::ActNot)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActNot)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
       : action_formula(term)
@@ -303,10 +303,10 @@ class and_: public action_formula
   public:
     /// \brief Default constructor.
     and_()
-      : action_formula(core::detail::default_values::ActAnd)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActAnd)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
       : action_formula(term)
@@ -371,10 +371,10 @@ class or_: public action_formula
   public:
     /// \brief Default constructor.
     or_()
-      : action_formula(core::detail::default_values::ActOr)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActOr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
       : action_formula(term)
@@ -439,10 +439,10 @@ class imp: public action_formula
   public:
     /// \brief Default constructor.
     imp()
-      : action_formula(core::detail::default_values::ActImp)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActImp)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
       : action_formula(term)
@@ -507,10 +507,10 @@ class forall: public action_formula
   public:
     /// \brief Default constructor.
     forall()
-      : action_formula(core::detail::default_values::ActForall)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActForall)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit forall(const atermpp::aterm& term)
       : action_formula(term)
@@ -575,10 +575,10 @@ class exists: public action_formula
   public:
     /// \brief Default constructor.
     exists()
-      : action_formula(core::detail::default_values::ActExists)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActExists)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit exists(const atermpp::aterm& term)
       : action_formula(term)
@@ -643,10 +643,10 @@ class at: public action_formula
   public:
     /// \brief Default constructor.
     at()
-      : action_formula(core::detail::default_values::ActAt)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActAt)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit at(const atermpp::aterm& term)
       : action_formula(term)
@@ -711,10 +711,10 @@ class multi_action: public action_formula
   public:
     /// \brief Default constructor.
     multi_action()
-      : action_formula(core::detail::default_values::ActMultAct)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActMultAct)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit multi_action(const atermpp::aterm& term)
       : action_formula(term)

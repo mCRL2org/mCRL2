@@ -41,10 +41,10 @@ class pbes_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     pbes_expression()
-      : atermpp::aterm_appl(core::detail::default_values::PBExpr)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PBExpr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit pbes_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -52,17 +52,17 @@ class pbes_expression: public atermpp::aterm_appl
       assert(core::detail::check_rule_PBExpr(*this));
     }
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::data_expression.
     pbes_expression(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::variable.
     pbes_expression(const data::variable& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::untyped_data_parameter.
     pbes_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
@@ -240,10 +240,10 @@ class not_: public pbes_expression
   public:
     /// \brief Default constructor.
     not_()
-      : pbes_expression(core::detail::default_values::PBESNot)
+      : pbes_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PBESNot)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -303,10 +303,10 @@ class and_: public pbes_expression
   public:
     /// \brief Default constructor.
     and_()
-      : pbes_expression(core::detail::default_values::PBESAnd)
+      : pbes_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PBESAnd)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -371,10 +371,10 @@ class or_: public pbes_expression
   public:
     /// \brief Default constructor.
     or_()
-      : pbes_expression(core::detail::default_values::PBESOr)
+      : pbes_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PBESOr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -439,10 +439,10 @@ class imp: public pbes_expression
   public:
     /// \brief Default constructor.
     imp()
-      : pbes_expression(core::detail::default_values::PBESImp)
+      : pbes_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PBESImp)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -507,10 +507,10 @@ class forall: public pbes_expression
   public:
     /// \brief Default constructor.
     forall()
-      : pbes_expression(core::detail::default_values::PBESForall)
+      : pbes_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PBESForall)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit forall(const atermpp::aterm& term)
       : pbes_expression(term)
@@ -575,10 +575,10 @@ class exists: public pbes_expression
   public:
     /// \brief Default constructor.
     exists()
-      : pbes_expression(core::detail::default_values::PBESExists)
+      : pbes_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PBESExists)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit exists(const atermpp::aterm& term)
       : pbes_expression(term)

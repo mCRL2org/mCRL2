@@ -61,7 +61,9 @@ probabilistic_state<std::size_t, probabilistic_data_expression> lps2lts_algorith
                          i=other_probabilities.begin();
                          i!=other_probabilities.end(); ++i)
   {
-    if (is_application(i->probability()) && atermpp::down_cast<data::application>(i->probability()).head().size()!=3)
+    if (!is_application(i->probability()) && 
+           !is_function_symbol(atermpp::down_cast<data::application>(i->probability()).head()) &&
+                atermpp::down_cast<data::application>(i->probability()).head()!=data::sort_real::creal())
     {
       throw mcrl2::runtime_error("The probability " + data::pp(i->probability()) + " is not a proper rational number.");
     }
@@ -909,7 +911,9 @@ void lps2lts_algorithm::print_target_distribution_in_aut_format(
     {
       const lps::state probability_destination = i->state();
       const std::pair<std::size_t, bool> probability_destination_state_number=add_target_state(source_state,probability_destination);
-      if (is_application(i->probability()) && atermpp::down_cast<data::application>(i->probability()).head().size()!=3)
+      if (!is_application(i->probability()) && 
+             !is_function_symbol(atermpp::down_cast<data::application>(i->probability()).head()) &&
+                  atermpp::down_cast<data::application>(i->probability()).head()!=data::sort_real::creal())
       {
         if (m_options.outformat == lts_aut)
         {

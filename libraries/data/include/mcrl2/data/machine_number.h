@@ -1,0 +1,132 @@
+// Author(s): Jan Friso Groote
+// Copyright: see the accompanying file COPYING or copy at
+// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/data/machine_number.h
+/// \brief The class machine_number, which is a subclass of data_expression.
+
+#ifndef MCRL2_DATA_MACHINE_NUMBER_H
+#define MCRL2_DATA_MACHINE_NUMBER_H
+
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/data/data_expression.h"
+
+namespace mcrl2
+{
+
+namespace data
+{
+
+typedef std::pair<atermpp::aterm, atermpp::aterm> machine_number_key_type;
+
+/// \brief A machine number
+/* Exercise by hand. Shoul be removed
+class machine_number: public data_expression
+{
+  public:
+
+
+    /// Move semantics
+    machine_number(const machine_number&) noexcept = default;
+    machine_number(machine_number&&) noexcept = default;
+    machine_number& operator=(const machine_number&) noexcept = default;
+    machine_number& operator=(machine_number&&) noexcept = default;
+
+    /// \brief Constructor
+    /// \param value The value stored as a machine number.
+    machine_number(const size_t value)
+     : data_expression(atermpp::aterm_int(value))
+    {}
+
+    /// \brief Extract the value stored in a machine number
+    size_t value() const
+    {
+      return ((atermpp::aterm_int)*this).value();
+    }
+}; */
+
+//--- start generated class machine_number ---//
+/// \brief A machine number
+class machine_number: public data_expression
+{
+  public:
+    /// \brief Default constructor.
+    machine_number()
+      : data_expression(atermpp::aterm_int(std::size_t(0)))
+    {}
+
+    /// \brief Constructor based on an aterm.
+    /// \param term A term
+    explicit machine_number(const atermpp::aterm& term)
+      : data_expression(term)
+    {
+      assert(this->type_is_int());
+    }
+
+    /// \brief Constructor.
+    machine_number(std::size_t value)
+      : data_expression(atermpp::aterm_int(value))
+    {}
+
+    /// Move semantics
+    machine_number(const machine_number&) noexcept = default;
+    machine_number(machine_number&&) noexcept = default;
+    machine_number& operator=(const machine_number&) noexcept = default;
+    machine_number& operator=(machine_number&&) noexcept = default;
+
+    std::size_t value() const
+    {
+      return atermpp::down_cast<atermpp::aterm_int>(static_cast<atermpp::aterm>(*this)).value();
+    }
+};
+
+/// \brief list of machine_numbers
+typedef atermpp::term_list<machine_number> machine_number_list;
+
+/// \brief vector of machine_numbers
+typedef std::vector<machine_number>    machine_number_vector;
+
+// prototype declaration
+std::string pp(const machine_number& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \param x Object x
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const machine_number& x)
+{
+  return out << data::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(machine_number& t1, machine_number& t2)
+{
+  t1.swap(t2);
+}
+//--- end generated class machine_number ---//
+
+
+/// \brief Indicates whether this expression is a machine number
+/// \param t An aterm. 
+/// \return A boolean indicating whether this expression is a machine number.
+inline bool is_machine_number(const atermpp::aterm& t)
+{
+  return t.type_is_int();
+}
+
+// template function overloads
+std::string pp(const machine_number_list& x);
+std::string pp(const machine_number_vector& x);
+std::set<data::variable> find_all_variables(const data::machine_number& x);
+
+} // namespace data
+
+} // namespace mcrl2
+
+#endif // MCRL2_DATA_MACHINE_NUMBER_H
+

@@ -24,6 +24,7 @@ def make_classes(all_classes, filename, class_text, namespace, add_constructor_o
     # N.B. use the classes defined in all_classes
     classes = [all_classes[c.classname(True)] for c in classes]
 
+
     result = True
     if os.path.isdir(filename):
         for c in classes:

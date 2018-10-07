@@ -36,10 +36,10 @@ class regular_formula: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     regular_formula()
-      : atermpp::aterm_appl(core::detail::default_values::RegFrm)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RegFrm)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit regular_formula(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -47,12 +47,12 @@ class regular_formula: public atermpp::aterm_appl
       assert(core::detail::check_rule_RegFrm(*this));
     }
 
-    /// \brief Constructor.
+    /// \brief Constructor based on action_formulas::action_formula.
     regular_formula(const action_formulas::action_formula& x)
       : atermpp::aterm_appl(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::data_expression.
     regular_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
@@ -118,10 +118,10 @@ class seq: public regular_formula
   public:
     /// \brief Default constructor.
     seq()
-      : regular_formula(core::detail::default_values::RegSeq)
+      : regular_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RegSeq)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit seq(const atermpp::aterm& term)
       : regular_formula(term)
@@ -186,10 +186,10 @@ class alt: public regular_formula
   public:
     /// \brief Default constructor.
     alt()
-      : regular_formula(core::detail::default_values::RegAlt)
+      : regular_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RegAlt)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit alt(const atermpp::aterm& term)
       : regular_formula(term)
@@ -254,10 +254,10 @@ class trans: public regular_formula
   public:
     /// \brief Default constructor.
     trans()
-      : regular_formula(core::detail::default_values::RegTrans)
+      : regular_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RegTrans)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit trans(const atermpp::aterm& term)
       : regular_formula(term)
@@ -317,10 +317,10 @@ class trans_or_nil: public regular_formula
   public:
     /// \brief Default constructor.
     trans_or_nil()
-      : regular_formula(core::detail::default_values::RegTransOrNil)
+      : regular_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RegTransOrNil)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit trans_or_nil(const atermpp::aterm& term)
       : regular_formula(term)
@@ -380,10 +380,10 @@ class untyped_regular_formula: public regular_formula
   public:
     /// \brief Default constructor.
     untyped_regular_formula()
-      : regular_formula(core::detail::default_values::UntypedRegFrm)
+      : regular_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedRegFrm)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_regular_formula(const atermpp::aterm& term)
       : regular_formula(term)
@@ -396,7 +396,7 @@ class untyped_regular_formula: public regular_formula
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), name, left, right))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     untyped_regular_formula(const std::string& name, const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
     {}

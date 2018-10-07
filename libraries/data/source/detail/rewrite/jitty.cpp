@@ -632,11 +632,9 @@ data_expression RewriterJitty::rewrite_aux(
     }
     if (is_exists_binder(binder))
     {
-      assert(term.size()==1);
       return existential_quantifier_enumeration(t,sigma);
     }
     assert(is_forall_binder(binder));
-    assert(term.size()==1);
     return universal_quantifier_enumeration(head1,sigma);
   }
   // Here term does not have the shape appl(t1,...,tn)

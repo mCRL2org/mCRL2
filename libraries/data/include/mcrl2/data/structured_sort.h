@@ -71,10 +71,10 @@ class structured_sort: public sort_expression
   public:
     /// \brief Default constructor.
     structured_sort()
-      : sort_expression(core::detail::default_values::SortStruct)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortStruct)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit structured_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -87,7 +87,7 @@ class structured_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))

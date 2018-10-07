@@ -33,10 +33,10 @@ class process_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_equation()
-      : atermpp::aterm_appl(core::detail::default_values::ProcEqn)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ProcEqn)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit process_equation(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)

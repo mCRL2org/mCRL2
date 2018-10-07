@@ -58,15 +58,14 @@ struct is_a_variable
 };
 
 static
-bool occur_check(const variable& v, const atermpp::aterm_appl& e)
+bool occur_check(const variable& v, const data_expression& e)
 {
   if (v==e)
   {
     // The variable is reset. This is ok.
     return true;
   }
-  std::set<variable> s;
-  find_all_if(e,is_a_variable(),std::inserter(s,s.begin()));
+  std::set<variable> s = find_free_variables(e);
   if (s.count(v)>0)
   {
     return false; // Occur check failed.

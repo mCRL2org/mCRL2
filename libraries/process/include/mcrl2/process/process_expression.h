@@ -41,10 +41,10 @@ class process_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_expression()
-      : atermpp::aterm_appl(core::detail::default_values::ProcExpr)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ProcExpr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit process_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -52,7 +52,7 @@ class process_expression: public atermpp::aterm_appl
       assert(core::detail::check_rule_ProcExpr(*this));
     }
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::untyped_data_parameter.
     process_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
@@ -151,10 +151,10 @@ class action: public process_expression
   public:
     /// \brief Default constructor.
     action()
-      : process_expression(core::detail::default_values::Action)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Action)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit action(const atermpp::aterm& term)
       : process_expression(term)
@@ -225,10 +225,10 @@ class process_instance: public process_expression
   public:
     /// \brief Default constructor.
     process_instance()
-      : process_expression(core::detail::default_values::Process)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Process)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit process_instance(const atermpp::aterm& term)
       : process_expression(term)
@@ -293,10 +293,10 @@ class process_instance_assignment: public process_expression
   public:
     /// \brief Default constructor.
     process_instance_assignment()
-      : process_expression(core::detail::default_values::ProcessAssignment)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ProcessAssignment)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit process_instance_assignment(const atermpp::aterm& term)
       : process_expression(term)
@@ -361,10 +361,10 @@ class delta: public process_expression
   public:
     /// \brief Default constructor.
     delta()
-      : process_expression(core::detail::default_values::Delta)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Delta)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit delta(const atermpp::aterm& term)
       : process_expression(term)
@@ -414,10 +414,10 @@ class tau: public process_expression
   public:
     /// \brief Default constructor.
     tau()
-      : process_expression(core::detail::default_values::Tau)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Tau)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit tau(const atermpp::aterm& term)
       : process_expression(term)
@@ -467,10 +467,10 @@ class sum: public process_expression
   public:
     /// \brief Default constructor.
     sum()
-      : process_expression(core::detail::default_values::Sum)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Sum)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit sum(const atermpp::aterm& term)
       : process_expression(term)
@@ -535,10 +535,10 @@ class block: public process_expression
   public:
     /// \brief Default constructor.
     block()
-      : process_expression(core::detail::default_values::Block)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Block)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit block(const atermpp::aterm& term)
       : process_expression(term)
@@ -603,10 +603,10 @@ class hide: public process_expression
   public:
     /// \brief Default constructor.
     hide()
-      : process_expression(core::detail::default_values::Hide)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Hide)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit hide(const atermpp::aterm& term)
       : process_expression(term)
@@ -671,10 +671,10 @@ class rename: public process_expression
   public:
     /// \brief Default constructor.
     rename()
-      : process_expression(core::detail::default_values::Rename)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Rename)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit rename(const atermpp::aterm& term)
       : process_expression(term)
@@ -739,10 +739,10 @@ class comm: public process_expression
   public:
     /// \brief Default constructor.
     comm()
-      : process_expression(core::detail::default_values::Comm)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Comm)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit comm(const atermpp::aterm& term)
       : process_expression(term)
@@ -807,10 +807,10 @@ class allow: public process_expression
   public:
     /// \brief Default constructor.
     allow()
-      : process_expression(core::detail::default_values::Allow)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Allow)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit allow(const atermpp::aterm& term)
       : process_expression(term)
@@ -875,10 +875,10 @@ class sync: public process_expression
   public:
     /// \brief Default constructor.
     sync()
-      : process_expression(core::detail::default_values::Sync)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Sync)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit sync(const atermpp::aterm& term)
       : process_expression(term)
@@ -943,10 +943,10 @@ class at: public process_expression
   public:
     /// \brief Default constructor.
     at()
-      : process_expression(core::detail::default_values::AtTime)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::AtTime)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit at(const atermpp::aterm& term)
       : process_expression(term)
@@ -1011,10 +1011,10 @@ class seq: public process_expression
   public:
     /// \brief Default constructor.
     seq()
-      : process_expression(core::detail::default_values::Seq)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Seq)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit seq(const atermpp::aterm& term)
       : process_expression(term)
@@ -1079,10 +1079,10 @@ class if_then: public process_expression
   public:
     /// \brief Default constructor.
     if_then()
-      : process_expression(core::detail::default_values::IfThen)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::IfThen)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit if_then(const atermpp::aterm& term)
       : process_expression(term)
@@ -1147,10 +1147,10 @@ class if_then_else: public process_expression
   public:
     /// \brief Default constructor.
     if_then_else()
-      : process_expression(core::detail::default_values::IfThenElse)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::IfThenElse)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit if_then_else(const atermpp::aterm& term)
       : process_expression(term)
@@ -1220,10 +1220,10 @@ class bounded_init: public process_expression
   public:
     /// \brief Default constructor.
     bounded_init()
-      : process_expression(core::detail::default_values::BInit)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BInit)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit bounded_init(const atermpp::aterm& term)
       : process_expression(term)
@@ -1288,10 +1288,10 @@ class merge: public process_expression
   public:
     /// \brief Default constructor.
     merge()
-      : process_expression(core::detail::default_values::Merge)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Merge)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit merge(const atermpp::aterm& term)
       : process_expression(term)
@@ -1356,10 +1356,10 @@ class left_merge: public process_expression
   public:
     /// \brief Default constructor.
     left_merge()
-      : process_expression(core::detail::default_values::LMerge)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::LMerge)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit left_merge(const atermpp::aterm& term)
       : process_expression(term)
@@ -1424,10 +1424,10 @@ class choice: public process_expression
   public:
     /// \brief Default constructor.
     choice()
-      : process_expression(core::detail::default_values::Choice)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Choice)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit choice(const atermpp::aterm& term)
       : process_expression(term)
@@ -1492,10 +1492,10 @@ class stochastic_operator: public process_expression
   public:
     /// \brief Default constructor.
     stochastic_operator()
-      : process_expression(core::detail::default_values::StochasticOperator)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StochasticOperator)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit stochastic_operator(const atermpp::aterm& term)
       : process_expression(term)
@@ -1565,10 +1565,10 @@ class untyped_process_assignment: public process_expression
   public:
     /// \brief Default constructor.
     untyped_process_assignment()
-      : process_expression(core::detail::default_values::UntypedProcessAssignment)
+      : process_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedProcessAssignment)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_process_assignment(const atermpp::aterm& term)
       : process_expression(term)
@@ -1581,7 +1581,7 @@ class untyped_process_assignment: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), name, assignments))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
     {}

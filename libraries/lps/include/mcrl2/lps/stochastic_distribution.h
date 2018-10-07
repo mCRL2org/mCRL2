@@ -25,10 +25,10 @@ class stochastic_distribution: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     stochastic_distribution()
-      : atermpp::aterm_appl(core::detail::default_values::Distribution)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Distribution)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit stochastic_distribution(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)

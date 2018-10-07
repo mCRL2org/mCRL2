@@ -26,10 +26,10 @@ class untyped_sort: public sort_expression
   public:
     /// \brief Default constructor.
     untyped_sort()
-      : sort_expression(core::detail::default_values::UntypedSortUnknown)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedSortUnknown)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_sort(const atermpp::aterm& term)
       : sort_expression(term)

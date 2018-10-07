@@ -32,10 +32,10 @@ class container_sort: public sort_expression
   public:
     /// \brief Default constructor.
     container_sort()
-      : sort_expression(core::detail::default_values::SortCons)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortCons)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit container_sort(const atermpp::aterm& term)
       : sort_expression(term)
