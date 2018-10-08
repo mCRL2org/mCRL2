@@ -2,6 +2,7 @@ set(MCRL2_TOOLS
   besconvert
   complps2pbes
   lpsrealelm
+  lpsstategraph
   lpssymbolicbisim
   pbesabsinthe
   pbespareqelm
