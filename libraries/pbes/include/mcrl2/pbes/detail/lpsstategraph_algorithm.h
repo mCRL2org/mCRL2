@@ -97,6 +97,15 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
         propositional_variable_instantiation Xi(X, gi);
         conjuncts.push_back(make_forall(ei, imp(x, Xi)));
       }
+      for (const lps::deadlock_summand& summand: lpsspec.process().deadlock_summands())
+      {
+        const auto& ei = summand.summation_variables();
+        const auto& ci = summand.condition();
+        data::data_expression_list gi = data::make_data_expression_list(lpsspec.process().process_parameters());
+        propositional_variable_instantiation Xi(X, gi);
+        conjuncts.push_back(make_forall(ei, imp(ci, Xi)));
+      }
+
       // N.B. It is essential that the order in which the conjuncts are traversed in a PBES matches the order of the corresponding summands.
       pbes_expression rhs = conjuncts[0];
       for (std::size_t i = 1; i < conjuncts.size(); i++)
@@ -109,107 +118,6 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
       pbesspec.initial_state() = propositional_variable_instantiation(X, right_hand_sides(lpsspec.initial_process().assignments()));
       pbesspec.equations().push_back(eqn);
       return pbesspec;
-    }
-
-    // TODO: reuse code from local_reset_variables_algorithm::reset_variable
-    data::data_expression_list reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
-    {
-      using utilities::detail::contains;
-
-      // mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << x << " with index " << i << std::endl;
-      assert(i < eq_X.predicate_variables().size());
-      const predicate_variable& Ye = eq_X.predicate_variables()[i];
-      assert(Ye.variable() == x);
-
-      const core::identifier_string& X = eq_X.variable().name();
-      const core::identifier_string& Y = Ye.name();
-      const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-      auto const& e = x.parameters();
-      std::vector<data::data_expression> e1(e.begin(), e.end());
-      const std::vector<data::variable>& d_Y = eq_Y.parameters();
-      assert(d_Y.size() == Ye.parameters().size());
-      const std::size_t J = m_local_control_flow_graphs.size();
-
-      auto const& dp_Y = eq_Y.data_parameter_indices();
-      for (std::size_t k: dp_Y)
-      {
-        bool relevant = true;
-        std::set<data::data_expression> condition;
-        for (std::size_t j = 0; j < J; j++)
-        {
-          auto const& Vj = m_local_control_flow_graphs[j];
-          auto& Bj = m_belongs[j];
-          default_rules_predicate rules(Vj);
-          if (rules(X, i))
-          {
-            auto const& v = Vj.find_vertex(Y); // v = (Y, p, q)
-            std::size_t p = v.index();
-            auto di = Ye.target().find(p);
-            if (di != Ye.target().end())
-            {
-              auto const& q1 = di->second; // q1 = target(X, i, p)
-              auto const& u = Vj.find_vertex(local_control_flow_graph_vertex(Y, p, data::undefined_variable(), q1));
-              if (contains(Bj[Y], d_Y[k]) && !contains(u.marking(), d_Y[k]))
-              {
-                relevant = false;
-                break;
-              }
-            }
-            else if(!v.has_variable())
-            {
-              if (contains(Bj[Y], d_Y[k]) && !contains(v.marking(), d_Y[k]))
-              {
-                relevant = false;
-                break;
-              }
-            }
-            else
-            {
-              // update relevant and condition
-              if (contains(Bj[Y], d_Y[k]))
-              {
-                bool found = false;
-                for (const auto& w: Vj.vertices)
-                {
-                  if (w.name() == Y && w.index() == p)  // w = (Y, p, d_Y[p]=r)
-                  {
-                    if (contains(w.marking(), d_Y[k]))
-                    {
-                      found = true;
-                    }
-                    else
-                    {
-                      if  (w.has_variable())
-                      {
-                        auto const& r = w.value();
-                        condition.insert(data::equal_to(nth_element(e, p), r));
-                      }
-                    }
-                  }
-                }
-                if (!found)
-                {
-                  relevant = false;
-                  break;
-                }
-              }
-            }
-          }
-        }
-        if (!relevant)
-        {
-          e1[k] = default_value(Y, k, e1[k].sort());
-        }
-        else
-        {
-          if (!condition.empty())
-          {
-            e1[k] = data::if_(data::lazy::join_or(condition.begin(), condition.end()), default_value(Y, k, e1[k].sort()), nth_element(e, k));
-            mCRL2log(log::debug1, "stategraph") << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
-          }
-        }
-      }
-      return data::data_expression_list(e1.begin(), e1.end());
     }
 
     // Applies resetting of variables to the original PBES p.
@@ -228,7 +136,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
 
     void run() override
     {
-      super::run();
+      stategraph_local_algorithm::run();
       m_transformed_lps = m_original_lps;
       compute_occurring_data_parameters();
 
@@ -282,7 +190,7 @@ struct lps_reset_traverser: public pbes_expression_traverser<lps_reset_traverser
 
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
-    data::data_expression_list g_i = algorithm.reset_variable(x, eq_X, i);
+    data::data_expression_list g_i = algorithm.reset_variable_parameters(x, eq_X, i);
     if (i < summands.size())
     {
       summands[i].assignments() = make_assignments(process_parameters, g_i);

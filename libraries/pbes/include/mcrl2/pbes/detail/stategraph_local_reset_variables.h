@@ -99,12 +99,20 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
     }
 
+    data::data_expression_list reset_variable_parameters(const propositional_variable_instantiation& x,
+                                                         const stategraph_equation& eq_X, std::size_t i);
+
   public:
 
     // expands a propositional variable instantiation using the control flow graph
     // x = Y(e)
     // Y(e) = PVI(phi_X, i)
-    pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i);
+    pbes_expression reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
+    {
+      const predicate_variable& Ye = eq_X.predicate_variables()[i];
+      data::data_expression_list e = reset_variable_parameters(x, eq_X, i);
+      return propositional_variable_instantiation(Ye.name(), e);
+    }
 
     // Applies resetting of variables to the original PBES p.
     void reset_variables_to_original(pbes& p)
@@ -260,7 +268,7 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
   return f.top();
 }
 
-pbes_expression local_reset_variables_algorithm::reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
+data::data_expression_list local_reset_variables_algorithm::reset_variable_parameters(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
 {
   using utilities::detail::contains;
 
@@ -357,7 +365,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
       }
     }
   }
-  return propositional_variable_instantiation(Y, data::data_expression_list(e1.begin(), e1.end()));
+  return data::data_expression_list(e1.begin(), e1.end());
 }
 
 

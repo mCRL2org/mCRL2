@@ -83,7 +83,7 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  use global variant:               " << std::boolalpha << options.use_global_variant << std::endl;
       mCRL2log(verbose) << "  print influence graph:            " << std::boolalpha << options.print_influence_graph << std::endl;
       mCRL2log(verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
-      mCRL2log(verbose) << "  margking algorithm:               " << options.marking_algorithm << std::endl;
+      mCRL2log(verbose) << "  marking algorithm:                " << options.marking_algorithm << std::endl;
       mCRL2log(verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
       mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
