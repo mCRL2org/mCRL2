@@ -1148,7 +1148,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
     { }
 
     /// \brief Computes the control flow graph
-    void run()
+    void run() override
     {
       super::run();
 
@@ -1193,6 +1193,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
       print_control_flow_marking();
 
       print_marking_statistics();
+    }
+
+
+
+    const std::vector<belongs_relation>& belongs() const
+    {
+      return m_belongs;
     }
 };
 

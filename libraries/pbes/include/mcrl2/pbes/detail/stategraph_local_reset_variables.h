@@ -51,6 +51,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 
   protected:
     const pbes& m_original_pbes;
+    pbes m_transformed_pbes; // will contain the result of the computation
 
     // if true, the resulting PBES is simplified
     bool m_simplify;
@@ -137,17 +138,20 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes run()
+    void run() override
     {
       super::run();
-      pbes result = m_original_pbes;
+      m_transformed_pbes = m_original_pbes;
       compute_occurring_data_parameters();
 
       start_timer("reset_variables_to_original");
-      reset_variables_to_original(result);
+      reset_variables_to_original(m_transformed_pbes);
       finish_timer("reset_variables_to_original");
+    }
 
-      return result;
+    const pbes& result() const
+    {
+      return m_transformed_pbes;
     }
 };
 

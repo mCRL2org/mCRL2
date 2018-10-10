@@ -30,7 +30,8 @@ void stategraph(pbes& p, const pbesstategraph_options& options)
   if (options.use_global_variant)
   {
     detail::global_reset_variables_algorithm algorithm(p, options);
-    p = algorithm.run();
+    algorithm.run();
+    p = algorithm.result();
     if (options.print_influence_graph)
     {
       detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
@@ -40,7 +41,8 @@ void stategraph(pbes& p, const pbesstategraph_options& options)
   else
   {
     detail::local_reset_variables_algorithm algorithm(p, options);
-    p = algorithm.run();
+    algorithm.run();
+    p = algorithm.result();
     if (options.print_influence_graph)
     {
       detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());

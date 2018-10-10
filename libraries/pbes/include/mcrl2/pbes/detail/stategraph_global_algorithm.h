@@ -171,12 +171,17 @@ class stategraph_global_algorithm: public stategraph_algorithm
     { }
 
     /// \brief Computes the control flow graph
-    void run()
+    void run() override
     {
       super::run();
       start_timer("compute_global_control_flow_graph");
       compute_global_control_flow_graph();
       finish_timer("compute_global_control_flow_graph");
+    }
+
+    const global_control_flow_graph& global_graph() const
+    {
+      return m_control_flow_graph;
     }
 };
 

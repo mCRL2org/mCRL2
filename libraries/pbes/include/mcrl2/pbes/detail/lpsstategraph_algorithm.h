@@ -37,67 +37,270 @@ data::data_expression_list right_hand_sides(const data::assignment_list& x)
   return data::data_expression_list(result.begin(), result.end());
 }
 
-inline
-pbes construct_stategraph_pbes(const lps::specification& lpsspec)
+class lpsstategraph_algorithm;
+void lps_reset_variables(lpsstategraph_algorithm& algorithm,
+                         const pbes_expression& x,
+                         const stategraph_equation& eq_X,
+                         const data::variable_list& process_parameters,
+                         std::vector<lps::action_summand>& summands
+);
+
+class lpsstategraph_algorithm: public local_reset_variables_algorithm
 {
-  pbes pbesspec;
-  data::data_specification dataspec = lpsspec.data();
+  protected:
+    friend struct lps_reset_traverser;
+    typedef local_reset_variables_algorithm super;
 
-  // create 'used' functions for every sort in the free variables of actions
-  data::set_identifier_generator generator;
-  core::identifier_string used = generator("used");
-  std::set<data::sort_expression> action_variable_sorts;
-  for (const lps::action_summand& summand: lpsspec.process().action_summands())
-  {
-    for (const data::variable& v: lps::find_free_variables(summand.multi_action()))
+    const lps::specification& m_original_lps;
+    lps::specification m_transformed_lps; // will contain the result of the computation
+
+    pbes construct_stategraph_pbes(const lps::specification& lpsspec)
     {
-      action_variable_sorts.insert(v.sort());
+      pbes pbesspec;
+      data::data_specification dataspec = lpsspec.data();
+
+      // create 'used' functions for every sort in the free variables of actions
+      data::set_identifier_generator generator;
+      core::identifier_string used = generator("used");
+      std::set<data::sort_expression> action_variable_sorts;
+      for (const lps::action_summand& summand: lpsspec.process().action_summands())
+      {
+        for (const data::variable& v: lps::find_free_variables(summand.multi_action()))
+        {
+          action_variable_sorts.insert(v.sort());
+        }
+      }
+      std::map<data::sort_expression, data::function_symbol> functions;
+      for (const data::sort_expression& s: action_variable_sorts)
+      {
+        data::function_symbol f(used, data::function_sort({ s }, data::sort_bool::bool_()));
+        functions[s] = f;
+        dataspec.add_mapping(f);
+      }
+
+      // the PBES variable
+      core::identifier_string X("X");
+
+      // create a PBES equation that contains a conjunct for each action summand
+      std::vector<pbes_expression> conjuncts;
+      for (const lps::action_summand& summand: lpsspec.process().action_summands())
+      {
+        const auto& ei = summand.summation_variables();
+        const auto& ci = summand.condition();
+        data::data_expression_list gi = summand.next_state(lpsspec.process().process_parameters());
+
+        data::data_expression x = ci;
+        for (const data::variable& v: lps::find_free_variables(summand.multi_action()))
+        {
+          x = data::and_(x, data::application(functions[v.sort()], { v }));
+        }
+        propositional_variable_instantiation Xi(X, gi);
+        conjuncts.push_back(make_forall(ei, imp(x, Xi)));
+      }
+      // N.B. It is essential that the order in which the conjuncts are traversed in a PBES matches the order of the corresponding summands.
+      pbes_expression rhs = conjuncts[0];
+      for (std::size_t i = 1; i < conjuncts.size(); i++)
+      {
+        rhs = and_(conjuncts[i], rhs);
+      }
+      pbes_equation eqn(fixpoint_symbol::nu(), propositional_variable(X, lpsspec.process().process_parameters()), rhs);
+
+      pbesspec.data() = dataspec;
+      pbesspec.initial_state() = propositional_variable_instantiation(X, right_hand_sides(lpsspec.initial_process().assignments()));
+      pbesspec.equations().push_back(eqn);
+      return pbesspec;
+    }
+
+    // TODO: reuse code from local_reset_variables_algorithm::reset_variable
+    data::data_expression_list reset_variable(const propositional_variable_instantiation& x, const stategraph_equation& eq_X, std::size_t i)
+    {
+      using utilities::detail::contains;
+
+      // mCRL2log(log::debug, "stategraph") << "--- resetting variable Y(e) = " << x << " with index " << i << std::endl;
+      assert(i < eq_X.predicate_variables().size());
+      const predicate_variable& Ye = eq_X.predicate_variables()[i];
+      assert(Ye.variable() == x);
+
+      const core::identifier_string& X = eq_X.variable().name();
+      const core::identifier_string& Y = Ye.name();
+      const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
+      auto const& e = x.parameters();
+      std::vector<data::data_expression> e1(e.begin(), e.end());
+      const std::vector<data::variable>& d_Y = eq_Y.parameters();
+      assert(d_Y.size() == Ye.parameters().size());
+      const std::size_t J = m_local_control_flow_graphs.size();
+
+      auto const& dp_Y = eq_Y.data_parameter_indices();
+      for (std::size_t k: dp_Y)
+      {
+        bool relevant = true;
+        std::set<data::data_expression> condition;
+        for (std::size_t j = 0; j < J; j++)
+        {
+          auto const& Vj = m_local_control_flow_graphs[j];
+          auto& Bj = m_belongs[j];
+          default_rules_predicate rules(Vj);
+          if (rules(X, i))
+          {
+            auto const& v = Vj.find_vertex(Y); // v = (Y, p, q)
+            std::size_t p = v.index();
+            auto di = Ye.target().find(p);
+            if (di != Ye.target().end())
+            {
+              auto const& q1 = di->second; // q1 = target(X, i, p)
+              auto const& u = Vj.find_vertex(local_control_flow_graph_vertex(Y, p, data::undefined_variable(), q1));
+              if (contains(Bj[Y], d_Y[k]) && !contains(u.marking(), d_Y[k]))
+              {
+                relevant = false;
+                break;
+              }
+            }
+            else if(!v.has_variable())
+            {
+              if (contains(Bj[Y], d_Y[k]) && !contains(v.marking(), d_Y[k]))
+              {
+                relevant = false;
+                break;
+              }
+            }
+            else
+            {
+              // update relevant and condition
+              if (contains(Bj[Y], d_Y[k]))
+              {
+                bool found = false;
+                for (const auto& w: Vj.vertices)
+                {
+                  if (w.name() == Y && w.index() == p)  // w = (Y, p, d_Y[p]=r)
+                  {
+                    if (contains(w.marking(), d_Y[k]))
+                    {
+                      found = true;
+                    }
+                    else
+                    {
+                      if  (w.has_variable())
+                      {
+                        auto const& r = w.value();
+                        condition.insert(data::equal_to(nth_element(e, p), r));
+                      }
+                    }
+                  }
+                }
+                if (!found)
+                {
+                  relevant = false;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if (!relevant)
+        {
+          e1[k] = default_value(Y, k, e1[k].sort());
+        }
+        else
+        {
+          if (!condition.empty())
+          {
+            e1[k] = data::if_(data::lazy::join_or(condition.begin(), condition.end()), default_value(Y, k, e1[k].sort()), nth_element(e, k));
+            mCRL2log(log::debug1, "stategraph") << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
+          }
+        }
+      }
+      return data::data_expression_list(e1.begin(), e1.end());
+    }
+
+    // Applies resetting of variables to the original PBES p.
+    void reset_variables_to_original(lps::specification& lpsspec)
+    {
+      mCRL2log(log::debug, "stategraph") << "=== resetting variables to the original LPS ---" << std::endl;
+
+      stategraph_equation& eqn = m_pbes.equations().front();
+      lps_reset_variables(*this, eqn.formula(), eqn, lpsspec.process().process_parameters(), lpsspec.process().action_summands());
+    }
+
+  public:
+    lpsstategraph_algorithm(const lps::specification& lpsspec, const pbesstategraph_options& options)
+      : local_reset_variables_algorithm(construct_stategraph_pbes(lpsspec), options), m_original_lps(lpsspec)
+    {}
+
+    void run() override
+    {
+      super::run();
+      m_transformed_lps = m_original_lps;
+      compute_occurring_data_parameters();
+
+      start_timer("reset_variables_to_original");
+      reset_variables_to_original(m_transformed_lps);
+      finish_timer("reset_variables_to_original");
+    }
+
+    const lps::specification& result() const
+    {
+      return m_transformed_lps;
+    }
+};
+
+inline
+data::assignment_list make_assignments(const data::variable_list& d, const data::data_expression_list& e)
+{
+  std::vector<data::assignment> result;
+  auto di = d.begin();
+  auto ei = e.begin();
+  for (; di != d.end(); ++di, ++ei)
+  {
+    if (*di != *ei)
+    {
+      result.emplace_back(*di, *ei);
     }
   }
-  std::map<data::sort_expression, data::function_symbol> functions;
-  for (const data::sort_expression& s: action_variable_sorts)
-  {
-    data::function_symbol f(used, data::function_sort({ s }, data::sort_bool::bool_()));
-    functions[s] = f;
-    dataspec.add_mapping(f);
-  }
-
-  // the PBES variable
-  core::identifier_string X("X");
-
-  // create a PBES equation that contains a conjunct for each action summand
-  std::vector<pbes_expression> conjuncts;
-  for (const lps::action_summand& summand: lpsspec.process().action_summands())
-  {
-    const auto& ei = summand.summation_variables();
-    const auto& ci = summand.condition();
-    data::data_expression_list gi = summand.next_state(lpsspec.process().process_parameters());
-
-    data::data_expression x = ci;
-    for (const data::variable& v: lps::find_free_variables(summand.multi_action()))
-    {
-      x = data::and_(x, data::application(functions[v.sort()], { v }));
-    }
-    propositional_variable_instantiation Xi(X, gi);
-    conjuncts.push_back(make_forall(ei, imp(x, Xi)));
-  }
-  // N.B. It is essential that the order in which the conjuncts are traversed in a PBES matches the order of the corresponding summands.
-  pbes_expression rhs = conjuncts[0];
-  for (std::size_t i = 1; i < conjuncts.size(); i++)
-  {
-    rhs = and_(conjuncts[i], rhs);
-  }
-  pbes_equation eqn(fixpoint_symbol::nu(), propositional_variable(X, lpsspec.process().process_parameters()), rhs);
-
-  pbesspec.data() = dataspec;
-  pbesspec.initial_state() = propositional_variable_instantiation(X, right_hand_sides(lpsspec.initial_process().assignments()));
-  pbesspec.equations().push_back(eqn);
-  return pbesspec;
+  return data::assignment_list(result.begin(), result.end());
 }
 
-inline
-void extract_stategraph_lps(lps::specification& lpsspec /* some parameters containing the marking */)
+struct lps_reset_traverser: public pbes_expression_traverser<lps_reset_traverser>
 {
+  typedef pbes_expression_traverser<lps_reset_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  lpsstategraph_algorithm& algorithm;
+  const stategraph_equation& eq_X;
+  const data::variable_list& process_parameters;
+  std::vector<lps::action_summand>& summands;
+  std::size_t i = 0; // the index of a summand
+
+  lps_reset_traverser(lpsstategraph_algorithm& algorithm_,
+                      const stategraph_equation& eq_X_,
+                      const data::variable_list& process_parameters_,
+                      std::vector<lps::action_summand>& summands_
+                      )
+    : algorithm(algorithm_), eq_X(eq_X_), process_parameters(process_parameters_), summands(summands_)
+  {}
+
+  void leave(const pbes_system::propositional_variable_instantiation& x)
+  {
+    data::data_expression_list g_i = algorithm.reset_variable(x, eq_X, i);
+    if (i < summands.size())
+    {
+      summands[i].assignments() = make_assignments(process_parameters, g_i);
+      i++;
+    }
+  }
+};
+
+inline
+void lps_reset_variables(lpsstategraph_algorithm& algorithm,
+                         const pbes_expression& x,
+                         const stategraph_equation& eq_X,
+                         const data::variable_list& process_parameters,
+                         std::vector<lps::action_summand>& summands
+                        )
+{
+  lps_reset_traverser f(algorithm, eq_X, process_parameters, summands);
+  f.apply(x);
 }
 
 } // namespace detail
@@ -108,31 +311,17 @@ void extract_stategraph_lps(lps::specification& lpsspec /* some parameters conta
 inline
 void lpsstategraph(lps::specification& lpsspec, const pbesstategraph_options& options)
 {
-  pbes p = detail::construct_stategraph_pbes(lpsspec);
-
-  algorithms::normalize(p);
   if (options.use_global_variant)
   {
-    detail::global_reset_variables_algorithm algorithm(p, options);
-    p = algorithm.run();
-    if (options.print_influence_graph)
-    {
-      detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
-      ialgo.run();
-    }
+    throw mcrl2::runtime_error("The use global variant option is not supported in lpsstategraph!");
   }
-  else
+  if (options.print_influence_graph)
   {
-    detail::local_reset_variables_algorithm algorithm(p, options);
-    p = algorithm.run();
-    if (options.print_influence_graph)
-    {
-      detail::stategraph_influence_graph_algorithm ialgo(algorithm.get_pbes());
-      ialgo.run();
-    }
+    throw mcrl2::runtime_error("The print influence graph option is not supported in lpsstategraph!");
   }
-
-  detail::extract_stategraph_lps(lpsspec);
+  detail::lpsstategraph_algorithm algorithm(lpsspec, options);
+  algorithm.run();
+  lpsspec = algorithm.result();
 }
 
 void lpsstategraph(const std::string& input_filename,

@@ -910,7 +910,7 @@ class stategraph_algorithm
     }
 
     /// \brief Computes the control flow graph
-    void run()
+    virtual void run()
     {
       simplify(m_pbes);
       m_pbes.compute_source_target_copy();
@@ -935,6 +935,11 @@ class stategraph_algorithm
     const GCFP_graph& GCFP() const
     {
       return m_GCFP_graph;
+    }
+
+    const std::vector<local_control_flow_graph>& local_graphs() const
+    {
+      return m_local_control_flow_graphs;
     }
 };
 

@@ -35,6 +35,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
 
   protected:
     const pbes& m_original_pbes;
+    pbes m_transformed_pbes; // will contain the result of the computation
 
     // if true, the resulting PBES is simplified
     bool m_simplify;
@@ -137,7 +138,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         if (is_global_control_flow_parameter(Y, j))
         {
           const predicate_variable& X_i = eq_X.predicate_variables()[i];
-          std::map<std::size_t, data::data_expression>::const_iterator target_j = X_i.target().find(j);
+          auto target_j = X_i.target().find(j);
           if (target_j != X_i.target().end())
           {
             data::data_expression f_k = *k;
@@ -185,7 +186,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         std::vector<data::data_expression> r;
         std::size_t N = u.marked_parameters().size();
         assert(e.size() == u.marked_parameters().size());
-        data::data_expression_list::const_iterator k = u.values().begin();
+        auto k = u.values().begin();
         data::data_expression condition = data::true_();
         for (std::size_t j = 0; j < N; ++j)
         {
@@ -272,7 +273,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
     /// \brief Runs the stategraph algorithm
     /// \param simplify If true, simplify the resulting PBES
     /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    pbes run()
+    void run() override
     {
       super::run();
       start_timer("compute_global_control_flow_marking");
@@ -280,9 +281,13 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       finish_timer("compute_global_control_flow_marking");
       mCRL2log(log::verbose) << "Computed control flow marking" << std::endl;
       mCRL2log(log::debug) <<  "--- control flow marking ---\n" << m_control_flow_graph.print_marking();
-      pbes result = m_original_pbes;
-      reset_variables_to_original(result);
-      return result;
+      m_transformed_pbes = m_original_pbes;
+      reset_variables_to_original(m_transformed_pbes);
+    }
+
+    const pbes& result() const
+    {
+      return m_transformed_pbes;
     }
 };
 

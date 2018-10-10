@@ -24,7 +24,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using data::tools::rewriter_tool;
 
-// class pbes_stategraph_tool: public pbes_input_tool<pbes_output_tool<rewriter_tool<input_output_tool> > >
 class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
 {
   typedef rewriter_tool<input_output_tool> super;
