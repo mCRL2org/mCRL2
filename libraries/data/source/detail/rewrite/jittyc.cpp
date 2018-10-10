@@ -1808,7 +1808,7 @@ class RewriterCompilingJitty::ImplementTree
       else
       {
         m_stream << "if (is_application_no_check(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]) && "
-                 <<     "uint_address(down_cast<application>(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg << "]).head()) == "
+                 <<     "uint_address(down_cast<application>(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]).head()) == "
                  << func << ") // F2b " << tree.function().name() << "\n" << m_padding
                  << "{\n" << m_padding
                  << "  const data_expression& t" << cnt << " = down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "];\n";

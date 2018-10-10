@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_MACHINE_NUMBER_H
 #define MCRL2_DATA_MACHINE_NUMBER_H
 
+#include <limits>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_expression.h"
 
@@ -23,31 +24,6 @@ namespace data
 
 typedef std::pair<atermpp::aterm, atermpp::aterm> machine_number_key_type;
 
-/// \brief A machine number
-/* Exercise by hand. Shoul be removed
-class machine_number: public data_expression
-{
-  public:
-
-
-    /// Move semantics
-    machine_number(const machine_number&) noexcept = default;
-    machine_number(machine_number&&) noexcept = default;
-    machine_number& operator=(const machine_number&) noexcept = default;
-    machine_number& operator=(machine_number&&) noexcept = default;
-
-    /// \brief Constructor
-    /// \param value The value stored as a machine number.
-    machine_number(const size_t value)
-     : data_expression(atermpp::aterm_int(value))
-    {}
-
-    /// \brief Extract the value stored in a machine number
-    size_t value() const
-    {
-      return ((atermpp::aterm_int)*this).value();
-    }
-}; */
 
 //--- start generated class machine_number ---//
 /// \brief A machine number
@@ -118,6 +94,172 @@ inline bool is_machine_number(const atermpp::aterm& t)
 {
   return t.type_is_int();
 }
+
+/* Below standard operations on machine numbers are implemented.  */
+
+/// \brief The machine number representing 0.
+/// \return The machine number 0.
+inline const machine_number zero_word()
+{
+  return machine_number();
+}
+
+/// \brief The machine number representing 1.
+/// \return The machine number 1.
+inline const machine_number one_word()
+{
+  return machine_number(1);
+}
+
+/// \brief The largest representable machine number.
+/// \return The largest number a machine word can hold. 
+inline const machine_number max_word()
+{
+  return machine_number(std::numeric_limits<std::size_t>::max());
+}
+
+/// \brief The successor function on a machine numbers, that wraps around.
+/// \param n 
+/// \return n+1, or zero if n is the maximum number.
+inline machine_number succ_word(const machine_number& n)
+{
+  return machine_number(1+n.value());
+}
+
+/// \brief The result of adding two words modulo the maximal representable machine word plus 1.
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return n1+n2 modulo the machine word. 
+inline machine_number add_word(const machine_number& n1, const machine_number& n2)
+{
+  const std::size_t v1=n1.value();
+  const std::size_t v2=n2.value();
+  return machine_number(v1+v2);
+}
+
+/// \brief An indication whether an overflow occurs when n1 and n2 are added. 
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return If n1+n2 is larger than a machine word, than 1, otherwise 0.
+inline machine_number add_overflow_word(const machine_number& n1, const machine_number& n2)
+{
+  const std::size_t v1=n1.value();
+  const std::size_t v2=n2.value();
+  return (v1+v2>v1?zero_word():one_word());
+}
+
+/// \brief The result of multiplying two words modulo the maximal representable machine word plus 1.
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return n1*n2 modulo the machine word. 
+inline machine_number times_word(const machine_number& n1, const machine_number& n2)
+{
+  const std::size_t v1=n1.value();
+  const std::size_t v2=n2.value();
+  return machine_number(v1*v2);
+}
+
+/// \brief The result of multiplying two words divided by the maximal representable machine word plus 1.
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return n1*n2 div the maximal machine word+1. 
+inline machine_number times_overflow_word(const machine_number& n1, const machine_number& n2)
+{
+  const __uint128_t m1=n1.value();
+  const __uint128_t m2=n2.value();
+  return machine_number(static_cast<std::size_t>((m1*m2) >> std::numeric_limits<std::size_t>::digits));
+}
+
+/// \brief The result of subtracting two words modulo the maximal representable machine word plus 1.
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return n1-n2 modulo the machine word. 
+inline machine_number minus_word(const machine_number& n1, const machine_number& n2)
+{
+  const std::size_t v1=n1.value();
+  const std::size_t v2=n2.value();
+  return machine_number(v1-v2);
+}
+
+/// \brief The result of dividing the first word by the second. 
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return n1/n2.
+inline machine_number div_word(const machine_number& n1, const machine_number& n2)
+{
+  const std::size_t v1=n1.value();
+  const std::size_t v2=n2.value();
+  return machine_number(v1/v2);
+}
+
+/// \brief The result n1 modulo n2.
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return n1 modulo n2. 
+inline machine_number mod_word(const machine_number& n1, const machine_number& n2)
+{
+  const std::size_t v1=n1.value();
+  const std::size_t v2=n2.value();
+  return machine_number(v1 % v2);
+}
+
+/// \brief The square root of n, rounded down to a machine word. 
+/// \param n The argument.
+/// \return The square root of n rounded down. 
+inline machine_number sqrt_word(const machine_number& n)
+{
+  return machine_number(static_cast<std::size_t>(sqrt(n.value())));
+}
+
+/// \brief Calculates (base*n1 + n2) div n3.
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \param n3 The third argument. 
+/// \return (base*n1 + n2) div n3
+inline machine_number div_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3)
+{
+  __uint128_t m1=n1.value();
+  m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
+  const __uint128_t m3=n3.value();;
+  return machine_number(m1 / m3);
+}
+
+/// \brief Calculates (base*n1 + n2) div (base*n3 + n4).
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \param n3 The third argument. 
+/// \param n4 The fourth argument. 
+/// \return (base*n1 + n2) div (base*n3 + n4)
+inline machine_number div_double_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4)
+{
+  __uint128_t m1=n1.value();
+  m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
+  __uint128_t m3=n3.value();;
+  m3 = (m3 << std::numeric_limits<std::size_t>::digits) + n4.value();
+  return machine_number(m1 / m3);
+}
+
+/*
+% Core functions that are used by other datatypes.
+map  one_word, max_word: Word;
+
+     add_word, add_overflow_word, times_word, times_overflow_word, minus_word, div_word, mod_word: Word # Word -> Word;
+     sqrt_word: Word->Word;                            % The square root on a word yielding the square root rounded down. 
+     div_doubleword: Word # Word # Word -> Word;       % div_doubleword(w1,w2,w3) calculates (base*w1 + w2) div w3, where the result should fit in a word. 
+     div_double_doubleword: Word # Word # Word # Word -> Word; % div_double_doubleword(w1,w2,w3,w4) calculates (base*w1 + w2) div (base*w3 + w4) where the result should fit in a word. 
+
+XXXXXXXXXXX   HIER GEBLEVEN MET IMPLEMENTEREN. 
+     div_triple_doubleword: Word # Word # Word # Word # Word -> Word; % div_triple_doubleword(w1,w2,w3,w4,w5) calculates (base*(base*w1 + w2)+w3) div (base*w4 + w5) where the result should fit in a word. 
+     mod_doubleword: Word # Word # Word -> Word;       % mod_doubleword(w1,w2,w3) calculates (base*w1 + w2) mod w3. The result fits in one word. 
+     sqrt_doubleword: Word # Word -> Word;             % The square root of base*w1+w2.
+     sqrt_tripleword: Word # Word # Word -> Word;      % The least significant word of the square root of base*(base*w1+w2)+w3.
+     sqrt_tripleword_overflow: Word # Word # Word -> Word;   % The most significant word of square root of base*(base*w1+w2)+w3.
+     sqrt_quadrupleword: Word # Word # Word # Word -> Word;  % The least significant word of the square root of base*(base*(base*w1+w2)+w3)+w4.
+     sqrt_quadrupleword_overflow: Word # Word # Word # Word -> Word;  % The most significant word of the square root of base*(base*(base*w1+w2)+w3)+w4.
+     pred_word: Word->Word;   % Successor and predecessor that wraps around.
+*/
+
+/// \brief 
 
 // template function overloads
 std::string pp(const machine_number_list& x);
