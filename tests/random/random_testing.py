@@ -146,6 +146,11 @@ class LpsBinaryTest(ProcessTest):
         super(LpsBinaryTest, self).__init__(name, ymlfile('lpsbinary'), settings)
         self.generate_process_parameters = True
 
+class LpsstategraphTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(LpsstategraphTest, self).__init__(name, ymlfile('lpsstategraph'), settings)
+        self.generate_process_parameters = True
+
 class Lps2pbesTest(ProcessTest):
     def __init__(self, name, settings = dict()):
         super(Lps2pbesTest, self).__init__(name, ymlfile('lps2pbes'), settings)
@@ -275,6 +280,7 @@ available_tests = {
     'lpsconstelm'                                 : lambda name, settings: LpsConstelmTest(name, settings)                                             ,
     'lpsbinary'                                   : lambda name, settings: LpsBinaryTest(name, settings)                                               ,
     'lps2pbes'                                    : lambda name, settings: Lps2pbesTest(name, settings)                                                ,
+    'lpsstategraph'                               : lambda name, settings: LpsstategraphTest(name, settings)                                           ,
     'lts2pbes'                                    : lambda name, settings: Lts2pbesTest(name, settings)                                                ,
     'ltscompare-bisim'                            : lambda name, settings: LtscompareTest(name, 'bisim', settings)                                     ,
     'ltscompare-bisim-gv'                         : lambda name, settings: LtscompareTest(name, 'bisim-gv', settings)                                  ,
