@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_LPSSTATEGRAPH_ALGORITHM_H
 
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/specification.h"
@@ -223,6 +224,7 @@ void lpsstategraph(lps::specification& lpsspec, const pbesstategraph_options& op
   {
     throw mcrl2::runtime_error("The print influence graph option is not supported in lpsstategraph!");
   }
+  lps::detail::instantiate_global_variables(lpsspec);
   detail::lpsstategraph_algorithm algorithm(lpsspec, options);
   algorithm.run();
   lpsspec = algorithm.result();
