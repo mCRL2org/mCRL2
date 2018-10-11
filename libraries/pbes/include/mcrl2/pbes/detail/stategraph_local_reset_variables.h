@@ -50,7 +50,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     typedef stategraph_local_algorithm super;
 
   protected:
-    const pbes& m_original_pbes;
+    const pbes m_original_pbes; // TODO: make this a const reference again
     pbes m_transformed_pbes; // will contain the result of the computation
 
     // if true, the resulting PBES is simplified
@@ -280,7 +280,7 @@ data::data_expression_list local_reset_variables_algorithm::reset_variable_param
   const core::identifier_string& X = eq_X.variable().name();
   const core::identifier_string& Y = Ye.name();
   const stategraph_equation& eq_Y = *find_equation(m_pbes, Y);
-  auto const& e = x.parameters();
+  const data::data_expression_list& e = x.parameters();
   std::vector<data::data_expression> e1(e.begin(), e.end());
   const std::vector<data::variable>& d_Y = eq_Y.parameters();
   assert(d_Y.size() == Ye.parameters().size());

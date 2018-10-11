@@ -18,6 +18,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
 
 namespace mcrl2 {
@@ -107,11 +108,7 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
       }
 
       // N.B. It is essential that the order in which the conjuncts are traversed in a PBES matches the order of the corresponding summands.
-      pbes_expression rhs = conjuncts[0];
-      for (std::size_t i = 1; i < conjuncts.size(); i++)
-      {
-        rhs = and_(conjuncts[i], rhs);
-      }
+      pbes_expression rhs = join_and(conjuncts.begin(), conjuncts.end());
       pbes_equation eqn(fixpoint_symbol::nu(), propositional_variable(X, lpsspec.process().process_parameters()), rhs);
 
       pbesspec.data() = dataspec;
@@ -139,7 +136,6 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
       stategraph_local_algorithm::run();
       m_transformed_lps = m_original_lps;
       compute_occurring_data_parameters();
-
       start_timer("reset_variables_to_original");
       reset_variables_to_original(m_transformed_lps);
       finish_timer("reset_variables_to_original");
