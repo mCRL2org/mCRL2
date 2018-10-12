@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jeroen Keiren
+// Author(s): Wieger Wesselink, Tim Willemse
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbesstategraph.cpp
+/// \file lpsstategraph.cpp
 
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/tools.h"
@@ -24,20 +24,20 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using data::tools::rewriter_tool;
 
-class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
+class lpsstategraph_tool: public rewriter_tool<input_output_tool>
 {
   typedef rewriter_tool<input_output_tool> super;
 
   protected:
     pbesstategraph_options options;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       options.rewrite_strategy = rewrite_strategy();
       options.simplify = 0 == parser.options.count("no-simplify");
-      options.use_global_variant = 0 < parser.options.count("use-global-variant");
-      options.print_influence_graph = 0 < parser.options.count("print-influence-graph");
+      options.use_global_variant = false;
+      options.print_influence_graph = false;
       options.cache_marking_updates = 0 == parser.options.count("disable-cache-marking-updates");
       options.marking_algorithm = parser.option_argument_as<int>("marking-algorithm");
       if (options.marking_algorithm < 0 || options.marking_algorithm > 2)
@@ -50,12 +50,10 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       options.timer = &timer();
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_hidden_option("no-simplify", "do not simplify the PBES during reduction (works only in combination with -g)", 's');
-      desc.add_option("use-global-variant", "use the global variant of the algorithm", 'g');
-      desc.add_hidden_option("print-influence-graph", "print the influence graph", 'I');
       desc.add_hidden_option("disable-cache-marking-updates", "disable caching of rewriter calls in marking updates", 'c');
       desc.add_option("marking-algorithm", make_optional_argument("NAME", "0"), "specifies the algorithm that is used for the marking computation 0 (default), 1 or 2. In certain cases this choice can have a significant impact on the performance.", 'm');
       desc.add_hidden_option("use-alternative-lcfp-criterion", "use an alternative criterion for local control flow parameter computation", 'x');
@@ -64,9 +62,9 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
     }
 
   public:
-    pbes_stategraph_tool()
+    lpsstategraph_tool()
       : super(
-        "pbesstategraph",
+        "lpsstategraph",
         "Wieger Wesselink; Tim Willemse",
         "reduces an LPS",
         "Reads a file containing an LPS, and reduces it based on an analysis of control flow parameters."
@@ -74,14 +72,12 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "lpsstategraph parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:                       " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:                      " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  simplify:                         " << std::boolalpha << options.simplify << std::endl;
-      mCRL2log(verbose) << "  use global variant:               " << std::boolalpha << options.use_global_variant << std::endl;
-      mCRL2log(verbose) << "  print influence graph:            " << std::boolalpha << options.print_influence_graph << std::endl;
       mCRL2log(verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
       mCRL2log(verbose) << "  marking algorithm:                " << options.marking_algorithm << std::endl;
       mCRL2log(verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
@@ -95,6 +91,6 @@ class pbes_stategraph_tool: public rewriter_tool<input_output_tool>
 
 int main(int argc, char* argv[])
 {
-  return pbes_stategraph_tool().execute(argc, argv);
+  return lpsstategraph_tool().execute(argc, argv);
 }
 
