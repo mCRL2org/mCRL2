@@ -71,34 +71,34 @@ typedef atermpp::term_list<process_expression> process_expression_list;
 typedef std::vector<process_expression>    process_expression_vector;
 
 // prototypes
-inline bool is_action(const atermpp::aterm_appl& x);
-inline bool is_process_instance(const atermpp::aterm_appl& x);
-inline bool is_process_instance_assignment(const atermpp::aterm_appl& x);
-inline bool is_delta(const atermpp::aterm_appl& x);
-inline bool is_tau(const atermpp::aterm_appl& x);
-inline bool is_sum(const atermpp::aterm_appl& x);
-inline bool is_block(const atermpp::aterm_appl& x);
-inline bool is_hide(const atermpp::aterm_appl& x);
-inline bool is_rename(const atermpp::aterm_appl& x);
-inline bool is_comm(const atermpp::aterm_appl& x);
-inline bool is_allow(const atermpp::aterm_appl& x);
-inline bool is_sync(const atermpp::aterm_appl& x);
-inline bool is_at(const atermpp::aterm_appl& x);
-inline bool is_seq(const atermpp::aterm_appl& x);
-inline bool is_if_then(const atermpp::aterm_appl& x);
-inline bool is_if_then_else(const atermpp::aterm_appl& x);
-inline bool is_bounded_init(const atermpp::aterm_appl& x);
-inline bool is_merge(const atermpp::aterm_appl& x);
-inline bool is_left_merge(const atermpp::aterm_appl& x);
-inline bool is_choice(const atermpp::aterm_appl& x);
-inline bool is_stochastic_operator(const atermpp::aterm_appl& x);
-inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
+inline bool is_action(const atermpp::aterm& x);
+inline bool is_process_instance(const atermpp::aterm& x);
+inline bool is_process_instance_assignment(const atermpp::aterm& x);
+inline bool is_delta(const atermpp::aterm& x);
+inline bool is_tau(const atermpp::aterm& x);
+inline bool is_sum(const atermpp::aterm& x);
+inline bool is_block(const atermpp::aterm& x);
+inline bool is_hide(const atermpp::aterm& x);
+inline bool is_rename(const atermpp::aterm& x);
+inline bool is_comm(const atermpp::aterm& x);
+inline bool is_allow(const atermpp::aterm& x);
+inline bool is_sync(const atermpp::aterm& x);
+inline bool is_at(const atermpp::aterm& x);
+inline bool is_seq(const atermpp::aterm& x);
+inline bool is_if_then(const atermpp::aterm& x);
+inline bool is_if_then_else(const atermpp::aterm& x);
+inline bool is_bounded_init(const atermpp::aterm& x);
+inline bool is_merge(const atermpp::aterm& x);
+inline bool is_left_merge(const atermpp::aterm& x);
+inline bool is_choice(const atermpp::aterm& x);
+inline bool is_stochastic_operator(const atermpp::aterm& x);
+inline bool is_untyped_process_assignment(const atermpp::aterm& x);
 
 /// \brief Test for a process_expression expression
 /// \param x A term
 /// \return True if \a x is a process_expression expression
 inline
-bool is_process_expression(const atermpp::aterm_appl& x)
+bool is_process_expression(const atermpp::aterm& x)
 {
   return process::is_action(x) ||
          process::is_process_instance(x) ||
@@ -194,9 +194,9 @@ typedef std::vector<action>    action_vector;
 /// \param x A term
 /// \return True if \a x is a action expression
 inline
-bool is_action(const atermpp::aterm_appl& x)
+bool is_action(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Action;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Action;
 }
 
 // prototype declaration
@@ -262,9 +262,9 @@ class process_instance: public process_expression
 /// \param x A term
 /// \return True if \a x is a process_instance expression
 inline
-bool is_process_instance(const atermpp::aterm_appl& x)
+bool is_process_instance(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Process;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Process;
 }
 
 // prototype declaration
@@ -330,9 +330,9 @@ class process_instance_assignment: public process_expression
 /// \param x A term
 /// \return True if \a x is a process_instance_assignment expression
 inline
-bool is_process_instance_assignment(const atermpp::aterm_appl& x)
+bool is_process_instance_assignment(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ProcessAssignment;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ProcessAssignment;
 }
 
 // prototype declaration
@@ -383,9 +383,9 @@ class delta: public process_expression
 /// \param x A term
 /// \return True if \a x is a delta expression
 inline
-bool is_delta(const atermpp::aterm_appl& x)
+bool is_delta(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Delta;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Delta;
 }
 
 // prototype declaration
@@ -436,9 +436,9 @@ class tau: public process_expression
 /// \param x A term
 /// \return True if \a x is a tau expression
 inline
-bool is_tau(const atermpp::aterm_appl& x)
+bool is_tau(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Tau;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Tau;
 }
 
 // prototype declaration
@@ -504,9 +504,9 @@ class sum: public process_expression
 /// \param x A term
 /// \return True if \a x is a sum expression
 inline
-bool is_sum(const atermpp::aterm_appl& x)
+bool is_sum(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Sum;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Sum;
 }
 
 // prototype declaration
@@ -572,9 +572,9 @@ class block: public process_expression
 /// \param x A term
 /// \return True if \a x is a block expression
 inline
-bool is_block(const atermpp::aterm_appl& x)
+bool is_block(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Block;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Block;
 }
 
 // prototype declaration
@@ -640,9 +640,9 @@ class hide: public process_expression
 /// \param x A term
 /// \return True if \a x is a hide expression
 inline
-bool is_hide(const atermpp::aterm_appl& x)
+bool is_hide(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Hide;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Hide;
 }
 
 // prototype declaration
@@ -708,9 +708,9 @@ class rename: public process_expression
 /// \param x A term
 /// \return True if \a x is a rename expression
 inline
-bool is_rename(const atermpp::aterm_appl& x)
+bool is_rename(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Rename;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Rename;
 }
 
 // prototype declaration
@@ -776,9 +776,9 @@ class comm: public process_expression
 /// \param x A term
 /// \return True if \a x is a comm expression
 inline
-bool is_comm(const atermpp::aterm_appl& x)
+bool is_comm(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Comm;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Comm;
 }
 
 // prototype declaration
@@ -844,9 +844,9 @@ class allow: public process_expression
 /// \param x A term
 /// \return True if \a x is a allow expression
 inline
-bool is_allow(const atermpp::aterm_appl& x)
+bool is_allow(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Allow;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Allow;
 }
 
 // prototype declaration
@@ -912,9 +912,9 @@ class sync: public process_expression
 /// \param x A term
 /// \return True if \a x is a sync expression
 inline
-bool is_sync(const atermpp::aterm_appl& x)
+bool is_sync(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Sync;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Sync;
 }
 
 // prototype declaration
@@ -980,9 +980,9 @@ class at: public process_expression
 /// \param x A term
 /// \return True if \a x is a at expression
 inline
-bool is_at(const atermpp::aterm_appl& x)
+bool is_at(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::AtTime;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::AtTime;
 }
 
 // prototype declaration
@@ -1048,9 +1048,9 @@ class seq: public process_expression
 /// \param x A term
 /// \return True if \a x is a seq expression
 inline
-bool is_seq(const atermpp::aterm_appl& x)
+bool is_seq(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Seq;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Seq;
 }
 
 // prototype declaration
@@ -1116,9 +1116,9 @@ class if_then: public process_expression
 /// \param x A term
 /// \return True if \a x is a if_then expression
 inline
-bool is_if_then(const atermpp::aterm_appl& x)
+bool is_if_then(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::IfThen;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::IfThen;
 }
 
 // prototype declaration
@@ -1189,9 +1189,9 @@ class if_then_else: public process_expression
 /// \param x A term
 /// \return True if \a x is a if_then_else expression
 inline
-bool is_if_then_else(const atermpp::aterm_appl& x)
+bool is_if_then_else(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::IfThenElse;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::IfThenElse;
 }
 
 // prototype declaration
@@ -1257,9 +1257,9 @@ class bounded_init: public process_expression
 /// \param x A term
 /// \return True if \a x is a bounded_init expression
 inline
-bool is_bounded_init(const atermpp::aterm_appl& x)
+bool is_bounded_init(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BInit;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BInit;
 }
 
 // prototype declaration
@@ -1325,9 +1325,9 @@ class merge: public process_expression
 /// \param x A term
 /// \return True if \a x is a merge expression
 inline
-bool is_merge(const atermpp::aterm_appl& x)
+bool is_merge(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Merge;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Merge;
 }
 
 // prototype declaration
@@ -1393,9 +1393,9 @@ class left_merge: public process_expression
 /// \param x A term
 /// \return True if \a x is a left_merge expression
 inline
-bool is_left_merge(const atermpp::aterm_appl& x)
+bool is_left_merge(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::LMerge;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::LMerge;
 }
 
 // prototype declaration
@@ -1461,9 +1461,9 @@ class choice: public process_expression
 /// \param x A term
 /// \return True if \a x is a choice expression
 inline
-bool is_choice(const atermpp::aterm_appl& x)
+bool is_choice(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Choice;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Choice;
 }
 
 // prototype declaration
@@ -1534,9 +1534,9 @@ class stochastic_operator: public process_expression
 /// \param x A term
 /// \return True if \a x is a stochastic_operator expression
 inline
-bool is_stochastic_operator(const atermpp::aterm_appl& x)
+bool is_stochastic_operator(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StochasticOperator;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StochasticOperator;
 }
 
 // prototype declaration
@@ -1607,9 +1607,9 @@ class untyped_process_assignment: public process_expression
 /// \param x A term
 /// \return True if \a x is a untyped_process_assignment expression
 inline
-bool is_untyped_process_assignment(const atermpp::aterm_appl& x)
+bool is_untyped_process_assignment(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedProcessAssignment;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedProcessAssignment;
 }
 
 // prototype declaration

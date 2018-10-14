@@ -83,6 +83,13 @@ inline bool is_variable(const atermpp::aterm& x)
   return !x.type_is_int() && atermpp::down_cast<const atermpp::aterm_appl>(x).function() == core::detail::function_symbols::DataVarId;
 }
 
+/// \brief Returns true if the term t is a machine number.
+/// \brief Returns true if the term t is a machine number.
+inline bool is_machine_number(const atermpp::aterm& x)
+{
+  return x.type_is_int();
+}
+
 /// \brief Returns true if the term t is an application
 /// \details This function is inefficient as the arity of a term must 
 ///          be determined and an inspection must take place in an 
@@ -208,9 +215,10 @@ inline void swap(data_expression& t1, data_expression& t2)
 /// \param x A term
 /// \return True if it is a data_expression expression
 inline
-bool is_data_expression(const atermpp::aterm_appl& x)
+bool is_data_expression(const atermpp::aterm& x)
 {
-  return is_lambda(x)                           ||
+  return is_machine_number(x)                   ||
+         is_lambda(x)                           ||
          is_forall(x)                           ||
          is_exists(x)                           ||
          is_set_comprehension(x)                ||

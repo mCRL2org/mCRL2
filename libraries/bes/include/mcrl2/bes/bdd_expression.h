@@ -55,15 +55,15 @@ typedef atermpp::term_list<bdd_expression> bdd_expression_list;
 typedef std::vector<bdd_expression>    bdd_expression_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_if(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_if(const atermpp::aterm& x);
 
 /// \brief Test for a bdd_expression expression
 /// \param x A term
 /// \return True if \a x is a bdd_expression expression
 inline
-bool is_bdd_expression(const atermpp::aterm_appl& x)
+bool is_bdd_expression(const atermpp::aterm& x)
 {
   return bdd::is_true(x) ||
          bdd::is_false(x) ||
@@ -118,9 +118,9 @@ class true_: public bdd_expression
 /// \param x A term
 /// \return True if \a x is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& x)
+bool is_true(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BddTrue;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BddTrue;
 }
 
 // prototype declaration
@@ -171,9 +171,9 @@ class false_: public bdd_expression
 /// \param x A term
 /// \return True if \a x is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& x)
+bool is_false(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BddFalse;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BddFalse;
 }
 
 // prototype declaration
@@ -249,9 +249,9 @@ class if_: public bdd_expression
 /// \param x A term
 /// \return True if \a x is a if expression
 inline
-bool is_if(const atermpp::aterm_appl& x)
+bool is_if(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BddIf;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BddIf;
 }
 
 // prototype declaration

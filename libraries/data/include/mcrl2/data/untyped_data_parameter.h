@@ -73,9 +73,9 @@ typedef std::vector<untyped_data_parameter>    untyped_data_parameter_vector;
 /// \param x A term
 /// \return True if \a x is a untyped_data_parameter expression
 inline
-bool is_untyped_data_parameter(const atermpp::aterm_appl& x)
+bool is_untyped_data_parameter(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedDataParameter;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedDataParameter;
 }
 
 // prototype declaration

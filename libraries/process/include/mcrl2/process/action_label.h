@@ -81,9 +81,9 @@ typedef std::vector<action_label>    action_label_vector;
 /// \param x A term
 /// \return True if \a x is a action_label expression
 inline
-bool is_action_label(const atermpp::aterm_appl& x)
+bool is_action_label(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActId;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActId;
 }
 
 // prototype declaration

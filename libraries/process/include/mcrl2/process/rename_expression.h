@@ -79,9 +79,9 @@ typedef std::vector<rename_expression>    rename_expression_vector;
 /// \param x A term
 /// \return True if \a x is a rename_expression expression
 inline
-bool is_rename_expression(const atermpp::aterm_appl& x)
+bool is_rename_expression(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::RenameExpr;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::RenameExpr;
 }
 
 // prototype declaration

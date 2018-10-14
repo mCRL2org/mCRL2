@@ -70,19 +70,19 @@ typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 typedef std::vector<boolean_expression>    boolean_expression_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_boolean_variable(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_not(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_boolean_variable(const atermpp::aterm& x);
 
 /// \brief Test for a boolean_expression expression
 /// \param x A term
 /// \return True if \a x is a boolean_expression expression
 inline
-bool is_boolean_expression(const atermpp::aterm_appl& x)
+bool is_boolean_expression(const atermpp::aterm& x)
 {
   return bes::is_true(x) ||
          bes::is_false(x) ||
@@ -141,9 +141,9 @@ class true_: public boolean_expression
 /// \param x A term
 /// \return True if \a x is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& x)
+bool is_true(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BooleanTrue;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BooleanTrue;
 }
 
 // prototype declaration
@@ -194,9 +194,9 @@ class false_: public boolean_expression
 /// \param x A term
 /// \return True if \a x is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& x)
+bool is_false(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BooleanFalse;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BooleanFalse;
 }
 
 // prototype declaration
@@ -257,9 +257,9 @@ class not_: public boolean_expression
 /// \param x A term
 /// \return True if \a x is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_not(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BooleanNot;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BooleanNot;
 }
 
 // prototype declaration
@@ -325,9 +325,9 @@ class and_: public boolean_expression
 /// \param x A term
 /// \return True if \a x is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& x)
+bool is_and(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BooleanAnd;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BooleanAnd;
 }
 
 // prototype declaration
@@ -393,9 +393,9 @@ class or_: public boolean_expression
 /// \param x A term
 /// \return True if \a x is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& x)
+bool is_or(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BooleanOr;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BooleanOr;
 }
 
 // prototype declaration
@@ -461,9 +461,9 @@ class imp: public boolean_expression
 /// \param x A term
 /// \return True if \a x is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& x)
+bool is_imp(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BooleanImp;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BooleanImp;
 }
 
 // prototype declaration
@@ -538,9 +538,9 @@ class boolean_variable: public boolean_expression
 /// \param x A term
 /// \return True if \a x is a boolean_variable expression
 inline
-bool is_boolean_variable(const atermpp::aterm_appl& x)
+bool is_boolean_variable(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BooleanVariable;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BooleanVariable;
 }
 
 // prototype declaration

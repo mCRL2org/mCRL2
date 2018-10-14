@@ -101,9 +101,9 @@ class list_container: public container_type
 /// \param x A term
 /// \return True if \a x is a list_container expression
 inline
-bool is_list_container(const atermpp::aterm_appl& x)
+bool is_list_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortList;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortList;
 }
 
 // prototype declaration
@@ -154,9 +154,9 @@ class set_container: public container_type
 /// \param x A term
 /// \return True if \a x is a set_container expression
 inline
-bool is_set_container(const atermpp::aterm_appl& x)
+bool is_set_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortSet;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortSet;
 }
 
 // prototype declaration
@@ -207,9 +207,9 @@ class bag_container: public container_type
 /// \param x A term
 /// \return True if \a x is a bag_container expression
 inline
-bool is_bag_container(const atermpp::aterm_appl& x)
+bool is_bag_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortBag;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortBag;
 }
 
 // prototype declaration
@@ -260,9 +260,9 @@ class fset_container: public container_type
 /// \param x A term
 /// \return True if \a x is a fset_container expression
 inline
-bool is_fset_container(const atermpp::aterm_appl& x)
+bool is_fset_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortFSet;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortFSet;
 }
 
 // prototype declaration
@@ -313,9 +313,9 @@ class fbag_container: public container_type
 /// \param x A term
 /// \return True if \a x is a fbag_container expression
 inline
-bool is_fbag_container(const atermpp::aterm_appl& x)
+bool is_fbag_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortFBag;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortFBag;
 }
 
 // prototype declaration

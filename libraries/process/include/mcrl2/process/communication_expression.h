@@ -79,9 +79,9 @@ typedef std::vector<communication_expression>    communication_expression_vector
 /// \param x A term
 /// \return True if \a x is a communication_expression expression
 inline
-bool is_communication_expression(const atermpp::aterm_appl& x)
+bool is_communication_expression(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::CommExpr;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::CommExpr;
 }
 
 // prototype declaration

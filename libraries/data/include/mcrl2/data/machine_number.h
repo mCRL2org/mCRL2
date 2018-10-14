@@ -87,14 +87,6 @@ inline void swap(machine_number& t1, machine_number& t2)
 //--- end generated class machine_number ---//
 
 
-/// \brief Indicates whether this expression is a machine number
-/// \param t An aterm. 
-/// \return A boolean indicating whether this expression is a machine number.
-inline bool is_machine_number(const atermpp::aterm& t)
-{
-  return t.type_is_int();
-}
-
 /* Below standard operations on machine numbers are implemented.  */
 
 /// \brief The machine number representing 0.

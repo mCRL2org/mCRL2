@@ -31,30 +31,30 @@ namespace regular_formulas
 
 //--- start generated classes ---//
 /// \brief A regular formula
-class regular_formula: public atermpp::aterm_appl
+class regular_formula: public atermpp::aterm
 {
   public:
     /// \brief Default constructor.
     regular_formula()
-      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RegFrm)))
+      : atermpp::aterm(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RegFrm)))
     {}
 
     /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit regular_formula(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_RegFrm(*this));
     }
 
     /// \brief Constructor based on action_formulas::action_formula.
     regular_formula(const action_formulas::action_formula& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \brief Constructor based on data::data_expression.
     regular_formula(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -71,17 +71,17 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 typedef std::vector<regular_formula>    regular_formula_vector;
 
 // prototypes
-inline bool is_seq(const atermpp::aterm_appl& x);
-inline bool is_alt(const atermpp::aterm_appl& x);
-inline bool is_trans(const atermpp::aterm_appl& x);
-inline bool is_trans_or_nil(const atermpp::aterm_appl& x);
-inline bool is_untyped_regular_formula(const atermpp::aterm_appl& x);
+inline bool is_seq(const atermpp::aterm& x);
+inline bool is_alt(const atermpp::aterm& x);
+inline bool is_trans(const atermpp::aterm& x);
+inline bool is_trans_or_nil(const atermpp::aterm& x);
+inline bool is_untyped_regular_formula(const atermpp::aterm& x);
 
 /// \brief Test for a regular_formula expression
 /// \param x A term
 /// \return True if \a x is a regular_formula expression
 inline
-bool is_regular_formula(const atermpp::aterm_appl& x)
+bool is_regular_formula(const atermpp::aterm& x)
 {
   return action_formulas::is_action_formula(x) ||
          data::is_data_expression(x) ||
@@ -142,12 +142,12 @@ class seq: public regular_formula
 
     const regular_formula& left() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[1]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -155,9 +155,9 @@ class seq: public regular_formula
 /// \param x A term
 /// \return True if \a x is a seq expression
 inline
-bool is_seq(const atermpp::aterm_appl& x)
+bool is_seq(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::RegSeq;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::RegSeq;
 }
 
 // prototype declaration
@@ -210,12 +210,12 @@ class alt: public regular_formula
 
     const regular_formula& left() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[1]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -223,9 +223,9 @@ class alt: public regular_formula
 /// \param x A term
 /// \return True if \a x is a alt expression
 inline
-bool is_alt(const atermpp::aterm_appl& x)
+bool is_alt(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::RegAlt;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::RegAlt;
 }
 
 // prototype declaration
@@ -278,7 +278,7 @@ class trans: public regular_formula
 
     const regular_formula& operand() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 
@@ -286,9 +286,9 @@ class trans: public regular_formula
 /// \param x A term
 /// \return True if \a x is a trans expression
 inline
-bool is_trans(const atermpp::aterm_appl& x)
+bool is_trans(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::RegTrans;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::RegTrans;
 }
 
 // prototype declaration
@@ -341,7 +341,7 @@ class trans_or_nil: public regular_formula
 
     const regular_formula& operand() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 
@@ -349,9 +349,9 @@ class trans_or_nil: public regular_formula
 /// \param x A term
 /// \return True if \a x is a trans_or_nil expression
 inline
-bool is_trans_or_nil(const atermpp::aterm_appl& x)
+bool is_trans_or_nil(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::RegTransOrNil;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::RegTransOrNil;
 }
 
 // prototype declaration
@@ -409,17 +409,17 @@ class untyped_regular_formula: public regular_formula
 
     const core::identifier_string& name() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const regular_formula& left() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[1]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 
     const regular_formula& right() const
     {
-      return atermpp::down_cast<regular_formula>((*this)[2]);
+      return atermpp::down_cast<regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[2]);
     }
 };
 
@@ -427,9 +427,9 @@ class untyped_regular_formula: public regular_formula
 /// \param x A term
 /// \return True if \a x is a untyped_regular_formula expression
 inline
-bool is_untyped_regular_formula(const atermpp::aterm_appl& x)
+bool is_untyped_regular_formula(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedRegFrm;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedRegFrm;
 }
 
 // prototype declaration

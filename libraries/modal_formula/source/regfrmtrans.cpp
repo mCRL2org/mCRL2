@@ -28,7 +28,7 @@ namespace detail
 //local declarations
 //------------------
 
-static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_generator &xyz_generator);
+static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_generator& xyz_generator);
 /*Pre: part represents a part of a state formula
  *     after the data implementation phase
  *Ret: part in which all regular formulas are translated in terms of state and
@@ -38,7 +38,7 @@ static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_
 //implementation
 //--------------
 
-state_formula translate_reg_frms(const state_formula &state_frm)
+state_formula translate_reg_frms(const state_formula& state_frm)
 {
   xyz_identifier_generator xyz_generator(find_identifiers(state_frm));
   return translate_reg_frms_appl(state_frm, xyz_generator);

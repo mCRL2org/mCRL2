@@ -72,7 +72,7 @@ struct index_adder
       }
       else if (xa.function() == core::detail::function_symbol_PropVarInstNoIndex())
       {
-        const pbes_system::propositional_variable_instantiation& y = atermpp::down_cast<const pbes_system::propositional_variable_instantiation>(xa);
+        const pbes_system::propositional_variable_instantiation& y = atermpp::down_cast<const pbes_system::propositional_variable_instantiation>(x);
         std::size_t index = core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(y.name(), y.parameters()));
         return atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(), xa[0], xa[1], atermpp::aterm_int(index));
       }

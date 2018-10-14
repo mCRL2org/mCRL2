@@ -27,7 +27,7 @@ namespace lps
 {
 
 // prototype declaration
-bool is_multi_action(const atermpp::aterm_appl& x);
+bool is_multi_action(const atermpp::aterm& x);
 
 /// \brief Represents a multi action
 /// \details Multi actions consist of a list of actions together with an optional time tag.
@@ -179,9 +179,9 @@ inline void swap(multi_action& t1, multi_action& t2)
 
 /// \brief Returns true if the term t is a multi action
 inline
-bool is_multi_action(const atermpp::aterm_appl& x)
+bool is_multi_action(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::MultAct;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::MultAct;
 }
 
 // template function overloads

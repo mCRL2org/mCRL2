@@ -101,47 +101,47 @@ untyped_data_parameter(const core::identifier_string& name, const data_expressio
 '''
 
 STATE_FORMULA_CLASSES = r'''
-state_formula()                                                                                                 : public atermpp::aterm_appl           | XICU | StateFrm        | A state formula
-true_()                                                                                                         : public state_formulas::state_formula | EI   | StateTrue       | The value true for state formulas
-false_()                                                                                                        : public state_formulas::state_formula | EI   | StateFalse      | The value false for state formulas
-not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EI   | StateNot        | The not operator for state formulas
-and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StateAnd        | The and operator for state formulas
-or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateOr         | The or operator for state formulas
-imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateImp        | The implication operator for state formulas
-forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateForall     | The universal quantification operator for state formulas
-exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateExists     | The existential quantification operator for state formulas
-must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EI   | StateMust       | The must operator for state formulas
-may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EI   | StateMay        | The may operator for state formulas
-yaled()                                                                                                         : public state_formulas::state_formula | EI   | StateYaled      | The yaled operator for state formulas
-yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateYaledTimed | The timed yaled operator for state formulas
-delay()                                                                                                         : public state_formulas::state_formula | EI   | StateDelay      | The delay operator for state formulas
-delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateDelayTimed | The timed delay operator for state formulas
-variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EI   | StateVar        | The state formula variable
-nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateNu         | The nu operator for state formulas
-mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateMu         | The mu operator for state formulas
+state_formula()                                                                                                 : public atermpp::aterm                | XICU | StateFrm        | A state formula
+true_()                                                                                                         : public state_formulas::state_formula | EIA  | StateTrue       | The value true for state formulas
+false_()                                                                                                        : public state_formulas::state_formula | EIA  | StateFalse      | The value false for state formulas
+not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EIA  | StateNot        | The not operator for state formulas
+and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EIA  | StateAnd        | The and operator for state formulas
+or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EIA  | StateOr         | The or operator for state formulas
+imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EIA  | StateImp        | The implication operator for state formulas
+forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EIA  | StateForall     | The universal quantification operator for state formulas
+exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EIA  | StateExists     | The existential quantification operator for state formulas
+must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EIA  | StateMust       | The must operator for state formulas
+may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EIA  | StateMay        | The may operator for state formulas
+yaled()                                                                                                         : public state_formulas::state_formula | EIA  | StateYaled      | The yaled operator for state formulas
+yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EIA  | StateYaledTimed | The timed yaled operator for state formulas
+delay()                                                                                                         : public state_formulas::state_formula | EIA  | StateDelay      | The delay operator for state formulas
+delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EIA  | StateDelayTimed | The timed delay operator for state formulas
+variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EIA  | StateVar        | The state formula variable
+nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EIA  | StateNu         | The nu operator for state formulas
+mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EIA  | StateMu         | The mu operator for state formulas
 '''
 
 REGULAR_FORMULA_CLASSES = r'''
-regular_formula()                                                                                                       : public atermpp::aterm_appl               | XIC | RegFrm        | A regular formula
-seq(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegSeq        | The seq operator for regular formulas
-alt(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegAlt        | The alt operator for regular formulas
-trans(const regular_formula& operand)                                                                                   : public regular_formulas::regular_formula | EI  | RegTrans      | The trans operator for regular formulas
-trans_or_nil(const regular_formula& operand)                                                                            : public regular_formulas::regular_formula | EI  | RegTransOrNil | The 'trans or nil' operator for regular formulas
-untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right) : public regular_formulas::regular_formula | EI  | UntypedRegFrm | An untyped regular formula or action formula
+regular_formula()                                                                                                       : public atermpp::aterm                    | XIC | RegFrm        | A regular formula
+seq(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EIA | RegSeq        | The seq operator for regular formulas
+alt(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EIA | RegAlt        | The alt operator for regular formulas
+trans(const regular_formula& operand)                                                                                   : public regular_formulas::regular_formula | EIA | RegTrans      | The trans operator for regular formulas
+trans_or_nil(const regular_formula& operand)                                                                            : public regular_formulas::regular_formula | EIA | RegTransOrNil | The 'trans or nil' operator for regular formulas
+untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right) : public regular_formulas::regular_formula | EIA | UntypedRegFrm | An untyped regular formula or action formula
 '''
 
 ACTION_FORMULA_CLASSES = r'''
-action_formula()                                                            : public atermpp::aterm_appl             | XIC  | ActFrm            | An action formula
-true_()                                                                     : public action_formulas::action_formula | EI   | ActTrue           | The value true for action formulas
-false_()                                                                    : public action_formulas::action_formula | EI   | ActFalse          | The value false for action formulas
-not_(const action_formula& operand)                                         : public action_formulas::action_formula | EI   | ActNot            | The not operator for action formulas
-and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EI   | ActAnd            | The and operator for action formulas
-or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActOr             | The or operator for action formulas
-imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActImp            | The implication operator for action formulas
-forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActForall         | The universal quantification operator for action formulas
-exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists         | The existential quantification operator for action formulas
-at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt             | The at operator for action formulas
-multi_action(const process::action_list& actions)                           : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
+action_formula()                                                            : public atermpp::aterm                  | XIC  | ActFrm            | An action formula
+true_()                                                                     : public action_formulas::action_formula | EIA  | ActTrue           | The value true for action formulas
+false_()                                                                    : public action_formulas::action_formula | EIA  | ActFalse          | The value false for action formulas
+not_(const action_formula& operand)                                         : public action_formulas::action_formula | EIA  | ActNot            | The not operator for action formulas
+and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EIA  | ActAnd            | The and operator for action formulas
+or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EIA  | ActOr             | The or operator for action formulas
+imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EIA  | ActImp            | The implication operator for action formulas
+forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EIA  | ActForall         | The universal quantification operator for action formulas
+exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EIA  | ActExists         | The existential quantification operator for action formulas
+at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EIA  | ActAt             | The at operator for action formulas
+multi_action(const process::action_list& actions)                           : public action_formulas::action_formula | EIA  | ActMultAct        | The multi action for action formulas
 '''
 
 MODAL_FORMULA_CLASSES = r'''
@@ -209,14 +209,14 @@ pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_e
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PBExpr            | A pbes expression
-propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUIs | PropVarInst       | A propositional variable instantiation
-not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EI    | PBESNot           | The not operator for pbes expressions
-and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EI    | PBESAnd           | The and operator for pbes expressions
-or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESOr            | The or operator for pbes expressions
-imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESImp           | The implication operator for pbes expressions
-forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESForall        | The universal quantification operator for pbes expressions
-exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESExists        | The existential quantification operator for pbes expressions
+pbes_expression()                                                                                                       : public atermpp::aterm               | XCI    | PBExpr            | A pbes expression
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUIsA | PropVarInst       | A propositional variable instantiation
+not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EIA    | PBESNot           | The not operator for pbes expressions
+and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EIA    | PBESAnd           | The and operator for pbes expressions
+or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EIA    | PBESOr            | The or operator for pbes expressions
+imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EIA    | PBESImp           | The implication operator for pbes expressions
+forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EIA    | PBESForall        | The universal quantification operator for pbes expressions
+exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EIA    | PBESExists        | The existential quantification operator for pbes expressions
 '''
 
 BOOLEAN_CLASSES = r'''
@@ -982,12 +982,12 @@ bool is_%s(const %s& x)
         if name[-1] == '_':
             name = name[:-1]
         if 'X' in self.modifiers():
-            prototypes = '// prototypes\n' + '\n'.join(['inline bool is_%s(const atermpp::aterm_appl& x);' % re.sub('_$', '', c.classname()) for c in self.derived_classes(all_classes) if c.namespace() == self.namespace()]) + '\n\n'
+            prototypes = '// prototypes\n' + '\n'.join(['inline bool is_%s(const atermpp::aterm& x);' % re.sub('_$', '', c.classname()) for c in self.derived_classes(all_classes) if c.namespace() == self.namespace()]) + '\n\n'
             return_value = ' ||\n         '.join(['%s::is_%s(x)' % (c.namespace(), re.sub('_$', '', c.classname())) for c in self.derived_classes(all_classes)])
         else:
             prototypes = ''
-            return_value = 'x.function() == core::detail::function_symbols::%s' % self.aterm
-        text = text % (prototypes, name, name, name, 'atermpp::aterm_appl', return_value)
+            return_value = 'x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::%s' % self.aterm
+        text = text % (prototypes, name, name, name, 'atermpp::aterm', return_value)
         return text
 
     def is_function_name(self, include_namespace = True):

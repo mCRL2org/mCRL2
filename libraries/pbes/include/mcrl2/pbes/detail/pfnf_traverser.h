@@ -109,7 +109,7 @@ struct pfnf_traverser_implication
   pbes_expression g;
   std::vector<propositional_variable_instantiation> rhs;
 
-  pfnf_traverser_implication(const atermpp::aterm_appl& g_, const std::vector<propositional_variable_instantiation>& rhs_)
+  pfnf_traverser_implication(const atermpp::aterm& g_, const std::vector<propositional_variable_instantiation>& rhs_)
     : g(g_),
       rhs(rhs_)
   {}
@@ -132,11 +132,11 @@ struct pfnf_traverser_implication
 
 struct pfnf_traverser_expression
 {
-	pbes_expression expr;
+  pbes_expression expr;
   std::vector<pfnf_traverser_quantifier> quantifiers;
   std::vector<pfnf_traverser_implication> implications;
 
-  pfnf_traverser_expression(const atermpp::aterm_appl& x, const std::vector<pfnf_traverser_quantifier>& quantifiers_, const std::vector<pfnf_traverser_implication>& implications_)
+  pfnf_traverser_expression(const atermpp::aterm& x, const std::vector<pfnf_traverser_quantifier>& quantifiers_, const std::vector<pfnf_traverser_implication>& implications_)
     : expr(x),
       quantifiers(quantifiers_),
       implications(implications_)

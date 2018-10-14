@@ -60,14 +60,14 @@ typedef atermpp::term_list<assignment_expression> assignment_expression_list;
 typedef std::vector<assignment_expression>    assignment_expression_vector;
 
 // prototypes
-inline bool is_assignment(const atermpp::aterm_appl& x);
-inline bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x);
+inline bool is_assignment(const atermpp::aterm& x);
+inline bool is_untyped_identifier_assignment(const atermpp::aterm& x);
 
 /// \brief Test for a assignment_expression expression
 /// \param x A term
 /// \return True if \a x is a assignment_expression expression
 inline
-bool is_assignment_expression(const atermpp::aterm_appl& x)
+bool is_assignment_expression(const atermpp::aterm& x)
 {
   return data::is_assignment(x) ||
          data::is_untyped_identifier_assignment(x);
@@ -160,9 +160,9 @@ typedef std::vector<assignment>    assignment_vector;
 /// \param x A term
 /// \return True if \a x is a assignment expression
 inline
-bool is_assignment(const atermpp::aterm_appl& x)
+bool is_assignment(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::DataVarIdInit;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::DataVarIdInit;
 }
 
 // prototype declaration
@@ -248,9 +248,9 @@ typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignm
 /// \param x A term
 /// \return True if \a x is a untyped_identifier_assignment expression
 inline
-bool is_untyped_identifier_assignment(const atermpp::aterm_appl& x)
+bool is_untyped_identifier_assignment(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedIdentifierAssignment;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedIdentifierAssignment;
 }
 
 // prototype declaration

@@ -98,9 +98,9 @@ typedef std::vector<structured_sort_constructor_argument>    structured_sort_con
 /// \param x A term
 /// \return True if \a x is a structured_sort_constructor_argument expression
 inline
-bool is_structured_sort_constructor_argument(const atermpp::aterm_appl& x)
+bool is_structured_sort_constructor_argument(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StructProj;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StructProj;
 }
 
 // prototype declaration

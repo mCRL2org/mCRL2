@@ -72,9 +72,9 @@ typedef std::vector<alias>    alias_vector;
 /// \param x A term
 /// \return True if \a x is a alias expression
 inline
-bool is_alias(const atermpp::aterm_appl& x)
+bool is_alias(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortRef;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortRef;
 }
 
 // prototype declaration

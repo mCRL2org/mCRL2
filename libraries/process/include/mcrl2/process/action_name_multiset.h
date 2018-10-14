@@ -70,9 +70,9 @@ typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 /// \param x A term
 /// \return True if \a x is a action_name_multiset expression
 inline
-bool is_action_name_multiset(const atermpp::aterm_appl& x)
+bool is_action_name_multiset(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::MultActName;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::MultActName;
 }
 
 // prototype declaration

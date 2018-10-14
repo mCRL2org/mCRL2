@@ -90,9 +90,9 @@ typedef std::vector<process_initializer>    process_initializer_vector;
 /// \param x A term
 /// \return True if \a x is a process_initializer expression
 inline
-bool is_process_initializer(const atermpp::aterm_appl& x)
+bool is_process_initializer(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::LinearProcessInit;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::LinearProcessInit;
 }
 
 // prototype declaration

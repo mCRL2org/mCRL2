@@ -64,9 +64,9 @@ typedef std::vector<untyped_multi_action>    untyped_multi_action_vector;
 /// \param x A term
 /// \return True if \a x is a untyped_multi_action expression
 inline
-bool is_untyped_multi_action(const atermpp::aterm_appl& x)
+bool is_untyped_multi_action(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedMultiAction;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedMultiAction;
 }
 
 // prototype declaration

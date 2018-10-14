@@ -31,30 +31,30 @@ namespace state_formulas
 
 //--- start generated classes ---//
 /// \brief A state formula
-class state_formula: public atermpp::aterm_appl
+class state_formula: public atermpp::aterm
 {
   public:
     /// \brief Default constructor.
     state_formula()
-      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateFrm)))
+      : atermpp::aterm(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::StateFrm)))
     {}
 
     /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit state_formula(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_StateFrm(*this));
     }
 
     /// \brief Constructor based on data::data_expression.
     state_formula(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// \brief Constructor based on data::untyped_data_parameter.
     state_formula(const data::untyped_data_parameter& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -76,29 +76,29 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 typedef std::vector<state_formula>    state_formula_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_forall(const atermpp::aterm_appl& x);
-inline bool is_exists(const atermpp::aterm_appl& x);
-inline bool is_must(const atermpp::aterm_appl& x);
-inline bool is_may(const atermpp::aterm_appl& x);
-inline bool is_yaled(const atermpp::aterm_appl& x);
-inline bool is_yaled_timed(const atermpp::aterm_appl& x);
-inline bool is_delay(const atermpp::aterm_appl& x);
-inline bool is_delay_timed(const atermpp::aterm_appl& x);
-inline bool is_variable(const atermpp::aterm_appl& x);
-inline bool is_nu(const atermpp::aterm_appl& x);
-inline bool is_mu(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_not(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_forall(const atermpp::aterm& x);
+inline bool is_exists(const atermpp::aterm& x);
+inline bool is_must(const atermpp::aterm& x);
+inline bool is_may(const atermpp::aterm& x);
+inline bool is_yaled(const atermpp::aterm& x);
+inline bool is_yaled_timed(const atermpp::aterm& x);
+inline bool is_delay(const atermpp::aterm& x);
+inline bool is_delay_timed(const atermpp::aterm& x);
+inline bool is_variable(const atermpp::aterm& x);
+inline bool is_nu(const atermpp::aterm& x);
+inline bool is_mu(const atermpp::aterm& x);
 
 /// \brief Test for a state_formula expression
 /// \param x A term
 /// \return True if \a x is a state_formula expression
 inline
-bool is_state_formula(const atermpp::aterm_appl& x)
+bool is_state_formula(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
          data::is_untyped_data_parameter(x) ||
@@ -169,9 +169,9 @@ class true_: public state_formula
 /// \param x A term
 /// \return True if \a x is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& x)
+bool is_true(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateTrue;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateTrue;
 }
 
 // prototype declaration
@@ -222,9 +222,9 @@ class false_: public state_formula
 /// \param x A term
 /// \return True if \a x is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& x)
+bool is_false(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateFalse;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateFalse;
 }
 
 // prototype declaration
@@ -277,7 +277,7 @@ class not_: public state_formula
 
     const state_formula& operand() const
     {
-      return atermpp::down_cast<state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 
@@ -285,9 +285,9 @@ class not_: public state_formula
 /// \param x A term
 /// \return True if \a x is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_not(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateNot;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateNot;
 }
 
 // prototype declaration
@@ -340,12 +340,12 @@ class and_: public state_formula
 
     const state_formula& left() const
     {
-      return atermpp::down_cast<state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::down_cast<state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -353,9 +353,9 @@ class and_: public state_formula
 /// \param x A term
 /// \return True if \a x is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& x)
+bool is_and(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateAnd;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateAnd;
 }
 
 // prototype declaration
@@ -408,12 +408,12 @@ class or_: public state_formula
 
     const state_formula& left() const
     {
-      return atermpp::down_cast<state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::down_cast<state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -421,9 +421,9 @@ class or_: public state_formula
 /// \param x A term
 /// \return True if \a x is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& x)
+bool is_or(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateOr;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateOr;
 }
 
 // prototype declaration
@@ -476,12 +476,12 @@ class imp: public state_formula
 
     const state_formula& left() const
     {
-      return atermpp::down_cast<state_formula>((*this)[0]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const state_formula& right() const
     {
-      return atermpp::down_cast<state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -489,9 +489,9 @@ class imp: public state_formula
 /// \param x A term
 /// \return True if \a x is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& x)
+bool is_imp(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateImp;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateImp;
 }
 
 // prototype declaration
@@ -544,12 +544,12 @@ class forall: public state_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::down_cast<data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const state_formula& body() const
     {
-      return atermpp::down_cast<state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -557,9 +557,9 @@ class forall: public state_formula
 /// \param x A term
 /// \return True if \a x is a forall expression
 inline
-bool is_forall(const atermpp::aterm_appl& x)
+bool is_forall(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateForall;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateForall;
 }
 
 // prototype declaration
@@ -612,12 +612,12 @@ class exists: public state_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::down_cast<data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const state_formula& body() const
     {
-      return atermpp::down_cast<state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -625,9 +625,9 @@ class exists: public state_formula
 /// \param x A term
 /// \return True if \a x is a exists expression
 inline
-bool is_exists(const atermpp::aterm_appl& x)
+bool is_exists(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateExists;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateExists;
 }
 
 // prototype declaration
@@ -680,12 +680,12 @@ class must: public state_formula
 
     const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formulas::regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::down_cast<state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -693,9 +693,9 @@ class must: public state_formula
 /// \param x A term
 /// \return True if \a x is a must expression
 inline
-bool is_must(const atermpp::aterm_appl& x)
+bool is_must(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateMust;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateMust;
 }
 
 // prototype declaration
@@ -748,12 +748,12 @@ class may: public state_formula
 
     const regular_formulas::regular_formula& formula() const
     {
-      return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
+      return atermpp::down_cast<regular_formulas::regular_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::down_cast<state_formula>((*this)[1]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -761,9 +761,9 @@ class may: public state_formula
 /// \param x A term
 /// \return True if \a x is a may expression
 inline
-bool is_may(const atermpp::aterm_appl& x)
+bool is_may(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateMay;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateMay;
 }
 
 // prototype declaration
@@ -814,9 +814,9 @@ class yaled: public state_formula
 /// \param x A term
 /// \return True if \a x is a yaled expression
 inline
-bool is_yaled(const atermpp::aterm_appl& x)
+bool is_yaled(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateYaled;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateYaled;
 }
 
 // prototype declaration
@@ -869,7 +869,7 @@ class yaled_timed: public state_formula
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::down_cast<data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 
@@ -877,9 +877,9 @@ class yaled_timed: public state_formula
 /// \param x A term
 /// \return True if \a x is a yaled_timed expression
 inline
-bool is_yaled_timed(const atermpp::aterm_appl& x)
+bool is_yaled_timed(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateYaledTimed;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateYaledTimed;
 }
 
 // prototype declaration
@@ -930,9 +930,9 @@ class delay: public state_formula
 /// \param x A term
 /// \return True if \a x is a delay expression
 inline
-bool is_delay(const atermpp::aterm_appl& x)
+bool is_delay(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateDelay;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateDelay;
 }
 
 // prototype declaration
@@ -985,7 +985,7 @@ class delay_timed: public state_formula
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::down_cast<data::data_expression>((*this)[0]);
+      return atermpp::down_cast<data::data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 
@@ -993,9 +993,9 @@ class delay_timed: public state_formula
 /// \param x A term
 /// \return True if \a x is a delay_timed expression
 inline
-bool is_delay_timed(const atermpp::aterm_appl& x)
+bool is_delay_timed(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateDelayTimed;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateDelayTimed;
 }
 
 // prototype declaration
@@ -1053,12 +1053,12 @@ class variable: public state_formula
 
     const core::identifier_string& name() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const data::data_expression_list& arguments() const
     {
-      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -1066,9 +1066,9 @@ class variable: public state_formula
 /// \param x A term
 /// \return True if \a x is a variable expression
 inline
-bool is_variable(const atermpp::aterm_appl& x)
+bool is_variable(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateVar;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateVar;
 }
 
 // prototype declaration
@@ -1126,17 +1126,17 @@ class nu: public state_formula
 
     const core::identifier_string& name() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::down_cast<data::assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::assignment_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::down_cast<state_formula>((*this)[2]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[2]);
     }
 };
 
@@ -1144,9 +1144,9 @@ class nu: public state_formula
 /// \param x A term
 /// \return True if \a x is a nu expression
 inline
-bool is_nu(const atermpp::aterm_appl& x)
+bool is_nu(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateNu;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateNu;
 }
 
 // prototype declaration
@@ -1204,17 +1204,17 @@ class mu: public state_formula
 
     const core::identifier_string& name() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const data::assignment_list& assignments() const
     {
-      return atermpp::down_cast<data::assignment_list>((*this)[1]);
+      return atermpp::down_cast<data::assignment_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 
     const state_formula& operand() const
     {
-      return atermpp::down_cast<state_formula>((*this)[2]);
+      return atermpp::down_cast<state_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[2]);
     }
 };
 
@@ -1222,9 +1222,9 @@ class mu: public state_formula
 /// \param x A term
 /// \return True if \a x is a mu expression
 inline
-bool is_mu(const atermpp::aterm_appl& x)
+bool is_mu(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::StateMu;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::StateMu;
 }
 
 // prototype declaration
