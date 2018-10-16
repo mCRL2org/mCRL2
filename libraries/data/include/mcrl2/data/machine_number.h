@@ -231,6 +231,51 @@ inline machine_number div_double_doubleword(const machine_number& n1, const mach
   return machine_number(m1 / m3);
 }
 
+/// \brief Calculates (base*(base*n1 + n2)+n3) div (base*n4 + n5).
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \param n3 The third argument. 
+/// \param n4 The fourth argument. 
+/// \param n5 The fifth argument. 
+/// \return (base*(base*n1 + n2)+n3) div (base*n4 + n5)
+inline machine_number div_triple_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4, const machine_number& n5)
+{
+  __uint128_t m1=n1.value();
+  m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
+  __uint128_t m3=n3.value();;
+  m3 = (m3 << std::numeric_limits<std::size_t>::digits) + n4.value();
+  // Not correct.
+  assert(0);
+  return machine_number(m1 / m3);
+}
+
+/// \brief Calculates (base*n1 + n2) mod (base*n3 + n4).
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \param n3 The third argument. 
+/// \param n4 The fourth argument. 
+/// \return (base*n1 + n2) mod (base*n3 + n4)
+inline machine_number mod_double_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4)
+{
+  __uint128_t m1=n1.value();
+  m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
+  __uint128_t m3=n3.value();;
+  m3 = (m3 << std::numeric_limits<std::size_t>::digits) + n4.value();
+  return machine_number(m1 % m3);
+}
+
+/// \brief The square root of base*n1+n2 rounded down.
+/// \param n1 The first argument.
+/// \param n2 The second argument. 
+/// \return The square root of base*n1+n2 rounded down.
+inline machine_number sqrt_doubleword(const machine_number& n1, const machine_number& n2)
+{
+  __uint128_t m1=n1.value();
+  m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
+  // unfinished 
+  assert(0);
+  return 0;
+}
 /*
 % Core functions that are used by other datatypes.
 map  one_word, max_word: Word;
@@ -250,6 +295,14 @@ XXXXXXXXXXX   HIER GEBLEVEN MET IMPLEMENTEREN.
      sqrt_quadrupleword_overflow: Word # Word # Word # Word -> Word;  % The most significant word of the square root of base*(base*(base*w1+w2)+w3)+w4.
      pred_word: Word->Word;   % Successor and predecessor that wraps around.
 */
+
+/// \brief The predeccessor function on a machine numbers, that wraps around.
+/// \param n 
+/// \return n-1, or maxword if n is zero.
+inline machine_number pred_word(const machine_number& n)
+{
+  return machine_number(n.value()-1);
+}
 
 /// \brief 
 
