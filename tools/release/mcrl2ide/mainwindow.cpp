@@ -17,7 +17,7 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 
-MainWindow::MainWindow(const QString& inputProjectFilePath, QWidget* parent)
+MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
     : QMainWindow(parent)
 {
   specificationEditor = new CodeEditor(this, true);
@@ -43,11 +43,14 @@ MainWindow::MainWindow(const QString& inputProjectFilePath, QWidget* parent)
   /* change the UI whenever a new project has opened */
   connect(fileSystem, SIGNAL(newProjectOpened()), this,
           SLOT(onNewProjectOpened()));
+  /* change the UI whenever the IDE enters specification only mode */
+  connect(fileSystem, SIGNAL(enterSpecificationOnlyMode()), this,
+          SLOT(onEnterSpecificationOnlyMode()));
 
   /* make saving a project only enabled whenever there are changes */
-  saveProjectAction->setEnabled(false);
-  connect(specificationEditor, SIGNAL(modificationChanged(bool)),
-          saveProjectAction, SLOT(setEnabled(bool)));
+  saveAction->setEnabled(false);
+  connect(specificationEditor, SIGNAL(modificationChanged(bool)), saveAction,
+          SLOT(setEnabled(bool)));
 
   /* change the tool buttons to start or abort a tool depending on whether
    *   processes are running */
@@ -77,9 +80,9 @@ MainWindow::MainWindow(const QString& inputProjectFilePath, QWidget* parent)
   processSystem->testExecutableExistence();
 
   /* open a project if a project file is given */
-  if (!inputProjectFilePath.isEmpty())
+  if (!inputFilePath.isEmpty())
   {
-    actionOpenProject(inputProjectFilePath);
+    actionOpenProject(inputFilePath);
   }
 }
 
@@ -104,12 +107,11 @@ void MainWindow::setupMenuBar()
 
   fileMenu->addSeparator();
 
-  saveProjectAction =
-      fileMenu->addAction(QIcon(":/icons/save_project.png"), "Save Project",
-                          this, SLOT(actionSaveProject()), QKeySequence::Save);
+  saveAction = fileMenu->addAction(saveProjectIcon, saveProjectText, this,
+                                   SLOT(actionSave()), QKeySequence::Save);
 
-  saveProjectAsAction =
-      fileMenu->addAction("Save Project As", this, SLOT(actionSaveProjectAs()),
+  saveAsAction =
+      fileMenu->addAction(saveProjectAsText, this, SLOT(actionSaveAs()),
                           QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
 
   fileMenu->addSeparator();
@@ -213,7 +215,7 @@ void MainWindow::setupToolbar()
   /* create each toolbar item by adding the actions */
   toolbar->addAction(newProjectAction);
   toolbar->addAction(openProjectAction);
-  toolbar->addAction(saveProjectAction);
+  toolbar->addAction(saveAction);
   toolbar->addSeparator();
   toolbar->addAction(parseAction);
   toolbar->addAction(simulateAction);
@@ -268,8 +270,18 @@ void MainWindow::onNewProjectOpened()
     propertiesDock->addProperty(property);
   }
 
-  /* enable opening the project in explorer */
-  openProjectFolderInExplorerAction->setEnabled(true);
+  /* change the file buttons */
+  changeFileButtons(false);
+}
+
+void MainWindow::onEnterSpecificationOnlyMode()
+{
+  /* change the title */
+  setWindowTitle(QString("mCRL2 IDE - Specification only mode - ")
+                     .append(fileSystem->getSpecificationFileName()));
+
+  /* change the file buttons */
+  changeFileButtons(true);
 }
 
 void MainWindow::actionNewProject(bool askToSave)
@@ -277,26 +289,26 @@ void MainWindow::actionNewProject(bool askToSave)
   fileSystem->newProject(askToSave);
 }
 
-void MainWindow::actionOpenProject(const QString& inputProjectFilePath)
+void MainWindow::actionOpenProject(const QString& inputFilePath)
 {
-  if (inputProjectFilePath.isEmpty())
+  if (inputFilePath.isEmpty())
   {
     fileSystem->openProject();
   }
   else
   {
-    fileSystem->openProjectFromFolder(inputProjectFilePath);
+    fileSystem->openFromArgument(inputFilePath);
   }
 }
 
-void MainWindow::actionSaveProject()
+void MainWindow::actionSave()
 {
-  fileSystem->saveProject();
+  fileSystem->save();
 }
 
-void MainWindow::actionSaveProjectAs()
+void MainWindow::actionSaveAs()
 {
-  fileSystem->saveProjectAs();
+  fileSystem->saveAs();
 }
 
 void MainWindow::actionOpenProjectFolderInExplorer()
@@ -323,10 +335,10 @@ bool MainWindow::assertProjectOpened()
   {
     QMessageBox msgBox(
         QMessageBox::Information, "mCRL2 IDE",
-        "To use this tool it is required to create a project first",
+        "To use this tool it is required to create or open a project first",
         QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
     msgBox.exec();
-    return fileSystem->newProject(false);
+    return false;
   }
   else
   {
@@ -334,9 +346,21 @@ bool MainWindow::assertProjectOpened()
   }
 }
 
+bool MainWindow::assertSpecificationOpened()
+{
+  if (!fileSystem->getSpecificationFileName().isEmpty())
+  {
+    return true;
+  }
+  else
+  {
+    return assertProjectOpened();
+  }
+}
+
 void MainWindow::actionParse()
 {
-  if (assertProjectOpened())
+  if (assertSpecificationOpened())
   {
     if (processSystem->isThreadRunning(ProcessType::Parsing))
     {
@@ -351,7 +375,7 @@ void MainWindow::actionParse()
 
 void MainWindow::actionSimulate()
 {
-  if (assertProjectOpened())
+  if (assertSpecificationOpened())
   {
     if (processSystem->isThreadRunning(ProcessType::Simulation))
     {
@@ -366,7 +390,7 @@ void MainWindow::actionSimulate()
 
 void MainWindow::actionShowLts()
 {
-  if (assertProjectOpened())
+  if (assertSpecificationOpened())
   {
     if (processSystem->isThreadRunning(ProcessType::LtsCreation))
     {
@@ -382,7 +406,7 @@ void MainWindow::actionShowLts()
 
 void MainWindow::actionShowReducedLts()
 {
-  if (assertProjectOpened())
+  if (assertSpecificationOpened())
   {
     if (processSystem->isThreadRunning(ProcessType::LtsCreation))
     {
@@ -478,6 +502,24 @@ void MainWindow::actionVerifyAllProperties()
   }
 }
 
+void MainWindow::changeFileButtons(bool specificationOnlyMode)
+{
+  if (specificationOnlyMode)
+  {
+    saveAction->setText(saveSpecificationText);
+    saveAction->setIcon(saveSpecificationIcon);
+    saveAsAction->setText(saveSpecificationAsText);
+    openProjectFolderInExplorerAction->setEnabled(false);
+  }
+  else
+  {
+    saveAction->setText(saveProjectText);
+    saveAction->setIcon(saveProjectIcon);
+    saveAsAction->setText(saveProjectAsText);
+    openProjectFolderInExplorerAction->setEnabled(true);
+  }
+}
+
 void MainWindow::changeToolButtons(bool toAbort, ProcessType processType)
 {
   switch (processType)
@@ -556,7 +598,9 @@ bool MainWindow::event(QEvent* event)
   case QEvent::WindowActivate:
     /* if the specification has been modified outside of the IDE, ask to
      *   update the editor */
-    if (!reloadIsBeingHandled && fileSystem->projectOpened() &&
+    if (!reloadIsBeingHandled &&
+        (fileSystem->projectOpened() ||
+         fileSystem->inSpecificationOnlyMode()) &&
         fileSystem->isSpecificationNewlyModifiedFromOutside())
     {
       reloadIsBeingHandled = true;
@@ -593,7 +637,7 @@ bool MainWindow::event(QEvent* event)
       switch (result)
       {
       case QMessageBox::Yes:
-        if (!fileSystem->saveProject())
+        if (!fileSystem->save())
         {
           event->ignore();
           return false;

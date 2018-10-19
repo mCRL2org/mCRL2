@@ -46,10 +46,16 @@ class MainWindow : public QMainWindow
   void setDocksToDefault();
 
   /**
-   * @brief onNewProjectOpened Changes the user interface wheneever a new
+   * @brief onNewProjectOpened Changes the user interface whenever a new
    *   project has been opened
    */
   void onNewProjectOpened();
+
+  /**
+   * @brief onEnterSpecificationOnlyMode Changes the user interface whenever the
+   *   IDE enters specification only mode
+   */
+  void onEnterSpecificationOnlyMode();
 
   /**
    * @brief actionNewProject Allows the user to create a new project
@@ -65,15 +71,15 @@ class MainWindow : public QMainWindow
   void actionOpenProject(const QString& inputProjectFilePath = "");
 
   /**
-   * @brief actionNewProject Allows the user to save a project
+   * @brief actionSave Allows the user to save a project or specification
    */
-  void actionSaveProject();
+  void actionSave();
 
   /**
-   * @brief actionNewProject Allows the user to save a new project under a new
-   *   name
+   * @brief actionSaveAs Allows the user to save a project or specification
+   *   under a new name
    */
-  void actionSaveProjectAs();
+  void actionSaveAs();
 
   /**
    * @brief actionOpenProjectFolderInExplorer Allows the user to open the
@@ -131,6 +137,14 @@ class MainWindow : public QMainWindow
   void actionVerifyAllProperties();
 
   /**
+   * @brief changeToolButtons Whenever the IDE changes from specification only
+   *   mode to project mode or vice versa, change the file actions
+   * @param specificationOnlyMode Whether the IDE changed to specification only
+   *   mode
+   */
+  void changeFileButtons(bool specificationOnlyMode);
+
+  /**
    * @brief changeToolButtons Whenever a thread is running, change corresponding
    *   actions from start to abort; vice versa when a thread has stopped running
    * @param toAbort Whether actions should be changed from start to abort or
@@ -152,8 +166,17 @@ class MainWindow : public QMainWindow
   private:
   QAction* newProjectAction;
   QAction* openProjectAction;
-  QAction* saveProjectAction;
-  QAction* saveProjectAsAction;
+
+  QAction* saveAction;
+  QString saveProjectText = "Save Project";
+  QIcon saveProjectIcon = QIcon(":/icons/save_project.png");
+  QString saveSpecificationText = "Save Specification";
+  QIcon saveSpecificationIcon = QIcon(":/icons/save_specification.png");
+
+  QAction* saveAsAction;
+  QString saveProjectAsText = "Save Project As";
+  QString saveSpecificationAsText = "Save Specification As";
+
   QAction* openProjectFolderInExplorerAction;
   QAction* exitAction;
 
@@ -236,10 +259,18 @@ class MainWindow : public QMainWindow
   void setupDocks();
 
   /**
-   * @brief mentionNeedOfProject Forces the user to make a project
+   * @brief assertProjectOpened Forces the user to make a project if no project
+   *   was opened
    * @return Whether a project has been succesfully made
    */
   bool assertProjectOpened();
+
+  /**
+   * @brief assertSpecificationOpened Forces the user to make a project if no
+   *   specification was opened
+   * @return Whether a project has been succesfully made
+   */
+  bool assertSpecificationOpened();
 };
 
 #endif // MAINWINDOW_H

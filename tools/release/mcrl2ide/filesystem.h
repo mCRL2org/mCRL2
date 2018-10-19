@@ -167,6 +167,13 @@ class FileSystem : public QObject
   QString getProjectName();
 
   /**
+   * @brief getSpecificationFileName Gets the name of the specificationFile
+   * @return The name of the specificationFile or the empty string if no
+   *   specification file is known
+   */
+  QString getSpecificationFileName();
+
+  /**
    * @brief getProperties Gets the properties of the current project
    * @return The properties of the current project
    */
@@ -177,6 +184,12 @@ class FileSystem : public QObject
    * @return Whether a project is opened
    */
   bool projectOpened();
+
+  /**
+   * @brief inSpecificationOnlyMode Checks whether the IDE is in specification only mode
+   * @return Whether the IDE is in specification only mode
+   */
+  bool inSpecificationOnlyMode();
 
   /**
    * @brief specificationModified Checks whether the specification has been
@@ -288,6 +301,12 @@ class FileSystem : public QObject
   bool loadSpecification();
 
   /**
+   * @brief openProjectFromArgument Opens a project from the input argument
+   * @param InputFilePath The input argument
+   */
+  void openFromArgument(const QString& InputFilePath);
+
+  /**
    * @brief openProjectFromFolder Opens a project from a given project folder
    * @param newProjectFolderPath The path to the project folder
    */
@@ -299,18 +318,18 @@ class FileSystem : public QObject
   void openProject();
 
   /**
-   * @brief saveProject Saves the project to file
+   * @brief save Saves the project to file
    * @param forceSave Whether the files should be saved even if they have not
    *   been modified
    * @return Whether saving was successfull
    */
-  bool saveProject(bool forceSave = false);
+  bool save(bool forceSave = false);
 
   /**
-   * @brief saveProjectAs Saves the project to file under a new name
+   * @brief saveAs Saves the project to file under a new name
    * @return Whether saving was successfull
    */
-  bool saveProjectAs();
+  bool saveAs();
 
   /**
    * @brief saveProperty Saves a property to file
@@ -345,6 +364,12 @@ class FileSystem : public QObject
 
   signals:
   /**
+   * @brief enterSpecificationOnlyMode Is emitted wheneverthe IDE is opened
+   *   with a specification as argument
+   */
+  void enterSpecificationOnlyMode();
+
+  /**
    * @brief newProjectOpened Is emitted whenever a new project has been openend
    */
   void newProjectOpened();
@@ -364,6 +389,7 @@ class FileSystem : public QObject
   bool projectOpen;
   std::list<Property> properties;
   bool specificationModified;
+  bool specificationOnlyMode;
   QDateTime lastKnownSpecificationModificationTime;
 
   /**

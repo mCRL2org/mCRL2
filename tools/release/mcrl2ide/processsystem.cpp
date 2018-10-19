@@ -329,7 +329,7 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
 int ProcessSystem::parseSpecification()
 {
-  if (fileSystem->saveProject())
+  if (fileSystem->save())
   {
     /* create the subprocesses */
     int processid = pid++;
@@ -349,7 +349,7 @@ int ProcessSystem::parseSpecification()
 
 int ProcessSystem::simulate()
 {
-  if (fileSystem->saveProject())
+  if (fileSystem->save())
   {
     /* create the subprocesses */
     int processid = pid++;
@@ -371,7 +371,7 @@ int ProcessSystem::simulate()
 
 int ProcessSystem::showLts(LtsReduction reduction)
 {
-  if (fileSystem->saveProject())
+  if (fileSystem->save())
   {
     /* create the subprocesses */
     std::vector<QProcess*> showLtsProcesses = {};
@@ -408,7 +408,7 @@ int ProcessSystem::showLts(LtsReduction reduction)
 
 int ProcessSystem::parseProperty(const Property& property)
 {
-  if (fileSystem->saveProject())
+  if (fileSystem->save())
   {
     /* create the subprocesses */
     int processid = pid++;
@@ -431,7 +431,7 @@ int ProcessSystem::parseProperty(const Property& property)
 
 int ProcessSystem::verifyProperty(const Property& property)
 {
-  if (fileSystem->saveProject())
+  if (fileSystem->save())
   {
     /* create the subprocesses */
     int processid = pid++;
@@ -456,7 +456,7 @@ int ProcessSystem::verifyProperty(const Property& property)
 
 int ProcessSystem::showEvidence(const Property& property)
 {
-  if (fileSystem->saveProject())
+  if (fileSystem->save())
   {
     /* create the subprocesses */
     int processid = pid++;
