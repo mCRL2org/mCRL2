@@ -423,20 +423,22 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
 bool FileSystem::deletePropertyFile(const QString& propertyName,
                                     bool showIfFailed)
 {
-  QFile* propertyFile = new QFile(propertyFilePath(propertyName));
+  QFile propertyFile(propertyFilePath(propertyName));
   bool deleteSucceeded = true;
-  if (showIfFailed && propertyFile->exists() && !propertyFile->remove())
+  if (!propertyFile.remove())
   {
-    /* if deleting the file failed, tell the user */
-    QMessageBox msgBox(QMessageBox::Information, "Delete property",
-                       "Could not delete property file: " +
-                           propertyFile->errorString(),
-                       QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-    msgBox.exec();
     deleteSucceeded = false;
+    if (showIfFailed)
+    {
+      /* if deleting the file failed, tell the user */
+      QMessageBox msgBox(QMessageBox::Information, "Delete property",
+                         "Could not delete property file: " +
+                             propertyFile.errorString(),
+                         QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
+      msgBox.exec();
+    }
   }
 
-  propertyFile->deleteLater();
   return deleteSucceeded;
 }
 

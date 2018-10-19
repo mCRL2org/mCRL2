@@ -64,11 +64,10 @@ class AddEditPropertyDialog : public QDialog
   Property getProperty();
 
   /**
-   * @brief setOldPropertyName Records the name the property had when editing
-   *   began
-   * @param propertyName The name the property had when editing began
+   * @brief setOldProperty Records the property as when editing began
+   * @param oldProperty The property as when editing began
    */
-  void setOldPropertyName(const QString& propertyName);
+  void setOldProperty(const Property& oldProperty);
 
   public slots:
   /**
@@ -90,7 +89,7 @@ class AddEditPropertyDialog : public QDialog
 
   /**
    * @brief onRejected On rejected (Cancel, escape, "X"), abort the last parsing
-   *   process
+   *   process, reset the property and clean up the properties folder
    */
   void onRejected();
 
@@ -100,7 +99,7 @@ class AddEditPropertyDialog : public QDialog
   ProcessSystem* processSystem;
   FileSystem* fileSystem;
   QString windowTitle;
-  QString oldPropertyName;
+  Property oldProperty;
   int propertyParsingProcessid;
   QRegExpValidator* propertyNameValidator;
 

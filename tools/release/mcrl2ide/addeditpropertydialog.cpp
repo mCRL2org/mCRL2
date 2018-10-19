@@ -22,7 +22,6 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
 
   this->processSystem = processSystem;
   this->fileSystem = fileSystem;
-  oldPropertyName = "";
   propertyParsingProcessid = -1;
 
   propertyNameValidator = new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*"));
@@ -82,9 +81,9 @@ Property AddEditPropertyDialog::getProperty()
                   ui->propertyTextField->toPlainText());
 }
 
-void AddEditPropertyDialog::setOldPropertyName(const QString& propertyName)
+void AddEditPropertyDialog::setOldProperty(const Property& oldProperty)
 {
-  oldPropertyName = propertyName;
+  this->oldProperty = oldProperty;
 }
 
 bool AddEditPropertyDialog::checkInput()
@@ -98,7 +97,7 @@ bool AddEditPropertyDialog::checkInput()
   {
     error = "The property name may not be empty";
   }
-  else if (oldPropertyName != propertyName &&
+  else if (oldProperty.name != propertyName &&
            fileSystem->propertyNameExists(propertyName))
   {
     error = "A property with this name already exists";
@@ -191,4 +190,8 @@ void AddEditPropertyDialog::onRejected()
 {
   /* abort the parsing process */
   abortPropertyParsing();
+
+  /* save the original property and clean up */
+  fileSystem->saveProperty(oldProperty);
+  fileSystem->deleteUnlistedPropertyFiles();
 }
