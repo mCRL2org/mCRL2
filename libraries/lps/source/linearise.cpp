@@ -244,6 +244,7 @@ class specification_basic_type
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
       // So, the identifiers in the data type must be added explicitly.
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.equations()));
+      fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.user_defined_aliases()));
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.sorts()));
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.constructors()));
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.mappings()));

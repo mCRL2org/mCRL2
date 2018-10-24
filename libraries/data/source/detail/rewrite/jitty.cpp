@@ -186,9 +186,8 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
 
     std::vector<int> args(arity,-1);
 
-    for (data_equation_list::const_iterator i=rules.begin(); i!=rules.end(); ++i)
+    for (const data_equation& this_rule: rules)
     {
-      const data_equation& this_rule = *i;
       max_number_of_variables=std::max(this_rule.variables().size(),max_number_of_variables);
       const data_expression& this_rule_lhs = this_rule.lhs();
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
