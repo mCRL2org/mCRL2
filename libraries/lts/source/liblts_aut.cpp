@@ -258,13 +258,14 @@ static bool read_initial_part_of_an_aut_transition(
   if (ch == '"')
   {
     label="";
-    is >> ch;
+    // In case the label is using quotes whitespaces
+    // in the label are preserved. 
+    is >> noskipws >> ch;
     while ((ch != '"') && !is.eof())
     {
       label.push_back(ch);
       is >> ch;
     }
-
     if (ch != '"')
     {
       throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + std::to_string(line_no) + ".");
@@ -273,6 +274,8 @@ static bool read_initial_part_of_an_aut_transition(
   }
   else
   {
+    // In case the label is not within quotes,
+    // whitespaces are removed from the label. 
     label = ch;
     is >> ch;
     while ((ch != ',') && !is.eof())
