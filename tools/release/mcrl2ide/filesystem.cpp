@@ -641,6 +641,9 @@ std::cerr << "PAD |" << specFilePath.toStdString() << "|\n";
               properties.push_back(readPropertyFromFile(filePath));
             }
           }
+          properties.sort([] (const Property& lhs, const Property& rhs) {
+            return QString::compare(lhs.name, rhs.name) < 0;
+          });
           delete dirIterator;
 
           projectOpen = true;
