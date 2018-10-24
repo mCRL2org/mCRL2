@@ -64,6 +64,7 @@ next_state_generator::next_state_generator(
   : m_specification(spec),
     m_rewriter(rewriter),
     m_substitution(base_substitution),
+    m_base_substitution(base_substitution),
     m_enumerator(m_rewriter, m_specification.data(), m_rewriter, m_id_generator, (std::numeric_limits<std::size_t>::max)(),true),  // Generate exceptions.
     m_use_enumeration_caching(use_enumeration_caching)
 {
@@ -323,10 +324,17 @@ atermpp::detail::shared_subset<next_state_generator::summand_t>::iterator next_s
 
 
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue)
+next_state_generator::iterator::iterator(
+           next_state_generator *generator, 
+           const state& state, 
+           next_state_generator::substitution_t *substitution, 
+           next_state_generator::substitution_t *base_substitution, 
+           summand_subset_t& summand_subset, 
+           enumerator_queue_t* enumeration_queue)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
+    m_base_substitution(base_substitution),
     m_single_summand(false),
     m_use_summand_pruning(summand_subset.m_use_summand_pruning),
     m_summand(nullptr),
@@ -352,10 +360,17 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
   increment();
 }
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, std::size_t summand_index, enumerator_queue_t* enumeration_queue)
+next_state_generator::iterator::iterator(
+           next_state_generator *generator, 
+           const state& state, 
+           next_state_generator::substitution_t *substitution, 
+           next_state_generator::substitution_t *base_substitution, 
+           std::size_t summand_index, 
+           enumerator_queue_t* enumeration_queue)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
+    m_base_substitution(base_substitution),
     m_single_summand(true),
     m_single_summand_index(summand_index),
     m_use_summand_pruning(false),
@@ -550,7 +565,7 @@ void next_state_generator::iterator::increment()
 
       // Reduce condition as much as possible, and give a hint of the original condition in the error message.
       data_expression reduced_condition(m_generator->m_rewriter(m_summand->condition, *m_substitution));
-      std::string printed_condition(data::pp(m_summand->condition).substr(0, 300));
+      std::string printed_condition(data::pp(data::replace_variables(m_summand->condition,*m_base_substitution)).substr(0, 300));  //XXXX
 
       throw mcrl2::runtime_error("Expression " + data::pp(reduced_condition) +
                                  " does not rewrite to true or false in the condition "
