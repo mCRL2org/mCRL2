@@ -807,7 +807,7 @@ follows::
 
   { n: Nat | 2 }
 
-One additional operation is defined on bags:
+One additional operation is defined on bags to count how often an element occurs in a bag:
 
 .. list-table:: Predefined operations on sets
    :header-rows: 1
@@ -816,9 +816,9 @@ One additional operation is defined on bags:
    * - Name
      - Sort(s)
      - Semantics
-   * - :samp:`count({a}, {b})`
-     - :samp:`Bag({S}) # {S} -> Nat`
-     - The number :samp:`{b}`s in :samp:`{a}`.
+   * - :samp:`count({a}, {b})`    
+     - :samp:`{S} # Bag({S}) -> Nat`
+     - The number :samp:`{a}`s in :samp:`{b}`.
 
 To make it easy to interpret sets as bags, and to convert bags to sets, the 
 following operations are also defined:
