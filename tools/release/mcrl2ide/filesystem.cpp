@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "iostream"
 #include "filesystem.h"
 
 #include <QFile>
@@ -604,14 +605,16 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
       }
       else
       {
+        // Read the filename from the project file and remove control characters. 
         specFilePath =
-            projectInfo.right(projectInfo.length() - specLineIndex - 5);
+            projectInfo.right(projectInfo.length() - specLineIndex - 5).simplified();
         projectFile.close();
         if (QFileInfo(specFilePath).isRelative())
         {
           specFilePath =
               newProjectFolderPath + QDir::separator() + specFilePath;
         }
+std::cerr << "PAD |" << specFilePath.toStdString() << "|\n";
 
         /* read the specification and put it in the specification editor */
         if (!loadSpecification())
