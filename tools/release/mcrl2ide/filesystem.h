@@ -268,6 +268,31 @@ class FileSystem : public QObject
   bool newProject(bool askToSave = true, bool forNewProject = true);
 
   /**
+   * @brief loadSpecification Loads the specification from its file and puts it
+   *   in the editor
+   * @param loadSpecFilePath The path to the specification (optional)
+   * @return Whether the specification file could be found
+   */
+  bool loadSpecification(QString loadSpecFilePath = "");
+
+  /**
+   * @brief openProjectFromArgument Opens a project from the input argument
+   * @param InputFilePath The input argument
+   */
+  void openFromArgument(const QString& InputFilePath);
+
+  /**
+   * @brief openProjectFromFolder Opens a project from a given project folder
+   * @param newProjectFolderPath The path to the project folder
+   */
+  void openProjectFromFolder(const QString& newProjectFolderPath);
+
+  /**
+   * @brief openProject Opens a project chosen by the user
+   */
+  void openProject();
+
+  /**
    * @brief newProperty Adds a new property
    * @param property The new property to add
    */
@@ -292,30 +317,6 @@ class FileSystem : public QObject
    * @return Whether the property has been deleted
    */
   bool deleteProperty(const Property& property);
-
-  /**
-   * @brief loadSpecification Loads the specification from its file and puts it
-   *   in the editor
-   * @return Whether the specification file could be found
-   */
-  bool loadSpecification();
-
-  /**
-   * @brief openProjectFromArgument Opens a project from the input argument
-   * @param InputFilePath The input argument
-   */
-  void openFromArgument(const QString& InputFilePath);
-
-  /**
-   * @brief openProjectFromFolder Opens a project from a given project folder
-   * @param newProjectFolderPath The path to the project folder
-   */
-  void openProjectFromFolder(const QString& newProjectFolderPath);
-
-  /**
-   * @brief openProject Opens a project chosen by the user
-   */
-  void openProject();
 
   /**
    * @brief save Saves the project to file
