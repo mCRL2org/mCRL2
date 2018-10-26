@@ -18,6 +18,9 @@
 #include <QInputDialog>
 #include <QDesktopServices>
 #include <QCoreApplication>
+#include <QDomNode>
+#include <QDomElement>
+#include <QDomNodeList>
 
 Property::Property()
 {
@@ -331,15 +334,82 @@ QFileDialog* FileSystem::createFileDialog(int type)
   return fileDialog;
 }
 
-void FileSystem::createProjectFile()
+QDomDocument FileSystem::createNewProjectOptions()
 {
+  QDomDocument newProjectOptions;
+
+  QDomElement rootElement = newProjectOptions.createElement("root");
+  newProjectOptions.appendChild(rootElement);
+
+  QDomElement specElement = newProjectOptions.createElement("spec");
+  rootElement.appendChild(specElement);
+
+  QDomElement propertiesElement = newProjectOptions.createElement("properties");
+  rootElement.appendChild(propertiesElement);
+
+  return newProjectOptions;
+}
+
+void FileSystem::updateProjectFile()
+{
+  /* save the project options to the project file */
   QFile projectFile(projectFilePath());
   projectFile.open(QIODevice::WriteOnly);
   QTextStream saveStream(&projectFile);
-  /* we add the relative path to the specication, which is simply the name of
-   *   the specification file */
-  saveStream << "SPEC " + QFileInfo(specificationFilePath()).fileName();
+  saveStream << projectOptions.toString();
   projectFile.close();
+}
+
+QDomDocument FileSystem::convertProjectFileToNewFormat(
+    QString newProjectFolderPath, QString newProjectFilePath, QString oldFormat)
+{
+  /* notify the user of the conversion */
+  QMessageBox msgBox(QMessageBox::Information, "Open Project",
+                     "The project file of this project has an older format. It "
+                     "will be converted to the newest format.",
+                     QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
+  msgBox.exec();
+
+  QDomDocument newFormat = createNewProjectOptions();
+
+  /* read the specification path from the old format */
+  int specLineIndex = oldFormat.lastIndexOf("SPEC");
+  QString specFilePathEntry =
+      oldFormat.right(oldFormat.length() - specLineIndex - 5).simplified();
+  QDomText specPathNode =
+      newFormat.createTextNode(QFileInfo(specFilePathEntry).fileName());
+  newFormat.elementsByTagName("spec").at(0).appendChild(specPathNode);
+
+  /* get all properties */
+  QDir propertiesFolder(newProjectFolderPath + QDir::separator() +
+                        propertiesFolderName);
+  if (propertiesFolder.exists())
+  {
+    QDirIterator dirIterator(propertiesFolder);
+    QDomNode propertiesNode = newFormat.elementsByTagName("properties").at(0);
+
+    while (dirIterator.hasNext())
+    {
+      QString filePath = dirIterator.next();
+      if (QFileInfo(filePath).isFile() && filePath.endsWith(".mcf"))
+      {
+        QDomElement propertyElement = newFormat.createElement("property");
+        propertiesNode.appendChild(propertyElement);
+        QDomText propertyPathNode =
+            newFormat.createTextNode(QFileInfo(filePath).baseName());
+        propertyElement.appendChild(propertyPathNode);
+      }
+    }
+  }
+
+  /* save the new format to file */
+  QFile projectFile(newProjectFilePath);
+  projectFile.open(QIODevice::WriteOnly);
+  QTextStream saveStream(&projectFile);
+  saveStream << newFormat.toString();
+  projectFile.close();
+
+  return newFormat;
 }
 
 bool FileSystem::newProject(bool askToSave, bool forNewProject)
@@ -386,7 +456,14 @@ bool FileSystem::newProject(bool askToSave, bool forNewProject)
       projectName = newProjectName;
       specFilePath = defaultSpecificationFilePath();
 
-      createProjectFile();
+      projectOptions = createNewProjectOptions();
+      /* we add the relative path to the specification to the project options,
+       *   which is simply the name of the specification file */
+      QDomText specPathNode =
+          projectOptions.createTextNode(QFileInfo(specFilePath).fileName());
+      projectOptions.elementsByTagName("spec").at(0).appendChild(specPathNode);
+      updateProjectFile();
+
       QDir(projectFolderPath).mkdir(propertiesFolderName);
 
       /* also empty the editor and properties list if we are not saving as and
@@ -522,58 +599,90 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     QFile projectFile(newProjectFilePath);
     projectFile.open(QIODevice::ReadOnly);
     QTextStream projectOpenStream(&projectFile);
-    QStringList projectInfo = projectOpenStream.readAll().split("\n");
+    QString newProjectFileContents = projectOpenStream.readAll();
+    projectFile.close();
 
-    /* the first line contains the specification */
-    QString specInfo = projectInfo[0];
-    int specLineIndex = specInfo.lastIndexOf("SPEC");
-    if (specLineIndex < 0)
+    bool successfullyParsed = true;
+    QString parseError = "";
+    int parseErrorRow = 0;
+    int parseErrorColumn = 0;
+    QDomDocument newProjectOptions;
+    /* if the project file begins with SPEC, it is old type of project file and
+     *   should be converted to the new format
+     * this should be removed in the future */
+    if (newProjectFileContents.startsWith("SPEC"))
     {
-      error = "Project file in provided project folder does not contain a "
-              "specification (should contain \"SPEC <path_to_spec>\" on first "
-              "line).";
+      newProjectOptions = convertProjectFileToNewFormat(
+          newProjectFolderPath, newProjectFilePath, newProjectFileContents);
     }
     else
     {
-      /* get the path to the specification */
-      QString newSpecFilePath =
-          specInfo.right(specInfo.length() - specLineIndex - 5).simplified();
-      projectFile.close();
-      if (QFileInfo(newSpecFilePath).isRelative())
-      {
-        newSpecFilePath =
-            newProjectFolderPath + QDir::separator() + newSpecFilePath;
-      }
+      successfullyParsed =
+          newProjectOptions.setContent(newProjectFileContents, &parseError,
+                                       &parseErrorRow, &parseErrorColumn);
+    }
 
-      /* read the specification and put it in the specification editor */
-      if (!loadSpecification(newSpecFilePath))
+    if (!successfullyParsed)
+    {
+      error = "Project file could not be parsed correctly: " + parseError +
+              " on line " + QString::number(parseErrorRow) + " and column " +
+              QString::number(parseErrorColumn);
+    }
+    else
+    {
+      /* check if the project info contains a path to the specification */
+      QDomElement specElement =
+          newProjectOptions.elementsByTagName("spec").at(0).toElement();
+      if (specElement.isNull())
       {
-        error = "Specification file given in the project file in the "
-                "provided project folder does not exist";
+        error =
+            "Project file in provided project folder does not contain a "
+            "specification (should contain a \"spec\" element with the path "
+            "to the specification as value).";
+        projectFile.close();
       }
       else
       {
-        /* set project variables */
-        projectFolderPath = QFileInfo(newProjectFilePath).path();
-        projectName = QFileInfo(newProjectFilePath).baseName();
-
-        /* read all properties */
-        properties.clear();
-        QDirIterator* dirIterator =
-            new QDirIterator(QDir(propertiesFolderPath()));
-
-        while (dirIterator->hasNext())
+        /* get the path to the specification */
+        QString newSpecFilePath = specElement.text();
+        if (QFileInfo(newSpecFilePath).isRelative())
         {
-          QString filePath = dirIterator->next();
-          if (QFileInfo(filePath).isFile() && filePath.endsWith(".mcf"))
-          {
-            properties.push_back(readPropertyFromFile(filePath));
-          }
+          newSpecFilePath =
+              newProjectFolderPath + QDir::separator() + newSpecFilePath;
         }
-        delete dirIterator;
 
-        projectOpen = true;
-        emit newProjectOpened();
+        /* read the specification and put it in the specification editor */
+        if (!loadSpecification(newSpecFilePath))
+        {
+          error = "Specification file given in the project file in the "
+                  "provided project folder does not exist";
+        }
+        else
+        {
+          /* opening is successful, so set project variables */
+          projectFolderPath = QFileInfo(newProjectFilePath).path();
+          projectName = QFileInfo(newProjectFilePath).baseName();
+          projectOptions = newProjectOptions;
+
+          /* read all properties */
+          properties.clear();
+
+          QDomNodeList propertyNodes =
+              projectOptions.elementsByTagName("property");
+          for (int i = 0; i < propertyNodes.length(); i++)
+          {
+            QDomElement element = propertyNodes.at(i).toElement();
+            Property readProperty =
+                readPropertyFromFile(propertyFilePath(element.text()));
+            if (!readProperty.name.isEmpty())
+            {
+              properties.push_back(readProperty);
+            }
+          }
+
+          projectOpen = true;
+          emit newProjectOpened();
+        }
       }
     }
   }
@@ -605,12 +714,18 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
   QString fileName = QFileInfo(propertyFile).fileName();
   fileName.chop(4);
 
-  propertyFile.open(QIODevice::ReadOnly);
-  QTextStream propertyOpenStream(&propertyFile);
-  QString propertyText = propertyOpenStream.readAll();
-  propertyFile.close();
+  if (propertyFile.open(QIODevice::ReadOnly))
+  {
+    QTextStream propertyOpenStream(&propertyFile);
+    QString propertyText = propertyOpenStream.readAll();
+    propertyFile.close();
 
-  return Property(fileName, propertyText);
+    return Property(fileName, propertyText);
+  }
+  else
+  {
+    return Property();
+  }
 }
 
 bool FileSystem::deletePropertyFile(const QString& propertyName,
@@ -652,14 +767,29 @@ void FileSystem::deleteUnlistedPropertyFiles()
   }
 }
 
-void FileSystem::newProperty(const Property& property)
+void FileSystem::newProperty(const Property& property,
+                             bool cleanPropertiesFolder)
 {
   /* add to the properties list and save it */
   properties.push_back(property);
   saveProperty(property);
 
-  /* delete any obsolete property files generated by the dialog */
-  deleteUnlistedPropertyFiles();
+  /* edit the project options and save it */
+  QDomNode propertiesNode =
+      projectOptions.elementsByTagName("properties").at(0);
+
+  QDomElement propertyElement = projectOptions.createElement("property");
+  propertiesNode.appendChild(propertyElement);
+  QDomText propertyPathNode = projectOptions.createTextNode(property.name);
+  propertyElement.appendChild(propertyPathNode);
+
+  updateProjectFile();
+
+  /* delete obsolete property files (generated by the add property dialog) */
+  if (cleanPropertiesFolder)
+  {
+    deleteUnlistedPropertyFiles();
+  }
 }
 
 std::list<Property> FileSystem::importProperties()
@@ -675,8 +805,7 @@ std::list<Property> FileSystem::importProperties()
       if (propertyFilePath.endsWith(".mcf"))
       {
         Property importedProperty = readPropertyFromFile(propertyFilePath);
-        importedProperties.push_back(importedProperty);
-        saveProperty(importedProperty);
+        newProperty(importedProperty, false);
       }
     }
     /* add the imported properties to the list of properties */
@@ -692,6 +821,25 @@ void FileSystem::editProperty(const Property& oldProperty,
   /* alter the properties list and save it */
   std::replace(properties.begin(), properties.end(), oldProperty, newProperty);
   saveProperty(newProperty);
+
+  /* edit the project options if the name has changed and save it */
+  if (oldProperty.name != newProperty.name)
+  {
+    QDomNodeList propertyNodes = projectOptions.elementsByTagName("property");
+    for (int i = 0; i < propertyNodes.length(); i++)
+    {
+      QDomElement propertyElement = propertyNodes.at(i).toElement();
+      if (propertyElement.text() == oldProperty.name)
+      {
+        QDomText newPropertyNameNode =
+            projectOptions.createTextNode(newProperty.name);
+        propertyElement.replaceChild(newPropertyNameNode,
+                                     propertyElement.firstChild());
+      }
+    }
+
+    updateProjectFile();
+  }
 
   /* delete any obsolete property files generated by the dialog
    * this also deletes the original property file if the property name has
@@ -722,6 +870,19 @@ bool FileSystem::deleteProperty(const Property& oldProperty)
     {
       deleteIt = false;
     }
+
+    /* remove it from the project options */
+    QDomNodeList propertyNodes = projectOptions.elementsByTagName("property");
+    for (int i = 0; i < propertyNodes.length(); i++)
+    {
+      QDomElement propertyElement = propertyNodes.at(i).toElement();
+      if (propertyElement.text() == oldProperty.name)
+      {
+        propertyElement.parentNode().removeChild(propertyElement);
+      }
+    }
+
+    updateProjectFile();
   }
 
   return deleteIt;

@@ -19,6 +19,7 @@
 #include <QTemporaryDir>
 #include <QSettings>
 #include <QDateTime>
+#include <QDomDocument>
 
 enum class LtsReduction
 {
@@ -186,7 +187,8 @@ class FileSystem : public QObject
   bool projectOpened();
 
   /**
-   * @brief inSpecificationOnlyMode Checks whether the IDE is in specification only mode
+   * @brief inSpecificationOnlyMode Checks whether the IDE is in specification
+   *   only mode
    * @return Whether the IDE is in specification only mode
    */
   bool inSpecificationOnlyMode();
@@ -295,8 +297,10 @@ class FileSystem : public QObject
   /**
    * @brief newProperty Adds a new property
    * @param property The new property to add
+   * @param cleanPropertiesFolder Whether obsolete property files should be
+   *   removed
    */
-  void newProperty(const Property& property);
+  void newProperty(const Property& property, bool cleanPropertiesFolder = true);
 
   /**
    * @brief importProperties Imports properties from file
@@ -388,6 +392,7 @@ class FileSystem : public QObject
 
   QString projectName;
   bool projectOpen;
+  QDomDocument projectOptions;
   std::list<Property> properties;
   bool specificationModified;
   bool specificationOnlyMode;
@@ -415,10 +420,31 @@ class FileSystem : public QObject
   QFileDialog* createFileDialog(int type);
 
   /**
-   * @brief createProjectFile Create a project file to store some info and to
-   *   indicate that the parent folder is a valid mcrl2 project folder
+   * @brief createNewProjectOptions Creates a DOM document containg the project
+   *   options, assumes that the project state is already set
+   * @return The DOM document containg the project options
    */
-  void createProjectFile();
+  QDomDocument createNewProjectOptions();
+
+  /**
+   * @brief updateProjectFile Saves the project options to the project file
+   * assumes that a project is open
+   */
+  void updateProjectFile();
+
+  /**
+   * @brief convertProjectFileToNewFormat Converts a project file to the new
+   *   project file format
+   * Old format: "SPEC <path to spec>", new format: DOM structure
+   * This method should be removed in the future
+   * @param newProjectFolderPath The path to the project project folder
+   * @param newProjectFilePath The path to the project file
+   * @param oldFormat The contents of the project file in the old format
+   * @return The new format
+   */
+  QDomDocument convertProjectFileToNewFormat(QString newProjectFolderPath,
+                                             QString newProjectFilePath,
+                                             QString oldFormat);
 
   /**
    * @brief readPropertyFromFile Reads a property from a file
