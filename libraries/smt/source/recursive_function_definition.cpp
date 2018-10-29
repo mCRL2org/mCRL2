@@ -15,7 +15,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
-#include "mcrl2/data/substitutions/variable_assignment.h"
+#include "mcrl2/data/substitutions/variable_substitution.h"
 #include "mcrl2/smt/recursive_function_definition.h"
 
 namespace mcrl2
@@ -263,8 +263,8 @@ static data::data_expression construct_rhs(data_specification *data_specificatio
        * variable that disappears.
        */
       assert(data::is_variable(pattern));
-      data::data_expression condition = data::replace_free_variables(i->condition, data::variable_assignment(data::variable(pattern), matching_target));
-      data::data_expression rhs = data::replace_free_variables(i->rhs, data::variable_assignment(data::variable(pattern), matching_target));
+      data::data_expression condition = data::replace_free_variables(i->condition, data::variable_substitution(data::variable(pattern), matching_target));
+      data::data_expression rhs = data::replace_free_variables(i->rhs, data::variable_substitution(data::variable(pattern), matching_target));
 
       const std::set<data::function_symbol>& constructors = data_specification->constructors(matching_target.sort());
       for (std::set<data::function_symbol>::const_iterator j = constructors.begin(); j != constructors.end(); j++)

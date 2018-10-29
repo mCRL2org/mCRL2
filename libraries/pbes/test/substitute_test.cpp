@@ -11,7 +11,7 @@
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/data/substitutions/variable_assignment.h"
+#include "mcrl2/data/substitutions/variable_substitution.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_variable_assignment)
   pbes_expression expected_result = parse_pbes_expression("forall n: Nat. exists m: Nat. val(n > n)");
   data::variable m("m", data::sort_nat::nat());
   data::variable n("n", data::sort_nat::nat());
-  data::variable_assignment sigma(m, n);
+  data::variable_substitution sigma(m, n);
   pbes_expression result = pbes_system::replace_variables(x, sigma);
   if (!(result == expected_result))
   {
