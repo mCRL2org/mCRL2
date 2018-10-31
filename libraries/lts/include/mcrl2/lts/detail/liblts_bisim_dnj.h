@@ -109,14 +109,14 @@ namespace detail
 ///                                    actions on states must be preserved. If
 ///                                    false these are removed. If true these
 ///                                    are preserved.
-/// \param[out]    reverse_map         If this pointer is != nullptr, the
-///                                    function fills the vector with, per
+/// \param[out]    arbitrary_state_per_block    If this pointer is != nullptr,
+///                                    the function fills the vector with, per
 ///                                    equivalence class, the number of an
 ///                                    arbitrary original state in the class.
 template <class LTS_TYPE>
 void bisimulation_reduce_dnj(LTS_TYPE& l, bool branching = false,
-                              bool preserve_divergence = false,
-                              std::vector<std::size_t>* reverse_map = nullptr);
+                bool preserve_divergence = false,
+                std::vector<std::size_t>* arbitrary_state_per_block = nullptr);
 
 
 /// \brief Checks whether the two initial states of two LTSs are strong or

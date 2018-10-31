@@ -2489,8 +2489,9 @@ class bisim_partitioner_dnj
   public:
     /// \brief constructor
     /// \details The constructor constructs the data structures and immediately
-    /// calculates the bisimulation quotient.  However, it does not change the
-    /// LTS.
+    /// calculates the partition corresponding with the bisimulation quotient.
+    /// It destroys the transitions on the LTS (to save memory) but does not
+    /// adapt the LTS to represent the quotient's transitions.
     /// \param new_aut                 LTS that needs to be reduced
     /// \param new_branching           If true branching bisimulation is used,
     ///                                otherwise strong bisimulation is
@@ -2513,31 +2514,62 @@ class bisim_partitioner_dnj
     ~bisim_partitioner_dnj()  {  }
 
 
+    /// \brief Calculate the number of equivalence classes
+    /// \details The number of equivalence classes (which is valid after the
+    /// partition has been constructed) is equal to the number of states in the
+    /// bisimulation quotient.
+    static state_type num_eq_classes()
+    {
+        return block_t::nr_of_blocks;
+    }
+
+
+    /// \brief Get the equivalence class of a state
+    /// \details After running the minimisation algorithm, this function
+    /// produces the number of the equivalence class of a state.  This number
+    /// is the same as the number of the state in the minimised LTS to which
+    /// the original state is mapped.
+    /// \param s state whose equivalence class needs to be found
+    /// \returns sequence number of the equivalence class of state s
+    state_type get_eq_class(state_type s) const
+    {
+        return part_st.block(s)->seqnr;
+    }
+
+
     /// \brief Adapt the LTS after minimisation
     /// \details After the efficient branching bisimulation minimisation, the
     /// information about the quotient LTS is only stored in the partition data
     /// structure of the partitioner object.  This function exports the
     /// information back to the LTS by adapting its states and transitions:  it
     /// updates the number of states and adds those transitions that are
-    /// mandated by the partition data structure.
+    /// mandated by the partition data structure.  If desired, it also creates
+    /// a vector containing an arbritrary (example) original state per
+    /// equivalence class.
     ///
     /// The main parameter and return value are implicit with this function: a
     /// reference to the LTS was stored in the object by the constructor.
-    /// \param reverse_map If this pointer is != nullptr, the function fills
-    ///                    the vector with, per equivalence class, the number
-    ///                    of an arbitrary original state in the class.
-    void replace_transition_system(std::vector<std::size_t>* const reverse_map)
+    /// \param[out] arbitrary_state_per_block    If this pointer is != nullptr,
+    ///                                the function fills the vector with, per
+    ///                                equivalence class, the number of an
+    ///                                arbitrary original state in the class.
+    void finalize_minimized_LTS(std::vector<std::size_t>* const
+                                                     arbitrary_state_per_block)
     {
-        if (nullptr != reverse_map)
+        if (nullptr != arbitrary_state_per_block)
         {
-            reverse_map->assign(num_eq_classes(), (state_type) -1);
-
+            arbitrary_state_per_block->resize(num_eq_classes());
+                                                                                #ifndef NDEBUG
+                                                                                    arbitrary_state_per_block->assign(num_eq_classes(), (state_type) -1);
+                                                                                #endif
             // for all blocks
             permutation_const_iter_t s_iter = part_st.permutation.cbegin();     assert(s_iter == state_info_entry::perm_begin);
             do
             {
-                const block_t* const B = (*s_iter)->block;                      assert(0 <= B->seqnr);  assert(B->seqnr < reverse_map->size());
-                (*reverse_map)[B->seqnr]=*s_iter-&*part_st.state_info.cbegin();
+                const block_t* const B = (*s_iter)->block;                      assert(0 <= B->seqnr);  assert(B->seqnr < arbitrary_state_per_block->size());
+                                                                                assert((state_type) -1 == (*arbitrary_state_per_block)[B->seqnr]);
+                (*arbitrary_state_per_block)[B->seqnr] =
+                                       *s_iter - &*part_st.state_info.cbegin();
                 s_iter = B->end;
             }
             while (s_iter < part_st.permutation.cend());                        assert(s_iter == state_info_entry::perm_end);
@@ -2596,25 +2628,6 @@ class bisim_partitioner_dnj
         }
 
         aut.set_initial_state(get_eq_class(aut.initial_state()));
-    }
-
-
-    static state_type num_eq_classes()
-    {
-        return block_t::nr_of_blocks;
-    }
-
-
-    /// \brief Get the equivalence class of a state
-    /// \details After running the minimisation algorithm, this function
-    /// produces the number of the equivalence class of a state.  This number
-    /// is the same as the number of the state in the minimised LTS to which
-    /// the original state is mapped.
-    /// \param s state whose equivalence class needs to be found
-    /// \returns sequence number of the equivalence class of state s
-    state_type get_eq_class(state_type s) const
-    {
-        return part_st.block(s)->seqnr;
     }
 
 
@@ -4532,13 +4545,14 @@ bunch_t* bunch_t::first_nontrivial;
 ///                                    actions on states must be preserved. If
 ///                                    false these are removed. If true these
 ///                                    are preserved.
-/// \param[out] reverse_map If this pointer is != nullptr, the function fills
-///                         the vector with, per equivalence class, the number
-///                         of an arbitrary original state in the class.
+/// \param[out]    arbitrary_state_per_block    If this pointer is != nullptr,
+///                                    the function fills the vector with, per
+///                                    equivalence class, the number of an
+///                                    arbitrary original state in the class.
 template <class LTS_TYPE>
 void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching /* = false */,
-                   bool const preserve_divergence /* = false */,
-                   std::vector<std::size_t>* const reverse_map /* = nullptr */)
+     bool const preserve_divergence /* = false */,
+     std::vector<std::size_t>* const arbitrary_state_per_block /* = nullptr */)
 {
     // First, contract tau-SCCs to single states in case of branching
     // bisimulation.
@@ -4555,7 +4569,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching /* = false */,
                                                           preserve_divergence);
 
         // Assign the reduced LTS
-        bisim_part.replace_transition_system(reverse_map);
+        bisim_part.finalize_minimized_LTS(arbitrary_state_per_block);
     }
 }
 
@@ -4617,12 +4631,12 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
 
 
 
-template void bisimulation_reduce_dnj(lts_lts_t& l, bool branching,
-              bool preserve_divergence, std::vector<std::size_t>* reverse_map);
-template void bisimulation_reduce_dnj(lts_aut_t& l, bool branching,
-              bool preserve_divergence, std::vector<std::size_t>* reverse_map);
-template void bisimulation_reduce_dnj(lts_fsm_t& l, bool branching,
-              bool preserve_divergence, std::vector<std::size_t>* reverse_map);
+template void bisimulation_reduce_dnj(lts_lts_t& l, bool branching, bool
+     preserve_divergence, std::vector<std::size_t>* arbitrary_state_per_block);
+template void bisimulation_reduce_dnj(lts_aut_t& l, bool branching, bool
+     preserve_divergence, std::vector<std::size_t>* arbitrary_state_per_block);
+template void bisimulation_reduce_dnj(lts_fsm_t& l, bool branching, bool
+     preserve_divergence, std::vector<std::size_t>* arbitrary_state_per_block);
 
 template bool destructive_bisimulation_compare_dnj(lts_lts_t& l1,lts_lts_t& l2,
      bool branching, bool preserve_divergence, bool generate_counter_examples);
