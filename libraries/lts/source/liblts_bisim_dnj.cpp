@@ -1308,7 +1308,7 @@ class block_bunch_slice_t
                                                                                     static block_bunch_const_iter_t block_bunch_begin;
                                                                                     static const block_bunch_iter_t* block_bunch_end;
 
-                                                                                    static struct {
+                                                                                    struct {
                                                                                         inline bool operator()(const block_bunch_entry& p1,
                                                                                                                                  const block_bunch_slice_t* p2)
                                                                                         {
