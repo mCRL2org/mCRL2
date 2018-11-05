@@ -14,11 +14,11 @@ use the mCRL2 tool-set and its language. With this tool the user can
 * define properties and verify them on the mCRL2 specification
 * create and view the evidence for these properties
 
-..note::
+.. note::
 
    Although mcrl2ide is marked as a release tool, it is still in developement.
 
-..note::
+.. note::
 
    Known issues in the 201808.0 release version:
 
@@ -32,7 +32,7 @@ use the mCRL2 tool-set and its language. With this tool the user can
      file system, which may lead to confusing results when using these
      properties. To keep the state of the IDE consistent with the file system
      always press "Parse" at least once just before pressing "Add"/"Edit" and do
-     not close the dialog without pressing "Add"/"Edit". One can also reopen the 
-     project to reload the properties in the IDE from the file system. 
+     not close the dialog without pressing "Add"/"Edit". One can also reopen the
+     project to reload the properties in the IDE from the file system.
 
    These issues have been fixed in the latest version
