@@ -1,20 +1,6 @@
-% concatenation: ++
-
-
 \documentclass{article}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{amssymb}
 \usepackage{amsfonts}
-
-%TCIDATA{OutputFilter=LATEX.DLL}
-%TCIDATA{Version=5.50.0.2890}
-%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
-%TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{Created=Monday, January 21, 2013 17:27:12}
-%TCIDATA{LastRevised=Friday, May 16, 2014 17:51:53}
-%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
-%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
-%TCIDATA{CSTFile=40 LaTeX article.cst}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{acknowledgement}[theorem]{Acknowledgement}
@@ -38,86 +24,96 @@
 \newtheorem{solution}[theorem]{Solution}
 \newtheorem{summary}[theorem]{Summary}
 \newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
-\input{include/tcilatex}
-\providecommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}{\text{\scriptsize+}\!\text{\scriptsize+}}\hspace{0.12em}}}
-
-
+\newcommand{\concat}{\ensuremath{+\!\!+}}
 \begin{document}
 
+\title{Enumerator}
+\author{Wieger Wesselink}
+\maketitle
 
-\section{Enumerator}
+This document specifies an algorithm for enumeration. Let $\varphi $ be an
+expression of type $T$, let $v=FV(\varphi )$ be the list of free variables
+occurring in $\varphi $, and let $accept$ be a predicate function on
+expressions of type $T$. We define a \emph{solution} of $\varphi $ as a
+ground term consisting of constructors only, that is obtained by assigning
+values to the variables in $v$ such that $accept(\varphi)$ evaluates to true. The
+enumeration algorithm iteratively computes solutions of the expression $%
+\varphi$.
 
-This document specifies an algorithm for enumeration. Let $v$ be a list of
-variables, $\varphi ,\widehat{\varphi }$ expressions of type Bool and, $R$ a
-rewriter, and $\sigma $ a substitution that is applied during rewriting with 
-$R$. For each sort $S$ a set of constructor functions $\mathrm{constructors}%
-(S)$ is defined. We assume that $\mathrm{constructors}(\mathrm{sort}(d))\neq
-\emptyset $ for all $d\in v$. Note that the algorithm computes all solutions
-of the condition $\varphi $ that are not equal to $\widehat{\varphi }$. Each
-solution corresponds with an assignment to the original variables $v$. The
-algorithm can be easily extended to compute this assignment. A precondition
-of the algorithm is that for all $v_{i}\in v$ we must have $\sigma
+Let $R$ be a rewriter on expressions of type $T$, let $r$ be a rewriter on
+data expressions, and let $\sigma $ a substitution on data variables that is
+applied during rewriting with $R$. We assume that for each sort $S$ a set of
+constructor functions $\mathrm{constructors}(S)$ is defined, such that $%
+\mathrm{constructors}(\mathrm{sort}(d))\neq \emptyset $ for all $d\in v$. A
+precondition of the algorithm is that for all $v_{i}\in v$ we have $\sigma
 (v_{i})=v_{i}$.
 
-\bigskip 
 \[
 \begin{tabular}{l}
-\textsc{Enumerate(}$v,\varphi ,\widehat{\varphi },R,\sigma $\textsc{)} \\ 
-$P:=[\left\langle v,R(\varphi ,\sigma )\right\rangle ]$ \\ 
-$\Omega :=\emptyset $ \\ 
-\textbf{while} $P\neq \emptyset $ \textbf{do} \\ 
+\textsc{Enumerate(}$v,\varphi ,accept,R,r,\sigma $\textsc{)} \\
+$P:=[\left\langle v,R(\varphi ,\sigma )\right\rangle ]$ \\
+$\Omega :=\emptyset $ \\
+\textbf{while} $P\neq \emptyset $ \textbf{do} \\
 \qquad \textbf{let} $\left\langle v,\varphi \right\rangle =\mathrm{head}(P)$
-\\ 
-\qquad $P:=\mathrm{tail}(P)$ \\ 
-\qquad \textbf{let} $v=[v_{1},\ldots ,v_{n}]$ \\ 
-\qquad $\text{\textbf{if }}\varphi \neq \widehat{\varphi }\text{ \textbf{then%
-}}$ \\ 
-\qquad \qquad $\text{\textbf{if }}v=[]\text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad $\Omega :=\Omega \cup \left\{ \varphi \right\} $ \\ 
-\qquad \qquad $\text{\textbf{else}}$ \\ 
-\qquad \qquad \qquad $\text{\textbf{if }}\mathrm{constructors}(\mathrm{sort}%
-(v_{1}))\neq \emptyset \text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad \qquad \textbf{for} $c\in $ $\mathrm{constructors}(%
-\mathrm{sort}(v_{1}))$ \textbf{do} \\ 
+\\
+\qquad $P:=\mathrm{tail}(P)$ \\
+\qquad \textbf{let} $v=[v_{1},\ldots ,v_{n}]$ \\
+\qquad \textbf{if} $accept(\varphi)$ \textbf{then} \\
+\qquad \qquad \textbf{if } $v=[]$ \textbf{then} \\
+\qquad \qquad \qquad $\Omega :=\Omega \cup \left\{\varphi \right\}$ \\
+\qquad \qquad \textbf{else} \\
+\qquad \qquad \qquad \textbf{if } $\mathrm{constructors}(\mathrm{sort} (v_{1}))\neq \emptyset$ \textbf{then} \\
+\qquad \qquad \qquad \qquad \textbf{for} $c\in $ $\mathrm{constructors}(\mathrm{sort}(v_{1}))$ \textbf{do} \\
 \qquad \qquad \qquad \qquad \qquad \textbf{let} $c:D_{1}\times \ldots \times
-D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\ 
-\qquad \qquad \qquad \qquad \qquad \textbf{choose }$y_{1},\ldots ,y_{m}$ 
-\textbf{such} that $y_{i}\notin \{v_{1},\ldots ,v_{n}\}\cup FV(\varphi )$,
-for $i=1,\cdots ,m$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi ,\sigma
-\lbrack v_{1}:=c(y_{1},\ldots ,y_{m})])$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\text{\textbf{if }}\varphi ^{\prime
-}=\varphi \text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\ 
-\qquad \qquad \qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
-\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n},y_{1},\ldots ,y_{m}],\varphi ^{\prime }\right\rangle ]$
-\\ 
-\qquad \qquad \qquad $\text{\textbf{else}}$ \\ 
-\qquad \qquad \qquad \qquad $\text{\textbf{error}}$ \\ 
-$\text{\textbf{return}}$ $\Omega $%
+D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\
+\qquad \qquad \qquad \qquad \qquad \textbf{choose }$y_{1},\ldots ,y_{m}$
+\textbf{such} that $y_i \notin \{ v_1, \ldots ,v_n \} \cup FV(\varphi)$, for $i=1, \cdots, m$ \\
+\qquad \qquad \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi ,\sigma \lbrack v_{1}:=r(c(y_{1},\ldots ,y_{m}))])$ \\
+\qquad \qquad \qquad \qquad \qquad \textbf{if } $\varphi^\prime = \varphi$ \textbf{ then} \\
+\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle [v_{2},\ldots ,v_{n}],\varphi ^{\prime }\right\rangle ]$ \\
+\qquad \qquad \qquad \qquad \qquad \textbf{else} \\
+\qquad \qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle [v_{2},\ldots ,v_{n},y_{1},\ldots ,y_{m}],\varphi ^{\prime }\right\rangle ]$ \\
+\qquad \qquad \qquad \textbf{else} \\
+\qquad \qquad \qquad \qquad \textbf{error} \\
+\textbf{return} $\Omega$
 \end{tabular}%
 \]%
-where $\epsilon $ is the empty substitution. The enumeration can be extended
-to finite sets and functions by adding
+where $\epsilon $ is the empty substitution.
+
+\begin{remark}
+The algorithm works both for data expressions and PBES expressions.
+\end{remark}
+
+\begin{remark}
+In the case of data expressions, $R$ and $r$ may coincide.%
+\end{remark}
+
+\begin{remark}
+The algorithm can be easily extended such that it also returns the assignments
+corresponding a solution.
+\end{remark}
+
+\begin{remark}
+The most common use case is to take an expression $\varphi $ of
+type Bool, and to choose $accept(\varphi )\equiv \varphi \neq false$.
+Then it can for example be used to compute all assignments to $FV(\varphi)$
+that cause a condition $\varphi$ to be evaluated to true.
+\end{remark}
+
+The enumeration can be extended to finite sets and functions by adding
 
 \[
 \begin{tabular}{l}
-\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}(v_{1})=Set(E)$
-with $E$ finite$\text{ \textbf{then}}$ \\ 
-\qquad \qquad \qquad \qquad \textbf{for} $e\in \mathrm{subsets}(E)$ \textbf{%
-do} \\ 
-\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n}],R(\varphi ,\sigma \lbrack v_{1}:=e])\right\rangle ]$
-\\ 
-\qquad \qquad \qquad $\text{\textbf{else if }}\mathrm{sort}%
-(v_{1})=D_{1}\times \ldots \times D_{m}\rightarrow D\text{ \textbf{then}}$
-\\ 
-\qquad \qquad \qquad \qquad \textbf{for} $f\in \mathrm{functions}(\mathrm{%
-sort}(v_{1}))$ \textbf{do} \\ 
-\qquad \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle
-[v_{2},\ldots ,v_{n}],R(\varphi ,\sigma \lbrack v_{1}:=f])\right\rangle ]$%
+\qquad \qquad \textbf{else if }$\mathrm{sort}(v_{1})=Set(E)$
+with $E$ finite \textbf{then} \\
+\qquad \qquad \qquad \textbf{for} $e\in \mathrm{subsets}(E)$ \textbf{do} \\
+\qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle [v_{2},\ldots ,v_{n}],R(\varphi ,\sigma \lbrack v_{1}:=e])\right\rangle ]$ \\
+\qquad \qquad \textbf{else if } $\mathrm{sort}%
+(v_{1})=D_{1}\times \ldots \times D_{m}\rightarrow D$ \textbf{ then}
+\\
+\qquad \qquad \qquad \textbf{for} $f\in \mathrm{functions}(\mathrm{%
+sort}(v_{1}))$ \textbf{do} \\
+\qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle [v_{2},\ldots ,v_{n}],R(\varphi ,\sigma \lbrack v_{1}:=f])\right\rangle ]$%
 \end{tabular}%
 \]
 
