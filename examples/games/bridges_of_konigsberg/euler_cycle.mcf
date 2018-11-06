@@ -1,0 +1,23 @@
+% The formula below expresses that there is an Euler
+% cycle in Konigsberg, meaning that there is a finite
+% sequence of bridge crossings where every bridge is 
+% crossed exactly once.
+% The formula has a parameter that indicates which bridges
+% have been crossed, which is a set of positive numbers, 
+% initially empty. The first part of the formula says that
+% all seven bridge have been crossed; the second part says
+% that there is a crossing possible over a bridge that has
+% not been crossed. As the formula is a minimal fixed point,
+% it says that either all bridge have been crossed or there
+% is a bridge crossing possible such that we are closer to
+% the goal of crossing all bridges. 
+% In this variant it is not checked that we end up in the 
+% original state. 
+
+mu X(crossed_bridges:Set(Pos)={}).
+     (forall n:Pos.val(n>7 || n in crossed_bridges))
+     ||
+     (exists n:Pos.val(n<=7 && !(n in crossed_bridges)) &&
+             <bridge(n)>X(crossed_bridges+{n}))
+
+     
