@@ -3,7 +3,7 @@
 .. _tool-pbessolve:
 
 pbessolve
-=======
+=========
 
 The tool ``pbessolve`` can solve a PBES. The solution is printed as ``true`` or ``false`` on
 the command line output. If the property encoded in the PBES holds, in addition a witness can be constructed,

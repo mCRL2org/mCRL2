@@ -3,7 +3,7 @@
 .. _tool-pbesinfo:
 
 pbesinfo
-=======
+========
 
 This tool prints some basic information about a file containing a parameterised
 Boolean equation system. It indicates the number of minimal and maximal fixed
