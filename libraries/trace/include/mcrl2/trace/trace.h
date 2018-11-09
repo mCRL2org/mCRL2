@@ -445,7 +445,7 @@ class Trace
         }
 
       }
-      catch (mcrl2::runtime_error err)
+      catch (mcrl2::runtime_error& err)
       {
         std::string s;
         s = "error loading trace: ";

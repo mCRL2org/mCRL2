@@ -438,7 +438,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& l, const std::string& filename)
     {  
       stream.open(filename, std::ifstream::in | std::ifstream::binary);
     }
-    catch (std::ifstream::failure)
+    catch (std::ifstream::failure&)
     {
       if (filename=="")
       {
@@ -455,7 +455,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& l, const std::string& filename)
       input=atermpp::read_term_from_binary_stream(stream);
       stream.close();
     }
-    catch (std::ifstream::failure)
+    catch (std::ifstream::failure&)
     {
       if (filename=="")
       {
@@ -620,7 +620,7 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& l, const std::string& file
     {
       stream.open(filename, std::ofstream::out | std::ofstream::binary);
     }
-    catch (std::ofstream::failure )
+    catch (std::ofstream::failure&)
     {
       throw mcrl2::runtime_error("Fail to open file " + filename + " for writing.");
     }
@@ -629,7 +629,7 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& l, const std::string& file
       atermpp::write_term_to_binary_stream(t0, stream);
       stream.close();
     }
-    catch (std::ofstream::failure)
+    catch (std::ofstream::failure&)
     {
       throw mcrl2::runtime_error("Fail to write lts correctly to the file " + filename + ".");
     }

@@ -129,7 +129,7 @@ function_symbol::function_symbol(const std::string& name_, const std::size_t ari
           std::size_t number=std::stol(potential_number);
           i->second(number+1); // Set the index belonging to the found prefix to at least a safe number+1.
         }
-        catch (std::exception)
+        catch (std::exception&)
         {
           // Can be std::invalid_argument or an out_of_range exception.
           // In both cases nothing needs to be done, and the exception can be ignored.
