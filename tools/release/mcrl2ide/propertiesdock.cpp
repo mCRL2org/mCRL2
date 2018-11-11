@@ -18,7 +18,6 @@ PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
 {
   this->processSystem = processSystem;
   this->fileSystem = fileSystem;
-  previousHorizontalScrollbarMaximum = 0;
 
   /* create the properties layout */
   propertiesLayout = new QVBoxLayout();
@@ -31,11 +30,7 @@ PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
   innerDockWidget = new QScrollArea();
   innerDockWidget->setWidget(innerScrollWidget);
   innerDockWidget->setWidgetResizable(true);
-  innerDockWidget->setStyleSheet("QScrollArea { border: none; }");
-
-  hScrollBar = innerDockWidget->horizontalScrollBar();
-  connect(hScrollBar, SIGNAL(rangeChanged(int, int)), this,
-          SLOT(keepContentsLeft(int, int)));
+  innerDockWidget->setFrameShape(QFrame::NoFrame);
 
   this->setWidget(innerDockWidget);
 }
@@ -43,7 +38,6 @@ PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
 PropertiesDock::~PropertiesDock()
 {
   propertiesLayout->deleteLater();
-  hScrollBar->deleteLater();
   innerDockWidget->deleteLater();
 }
 
@@ -65,17 +59,6 @@ void PropertiesDock::setToNoProperties()
   propertiesLayout->addWidget(noPropertiesLabel);
 
   propertyWidgets.clear();
-}
-
-void PropertiesDock::keepContentsLeft(int min, int max)
-{
-  Q_UNUSED(min);
-  if (max > previousHorizontalScrollbarMaximum)
-  {
-    hScrollBar->setValue(hScrollBar->value() +
-                         (max - previousHorizontalScrollbarMaximum));
-  }
-  previousHorizontalScrollbarMaximum = max;
 }
 
 void PropertiesDock::addProperty(const Property& property)

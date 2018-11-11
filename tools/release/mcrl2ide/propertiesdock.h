@@ -56,13 +56,6 @@ class PropertiesDock : public QDockWidget
 
   public slots:
   /**
-   * @brief keepContentsLeft When resizing the properties dock, this will make
-   *   sure that the contents stay to the left as much as possible whenever a
-   *   horizontal scroll bar is needed
-   */
-  void keepContentsLeft(int min, int max);
-
-  /**
    * @brief deleteProperty Removes a property from the dock
    * @param propertyWidget The property widget to remove
    */
@@ -79,8 +72,6 @@ class PropertiesDock : public QDockWidget
   FileSystem* fileSystem;
 
   QScrollArea* innerDockWidget;
-  QScrollBar* hScrollBar;
-  int previousHorizontalScrollbarMaximum;
   QVBoxLayout* propertiesLayout;
   std::list<PropertyWidget*> propertyWidgets;
 };

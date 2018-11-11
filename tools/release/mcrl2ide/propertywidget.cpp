@@ -32,6 +32,16 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   /* create the label for the property name */
   propertyNameLabel = new QLabel(property.name);
 
+  /* create a scrollarea to reduce the name label when needed */
+  propertyNameScrollArea = new QScrollArea(this);
+  propertyNameScrollArea->setWidget(propertyNameLabel);
+  propertyNameScrollArea->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+  propertyNameScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  propertyNameScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  propertyNameScrollArea->setMinimumWidth(16);
+  propertyNameScrollArea->setMaximumHeight(propertyNameLabel->height());
+  propertyNameScrollArea->setFrameShape(QFrame::NoFrame);
+
   /* create the verify button */
   QPushButton* verifyButton = new QPushButton();
   verifyButton->setIcon(QIcon(":/icons/verify.png"));
@@ -93,7 +103,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
 
   /* lay them out */
   propertyLayout = new QHBoxLayout();
-  propertyLayout->addWidget(propertyNameLabel);
+  propertyLayout->addWidget(propertyNameScrollArea);
   propertyLayout->addStretch();
   propertyLayout->addWidget(verificationWidgets);
   propertyLayout->addWidget(editButton);
@@ -122,9 +132,9 @@ PropertyWidget::~PropertyWidget()
   editPropertyDialog->deleteLater();
 }
 
-void PropertyWidget::paintEvent(QPaintEvent* pe)
+void PropertyWidget::paintEvent(QPaintEvent* event)
 {
-  Q_UNUSED(pe);
+  Q_UNUSED(event);
   QStyleOption o;
   o.initFrom(this);
   QPainter p(this);

@@ -19,6 +19,7 @@
 #include <QPushButton>
 #include <QProcess>
 #include <QStackedWidget>
+#include <QScrollArea>
 
 /**
  * @brief The PropertyWidget class defines a widget for a single property in the
@@ -107,9 +108,9 @@ class PropertyWidget : public QWidget
   protected:
   /**
    * @brief paintEvent Makes sure that the widget is painted correctly
-   * @param pe A paint event
+   * @param event A paint event
    */
-  void paintEvent(QPaintEvent* pe) override;
+  void paintEvent(QPaintEvent* event) override;
 
   private:
   ProcessSystem* processSystem;
@@ -119,6 +120,7 @@ class PropertyWidget : public QWidget
 
   QHBoxLayout* propertyLayout;
   QLabel* propertyNameLabel;
+  QScrollArea* propertyNameScrollArea;
   QStackedWidget* verificationWidgets;
   QPushButton* editButton;
   QPushButton* deleteButton;
