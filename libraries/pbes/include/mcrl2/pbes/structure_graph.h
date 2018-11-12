@@ -323,7 +323,7 @@ struct structure_graph_builder
   pbes_expression m_initial_state; // The initial state.
 
   explicit structure_graph_builder(structure_graph& G)
-    : m_graph(G)
+    : m_graph(G), m_initial_state(data::undefined_data_expression())
   {}
 
   structure_graph::decoration_type decoration(const pbes_expression& x) const

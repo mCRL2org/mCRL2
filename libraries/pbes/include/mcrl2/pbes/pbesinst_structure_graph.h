@@ -28,7 +28,6 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
 {
   protected:
     detail::structure_graph_builder m_graph_builder;
-    bool m_initial_state_assigned;
 
     void SG0(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
     {
@@ -107,16 +106,15 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
          int optimization = 0
         )
       : pbesinst_lazy_algorithm(p, rewrite_strategy, search_strategy, optimization),
-        m_graph_builder(G),
-        m_initial_state_assigned(false)
+        m_graph_builder(G)
     {}
 
     void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
     {
-      if (!m_initial_state_assigned)
+      // the body of this if statement will only be executed for the first equation
+      if (m_graph_builder.m_initial_state == data::undefined_data_expression())
       {
         m_graph_builder.set_initial_state(X);
-        m_initial_state_assigned = true;
       }
       SG0(X, psi, k);
     }

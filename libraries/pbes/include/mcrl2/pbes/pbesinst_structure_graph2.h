@@ -86,7 +86,7 @@ bool find_loop(const simple_structure_graph& G,
     return i->second;
   }
 
-  if (w_.decoration == data::undefined_index() ||
+  if (w_.decoration == structure_graph::d_none ||
       ((w_.rank % 2 == 0 && w_.decoration == structure_graph::d_disjunction) ||
        (w_.rank % 2 != 0 && w_.decoration == structure_graph::d_conjunction))
      )
@@ -412,6 +412,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, optimization),
         find_loops_guard(2)
     {}
+
+    // Optimization 2 is implemented by overriding the function rewrite_psi.
 
     pbes_expression rewrite_psi(const fixpoint_symbol& symbol,
                                 const propositional_variable_instantiation& X,
