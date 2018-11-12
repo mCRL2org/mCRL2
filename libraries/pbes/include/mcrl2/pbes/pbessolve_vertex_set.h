@@ -274,29 +274,20 @@ void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::str
   // mCRL2log(log::debug) << "exclude = " << G.exclude() << "\n";
 }
 
-// Returns true if the vertex u satisfies the conditions for being added to the attractor set A.
-// alpha = 0: disjunctive
-// alpha = 1: conjunctive
+// Returns true if the successors of u are included in A
 template <typename StructureGraph>
-bool is_attractor(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, int alpha)
+bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A)
 {
-  if (G.decoration(u) != alpha)
+  for (auto v: G.successors(u))
   {
-    return true;
-  }
-  if (G.decoration(u) != (1 - alpha))
-  {
-    for (auto v: G.successors(u))
+    if (!(A.contains(v)))
     {
-      if (!(A.contains(v)))
-      {
-        return false;
-      }
+      return false;
     }
-    return true;
   }
-  return false;
+  return true;
 }
+
 
 // Computes the conjunctive attractor set, by extending A.
 // alpha = 0: disjunctive
@@ -326,7 +317,7 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, int alph
     // N.B. Use a breadth first search, to minimize counter examples
     auto u = todo.pop_front();
 
-    if (is_attractor(G, u, A, 1 - alpha))
+    if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
       // set strategy
       if (G.decoration(u) != (1 - alpha))
