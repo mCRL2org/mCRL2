@@ -21,7 +21,7 @@ namespace data {
 
 /// \brief Returns an index that corresponds to 'undefined'
 inline
-std::size_t undefined_index()
+constexpr std::size_t undefined_index()
 {
   return std::size_t(-1);
 }
