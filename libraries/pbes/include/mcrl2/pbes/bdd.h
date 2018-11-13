@@ -86,6 +86,8 @@ class term
 {
   public:
     virtual std::string print(bool after) const = 0;
+
+    virtual ~term() = default; 
 };
 
 typedef std::shared_ptr<term> bdd_node;
@@ -107,6 +109,7 @@ class true_: public term
   {
     return "True";
   }
+
 };
 
 inline
