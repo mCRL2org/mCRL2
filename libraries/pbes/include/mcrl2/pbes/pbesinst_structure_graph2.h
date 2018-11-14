@@ -231,6 +231,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       std::size_t n = m_graph_builder.m_vertices.size();
       vertex_set U(n);
 
+      std::size_t count;
+
       for (const propositional_variable_instantiation& X: discovered)
       {
         structure_graph::index_type u = m_graph_builder.find_vertex(X);
@@ -263,10 +265,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         {
           if (!U_minus_X.contains(x))
           {
+            count++;
             S_alpha.insert(x);
           }
         }
       }
+      mCRL2log(log::debug) << "Fatal attractors: inserted " << count << " vertices." << std::endl;
     }
 
     bool solution_found(const propositional_variable_instantiation& init) const override
