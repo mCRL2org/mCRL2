@@ -33,7 +33,7 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
   {
     for (auto u: G.predecessors(v))
     {
-      if (U.contains(u) && G.rank(u) == j && !A.contains(u))
+      if (U.contains(u) && G.rank(u) >= j && !A.contains(u))
       {
         todo.insert(u);
       }
@@ -68,7 +68,7 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
 
       for (auto v: G.predecessors(u))
       {
-        if (U.contains(v) && G.rank(v) == j && !A.contains(v))
+        if (U.contains(v) && G.rank(v) >= j && !A.contains(v))
         {
           todo.insert(v);
         }
