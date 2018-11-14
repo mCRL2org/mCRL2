@@ -231,7 +231,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       std::size_t n = m_graph_builder.m_vertices.size();
       vertex_set U(n);
 
-      std::size_t count;
+      std::size_t count = 0;
 
       for (const propositional_variable_instantiation& X: discovered)
       {
