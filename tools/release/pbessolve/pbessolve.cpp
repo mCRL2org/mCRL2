@@ -54,7 +54,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     std::string ltsfile;
     std::string evidence_file;
 
-    int m_strategy = 0; // can be 0, 1, 2, 3 or 4
+    int m_strategy = 0; // can be 0, 1, 2, 3, 4 or 5
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -102,7 +102,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       " they can be set to true or false, depending on the"
                       " fixed point symbol. This can increase the time"
                       " needed to generate an equation substantially. N.B. This"
-                      " optimization may cause stack overflow issues."),
+                      " optimization may cause stack overflow issues.")
+                    .add_value_desc(5, "A generalization of strategy 4, where a so-called"
+                      "fatal attractor is applied."),
                         "use strategy STRATEGY",
                  's');
     }
@@ -130,6 +132,10 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       }
       m_search_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       m_strategy = parser.option_argument_as<int>("strategy");
+      if (m_strategy < 0 || m_strategy > 5)
+      {
+        throw mcrl2::runtime_error("Invalid strategy " + std::to_string(m_strategy));
+      }
     }
 
     std::set<utilities::file_format> available_input_formats() const override

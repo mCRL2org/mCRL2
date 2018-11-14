@@ -289,7 +289,7 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
 }
 
 
-// Computes the conjunctive attractor set, by extending A.
+// Computes an attractor set, by extending A.
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
@@ -341,7 +341,7 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, int alph
 
       for (auto v: G.predecessors(u))
       {
-        if (!A.contains(v) && !todo.contains(v))
+        if (!A.contains(v))
         {
           todo.insert(v);
         }

@@ -13,6 +13,8 @@
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 
 #include "mcrl2/data/undefined.h"
+#include "mcrl2/pbes/pbesinst_fatal_attractors.h"
+#include "mcrl2/pbes/pbesinst_find_loops.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
@@ -63,65 +65,6 @@ class periodic_guard
     }
 };
 
-inline
-bool find_loop(const simple_structure_graph& G,
-               structure_graph::index_type v,
-               structure_graph::index_type w,
-               std::size_t p,
-               std::unordered_map<structure_graph::index_type, bool>& visited
-              )
-{
-  const auto& w_ = G.find_vertex(w);
-  if (w_.decoration == structure_graph::d_true || w_.decoration == structure_graph::d_false)
-  {
-    return false;
-  }
-  if (w_.rank != data::undefined_index() && w_.rank != p)
-  {
-    return false;
-  }
-  auto i = visited.find(w);
-  if (i != visited.end())
-  {
-    return i->second;
-  }
-
-  if (w_.decoration == structure_graph::d_none ||
-      ((w_.rank % 2 == 0 && w_.decoration == structure_graph::d_disjunction) ||
-       (w_.rank % 2 != 0 && w_.decoration == structure_graph::d_conjunction))
-     )
-  {
-    visited[w] = false;
-    for (structure_graph::index_type u: w_.successors)
-    {
-      if (u == v || find_loop(G, v, u, p, visited))
-      {
-        visited[w] = true;
-        return true;
-      }
-    }
-  }
-  else
-  {
-    visited[w] = true;
-    bool has_successors = false;
-    for (structure_graph::index_type u: w_.successors)
-    {
-      has_successors = true;
-      if (u != v && !find_loop(G, v, u, p, visited))
-      {
-        visited[w] = false;
-        return false;
-      }
-    }
-    if (!has_successors)
-    {
-      visited[w] = false;
-    }
-  }
-  return false;
-}
-
 } // namespace detail
 
 /// \brief Adds an optimization to pbesinst_structure_graph.
@@ -134,6 +77,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     detail::computation_guard S0_guard;
     detail::computation_guard S1_guard;
     detail::computation_guard find_loops_guard;
+    detail::computation_guard fatal_attractors_guard;
     detail::periodic_guard reset_guard;
 
     template<typename T>
@@ -265,6 +209,61 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           else
           {
             S0.insert(u);
+          }
+        }
+      }
+    }
+
+    void insert(std::map<std::size_t, vertex_set>& U_rank_map, structure_graph::index_type u, std::size_t j, std::size_t n)
+    {
+      std::map<std::size_t, vertex_set>::iterator i = U_rank_map.find(j);
+      if (i == U_rank_map.end())
+      {
+        i = U_rank_map.insert({ j, vertex_set(n) }).first;
+      }
+      i->second.insert(u);
+    }
+
+    void fatal_attractors(const simple_structure_graph& G)
+    {
+      // compute U and U_rank_map, such that U_rank_map[j] = U_j
+      std::map<std::size_t, vertex_set> U_rank_map;
+      std::size_t n = m_graph_builder.m_vertices.size();
+      vertex_set U(n);
+
+      for (const propositional_variable_instantiation& X: discovered)
+      {
+        structure_graph::index_type u = m_graph_builder.find_vertex(X);
+        std::size_t j = G.rank(u);
+        if (j != data::undefined_index())
+        {
+          insert(U_rank_map, u, j, n);
+        }
+        U.insert(u);
+      }
+
+      for (auto& p: U_rank_map)
+      {
+        std::size_t j = p.first;
+        const vertex_set& U_j = p.second;
+        int alpha = j % 2;
+        vertex_set& S_alpha = alpha == 0 ? S0 : S1;
+        vertex_set X = detail::compute_attractor_set_min_rank(G, U_j, alpha, U, j);
+        vertex_set U_minus_X(n);
+        for (structure_graph::index_type u: U.vertices())
+        {
+          if (!X.contains(u))
+          {
+            U_minus_X.insert(u);
+          }
+        }
+        U_minus_X = compute_attractor_set(G, U_minus_X, 1 - alpha);
+
+        for (structure_graph::index_type x: X.vertices())
+        {
+          if (!U_minus_X.contains(x))
+          {
+            S_alpha.insert(x);
           }
         }
       }
@@ -410,7 +409,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         int optimization = 0
     )
       : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, optimization),
-        find_loops_guard(2)
+        find_loops_guard(2), fatal_attractors_guard(2)
     {}
 
     // Optimization 2 is implemented by overriding the function rewrite_psi.
@@ -475,6 +474,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
       {
         find_loops(G);
+      }
+      else if (m_optimization == 5 && fatal_attractors_guard(std::max(S0.size(), S1.size())))
+      {
+        fatal_attractors(G);
       }
       if (S0_guard(S0.size()))
       {
