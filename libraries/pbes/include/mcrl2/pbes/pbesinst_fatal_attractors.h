@@ -47,23 +47,23 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
 
     if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
-//      // set strategy
-//      if (G.decoration(u) != (1 - alpha))
-//      {
-//        for (auto w: G.successors(u))
-//        {
-//          if ((A.contains(w)))
-//          {
-//            mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
-//            G.find_vertex(u).strategy = w;
-//            break;
-//          }
-//        }
-//        if (G.strategy(u) == structure_graph::undefined_vertex)
-//        {
-//          mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
-//        }
-//      }
+      // set strategy
+      if (G.decoration(u) != (1 - alpha))
+      {
+        for (auto w: G.successors(u))
+        {
+          if ((A.contains(w)))
+          {
+            mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
+            G.find_vertex(u).strategy = w;
+            break;
+          }
+        }
+        if (G.strategy(u) == structure_graph::undefined_vertex)
+        {
+          mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
+        }
+      }
       A.insert(u);
 
       for (auto v: G.predecessors(u))
