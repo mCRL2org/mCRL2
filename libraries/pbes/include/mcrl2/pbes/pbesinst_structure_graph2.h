@@ -239,9 +239,14 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       {
         structure_graph::index_type u = m_graph_builder.find_vertex(X);
         std::size_t j = G.rank(u);
+        int alpha = j % 2;
         if (j != data::undefined_index())
         {
           U.insert(u);
+          if ((alpha == 0 && G.decoration(u) == structure_graph::decoration_type::d_false) || (alpha == 1 && G.decoration(u) == structure_graph::decoration_type::d_true))
+          {
+            continue;
+          }
           insert(U_rank_map, u, j, n);
         }
       }
