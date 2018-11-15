@@ -95,6 +95,12 @@ class simple_structure_graph
     }
 };
 
+inline
+std::ostream& operator<<(std::ostream& out, const simple_structure_graph& G)
+{
+  return print_structure_graph(out, G);
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

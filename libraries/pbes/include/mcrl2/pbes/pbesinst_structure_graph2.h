@@ -226,6 +226,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void fatal_attractors(const simple_structure_graph& G)
     {
+      mCRL2log(log::debug) << "Apply fatal attractors to graph:\n" << G << std::endl;
+
       // count the number of insertions in the sets S0 and S1
       std::size_t insertion_count = 0;
 
@@ -252,23 +254,35 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         vertex_set& S_alpha = alpha == 0 ? S0 : S1;
         vertex_set X = detail::compute_attractor_set_min_rank(G, U_j, alpha, U, j);
 
-        // compute U \ X
-        vertex_set U_minus_X(n);
-        for (structure_graph::index_type u: U.vertices())
+        // compute A \ X
+        vertex_set A_minus_X(n);
+        for (structure_graph::index_type u = 0; u < n; u++)
         {
           if (!X.contains(u))
           {
-            U_minus_X.insert(u);
+            A_minus_X.insert(u);
           }
         }
 
-        U_minus_X = compute_attractor_set(G, U_minus_X, 1 - alpha);
-        for (structure_graph::index_type x: X.vertices())
+        // compute Y
+        vertex_set Y(n);
+        A_minus_X = compute_attractor_set(G, A_minus_X, 1 - alpha);
+        for (structure_graph::index_type u: U_j.vertices())
         {
-          if (!U_minus_X.contains(x))
+          if (!A_minus_X.contains(u))
+          {
+            Y.insert(u);
+          }
+        }
+
+        if (!Y.is_empty())
+        {
+          Y = detail::compute_attractor_set_min_rank(G, Y, alpha, U, j);
+          for (structure_graph::index_type y: Y.vertices())
           {
             insertion_count++;
-            S_alpha.insert(x);
+            S_alpha.insert(y);
+            mCRL2log(log::debug) << "Fatal attractors: insert " << G.find_vertex(y) << " in S" << alpha << std::endl;
           }
         }
       }

@@ -235,10 +235,10 @@ class structure_graph
     }
 };
 
-inline
-std::vector<structure_graph::index_type> predecessors(const structure_graph& G, structure_graph::index_type u)
+template <typename StructureGraph>
+std::vector<typename StructureGraph::index_type> structure_graph_predecessors(const StructureGraph& G, typename StructureGraph::index_type u)
 {
-  std::vector<structure_graph::index_type> result;
+  std::vector<typename StructureGraph::index_type> result;
   for (auto v: G.predecessors(u))
   {
     result.push_back(v);
@@ -246,10 +246,10 @@ std::vector<structure_graph::index_type> predecessors(const structure_graph& G, 
   return result;
 }
 
-inline
-std::vector<structure_graph::index_type> successors(const structure_graph& G, structure_graph::index_type u)
+template <typename StructureGraph>
+std::vector<typename StructureGraph::index_type> structure_graph_successors(const StructureGraph& G, typename StructureGraph::index_type u)
 {
-  std::vector<structure_graph::index_type> result;
+  std::vector<typename StructureGraph::index_type> result;
   for (auto v: G.successors(u))
   {
     result.push_back(v);
@@ -284,8 +284,8 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
   return out;
 }
 
-inline
-std::ostream& operator<<(std::ostream& out, const structure_graph& G)
+template <typename StructureGraph>
+std::ostream& print_structure_graph(std::ostream& out, const StructureGraph& G)
 {
   auto N = G.all_vertices().size();
   for (structure_graph::index_type i = 0; i < N; i++)
@@ -297,8 +297,8 @@ std::ostream& operator<<(std::ostream& out, const structure_graph& G)
           << "vertex(formula = " << u.formula
           << ", decoration = " << u.decoration
           << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
-          << ", predecessors = " << core::detail::print_list(predecessors(G, i))
-          << ", successors = " << core::detail::print_list(successors(G, i))
+          << ", predecessors = " << core::detail::print_list(structure_graph_predecessors(G, i))
+          << ", successors = " << core::detail::print_list(structure_graph_successors(G, i))
           << ", strategy = " << (u.strategy == structure_graph::undefined_vertex ? std::string("undefined") : std::to_string(u.strategy))
           << ")"
           << std::endl;
@@ -309,6 +309,12 @@ std::ostream& operator<<(std::ostream& out, const structure_graph& G)
     out << "  empty" << std::endl;
   }
   return out;
+}
+
+inline
+std::ostream& operator<<(std::ostream& out, const structure_graph& G)
+{
+  return print_structure_graph(out, G);
 }
 
 namespace detail {
