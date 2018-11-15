@@ -216,7 +216,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void insert(std::map<std::size_t, vertex_set>& U_rank_map, structure_graph::index_type u, std::size_t j, std::size_t n)
     {
-      std::map<std::size_t, vertex_set>::iterator i = U_rank_map.find(j);
+      auto i = U_rank_map.find(j);
       if (i == U_rank_map.end())
       {
         i = U_rank_map.insert({ j, vertex_set(n) }).first;
@@ -226,22 +226,22 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void fatal_attractors(const simple_structure_graph& G)
     {
+      // count the number of insertions in the sets S0 and S1
+      std::size_t insertion_count = 0;
+
       // compute U and U_rank_map, such that U_rank_map[j] = U_j
       std::map<std::size_t, vertex_set> U_rank_map;
       std::size_t n = m_graph_builder.m_vertices.size();
       vertex_set U(n);
-
-      std::size_t count = 0;
-
       for (const propositional_variable_instantiation& X: discovered)
       {
         structure_graph::index_type u = m_graph_builder.find_vertex(X);
         std::size_t j = G.rank(u);
         if (j != data::undefined_index())
         {
+          U.insert(u);
           insert(U_rank_map, u, j, n);
         }
-        U.insert(u);
       }
 
       for (auto& p: U_rank_map)
@@ -251,6 +251,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         int alpha = j % 2;
         vertex_set& S_alpha = alpha == 0 ? S0 : S1;
         vertex_set X = detail::compute_attractor_set_min_rank(G, U_j, alpha, U, j);
+
+        // compute U \ X
         vertex_set U_minus_X(n);
         for (structure_graph::index_type u: U.vertices())
         {
@@ -259,18 +261,18 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             U_minus_X.insert(u);
           }
         }
-        U_minus_X = compute_attractor_set(G, U_minus_X, 1 - alpha);
 
+        U_minus_X = compute_attractor_set(G, U_minus_X, 1 - alpha);
         for (structure_graph::index_type x: X.vertices())
         {
           if (!U_minus_X.contains(x))
           {
-            count++;
+            insertion_count++;
             S_alpha.insert(x);
           }
         }
       }
-      mCRL2log(log::debug) << "Fatal attractors: inserted " << count << " vertices." << std::endl;
+      mCRL2log(log::debug) << "Fatal attractors: inserted " << insertion_count << " vertices." << std::endl;
     }
 
     bool solution_found(const propositional_variable_instantiation& init) const override
