@@ -43,10 +43,7 @@ bool find_loop(const simple_structure_graph& G,
     return i->second;
   }
 
-  if (w_.decoration == structure_graph::d_none ||
-      ((w_.rank % 2 == 0 && w_.decoration == structure_graph::d_disjunction) ||
-       (w_.rank % 2 != 0 && w_.decoration == structure_graph::d_conjunction))
-          )
+  if (w_.decoration == structure_graph::d_none || w_.decoration == p % 2)
   {
     visited[w] = false;
     for (structure_graph::index_type u: w_.successors)
@@ -57,6 +54,7 @@ bool find_loop(const simple_structure_graph& G,
         return true;
       }
     }
+    return visited[w];
   }
   else
   {
@@ -75,6 +73,7 @@ bool find_loop(const simple_structure_graph& G,
     {
       visited[w] = false;
     }
+    return visited[w];
   }
   return false;
 }

@@ -353,6 +353,18 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, std::siz
   return A;
 }
 
+namespace detail {
+
+inline
+void log_vertex_set(const vertex_set& V, const std::string& name)
+{
+  std::vector<structure_graph::index_type> vertices = V.vertices();
+  std::sort(vertices.begin(), vertices.end());
+  mCRL2log(log::debug) << name << " = " << core::detail::print_set(vertices) << std::endl;
+}
+
+} // namespace detail
+
 } // namespace pbes_system
 
 } // namespace mcrl2
