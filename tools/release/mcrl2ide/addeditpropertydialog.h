@@ -11,6 +11,7 @@
 #define ADDEDITPROPERTYDIALOG_H
 
 #include "processsystem.h"
+#include "filesystem.h"
 
 #include <QDialog>
 #include <QRegExpValidator>

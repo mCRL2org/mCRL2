@@ -12,6 +12,7 @@
 
 #include "propertywidget.h"
 #include "processsystem.h"
+#include "filesystem.h"
 
 #include <QDockWidget>
 #include <QVBoxLayout>

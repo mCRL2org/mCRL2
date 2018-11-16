@@ -11,6 +11,7 @@
 #define PROPERTYWIDGET_H
 
 #include "processsystem.h"
+#include "filesystem.h"
 #include "addeditpropertydialog.h"
 
 #include <QLabel>
