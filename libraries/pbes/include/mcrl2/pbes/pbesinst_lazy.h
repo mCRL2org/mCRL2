@@ -75,6 +75,9 @@ class pbesinst_lazy_algorithm
     /// \brief The search strategy to use when exploring the state space.
     search_strategy m_search_strategy;
 
+    // \brief The number of iterations
+    std::size_t m_iteration_count = 0;
+
     int m_optimization = 0;
 
     /// \brief Prints a log message for every 1000-th equation
@@ -212,7 +215,7 @@ class pbesinst_lazy_algorithm
     {
       using utilities::detail::contains;
 
-      std::size_t m_iteration_count = 0;
+      m_iteration_count = 0;
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);

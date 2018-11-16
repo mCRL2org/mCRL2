@@ -25,7 +25,7 @@ namespace detail {
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
 template <typename StructureGraph>
-vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A, int alpha, const vertex_set& U, std::size_t j)
+vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
 {
   // put all predecessors of elements in A in todo
   deque_vertex_set todo(G.all_vertices().size());

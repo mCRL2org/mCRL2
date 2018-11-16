@@ -294,7 +294,7 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
 template <typename StructureGraph>
-vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, int alpha)
+vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, std::size_t alpha)
 {
   // utilities::chrono_timer timer;
   // std::size_t A_size = A.size();
