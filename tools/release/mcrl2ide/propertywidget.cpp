@@ -154,8 +154,9 @@ void PropertyWidget::resetWidget()
 
 void PropertyWidget::actionVerify()
 {
-  /* check if the property isn't already being verified */
-  if (verificationWidgets->currentIndex() != 1)
+  /* only verify when it hasn't been verified yet for the current specification
+   *   and property */
+  if (verificationWidgets->currentIndex() == 0)
   {
     resetWidget();
     /* start the verification process */
@@ -180,20 +181,27 @@ void PropertyWidget::actionVerifyResult(int processid)
   {
     /* get the result and apply it to the widget */
     QString result = processSystem->getResult(lastRunningProcessId);
+    QString styleSheet = " {background-color:rgb(%1)}";
     if (result == "true")
     {
       verificationWidgets->setCurrentIndex(2);
-      this->setStyleSheet("PropertyWidget{background-color:rgb(153,255,153)}");
+      styleSheet = styleSheet.arg("153,255,153");
     }
     else if (result == "false")
     {
       verificationWidgets->setCurrentIndex(3);
-      this->setStyleSheet("PropertyWidget{background-color:rgb(255,153,153)}");
+      styleSheet = styleSheet.arg("255,153,153");
     }
     else
     {
       verificationWidgets->setCurrentIndex(0);
+      styleSheet = "";
     }
+
+    this->setStyleSheet(".PropertyWidget" + styleSheet);
+    propertyNameScrollArea->setStyleSheet(".QScrollArea" + styleSheet);
+    propertyNameLabel->setStyleSheet(".QLabel" + styleSheet);
+
     editButton->setEnabled(true);
     deleteButton->setEnabled(true);
   }

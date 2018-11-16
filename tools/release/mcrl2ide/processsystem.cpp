@@ -730,7 +730,7 @@ void ProcessSystem::verificationResult(int previousExitCode)
       consoleDock->writeToConsole(
           ProcessType::Verification,
           "The property " + propertyName +
-              " on this specification evaluates to true");
+              " on this specification evaluates to true\n");
     }
     else if (output.startsWith("false"))
     {
@@ -738,7 +738,7 @@ void ProcessSystem::verificationResult(int previousExitCode)
       consoleDock->writeToConsole(
           ProcessType::Verification,
           "The property " + propertyName +
-              " on this specification evaluates to false");
+              " on this specification evaluates to false\n");
     }
   }
   emit processFinished(processid);
