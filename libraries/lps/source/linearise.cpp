@@ -53,7 +53,6 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/replace.h"
-// #include "mcrl2/data/substitutions/map_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
@@ -1306,7 +1305,7 @@ class specification_basic_type
       const process_identifier& procDecl,
       std::vector <process_identifier>& pcrlprocesses)
     {
-      std::set <process_identifier>  visited;
+      std::set <process_identifier> visited;
       collectPcrlProcesses(procDecl, pcrlprocesses, visited);
     }
 
@@ -2469,9 +2468,9 @@ class specification_basic_type
 
 
     process_expression bodytovarheadGNF(
-      const process_expression& body, // intentionally not a reference.
+      const process_expression& body, 
       const state s,
-      const variable_list& freevars, // intentionally not a reference.
+      const variable_list& freevars, 
       const variableposition v,
       const std::set<variable>& variables_bound_in_sum)
     {
@@ -2548,16 +2547,16 @@ class specification_basic_type
           body1=substitute_pCRLproc(body1,sigma);
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
-          body1=bodytovarheadGNF(body1,seq_state,sumvars+freevars,v,variables_bound_in_sum1);
+          body1=bodytovarheadGNF(body1,name_state,sumvars+freevars,v,variables_bound_in_sum1);
           /* Due to the optimisation below, suggested by Yaroslav Usenko, bodytovarheadGNF(...,sum_state,...)
              can deliver a process of the form c -> x + !c -> y. In this case, the
              sumvars must be distributed over both summands. */
           return stochastic_operator(sumvars,distribution,body1);
         }
-        const process_expression body1=bodytovarheadGNF(body,seq_state,freevars,first,variables_bound_in_sum);
-        const process_identifier newproc=newprocess(freevars,body1,pCRL,
-                                         canterminatebody(body1),
-                                         containstimebody(body1));
+        const process_expression body_=bodytovarheadGNF(body,seq_state,freevars,first,variables_bound_in_sum);
+        const process_identifier newproc=newprocess(freevars,body_,pCRL,
+                                         canterminatebody(body_),
+                                         containstimebody(body_));
         assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
         return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
       }
