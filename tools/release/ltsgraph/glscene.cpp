@@ -575,7 +575,6 @@ void GLScene::renderStateNumber(GLuint i)
   glStartName(so_node, i);
   QVector3D eye = worldToEye(node.pos());
   drawCenteredText(eye.x(), eye.y(), QString::number(i));
-  glPushMatrix();
   glEndName();
 }
 
