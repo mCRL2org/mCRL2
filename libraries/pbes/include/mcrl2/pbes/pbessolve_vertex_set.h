@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESSOLVE_VERTEX_SET_H
 #define MCRL2_PBES_PBESSOLVE_VERTEX_SET_H
 
+#include <algorithm>
 #include <deque>
 #include "mcrl2/pbes/structure_graph.h"
 
@@ -355,12 +356,18 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, std::siz
 
 namespace detail {
 
+template <typename T>
+std::vector<T> sorted(const std::vector<T>& x)
+{
+  std::vector<T> result = x;
+  std::sort(result.begin(), result.end());
+  return result;
+}
+
 inline
 void log_vertex_set(const vertex_set& V, const std::string& name)
 {
-  std::vector<structure_graph::index_type> vertices = V.vertices();
-  std::sort(vertices.begin(), vertices.end());
-  mCRL2log(log::debug) << name << " = " << core::detail::print_set(vertices) << std::endl;
+  mCRL2log(log::debug) << name << " = " << core::detail::print_set(sorted(V.vertices())) << std::endl;
 }
 
 } // namespace detail

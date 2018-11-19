@@ -329,13 +329,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     bool solution_found(const propositional_variable_instantiation& init) const override
     {
       auto u = m_graph_builder.find_vertex(init);
-      bool result = S0.contains(u) || S1.contains(u);
-if (result) {
-  mCRL2log(log::debug) << "Solution found" << std::endl;
-  detail::log_vertex_set(S0, "S0");
-  detail::log_vertex_set(S1, "S1");
-}
-      return result;
+      return S0.contains(u) || S1.contains(u);
     }
 
     bool successors_disjoint(const simple_structure_graph& G, const structure_graph::index_type u, const vertex_set& S) const
@@ -536,13 +530,9 @@ if (result) {
           }
         }
       }
-      detail::log_vertex_set(S0, "S0");
-      detail::log_vertex_set(S1, "S1");
       if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
       {
         find_loops(G);
-        detail::log_vertex_set(S0, "loops(S0)");
-        detail::log_vertex_set(S1, "loops(S1)");
       }
       else if (m_optimization == 5 && fatal_attractors_guard(m_iteration_count))
       {
@@ -556,8 +546,6 @@ if (result) {
       {
         compute_attractor_set_S1(G);
       }
-      detail::log_vertex_set(S0, "Attr(S0)");
-      detail::log_vertex_set(S1, "Attr(S1)");
     }
 };
 
