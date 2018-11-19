@@ -1524,8 +1524,7 @@ class part_trans_t
 
         /* -  -  -  -  -  -  -  - adapt part_tr.succ -  -  -  -  -  -  -  - */
 
-        // adapt the outgoing transition array:
-        // move the transition to the end
+        // Line 1.17: Register that s --> t is now part of new_bunch
         succ_iter_t const old_succ_pos = action_block_iter->succ();             assert(old_succ_pos->block_bunch->pred->action_block == action_block_iter);
         succ_iter_t out_slice_begin = old_succ_pos->out_slice_begin();          assert(out_slice_begin->block_bunch->pred->action_block->succ() ==
                                                                                                                                               out_slice_begin);
@@ -1553,9 +1552,12 @@ class part_trans_t
             // transitions in the new bunch have been positioned correctly.
         if (first_transition_of_state)
         {
-            new_succ_pos->begin_or_before_end.set(new_succ_pos);
+            // Line 1.15: Set the current out-slice pointer of s to a
+            //            transition in splitter_bunch (preferably not
+            //            s --> t itself)
             new_succ_pos->block_bunch->pred->source->current_out_slice.begin =
                                                                out_slice_begin;
+            new_succ_pos->begin_or_before_end.set(new_succ_pos);
         }
         else
         {
@@ -1618,6 +1620,10 @@ class part_trans_t
 
         /* -  -  -  -  -  -  -  - adapt part_tr.succ -  -  -  -  -  -  -  - */
 
+        // Line 1.17: Register that s --> t is now part of new_bunch
+            // We already moved the transition in part_tr.succ to the correct
+            // place in first_move_transition_to_new_bunch(); now we have to
+            // set begin_or_before_end.
         succ_iter_t const new_succ_pos = action_block_iter->succ();             assert(new_succ_pos->block_bunch->pred->action_block == action_block_iter);
         succ_iter_t const new_begin_or_before_end =
                     new_succ_pos->begin_or_before_end()->begin_or_before_end(); assert(new_begin_or_before_end->block_bunch->pred->action_block->succ() ==
@@ -1709,12 +1715,16 @@ class part_trans_t
             // The old block_bunch-slice becomes unstable, and the new
             // block_bunch-slice is created unstable.
 
-            // Move the old block_bunch-slice to the unstable slices.
+            // Line 1.16: Add the block_bunch-slice of splitter_bunch where
+            //            s --> t was in to the list of unstable
+            //            block_bunch-slices
             unstable_block_bunch.splice(unstable_block_bunch.begin(),
                      source->block->stable_block_bunch, old_block_bunch_slice);
             old_block_bunch_slice->make_unstable();
 
-            // create the new unstable block_bunch-slice
+            // Line 1.18: Add the block_bunch-slice of new_bunch where
+            //            s --> t is now in to the list of unstable
+            //            block_bunch-slices
             unstable_block_bunch.emplace_front(new_block_bunch_pos + 1,
                                                              new_bunch, false);
             new_block_bunch_slice = unstable_block_bunch.begin();
@@ -3244,13 +3254,13 @@ class bisim_partitioner_dnj
                 // Line 1.14: Mark s
                 bool const first_transition_of_state =
                                                    source->block->mark(source);
-                // Line 1.15: Register that s --> t is now part of new_bunch
-                // and
-                // Line 1.16: Set the current out-slice pointer of s to a
-                //            transition in splitter_bunch
+                // Line 1.15: Set the current out-slice pointer of s to a
+                //            transition in splitter_bunch (preferably not
+                //            s --> t itself)
+                // Line 1.17: Register that s --> t is now part of new_bunch
                 part_tr.first_move_transition_to_new_bunch(splitter_iter,
                                                     first_transition_of_state); // mCRL2complexity(splitter_iter->succ()->block_bunch->pred, ...) -- subsumed
-            // Line 1.18: end for                                               // in the call below
+            // Line 1.19: end for                                               // in the call below
             }
             while (++splitter_iter < new_bunch->end);
 
@@ -3260,24 +3270,26 @@ class bisim_partitioner_dnj
             splitter_iter = new_bunch->begin;                                   assert(splitter_iter < new_bunch->end);
             do
             {
-                // Line 1.15: Register that s --> t is now part of new_bunch
-                // and
-                // Line 1.17: Add the block_bunch-slice with s --> t and the
-                //            corresponding block_bunch-slice in splitter_bunch
-                //            to the list of unstable block_bunch-slices
+                // Line 1.16: Add the block_bunch-slice of splitter_bunch where
+                //            s --> t was in to the list of unstable
+                //            block_bunch-slices
+                // Line 1.17: Register that s --> t is now part of new_bunch
+                // Line 1.18: Add the block_bunch-slice of new_bunch where
+                //            s --> t is now in to the list of unstable
+                //            block_bunch-slices
                 part_tr.second_move_transition_to_new_bunch(                    ONLY_IF_DEBUG( *this, )
                                                      splitter_iter, new_bunch); // mCRL2complexity(splitter_iter->succ()->block_bunch->pred, ...) -- subsumed
-            // Line 1.18: end for                                               // in the call below
+            // Line 1.19: end for                                               // in the call below
             }
             while (++splitter_iter < new_bunch->end);                           mCRL2complexity(new_bunch, add_work(bisim_gjkw::check_complexity::
                                                                                                            refine_partition_until_it_becomes_stable__find_pred,
             /*----------------- stabilise the partition again ---------------*/                                                       max_splitter_counter), );
 
-            // Line 1.19: while the list of unstable block_bunch-slices is not
+            // Line 1.20: while the list of unstable block_bunch-slices is not
             //                  empty do
             while (!part_tr.unstable_block_bunch.empty())
             {                                                                   // The work in this iteration is ascribed to some transition in the
-                // Line 1.20: splitter := the first unstable block bunch-slice  // splitter block_bunch-slice.  Therefore, we increase the counter of that
+                // Line 1.21: splitter := the first unstable block bunch-slice  // splitter block_bunch-slice.  Therefore, we increase the counter of that
                     // The first element of the unstable block_bunch-slices     // block_bunch-slice.  This is allowed because we started with a small
                     // list should be a small splitter of a block that is       // splitter.
                     // marked accordingly.                                      //
@@ -3285,18 +3297,18 @@ class bisim_partitioner_dnj
                                           part_tr.unstable_block_bunch.begin(); mCRL2complexity(splitter, add_work(bisim_gjkw::check_complexity::
                                                                                   refine_partition_until_it_becomes_stable__stabilize, max_splitter_counter),);
                 block_t* refine_block = splitter->source_block();               assert(!splitter->is_stable());  assert(splitter->bunch() == new_bunch);
-                /* Line 1.21: Remove splitter from the list of unstable      */ assert(!splitter->empty());
+                /* Line 1.22: Remove splitter from the list of unstable      */ assert(!splitter->empty());
                 /*            block_bunch-slices                             */ assert(1 < refine_block->size());  assert(0 < refine_block->marked_size());
                 refine_block->stable_block_bunch.splice(
                     refine_block->stable_block_bunch.end(),
                                        part_tr.unstable_block_bunch, splitter);
                 splitter->make_stable();                                        // test whether the next splitter actually belongs to this block:
-                /* Line 1.22: (red_block, blue_block) := refine(source block */ assert(*part_tr.unstable_block_bunch.front().bunch() < *splitter->bunch());
+                /* Line 1.23: (red_block, blue_block) := refine(source block */ assert(*part_tr.unstable_block_bunch.front().bunch() < *splitter->bunch());
                 /*         of splitter, splitter, extend from marked states) */ assert(part_tr.unstable_block_bunch.front().source_block() == refine_block);
                 permutation_iter_t refine_block_begin = refine_block->begin;    assert((*refine_block_begin)->pos == refine_block_begin);
                 block_t* red_block = refine(refine_block, splitter,
                                                     extend_from_marked_states);
-                // Line 1.23: Mark unstable block bunch-slices of blue_block as
+                // Line 1.24: Mark unstable block bunch-slices of blue_block as
                 //            stable
                 if (refine_block_begin < red_block->begin)
                 {
@@ -3316,52 +3328,52 @@ class bisim_partitioner_dnj
                         blue_splitter->make_stable();
                     }
                 }
-                // Line 1.24: if red_block has marked states (i. e. it has new
+                // Line 1.25: if red_block has marked states (i. e. it has new
                 //               non-inert transitions) then
                 if (0 < red_block->marked_size())
                 {
-                    // Line 1.25: red_block := postprocess(red_block)
+                    // Line 1.26: red_block := postprocess(red_block)
                     red_block = postprocess_new_noninert(red_block, splitter);
-                    // Line 1.26: if red block == {} then
+                    // Line 1.27: if red block == {} then
                     //                Continue this loop, i. e. go to Line 1.19
                     if (nullptr == red_block)  continue;
-                // Line 1.27: end if
+                // Line 1.28: end if
                 }
-                // Line 1.28: splitter := the first (remaining) unstable
+                // Line 1.29: splitter := the first (remaining) unstable
                 //                        block_bunch-slice
                     // Now the first element of the unstable block_bunch-slices
                     // list should be a large splitter of red_block, and it
                     // should be handled using the current_out_slice pointers.
                 splitter = part_tr.unstable_block_bunch.begin();
                 if (part_tr.unstable_block_bunch.end() == splitter)  break;     assert(!splitter->is_stable());
-                // Line 1.29: if red_block == source block of splitter then
+                // Line 1.30: if red_block == source block of splitter then
                 if (red_block == splitter->source_block())
                 {                                                               assert(splitter->bunch() == splitter_bunch);
-                    // Line 1.30: Remove splitter from the list of unstable
+                    // Line 1.31: Remove splitter from the list of unstable
                     //            block_bunch-slices
                     red_block->stable_block_bunch.splice(
                         red_block->stable_block_bunch.end(),
                                        part_tr.unstable_block_bunch, splitter);
                     splitter->make_stable();
 
-                    // Line 1.31: (red_block, ) := refine(red_block, splitter,
+                    // Line 1.32: (red_block, ) := refine(red_block, splitter,
                     //                                    extend from splitter)
                     if (1 >= red_block->size())  continue;
                     red_block = refine(red_block,splitter,extend_from_splitter  ONLY_IF_DEBUG( , new_bunch )
                                                                              );
-                    // Line 1.32: if red_block has marked states (i. e. it has
+                    // Line 1.33: if red_block has marked states (i. e. it has
                     //               new non-inert transitions) then
                     if (0 < red_block->marked_size())
                     {
-                        // Line 1.33: postprocess(red_block)
+                        // Line 1.34: postprocess(red_block)
                         postprocess_new_noninert(red_block, splitter);
-                    // Line 1.34: end if
+                    // Line 1.35: end if
                     }
-                // Line 1.35: end if
+                // Line 1.36: end if
                 }
-            // Line 1.36: end while
+            // Line 1.37: end while
             }
-        // Line 1.37: end while
+        // Line 1.38: end while
         }
 
         // store the labels with the action_block-slices
