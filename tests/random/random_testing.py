@@ -235,8 +235,9 @@ class PbessolveTest(PbesTest):
         super(PbessolveTest, self).__init__(name, ymlfile('pbessolve'), settings)
 
 class Pbessolve_counter_exampleTest(ProcessTest):
-    def __init__(self, name, settings = dict()):
+    def __init__(self, name, optimization = 0, settings = dict()):
         super(Pbessolve_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
+        self.set_command_line_options('t3', ['-s{}'.format(optimization)])
 
     def create_inputfiles(self, runpath = '.'):
         super(Pbessolve_counter_exampleTest, self).create_inputfiles(runpath)
@@ -323,7 +324,12 @@ available_tests = {
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)                   ,
     'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                             ,
     'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                               ,
-    'pbessolve-counter-example'                   : lambda name, settings: Pbessolve_counter_exampleTest(name, settings)                               ,
+    'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 0, settings)                            ,
+    'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 1, settings)                            ,
+    'pbessolve-counter-example-optimization-2'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 2, settings)                            ,
+    'pbessolve-counter-example-optimization-3'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 3, settings)                            ,
+    'pbessolve-counter-example-optimization-4'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 4, settings)                            ,
+    #'pbessolve-counter-example-optimization-5'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 5, settings)                            ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
