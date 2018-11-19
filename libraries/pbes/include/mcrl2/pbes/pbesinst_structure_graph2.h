@@ -184,7 +184,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void find_loops(const simple_structure_graph& G)
     {
-      mCRL2log(log::debug) << "Apply find loops to graph:\n" << G << std::endl;
+      mCRL2log(log::debug) << "Apply find loops (iteration " << m_iteration_count << ") to graph:\n" << G << std::endl;
+
+      // count the number of insertions in the sets S0 and S1
+      std::size_t insertion_count = 0;
 
       std::unordered_map<structure_graph::index_type, bool> visited;
       for (const propositional_variable_instantiation& X: discovered)
@@ -207,13 +210,17 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           if (u_.rank % 2 == 1)
           {
             S1.insert(u);
+            insertion_count++;
           }
           else
           {
             S0.insert(u);
+            insertion_count++;
           }
         }
       }
+
+      mCRL2log(log::debug) << "Find loops: (iteration " << m_iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
     }
 
     void insert(std::map<std::size_t, vertex_set>& U_rank_map, structure_graph::index_type u, std::size_t j, std::size_t n)
@@ -228,7 +235,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void fatal_attractors(const simple_structure_graph& G)
     {
-      mCRL2log(log::debug) << "Apply fatal attractors to graph:\n" << G << std::endl;
+      mCRL2log(log::debug) << "Apply fatal attractors (iteration " << m_iteration_count << ") to graph:\n" << G << std::endl;
 
       // count the number of insertions in the sets S0 and S1
       std::size_t insertion_count = 0;
@@ -323,7 +330,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
         }
       }
-      mCRL2log(log::debug) << "Fatal attractors: inserted " << insertion_count << " vertices." << std::endl;
+      mCRL2log(log::debug) << "Fatal attractors: (iteration " << m_iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
     }
 
     bool solution_found(const propositional_variable_instantiation& init) const override
