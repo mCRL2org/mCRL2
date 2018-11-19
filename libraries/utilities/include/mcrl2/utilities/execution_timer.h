@@ -14,6 +14,7 @@
 
 #include "mcrl2/utilities/exception.h"
 #include <ctime>
+#include <cmath>
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -67,8 +68,8 @@ class execution_timer
     /// \param[in] s The output stream to which the report is written.
     void write_report(std::ostream& s)
     {
-      s.setf(std::ios::fixed, std::ios::floatfield); // Print floats in 2 decimals
-      s.precision(2);
+      std::ios::fmtflags oldflags = s.setf(std::ios::fixed, std::ios::floatfield);
+      s.precision((std::streamsize) (log10(CLOCKS_PER_SEC) + 0.1));
 
       s << "- tool: " << m_tool_name << std::endl
         << "  timing:" << std::endl;
@@ -86,10 +87,11 @@ class execution_timer
         else
         {
           s << "    " << i->first << ": "
-            << (static_cast<float>(i->second.finish - i->second.start))/CLOCKS_PER_SEC 
+            << static_cast<double>(i->second.finish - i->second.start) / CLOCKS_PER_SEC
             << std::endl;
         }
       }
+      s.flags(oldflags);
     }
 
   public:
