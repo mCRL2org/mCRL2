@@ -50,6 +50,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     // for doing a consistency check on the computed strategy
     bool m_check_strategy = false;
 
+    // if true, apply optimization 4 and 5 at every iteration
+    bool aggressive = false;
+
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;
@@ -107,6 +110,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       "fatal attractor is applied."),
                         "use strategy STRATEGY",
                  's');
+      desc.add_hidden_option("aggressive", "apply optimizations 4 and 5 at every iteration");
     }
 
 
@@ -136,6 +140,10 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(m_strategy));
       }
+      if (parser.options.count("aggressive") > 0)
+      {
+        aggressive = true;
+      }
     }
 
     std::set<utilities::file_format> available_input_formats() const override
@@ -159,11 +167,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {}
 
     template <typename PbesInstAlgorithm>
-    void run_algorithm(const pbes_system::pbes& pbesspec)
+    void run_algorithm(PbesInstAlgorithm& algorithm, const pbes_system::pbes& pbesspec, structure_graph& G)
     {
-      structure_graph G;
-
-      PbesInstAlgorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_strategy);
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       timer().start("instantiation");
       algorithm.run();
@@ -218,13 +223,17 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(input_filename());
       pbes_system::algorithms::normalize(pbesspec);
 
+      structure_graph G;
       if (m_strategy <= 1)
       {
-        run_algorithm<pbesinst_structure_graph_algorithm>(pbesspec);
+        pbesinst_structure_graph_algorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_strategy);
+        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G);
       }
       else
       {
-        run_algorithm<pbesinst_structure_graph_algorithm2>(pbesspec);
+        pbesinst_structure_graph_algorithm2 algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_strategy);
+        algorithm.enable_aggressive_mode(aggressive);
+        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G);
       }
       return true;
     }

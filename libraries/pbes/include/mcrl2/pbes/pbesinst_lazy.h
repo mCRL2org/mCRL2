@@ -222,13 +222,17 @@ class pbesinst_lazy_algorithm
       discovered.insert(init);
       while (!todo.empty())
       {
+        ++m_iteration_count;
+        mCRL2log(log::status) << print_equation_count(m_iteration_count);
+        detail::check_bes_equation_limit(m_iteration_count);
+
         auto const& X_e = next_todo();
 
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
-        auto const& phi = eqn.formula();
+        const auto& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
 
         // optional step
@@ -245,9 +249,6 @@ class pbesinst_lazy_algorithm
             discovered.insert(Y_f);
           }
         }
-
-        mCRL2log(log::status) << print_equation_count(++m_iteration_count);
-        detail::check_bes_equation_limit(m_iteration_count);
 
         if (solution_found(init))
         {

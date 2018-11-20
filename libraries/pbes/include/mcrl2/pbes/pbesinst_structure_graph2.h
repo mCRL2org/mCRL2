@@ -79,6 +79,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     detail::computation_guard find_loops_guard;
     detail::computation_guard fatal_attractors_guard;
     detail::periodic_guard reset_guard;
+    bool aggressive = false; // if true, apply optimization 4 and 5 at every iteration
 
     template<typename T>
     pbes_expression expr(const T& x) const
@@ -280,16 +281,16 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
 
-      detail::log_vertex_set(done, "done");
-      detail::log_vertex_set(discovered_, "discovered");
-      detail::log_vertex_set(S0, "S0");
-      detail::log_vertex_set(S1, "S1");
+//      detail::log_vertex_set(done, "done");
+//      detail::log_vertex_set(discovered_, "discovered");
+//      detail::log_vertex_set(S0, "S0");
+//      detail::log_vertex_set(S1, "S1");
 
       for (auto& p: U_j_map)
       {
         std::size_t j = p.first;
         const vertex_set& U_j = p.second;
-        detail::log_vertex_set(U_j, "U_" + std::to_string(j));
+//        detail::log_vertex_set(U_j, "U_" + std::to_string(j));
         auto alpha = j % 2;
         vertex_set& S_alpha = alpha == 0 ? S0 : S1;
         vertex_set X = detail::compute_attractor_set_min_rank(G, U_j, alpha, done, j);
@@ -303,7 +304,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             discovered_minus_X_S_alpha.insert(u);
           }
         }
-        detail::log_vertex_set(discovered_minus_X_S_alpha, "discovered \\ X");
+//        detail::log_vertex_set(discovered_minus_X_S_alpha, "discovered \\ X");
 
         // compute Y
         vertex_set Y(n);
@@ -316,12 +317,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
         }
 
-        detail::log_vertex_set(Y, "Y");
+//        detail::log_vertex_set(Y, "Y");
 
         if (!Y.is_empty())
         {
           Y = detail::compute_attractor_set_min_rank(G, Y, alpha, done, j);
-          detail::log_vertex_set(Y, "AttrMinRank(Y)");
+//          detail::log_vertex_set(Y, "AttrMinRank(Y)");
           for (structure_graph::index_type y: Y.vertices())
           {
             insertion_count++;
@@ -476,8 +477,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         find_loops_guard(2), fatal_attractors_guard(2)
     {}
 
-    // Optimization 2 is implemented by overriding the function rewrite_psi.
+    void enable_aggressive_mode(bool enabled = true)
+    {
+      aggressive = enabled;
+    }
 
+    // Optimization 2 is implemented by overriding the function rewrite_psi.
     pbes_expression rewrite_psi(const fixpoint_symbol& symbol,
                                 const propositional_variable_instantiation& X,
                                 const pbes_expression& psi
@@ -537,11 +542,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
         }
       }
-      if (m_optimization == 4 && find_loops_guard(std::max(S0.size(), S1.size())))
+      if (m_optimization == 4 && (aggressive || find_loops_guard(m_iteration_count)))
       {
         find_loops(G);
       }
-      else if (m_optimization == 5 && fatal_attractors_guard(m_iteration_count))
+      else if (m_optimization == 5 && (aggressive || fatal_attractors_guard(m_iteration_count)))
       {
         fatal_attractors(G);
       }
