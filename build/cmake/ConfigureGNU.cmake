@@ -126,6 +126,13 @@ endif()
 ##---------------------------------------------------
 
 if(APPLE)
+  # Set the size of the stack on apple to 4Gig, which is much larger than the default size. 
+  if (NOT DEFINED MCRL2_OSX_STACK_SIZE)
+   # Stack size set to 4GB for Mac, since terminal hard limit is 64MB
+   # This number is the number of bytes in Hex
+   set (MCRL2_OSX_STACK_SIZE "200000000" CACHE STRING "Maximum stack size to allow on MacOS, in number of bytes in hexadecimal (200000000 equals 4GB).")
+ endif()
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size,${MCRL2_OSX_STACK_SIZE}")
   set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "")
 else()
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
