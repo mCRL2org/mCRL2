@@ -237,7 +237,10 @@ class PbessolveTest(PbesTest):
 class Pbessolve_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization = 0, settings = dict()):
         super(Pbessolve_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
-        self.set_command_line_options('t3', ['-s{}'.format(optimization)])
+        if optimization in [4, 5]:
+            self.set_command_line_options('t3', ['-s{}'.format(optimization), '--aggressive'])
+        else:
+            self.set_command_line_options('t3', ['-s{}'.format(optimization)])
 
     def create_inputfiles(self, runpath = '.'):
         super(Pbessolve_counter_exampleTest, self).create_inputfiles(runpath)

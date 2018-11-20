@@ -109,7 +109,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
         m_graph_builder(G)
     {}
 
-    void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
+    void on_report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
     {
       // the body of this if statement will only be executed for the first equation
       if (m_graph_builder.m_initial_state == data::undefined_data_expression())

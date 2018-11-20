@@ -251,17 +251,22 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         todo_[u] = true;
       }
 
-      // compute done and discovered_
+      // compute done
       vertex_set done(n);
-      vertex_set discovered_(n);
       for (const propositional_variable_instantiation& X: discovered)
       {
         structure_graph::index_type u = m_graph_builder.find_vertex(X);
-        discovered_.insert(u);
         if (!todo_[u])
         {
           done.insert(u);
         }
+      }
+
+      // compute V
+      vertex_set V(n);
+      for (structure_graph::index_type u = 0; u < n; u++)
+      {
+        V.insert(u);
       }
 
       // compute U_j_map, such that U_j_map[j] = U_j
@@ -281,30 +286,30 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
 
-//      detail::log_vertex_set(done, "done");
-//      detail::log_vertex_set(discovered_, "discovered");
-//      detail::log_vertex_set(S0, "S0");
-//      detail::log_vertex_set(S1, "S1");
+      detail::log_vertex_set(done, "done");
+      detail::log_vertex_set(V, "V");
+      detail::log_vertex_set(S0, "S0");
+      detail::log_vertex_set(S1, "S1");
 
       for (auto& p: U_j_map)
       {
         std::size_t j = p.first;
         const vertex_set& U_j = p.second;
-//        detail::log_vertex_set(U_j, "U_" + std::to_string(j));
+        detail::log_vertex_set(U_j, "U_" + std::to_string(j));
         auto alpha = j % 2;
         vertex_set& S_alpha = alpha == 0 ? S0 : S1;
         vertex_set X = detail::compute_attractor_set_min_rank(G, U_j, alpha, done, j);
 
         // compute discovered \ (X \cup S_alpha)
         vertex_set discovered_minus_X_S_alpha(n);
-        for (structure_graph::index_type u: discovered_.vertices())
+        for (structure_graph::index_type u: V.vertices())
         {
           if (!X.contains(u) && !S_alpha.contains(u))
           {
             discovered_minus_X_S_alpha.insert(u);
           }
         }
-//        detail::log_vertex_set(discovered_minus_X_S_alpha, "discovered \\ X");
+        detail::log_vertex_set(discovered_minus_X_S_alpha, "discovered \\ X");
 
         // compute Y
         vertex_set Y(n);
@@ -317,12 +322,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
         }
 
-//        detail::log_vertex_set(Y, "Y");
+        detail::log_vertex_set(Y, "Y");
 
         if (!Y.is_empty())
         {
           Y = detail::compute_attractor_set_min_rank(G, Y, alpha, done, j);
-//          detail::log_vertex_set(Y, "AttrMinRank(Y)");
+          detail::log_vertex_set(Y, "AttrMinRank(Y)");
           for (structure_graph::index_type y: Y.vertices())
           {
             insertion_count++;
@@ -496,11 +501,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return x;
     }
 
-    void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
+    void on_report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
     {
-      mCRL2log(log::debug) << "generated equation " << X << " = " << psi << " with rank " << k << std::endl;
-
-      super::report_equation(X, psi, k);
+      super::on_report_equation(X, psi, k);
       auto u = m_graph_builder.find_vertex(X);
       simple_structure_graph G(m_graph_builder.m_vertices);
 
@@ -542,14 +545,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
         }
       }
-      if (m_optimization == 4 && (aggressive || find_loops_guard(m_iteration_count)))
-      {
-        find_loops(G);
-      }
-      else if (m_optimization == 5 && (aggressive || fatal_attractors_guard(m_iteration_count)))
-      {
-        fatal_attractors(G);
-      }
       if (S0_guard(S0.size()))
       {
         compute_attractor_set_S0(G);
@@ -557,6 +552,20 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       if (S1_guard(S1.size()))
       {
         compute_attractor_set_S1(G);
+      }
+    }
+
+    void on_end_iteration() override
+    {
+      if (m_optimization == 4 && (aggressive || find_loops_guard(m_iteration_count)))
+      {
+        simple_structure_graph G(m_graph_builder.m_vertices);
+        find_loops(G);
+      }
+      else if (m_optimization == 5 && (aggressive || fatal_attractors_guard(m_iteration_count)))
+      {
+        simple_structure_graph G(m_graph_builder.m_vertices);
+        fatal_attractors(G);
       }
     }
 };

@@ -165,7 +165,11 @@ class pbesinst_lazy_algorithm
 
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
-    virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)
+    virtual void on_report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)
+    { }
+
+    /// \brief This function is called at the end of every iteration.
+    virtual void on_end_iteration()
     { }
 
     propositional_variable_instantiation next_todo()
@@ -238,8 +242,10 @@ class pbesinst_lazy_algorithm
         // optional step
         psi_e = rewrite_psi(eqn.symbol(), X_e, psi_e);
 
-        // Store and report the new equation
-        report_equation(X_e, psi_e, m_equation_index.rank(X_e.name()));
+        // report the generated equation
+        std::size_t k = m_equation_index.rank(X_e.name());
+        mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e << " with rank " << k << std::endl;
+        on_report_equation(X_e, psi_e, k);
 
         for (const propositional_variable_instantiation& Y_f: find_propositional_variable_instantiations(psi_e))
         {
@@ -250,11 +256,12 @@ class pbesinst_lazy_algorithm
           }
         }
 
+        on_end_iteration();
+
         if (solution_found(init))
         {
           break;
         }
-
         reset(init, todo, (discovered.size() - todo.size()) / 2);
       }
     }

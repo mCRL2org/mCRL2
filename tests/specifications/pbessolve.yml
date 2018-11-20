@@ -33,12 +33,12 @@ tools:
   t6:
     input: [l2]
     output: []
-    args: [-s4]
+    args: [-s4, --aggressive]
     name: pbessolve
   t7:
     input: [l2]
     output: []
-    args: [-s5]
+    args: [-s5, --aggressive]
     name: pbessolve
   t8:
     input: [l2]
