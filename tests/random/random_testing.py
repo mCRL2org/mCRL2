@@ -343,6 +343,13 @@ def print_names(tests):
     for name in sorted(tests):
         print(name)
 
+# Return all tests that match with pattern. In case of an exact match, only this exact match is returned.
+def matching_tests(tests, pattern):
+    matches = [name for name in sorted(tests) if re.search(pattern, name)]
+    if pattern in matches:
+        return [pattern]
+    return matches
+
 def main(tests):
     import argparse
     cmdline_parser = argparse.ArgumentParser()
@@ -367,14 +374,13 @@ def main(tests):
         os.mkdir(testdir)
     os.chdir(testdir)
 
-    for name in sorted(tests):
-        if re.search(args.pattern, name):
-            try:
-                for i in I:
-                    test = tests[name]('{}_{}'.format(name, i), settings)
-                    test.execute_in_sandbox()
-            except Exception as e:
-                print(e)
+    for name in matching_tests(tests, args.pattern):
+        try:
+            for i in I:
+                test = tests[name]('{}_{}'.format(name, i), settings)
+                test.execute_in_sandbox()
+        except Exception as e:
+            print(e)
 
 if __name__ == '__main__':
     main(available_tests)
