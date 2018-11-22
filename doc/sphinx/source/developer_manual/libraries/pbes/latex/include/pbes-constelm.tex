@@ -93,33 +93,18 @@ if }X(e)\in \mathsf{iocc}(\psi ) \\
 \emptyset & \text{otherwise}%
 \end{array}%
 \right. \\
-cond_{T}(X(e),\mathsf{Q}d:{D}.\varphi ) & = & \left\{
+cond_{\Gamma}(X(e),\mathsf{Q}d:{D}.\varphi ) & = & \left\{
 \begin{array}{cc}
-\{c_{T}(\mathsf{Q}d:{D}.\varphi )\}\cup \{\mathsf{Q}d:{D}.\theta \ |\ \theta
-\ \in cond_{\Gamma }(X(e),\varphi )\} & \text{if }X(e)\in \mathsf{iocc}%
+\{c_{\Gamma}(\mathsf{Q}d:{D}.\varphi )\}\cup \{\mathsf{Q}d:{D}.\theta \ |\
+\theta \in cond_{\Gamma }(X(e),\varphi )\} & \text{if }X(e)\in \mathsf{iocc}%
 (\varphi ) \\
 \emptyset & \text{otherwise}%
 \end{array}%
-\right. \\
-cond_{T}(X(e),\mathsf{\forall }d:{D}.\varphi ) & = & \left\{
-\begin{array}{cc}
-\{c_{F}(\mathsf{\forall }d:{D}.\varphi )\}\cup \{\mathsf{\exists }d:{D}%
-.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in
-\mathsf{iocc}(\varphi ) \\
-\emptyset & \text{otherwise}%
-\end{array}%
-\right. \\
-cond_{T}(X(e),\mathsf{\exists }d:{D}.\varphi ) & = & \left\{
-\begin{array}{cc}
-\{c_{F}(\mathsf{\exists }d:{D}.\varphi )\}\cup \{\mathsf{\forall }d:{D}%
-.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in
-\mathsf{iocc}(\varphi ) \\
-\emptyset & \text{otherwise}%
-\end{array}%
-\right.%
+\right.
 \end{array}%
 \end{equation*}%
-with $\Gamma \in \{T,F\}$. Then we define%
+with $\Gamma \in \{T,F\}$ and $\mathsf{Q} \in \{\forall, \exists\}$. Then we
+define%
 \begin{equation*}
 needs\_update(X(e),\varphi )=\dbigwedge\limits_{c\in cond_{T}(X(e),\varphi
 )\cup cond_{F}(X(e),\varphi )}\lnot c
