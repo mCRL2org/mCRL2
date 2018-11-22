@@ -228,7 +228,7 @@ class Lps2PbesTool(Tool):
         if not runpath:
             runpath = os.getcwd()
         return [os.path.join(runpath, self.input_nodes[0].filename()),
-                '-f' + os.path.join(runpath, self.input_nodes[1].filename()),
+                '-f ' + os.path.join(runpath, self.input_nodes[1].filename()),
                 os.path.join(runpath, self.output_nodes[0].filename())
                ]
 
@@ -242,7 +242,7 @@ class Lts2PbesTool(Tool):
         if not runpath:
             runpath = os.getcwd()
         return [os.path.join(runpath, self.input_nodes[0].filename()),
-                '-f' + os.path.join(runpath, self.input_nodes[1].filename()),
+                '-f ' + os.path.join(runpath, self.input_nodes[1].filename()),
                 os.path.join(runpath, self.output_nodes[0].filename())
                ]
 
@@ -283,7 +283,7 @@ class PbesSolveTool(Tool):
         if not runpath:
             runpath = os.getcwd()
         return [os.path.join(runpath, self.input_nodes[0].filename()),
-                '-f' + os.path.join(runpath, self.input_nodes[1].filename())
+                '-f ' + os.path.join(runpath, self.input_nodes[1].filename())
                ]
 
     def assign_outputs(self):
