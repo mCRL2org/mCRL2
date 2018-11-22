@@ -47,43 +47,22 @@ bool find_loop(const simple_structure_graph& G,
   if (U.contains(w))
   {
     visited[w] = false;
-    for (structure_graph::index_type u: w_.successors)
+    if (w_.decoration == structure_graph::d_none || w_.decoration == p % 2)
     {
-      if (u == v || find_loop(G, U, v, u, p, visited))
+      for (structure_graph::index_type u: w_.successors)
       {
-        visited[w] = true;
-        mCRL2log(log::verbose) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
-        return true;
+        if (u == v || find_loop(G, U, v, u, p, visited))
+        {
+          visited[w] = true;
+          mCRL2log(log::verbose) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
+          return true;
+        }
       }
     }
-    if (visited[w])
+    else
     {
-      mCRL2log(log::verbose) << "       case 2: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
+      return false;
     }
-    return visited[w];
-  }
-  else
-  {
-    visited[w] = true;
-    bool has_successors = false;
-    for (structure_graph::index_type u: w_.successors)
-    {
-      has_successors = true;
-      if (u != v && !find_loop(G, U, v, u, p, visited))
-      {
-        visited[w] = false;
-        return false;
-      }
-    }
-    if (!has_successors)
-    {
-      visited[w] = false;
-    }
-    if (visited[w])
-    {
-      mCRL2log(log::verbose) << "       case 3: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
-    }
-    return visited[w];
   }
   return false;
 }
