@@ -22,6 +22,7 @@ namespace detail {
 
 inline
 bool find_loop(const simple_structure_graph& G,
+               const vertex_set& U,
                structure_graph::index_type v,
                structure_graph::index_type w,
                std::size_t p,
@@ -43,12 +44,12 @@ bool find_loop(const simple_structure_graph& G,
     return i->second;
   }
 
-  if (w_.decoration == structure_graph::d_none || w_.decoration == p % 2)
+  if (U.contains(w))
   {
     visited[w] = false;
     for (structure_graph::index_type u: w_.successors)
     {
-      if (u == v || find_loop(G, v, u, p, visited))
+      if (u == v || find_loop(G, U, v, u, p, visited))
       {
         visited[w] = true;
         mCRL2log(log::verbose) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
@@ -68,7 +69,7 @@ bool find_loop(const simple_structure_graph& G,
     for (structure_graph::index_type u: w_.successors)
     {
       has_successors = true;
-      if (u != v && !find_loop(G, v, u, p, visited))
+      if (u != v && !find_loop(G, U, v, u, p, visited))
       {
         visited[w] = false;
         return false;
@@ -89,6 +90,7 @@ bool find_loop(const simple_structure_graph& G,
 
 void find_loops(const simple_structure_graph& G,
                 const std::unordered_set<propositional_variable_instantiation>& discovered,
+                const std::deque<propositional_variable_instantiation>& todo,
                 vertex_set& S0,
                 vertex_set& S1,
                 std::size_t iteration_count,
@@ -100,10 +102,30 @@ void find_loops(const simple_structure_graph& G,
   // count the number of insertions in the sets S0 and S1
   std::size_t insertion_count = 0;
 
-  std::unordered_map<structure_graph::index_type, bool> visited;
+  std::size_t n = graph_builder.m_vertices.size();
+
+  // compute todo_
+  boost::dynamic_bitset<> todo_(n);
+  for (const propositional_variable_instantiation& X: todo)
+  {
+    structure_graph::index_type u = graph_builder.find_vertex(X);
+    todo_[u] = true;
+  }
+
+  // compute done
+  vertex_set done(n);
   for (const propositional_variable_instantiation& X: discovered)
   {
     structure_graph::index_type u = graph_builder.find_vertex(X);
+    if (!todo_[u])
+    {
+      done.insert(u);
+    }
+  }
+
+  std::unordered_map<structure_graph::index_type, bool> visited;
+  for (structure_graph::index_type u: done.vertices())
+  {
     const auto& u_ = G.find_vertex(u);
     if (u_.rank == data::undefined_index())
     {
@@ -115,7 +137,7 @@ void find_loops(const simple_structure_graph& G,
     {
       visited[u] = false;
     }
-    bool b = detail::find_loop(G, u, u, u_.rank, visited);
+    bool b = find_loop(G, done, u, u, u_.rank, visited);
     visited[u] = b;
     if (b)
     {
