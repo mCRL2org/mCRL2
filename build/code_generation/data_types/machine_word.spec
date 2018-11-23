@@ -39,4 +39,4 @@ map  @one_word <"one_word">: @word;
 
 
 var d:@word;
-eqn d==d = true;
+eqn ==(d, d) = true;

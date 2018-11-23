@@ -1391,7 +1391,7 @@ namespace mcrl2 {
         variable vd("d",machine_word());
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list({vd==d, vtrue}), vd==d, vtrue));
+        result.push_back(data_equation(variable_list({vd, vtrue}), equal_to(vd, vd), vtrue));
         return result;
       }
 
