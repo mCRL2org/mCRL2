@@ -76,7 +76,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
   connect(counterexampleButton, SIGNAL(clicked()), this,
           SLOT(actionShowEvidence()));
 
-  /* stack the verification widgets */
+  /* stack the verification buttons */
   verificationWidgets = new QStackedWidget(this);
   verificationWidgets->setMaximumWidth(40);
   verificationWidgets->addWidget(verifyButton);         /* index = 0 */
@@ -150,6 +150,8 @@ void PropertyWidget::resetWidget()
 {
   verificationWidgets->setCurrentIndex(0);
   this->setStyleSheet("");
+  propertyNameScrollArea->setStyleSheet("");
+  propertyNameLabel->setStyleSheet("");
 }
 
 void PropertyWidget::actionVerify()

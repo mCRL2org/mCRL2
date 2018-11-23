@@ -32,19 +32,19 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   if (add)
   {
     windowTitle = "Add Property";
-    ui->addEditButton->setText("Add");
   }
   else
   {
     windowTitle = "Edit Property";
-    ui->addEditButton->setText("Edit");
   }
+
+  ui->saveButton->setText("Save");
 
   setWindowTitle(windowTitle);
   setWindowFlags(Qt::Window);
 
   connect(ui->parseButton, SIGNAL(clicked()), this, SLOT(parseProperty()));
-  connect(ui->addEditButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));
+  connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(processSystem, SIGNAL(processFinished(int)), this,
           SLOT(parseResults(int)));
@@ -59,7 +59,7 @@ AddEditPropertyDialog::~AddEditPropertyDialog()
 
 void AddEditPropertyDialog::resetFocus()
 {
-  ui->addEditButton->setFocus();
+  ui->saveButton->setFocus();
   ui->propertyNameField->setFocus();
 }
 
@@ -101,10 +101,6 @@ bool AddEditPropertyDialog::checkInput()
            fileSystem->propertyNameExists(propertyName))
   {
     error = "A property with this name already exists";
-  }
-  else if (ui->propertyTextField->toPlainText().count() == 0)
-  {
-    error = "The property text may not be empty";
   }
 
   if (!error.isEmpty())
