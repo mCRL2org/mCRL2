@@ -18,6 +18,7 @@ add_mcrl2_tool(mcrl2ide
     propertywidget.cpp
   DEPENDS
     mcrl2_gui
+    mcrl2_lts
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets

@@ -11,6 +11,7 @@
 #define FILESYSTEM_H
 
 #include "codeeditor.h"
+#include "mcrl2/lts/lts_equivalence.h"
 
 #include <QObject>
 #include <QDir>
@@ -21,43 +22,27 @@
 #include <QDateTime>
 #include <QDomDocument>
 
-enum class LtsReduction
-{
-  None = 0,
-  StrongBisimulation = 1,
-  Trace = 2,
-  DPBranchingBisimulation = 3,
-  BranchingBisimulation = 4,
-  WeakBisimulation = 5,
-  WeakTrace = 6
-};
-
-const std::map<LtsReduction, QString> LTSREDUCTIONNAMES = {
-    {LtsReduction::None, "None"},
-    {LtsReduction::StrongBisimulation, "Strong Bisimulation"},
-    {LtsReduction::Trace, "Trace equivalence"},
-    {LtsReduction::DPBranchingBisimulation, "Divergence Preserving Branching Bisimulation"},
-    {LtsReduction::BranchingBisimulation, "Branching Bisimulation"},
-    {LtsReduction::WeakBisimulation, "Weak Bisimulation"},
-    {LtsReduction::WeakTrace, "Weak Trace Equivalence"}};
-
-const std::map<LtsReduction, QString> LTSREDUCTIONTOOLARGUMENTS = {
-    {LtsReduction::None, "none"},
-    {LtsReduction::StrongBisimulation, "bisim"},
-    {LtsReduction::Trace, "trace"},
-    {LtsReduction::DPBranchingBisimulation, "dpbranching-bisim"},
-    {LtsReduction::BranchingBisimulation, "branching-bisim"},
-    {LtsReduction::WeakBisimulation, "weak-bisim"},
-    {LtsReduction::WeakTrace, "weak-trace"}};
-
-const std::map<LtsReduction, bool> LTSREDUCTIONUSESABSTRACTION = {
-    {LtsReduction::None, false},
-    {LtsReduction::StrongBisimulation, false},
-    {LtsReduction::Trace, false},
-    {LtsReduction::DPBranchingBisimulation, true},
-    {LtsReduction::BranchingBisimulation, true},
-    {LtsReduction::WeakBisimulation, true},
-    {LtsReduction::WeakTrace, true}};
+/* contains som extra info for lts reductions:
+ *   - the name of the reduction
+ *   - whether this reduction makes use of abstraction */
+const std::map<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
+    LTSREDUCTIONINFO = {
+        {mcrl2::lts::lts_equivalence::lts_eq_none,
+         std::pair<QString, bool>("None", false)},
+        {mcrl2::lts::lts_equivalence::lts_eq_bisim,
+         std::pair<QString, bool>("Strong Bisimulation", false)},
+        {mcrl2::lts::lts_equivalence::lts_eq_trace,
+         std::pair<QString, bool>("Trace equivalence", false)},
+        {mcrl2::lts::lts_equivalence::
+             lts_eq_divergence_preserving_branching_bisim,
+         std::pair<QString, bool>(
+             "Divergence Preserving Branching Bisimulation", true)},
+        {mcrl2::lts::lts_equivalence::lts_eq_branching_bisim,
+         std::pair<QString, bool>("Branching Bisimulation", true)},
+        {mcrl2::lts::lts_equivalence::lts_eq_weak_bisim,
+         std::pair<QString, bool>("Weak Bisimulation", true)},
+        {mcrl2::lts::lts_equivalence::lts_eq_weak_trace,
+         std::pair<QString, bool>("Weak Trace Equivalence", true)}};
 
 class Property
 {
@@ -152,8 +137,9 @@ class FileSystem : public QObject
    * @param propertyName The property name in case this is an evindence lts
    * @return The file path of the lts
    */
-  QString ltsFilePath(LtsReduction reduction, bool evidence = false,
-                      const QString& propertyName = "");
+  QString ltsFilePath(mcrl2::lts::lts_equivalence reduction =
+                          mcrl2::lts::lts_equivalence::lts_eq_none,
+                      bool evidence = false, const QString& propertyName = "");
 
   /**
    * @brief propertyFilePath Defines the file path of a property
@@ -261,7 +247,8 @@ class FileSystem : public QObject
    * @return Whether an lts file exists that is created from the current
    *   specification
    */
-  bool upToDateLtsFileExists(LtsReduction reduction, bool evidence = false,
+  bool upToDateLtsFileExists(mcrl2::lts::lts_equivalence reduction,
+                             bool evidence = false,
                              const QString& propertyName = "");
 
   /**

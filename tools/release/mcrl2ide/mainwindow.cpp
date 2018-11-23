@@ -402,7 +402,7 @@ void MainWindow::actionShowLts()
     else
     {
       lastLtsHasReduction = false;
-      processSystem->showLts(LtsReduction::None);
+      processSystem->showLts(mcrl2::lts::lts_equivalence::lts_eq_none);
     }
   }
 }
@@ -418,11 +418,12 @@ void MainWindow::actionShowReducedLts()
     else
     {
       QStringList reductionNames;
-      for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
+      for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
+               item : LTSREDUCTIONINFO)
       {
-        if (item.first != LtsReduction::None)
+        if (item.first != mcrl2::lts::lts_equivalence::lts_eq_none)
         {
-          reductionNames << item.second;
+          reductionNames << item.second.first;
         }
       }
 
@@ -449,22 +450,24 @@ void MainWindow::actionShowReducedLts()
       int secondSeparatorIndex = 2;
       items << "----- CHOOSE REDUCTION -----"
             << "--- WITHOUT ABSTRACTION ---";
-      for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
+      for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
+               item : LTSREDUCTIONINFO)
       {
-        if (!LTSREDUCTIONUSESABSTRACTION.at(item.first) &&
-            item.first != LtsReduction::None)
+        if (!item.second.second &&
+            item.first != mcrl2::lts::lts_equivalence::lts_eq_none)
         {
-          items << item.second;
+          items << item.second.first;
           secondSeparatorIndex++;
         }
       }
 
       items << "--- WITH ABSTRACTION ---";
-      for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
+      for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
+               item : LTSREDUCTIONINFO)
       {
-        if (LTSREDUCTIONUSESABSTRACTION.at(item.first))
+        if (item.second.second)
         {
-          items << item.second;
+          items << item.second.first;
         }
       }
 
@@ -482,10 +485,12 @@ void MainWindow::actionShowReducedLts()
       if (reductionDialog.exec())
       {
         QString selectedReduction = reductionBox.currentText();
-        LtsReduction reduction = LtsReduction::None;
-        for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
+        mcrl2::lts::lts_equivalence reduction =
+            mcrl2::lts::lts_equivalence::lts_eq_none;
+        for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
+                 item : LTSREDUCTIONINFO)
         {
-          if (item.second == selectedReduction)
+          if (item.second.first == selectedReduction)
           {
             reduction = item.first;
             break;

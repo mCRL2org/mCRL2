@@ -177,7 +177,7 @@ class ProcessSystem : public QObject
    * @param reduction What reduction to apply
    * @return The process id of the lts creation process
    */
-  int showLts(LtsReduction reduction);
+  int showLts(mcrl2::lts::lts_equivalence reduction);
 
   /**
    * @brief parseProperty Parses the given property
@@ -278,7 +278,8 @@ class ProcessSystem : public QObject
                              int subprocessIndex,
                              const QString& propertyName = "",
                              bool evidence = false,
-                             LtsReduction reduction = LtsReduction::None);
+                             mcrl2::lts::lts_equivalence reduction =
+                                 mcrl2::lts::lts_equivalence::lts_eq_none);
 
   private slots:
   /**

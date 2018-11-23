@@ -172,7 +172,8 @@ bool ProcessSystem::isThreadRunning(ProcessType processType)
 QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
                                           int processid, int subprocessIndex,
                                           const QString& propertyName,
-                                          bool evidence, LtsReduction reduction)
+                                          bool evidence,
+                                          mcrl2::lts::lts_equivalence reduction)
 {
   QProcess* subprocess = new QProcess();
   ProcessType processType = processTypes[processid];
@@ -252,8 +253,9 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
   case SubprocessType::Lps2lts:
     program = "lps2lts";
     arguments << fileSystem->lpsFilePath(evidence, propertyName)
-              << fileSystem->ltsFilePath(LtsReduction::None, evidence,
-                                         propertyName)
+              << fileSystem->ltsFilePath(
+                     mcrl2::lts::lts_equivalence::lts_eq_none, evidence,
+                     propertyName)
               << "--rewriter=jitty"
               << "--strategy=breadth"
               << "--verbose";
@@ -261,9 +263,11 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
   case SubprocessType::Ltsconvert:
     program = "ltsconvert";
-    arguments << fileSystem->ltsFilePath(LtsReduction::None)
-              << fileSystem->ltsFilePath(reduction) << "--verbose"
-              << "--equivalence=" + LTSREDUCTIONTOOLARGUMENTS.at(reduction);
+    arguments << fileSystem->ltsFilePath() << fileSystem->ltsFilePath(reduction)
+              << "--verbose"
+              << "--equivalence=" +
+                     QString::fromStdString(
+                         mcrl2::lts::print_equivalence(reduction));
     break;
 
   case SubprocessType::Ltsgraph:
@@ -358,7 +362,7 @@ int ProcessSystem::simulate()
   return -1;
 }
 
-int ProcessSystem::showLts(LtsReduction reduction)
+int ProcessSystem::showLts(mcrl2::lts::lts_equivalence reduction)
 {
   if (fileSystem->save())
   {
@@ -368,7 +372,7 @@ int ProcessSystem::showLts(LtsReduction reduction)
     ProcessType processType = ProcessType::LtsCreation;
     processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
-    bool noReduction = reduction == LtsReduction::None;
+    bool noReduction = reduction == mcrl2::lts::lts_equivalence::lts_eq_none;
 
     showLtsProcesses.push_back(
         createSubprocess(SubprocessType::ParseMcrl2, processid, 0));
@@ -517,8 +521,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
           subprocess->property("subprocessType").toInt());
       QString propertyName = subprocess->property("propertyName").toString();
       bool evidence = subprocess->property("evidence").toBool();
-      LtsReduction reduction =
-          static_cast<LtsReduction>(subprocess->property("reduction").toInt());
+      mcrl2::lts::lts_equivalence reduction =
+          static_cast<mcrl2::lts::lts_equivalence>(
+              subprocess->property("reduction").toInt());
 
       bool noNeedToRun = false;
 
@@ -565,8 +570,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
       case SubprocessType::Lps2lts:
         consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
 
-        if (fileSystem->upToDateLtsFileExists(LtsReduction::None, evidence,
-                                              propertyName))
+        if (fileSystem->upToDateLtsFileExists(
+                mcrl2::lts::lts_equivalence::lts_eq_none, evidence,
+                propertyName))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(

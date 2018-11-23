@@ -105,12 +105,13 @@ QString FileSystem::lpsFilePath(bool evidence, const QString& propertyName)
          (evidence ? "_" + propertyName + "_evidence" : "") + "_lps.lps";
 }
 
-QString FileSystem::ltsFilePath(LtsReduction reduction, bool evidence,
-                                const QString& propertyName)
+QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence reduction,
+                                bool evidence, const QString& propertyName)
 {
   return temporaryFolder.path() + QDir::separator() + projectName +
          (evidence ? "_" + propertyName + "_evidence" : "") + "_lts_" +
-         QString(LTSREDUCTIONNAMES.at(reduction)).replace(' ', '_') + ".lts";
+         QString(LTSREDUCTIONINFO.at(reduction).first).replace(' ', '_') +
+         ".lts";
 }
 
 QString FileSystem::propertyFilePath(const QString& propertyName)
@@ -239,7 +240,8 @@ bool FileSystem::upToDateLpsFileExists(bool evidence,
   }
 }
 
-bool FileSystem::upToDateLtsFileExists(LtsReduction reduction, bool evidence,
+bool FileSystem::upToDateLtsFileExists(mcrl2::lts::lts_equivalence reduction,
+                                       bool evidence,
                                        const QString& propertyName)
 {
   /* in case of not a reduced lts, an lts file is up to date if the lts file
@@ -249,7 +251,7 @@ bool FileSystem::upToDateLtsFileExists(LtsReduction reduction, bool evidence,
    *   the lts file is not empty and the lts file is created after the last time
    *   the unreduced lts file was modified
    */
-  if (reduction == LtsReduction::None)
+  if (reduction == mcrl2::lts::lts_equivalence::lts_eq_none)
   {
     QFile unreducedLtsFile(ltsFilePath(reduction, evidence, propertyName));
     return unreducedLtsFile.exists() && unreducedLtsFile.size() > 0 &&
@@ -260,7 +262,7 @@ bool FileSystem::upToDateLtsFileExists(LtsReduction reduction, bool evidence,
   {
     QFile reducedLtsFile(ltsFilePath(reduction));
     return reducedLtsFile.exists() && reducedLtsFile.size() > 0 &&
-           QFileInfo(ltsFilePath(LtsReduction::None)).lastModified() <=
+           QFileInfo(ltsFilePath()).lastModified() <=
                QFileInfo(reducedLtsFile).lastModified();
   }
 }
