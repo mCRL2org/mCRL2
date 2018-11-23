@@ -25,14 +25,39 @@ enum class LtsReduction
 {
   None = 0,
   StrongBisimulation = 1,
-  BranchingBisimulation = 2
+  Trace = 2,
+  DPBranchingBisimulation = 3,
+  BranchingBisimulation = 4,
+  WeakBisimulation = 5,
+  WeakTrace = 6
 };
 
 const std::map<LtsReduction, QString> LTSREDUCTIONNAMES = {
     {LtsReduction::None, "None"},
     {LtsReduction::StrongBisimulation, "Strong Bisimulation"},
+    {LtsReduction::Trace, "Trace equivalence"},
+    {LtsReduction::DPBranchingBisimulation, "Divergence Preserving Branching Bisimulation"},
     {LtsReduction::BranchingBisimulation, "Branching Bisimulation"},
-};
+    {LtsReduction::WeakBisimulation, "Weak Bisimulation"},
+    {LtsReduction::WeakTrace, "Weak Trace Equivalence"}};
+
+const std::map<LtsReduction, QString> LTSREDUCTIONTOOLARGUMENTS = {
+    {LtsReduction::None, "none"},
+    {LtsReduction::StrongBisimulation, "bisim"},
+    {LtsReduction::Trace, "trace"},
+    {LtsReduction::DPBranchingBisimulation, "dpbranching-bisim"},
+    {LtsReduction::BranchingBisimulation, "branching-bisim"},
+    {LtsReduction::WeakBisimulation, "weak-bisim"},
+    {LtsReduction::WeakTrace, "weak-trace"}};
+
+const std::map<LtsReduction, bool> LTSREDUCTIONUSESABSTRACTION = {
+    {LtsReduction::None, false},
+    {LtsReduction::StrongBisimulation, false},
+    {LtsReduction::Trace, false},
+    {LtsReduction::DPBranchingBisimulation, true},
+    {LtsReduction::BranchingBisimulation, true},
+    {LtsReduction::WeakBisimulation, true},
+    {LtsReduction::WeakTrace, true}};
 
 class Property
 {

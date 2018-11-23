@@ -16,6 +16,9 @@
 #include <QInputDialog>
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QComboBox>
+#include <QDialogButtonBox>
+#include <QStandardItemModel>
 
 MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
     : QMainWindow(parent)
@@ -423,21 +426,69 @@ void MainWindow::actionShowReducedLts()
         }
       }
 
-      /* ask the user what reduction to use */
-      bool ok;
-      QString reductionName = QInputDialog::getItem(
-          this, "Show reduced LTS", "Reduction:", reductionNames, 0, false, &ok,
-          Qt::WindowCloseButtonHint);
+      /* create a dialog for asking the user what reduction to use */
+      QDialog reductionDialog(this, Qt::WindowCloseButtonHint);
+      QVBoxLayout vbox;
+      QLabel textLabel("Reduction:");
+      QComboBox reductionBox;
+      QDialogButtonBox buttonBox(QDialogButtonBox::Cancel);
 
-      /* if user pressed ok, create a reduced lts */
-      if (ok)
+      vbox.addWidget(&textLabel);
+      vbox.addWidget(&reductionBox);
+      vbox.addWidget(&buttonBox);
+
+      reductionDialog.setLayout(&vbox);
+
+      connect(&reductionBox, SIGNAL(activated(int)), &reductionDialog,
+              SLOT(accept()));
+      connect(&buttonBox, SIGNAL(rejected()), &reductionDialog, SLOT(reject()));
+
+      /* add the items to the combobox, including some unselectable seperators
+       *   to indicate the use of abstraction */
+      QStringList items;
+      int secondSeparatorIndex = 2;
+      items << "----- CHOOSE REDUCTION -----"
+            << "--- WITHOUT ABSTRACTION ---";
+      for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
       {
+        if (!LTSREDUCTIONUSESABSTRACTION.at(item.first) &&
+            item.first != LtsReduction::None)
+        {
+          items << item.second;
+          secondSeparatorIndex++;
+        }
+      }
+
+      items << "--- WITH ABSTRACTION ---";
+      for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
+      {
+        if (LTSREDUCTIONUSESABSTRACTION.at(item.first))
+        {
+          items << item.second;
+        }
+      }
+
+      reductionBox.addItems(items);
+
+      QStandardItemModel* model =
+          qobject_cast<QStandardItemModel*>(reductionBox.model());
+      model->item(0)->setFlags(model->item(0)->flags() & ~Qt::ItemIsEnabled);
+      model->item(1)->setFlags(model->item(1)->flags() & ~Qt::ItemIsEnabled);
+      model->item(secondSeparatorIndex)
+          ->setFlags(model->item(secondSeparatorIndex)->flags() &
+                     ~Qt::ItemIsEnabled);
+
+      /* execute the dialog */
+      if (reductionDialog.exec())
+      {
+        QString selectedReduction = reductionBox.currentText();
         LtsReduction reduction = LtsReduction::None;
         for (std::pair<const LtsReduction, QString> item : LTSREDUCTIONNAMES)
         {
-          if (item.second == reductionName)
+          if (item.second == selectedReduction)
           {
             reduction = item.first;
+            break;
           }
         }
 

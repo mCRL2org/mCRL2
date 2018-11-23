@@ -262,19 +262,8 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
   case SubprocessType::Ltsconvert:
     program = "ltsconvert";
     arguments << fileSystem->ltsFilePath(LtsReduction::None)
-              << fileSystem->ltsFilePath(reduction) << "--verbose";
-    switch (reduction)
-    {
-    case LtsReduction::None:
-      arguments << "--equivalence=none";
-      break;
-    case LtsReduction::StrongBisimulation:
-      arguments << "--equivalence=bisim";
-      break;
-    case LtsReduction::BranchingBisimulation:
-      arguments << "--equivalence=branching-bisim";
-      break;
-    }
+              << fileSystem->ltsFilePath(reduction) << "--verbose"
+              << "--equivalence=" + LTSREDUCTIONTOOLARGUMENTS.at(reduction);
     break;
 
   case SubprocessType::Ltsgraph:
