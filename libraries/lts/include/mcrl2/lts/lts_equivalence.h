@@ -245,7 +245,7 @@ inline std::string print_equivalence(const lts_equivalence eq)
     case lts_red_tau_star:
       return "tau-star";
     case lts_red_determinisation:
-      return "deterministation";
+      return "determinisation";
     default:
       throw mcrl2::runtime_error("Unknown equivalence.");
   }
