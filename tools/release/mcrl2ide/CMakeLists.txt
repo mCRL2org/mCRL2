@@ -24,3 +24,5 @@ add_mcrl2_tool(mcrl2ide
     Qt5::Widgets
     Qt5::Xml
 )
+
+add_dependencies(mcrl2ide mcrl22lps lpsxsim lps2lts ltsconvert ltsgraph lps2pbes pbessolve)
