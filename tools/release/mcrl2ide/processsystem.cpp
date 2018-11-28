@@ -140,14 +140,27 @@ void ProcessSystem::testExecutableExistence()
       process.waitForFinished();
       QString output = process.readAllStandardOutput();
       QStringList splittedOutput = output.split(QRegExp("[ \r\n]"));
-      QString version = splittedOutput[3] + " " + splittedOutput[4];
-      if (version != mcrl2ideVersion)
+      /* check if the output has the correct output */
+      if (splittedOutput.length() >= 4 && splittedOutput[1] == "mCRL2" &&
+          splittedOutput[2] == "toolset" && splittedOutput[3].startsWith("2"))
       {
-        consoleDock->broadcast("WARNING: Tool " + tool +
-                               " does not have the same version as mCRL2 IDE: "
-                               "mCRL2 IDE has version " +
-                               mcrl2ideVersion + " whereas " + tool +
-                               " has version " + version + ".\n");
+        QString version = splittedOutput[3] + " " + splittedOutput[4];
+        if (version != mcrl2ideVersion)
+        {
+          consoleDock->broadcast(
+              "WARNING: Tool " + tool +
+              " does not have the same version as mCRL2 IDE: "
+              "mCRL2 IDE has version " +
+              mcrl2ideVersion + " whereas " + tool + " has version " + version +
+              ".\n");
+        }
+      }
+      else
+      {
+        consoleDock->broadcast(
+            "WARNING: The executable of tool " + tool +
+            " produced unexpected version output. Either the version output "
+            "has changed or the tool has crashed (using --version).\n");
       }
     }
     else
