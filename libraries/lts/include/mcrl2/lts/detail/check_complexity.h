@@ -530,7 +530,7 @@ class check_complexity
             assert(from < FirstPostprocessCounter);
             assert(FirstCounter <= to);
             assert(to <= LastCounter);
-            assert(max_value <= (to < FirstTempCounter ? log_n : 1));
+            assert(max_value <= (to < FirstTempCounter ? log_n : 1U));
             if (0 == counters[from - FirstCounter])  return true;
             if (counters[to - FirstCounter] >= max_value)
             {

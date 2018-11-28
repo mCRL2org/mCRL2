@@ -1,4 +1,4 @@
-// Author(s): David N. Jansen, Institute of Software, Chinese Academy of
+﻿// Author(s): David N. Jansen, Institute of Software, Chinese Academy of
 // Sciences, Beijing, PR China
 //
 // Copyright: see the accompanying file COPYING or copy at
@@ -1308,16 +1308,17 @@ class block_bunch_slice_t
                                                                                     static block_bunch_const_iter_t block_bunch_begin;
                                                                                     static const block_bunch_iter_t* block_bunch_end;
 
-                                                                                    struct {
-                                                                                        inline bool operator()(const block_bunch_entry& p1,
-                                                                                                                                 const block_bunch_slice_t* p2)
-                                                                                        {
-                                                                                            return &*p1.slice.iter != p2;
-                                                                                        }
-                                                                                    } block_bunch_not_equal;
-
                                                                                     std::string debug_id() const
-                                                                                    {   assert(block_bunch_begin <= end);  assert(end <= *block_bunch_end);
+                                                                                    {
+                                                                                        static struct {
+                                                                                            bool operator()(const block_bunch_entry& p1,
+                                                                                                                           const block_bunch_slice_t* p2) const
+                                                                                            {
+                                                                                                return &*p1.slice.iter != p2;
+                                                                                            }
+                                                                                        } block_bunch_not_equal;
+
+                                                                                        assert(block_bunch_begin <= end);  assert(end <= *block_bunch_end);
                                                                                         std::string index_string = std::to_string(end - block_bunch_begin);
                                                                                         if (empty())
                                                                                         {
@@ -4257,8 +4258,8 @@ inline bool state_info_entry::surely_has_no_transition_in(const bunch_t* const
                                                                                     }
 
                                                                                     static struct {
-                                                                                        inline bool operator()(iterator_or_counter<action_block_iter_t>
-                                                                                                            const& p1, action_block_iter_t const& action_block)
+                                                                                        bool operator()(iterator_or_counter<action_block_iter_t> const& p1,
+                                                                                                                 action_block_iter_t const& action_block) const
                                                                                         {
                                                                                             return p1.begin > action_block;
                                                                                         }
