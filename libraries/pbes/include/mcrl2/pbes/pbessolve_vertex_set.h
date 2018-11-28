@@ -263,6 +263,34 @@ vertex_set set_union(const vertex_set& V, const vertex_set& W)
   return result;
 }
 
+inline
+vertex_set set_intersection(const vertex_set& V, const vertex_set& W)
+{
+  vertex_set result(V.extent());
+  for (structure_graph::index_type v: V.vertices())
+  {
+    if (W.contains(v))
+    {
+      result.insert(v);
+    }
+  }
+  return result;
+}
+
+inline
+vertex_set set_minus(const vertex_set& V, const vertex_set& W)
+{
+  vertex_set result(V.extent());
+  for (structure_graph::index_type v: V.vertices())
+  {
+    if (!W.contains(v))
+    {
+      result.insert(v);
+    }
+  }
+  return result;
+}
+
 template <typename StructureGraph>
 void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::string& name)
 {

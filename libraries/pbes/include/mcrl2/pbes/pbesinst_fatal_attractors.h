@@ -138,15 +138,11 @@ void fatal_attractors(const simple_structure_graph& G,
   {
     std::size_t j = G.rank(u);
     auto alpha = j % 2;
-    vertex_set& S_alpha = alpha == 0 ? S0 : S1;
     if ((alpha == 0 && G.decoration(u) == structure_graph::decoration_type::d_false) || (alpha == 1 && G.decoration(u) == structure_graph::decoration_type::d_true))
     {
       continue;
     }
-    if (!S_alpha.contains(u))
-    {
-      insert_in_rank_map(U_j_map, u, j, n);
-    }
+    insert_in_rank_map(U_j_map, u, j, n);
   }
 
   detail::log_vertex_set(done, "done");
@@ -161,44 +157,28 @@ void fatal_attractors(const simple_structure_graph& G,
     detail::log_vertex_set(U_j, "U_" + std::to_string(j));
     auto alpha = j % 2;
     vertex_set& S_alpha = alpha == 0 ? S0 : S1;
-    vertex_set X = detail::compute_attractor_set_min_rank(G, U_j, alpha, done, j);
+    vertex_set U = set_union(U_j, S_alpha);
+    vertex_set X = detail::compute_attractor_set_min_rank(G, U, alpha, done, j);
+    vertex_set Y = set_minus(V, compute_attractor_set(G, set_minus(V, X), 1 - alpha));
 
-    // compute discovered \ (X \cup S_alpha)
-    vertex_set discovered_minus_X_S_alpha(n);
-    for (structure_graph::index_type u: V.vertices())
+    while (X != Y)
     {
-      if (!X.contains(u) && !S_alpha.contains(u))
-      {
-        discovered_minus_X_S_alpha.insert(u);
-      }
+      detail::log_vertex_set(X, "X");
+      detail::log_vertex_set(Y, "Y");
+      X = detail::compute_attractor_set_min_rank(G, set_intersection(U, Y), alpha, done, j);
+      Y = set_minus(V, compute_attractor_set(G, set_minus(V, X), 1 - alpha));
     }
-    detail::log_vertex_set(discovered_minus_X_S_alpha, "discovered \\ X");
+    detail::log_vertex_set(X, "X (final value)");
 
-    // compute Y
-    vertex_set Y(n);
-    discovered_minus_X_S_alpha = compute_attractor_set(G, discovered_minus_X_S_alpha, 1 - alpha);
-    for (structure_graph::index_type u: U_j.vertices())
+    for (structure_graph::index_type x: X.vertices())
     {
-      if (!discovered_minus_X_S_alpha.contains(u))
-      {
-        Y.insert(u);
-      }
-    }
-
-    detail::log_vertex_set(Y, "Y");
-
-    if (!Y.is_empty())
-    {
-      Y = detail::compute_attractor_set_min_rank(G, Y, alpha, done, j);
-      detail::log_vertex_set(Y, "AttrMinRank(Y)");
-      for (structure_graph::index_type y: Y.vertices())
-      {
-        insertion_count++;
-        S_alpha.insert(y);
-        mCRL2log(log::debug) << "Fatal attractors: insert vertex " << y << " in S" << alpha << std::endl;
-      }
+      insertion_count++;
+      S_alpha.insert(x);
+      mCRL2log(log::debug) << "Fatal attractors: insert vertex " << x << " in S" << alpha << std::endl;
     }
   }
+  S0 = compute_attractor_set(G, S0, 0);
+  S1 = compute_attractor_set(G, S1, 1);
   mCRL2log(log::debug) << "Fatal attractors: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 
