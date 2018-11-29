@@ -153,10 +153,12 @@ void fatal_attractors(const simple_structure_graph& G,
   for (auto& p: U_j_map)
   {
     std::size_t j = p.first;
-    const vertex_set& U_j = p.second;
-    detail::log_vertex_set(U_j, "U_" + std::to_string(j));
     auto alpha = j % 2;
     vertex_set& S_alpha = alpha == 0 ? S0 : S1;
+    vertex_set& S_one_minus_alpha = alpha == 0 ? S1 : S0;
+    vertex_set& U_j = p.second;
+    U_j = set_minus(U_j, S_one_minus_alpha);
+    detail::log_vertex_set(U_j, "U_" + std::to_string(j));
     vertex_set U = set_union(U_j, S_alpha);
     vertex_set X = detail::compute_attractor_set_min_rank(G, U, alpha, done, j);
     vertex_set Y = set_minus(V, compute_attractor_set(G, set_minus(V, X), 1 - alpha));
@@ -166,7 +168,7 @@ void fatal_attractors(const simple_structure_graph& G,
       detail::log_vertex_set(X, "X");
       detail::log_vertex_set(Y, "Y");
       X = detail::compute_attractor_set_min_rank(G, set_intersection(U, Y), alpha, done, j);
-      Y = set_minus(V, compute_attractor_set(G, set_minus(V, X), 1 - alpha));
+      Y = set_minus(Y, compute_attractor_set(G, set_minus(Y, X), 1 - alpha));
     }
     detail::log_vertex_set(X, "X (final value)");
 
