@@ -81,7 +81,10 @@ class parity_game_generator
     bool m_true_false_dependencies;
 
     /// \brief True if it is a min-parity game.
-    bool m_is_min_parity;
+    bool m_is_min_parity_game;
+
+    /// \brief The maximum priority value of the game.
+    std::size_t m_max_priority = 0;
 
     /// \brief Adds a BES equation for a given PBES expression, if it not already exists.
     /// \param t A PBES expression
@@ -160,41 +163,39 @@ class parity_game_generator
     }
 
     /// \brief Compute priorities of PBES propositional variables.
-    template <typename Container>
-    void compute_priorities(const Container& equations)
+    void compute_priorities(const std::vector<pbes_equation>& equations)
     {
-
       fixpoint_symbol sigma = fixpoint_symbol::nu();
       std::size_t priority = 0;
-      for (auto i = equations.begin(); i != equations.end(); ++i)
+      for (const auto& equation: equations)
       {
-        if (pbes_equation(*i).symbol() == sigma)
+        if (equation.symbol() == sigma)
         {
-          m_priorities[pbes_equation(*i).variable().name()] = priority;
+          m_priorities[equation.variable().name()] = priority;
         }
         else
         {
-          sigma = pbes_equation(*i).symbol();
-          m_priorities[pbes_equation(*i).variable().name()] = ++priority;
+          sigma = equation.symbol();
+          m_priorities[equation.variable().name()] = ++priority;
         }
       }
 
       // If it is a max-priority game, adjust the priorities
-      if (!m_is_min_parity)
+      if (!m_is_min_parity_game)
       {
         // Choose an even upperbound max_priority
-        std::size_t max_priority = (priority % 2 == 0 ? priority : priority + 1);
-        if (max_priority == 0)
+        std::size_t m_max_priority = (priority % 2 == 0 ? priority : priority + 1);
+        if (m_max_priority == 0)
         {
-          max_priority = 2;
+          m_max_priority = 2;
         }
         for (auto& i: m_priorities)
         {
-          i.second = max_priority - i.second;
+          i.second = m_max_priority - i.second;
         }
         // Add BES equations for true and false with priorities 0 and 1.
-        add_bes_equation(true_(), max_priority);
-        add_bes_equation(false_(), max_priority - 1);
+        add_bes_equation(true_(), m_max_priority);
+        add_bes_equation(false_(), m_max_priority - 1);
       }
       else
       {
@@ -222,7 +223,6 @@ class parity_game_generator
     }
 
     /// \brief Prints a log message for every step-th equation
-    virtual
     std::string print_equation_count(std::size_t size, std::size_t step = 1000) const
     {
       if (size > 0 && (size % step == 0 || (size < 1000 && size % 100 == 0)))
@@ -272,14 +272,14 @@ class parity_game_generator
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
     /// \param rewrite_strategy Strategy to use for the data rewriter
-    parity_game_generator(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
+    explicit parity_game_generator(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       :
       m_initialized(false),
       m_pbes(p),
       datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
       R(datar, p.data()),
       m_true_false_dependencies(true_false_dependencies),
-      m_is_min_parity(is_min_parity)
+      m_is_min_parity_game(is_min_parity)
     {
       pbes_system::algorithms::instantiate_global_variables(p);
     }
@@ -413,14 +413,16 @@ class parity_game_generator
       {
         for (const pbes_expression& term: split_and(psi))
         {
-          result.insert(add_bes_equation(term, priority));
+          auto prio = is_or(term) ? (m_is_min_parity_game ? m_max_priority : 0) : priority;
+          result.insert(add_bes_equation(term, prio));
         }
       }
       else if (is_or(psi))
       {
         for (const pbes_expression& term: split_or(psi))
         {
-          result.insert(add_bes_equation(term, priority));
+          auto prio = is_and(term) ? (m_is_min_parity_game ? m_max_priority : 0) : priority;
+          result.insert(add_bes_equation(term, prio));
         }
       }
       else if (is_true(psi))
