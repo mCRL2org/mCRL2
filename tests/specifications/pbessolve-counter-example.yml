@@ -20,7 +20,7 @@ tools:
   t1:
     input: [l1]
     output: [l3]
-    args: [-lstack]
+    args: [-n]
     name: mcrl22lps
   t2:
     input: [l3, l2]
