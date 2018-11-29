@@ -234,6 +234,16 @@ class PbessolveTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(PbessolveTest, self).__init__(name, ymlfile('pbessolve'), settings)
 
+class PbessolveDepthFirstTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(PbessolveDepthFirstTest, self).__init__(name, ymlfile('pbessolve'), settings)
+        self.set_command_line_options('t2', ['-zdepth-first'])
+        self.set_command_line_options('t3', ['-zdepth-first'])
+        self.set_command_line_options('t4', ['-zdepth-first'])
+        self.set_command_line_options('t5', ['-zdepth-first'])
+        self.set_command_line_options('t6', ['-zdepth-first'])
+        self.set_command_line_options('t7', ['-zdepth-first'])
+
 class Pbessolve_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization = 0, settings = dict()):
         super(Pbessolve_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
@@ -327,6 +337,7 @@ available_tests = {
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)                   ,
     'pbespgsolve'                                 : lambda name, settings: PbespgsolveTest(name, settings)                                             ,
     'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                               ,
+    'pbessolve-depth-first'                       : lambda name, settings: PbessolveDepthFirstTest(name, settings)                                     ,
     'pbessolve-counter-example-optimization-0'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 0, settings)                            ,
     'pbessolve-counter-example-optimization-1'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 1, settings)                            ,
     'pbessolve-counter-example-optimization-2'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 2, settings)                            ,
