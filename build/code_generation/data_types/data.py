@@ -169,19 +169,25 @@ class variable_declaration_list():
     return "".join(["{0};\n".format(e.code(spec)) for e in self.elements])
 
 class function_declaration():
-  def __init__(self, id, sort_expr, l):
+  def __init__(self, id, sort_expr, l, internextern, definedby):
     assert(isinstance(id, identifier))
     assert(isinstance(sort_expr, sort_expression))
     assert(isinstance(l, label))
+    assert(isinstance(internextern, internal_external))
+    assert(isinstance(definedby, defined_by))
     self.id = id
     self.sort_expression = sort_expr
     self.label = l
+    self.internextern = internextern
+    self.definedby = definedby
     self.namespace = ""
     self.original_namespace = ""
 
   def __eq__(self, other):
-    if hasattr(other, "id") and hasattr(other, "label") and hasattr(other, "namespace") and hasattr(other, "original_namespace"):
-      return self.id == other.id and self.label == other.label and self.namespace == other.namespace and self.original_namespace == other.original_namespace
+    if (hasattr(other, "id") and hasattr(other, "label") and hasattr(other, "namespace") and 
+            hasattr(other, "original_namespace") and hasattr(other, "internextern") and hasattr(other, "definedby")):
+      return (self.id == other.id and self.label == other.label and self.namespace == other.namespace and self.original_namespace == other.original_namespace and
+              self.internextern == other.internextern and self.definedby == other.definedby)
     else:
       return NotImplemented
 
@@ -225,6 +231,28 @@ class function_declaration():
     return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
 
 
+class internal_external():
+  def __init__(self, status):
+    assert(status=="internal" or status=="external")
+    self.status = status
+
+  def __eq__(self, other):
+    assert(self.status=="internal" or self.status=="external")
+    assert(other.status=="internal" or other.status=="external")
+    return self.status == other.status
+
+
+class defined_by():
+  def __init__(self, status):
+    assert(status=="defined_by_rewrite_rules" or status=="defined_by_code")
+    self.status = status
+
+  def __eq__(self, other):
+    assert(self.status=="defined_by_rewrite_rules" or self.status=="defined_by_code")
+    assert(other.status=="defined_by_rewrite_rules" or other.status=="defined_by_code")
+    return self.status == other.status
+
+
 class function_declaration_list():
   def __init__(self, elements):
     assert(all(map(lambda x: isinstance(x, function_declaration), elements)))
@@ -254,19 +282,26 @@ class function_declaration_list():
 
   def find_function(self, function, argumentcount):
     if function.id == "==":
-      return function_declaration(function.id, sort_expression(), label(identifier("equal_to")))
+      return function_declaration(function.id, sort_expression(), label(identifier("equal_to")),
+                    internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     elif function.id == "!=":
-      return function_declaration(function.id, sort_expression(), label(identifier("not_equal_to")))
+      return function_declaration(function.id, sort_expression(), label(identifier("not_equal_to")),
+                    internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     elif function.id == "if":
-      return function_declaration(function.id, sort_expression(), label(identifier("if_")))
+      return function_declaration(function.id, sort_expression(), label(identifier("if_")),
+                    internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     elif function.id == "<":
-      return function_declaration(function.id, sort_expression(), label(identifier("less")))
+      return function_declaration(function.id, sort_expression(), label(identifier("less")),
+                    internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     elif function.id == ">":
-      return function_declaration(function.id, sort_expression(), label(identifier("greater")))
+      return function_declaration(function.id, sort_expression(), label(identifier("greater")),
+                    internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     elif function.id == "<=":
-      return function_declaration(function.id, sort_expression(), label(identifier("less_equal")))
+      return function_declaration(function.id, sort_expression(), label(identifier("less_equal")),
+                    internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     elif function.id == ">=":
-      return function_declaration(function.id, sort_expression(), label(identifier("greater_equal")))
+      return function_declaration(function.id, sort_expression(), label(identifier("greater_equal")),
+                    internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     else:
       for e in self.elements:
         if e.id == function.id:
@@ -1288,7 +1323,7 @@ class structured_sort_declaration():
       s = sort_expr
     else:
       s = sort_arrow(self.arguments, sort_expr)
-    f = function_declaration(self.id, s, self.label)
+    f = function_declaration(self.id, s, self.label,internal_external("internal"),defined_by("defined_by_rewrite_rules"))
     # f.set_namespace should not be used here, as this function may be
     # introduced in an included specification, and hence we need to preserve
     # original_namespace

@@ -1,7 +1,7 @@
 #using S
 #using T
 
-map @func_update <"function_update">: (S -> T) <"arg1"> # S <"arg2"> # T <"arg3"> -> (S -> T);
+map @func_update <"function_update">: (S -> T) <"arg1"> # S <"arg2"> # T <"arg3"> -> (S -> T)              internal defined_by_rewrite_rules;
 
 var x: S;
     y: S;

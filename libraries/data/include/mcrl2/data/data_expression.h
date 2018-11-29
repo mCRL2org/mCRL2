@@ -171,6 +171,12 @@ class data_expression: public atermpp::aterm
                            const data_expression& e3,
                            const data_expression& e4) const;
 
+    application operator()(const data_expression& e1,
+                           const data_expression& e2,
+                           const data_expression& e3,
+                           const data_expression& e4,
+                           const data_expression& e5) const;
+
     /// \brief Returns the sort of the data expression
 
     sort_expression sort() const;
@@ -316,6 +322,13 @@ inline
 application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4) const
 {
   return application(*this, e1, e2, e3, e4);
+}
+
+/// \brief Apply data expression to five data expressions
+inline
+application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4, const data_expression& e5) const
+{
+  return application(*this, e1, e2, e3, e4, e5);
 }
 
 } // namespace data

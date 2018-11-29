@@ -1,4 +1,4 @@
-% Author(s): Aad Mathijssen, Jeroen Keiren
+% Author(s): Jan Friso Groote
 % Copyright: see the accompanying file COPYING or copy at
 % https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 %
@@ -6,76 +6,122 @@
 % (See accompanying file LICENSE_1_0.txt or copy at
 % http://www.boost.org/LICENSE_1_0.txt)
 %
-% Specification of the Pos data sort.
+% Specification of the Pos data sort that uses machine numbers for efficiency.
 
 #include bool.spec
+#include machine_word.spec
 
 sort Pos <"pos">;
 
-cons @c1 <"c1">:Pos;
-     @cDub <"cdub">:Bool <"left"> #Pos <"right"> ->Pos;
+cons @one <"one">:Pos                                                                                                                   internal defined_by_rewrite_rules;
+% The successor constructor should be merged with the successor below, by removing the latter.
+% Currently, this does not work, as the translator to C code does not see that there are multiple
+% successor functions of different types, as this one is a constructor. 
+     @succ <"succ_constructor">:Pos <"arg"> -> Pos                                                                                      internal defined_by_rewrite_rules;
 
-map max <"maximum">:Pos <"left"> #Pos <"right">->Pos;
-    min <"minimum">:Pos <"left"> #Pos <"right">->Pos;
-    succ <"succ">:Pos <"arg">->Pos;
-    @pospred <"pos_predecessor">:Pos <"arg">->Pos;
-    + <"plus">:Pos <"left"> #Pos <"right">->Pos;
-    @addc <"add_with_carry">:Bool <"arg1"> #Pos <"arg2"> #Pos <"arg3">->Pos;
-    * <"times">:Pos <"left"> #Pos <"right">->Pos;
-    @powerlog2 <"powerlog2_pos">:Pos <"arg"> -> Pos;
+map  @most_significant_digit <"most_significant_digit">: @word <"arg"> -> Pos                                                           internal defined_by_rewrite_rules;
+     succ <"succ">:Pos <"arg"> -> Pos                                                                                                   external defined_by_rewrite_rules;
+     @concat_digit <"concat_digit">: Pos <"arg1"> # @word <"arg2"> -> Pos                                                               internal defined_by_rewrite_rules;
+     max <"maximum">: Pos <"left"> # Pos <"right"> -> Pos                                                                               external defined_by_rewrite_rules;
+     min <"minimum">: Pos <"left"> # Pos <"right"> -> Pos                                                                               external defined_by_rewrite_rules;
+     @pospred <"pos_predecessor">: Pos <"arg"> -> Pos                                                                                   internal defined_by_rewrite_rules;
+     + <"plus">: Pos <"left"> # Pos <"right"> -> Pos                                                                                    external defined_by_rewrite_rules;
+     * <"times">: Pos <"left"> # Pos <"right"> -> Pos                                                                                   external defined_by_rewrite_rules;
+     @powerlog2 <"powerlog2_pos">: Pos <"arg"> -> Pos                                                                                   internal defined_by_rewrite_rules;
+% Auxiliary function to implement multiplication that uses where clauses.
+     @times_whr_mult_overflow <"times_whr_mult_overflow">: @word <"arg1"> # @word <"arg2"> # Pos <"arg3"> # @word <"arg4"> -> Pos       internal defined_by_rewrite_rules;
+% The functions below are used in the old datatypes (as described in the 2014 book). If not used anymore, they can be removed. 
+     @addc <"add_with_carry">: Bool <"arg1"> #Pos <"arg2"> #Pos <"arg3">->Pos                                                           internal defined_by_rewrite_rules;
+     @c1 <"c1">: Pos                                                                                                                    internal defined_by_rewrite_rules;
+     @cDub <"cdub">:Bool <"left"> # Pos <"right"> -> Pos                                                                                internal defined_by_rewrite_rules;
 
-var b:Bool;
-    c:Bool;
-    p:Pos;
-    q:Pos;
-    p1:Pos;
-    q1:Pos;
-eqn ==(@c1, @cDub(b,p)) = false;
-    ==(@cDub(b,p), @c1) = false;
-% The tools run 10% faster with the rules below, compared to the rules in the book of 2014. 
-    ==(@cDub(b,p), @cDub(b, q)) =  ==(p,q);
-    ==(@cDub(false,p), @cDub(true, q)) = false;
-    ==(@cDub(true,p), @cDub(false, q)) = false;
-    ==(succ(p),@c1) = false;
-    ==(@c1,succ(q)) = false;
-    ==(succ(p),@cDub(c,q)) = ==(p,@pospred(@cDub(c,q)));
-    ==(@cDub(b,p),succ(q)) = ==(@pospred(@cDub(b,p)),q);
-    <(p, @c1) = false;
-    <(@c1, @cDub(b,p)) = true;
-% The equation below is required for the enumeration of lists
-    <(@cDub(b,p), @cDub(c,q)) = if(=>(c,b), <(p,q), <=(p,q));
-    <(succ(p),@cDub(c,q)) = <(p,@pospred(@cDub(c,q)));
-    <(@cDub(b,p),succ(q)) = <=(@cDub(b,p),q);
-    <(@c1,succ(q)) = true;
-    <=(@c1, p) = true;
-    <=(@cDub(b,p), @c1) = false;
-% The equation below is required for the enumeration of lists
-    <=(@cDub(b,p), @cDub(c,q)) = if(=>(b,c), <=(p,q), <(p,q));
-    <=(succ(p),@cDub(c,q)) = <(p,@cDub(c,q));
-    <=(@cDub(b,p),succ(q)) = <=(@pospred(@cDub(b,p)),q);
-    <=(succ(p),@c1) = false;
-    max(p,q) = if(<=(p,q),q,p);
-    min(p,q) = if(<=(p,q),p,q);
-    succ(@c1) = @cDub(false, @c1);
-    succ(@cDub(false,p)) = @cDub(true,p);
-    succ(@cDub(true,p)) = @cDub(false,succ(p));
-    @pospred(@c1) = @c1;
-    @pospred(@cDub(false,@c1)) = @c1;
-    @pospred(@cDub(false,@cDub(b,p))) = @cDub(true,@pospred(@cDub(b,p)));
-    @pospred(@cDub(true,p)) = @cDub(false,p);
-    +(p,q) = @addc(false,p,q);
-    @addc(false,@c1,p) = succ(p);
-    @addc(true,@c1,p) = succ(succ(p));
-    @addc(false,p,@c1) = succ(p);
-    @addc(true,p,@c1) = succ(succ(p));
-    @addc(b,@cDub(c,p),@cDub(c,q)) = @cDub(b,@addc(c,p,q));
-    @addc(b,@cDub(false,p),@cDub(true,q)) = @cDub(!(b), @addc(b,p,q));
-    @addc(b,@cDub(true,p),@cDub(false,q)) = @cDub(!(b), @addc(b,p,q));
-    *(@c1,p) = p;
-    *(p,@c1) = p;
-    *(@cDub(false,p),q) = @cDub(false,*(p,q));
-    *(p,@cDub(false,q)) = @cDub(false,*(p,q));
-    *(@cDub(true,p),@cDub(true,q)) = @cDub(true,@addc(false,p,@addc(false,q,@cDub(false,*(p,q)))));
-    @powerlog2(@c1) = @c1;
-    @powerlog2(@cDub(b,@c1)) = @c1;
-    @powerlog2(@cDub(b,@cDub(c,p))) = @cDub(false,@powerlog2(p));
+% auxiliary functions that should not be made availabe to users of mCRL2.
+% @Pos2Pos64 : Pos_old -> Pos;
+% @Pos642Pos : Pos -> Pos_old;
+
+var  b: Bool;
+     p: Pos;
+     p1: Pos;
+     p2: Pos;
+     w: @word;
+     w1: @word;
+     w2: @word;
+eqn  @one = @most_significant_digit(@one_word);
+     @succ(p) = succ(p);
+     succ(@most_significant_digit(w1)) = if(==(w1,@max_word),
+                                             @concat_digit(@most_significant_digit(@one_word),@zero_word),
+                                             @most_significant_digit(@succ_word(w1)));
+     succ(@concat_digit(p,w1)) = if(==(w1,@max_word),
+                                            @concat_digit(succ(p),@zero_word),
+                                            @concat_digit(p,@succ_word(w1)));
+
+     ==(@most_significant_digit(w1),@most_significant_digit(w2)) = ==(w1,w2);
+     ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     ==(@most_significant_digit(w1),@concat_digit(p,w2)) = false;
+     ==(@concat_digit(p1,w1),@concat_digit(p2,w2)) = &&(==(p1,p2), ==(w1,w2));
+
+     <(@most_significant_digit(w1),@most_significant_digit(w2)) = <(w1,w2);
+     <(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     <(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
+     <(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<(w1,w2),<=(p1,p2),<(p1,p2));
+
+     <=(@most_significant_digit(w1),@most_significant_digit(w2)) = <=(w1,w2);
+     <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     <=(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
+     <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<=(w1,w2),<=(p1,p2),<(p1,p2));
+
+     max(p1,p2) = if(<=(p1,p2),p2,p1);
+     min(p1,p2) = if(<=(p1,p2),p1,p2);
+
+     @pospred(@most_significant_digit(w1)) = if(==(w1,@one_word),
+                                                         @most_significant_digit(@one_word),
+                                                         @most_significant_digit(@pred_word(w1)));
+     @pospred(@concat_digit(p,w1)) = if(==(w1,@zero_word),
+                                            if(==(p,@most_significant_digit(@one_word)),
+                                                         @most_significant_digit(@max_word),
+                                                         @concat_digit(@pospred(p),@max_word)),
+                                            @concat_digit(p,@pred_word(w1)));
+
+     +(@most_significant_digit(w1),@most_significant_digit(w2)) =
+                                     if(==(@add_overflow_word(w1,w2),@zero_word),
+                                                    @most_significant_digit(@add_word(w1,w2)),
+                                                    @concat_digit(@most_significant_digit(@one_word),(@add_word(w1,w2))));
+     +(@concat_digit(p1,w1),@most_significant_digit(w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)),p1),
+                                                                         @add_word(w1,w2));
+     +(@most_significant_digit(w1),@concat_digit(p2,w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)), p2),
+                                                                         @add_word(w1,w2));
+     +(@concat_digit(p1,w1),@concat_digit(p2,w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)), +(p1,p2)),
+                                                                       @add_word(w1,w2));
+
+% The definition below uses where clauses. The where clauses are translated away by the introduction of the 
+% function @times_whr_mult_overflow. 
+%      *(@most_significant_digit(w1),@most_significant_digit(w2)) =
+%                                                 if(==(overflow,@zero_word),
+%                                                       @most_significant_digit(mult),
+%                                                       @concat_digit(@most_significant_digit(overflow),mult))
+%                                                 whr mult=@times_word(w1,w2),
+%                                                     overflow=@times_overflow_word(w1,w2) end;
+ 
+     *(@most_significant_digit(w1),@most_significant_digit(w2)) =
+                @times_whr_mult_overflow(w1,w2,@times_word(w1,w2),@times_overflow_word(w1,w2));
+
+     @times_whr_mult_overflow(w1,w2,p,w) = if(==(w,@zero_word),
+                                              @most_significant_digit(p),
+                                              @concat_digit(@most_significant_digit(w),p));
+ 
+     *(@concat_digit(p1,w1),@most_significant_digit(w2)) = @concat_digit(
+                                                                  +(*(p1,@most_significant_digit(w2)),@most_significant_digit(@times_overflow_word(w1,w2))),
+                                                                  @times_word(w1,w2));
+
+     *(@most_significant_digit(w1),@concat_digit(p2,w2)) = @concat_digit(
+                                                                  +(*(p2,@most_significant_digit(w1)),@most_significant_digit(@times_overflow_word(w1,w2))),
+                                                                  @times_word(w1,w2));
+
+     *(@concat_digit(p1,w1),@concat_digit(p2,w2)) = +(@concat_digit(*(@concat_digit(p1,w1),p2),@zero_word),
+                                                           *(@concat_digit(p1,w1),@most_significant_digit(w2)));
+     @addc(true,p1,p2) = +(+(p1,p2),@one);
+     @addc(false,p1,p2) = +(p1,p2);
+     @c1 = @most_significant_digit(@one_word);
+     @cDub(true,p) = +(+(p,p),@one);
+     @cDub(false,p) = +(p,p);
+

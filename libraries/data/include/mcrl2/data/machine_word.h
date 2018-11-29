@@ -22,6 +22,7 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard.h"
+#include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 
@@ -60,16 +61,16 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier zero_word
-      /// \return Identifier zero_word
+      /// \brief Generate identifier \@zero_word
+      /// \return Identifier \@zero_word
       inline
       core::identifier_string const& zero64_name()
       {
-        static core::identifier_string zero64_name = core::identifier_string("zero_word");
+        static core::identifier_string zero64_name = core::identifier_string("@zero_word");
         return zero64_name;
       }
 
-      /// \brief Constructor for function symbol zero_word
+      /// \brief Constructor for function symbol \@zero_word
       
       /// \return Function symbol zero64
       inline
@@ -79,9 +80,9 @@ namespace mcrl2 {
         return zero64;
       }
 
-      /// \brief Recogniser for function zero_word
+      /// \brief Recogniser for function \@zero_word
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching zero_word
+      /// \return true iff e is the function symbol matching \@zero_word
       inline
       bool is_zero64_function_symbol(const atermpp::aterm& e)
       {
@@ -92,16 +93,16 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier succ_word
-      /// \return Identifier succ_word
+      /// \brief Generate identifier \@succ_word
+      /// \return Identifier \@succ_word
       inline
       core::identifier_string const& succ64_name()
       {
-        static core::identifier_string succ64_name = core::identifier_string("succ_word");
+        static core::identifier_string succ64_name = core::identifier_string("@succ_word");
         return succ64_name;
       }
 
-      /// \brief Constructor for function symbol succ_word
+      /// \brief Constructor for function symbol \@succ_word
       
       /// \return Function symbol succ64
       inline
@@ -111,9 +112,9 @@ namespace mcrl2 {
         return succ64;
       }
 
-      /// \brief Recogniser for function succ_word
+      /// \brief Recogniser for function \@succ_word
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching succ_word
+      /// \return true iff e is the function symbol matching \@succ_word
       inline
       bool is_succ64_function_symbol(const atermpp::aterm& e)
       {
@@ -124,17 +125,17 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol succ_word
+      /// \brief Application of function symbol \@succ_word
       
       /// \param arg0 A data expression
-      /// \return Application of succ_word to a number of arguments
+      /// \return Application of \@succ_word to a number of arguments
       inline
       application succ64(const data_expression& arg0)
       {
         return sort_machine_word::succ64()(arg0);
       }
 
-      /// \brief Recogniser for application of succ_word
+      /// \brief Recogniser for application of \@succ_word
       /// \param e A data expression
       /// \return true iff e is an application of function symbol succ64 to a
       ///     number of arguments
@@ -1391,7 +1392,7 @@ namespace mcrl2 {
         variable vd("d",machine_word());
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list({vd, vtrue}), equal_to(vd, vd), vtrue));
+        result.push_back(data_equation(variable_list({vd}), equal_to(vd, vd), sort_bool::true_()));
         return result;
       }
 

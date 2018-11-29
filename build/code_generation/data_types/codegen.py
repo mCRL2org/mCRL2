@@ -138,6 +138,18 @@ class TokenForall(Parsing.Token):
 # exists
 class TokenExists(Parsing.Token):
     "%token exists"
+# external
+class TokenExternal(Parsing.Token):
+    "%token external"
+# internal
+class TokenInternal(Parsing.Token):
+    "%token internal"
+# defined_by_rewrite_rules
+class TokenDefinedByRewriteRules(Parsing.Token):
+    "%token defined_by_rewrite_rules"
+# defined_by_code
+class TokenDefinedByCode(Parsing.Token):
+    "%token defined_by_code"
 
 # identifiers
 class TokenID(Parsing.Token):
@@ -190,7 +202,10 @@ class TokenID(Parsing.Token):
 # VarDecl ::= ID ":" SortExpr
 # OpDecls ::= OpDecl
 #           | OpDecls OpDecl
-# OpDecl ::= ID Label ":" SortExpr
+# OpDecl ::= ID Label ":" SortExpr Designator 
+# Designator ::= InternalExternal DefinedBy
+# InternalExternal ::= "internal" | "external"
+# DefinedBy ::= "defined_by_rewrite_rules" | "defined_by_code"
 # EqnDecls ::= EqnDecl
 #            | EqnDecls EqnDecl
 # EqnDecl ::= DataExpr "=" DataExpr
@@ -516,20 +531,46 @@ class OpDecls(Parsing.Nonterm):
         self.data.push_back(opdecl.data)
         printVerbose("OpDecls", self.data)
 
-# OpDecl ::= ID Label ":" SortExpr
+# OpDecl ::= ID Label ":" SortExpr Designator 
 class OpDecl(Parsing.Nonterm):
     "%nonterm"
-    def reduceOpDecl(self, id, label, colon, sortexpr):
-        "%reduce id Label colon SortExpr"
-        self.data = function_declaration(id.data, sortexpr.data, label.data)
+    def reduceOpDecl(self, id, label, colon, sortexpr, internal_external, defined_by):
+        "%reduce id Label colon SortExpr InternalExternal DefinedBy"
+        self.data = function_declaration(id.data, sortexpr.data, label.data, internal_external.data, defined_by.data)
         printVerbose("OpDecl", self.data)
 
     # Hack for count on lists
-    def reduceCount(self, hash, label, colon, sortexpr):
-        "%reduce hash Label colon SortExpr"
+    def reduceCount(self, hash, label, colon, sortexpr, internal_external, defined_by):
+        "%reduce hash Label colon SortExpr InternalExternal DefinedBy"
         id = TokenID(parser, "#")
-        self.data = function_declaration(id.data, sortexpr.data, label.data)
+        self.data = function_declaration(id.data, sortexpr.data, label.data, internal_external.data, defined_by.data)
         printVerbose("OpDecl", self.data)
+
+# InternalExternal ::= "internal" | "external"
+class InternalExternal(Parsing.Nonterm):
+    "%nonterm"
+    def reduceExternal(self, external):
+        "%reduce external"
+        self.data = internal_external("external")
+        printVerbose("InternalExternal", self.data)
+
+    def reduceInternal(self, internal):
+        "%reduce internal"
+        self.data = internal_external("internal")
+        printVerbose("InternalExternal", self.data)
+
+# DefinedBy ::= "defined_by_rewrite_rules" | "defined_by_code"
+class DefinedBy(Parsing.Nonterm):
+    "%nonterm"
+    def reduceByRewriteRules(self, rules):
+        "%reduce defined_by_rewrite_rules"
+        self.data = defined_by("defined_by_rewrite_rules")
+        printVerbose("DefinedBy", self.data)
+
+    def reduceByCode(self, code):
+        "%reduce defined_by_code"
+        self.data = defined_by("defined_by_code")
+        printVerbose("DefinedBy", self.data)
 
 # EqnDecls ::= EqnDecl
 #            | EqnDecls EqnDecl
@@ -753,7 +794,11 @@ class Parser(Parsing.Lr):
                 "struct"  : TokenStruct,
                 "lambda"  : TokenLambda,
                 "forall"  : TokenForall,
-                "exists"  : TokenExists
+                "exists"  : TokenExists,
+                "external": TokenExternal,
+                "internal": TokenInternal,
+                "defined_by_rewrite_rules": TokenDefinedByRewriteRules,
+                "defined_by_code": TokenDefinedByCode
                }
 
         # First make sure the needed separators are surrounded by spaces
