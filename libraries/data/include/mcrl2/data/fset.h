@@ -30,7 +30,7 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort fset
+    /// \brief Namespace for system defined sort fset.
     namespace sort_fset {
 
       /// \brief Constructor for sort expression FSet(S)
@@ -58,8 +58,8 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier {}
-      /// \return Identifier {}
+      /// \brief Generate identifier {}.
+      /// \return Identifier {}.
       inline
       core::identifier_string const& empty_name()
       {
@@ -67,9 +67,9 @@ namespace mcrl2 {
         return empty_name;
       }
 
-      /// \brief Constructor for function symbol {}
+      /// \brief Constructor for function symbol {}.
       /// \param s A sort expression
-      /// \return Function symbol empty
+      /// \return Function symbol empty.
       inline
       function_symbol empty(const sort_expression& s)
       {
@@ -77,9 +77,9 @@ namespace mcrl2 {
         return empty;
       }
 
-      /// \brief Recogniser for function {}
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching {}
+      /// \brief Recogniser for function {}.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching {}.
       inline
       bool is_empty_function_symbol(const atermpp::aterm& e)
       {
@@ -90,8 +90,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fset_insert
-      /// \return Identifier \@fset_insert
+      /// \brief Generate identifier \@fset_insert.
+      /// \return Identifier \@fset_insert.
       inline
       core::identifier_string const& insert_name()
       {
@@ -99,9 +99,9 @@ namespace mcrl2 {
         return insert_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_insert
+      /// \brief Constructor for function symbol \@fset_insert.
       /// \param s A sort expression
-      /// \return Function symbol insert
+      /// \return Function symbol insert.
       inline
       function_symbol insert(const sort_expression& s)
       {
@@ -109,9 +109,9 @@ namespace mcrl2 {
         return insert;
       }
 
-      /// \brief Recogniser for function \@fset_insert
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_insert
+      /// \brief Recogniser for function \@fset_insert.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_insert.
       inline
       bool is_insert_function_symbol(const atermpp::aterm& e)
       {
@@ -146,9 +146,9 @@ namespace mcrl2 {
         }
         return false;
       }
-      /// \brief Give all system defined constructors for fset
-      /// \param s A sort expression
-      /// \return All system defined constructors for fset
+      /// \brief Give all system defined constructors for fset.
+      /// \param s A sort expression.
+      /// \return All system defined constructors for fset.
       inline
       function_symbol_vector fset_generate_constructors_code(const sort_expression& s)
       {
@@ -158,9 +158,30 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for fset.
+      /// \param s A sort expression.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for fset.
+      inline
+      function_symbol_vector fset_mCRL2_usable_constructors(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_fset::empty(s));
 
-      /// \brief Generate identifier \@fset_cons
-      /// \return Identifier \@fset_cons
+        return result;
+      }
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for fset.
+      /// \param s A sort expression.
+      /// \return All system defined constructors that are to be implemented in C++ for fset.
+      inline
+      function_symbol_vector fset_cpp_implementable_constructors(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        static_cast< void >(s); // suppress unused variable warnings
+        return result;
+      }
+
+      /// \brief Generate identifier \@fset_cons.
+      /// \return Identifier \@fset_cons.
       inline
       core::identifier_string const& cons_name()
       {
@@ -168,9 +189,9 @@ namespace mcrl2 {
         return cons_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_cons
+      /// \brief Constructor for function symbol \@fset_cons.
       /// \param s A sort expression
-      /// \return Function symbol cons_
+      /// \return Function symbol cons_.
       inline
       function_symbol cons_(const sort_expression& s)
       {
@@ -178,9 +199,9 @@ namespace mcrl2 {
         return cons_;
       }
 
-      /// \brief Recogniser for function \@fset_cons
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_cons
+      /// \brief Recogniser for function \@fset_cons.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_cons.
       inline
       bool is_cons_function_symbol(const atermpp::aterm& e)
       {
@@ -216,8 +237,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fset_cinsert
-      /// \return Identifier \@fset_cinsert
+      /// \brief Generate identifier \@fset_cinsert.
+      /// \return Identifier \@fset_cinsert.
       inline
       core::identifier_string const& cinsert_name()
       {
@@ -225,9 +246,9 @@ namespace mcrl2 {
         return cinsert_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_cinsert
+      /// \brief Constructor for function symbol \@fset_cinsert.
       /// \param s A sort expression
-      /// \return Function symbol cinsert
+      /// \return Function symbol cinsert.
       inline
       function_symbol cinsert(const sort_expression& s)
       {
@@ -235,9 +256,9 @@ namespace mcrl2 {
         return cinsert;
       }
 
-      /// \brief Recogniser for function \@fset_cinsert
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_cinsert
+      /// \brief Recogniser for function \@fset_cinsert.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_cinsert.
       inline
       bool is_cinsert_function_symbol(const atermpp::aterm& e)
       {
@@ -274,8 +295,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier in
-      /// \return Identifier in
+      /// \brief Generate identifier in.
+      /// \return Identifier in.
       inline
       core::identifier_string const& in_name()
       {
@@ -283,9 +304,9 @@ namespace mcrl2 {
         return in_name;
       }
 
-      /// \brief Constructor for function symbol in
+      /// \brief Constructor for function symbol in.
       /// \param s A sort expression
-      /// \return Function symbol in
+      /// \return Function symbol in.
       inline
       function_symbol in(const sort_expression& s)
       {
@@ -293,9 +314,9 @@ namespace mcrl2 {
         return in;
       }
 
-      /// \brief Recogniser for function in
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching in
+      /// \brief Recogniser for function in.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching in.
       inline
       bool is_in_function_symbol(const atermpp::aterm& e)
       {
@@ -331,8 +352,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fset_union
-      /// \return Identifier \@fset_union
+      /// \brief Generate identifier \@fset_union.
+      /// \return Identifier \@fset_union.
       inline
       core::identifier_string const& fset_union_name()
       {
@@ -340,9 +361,9 @@ namespace mcrl2 {
         return fset_union_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_union
+      /// \brief Constructor for function symbol \@fset_union.
       /// \param s A sort expression
-      /// \return Function symbol fset_union
+      /// \return Function symbol fset_union.
       inline
       function_symbol fset_union(const sort_expression& s)
       {
@@ -350,9 +371,9 @@ namespace mcrl2 {
         return fset_union;
       }
 
-      /// \brief Recogniser for function \@fset_union
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_union
+      /// \brief Recogniser for function \@fset_union.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_union.
       inline
       bool is_fset_union_function_symbol(const atermpp::aterm& e)
       {
@@ -390,8 +411,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fset_inter
-      /// \return Identifier \@fset_inter
+      /// \brief Generate identifier \@fset_inter.
+      /// \return Identifier \@fset_inter.
       inline
       core::identifier_string const& fset_intersection_name()
       {
@@ -399,9 +420,9 @@ namespace mcrl2 {
         return fset_intersection_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_inter
+      /// \brief Constructor for function symbol \@fset_inter.
       /// \param s A sort expression
-      /// \return Function symbol fset_intersection
+      /// \return Function symbol fset_intersection.
       inline
       function_symbol fset_intersection(const sort_expression& s)
       {
@@ -409,9 +430,9 @@ namespace mcrl2 {
         return fset_intersection;
       }
 
-      /// \brief Recogniser for function \@fset_inter
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_inter
+      /// \brief Recogniser for function \@fset_inter.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@fset_inter.
       inline
       bool is_fset_intersection_function_symbol(const atermpp::aterm& e)
       {
@@ -449,8 +470,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier -
-      /// \return Identifier -
+      /// \brief Generate identifier -.
+      /// \return Identifier -.
       inline
       core::identifier_string const& difference_name()
       {
@@ -458,9 +479,9 @@ namespace mcrl2 {
         return difference_name;
       }
 
-      /// \brief Constructor for function symbol -
+      /// \brief Constructor for function symbol -.
       /// \param s A sort expression
-      /// \return Function symbol difference
+      /// \return Function symbol difference.
       inline
       function_symbol difference(const sort_expression& s)
       {
@@ -468,9 +489,9 @@ namespace mcrl2 {
         return difference;
       }
 
-      /// \brief Recogniser for function -
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching -
+      /// \brief Recogniser for function -.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching -.
       inline
       bool is_difference_function_symbol(const atermpp::aterm& e)
       {
@@ -506,8 +527,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier +
-      /// \return Identifier +
+      /// \brief Generate identifier +.
+      /// \return Identifier +.
       inline
       core::identifier_string const& union_name()
       {
@@ -515,9 +536,9 @@ namespace mcrl2 {
         return union_name;
       }
 
-      /// \brief Constructor for function symbol +
+      /// \brief Constructor for function symbol +.
       /// \param s A sort expression
-      /// \return Function symbol union_
+      /// \return Function symbol union_.
       inline
       function_symbol union_(const sort_expression& s)
       {
@@ -525,9 +546,9 @@ namespace mcrl2 {
         return union_;
       }
 
-      /// \brief Recogniser for function +
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching +
+      /// \brief Recogniser for function +.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching +.
       inline
       bool is_union_function_symbol(const atermpp::aterm& e)
       {
@@ -563,8 +584,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier *
-      /// \return Identifier *
+      /// \brief Generate identifier *.
+      /// \return Identifier *.
       inline
       core::identifier_string const& intersection_name()
       {
@@ -572,9 +593,9 @@ namespace mcrl2 {
         return intersection_name;
       }
 
-      /// \brief Constructor for function symbol *
+      /// \brief Constructor for function symbol *.
       /// \param s A sort expression
-      /// \return Function symbol intersection
+      /// \return Function symbol intersection.
       inline
       function_symbol intersection(const sort_expression& s)
       {
@@ -582,9 +603,9 @@ namespace mcrl2 {
         return intersection;
       }
 
-      /// \brief Recogniser for function *
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching *
+      /// \brief Recogniser for function *.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching *.
       inline
       bool is_intersection_function_symbol(const atermpp::aterm& e)
       {
@@ -620,8 +641,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier #
-      /// \return Identifier #
+      /// \brief Generate identifier #.
+      /// \return Identifier #.
       inline
       core::identifier_string const& count_name()
       {
@@ -629,9 +650,9 @@ namespace mcrl2 {
         return count_name;
       }
 
-      /// \brief Constructor for function symbol #
+      /// \brief Constructor for function symbol #.
       /// \param s A sort expression
-      /// \return Function symbol count
+      /// \return Function symbol count.
       inline
       function_symbol count(const sort_expression& s)
       {
@@ -639,9 +660,9 @@ namespace mcrl2 {
         return count;
       }
 
-      /// \brief Recogniser for function #
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching #
+      /// \brief Recogniser for function #.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching #.
       inline
       bool is_count_function_symbol(const atermpp::aterm& e)
       {
@@ -693,11 +714,35 @@ namespace mcrl2 {
         result.push_back(sort_fset::count(s));
         return result;
       }
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for fset
+      /// \param s A sort expression
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis fset
+      inline
+      function_symbol_vector fset_mCRL2_usable_mappings(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_fset::in(s));
+        result.push_back(sort_fset::difference(s));
+        result.push_back(sort_fset::union_(s));
+        result.push_back(sort_fset::intersection(s));
+        result.push_back(sort_fset::count(s));
+        return result;
+      }
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for fset
+      /// \param s A sort expression
+      /// \return All system defined mappings that are to be implemented in C++ code for fset
+      inline
+      function_symbol_vector fset_cpp_implementable_mappings(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        static_cast< void >(s); // suppress unused variable warnings
+        return result;
+      }
       ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       data_expression right(const data_expression& e)
       {
@@ -706,10 +751,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
+      ///        arg1 from an application.
+      /// \param e A data expression.
+      /// \pre arg1 is defined for e.
+      /// \return The argument of e that corresponds to arg1.
       inline
       data_expression arg1(const data_expression& e)
       {
@@ -718,10 +763,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
+      ///        arg2 from an application.
+      /// \param e A data expression.
+      /// \pre arg2 is defined for e.
+      /// \return The argument of e that corresponds to arg2.
       inline
       data_expression arg2(const data_expression& e)
       {
@@ -730,10 +775,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg3 from an application
-      /// \param e A data expression
-      /// \pre arg3 is defined for e
-      /// \return The argument of e that corresponds to arg3
+      ///        arg3 from an application.
+      /// \param e A data expression.
+      /// \pre arg3 is defined for e.
+      /// \return The argument of e that corresponds to arg3.
       inline
       data_expression arg3(const data_expression& e)
       {
@@ -742,10 +787,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg4 from an application
-      /// \param e A data expression
-      /// \pre arg4 is defined for e
-      /// \return The argument of e that corresponds to arg4
+      ///        arg4 from an application.
+      /// \param e A data expression.
+      /// \pre arg4 is defined for e.
+      /// \return The argument of e that corresponds to arg4.
       inline
       data_expression arg4(const data_expression& e)
       {
@@ -754,10 +799,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       data_expression arg(const data_expression& e)
       {
@@ -766,10 +811,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       data_expression left(const data_expression& e)
       {

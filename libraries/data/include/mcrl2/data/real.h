@@ -31,7 +31,7 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort real_
+    /// \brief Namespace for system defined sort real_.
     namespace sort_real {
 
       inline
@@ -63,17 +63,33 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Give all system defined constructors for real_
-      /// \return All system defined constructors for real_
+      /// \brief Give all system defined constructors for real_.
+      /// \return All system defined constructors for real_.
       inline
       function_symbol_vector real_generate_constructors_code()
       {
         function_symbol_vector result;
         return result;
       }
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for real_.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for real_.
+      inline
+      function_symbol_vector real_mCRL2_usable_constructors()
+      {
+        function_symbol_vector result;
+        return result;
+      }
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for real_.
+      /// \return All system defined constructors that are to be implemented in C++ for real_.
+      inline
+      function_symbol_vector real_cpp_implementable_constructors()
+      {
+        function_symbol_vector result;
+        return result;
+      }
 
-      /// \brief Generate identifier \@cReal
-      /// \return Identifier \@cReal
+      /// \brief Generate identifier \@cReal.
+      /// \return Identifier \@cReal.
       inline
       core::identifier_string const& creal_name()
       {
@@ -81,9 +97,9 @@ namespace mcrl2 {
         return creal_name;
       }
 
-      /// \brief Constructor for function symbol \@cReal
+      /// \brief Constructor for function symbol \@cReal.
       
-      /// \return Function symbol creal
+      /// \return Function symbol creal.
       inline
       function_symbol const& creal()
       {
@@ -91,9 +107,9 @@ namespace mcrl2 {
         return creal;
       }
 
-      /// \brief Recogniser for function \@cReal
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@cReal
+      /// \brief Recogniser for function \@cReal.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@cReal.
       inline
       bool is_creal_function_symbol(const atermpp::aterm& e)
       {
@@ -129,8 +145,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Pos2Real
-      /// \return Identifier Pos2Real
+      /// \brief Generate identifier Pos2Real.
+      /// \return Identifier Pos2Real.
       inline
       core::identifier_string const& pos2real_name()
       {
@@ -138,9 +154,9 @@ namespace mcrl2 {
         return pos2real_name;
       }
 
-      /// \brief Constructor for function symbol Pos2Real
+      /// \brief Constructor for function symbol Pos2Real.
       
-      /// \return Function symbol pos2real
+      /// \return Function symbol pos2real.
       inline
       function_symbol const& pos2real()
       {
@@ -148,9 +164,9 @@ namespace mcrl2 {
         return pos2real;
       }
 
-      /// \brief Recogniser for function Pos2Real
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Pos2Real
+      /// \brief Recogniser for function Pos2Real.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Pos2Real.
       inline
       bool is_pos2real_function_symbol(const atermpp::aterm& e)
       {
@@ -185,8 +201,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Nat2Real
-      /// \return Identifier Nat2Real
+      /// \brief Generate identifier Nat2Real.
+      /// \return Identifier Nat2Real.
       inline
       core::identifier_string const& nat2real_name()
       {
@@ -194,9 +210,9 @@ namespace mcrl2 {
         return nat2real_name;
       }
 
-      /// \brief Constructor for function symbol Nat2Real
+      /// \brief Constructor for function symbol Nat2Real.
       
-      /// \return Function symbol nat2real
+      /// \return Function symbol nat2real.
       inline
       function_symbol const& nat2real()
       {
@@ -204,9 +220,9 @@ namespace mcrl2 {
         return nat2real;
       }
 
-      /// \brief Recogniser for function Nat2Real
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Nat2Real
+      /// \brief Recogniser for function Nat2Real.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Nat2Real.
       inline
       bool is_nat2real_function_symbol(const atermpp::aterm& e)
       {
@@ -241,8 +257,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Int2Real
-      /// \return Identifier Int2Real
+      /// \brief Generate identifier Int2Real.
+      /// \return Identifier Int2Real.
       inline
       core::identifier_string const& int2real_name()
       {
@@ -250,9 +266,9 @@ namespace mcrl2 {
         return int2real_name;
       }
 
-      /// \brief Constructor for function symbol Int2Real
+      /// \brief Constructor for function symbol Int2Real.
       
-      /// \return Function symbol int2real
+      /// \return Function symbol int2real.
       inline
       function_symbol const& int2real()
       {
@@ -260,9 +276,9 @@ namespace mcrl2 {
         return int2real;
       }
 
-      /// \brief Recogniser for function Int2Real
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Int2Real
+      /// \brief Recogniser for function Int2Real.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Int2Real.
       inline
       bool is_int2real_function_symbol(const atermpp::aterm& e)
       {
@@ -297,8 +313,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Real2Pos
-      /// \return Identifier Real2Pos
+      /// \brief Generate identifier Real2Pos.
+      /// \return Identifier Real2Pos.
       inline
       core::identifier_string const& real2pos_name()
       {
@@ -306,9 +322,9 @@ namespace mcrl2 {
         return real2pos_name;
       }
 
-      /// \brief Constructor for function symbol Real2Pos
+      /// \brief Constructor for function symbol Real2Pos.
       
-      /// \return Function symbol real2pos
+      /// \return Function symbol real2pos.
       inline
       function_symbol const& real2pos()
       {
@@ -316,9 +332,9 @@ namespace mcrl2 {
         return real2pos;
       }
 
-      /// \brief Recogniser for function Real2Pos
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Real2Pos
+      /// \brief Recogniser for function Real2Pos.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Real2Pos.
       inline
       bool is_real2pos_function_symbol(const atermpp::aterm& e)
       {
@@ -353,8 +369,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Real2Nat
-      /// \return Identifier Real2Nat
+      /// \brief Generate identifier Real2Nat.
+      /// \return Identifier Real2Nat.
       inline
       core::identifier_string const& real2nat_name()
       {
@@ -362,9 +378,9 @@ namespace mcrl2 {
         return real2nat_name;
       }
 
-      /// \brief Constructor for function symbol Real2Nat
+      /// \brief Constructor for function symbol Real2Nat.
       
-      /// \return Function symbol real2nat
+      /// \return Function symbol real2nat.
       inline
       function_symbol const& real2nat()
       {
@@ -372,9 +388,9 @@ namespace mcrl2 {
         return real2nat;
       }
 
-      /// \brief Recogniser for function Real2Nat
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Real2Nat
+      /// \brief Recogniser for function Real2Nat.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Real2Nat.
       inline
       bool is_real2nat_function_symbol(const atermpp::aterm& e)
       {
@@ -409,8 +425,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Real2Int
-      /// \return Identifier Real2Int
+      /// \brief Generate identifier Real2Int.
+      /// \return Identifier Real2Int.
       inline
       core::identifier_string const& real2int_name()
       {
@@ -418,9 +434,9 @@ namespace mcrl2 {
         return real2int_name;
       }
 
-      /// \brief Constructor for function symbol Real2Int
+      /// \brief Constructor for function symbol Real2Int.
       
-      /// \return Function symbol real2int
+      /// \return Function symbol real2int.
       inline
       function_symbol const& real2int()
       {
@@ -428,9 +444,9 @@ namespace mcrl2 {
         return real2int;
       }
 
-      /// \brief Recogniser for function Real2Int
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Real2Int
+      /// \brief Recogniser for function Real2Int.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Real2Int.
       inline
       bool is_real2int_function_symbol(const atermpp::aterm& e)
       {
@@ -465,8 +481,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier max
-      /// \return Identifier max
+      /// \brief Generate identifier max.
+      /// \return Identifier max.
       inline
       core::identifier_string const& maximum_name()
       {
@@ -528,8 +544,8 @@ namespace mcrl2 {
         return maximum;
       }
 
-      /// \brief Recogniser for function max
-      /// \param e A data expression
+      /// \brief Recogniser for function max.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching max
       inline
       bool is_maximum_function_symbol(const atermpp::aterm& e)
@@ -567,8 +583,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier min
-      /// \return Identifier min
+      /// \brief Generate identifier min.
+      /// \return Identifier min.
       inline
       core::identifier_string const& minimum_name()
       {
@@ -606,8 +622,8 @@ namespace mcrl2 {
         return minimum;
       }
 
-      /// \brief Recogniser for function min
-      /// \param e A data expression
+      /// \brief Recogniser for function min.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching min
       inline
       bool is_minimum_function_symbol(const atermpp::aterm& e)
@@ -645,8 +661,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier abs
-      /// \return Identifier abs
+      /// \brief Generate identifier abs.
+      /// \return Identifier abs.
       inline
       core::identifier_string const& abs_name()
       {
@@ -676,8 +692,8 @@ namespace mcrl2 {
         return abs;
       }
 
-      /// \brief Recogniser for function abs
-      /// \param e A data expression
+      /// \brief Recogniser for function abs.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching abs
       inline
       bool is_abs_function_symbol(const atermpp::aterm& e)
@@ -714,8 +730,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier -
-      /// \return Identifier -
+      /// \brief Generate identifier -.
+      /// \return Identifier -.
       inline
       core::identifier_string const& negate_name()
       {
@@ -753,8 +769,8 @@ namespace mcrl2 {
         return negate;
       }
 
-      /// \brief Recogniser for function -
-      /// \param e A data expression
+      /// \brief Recogniser for function -.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching -
       inline
       bool is_negate_function_symbol(const atermpp::aterm& e)
@@ -791,8 +807,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier succ
-      /// \return Identifier succ
+      /// \brief Generate identifier succ.
+      /// \return Identifier succ.
       inline
       core::identifier_string const& succ_name()
       {
@@ -830,8 +846,8 @@ namespace mcrl2 {
         return succ;
       }
 
-      /// \brief Recogniser for function succ
-      /// \param e A data expression
+      /// \brief Recogniser for function succ.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching succ
       inline
       bool is_succ_function_symbol(const atermpp::aterm& e)
@@ -868,8 +884,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier pred
-      /// \return Identifier pred
+      /// \brief Generate identifier pred.
+      /// \return Identifier pred.
       inline
       core::identifier_string const& pred_name()
       {
@@ -907,8 +923,8 @@ namespace mcrl2 {
         return pred;
       }
 
-      /// \brief Recogniser for function pred
-      /// \param e A data expression
+      /// \brief Recogniser for function pred.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching pred
       inline
       bool is_pred_function_symbol(const atermpp::aterm& e)
@@ -945,8 +961,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier +
-      /// \return Identifier +
+      /// \brief Generate identifier +.
+      /// \return Identifier +.
       inline
       core::identifier_string const& plus_name()
       {
@@ -992,8 +1008,8 @@ namespace mcrl2 {
         return plus;
       }
 
-      /// \brief Recogniser for function +
-      /// \param e A data expression
+      /// \brief Recogniser for function +.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching +
       inline
       bool is_plus_function_symbol(const atermpp::aterm& e)
@@ -1031,8 +1047,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier -
-      /// \return Identifier -
+      /// \brief Generate identifier -.
+      /// \return Identifier -.
       inline
       core::identifier_string const& minus_name()
       {
@@ -1070,8 +1086,8 @@ namespace mcrl2 {
         return minus;
       }
 
-      /// \brief Recogniser for function -
-      /// \param e A data expression
+      /// \brief Recogniser for function -.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching -
       inline
       bool is_minus_function_symbol(const atermpp::aterm& e)
@@ -1109,8 +1125,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier *
-      /// \return Identifier *
+      /// \brief Generate identifier *.
+      /// \return Identifier *.
       inline
       core::identifier_string const& times_name()
       {
@@ -1148,8 +1164,8 @@ namespace mcrl2 {
         return times;
       }
 
-      /// \brief Recogniser for function *
-      /// \param e A data expression
+      /// \brief Recogniser for function *.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching *
       inline
       bool is_times_function_symbol(const atermpp::aterm& e)
@@ -1187,8 +1203,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier exp
-      /// \return Identifier exp
+      /// \brief Generate identifier exp.
+      /// \return Identifier exp.
       inline
       core::identifier_string const& exp_name()
       {
@@ -1226,8 +1242,8 @@ namespace mcrl2 {
         return exp;
       }
 
-      /// \brief Recogniser for function exp
-      /// \param e A data expression
+      /// \brief Recogniser for function exp.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching exp
       inline
       bool is_exp_function_symbol(const atermpp::aterm& e)
@@ -1265,8 +1281,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier /
-      /// \return Identifier /
+      /// \brief Generate identifier /.
+      /// \return Identifier /.
       inline
       core::identifier_string const& divides_name()
       {
@@ -1283,8 +1299,8 @@ namespace mcrl2 {
         return divides;
       }
 
-      /// \brief Recogniser for function /
-      /// \param e A data expression
+      /// \brief Recogniser for function /.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching /
       inline
       bool is_divides_function_symbol(const atermpp::aterm& e)
@@ -1322,8 +1338,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier floor
-      /// \return Identifier floor
+      /// \brief Generate identifier floor.
+      /// \return Identifier floor.
       inline
       core::identifier_string const& floor_name()
       {
@@ -1331,9 +1347,9 @@ namespace mcrl2 {
         return floor_name;
       }
 
-      /// \brief Constructor for function symbol floor
+      /// \brief Constructor for function symbol floor.
       
-      /// \return Function symbol floor
+      /// \return Function symbol floor.
       inline
       function_symbol const& floor()
       {
@@ -1341,9 +1357,9 @@ namespace mcrl2 {
         return floor;
       }
 
-      /// \brief Recogniser for function floor
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching floor
+      /// \brief Recogniser for function floor.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching floor.
       inline
       bool is_floor_function_symbol(const atermpp::aterm& e)
       {
@@ -1378,8 +1394,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier ceil
-      /// \return Identifier ceil
+      /// \brief Generate identifier ceil.
+      /// \return Identifier ceil.
       inline
       core::identifier_string const& ceil_name()
       {
@@ -1387,9 +1403,9 @@ namespace mcrl2 {
         return ceil_name;
       }
 
-      /// \brief Constructor for function symbol ceil
+      /// \brief Constructor for function symbol ceil.
       
-      /// \return Function symbol ceil
+      /// \return Function symbol ceil.
       inline
       function_symbol const& ceil()
       {
@@ -1397,9 +1413,9 @@ namespace mcrl2 {
         return ceil;
       }
 
-      /// \brief Recogniser for function ceil
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching ceil
+      /// \brief Recogniser for function ceil.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching ceil.
       inline
       bool is_ceil_function_symbol(const atermpp::aterm& e)
       {
@@ -1434,8 +1450,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier round
-      /// \return Identifier round
+      /// \brief Generate identifier round.
+      /// \return Identifier round.
       inline
       core::identifier_string const& round_name()
       {
@@ -1443,9 +1459,9 @@ namespace mcrl2 {
         return round_name;
       }
 
-      /// \brief Constructor for function symbol round
+      /// \brief Constructor for function symbol round.
       
-      /// \return Function symbol round
+      /// \return Function symbol round.
       inline
       function_symbol const& round()
       {
@@ -1453,9 +1469,9 @@ namespace mcrl2 {
         return round;
       }
 
-      /// \brief Recogniser for function round
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching round
+      /// \brief Recogniser for function round.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching round.
       inline
       bool is_round_function_symbol(const atermpp::aterm& e)
       {
@@ -1490,8 +1506,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@redfrac
-      /// \return Identifier \@redfrac
+      /// \brief Generate identifier \@redfrac.
+      /// \return Identifier \@redfrac.
       inline
       core::identifier_string const& reduce_fraction_name()
       {
@@ -1499,9 +1515,9 @@ namespace mcrl2 {
         return reduce_fraction_name;
       }
 
-      /// \brief Constructor for function symbol \@redfrac
+      /// \brief Constructor for function symbol \@redfrac.
       
-      /// \return Function symbol reduce_fraction
+      /// \return Function symbol reduce_fraction.
       inline
       function_symbol const& reduce_fraction()
       {
@@ -1509,9 +1525,9 @@ namespace mcrl2 {
         return reduce_fraction;
       }
 
-      /// \brief Recogniser for function \@redfrac
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@redfrac
+      /// \brief Recogniser for function \@redfrac.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@redfrac.
       inline
       bool is_reduce_fraction_function_symbol(const atermpp::aterm& e)
       {
@@ -1547,8 +1563,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@redfracwhr
-      /// \return Identifier \@redfracwhr
+      /// \brief Generate identifier \@redfracwhr.
+      /// \return Identifier \@redfracwhr.
       inline
       core::identifier_string const& reduce_fraction_where_name()
       {
@@ -1556,9 +1572,9 @@ namespace mcrl2 {
         return reduce_fraction_where_name;
       }
 
-      /// \brief Constructor for function symbol \@redfracwhr
+      /// \brief Constructor for function symbol \@redfracwhr.
       
-      /// \return Function symbol reduce_fraction_where
+      /// \return Function symbol reduce_fraction_where.
       inline
       function_symbol const& reduce_fraction_where()
       {
@@ -1566,9 +1582,9 @@ namespace mcrl2 {
         return reduce_fraction_where;
       }
 
-      /// \brief Recogniser for function \@redfracwhr
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@redfracwhr
+      /// \brief Recogniser for function \@redfracwhr.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@redfracwhr.
       inline
       bool is_reduce_fraction_where_function_symbol(const atermpp::aterm& e)
       {
@@ -1605,8 +1621,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@redfrachlp
-      /// \return Identifier \@redfrachlp
+      /// \brief Generate identifier \@redfrachlp.
+      /// \return Identifier \@redfrachlp.
       inline
       core::identifier_string const& reduce_fraction_helper_name()
       {
@@ -1614,9 +1630,9 @@ namespace mcrl2 {
         return reduce_fraction_helper_name;
       }
 
-      /// \brief Constructor for function symbol \@redfrachlp
+      /// \brief Constructor for function symbol \@redfrachlp.
       
-      /// \return Function symbol reduce_fraction_helper
+      /// \return Function symbol reduce_fraction_helper.
       inline
       function_symbol const& reduce_fraction_helper()
       {
@@ -1624,9 +1640,9 @@ namespace mcrl2 {
         return reduce_fraction_helper;
       }
 
-      /// \brief Recogniser for function \@redfrachlp
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@redfrachlp
+      /// \brief Recogniser for function \@redfrachlp.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@redfrachlp.
       inline
       bool is_reduce_fraction_helper_function_symbol(const atermpp::aterm& e)
       {
@@ -1696,11 +1712,50 @@ namespace mcrl2 {
         result.push_back(sort_real::reduce_fraction_helper());
         return result;
       }
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for real_
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis real_
+      inline
+      function_symbol_vector real_mCRL2_usable_mappings()
+      {
+        function_symbol_vector result;
+        result.push_back(sort_real::pos2real());
+        result.push_back(sort_real::nat2real());
+        result.push_back(sort_real::int2real());
+        result.push_back(sort_real::real2pos());
+        result.push_back(sort_real::real2nat());
+        result.push_back(sort_real::real2int());
+        result.push_back(sort_real::maximum(real_(), real_()));
+        result.push_back(sort_real::minimum(real_(), real_()));
+        result.push_back(sort_real::abs(real_()));
+        result.push_back(sort_real::negate(real_()));
+        result.push_back(sort_real::succ(real_()));
+        result.push_back(sort_real::pred(real_()));
+        result.push_back(sort_real::plus(real_(), real_()));
+        result.push_back(sort_real::minus(real_(), real_()));
+        result.push_back(sort_real::times(real_(), real_()));
+        result.push_back(sort_real::exp(real_(), sort_int::int_()));
+        result.push_back(sort_real::divides(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(sort_real::divides(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(sort_real::divides(sort_int::int_(), sort_int::int_()));
+        result.push_back(sort_real::divides(real_(), real_()));
+        result.push_back(sort_real::floor());
+        result.push_back(sort_real::ceil());
+        result.push_back(sort_real::round());
+        return result;
+      }
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for real_
+      /// \return All system defined mappings that are to be implemented in C++ code for real_
+      inline
+      function_symbol_vector real_cpp_implementable_mappings()
+      {
+        function_symbol_vector result;
+        return result;
+      }
       ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       data_expression right(const data_expression& e)
       {
@@ -1709,10 +1764,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
+      ///        arg1 from an application.
+      /// \param e A data expression.
+      /// \pre arg1 is defined for e.
+      /// \return The argument of e that corresponds to arg1.
       inline
       data_expression arg1(const data_expression& e)
       {
@@ -1721,10 +1776,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
+      ///        arg2 from an application.
+      /// \param e A data expression.
+      /// \pre arg2 is defined for e.
+      /// \return The argument of e that corresponds to arg2.
       inline
       data_expression arg2(const data_expression& e)
       {
@@ -1733,10 +1788,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg3 from an application
-      /// \param e A data expression
-      /// \pre arg3 is defined for e
-      /// \return The argument of e that corresponds to arg3
+      ///        arg3 from an application.
+      /// \param e A data expression.
+      /// \pre arg3 is defined for e.
+      /// \return The argument of e that corresponds to arg3.
       inline
       data_expression arg3(const data_expression& e)
       {
@@ -1745,10 +1800,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       data_expression arg(const data_expression& e)
       {
@@ -1757,10 +1812,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       data_expression left(const data_expression& e)
       {

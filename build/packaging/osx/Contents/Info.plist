@@ -28,5 +28,7 @@
   <string>Copyright (C) 2005-@MCRL2_COPYRIGHT_YEAR@ Eindhoven University of Technology</string>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
+  <key>NSAppleEventsUsageDescription</key>
+  <string>"Use the GPU"</string>
 </dict>
 </plist>

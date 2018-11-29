@@ -28,8 +28,8 @@ namespace mcrl2 {
   namespace data {
 
 
-      /// \brief Generate identifier \@func_update
-      /// \return Identifier \@func_update
+      /// \brief Generate identifier \@func_update.
+      /// \return Identifier \@func_update.
       inline
       core::identifier_string const& function_update_name()
       {
@@ -37,10 +37,10 @@ namespace mcrl2 {
         return function_update_name;
       }
 
-      /// \brief Constructor for function symbol \@func_update
+      /// \brief Constructor for function symbol \@func_update.
       /// \param s A sort expression
       /// \param t A sort expression
-      /// \return Function symbol function_update
+      /// \return Function symbol function_update.
       inline
       function_symbol function_update(const sort_expression& s, const sort_expression& t)
       {
@@ -48,9 +48,9 @@ namespace mcrl2 {
         return function_update;
       }
 
-      /// \brief Recogniser for function \@func_update
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@func_update
+      /// \brief Recogniser for function \@func_update.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@func_update.
       inline
       bool is_function_update_function_symbol(const atermpp::aterm& e)
       {
@@ -98,11 +98,35 @@ namespace mcrl2 {
         result.push_back(function_update(s, t));
         return result;
       }
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for function_update
+      /// \param s A sort expression
+      /// \param t A sort expression
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis function_update
+      inline
+      function_symbol_vector function_update_mCRL2_usable_mappings(const sort_expression& s, const sort_expression& t)
+      {
+        function_symbol_vector result;
+        static_cast< void >(s); // suppress unused variable warnings
+        static_cast< void >(t); // suppress unused variable warnings
+        return result;
+      }
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for function_update
+      /// \param s A sort expression
+      /// \param t A sort expression
+      /// \return All system defined mappings that are to be implemented in C++ code for function_update
+      inline
+      function_symbol_vector function_update_cpp_implementable_mappings(const sort_expression& s, const sort_expression& t)
+      {
+        function_symbol_vector result;
+        static_cast< void >(s); // suppress unused variable warnings
+        static_cast< void >(t); // suppress unused variable warnings
+        return result;
+      }
       ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
+      ///        arg1 from an application.
+      /// \param e A data expression.
+      /// \pre arg1 is defined for e.
+      /// \return The argument of e that corresponds to arg1.
       inline
       data_expression arg1(const data_expression& e)
       {
@@ -111,10 +135,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
+      ///        arg2 from an application.
+      /// \param e A data expression.
+      /// \pre arg2 is defined for e.
+      /// \return The argument of e that corresponds to arg2.
       inline
       data_expression arg2(const data_expression& e)
       {
@@ -123,10 +147,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg3 from an application
-      /// \param e A data expression
-      /// \pre arg3 is defined for e
-      /// \return The argument of e that corresponds to arg3
+      ///        arg3 from an application.
+      /// \param e A data expression.
+      /// \pre arg3 is defined for e.
+      /// \return The argument of e that corresponds to arg3.
       inline
       data_expression arg3(const data_expression& e)
       {

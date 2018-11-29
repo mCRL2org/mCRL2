@@ -230,6 +230,37 @@ class function_declaration():
 
     return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
 
+  def mCRL2_usable_functions(self, spec, function_declarations):
+    if self.namespace <> self.original_namespace or self.namespace <> function_declarations.namespace or self.namespace <> spec.namespace or self.internextern.is_internal():
+      return ""
+
+    sort_params = self.sort_expression.sort_parameters(spec)
+    # Determine whether this function is overloaded
+    functions = filter(lambda x: (x.id == self.id) and (x.label == self.label) and (x.namespace == self.namespace), function_declarations.elements)
+    extra_parameters = []
+    if len(functions) > 1:
+      try:
+        extra_parameters.append(self.sort_expression.domain.code(spec))
+      except:
+        pass # in case sort_expression has no domain
+
+    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+
+  def cplusplus_implementable_functions(self, spec, function_declarations):
+    if self.namespace <> self.original_namespace or self.namespace <> function_declarations.namespace or self.namespace <> spec.namespace or not self.definedby.is_defined_by_code():
+      return ""
+
+    sort_params = self.sort_expression.sort_parameters(spec)
+    # Determine whether this function is overloaded
+    functions = filter(lambda x: (x.id == self.id) and (x.label == self.label) and (x.namespace == self.namespace) and (x.definedby.is_defined_by_code), function_declarations.elements)
+    extra_parameters = []
+    if len(functions) > 1:
+      try:
+        extra_parameters.append(self.sort_expression.domain.code(spec))
+      except:
+        pass # in case sort_expression has no domain
+    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+
 
 class internal_external():
   def __init__(self, status):
@@ -241,6 +272,16 @@ class internal_external():
     assert(other.status=="internal" or other.status=="external")
     return self.status == other.status
 
+  def is_internal(self):
+    assert(self.status=="internal" or self.status=="external")
+    return self.status=="internal";
+
+  def is_external(self):
+    assert(self.status=="internal" or self.status=="external")
+    return self.status=="external";
+
+  def string(self):
+    return self.status
 
 class defined_by():
   def __init__(self, status):
@@ -252,6 +293,16 @@ class defined_by():
     assert(other.status=="defined_by_rewrite_rules" or other.status=="defined_by_code")
     return self.status == other.status
 
+  def is_defined_by_code(self):
+    assert(self.status=="defined_by_rewrite_rules" or self.status=="defined_by_code")
+    return self.status == "defined_by_code"
+
+  def is_defined_by_rewrite_rules(self):
+    assert(self.status=="defined_by_rewrite_rules" or self.status=="defined_by_code")
+    return self.status == "defined_by_rewrite_rules"
+
+  def string(self):
+    return self.status
 
 class function_declaration_list():
   def __init__(self, elements):
@@ -329,6 +380,20 @@ class function_declaration_list():
         code += e.generator_code(spec, self)
     return code
 
+  def mCRL2_usable_functions(self, spec, is_constructor_declaration = False):
+    code = ""
+    for e in self.elements:
+      if not is_constructor_declaration or not spec.sort_specification.is_alias(target_sort(e.sort_expression)):
+        code += e.mCRL2_usable_functions(spec, self)
+    return code
+
+  def cplusplus_implementable_functions(self, spec, is_constructor_declaration = False):
+    code = ""
+    for e in self.elements:
+      if not is_constructor_declaration or not spec.sort_specification.is_alias(target_sort(e.sort_expression)):
+        code += e.cplusplus_implementable_functions(spec, self)
+    return code
+
   def projection_code(self, spec):
     projection_arguments = {}
     for e in self.elements:
@@ -368,10 +433,10 @@ class function_declaration_list():
         projection.append(projection_case)
 
       function = '''      ///\\brief Function for projecting out argument
-      ///        {0} from an application
-      /// \\param e A data expression
-      /// \\pre {0} is defined for e
-      /// \\return The argument of e that corresponds to {0}
+      ///        {0} from an application.
+      /// \\param e A data expression.
+      /// \\pre {0} is defined for e.
+      /// \\return The argument of e that corresponds to {0}.
       inline
       data_expression {1}(const data_expression& e)
       {{
@@ -407,8 +472,8 @@ class function_declaration_list():
 
       def function_name(self, fullname, name):
         CODE_TEMPLATE = Template('''
-      /// \\brief Generate identifier ${namestring}
-      /// \\return Identifier ${namestring}
+      /// \\brief Generate identifier ${namestring}.
+      /// \\return Identifier ${namestring}.
       inline
       core::identifier_string const& ${namecode}_name()
       {
@@ -420,9 +485,9 @@ class function_declaration_list():
 
       def function_constructor(self, fullname, name, sortparams, sort):
         CODE_TEMPLATE = Template('''
-      /// \\brief Constructor for function symbol ${namestring}
+      /// \\brief Constructor for function symbol ${namestring}.
       ${sortparameterstring}
-      /// \\return Function symbol ${functionname}
+      /// \\return Function symbol ${functionname}.
       inline
       function_symbol ${const}${functionname}(${sortparameters})
       {
@@ -514,9 +579,9 @@ ${cases}
 
       def function_recogniser(self, fullname, name, sortparams):
         CODE_TEMPLATE = Template('''
-      /// \\brief Recogniser for function ${namestring}
-      /// \\param e A data expression
-      /// \\return true iff e is the function symbol matching ${namestring}
+      /// \\brief Recogniser for function ${namestring}.
+      /// \\param e A data expression.
+      /// \\return true iff e is the function symbol matching ${namestring}.
       inline
       bool is_${functionname}_function_symbol(const atermpp::aterm& e)
       {
@@ -537,8 +602,8 @@ ${cases}
 
       def polymorphic_function_recogniser(self, fullname, name, sortparams):
         CODE_TEMPLATE = Template('''
-      /// \\brief Recogniser for function ${namestring}
-      /// \\param e A data expression
+      /// \\brief Recogniser for function ${namestring}.
+      /// \\param e A data expression.
       /// \\return true iff e is the function symbol matching ${namestring}
       inline
       bool is_${functionname}_function_symbol(const atermpp::aterm& e)
@@ -1323,7 +1388,7 @@ class structured_sort_declaration():
       s = sort_expr
     else:
       s = sort_arrow(self.arguments, sort_expr)
-    f = function_declaration(self.id, s, self.label,internal_external("internal"),defined_by("defined_by_rewrite_rules"))
+    f = function_declaration(self.id, s, self.label,internal_external("internal"), defined_by("defined_by_rewrite_rules"))
     # f.set_namespace should not be used here, as this function may be
     # introduced in an included specification, and hence we need to preserve
     # original_namespace
@@ -1759,6 +1824,40 @@ class mapping_specification():
       code += self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_mapping_code())
       code += "        return result;\n"
       code += "      }\n"
+
+      code += "      /// \\brief Give all system defined mappings that can be used in mCRL2 specs for %s\n" % (escape(namespace_string))
+      for s in self.declarations.sort_parameters(spec):
+        code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
+      code += "      /// \\return All system defined mappings for that can be used in mCRL2 specificationis %s\n" % (escape(namespace_string))
+      code += "      inline\n"
+      code += "      function_symbol_vector %s_mCRL2_usable_mappings(%s)\n" % (namespace_string, sort_parameters)
+      code += "      {\n"
+      code += "        function_symbol_vector result;\n"
+      add_mappings_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_mapping_code())
+      if add_mappings_code == "":
+        for s in self.declarations.sort_parameters(spec):
+          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
+      else:
+        code += add_mappings_code
+      code += "        return result;\n"
+      code += "      }\n"
+
+      code += "      /// \\brief Give all system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
+      for s in self.declarations.sort_parameters(spec):
+        code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
+      code += "      /// \\return All system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
+      code += "      inline\n"
+      code += "      function_symbol_vector %s_cpp_implementable_mappings(%s)\n" % (namespace_string, sort_parameters)
+      code += "      {\n"
+      code += "        function_symbol_vector result;\n"
+      add_mappings_code = self.declarations.cplusplus_implementable_functions(spec) + (spec.sort_specification.structured_sort_mapping_code())
+      if add_mappings_code == "":
+        for s in self.declarations.sort_parameters(spec):
+          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
+      else:
+        code += add_mappings_code
+      code += "        return result;\n"
+      code += "      }\n"
       return code
     else:
       return ""
@@ -1794,10 +1893,11 @@ class constructor_specification():
       if namespace_string == "undefined":
         namespace_string = spec.get_namespace()
       code  = self.declarations.code(spec)
-      code += "      /// \\brief Give all system defined constructors for %s\n" % (escape(namespace_string))
+
+      code += "      /// \\brief Give all system defined constructors for %s.\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
-        code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
-      code += "      /// \\return All system defined constructors for %s\n" % (escape(namespace_string))
+        code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
+      code += "      /// \\return All system defined constructors for %s.\n" % (escape(namespace_string))
       code += "      inline\n"
       code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (namespace_string,sort_parameters)
       code += "      {\n"
@@ -1809,6 +1909,42 @@ class constructor_specification():
       else:
         code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
         code += "%s\n" % (self.declarations.generator_code(spec, True))
+      code += "        return result;\n"
+      code += "      }\n"
+      
+      code += "      /// \\brief Give all defined constructors which can be used in mCRL2 specs for %s.\n" % (escape(namespace_string))
+      for s in self.declarations.sort_parameters(spec):
+        code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
+      code += "      /// \\return All system defined constructors that can be used in an mCRL2 specification for %s.\n" % (escape(namespace_string))
+      code += "      inline\n"
+      code += "      function_symbol_vector %s_mCRL2_usable_constructors(%s)\n" % (namespace_string,sort_parameters)
+      code += "      {\n"
+      code += "        function_symbol_vector result;\n"
+      add_constructors_code = self.declarations.mCRL2_usable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
+      if add_constructors_code == "":
+        for s in self.declarations.sort_parameters(spec):
+          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
+      else:
+        code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
+        code += "%s\n" % (self.declarations.mCRL2_usable_functions(spec, True))
+      code += "        return result;\n"
+      code += "      }\n"
+      
+      code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
+      for s in self.declarations.sort_parameters(spec):
+        code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
+      code += "      /// \\return All system defined constructors that are to be implemented in C++ for %s.\n" % (escape(namespace_string))
+      code += "      inline\n"
+      code += "      function_symbol_vector %s_cpp_implementable_constructors(%s)\n" % (namespace_string,sort_parameters)
+      code += "      {\n"
+      code += "        function_symbol_vector result;\n"
+      add_constructors_code = self.declarations.cplusplus_implementable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
+      if add_constructors_code == "":
+        for s in self.declarations.sort_parameters(spec):
+          code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
+      else:
+        code += "%s" % (spec.sort_specification.structured_sort_constructor_code())
+        code += "%s\n" % (self.declarations.cplusplus_implementable_functions(spec, True))
       code += "        return result;\n"
       code += "      }\n"
       return code
@@ -2045,7 +2181,7 @@ class specification():
     code += "namespace mcrl2 {\n\n"
     code += "  namespace data {\n\n"
     if self.namespace <> "undefined":
-      code += "    /// \\brief Namespace for system defined sort %s\n" % (escape(self.get_namespace()))
+      code += "    /// \\brief Namespace for system defined sort %s.\n" % (escape(self.get_namespace()))
       code += "    namespace sort_%s {\n\n" % (self.get_namespace())
     code += self.sort_specification.code(self)
     code += self.function_specification.code(self)

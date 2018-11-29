@@ -33,7 +33,7 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort bag
+    /// \brief Namespace for system defined sort bag.
     namespace sort_bag {
 
       /// \brief Constructor for sort expression Bag(S)
@@ -61,8 +61,8 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier \@bag
-      /// \return Identifier \@bag
+      /// \brief Generate identifier \@bag.
+      /// \return Identifier \@bag.
       inline
       core::identifier_string const& constructor_name()
       {
@@ -70,9 +70,9 @@ namespace mcrl2 {
         return constructor_name;
       }
 
-      /// \brief Constructor for function symbol \@bag
+      /// \brief Constructor for function symbol \@bag.
       /// \param s A sort expression
-      /// \return Function symbol constructor
+      /// \return Function symbol constructor.
       inline
       function_symbol constructor(const sort_expression& s)
       {
@@ -80,9 +80,9 @@ namespace mcrl2 {
         return constructor;
       }
 
-      /// \brief Recogniser for function \@bag
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@bag
+      /// \brief Recogniser for function \@bag.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@bag.
       inline
       bool is_constructor_function_symbol(const atermpp::aterm& e)
       {
@@ -117,9 +117,9 @@ namespace mcrl2 {
         }
         return false;
       }
-      /// \brief Give all system defined constructors for bag
-      /// \param s A sort expression
-      /// \return All system defined constructors for bag
+      /// \brief Give all system defined constructors for bag.
+      /// \param s A sort expression.
+      /// \return All system defined constructors for bag.
       inline
       function_symbol_vector bag_generate_constructors_code(const sort_expression& s)
       {
@@ -128,9 +128,29 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for bag.
+      /// \param s A sort expression.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for bag.
+      inline
+      function_symbol_vector bag_mCRL2_usable_constructors(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        static_cast< void >(s); // suppress unused variable warnings
+        return result;
+      }
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for bag.
+      /// \param s A sort expression.
+      /// \return All system defined constructors that are to be implemented in C++ for bag.
+      inline
+      function_symbol_vector bag_cpp_implementable_constructors(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        static_cast< void >(s); // suppress unused variable warnings
+        return result;
+      }
 
-      /// \brief Generate identifier \@bagfbag
-      /// \return Identifier \@bagfbag
+      /// \brief Generate identifier \@bagfbag.
+      /// \return Identifier \@bagfbag.
       inline
       core::identifier_string const& bag_fbag_name()
       {
@@ -138,9 +158,9 @@ namespace mcrl2 {
         return bag_fbag_name;
       }
 
-      /// \brief Constructor for function symbol \@bagfbag
+      /// \brief Constructor for function symbol \@bagfbag.
       /// \param s A sort expression
-      /// \return Function symbol bag_fbag
+      /// \return Function symbol bag_fbag.
       inline
       function_symbol bag_fbag(const sort_expression& s)
       {
@@ -148,9 +168,9 @@ namespace mcrl2 {
         return bag_fbag;
       }
 
-      /// \brief Recogniser for function \@bagfbag
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@bagfbag
+      /// \brief Recogniser for function \@bagfbag.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@bagfbag.
       inline
       bool is_bag_fbag_function_symbol(const atermpp::aterm& e)
       {
@@ -185,8 +205,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@bagcomp
-      /// \return Identifier \@bagcomp
+      /// \brief Generate identifier \@bagcomp.
+      /// \return Identifier \@bagcomp.
       inline
       core::identifier_string const& bag_comprehension_name()
       {
@@ -194,9 +214,9 @@ namespace mcrl2 {
         return bag_comprehension_name;
       }
 
-      /// \brief Constructor for function symbol \@bagcomp
+      /// \brief Constructor for function symbol \@bagcomp.
       /// \param s A sort expression
-      /// \return Function symbol bag_comprehension
+      /// \return Function symbol bag_comprehension.
       inline
       function_symbol bag_comprehension(const sort_expression& s)
       {
@@ -204,9 +224,9 @@ namespace mcrl2 {
         return bag_comprehension;
       }
 
-      /// \brief Recogniser for function \@bagcomp
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@bagcomp
+      /// \brief Recogniser for function \@bagcomp.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@bagcomp.
       inline
       bool is_bag_comprehension_function_symbol(const atermpp::aterm& e)
       {
@@ -241,8 +261,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier count
-      /// \return Identifier count
+      /// \brief Generate identifier count.
+      /// \return Identifier count.
       inline
       core::identifier_string const& count_name()
       {
@@ -259,8 +279,8 @@ namespace mcrl2 {
         return count;
       }
 
-      /// \brief Recogniser for function count
-      /// \param e A data expression
+      /// \brief Recogniser for function count.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching count
       inline
       bool is_count_function_symbol(const atermpp::aterm& e)
@@ -298,8 +318,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier in
-      /// \return Identifier in
+      /// \brief Generate identifier in.
+      /// \return Identifier in.
       inline
       core::identifier_string const& in_name()
       {
@@ -316,8 +336,8 @@ namespace mcrl2 {
         return in;
       }
 
-      /// \brief Recogniser for function in
-      /// \param e A data expression
+      /// \brief Recogniser for function in.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching in
       inline
       bool is_in_function_symbol(const atermpp::aterm& e)
@@ -355,8 +375,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier +
-      /// \return Identifier +
+      /// \brief Generate identifier +.
+      /// \return Identifier +.
       inline
       core::identifier_string const& union_name()
       {
@@ -394,8 +414,8 @@ namespace mcrl2 {
         return union_;
       }
 
-      /// \brief Recogniser for function +
-      /// \param e A data expression
+      /// \brief Recogniser for function +.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching +
       inline
       bool is_union_function_symbol(const atermpp::aterm& e)
@@ -433,8 +453,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier *
-      /// \return Identifier *
+      /// \brief Generate identifier *.
+      /// \return Identifier *.
       inline
       core::identifier_string const& intersection_name()
       {
@@ -472,8 +492,8 @@ namespace mcrl2 {
         return intersection;
       }
 
-      /// \brief Recogniser for function *
-      /// \param e A data expression
+      /// \brief Recogniser for function *.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching *
       inline
       bool is_intersection_function_symbol(const atermpp::aterm& e)
@@ -511,8 +531,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier -
-      /// \return Identifier -
+      /// \brief Generate identifier -.
+      /// \return Identifier -.
       inline
       core::identifier_string const& difference_name()
       {
@@ -550,8 +570,8 @@ namespace mcrl2 {
         return difference;
       }
 
-      /// \brief Recogniser for function -
-      /// \param e A data expression
+      /// \brief Recogniser for function -.
+      /// \param e A data expression.
       /// \return true iff e is the function symbol matching -
       inline
       bool is_difference_function_symbol(const atermpp::aterm& e)
@@ -589,8 +609,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Bag2Set
-      /// \return Identifier Bag2Set
+      /// \brief Generate identifier Bag2Set.
+      /// \return Identifier Bag2Set.
       inline
       core::identifier_string const& bag2set_name()
       {
@@ -598,9 +618,9 @@ namespace mcrl2 {
         return bag2set_name;
       }
 
-      /// \brief Constructor for function symbol Bag2Set
+      /// \brief Constructor for function symbol Bag2Set.
       /// \param s A sort expression
-      /// \return Function symbol bag2set
+      /// \return Function symbol bag2set.
       inline
       function_symbol bag2set(const sort_expression& s)
       {
@@ -608,9 +628,9 @@ namespace mcrl2 {
         return bag2set;
       }
 
-      /// \brief Recogniser for function Bag2Set
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Bag2Set
+      /// \brief Recogniser for function Bag2Set.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Bag2Set.
       inline
       bool is_bag2set_function_symbol(const atermpp::aterm& e)
       {
@@ -645,8 +665,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier Set2Bag
-      /// \return Identifier Set2Bag
+      /// \brief Generate identifier Set2Bag.
+      /// \return Identifier Set2Bag.
       inline
       core::identifier_string const& set2bag_name()
       {
@@ -654,9 +674,9 @@ namespace mcrl2 {
         return set2bag_name;
       }
 
-      /// \brief Constructor for function symbol Set2Bag
+      /// \brief Constructor for function symbol Set2Bag.
       /// \param s A sort expression
-      /// \return Function symbol set2bag
+      /// \return Function symbol set2bag.
       inline
       function_symbol set2bag(const sort_expression& s)
       {
@@ -664,9 +684,9 @@ namespace mcrl2 {
         return set2bag;
       }
 
-      /// \brief Recogniser for function Set2Bag
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching Set2Bag
+      /// \brief Recogniser for function Set2Bag.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching Set2Bag.
       inline
       bool is_set2bag_function_symbol(const atermpp::aterm& e)
       {
@@ -701,8 +721,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@zero_
-      /// \return Identifier \@zero_
+      /// \brief Generate identifier \@zero_.
+      /// \return Identifier \@zero_.
       inline
       core::identifier_string const& zero_function_name()
       {
@@ -710,9 +730,9 @@ namespace mcrl2 {
         return zero_function_name;
       }
 
-      /// \brief Constructor for function symbol \@zero_
+      /// \brief Constructor for function symbol \@zero_.
       /// \param s A sort expression
-      /// \return Function symbol zero_function
+      /// \return Function symbol zero_function.
       inline
       function_symbol zero_function(const sort_expression& s)
       {
@@ -720,9 +740,9 @@ namespace mcrl2 {
         return zero_function;
       }
 
-      /// \brief Recogniser for function \@zero_
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@zero_
+      /// \brief Recogniser for function \@zero_.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@zero_.
       inline
       bool is_zero_function_function_symbol(const atermpp::aterm& e)
       {
@@ -757,8 +777,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@one_
-      /// \return Identifier \@one_
+      /// \brief Generate identifier \@one_.
+      /// \return Identifier \@one_.
       inline
       core::identifier_string const& one_function_name()
       {
@@ -766,9 +786,9 @@ namespace mcrl2 {
         return one_function_name;
       }
 
-      /// \brief Constructor for function symbol \@one_
+      /// \brief Constructor for function symbol \@one_.
       /// \param s A sort expression
-      /// \return Function symbol one_function
+      /// \return Function symbol one_function.
       inline
       function_symbol one_function(const sort_expression& s)
       {
@@ -776,9 +796,9 @@ namespace mcrl2 {
         return one_function;
       }
 
-      /// \brief Recogniser for function \@one_
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@one_
+      /// \brief Recogniser for function \@one_.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@one_.
       inline
       bool is_one_function_function_symbol(const atermpp::aterm& e)
       {
@@ -813,8 +833,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@add_
-      /// \return Identifier \@add_
+      /// \brief Generate identifier \@add_.
+      /// \return Identifier \@add_.
       inline
       core::identifier_string const& add_function_name()
       {
@@ -822,9 +842,9 @@ namespace mcrl2 {
         return add_function_name;
       }
 
-      /// \brief Constructor for function symbol \@add_
+      /// \brief Constructor for function symbol \@add_.
       /// \param s A sort expression
-      /// \return Function symbol add_function
+      /// \return Function symbol add_function.
       inline
       function_symbol add_function(const sort_expression& s)
       {
@@ -832,9 +852,9 @@ namespace mcrl2 {
         return add_function;
       }
 
-      /// \brief Recogniser for function \@add_
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@add_
+      /// \brief Recogniser for function \@add_.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@add_.
       inline
       bool is_add_function_function_symbol(const atermpp::aterm& e)
       {
@@ -870,8 +890,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@min_
-      /// \return Identifier \@min_
+      /// \brief Generate identifier \@min_.
+      /// \return Identifier \@min_.
       inline
       core::identifier_string const& min_function_name()
       {
@@ -879,9 +899,9 @@ namespace mcrl2 {
         return min_function_name;
       }
 
-      /// \brief Constructor for function symbol \@min_
+      /// \brief Constructor for function symbol \@min_.
       /// \param s A sort expression
-      /// \return Function symbol min_function
+      /// \return Function symbol min_function.
       inline
       function_symbol min_function(const sort_expression& s)
       {
@@ -889,9 +909,9 @@ namespace mcrl2 {
         return min_function;
       }
 
-      /// \brief Recogniser for function \@min_
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@min_
+      /// \brief Recogniser for function \@min_.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@min_.
       inline
       bool is_min_function_function_symbol(const atermpp::aterm& e)
       {
@@ -927,8 +947,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@monus_
-      /// \return Identifier \@monus_
+      /// \brief Generate identifier \@monus_.
+      /// \return Identifier \@monus_.
       inline
       core::identifier_string const& monus_function_name()
       {
@@ -936,9 +956,9 @@ namespace mcrl2 {
         return monus_function_name;
       }
 
-      /// \brief Constructor for function symbol \@monus_
+      /// \brief Constructor for function symbol \@monus_.
       /// \param s A sort expression
-      /// \return Function symbol monus_function
+      /// \return Function symbol monus_function.
       inline
       function_symbol monus_function(const sort_expression& s)
       {
@@ -946,9 +966,9 @@ namespace mcrl2 {
         return monus_function;
       }
 
-      /// \brief Recogniser for function \@monus_
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@monus_
+      /// \brief Recogniser for function \@monus_.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@monus_.
       inline
       bool is_monus_function_function_symbol(const atermpp::aterm& e)
       {
@@ -984,8 +1004,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@Nat2Bool_
-      /// \return Identifier \@Nat2Bool_
+      /// \brief Generate identifier \@Nat2Bool_.
+      /// \return Identifier \@Nat2Bool_.
       inline
       core::identifier_string const& nat2bool_function_name()
       {
@@ -993,9 +1013,9 @@ namespace mcrl2 {
         return nat2bool_function_name;
       }
 
-      /// \brief Constructor for function symbol \@Nat2Bool_
+      /// \brief Constructor for function symbol \@Nat2Bool_.
       /// \param s A sort expression
-      /// \return Function symbol nat2bool_function
+      /// \return Function symbol nat2bool_function.
       inline
       function_symbol nat2bool_function(const sort_expression& s)
       {
@@ -1003,9 +1023,9 @@ namespace mcrl2 {
         return nat2bool_function;
       }
 
-      /// \brief Recogniser for function \@Nat2Bool_
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@Nat2Bool_
+      /// \brief Recogniser for function \@Nat2Bool_.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@Nat2Bool_.
       inline
       bool is_nat2bool_function_function_symbol(const atermpp::aterm& e)
       {
@@ -1040,8 +1060,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@Bool2Nat_
-      /// \return Identifier \@Bool2Nat_
+      /// \brief Generate identifier \@Bool2Nat_.
+      /// \return Identifier \@Bool2Nat_.
       inline
       core::identifier_string const& bool2nat_function_name()
       {
@@ -1049,9 +1069,9 @@ namespace mcrl2 {
         return bool2nat_function_name;
       }
 
-      /// \brief Constructor for function symbol \@Bool2Nat_
+      /// \brief Constructor for function symbol \@Bool2Nat_.
       /// \param s A sort expression
-      /// \return Function symbol bool2nat_function
+      /// \return Function symbol bool2nat_function.
       inline
       function_symbol bool2nat_function(const sort_expression& s)
       {
@@ -1059,9 +1079,9 @@ namespace mcrl2 {
         return bool2nat_function;
       }
 
-      /// \brief Recogniser for function \@Bool2Nat_
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@Bool2Nat_
+      /// \brief Recogniser for function \@Bool2Nat_.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@Bool2Nat_.
       inline
       bool is_bool2nat_function_function_symbol(const atermpp::aterm& e)
       {
@@ -1120,11 +1140,36 @@ namespace mcrl2 {
         result.push_back(sort_bag::bool2nat_function(s));
         return result;
       }
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for bag
+      /// \param s A sort expression
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis bag
+      inline
+      function_symbol_vector bag_mCRL2_usable_mappings(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_bag::count(s, s, bag(s)));
+        result.push_back(sort_bag::in(s, s, bag(s)));
+        result.push_back(sort_bag::union_(s, bag(s), bag(s)));
+        result.push_back(sort_bag::intersection(s, bag(s), bag(s)));
+        result.push_back(sort_bag::difference(s, bag(s), bag(s)));
+        result.push_back(sort_bag::bag2set(s));
+        return result;
+      }
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for bag
+      /// \param s A sort expression
+      /// \return All system defined mappings that are to be implemented in C++ code for bag
+      inline
+      function_symbol_vector bag_cpp_implementable_mappings(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        static_cast< void >(s); // suppress unused variable warnings
+        return result;
+      }
       ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       data_expression right(const data_expression& e)
       {
@@ -1133,10 +1178,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       data_expression arg(const data_expression& e)
       {
@@ -1145,10 +1190,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       data_expression left(const data_expression& e)
       {

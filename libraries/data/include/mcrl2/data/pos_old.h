@@ -28,7 +28,7 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort pos_old
+    /// \brief Namespace for system defined sort pos_old.
     namespace sort_pos_old {
 
       inline
@@ -61,8 +61,8 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier \@c1
-      /// \return Identifier \@c1
+      /// \brief Generate identifier \@c1.
+      /// \return Identifier \@c1.
       inline
       core::identifier_string const& c1_name()
       {
@@ -70,9 +70,9 @@ namespace mcrl2 {
         return c1_name;
       }
 
-      /// \brief Constructor for function symbol \@c1
+      /// \brief Constructor for function symbol \@c1.
       
-      /// \return Function symbol c1
+      /// \return Function symbol c1.
       inline
       function_symbol const& c1()
       {
@@ -80,21 +80,21 @@ namespace mcrl2 {
         return c1;
       }
 
-      /// \brief Recogniser for function \@c1
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@c1
+      /// \brief Recogniser for function \@c1.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@c1.
       inline
       bool is_c1_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == c1();
+          return atermpp::down_cast<function_symbol>(e) == c1();
         }
         return false;
       }
 
-      /// \brief Generate identifier \@cDub
-      /// \return Identifier \@cDub
+      /// \brief Generate identifier \@cDub.
+      /// \return Identifier \@cDub.
       inline
       core::identifier_string const& cdub_name()
       {
@@ -102,9 +102,9 @@ namespace mcrl2 {
         return cdub_name;
       }
 
-      /// \brief Constructor for function symbol \@cDub
+      /// \brief Constructor for function symbol \@cDub.
       
-      /// \return Function symbol cdub
+      /// \return Function symbol cdub.
       inline
       function_symbol const& cdub()
       {
@@ -112,15 +112,15 @@ namespace mcrl2 {
         return cdub;
       }
 
-      /// \brief Recogniser for function \@cDub
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@cDub
+      /// \brief Recogniser for function \@cDub.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@cDub.
       inline
       bool is_cdub_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == cdub();
+          return atermpp::down_cast<function_symbol>(e) == cdub();
         }
         return false;
       }
@@ -149,8 +149,8 @@ namespace mcrl2 {
         }
         return false;
       }
-      /// \brief Give all system defined constructors for pos_old
-      /// \return All system defined constructors for pos_old
+      /// \brief Give all system defined constructors for pos_old.
+      /// \return All system defined constructors for pos_old.
       inline
       function_symbol_vector pos_old_generate_constructors_code()
       {
@@ -160,9 +160,25 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for pos_old.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for pos_old.
+      inline
+      function_symbol_vector pos_old_mCRL2_usable_constructors()
+      {
+        function_symbol_vector result;
+        return result;
+      }
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for pos_old.
+      /// \return All system defined constructors that are to be implemented in C++ for pos_old.
+      inline
+      function_symbol_vector pos_old_cpp_implementable_constructors()
+      {
+        function_symbol_vector result;
+        return result;
+      }
 
-      /// \brief Generate identifier max
-      /// \return Identifier max
+      /// \brief Generate identifier max.
+      /// \return Identifier max.
       inline
       core::identifier_string const& maximum_name()
       {
@@ -170,9 +186,9 @@ namespace mcrl2 {
         return maximum_name;
       }
 
-      /// \brief Constructor for function symbol max
+      /// \brief Constructor for function symbol max.
       
-      /// \return Function symbol maximum
+      /// \return Function symbol maximum.
       inline
       function_symbol const& maximum()
       {
@@ -180,15 +196,15 @@ namespace mcrl2 {
         return maximum;
       }
 
-      /// \brief Recogniser for function max
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching max
+      /// \brief Recogniser for function max.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching max.
       inline
       bool is_maximum_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == maximum();
+          return atermpp::down_cast<function_symbol>(e) == maximum();
         }
         return false;
       }
@@ -218,8 +234,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier min
-      /// \return Identifier min
+      /// \brief Generate identifier min.
+      /// \return Identifier min.
       inline
       core::identifier_string const& minimum_name()
       {
@@ -227,9 +243,9 @@ namespace mcrl2 {
         return minimum_name;
       }
 
-      /// \brief Constructor for function symbol min
+      /// \brief Constructor for function symbol min.
       
-      /// \return Function symbol minimum
+      /// \return Function symbol minimum.
       inline
       function_symbol const& minimum()
       {
@@ -237,15 +253,15 @@ namespace mcrl2 {
         return minimum;
       }
 
-      /// \brief Recogniser for function min
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching min
+      /// \brief Recogniser for function min.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching min.
       inline
       bool is_minimum_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == minimum();
+          return atermpp::down_cast<function_symbol>(e) == minimum();
         }
         return false;
       }
@@ -275,8 +291,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier succ
-      /// \return Identifier succ
+      /// \brief Generate identifier succ.
+      /// \return Identifier succ.
       inline
       core::identifier_string const& succ_name()
       {
@@ -284,9 +300,9 @@ namespace mcrl2 {
         return succ_name;
       }
 
-      /// \brief Constructor for function symbol succ
+      /// \brief Constructor for function symbol succ.
       
-      /// \return Function symbol succ
+      /// \return Function symbol succ.
       inline
       function_symbol const& succ()
       {
@@ -294,15 +310,15 @@ namespace mcrl2 {
         return succ;
       }
 
-      /// \brief Recogniser for function succ
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching succ
+      /// \brief Recogniser for function succ.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching succ.
       inline
       bool is_succ_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == succ();
+          return atermpp::down_cast<function_symbol>(e) == succ();
         }
         return false;
       }
@@ -331,8 +347,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@pospred
-      /// \return Identifier \@pospred
+      /// \brief Generate identifier \@pospred.
+      /// \return Identifier \@pospred.
       inline
       core::identifier_string const& pos_predecessor_name()
       {
@@ -340,9 +356,9 @@ namespace mcrl2 {
         return pos_predecessor_name;
       }
 
-      /// \brief Constructor for function symbol \@pospred
+      /// \brief Constructor for function symbol \@pospred.
       
-      /// \return Function symbol pos_predecessor
+      /// \return Function symbol pos_predecessor.
       inline
       function_symbol const& pos_predecessor()
       {
@@ -350,15 +366,15 @@ namespace mcrl2 {
         return pos_predecessor;
       }
 
-      /// \brief Recogniser for function \@pospred
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@pospred
+      /// \brief Recogniser for function \@pospred.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@pospred.
       inline
       bool is_pos_predecessor_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == pos_predecessor();
+          return atermpp::down_cast<function_symbol>(e) == pos_predecessor();
         }
         return false;
       }
@@ -387,8 +403,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier +
-      /// \return Identifier +
+      /// \brief Generate identifier +.
+      /// \return Identifier +.
       inline
       core::identifier_string const& plus_name()
       {
@@ -396,9 +412,9 @@ namespace mcrl2 {
         return plus_name;
       }
 
-      /// \brief Constructor for function symbol +
+      /// \brief Constructor for function symbol +.
       
-      /// \return Function symbol plus
+      /// \return Function symbol plus.
       inline
       function_symbol const& plus()
       {
@@ -406,15 +422,15 @@ namespace mcrl2 {
         return plus;
       }
 
-      /// \brief Recogniser for function +
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching +
+      /// \brief Recogniser for function +.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching +.
       inline
       bool is_plus_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == plus();
+          return atermpp::down_cast<function_symbol>(e) == plus();
         }
         return false;
       }
@@ -444,8 +460,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@addc
-      /// \return Identifier \@addc
+      /// \brief Generate identifier \@addc.
+      /// \return Identifier \@addc.
       inline
       core::identifier_string const& add_with_carry_name()
       {
@@ -453,9 +469,9 @@ namespace mcrl2 {
         return add_with_carry_name;
       }
 
-      /// \brief Constructor for function symbol \@addc
+      /// \brief Constructor for function symbol \@addc.
       
-      /// \return Function symbol add_with_carry
+      /// \return Function symbol add_with_carry.
       inline
       function_symbol const& add_with_carry()
       {
@@ -463,15 +479,15 @@ namespace mcrl2 {
         return add_with_carry;
       }
 
-      /// \brief Recogniser for function \@addc
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@addc
+      /// \brief Recogniser for function \@addc.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@addc.
       inline
       bool is_add_with_carry_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == add_with_carry();
+          return atermpp::down_cast<function_symbol>(e) == add_with_carry();
         }
         return false;
       }
@@ -502,8 +518,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier *
-      /// \return Identifier *
+      /// \brief Generate identifier *.
+      /// \return Identifier *.
       inline
       core::identifier_string const& times_name()
       {
@@ -511,9 +527,9 @@ namespace mcrl2 {
         return times_name;
       }
 
-      /// \brief Constructor for function symbol *
+      /// \brief Constructor for function symbol *.
       
-      /// \return Function symbol times
+      /// \return Function symbol times.
       inline
       function_symbol const& times()
       {
@@ -521,15 +537,15 @@ namespace mcrl2 {
         return times;
       }
 
-      /// \brief Recogniser for function *
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching *
+      /// \brief Recogniser for function *.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching *.
       inline
       bool is_times_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == times();
+          return atermpp::down_cast<function_symbol>(e) == times();
         }
         return false;
       }
@@ -559,8 +575,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@powerlog2
-      /// \return Identifier \@powerlog2
+      /// \brief Generate identifier \@powerlog2.
+      /// \return Identifier \@powerlog2.
       inline
       core::identifier_string const& powerlog2_pos_name()
       {
@@ -568,9 +584,9 @@ namespace mcrl2 {
         return powerlog2_pos_name;
       }
 
-      /// \brief Constructor for function symbol \@powerlog2
+      /// \brief Constructor for function symbol \@powerlog2.
       
-      /// \return Function symbol powerlog2_pos
+      /// \return Function symbol powerlog2_pos.
       inline
       function_symbol const& powerlog2_pos()
       {
@@ -578,15 +594,15 @@ namespace mcrl2 {
         return powerlog2_pos;
       }
 
-      /// \brief Recogniser for function \@powerlog2
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@powerlog2
+      /// \brief Recogniser for function \@powerlog2.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@powerlog2.
       inline
       bool is_powerlog2_pos_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == powerlog2_pos();
+          return atermpp::down_cast<function_symbol>(e) == powerlog2_pos();
         }
         return false;
       }
@@ -630,11 +646,32 @@ namespace mcrl2 {
         result.push_back(sort_pos_old::powerlog2_pos());
         return result;
       }
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for pos_old
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis pos_old
+      inline
+      function_symbol_vector pos_old_mCRL2_usable_mappings()
+      {
+        function_symbol_vector result;
+        result.push_back(sort_pos_old::maximum());
+        result.push_back(sort_pos_old::minimum());
+        result.push_back(sort_pos_old::succ());
+        result.push_back(sort_pos_old::plus());
+        result.push_back(sort_pos_old::times());
+        return result;
+      }
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for pos_old
+      /// \return All system defined mappings that are to be implemented in C++ code for pos_old
+      inline
+      function_symbol_vector pos_old_cpp_implementable_mappings()
+      {
+        function_symbol_vector result;
+        return result;
+      }
       ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       data_expression right(const data_expression& e)
       {
@@ -643,10 +680,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
+      ///        arg1 from an application.
+      /// \param e A data expression.
+      /// \pre arg1 is defined for e.
+      /// \return The argument of e that corresponds to arg1.
       inline
       data_expression arg1(const data_expression& e)
       {
@@ -655,10 +692,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
+      ///        arg2 from an application.
+      /// \param e A data expression.
+      /// \pre arg2 is defined for e.
+      /// \return The argument of e that corresponds to arg2.
       inline
       data_expression arg2(const data_expression& e)
       {
@@ -667,10 +704,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg3 from an application
-      /// \param e A data expression
-      /// \pre arg3 is defined for e
-      /// \return The argument of e that corresponds to arg3
+      ///        arg3 from an application.
+      /// \param e A data expression.
+      /// \pre arg3 is defined for e.
+      /// \return The argument of e that corresponds to arg3.
       inline
       data_expression arg3(const data_expression& e)
       {
@@ -679,10 +716,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       data_expression arg(const data_expression& e)
       {
@@ -691,10 +728,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       data_expression left(const data_expression& e)
       {

@@ -14,7 +14,7 @@
 
 sort Nat <"nat">;
 % Auxiliary sort natpair, pair of natural numbers
-     @NatPair <"natpair">
+     @NatPair <"natpair">;
 
 cons @c0 <"c0"> : Nat                                                                                          internal defined_by_rewrite_rules;
      @cNat <"cnat"> : Pos <"arg"> -> Nat                                                                       internal defined_by_rewrite_rules; 

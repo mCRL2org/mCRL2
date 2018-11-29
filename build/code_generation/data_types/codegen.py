@@ -552,12 +552,12 @@ class InternalExternal(Parsing.Nonterm):
     def reduceExternal(self, external):
         "%reduce external"
         self.data = internal_external("external")
-        printVerbose("InternalExternal", self.data)
+        printVerbose("InternalExternal", self.data.string())
 
     def reduceInternal(self, internal):
         "%reduce internal"
         self.data = internal_external("internal")
-        printVerbose("InternalExternal", self.data)
+        printVerbose("InternalExternal", self.data.string())
 
 # DefinedBy ::= "defined_by_rewrite_rules" | "defined_by_code"
 class DefinedBy(Parsing.Nonterm):
@@ -565,12 +565,12 @@ class DefinedBy(Parsing.Nonterm):
     def reduceByRewriteRules(self, rules):
         "%reduce defined_by_rewrite_rules"
         self.data = defined_by("defined_by_rewrite_rules")
-        printVerbose("DefinedBy", self.data)
+        printVerbose("DefinedBy", self.data.string())
 
     def reduceByCode(self, code):
         "%reduce defined_by_code"
         self.data = defined_by("defined_by_code")
-        printVerbose("DefinedBy", self.data)
+        printVerbose("DefinedBy", self.data.string())
 
 # EqnDecls ::= EqnDecl
 #            | EqnDecls EqnDecl

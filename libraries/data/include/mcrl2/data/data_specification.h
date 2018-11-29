@@ -154,10 +154,14 @@ class data_specification: public sort_specification
 
     /// \brief Cache normalised mappings grouped by target sort.
     mutable target_sort_to_function_map m_grouped_normalised_mappings;
-    //
+    
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
     mutable data_equation_vector m_normalised_equations;
+  
+    /// \brief A set with function symbols that are implemented using an C++ function, and not using rewrite rules. 
+    /// \details The sorts in these equations are normalised.
+    mutable std::set<function_symbol> m_cpp_implemented_functions;
 
     void data_is_not_necessarily_normalised_anymore() const
     {
@@ -176,7 +180,7 @@ class data_specification: public sort_specification
     inline
     void add_normalised_constructor(const function_symbol& f) const
     {
-      function_symbol g(normalize_sorts(f, *this));
+      const function_symbol g(normalize_sorts(f, *this));
       if (std::find(m_normalised_constructors.begin(),m_normalised_constructors.end(),g)==m_normalised_constructors.end()) // not found
       {
         m_normalised_constructors.push_back(g);
@@ -192,7 +196,7 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_normalised_mapping(const function_symbol& f) const
     {
-      function_symbol g(normalize_sorts(f, *this));
+      const function_symbol g(normalize_sorts(f, *this));
       if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),g)==m_normalised_mappings.end()) // not found
       {
         m_normalised_mappings.push_back(g);
@@ -209,6 +213,12 @@ class data_specification: public sort_specification
     void add_normalised_equation(const data_equation& e) const
     {
       m_normalised_equations.push_back(normalize_sorts(e,*this));
+    }
+
+    void add_normalised_cpp_implemented_function(const function_symbol& f) const
+    {
+      const function_symbol g(normalize_sorts(f,*this));
+      m_cpp_implemented_functions.insert(g);
     }
 
     template < class Iterator >
@@ -463,6 +473,7 @@ class data_specification: public sort_specification
       m_normalised_constructors.clear();
       m_normalised_mappings.clear();
       m_normalised_equations.clear();
+      m_cpp_implemented_functions.clear();
 
       for (const sort_expression& sort: sorts())
       {
@@ -810,7 +821,8 @@ class data_specification: public sort_specification
         sort_specification::operator==(other) &&
         m_normalised_constructors == other.m_normalised_constructors &&
         m_normalised_mappings == other.m_normalised_mappings &&
-        m_normalised_equations == other.m_normalised_equations;
+        m_normalised_equations == other.m_normalised_equations &&
+        m_cpp_implemented_functions == other.m_cpp_implemented_functions;
     }
 
     data_specification& operator=(const data_specification& other)
@@ -824,6 +836,7 @@ class data_specification: public sort_specification
       m_grouped_normalised_mappings=other.m_grouped_normalised_mappings;
       m_grouped_normalised_constructors=other.m_grouped_normalised_constructors;
       m_normalised_equations=other.m_normalised_equations;
+      m_cpp_implemented_functions=other.m_cpp_implemented_functions;
       return *this;
     }
 

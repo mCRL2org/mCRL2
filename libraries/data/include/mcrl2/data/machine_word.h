@@ -28,7 +28,7 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Namespace for system defined sort machine_word
+    /// \brief Namespace for system defined sort machine_word.
     namespace sort_machine_word {
 
       inline
@@ -61,8 +61,8 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier \@zero_word
-      /// \return Identifier \@zero_word
+      /// \brief Generate identifier \@zero_word.
+      /// \return Identifier \@zero_word.
       inline
       core::identifier_string const& zero64_name()
       {
@@ -70,9 +70,9 @@ namespace mcrl2 {
         return zero64_name;
       }
 
-      /// \brief Constructor for function symbol \@zero_word
+      /// \brief Constructor for function symbol \@zero_word.
       
-      /// \return Function symbol zero64
+      /// \return Function symbol zero64.
       inline
       function_symbol const& zero64()
       {
@@ -80,21 +80,21 @@ namespace mcrl2 {
         return zero64;
       }
 
-      /// \brief Recogniser for function \@zero_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@zero_word
+      /// \brief Recogniser for function \@zero_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@zero_word.
       inline
       bool is_zero64_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == zero64();
+          return atermpp::down_cast<function_symbol>(e) == zero64();
         }
         return false;
       }
 
-      /// \brief Generate identifier \@succ_word
-      /// \return Identifier \@succ_word
+      /// \brief Generate identifier \@succ_word.
+      /// \return Identifier \@succ_word.
       inline
       core::identifier_string const& succ64_name()
       {
@@ -102,9 +102,9 @@ namespace mcrl2 {
         return succ64_name;
       }
 
-      /// \brief Constructor for function symbol \@succ_word
+      /// \brief Constructor for function symbol \@succ_word.
       
-      /// \return Function symbol succ64
+      /// \return Function symbol succ64.
       inline
       function_symbol const& succ64()
       {
@@ -112,15 +112,15 @@ namespace mcrl2 {
         return succ64;
       }
 
-      /// \brief Recogniser for function \@succ_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@succ_word
+      /// \brief Recogniser for function \@succ_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@succ_word.
       inline
       bool is_succ64_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == succ64();
+          return atermpp::down_cast<function_symbol>(e) == succ64();
         }
         return false;
       }
@@ -148,8 +148,8 @@ namespace mcrl2 {
         }
         return false;
       }
-      /// \brief Give all system defined constructors for machine_word
-      /// \return All system defined constructors for machine_word
+      /// \brief Give all system defined constructors for machine_word.
+      /// \return All system defined constructors for machine_word.
       inline
       function_symbol_vector machine_word_generate_constructors_code()
       {
@@ -159,9 +159,28 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Give all defined constructors which can be used in mCRL2 specs for machine_word.
+      /// \return All system defined constructors that can be used in an mCRL2 specification for machine_word.
+      inline
+      function_symbol_vector machine_word_mCRL2_usable_constructors()
+      {
+        function_symbol_vector result;
+        return result;
+      }
+      /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for machine_word.
+      /// \return All system defined constructors that are to be implemented in C++ for machine_word.
+      inline
+      function_symbol_vector machine_word_cpp_implementable_constructors()
+      {
+        function_symbol_vector result;
+        result.push_back(sort_machine_word::zero64());
+        result.push_back(sort_machine_word::succ64());
 
-      /// \brief Generate identifier \@one_word
-      /// \return Identifier \@one_word
+        return result;
+      }
+
+      /// \brief Generate identifier \@one_word.
+      /// \return Identifier \@one_word.
       inline
       core::identifier_string const& one_word_name()
       {
@@ -169,9 +188,9 @@ namespace mcrl2 {
         return one_word_name;
       }
 
-      /// \brief Constructor for function symbol \@one_word
+      /// \brief Constructor for function symbol \@one_word.
       
-      /// \return Function symbol one_word
+      /// \return Function symbol one_word.
       inline
       function_symbol const& one_word()
       {
@@ -179,21 +198,21 @@ namespace mcrl2 {
         return one_word;
       }
 
-      /// \brief Recogniser for function \@one_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@one_word
+      /// \brief Recogniser for function \@one_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@one_word.
       inline
       bool is_one_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == one_word();
+          return atermpp::down_cast<function_symbol>(e) == one_word();
         }
         return false;
       }
 
-      /// \brief Generate identifier \@max_word
-      /// \return Identifier \@max_word
+      /// \brief Generate identifier \@max_word.
+      /// \return Identifier \@max_word.
       inline
       core::identifier_string const& max_word_name()
       {
@@ -201,9 +220,9 @@ namespace mcrl2 {
         return max_word_name;
       }
 
-      /// \brief Constructor for function symbol \@max_word
+      /// \brief Constructor for function symbol \@max_word.
       
-      /// \return Function symbol max_word
+      /// \return Function symbol max_word.
       inline
       function_symbol const& max_word()
       {
@@ -211,21 +230,21 @@ namespace mcrl2 {
         return max_word;
       }
 
-      /// \brief Recogniser for function \@max_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@max_word
+      /// \brief Recogniser for function \@max_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@max_word.
       inline
       bool is_max_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == max_word();
+          return atermpp::down_cast<function_symbol>(e) == max_word();
         }
         return false;
       }
 
-      /// \brief Generate identifier \@add_word
-      /// \return Identifier \@add_word
+      /// \brief Generate identifier \@add_word.
+      /// \return Identifier \@add_word.
       inline
       core::identifier_string const& add_word_name()
       {
@@ -233,9 +252,9 @@ namespace mcrl2 {
         return add_word_name;
       }
 
-      /// \brief Constructor for function symbol \@add_word
+      /// \brief Constructor for function symbol \@add_word.
       
-      /// \return Function symbol add_word
+      /// \return Function symbol add_word.
       inline
       function_symbol const& add_word()
       {
@@ -243,15 +262,15 @@ namespace mcrl2 {
         return add_word;
       }
 
-      /// \brief Recogniser for function \@add_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@add_word
+      /// \brief Recogniser for function \@add_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@add_word.
       inline
       bool is_add_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == add_word();
+          return atermpp::down_cast<function_symbol>(e) == add_word();
         }
         return false;
       }
@@ -281,8 +300,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@add_overflow_word
-      /// \return Identifier \@add_overflow_word
+      /// \brief Generate identifier \@add_overflow_word.
+      /// \return Identifier \@add_overflow_word.
       inline
       core::identifier_string const& add_overflow_name()
       {
@@ -290,9 +309,9 @@ namespace mcrl2 {
         return add_overflow_name;
       }
 
-      /// \brief Constructor for function symbol \@add_overflow_word
+      /// \brief Constructor for function symbol \@add_overflow_word.
       
-      /// \return Function symbol add_overflow
+      /// \return Function symbol add_overflow.
       inline
       function_symbol const& add_overflow()
       {
@@ -300,15 +319,15 @@ namespace mcrl2 {
         return add_overflow;
       }
 
-      /// \brief Recogniser for function \@add_overflow_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@add_overflow_word
+      /// \brief Recogniser for function \@add_overflow_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@add_overflow_word.
       inline
       bool is_add_overflow_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == add_overflow();
+          return atermpp::down_cast<function_symbol>(e) == add_overflow();
         }
         return false;
       }
@@ -338,8 +357,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@times_word
-      /// \return Identifier \@times_word
+      /// \brief Generate identifier \@times_word.
+      /// \return Identifier \@times_word.
       inline
       core::identifier_string const& times_word_name()
       {
@@ -347,9 +366,9 @@ namespace mcrl2 {
         return times_word_name;
       }
 
-      /// \brief Constructor for function symbol \@times_word
+      /// \brief Constructor for function symbol \@times_word.
       
-      /// \return Function symbol times_word
+      /// \return Function symbol times_word.
       inline
       function_symbol const& times_word()
       {
@@ -357,15 +376,15 @@ namespace mcrl2 {
         return times_word;
       }
 
-      /// \brief Recogniser for function \@times_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@times_word
+      /// \brief Recogniser for function \@times_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@times_word.
       inline
       bool is_times_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == times_word();
+          return atermpp::down_cast<function_symbol>(e) == times_word();
         }
         return false;
       }
@@ -395,8 +414,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@times_overflow_word
-      /// \return Identifier \@times_overflow_word
+      /// \brief Generate identifier \@times_overflow_word.
+      /// \return Identifier \@times_overflow_word.
       inline
       core::identifier_string const& timew_overflow_word_name()
       {
@@ -404,9 +423,9 @@ namespace mcrl2 {
         return timew_overflow_word_name;
       }
 
-      /// \brief Constructor for function symbol \@times_overflow_word
+      /// \brief Constructor for function symbol \@times_overflow_word.
       
-      /// \return Function symbol timew_overflow_word
+      /// \return Function symbol timew_overflow_word.
       inline
       function_symbol const& timew_overflow_word()
       {
@@ -414,15 +433,15 @@ namespace mcrl2 {
         return timew_overflow_word;
       }
 
-      /// \brief Recogniser for function \@times_overflow_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@times_overflow_word
+      /// \brief Recogniser for function \@times_overflow_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@times_overflow_word.
       inline
       bool is_timew_overflow_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == timew_overflow_word();
+          return atermpp::down_cast<function_symbol>(e) == timew_overflow_word();
         }
         return false;
       }
@@ -452,8 +471,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@minus_word
-      /// \return Identifier \@minus_word
+      /// \brief Generate identifier \@minus_word.
+      /// \return Identifier \@minus_word.
       inline
       core::identifier_string const& minus_word_name()
       {
@@ -461,9 +480,9 @@ namespace mcrl2 {
         return minus_word_name;
       }
 
-      /// \brief Constructor for function symbol \@minus_word
+      /// \brief Constructor for function symbol \@minus_word.
       
-      /// \return Function symbol minus_word
+      /// \return Function symbol minus_word.
       inline
       function_symbol const& minus_word()
       {
@@ -471,15 +490,15 @@ namespace mcrl2 {
         return minus_word;
       }
 
-      /// \brief Recogniser for function \@minus_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@minus_word
+      /// \brief Recogniser for function \@minus_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@minus_word.
       inline
       bool is_minus_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == minus_word();
+          return atermpp::down_cast<function_symbol>(e) == minus_word();
         }
         return false;
       }
@@ -509,8 +528,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@div_word
-      /// \return Identifier \@div_word
+      /// \brief Generate identifier \@div_word.
+      /// \return Identifier \@div_word.
       inline
       core::identifier_string const& div_word_name()
       {
@@ -518,9 +537,9 @@ namespace mcrl2 {
         return div_word_name;
       }
 
-      /// \brief Constructor for function symbol \@div_word
+      /// \brief Constructor for function symbol \@div_word.
       
-      /// \return Function symbol div_word
+      /// \return Function symbol div_word.
       inline
       function_symbol const& div_word()
       {
@@ -528,15 +547,15 @@ namespace mcrl2 {
         return div_word;
       }
 
-      /// \brief Recogniser for function \@div_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@div_word
+      /// \brief Recogniser for function \@div_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@div_word.
       inline
       bool is_div_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == div_word();
+          return atermpp::down_cast<function_symbol>(e) == div_word();
         }
         return false;
       }
@@ -566,8 +585,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@mod_word
-      /// \return Identifier \@mod_word
+      /// \brief Generate identifier \@mod_word.
+      /// \return Identifier \@mod_word.
       inline
       core::identifier_string const& mod_word_name()
       {
@@ -575,9 +594,9 @@ namespace mcrl2 {
         return mod_word_name;
       }
 
-      /// \brief Constructor for function symbol \@mod_word
+      /// \brief Constructor for function symbol \@mod_word.
       
-      /// \return Function symbol mod_word
+      /// \return Function symbol mod_word.
       inline
       function_symbol const& mod_word()
       {
@@ -585,15 +604,15 @@ namespace mcrl2 {
         return mod_word;
       }
 
-      /// \brief Recogniser for function \@mod_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@mod_word
+      /// \brief Recogniser for function \@mod_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@mod_word.
       inline
       bool is_mod_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == mod_word();
+          return atermpp::down_cast<function_symbol>(e) == mod_word();
         }
         return false;
       }
@@ -623,8 +642,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@sqrt_word
-      /// \return Identifier \@sqrt_word
+      /// \brief Generate identifier \@sqrt_word.
+      /// \return Identifier \@sqrt_word.
       inline
       core::identifier_string const& sqrt_word_name()
       {
@@ -632,9 +651,9 @@ namespace mcrl2 {
         return sqrt_word_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_word
+      /// \brief Constructor for function symbol \@sqrt_word.
       
-      /// \return Function symbol sqrt_word
+      /// \return Function symbol sqrt_word.
       inline
       function_symbol const& sqrt_word()
       {
@@ -642,15 +661,15 @@ namespace mcrl2 {
         return sqrt_word;
       }
 
-      /// \brief Recogniser for function \@sqrt_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@sqrt_word
+      /// \brief Recogniser for function \@sqrt_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@sqrt_word.
       inline
       bool is_sqrt_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == sqrt_word();
+          return atermpp::down_cast<function_symbol>(e) == sqrt_word();
         }
         return false;
       }
@@ -679,8 +698,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@div_doubleword
-      /// \return Identifier \@div_doubleword
+      /// \brief Generate identifier \@div_doubleword.
+      /// \return Identifier \@div_doubleword.
       inline
       core::identifier_string const& div_doubleword_name()
       {
@@ -688,9 +707,9 @@ namespace mcrl2 {
         return div_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@div_doubleword
+      /// \brief Constructor for function symbol \@div_doubleword.
       
-      /// \return Function symbol div_doubleword
+      /// \return Function symbol div_doubleword.
       inline
       function_symbol const& div_doubleword()
       {
@@ -698,15 +717,15 @@ namespace mcrl2 {
         return div_doubleword;
       }
 
-      /// \brief Recogniser for function \@div_doubleword
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@div_doubleword
+      /// \brief Recogniser for function \@div_doubleword.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@div_doubleword.
       inline
       bool is_div_doubleword_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == div_doubleword();
+          return atermpp::down_cast<function_symbol>(e) == div_doubleword();
         }
         return false;
       }
@@ -737,8 +756,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@div_double_doubleword
-      /// \return Identifier \@div_double_doubleword
+      /// \brief Generate identifier \@div_double_doubleword.
+      /// \return Identifier \@div_double_doubleword.
       inline
       core::identifier_string const& div_double_doubleword_name()
       {
@@ -746,9 +765,9 @@ namespace mcrl2 {
         return div_double_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@div_double_doubleword
+      /// \brief Constructor for function symbol \@div_double_doubleword.
       
-      /// \return Function symbol div_double_doubleword
+      /// \return Function symbol div_double_doubleword.
       inline
       function_symbol const& div_double_doubleword()
       {
@@ -756,15 +775,15 @@ namespace mcrl2 {
         return div_double_doubleword;
       }
 
-      /// \brief Recogniser for function \@div_double_doubleword
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@div_double_doubleword
+      /// \brief Recogniser for function \@div_double_doubleword.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@div_double_doubleword.
       inline
       bool is_div_double_doubleword_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == div_double_doubleword();
+          return atermpp::down_cast<function_symbol>(e) == div_double_doubleword();
         }
         return false;
       }
@@ -796,8 +815,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@div_triple_doubleword
-      /// \return Identifier \@div_triple_doubleword
+      /// \brief Generate identifier \@div_triple_doubleword.
+      /// \return Identifier \@div_triple_doubleword.
       inline
       core::identifier_string const& div_triple_doubleword_name()
       {
@@ -805,9 +824,9 @@ namespace mcrl2 {
         return div_triple_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@div_triple_doubleword
+      /// \brief Constructor for function symbol \@div_triple_doubleword.
       
-      /// \return Function symbol div_triple_doubleword
+      /// \return Function symbol div_triple_doubleword.
       inline
       function_symbol const& div_triple_doubleword()
       {
@@ -815,15 +834,15 @@ namespace mcrl2 {
         return div_triple_doubleword;
       }
 
-      /// \brief Recogniser for function \@div_triple_doubleword
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@div_triple_doubleword
+      /// \brief Recogniser for function \@div_triple_doubleword.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@div_triple_doubleword.
       inline
       bool is_div_triple_doubleword_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == div_triple_doubleword();
+          return atermpp::down_cast<function_symbol>(e) == div_triple_doubleword();
         }
         return false;
       }
@@ -856,8 +875,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@mod_doubleword
-      /// \return Identifier \@mod_doubleword
+      /// \brief Generate identifier \@mod_doubleword.
+      /// \return Identifier \@mod_doubleword.
       inline
       core::identifier_string const& mod_doubleword_name()
       {
@@ -865,9 +884,9 @@ namespace mcrl2 {
         return mod_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@mod_doubleword
+      /// \brief Constructor for function symbol \@mod_doubleword.
       
-      /// \return Function symbol mod_doubleword
+      /// \return Function symbol mod_doubleword.
       inline
       function_symbol const& mod_doubleword()
       {
@@ -875,15 +894,15 @@ namespace mcrl2 {
         return mod_doubleword;
       }
 
-      /// \brief Recogniser for function \@mod_doubleword
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@mod_doubleword
+      /// \brief Recogniser for function \@mod_doubleword.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@mod_doubleword.
       inline
       bool is_mod_doubleword_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == mod_doubleword();
+          return atermpp::down_cast<function_symbol>(e) == mod_doubleword();
         }
         return false;
       }
@@ -914,8 +933,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@sqrt_doubleword
-      /// \return Identifier \@sqrt_doubleword
+      /// \brief Generate identifier \@sqrt_doubleword.
+      /// \return Identifier \@sqrt_doubleword.
       inline
       core::identifier_string const& sqrt_doubleword_name()
       {
@@ -923,9 +942,9 @@ namespace mcrl2 {
         return sqrt_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_doubleword
+      /// \brief Constructor for function symbol \@sqrt_doubleword.
       
-      /// \return Function symbol sqrt_doubleword
+      /// \return Function symbol sqrt_doubleword.
       inline
       function_symbol const& sqrt_doubleword()
       {
@@ -933,15 +952,15 @@ namespace mcrl2 {
         return sqrt_doubleword;
       }
 
-      /// \brief Recogniser for function \@sqrt_doubleword
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@sqrt_doubleword
+      /// \brief Recogniser for function \@sqrt_doubleword.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@sqrt_doubleword.
       inline
       bool is_sqrt_doubleword_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == sqrt_doubleword();
+          return atermpp::down_cast<function_symbol>(e) == sqrt_doubleword();
         }
         return false;
       }
@@ -971,8 +990,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@sqrt_tripleword
-      /// \return Identifier \@sqrt_tripleword
+      /// \brief Generate identifier \@sqrt_tripleword.
+      /// \return Identifier \@sqrt_tripleword.
       inline
       core::identifier_string const& sqrt_tripleword_name()
       {
@@ -980,9 +999,9 @@ namespace mcrl2 {
         return sqrt_tripleword_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_tripleword
+      /// \brief Constructor for function symbol \@sqrt_tripleword.
       
-      /// \return Function symbol sqrt_tripleword
+      /// \return Function symbol sqrt_tripleword.
       inline
       function_symbol const& sqrt_tripleword()
       {
@@ -990,15 +1009,15 @@ namespace mcrl2 {
         return sqrt_tripleword;
       }
 
-      /// \brief Recogniser for function \@sqrt_tripleword
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@sqrt_tripleword
+      /// \brief Recogniser for function \@sqrt_tripleword.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@sqrt_tripleword.
       inline
       bool is_sqrt_tripleword_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == sqrt_tripleword();
+          return atermpp::down_cast<function_symbol>(e) == sqrt_tripleword();
         }
         return false;
       }
@@ -1029,8 +1048,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@sqrt_tripleword_overflow
-      /// \return Identifier \@sqrt_tripleword_overflow
+      /// \brief Generate identifier \@sqrt_tripleword_overflow.
+      /// \return Identifier \@sqrt_tripleword_overflow.
       inline
       core::identifier_string const& sqrt_tripleword_overflow_name()
       {
@@ -1038,9 +1057,9 @@ namespace mcrl2 {
         return sqrt_tripleword_overflow_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_tripleword_overflow
+      /// \brief Constructor for function symbol \@sqrt_tripleword_overflow.
       
-      /// \return Function symbol sqrt_tripleword_overflow
+      /// \return Function symbol sqrt_tripleword_overflow.
       inline
       function_symbol const& sqrt_tripleword_overflow()
       {
@@ -1048,15 +1067,15 @@ namespace mcrl2 {
         return sqrt_tripleword_overflow;
       }
 
-      /// \brief Recogniser for function \@sqrt_tripleword_overflow
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@sqrt_tripleword_overflow
+      /// \brief Recogniser for function \@sqrt_tripleword_overflow.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@sqrt_tripleword_overflow.
       inline
       bool is_sqrt_tripleword_overflow_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == sqrt_tripleword_overflow();
+          return atermpp::down_cast<function_symbol>(e) == sqrt_tripleword_overflow();
         }
         return false;
       }
@@ -1087,8 +1106,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@sqrt_quadrupleword
-      /// \return Identifier \@sqrt_quadrupleword
+      /// \brief Generate identifier \@sqrt_quadrupleword.
+      /// \return Identifier \@sqrt_quadrupleword.
       inline
       core::identifier_string const& sqrt_quadrupleword_name()
       {
@@ -1096,9 +1115,9 @@ namespace mcrl2 {
         return sqrt_quadrupleword_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_quadrupleword
+      /// \brief Constructor for function symbol \@sqrt_quadrupleword.
       
-      /// \return Function symbol sqrt_quadrupleword
+      /// \return Function symbol sqrt_quadrupleword.
       inline
       function_symbol const& sqrt_quadrupleword()
       {
@@ -1106,15 +1125,15 @@ namespace mcrl2 {
         return sqrt_quadrupleword;
       }
 
-      /// \brief Recogniser for function \@sqrt_quadrupleword
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@sqrt_quadrupleword
+      /// \brief Recogniser for function \@sqrt_quadrupleword.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@sqrt_quadrupleword.
       inline
       bool is_sqrt_quadrupleword_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == sqrt_quadrupleword();
+          return atermpp::down_cast<function_symbol>(e) == sqrt_quadrupleword();
         }
         return false;
       }
@@ -1146,8 +1165,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@sqrt_quadrupleword_overflow
-      /// \return Identifier \@sqrt_quadrupleword_overflow
+      /// \brief Generate identifier \@sqrt_quadrupleword_overflow.
+      /// \return Identifier \@sqrt_quadrupleword_overflow.
       inline
       core::identifier_string const& sqrt_quadrupleword_overflow_name()
       {
@@ -1155,9 +1174,9 @@ namespace mcrl2 {
         return sqrt_quadrupleword_overflow_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_quadrupleword_overflow
+      /// \brief Constructor for function symbol \@sqrt_quadrupleword_overflow.
       
-      /// \return Function symbol sqrt_quadrupleword_overflow
+      /// \return Function symbol sqrt_quadrupleword_overflow.
       inline
       function_symbol const& sqrt_quadrupleword_overflow()
       {
@@ -1165,15 +1184,15 @@ namespace mcrl2 {
         return sqrt_quadrupleword_overflow;
       }
 
-      /// \brief Recogniser for function \@sqrt_quadrupleword_overflow
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@sqrt_quadrupleword_overflow
+      /// \brief Recogniser for function \@sqrt_quadrupleword_overflow.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@sqrt_quadrupleword_overflow.
       inline
       bool is_sqrt_quadrupleword_overflow_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == sqrt_quadrupleword_overflow();
+          return atermpp::down_cast<function_symbol>(e) == sqrt_quadrupleword_overflow();
         }
         return false;
       }
@@ -1205,8 +1224,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@pred_word
-      /// \return Identifier \@pred_word
+      /// \brief Generate identifier \@pred_word.
+      /// \return Identifier \@pred_word.
       inline
       core::identifier_string const& pred_word_name()
       {
@@ -1214,9 +1233,9 @@ namespace mcrl2 {
         return pred_word_name;
       }
 
-      /// \brief Constructor for function symbol \@pred_word
+      /// \brief Constructor for function symbol \@pred_word.
       
-      /// \return Function symbol pred_word
+      /// \return Function symbol pred_word.
       inline
       function_symbol const& pred_word()
       {
@@ -1224,15 +1243,15 @@ namespace mcrl2 {
         return pred_word;
       }
 
-      /// \brief Recogniser for function \@pred_word
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@pred_word
+      /// \brief Recogniser for function \@pred_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@pred_word.
       inline
       bool is_pred_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == pred_word();
+          return atermpp::down_cast<function_symbol>(e) == pred_word();
         }
         return false;
       }
@@ -1288,11 +1307,47 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::pred_word());
         return result;
       }
+      /// \brief Give all system defined mappings that can be used in mCRL2 specs for machine_word
+      /// \return All system defined mappings for that can be used in mCRL2 specificationis machine_word
+      inline
+      function_symbol_vector machine_word_mCRL2_usable_mappings()
+      {
+        function_symbol_vector result;
+        return result;
+      }
+      /// \brief Give all system defined mappings that are to be implemented in C++ code for machine_word
+      /// \return All system defined mappings that are to be implemented in C++ code for machine_word
+      inline
+      function_symbol_vector machine_word_cpp_implementable_mappings()
+      {
+        function_symbol_vector result;
+        result.push_back(sort_machine_word::one_word());
+        result.push_back(sort_machine_word::max_word());
+        result.push_back(sort_machine_word::add_word());
+        result.push_back(sort_machine_word::add_overflow());
+        result.push_back(sort_machine_word::times_word());
+        result.push_back(sort_machine_word::timew_overflow_word());
+        result.push_back(sort_machine_word::minus_word());
+        result.push_back(sort_machine_word::div_word());
+        result.push_back(sort_machine_word::mod_word());
+        result.push_back(sort_machine_word::sqrt_word());
+        result.push_back(sort_machine_word::div_doubleword());
+        result.push_back(sort_machine_word::div_double_doubleword());
+        result.push_back(sort_machine_word::div_triple_doubleword());
+        result.push_back(sort_machine_word::mod_doubleword());
+        result.push_back(sort_machine_word::sqrt_doubleword());
+        result.push_back(sort_machine_word::sqrt_tripleword());
+        result.push_back(sort_machine_word::sqrt_tripleword_overflow());
+        result.push_back(sort_machine_word::sqrt_quadrupleword());
+        result.push_back(sort_machine_word::sqrt_quadrupleword_overflow());
+        result.push_back(sort_machine_word::pred_word());
+        return result;
+      }
       ///\brief Function for projecting out argument
-      ///        right from an application
-      /// \param e A data expression
-      /// \pre right is defined for e
-      /// \return The argument of e that corresponds to right
+      ///        right from an application.
+      /// \param e A data expression.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
       data_expression right(const data_expression& e)
       {
@@ -1301,10 +1356,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
+      ///        arg1 from an application.
+      /// \param e A data expression.
+      /// \pre arg1 is defined for e.
+      /// \return The argument of e that corresponds to arg1.
       inline
       data_expression arg1(const data_expression& e)
       {
@@ -1313,10 +1368,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
+      ///        arg2 from an application.
+      /// \param e A data expression.
+      /// \pre arg2 is defined for e.
+      /// \return The argument of e that corresponds to arg2.
       inline
       data_expression arg2(const data_expression& e)
       {
@@ -1325,10 +1380,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg3 from an application
-      /// \param e A data expression
-      /// \pre arg3 is defined for e
-      /// \return The argument of e that corresponds to arg3
+      ///        arg3 from an application.
+      /// \param e A data expression.
+      /// \pre arg3 is defined for e.
+      /// \return The argument of e that corresponds to arg3.
       inline
       data_expression arg3(const data_expression& e)
       {
@@ -1337,10 +1392,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg4 from an application
-      /// \param e A data expression
-      /// \pre arg4 is defined for e
-      /// \return The argument of e that corresponds to arg4
+      ///        arg4 from an application.
+      /// \param e A data expression.
+      /// \pre arg4 is defined for e.
+      /// \return The argument of e that corresponds to arg4.
       inline
       data_expression arg4(const data_expression& e)
       {
@@ -1349,10 +1404,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg5 from an application
-      /// \param e A data expression
-      /// \pre arg5 is defined for e
-      /// \return The argument of e that corresponds to arg5
+      ///        arg5 from an application.
+      /// \param e A data expression.
+      /// \pre arg5 is defined for e.
+      /// \return The argument of e that corresponds to arg5.
       inline
       data_expression arg5(const data_expression& e)
       {
@@ -1361,10 +1416,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg from an application
-      /// \param e A data expression
-      /// \pre arg is defined for e
-      /// \return The argument of e that corresponds to arg
+      ///        arg from an application.
+      /// \param e A data expression.
+      /// \pre arg is defined for e.
+      /// \return The argument of e that corresponds to arg.
       inline
       data_expression arg(const data_expression& e)
       {
@@ -1373,10 +1428,10 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        left from an application
-      /// \param e A data expression
-      /// \pre left is defined for e
-      /// \return The argument of e that corresponds to left
+      ///        left from an application.
+      /// \param e A data expression.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
       data_expression left(const data_expression& e)
       {
