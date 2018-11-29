@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_STRUCTURE_GRAPH_H
 
+#include <algorithm>
 #include <iomanip>
 #include <limits>
 #include <boost/dynamic_bitset.hpp>
@@ -443,6 +444,50 @@ struct structure_graph_builder
       return structure_graph::undefined_vertex;
     }
     return i->second;
+  }
+
+  // Erases all vertices in the set U.
+  void erase_vertices(const std::set<structure_graph::index_type>& U)
+  {
+    mCRL2log(log::debug) << "erasing nodes " << core::detail::print_set(U) << std::endl;
+
+    using utilities::detail::contains;
+
+    // compute new index for the vertices
+    std::vector<index_type> index;
+    for (index_type u = 0; u != m_vertices.size(); u++)
+    {
+      index.push_back(contains(U, u) ? structure_graph::undefined_vertex : index.size());
+    }
+
+    // computes new predecessors / successors
+    auto update = [&](const std::vector<index_type>& V) {
+      std::vector<index_type> result;
+      for (auto v: V)
+      {
+        if (index[v] != structure_graph::undefined_vertex)
+        {
+          result.push_back(index[v]);
+        }
+      }
+      return result;
+    };
+
+    for (index_type u = 0; u != m_vertices.size(); u++)
+    {
+      if (index[u] != structure_graph::undefined_vertex)
+      {
+        structure_graph::vertex& u_ = m_vertices[u];
+        u_.predecessors = update(u_.predecessors);
+        u_.successors = update(u_.successors);
+        if (index[u] != u)
+        {
+          std::swap(m_vertices[u], m_vertices[index[u]]);
+        }
+      }
+    }
+
+    m_vertices.erase(m_vertices.begin() + m_vertices.size() - U.size(), m_vertices.end());
   }
 };
 
