@@ -39,6 +39,7 @@ class ltsinfo_tool : public ltsinfo_base
     std::string                 infilename;
     mcrl2::lts::lts_type        intype;
     bool                        print_state_labels;
+    bool                        print_branching_factor;
 
   public:
 
@@ -70,7 +71,9 @@ class ltsinfo_tool : public ltsinfo_base
       add_option("in", make_mandatory_argument("FORMAT"),
                  "use FORMAT as the input format", 'i').
       add_option("state-label",
-                 "print the labels of states",'l') ;
+                 "print the labels of states",'l').
+      add_option("branching-factor",
+                 "print the average, minimal and maximal branching factor",'b');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -103,7 +106,8 @@ class ltsinfo_tool : public ltsinfo_base
         }
       }
 
-      print_state_labels=parser.options.count("state-label")>0;
+      print_state_labels = parser.options.count("state-label") > 0;
+      print_branching_factor = parser.options.count("branching-factor") > 0;
     }
 
     template <class SL, class AL, class BASE>
@@ -141,6 +145,33 @@ class ltsinfo_tool : public ltsinfo_base
         mCRL2log(info) << "This lts has no probabilistic states.\n";
       }
 
+    }
+
+    template<typename LTS>
+    void print_the_branching_factor(const LTS& lts) const
+    {
+      if (!print_branching_factor) { return; }
+
+      std::vector<std::uint64_t> branching_factor(lts.num_states());
+
+      for (auto& transition : lts.get_transitions())
+      {
+        ++branching_factor[transition.from()];
+      }
+
+      double average_branching_factor = 0;
+      std::uint64_t min_branching_factor = std::numeric_limits<std::uint64_t>::max();
+      std::uint64_t max_branching_factor = 0;
+
+      for (auto& factor : branching_factor)
+      {
+        max_branching_factor = std::max(factor, max_branching_factor);
+        min_branching_factor = std::min(factor, min_branching_factor);
+
+        average_branching_factor += static_cast<double>(factor) / lts.num_states();
+      }
+
+      mCRL2log(info) << "The branching factor is min: " << min_branching_factor << ", max: " << max_branching_factor << " and average: " << average_branching_factor << "\n";
     }
 
     // Code to print the state labels. There is a specialisation for an probabilistic_lts_lts_t.
@@ -242,6 +273,7 @@ class ltsinfo_tool : public ltsinfo_base
       provide_probabilistic_information(l);
 
       print_the_state_labels(l);
+      print_the_branching_factor(l);
 
       return true;
     }
