@@ -180,11 +180,12 @@ class parity_game_generator
         }
       }
 
+      m_max_priority = (priority % 2 == 0 ? priority : priority + 1);
+
       // If it is a max-priority game, adjust the priorities
       if (!m_is_min_parity_game)
       {
         // Choose an even upperbound max_priority
-        std::size_t m_max_priority = (priority % 2 == 0 ? priority : priority + 1);
         if (m_max_priority == 0)
         {
           m_max_priority = 2;
