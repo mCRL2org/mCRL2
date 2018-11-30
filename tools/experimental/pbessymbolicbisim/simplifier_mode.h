@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_LPSSYMBOLICBISIM_TOOL_MODE_H
-#define MCRL2_LPSSYMBOLICBISIM_TOOL_MODE_H
+#ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MODE_H
+#define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MODE_H
 
 #include <iostream>
 #include <string>
@@ -127,7 +127,4 @@ inline std::string description(const simplifier_mode r)
   }
 }
 
-#endif // MCRL2_LPSSYMBOLICBISIM_TOOL_MODE_H
-
-
-
+#endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MODE_H

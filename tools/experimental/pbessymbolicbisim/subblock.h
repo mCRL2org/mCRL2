@@ -101,7 +101,7 @@ public:
               make_application(m_char_func, m_var.parameters()),
               sort_bool::and_(
                 summ.condition(),
-                m_dm.rewr(make_application(other.m_char_func, summ.new_state().parameters()))
+                make_application(other.m_char_func, summ.new_state().parameters())
               )
             ))
           );

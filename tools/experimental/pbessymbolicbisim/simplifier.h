@@ -45,14 +45,14 @@ protected:
 
   virtual data_expression simplify_expression(const data_expression& expr) = 0;
 
-  data_expression apply_data_expression(const data_expression& expr)
+  data_expression apply_data_expression(const data_expression& expr, const mutable_indexed_substitution<>& sigma)
   {
     if(expr == sort_bool::true_() || expr == sort_bool::false_())
     {
       return expr;
     }
     // Rewrite the expression to some kind of normal form using BDDs
-    data_expression rewritten = rewr(proving_rewr(expr));
+    data_expression rewritten = rewr(proving_rewr(expr,sigma));
     // Check the cache
     std::map< data_expression, data_expression >::const_iterator res = cache.find(rewritten);
     if(res != cache.end())
@@ -77,9 +77,9 @@ protected:
     return simpl;
   }
 
-  lambda apply_lambda(const lambda& expr)
+  lambda apply_lambda(const lambda& expr, const mutable_indexed_substitution<>& sigma)
   {
-    return lambda(expr.variables(), apply_data_expression(expr.body()));
+    return lambda(expr.variables(), apply_data_expression(expr.body(), sigma));
   }
 
 public:
@@ -90,7 +90,13 @@ public:
 
   data_expression apply(const data_expression& expr)
   {
-    return is_lambda(expr) ? apply_lambda(expr) : apply_data_expression(expr);
+    const mutable_indexed_substitution<> sigma;
+    return apply(expr, sigma);
+  }
+
+  data_expression apply(const data_expression& expr, const mutable_indexed_substitution<>& sigma)
+  {
+    return is_lambda(expr) ? apply_lambda(expr, sigma) : apply_data_expression(expr,sigma);
   }
 };
 
