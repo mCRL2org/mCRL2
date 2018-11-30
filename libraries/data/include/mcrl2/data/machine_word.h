@@ -32,7 +32,7 @@ namespace mcrl2 {
     namespace sort_machine_word {
 
       inline
-      core::identifier_string const& machine_word_name()
+      const core::identifier_string& machine_word_name()
       {
         static core::identifier_string machine_word_name = core::identifier_string("@word");
         return machine_word_name;
@@ -41,7 +41,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression \@word
       /// \return Sort expression \@word
       inline
-      basic_sort const& machine_word()
+      const basic_sort& machine_word()
       {
         static basic_sort machine_word = basic_sort(machine_word_name());
         return machine_word;
@@ -64,7 +64,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@zero_word.
       /// \return Identifier \@zero_word.
       inline
-      core::identifier_string const& zero64_name()
+      const core::identifier_string& zero64_name()
       {
         static core::identifier_string zero64_name = core::identifier_string("@zero_word");
         return zero64_name;
@@ -74,7 +74,7 @@ namespace mcrl2 {
       
       /// \return Function symbol zero64.
       inline
-      function_symbol const& zero64()
+      const function_symbol& zero64()
       {
         static function_symbol zero64(zero64_name(), machine_word());
         return zero64;
@@ -93,10 +93,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @zero_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol zero64 to a
+      ///     number of arguments
+      inline
+      application zero64(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@succ_word.
       /// \return Identifier \@succ_word.
       inline
-      core::identifier_string const& succ64_name()
+      const core::identifier_string& succ64_name()
       {
         static core::identifier_string succ64_name = core::identifier_string("@succ_word");
         return succ64_name;
@@ -106,7 +115,7 @@ namespace mcrl2 {
       
       /// \return Function symbol succ64.
       inline
-      function_symbol const& succ64()
+      const function_symbol& succ64()
       {
         static function_symbol succ64(succ64_name(), make_function_sort(machine_word(), machine_word()));
         return succ64;
@@ -148,6 +157,15 @@ namespace mcrl2 {
         }
         return false;
       }
+
+      /// \brief Function prototype that implements @succ_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol succ64 to a
+      ///     number of arguments
+      inline
+      application succ64(const atermpp::aterm& e);
+   
       /// \brief Give all system defined constructors for machine_word.
       /// \return All system defined constructors for machine_word.
       inline
@@ -182,7 +200,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@one_word.
       /// \return Identifier \@one_word.
       inline
-      core::identifier_string const& one_word_name()
+      const core::identifier_string& one_word_name()
       {
         static core::identifier_string one_word_name = core::identifier_string("@one_word");
         return one_word_name;
@@ -192,7 +210,7 @@ namespace mcrl2 {
       
       /// \return Function symbol one_word.
       inline
-      function_symbol const& one_word()
+      const function_symbol& one_word()
       {
         static function_symbol one_word(one_word_name(), machine_word());
         return one_word;
@@ -211,10 +229,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @one_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol one_word to a
+      ///     number of arguments
+      inline
+      application one_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@max_word.
       /// \return Identifier \@max_word.
       inline
-      core::identifier_string const& max_word_name()
+      const core::identifier_string& max_word_name()
       {
         static core::identifier_string max_word_name = core::identifier_string("@max_word");
         return max_word_name;
@@ -224,7 +251,7 @@ namespace mcrl2 {
       
       /// \return Function symbol max_word.
       inline
-      function_symbol const& max_word()
+      const function_symbol& max_word()
       {
         static function_symbol max_word(max_word_name(), machine_word());
         return max_word;
@@ -243,10 +270,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @max_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol max_word to a
+      ///     number of arguments
+      inline
+      application max_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@add_word.
       /// \return Identifier \@add_word.
       inline
-      core::identifier_string const& add_word_name()
+      const core::identifier_string& add_word_name()
       {
         static core::identifier_string add_word_name = core::identifier_string("@add_word");
         return add_word_name;
@@ -256,7 +292,7 @@ namespace mcrl2 {
       
       /// \return Function symbol add_word.
       inline
-      function_symbol const& add_word()
+      const function_symbol& add_word()
       {
         static function_symbol add_word(add_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return add_word;
@@ -300,10 +336,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @add_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol add_word to a
+      ///     number of arguments
+      inline
+      application add_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@add_overflow_word.
       /// \return Identifier \@add_overflow_word.
       inline
-      core::identifier_string const& add_overflow_name()
+      const core::identifier_string& add_overflow_name()
       {
         static core::identifier_string add_overflow_name = core::identifier_string("@add_overflow_word");
         return add_overflow_name;
@@ -313,7 +358,7 @@ namespace mcrl2 {
       
       /// \return Function symbol add_overflow.
       inline
-      function_symbol const& add_overflow()
+      const function_symbol& add_overflow()
       {
         static function_symbol add_overflow(add_overflow_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return add_overflow;
@@ -357,10 +402,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @add_overflow_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol add_overflow to a
+      ///     number of arguments
+      inline
+      application add_overflow(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@times_word.
       /// \return Identifier \@times_word.
       inline
-      core::identifier_string const& times_word_name()
+      const core::identifier_string& times_word_name()
       {
         static core::identifier_string times_word_name = core::identifier_string("@times_word");
         return times_word_name;
@@ -370,7 +424,7 @@ namespace mcrl2 {
       
       /// \return Function symbol times_word.
       inline
-      function_symbol const& times_word()
+      const function_symbol& times_word()
       {
         static function_symbol times_word(times_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return times_word;
@@ -414,10 +468,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @times_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol times_word to a
+      ///     number of arguments
+      inline
+      application times_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@times_overflow_word.
       /// \return Identifier \@times_overflow_word.
       inline
-      core::identifier_string const& timew_overflow_word_name()
+      const core::identifier_string& timew_overflow_word_name()
       {
         static core::identifier_string timew_overflow_word_name = core::identifier_string("@times_overflow_word");
         return timew_overflow_word_name;
@@ -427,7 +490,7 @@ namespace mcrl2 {
       
       /// \return Function symbol timew_overflow_word.
       inline
-      function_symbol const& timew_overflow_word()
+      const function_symbol& timew_overflow_word()
       {
         static function_symbol timew_overflow_word(timew_overflow_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return timew_overflow_word;
@@ -471,10 +534,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @times_overflow_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol timew_overflow_word to a
+      ///     number of arguments
+      inline
+      application timew_overflow_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@minus_word.
       /// \return Identifier \@minus_word.
       inline
-      core::identifier_string const& minus_word_name()
+      const core::identifier_string& minus_word_name()
       {
         static core::identifier_string minus_word_name = core::identifier_string("@minus_word");
         return minus_word_name;
@@ -484,7 +556,7 @@ namespace mcrl2 {
       
       /// \return Function symbol minus_word.
       inline
-      function_symbol const& minus_word()
+      const function_symbol& minus_word()
       {
         static function_symbol minus_word(minus_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return minus_word;
@@ -528,10 +600,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @minus_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol minus_word to a
+      ///     number of arguments
+      inline
+      application minus_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@div_word.
       /// \return Identifier \@div_word.
       inline
-      core::identifier_string const& div_word_name()
+      const core::identifier_string& div_word_name()
       {
         static core::identifier_string div_word_name = core::identifier_string("@div_word");
         return div_word_name;
@@ -541,7 +622,7 @@ namespace mcrl2 {
       
       /// \return Function symbol div_word.
       inline
-      function_symbol const& div_word()
+      const function_symbol& div_word()
       {
         static function_symbol div_word(div_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return div_word;
@@ -585,10 +666,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @div_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol div_word to a
+      ///     number of arguments
+      inline
+      application div_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@mod_word.
       /// \return Identifier \@mod_word.
       inline
-      core::identifier_string const& mod_word_name()
+      const core::identifier_string& mod_word_name()
       {
         static core::identifier_string mod_word_name = core::identifier_string("@mod_word");
         return mod_word_name;
@@ -598,7 +688,7 @@ namespace mcrl2 {
       
       /// \return Function symbol mod_word.
       inline
-      function_symbol const& mod_word()
+      const function_symbol& mod_word()
       {
         static function_symbol mod_word(mod_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return mod_word;
@@ -642,10 +732,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @mod_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol mod_word to a
+      ///     number of arguments
+      inline
+      application mod_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@sqrt_word.
       /// \return Identifier \@sqrt_word.
       inline
-      core::identifier_string const& sqrt_word_name()
+      const core::identifier_string& sqrt_word_name()
       {
         static core::identifier_string sqrt_word_name = core::identifier_string("@sqrt_word");
         return sqrt_word_name;
@@ -655,7 +754,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt_word.
       inline
-      function_symbol const& sqrt_word()
+      const function_symbol& sqrt_word()
       {
         static function_symbol sqrt_word(sqrt_word_name(), make_function_sort(machine_word(), machine_word()));
         return sqrt_word;
@@ -698,10 +797,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @sqrt_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt_word to a
+      ///     number of arguments
+      inline
+      application sqrt_word(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@div_doubleword.
       /// \return Identifier \@div_doubleword.
       inline
-      core::identifier_string const& div_doubleword_name()
+      const core::identifier_string& div_doubleword_name()
       {
         static core::identifier_string div_doubleword_name = core::identifier_string("@div_doubleword");
         return div_doubleword_name;
@@ -711,7 +819,7 @@ namespace mcrl2 {
       
       /// \return Function symbol div_doubleword.
       inline
-      function_symbol const& div_doubleword()
+      const function_symbol& div_doubleword()
       {
         static function_symbol div_doubleword(div_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return div_doubleword;
@@ -756,10 +864,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @div_doubleword..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol div_doubleword to a
+      ///     number of arguments
+      inline
+      application div_doubleword(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@div_double_doubleword.
       /// \return Identifier \@div_double_doubleword.
       inline
-      core::identifier_string const& div_double_doubleword_name()
+      const core::identifier_string& div_double_doubleword_name()
       {
         static core::identifier_string div_double_doubleword_name = core::identifier_string("@div_double_doubleword");
         return div_double_doubleword_name;
@@ -769,7 +886,7 @@ namespace mcrl2 {
       
       /// \return Function symbol div_double_doubleword.
       inline
-      function_symbol const& div_double_doubleword()
+      const function_symbol& div_double_doubleword()
       {
         static function_symbol div_double_doubleword(div_double_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return div_double_doubleword;
@@ -815,10 +932,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @div_double_doubleword..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol div_double_doubleword to a
+      ///     number of arguments
+      inline
+      application div_double_doubleword(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@div_triple_doubleword.
       /// \return Identifier \@div_triple_doubleword.
       inline
-      core::identifier_string const& div_triple_doubleword_name()
+      const core::identifier_string& div_triple_doubleword_name()
       {
         static core::identifier_string div_triple_doubleword_name = core::identifier_string("@div_triple_doubleword");
         return div_triple_doubleword_name;
@@ -828,7 +954,7 @@ namespace mcrl2 {
       
       /// \return Function symbol div_triple_doubleword.
       inline
-      function_symbol const& div_triple_doubleword()
+      const function_symbol& div_triple_doubleword()
       {
         static function_symbol div_triple_doubleword(div_triple_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return div_triple_doubleword;
@@ -875,10 +1001,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @div_triple_doubleword..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol div_triple_doubleword to a
+      ///     number of arguments
+      inline
+      application div_triple_doubleword(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@mod_doubleword.
       /// \return Identifier \@mod_doubleword.
       inline
-      core::identifier_string const& mod_doubleword_name()
+      const core::identifier_string& mod_doubleword_name()
       {
         static core::identifier_string mod_doubleword_name = core::identifier_string("@mod_doubleword");
         return mod_doubleword_name;
@@ -888,7 +1023,7 @@ namespace mcrl2 {
       
       /// \return Function symbol mod_doubleword.
       inline
-      function_symbol const& mod_doubleword()
+      const function_symbol& mod_doubleword()
       {
         static function_symbol mod_doubleword(mod_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return mod_doubleword;
@@ -933,10 +1068,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @mod_doubleword..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol mod_doubleword to a
+      ///     number of arguments
+      inline
+      application mod_doubleword(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@sqrt_doubleword.
       /// \return Identifier \@sqrt_doubleword.
       inline
-      core::identifier_string const& sqrt_doubleword_name()
+      const core::identifier_string& sqrt_doubleword_name()
       {
         static core::identifier_string sqrt_doubleword_name = core::identifier_string("@sqrt_doubleword");
         return sqrt_doubleword_name;
@@ -946,7 +1090,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt_doubleword.
       inline
-      function_symbol const& sqrt_doubleword()
+      const function_symbol& sqrt_doubleword()
       {
         static function_symbol sqrt_doubleword(sqrt_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return sqrt_doubleword;
@@ -990,10 +1134,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @sqrt_doubleword..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt_doubleword to a
+      ///     number of arguments
+      inline
+      application sqrt_doubleword(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@sqrt_tripleword.
       /// \return Identifier \@sqrt_tripleword.
       inline
-      core::identifier_string const& sqrt_tripleword_name()
+      const core::identifier_string& sqrt_tripleword_name()
       {
         static core::identifier_string sqrt_tripleword_name = core::identifier_string("@sqrt_tripleword");
         return sqrt_tripleword_name;
@@ -1003,7 +1156,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt_tripleword.
       inline
-      function_symbol const& sqrt_tripleword()
+      const function_symbol& sqrt_tripleword()
       {
         static function_symbol sqrt_tripleword(sqrt_tripleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_tripleword;
@@ -1048,10 +1201,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @sqrt_tripleword..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt_tripleword to a
+      ///     number of arguments
+      inline
+      application sqrt_tripleword(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@sqrt_tripleword_overflow.
       /// \return Identifier \@sqrt_tripleword_overflow.
       inline
-      core::identifier_string const& sqrt_tripleword_overflow_name()
+      const core::identifier_string& sqrt_tripleword_overflow_name()
       {
         static core::identifier_string sqrt_tripleword_overflow_name = core::identifier_string("@sqrt_tripleword_overflow");
         return sqrt_tripleword_overflow_name;
@@ -1061,7 +1223,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt_tripleword_overflow.
       inline
-      function_symbol const& sqrt_tripleword_overflow()
+      const function_symbol& sqrt_tripleword_overflow()
       {
         static function_symbol sqrt_tripleword_overflow(sqrt_tripleword_overflow_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_tripleword_overflow;
@@ -1106,10 +1268,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @sqrt_tripleword_overflow..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt_tripleword_overflow to a
+      ///     number of arguments
+      inline
+      application sqrt_tripleword_overflow(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@sqrt_quadrupleword.
       /// \return Identifier \@sqrt_quadrupleword.
       inline
-      core::identifier_string const& sqrt_quadrupleword_name()
+      const core::identifier_string& sqrt_quadrupleword_name()
       {
         static core::identifier_string sqrt_quadrupleword_name = core::identifier_string("@sqrt_quadrupleword");
         return sqrt_quadrupleword_name;
@@ -1119,7 +1290,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt_quadrupleword.
       inline
-      function_symbol const& sqrt_quadrupleword()
+      const function_symbol& sqrt_quadrupleword()
       {
         static function_symbol sqrt_quadrupleword(sqrt_quadrupleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_quadrupleword;
@@ -1165,10 +1336,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @sqrt_quadrupleword..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt_quadrupleword to a
+      ///     number of arguments
+      inline
+      application sqrt_quadrupleword(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@sqrt_quadrupleword_overflow.
       /// \return Identifier \@sqrt_quadrupleword_overflow.
       inline
-      core::identifier_string const& sqrt_quadrupleword_overflow_name()
+      const core::identifier_string& sqrt_quadrupleword_overflow_name()
       {
         static core::identifier_string sqrt_quadrupleword_overflow_name = core::identifier_string("@sqrt_quadrupleword_overflow");
         return sqrt_quadrupleword_overflow_name;
@@ -1178,7 +1358,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt_quadrupleword_overflow.
       inline
-      function_symbol const& sqrt_quadrupleword_overflow()
+      const function_symbol& sqrt_quadrupleword_overflow()
       {
         static function_symbol sqrt_quadrupleword_overflow(sqrt_quadrupleword_overflow_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_quadrupleword_overflow;
@@ -1224,10 +1404,19 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Function prototype that implements @sqrt_quadrupleword_overflow..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol sqrt_quadrupleword_overflow to a
+      ///     number of arguments
+      inline
+      application sqrt_quadrupleword_overflow(const atermpp::aterm& e);
+   
+
       /// \brief Generate identifier \@pred_word.
       /// \return Identifier \@pred_word.
       inline
-      core::identifier_string const& pred_word_name()
+      const core::identifier_string& pred_word_name()
       {
         static core::identifier_string pred_word_name = core::identifier_string("@pred_word");
         return pred_word_name;
@@ -1237,7 +1426,7 @@ namespace mcrl2 {
       
       /// \return Function symbol pred_word.
       inline
-      function_symbol const& pred_word()
+      const function_symbol& pred_word()
       {
         static function_symbol pred_word(pred_word_name(), make_function_sort(machine_word(), machine_word()));
         return pred_word;
@@ -1279,6 +1468,213 @@ namespace mcrl2 {
         }
         return false;
       }
+
+      /// \brief Function prototype that implements @pred_word..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol pred_word to a
+      ///     number of arguments
+      inline
+      application pred_word(const atermpp::aterm& e);
+   
+
+      /// \brief Generate identifier \@equal.
+      /// \return Identifier \@equal.
+      inline
+      const core::identifier_string& equal_word_name()
+      {
+        static core::identifier_string equal_word_name = core::identifier_string("@equal");
+        return equal_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@equal.
+      
+      /// \return Function symbol equal_word.
+      inline
+      const function_symbol& equal_word()
+      {
+        static function_symbol equal_word(equal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return equal_word;
+      }
+
+      /// \brief Recogniser for function \@equal.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@equal.
+      inline
+      bool is_equal_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == equal_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@equal
+      
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@equal to a number of arguments
+      inline
+      application equal_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::equal_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@equal
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol equal_word to a
+      ///     number of arguments
+      inline
+      bool is_equal_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_equal_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Function prototype that implements @equal..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol equal_word to a
+      ///     number of arguments
+      inline
+      application equal_word(const atermpp::aterm& e);
+   
+
+      /// \brief Generate identifier \@less.
+      /// \return Identifier \@less.
+      inline
+      const core::identifier_string& less_word_name()
+      {
+        static core::identifier_string less_word_name = core::identifier_string("@less");
+        return less_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@less.
+      
+      /// \return Function symbol less_word.
+      inline
+      const function_symbol& less_word()
+      {
+        static function_symbol less_word(less_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return less_word;
+      }
+
+      /// \brief Recogniser for function \@less.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@less.
+      inline
+      bool is_less_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == less_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@less
+      
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@less to a number of arguments
+      inline
+      application less_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::less_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@less
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol less_word to a
+      ///     number of arguments
+      inline
+      bool is_less_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_less_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Function prototype that implements @less..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol less_word to a
+      ///     number of arguments
+      inline
+      application less_word(const atermpp::aterm& e);
+   
+
+      /// \brief Generate identifier \@lessequal.
+      /// \return Identifier \@lessequal.
+      inline
+      const core::identifier_string& lessequal_word_name()
+      {
+        static core::identifier_string lessequal_word_name = core::identifier_string("@lessequal");
+        return lessequal_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@lessequal.
+      
+      /// \return Function symbol lessequal_word.
+      inline
+      const function_symbol& lessequal_word()
+      {
+        static function_symbol lessequal_word(lessequal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return lessequal_word;
+      }
+
+      /// \brief Recogniser for function \@lessequal.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@lessequal.
+      inline
+      bool is_lessequal_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == lessequal_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@lessequal
+      
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@lessequal to a number of arguments
+      inline
+      application lessequal_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::lessequal_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@lessequal
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol lessequal_word to a
+      ///     number of arguments
+      inline
+      bool is_lessequal_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_lessequal_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Function prototype that implements @lessequal..
+      /// \details This function must be implemented in details/machine_word.h.
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol lessequal_word to a
+      ///     number of arguments
+      inline
+      application lessequal_word(const atermpp::aterm& e);
+   
       /// \brief Give all system defined mappings for machine_word
       /// \return All system defined mappings for machine_word
       inline
@@ -1305,6 +1701,9 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::sqrt_quadrupleword());
         result.push_back(sort_machine_word::sqrt_quadrupleword_overflow());
         result.push_back(sort_machine_word::pred_word());
+        result.push_back(sort_machine_word::equal_word());
+        result.push_back(sort_machine_word::less_word());
+        result.push_back(sort_machine_word::lessequal_word());
         return result;
       }
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for machine_word
@@ -1341,6 +1740,9 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::sqrt_quadrupleword());
         result.push_back(sort_machine_word::sqrt_quadrupleword_overflow());
         result.push_back(sort_machine_word::pred_word());
+        result.push_back(sort_machine_word::equal_word());
+        result.push_back(sort_machine_word::less_word());
+        result.push_back(sort_machine_word::lessequal_word());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1351,7 +1753,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_application(e) || is_times_word_application(e) || is_timew_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e));
+        assert(is_add_word_application(e) || is_add_overflow_application(e) || is_times_word_application(e) || is_timew_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -1435,7 +1837,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_application(e) || is_times_word_application(e) || is_timew_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e));
+        assert(is_add_word_application(e) || is_add_overflow_application(e) || is_times_word_application(e) || is_timew_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -1444,10 +1846,13 @@ namespace mcrl2 {
       inline
       data_equation_vector machine_word_generate_equations_code()
       {
-        variable vd("d",machine_word());
+        variable vw1("w1",machine_word());
+        variable vw2("w2",machine_word());
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list({vd}), equal_to(vd, vd), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(vw1, vw2), equal_word(vw1, vw2)));
+        result.push_back(data_equation(variable_list({vw1, vw2}), less(vw1, vw2), less_word(vw1, vw2)));
+        result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(vw1, vw2), lessequal_word(vw1, vw2)));
         return result;
       }
 

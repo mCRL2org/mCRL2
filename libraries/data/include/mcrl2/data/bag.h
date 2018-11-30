@@ -64,7 +64,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@bag.
       /// \return Identifier \@bag.
       inline
-      core::identifier_string const& constructor_name()
+      const core::identifier_string& constructor_name()
       {
         static core::identifier_string constructor_name = core::identifier_string("@bag");
         return constructor_name;
@@ -152,7 +152,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@bagfbag.
       /// \return Identifier \@bagfbag.
       inline
-      core::identifier_string const& bag_fbag_name()
+      const core::identifier_string& bag_fbag_name()
       {
         static core::identifier_string bag_fbag_name = core::identifier_string("@bagfbag");
         return bag_fbag_name;
@@ -208,7 +208,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@bagcomp.
       /// \return Identifier \@bagcomp.
       inline
-      core::identifier_string const& bag_comprehension_name()
+      const core::identifier_string& bag_comprehension_name()
       {
         static core::identifier_string bag_comprehension_name = core::identifier_string("@bagcomp");
         return bag_comprehension_name;
@@ -264,7 +264,7 @@ namespace mcrl2 {
       /// \brief Generate identifier count.
       /// \return Identifier count.
       inline
-      core::identifier_string const& count_name()
+      const core::identifier_string& count_name()
       {
         static core::identifier_string count_name = core::identifier_string("count");
         return count_name;
@@ -321,7 +321,7 @@ namespace mcrl2 {
       /// \brief Generate identifier in.
       /// \return Identifier in.
       inline
-      core::identifier_string const& in_name()
+      const core::identifier_string& in_name()
       {
         static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
@@ -378,7 +378,7 @@ namespace mcrl2 {
       /// \brief Generate identifier +.
       /// \return Identifier +.
       inline
-      core::identifier_string const& union_name()
+      const core::identifier_string& union_name()
       {
         static core::identifier_string union_name = core::identifier_string("+");
         return union_name;
@@ -456,7 +456,7 @@ namespace mcrl2 {
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
-      core::identifier_string const& intersection_name()
+      const core::identifier_string& intersection_name()
       {
         static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
@@ -534,7 +534,7 @@ namespace mcrl2 {
       /// \brief Generate identifier -.
       /// \return Identifier -.
       inline
-      core::identifier_string const& difference_name()
+      const core::identifier_string& difference_name()
       {
         static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
@@ -612,7 +612,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Bag2Set.
       /// \return Identifier Bag2Set.
       inline
-      core::identifier_string const& bag2set_name()
+      const core::identifier_string& bag2set_name()
       {
         static core::identifier_string bag2set_name = core::identifier_string("Bag2Set");
         return bag2set_name;
@@ -668,7 +668,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Set2Bag.
       /// \return Identifier Set2Bag.
       inline
-      core::identifier_string const& set2bag_name()
+      const core::identifier_string& set2bag_name()
       {
         static core::identifier_string set2bag_name = core::identifier_string("Set2Bag");
         return set2bag_name;
@@ -724,7 +724,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@zero_.
       /// \return Identifier \@zero_.
       inline
-      core::identifier_string const& zero_function_name()
+      const core::identifier_string& zero_function_name()
       {
         static core::identifier_string zero_function_name = core::identifier_string("@zero_");
         return zero_function_name;
@@ -780,7 +780,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@one_.
       /// \return Identifier \@one_.
       inline
-      core::identifier_string const& one_function_name()
+      const core::identifier_string& one_function_name()
       {
         static core::identifier_string one_function_name = core::identifier_string("@one_");
         return one_function_name;
@@ -836,7 +836,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@add_.
       /// \return Identifier \@add_.
       inline
-      core::identifier_string const& add_function_name()
+      const core::identifier_string& add_function_name()
       {
         static core::identifier_string add_function_name = core::identifier_string("@add_");
         return add_function_name;
@@ -893,7 +893,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@min_.
       /// \return Identifier \@min_.
       inline
-      core::identifier_string const& min_function_name()
+      const core::identifier_string& min_function_name()
       {
         static core::identifier_string min_function_name = core::identifier_string("@min_");
         return min_function_name;
@@ -950,7 +950,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@monus_.
       /// \return Identifier \@monus_.
       inline
-      core::identifier_string const& monus_function_name()
+      const core::identifier_string& monus_function_name()
       {
         static core::identifier_string monus_function_name = core::identifier_string("@monus_");
         return monus_function_name;
@@ -1007,7 +1007,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@Nat2Bool_.
       /// \return Identifier \@Nat2Bool_.
       inline
-      core::identifier_string const& nat2bool_function_name()
+      const core::identifier_string& nat2bool_function_name()
       {
         static core::identifier_string nat2bool_function_name = core::identifier_string("@Nat2Bool_");
         return nat2bool_function_name;
@@ -1063,7 +1063,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@Bool2Nat_.
       /// \return Identifier \@Bool2Nat_.
       inline
-      core::identifier_string const& bool2nat_function_name()
+      const core::identifier_string& bool2nat_function_name()
       {
         static core::identifier_string bool2nat_function_name = core::identifier_string("@Bool2Nat_");
         return bool2nat_function_name;

@@ -61,7 +61,7 @@ namespace mcrl2 {
       /// \brief Generate identifier {}.
       /// \return Identifier {}.
       inline
-      core::identifier_string const& empty_name()
+      const core::identifier_string& empty_name()
       {
         static core::identifier_string empty_name = core::identifier_string("{}");
         return empty_name;
@@ -93,7 +93,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_insert.
       /// \return Identifier \@fset_insert.
       inline
-      core::identifier_string const& insert_name()
+      const core::identifier_string& insert_name()
       {
         static core::identifier_string insert_name = core::identifier_string("@fset_insert");
         return insert_name;
@@ -183,7 +183,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_cons.
       /// \return Identifier \@fset_cons.
       inline
-      core::identifier_string const& cons_name()
+      const core::identifier_string& cons_name()
       {
         static core::identifier_string cons_name = core::identifier_string("@fset_cons");
         return cons_name;
@@ -240,7 +240,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_cinsert.
       /// \return Identifier \@fset_cinsert.
       inline
-      core::identifier_string const& cinsert_name()
+      const core::identifier_string& cinsert_name()
       {
         static core::identifier_string cinsert_name = core::identifier_string("@fset_cinsert");
         return cinsert_name;
@@ -298,7 +298,7 @@ namespace mcrl2 {
       /// \brief Generate identifier in.
       /// \return Identifier in.
       inline
-      core::identifier_string const& in_name()
+      const core::identifier_string& in_name()
       {
         static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
@@ -355,7 +355,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_union.
       /// \return Identifier \@fset_union.
       inline
-      core::identifier_string const& fset_union_name()
+      const core::identifier_string& fset_union_name()
       {
         static core::identifier_string fset_union_name = core::identifier_string("@fset_union");
         return fset_union_name;
@@ -414,7 +414,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset_inter.
       /// \return Identifier \@fset_inter.
       inline
-      core::identifier_string const& fset_intersection_name()
+      const core::identifier_string& fset_intersection_name()
       {
         static core::identifier_string fset_intersection_name = core::identifier_string("@fset_inter");
         return fset_intersection_name;
@@ -473,7 +473,7 @@ namespace mcrl2 {
       /// \brief Generate identifier -.
       /// \return Identifier -.
       inline
-      core::identifier_string const& difference_name()
+      const core::identifier_string& difference_name()
       {
         static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
@@ -530,7 +530,7 @@ namespace mcrl2 {
       /// \brief Generate identifier +.
       /// \return Identifier +.
       inline
-      core::identifier_string const& union_name()
+      const core::identifier_string& union_name()
       {
         static core::identifier_string union_name = core::identifier_string("+");
         return union_name;
@@ -587,7 +587,7 @@ namespace mcrl2 {
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
-      core::identifier_string const& intersection_name()
+      const core::identifier_string& intersection_name()
       {
         static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
@@ -644,7 +644,7 @@ namespace mcrl2 {
       /// \brief Generate identifier #.
       /// \return Identifier #.
       inline
-      core::identifier_string const& count_name()
+      const core::identifier_string& count_name()
       {
         static core::identifier_string count_name = core::identifier_string("#");
         return count_name;

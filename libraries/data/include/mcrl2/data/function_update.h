@@ -31,7 +31,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@func_update.
       /// \return Identifier \@func_update.
       inline
-      core::identifier_string const& function_update_name()
+      const core::identifier_string& function_update_name()
       {
         static core::identifier_string function_update_name = core::identifier_string("@func_update");
         return function_update_name;

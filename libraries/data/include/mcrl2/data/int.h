@@ -34,7 +34,7 @@ namespace mcrl2 {
     namespace sort_int {
 
       inline
-      core::identifier_string const& int_name()
+      const core::identifier_string& int_name()
       {
         static core::identifier_string int_name = core::identifier_string("Int");
         return int_name;
@@ -43,7 +43,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression Int
       /// \return Sort expression Int
       inline
-      basic_sort const& int_()
+      const basic_sort& int_()
       {
         static basic_sort int_ = basic_sort(int_name());
         return int_;
@@ -66,7 +66,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@cInt.
       /// \return Identifier \@cInt.
       inline
-      core::identifier_string const& cint_name()
+      const core::identifier_string& cint_name()
       {
         static core::identifier_string cint_name = core::identifier_string("@cInt");
         return cint_name;
@@ -76,7 +76,7 @@ namespace mcrl2 {
       
       /// \return Function symbol cint.
       inline
-      function_symbol const& cint()
+      const function_symbol& cint()
       {
         static function_symbol cint(cint_name(), make_function_sort(sort_nat::nat(), int_()));
         return cint;
@@ -122,7 +122,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@cNeg.
       /// \return Identifier \@cNeg.
       inline
-      core::identifier_string const& cneg_name()
+      const core::identifier_string& cneg_name()
       {
         static core::identifier_string cneg_name = core::identifier_string("@cNeg");
         return cneg_name;
@@ -132,7 +132,7 @@ namespace mcrl2 {
       
       /// \return Function symbol cneg.
       inline
-      function_symbol const& cneg()
+      const function_symbol& cneg()
       {
         static function_symbol cneg(cneg_name(), make_function_sort(sort_pos::pos(), int_()));
         return cneg;
@@ -205,7 +205,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Nat2Int.
       /// \return Identifier Nat2Int.
       inline
-      core::identifier_string const& nat2int_name()
+      const core::identifier_string& nat2int_name()
       {
         static core::identifier_string nat2int_name = core::identifier_string("Nat2Int");
         return nat2int_name;
@@ -215,7 +215,7 @@ namespace mcrl2 {
       
       /// \return Function symbol nat2int.
       inline
-      function_symbol const& nat2int()
+      const function_symbol& nat2int()
       {
         static function_symbol nat2int(nat2int_name(), make_function_sort(sort_nat::nat(), int_()));
         return nat2int;
@@ -261,7 +261,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Int2Nat.
       /// \return Identifier Int2Nat.
       inline
-      core::identifier_string const& int2nat_name()
+      const core::identifier_string& int2nat_name()
       {
         static core::identifier_string int2nat_name = core::identifier_string("Int2Nat");
         return int2nat_name;
@@ -271,7 +271,7 @@ namespace mcrl2 {
       
       /// \return Function symbol int2nat.
       inline
-      function_symbol const& int2nat()
+      const function_symbol& int2nat()
       {
         static function_symbol int2nat(int2nat_name(), make_function_sort(int_(), sort_nat::nat()));
         return int2nat;
@@ -317,7 +317,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Pos2Int.
       /// \return Identifier Pos2Int.
       inline
-      core::identifier_string const& pos2int_name()
+      const core::identifier_string& pos2int_name()
       {
         static core::identifier_string pos2int_name = core::identifier_string("Pos2Int");
         return pos2int_name;
@@ -327,7 +327,7 @@ namespace mcrl2 {
       
       /// \return Function symbol pos2int.
       inline
-      function_symbol const& pos2int()
+      const function_symbol& pos2int()
       {
         static function_symbol pos2int(pos2int_name(), make_function_sort(sort_pos::pos(), int_()));
         return pos2int;
@@ -373,7 +373,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Int2Pos.
       /// \return Identifier Int2Pos.
       inline
-      core::identifier_string const& int2pos_name()
+      const core::identifier_string& int2pos_name()
       {
         static core::identifier_string int2pos_name = core::identifier_string("Int2Pos");
         return int2pos_name;
@@ -383,7 +383,7 @@ namespace mcrl2 {
       
       /// \return Function symbol int2pos.
       inline
-      function_symbol const& int2pos()
+      const function_symbol& int2pos()
       {
         static function_symbol int2pos(int2pos_name(), make_function_sort(int_(), sort_pos::pos()));
         return int2pos;
@@ -429,7 +429,7 @@ namespace mcrl2 {
       /// \brief Generate identifier max.
       /// \return Identifier max.
       inline
-      core::identifier_string const& maximum_name()
+      const core::identifier_string& maximum_name()
       {
         static core::identifier_string maximum_name = core::identifier_string("max");
         return maximum_name;
@@ -527,7 +527,7 @@ namespace mcrl2 {
       /// \brief Generate identifier min.
       /// \return Identifier min.
       inline
-      core::identifier_string const& minimum_name()
+      const core::identifier_string& minimum_name()
       {
         static core::identifier_string minimum_name = core::identifier_string("min");
         return minimum_name;
@@ -601,7 +601,7 @@ namespace mcrl2 {
       /// \brief Generate identifier abs.
       /// \return Identifier abs.
       inline
-      core::identifier_string const& abs_name()
+      const core::identifier_string& abs_name()
       {
         static core::identifier_string abs_name = core::identifier_string("abs");
         return abs_name;
@@ -611,7 +611,7 @@ namespace mcrl2 {
       
       /// \return Function symbol abs.
       inline
-      function_symbol const& abs()
+      const function_symbol& abs()
       {
         static function_symbol abs(abs_name(), make_function_sort(int_(), sort_nat::nat()));
         return abs;
@@ -657,7 +657,7 @@ namespace mcrl2 {
       /// \brief Generate identifier -.
       /// \return Identifier -.
       inline
-      core::identifier_string const& negate_name()
+      const core::identifier_string& negate_name()
       {
         static core::identifier_string negate_name = core::identifier_string("-");
         return negate_name;
@@ -713,7 +713,7 @@ namespace mcrl2 {
       /// \brief Generate identifier succ.
       /// \return Identifier succ.
       inline
-      core::identifier_string const& succ_name()
+      const core::identifier_string& succ_name()
       {
         static core::identifier_string succ_name = core::identifier_string("succ");
         return succ_name;
@@ -786,7 +786,7 @@ namespace mcrl2 {
       /// \brief Generate identifier pred.
       /// \return Identifier pred.
       inline
-      core::identifier_string const& pred_name()
+      const core::identifier_string& pred_name()
       {
         static core::identifier_string pred_name = core::identifier_string("pred");
         return pred_name;
@@ -859,7 +859,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@dub.
       /// \return Identifier \@dub.
       inline
-      core::identifier_string const& dub_name()
+      const core::identifier_string& dub_name()
       {
         static core::identifier_string dub_name = core::identifier_string("@dub");
         return dub_name;
@@ -929,7 +929,7 @@ namespace mcrl2 {
       /// \brief Generate identifier +.
       /// \return Identifier +.
       inline
-      core::identifier_string const& plus_name()
+      const core::identifier_string& plus_name()
       {
         static core::identifier_string plus_name = core::identifier_string("+");
         return plus_name;
@@ -1011,7 +1011,7 @@ namespace mcrl2 {
       /// \brief Generate identifier -.
       /// \return Identifier -.
       inline
-      core::identifier_string const& minus_name()
+      const core::identifier_string& minus_name()
       {
         static core::identifier_string minus_name = core::identifier_string("-");
         return minus_name;
@@ -1068,7 +1068,7 @@ namespace mcrl2 {
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
-      core::identifier_string const& times_name()
+      const core::identifier_string& times_name()
       {
         static core::identifier_string times_name = core::identifier_string("*");
         return times_name;
@@ -1142,7 +1142,7 @@ namespace mcrl2 {
       /// \brief Generate identifier div.
       /// \return Identifier div.
       inline
-      core::identifier_string const& div_name()
+      const core::identifier_string& div_name()
       {
         static core::identifier_string div_name = core::identifier_string("div");
         return div_name;
@@ -1212,7 +1212,7 @@ namespace mcrl2 {
       /// \brief Generate identifier mod.
       /// \return Identifier mod.
       inline
-      core::identifier_string const& mod_name()
+      const core::identifier_string& mod_name()
       {
         static core::identifier_string mod_name = core::identifier_string("mod");
         return mod_name;
@@ -1269,7 +1269,7 @@ namespace mcrl2 {
       /// \brief Generate identifier exp.
       /// \return Identifier exp.
       inline
-      core::identifier_string const& exp_name()
+      const core::identifier_string& exp_name()
       {
         static core::identifier_string exp_name = core::identifier_string("exp");
         return exp_name;

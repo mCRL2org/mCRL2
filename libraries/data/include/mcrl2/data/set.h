@@ -62,7 +62,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@set.
       /// \return Identifier \@set.
       inline
-      core::identifier_string const& constructor_name()
+      const core::identifier_string& constructor_name()
       {
         static core::identifier_string constructor_name = core::identifier_string("@set");
         return constructor_name;
@@ -150,7 +150,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@setfset.
       /// \return Identifier \@setfset.
       inline
-      core::identifier_string const& set_fset_name()
+      const core::identifier_string& set_fset_name()
       {
         static core::identifier_string set_fset_name = core::identifier_string("@setfset");
         return set_fset_name;
@@ -206,7 +206,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@setcomp.
       /// \return Identifier \@setcomp.
       inline
-      core::identifier_string const& set_comprehension_name()
+      const core::identifier_string& set_comprehension_name()
       {
         static core::identifier_string set_comprehension_name = core::identifier_string("@setcomp");
         return set_comprehension_name;
@@ -262,7 +262,7 @@ namespace mcrl2 {
       /// \brief Generate identifier in.
       /// \return Identifier in.
       inline
-      core::identifier_string const& in_name()
+      const core::identifier_string& in_name()
       {
         static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
@@ -319,7 +319,7 @@ namespace mcrl2 {
       /// \brief Generate identifier !.
       /// \return Identifier !.
       inline
-      core::identifier_string const& complement_name()
+      const core::identifier_string& complement_name()
       {
         static core::identifier_string complement_name = core::identifier_string("!");
         return complement_name;
@@ -375,7 +375,7 @@ namespace mcrl2 {
       /// \brief Generate identifier +.
       /// \return Identifier +.
       inline
-      core::identifier_string const& union_name()
+      const core::identifier_string& union_name()
       {
         static core::identifier_string union_name = core::identifier_string("+");
         return union_name;
@@ -445,7 +445,7 @@ namespace mcrl2 {
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
-      core::identifier_string const& intersection_name()
+      const core::identifier_string& intersection_name()
       {
         static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
@@ -515,7 +515,7 @@ namespace mcrl2 {
       /// \brief Generate identifier -.
       /// \return Identifier -.
       inline
-      core::identifier_string const& difference_name()
+      const core::identifier_string& difference_name()
       {
         static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
@@ -585,7 +585,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@false_.
       /// \return Identifier \@false_.
       inline
-      core::identifier_string const& false_function_name()
+      const core::identifier_string& false_function_name()
       {
         static core::identifier_string false_function_name = core::identifier_string("@false_");
         return false_function_name;
@@ -641,7 +641,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@true_.
       /// \return Identifier \@true_.
       inline
-      core::identifier_string const& true_function_name()
+      const core::identifier_string& true_function_name()
       {
         static core::identifier_string true_function_name = core::identifier_string("@true_");
         return true_function_name;
@@ -697,7 +697,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@not_.
       /// \return Identifier \@not_.
       inline
-      core::identifier_string const& not_function_name()
+      const core::identifier_string& not_function_name()
       {
         static core::identifier_string not_function_name = core::identifier_string("@not_");
         return not_function_name;
@@ -753,7 +753,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@and_.
       /// \return Identifier \@and_.
       inline
-      core::identifier_string const& and_function_name()
+      const core::identifier_string& and_function_name()
       {
         static core::identifier_string and_function_name = core::identifier_string("@and_");
         return and_function_name;
@@ -810,7 +810,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@or_.
       /// \return Identifier \@or_.
       inline
-      core::identifier_string const& or_function_name()
+      const core::identifier_string& or_function_name()
       {
         static core::identifier_string or_function_name = core::identifier_string("@or_");
         return or_function_name;

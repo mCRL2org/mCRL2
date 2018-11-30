@@ -31,7 +31,7 @@ namespace mcrl2 {
     namespace sort_bool {
 
       inline
-      core::identifier_string const& bool_name()
+      const core::identifier_string& bool_name()
       {
         static core::identifier_string bool_name = core::identifier_string("Bool");
         return bool_name;
@@ -40,7 +40,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression Bool
       /// \return Sort expression Bool
       inline
-      basic_sort const& bool_()
+      const basic_sort& bool_()
       {
         static basic_sort bool_ = basic_sort(bool_name());
         return bool_;
@@ -63,7 +63,7 @@ namespace mcrl2 {
       /// \brief Generate identifier true.
       /// \return Identifier true.
       inline
-      core::identifier_string const& true_name()
+      const core::identifier_string& true_name()
       {
         static core::identifier_string true_name = core::identifier_string("true");
         return true_name;
@@ -73,7 +73,7 @@ namespace mcrl2 {
       
       /// \return Function symbol true_.
       inline
-      function_symbol const& true_()
+      const function_symbol& true_()
       {
         static function_symbol true_(true_name(), bool_());
         return true_;
@@ -95,7 +95,7 @@ namespace mcrl2 {
       /// \brief Generate identifier false.
       /// \return Identifier false.
       inline
-      core::identifier_string const& false_name()
+      const core::identifier_string& false_name()
       {
         static core::identifier_string false_name = core::identifier_string("false");
         return false_name;
@@ -105,7 +105,7 @@ namespace mcrl2 {
       
       /// \return Function symbol false_.
       inline
-      function_symbol const& false_()
+      const function_symbol& false_()
       {
         static function_symbol false_(false_name(), bool_());
         return false_;
@@ -157,7 +157,7 @@ namespace mcrl2 {
       /// \brief Generate identifier !.
       /// \return Identifier !.
       inline
-      core::identifier_string const& not_name()
+      const core::identifier_string& not_name()
       {
         static core::identifier_string not_name = core::identifier_string("!");
         return not_name;
@@ -167,7 +167,7 @@ namespace mcrl2 {
       
       /// \return Function symbol not_.
       inline
-      function_symbol const& not_()
+      const function_symbol& not_()
       {
         static function_symbol not_(not_name(), make_function_sort(bool_(), bool_()));
         return not_;
@@ -213,7 +213,7 @@ namespace mcrl2 {
       /// \brief Generate identifier &&.
       /// \return Identifier &&.
       inline
-      core::identifier_string const& and_name()
+      const core::identifier_string& and_name()
       {
         static core::identifier_string and_name = core::identifier_string("&&");
         return and_name;
@@ -223,7 +223,7 @@ namespace mcrl2 {
       
       /// \return Function symbol and_.
       inline
-      function_symbol const& and_()
+      const function_symbol& and_()
       {
         static function_symbol and_(and_name(), make_function_sort(bool_(), bool_(), bool_()));
         return and_;
@@ -270,7 +270,7 @@ namespace mcrl2 {
       /// \brief Generate identifier ||.
       /// \return Identifier ||.
       inline
-      core::identifier_string const& or_name()
+      const core::identifier_string& or_name()
       {
         static core::identifier_string or_name = core::identifier_string("||");
         return or_name;
@@ -280,7 +280,7 @@ namespace mcrl2 {
       
       /// \return Function symbol or_.
       inline
-      function_symbol const& or_()
+      const function_symbol& or_()
       {
         static function_symbol or_(or_name(), make_function_sort(bool_(), bool_(), bool_()));
         return or_;
@@ -327,7 +327,7 @@ namespace mcrl2 {
       /// \brief Generate identifier =>.
       /// \return Identifier =>.
       inline
-      core::identifier_string const& implies_name()
+      const core::identifier_string& implies_name()
       {
         static core::identifier_string implies_name = core::identifier_string("=>");
         return implies_name;
@@ -337,7 +337,7 @@ namespace mcrl2 {
       
       /// \return Function symbol implies.
       inline
-      function_symbol const& implies()
+      const function_symbol& implies()
       {
         static function_symbol implies(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
         return implies;

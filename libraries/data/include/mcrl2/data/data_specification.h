@@ -248,6 +248,15 @@ class data_specification: public sort_specification
       }
     }
 
+    template < class Container >
+    void add_normalised_cpp_implemented_functions(const Container& c) const
+    {
+      for(const function_symbol& f: c)
+      {
+        data_specification::add_normalised_cpp_implemented_function(f);
+      }
+    }
+
     /// \brief Adds constructors, mappings and equations for a structured sort
     ///        to this specification, and marks them as system defined.
     ///
@@ -407,6 +416,18 @@ class data_specification: public sort_specification
       return m_normalised_equations;
     }
 
+    /// \brief Gets all equations in this specification including those that are system defined
+    ///
+    /// \details The time complexity of this operation is the same as that for sort().
+    /// \return All equations in this specification, including those for
+    ///  structured sorts.
+    inline
+    const std::set< function_symbol >& cpp_implemented_functions() const
+    {
+      normalise_data_specification_if_required();
+      return m_cpp_implemented_functions;
+    }
+
     /// \brief Gets all user defined equations.
     ///
     /// \details The time complexity of this operation is constant.
@@ -526,6 +547,7 @@ class data_specification: public sort_specification
                        std::set < function_symbol >& constructors,
                        std::set < function_symbol >& mappings,
                        std::set < data_equation >& equations,
+                       std::set < function_symbol >& cpp_implemented_functions,
                        const bool skip_equations=false) const
     {
       // add sorts, constructors, mappings and equations
@@ -535,6 +557,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(), f.end());
         f = sort_bool::bool_generate_functions_code();
         mappings.insert(f.begin(), f.end());
+        f = sort_bool::bool_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f.begin(), f.end());
+        f = sort_bool::bool_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f.begin(), f.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_bool::bool_generate_equations_code());
@@ -547,6 +573,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_real::real_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        f = sort_real::real_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f.begin(), f.end());
+        f = sort_real::real_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f.begin(), f.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_real::real_generate_equations_code());
@@ -559,6 +589,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_int::int_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        f = sort_int::int_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f.begin(), f.end());
+        f = sort_int::int_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f.begin(), f.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_int::int_generate_equations_code());
@@ -571,6 +605,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_nat::nat_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        f = sort_nat::nat_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f.begin(), f.end());
+        f = sort_nat::nat_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f.begin(), f.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_nat::nat_generate_equations_code());
@@ -583,6 +621,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_pos::pos_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        f = sort_pos::pos_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f.begin(), f.end());
+        f = sort_pos::pos_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f.begin(), f.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_pos::pos_generate_equations_code());
@@ -614,6 +656,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_list::list_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          f = sort_list::list_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
+          f = sort_list::list_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
           if (!skip_equations)
           {
             data_equation_vector e(sort_list::list_generate_equations_code(element_sort));
@@ -628,6 +674,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_set::set_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          f = sort_set::set_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
+          f = sort_set::set_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
           if (!skip_equations)
           {
             data_equation_vector e(sort_set::set_generate_equations_code(element_sort));
@@ -640,6 +690,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_fset::fset_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          f = sort_fset::fset_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
+          f = sort_fset::fset_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
           if (!skip_equations)
           {
             data_equation_vector e = sort_fset::fset_generate_equations_code(element_sort);
@@ -654,6 +708,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_bag::bag_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          f = sort_bag::bag_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
+          f = sort_bag::bag_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
           if (!skip_equations)
           {
             data_equation_vector e(sort_bag::bag_generate_equations_code(element_sort));
@@ -666,6 +724,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_fbag::fbag_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          f = sort_fbag::fbag_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
+          f = sort_fbag::fbag_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f.begin(), f.end());
           if (!skip_equations)
           {
             data_equation_vector e = sort_fbag::fbag_generate_equations_code(element_sort);
@@ -694,12 +756,14 @@ class data_specification: public sort_specification
       std::set < function_symbol > constructors;
       std::set < function_symbol > mappings;
       std::set < data_equation > equations;
-      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations);
+      std::set < function_symbol > cpp_function_symbols;
+      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations, cpp_function_symbols);
 
       // add normalised constructors, mappings and equations
       add_normalised_constructors(constructors.begin(), constructors.end());
       add_normalised_mappings(mappings.begin(), mappings.end());
       add_normalised_equations(equations.begin(), equations.end());
+      add_normalised_cpp_implemented_functions(cpp_function_symbols);
     }
 
   public:
@@ -715,6 +779,9 @@ class data_specification: public sort_specification
                 std::set < function_symbol >& constructors,
                 std::set <function_symbol >& mappings) const
     {
+      std::set <function_symbol > cpp_implemented_functions;
+   
+      sorts.insert(sort_machine_word::machine_word());
       sorts.insert(sort_bool::bool_());
       sorts.insert(sort_pos::pos());
       sorts.insert(sort_nat::nat());
@@ -729,7 +796,7 @@ class data_specification: public sort_specification
       std::set < data_equation > dummy_equations;
       for(const sort_expression& s: sorts)
       {
-        find_associated_system_defined_data_types_for_a_sort(s, constructors, mappings, dummy_equations, true);
+        find_associated_system_defined_data_types_for_a_sort(s, constructors, mappings, dummy_equations, cpp_implemented_functions, true);
       }
       assert(dummy_equations.size()==0);
     }

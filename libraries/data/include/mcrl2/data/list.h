@@ -62,7 +62,7 @@ namespace mcrl2 {
       /// \brief Generate identifier [].
       /// \return Identifier [].
       inline
-      core::identifier_string const& empty_name()
+      const core::identifier_string& empty_name()
       {
         static core::identifier_string empty_name = core::identifier_string("[]");
         return empty_name;
@@ -94,7 +94,7 @@ namespace mcrl2 {
       /// \brief Generate identifier |>.
       /// \return Identifier |>.
       inline
-      core::identifier_string const& cons_name()
+      const core::identifier_string& cons_name()
       {
         static core::identifier_string cons_name = core::identifier_string("|>");
         return cons_name;
@@ -185,7 +185,7 @@ namespace mcrl2 {
       /// \brief Generate identifier in.
       /// \return Identifier in.
       inline
-      core::identifier_string const& in_name()
+      const core::identifier_string& in_name()
       {
         static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
@@ -242,7 +242,7 @@ namespace mcrl2 {
       /// \brief Generate identifier #.
       /// \return Identifier #.
       inline
-      core::identifier_string const& count_name()
+      const core::identifier_string& count_name()
       {
         static core::identifier_string count_name = core::identifier_string("#");
         return count_name;
@@ -298,7 +298,7 @@ namespace mcrl2 {
       /// \brief Generate identifier <|.
       /// \return Identifier <|.
       inline
-      core::identifier_string const& snoc_name()
+      const core::identifier_string& snoc_name()
       {
         static core::identifier_string snoc_name = core::identifier_string("<|");
         return snoc_name;
@@ -355,7 +355,7 @@ namespace mcrl2 {
       /// \brief Generate identifier ++.
       /// \return Identifier ++.
       inline
-      core::identifier_string const& concat_name()
+      const core::identifier_string& concat_name()
       {
         static core::identifier_string concat_name = core::identifier_string("++");
         return concat_name;
@@ -412,7 +412,7 @@ namespace mcrl2 {
       /// \brief Generate identifier ..
       /// \return Identifier ..
       inline
-      core::identifier_string const& element_at_name()
+      const core::identifier_string& element_at_name()
       {
         static core::identifier_string element_at_name = core::identifier_string(".");
         return element_at_name;
@@ -469,7 +469,7 @@ namespace mcrl2 {
       /// \brief Generate identifier head.
       /// \return Identifier head.
       inline
-      core::identifier_string const& head_name()
+      const core::identifier_string& head_name()
       {
         static core::identifier_string head_name = core::identifier_string("head");
         return head_name;
@@ -525,7 +525,7 @@ namespace mcrl2 {
       /// \brief Generate identifier tail.
       /// \return Identifier tail.
       inline
-      core::identifier_string const& tail_name()
+      const core::identifier_string& tail_name()
       {
         static core::identifier_string tail_name = core::identifier_string("tail");
         return tail_name;
@@ -581,7 +581,7 @@ namespace mcrl2 {
       /// \brief Generate identifier rhead.
       /// \return Identifier rhead.
       inline
-      core::identifier_string const& rhead_name()
+      const core::identifier_string& rhead_name()
       {
         static core::identifier_string rhead_name = core::identifier_string("rhead");
         return rhead_name;
@@ -637,7 +637,7 @@ namespace mcrl2 {
       /// \brief Generate identifier rtail.
       /// \return Identifier rtail.
       inline
-      core::identifier_string const& rtail_name()
+      const core::identifier_string& rtail_name()
       {
         static core::identifier_string rtail_name = core::identifier_string("rtail");
         return rtail_name;

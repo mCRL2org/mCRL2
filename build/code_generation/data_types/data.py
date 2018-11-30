@@ -455,14 +455,18 @@ class function_declaration_list():
     # hence we get function symbols with multiple sorts. Then for each of these
     # we generate the code
     class multi_function_declaration():
-      def __init__(self, id, namespace, sort_expressions, l):
+      def __init__(self, id, namespace, sort_expressions, l, internextern, definedby):
         assert(isinstance(id, identifier))
         assert(isinstance(sort_expressions, sort_expression_list))
         assert(isinstance(l, label))
+        assert(isinstance(internextern, internal_external))
+        assert(isinstance(definedby, defined_by))
         self.id = id
         self.namespace = namespace
         self.sort_expression_list = sort_expressions
         self.label = l
+        self.internextern = internextern
+        self.definedby = definedby
 
       def __eq__(self, other):
         return self.id == other.id and self.namespace == other.namespace and self.sort_expression_list == other.sort_expression_list and self.label == other.label
@@ -475,7 +479,7 @@ class function_declaration_list():
       /// \\brief Generate identifier ${namestring}.
       /// \\return Identifier ${namestring}.
       inline
-      core::identifier_string const& ${namecode}_name()
+      const core::identifier_string& ${namecode}_name()
       {
         static core::identifier_string ${namecode}_name = core::identifier_string("${name}");
         return ${namecode}_name;
@@ -489,7 +493,7 @@ class function_declaration_list():
       ${sortparameterstring}
       /// \\return Function symbol ${functionname}.
       inline
-      function_symbol ${const}${functionname}(${sortparameters})
+      ${const}function_symbol${reference} ${functionname}(${sortparameters})
       {
         ${static}function_symbol ${functionname}(${functionname}_name(), ${sortname});
         return ${functionname};
@@ -502,7 +506,8 @@ class function_declaration_list():
           functionname=escape(name),
           sortparameters = ', '.join(map(lambda x: 'const sort_expression& {0}'.format(x.code()), sortparams)),
           sortname=sort,
-          const='const& ' if sortparams == [] else '',
+          const='const ' if sortparams == [] else '',
+          reference='&' if sortparams == [] else '',
           static='static ' if sortparams == [] else '')
 
       def polymorphic_function_constructor(self, fullname, name, sortparams):
@@ -690,6 +695,27 @@ ${cases}
         return self.function_application(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.domain.parameters(spec), polymorphic) + \
                self.function_application_recogniser(self.id, self.label)
 
+      def function_cpp_implemented_code(self, sort, fullname, name):
+        if not self.definedby.is_defined_by_code():
+          return ""
+        else:
+          CODE_TEMPLATE = Template('''
+      /// \\brief Function prototype that implements ${namestring}..
+      /// \\details This function must be implemented in details/${namespace}.h.
+      /// \\param e A data expression
+      /// \\return true iff e is an application of function symbol ${functionname} to a
+      ///     number of arguments
+      inline
+      application ${functionname}(const atermpp::aterm& e);\n   
+''')
+
+          return CODE_TEMPLATE.substitute(
+            namestring = fullname,
+            functionname = name,
+            namespace = self.namespace
+          )  
+# XXXX
+
       def code(self, spec):
         assert(isinstance(spec, specification))
 
@@ -700,7 +726,8 @@ ${cases}
           sort = self.sort_expression_list.elements[0] # as len is 1
           return self.function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.code(spec)) + \
                  self.function_recogniser(self.id, self.label, self.sort_expression_list.sort_parameters(spec)) + \
-                 self.function_application_code(sort)
+                 self.function_application_code(sort) + \
+                 self.function_cpp_implemented_code(sort, self.id, self.label)
 
         else:
           assert self.sort_expression_list.elements > 1
@@ -729,7 +756,8 @@ ${cases}
               e.sort_expression_list.push_back(element.sort_expression)
             return
 
-        self.elements += [multi_function_declaration(element.id, element.namespace, sort_expression_list([element.sort_expression]), element.label)]
+        self.elements += [multi_function_declaration(element.id, element.namespace, sort_expression_list([element.sort_expression]), element.label, 
+                                                     element.internextern, element.definedby)]
 
       def __str__(self):
         return "".join(["{0}\n".format(e) for e in self.elements])
@@ -1574,7 +1602,7 @@ class sort_declaration():
   def sort_name(self, id, label):
     code = ""
     code += "      inline\n"
-    code += "      core::identifier_string const& %s_name()\n" % (label)
+    code += "      const core::identifier_string& %s_name()\n" % (label)
     code += "      {\n"
     code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, id)
     code += "        return %s_name;\n" % (label)
@@ -1584,7 +1612,7 @@ class sort_declaration():
   def container_name(self, id, label):
     code = ""
     code += "      inline\n"
-    code += "      core::identifier_string const& %s_name()\n" % (label)
+    code += "      const core::identifier_string& %s_name()\n" % (label)
     code += "      {\n"
     code += "        static core::identifier_string %s_name = core::identifier_string(\"%s\");\n" % (label, label)
     code += "        return %s_name;\n" % (label)
@@ -1597,7 +1625,7 @@ class sort_declaration():
     code += "      /// \\brief Constructor for sort expression %s\n" % (escape(id))
     code += "      /// \\return Sort expression %s\n" % (escape(id))
     code += "      inline\n"
-    code += "      basic_sort const& %s()\n" % (label)
+    code += "      const basic_sort& %s()\n" % (label)
     code += "      {\n"
     code += "        static basic_sort %s = basic_sort(%s_name());\n" % (label, label)
     code += "        return %s;\n" % (label)

@@ -63,7 +63,7 @@ namespace mcrl2 {
       /// \brief Generate identifier {:}.
       /// \return Identifier {:}.
       inline
-      core::identifier_string const& empty_name()
+      const core::identifier_string& empty_name()
       {
         static core::identifier_string empty_name = core::identifier_string("{:}");
         return empty_name;
@@ -95,7 +95,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fbag_insert.
       /// \return Identifier \@fbag_insert.
       inline
-      core::identifier_string const& insert_name()
+      const core::identifier_string& insert_name()
       {
         static core::identifier_string insert_name = core::identifier_string("@fbag_insert");
         return insert_name;
@@ -186,7 +186,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fbag_cons.
       /// \return Identifier \@fbag_cons.
       inline
-      core::identifier_string const& cons_name()
+      const core::identifier_string& cons_name()
       {
         static core::identifier_string cons_name = core::identifier_string("@fbag_cons");
         return cons_name;
@@ -244,7 +244,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fbag_cinsert.
       /// \return Identifier \@fbag_cinsert.
       inline
-      core::identifier_string const& cinsert_name()
+      const core::identifier_string& cinsert_name()
       {
         static core::identifier_string cinsert_name = core::identifier_string("@fbag_cinsert");
         return cinsert_name;
@@ -302,7 +302,7 @@ namespace mcrl2 {
       /// \brief Generate identifier count.
       /// \return Identifier count.
       inline
-      core::identifier_string const& count_name()
+      const core::identifier_string& count_name()
       {
         static core::identifier_string count_name = core::identifier_string("count");
         return count_name;
@@ -359,7 +359,7 @@ namespace mcrl2 {
       /// \brief Generate identifier in.
       /// \return Identifier in.
       inline
-      core::identifier_string const& in_name()
+      const core::identifier_string& in_name()
       {
         static core::identifier_string in_name = core::identifier_string("in");
         return in_name;
@@ -416,7 +416,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fbag_join.
       /// \return Identifier \@fbag_join.
       inline
-      core::identifier_string const& join_name()
+      const core::identifier_string& join_name()
       {
         static core::identifier_string join_name = core::identifier_string("@fbag_join");
         return join_name;
@@ -475,7 +475,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fbag_inter.
       /// \return Identifier \@fbag_inter.
       inline
-      core::identifier_string const& fbag_intersect_name()
+      const core::identifier_string& fbag_intersect_name()
       {
         static core::identifier_string fbag_intersect_name = core::identifier_string("@fbag_inter");
         return fbag_intersect_name;
@@ -534,7 +534,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fbag_diff.
       /// \return Identifier \@fbag_diff.
       inline
-      core::identifier_string const& fbag_difference_name()
+      const core::identifier_string& fbag_difference_name()
       {
         static core::identifier_string fbag_difference_name = core::identifier_string("@fbag_diff");
         return fbag_difference_name;
@@ -593,7 +593,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fbag2fset.
       /// \return Identifier \@fbag2fset.
       inline
-      core::identifier_string const& fbag2fset_name()
+      const core::identifier_string& fbag2fset_name()
       {
         static core::identifier_string fbag2fset_name = core::identifier_string("@fbag2fset");
         return fbag2fset_name;
@@ -650,7 +650,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@fset2fbag.
       /// \return Identifier \@fset2fbag.
       inline
-      core::identifier_string const& fset2fbag_name()
+      const core::identifier_string& fset2fbag_name()
       {
         static core::identifier_string fset2fbag_name = core::identifier_string("@fset2fbag");
         return fset2fbag_name;
@@ -706,7 +706,7 @@ namespace mcrl2 {
       /// \brief Generate identifier +.
       /// \return Identifier +.
       inline
-      core::identifier_string const& union_name()
+      const core::identifier_string& union_name()
       {
         static core::identifier_string union_name = core::identifier_string("+");
         return union_name;
@@ -763,7 +763,7 @@ namespace mcrl2 {
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
-      core::identifier_string const& intersection_name()
+      const core::identifier_string& intersection_name()
       {
         static core::identifier_string intersection_name = core::identifier_string("*");
         return intersection_name;
@@ -820,7 +820,7 @@ namespace mcrl2 {
       /// \brief Generate identifier -.
       /// \return Identifier -.
       inline
-      core::identifier_string const& difference_name()
+      const core::identifier_string& difference_name()
       {
         static core::identifier_string difference_name = core::identifier_string("-");
         return difference_name;
@@ -877,7 +877,7 @@ namespace mcrl2 {
       /// \brief Generate identifier #.
       /// \return Identifier #.
       inline
-      core::identifier_string const& count_all_name()
+      const core::identifier_string& count_all_name()
       {
         static core::identifier_string count_all_name = core::identifier_string("#");
         return count_all_name;

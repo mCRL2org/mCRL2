@@ -37,6 +37,12 @@ map  @one_word <"one_word">: @word                                              
      @sqrt_quadrupleword <"sqrt_quadrupleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word                         internal defined_by_code;  
      @sqrt_quadrupleword_overflow <"sqrt_quadrupleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word       internal defined_by_code;  
      @pred_word <"pred_word">: @word <"arg"> ->@word                                                                                                internal defined_by_code;   
+     @equal <"equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                                     internal defined_by_code;
+     @less <"less_word">: @word <"left"> # @word <"right"> -> Bool                                                                                       internal defined_by_code;
+     @lessequal <"lessequal_word">: @word <"left"> # @word <"right"> -> Bool                                                                             internal defined_by_code;
 
-var d:@word;
-eqn ==(d, d) = true;
+var  w1:@word;
+     w2:@word;
+eqn  ==(w1, w2) = @equal(w1, w2);
+     <(w1, w2) = @less(w1, w2);
+     <=(w1, w2) = @lessequal(w1, w2);

@@ -33,7 +33,7 @@ namespace mcrl2 {
     namespace sort_nat {
 
       inline
-      core::identifier_string const& nat_name()
+      const core::identifier_string& nat_name()
       {
         static core::identifier_string nat_name = core::identifier_string("Nat");
         return nat_name;
@@ -42,7 +42,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression Nat
       /// \return Sort expression Nat
       inline
-      basic_sort const& nat()
+      const basic_sort& nat()
       {
         static basic_sort nat = basic_sort(nat_name());
         return nat;
@@ -62,7 +62,7 @@ namespace mcrl2 {
       }
 
       inline
-      core::identifier_string const& natpair_name()
+      const core::identifier_string& natpair_name()
       {
         static core::identifier_string natpair_name = core::identifier_string("@NatPair");
         return natpair_name;
@@ -71,7 +71,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression \@NatPair
       /// \return Sort expression \@NatPair
       inline
-      basic_sort const& natpair()
+      const basic_sort& natpair()
       {
         static basic_sort natpair = basic_sort(natpair_name());
         return natpair;
@@ -94,7 +94,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@c0.
       /// \return Identifier \@c0.
       inline
-      core::identifier_string const& c0_name()
+      const core::identifier_string& c0_name()
       {
         static core::identifier_string c0_name = core::identifier_string("@c0");
         return c0_name;
@@ -104,7 +104,7 @@ namespace mcrl2 {
       
       /// \return Function symbol c0.
       inline
-      function_symbol const& c0()
+      const function_symbol& c0()
       {
         static function_symbol c0(c0_name(), nat());
         return c0;
@@ -126,7 +126,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@cNat.
       /// \return Identifier \@cNat.
       inline
-      core::identifier_string const& cnat_name()
+      const core::identifier_string& cnat_name()
       {
         static core::identifier_string cnat_name = core::identifier_string("@cNat");
         return cnat_name;
@@ -136,7 +136,7 @@ namespace mcrl2 {
       
       /// \return Function symbol cnat.
       inline
-      function_symbol const& cnat()
+      const function_symbol& cnat()
       {
         static function_symbol cnat(cnat_name(), make_function_sort(sort_pos::pos(), nat()));
         return cnat;
@@ -182,7 +182,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@cPair.
       /// \return Identifier \@cPair.
       inline
-      core::identifier_string const& cpair_name()
+      const core::identifier_string& cpair_name()
       {
         static core::identifier_string cpair_name = core::identifier_string("@cPair");
         return cpair_name;
@@ -192,7 +192,7 @@ namespace mcrl2 {
       
       /// \return Function symbol cpair.
       inline
-      function_symbol const& cpair()
+      const function_symbol& cpair()
       {
         static function_symbol cpair(cpair_name(), make_function_sort(nat(), nat(), natpair()));
         return cpair;
@@ -267,7 +267,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Pos2Nat.
       /// \return Identifier Pos2Nat.
       inline
-      core::identifier_string const& pos2nat_name()
+      const core::identifier_string& pos2nat_name()
       {
         static core::identifier_string pos2nat_name = core::identifier_string("Pos2Nat");
         return pos2nat_name;
@@ -277,7 +277,7 @@ namespace mcrl2 {
       
       /// \return Function symbol pos2nat.
       inline
-      function_symbol const& pos2nat()
+      const function_symbol& pos2nat()
       {
         static function_symbol pos2nat(pos2nat_name(), make_function_sort(sort_pos::pos(), nat()));
         return pos2nat;
@@ -323,7 +323,7 @@ namespace mcrl2 {
       /// \brief Generate identifier Nat2Pos.
       /// \return Identifier Nat2Pos.
       inline
-      core::identifier_string const& nat2pos_name()
+      const core::identifier_string& nat2pos_name()
       {
         static core::identifier_string nat2pos_name = core::identifier_string("Nat2Pos");
         return nat2pos_name;
@@ -333,7 +333,7 @@ namespace mcrl2 {
       
       /// \return Function symbol nat2pos.
       inline
-      function_symbol const& nat2pos()
+      const function_symbol& nat2pos()
       {
         static function_symbol nat2pos(nat2pos_name(), make_function_sort(nat(), sort_pos::pos()));
         return nat2pos;
@@ -379,7 +379,7 @@ namespace mcrl2 {
       /// \brief Generate identifier max.
       /// \return Identifier max.
       inline
-      core::identifier_string const& maximum_name()
+      const core::identifier_string& maximum_name()
       {
         static core::identifier_string maximum_name = core::identifier_string("max");
         return maximum_name;
@@ -457,7 +457,7 @@ namespace mcrl2 {
       /// \brief Generate identifier min.
       /// \return Identifier min.
       inline
-      core::identifier_string const& minimum_name()
+      const core::identifier_string& minimum_name()
       {
         static core::identifier_string minimum_name = core::identifier_string("min");
         return minimum_name;
@@ -527,7 +527,7 @@ namespace mcrl2 {
       /// \brief Generate identifier succ.
       /// \return Identifier succ.
       inline
-      core::identifier_string const& succ_name()
+      const core::identifier_string& succ_name()
       {
         static core::identifier_string succ_name = core::identifier_string("succ");
         return succ_name;
@@ -583,7 +583,7 @@ namespace mcrl2 {
       /// \brief Generate identifier pred.
       /// \return Identifier pred.
       inline
-      core::identifier_string const& pred_name()
+      const core::identifier_string& pred_name()
       {
         static core::identifier_string pred_name = core::identifier_string("pred");
         return pred_name;
@@ -593,7 +593,7 @@ namespace mcrl2 {
       
       /// \return Function symbol pred.
       inline
-      function_symbol const& pred()
+      const function_symbol& pred()
       {
         static function_symbol pred(pred_name(), make_function_sort(sort_pos::pos(), nat()));
         return pred;
@@ -639,7 +639,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@dub.
       /// \return Identifier \@dub.
       inline
-      core::identifier_string const& dub_name()
+      const core::identifier_string& dub_name()
       {
         static core::identifier_string dub_name = core::identifier_string("@dub");
         return dub_name;
@@ -649,7 +649,7 @@ namespace mcrl2 {
       
       /// \return Function symbol dub.
       inline
-      function_symbol const& dub()
+      const function_symbol& dub()
       {
         static function_symbol dub(dub_name(), make_function_sort(sort_bool::bool_(), nat(), nat()));
         return dub;
@@ -696,7 +696,7 @@ namespace mcrl2 {
       /// \brief Generate identifier +.
       /// \return Identifier +.
       inline
-      core::identifier_string const& plus_name()
+      const core::identifier_string& plus_name()
       {
         static core::identifier_string plus_name = core::identifier_string("+");
         return plus_name;
@@ -774,7 +774,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@gtesubtb.
       /// \return Identifier \@gtesubtb.
       inline
-      core::identifier_string const& gte_subtract_with_borrow_name()
+      const core::identifier_string& gte_subtract_with_borrow_name()
       {
         static core::identifier_string gte_subtract_with_borrow_name = core::identifier_string("@gtesubtb");
         return gte_subtract_with_borrow_name;
@@ -784,7 +784,7 @@ namespace mcrl2 {
       
       /// \return Function symbol gte_subtract_with_borrow.
       inline
-      function_symbol const& gte_subtract_with_borrow()
+      const function_symbol& gte_subtract_with_borrow()
       {
         static function_symbol gte_subtract_with_borrow(gte_subtract_with_borrow_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
         return gte_subtract_with_borrow;
@@ -832,7 +832,7 @@ namespace mcrl2 {
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
-      core::identifier_string const& times_name()
+      const core::identifier_string& times_name()
       {
         static core::identifier_string times_name = core::identifier_string("*");
         return times_name;
@@ -902,7 +902,7 @@ namespace mcrl2 {
       /// \brief Generate identifier div.
       /// \return Identifier div.
       inline
-      core::identifier_string const& div_name()
+      const core::identifier_string& div_name()
       {
         static core::identifier_string div_name = core::identifier_string("div");
         return div_name;
@@ -912,7 +912,7 @@ namespace mcrl2 {
       
       /// \return Function symbol div.
       inline
-      function_symbol const& div()
+      const function_symbol& div()
       {
         static function_symbol div(div_name(), make_function_sort(nat(), sort_pos::pos(), nat()));
         return div;
@@ -959,7 +959,7 @@ namespace mcrl2 {
       /// \brief Generate identifier mod.
       /// \return Identifier mod.
       inline
-      core::identifier_string const& mod_name()
+      const core::identifier_string& mod_name()
       {
         static core::identifier_string mod_name = core::identifier_string("mod");
         return mod_name;
@@ -969,7 +969,7 @@ namespace mcrl2 {
       
       /// \return Function symbol mod.
       inline
-      function_symbol const& mod()
+      const function_symbol& mod()
       {
         static function_symbol mod(mod_name(), make_function_sort(nat(), sort_pos::pos(), nat()));
         return mod;
@@ -1016,7 +1016,7 @@ namespace mcrl2 {
       /// \brief Generate identifier exp.
       /// \return Identifier exp.
       inline
-      core::identifier_string const& exp_name()
+      const core::identifier_string& exp_name()
       {
         static core::identifier_string exp_name = core::identifier_string("exp");
         return exp_name;
@@ -1086,7 +1086,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@even.
       /// \return Identifier \@even.
       inline
-      core::identifier_string const& even_name()
+      const core::identifier_string& even_name()
       {
         static core::identifier_string even_name = core::identifier_string("@even");
         return even_name;
@@ -1096,7 +1096,7 @@ namespace mcrl2 {
       
       /// \return Function symbol even.
       inline
-      function_symbol const& even()
+      const function_symbol& even()
       {
         static function_symbol even(even_name(), make_function_sort(nat(), sort_bool::bool_()));
         return even;
@@ -1142,7 +1142,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@monus.
       /// \return Identifier \@monus.
       inline
-      core::identifier_string const& monus_name()
+      const core::identifier_string& monus_name()
       {
         static core::identifier_string monus_name = core::identifier_string("@monus");
         return monus_name;
@@ -1152,7 +1152,7 @@ namespace mcrl2 {
       
       /// \return Function symbol monus.
       inline
-      function_symbol const& monus()
+      const function_symbol& monus()
       {
         static function_symbol monus(monus_name(), make_function_sort(nat(), nat(), nat()));
         return monus;
@@ -1199,7 +1199,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@swap_zero.
       /// \return Identifier \@swap_zero.
       inline
-      core::identifier_string const& swap_zero_name()
+      const core::identifier_string& swap_zero_name()
       {
         static core::identifier_string swap_zero_name = core::identifier_string("@swap_zero");
         return swap_zero_name;
@@ -1209,7 +1209,7 @@ namespace mcrl2 {
       
       /// \return Function symbol swap_zero.
       inline
-      function_symbol const& swap_zero()
+      const function_symbol& swap_zero()
       {
         static function_symbol swap_zero(swap_zero_name(), make_function_sort(nat(), nat(), nat()));
         return swap_zero;
@@ -1256,7 +1256,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@swap_zero_add.
       /// \return Identifier \@swap_zero_add.
       inline
-      core::identifier_string const& swap_zero_add_name()
+      const core::identifier_string& swap_zero_add_name()
       {
         static core::identifier_string swap_zero_add_name = core::identifier_string("@swap_zero_add");
         return swap_zero_add_name;
@@ -1266,7 +1266,7 @@ namespace mcrl2 {
       
       /// \return Function symbol swap_zero_add.
       inline
-      function_symbol const& swap_zero_add()
+      const function_symbol& swap_zero_add()
       {
         static function_symbol swap_zero_add(swap_zero_add_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_add;
@@ -1315,7 +1315,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@swap_zero_min.
       /// \return Identifier \@swap_zero_min.
       inline
-      core::identifier_string const& swap_zero_min_name()
+      const core::identifier_string& swap_zero_min_name()
       {
         static core::identifier_string swap_zero_min_name = core::identifier_string("@swap_zero_min");
         return swap_zero_min_name;
@@ -1325,7 +1325,7 @@ namespace mcrl2 {
       
       /// \return Function symbol swap_zero_min.
       inline
-      function_symbol const& swap_zero_min()
+      const function_symbol& swap_zero_min()
       {
         static function_symbol swap_zero_min(swap_zero_min_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_min;
@@ -1374,7 +1374,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@swap_zero_monus.
       /// \return Identifier \@swap_zero_monus.
       inline
-      core::identifier_string const& swap_zero_monus_name()
+      const core::identifier_string& swap_zero_monus_name()
       {
         static core::identifier_string swap_zero_monus_name = core::identifier_string("@swap_zero_monus");
         return swap_zero_monus_name;
@@ -1384,7 +1384,7 @@ namespace mcrl2 {
       
       /// \return Function symbol swap_zero_monus.
       inline
-      function_symbol const& swap_zero_monus()
+      const function_symbol& swap_zero_monus()
       {
         static function_symbol swap_zero_monus(swap_zero_monus_name(), make_function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_monus;
@@ -1433,7 +1433,7 @@ namespace mcrl2 {
       /// \brief Generate identifier sqrt.
       /// \return Identifier sqrt.
       inline
-      core::identifier_string const& sqrt_name()
+      const core::identifier_string& sqrt_name()
       {
         static core::identifier_string sqrt_name = core::identifier_string("sqrt");
         return sqrt_name;
@@ -1443,7 +1443,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt.
       inline
-      function_symbol const& sqrt()
+      const function_symbol& sqrt()
       {
         static function_symbol sqrt(sqrt_name(), make_function_sort(nat(), nat()));
         return sqrt;
@@ -1489,7 +1489,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@sqrt_nat.
       /// \return Identifier \@sqrt_nat.
       inline
-      core::identifier_string const& sqrt_nat_aux_func_name()
+      const core::identifier_string& sqrt_nat_aux_func_name()
       {
         static core::identifier_string sqrt_nat_aux_func_name = core::identifier_string("@sqrt_nat");
         return sqrt_nat_aux_func_name;
@@ -1499,7 +1499,7 @@ namespace mcrl2 {
       
       /// \return Function symbol sqrt_nat_aux_func.
       inline
-      function_symbol const& sqrt_nat_aux_func()
+      const function_symbol& sqrt_nat_aux_func()
       {
         static function_symbol sqrt_nat_aux_func(sqrt_nat_aux_func_name(), make_function_sort(nat(), nat(), sort_pos::pos(), nat()));
         return sqrt_nat_aux_func;
@@ -1547,7 +1547,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@first.
       /// \return Identifier \@first.
       inline
-      core::identifier_string const& first_name()
+      const core::identifier_string& first_name()
       {
         static core::identifier_string first_name = core::identifier_string("@first");
         return first_name;
@@ -1557,7 +1557,7 @@ namespace mcrl2 {
       
       /// \return Function symbol first.
       inline
-      function_symbol const& first()
+      const function_symbol& first()
       {
         static function_symbol first(first_name(), make_function_sort(natpair(), nat()));
         return first;
@@ -1603,7 +1603,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@last.
       /// \return Identifier \@last.
       inline
-      core::identifier_string const& last_name()
+      const core::identifier_string& last_name()
       {
         static core::identifier_string last_name = core::identifier_string("@last");
         return last_name;
@@ -1613,7 +1613,7 @@ namespace mcrl2 {
       
       /// \return Function symbol last.
       inline
-      function_symbol const& last()
+      const function_symbol& last()
       {
         static function_symbol last(last_name(), make_function_sort(natpair(), nat()));
         return last;
@@ -1659,7 +1659,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@divmod.
       /// \return Identifier \@divmod.
       inline
-      core::identifier_string const& divmod_name()
+      const core::identifier_string& divmod_name()
       {
         static core::identifier_string divmod_name = core::identifier_string("@divmod");
         return divmod_name;
@@ -1669,7 +1669,7 @@ namespace mcrl2 {
       
       /// \return Function symbol divmod.
       inline
-      function_symbol const& divmod()
+      const function_symbol& divmod()
       {
         static function_symbol divmod(divmod_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), natpair()));
         return divmod;
@@ -1716,7 +1716,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@gdivmod.
       /// \return Identifier \@gdivmod.
       inline
-      core::identifier_string const& generalised_divmod_name()
+      const core::identifier_string& generalised_divmod_name()
       {
         static core::identifier_string generalised_divmod_name = core::identifier_string("@gdivmod");
         return generalised_divmod_name;
@@ -1726,7 +1726,7 @@ namespace mcrl2 {
       
       /// \return Function symbol generalised_divmod.
       inline
-      function_symbol const& generalised_divmod()
+      const function_symbol& generalised_divmod()
       {
         static function_symbol generalised_divmod(generalised_divmod_name(), make_function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair()));
         return generalised_divmod;
@@ -1774,7 +1774,7 @@ namespace mcrl2 {
       /// \brief Generate identifier \@ggdivmod.
       /// \return Identifier \@ggdivmod.
       inline
-      core::identifier_string const& doubly_generalised_divmod_name()
+      const core::identifier_string& doubly_generalised_divmod_name()
       {
         static core::identifier_string doubly_generalised_divmod_name = core::identifier_string("@ggdivmod");
         return doubly_generalised_divmod_name;
@@ -1784,7 +1784,7 @@ namespace mcrl2 {
       
       /// \return Function symbol doubly_generalised_divmod.
       inline
-      function_symbol const& doubly_generalised_divmod()
+      const function_symbol& doubly_generalised_divmod()
       {
         static function_symbol doubly_generalised_divmod(doubly_generalised_divmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natpair()));
         return doubly_generalised_divmod;
