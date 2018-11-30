@@ -13,6 +13,7 @@
 #define MCRL2_DATA_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H
 
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/data/join.h"
 #include "mcrl2/data/builder.h"
 
 namespace mcrl2 {
@@ -119,16 +120,22 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
     {
       using utilities::detail::set_difference;
       using utilities::detail::set_intersection;
-      data_expression const& phi = sort_bool::left(x);
-      data_expression const& psi = sort_bool::right(x);
-      std::set<variable> vars_phi = find_free_variables(phi);
-      std::set<variable> vars_psi = find_free_variables(psi);
-      std::set<variable> W = set_intersection(set_intersection(V, vars_phi), vars_psi);
-      return make_forall(variable_list(W.begin(), W.end()),
-                         sort_bool::or_(quantifiers_inside_forall(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
-                             quantifiers_inside_forall(set_difference(set_intersection(V, vars_psi), vars_phi), psi)
-                            )
-                        );
+      const std::set<data_expression> disjuncts = split_or(x);
+      std::set<variable> W = V;
+      data_expression result = sort_bool::false_();
+      std::vector<std::pair<data_expression, std::set<variable>>> disjunct_vars;
+      disjunct_vars.reserve(disjuncts.size());
+      for(const data_expression& disjunct: disjuncts)
+      {
+        std::set<variable> vars_disjunct = find_free_variables(disjunct);
+        W = set_intersection(W, vars_disjunct);
+        disjunct_vars.emplace_back(disjunct, vars_disjunct);
+      }
+      for(const auto& cv: disjunct_vars)
+      {
+        result = lazy::or_(result, quantifiers_inside_forall(set_difference(set_intersection(V, cv.second), W), cv.first));
+      }
+      return make_forall(variable_list(W.begin(),W.end()), result);
     }
     else if(sort_bool::is_implies_application(x))
     {
@@ -209,16 +216,22 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
     {
       using utilities::detail::set_difference;
       using utilities::detail::set_intersection;
-      data_expression const& phi = sort_bool::left(x);
-      data_expression const& psi = sort_bool::right(x);
-      std::set<variable> vars_phi = find_free_variables(phi);
-      std::set<variable> vars_psi = find_free_variables(psi);
-      std::set<variable> W = set_intersection(set_intersection(V, vars_phi), vars_psi);
-      return make_exists(variable_list(W.begin(), W.end()),
-                         sort_bool::and_(quantifiers_inside_exists(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
-                              quantifiers_inside_exists(set_difference(set_intersection(V, vars_psi), vars_phi), psi)
-                             )
-                        );
+      const std::set<data_expression> conjuncts = split_and(x);
+      std::set<variable> W = V;
+      data_expression result = sort_bool::true_();
+      std::vector<std::pair<data_expression, std::set<variable>>> conjunct_vars;
+      conjunct_vars.reserve(conjuncts.size());
+      for(const data_expression& conjunct: conjuncts)
+      {
+        std::set<variable> vars_conjunct = find_free_variables(conjunct);
+        W = set_intersection(W, vars_conjunct);
+        conjunct_vars.emplace_back(conjunct, vars_conjunct);
+      }
+      for(const auto& cv: conjunct_vars)
+      {
+        result = lazy::and_(result, quantifiers_inside_exists(set_difference(set_intersection(V, cv.second), W), cv.first));
+      }
+      return make_exists(variable_list(W.begin(),W.end()), result);
     }
     else if(sort_bool::is_or_application(x))
     {
