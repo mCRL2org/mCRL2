@@ -257,6 +257,13 @@ void MainWindow::setDocksToDefault()
 
   propertiesDock->show();
   consoleDock->show();
+
+  // Workaround for QTBUG-65592.
+  propertiesDock->setObjectName("PropertiesDockObject");
+  consoleDock->setObjectName("ConsoleDockObject");
+  toolbar->setObjectName("ToolbarObject");
+  QByteArray array = saveState();
+  restoreState(array);
 }
 
 void MainWindow::setupDocks()
