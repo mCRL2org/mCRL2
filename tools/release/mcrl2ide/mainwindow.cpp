@@ -208,6 +208,23 @@ void MainWindow::setupMenuBar()
   verifyAllPropertiesAction = toolsMenu->addAction(
       verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
       SLOT(actionVerifyAllProperties()), QKeySequence(Qt::ALT + Qt::Key_V));
+
+  /* create the options menu */
+  QMenu* optionsMenu = menuBar()->addMenu("Options");
+
+  saveIntermediateFilesMenu =
+      optionsMenu->addMenu("Save intermediate files to project");
+  saveIntermediateFilesMenu->setEnabled(false);
+
+  for (std::pair<IntermediateFileType, QString> item :
+       INTERMEDIATEFILETYPENAMES)
+  {
+    QAction* saveFileAction = saveIntermediateFilesMenu->addAction(item.second);
+    saveFileAction->setCheckable(true);
+    saveFileAction->setProperty("filetype", item.first);
+    connect(saveFileAction, SIGNAL(toggled(bool)), fileSystem,
+            SLOT(setSaveIntermediateFilesOptions(bool)));
+  }
 }
 
 void MainWindow::setupToolbar()
@@ -560,6 +577,7 @@ void MainWindow::actionVerifyAllProperties()
 
 void MainWindow::changeFileButtons(bool specificationOnlyMode)
 {
+  saveIntermediateFilesMenu->setEnabled(true);
   if (specificationOnlyMode)
   {
     saveAction->setText(saveSpecificationText);

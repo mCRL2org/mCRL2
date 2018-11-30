@@ -226,6 +226,7 @@ class MainWindow : public QMainWindow
   QIcon verifyAllPropertiesAbortIcon = QIcon(":/icons/verify_all_abort.png");
 
   QMenu* viewMenu;
+  QMenu* saveIntermediateFilesMenu;
   QToolBar* toolbar;
   CodeEditor* specificationEditor;
   PropertiesDock* propertiesDock;

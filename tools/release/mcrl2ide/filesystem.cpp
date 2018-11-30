@@ -53,6 +53,11 @@ FileSystem::FileSystem(CodeEditor* specificationEditor, QSettings* settings,
   specificationModified = false;
   projectOpen = false;
   specificationOnlyMode = false;
+  for (std::pair<IntermediateFileType, QString> item :
+       INTERMEDIATEFILETYPENAMES)
+  {
+    saveIntermediateFilesOptions[item.first] = false;
+  }
 
   if (!temporaryFolder.isValid())
   {
@@ -71,6 +76,14 @@ void FileSystem::makeSurePropertiesFolderExists()
   }
 }
 
+void FileSystem::makeSureArtefactsFolderExists()
+{
+  if (!QDir(artefactsFolderPath()).exists())
+  {
+    QDir().mkpath(artefactsFolderPath());
+  }
+}
+
 QString FileSystem::projectFilePath()
 {
   return projectFolderPath + QDir::separator() + projectName +
@@ -80,6 +93,24 @@ QString FileSystem::projectFilePath()
 QString FileSystem::propertiesFolderPath()
 {
   return projectFolderPath + QDir::separator() + propertiesFolderName;
+}
+
+QString FileSystem::artefactsFolderPath()
+{
+  return projectFolderPath + QDir::separator() + artefactsFolderName;
+}
+
+QString FileSystem::intermediateFilesFolderPath(IntermediateFileType fileType)
+{
+  if (saveIntermediateFilesOptions.at(fileType))
+  {
+    makeSureArtefactsFolderExists();
+    return artefactsFolderPath();
+  }
+  else
+  {
+    return temporaryFolder.path();
+  }
 }
 
 QString FileSystem::defaultSpecificationFilePath()
@@ -101,14 +132,16 @@ QString FileSystem::specificationFilePath()
 
 QString FileSystem::lpsFilePath(bool evidence, const QString& propertyName)
 {
-  return temporaryFolder.path() + QDir::separator() + projectName +
+  return intermediateFilesFolderPath(IntermediateFileType::Lps) +
+         QDir::separator() + projectName +
          (evidence ? "_" + propertyName + "_evidence" : "") + "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence reduction,
                                 bool evidence, const QString& propertyName)
 {
-  return temporaryFolder.path() + QDir::separator() + projectName +
+  return intermediateFilesFolderPath(IntermediateFileType::Lts) +
+         QDir::separator() + projectName +
          (evidence ? "_" + propertyName + "_evidence" : "") + "_lts_" +
          QString(LTSREDUCTIONINFO.at(reduction).first).replace(' ', '_') +
          ".lts";
@@ -121,8 +154,9 @@ QString FileSystem::propertyFilePath(const QString& propertyName)
 
 QString FileSystem::pbesFilePath(const QString& propertyName, bool evidence)
 {
-  return temporaryFolder.path() + QDir::separator() + projectName + "_" +
-         propertyName + (evidence ? "_evidence" : "") + "_pbes.pbes";
+  return intermediateFilesFolderPath(IntermediateFileType::Pbes) +
+         QDir::separator() + projectName + "_" + propertyName +
+         (evidence ? "_evidence" : "") + "_pbes.pbes";
 }
 
 QString FileSystem::toolPath(const QString& tool)
@@ -213,6 +247,13 @@ bool FileSystem::propertyNameExists(const QString& propertyName)
     }
   }
   return false;
+}
+
+void FileSystem::setSaveIntermediateFilesOptions(bool checked)
+{
+  IntermediateFileType fileType =
+      static_cast<IntermediateFileType>(sender()->property("filetype").toInt());
+  saveIntermediateFilesOptions[fileType] = checked;
 }
 
 bool FileSystem::upToDateLpsFileExists(bool evidence,

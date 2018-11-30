@@ -44,6 +44,18 @@ const std::map<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
         {mcrl2::lts::lts_equivalence::lts_eq_weak_trace,
          std::pair<QString, bool>("Weak Trace Equivalence", true)}};
 
+enum IntermediateFileType
+{
+  Lps = 0,
+  Lts = 1,
+  Pbes = 2
+};
+
+const std::map<IntermediateFileType, QString> INTERMEDIATEFILETYPENAMES = {
+    {IntermediateFileType::Lps, "LPS"},
+    {IntermediateFileType::Lts, "LTS"},
+    {IntermediateFileType::Pbes, "PBES"}};
+
 class Property
 {
   public:
@@ -105,9 +117,27 @@ class FileSystem : public QObject
   /**
    * @brief propertiesFolderPath Defines the file path of the current properties
    *   folder
-   * @return The file path of the properties folder
+   * @return The path of the properties folder
    */
   QString propertiesFolderPath();
+
+  /**
+   * @brief artefactsFolderPath Defines the file path of the artefacts folder,
+   *   which is a folder in the project folder used for intermediate files
+   * @return The path of the artefacts folder
+   */
+  QString artefactsFolderPath();
+
+  /**
+   * @brief intermediateFilesFolderPath Defines the file path of the
+   *   intermediate files folder. This can be the temporary folder or the
+   *   artefacts folder, depending on the options.
+   * @param fileType For which file type we want to know the intermediate files
+   *   folder
+   * @return The file path of the intermediate files folder for the given file
+   *   type
+   */
+  QString intermediateFilesFolderPath(IntermediateFileType fileType);
 
   /**
    * @brief defaultSpecificationFilePath Defines the default file path of a
@@ -374,6 +404,13 @@ class FileSystem : public QObject
   void setSpecificationModified(bool modified);
 
   /**
+   * @brief setSaveIntermediateFilesOptions Sets the options on whether
+   *   intermediate files need to be saved
+   * @param checked Whether an options was checked or unchecked
+   */
+  void setSaveIntermediateFilesOptions(bool checked);
+
+  /**
    * @brief deleteUnlistedPropertyFiles Deletes all property files for which
    *   there is no entry in the "properties" list
    */
@@ -396,11 +433,13 @@ class FileSystem : public QObject
   QString projectFolderPath;
   QString specFilePath;
   QString propertiesFolderName = "properties";
+  QString artefactsFolderName = "artefacts";
   QTemporaryDir temporaryFolder;
 
   QWidget* parent;
   CodeEditor* specificationEditor;
   QSettings* settings;
+  std::map<IntermediateFileType, bool> saveIntermediateFilesOptions;
 
   QString projectName;
   bool projectOpen;
@@ -415,6 +454,12 @@ class FileSystem : public QObject
    *   exists, if not creates it
    */
   void makeSurePropertiesFolderExists();
+
+  /**
+   * @brief makeSureArtefactsFolderExists Checks whether the artefacts folder
+   *   exists, if not creates it
+   */
+  void makeSureArtefactsFolderExists();
 
   /**
    * @brief updateSpecificationModificationTime Updates the specification
