@@ -12,8 +12,8 @@
 #include bool.spec
 
 sort @word <"machine_word">;
-cons @zero_word <"zero64">: @word                                                                                                                   internal defined_by_code;
-     @succ_word <"succ64">: @word <"arg">-> @word                                                                                                   internal defined_by_code;
+cons @zero_word <"zero_word">: @word                                                                                                                   internal defined_by_code;
+     @succ_word <"succ_word">: @word <"arg">-> @word                                                                                                   internal defined_by_code;
 
 %% Core functions that are used by other datatypes.
 map  @one_word <"one_word">: @word                                                                                                                  internal defined_by_code;

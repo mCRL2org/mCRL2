@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_POS_OLD_H
 #define MCRL2_DATA_POS_OLD_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -70,8 +71,7 @@ namespace mcrl2 {
         return c1_name;
       }
 
-      /// \brief Constructor for function symbol \@c1.
-      
+      /// \brief Constructor for function symbol \@c1.       
       /// \return Function symbol c1.
       inline
       const function_symbol& c1()
@@ -79,6 +79,7 @@ namespace mcrl2 {
         static function_symbol c1(c1_name(), pos_old());
         return c1;
       }
+
 
       /// \brief Recogniser for function \@c1.
       /// \param e A data expression.
@@ -102,8 +103,7 @@ namespace mcrl2 {
         return cdub_name;
       }
 
-      /// \brief Constructor for function symbol \@cDub.
-      
+      /// \brief Constructor for function symbol \@cDub.       
       /// \return Function symbol cdub.
       inline
       const function_symbol& cdub()
@@ -111,6 +111,7 @@ namespace mcrl2 {
         static function_symbol cdub(cdub_name(), make_function_sort(sort_bool::bool_(), pos_old(), pos_old()));
         return cdub;
       }
+
 
       /// \brief Recogniser for function \@cDub.
       /// \param e A data expression.
@@ -125,21 +126,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@cDub
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@cDub to a number of arguments
+      /// \brief Application of the function symbol \@cDub.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@cDub to a number of arguments.
       inline
       application cdub(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_pos_old::cdub()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@cDub
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@cDub.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol cdub to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_cdub_application(const atermpp::aterm& e)
       {
@@ -168,12 +168,14 @@ namespace mcrl2 {
         function_symbol_vector result;
         return result;
       }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for pos_old.
       /// \return All system defined constructors that are to be implemented in C++ for pos_old.
       inline
-      function_symbol_vector pos_old_cpp_implementable_constructors()
+      implementation_map pos_old_cpp_implementable_constructors()
       {
-        function_symbol_vector result;
+        implementation_map result;
         return result;
       }
 
@@ -186,8 +188,7 @@ namespace mcrl2 {
         return maximum_name;
       }
 
-      /// \brief Constructor for function symbol max.
-      
+      /// \brief Constructor for function symbol max.       
       /// \return Function symbol maximum.
       inline
       const function_symbol& maximum()
@@ -195,6 +196,7 @@ namespace mcrl2 {
         static function_symbol maximum(maximum_name(), make_function_sort(pos_old(), pos_old(), pos_old()));
         return maximum;
       }
+
 
       /// \brief Recogniser for function max.
       /// \param e A data expression.
@@ -209,21 +211,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol max
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of max to a number of arguments
+      /// \brief Application of the function symbol max.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of max to a number of arguments.
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_pos_old::maximum()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of max
-      /// \param e A data expression
+      /// \brief Recogniser for application of max.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol maximum to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_maximum_application(const atermpp::aterm& e)
       {
@@ -243,8 +244,7 @@ namespace mcrl2 {
         return minimum_name;
       }
 
-      /// \brief Constructor for function symbol min.
-      
+      /// \brief Constructor for function symbol min.       
       /// \return Function symbol minimum.
       inline
       const function_symbol& minimum()
@@ -252,6 +252,7 @@ namespace mcrl2 {
         static function_symbol minimum(minimum_name(), make_function_sort(pos_old(), pos_old(), pos_old()));
         return minimum;
       }
+
 
       /// \brief Recogniser for function min.
       /// \param e A data expression.
@@ -266,21 +267,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol min
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of min to a number of arguments
+      /// \brief Application of the function symbol min.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of min to a number of arguments.
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_pos_old::minimum()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of min
-      /// \param e A data expression
+      /// \brief Recogniser for application of min.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol minimum to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_minimum_application(const atermpp::aterm& e)
       {
@@ -300,8 +300,7 @@ namespace mcrl2 {
         return succ_name;
       }
 
-      /// \brief Constructor for function symbol succ.
-      
+      /// \brief Constructor for function symbol succ.       
       /// \return Function symbol succ.
       inline
       const function_symbol& succ()
@@ -309,6 +308,7 @@ namespace mcrl2 {
         static function_symbol succ(succ_name(), make_function_sort(pos_old(), pos_old()));
         return succ;
       }
+
 
       /// \brief Recogniser for function succ.
       /// \param e A data expression.
@@ -323,20 +323,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol succ
-      
-      /// \param arg0 A data expression
-      /// \return Application of succ to a number of arguments
+      /// \brief Application of the function symbol succ.        
+      /// \param arg0 A data expression. 
+      /// \return Application of succ to a number of arguments.
       inline
       application succ(const data_expression& arg0)
       {
         return sort_pos_old::succ()(arg0);
       }
 
-      /// \brief Recogniser for application of succ
-      /// \param e A data expression
+      /// \brief Recogniser for application of succ.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol succ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_succ_application(const atermpp::aterm& e)
       {
@@ -356,8 +355,7 @@ namespace mcrl2 {
         return pos_predecessor_name;
       }
 
-      /// \brief Constructor for function symbol \@pospred.
-      
+      /// \brief Constructor for function symbol \@pospred.       
       /// \return Function symbol pos_predecessor.
       inline
       const function_symbol& pos_predecessor()
@@ -365,6 +363,7 @@ namespace mcrl2 {
         static function_symbol pos_predecessor(pos_predecessor_name(), make_function_sort(pos_old(), pos_old()));
         return pos_predecessor;
       }
+
 
       /// \brief Recogniser for function \@pospred.
       /// \param e A data expression.
@@ -379,20 +378,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@pospred
-      
-      /// \param arg0 A data expression
-      /// \return Application of \@pospred to a number of arguments
+      /// \brief Application of the function symbol \@pospred.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@pospred to a number of arguments.
       inline
       application pos_predecessor(const data_expression& arg0)
       {
         return sort_pos_old::pos_predecessor()(arg0);
       }
 
-      /// \brief Recogniser for application of \@pospred
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@pospred.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol pos_predecessor to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_pos_predecessor_application(const atermpp::aterm& e)
       {
@@ -412,8 +410,7 @@ namespace mcrl2 {
         return plus_name;
       }
 
-      /// \brief Constructor for function symbol +.
-      
+      /// \brief Constructor for function symbol +.       
       /// \return Function symbol plus.
       inline
       const function_symbol& plus()
@@ -421,6 +418,7 @@ namespace mcrl2 {
         static function_symbol plus(plus_name(), make_function_sort(pos_old(), pos_old(), pos_old()));
         return plus;
       }
+
 
       /// \brief Recogniser for function +.
       /// \param e A data expression.
@@ -435,21 +433,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol +
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of + to a number of arguments
+      /// \brief Application of the function symbol +.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of + to a number of arguments.
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_pos_old::plus()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of +
-      /// \param e A data expression
+      /// \brief Recogniser for application of +.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol plus to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_plus_application(const atermpp::aterm& e)
       {
@@ -469,8 +466,7 @@ namespace mcrl2 {
         return add_with_carry_name;
       }
 
-      /// \brief Constructor for function symbol \@addc.
-      
+      /// \brief Constructor for function symbol \@addc.       
       /// \return Function symbol add_with_carry.
       inline
       const function_symbol& add_with_carry()
@@ -478,6 +474,7 @@ namespace mcrl2 {
         static function_symbol add_with_carry(add_with_carry_name(), make_function_sort(sort_bool::bool_(), pos_old(), pos_old(), pos_old()));
         return add_with_carry;
       }
+
 
       /// \brief Recogniser for function \@addc.
       /// \param e A data expression.
@@ -492,22 +489,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@addc
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@addc to a number of arguments
+      /// \brief Application of the function symbol \@addc.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@addc to a number of arguments.
       inline
       application add_with_carry(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_pos_old::add_with_carry()(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@addc
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@addc.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol add_with_carry to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_add_with_carry_application(const atermpp::aterm& e)
       {
@@ -527,8 +523,7 @@ namespace mcrl2 {
         return times_name;
       }
 
-      /// \brief Constructor for function symbol *.
-      
+      /// \brief Constructor for function symbol *.       
       /// \return Function symbol times.
       inline
       const function_symbol& times()
@@ -536,6 +531,7 @@ namespace mcrl2 {
         static function_symbol times(times_name(), make_function_sort(pos_old(), pos_old(), pos_old()));
         return times;
       }
+
 
       /// \brief Recogniser for function *.
       /// \param e A data expression.
@@ -550,21 +546,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol *
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of * to a number of arguments
+      /// \brief Application of the function symbol *.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of * to a number of arguments.
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_pos_old::times()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of *
-      /// \param e A data expression
+      /// \brief Recogniser for application of *.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol times to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_times_application(const atermpp::aterm& e)
       {
@@ -584,8 +579,7 @@ namespace mcrl2 {
         return powerlog2_pos_name;
       }
 
-      /// \brief Constructor for function symbol \@powerlog2.
-      
+      /// \brief Constructor for function symbol \@powerlog2.       
       /// \return Function symbol powerlog2_pos.
       inline
       const function_symbol& powerlog2_pos()
@@ -593,6 +587,7 @@ namespace mcrl2 {
         static function_symbol powerlog2_pos(powerlog2_pos_name(), make_function_sort(pos_old(), pos_old()));
         return powerlog2_pos;
       }
+
 
       /// \brief Recogniser for function \@powerlog2.
       /// \param e A data expression.
@@ -607,20 +602,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@powerlog2
-      
-      /// \param arg0 A data expression
-      /// \return Application of \@powerlog2 to a number of arguments
+      /// \brief Application of the function symbol \@powerlog2.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@powerlog2 to a number of arguments.
       inline
       application powerlog2_pos(const data_expression& arg0)
       {
         return sort_pos_old::powerlog2_pos()(arg0);
       }
 
-      /// \brief Recogniser for application of \@powerlog2
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@powerlog2.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol powerlog2_pos to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_powerlog2_pos_application(const atermpp::aterm& e)
       {
@@ -659,12 +653,16 @@ namespace mcrl2 {
         result.push_back(sort_pos_old::times());
         return result;
       }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for pos_old
-      /// \return All system defined mappings that are to be implemented in C++ code for pos_old
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for pos_old
       inline
-      function_symbol_vector pos_old_cpp_implementable_mappings()
+      implementation_map pos_old_cpp_implementable_mappings()
       {
-        function_symbol_vector result;
+        implementation_map result;
         return result;
       }
       ///\brief Function for projecting out argument

@@ -252,14 +252,15 @@ class function_declaration():
 
     sort_params = self.sort_expression.sort_parameters(spec)
     # Determine whether this function is overloaded
-    functions = filter(lambda x: (x.id == self.id) and (x.label == self.label) and (x.namespace == self.namespace) and (x.definedby.is_defined_by_code), function_declarations.elements)
+    functions = filter(lambda x: (x.id == self.id) and (x.label == self.label) and (x.namespace == self.namespace) and (x.definedby.is_defined_by_code()), function_declarations.elements)
     extra_parameters = []
     if len(functions) > 1:
       try:
         extra_parameters.append(self.sort_expression.domain.code(spec))
       except:
         pass # in case sort_expression has no domain
-    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+#    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+    return "        result[{0}()]=std::pair<std::function<data_expression(const application&)>, std::string>({0}_application,\"{0}\");\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
 
 
 class internal_external():
@@ -313,6 +314,12 @@ class function_declaration_list():
 
   def __eq__(self, other):
     return self.elements == other.elements and self.namespace == other.namespace and self.original_namespace == other.original_namespace
+
+  def has_cplusplus_implementable_code(self):
+    for e in self.elements:
+      if e.namespace == self.namespace and e.definedby.is_defined_by_code():
+        return True
+    return False
 
   def empty(self):
     return len(self.elements) == 0
@@ -487,9 +494,9 @@ class function_declaration_list():
 ''')
         return CODE_TEMPLATE.substitute(namestring=escape(fullname), namecode=name, name=fullname)
 
-      def function_constructor(self, fullname, name, sortparams, sort):
+      def function_constructor(self, fullname, name, sortparams, sort, number_of_data_parameters):
         CODE_TEMPLATE = Template('''
-      /// \\brief Constructor for function symbol ${namestring}.
+      /// \\brief Constructor for function symbol ${namestring}. \
       ${sortparameterstring}
       /// \\return Function symbol ${functionname}.
       inline
@@ -498,17 +505,19 @@ class function_declaration_list():
         ${static}function_symbol ${functionname}(${functionname}_name(), ${sortname});
         return ${functionname};
       }
-''')
+
+''' )
 
         return self.function_name(fullname, name) + CODE_TEMPLATE.substitute(
           namestring=escape(fullname),
-          sortparameterstring='\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(escape(x.code())), sortparams)),
+          sortparameterstring='\n      '.join(map(lambda x: '/// \\param {0} A sort expression.'.format(escape(x.code())), sortparams)),
           functionname=escape(name),
           sortparameters = ', '.join(map(lambda x: 'const sort_expression& {0}'.format(x.code()), sortparams)),
           sortname=sort,
           const='const ' if sortparams == [] else '',
           reference='&' if sortparams == [] else '',
-          static='static ' if sortparams == [] else '')
+          static='static ' if sortparams == [] else '',
+          parameters=", ".join(["a[%s]" %e for e in range(0,number_of_data_parameters)]))
 
       def polymorphic_function_constructor(self, fullname, name, sortparams):
         CODE_TEMPLATE = Template('''
@@ -641,10 +650,10 @@ ${cases}
 
       def function_application(self, fullname, name, sort_params, data_params, polymorphic):
         CODE_TEMPLATE = Template('''
-      /// \\brief Application of function symbol ${namestring}
-      ${sortparameterstring}
-      ${dataparameterstring}
-      /// \\return Application of ${namestring} to a number of arguments
+      /// \\brief Application of the function symbol ${namestring}. \
+      ${sortparameterstring} 
+      ${dataparameterstring} 
+      /// \\return Application of ${namestring} to a number of arguments.
       inline
       application ${functionname}(${parameters})
       {
@@ -657,8 +666,8 @@ ${cases}
         domain_params = map(lambda x: '{0}.sort()'.format(x), data_params) if polymorphic else []
         return CODE_TEMPLATE.substitute(
           namestring = escape(fullname),
-          sortparameterstring = '' if sort_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(fcode(x, spec)), sort_params)),
-          dataparameterstring = '' if data_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A data expression'.format(fcode(x, spec)), data_params)),
+          sortparameterstring = '' if sort_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A sort expression.'.format(fcode(x, spec)), sort_params)),
+          dataparameterstring = '' if data_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A data expression.'.format(fcode(x, spec)), data_params)),
           functionname = name,
           parameters = ', '.join(formal_sort_params + formal_data_params),
           nsfunctionname = add_namespace(name, self.namespace),
@@ -666,12 +675,74 @@ ${cases}
           actdataparameters = ', '.join(map(lambda x: fcode(x, spec), data_params))
         )
 
+      def constant_implementation_code(self, fullname, name, sort_params, polymorphic):
+        if not self.definedby.is_defined_by_code():
+          return ""
+        CODE_TEMPLATE = Template('''
+      /// \\brief The data expression of an application of the constant symbol ${namestring}.
+      /// \\details This function is to be implemented manually. \
+      ${sortparameterstring}
+      /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
+      inline
+      const data_expression& ${functionname}_manual_implementation(${parameters});
+
+      inline
+      data_expression ${functionname}_application(const application& a)
+      {
+        static_cast< void >(a); // suppress unused variable warning.
+        assert(a.head()==${functionname}());
+        return ${functionname}_manual_implementation();
+      }\n
+''')
+
+        formal_sort_params = map(lambda x: 'const sort_expression& {0}'.format(fcode(x, spec)), sort_params)
+        domain_params = map(lambda x: '{0}.sort()'.format(x), data_params) if polymorphic else []
+        return CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          sortparameterstring = '' if sort_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A sort expression.'.format(fcode(x, spec)), sort_params)),
+          functionname = name,
+          parameters = ', '.join(formal_sort_params),
+        )
+
+      def function_implementation_code(self, fullname, name, sort_params, data_params, polymorphic):
+        if not self.definedby.is_defined_by_code():
+          return ""
+        CODE_TEMPLATE = Template('''
+      /// \\brief The data expression of an application of the function symbol ${namestring}.
+      /// \\details This function is to be implemented manually. \
+      ${sortparameterstring} \
+      ${dataparameterstring}
+      /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
+      inline
+      data_expression ${functionname}_manual_implementation(${parameters});\n
+
+      inline
+      data_expression ${functionname}_application(const application& a)
+      {
+        assert(a.head()==${functionname}());
+        return ${functionname}_manual_implementation(${aaparameters});
+      }\n
+''')
+
+        formal_sort_params = map(lambda x: 'const sort_expression& {0}'.format(fcode(x, spec)), sort_params)
+        formal_data_params = map(lambda x: 'const data_expression& {0}'.format(fcode(x, spec)), data_params)
+        domain_params = map(lambda x: '{0}.sort()'.format(x), data_params) if polymorphic else []
+        return CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          sortparameterstring = '' if sort_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A sort expression.'.format(fcode(x, spec)), sort_params)),
+          dataparameterstring = '' if data_params == '' else '\n      '.join(map(lambda x: '/// \\param {0} A data expression.'.format(fcode(x, spec)), data_params)),
+          functionname = name,
+          parameters = ', '.join(formal_sort_params + formal_data_params),
+          aaparameters=", ".join(["a[%s]" %e for e in range(0,len(data_params))])
+        )
+
+
       def function_application_recogniser(self, fullname, name):
         CODE_TEMPLATE = Template('''
-      /// \\brief Recogniser for application of ${namestring}
-      /// \\param e A data expression
+      /// \\brief Recogniser for application of ${namestring}.
+      /// \\param e A data expression.
       /// \\return true iff e is an application of function symbol ${functionname} to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_${functionname}_application(const atermpp::aterm& e)
       {
@@ -690,31 +761,12 @@ ${cases}
 
       def function_application_code(self, sort, polymorphic = False):
         if not isinstance(sort, sort_arrow):
-          return ''
+          return self.constant_implementation_code(self.id, self.label, self.sort_expression_list.sort_parameters(spec), polymorphic)
 
         return self.function_application(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.domain.parameters(spec), polymorphic) + \
-               self.function_application_recogniser(self.id, self.label)
+               self.function_application_recogniser(self.id, self.label) + \
+               self.function_implementation_code(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.domain.parameters(spec), polymorphic)
 
-      def function_cpp_implemented_code(self, sort, fullname, name):
-        if not self.definedby.is_defined_by_code():
-          return ""
-        else:
-          CODE_TEMPLATE = Template('''
-      /// \\brief Function prototype that implements ${namestring}..
-      /// \\details This function must be implemented in details/${namespace}.h.
-      /// \\param e A data expression
-      /// \\return true iff e is an application of function symbol ${functionname} to a
-      ///     number of arguments
-      inline
-      application ${functionname}(const atermpp::aterm& e);\n   
-''')
-
-          return CODE_TEMPLATE.substitute(
-            namestring = fullname,
-            functionname = name,
-            namespace = self.namespace
-          )  
-# XXXX
 
       def code(self, spec):
         assert(isinstance(spec, specification))
@@ -724,17 +776,17 @@ ${cases}
 
         if len(self.sort_expression_list.elements) == 1:
           sort = self.sort_expression_list.elements[0] # as len is 1
-          return self.function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.code(spec)) + \
+          parameter_list_length = (len(sort.domain.parameters(spec)) if isinstance(sort,sort_arrow) else 0)
+          return self.function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec), sort.code(spec), parameter_list_length) + \
                  self.function_recogniser(self.id, self.label, self.sort_expression_list.sort_parameters(spec)) + \
-                 self.function_application_code(sort) + \
-                 self.function_cpp_implemented_code(sort, self.id, self.label)
+                 self.function_application_code(sort)
 
         else:
           assert self.sort_expression_list.elements > 1
 
           return self.polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec)) + \
                  self.polymorphic_function_recogniser(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec)) + \
-                 self.function_application_code(self.sort_expression_list.elements[0], True)
+                 self.function_application_code(self.sort_expression_list.elements[0], True) 
 
     class multi_function_declaration_list():
       def __init__(self, elements):
@@ -1816,6 +1868,9 @@ class mapping_specification():
     self.namespace = ""
     self.original_namespace = ""
 
+  def has_cplusplus_implementable_code(self):
+    return self.declarations.has_cplusplus_implementable_code()
+
   def set_namespace(self, string):
     self.namespace = string
     if self.original_namespace == "":
@@ -1869,16 +1924,18 @@ class mapping_specification():
         code += add_mappings_code
       code += "        return result;\n"
       code += "      }\n"
-
+      code += "\n\n"
+      code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
+      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;\n"
       code += "      /// \\brief Give all system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
-      code += "      /// \\return All system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
+      code += "      /// \\return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for %s\n" % (escape(namespace_string))
       code += "      inline\n"
-      code += "      function_symbol_vector %s_cpp_implementable_mappings(%s)\n" % (namespace_string, sort_parameters)
+      code += "      implementation_map %s_cpp_implementable_mappings(%s)\n" % (namespace_string, sort_parameters)
       code += "      {\n"
-      code += "        function_symbol_vector result;\n"
-      add_mappings_code = self.declarations.cplusplus_implementable_functions(spec) + (spec.sort_specification.structured_sort_mapping_code())
+      code += "        implementation_map result;\n"
+      add_mappings_code = self.declarations.cplusplus_implementable_functions(spec)
       if add_mappings_code == "":
         for s in self.declarations.sort_parameters(spec):
           code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (str(s).lower())
@@ -1896,6 +1953,9 @@ class constructor_specification():
     self.declarations = declarations
     self.namespace = ""
     self.original_namespace = ""
+
+  def has_cplusplus_implementable_code(self):
+    return self.declarations.has_cplusplus_implementable_code()
 
   def set_namespace(self, string):
     self.namespace = string
@@ -1958,14 +2018,16 @@ class constructor_specification():
       code += "        return result;\n"
       code += "      }\n"
       
+      code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
+      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;\n"
       code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
         code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))
       code += "      /// \\return All system defined constructors that are to be implemented in C++ for %s.\n" % (escape(namespace_string))
       code += "      inline\n"
-      code += "      function_symbol_vector %s_cpp_implementable_constructors(%s)\n" % (namespace_string,sort_parameters)
+      code += "      implementation_map %s_cpp_implementable_constructors(%s)\n" % (namespace_string,sort_parameters)
       code += "      {\n"
-      code += "        function_symbol_vector result;\n"
+      code += "        implementation_map result;\n"
       add_constructors_code = self.declarations.cplusplus_implementable_functions(spec) + (spec.sort_specification.structured_sort_constructor_code())
       if add_constructors_code == "":
         for s in self.declarations.sort_parameters(spec):
@@ -1987,6 +2049,9 @@ class function_specification():
     self.mapping_specification = mapping_spec
     self.namespace = ""
     self.original_namespace = ""
+
+  def has_cplusplus_implementable_code(self):
+    return self.constructor_specification.has_cplusplus_implementable_code() or self.mapping_specification.has_cplusplus_implementable_code()
 
   def merge_specification(self, spec, is_supertype):
     self.constructor_specification.merge_specification(spec.constructor_specification, is_supertype)
@@ -2097,6 +2162,9 @@ class specification():
     self.original_namespace = ""
     self.originfile = ""
 
+  def has_cplusplus_implementable_code(self):
+    return self.function_specification.has_cplusplus_implementable_code()
+
   def set_includes(self, includes):
     assert(isinstance(includes, include_list))
     self.includes = includes
@@ -2185,6 +2253,7 @@ class specification():
     code += "\n"
     code += "#ifndef MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
     code += "#define MCRL2_DATA_%s_H\n\n" % (self.get_namespace().upper())
+    code += "#include \"functional\"    // std::function\n"
     code += "#include \"mcrl2/utilities/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
     code += "#include \"mcrl2/data/function_sort.h\"\n"
@@ -2192,7 +2261,8 @@ class specification():
     code += "#include \"mcrl2/data/application.h\"\n"
     code += "#include \"mcrl2/data/data_equation.h\"\n"
     code += "#include \"mcrl2/data/standard.h\"\n"
-#    code += "#include \"mcrl2/data/data_specification.h\"\n"
+#     code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace())) 
+#                 if self.has_cplusplus_implementable_code() else "")
     if self.has_lambda():
       code += "#include \"mcrl2/data/lambda.h\"\n"
     if self.has_forall():

@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_REAL_H
 #define MCRL2_DATA_REAL_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -79,12 +80,14 @@ namespace mcrl2 {
         function_symbol_vector result;
         return result;
       }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for real_.
       /// \return All system defined constructors that are to be implemented in C++ for real_.
       inline
-      function_symbol_vector real_cpp_implementable_constructors()
+      implementation_map real_cpp_implementable_constructors()
       {
-        function_symbol_vector result;
+        implementation_map result;
         return result;
       }
 
@@ -97,8 +100,7 @@ namespace mcrl2 {
         return creal_name;
       }
 
-      /// \brief Constructor for function symbol \@cReal.
-      
+      /// \brief Constructor for function symbol \@cReal.       
       /// \return Function symbol creal.
       inline
       const function_symbol& creal()
@@ -106,6 +108,7 @@ namespace mcrl2 {
         static function_symbol creal(creal_name(), make_function_sort(sort_int::int_(), sort_pos::pos(), real_()));
         return creal;
       }
+
 
       /// \brief Recogniser for function \@cReal.
       /// \param e A data expression.
@@ -120,21 +123,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@cReal
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@cReal to a number of arguments
+      /// \brief Application of the function symbol \@cReal.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@cReal to a number of arguments.
       inline
       application creal(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::creal()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@cReal
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@cReal.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol creal to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_creal_application(const atermpp::aterm& e)
       {
@@ -154,8 +156,7 @@ namespace mcrl2 {
         return pos2real_name;
       }
 
-      /// \brief Constructor for function symbol Pos2Real.
-      
+      /// \brief Constructor for function symbol Pos2Real.       
       /// \return Function symbol pos2real.
       inline
       const function_symbol& pos2real()
@@ -163,6 +164,7 @@ namespace mcrl2 {
         static function_symbol pos2real(pos2real_name(), make_function_sort(sort_pos::pos(), real_()));
         return pos2real;
       }
+
 
       /// \brief Recogniser for function Pos2Real.
       /// \param e A data expression.
@@ -177,20 +179,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Pos2Real
-      
-      /// \param arg0 A data expression
-      /// \return Application of Pos2Real to a number of arguments
+      /// \brief Application of the function symbol Pos2Real.        
+      /// \param arg0 A data expression. 
+      /// \return Application of Pos2Real to a number of arguments.
       inline
       application pos2real(const data_expression& arg0)
       {
         return sort_real::pos2real()(arg0);
       }
 
-      /// \brief Recogniser for application of Pos2Real
-      /// \param e A data expression
+      /// \brief Recogniser for application of Pos2Real.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol pos2real to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_pos2real_application(const atermpp::aterm& e)
       {
@@ -210,8 +211,7 @@ namespace mcrl2 {
         return nat2real_name;
       }
 
-      /// \brief Constructor for function symbol Nat2Real.
-      
+      /// \brief Constructor for function symbol Nat2Real.       
       /// \return Function symbol nat2real.
       inline
       const function_symbol& nat2real()
@@ -219,6 +219,7 @@ namespace mcrl2 {
         static function_symbol nat2real(nat2real_name(), make_function_sort(sort_nat::nat(), real_()));
         return nat2real;
       }
+
 
       /// \brief Recogniser for function Nat2Real.
       /// \param e A data expression.
@@ -233,20 +234,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Nat2Real
-      
-      /// \param arg0 A data expression
-      /// \return Application of Nat2Real to a number of arguments
+      /// \brief Application of the function symbol Nat2Real.        
+      /// \param arg0 A data expression. 
+      /// \return Application of Nat2Real to a number of arguments.
       inline
       application nat2real(const data_expression& arg0)
       {
         return sort_real::nat2real()(arg0);
       }
 
-      /// \brief Recogniser for application of Nat2Real
-      /// \param e A data expression
+      /// \brief Recogniser for application of Nat2Real.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol nat2real to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_nat2real_application(const atermpp::aterm& e)
       {
@@ -266,8 +266,7 @@ namespace mcrl2 {
         return int2real_name;
       }
 
-      /// \brief Constructor for function symbol Int2Real.
-      
+      /// \brief Constructor for function symbol Int2Real.       
       /// \return Function symbol int2real.
       inline
       const function_symbol& int2real()
@@ -275,6 +274,7 @@ namespace mcrl2 {
         static function_symbol int2real(int2real_name(), make_function_sort(sort_int::int_(), real_()));
         return int2real;
       }
+
 
       /// \brief Recogniser for function Int2Real.
       /// \param e A data expression.
@@ -289,20 +289,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Int2Real
-      
-      /// \param arg0 A data expression
-      /// \return Application of Int2Real to a number of arguments
+      /// \brief Application of the function symbol Int2Real.        
+      /// \param arg0 A data expression. 
+      /// \return Application of Int2Real to a number of arguments.
       inline
       application int2real(const data_expression& arg0)
       {
         return sort_real::int2real()(arg0);
       }
 
-      /// \brief Recogniser for application of Int2Real
-      /// \param e A data expression
+      /// \brief Recogniser for application of Int2Real.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol int2real to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_int2real_application(const atermpp::aterm& e)
       {
@@ -322,8 +321,7 @@ namespace mcrl2 {
         return real2pos_name;
       }
 
-      /// \brief Constructor for function symbol Real2Pos.
-      
+      /// \brief Constructor for function symbol Real2Pos.       
       /// \return Function symbol real2pos.
       inline
       const function_symbol& real2pos()
@@ -331,6 +329,7 @@ namespace mcrl2 {
         static function_symbol real2pos(real2pos_name(), make_function_sort(real_(), sort_pos::pos()));
         return real2pos;
       }
+
 
       /// \brief Recogniser for function Real2Pos.
       /// \param e A data expression.
@@ -345,20 +344,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Real2Pos
-      
-      /// \param arg0 A data expression
-      /// \return Application of Real2Pos to a number of arguments
+      /// \brief Application of the function symbol Real2Pos.        
+      /// \param arg0 A data expression. 
+      /// \return Application of Real2Pos to a number of arguments.
       inline
       application real2pos(const data_expression& arg0)
       {
         return sort_real::real2pos()(arg0);
       }
 
-      /// \brief Recogniser for application of Real2Pos
-      /// \param e A data expression
+      /// \brief Recogniser for application of Real2Pos.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol real2pos to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_real2pos_application(const atermpp::aterm& e)
       {
@@ -378,8 +376,7 @@ namespace mcrl2 {
         return real2nat_name;
       }
 
-      /// \brief Constructor for function symbol Real2Nat.
-      
+      /// \brief Constructor for function symbol Real2Nat.       
       /// \return Function symbol real2nat.
       inline
       const function_symbol& real2nat()
@@ -387,6 +384,7 @@ namespace mcrl2 {
         static function_symbol real2nat(real2nat_name(), make_function_sort(real_(), sort_nat::nat()));
         return real2nat;
       }
+
 
       /// \brief Recogniser for function Real2Nat.
       /// \param e A data expression.
@@ -401,20 +399,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Real2Nat
-      
-      /// \param arg0 A data expression
-      /// \return Application of Real2Nat to a number of arguments
+      /// \brief Application of the function symbol Real2Nat.        
+      /// \param arg0 A data expression. 
+      /// \return Application of Real2Nat to a number of arguments.
       inline
       application real2nat(const data_expression& arg0)
       {
         return sort_real::real2nat()(arg0);
       }
 
-      /// \brief Recogniser for application of Real2Nat
-      /// \param e A data expression
+      /// \brief Recogniser for application of Real2Nat.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol real2nat to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_real2nat_application(const atermpp::aterm& e)
       {
@@ -434,8 +431,7 @@ namespace mcrl2 {
         return real2int_name;
       }
 
-      /// \brief Constructor for function symbol Real2Int.
-      
+      /// \brief Constructor for function symbol Real2Int.       
       /// \return Function symbol real2int.
       inline
       const function_symbol& real2int()
@@ -443,6 +439,7 @@ namespace mcrl2 {
         static function_symbol real2int(real2int_name(), make_function_sort(real_(), sort_int::int_()));
         return real2int;
       }
+
 
       /// \brief Recogniser for function Real2Int.
       /// \param e A data expression.
@@ -457,20 +454,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol Real2Int
-      
-      /// \param arg0 A data expression
-      /// \return Application of Real2Int to a number of arguments
+      /// \brief Application of the function symbol Real2Int.        
+      /// \param arg0 A data expression. 
+      /// \return Application of Real2Int to a number of arguments.
       inline
       application real2int(const data_expression& arg0)
       {
         return sort_real::real2int()(arg0);
       }
 
-      /// \brief Recogniser for application of Real2Int
-      /// \param e A data expression
+      /// \brief Recogniser for application of Real2Int.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol real2int to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_real2int_application(const atermpp::aterm& e)
       {
@@ -558,21 +554,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol max
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of max to a number of arguments
+      /// \brief Application of the function symbol max.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of max to a number of arguments.
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of max
-      /// \param e A data expression
+      /// \brief Recogniser for application of max.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol maximum to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_maximum_application(const atermpp::aterm& e)
       {
@@ -636,21 +631,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol min
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of min to a number of arguments
+      /// \brief Application of the function symbol min.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of min to a number of arguments.
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of min
-      /// \param e A data expression
+      /// \brief Recogniser for application of min.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol minimum to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_minimum_application(const atermpp::aterm& e)
       {
@@ -706,20 +700,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol abs
-      
-      /// \param arg0 A data expression
-      /// \return Application of abs to a number of arguments
+      /// \brief Application of the function symbol abs.        
+      /// \param arg0 A data expression. 
+      /// \return Application of abs to a number of arguments.
       inline
       application abs(const data_expression& arg0)
       {
         return sort_real::abs(arg0.sort())(arg0);
       }
 
-      /// \brief Recogniser for application of abs
-      /// \param e A data expression
+      /// \brief Recogniser for application of abs.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol abs to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_abs_application(const atermpp::aterm& e)
       {
@@ -783,20 +776,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol -
-      
-      /// \param arg0 A data expression
-      /// \return Application of - to a number of arguments
+      /// \brief Application of the function symbol -.        
+      /// \param arg0 A data expression. 
+      /// \return Application of - to a number of arguments.
       inline
       application negate(const data_expression& arg0)
       {
         return sort_real::negate(arg0.sort())(arg0);
       }
 
-      /// \brief Recogniser for application of -
-      /// \param e A data expression
+      /// \brief Recogniser for application of -.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol negate to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_negate_application(const atermpp::aterm& e)
       {
@@ -860,20 +852,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol succ
-      
-      /// \param arg0 A data expression
-      /// \return Application of succ to a number of arguments
+      /// \brief Application of the function symbol succ.        
+      /// \param arg0 A data expression. 
+      /// \return Application of succ to a number of arguments.
       inline
       application succ(const data_expression& arg0)
       {
         return sort_real::succ(arg0.sort())(arg0);
       }
 
-      /// \brief Recogniser for application of succ
-      /// \param e A data expression
+      /// \brief Recogniser for application of succ.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol succ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_succ_application(const atermpp::aterm& e)
       {
@@ -937,20 +928,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol pred
-      
-      /// \param arg0 A data expression
-      /// \return Application of pred to a number of arguments
+      /// \brief Application of the function symbol pred.        
+      /// \param arg0 A data expression. 
+      /// \return Application of pred to a number of arguments.
       inline
       application pred(const data_expression& arg0)
       {
         return sort_real::pred(arg0.sort())(arg0);
       }
 
-      /// \brief Recogniser for application of pred
-      /// \param e A data expression
+      /// \brief Recogniser for application of pred.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol pred to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_pred_application(const atermpp::aterm& e)
       {
@@ -1022,21 +1012,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol +
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of + to a number of arguments
+      /// \brief Application of the function symbol +.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of + to a number of arguments.
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of +
-      /// \param e A data expression
+      /// \brief Recogniser for application of +.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol plus to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_plus_application(const atermpp::aterm& e)
       {
@@ -1100,21 +1089,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol -
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of - to a number of arguments
+      /// \brief Application of the function symbol -.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of - to a number of arguments.
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of -
-      /// \param e A data expression
+      /// \brief Recogniser for application of -.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol minus to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_minus_application(const atermpp::aterm& e)
       {
@@ -1178,21 +1166,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol *
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of * to a number of arguments
+      /// \brief Application of the function symbol *.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of * to a number of arguments.
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of *
-      /// \param e A data expression
+      /// \brief Recogniser for application of *.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol times to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_times_application(const atermpp::aterm& e)
       {
@@ -1256,21 +1243,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol exp
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of exp to a number of arguments
+      /// \brief Application of the function symbol exp.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of exp to a number of arguments.
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of exp
-      /// \param e A data expression
+      /// \brief Recogniser for application of exp.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol exp to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_exp_application(const atermpp::aterm& e)
       {
@@ -1313,21 +1299,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol /
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of / to a number of arguments
+      /// \brief Application of the function symbol /.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of / to a number of arguments.
       inline
       application divides(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::divides(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of /
-      /// \param e A data expression
+      /// \brief Recogniser for application of /.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol divides to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_divides_application(const atermpp::aterm& e)
       {
@@ -1347,8 +1332,7 @@ namespace mcrl2 {
         return floor_name;
       }
 
-      /// \brief Constructor for function symbol floor.
-      
+      /// \brief Constructor for function symbol floor.       
       /// \return Function symbol floor.
       inline
       const function_symbol& floor()
@@ -1356,6 +1340,7 @@ namespace mcrl2 {
         static function_symbol floor(floor_name(), make_function_sort(real_(), sort_int::int_()));
         return floor;
       }
+
 
       /// \brief Recogniser for function floor.
       /// \param e A data expression.
@@ -1370,20 +1355,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol floor
-      
-      /// \param arg0 A data expression
-      /// \return Application of floor to a number of arguments
+      /// \brief Application of the function symbol floor.        
+      /// \param arg0 A data expression. 
+      /// \return Application of floor to a number of arguments.
       inline
       application floor(const data_expression& arg0)
       {
         return sort_real::floor()(arg0);
       }
 
-      /// \brief Recogniser for application of floor
-      /// \param e A data expression
+      /// \brief Recogniser for application of floor.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol floor to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_floor_application(const atermpp::aterm& e)
       {
@@ -1403,8 +1387,7 @@ namespace mcrl2 {
         return ceil_name;
       }
 
-      /// \brief Constructor for function symbol ceil.
-      
+      /// \brief Constructor for function symbol ceil.       
       /// \return Function symbol ceil.
       inline
       const function_symbol& ceil()
@@ -1412,6 +1395,7 @@ namespace mcrl2 {
         static function_symbol ceil(ceil_name(), make_function_sort(real_(), sort_int::int_()));
         return ceil;
       }
+
 
       /// \brief Recogniser for function ceil.
       /// \param e A data expression.
@@ -1426,20 +1410,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol ceil
-      
-      /// \param arg0 A data expression
-      /// \return Application of ceil to a number of arguments
+      /// \brief Application of the function symbol ceil.        
+      /// \param arg0 A data expression. 
+      /// \return Application of ceil to a number of arguments.
       inline
       application ceil(const data_expression& arg0)
       {
         return sort_real::ceil()(arg0);
       }
 
-      /// \brief Recogniser for application of ceil
-      /// \param e A data expression
+      /// \brief Recogniser for application of ceil.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol ceil to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_ceil_application(const atermpp::aterm& e)
       {
@@ -1459,8 +1442,7 @@ namespace mcrl2 {
         return round_name;
       }
 
-      /// \brief Constructor for function symbol round.
-      
+      /// \brief Constructor for function symbol round.       
       /// \return Function symbol round.
       inline
       const function_symbol& round()
@@ -1468,6 +1450,7 @@ namespace mcrl2 {
         static function_symbol round(round_name(), make_function_sort(real_(), sort_int::int_()));
         return round;
       }
+
 
       /// \brief Recogniser for function round.
       /// \param e A data expression.
@@ -1482,20 +1465,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol round
-      
-      /// \param arg0 A data expression
-      /// \return Application of round to a number of arguments
+      /// \brief Application of the function symbol round.        
+      /// \param arg0 A data expression. 
+      /// \return Application of round to a number of arguments.
       inline
       application round(const data_expression& arg0)
       {
         return sort_real::round()(arg0);
       }
 
-      /// \brief Recogniser for application of round
-      /// \param e A data expression
+      /// \brief Recogniser for application of round.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol round to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_round_application(const atermpp::aterm& e)
       {
@@ -1515,8 +1497,7 @@ namespace mcrl2 {
         return reduce_fraction_name;
       }
 
-      /// \brief Constructor for function symbol \@redfrac.
-      
+      /// \brief Constructor for function symbol \@redfrac.       
       /// \return Function symbol reduce_fraction.
       inline
       const function_symbol& reduce_fraction()
@@ -1524,6 +1505,7 @@ namespace mcrl2 {
         static function_symbol reduce_fraction(reduce_fraction_name(), make_function_sort(sort_int::int_(), sort_int::int_(), real_()));
         return reduce_fraction;
       }
+
 
       /// \brief Recogniser for function \@redfrac.
       /// \param e A data expression.
@@ -1538,21 +1520,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@redfrac
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@redfrac to a number of arguments
+      /// \brief Application of the function symbol \@redfrac.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@redfrac to a number of arguments.
       inline
       application reduce_fraction(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::reduce_fraction()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@redfrac
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@redfrac.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol reduce_fraction to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_reduce_fraction_application(const atermpp::aterm& e)
       {
@@ -1572,8 +1553,7 @@ namespace mcrl2 {
         return reduce_fraction_where_name;
       }
 
-      /// \brief Constructor for function symbol \@redfracwhr.
-      
+      /// \brief Constructor for function symbol \@redfracwhr.       
       /// \return Function symbol reduce_fraction_where.
       inline
       const function_symbol& reduce_fraction_where()
@@ -1581,6 +1561,7 @@ namespace mcrl2 {
         static function_symbol reduce_fraction_where(reduce_fraction_where_name(), make_function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_()));
         return reduce_fraction_where;
       }
+
 
       /// \brief Recogniser for function \@redfracwhr.
       /// \param e A data expression.
@@ -1595,22 +1576,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@redfracwhr
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@redfracwhr to a number of arguments
+      /// \brief Application of the function symbol \@redfracwhr.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@redfracwhr to a number of arguments.
       inline
       application reduce_fraction_where(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_real::reduce_fraction_where()(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@redfracwhr
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@redfracwhr.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol reduce_fraction_where to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_reduce_fraction_where_application(const atermpp::aterm& e)
       {
@@ -1630,8 +1610,7 @@ namespace mcrl2 {
         return reduce_fraction_helper_name;
       }
 
-      /// \brief Constructor for function symbol \@redfrachlp.
-      
+      /// \brief Constructor for function symbol \@redfrachlp.       
       /// \return Function symbol reduce_fraction_helper.
       inline
       const function_symbol& reduce_fraction_helper()
@@ -1639,6 +1618,7 @@ namespace mcrl2 {
         static function_symbol reduce_fraction_helper(reduce_fraction_helper_name(), make_function_sort(real_(), sort_int::int_(), real_()));
         return reduce_fraction_helper;
       }
+
 
       /// \brief Recogniser for function \@redfrachlp.
       /// \param e A data expression.
@@ -1653,21 +1633,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@redfrachlp
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@redfrachlp to a number of arguments
+      /// \brief Application of the function symbol \@redfrachlp.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@redfrachlp to a number of arguments.
       inline
       application reduce_fraction_helper(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_real::reduce_fraction_helper()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@redfrachlp
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@redfrachlp.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol reduce_fraction_helper to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_reduce_fraction_helper_application(const atermpp::aterm& e)
       {
@@ -1743,12 +1722,16 @@ namespace mcrl2 {
         result.push_back(sort_real::round());
         return result;
       }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for real_
-      /// \return All system defined mappings that are to be implemented in C++ code for real_
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for real_
       inline
-      function_symbol_vector real_cpp_implementable_mappings()
+      implementation_map real_cpp_implementable_mappings()
       {
-        function_symbol_vector result;
+        implementation_map result;
         return result;
       }
       ///\brief Function for projecting out argument

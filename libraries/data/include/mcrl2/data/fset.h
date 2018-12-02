@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_FSET_H
 #define MCRL2_DATA_FSET_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -67,8 +68,7 @@ namespace mcrl2 {
         return empty_name;
       }
 
-      /// \brief Constructor for function symbol {}.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol {}.       /// \param s A sort expression.
       /// \return Function symbol empty.
       inline
       function_symbol empty(const sort_expression& s)
@@ -76,6 +76,7 @@ namespace mcrl2 {
         function_symbol empty(empty_name(), fset(s));
         return empty;
       }
+
 
       /// \brief Recogniser for function {}.
       /// \param e A data expression.
@@ -99,8 +100,7 @@ namespace mcrl2 {
         return insert_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_insert.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol \@fset_insert.       /// \param s A sort expression.
       /// \return Function symbol insert.
       inline
       function_symbol insert(const sort_expression& s)
@@ -108,6 +108,7 @@ namespace mcrl2 {
         function_symbol insert(insert_name(), make_function_sort(s, fset(s), fset(s)));
         return insert;
       }
+
 
       /// \brief Recogniser for function \@fset_insert.
       /// \param e A data expression.
@@ -122,21 +123,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_insert
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@fset_insert to a number of arguments
+      /// \brief Application of the function symbol \@fset_insert.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@fset_insert to a number of arguments.
       inline
       application insert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::insert(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@fset_insert
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_insert.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol insert to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_insert_application(const atermpp::aterm& e)
       {
@@ -169,13 +169,15 @@ namespace mcrl2 {
 
         return result;
       }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for fset.
       /// \param s A sort expression.
       /// \return All system defined constructors that are to be implemented in C++ for fset.
       inline
-      function_symbol_vector fset_cpp_implementable_constructors(const sort_expression& s)
+      implementation_map fset_cpp_implementable_constructors(const sort_expression& s)
       {
-        function_symbol_vector result;
+        implementation_map result;
         static_cast< void >(s); // suppress unused variable warnings
         return result;
       }
@@ -189,8 +191,7 @@ namespace mcrl2 {
         return cons_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_cons.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol \@fset_cons.       /// \param s A sort expression.
       /// \return Function symbol cons_.
       inline
       function_symbol cons_(const sort_expression& s)
@@ -198,6 +199,7 @@ namespace mcrl2 {
         function_symbol cons_(cons_name(), make_function_sort(s, fset(s), fset(s)));
         return cons_;
       }
+
 
       /// \brief Recogniser for function \@fset_cons.
       /// \param e A data expression.
@@ -212,21 +214,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_cons
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@fset_cons to a number of arguments
+      /// \brief Application of the function symbol \@fset_cons.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@fset_cons to a number of arguments.
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::cons_(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@fset_cons
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_cons.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol cons_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_cons_application(const atermpp::aterm& e)
       {
@@ -246,8 +247,7 @@ namespace mcrl2 {
         return cinsert_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_cinsert.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol \@fset_cinsert.       /// \param s A sort expression.
       /// \return Function symbol cinsert.
       inline
       function_symbol cinsert(const sort_expression& s)
@@ -255,6 +255,7 @@ namespace mcrl2 {
         function_symbol cinsert(cinsert_name(), make_function_sort(s, sort_bool::bool_(), fset(s), fset(s)));
         return cinsert;
       }
+
 
       /// \brief Recogniser for function \@fset_cinsert.
       /// \param e A data expression.
@@ -269,22 +270,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_cinsert
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@fset_cinsert to a number of arguments
+      /// \brief Application of the function symbol \@fset_cinsert.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@fset_cinsert to a number of arguments.
       inline
       application cinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_fset::cinsert(s)(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@fset_cinsert
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_cinsert.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol cinsert to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_cinsert_application(const atermpp::aterm& e)
       {
@@ -304,8 +304,7 @@ namespace mcrl2 {
         return in_name;
       }
 
-      /// \brief Constructor for function symbol in.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol in.       /// \param s A sort expression.
       /// \return Function symbol in.
       inline
       function_symbol in(const sort_expression& s)
@@ -313,6 +312,7 @@ namespace mcrl2 {
         function_symbol in(in_name(), make_function_sort(s, fset(s), sort_bool::bool_()));
         return in;
       }
+
 
       /// \brief Recogniser for function in.
       /// \param e A data expression.
@@ -327,21 +327,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol in
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of in to a number of arguments
+      /// \brief Application of the function symbol in.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of in to a number of arguments.
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::in(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of in
-      /// \param e A data expression
+      /// \brief Recogniser for application of in.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol in to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_in_application(const atermpp::aterm& e)
       {
@@ -361,8 +360,7 @@ namespace mcrl2 {
         return fset_union_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_union.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol \@fset_union.       /// \param s A sort expression.
       /// \return Function symbol fset_union.
       inline
       function_symbol fset_union(const sort_expression& s)
@@ -370,6 +368,7 @@ namespace mcrl2 {
         function_symbol fset_union(fset_union_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
         return fset_union;
       }
+
 
       /// \brief Recogniser for function \@fset_union.
       /// \param e A data expression.
@@ -384,23 +383,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_union
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@fset_union to a number of arguments
+      /// \brief Application of the function symbol \@fset_union.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@fset_union to a number of arguments.
       inline
       application fset_union(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return sort_fset::fset_union(s)(arg0, arg1, arg2, arg3);
       }
 
-      /// \brief Recogniser for application of \@fset_union
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_union.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol fset_union to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_fset_union_application(const atermpp::aterm& e)
       {
@@ -420,8 +418,7 @@ namespace mcrl2 {
         return fset_intersection_name;
       }
 
-      /// \brief Constructor for function symbol \@fset_inter.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol \@fset_inter.       /// \param s A sort expression.
       /// \return Function symbol fset_intersection.
       inline
       function_symbol fset_intersection(const sort_expression& s)
@@ -429,6 +426,7 @@ namespace mcrl2 {
         function_symbol fset_intersection(fset_intersection_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
         return fset_intersection;
       }
+
 
       /// \brief Recogniser for function \@fset_inter.
       /// \param e A data expression.
@@ -443,23 +441,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@fset_inter
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@fset_inter to a number of arguments
+      /// \brief Application of the function symbol \@fset_inter.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@fset_inter to a number of arguments.
       inline
       application fset_intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return sort_fset::fset_intersection(s)(arg0, arg1, arg2, arg3);
       }
 
-      /// \brief Recogniser for application of \@fset_inter
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@fset_inter.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol fset_intersection to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_fset_intersection_application(const atermpp::aterm& e)
       {
@@ -479,8 +476,7 @@ namespace mcrl2 {
         return difference_name;
       }
 
-      /// \brief Constructor for function symbol -.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol -.       /// \param s A sort expression.
       /// \return Function symbol difference.
       inline
       function_symbol difference(const sort_expression& s)
@@ -488,6 +484,7 @@ namespace mcrl2 {
         function_symbol difference(difference_name(), make_function_sort(fset(s), fset(s), fset(s)));
         return difference;
       }
+
 
       /// \brief Recogniser for function -.
       /// \param e A data expression.
@@ -502,21 +499,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol -
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of - to a number of arguments
+      /// \brief Application of the function symbol -.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of - to a number of arguments.
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::difference(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of -
-      /// \param e A data expression
+      /// \brief Recogniser for application of -.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol difference to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_difference_application(const atermpp::aterm& e)
       {
@@ -536,8 +532,7 @@ namespace mcrl2 {
         return union_name;
       }
 
-      /// \brief Constructor for function symbol +.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol +.       /// \param s A sort expression.
       /// \return Function symbol union_.
       inline
       function_symbol union_(const sort_expression& s)
@@ -545,6 +540,7 @@ namespace mcrl2 {
         function_symbol union_(union_name(), make_function_sort(fset(s), fset(s), fset(s)));
         return union_;
       }
+
 
       /// \brief Recogniser for function +.
       /// \param e A data expression.
@@ -559,21 +555,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol +
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of + to a number of arguments
+      /// \brief Application of the function symbol +.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of + to a number of arguments.
       inline
       application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::union_(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of +
-      /// \param e A data expression
+      /// \brief Recogniser for application of +.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol union_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_union_application(const atermpp::aterm& e)
       {
@@ -593,8 +588,7 @@ namespace mcrl2 {
         return intersection_name;
       }
 
-      /// \brief Constructor for function symbol *.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol *.       /// \param s A sort expression.
       /// \return Function symbol intersection.
       inline
       function_symbol intersection(const sort_expression& s)
@@ -602,6 +596,7 @@ namespace mcrl2 {
         function_symbol intersection(intersection_name(), make_function_sort(fset(s), fset(s), fset(s)));
         return intersection;
       }
+
 
       /// \brief Recogniser for function *.
       /// \param e A data expression.
@@ -616,21 +611,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol *
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of * to a number of arguments
+      /// \brief Application of the function symbol *.       /// \param s A sort expression. 
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of * to a number of arguments.
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return sort_fset::intersection(s)(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of *
-      /// \param e A data expression
+      /// \brief Recogniser for application of *.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol intersection to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_intersection_application(const atermpp::aterm& e)
       {
@@ -650,8 +644,7 @@ namespace mcrl2 {
         return count_name;
       }
 
-      /// \brief Constructor for function symbol #.
-      /// \param s A sort expression
+      /// \brief Constructor for function symbol #.       /// \param s A sort expression.
       /// \return Function symbol count.
       inline
       function_symbol count(const sort_expression& s)
@@ -659,6 +652,7 @@ namespace mcrl2 {
         function_symbol count(count_name(), make_function_sort(fset(s), sort_nat::nat()));
         return count;
       }
+
 
       /// \brief Recogniser for function #.
       /// \param e A data expression.
@@ -673,20 +667,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol #
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \return Application of # to a number of arguments
+      /// \brief Application of the function symbol #.       /// \param s A sort expression. 
+      /// \param arg0 A data expression. 
+      /// \return Application of # to a number of arguments.
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
         return sort_fset::count(s)(arg0);
       }
 
-      /// \brief Recogniser for application of #
-      /// \param e A data expression
+      /// \brief Recogniser for application of #.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol count to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_count_application(const atermpp::aterm& e)
       {
@@ -728,13 +721,17 @@ namespace mcrl2 {
         result.push_back(sort_fset::count(s));
         return result;
       }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for fset
       /// \param s A sort expression
-      /// \return All system defined mappings that are to be implemented in C++ code for fset
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for fset
       inline
-      function_symbol_vector fset_cpp_implementable_mappings(const sort_expression& s)
+      implementation_map fset_cpp_implementable_mappings(const sort_expression& s)
       {
-        function_symbol_vector result;
+        implementation_map result;
         static_cast< void >(s); // suppress unused variable warnings
         return result;
       }

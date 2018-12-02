@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_BOOL_H
 #define MCRL2_DATA_BOOL_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -69,8 +70,7 @@ namespace mcrl2 {
         return true_name;
       }
 
-      /// \brief Constructor for function symbol true.
-      
+      /// \brief Constructor for function symbol true.       
       /// \return Function symbol true_.
       inline
       const function_symbol& true_()
@@ -78,6 +78,7 @@ namespace mcrl2 {
         static function_symbol true_(true_name(), bool_());
         return true_;
       }
+
 
       /// \brief Recogniser for function true.
       /// \param e A data expression.
@@ -101,8 +102,7 @@ namespace mcrl2 {
         return false_name;
       }
 
-      /// \brief Constructor for function symbol false.
-      
+      /// \brief Constructor for function symbol false.       
       /// \return Function symbol false_.
       inline
       const function_symbol& false_()
@@ -110,6 +110,7 @@ namespace mcrl2 {
         static function_symbol false_(false_name(), bool_());
         return false_;
       }
+
 
       /// \brief Recogniser for function false.
       /// \param e A data expression.
@@ -145,12 +146,14 @@ namespace mcrl2 {
 
         return result;
       }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for bool_.
       /// \return All system defined constructors that are to be implemented in C++ for bool_.
       inline
-      function_symbol_vector bool_cpp_implementable_constructors()
+      implementation_map bool_cpp_implementable_constructors()
       {
-        function_symbol_vector result;
+        implementation_map result;
         return result;
       }
 
@@ -163,8 +166,7 @@ namespace mcrl2 {
         return not_name;
       }
 
-      /// \brief Constructor for function symbol !.
-      
+      /// \brief Constructor for function symbol !.       
       /// \return Function symbol not_.
       inline
       const function_symbol& not_()
@@ -172,6 +174,7 @@ namespace mcrl2 {
         static function_symbol not_(not_name(), make_function_sort(bool_(), bool_()));
         return not_;
       }
+
 
       /// \brief Recogniser for function !.
       /// \param e A data expression.
@@ -186,20 +189,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol !
-      
-      /// \param arg0 A data expression
-      /// \return Application of ! to a number of arguments
+      /// \brief Application of the function symbol !.        
+      /// \param arg0 A data expression. 
+      /// \return Application of ! to a number of arguments.
       inline
       application not_(const data_expression& arg0)
       {
         return sort_bool::not_()(arg0);
       }
 
-      /// \brief Recogniser for application of !
-      /// \param e A data expression
+      /// \brief Recogniser for application of !.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol not_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_not_application(const atermpp::aterm& e)
       {
@@ -219,8 +221,7 @@ namespace mcrl2 {
         return and_name;
       }
 
-      /// \brief Constructor for function symbol &&.
-      
+      /// \brief Constructor for function symbol &&.       
       /// \return Function symbol and_.
       inline
       const function_symbol& and_()
@@ -228,6 +229,7 @@ namespace mcrl2 {
         static function_symbol and_(and_name(), make_function_sort(bool_(), bool_(), bool_()));
         return and_;
       }
+
 
       /// \brief Recogniser for function &&.
       /// \param e A data expression.
@@ -242,21 +244,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol &&
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of && to a number of arguments
+      /// \brief Application of the function symbol &&.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of && to a number of arguments.
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::and_()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of &&
-      /// \param e A data expression
+      /// \brief Recogniser for application of &&.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol and_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_and_application(const atermpp::aterm& e)
       {
@@ -276,8 +277,7 @@ namespace mcrl2 {
         return or_name;
       }
 
-      /// \brief Constructor for function symbol ||.
-      
+      /// \brief Constructor for function symbol ||.       
       /// \return Function symbol or_.
       inline
       const function_symbol& or_()
@@ -285,6 +285,7 @@ namespace mcrl2 {
         static function_symbol or_(or_name(), make_function_sort(bool_(), bool_(), bool_()));
         return or_;
       }
+
 
       /// \brief Recogniser for function ||.
       /// \param e A data expression.
@@ -299,21 +300,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol ||
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of || to a number of arguments
+      /// \brief Application of the function symbol ||.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of || to a number of arguments.
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::or_()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of ||
-      /// \param e A data expression
+      /// \brief Recogniser for application of ||.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol or_ to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_or_application(const atermpp::aterm& e)
       {
@@ -333,8 +333,7 @@ namespace mcrl2 {
         return implies_name;
       }
 
-      /// \brief Constructor for function symbol =>.
-      
+      /// \brief Constructor for function symbol =>.       
       /// \return Function symbol implies.
       inline
       const function_symbol& implies()
@@ -342,6 +341,7 @@ namespace mcrl2 {
         static function_symbol implies(implies_name(), make_function_sort(bool_(), bool_(), bool_()));
         return implies;
       }
+
 
       /// \brief Recogniser for function =>.
       /// \param e A data expression.
@@ -356,21 +356,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol =>
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of => to a number of arguments
+      /// \brief Application of the function symbol =>.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of => to a number of arguments.
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_bool::implies()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of =>
-      /// \param e A data expression
+      /// \brief Recogniser for application of =>.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol implies to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_implies_application(const atermpp::aterm& e)
       {
@@ -404,12 +403,16 @@ namespace mcrl2 {
         result.push_back(sort_bool::implies());
         return result;
       }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for bool_
-      /// \return All system defined mappings that are to be implemented in C++ code for bool_
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for bool_
       inline
-      function_symbol_vector bool_cpp_implementable_mappings()
+      implementation_map bool_cpp_implementable_mappings()
       {
-        function_symbol_vector result;
+        implementation_map result;
         return result;
       }
       ///\brief Function for projecting out argument

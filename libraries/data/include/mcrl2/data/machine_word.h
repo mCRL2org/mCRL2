@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_MACHINE_WORD_H
 #define MCRL2_DATA_MACHINE_WORD_H
 
+#include "functional"    // std::function
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -64,116 +65,127 @@ namespace mcrl2 {
       /// \brief Generate identifier \@zero_word.
       /// \return Identifier \@zero_word.
       inline
-      const core::identifier_string& zero64_name()
+      const core::identifier_string& zero_word_name()
       {
-        static core::identifier_string zero64_name = core::identifier_string("@zero_word");
-        return zero64_name;
+        static core::identifier_string zero_word_name = core::identifier_string("@zero_word");
+        return zero_word_name;
       }
 
-      /// \brief Constructor for function symbol \@zero_word.
-      
-      /// \return Function symbol zero64.
+      /// \brief Constructor for function symbol \@zero_word.       
+      /// \return Function symbol zero_word.
       inline
-      const function_symbol& zero64()
+      const function_symbol& zero_word()
       {
-        static function_symbol zero64(zero64_name(), machine_word());
-        return zero64;
+        static function_symbol zero_word(zero_word_name(), machine_word());
+        return zero_word;
       }
+
 
       /// \brief Recogniser for function \@zero_word.
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@zero_word.
       inline
-      bool is_zero64_function_symbol(const atermpp::aterm& e)
+      bool is_zero_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == zero64();
+          return atermpp::down_cast<function_symbol>(e) == zero_word();
         }
         return false;
       }
 
-      /// \brief Function prototype that implements @zero_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol zero64 to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the constant symbol \@zero_word.
+      /// \details This function is to be implemented manually.       
+      /// \return The data expression corresponding to an application of \@zero_word to a number of arguments.
       inline
-      application zero64(const atermpp::aterm& e);
-   
+      const data_expression& zero_word_manual_implementation();
+
+      inline
+      data_expression zero_word_application(const application& a)
+      {
+        static_cast< void >(a); // suppress unused variable warning.
+        assert(a.head()==zero_word());
+        return zero_word_manual_implementation();
+      }
+
 
       /// \brief Generate identifier \@succ_word.
       /// \return Identifier \@succ_word.
       inline
-      const core::identifier_string& succ64_name()
+      const core::identifier_string& succ_word_name()
       {
-        static core::identifier_string succ64_name = core::identifier_string("@succ_word");
-        return succ64_name;
+        static core::identifier_string succ_word_name = core::identifier_string("@succ_word");
+        return succ_word_name;
       }
 
-      /// \brief Constructor for function symbol \@succ_word.
-      
-      /// \return Function symbol succ64.
+      /// \brief Constructor for function symbol \@succ_word.       
+      /// \return Function symbol succ_word.
       inline
-      const function_symbol& succ64()
+      const function_symbol& succ_word()
       {
-        static function_symbol succ64(succ64_name(), make_function_sort(machine_word(), machine_word()));
-        return succ64;
+        static function_symbol succ_word(succ_word_name(), make_function_sort(machine_word(), machine_word()));
+        return succ_word;
       }
+
 
       /// \brief Recogniser for function \@succ_word.
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@succ_word.
       inline
-      bool is_succ64_function_symbol(const atermpp::aterm& e)
+      bool is_succ_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == succ64();
+          return atermpp::down_cast<function_symbol>(e) == succ_word();
         }
         return false;
       }
 
-      /// \brief Application of function symbol \@succ_word
-      
-      /// \param arg0 A data expression
-      /// \return Application of \@succ_word to a number of arguments
+      /// \brief Application of the function symbol \@succ_word.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@succ_word to a number of arguments.
       inline
-      application succ64(const data_expression& arg0)
+      application succ_word(const data_expression& arg0)
       {
-        return sort_machine_word::succ64()(arg0);
+        return sort_machine_word::succ_word()(arg0);
       }
 
-      /// \brief Recogniser for application of \@succ_word
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol succ64 to a
-      ///     number of arguments
+      /// \brief Recogniser for application of \@succ_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol succ_word to a
+      ///     number of arguments.
       inline
-      bool is_succ64_application(const atermpp::aterm& e)
+      bool is_succ_word_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_succ64_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_succ_word_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
 
-      /// \brief Function prototype that implements @succ_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol succ64 to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@succ_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@succ_word to a number of arguments.
       inline
-      application succ64(const atermpp::aterm& e);
-   
+      data_expression succ_word_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression succ_word_application(const application& a)
+      {
+        assert(a.head()==succ_word());
+        return succ_word_manual_implementation(a[0]);
+      }
+
       /// \brief Give all system defined constructors for machine_word.
       /// \return All system defined constructors for machine_word.
       inline
       function_symbol_vector machine_word_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(sort_machine_word::zero64());
-        result.push_back(sort_machine_word::succ64());
+        result.push_back(sort_machine_word::zero_word());
+        result.push_back(sort_machine_word::succ_word());
 
         return result;
       }
@@ -185,14 +197,16 @@ namespace mcrl2 {
         function_symbol_vector result;
         return result;
       }
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for machine_word.
       /// \return All system defined constructors that are to be implemented in C++ for machine_word.
       inline
-      function_symbol_vector machine_word_cpp_implementable_constructors()
+      implementation_map machine_word_cpp_implementable_constructors()
       {
-        function_symbol_vector result;
-        result.push_back(sort_machine_word::zero64());
-        result.push_back(sort_machine_word::succ64());
+        implementation_map result;
+        result[sort_machine_word::zero_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::zero_word_application,"sort_machine_word::zero_word");
+        result[sort_machine_word::succ_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::succ_word_application,"sort_machine_word::succ_word");
 
         return result;
       }
@@ -206,8 +220,7 @@ namespace mcrl2 {
         return one_word_name;
       }
 
-      /// \brief Constructor for function symbol \@one_word.
-      
+      /// \brief Constructor for function symbol \@one_word.       
       /// \return Function symbol one_word.
       inline
       const function_symbol& one_word()
@@ -215,6 +228,7 @@ namespace mcrl2 {
         static function_symbol one_word(one_word_name(), machine_word());
         return one_word;
       }
+
 
       /// \brief Recogniser for function \@one_word.
       /// \param e A data expression.
@@ -229,14 +243,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @one_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol one_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the constant symbol \@one_word.
+      /// \details This function is to be implemented manually.       
+      /// \return The data expression corresponding to an application of \@one_word to a number of arguments.
       inline
-      application one_word(const atermpp::aterm& e);
-   
+      const data_expression& one_word_manual_implementation();
+
+      inline
+      data_expression one_word_application(const application& a)
+      {
+        static_cast< void >(a); // suppress unused variable warning.
+        assert(a.head()==one_word());
+        return one_word_manual_implementation();
+      }
+
 
       /// \brief Generate identifier \@max_word.
       /// \return Identifier \@max_word.
@@ -247,8 +267,7 @@ namespace mcrl2 {
         return max_word_name;
       }
 
-      /// \brief Constructor for function symbol \@max_word.
-      
+      /// \brief Constructor for function symbol \@max_word.       
       /// \return Function symbol max_word.
       inline
       const function_symbol& max_word()
@@ -256,6 +275,7 @@ namespace mcrl2 {
         static function_symbol max_word(max_word_name(), machine_word());
         return max_word;
       }
+
 
       /// \brief Recogniser for function \@max_word.
       /// \param e A data expression.
@@ -270,14 +290,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @max_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol max_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the constant symbol \@max_word.
+      /// \details This function is to be implemented manually.       
+      /// \return The data expression corresponding to an application of \@max_word to a number of arguments.
       inline
-      application max_word(const atermpp::aterm& e);
-   
+      const data_expression& max_word_manual_implementation();
+
+      inline
+      data_expression max_word_application(const application& a)
+      {
+        static_cast< void >(a); // suppress unused variable warning.
+        assert(a.head()==max_word());
+        return max_word_manual_implementation();
+      }
+
 
       /// \brief Generate identifier \@add_word.
       /// \return Identifier \@add_word.
@@ -288,8 +314,7 @@ namespace mcrl2 {
         return add_word_name;
       }
 
-      /// \brief Constructor for function symbol \@add_word.
-      
+      /// \brief Constructor for function symbol \@add_word.       
       /// \return Function symbol add_word.
       inline
       const function_symbol& add_word()
@@ -297,6 +322,7 @@ namespace mcrl2 {
         static function_symbol add_word(add_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return add_word;
       }
+
 
       /// \brief Recogniser for function \@add_word.
       /// \param e A data expression.
@@ -311,21 +337,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@add_word
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@add_word to a number of arguments
+      /// \brief Application of the function symbol \@add_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@add_word to a number of arguments.
       inline
       application add_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::add_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@add_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@add_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol add_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_add_word_application(const atermpp::aterm& e)
       {
@@ -336,14 +361,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @add_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol add_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@add_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@add_word to a number of arguments.
       inline
-      application add_word(const atermpp::aterm& e);
-   
+      data_expression add_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression add_word_application(const application& a)
+      {
+        assert(a.head()==add_word());
+        return add_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@add_overflow_word.
       /// \return Identifier \@add_overflow_word.
@@ -354,8 +386,7 @@ namespace mcrl2 {
         return add_overflow_name;
       }
 
-      /// \brief Constructor for function symbol \@add_overflow_word.
-      
+      /// \brief Constructor for function symbol \@add_overflow_word.       
       /// \return Function symbol add_overflow.
       inline
       const function_symbol& add_overflow()
@@ -363,6 +394,7 @@ namespace mcrl2 {
         static function_symbol add_overflow(add_overflow_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return add_overflow;
       }
+
 
       /// \brief Recogniser for function \@add_overflow_word.
       /// \param e A data expression.
@@ -377,21 +409,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@add_overflow_word
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@add_overflow_word to a number of arguments
+      /// \brief Application of the function symbol \@add_overflow_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@add_overflow_word to a number of arguments.
       inline
       application add_overflow(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::add_overflow()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@add_overflow_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@add_overflow_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol add_overflow to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_add_overflow_application(const atermpp::aterm& e)
       {
@@ -402,14 +433,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @add_overflow_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol add_overflow to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@add_overflow_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@add_overflow_word to a number of arguments.
       inline
-      application add_overflow(const atermpp::aterm& e);
-   
+      data_expression add_overflow_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression add_overflow_application(const application& a)
+      {
+        assert(a.head()==add_overflow());
+        return add_overflow_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@times_word.
       /// \return Identifier \@times_word.
@@ -420,8 +458,7 @@ namespace mcrl2 {
         return times_word_name;
       }
 
-      /// \brief Constructor for function symbol \@times_word.
-      
+      /// \brief Constructor for function symbol \@times_word.       
       /// \return Function symbol times_word.
       inline
       const function_symbol& times_word()
@@ -429,6 +466,7 @@ namespace mcrl2 {
         static function_symbol times_word(times_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return times_word;
       }
+
 
       /// \brief Recogniser for function \@times_word.
       /// \param e A data expression.
@@ -443,21 +481,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@times_word
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@times_word to a number of arguments
+      /// \brief Application of the function symbol \@times_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@times_word to a number of arguments.
       inline
       application times_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::times_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@times_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@times_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol times_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_times_word_application(const atermpp::aterm& e)
       {
@@ -468,14 +505,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @times_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol times_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@times_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@times_word to a number of arguments.
       inline
-      application times_word(const atermpp::aterm& e);
-   
+      data_expression times_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression times_word_application(const application& a)
+      {
+        assert(a.head()==times_word());
+        return times_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@times_overflow_word.
       /// \return Identifier \@times_overflow_word.
@@ -486,8 +530,7 @@ namespace mcrl2 {
         return timew_overflow_word_name;
       }
 
-      /// \brief Constructor for function symbol \@times_overflow_word.
-      
+      /// \brief Constructor for function symbol \@times_overflow_word.       
       /// \return Function symbol timew_overflow_word.
       inline
       const function_symbol& timew_overflow_word()
@@ -495,6 +538,7 @@ namespace mcrl2 {
         static function_symbol timew_overflow_word(timew_overflow_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return timew_overflow_word;
       }
+
 
       /// \brief Recogniser for function \@times_overflow_word.
       /// \param e A data expression.
@@ -509,21 +553,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@times_overflow_word
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@times_overflow_word to a number of arguments
+      /// \brief Application of the function symbol \@times_overflow_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@times_overflow_word to a number of arguments.
       inline
       application timew_overflow_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::timew_overflow_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@times_overflow_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@times_overflow_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol timew_overflow_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_timew_overflow_word_application(const atermpp::aterm& e)
       {
@@ -534,14 +577,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @times_overflow_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol timew_overflow_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@times_overflow_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@times_overflow_word to a number of arguments.
       inline
-      application timew_overflow_word(const atermpp::aterm& e);
-   
+      data_expression timew_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression timew_overflow_word_application(const application& a)
+      {
+        assert(a.head()==timew_overflow_word());
+        return timew_overflow_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@minus_word.
       /// \return Identifier \@minus_word.
@@ -552,8 +602,7 @@ namespace mcrl2 {
         return minus_word_name;
       }
 
-      /// \brief Constructor for function symbol \@minus_word.
-      
+      /// \brief Constructor for function symbol \@minus_word.       
       /// \return Function symbol minus_word.
       inline
       const function_symbol& minus_word()
@@ -561,6 +610,7 @@ namespace mcrl2 {
         static function_symbol minus_word(minus_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return minus_word;
       }
+
 
       /// \brief Recogniser for function \@minus_word.
       /// \param e A data expression.
@@ -575,21 +625,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@minus_word
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@minus_word to a number of arguments
+      /// \brief Application of the function symbol \@minus_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@minus_word to a number of arguments.
       inline
       application minus_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::minus_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@minus_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@minus_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol minus_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_minus_word_application(const atermpp::aterm& e)
       {
@@ -600,14 +649,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @minus_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol minus_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@minus_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@minus_word to a number of arguments.
       inline
-      application minus_word(const atermpp::aterm& e);
-   
+      data_expression minus_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression minus_word_application(const application& a)
+      {
+        assert(a.head()==minus_word());
+        return minus_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@div_word.
       /// \return Identifier \@div_word.
@@ -618,8 +674,7 @@ namespace mcrl2 {
         return div_word_name;
       }
 
-      /// \brief Constructor for function symbol \@div_word.
-      
+      /// \brief Constructor for function symbol \@div_word.       
       /// \return Function symbol div_word.
       inline
       const function_symbol& div_word()
@@ -627,6 +682,7 @@ namespace mcrl2 {
         static function_symbol div_word(div_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return div_word;
       }
+
 
       /// \brief Recogniser for function \@div_word.
       /// \param e A data expression.
@@ -641,21 +697,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@div_word
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@div_word to a number of arguments
+      /// \brief Application of the function symbol \@div_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@div_word to a number of arguments.
       inline
       application div_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::div_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@div_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@div_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol div_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_div_word_application(const atermpp::aterm& e)
       {
@@ -666,14 +721,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @div_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol div_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@div_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@div_word to a number of arguments.
       inline
-      application div_word(const atermpp::aterm& e);
-   
+      data_expression div_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression div_word_application(const application& a)
+      {
+        assert(a.head()==div_word());
+        return div_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@mod_word.
       /// \return Identifier \@mod_word.
@@ -684,8 +746,7 @@ namespace mcrl2 {
         return mod_word_name;
       }
 
-      /// \brief Constructor for function symbol \@mod_word.
-      
+      /// \brief Constructor for function symbol \@mod_word.       
       /// \return Function symbol mod_word.
       inline
       const function_symbol& mod_word()
@@ -693,6 +754,7 @@ namespace mcrl2 {
         static function_symbol mod_word(mod_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return mod_word;
       }
+
 
       /// \brief Recogniser for function \@mod_word.
       /// \param e A data expression.
@@ -707,21 +769,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@mod_word
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@mod_word to a number of arguments
+      /// \brief Application of the function symbol \@mod_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@mod_word to a number of arguments.
       inline
       application mod_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::mod_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@mod_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@mod_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol mod_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_mod_word_application(const atermpp::aterm& e)
       {
@@ -732,14 +793,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @mod_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol mod_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@mod_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@mod_word to a number of arguments.
       inline
-      application mod_word(const atermpp::aterm& e);
-   
+      data_expression mod_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression mod_word_application(const application& a)
+      {
+        assert(a.head()==mod_word());
+        return mod_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@sqrt_word.
       /// \return Identifier \@sqrt_word.
@@ -750,8 +818,7 @@ namespace mcrl2 {
         return sqrt_word_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_word.
-      
+      /// \brief Constructor for function symbol \@sqrt_word.       
       /// \return Function symbol sqrt_word.
       inline
       const function_symbol& sqrt_word()
@@ -759,6 +826,7 @@ namespace mcrl2 {
         static function_symbol sqrt_word(sqrt_word_name(), make_function_sort(machine_word(), machine_word()));
         return sqrt_word;
       }
+
 
       /// \brief Recogniser for function \@sqrt_word.
       /// \param e A data expression.
@@ -773,20 +841,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@sqrt_word
-      
-      /// \param arg0 A data expression
-      /// \return Application of \@sqrt_word to a number of arguments
+      /// \brief Application of the function symbol \@sqrt_word.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@sqrt_word to a number of arguments.
       inline
       application sqrt_word(const data_expression& arg0)
       {
         return sort_machine_word::sqrt_word()(arg0);
       }
 
-      /// \brief Recogniser for application of \@sqrt_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@sqrt_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol sqrt_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_sqrt_word_application(const atermpp::aterm& e)
       {
@@ -797,14 +864,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @sqrt_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol sqrt_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@sqrt_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@sqrt_word to a number of arguments.
       inline
-      application sqrt_word(const atermpp::aterm& e);
-   
+      data_expression sqrt_word_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression sqrt_word_application(const application& a)
+      {
+        assert(a.head()==sqrt_word());
+        return sqrt_word_manual_implementation(a[0]);
+      }
+
 
       /// \brief Generate identifier \@div_doubleword.
       /// \return Identifier \@div_doubleword.
@@ -815,8 +888,7 @@ namespace mcrl2 {
         return div_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@div_doubleword.
-      
+      /// \brief Constructor for function symbol \@div_doubleword.       
       /// \return Function symbol div_doubleword.
       inline
       const function_symbol& div_doubleword()
@@ -824,6 +896,7 @@ namespace mcrl2 {
         static function_symbol div_doubleword(div_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return div_doubleword;
       }
+
 
       /// \brief Recogniser for function \@div_doubleword.
       /// \param e A data expression.
@@ -838,22 +911,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@div_doubleword
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@div_doubleword to a number of arguments
+      /// \brief Application of the function symbol \@div_doubleword.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@div_doubleword to a number of arguments.
       inline
       application div_doubleword(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_machine_word::div_doubleword()(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@div_doubleword
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@div_doubleword.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol div_doubleword to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_div_doubleword_application(const atermpp::aterm& e)
       {
@@ -864,14 +936,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @div_doubleword..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol div_doubleword to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@div_doubleword.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \return The data expression corresponding to an application of \@div_doubleword to a number of arguments.
       inline
-      application div_doubleword(const atermpp::aterm& e);
-   
+      data_expression div_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+
+
+      inline
+      data_expression div_doubleword_application(const application& a)
+      {
+        assert(a.head()==div_doubleword());
+        return div_doubleword_manual_implementation(a[0], a[1], a[2]);
+      }
+
 
       /// \brief Generate identifier \@div_double_doubleword.
       /// \return Identifier \@div_double_doubleword.
@@ -882,8 +962,7 @@ namespace mcrl2 {
         return div_double_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@div_double_doubleword.
-      
+      /// \brief Constructor for function symbol \@div_double_doubleword.       
       /// \return Function symbol div_double_doubleword.
       inline
       const function_symbol& div_double_doubleword()
@@ -891,6 +970,7 @@ namespace mcrl2 {
         static function_symbol div_double_doubleword(div_double_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return div_double_doubleword;
       }
+
 
       /// \brief Recogniser for function \@div_double_doubleword.
       /// \param e A data expression.
@@ -905,23 +985,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@div_double_doubleword
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@div_double_doubleword to a number of arguments
+      /// \brief Application of the function symbol \@div_double_doubleword.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@div_double_doubleword to a number of arguments.
       inline
       application div_double_doubleword(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return sort_machine_word::div_double_doubleword()(arg0, arg1, arg2, arg3);
       }
 
-      /// \brief Recogniser for application of \@div_double_doubleword
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@div_double_doubleword.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol div_double_doubleword to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_div_double_doubleword_application(const atermpp::aterm& e)
       {
@@ -932,14 +1011,23 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @div_double_doubleword..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol div_double_doubleword to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@div_double_doubleword.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \return The data expression corresponding to an application of \@div_double_doubleword to a number of arguments.
       inline
-      application div_double_doubleword(const atermpp::aterm& e);
-   
+      data_expression div_double_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
+
+
+      inline
+      data_expression div_double_doubleword_application(const application& a)
+      {
+        assert(a.head()==div_double_doubleword());
+        return div_double_doubleword_manual_implementation(a[0], a[1], a[2], a[3]);
+      }
+
 
       /// \brief Generate identifier \@div_triple_doubleword.
       /// \return Identifier \@div_triple_doubleword.
@@ -950,8 +1038,7 @@ namespace mcrl2 {
         return div_triple_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@div_triple_doubleword.
-      
+      /// \brief Constructor for function symbol \@div_triple_doubleword.       
       /// \return Function symbol div_triple_doubleword.
       inline
       const function_symbol& div_triple_doubleword()
@@ -959,6 +1046,7 @@ namespace mcrl2 {
         static function_symbol div_triple_doubleword(div_triple_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return div_triple_doubleword;
       }
+
 
       /// \brief Recogniser for function \@div_triple_doubleword.
       /// \param e A data expression.
@@ -973,24 +1061,23 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@div_triple_doubleword
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \param arg4 A data expression
-      /// \return Application of \@div_triple_doubleword to a number of arguments
+      /// \brief Application of the function symbol \@div_triple_doubleword.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \param arg4 A data expression. 
+      /// \return Application of \@div_triple_doubleword to a number of arguments.
       inline
       application div_triple_doubleword(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4)
       {
         return sort_machine_word::div_triple_doubleword()(arg0, arg1, arg2, arg3, arg4);
       }
 
-      /// \brief Recogniser for application of \@div_triple_doubleword
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@div_triple_doubleword.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol div_triple_doubleword to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_div_triple_doubleword_application(const atermpp::aterm& e)
       {
@@ -1001,14 +1088,24 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @div_triple_doubleword..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol div_triple_doubleword to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@div_triple_doubleword.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \param arg4 A data expression.
+      /// \return The data expression corresponding to an application of \@div_triple_doubleword to a number of arguments.
       inline
-      application div_triple_doubleword(const atermpp::aterm& e);
-   
+      data_expression div_triple_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4);
+
+
+      inline
+      data_expression div_triple_doubleword_application(const application& a)
+      {
+        assert(a.head()==div_triple_doubleword());
+        return div_triple_doubleword_manual_implementation(a[0], a[1], a[2], a[3], a[4]);
+      }
+
 
       /// \brief Generate identifier \@mod_doubleword.
       /// \return Identifier \@mod_doubleword.
@@ -1019,8 +1116,7 @@ namespace mcrl2 {
         return mod_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@mod_doubleword.
-      
+      /// \brief Constructor for function symbol \@mod_doubleword.       
       /// \return Function symbol mod_doubleword.
       inline
       const function_symbol& mod_doubleword()
@@ -1028,6 +1124,7 @@ namespace mcrl2 {
         static function_symbol mod_doubleword(mod_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return mod_doubleword;
       }
+
 
       /// \brief Recogniser for function \@mod_doubleword.
       /// \param e A data expression.
@@ -1042,22 +1139,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@mod_doubleword
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@mod_doubleword to a number of arguments
+      /// \brief Application of the function symbol \@mod_doubleword.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@mod_doubleword to a number of arguments.
       inline
       application mod_doubleword(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_machine_word::mod_doubleword()(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@mod_doubleword
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@mod_doubleword.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol mod_doubleword to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_mod_doubleword_application(const atermpp::aterm& e)
       {
@@ -1068,14 +1164,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @mod_doubleword..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol mod_doubleword to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@mod_doubleword.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \return The data expression corresponding to an application of \@mod_doubleword to a number of arguments.
       inline
-      application mod_doubleword(const atermpp::aterm& e);
-   
+      data_expression mod_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+
+
+      inline
+      data_expression mod_doubleword_application(const application& a)
+      {
+        assert(a.head()==mod_doubleword());
+        return mod_doubleword_manual_implementation(a[0], a[1], a[2]);
+      }
+
 
       /// \brief Generate identifier \@sqrt_doubleword.
       /// \return Identifier \@sqrt_doubleword.
@@ -1086,8 +1190,7 @@ namespace mcrl2 {
         return sqrt_doubleword_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_doubleword.
-      
+      /// \brief Constructor for function symbol \@sqrt_doubleword.       
       /// \return Function symbol sqrt_doubleword.
       inline
       const function_symbol& sqrt_doubleword()
@@ -1095,6 +1198,7 @@ namespace mcrl2 {
         static function_symbol sqrt_doubleword(sqrt_doubleword_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
         return sqrt_doubleword;
       }
+
 
       /// \brief Recogniser for function \@sqrt_doubleword.
       /// \param e A data expression.
@@ -1109,21 +1213,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@sqrt_doubleword
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@sqrt_doubleword to a number of arguments
+      /// \brief Application of the function symbol \@sqrt_doubleword.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@sqrt_doubleword to a number of arguments.
       inline
       application sqrt_doubleword(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::sqrt_doubleword()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@sqrt_doubleword
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@sqrt_doubleword.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol sqrt_doubleword to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_sqrt_doubleword_application(const atermpp::aterm& e)
       {
@@ -1134,14 +1237,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @sqrt_doubleword..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol sqrt_doubleword to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@sqrt_doubleword.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@sqrt_doubleword to a number of arguments.
       inline
-      application sqrt_doubleword(const atermpp::aterm& e);
-   
+      data_expression sqrt_doubleword_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression sqrt_doubleword_application(const application& a)
+      {
+        assert(a.head()==sqrt_doubleword());
+        return sqrt_doubleword_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@sqrt_tripleword.
       /// \return Identifier \@sqrt_tripleword.
@@ -1152,8 +1262,7 @@ namespace mcrl2 {
         return sqrt_tripleword_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_tripleword.
-      
+      /// \brief Constructor for function symbol \@sqrt_tripleword.       
       /// \return Function symbol sqrt_tripleword.
       inline
       const function_symbol& sqrt_tripleword()
@@ -1161,6 +1270,7 @@ namespace mcrl2 {
         static function_symbol sqrt_tripleword(sqrt_tripleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_tripleword;
       }
+
 
       /// \brief Recogniser for function \@sqrt_tripleword.
       /// \param e A data expression.
@@ -1175,22 +1285,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@sqrt_tripleword
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@sqrt_tripleword to a number of arguments
+      /// \brief Application of the function symbol \@sqrt_tripleword.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@sqrt_tripleword to a number of arguments.
       inline
       application sqrt_tripleword(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_machine_word::sqrt_tripleword()(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@sqrt_tripleword
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@sqrt_tripleword.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol sqrt_tripleword to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_sqrt_tripleword_application(const atermpp::aterm& e)
       {
@@ -1201,14 +1310,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @sqrt_tripleword..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol sqrt_tripleword to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@sqrt_tripleword.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \return The data expression corresponding to an application of \@sqrt_tripleword to a number of arguments.
       inline
-      application sqrt_tripleword(const atermpp::aterm& e);
-   
+      data_expression sqrt_tripleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+
+
+      inline
+      data_expression sqrt_tripleword_application(const application& a)
+      {
+        assert(a.head()==sqrt_tripleword());
+        return sqrt_tripleword_manual_implementation(a[0], a[1], a[2]);
+      }
+
 
       /// \brief Generate identifier \@sqrt_tripleword_overflow.
       /// \return Identifier \@sqrt_tripleword_overflow.
@@ -1219,8 +1336,7 @@ namespace mcrl2 {
         return sqrt_tripleword_overflow_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_tripleword_overflow.
-      
+      /// \brief Constructor for function symbol \@sqrt_tripleword_overflow.       
       /// \return Function symbol sqrt_tripleword_overflow.
       inline
       const function_symbol& sqrt_tripleword_overflow()
@@ -1228,6 +1344,7 @@ namespace mcrl2 {
         static function_symbol sqrt_tripleword_overflow(sqrt_tripleword_overflow_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_tripleword_overflow;
       }
+
 
       /// \brief Recogniser for function \@sqrt_tripleword_overflow.
       /// \param e A data expression.
@@ -1242,22 +1359,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@sqrt_tripleword_overflow
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@sqrt_tripleword_overflow to a number of arguments
+      /// \brief Application of the function symbol \@sqrt_tripleword_overflow.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@sqrt_tripleword_overflow to a number of arguments.
       inline
       application sqrt_tripleword_overflow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return sort_machine_word::sqrt_tripleword_overflow()(arg0, arg1, arg2);
       }
 
-      /// \brief Recogniser for application of \@sqrt_tripleword_overflow
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@sqrt_tripleword_overflow.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol sqrt_tripleword_overflow to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_sqrt_tripleword_overflow_application(const atermpp::aterm& e)
       {
@@ -1268,14 +1384,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @sqrt_tripleword_overflow..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol sqrt_tripleword_overflow to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@sqrt_tripleword_overflow.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \return The data expression corresponding to an application of \@sqrt_tripleword_overflow to a number of arguments.
       inline
-      application sqrt_tripleword_overflow(const atermpp::aterm& e);
-   
+      data_expression sqrt_tripleword_overflow_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+
+
+      inline
+      data_expression sqrt_tripleword_overflow_application(const application& a)
+      {
+        assert(a.head()==sqrt_tripleword_overflow());
+        return sqrt_tripleword_overflow_manual_implementation(a[0], a[1], a[2]);
+      }
+
 
       /// \brief Generate identifier \@sqrt_quadrupleword.
       /// \return Identifier \@sqrt_quadrupleword.
@@ -1286,8 +1410,7 @@ namespace mcrl2 {
         return sqrt_quadrupleword_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_quadrupleword.
-      
+      /// \brief Constructor for function symbol \@sqrt_quadrupleword.       
       /// \return Function symbol sqrt_quadrupleword.
       inline
       const function_symbol& sqrt_quadrupleword()
@@ -1295,6 +1418,7 @@ namespace mcrl2 {
         static function_symbol sqrt_quadrupleword(sqrt_quadrupleword_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_quadrupleword;
       }
+
 
       /// \brief Recogniser for function \@sqrt_quadrupleword.
       /// \param e A data expression.
@@ -1309,23 +1433,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@sqrt_quadrupleword
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@sqrt_quadrupleword to a number of arguments
+      /// \brief Application of the function symbol \@sqrt_quadrupleword.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@sqrt_quadrupleword to a number of arguments.
       inline
       application sqrt_quadrupleword(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return sort_machine_word::sqrt_quadrupleword()(arg0, arg1, arg2, arg3);
       }
 
-      /// \brief Recogniser for application of \@sqrt_quadrupleword
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@sqrt_quadrupleword.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol sqrt_quadrupleword to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_sqrt_quadrupleword_application(const atermpp::aterm& e)
       {
@@ -1336,14 +1459,23 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @sqrt_quadrupleword..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol sqrt_quadrupleword to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@sqrt_quadrupleword.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \return The data expression corresponding to an application of \@sqrt_quadrupleword to a number of arguments.
       inline
-      application sqrt_quadrupleword(const atermpp::aterm& e);
-   
+      data_expression sqrt_quadrupleword_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
+
+
+      inline
+      data_expression sqrt_quadrupleword_application(const application& a)
+      {
+        assert(a.head()==sqrt_quadrupleword());
+        return sqrt_quadrupleword_manual_implementation(a[0], a[1], a[2], a[3]);
+      }
+
 
       /// \brief Generate identifier \@sqrt_quadrupleword_overflow.
       /// \return Identifier \@sqrt_quadrupleword_overflow.
@@ -1354,8 +1486,7 @@ namespace mcrl2 {
         return sqrt_quadrupleword_overflow_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_quadrupleword_overflow.
-      
+      /// \brief Constructor for function symbol \@sqrt_quadrupleword_overflow.       
       /// \return Function symbol sqrt_quadrupleword_overflow.
       inline
       const function_symbol& sqrt_quadrupleword_overflow()
@@ -1363,6 +1494,7 @@ namespace mcrl2 {
         static function_symbol sqrt_quadrupleword_overflow(sqrt_quadrupleword_overflow_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word(), machine_word()));
         return sqrt_quadrupleword_overflow;
       }
+
 
       /// \brief Recogniser for function \@sqrt_quadrupleword_overflow.
       /// \param e A data expression.
@@ -1377,23 +1509,22 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@sqrt_quadrupleword_overflow
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@sqrt_quadrupleword_overflow to a number of arguments
+      /// \brief Application of the function symbol \@sqrt_quadrupleword_overflow.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@sqrt_quadrupleword_overflow to a number of arguments.
       inline
       application sqrt_quadrupleword_overflow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return sort_machine_word::sqrt_quadrupleword_overflow()(arg0, arg1, arg2, arg3);
       }
 
-      /// \brief Recogniser for application of \@sqrt_quadrupleword_overflow
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@sqrt_quadrupleword_overflow.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol sqrt_quadrupleword_overflow to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_sqrt_quadrupleword_overflow_application(const atermpp::aterm& e)
       {
@@ -1404,14 +1535,23 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @sqrt_quadrupleword_overflow..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol sqrt_quadrupleword_overflow to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@sqrt_quadrupleword_overflow.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \return The data expression corresponding to an application of \@sqrt_quadrupleword_overflow to a number of arguments.
       inline
-      application sqrt_quadrupleword_overflow(const atermpp::aterm& e);
-   
+      data_expression sqrt_quadrupleword_overflow_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3);
+
+
+      inline
+      data_expression sqrt_quadrupleword_overflow_application(const application& a)
+      {
+        assert(a.head()==sqrt_quadrupleword_overflow());
+        return sqrt_quadrupleword_overflow_manual_implementation(a[0], a[1], a[2], a[3]);
+      }
+
 
       /// \brief Generate identifier \@pred_word.
       /// \return Identifier \@pred_word.
@@ -1422,8 +1562,7 @@ namespace mcrl2 {
         return pred_word_name;
       }
 
-      /// \brief Constructor for function symbol \@pred_word.
-      
+      /// \brief Constructor for function symbol \@pred_word.       
       /// \return Function symbol pred_word.
       inline
       const function_symbol& pred_word()
@@ -1431,6 +1570,7 @@ namespace mcrl2 {
         static function_symbol pred_word(pred_word_name(), make_function_sort(machine_word(), machine_word()));
         return pred_word;
       }
+
 
       /// \brief Recogniser for function \@pred_word.
       /// \param e A data expression.
@@ -1445,20 +1585,19 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of function symbol \@pred_word
-      
-      /// \param arg0 A data expression
-      /// \return Application of \@pred_word to a number of arguments
+      /// \brief Application of the function symbol \@pred_word.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@pred_word to a number of arguments.
       inline
       application pred_word(const data_expression& arg0)
       {
         return sort_machine_word::pred_word()(arg0);
       }
 
-      /// \brief Recogniser for application of \@pred_word
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@pred_word.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol pred_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_pred_word_application(const atermpp::aterm& e)
       {
@@ -1469,14 +1608,20 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @pred_word..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol pred_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@pred_word.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@pred_word to a number of arguments.
       inline
-      application pred_word(const atermpp::aterm& e);
-   
+      data_expression pred_word_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression pred_word_application(const application& a)
+      {
+        assert(a.head()==pred_word());
+        return pred_word_manual_implementation(a[0]);
+      }
+
 
       /// \brief Generate identifier \@equal.
       /// \return Identifier \@equal.
@@ -1487,8 +1632,7 @@ namespace mcrl2 {
         return equal_word_name;
       }
 
-      /// \brief Constructor for function symbol \@equal.
-      
+      /// \brief Constructor for function symbol \@equal.       
       /// \return Function symbol equal_word.
       inline
       const function_symbol& equal_word()
@@ -1496,6 +1640,7 @@ namespace mcrl2 {
         static function_symbol equal_word(equal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
         return equal_word;
       }
+
 
       /// \brief Recogniser for function \@equal.
       /// \param e A data expression.
@@ -1505,26 +1650,25 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == equal_word();
+          return atermpp::down_cast<function_symbol>(e) == equal_word();
         }
         return false;
       }
 
-      /// \brief Application of function symbol \@equal
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@equal to a number of arguments
+      /// \brief Application of the function symbol \@equal.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@equal to a number of arguments.
       inline
       application equal_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::equal_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@equal
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@equal.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol equal_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_equal_word_application(const atermpp::aterm& e)
       {
@@ -1535,14 +1679,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @equal..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol equal_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@equal.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@equal to a number of arguments.
       inline
-      application equal_word(const atermpp::aterm& e);
-   
+      data_expression equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression equal_word_application(const application& a)
+      {
+        assert(a.head()==equal_word());
+        return equal_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@less.
       /// \return Identifier \@less.
@@ -1553,8 +1704,7 @@ namespace mcrl2 {
         return less_word_name;
       }
 
-      /// \brief Constructor for function symbol \@less.
-      
+      /// \brief Constructor for function symbol \@less.       
       /// \return Function symbol less_word.
       inline
       const function_symbol& less_word()
@@ -1562,6 +1712,7 @@ namespace mcrl2 {
         static function_symbol less_word(less_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
         return less_word;
       }
+
 
       /// \brief Recogniser for function \@less.
       /// \param e A data expression.
@@ -1571,26 +1722,25 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == less_word();
+          return atermpp::down_cast<function_symbol>(e) == less_word();
         }
         return false;
       }
 
-      /// \brief Application of function symbol \@less
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@less to a number of arguments
+      /// \brief Application of the function symbol \@less.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@less to a number of arguments.
       inline
       application less_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::less_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@less
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@less.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol less_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_less_word_application(const atermpp::aterm& e)
       {
@@ -1601,14 +1751,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @less..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol less_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@less.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@less to a number of arguments.
       inline
-      application less_word(const atermpp::aterm& e);
-   
+      data_expression less_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression less_word_application(const application& a)
+      {
+        assert(a.head()==less_word());
+        return less_word_manual_implementation(a[0], a[1]);
+      }
+
 
       /// \brief Generate identifier \@lessequal.
       /// \return Identifier \@lessequal.
@@ -1619,8 +1776,7 @@ namespace mcrl2 {
         return lessequal_word_name;
       }
 
-      /// \brief Constructor for function symbol \@lessequal.
-      
+      /// \brief Constructor for function symbol \@lessequal.       
       /// \return Function symbol lessequal_word.
       inline
       const function_symbol& lessequal_word()
@@ -1628,6 +1784,7 @@ namespace mcrl2 {
         static function_symbol lessequal_word(lessequal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
         return lessequal_word;
       }
+
 
       /// \brief Recogniser for function \@lessequal.
       /// \param e A data expression.
@@ -1637,26 +1794,25 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == lessequal_word();
+          return atermpp::down_cast<function_symbol>(e) == lessequal_word();
         }
         return false;
       }
 
-      /// \brief Application of function symbol \@lessequal
-      
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@lessequal to a number of arguments
+      /// \brief Application of the function symbol \@lessequal.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@lessequal to a number of arguments.
       inline
       application lessequal_word(const data_expression& arg0, const data_expression& arg1)
       {
         return sort_machine_word::lessequal_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@lessequal
-      /// \param e A data expression
+      /// \brief Recogniser for application of \@lessequal.
+      /// \param e A data expression.
       /// \return true iff e is an application of function symbol lessequal_word to a
-      ///     number of arguments
+      ///     number of arguments.
       inline
       bool is_lessequal_word_application(const atermpp::aterm& e)
       {
@@ -1667,14 +1823,21 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Function prototype that implements @lessequal..
-      /// \details This function must be implemented in details/machine_word.h.
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol lessequal_word to a
-      ///     number of arguments
+      /// \brief The data expression of an application of the function symbol \@lessequal.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@lessequal to a number of arguments.
       inline
-      application lessequal_word(const atermpp::aterm& e);
-   
+      data_expression lessequal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression lessequal_word_application(const application& a)
+      {
+        assert(a.head()==lessequal_word());
+        return lessequal_word_manual_implementation(a[0], a[1]);
+      }
+
       /// \brief Give all system defined mappings for machine_word
       /// \return All system defined mappings for machine_word
       inline
@@ -1714,35 +1877,39 @@ namespace mcrl2 {
         function_symbol_vector result;
         return result;
       }
+
+
+      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for machine_word
-      /// \return All system defined mappings that are to be implemented in C++ code for machine_word
+      /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for machine_word
       inline
-      function_symbol_vector machine_word_cpp_implementable_mappings()
+      implementation_map machine_word_cpp_implementable_mappings()
       {
-        function_symbol_vector result;
-        result.push_back(sort_machine_word::one_word());
-        result.push_back(sort_machine_word::max_word());
-        result.push_back(sort_machine_word::add_word());
-        result.push_back(sort_machine_word::add_overflow());
-        result.push_back(sort_machine_word::times_word());
-        result.push_back(sort_machine_word::timew_overflow_word());
-        result.push_back(sort_machine_word::minus_word());
-        result.push_back(sort_machine_word::div_word());
-        result.push_back(sort_machine_word::mod_word());
-        result.push_back(sort_machine_word::sqrt_word());
-        result.push_back(sort_machine_word::div_doubleword());
-        result.push_back(sort_machine_word::div_double_doubleword());
-        result.push_back(sort_machine_word::div_triple_doubleword());
-        result.push_back(sort_machine_word::mod_doubleword());
-        result.push_back(sort_machine_word::sqrt_doubleword());
-        result.push_back(sort_machine_word::sqrt_tripleword());
-        result.push_back(sort_machine_word::sqrt_tripleword_overflow());
-        result.push_back(sort_machine_word::sqrt_quadrupleword());
-        result.push_back(sort_machine_word::sqrt_quadrupleword_overflow());
-        result.push_back(sort_machine_word::pred_word());
-        result.push_back(sort_machine_word::equal_word());
-        result.push_back(sort_machine_word::less_word());
-        result.push_back(sort_machine_word::lessequal_word());
+        implementation_map result;
+        result[sort_machine_word::one_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word");
+        result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word");
+        result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word");
+        result[sort_machine_word::add_overflow()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::add_overflow_application,"sort_machine_word::add_overflow");
+        result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word");
+        result[sort_machine_word::timew_overflow_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::timew_overflow_word_application,"sort_machine_word::timew_overflow_word");
+        result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word");
+        result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word");
+        result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word");
+        result[sort_machine_word::sqrt_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word");
+        result[sort_machine_word::div_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_doubleword_application,"sort_machine_word::div_doubleword");
+        result[sort_machine_word::div_double_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_double_doubleword_application,"sort_machine_word::div_double_doubleword");
+        result[sort_machine_word::div_triple_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_triple_doubleword_application,"sort_machine_word::div_triple_doubleword");
+        result[sort_machine_word::mod_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::mod_doubleword_application,"sort_machine_word::mod_doubleword");
+        result[sort_machine_word::sqrt_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_doubleword_application,"sort_machine_word::sqrt_doubleword");
+        result[sort_machine_word::sqrt_tripleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_tripleword_application,"sort_machine_word::sqrt_tripleword");
+        result[sort_machine_word::sqrt_tripleword_overflow()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_tripleword_overflow_application,"sort_machine_word::sqrt_tripleword_overflow");
+        result[sort_machine_word::sqrt_quadrupleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_quadrupleword_application,"sort_machine_word::sqrt_quadrupleword");
+        result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow");
+        result[sort_machine_word::pred_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word");
+        result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word");
+        result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word");
+        result[sort_machine_word::lessequal_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::lessequal_word_application,"sort_machine_word::lessequal_word");
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1825,7 +1992,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succ64_application(e) || is_sqrt_word_application(e) || is_pred_word_application(e));
+        assert(is_succ_word_application(e) || is_sqrt_word_application(e) || is_pred_word_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
