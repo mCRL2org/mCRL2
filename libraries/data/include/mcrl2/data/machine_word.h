@@ -23,6 +23,7 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard.h"
+#include "mcrl2/data/detail/machine_word.h" // This file contains the manual implementations of rewrite functions.
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
@@ -380,19 +381,19 @@ namespace mcrl2 {
       /// \brief Generate identifier \@add_overflow_word.
       /// \return Identifier \@add_overflow_word.
       inline
-      const core::identifier_string& add_overflow_name()
+      const core::identifier_string& add_overflow_word_name()
       {
-        static core::identifier_string add_overflow_name = core::identifier_string("@add_overflow_word");
-        return add_overflow_name;
+        static core::identifier_string add_overflow_word_name = core::identifier_string("@add_overflow_word");
+        return add_overflow_word_name;
       }
 
       /// \brief Constructor for function symbol \@add_overflow_word.       
-      /// \return Function symbol add_overflow.
+      /// \return Function symbol add_overflow_word.
       inline
-      const function_symbol& add_overflow()
+      const function_symbol& add_overflow_word()
       {
-        static function_symbol add_overflow(add_overflow_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
-        return add_overflow;
+        static function_symbol add_overflow_word(add_overflow_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
+        return add_overflow_word;
       }
 
 
@@ -400,11 +401,11 @@ namespace mcrl2 {
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@add_overflow_word.
       inline
-      bool is_add_overflow_function_symbol(const atermpp::aterm& e)
+      bool is_add_overflow_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == add_overflow();
+          return atermpp::down_cast<function_symbol>(e) == add_overflow_word();
         }
         return false;
       }
@@ -414,21 +415,21 @@ namespace mcrl2 {
       /// \param arg1 A data expression. 
       /// \return Application of \@add_overflow_word to a number of arguments.
       inline
-      application add_overflow(const data_expression& arg0, const data_expression& arg1)
+      application add_overflow_word(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_machine_word::add_overflow()(arg0, arg1);
+        return sort_machine_word::add_overflow_word()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@add_overflow_word.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol add_overflow to a
+      /// \return true iff e is an application of function symbol add_overflow_word to a
       ///     number of arguments.
       inline
-      bool is_add_overflow_application(const atermpp::aterm& e)
+      bool is_add_overflow_word_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_add_overflow_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_add_overflow_word_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -438,14 +439,14 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_overflow_word to a number of arguments.
       inline
-      data_expression add_overflow_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      data_expression add_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
 
 
       inline
-      data_expression add_overflow_application(const application& a)
+      data_expression add_overflow_word_application(const application& a)
       {
-        assert(a.head()==add_overflow());
-        return add_overflow_manual_implementation(a[0], a[1]);
+        assert(a.head()==add_overflow_word());
+        return add_overflow_word_manual_implementation(a[0], a[1]);
       }
 
 
@@ -524,19 +525,19 @@ namespace mcrl2 {
       /// \brief Generate identifier \@times_overflow_word.
       /// \return Identifier \@times_overflow_word.
       inline
-      const core::identifier_string& timew_overflow_word_name()
+      const core::identifier_string& times_overflow_word_name()
       {
-        static core::identifier_string timew_overflow_word_name = core::identifier_string("@times_overflow_word");
-        return timew_overflow_word_name;
+        static core::identifier_string times_overflow_word_name = core::identifier_string("@times_overflow_word");
+        return times_overflow_word_name;
       }
 
       /// \brief Constructor for function symbol \@times_overflow_word.       
-      /// \return Function symbol timew_overflow_word.
+      /// \return Function symbol times_overflow_word.
       inline
-      const function_symbol& timew_overflow_word()
+      const function_symbol& times_overflow_word()
       {
-        static function_symbol timew_overflow_word(timew_overflow_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
-        return timew_overflow_word;
+        static function_symbol times_overflow_word(times_overflow_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
+        return times_overflow_word;
       }
 
 
@@ -544,11 +545,11 @@ namespace mcrl2 {
       /// \param e A data expression.
       /// \return true iff e is the function symbol matching \@times_overflow_word.
       inline
-      bool is_timew_overflow_word_function_symbol(const atermpp::aterm& e)
+      bool is_times_overflow_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == timew_overflow_word();
+          return atermpp::down_cast<function_symbol>(e) == times_overflow_word();
         }
         return false;
       }
@@ -558,21 +559,21 @@ namespace mcrl2 {
       /// \param arg1 A data expression. 
       /// \return Application of \@times_overflow_word to a number of arguments.
       inline
-      application timew_overflow_word(const data_expression& arg0, const data_expression& arg1)
+      application times_overflow_word(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_machine_word::timew_overflow_word()(arg0, arg1);
+        return sort_machine_word::times_overflow_word()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@times_overflow_word.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol timew_overflow_word to a
+      /// \return true iff e is an application of function symbol times_overflow_word to a
       ///     number of arguments.
       inline
-      bool is_timew_overflow_word_application(const atermpp::aterm& e)
+      bool is_times_overflow_word_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_timew_overflow_word_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_times_overflow_word_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -582,14 +583,14 @@ namespace mcrl2 {
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@times_overflow_word to a number of arguments.
       inline
-      data_expression timew_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      data_expression times_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
 
 
       inline
-      data_expression timew_overflow_word_application(const application& a)
+      data_expression times_overflow_word_application(const application& a)
       {
-        assert(a.head()==timew_overflow_word());
-        return timew_overflow_word_manual_implementation(a[0], a[1]);
+        assert(a.head()==times_overflow_word());
+        return times_overflow_word_manual_implementation(a[0], a[1]);
       }
 
 
@@ -1847,9 +1848,9 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::one_word());
         result.push_back(sort_machine_word::max_word());
         result.push_back(sort_machine_word::add_word());
-        result.push_back(sort_machine_word::add_overflow());
+        result.push_back(sort_machine_word::add_overflow_word());
         result.push_back(sort_machine_word::times_word());
-        result.push_back(sort_machine_word::timew_overflow_word());
+        result.push_back(sort_machine_word::times_overflow_word());
         result.push_back(sort_machine_word::minus_word());
         result.push_back(sort_machine_word::div_word());
         result.push_back(sort_machine_word::mod_word());
@@ -1890,9 +1891,9 @@ namespace mcrl2 {
         result[sort_machine_word::one_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word");
         result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word");
         result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word");
-        result[sort_machine_word::add_overflow()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::add_overflow_application,"sort_machine_word::add_overflow");
+        result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word");
         result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word");
-        result[sort_machine_word::timew_overflow_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::timew_overflow_word_application,"sort_machine_word::timew_overflow_word");
+        result[sort_machine_word::times_overflow_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word");
         result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word");
         result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word");
         result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word");
@@ -1920,7 +1921,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_application(e) || is_times_word_application(e) || is_timew_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
+        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -2004,7 +2005,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_application(e) || is_times_word_application(e) || is_timew_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
+        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 

@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_MACHINE_NUMBER_H
 #define MCRL2_DATA_MACHINE_NUMBER_H
 
-#include <limits>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_expression.h"
 

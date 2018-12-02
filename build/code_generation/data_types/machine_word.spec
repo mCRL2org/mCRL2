@@ -20,9 +20,9 @@ map  @one_word <"one_word">: @word                                              
      @max_word <"max_word">: @word                                                                                                                  internal defined_by_code;
 
      @add_word <"add_word">: @word <"left"> # @word <"right"> -> @word                                                                              internal defined_by_code; 
-     @add_overflow_word <"add_overflow">: @word <"left"> # @word <"right"> -> @word                                                                 internal defined_by_code; 
+     @add_overflow_word <"add_overflow_word">: @word <"left"> # @word <"right"> -> @word                                                                 internal defined_by_code; 
      @times_word <"times_word">: @word <"left"> # @word <"right"> -> @word                                                                          internal defined_by_code; 
-     @times_overflow_word <"timew_overflow_word">: @word <"left"> # @word <"right"> -> @word                                                        internal defined_by_code; 
+     @times_overflow_word <"times_overflow_word">: @word <"left"> # @word <"right"> -> @word                                                        internal defined_by_code; 
      @minus_word <"minus_word">: @word <"left"> # @word <"right"> -> @word                                                                          internal defined_by_code; 
      @div_word <"div_word">: @word <"left"> # @word <"right"> -> @word                                                                              internal defined_by_code; 
      @mod_word <"mod_word">: @word <"left"> # @word <"right"> -> @word                                                                              internal defined_by_code;

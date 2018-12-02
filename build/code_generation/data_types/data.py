@@ -2261,8 +2261,8 @@ class specification():
     code += "#include \"mcrl2/data/application.h\"\n"
     code += "#include \"mcrl2/data/data_equation.h\"\n"
     code += "#include \"mcrl2/data/standard.h\"\n"
-#     code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace())) 
-#                 if self.has_cplusplus_implementable_code() else "")
+    code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace())) 
+                 if self.has_cplusplus_implementable_code() else "")
     if self.has_lambda():
       code += "#include \"mcrl2/data/lambda.h\"\n"
     if self.has_forall():
