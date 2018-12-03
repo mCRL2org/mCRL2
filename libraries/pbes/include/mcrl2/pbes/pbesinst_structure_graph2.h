@@ -337,9 +337,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
                                 const pbes_expression& psi
                                ) override
     {
-      // N.B. The sets S0 and S1 need to be resized, because new vertices may have been added.
-      S0.resize(m_graph_builder.m_vertices.size());
-      S1.resize(m_graph_builder.m_vertices.size());
       pbes_expression x;
       std::tie(b, x) = Rplus(super::rewrite_psi(symbol, X, psi));
       return x;
@@ -348,6 +345,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     void on_report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k) override
     {
       super::on_report_equation(X, psi, k);
+
+      // The structure graph has just been extended, so S0 and S1 need to be resized.
+      S0.resize(m_graph_builder.m_vertices.size());
+      S1.resize(m_graph_builder.m_vertices.size());
+
       auto u = m_graph_builder.find_vertex(X);
       simple_structure_graph G(m_graph_builder.m_vertices);
 
