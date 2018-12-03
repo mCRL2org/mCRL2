@@ -11,6 +11,7 @@
 #define NAME "ltsinfo"
 #define AUTHOR "Muck van Weerdenburg"
 
+#include <algorithm>
 #include <string>
 
 #include "mcrl2/utilities/logger.h"
@@ -147,31 +148,50 @@ class ltsinfo_tool : public ltsinfo_base
 
     }
 
+    template<typename T>
+    static bool is_even(T t)
+    {
+      return t % 2 == 0;
+    }
+
+    /// \brief Prints the min, max, median and average of the branching factor for the given LTS.
     template<typename LTS>
     void print_the_branching_factor(const LTS& lts) const
     {
       if (!print_branching_factor) { return; }
 
+      // Count the number of transitions outgoing from each state
       std::vector<std::uint64_t> branching_factor(lts.num_states());
-
       for (auto& transition : lts.get_transitions())
       {
         ++branching_factor[transition.from()];
       }
 
-      double average_branching_factor = 0;
-      std::uint64_t min_branching_factor = std::numeric_limits<std::uint64_t>::max();
-      std::uint64_t max_branching_factor = 0;
+      // Sort the counts to obtain min, max and median.
+      std::sort(branching_factor.begin(), branching_factor.end());
+      std::uint64_t min = branching_factor.front();
+      std::uint64_t max = branching_factor.back();
 
+      double median = branching_factor[branching_factor.size() / 2];
+      if (is_even(branching_factor.size()))
+      {
+        // For even number of observations is even we average the observations left and right of the middle,
+        // because indices start at zero the left observation is located at n / 2 - 1.
+        median = (branching_factor[branching_factor.size() / 2 - 1] + branching_factor[branching_factor.size() / 2]) / 2;
+      }
+
+      // Calculate the average, (sum i from zero to n of i) divided by n or equivalently sum i from zero to n of i/n.
+      double average_branching_factor = 0;
       for (auto& factor : branching_factor)
       {
-        max_branching_factor = std::max(factor, max_branching_factor);
-        min_branching_factor = std::min(factor, min_branching_factor);
-
         average_branching_factor += static_cast<double>(factor) / lts.num_states();
       }
 
-      mCRL2log(info) << "The branching factor is min: " << min_branching_factor << ", max: " << max_branching_factor << " and average: " << average_branching_factor << "\n";
+      // Print the results.
+      mCRL2log(info) << "The branching factor is min: " << min
+        << ", max: " << max
+        << ", median: " << median
+        << " and average: " << average_branching_factor << "\n";
     }
 
     // Code to print the state labels. There is a specialisation for an probabilistic_lts_lts_t.
