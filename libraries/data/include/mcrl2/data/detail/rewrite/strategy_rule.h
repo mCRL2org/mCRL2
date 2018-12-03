@@ -21,25 +21,49 @@ namespace data
 namespace detail
 {
 
-class strategy_rule: public atermpp::aterm
+class strategy_rule: public atermpp::aterm_appl
 {
+  protected:
+
+    const atermpp::function_symbol& rewrite_index_function() const
+    {
+      static atermpp::function_symbol f=atermpp::function_symbol("rewrite_index",1);
+      return f;
+    }
+  
+    const atermpp::function_symbol& rewrite_cpp_function() const
+    {
+      static atermpp::function_symbol f=atermpp::function_symbol("rewrite_cpp_function",1);
+      return f;
+    }
+  
+
   public:
     strategy_rule(const std::size_t n)
-      : aterm(atermpp::aterm_int(n))
+      : atermpp::aterm_appl(rewrite_index_function(),atermpp::aterm_int(n))
+    {}
+
+    strategy_rule(const std::function<data_expression(const application&)> f)
+      : atermpp::aterm_appl(rewrite_cpp_function(),atermpp::aterm_int(reinterpret_cast<size_t>(f.target<void*>())))
     {}
 
     strategy_rule(const data_equation& eq)
-      : aterm(eq)
+      : atermpp::aterm_appl(eq)
     {}
 
     bool is_rewrite_index() const
     {
-      return type_is_int();
+      return function()==rewrite_index_function();
+    }
+
+    bool is_cpp_code() const
+    {
+      return function()==rewrite_cpp_function();
     }
 
     bool is_equation() const
     {
-      return !type_is_int();
+      return is_data_equation(*this);
     }
 
     data_equation equation() const
@@ -51,8 +75,17 @@ class strategy_rule: public atermpp::aterm
     std::size_t rewrite_index() const
     {
       assert(is_rewrite_index());
-      return (atermpp::down_cast<atermpp::aterm_int>(static_cast<atermpp::aterm>(*this))).value();
+      return (atermpp::down_cast<atermpp::aterm_int>(static_cast<atermpp::aterm>((*this)[0]))).value();
     }
+
+    const std::function<data_expression(const application&)> rewrite_cpp_code() const
+    {
+      assert(is_cpp_code());
+      size_t n=(atermpp::down_cast<atermpp::aterm_int>(static_cast<atermpp::aterm>((*this)[0]))).value();
+      return std::function<data_expression(const application&)>((data_expression(const application&)*)(&n));
+    }
+
+    
 };
 
 struct strategy
