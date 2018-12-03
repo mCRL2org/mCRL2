@@ -343,7 +343,7 @@ available_tests = {
     'pbessolve-counter-example-optimization-2'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 2, settings)                            ,
     'pbessolve-counter-example-optimization-3'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 3, settings)                            ,
     'pbessolve-counter-example-optimization-4'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 4, settings)                            ,
-    #'pbessolve-counter-example-optimization-5'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 5, settings)                            ,
+    'pbessolve-counter-example-optimization-5'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 5, settings)                            ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
