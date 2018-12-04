@@ -640,6 +640,10 @@ data_expression RewriterJitty::rewrite_aux(
                       const data_expression& term,
                       substitution_type& sigma)
 {
+  if (is_machine_number(term))
+  {
+    return term;
+  }
   if (is_application(term))
   {
     const application& terma=atermpp::down_cast<application>(term);

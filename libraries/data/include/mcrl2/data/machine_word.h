@@ -256,7 +256,6 @@ namespace mcrl2 {
       inline
       data_expression one_word_application(const data_expression& a)
       {
-std::cerr << "REWRITE ONE WORD\n";
         static_cast< void >(a); // suppress unused variable warning.
         assert(is_function_symbol(a));
         assert(a==one_word());

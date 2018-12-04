@@ -1172,11 +1172,89 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_binary_operation(x, " >= ");
     }
+    
+    //-------------------------------------------------------------------//
+    //                            machine_word
+    //-------------------------------------------------------------------//
+    
+    else if (sort_machine_word::is_zero_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::zero_word().value()));
+    }
+    else if (sort_machine_word::is_one_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::one_word().value()));
+    }
+    else if (sort_machine_word::is_max_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::max_word().value()));
+    }
+    else if (sort_machine_word::is_succ_word_application(x))
+    {
+      derived().print("(");
+      print_expression(sort_list::arg(x), right_precedence(x));
+      derived().print(" + 1)");
+    }
+    else if (sort_machine_word::is_add_word_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_machine_word::is_add_overflow_word_application(x))
+    {
+      derived().print("((");
+      print_expression(sort_nat::left(x), left_precedence(x));
+      derived().print(" div ");
+      print_expression(sort_nat::right(x), right_precedence(x));
+      derived().print("1) mod (1 + ");
+      derived().print(std::to_string(sort_machine_word::detail::max_word().value()));
+      derived().print(" ))");
+    }
+/* TODO:
+ 
+     @times_word <"times_word">: @word <"left"> # @word <"right"> -> @word                                                                          internal defined_by_code;
+     @times_overflow_word <"times_overflow_word">: @word <"left"> # @word <"right"> -> @word                                                        internal defined_by_code;
+     @minus_word <"minus_word">: @word <"left"> # @word <"right"> -> @word                                                                          internal defined_by_code;
+     @div_word <"div_word">: @word <"left"> # @word <"right"> -> @word                                                                              internal defined_by_code;
+     @mod_word <"mod_word">: @word <"left"> # @word <"right"> -> @word                                                                              internal defined_by_code;
+     @sqrt_word <"sqrt_word">: @word <"arg"> -> @word                                                                                               internal defined_by_code;                         
+     @div_doubleword <"div_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                  internal defined_by_code;
+     @div_double_doubleword <"div_double_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word                   internal defined_by_code;
+     @div_triple_doubleword <"div_triple_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> # @word <"arg5"> -> @word  internal defined_by_code;
+     @mod_doubleword <"mod_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                  internal defined_by_code;
+     @sqrt_doubleword <"sqrt_doubleword">: @word <"arg1"> # @word <"arg2"> -> @word                                                                 internal defined_by_code;
+     @sqrt_tripleword <"sqrt_tripleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                internal defined_by_code;
+     @sqrt_tripleword_overflow <"sqrt_tripleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                              internal defined_by_code;
+     @sqrt_quadrupleword <"sqrt_quadrupleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word                         internal defined_by_code;
+     @sqrt_quadrupleword_overflow <"sqrt_quadrupleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word       internal defined_by_code;
+     @pred_word <"pred_word">: @word <"arg"> ->@word                                                                                                internal defined_by_code;
+     @equal <"equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                                     internal defined_by_code;
+     @less <"less_word">: @word <"left"> # @word <"right"> -> Bool                                                                                       internal defined_by_code;
+     @lessequal <"lessequal_word">: @word <"left"> # @word <"right"> -> Bool  
+*/
+    
+// XXXXXXXXXXX Busy here. 
 
     //-------------------------------------------------------------------//
     //                            pos
     //-------------------------------------------------------------------//
 
+    // The first cases have been added for machine word based positive numbers. 
+    else if (sort_pos::is_most_significant_digit_application(x))
+    {
+      print_expression(sort_pos::arg(x));
+    }
+    else if (sort_pos::is_concat_digit_application(x))
+    {
+      if (data::sort_pos::is_positive_constant(x))
+      {
+        derived().print(data::sort_pos::positive_constant_as_string(x));
+      }
+      else
+      {
+        derived().print("PRINT_NUMBER_TODO");
+      }
+    }
+    // Here the case for machine based numbers ends. 
     else if (sort_pos::is_cdub_application(x))
     {
       if (data::sort_pos::is_positive_constant(x))
@@ -1727,6 +1805,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
+  void apply(const machine_number& x)
+  {
+      derived().print(std::to_string(x.value()));
+  }
+ 
   void apply(const data::where_clause& x)
   {
     derived().enter(x);

@@ -288,7 +288,8 @@ namespace data
 /// \brief Returns true if the term t is an application.
 inline bool is_application(const data_expression& t)
 {
-  return !(is_function_symbol(t) ||
+  return !(is_machine_number(t) ||
+           is_function_symbol(t) ||
            is_variable(t) ||
            is_where_clause(t) ||
            is_abstraction(t) ||
