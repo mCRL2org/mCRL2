@@ -366,9 +366,6 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
 // C++ function. First rewrite all the arguments, then apply the function. 
 strategy RewriterJitty::create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec)
 {
-  std::cerr << "C++ implemented function symbol " << f << "\n";
-  std::cerr << "SORT " << f.sort() << "\n";
-
   size_t number_of_arguments=0;
   if (is_function_sort(f.sort()))
   {
@@ -782,7 +779,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       }
       else if (rule.is_cpp_code())
       {
-        std::cerr << "Detected CPP code " << atermpp::aterm(term) << "\n";
         // Here it is assumed that precompiled code only works on the exact right number of arguments and
         // precompiled functions are not used in a higher order fashion. Maybe this requires an explicit check. 
         if (arity==0)
@@ -793,7 +789,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         {
           // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
           application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
-std::cerr << "ABOUT TO CPPWRITE " << atermpp::aterm(rewriteable_term) << "\n";
           return rule.rewrite_cpp_code()(rewriteable_term);
 
         }
@@ -944,7 +939,6 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
     }
     else if (rule.is_cpp_code())
     {
-std::cerr << "REWRITE OP BY CALL " << op << "\n";
       return rule.rewrite_cpp_code()(op);
     }
     else

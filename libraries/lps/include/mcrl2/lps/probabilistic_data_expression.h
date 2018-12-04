@@ -141,7 +141,6 @@ class probabilistic_data_expression: public data::data_expression
     */
     bool operator==(const probabilistic_data_expression& other) const
     {
-std::cerr << "ATERM FRAC " << atermpp::aterm(*this) << "  AND " << atermpp::aterm(other) << "\n";
       const data_expression result= m_rewriter()(data::equal_to(*this,other));
       if (result==data::sort_bool::true_())
       {
