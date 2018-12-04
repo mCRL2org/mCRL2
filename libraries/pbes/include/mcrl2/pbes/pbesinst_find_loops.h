@@ -120,17 +120,17 @@ void find_loops(const simple_structure_graph& G,
     visited[u] = b;
     if (b)
     {
-      if (u_.rank % 2 == 1)
-      {
-        S1.insert(u);
-        insertion_count++;
-        mCRL2log(log::verbose) << "Find loops: insert vertex " << u << " in S1" << std::endl;
-      }
-      else
+      if (u_.rank % 2 == 0)
       {
         S0.insert(u);
         insertion_count++;
         mCRL2log(log::verbose) << "Find loops: insert vertex " << u << " in S0" << std::endl;
+      }
+      else
+      {
+        S1.insert(u);
+        insertion_count++;
+        mCRL2log(log::verbose) << "Find loops: insert vertex " << u << " in S1" << std::endl;
       }
     }
   }

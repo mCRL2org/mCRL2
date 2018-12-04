@@ -49,7 +49,7 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
     if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
       // set strategy
-      if (G.decoration(u) != (1 - alpha))
+      if (G.decoration(u) == alpha)
       {
         for (auto w: G.successors(u))
         {
@@ -69,7 +69,7 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
 
       for (auto v: G.predecessors(u))
       {
-        if (U.contains(v) && G.rank(v) >= j && !A.contains(v))
+        if (U.contains(v) && (G.rank(v) >= j || (G.rank(u) == data::undefined_index() && G.decoration(u) <= 1)) && !A.contains(v))
         {
           todo.insert(v);
         }
