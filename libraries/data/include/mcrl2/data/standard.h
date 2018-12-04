@@ -56,6 +56,7 @@ struct symbol : public core::detail::singleton_identifier< Derived >
 
   static bool is_function_symbol(const data_expression& e)
   {
+std::cerr << "WHASDADAN " << atermpp::aterm(e) << "\n";
     return data::is_function_symbol(e) ? is_function_symbol(atermpp::down_cast<function_symbol>(e)) : false;
   }
 

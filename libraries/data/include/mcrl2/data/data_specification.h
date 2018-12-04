@@ -72,7 +72,7 @@ bool is_data_specification(const atermpp::aterm_appl& x)
 class data_specification: public sort_specification
 {
   public:
-    typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+    typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
 
   private:
 
@@ -252,7 +252,7 @@ class data_specification: public sort_specification
 
     void add_normalised_cpp_implemented_functions(const implementation_map& c) const
     {
-      typedef std::pair < function_symbol, std::pair<std::function<data_expression(const application&)>, std::string> > map_result_type;
+      typedef std::pair < function_symbol, std::pair<std::function<data_expression(const data_expression&)>, std::string> > map_result_type;
       for(const map_result_type& f: c)
       {
         const function_symbol g(normalize_sorts(f.first,*this));
@@ -634,6 +634,22 @@ class data_specification: public sort_specification
           equations.insert(e.begin(),e.end());
         }
       }
+      else if (sort == sort_machine_word::machine_word())
+      {
+        function_symbol_vector f(sort_machine_word::machine_word_generate_constructors_code());
+        constructors.insert(f.begin(),f.end());
+        f = sort_machine_word::machine_word_generate_functions_code();
+        mappings.insert(f.begin(),f.end());
+        implementation_map f1 = sort_machine_word::machine_word_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        f1 = sort_machine_word::machine_word_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        if (!skip_equations)
+        {
+          data_equation_vector e(sort_machine_word::machine_word_generate_equations_code());
+          equations.insert(e.begin(),e.end());
+        }
+      }
       else if (is_function_sort(sort))
       {
         const sort_expression& t=function_sort(sort).codomain();
@@ -786,6 +802,7 @@ class data_specification: public sort_specification
    
       sorts.insert(sort_machine_word::machine_word());
       sorts.insert(sort_bool::bool_());
+      sorts.insert(sort_machine_word::machine_word());
       sorts.insert(sort_pos::pos());
       sorts.insert(sort_nat::nat());
       sorts.insert(sort_int::int_());

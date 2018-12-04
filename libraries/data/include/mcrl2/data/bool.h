@@ -147,7 +147,7 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for bool_.
       /// \return All system defined constructors that are to be implemented in C++ for bool_.
       inline
@@ -406,7 +406,7 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for bool_
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for bool_
       inline
@@ -424,7 +424,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -436,7 +436,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -448,7 +448,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_not_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       /// \brief Give all system defined equations for bool_

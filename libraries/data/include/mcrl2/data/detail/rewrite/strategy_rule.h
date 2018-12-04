@@ -34,7 +34,7 @@ class strategy_rule
     enum { data_equation_type, rewrite_index_type, cpp_function_type } m_strategy_element_type;
     data_equation m_rewrite_rule;
     size_t m_rewrite_index;
-    std::function<data_expression(const application&)> m_cpp_function;
+    std::function<data_expression(const data_expression&)> m_cpp_function;
 
   public:
     strategy_rule(const std::size_t n)
@@ -42,7 +42,7 @@ class strategy_rule
         m_rewrite_index(n)
     {}
 
-    strategy_rule(const std::function<data_expression(const application&)> f)
+    strategy_rule(const std::function<data_expression(const data_expression&)> f)
       :  m_strategy_element_type(cpp_function_type),
          m_cpp_function(f)
     {}
@@ -80,7 +80,7 @@ class strategy_rule
       return m_rewrite_index;
     }
 
-    const std::function<data_expression(const application&)> rewrite_cpp_code() const
+    const std::function<data_expression(const data_expression&)> rewrite_cpp_code() const
     {
       assert(is_cpp_code());
       return m_cpp_function;

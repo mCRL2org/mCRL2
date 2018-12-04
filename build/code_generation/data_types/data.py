@@ -260,7 +260,7 @@ class function_declaration():
       except:
         pass # in case sort_expression has no domain
 #    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
-    return "        result[{0}()]=std::pair<std::function<data_expression(const application&)>, std::string>({0}_application,\"{0}\");\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+    return "        result[{0}()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>({0}_application,\"{0}\");\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
 
 
 class internal_external():
@@ -431,11 +431,11 @@ class function_declaration_list():
       projection = []
 
       if len(index_table) == 1:
-        projection.append("return atermpp::down_cast<const application >(e)[{0}];".format(index_table.keys()[0]))
+        projection.append("return atermpp::down_cast<const application>(e)[{0}];".format(index_table.keys()[0]))
       else:
         projection_case = '''        if ({0})
         {
-          return atermpp::down_cast<const application >(e)[%s];\n" % (i)
+          return atermpp::down_cast<const application>(e)[%s];\n" % (i)
         }'''.format(" || ".join(["is_{0}_application(e)".format(c[1] for c in index_table[i])]), i)
         projection.append(projection_case)
 
@@ -687,10 +687,11 @@ ${cases}
       const data_expression& ${functionname}_manual_implementation(${parameters});
 
       inline
-      data_expression ${functionname}_application(const application& a)
+      data_expression ${functionname}_application(const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
-        assert(a.head()==${functionname}());
+        assert(is_function_symbol(a));
+        assert(a==${functionname}());
         return ${functionname}_manual_implementation();
       }\n
 ''')
@@ -717,8 +718,10 @@ ${cases}
       data_expression ${functionname}_manual_implementation(${parameters});\n
 
       inline
-      data_expression ${functionname}_application(const application& a)
+      data_expression ${functionname}_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==${functionname}());
         return ${functionname}_manual_implementation(${aaparameters});
       }\n
@@ -1926,7 +1929,7 @@ class mapping_specification():
       code += "      }\n"
       code += "\n\n"
       code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;\n"
+      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
       code += "      /// \\brief Give all system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
@@ -2019,7 +2022,7 @@ class constructor_specification():
       code += "      }\n"
       
       code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;\n"
+      code += "      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;\n"
       code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
         code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))

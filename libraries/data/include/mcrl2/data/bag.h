@@ -139,7 +139,7 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for bag.
       /// \param s A sort expression.
       /// \return All system defined constructors that are to be implemented in C++ for bag.
@@ -1144,7 +1144,7 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for bag
       /// \param s A sort expression
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for bag
@@ -1164,7 +1164,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1176,7 +1176,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_bag_fbag_application(e) || is_bag_comprehension_application(e) || is_bag2set_application(e) || is_set2bag_application(e) || is_zero_function_application(e) || is_one_function_application(e) || is_nat2bool_function_application(e) || is_bool2nat_function_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1188,7 +1188,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_constructor_application(e) || is_count_application(e) || is_in_application(e) || is_union_application(e) || is_intersection_application(e) || is_difference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       /// \brief Give all system defined equations for bag

@@ -88,6 +88,11 @@ data_expression remove_normal_form_function(const data_expression& t)
     return t;
   }
 
+  if (is_machine_number(t))
+  {
+    return t;
+  }
+
   if (is_function_symbol(t))
   {
     assert(t!=this_term_is_in_normal_form());
@@ -362,16 +367,29 @@ strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol&
 strategy RewriterJitty::create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec)
 {
   std::cerr << "C++ implemented function symbol " << f << "\n";
+  std::cerr << "SORT " << f.sort() << "\n";
+
+  size_t number_of_arguments=0;
+  if (is_function_sort(f.sort()))
+  {
+    number_of_arguments=atermpp::down_cast<function_sort>(f.sort()).domain().size();
+  }
+  // Indicate that all arguments must be rewritten first. 
+  std::vector<strategy_rule> result;
+  for(size_t i=0; i<number_of_arguments; ++i)
+  {
+    result.push_back(strategy_rule(i));
+  }
+  result.push_back(strategy_rule(data_spec.cpp_implemented_functions().find(f)->second.first));
   
-  return strategy();
+  return strategy(0,result);
 }
 
 // Create a strategy to rewrite terms. This can either be a strategy that is based on rewrite
 // rules or it can be a strategy based on an explicitly given c++ function for this function symbol. 
 strategy RewriterJitty::create_strategy(const function_symbol& f, const data_equation_list& rules1, const data_specification& data_spec)
 {
-  std::cerr << "CREATE rewrite rule for " << f << "\n";
-  if (data_spec.cpp_implemented_functions().count(f)==0)    // There is no explicit implementation 
+  if (data_spec.cpp_implemented_functions().count(f)==0)    // There is no explicit implementation.
   {
     return create_a_rewriting_based_strategy(f, rules1);
   } 
@@ -391,14 +409,24 @@ void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
   }
 }
 
-void RewriterJitty::rebuild_strategy(const data_specification& data_spec)
+void RewriterJitty::rebuild_strategy(const data_specification& data_spec, const mcrl2::data::used_data_equation_selector& equation_selector)
 {
   jitty_strat.clear();
-  for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
+  function_symbol_vector function_symbols=data_spec.constructors();
+  function_symbols.insert(function_symbols.end(), data_spec.mappings().begin(), data_spec.mappings().end());
+  for(const function_symbol& f: function_symbols)
+  // for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
   {
-    const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(l->first);
-    make_jitty_strat_sufficiently_larger(i);
-    jitty_strat[i] = create_strategy(l->first,reverse(l->second), data_spec);
+    if (equation_selector(f)) 
+    {
+      const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(f);
+      make_jitty_strat_sufficiently_larger(i);
+      std::map< function_symbol, data_equation_list >::const_iterator j=jitty_eqns.find(f);
+      jitty_strat[i] = 
+            (j==jitty_eqns.end()
+                 ?create_strategy(f,data_equation_list(), data_spec)
+                 :create_strategy(f,reverse(j->second), data_spec));
+    }
   }
 
 }
@@ -437,7 +465,7 @@ RewriterJitty::RewriterJitty(
     }
   }
 
-  rebuild_strategy(data_spec);
+  rebuild_strategy(data_spec, equation_selector);
 }
 
 RewriterJitty::~RewriterJitty()
@@ -748,6 +776,24 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
           break;
         }
       }
+      else if (rule.is_cpp_code())
+      {
+        std::cerr << "Detected CPP code " << atermpp::aterm(term) << "\n";
+        // Here it is assumed that precompiled code only works on the exact right number of arguments and
+        // precompiled functions are not used in a higher order fashion. Maybe this requires an explicit check. 
+        if (arity==0)
+        { 
+          return rule.rewrite_cpp_code()(op);
+        }
+        else 
+        {
+          // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
+          application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
+std::cerr << "ABOUT TO CPPWRITE " << atermpp::aterm(rewriteable_term) << "\n";
+          return rule.rewrite_cpp_code()(rewriteable_term);
+
+        }
+      }
       else
       {
         const data_equation& rule1=rule.equation();
@@ -888,7 +934,14 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
   {
     if (rule.is_rewrite_index())
     {
+      assert(0); // JFG: I expect that this case is not possible. Remove if not true. 
+                 // If true, then this check does not need to be done and the assert can be lifted up. 
       break;
+    }
+    else if (rule.is_cpp_code())
+    {
+std::cerr << "REWRITE OP BY CALL " << op << "\n";
+      return rule.rewrite_cpp_code()(op);
     }
     else
     {

@@ -64,6 +64,7 @@ std::string pp(const data::function_symbol& x) { return data::pp< data::function
 std::string pp(const data::lambda& x) { return data::pp< data::lambda >(x); }
 std::string pp(const data::lambda_binder& x) { return data::pp< data::lambda_binder >(x); }
 std::string pp(const data::list_container& x) { return data::pp< data::list_container >(x); }
+std::string pp(const data::machine_number& x) { return data::pp< data::machine_number >(x); }
 std::string pp(const data::set_comprehension& x) { return data::pp< data::set_comprehension >(x); }
 std::string pp(const data::set_comprehension_binder& x) { return data::pp< data::set_comprehension_binder >(x); }
 std::string pp(const data::set_container& x) { return data::pp< data::set_container >(x); }

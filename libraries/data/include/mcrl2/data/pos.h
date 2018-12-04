@@ -169,7 +169,7 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for pos.
       /// \return All system defined constructors that are to be implemented in C++ for pos.
       inline
@@ -918,7 +918,7 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for pos
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for pos
       inline
@@ -936,7 +936,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_cdub_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -948,7 +948,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_concat_digit_application(e) || is_times_whr_mult_overflow_application(e) || is_add_with_carry_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -960,7 +960,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_concat_digit_application(e) || is_times_whr_mult_overflow_application(e) || is_add_with_carry_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -972,7 +972,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_times_whr_mult_overflow_application(e) || is_add_with_carry_application(e));
-        return atermpp::down_cast<const application >(e)[2];
+        return atermpp::down_cast<const application>(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -984,7 +984,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_times_whr_mult_overflow_application(e));
-        return atermpp::down_cast<const application >(e)[3];
+        return atermpp::down_cast<const application>(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -996,7 +996,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_succ_constructor_application(e) || is_most_significant_digit_application(e) || is_succ_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1008,7 +1008,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_cdub_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       /// \brief Give all system defined equations for pos

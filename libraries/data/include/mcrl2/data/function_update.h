@@ -113,7 +113,7 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for function_update
       /// \param s A sort expression
       /// \param t A sort expression
@@ -135,7 +135,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -147,7 +147,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -159,7 +159,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_function_update_application(e));
-        return atermpp::down_cast<const application >(e)[2];
+        return atermpp::down_cast<const application>(e)[2];
       }
 
       /// \brief Give all system defined equations for function_update

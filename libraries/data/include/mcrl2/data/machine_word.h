@@ -102,10 +102,11 @@ namespace mcrl2 {
       const data_expression& zero_word_manual_implementation();
 
       inline
-      data_expression zero_word_application(const application& a)
+      data_expression zero_word_application(const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
-        assert(a.head()==zero_word());
+        assert(is_function_symbol(a));
+        assert(a==zero_word());
         return zero_word_manual_implementation();
       }
 
@@ -173,8 +174,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression succ_word_application(const application& a)
+      data_expression succ_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==succ_word());
         return succ_word_manual_implementation(a[0]);
       }
@@ -199,15 +202,15 @@ namespace mcrl2 {
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for machine_word.
       /// \return All system defined constructors that are to be implemented in C++ for machine_word.
       inline
       implementation_map machine_word_cpp_implementable_constructors()
       {
         implementation_map result;
-        result[sort_machine_word::zero_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::zero_word_application,"sort_machine_word::zero_word");
-        result[sort_machine_word::succ_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::succ_word_application,"sort_machine_word::succ_word");
+        result[sort_machine_word::zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::zero_word_application,"sort_machine_word::zero_word");
+        result[sort_machine_word::succ_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::succ_word_application,"sort_machine_word::succ_word");
 
         return result;
       }
@@ -251,10 +254,12 @@ namespace mcrl2 {
       const data_expression& one_word_manual_implementation();
 
       inline
-      data_expression one_word_application(const application& a)
+      data_expression one_word_application(const data_expression& a)
       {
+std::cerr << "REWRITE ONE WORD\n";
         static_cast< void >(a); // suppress unused variable warning.
-        assert(a.head()==one_word());
+        assert(is_function_symbol(a));
+        assert(a==one_word());
         return one_word_manual_implementation();
       }
 
@@ -298,10 +303,11 @@ namespace mcrl2 {
       const data_expression& max_word_manual_implementation();
 
       inline
-      data_expression max_word_application(const application& a)
+      data_expression max_word_application(const data_expression& a)
       {
         static_cast< void >(a); // suppress unused variable warning.
-        assert(a.head()==max_word());
+        assert(is_function_symbol(a));
+        assert(a==max_word());
         return max_word_manual_implementation();
       }
 
@@ -371,8 +377,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression add_word_application(const application& a)
+      data_expression add_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==add_word());
         return add_word_manual_implementation(a[0], a[1]);
       }
@@ -443,8 +451,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression add_overflow_word_application(const application& a)
+      data_expression add_overflow_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==add_overflow_word());
         return add_overflow_word_manual_implementation(a[0], a[1]);
       }
@@ -515,8 +525,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression times_word_application(const application& a)
+      data_expression times_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==times_word());
         return times_word_manual_implementation(a[0], a[1]);
       }
@@ -587,8 +599,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression times_overflow_word_application(const application& a)
+      data_expression times_overflow_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==times_overflow_word());
         return times_overflow_word_manual_implementation(a[0], a[1]);
       }
@@ -659,8 +673,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression minus_word_application(const application& a)
+      data_expression minus_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==minus_word());
         return minus_word_manual_implementation(a[0], a[1]);
       }
@@ -731,8 +747,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression div_word_application(const application& a)
+      data_expression div_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==div_word());
         return div_word_manual_implementation(a[0], a[1]);
       }
@@ -803,8 +821,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression mod_word_application(const application& a)
+      data_expression mod_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==mod_word());
         return mod_word_manual_implementation(a[0], a[1]);
       }
@@ -873,8 +893,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression sqrt_word_application(const application& a)
+      data_expression sqrt_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==sqrt_word());
         return sqrt_word_manual_implementation(a[0]);
       }
@@ -947,8 +969,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression div_doubleword_application(const application& a)
+      data_expression div_doubleword_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==div_doubleword());
         return div_doubleword_manual_implementation(a[0], a[1], a[2]);
       }
@@ -1023,8 +1047,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression div_double_doubleword_application(const application& a)
+      data_expression div_double_doubleword_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==div_double_doubleword());
         return div_double_doubleword_manual_implementation(a[0], a[1], a[2], a[3]);
       }
@@ -1101,8 +1127,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression div_triple_doubleword_application(const application& a)
+      data_expression div_triple_doubleword_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==div_triple_doubleword());
         return div_triple_doubleword_manual_implementation(a[0], a[1], a[2], a[3], a[4]);
       }
@@ -1175,8 +1203,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression mod_doubleword_application(const application& a)
+      data_expression mod_doubleword_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==mod_doubleword());
         return mod_doubleword_manual_implementation(a[0], a[1], a[2]);
       }
@@ -1247,8 +1277,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression sqrt_doubleword_application(const application& a)
+      data_expression sqrt_doubleword_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==sqrt_doubleword());
         return sqrt_doubleword_manual_implementation(a[0], a[1]);
       }
@@ -1321,8 +1353,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression sqrt_tripleword_application(const application& a)
+      data_expression sqrt_tripleword_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==sqrt_tripleword());
         return sqrt_tripleword_manual_implementation(a[0], a[1], a[2]);
       }
@@ -1395,8 +1429,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression sqrt_tripleword_overflow_application(const application& a)
+      data_expression sqrt_tripleword_overflow_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==sqrt_tripleword_overflow());
         return sqrt_tripleword_overflow_manual_implementation(a[0], a[1], a[2]);
       }
@@ -1471,8 +1507,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression sqrt_quadrupleword_application(const application& a)
+      data_expression sqrt_quadrupleword_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==sqrt_quadrupleword());
         return sqrt_quadrupleword_manual_implementation(a[0], a[1], a[2], a[3]);
       }
@@ -1547,8 +1585,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression sqrt_quadrupleword_overflow_application(const application& a)
+      data_expression sqrt_quadrupleword_overflow_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==sqrt_quadrupleword_overflow());
         return sqrt_quadrupleword_overflow_manual_implementation(a[0], a[1], a[2], a[3]);
       }
@@ -1617,8 +1657,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression pred_word_application(const application& a)
+      data_expression pred_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==pred_word());
         return pred_word_manual_implementation(a[0]);
       }
@@ -1689,8 +1731,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression equal_word_application(const application& a)
+      data_expression equal_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==equal_word());
         return equal_word_manual_implementation(a[0], a[1]);
       }
@@ -1761,8 +1805,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression less_word_application(const application& a)
+      data_expression less_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==less_word());
         return less_word_manual_implementation(a[0], a[1]);
       }
@@ -1833,8 +1879,10 @@ namespace mcrl2 {
 
 
       inline
-      data_expression lessequal_word_application(const application& a)
+      data_expression lessequal_word_application(const data_expression& a1)
       {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==lessequal_word());
         return lessequal_word_manual_implementation(a[0], a[1]);
       }
@@ -1881,36 +1929,36 @@ namespace mcrl2 {
 
 
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
-      typedef std::map<function_symbol,std::pair<std::function<data_expression(const application&)>, std::string> > implementation_map;
+      typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
       /// \brief Give all system defined mappings that are to be implemented in C++ code for machine_word
       /// \return A mapping from C++ implementable function symbols to system defined mappings implemented in C++ code for machine_word
       inline
       implementation_map machine_word_cpp_implementable_mappings()
       {
         implementation_map result;
-        result[sort_machine_word::one_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word");
-        result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word");
-        result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word");
-        result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word");
-        result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word");
-        result[sort_machine_word::times_overflow_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word");
-        result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word");
-        result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word");
-        result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word");
-        result[sort_machine_word::sqrt_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word");
-        result[sort_machine_word::div_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_doubleword_application,"sort_machine_word::div_doubleword");
-        result[sort_machine_word::div_double_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_double_doubleword_application,"sort_machine_word::div_double_doubleword");
-        result[sort_machine_word::div_triple_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::div_triple_doubleword_application,"sort_machine_word::div_triple_doubleword");
-        result[sort_machine_word::mod_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::mod_doubleword_application,"sort_machine_word::mod_doubleword");
-        result[sort_machine_word::sqrt_doubleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_doubleword_application,"sort_machine_word::sqrt_doubleword");
-        result[sort_machine_word::sqrt_tripleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_tripleword_application,"sort_machine_word::sqrt_tripleword");
-        result[sort_machine_word::sqrt_tripleword_overflow()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_tripleword_overflow_application,"sort_machine_word::sqrt_tripleword_overflow");
-        result[sort_machine_word::sqrt_quadrupleword()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_quadrupleword_application,"sort_machine_word::sqrt_quadrupleword");
-        result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow");
-        result[sort_machine_word::pred_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word");
-        result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word");
-        result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word");
-        result[sort_machine_word::lessequal_word()]=std::pair<std::function<data_expression(const application&)>, std::string>(sort_machine_word::lessequal_word_application,"sort_machine_word::lessequal_word");
+        result[sort_machine_word::one_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word");
+        result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word");
+        result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word");
+        result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word");
+        result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word");
+        result[sort_machine_word::times_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word");
+        result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word");
+        result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word");
+        result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word");
+        result[sort_machine_word::sqrt_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word");
+        result[sort_machine_word::div_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_doubleword_application,"sort_machine_word::div_doubleword");
+        result[sort_machine_word::div_double_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_double_doubleword_application,"sort_machine_word::div_double_doubleword");
+        result[sort_machine_word::div_triple_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_triple_doubleword_application,"sort_machine_word::div_triple_doubleword");
+        result[sort_machine_word::mod_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_doubleword_application,"sort_machine_word::mod_doubleword");
+        result[sort_machine_word::sqrt_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_doubleword_application,"sort_machine_word::sqrt_doubleword");
+        result[sort_machine_word::sqrt_tripleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_application,"sort_machine_word::sqrt_tripleword");
+        result[sort_machine_word::sqrt_tripleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_overflow_application,"sort_machine_word::sqrt_tripleword_overflow");
+        result[sort_machine_word::sqrt_quadrupleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_application,"sort_machine_word::sqrt_quadrupleword");
+        result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow");
+        result[sort_machine_word::pred_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word");
+        result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word");
+        result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word");
+        result[sort_machine_word::lessequal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::lessequal_word_application,"sort_machine_word::lessequal_word");
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1922,7 +1970,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1934,7 +1982,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1946,7 +1994,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
-        return atermpp::down_cast<const application >(e)[1];
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1958,7 +2006,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
-        return atermpp::down_cast<const application >(e)[2];
+        return atermpp::down_cast<const application>(e)[2];
       }
 
       ///\brief Function for projecting out argument
@@ -1970,7 +2018,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
-        return atermpp::down_cast<const application >(e)[3];
+        return atermpp::down_cast<const application>(e)[3];
       }
 
       ///\brief Function for projecting out argument
@@ -1982,7 +2030,7 @@ namespace mcrl2 {
       data_expression arg5(const data_expression& e)
       {
         assert(is_div_triple_doubleword_application(e));
-        return atermpp::down_cast<const application >(e)[4];
+        return atermpp::down_cast<const application>(e)[4];
       }
 
       ///\brief Function for projecting out argument
@@ -1994,7 +2042,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_succ_word_application(e) || is_sqrt_word_application(e) || is_pred_word_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
@@ -2006,7 +2054,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
-        return atermpp::down_cast<const application >(e)[0];
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       /// \brief Give all system defined equations for machine_word

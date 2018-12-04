@@ -50,7 +50,7 @@ class used_data_equation_selector
     }
 
     template < typename Range >
-    void add_symbols(Range const& r)
+    void add_symbols(const Range& r)
     {
       m_used_symbols.insert(r.begin(), r.end());
     }
@@ -64,6 +64,9 @@ class used_data_equation_selector
       add_symbol(sort_bool::and_());
       add_symbol(sort_bool::or_());
       add_symbol(sort_bool::not_());
+      
+      add_symbols(specification.constructors(sort_machine_word::machine_word()));
+      add_symbols(specification.mappings(sort_machine_word::machine_word()));
 
       // Add all constructors of all sorts as they may be used when enumerating over these sorts
       std::set< sort_expression > sorts(specification.sorts().begin(),specification.sorts().end());
@@ -156,7 +159,7 @@ class used_data_equation_selector
 
     /// \brief context is a range of function symbols
     template <typename Range>
-    used_data_equation_selector(data_specification const& data_spec, Range const& context):
+    used_data_equation_selector(const data_specification& data_spec, const Range& context):
        add_all(false)
     {
       add_symbols(context);

@@ -234,6 +234,7 @@ inline const data_expression& zero_word_manual_implementation()
 /// \return The machine number 1.
 inline const data_expression& one_word_manual_implementation()
 {
+std::cerr << "ONE WORD MANULA IMPLEMENTSAIOTIN \n";
   return detail::one_word();
 }
 

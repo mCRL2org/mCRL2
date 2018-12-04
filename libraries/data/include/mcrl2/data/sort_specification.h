@@ -308,6 +308,7 @@ class sort_specification
     void add_predefined_basic_sorts()
     {
         add_system_defined_sort(sort_bool::bool_());
+        add_system_defined_sort(sort_machine_word::machine_word());
         add_system_defined_sort(sort_pos::pos());
     }
 

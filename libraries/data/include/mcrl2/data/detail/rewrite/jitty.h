@@ -58,7 +58,7 @@ class RewriterJitty: public Rewriter
     strategy create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec);
     strategy create_a_rewriting_based_strategy(const function_symbol& f, const data_equation_list& rules1);
     strategy create_strategy(const function_symbol& f, const data_equation_list& rules1, const data_specification& data_spec);
-    void rebuild_strategy(const data_specification& data_spec);
+    void rebuild_strategy(const data_specification& data_spec, const mcrl2::data::used_data_equation_selector& equation_selector);
 };
 
 /// \brief removes auxiliary expressions this_term_is_in_normal_form from data_expressions that are being rewritten.
