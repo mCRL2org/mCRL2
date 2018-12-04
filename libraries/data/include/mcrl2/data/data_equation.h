@@ -145,7 +145,7 @@ inline void swap(data_equation& t1, data_equation& t2)
 /// \brief Recognizer function.
 /// \param[in] t A aterm appl of which it is checked whether it is a data_equation.
 /// \returns True if the provided argument is a data_equation. 
-bool is_data_equation(const atermpp::aterm_appl& t)
+inline bool is_data_equation(const atermpp::aterm_appl& t)
 {
   return t.function()==core::detail::function_symbol_DataEqn();
 }

@@ -55,8 +55,10 @@ class RewriterJitty: public Rewriter
     /* Auxiliary function to take care that the array jitty_strat is sufficiently large
        to access element i */
     void make_jitty_strat_sufficiently_larger(const std::size_t i);
-    strategy create_strategy(const data_equation_list& rules1);
-    void rebuild_strategy();
+    strategy create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec);
+    strategy create_a_rewriting_based_strategy(const function_symbol& f, const data_equation_list& rules1);
+    strategy create_strategy(const function_symbol& f, const data_equation_list& rules1, const data_specification& data_spec);
+    void rebuild_strategy(const data_specification& data_spec);
 };
 
 /// \brief removes auxiliary expressions this_term_is_in_normal_form from data_expressions that are being rewritten.

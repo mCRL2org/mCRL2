@@ -170,8 +170,16 @@ class dependencies_rewrite_rule_pair
     }
 };
 
-strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
+
+
+
+
+// Create a strategy for the rewrite rules belonging to one particular symbol.
+// It is a prerequisite for this function to that all rewrite rules in rules1 have
+// the same main function symbol in the lhs. 
+strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol& f, const data_equation_list& rules1)
 {
+  static_cast<void>(f); // Avoid an unused variable warning. 
   data_equation_list rules=rules1;
   std::vector<strategy_rule> strat;
 
@@ -346,7 +354,33 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
     arity++;
   }
   
-  return strategy(max_number_of_variables,atermpp::term_list<data::detail::strategy_rule>(strat.begin(),strat.end()));   
+  return strategy(max_number_of_variables,strat);
+}
+
+// Create an explicit rewrite strategy when rewriting using an explicitly given 
+// C++ function. First rewrite all the arguments, then apply the function. 
+strategy RewriterJitty::create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec)
+{
+  std::cerr << "C++ implemented function symbol " << f << "\n";
+  
+  return strategy();
+}
+
+// Create a strategy to rewrite terms. This can either be a strategy that is based on rewrite
+// rules or it can be a strategy based on an explicitly given c++ function for this function symbol. 
+strategy RewriterJitty::create_strategy(const function_symbol& f, const data_equation_list& rules1, const data_specification& data_spec)
+{
+  std::cerr << "CREATE rewrite rule for " << f << "\n";
+  if (data_spec.cpp_implemented_functions().count(f)==0)    // There is no explicit implementation 
+  {
+    return create_a_rewriting_based_strategy(f, rules1);
+  } 
+  else 
+  {
+    assert(rules1.size()==0);  // There should be no explicit rewrite rules, as this function is implemented by 
+                               // an explicit C++ function. 
+    return create_a_cpp_function_based_strategy(f, data_spec);
+  }
 }
 
 void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
@@ -357,14 +391,14 @@ void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
   }
 }
 
-void RewriterJitty::rebuild_strategy()
+void RewriterJitty::rebuild_strategy(const data_specification& data_spec)
 {
   jitty_strat.clear();
   for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
   {
     const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(l->first);
     make_jitty_strat_sufficiently_larger(i);
-    jitty_strat[i] = create_strategy(reverse(l->second));
+    jitty_strat[i] = create_strategy(l->first,reverse(l->second), data_spec);
   }
 
 }
@@ -403,7 +437,7 @@ RewriterJitty::RewriterJitty(
     }
   }
 
-  rebuild_strategy();
+  rebuild_strategy(data_spec);
 }
 
 RewriterJitty::~RewriterJitty()
