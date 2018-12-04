@@ -403,6 +403,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void on_end_iteration() override
     {
+      using utilities::detail::contains;
+
       if (m_optimization == 4 && (aggressive || find_loops_guard(m_iteration_count)))
       {
         simple_structure_graph G(m_graph_builder.m_vertices);
@@ -412,6 +414,34 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       {
         simple_structure_graph G(m_graph_builder.m_vertices);
         detail::fatal_attractors(G, discovered, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+      }
+      if (!todo.empty())
+      {
+        auto u = m_graph_builder.find_vertex(init);
+        if (S0.contains(u) || S1.contains(u))
+        {
+          std::size_t alpha = S0.contains(u) ? 1 : 0;
+
+          std::size_t n = m_graph_builder.m_vertices.size();
+
+          // compute todo_
+          vertex_set todo_(n);
+          for (const propositional_variable_instantiation& X: todo)
+          {
+            structure_graph::index_type v = m_graph_builder.find_vertex(X);
+            todo_.insert(v);
+          }
+          mCRL2log(log::debug) << "final todo = " << core::detail::print_set(todo_.vertices()) << std::endl;
+
+          simple_structure_graph G(m_graph_builder.m_vertices);
+          todo_ = compute_attractor_set(G, todo_, alpha);
+          std::set<structure_graph::index_type> to_be_erased;
+          for (structure_graph::index_type v: todo_.vertices())
+          {
+            to_be_erased.insert(v);
+          }
+          m_graph_builder.erase_vertices(to_be_erased);
+        }
       }
     }
 };

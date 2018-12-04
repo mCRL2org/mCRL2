@@ -455,9 +455,10 @@ struct structure_graph_builder
 
     // compute new index for the vertices
     std::vector<index_type> index;
+    structure_graph::index_type count = 0;
     for (index_type u = 0; u != m_vertices.size(); u++)
     {
-      index.push_back(contains(U, u) ? structure_graph::undefined_vertex : index.size());
+      index.push_back(contains(U, u) ? structure_graph::undefined_vertex : count++);
     }
 
     // computes new predecessors / successors
@@ -470,7 +471,7 @@ struct structure_graph_builder
           result.push_back(index[v]);
         }
       }
-      return result;
+        return result;
     };
 
     for (index_type u = 0; u != m_vertices.size(); u++)
@@ -480,6 +481,10 @@ struct structure_graph_builder
         structure_graph::vertex& u_ = m_vertices[u];
         u_.predecessors = update(u_.predecessors);
         u_.successors = update(u_.successors);
+        if (u_.strategy != structure_graph::undefined_vertex)
+        {
+          u_.strategy = index[u_.strategy];
+        }
         if (index[u] != u)
         {
           std::swap(m_vertices[u], m_vertices[index[u]]);
