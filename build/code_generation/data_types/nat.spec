@@ -16,7 +16,7 @@
 sort Nat <"nat">;
 % Auxiliary sort natpair, pair of natural numbers
      @NatPair <"natnatpair">;
-     @WordNatPair <"wordnatpair">;
+     @wordNatPair <"wordnatpair">;
 
 cons @c0 <"c0"> : Nat                                                                                            internal defined_by_rewrite_rules;
      succ <"succ"> : Nat <"arg">->Pos                                                                            external defined_by_rewrite_rules;
@@ -24,9 +24,9 @@ cons @c0 <"c0"> : Nat                                                           
 % Constructor for natpair
      @cPair <"cpair"> : Nat <"arg1"> # Nat <"arg2"> -> @NatPair                                                  internal defined_by_rewrite_rules;
 
-map  @most_significant_digitNat <"most_significant_digit_nat">: Word <"arg"> -> Nat64                            internal defined_by_rewrite_rules;   
+map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> -> Nat                             internal defined_by_rewrite_rules;   
 % concat_digit(p,w) represents (2^N)*p + w.
-     @concat_digit <"concat_digit"> : Nat64 <"arg1"> # Word <"arg2"> -> Nat64                                    internal defined_by_rewrite_rules;
+     @concat_digit <"concat_digit"> : Nat <"arg1"> # @word <"arg2"> -> Nat                                       internal defined_by_rewrite_rules;
 
      Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat                                                                    external defined_by_rewrite_rules;
      Nat2Pos <"nat2pos"> : Nat <"arg"> -> Pos                                                                    external defined_by_rewrite_rules;
@@ -45,8 +45,19 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: Word <"arg"> -> 
      exp <"exp">:Nat <"left"> # Nat <"right"> -> Nat                                                             external defined_by_rewrite_rules;
      sqrt <"sqrt">:Nat <"arg"> -> Nat                                                                            external defined_by_rewrite_rules;
      @natpred <"natpred">: Nat <"arg"> -> Nat                                                                    internal defined_by_rewrite_rules;
+     @is_odd <"is_odd">: Nat <"arg"> -> Bool                                                                     internal defined_by_rewrite_rules;
+     @div2 <"div2">: Nat <"arg"> -> Nat                                                                          internal defined_by_rewrite_rules;
      @monus <"monus">:Nat <"left"> # Nat <"right"> -> Nat                                                        internal defined_by_rewrite_rules;
      @monus_whr <"monus_whr">:Nat <"arg1"> # @word <"arg2"> # Nat <"arg3"> # @word <"arg4"> # Nat <"arg5">-> Nat internal defined_by_rewrite_rules;
+     @exp_aux3p <"exp_aux3p">: Bool <"arg1"> # Pos <"arg2"> # @word <"arg3"> -> Pos                              internal defined_by_rewrite_rules;
+     @exp_aux4p <"exp_aux4p">: Bool <"arg1"> # Pos <"arg2"> # Nat <"arg3"> # @word <"arg4"> -> Pos               internal defined_by_rewrite_rules;
+     @exp_aux3n <"exp_aux3n">: Bool <"arg1"> # Nat <"arg2"> # @word <"arg3"> -> Nat                              internal defined_by_rewrite_rules;
+     @exp_aux4n <"exp_aux4n">: Bool <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # @word <"arg4"> -> Nat               internal defined_by_rewrite_rules;
+     @exp_auxtruep <"exp_auxtruep">: Pos <"arg1"> # Nat <"arg2"> # @word <"arg3"> -> Nat                         internal defined_by_rewrite_rules;
+     @exp_auxtruen <"exp_auxtruen">: Nat <"arg1"> # Nat <"arg2"> # @word <"arg3"> -> Nat                         internal defined_by_rewrite_rules;
+     @exp_auxfalsep <"exp_auxfalsep">: Pos <"arg1"> # Nat <"arg2"> # @word <"arg3"> -> Nat                       internal defined_by_rewrite_rules;
+     @exp_auxfalsen <"exp_auxfalsen">: Nat <"arg1"> # Nat <"arg2"> # @word <"arg3"> -> Nat                       internal defined_by_rewrite_rules;
+     @div_bold <"div_bold">: Nat64 <"arg1"> # Pos64 <"arg2"> -> Word;                                            internal defined_by_rewrite_rules;
 % The functions below are auxiliary and might be omitted. 
      @even <"even">:Nat <"arg"> -> Bool                                                                          external defined_by_rewrite_rules;
      @swap_zero <"swap_zero">:Nat <"left"> # Nat <"right"> -> Nat                                                internal defined_by_rewrite_rules;
@@ -77,7 +88,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                                     @concat_digit(@most_significant_digitNat(@one_word),@zero_word),
                                                     @most_significant_digitNat(@succ_word(w)));
      succ(@concat_digit(n,w)) = if(==(w,@max_word),
-                                           @concat_digit(@succ_nat64(n),@zero_word),
+                                           @concat_digit(@succ(n),@zero_word),
                                            @concat_digit(n,@succ_word(w)));
 
      ==(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = ==(w1,w2);
@@ -207,17 +218,153 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                            +(@concat_digit(*(@concat_digit(n1,w1),n2),@zero_word),
                                        *(@concat_digit(n1,w1),@most_significant_digitNat(w2)));
 
+     @is_odd(@most_significant_digitNat(w)) = @rightmost_bit(w);
+     @is_odd(@concat_digit(n,w)) = @rightmost_bit(w);
 
-     exp(p,@c0) = @c1;
-     exp(p,@cNat(@c1)) = p;
-     exp(p,@cNat(@cDub(false,q))) = exp(*(p,p),@cNat(q));
-     exp(p,@cNat(@cDub(true,q))) = *(p,exp(*(p,p),@cNat(q)));
-     exp(n,@c0) = @cNat(@c1);
-     exp(@c0, @cNat(p)) = @c0;
-     exp(@cNat(p),n) = @cNat(exp(p,n));
-     @even(@c0) = true;
-     @even(@cNat(@c1)) = false;
-     @even(@cNat(@cDub(b,p))) = !(b);
+     @div2(@most_significant_digitNat(w)) = @most_significant_digitNat(shift_right(false,w));
+     @div2(@concat_digit(n,w)) = if(==(n,most_significant_digitNat(@zero_word)),
+                                     @most_significant_digitNat(@shift_right(@is_odd(n),w)),
+                                     @concat_digit(@div2(n),@shift_right(@is_odd(n),w)));
+
+      exp(n,@most_significant_digitNat(w)) = @exp_aux3n(@rightmost_bit(w),n,w);
+      exp(n,@concat_digit(n1,w1)) = @exp_aux4n(@rightmost_bit(w1),n,n1,w1);
+ 
+      @exp_aux3n(true,n,w) = if(==(w,@one_word),
+                                 n,
+                                 *(n,@exp_aux3n(@rightmost_bit(@shift_right(false,w)),*(n,n),@shift_right(false,w))));
+ 
+      @exp_aux3n(false,n,w) = if(==(w,@zero_word),
+                                 @most_significant_digitNat(@one_word),
+                                 @exp_aux3n(rightmost_bit(@shift_right(false,w)),*(n,n),@shift_right(false,w)));
+ 
+      @exp_aux4n(true,n,n1,w) = @exp_auxtruen(n,@div2(n1),@shift_right(@is_odd(n1), w));
+      @exp_auxtruen(n,shift_n1,shift_w) =
+                             if(==(shift_n1,@most_significant_digitNat(@zero_word)),
+                                 *(n,@exp_aux3n(@rightmost_bit(shift_w),*(n,n),shift_w)),
+                                 *(n,@exp_aux4n(@rightmost_bit(shift_w),*(n,n),shift_n1,shift_w)));
+
+      @exp_aux4n(false,n,n1,w) = @exp_auxfalsen(n,shift_n1,shift_w);
+      @exp_auxfalsen(n,shift_n1,shift_w) =
+                             if(==(shift_n1,@most_significant_digitNat(@zero_word)),
+                                 @exp_aux3n(@rightmost_bit(shift_w),*(n,n),shift_w),
+                                 @exp_aux4n(@rightmost_bit(shift_w),*(n,n),shift_n1,shift_w));
+ 
+      exp(p,@most_significant_digitNat(w)) = @exp_aux3p(@mrightmost_bit(w),p,w);
+      exp(p,@concat_digit(n1,w1)) = @exp_aux4p(@rightmost_bit(w1),p,n1,w1);
+ 
+      @exp_aux3p(true,p,w) = if(==(w,@one_word),
+                                 p,
+                                 *(p,@exp_aux3p(@rightmost_bit(@shift_right(false,w)),*(p,p),@shift_right(false,w))));
+                                 
+      @exp_aux3p(false,p,w) = if(==(w,@zero_word),
+                                  @most_significant_digit(@zero_word),
+                                  @exp_aux3p(@rightmost_bit(@shift_right(false,w)),*(p,p),shift_right(false,w)));
+
+      @exp_aux4p(true,p,n1,w) = @exp_auxtruep(p,@div2(n1),@shift_right(@is_odd(n1), w));
+      @exp_aux_truep(p,shift_n1,shift_w) =
+                            if(==(shift_n1,@most_significant_digitNat(@zero_word)),
+                                 *(p,@exp_aux3p(@rightmost_bit(shift_w),*(p,p),shift_w)),
+                                 *(p,@exp_aux4p(@rightmost_bit(shift_w),*(p,p),shift_n1,shift_w)));
+
+      @exp_aux4p(false,p,n1,w) = @exp_auxfalsep(p,div2(n1),shift_right(is_odd(n1),w));
+      @exp_auxfalsep(p,shift_n1,shift_w) =
+                            if(==(shift_n1,@most_significant_digitNat(@zero_word)),
+                                 @exp_aux3p(@rightmost_bit(shift_w),*(p,p),shift_w),
+                                 @exp_aux4p(@rightmost_bit(shift_w),*(p,p),shift_n1,shift_w));
+ 
+
+%     @even(@c0) = true;
+%     @even(@cNat(@c1)) = false;
+%     @even(@cNat(@cDub(b,p))) = !(b);
+
+    div(@most_significant_digitNat(w1),@most_significant_digit(w2)) = @most_significant_digitNat(@div_word(w1,w2));
+    mod(@most_significant_digitNat(w1),@most_significant_digit(w2)) = @most_significant_digitNat(@mod_word(w1,w2));
+
+    div(@most_significant_digitNat(w1),@concat_digit(p,w2)) = @most_significant_digitNat(@zero_word);
+    mod(@most_significant_digitNat(w1),@concat_digit(p,w2)) = @most_significant_digitNat(w1);
+
+    n>@most_significant_digitNat(@zero_word) ->
+    div(@concat_digit(n,w1),@most_significant_digit(w2)) =
+                          if(<(n,@most_significant_digitNat(w2)),
+                                    @most_significant_digitNat(@div_bold(@concat_digit(n,w1),@most_significant_digit(w2))),
+                                    if (==(m1,@most_significant_digitNat(zero_word)),
+                                        @most_significant_digitNat(@div_bold(m3,@most_significant_digit(w2))),
+                                        @concat_digit(m1,@div_bold(m3,@most_significant_digit(w2)))))
+    @div_aux1(n,w1,w2,m3,pair_)
+                                    whr m3 = if(m2==@most_significant_digitNat(zero_word), @most_significant_digitNat(w1),@concat_digit(m2,w1)) end
+                                    whr m1 = first_(pair_), m2 = last_(pair_) end
+                                    whr pair_=divmod_aux(n,@most_significant_digit(w2)) end;
+
+%    n>@most_significant_digitNat(zero_word) ->
+%    mod(@concat_digit(n,w1),@most_significant_digit(w2)) = @most_significant_digitNat(mod_doubleword(msd(mod(n,@most_significant_digit(w2))),w1,w2));
+%
+%    n>@most_significant_digitNat(zero_word) ->
+%    div(@concat_digit(n,w1),@concat_digit(p,w2)) =
+%                          if(n<Pos2Nat_(@concat_digit(p,w2)),
+%                                  @most_significant_digitNat(@div_bold(@concat_digit(n,w1),@concat_digit(p,w2))),
+%                                  plus(m1,@most_significant_digitNat(@div_bold(m2,@concat_digit(p,w2))))
+%                                  whr m2 = if(last_(pair_)==@most_significant_digitNat(zero_word), @most_significant_digitNat(w1),@concat_digit(last_(pair_),w1)) end
+%                                  whr m1 = if(first_(pair_)==@most_significant_digitNat(zero_word), @most_significant_digitNat(zero_word),@concat_digit(first_(pair_),zero_word)) end
+%                                  whr pair_=divmod_aux(n,@concat_digit(p,w2)) end);
+%    n>@most_significant_digitNat(zero_word) ->
+%    mod(@concat_digit(n,w1),@concat_digit(p,w2)) =
+%                          monus(m,*(@concat_digit(Pos2Nat_(p),w2),@most_significant_digitNat(@div_bold(m,@concat_digit(p,w2)))))
+%                          whr m = if(m1>@most_significant_digitNat(zero_word),@concat_digit(m1,w1),@most_significant_digitNat(w1)) end
+%                          whr m1 = mod(n,@concat_digit(p,w2)) end;
+%
+%    divmod_aux(@most_significant_digitNat(w1),@most_significant_digit(w2)) = pair(@most_significant_digitNat(div_word(w1,w2)),
+%                                                                                @most_significant_digitNat(mod_word(w1,w2)));
+%
+%    divmod_aux(@most_significant_digitNat(w1),@concat_digit(p,w2)) = pair(@most_significant_digitNat(zero_word),@most_significant_digitNat(w1));
+%
+%    n>@most_significant_digitNat(zero_word) ->
+%    divmod_aux(@concat_digit(n,w1),@most_significant_digit(w2)) =
+%                          pair(if(n<@most_significant_digitNat(w2),
+%                                    @most_significant_digitNat(@div_bold(@concat_digit(n,w1),@most_significant_digit(w2))),
+%                                    if (m1==@most_significant_digitNat(zero_word),
+%                                        @most_significant_digitNat(@div_bold(m3,@most_significant_digit(w2))),
+%                                        @concat_digit(m1,@div_bold(m3,@most_significant_digit(w2))))),
+%                               @most_significant_digitNat(mod_doubleword(msd(m2),w1,w2)))
+%                          whr m3 = if(m2==@most_significant_digitNat(zero_word), @most_significant_digitNat(w1),@concat_digit(m2,w1)) end
+%                          whr m1 = first_(pair_), m2 = last_(pair_) end
+%                          whr pair_ = divmod_aux(n,@most_significant_digit(w2)) end;
+%
+%    n>@most_significant_digitNat(zero_word) ->
+%    divmod_aux(@concat_digit(n,w1),@concat_digit(p,w2)) =
+%                          if(n<Pos2Nat_(@concat_digit(p,w2)),
+%                             pair(@most_significant_digitNat(@div_bold(@concat_digit(n,w1),@concat_digit(p,w2))),
+%                                  monus(m,*(@concat_digit(Pos2Nat_(p),w2),@most_significant_digitNat(@div_bold(m,@concat_digit(p,w2)))))
+%                                  whr m = if(lp==@most_significant_digitNat(zero_word),@most_significant_digitNat(w1),@concat_digit(lp,w1)) end
+%                                  whr lp = mod(n,@concat_digit(p,w2)) end),
+%                             pair(plus(@concat_digit(first_(pair_),zero_word),@most_significant_digitNat(@div_bold(m,@concat_digit(p,w2)))),
+%                                  monus(m,*(@concat_digit(Pos2Nat_(p),w2),@most_significant_digitNat(@div_bold(m,@concat_digit(p,w2))))))
+%                                  whr m = if(lp==@most_significant_digitNat(zero_word),@most_significant_digitNat(w1),@concat_digit(lp,w1)) end
+%                                  whr lp = last_(pair_) end
+%                                  whr pair_ = divmod_aux(n,@concat_digit(p,w2)) end);
+%
+%    @div_bold(@most_significant_digitNat(w1),@most_significant_digit(w2)) = div_word(w1,w2);
+%
+%    @div_bold(@most_significant_digitNat(w1),@concat_digit(p,w2)) = zero_word;
+%
+%    @div_bold(@concat_digit(@most_significant_digitNat(w1),w2),@most_significant_digit(w3)) = div_doubleword(w1,w2,w3);
+%
+%    @div_bold(@concat_digit(@most_significant_digitNat(w),w1),@concat_digit(@most_significant_digit(w2),w3)) =
+%                                               div_double_doubleword(w,w1,w2,w3);
+%
+%    @div_bold(@concat_digit(@concat_digit(@most_significant_digitNat(w),w1),w2),@concat_digit(@most_significant_digit(w3),w4)) =
+%                                               div_triple_doubleword(w,w1,w2,w3,w4);
+%
+%    n>@most_significant_digitNat(zero_word) ->
+%    @div_bold(@concat_digit(n,w1),@concat_digit(@concat_digit(p,w2),w3)) =
+%                          if(n>= @concat_digit(Pos2Nat_(@concat_digit(p,w2)),zero_word),
+%                             max_word,
+%                             if(*(@most_significant_digitNat(m),Pos2Nat_(@concat_digit(@concat_digit(p,w2),w3)))>@concat_digit(n,w1),
+%                                pred_word(m),
+%                                m)
+%                             whr m = @div_bold(n,@concat_digit(p,w2)) end);
+%
+
+
      div(@c0,p) = @c0;
      div(@cNat(p),q) = @first(@divmod(p,q));
      mod(@c0,p) = @c0;

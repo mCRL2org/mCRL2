@@ -1886,6 +1886,152 @@ namespace mcrl2 {
         return lessequal_word_manual_implementation(a[0], a[1]);
       }
 
+
+      /// \brief Generate identifier \@rightmost_bit.
+      /// \return Identifier \@rightmost_bit.
+      inline
+      const core::identifier_string& rightmost_bit_name()
+      {
+        static core::identifier_string rightmost_bit_name = core::identifier_string("@rightmost_bit");
+        return rightmost_bit_name;
+      }
+
+      /// \brief Constructor for function symbol \@rightmost_bit.       
+      /// \return Function symbol rightmost_bit.
+      inline
+      const function_symbol& rightmost_bit()
+      {
+        static function_symbol rightmost_bit(rightmost_bit_name(), make_function_sort(machine_word(), sort_bool::bool_()));
+        return rightmost_bit;
+      }
+
+
+      /// \brief Recogniser for function \@rightmost_bit.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@rightmost_bit.
+      inline
+      bool is_rightmost_bit_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == rightmost_bit();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@rightmost_bit.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@rightmost_bit to a number of arguments.
+      inline
+      application rightmost_bit(const data_expression& arg0)
+      {
+        return sort_machine_word::rightmost_bit()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@rightmost_bit.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol rightmost_bit to a
+      ///     number of arguments.
+      inline
+      bool is_rightmost_bit_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_rightmost_bit_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@rightmost_bit.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@rightmost_bit to a number of arguments.
+      inline
+      data_expression rightmost_bit_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression rightmost_bit_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==rightmost_bit());
+        return rightmost_bit_manual_implementation(a[0]);
+      }
+
+
+      /// \brief Generate identifier \@shift_right.
+      /// \return Identifier \@shift_right.
+      inline
+      const core::identifier_string& shift_right_name()
+      {
+        static core::identifier_string shift_right_name = core::identifier_string("@shift_right");
+        return shift_right_name;
+      }
+
+      /// \brief Constructor for function symbol \@shift_right.       
+      /// \return Function symbol shift_right.
+      inline
+      const function_symbol& shift_right()
+      {
+        static function_symbol shift_right(shift_right_name(), make_function_sort(sort_bool::bool_(), machine_word(), machine_word()));
+        return shift_right;
+      }
+
+
+      /// \brief Recogniser for function \@shift_right.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@shift_right.
+      inline
+      bool is_shift_right_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == shift_right();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@shift_right.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@shift_right to a number of arguments.
+      inline
+      application shift_right(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::shift_right()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@shift_right.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol shift_right to a
+      ///     number of arguments.
+      inline
+      bool is_shift_right_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_shift_right_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@shift_right.
+      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@shift_right to a number of arguments.
+      inline
+      data_expression shift_right_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression shift_right_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==shift_right());
+        return shift_right_manual_implementation(a[0], a[1]);
+      }
+
       /// \brief Give all system defined mappings for machine_word
       /// \return All system defined mappings for machine_word
       inline
@@ -1915,6 +2061,8 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::equal_word());
         result.push_back(sort_machine_word::less_word());
         result.push_back(sort_machine_word::lessequal_word());
+        result.push_back(sort_machine_word::rightmost_bit());
+        result.push_back(sort_machine_word::shift_right());
         return result;
       }
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for machine_word
@@ -1958,6 +2106,8 @@ namespace mcrl2 {
         result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word");
         result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word");
         result[sort_machine_word::lessequal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::lessequal_word_application,"sort_machine_word::lessequal_word");
+        result[sort_machine_word::rightmost_bit()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::rightmost_bit_application,"sort_machine_word::rightmost_bit");
+        result[sort_machine_word::shift_right()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::shift_right_application,"sort_machine_word::shift_right");
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1980,7 +2130,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
+        assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e) || is_shift_right_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -1992,7 +2142,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
+        assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e) || is_shift_right_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2040,7 +2190,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succ_word_application(e) || is_sqrt_word_application(e) || is_pred_word_application(e));
+        assert(is_succ_word_application(e) || is_sqrt_word_application(e) || is_pred_word_application(e) || is_rightmost_bit_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
