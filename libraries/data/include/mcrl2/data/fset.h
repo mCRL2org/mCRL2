@@ -879,7 +879,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(vd, ve), intersection(s, cons_(s, vd, vs), cons_(s, ve, vt)), intersection(s, vs, cons_(s, ve, vt))));
         result.push_back(data_equation(variable_list({vd, ve, vs, vt}), less(ve, vd), intersection(s, cons_(s, vd, vs), cons_(s, ve, vt)), intersection(s, cons_(s, vd, vs), vt)));
         result.push_back(data_equation(variable_list(), count(s, empty(s)), sort_nat::c0()));
-        result.push_back(data_equation(variable_list({vd, vs}), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
+        result.push_back(data_equation(variable_list({v@cNat, vd, vs}), count(s, cons_(s, vd, vs)), v@cNat(sort_nat::succ(count(s, vs)))));
         result.push_back(data_equation(variable_list({vs, vt}), not_equal_to(vs, vt), sort_bool::not_(equal_to(vs, vt))));
         return result;
       }

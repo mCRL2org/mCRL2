@@ -712,42 +712,25 @@ namespace mcrl2 {
         return succ_name;
       }
 
-      // This function is not intended for public use and therefore not documented in Doxygen.
+      /// \brief Constructor for function symbol succ.       
+      /// \return Function symbol succ.
       inline
-      function_symbol succ(const sort_expression& s0)
+      const function_symbol& succ()
       {
-        sort_expression target_sort;
-        if (s0 == int_())
-        {
-          target_sort = int_();
-        }
-        else if (s0 == sort_nat::nat())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if (s0 == sort_pos::pos())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + pp(s0));
-        }
-
-        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
+        static function_symbol succ(succ_name(), make_function_sort(int_(), int_()));
         return succ;
       }
 
+
       /// \brief Recogniser for function succ.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching succ
+      /// \return true iff e is the function symbol matching succ.
       inline
       bool is_succ_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == succ_name() && function_sort(f.sort()).domain().size() == 1 && (f == succ(int_()) || f == succ(sort_nat::nat()) || f == succ(sort_pos::pos()));
+          return atermpp::down_cast<function_symbol>(e) == succ();
         }
         return false;
       }
@@ -758,7 +741,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return sort_int::succ(arg0.sort())(arg0);
+        return sort_int::succ()(arg0);
       }
 
       /// \brief Recogniser for application of succ.
@@ -1343,7 +1326,7 @@ namespace mcrl2 {
         result.push_back(sort_int::negate(sort_pos::pos()));
         result.push_back(sort_int::negate(sort_nat::nat()));
         result.push_back(sort_int::negate(int_()));
-        result.push_back(sort_int::succ(int_()));
+        result.push_back(sort_int::succ());
         result.push_back(sort_int::pred(sort_nat::nat()));
         result.push_back(sort_int::pred(int_()));
         result.push_back(sort_int::dub(sort_bool::bool_(), int_()));
@@ -1377,7 +1360,7 @@ namespace mcrl2 {
         result.push_back(sort_int::negate(sort_pos::pos()));
         result.push_back(sort_int::negate(sort_nat::nat()));
         result.push_back(sort_int::negate(int_()));
-        result.push_back(sort_int::succ(int_()));
+        result.push_back(sort_int::succ());
         result.push_back(sort_int::pred(sort_nat::nat()));
         result.push_back(sort_int::pred(int_()));
         result.push_back(sort_int::plus(int_(), int_()));
@@ -1466,7 +1449,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp, vq}), less_equal(cneg(vp), cneg(vq)), less_equal(vq, vp)));
         result.push_back(data_equation(variable_list({vn}), nat2int(vn), cint(vn)));
         result.push_back(data_equation(variable_list({vn}), int2nat(cint(vn)), vn));
-        result.push_back(data_equation(variable_list({vp}), pos2int(vp), cint(sort_nat::cnat(vp))));
+        result.push_back(data_equation(variable_list({v@cNat, vp}), pos2int(vp), cint(v@cNat(vp))));
         result.push_back(data_equation(variable_list({vn}), int2pos(cint(vn)), sort_nat::nat2pos(vn)));
         result.push_back(data_equation(variable_list({vn, vp}), maximum(vp, cint(vn)), maximum(vp, vn)));
         result.push_back(data_equation(variable_list({vp, vq}), maximum(vp, cneg(vq)), vp));
@@ -1479,24 +1462,24 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vx, vy}), maximum(vx, vy), if_(less_equal(vx, vy), vy, vx)));
         result.push_back(data_equation(variable_list({vx, vy}), minimum(vx, vy), if_(less_equal(vx, vy), vx, vy)));
         result.push_back(data_equation(variable_list({vn}), abs(cint(vn)), vn));
-        result.push_back(data_equation(variable_list({vp}), abs(cneg(vp)), sort_nat::cnat(vp)));
+        result.push_back(data_equation(variable_list({v@cNat, vp}), abs(cneg(vp)), v@cNat(vp)));
         result.push_back(data_equation(variable_list({vp}), negate(vp), cneg(vp)));
         result.push_back(data_equation(variable_list(), negate(sort_nat::c0()), cint(sort_nat::c0())));
-        result.push_back(data_equation(variable_list({vp}), negate(sort_nat::cnat(vp)), cneg(vp)));
+        result.push_back(data_equation(variable_list({v@cNat, vp}), negate(v@cNat(vp)), cneg(vp)));
         result.push_back(data_equation(variable_list({vn}), negate(cint(vn)), negate(vn)));
-        result.push_back(data_equation(variable_list({vp}), negate(cneg(vp)), cint(sort_nat::cnat(vp))));
-        result.push_back(data_equation(variable_list({vn}), succ(cint(vn)), cint(sort_nat::cnat(succ(vn)))));
-        result.push_back(data_equation(variable_list({vp}), succ(cneg(vp)), negate(pred(vp))));
+        result.push_back(data_equation(variable_list({v@cNat, vp}), negate(cneg(vp)), cint(v@cNat(vp))));
+        result.push_back(data_equation(variable_list({v@cNat, vn}), sort_nat::succ(cint(vn)), cint(v@cNat(sort_nat::succ(vn)))));
+        result.push_back(data_equation(variable_list({vp}), sort_nat::succ(cneg(vp)), negate(pred(vp))));
         result.push_back(data_equation(variable_list(), pred(sort_nat::c0()), cneg(sort_pos::c1())));
-        result.push_back(data_equation(variable_list({vp}), pred(sort_nat::cnat(vp)), cint(pred(vp))));
+        result.push_back(data_equation(variable_list({v@cNat, vp}), pred(v@cNat(vp)), cint(pred(vp))));
         result.push_back(data_equation(variable_list({vn}), pred(cint(vn)), pred(vn)));
-        result.push_back(data_equation(variable_list({vp}), pred(cneg(vp)), cneg(succ(vp))));
+        result.push_back(data_equation(variable_list({vp}), pred(cneg(vp)), cneg(sort_nat::succ(vp))));
         result.push_back(data_equation(variable_list({vb, vn}), dub(vb, cint(vn)), cint(dub(vb, vn))));
         result.push_back(data_equation(variable_list({vp}), dub(sort_bool::false_(), cneg(vp)), cneg(sort_pos::cdub(sort_bool::false_(), vp))));
         result.push_back(data_equation(variable_list({vp}), dub(sort_bool::true_(), cneg(vp)), negate(dub(sort_bool::true_(), pred(vp)))));
         result.push_back(data_equation(variable_list({vm, vn}), plus(cint(vm), cint(vn)), cint(plus(vm, vn))));
-        result.push_back(data_equation(variable_list({vn, vp}), plus(cint(vn), cneg(vp)), minus(vn, sort_nat::cnat(vp))));
-        result.push_back(data_equation(variable_list({vn, vp}), plus(cneg(vp), cint(vn)), minus(vn, sort_nat::cnat(vp))));
+        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), plus(cint(vn), cneg(vp)), minus(vn, v@cNat(vp))));
+        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), plus(cneg(vp), cint(vn)), minus(vn, v@cNat(vp))));
         result.push_back(data_equation(variable_list({vp, vq}), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
         result.push_back(data_equation(variable_list({vp, vq}), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
         result.push_back(data_equation(variable_list({vp, vq}), less(vp, vq), minus(vp, vq), negate(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vq, vp))));
@@ -1504,15 +1487,15 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vm, vn}), less(vm, vn), minus(vm, vn), negate(sort_nat::monus(vn, vm))));
         result.push_back(data_equation(variable_list({vx, vy}), minus(vx, vy), plus(vx, negate(vy))));
         result.push_back(data_equation(variable_list({vm, vn}), times(cint(vm), cint(vn)), cint(times(vm, vn))));
-        result.push_back(data_equation(variable_list({vn, vp}), times(cint(vn), cneg(vp)), negate(times(sort_nat::cnat(vp), vn))));
-        result.push_back(data_equation(variable_list({vn, vp}), times(cneg(vp), cint(vn)), negate(times(sort_nat::cnat(vp), vn))));
-        result.push_back(data_equation(variable_list({vp, vq}), times(cneg(vp), cneg(vq)), cint(sort_nat::cnat(times(vp, vq)))));
+        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), times(cint(vn), cneg(vp)), negate(times(v@cNat(vp), vn))));
+        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), times(cneg(vp), cint(vn)), negate(times(v@cNat(vp), vn))));
+        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), times(cneg(vp), cneg(vq)), cint(v@cNat(times(vp, vq)))));
         result.push_back(data_equation(variable_list({vn, vp}), div(cint(vn), vp), cint(div(vn, vp))));
-        result.push_back(data_equation(variable_list({vp, vq}), div(cneg(vp), vq), cneg(succ(div(pred(vp), vq)))));
+        result.push_back(data_equation(variable_list({vp, vq}), div(cneg(vp), vq), cneg(sort_nat::succ(div(pred(vp), vq)))));
         result.push_back(data_equation(variable_list({vn, vp}), mod(cint(vn), vp), mod(vn, vp)));
-        result.push_back(data_equation(variable_list({vp, vq}), mod(cneg(vp), vq), int2nat(minus(vq, succ(mod(pred(vp), vq))))));
+        result.push_back(data_equation(variable_list({vp, vq}), mod(cneg(vp), vq), int2nat(minus(vq, sort_nat::succ(mod(pred(vp), vq))))));
         result.push_back(data_equation(variable_list({vm, vn}), exp(cint(vm), vn), cint(exp(vm, vn))));
-        result.push_back(data_equation(variable_list({vn, vp}), sort_nat::even(vn), exp(cneg(vp), vn), cint(sort_nat::cnat(exp(vp, vn)))));
+        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), sort_nat::even(vn), exp(cneg(vp), vn), cint(v@cNat(exp(vp, vn)))));
         result.push_back(data_equation(variable_list({vn, vp}), sort_bool::not_(sort_nat::even(vn)), exp(cneg(vp), vn), cneg(exp(vp, vn))));
         return result;
       }

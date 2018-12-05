@@ -23,7 +23,6 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/machine_word.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 
@@ -64,59 +63,30 @@ namespace mcrl2 {
       }
 
       inline
-      const core::identifier_string& natnatpair_name()
+      const core::identifier_string& natpair_name()
       {
-        static core::identifier_string natnatpair_name = core::identifier_string("@NatPair");
-        return natnatpair_name;
+        static core::identifier_string natpair_name = core::identifier_string("@NatPair");
+        return natpair_name;
       }
 
       /// \brief Constructor for sort expression \@NatPair
       /// \return Sort expression \@NatPair
       inline
-      const basic_sort& natnatpair()
+      const basic_sort& natpair()
       {
-        static basic_sort natnatpair = basic_sort(natnatpair_name());
-        return natnatpair;
+        static basic_sort natpair = basic_sort(natpair_name());
+        return natpair;
       }
 
       /// \brief Recogniser for sort expression \@NatPair
       /// \param e A sort expression
-      /// \return true iff e == natnatpair()
+      /// \return true iff e == natpair()
       inline
-      bool is_natnatpair(const sort_expression& e)
+      bool is_natpair(const sort_expression& e)
       {
         if (is_basic_sort(e))
         {
-          return basic_sort(e) == natnatpair();
-        }
-        return false;
-      }
-
-      inline
-      const core::identifier_string& wordnatpair_name()
-      {
-        static core::identifier_string wordnatpair_name = core::identifier_string("@WordNatPair");
-        return wordnatpair_name;
-      }
-
-      /// \brief Constructor for sort expression \@WordNatPair
-      /// \return Sort expression \@WordNatPair
-      inline
-      const basic_sort& wordnatpair()
-      {
-        static basic_sort wordnatpair = basic_sort(wordnatpair_name());
-        return wordnatpair;
-      }
-
-      /// \brief Recogniser for sort expression \@WordNatPair
-      /// \param e A sort expression
-      /// \return true iff e == wordnatpair()
-      inline
-      bool is_wordnatpair(const sort_expression& e)
-      {
-        if (is_basic_sort(e))
-        {
-          return basic_sort(e) == wordnatpair();
+          return basic_sort(e) == natpair();
         }
         return false;
       }
@@ -154,57 +124,57 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier succ.
-      /// \return Identifier succ.
+      /// \brief Generate identifier \@cNat.
+      /// \return Identifier \@cNat.
       inline
-      const core::identifier_string& succ_name()
+      const core::identifier_string& cnat_name()
       {
-        static core::identifier_string succ_name = core::identifier_string("succ");
-        return succ_name;
+        static core::identifier_string cnat_name = core::identifier_string("@cNat");
+        return cnat_name;
       }
 
-      // This function is not intended for public use and therefore not documented in Doxygen.
+      /// \brief Constructor for function symbol \@cNat.       
+      /// \return Function symbol cnat.
       inline
-      function_symbol succ(const sort_expression& s0)
+      const function_symbol& cnat()
       {
-        sort_expression target_sort(sort_pos::pos());
-        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
-        return succ;
+        static function_symbol cnat(cnat_name(), make_function_sort(sort_pos::pos(), nat()));
+        return cnat;
       }
 
-      /// \brief Recogniser for function succ.
+
+      /// \brief Recogniser for function \@cNat.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching succ
+      /// \return true iff e is the function symbol matching \@cNat.
       inline
-      bool is_succ_function_symbol(const atermpp::aterm& e)
+      bool is_cnat_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == succ_name() && function_sort(f.sort()).domain().size() == 1 && (f == succ(nat()) || f == succ(sort_pos::pos()));
+          return atermpp::down_cast<function_symbol>(e) == cnat();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol succ.        
+      /// \brief Application of the function symbol \@cNat.        
       /// \param arg0 A data expression. 
-      /// \return Application of succ to a number of arguments.
+      /// \return Application of \@cNat to a number of arguments.
       inline
-      application succ(const data_expression& arg0)
+      application cnat(const data_expression& arg0)
       {
-        return sort_nat::succ(arg0.sort())(arg0);
+        return sort_nat::cnat()(arg0);
       }
 
-      /// \brief Recogniser for application of succ.
+      /// \brief Recogniser for application of \@cNat.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol succ to a
+      /// \return true iff e is an application of function symbol cnat to a
       ///     number of arguments.
       inline
-      bool is_succ_application(const atermpp::aterm& e)
+      bool is_cnat_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_succ_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_cnat_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -223,7 +193,7 @@ namespace mcrl2 {
       inline
       const function_symbol& cpair()
       {
-        static function_symbol cpair(cpair_name(), make_function_sort(nat(), nat(), natnatpair()));
+        static function_symbol cpair(cpair_name(), make_function_sort(nat(), nat(), natpair()));
         return cpair;
       }
 
@@ -271,7 +241,7 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
         result.push_back(sort_nat::c0());
-        result.push_back(sort_nat::succ(nat()));
+        result.push_back(sort_nat::cnat());
         result.push_back(sort_nat::cpair());
 
         return result;
@@ -282,8 +252,6 @@ namespace mcrl2 {
       function_symbol_vector nat_mCRL2_usable_constructors()
       {
         function_symbol_vector result;
-        result.push_back(sort_nat::succ(nat()));
-
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
@@ -295,130 +263,6 @@ namespace mcrl2 {
       {
         implementation_map result;
         return result;
-      }
-
-      /// \brief Generate identifier \@most_significant_digitNat.
-      /// \return Identifier \@most_significant_digitNat.
-      inline
-      const core::identifier_string& most_significant_digit_nat_name()
-      {
-        static core::identifier_string most_significant_digit_nat_name = core::identifier_string("@most_significant_digitNat");
-        return most_significant_digit_nat_name;
-      }
-
-      /// \brief Constructor for function symbol \@most_significant_digitNat.       
-      /// \return Function symbol most_significant_digit_nat.
-      inline
-      const function_symbol& most_significant_digit_nat()
-      {
-        static function_symbol most_significant_digit_nat(most_significant_digit_nat_name(), make_function_sort(word, nat64));
-        return most_significant_digit_nat;
-      }
-
-
-      /// \brief Recogniser for function \@most_significant_digitNat.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@most_significant_digitNat.
-      inline
-      bool is_most_significant_digit_nat_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == most_significant_digit_nat();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@most_significant_digitNat.        
-      /// \param arg0 A data expression. 
-      /// \return Application of \@most_significant_digitNat to a number of arguments.
-      inline
-      application most_significant_digit_nat(const data_expression& arg0)
-      {
-        return sort_nat::most_significant_digit_nat()(arg0);
-      }
-
-      /// \brief Recogniser for application of \@most_significant_digitNat.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol most_significant_digit_nat to a
-      ///     number of arguments.
-      inline
-      bool is_most_significant_digit_nat_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_most_significant_digit_nat_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@concat_digit.
-      /// \return Identifier \@concat_digit.
-      inline
-      const core::identifier_string& concat_digit_name()
-      {
-        static core::identifier_string concat_digit_name = core::identifier_string("@concat_digit");
-        return concat_digit_name;
-      }
-
-      // This function is not intended for public use and therefore not documented in Doxygen.
-      inline
-      function_symbol concat_digit(const sort_expression& s0, const sort_expression& s1)
-      {
-        sort_expression target_sort;
-        if (s0 == nat64 && s1 == word)
-        {
-          target_sort = nat64;
-        }
-        else if (s0 == sort_pos::pos() && s1 == sort_machine_word::machine_word())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for concat_digit with domain sorts " + pp(s0) + ", " + pp(s1));
-        }
-
-        function_symbol concat_digit(concat_digit_name(), make_function_sort(s0, s1, target_sort));
-        return concat_digit;
-      }
-
-      /// \brief Recogniser for function \@concat_digit.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@concat_digit
-      inline
-      bool is_concat_digit_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == concat_digit_name() && function_sort(f.sort()).domain().size() == 2 && (f == concat_digit(nat64, word) || f == concat_digit(sort_pos::pos(), sort_machine_word::machine_word()));
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@concat_digit.        
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression. 
-      /// \return Application of \@concat_digit to a number of arguments.
-      inline
-      application concat_digit(const data_expression& arg0, const data_expression& arg1)
-      {
-        return sort_nat::concat_digit(arg0.sort(), arg1.sort())(arg0, arg1);
-      }
-
-      /// \brief Recogniser for application of \@concat_digit.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol concat_digit to a
-      ///     number of arguments.
-      inline
-      bool is_concat_digit_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_concat_digit_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
       }
 
       /// \brief Generate identifier Pos2Nat.
@@ -677,6 +521,61 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier succ.
+      /// \return Identifier succ.
+      inline
+      const core::identifier_string& succ_name()
+      {
+        static core::identifier_string succ_name = core::identifier_string("succ");
+        return succ_name;
+      }
+
+      /// \brief Constructor for function symbol succ.       
+      /// \return Function symbol succ.
+      inline
+      const function_symbol& succ()
+      {
+        static function_symbol succ(succ_name(), make_function_sort(nat(), sort_pos::pos()));
+        return succ;
+      }
+
+
+      /// \brief Recogniser for function succ.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching succ.
+      inline
+      bool is_succ_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == succ();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol succ.        
+      /// \param arg0 A data expression. 
+      /// \return Application of succ to a number of arguments.
+      inline
+      application succ(const data_expression& arg0)
+      {
+        return sort_nat::succ()(arg0);
+      }
+
+      /// \brief Recogniser for application of succ.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol succ to a
+      ///     number of arguments.
+      inline
+      bool is_succ_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_succ_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
       /// \brief Generate identifier pred.
       /// \return Identifier pred.
       inline
@@ -728,6 +627,62 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_pred_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@dub.
+      /// \return Identifier \@dub.
+      inline
+      const core::identifier_string& dub_name()
+      {
+        static core::identifier_string dub_name = core::identifier_string("@dub");
+        return dub_name;
+      }
+
+      /// \brief Constructor for function symbol \@dub.       
+      /// \return Function symbol dub.
+      inline
+      const function_symbol& dub()
+      {
+        static function_symbol dub(dub_name(), make_function_sort(sort_bool::bool_(), nat(), nat()));
+        return dub;
+      }
+
+
+      /// \brief Recogniser for function \@dub.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@dub.
+      inline
+      bool is_dub_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == dub();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@dub.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@dub to a number of arguments.
+      inline
+      application dub(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_nat::dub()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@dub.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol dub to a
+      ///     number of arguments.
+      inline
+      bool is_dub_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_dub_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -805,6 +760,63 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_plus_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@gtesubtb.
+      /// \return Identifier \@gtesubtb.
+      inline
+      const core::identifier_string& gte_subtract_with_borrow_name()
+      {
+        static core::identifier_string gte_subtract_with_borrow_name = core::identifier_string("@gtesubtb");
+        return gte_subtract_with_borrow_name;
+      }
+
+      /// \brief Constructor for function symbol \@gtesubtb.       
+      /// \return Function symbol gte_subtract_with_borrow.
+      inline
+      const function_symbol& gte_subtract_with_borrow()
+      {
+        static function_symbol gte_subtract_with_borrow(gte_subtract_with_borrow_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
+        return gte_subtract_with_borrow;
+      }
+
+
+      /// \brief Recogniser for function \@gtesubtb.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@gtesubtb.
+      inline
+      bool is_gte_subtract_with_borrow_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == gte_subtract_with_borrow();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@gtesubtb.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@gtesubtb to a number of arguments.
+      inline
+      application gte_subtract_with_borrow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        return sort_nat::gte_subtract_with_borrow()(arg0, arg1, arg2);
+      }
+
+      /// \brief Recogniser for application of \@gtesubtb.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol gte_subtract_with_borrow to a
+      ///     number of arguments.
+      inline
+      bool is_gte_subtract_with_borrow_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_gte_subtract_with_borrow_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -1059,112 +1071,57 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier sqrt.
-      /// \return Identifier sqrt.
+      /// \brief Generate identifier \@even.
+      /// \return Identifier \@even.
       inline
-      const core::identifier_string& sqrt_name()
+      const core::identifier_string& even_name()
       {
-        static core::identifier_string sqrt_name = core::identifier_string("sqrt");
-        return sqrt_name;
+        static core::identifier_string even_name = core::identifier_string("@even");
+        return even_name;
       }
 
-      /// \brief Constructor for function symbol sqrt.       
-      /// \return Function symbol sqrt.
+      /// \brief Constructor for function symbol \@even.       
+      /// \return Function symbol even.
       inline
-      const function_symbol& sqrt()
+      const function_symbol& even()
       {
-        static function_symbol sqrt(sqrt_name(), make_function_sort(nat(), nat()));
-        return sqrt;
+        static function_symbol even(even_name(), make_function_sort(nat(), sort_bool::bool_()));
+        return even;
       }
 
 
-      /// \brief Recogniser for function sqrt.
+      /// \brief Recogniser for function \@even.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching sqrt.
+      /// \return true iff e is the function symbol matching \@even.
       inline
-      bool is_sqrt_function_symbol(const atermpp::aterm& e)
+      bool is_even_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == sqrt();
+          return atermpp::down_cast<function_symbol>(e) == even();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol sqrt.        
+      /// \brief Application of the function symbol \@even.        
       /// \param arg0 A data expression. 
-      /// \return Application of sqrt to a number of arguments.
+      /// \return Application of \@even to a number of arguments.
       inline
-      application sqrt(const data_expression& arg0)
+      application even(const data_expression& arg0)
       {
-        return sort_nat::sqrt()(arg0);
+        return sort_nat::even()(arg0);
       }
 
-      /// \brief Recogniser for application of sqrt.
+      /// \brief Recogniser for application of \@even.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol sqrt to a
+      /// \return true iff e is an application of function symbol even to a
       ///     number of arguments.
       inline
-      bool is_sqrt_application(const atermpp::aterm& e)
+      bool is_even_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_sqrt_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@natpred.
-      /// \return Identifier \@natpred.
-      inline
-      const core::identifier_string& natpred_name()
-      {
-        static core::identifier_string natpred_name = core::identifier_string("@natpred");
-        return natpred_name;
-      }
-
-      /// \brief Constructor for function symbol \@natpred.       
-      /// \return Function symbol natpred.
-      inline
-      const function_symbol& natpred()
-      {
-        static function_symbol natpred(natpred_name(), make_function_sort(nat(), nat()));
-        return natpred;
-      }
-
-
-      /// \brief Recogniser for function \@natpred.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@natpred.
-      inline
-      bool is_natpred_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == natpred();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@natpred.        
-      /// \param arg0 A data expression. 
-      /// \return Application of \@natpred to a number of arguments.
-      inline
-      application natpred(const data_expression& arg0)
-      {
-        return sort_nat::natpred()(arg0);
-      }
-
-      /// \brief Recogniser for application of \@natpred.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol natpred to a
-      ///     number of arguments.
-      inline
-      bool is_natpred_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_natpred_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_even_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -1221,120 +1178,6 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_monus_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@monus_whr.
-      /// \return Identifier \@monus_whr.
-      inline
-      const core::identifier_string& monus_whr_name()
-      {
-        static core::identifier_string monus_whr_name = core::identifier_string("@monus_whr");
-        return monus_whr_name;
-      }
-
-      /// \brief Constructor for function symbol \@monus_whr.       
-      /// \return Function symbol monus_whr.
-      inline
-      const function_symbol& monus_whr()
-      {
-        static function_symbol monus_whr(monus_whr_name(), make_function_sort(nat(), sort_machine_word::machine_word(), nat(), sort_machine_word::machine_word(), nat(), nat()));
-        return monus_whr;
-      }
-
-
-      /// \brief Recogniser for function \@monus_whr.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@monus_whr.
-      inline
-      bool is_monus_whr_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == monus_whr();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@monus_whr.        
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
-      /// \param arg3 A data expression.
-      /// \param arg4 A data expression. 
-      /// \return Application of \@monus_whr to a number of arguments.
-      inline
-      application monus_whr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4)
-      {
-        return sort_nat::monus_whr()(arg0, arg1, arg2, arg3, arg4);
-      }
-
-      /// \brief Recogniser for application of \@monus_whr.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol monus_whr to a
-      ///     number of arguments.
-      inline
-      bool is_monus_whr_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_monus_whr_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@even.
-      /// \return Identifier \@even.
-      inline
-      const core::identifier_string& even_name()
-      {
-        static core::identifier_string even_name = core::identifier_string("@even");
-        return even_name;
-      }
-
-      /// \brief Constructor for function symbol \@even.       
-      /// \return Function symbol even.
-      inline
-      const function_symbol& even()
-      {
-        static function_symbol even(even_name(), make_function_sort(nat(), sort_bool::bool_()));
-        return even;
-      }
-
-
-      /// \brief Recogniser for function \@even.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@even.
-      inline
-      bool is_even_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == even();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@even.        
-      /// \param arg0 A data expression. 
-      /// \return Application of \@even to a number of arguments.
-      inline
-      application even(const data_expression& arg0)
-      {
-        return sort_nat::even()(arg0);
-      }
-
-      /// \brief Recogniser for application of \@even.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol even to a
-      ///     number of arguments.
-      inline
-      bool is_even_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_even_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -1569,6 +1412,61 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier sqrt.
+      /// \return Identifier sqrt.
+      inline
+      const core::identifier_string& sqrt_name()
+      {
+        static core::identifier_string sqrt_name = core::identifier_string("sqrt");
+        return sqrt_name;
+      }
+
+      /// \brief Constructor for function symbol sqrt.       
+      /// \return Function symbol sqrt.
+      inline
+      const function_symbol& sqrt()
+      {
+        static function_symbol sqrt(sqrt_name(), make_function_sort(nat(), nat()));
+        return sqrt;
+      }
+
+
+      /// \brief Recogniser for function sqrt.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching sqrt.
+      inline
+      bool is_sqrt_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == sqrt();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol sqrt.        
+      /// \param arg0 A data expression. 
+      /// \return Application of sqrt to a number of arguments.
+      inline
+      application sqrt(const data_expression& arg0)
+      {
+        return sort_nat::sqrt()(arg0);
+      }
+
+      /// \brief Recogniser for application of sqrt.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol sqrt to a
+      ///     number of arguments.
+      inline
+      bool is_sqrt_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_sqrt_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
       /// \brief Generate identifier \@sqrt_nat.
       /// \return Identifier \@sqrt_nat.
       inline
@@ -1626,119 +1524,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@dub.
-      /// \return Identifier \@dub.
-      inline
-      const core::identifier_string& dub_name()
-      {
-        static core::identifier_string dub_name = core::identifier_string("@dub");
-        return dub_name;
-      }
-
-      /// \brief Constructor for function symbol \@dub.       
-      /// \return Function symbol dub.
-      inline
-      const function_symbol& dub()
-      {
-        static function_symbol dub(dub_name(), make_function_sort(sort_bool::bool_(), nat(), nat()));
-        return dub;
-      }
-
-
-      /// \brief Recogniser for function \@dub.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@dub.
-      inline
-      bool is_dub_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == dub();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@dub.        
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression. 
-      /// \return Application of \@dub to a number of arguments.
-      inline
-      application dub(const data_expression& arg0, const data_expression& arg1)
-      {
-        return sort_nat::dub()(arg0, arg1);
-      }
-
-      /// \brief Recogniser for application of \@dub.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol dub to a
-      ///     number of arguments.
-      inline
-      bool is_dub_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_dub_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@gtesubtb.
-      /// \return Identifier \@gtesubtb.
-      inline
-      const core::identifier_string& gte_subtract_with_borrow_name()
-      {
-        static core::identifier_string gte_subtract_with_borrow_name = core::identifier_string("@gtesubtb");
-        return gte_subtract_with_borrow_name;
-      }
-
-      /// \brief Constructor for function symbol \@gtesubtb.       
-      /// \return Function symbol gte_subtract_with_borrow.
-      inline
-      const function_symbol& gte_subtract_with_borrow()
-      {
-        static function_symbol gte_subtract_with_borrow(gte_subtract_with_borrow_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
-        return gte_subtract_with_borrow;
-      }
-
-
-      /// \brief Recogniser for function \@gtesubtb.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@gtesubtb.
-      inline
-      bool is_gte_subtract_with_borrow_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == gte_subtract_with_borrow();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@gtesubtb.        
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \param arg2 A data expression. 
-      /// \return Application of \@gtesubtb to a number of arguments.
-      inline
-      application gte_subtract_with_borrow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return sort_nat::gte_subtract_with_borrow()(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@gtesubtb.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol gte_subtract_with_borrow to a
-      ///     number of arguments.
-      inline
-      bool is_gte_subtract_with_borrow_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_gte_subtract_with_borrow_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
       /// \brief Generate identifier \@first.
       /// \return Identifier \@first.
       inline
@@ -1753,7 +1538,7 @@ namespace mcrl2 {
       inline
       const function_symbol& first()
       {
-        static function_symbol first(first_name(), make_function_sort(natnatpair(), nat()));
+        static function_symbol first(first_name(), make_function_sort(natpair(), nat()));
         return first;
       }
 
@@ -1808,7 +1593,7 @@ namespace mcrl2 {
       inline
       const function_symbol& last()
       {
-        static function_symbol last(last_name(), make_function_sort(natnatpair(), nat()));
+        static function_symbol last(last_name(), make_function_sort(natpair(), nat()));
         return last;
       }
 
@@ -1863,7 +1648,7 @@ namespace mcrl2 {
       inline
       const function_symbol& divmod()
       {
-        static function_symbol divmod(divmod_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), natnatpair()));
+        static function_symbol divmod(divmod_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), natpair()));
         return divmod;
       }
 
@@ -1919,7 +1704,7 @@ namespace mcrl2 {
       inline
       const function_symbol& generalised_divmod()
       {
-        static function_symbol generalised_divmod(generalised_divmod_name(), make_function_sort(natnatpair(), sort_bool::bool_(), sort_pos::pos(), natnatpair()));
+        static function_symbol generalised_divmod(generalised_divmod_name(), make_function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair()));
         return generalised_divmod;
       }
 
@@ -1976,7 +1761,7 @@ namespace mcrl2 {
       inline
       const function_symbol& doubly_generalised_divmod()
       {
-        static function_symbol doubly_generalised_divmod(doubly_generalised_divmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natnatpair()));
+        static function_symbol doubly_generalised_divmod(doubly_generalised_divmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natpair()));
         return doubly_generalised_divmod;
       }
 
@@ -2024,35 +1809,32 @@ namespace mcrl2 {
       function_symbol_vector nat_generate_functions_code()
       {
         function_symbol_vector result;
-        result.push_back(sort_nat::most_significant_digit_nat());
-        result.push_back(sort_nat::concat_digit(nat64, word));
         result.push_back(sort_nat::pos2nat());
         result.push_back(sort_nat::nat2pos());
         result.push_back(sort_nat::maximum(sort_pos::pos(), nat()));
         result.push_back(sort_nat::maximum(nat(), sort_pos::pos()));
         result.push_back(sort_nat::maximum(nat(), nat()));
         result.push_back(sort_nat::minimum(nat(), nat()));
+        result.push_back(sort_nat::succ());
         result.push_back(sort_nat::pred());
+        result.push_back(sort_nat::dub());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
+        result.push_back(sort_nat::gte_subtract_with_borrow());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::div());
         result.push_back(sort_nat::mod());
         result.push_back(sort_nat::exp(sort_pos::pos(), nat()));
         result.push_back(sort_nat::exp(nat(), nat()));
-        result.push_back(sort_nat::sqrt());
-        result.push_back(sort_nat::natpred());
-        result.push_back(sort_nat::monus());
-        result.push_back(sort_nat::monus_whr());
         result.push_back(sort_nat::even());
+        result.push_back(sort_nat::monus());
         result.push_back(sort_nat::swap_zero());
         result.push_back(sort_nat::swap_zero_add());
         result.push_back(sort_nat::swap_zero_min());
         result.push_back(sort_nat::swap_zero_monus());
+        result.push_back(sort_nat::sqrt());
         result.push_back(sort_nat::sqrt_nat_aux_func());
-        result.push_back(sort_nat::dub());
-        result.push_back(sort_nat::gte_subtract_with_borrow());
         result.push_back(sort_nat::first());
         result.push_back(sort_nat::last());
         result.push_back(sort_nat::divmod());
@@ -2072,6 +1854,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::maximum(nat(), sort_pos::pos()));
         result.push_back(sort_nat::maximum(nat(), nat()));
         result.push_back(sort_nat::minimum(nat(), nat()));
+        result.push_back(sort_nat::succ());
         result.push_back(sort_nat::pred());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
@@ -2081,8 +1864,9 @@ namespace mcrl2 {
         result.push_back(sort_nat::mod());
         result.push_back(sort_nat::exp(sort_pos::pos(), nat()));
         result.push_back(sort_nat::exp(nat(), nat()));
-        result.push_back(sort_nat::sqrt());
         result.push_back(sort_nat::even());
+        result.push_back(sort_nat::monus());
+        result.push_back(sort_nat::sqrt());
         return result;
       }
 
@@ -2105,7 +1889,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_dub_application(e) || is_divmod_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2117,7 +1901,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_concat_digit_application(e) || is_monus_whr_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2129,7 +1913,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_concat_digit_application(e) || is_monus_whr_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2141,7 +1925,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_monus_whr_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return atermpp::down_cast<const application>(e)[2];
       }
 
@@ -2153,20 +1937,8 @@ namespace mcrl2 {
       inline
       data_expression arg4(const data_expression& e)
       {
-        assert(is_monus_whr_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e));
+        assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e));
         return atermpp::down_cast<const application>(e)[3];
-      }
-
-      ///\brief Function for projecting out argument
-      ///        arg5 from an application.
-      /// \param e A data expression.
-      /// \pre arg5 is defined for e.
-      /// \return The argument of e that corresponds to arg5.
-      inline
-      data_expression arg5(const data_expression& e)
-      {
-        assert(is_monus_whr_application(e));
-        return atermpp::down_cast<const application>(e)[4];
       }
 
       ///\brief Function for projecting out argument
@@ -2177,7 +1949,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succ_application(e) || is_most_significant_digit_nat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_pred_application(e) || is_sqrt_application(e) || is_natpred_application(e) || is_even_application(e) || is_first_application(e) || is_last_application(e));
+        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2189,7 +1961,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_dub_application(e) || is_divmod_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2198,120 +1970,111 @@ namespace mcrl2 {
       inline
       data_equation_vector nat_generate_equations_code()
       {
+        variable vb("b",sort_bool::bool_());
+        variable vc("c",sort_bool::bool_());
         variable vp("p",sort_pos::pos());
+        variable vq("q",sort_pos::pos());
         variable vn("n",nat());
-        variable vn1("n1",nat());
-        variable vn2("n2",nat());
-        variable vw("w",sort_machine_word::machine_word());
-        variable vw1("w1",sort_machine_word::machine_word());
-        variable vw2("w2",sort_machine_word::machine_word());
+        variable vm("m",nat());
+        variable vu("u",nat());
+        variable vv("v",nat());
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list(), c0(), most_significant_digit_nat(sort_machine_word::zero_word())));
-        result.push_back(data_equation(variable_list({vw}), succ(most_significant_digit_nat(vw)), if_(equal_to(vw, sort_machine_word::max_word()), concat_digit(most_significant_digit_nat(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::succ_word(vw)))));
-        result.push_back(data_equation(variable_list({v@succ_nat64, vn, vw}), succ(concat_digit(vn, vw)), if_(equal_to(vw, sort_machine_word::max_word()), concat_digit(v@succ_nat64(vn), sort_machine_word::zero_word()), concat_digit(vn, sort_machine_word::succ_word(vw)))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), equal_to(vw1, vw2)));
-        result.push_back(data_equation(variable_list({vn, vw1, vw2}), equal_to(concat_digit(vn, vw1), most_significant_digit_nat(vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vn, vw1, vw2}), equal_to(most_significant_digit_nat(vw1), concat_digit(vn, vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), equal_to(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), sort_bool::and_(equal_to(vw1, vw2), equal_to(vn1, vn2))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), less(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), less(vw1, vw2)));
-        result.push_back(data_equation(variable_list({vn, vw1, vw2}), less(concat_digit(vn, vw1), most_significant_digit_nat(vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vn, vw1, vw2}), less(most_significant_digit_nat(vw1), concat_digit(vn, vw2)), sort_bool::true_()));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), less(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(less(vw1, vw2), less_equal(vn1, vn2), less(vn1, vn2))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), less_equal(vw1, vw2)));
-        result.push_back(data_equation(variable_list({vn, vw1, vw2}), less_equal(concat_digit(vn, vw1), most_significant_digit_nat(vw2)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vn, vw1, vw2}), less_equal(most_significant_digit_nat(vw1), concat_digit(vn, vw2)), sort_bool::true_()));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), less_equal(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(less_equal(vw1, vw2), less_equal(vn1, vn2), less(vn1, vn2))));
-        result.push_back(data_equation(variable_list({vw}), pos2nat(sort_pos::most_significant_digit(vw)), most_significant_digit_nat(vw)));
-        result.push_back(data_equation(variable_list({vp, vw}), pos2nat(concat_digit(vp, vw)), concat_digit(pos2nat(vp), vw)));
-        result.push_back(data_equation(variable_list({vw}), nat2pos(most_significant_digit_nat(vw)), sort_pos::most_significant_digit(vw)));
-        result.push_back(data_equation(variable_list({vp, vw}), nat2pos(concat_digit(vp, vw)), concat_digit(nat2pos(vp), vw)));
-        result.push_back(data_equation(variable_list({vn, vp}), maximum(vp, vn), if_(less_equal(vn, pos2nat(vp)), vp, nat2pos(vn))));
-        result.push_back(data_equation(variable_list({vn, vp}), maximum(vn, vp), if_(less_equal(vn, pos2nat(vp)), vp, nat2pos(vn))));
+        result.push_back(data_equation(variable_list({vp}), equal_to(c0(), cnat(vp)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vp}), equal_to(cnat(vp), c0()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vp, vq}), equal_to(cnat(vp), cnat(vq)), equal_to(vp, vq)));
+        result.push_back(data_equation(variable_list({vn}), less(vn, c0()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vp}), less(c0(), cnat(vp)), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vp, vq}), less(cnat(vp), cnat(vq)), less(vp, vq)));
+        result.push_back(data_equation(variable_list({vn}), less_equal(c0(), vn), sort_bool::true_()));
+        result.push_back(data_equation(variable_list({vp}), less_equal(cnat(vp), c0()), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vp, vq}), less_equal(cnat(vp), cnat(vq)), less_equal(vp, vq)));
+        result.push_back(data_equation(variable_list({vp}), pos2nat(vp), cnat(vp)));
+        result.push_back(data_equation(variable_list({vp}), nat2pos(cnat(vp)), vp));
+        result.push_back(data_equation(variable_list({vp}), maximum(vp, c0()), vp));
+        result.push_back(data_equation(variable_list({vp, vq}), maximum(vp, cnat(vq)), if_(less_equal(vp, vq), vq, vp)));
+        result.push_back(data_equation(variable_list({vp}), maximum(c0(), vp), vp));
+        result.push_back(data_equation(variable_list({vp, vq}), maximum(cnat(vp), vq), if_(less_equal(vp, vq), vq, vp)));
         result.push_back(data_equation(variable_list({vm, vn}), maximum(vm, vn), if_(less_equal(vm, vn), vn, vm)));
         result.push_back(data_equation(variable_list({vm, vn}), minimum(vm, vn), if_(less_equal(vm, vn), vm, vn)));
-        result.push_back(data_equation(variable_list({vpred_word, vw}), pred(sort_pos::most_significant_digit(vw)), most_significant_digit_nat(vpred_word(vw))));
-        result.push_back(data_equation(variable_list({v@pred_whr, vp, vpred_word, vw, vzero_word}), pred(concat_digit(vp, vw)), if_(equal_to(vw, vzero_word), v@pred_whr(pred(vp)), concat_digit(pos2nat(vp), vpred_word(vw)))));
-        result.push_back(data_equation(variable_list({v@pred_whr, vmax_word, vpredp, vzero_word}), v@pred_whr(vpredp), if_(equal_to(vpredp, most_significant_digit_nat(vzero_word)), most_significant_digit_nat(vmax_word), concat_digit(vpredp, vmax_word))));
-        result.push_back(data_equation(variable_list({vb, vn}), dub(vb, vn), if_(vb, plus(vn, vn), succ(plus(vn, vn)))));
-        result.push_back(data_equation(variable_list({vn, vp}), plus(vp, vn), plus(vn, vp)));
-        result.push_back(data_equation(variable_list({vw1, vw2}), plus(most_significant_digit_nat(vw1), sort_pos::most_significant_digit(vw2)), if_(equal_to(sort_machine_word::add_overflow_word(vw1, vw2), sort_machine_word::zero_word()), sort_pos::most_significant_digit(sort_machine_word::add_word(vw1, vw2)), concat_digit(sort_pos::most_significant_digit(sort_machine_word::one_word()), sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vw1, vw2}), plus(concat_digit(vn1, vw1), sort_pos::most_significant_digit(vw2)), concat_digit(plus(vn1, most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2))), sort_machine_word::add_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vp, vw1, vw2}), plus(most_significant_digit_nat(vw1), concat_digit(vp, vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), vp), sort_machine_word::add_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vn1, vp, vw1, vw2}), plus(concat_digit(vn1, vw1), concat_digit(vp, vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), plus(vn1, vp)), sort_machine_word::add_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), plus(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(equal_to(sort_machine_word::add_overflow_word(vw1, vw2), sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::add_word(vw1, vw2)), concat_digit(most_significant_digit_nat(sort_machine_word::one_word()), sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vw1, vw2}), plus(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), vn1), sort_machine_word::add_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vn2, vw1, vw2}), plus(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), vn2), sort_machine_word::add_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), plus(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), plus(vn1, vn2)), sort_machine_word::add_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vw}), natpred(most_significant_digit_nat(vw)), if_(equal_to(vw, sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::pred_word(vw)))));
-        result.push_back(data_equation(variable_list({vn, vw}), natpred(concat_digit(vn, vw)), if_(equal_to(vw, sort_machine_word::zero_word()), if_(equal_to(vn, most_significant_digit_nat(sort_machine_word::one_word())), most_significant_digit_nat(sort_machine_word::max_word()), concat_digit(natpred(vn), sort_machine_word::max_word())), concat_digit(vn, sort_machine_word::pred_word(vw)))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), monus(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(less(vw1, vw2), most_significant_digit_nat(sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vw1, vw2}), monus(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(less(vw1, vw2), if_(equal_to(vn1, most_significant_digit_nat(sort_machine_word::one_word())), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(natpred(vn1), sort_machine_word::minus_word(vw1, vw2))), concat_digit(vn1, sort_machine_word::minus_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn2, vw1, vw2}), monus(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), most_significant_digit_nat(sort_machine_word::zero_word())));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), monus(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), monus_whr(vn1, vw1, vn2, vw2, monus(vn1, vn2))));
-        result.push_back(data_equation(variable_list({vconcat_digit, vdiff, vdiff==most_significant_digitNat, vminus_word, vmost_significant_digitNat, vn1, vn2, vw1, vw1<w2, vw2, vzero_word}), monus_whr(vn1, vw1, vn2, vw2, vdiff), if_(vw1<w2, if_(equal_to(vdiff, most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(vdiff, most_significant_digit_nat(sort_machine_word::one_word())), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(natpred(vdiff), sort_machine_word::minus_word(vw1, vw2)))), if_(vdiff==most_significant_digitNat(vzero_word), vmost_significant_digitNat(vminus_word(vw1, vw2)), vconcat_digit(vdiff, vminus_word(vw1, vw2))))));
-        result.push_back(data_equation(variable_list({vn}), monus(c0(), vn), c0()));
-        result.push_back(data_equation(variable_list({vn}), monus(vn, c0()), vn));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), monus(v@cNat(vp), v@cNat(vq)), gte_subtract_with_borrow(sort_bool::false_(), vp, vq)));
+        result.push_back(data_equation(variable_list(), sort_pos::succ(c0()), sort_pos::c1()));
+        result.push_back(data_equation(variable_list({vp}), sort_pos::succ(cnat(vp)), sort_pos::succ(vp)));
+        result.push_back(data_equation(variable_list(), pred(sort_pos::c1()), c0()));
+        result.push_back(data_equation(variable_list({vp}), pred(sort_pos::cdub(sort_bool::true_(), vp)), cnat(sort_pos::cdub(sort_bool::false_(), vp))));
+        result.push_back(data_equation(variable_list({vp}), pred(sort_pos::cdub(sort_bool::false_(), vp)), dub(sort_bool::true_(), pred(vp))));
+        result.push_back(data_equation(variable_list(), dub(sort_bool::false_(), c0()), c0()));
+        result.push_back(data_equation(variable_list(), dub(sort_bool::true_(), c0()), cnat(sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vb, vp}), dub(vb, cnat(vp)), cnat(sort_pos::cdub(vb, vp))));
+        result.push_back(data_equation(variable_list({vp}), plus(vp, c0()), vp));
+        result.push_back(data_equation(variable_list({vp, vq}), plus(vp, cnat(vq)), sort_pos::add_with_carry(sort_bool::false_(), vp, vq)));
+        result.push_back(data_equation(variable_list({vp}), plus(c0(), vp), vp));
+        result.push_back(data_equation(variable_list({vp, vq}), plus(cnat(vp), vq), sort_pos::add_with_carry(sort_bool::false_(), vp, vq)));
+        result.push_back(data_equation(variable_list({vn}), plus(c0(), vn), vn));
+        result.push_back(data_equation(variable_list({vn}), plus(vn, c0()), vn));
+        result.push_back(data_equation(variable_list({vp, vq}), plus(cnat(vp), cnat(vq)), cnat(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(variable_list({vp}), gte_subtract_with_borrow(sort_bool::false_(), vp, sort_pos::c1()), pred(vp)));
+        result.push_back(data_equation(variable_list({vp}), gte_subtract_with_borrow(sort_bool::true_(), vp, sort_pos::c1()), pred(nat2pos(pred(vp)))));
+        result.push_back(data_equation(variable_list({vb, vc, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(vc, vp), sort_pos::cdub(vc, vq)), dub(vb, gte_subtract_with_borrow(vb, vp, vq))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(sort_bool::false_(), vp), sort_pos::cdub(sort_bool::true_(), vq)), dub(sort_bool::not_(vb), gte_subtract_with_borrow(sort_bool::true_(), vp, vq))));
+        result.push_back(data_equation(variable_list({vb, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(sort_bool::true_(), vp), sort_pos::cdub(sort_bool::false_(), vq)), dub(sort_bool::not_(vb), gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
         result.push_back(data_equation(variable_list({vn}), times(c0(), vn), c0()));
         result.push_back(data_equation(variable_list({vn}), times(vn, c0()), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), times(v@cNat(vp), v@cNat(vq)), v@cNat(times(vp, vq))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::times_word(vw1, vw2)), concat_digit(most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vw1, vw2, vzero_word}), times(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(equal_to(vw2, vzero_word), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), concat_digit(times(vn1, most_significant_digit_nat(vw2)), sort_machine_word::times_word(vw1, vw2)), concat_digit(plus(times(vn1, most_significant_digit_nat(vw2)), most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))))));
-        result.push_back(data_equation(variable_list({vn2, vw1, vw2, vzero_word}), times(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), if_(equal_to(vw1, vzero_word), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), concat_digit(times(vn2, most_significant_digit_nat(vw1)), sort_machine_word::times_word(vw1, vw2)), concat_digit(plus(times(vn2, most_significant_digit_nat(vw1)), most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))))));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), times(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), plus(concat_digit(times(concat_digit(vn1, vw1), vn2), sort_machine_word::zero_word()), times(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)))));
+        result.push_back(data_equation(variable_list({vp, vq}), times(cnat(vp), cnat(vq)), cnat(times(vp, vq))));
         result.push_back(data_equation(variable_list({vp}), exp(vp, c0()), sort_pos::c1()));
-        result.push_back(data_equation(variable_list({v@cNat, vp}), exp(vp, v@cNat(sort_pos::c1())), vp));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), exp(vp, v@cNat(sort_pos::cdub(sort_bool::false_(), vq))), exp(times(vp, vp), v@cNat(vq))));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), exp(vp, v@cNat(sort_pos::cdub(sort_bool::true_(), vq))), times(vp, exp(times(vp, vp), v@cNat(vq)))));
-        result.push_back(data_equation(variable_list({v@cNat, vn}), exp(vn, c0()), v@cNat(sort_pos::c1())));
-        result.push_back(data_equation(variable_list({v@cNat, vp}), exp(c0(), v@cNat(vp)), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), exp(v@cNat(vp), vn), v@cNat(exp(vp, vn))));
+        result.push_back(data_equation(variable_list({vp}), exp(vp, cnat(sort_pos::c1())), vp));
+        result.push_back(data_equation(variable_list({vp, vq}), exp(vp, cnat(sort_pos::cdub(sort_bool::false_(), vq))), exp(times(vp, vp), cnat(vq))));
+        result.push_back(data_equation(variable_list({vp, vq}), exp(vp, cnat(sort_pos::cdub(sort_bool::true_(), vq))), times(vp, exp(times(vp, vp), cnat(vq)))));
+        result.push_back(data_equation(variable_list({vn}), exp(vn, c0()), cnat(sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vp}), exp(c0(), cnat(vp)), c0()));
+        result.push_back(data_equation(variable_list({vn, vp}), exp(cnat(vp), vn), cnat(exp(vp, vn))));
         result.push_back(data_equation(variable_list(), even(c0()), sort_bool::true_()));
-        result.push_back(data_equation(variable_list({v@cNat}), even(v@cNat(sort_pos::c1())), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({v@cNat, vb, vp}), even(v@cNat(sort_pos::cdub(vb, vp))), sort_bool::not_(vb)));
+        result.push_back(data_equation(variable_list(), even(cnat(sort_pos::c1())), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vb, vp}), even(cnat(sort_pos::cdub(vb, vp))), sort_bool::not_(vb)));
         result.push_back(data_equation(variable_list({vp}), div(c0(), vp), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), div(v@cNat(vp), vq), first(divmod(vp, vq))));
+        result.push_back(data_equation(variable_list({vp, vq}), div(cnat(vp), vq), first(divmod(vp, vq))));
         result.push_back(data_equation(variable_list({vp}), mod(c0(), vp), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), mod(v@cNat(vp), vq), last(divmod(vp, vq))));
+        result.push_back(data_equation(variable_list({vp, vq}), mod(cnat(vp), vq), last(divmod(vp, vq))));
+        result.push_back(data_equation(variable_list({vn}), monus(c0(), vn), c0()));
+        result.push_back(data_equation(variable_list({vn}), monus(vn, c0()), vn));
+        result.push_back(data_equation(variable_list({vp, vq}), monus(cnat(vp), cnat(vq)), gte_subtract_with_borrow(sort_bool::false_(), vp, vq)));
         result.push_back(data_equation(variable_list({vm}), swap_zero(vm, c0()), vm));
         result.push_back(data_equation(variable_list({vn}), swap_zero(c0(), vn), vn));
-        result.push_back(data_equation(variable_list({v@cNat, vp}), swap_zero(v@cNat(vp), v@cNat(vp)), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), not_equal_to(vp, vq), swap_zero(v@cNat(vp), v@cNat(vq)), v@cNat(vq)));
+        result.push_back(data_equation(variable_list({vp}), swap_zero(cnat(vp), cnat(vp)), c0()));
+        result.push_back(data_equation(variable_list({vp, vq}), not_equal_to(vp, vq), swap_zero(cnat(vp), cnat(vq)), cnat(vq)));
         result.push_back(data_equation(variable_list({vm, vn}), swap_zero_add(c0(), c0(), vm, vn), plus(vm, vn)));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vp}), swap_zero_add(v@cNat(vp), c0(), vm, c0()), vm));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vp, vq}), swap_zero_add(v@cNat(vp), c0(), vm, v@cNat(vq)), swap_zero(v@cNat(vp), plus(swap_zero(v@cNat(vp), vm), v@cNat(vq)))));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), swap_zero_add(c0(), v@cNat(vp), c0(), vn), vn));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp, vq}), swap_zero_add(c0(), v@cNat(vp), v@cNat(vq), vn), swap_zero(v@cNat(vp), sort_nat::plus(v@cNat(vq), swap_zero(v@cNat(vp), vn)))));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vn, vp, vq}), swap_zero_add(v@cNat(vp), v@cNat(vq), vm, vn), swap_zero(sort_nat::plus(v@cNat(vp), v@cNat(vq)), plus(swap_zero(v@cNat(vp), vm), swap_zero(v@cNat(vq), vn)))));
+        result.push_back(data_equation(variable_list({vm, vp}), swap_zero_add(cnat(vp), c0(), vm, c0()), vm));
+        result.push_back(data_equation(variable_list({vm, vp, vq}), swap_zero_add(cnat(vp), c0(), vm, cnat(vq)), swap_zero(cnat(vp), plus(swap_zero(cnat(vp), vm), cnat(vq)))));
+        result.push_back(data_equation(variable_list({vn, vp}), swap_zero_add(c0(), cnat(vp), c0(), vn), vn));
+        result.push_back(data_equation(variable_list({vn, vp, vq}), swap_zero_add(c0(), cnat(vp), cnat(vq), vn), swap_zero(cnat(vp), plus(cnat(vq), swap_zero(cnat(vp), vn)))));
+        result.push_back(data_equation(variable_list({vm, vn, vp, vq}), swap_zero_add(cnat(vp), cnat(vq), vm, vn), swap_zero(plus(cnat(vp), cnat(vq)), plus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
         result.push_back(data_equation(variable_list({vm, vn}), swap_zero_min(c0(), c0(), vm, vn), minimum(vm, vn)));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vp}), swap_zero_min(v@cNat(vp), c0(), vm, c0()), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vp, vq}), swap_zero_min(v@cNat(vp), c0(), vm, v@cNat(vq)), minimum(swap_zero(v@cNat(vp), vm), v@cNat(vq))));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), swap_zero_min(c0(), v@cNat(vp), c0(), vn), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp, vq}), swap_zero_min(c0(), v@cNat(vp), v@cNat(vq), vn), minimum(v@cNat(vq), swap_zero(v@cNat(vp), vn))));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vn, vp, vq}), swap_zero_min(v@cNat(vp), v@cNat(vq), vm, vn), swap_zero(minimum(v@cNat(vp), v@cNat(vq)), minimum(swap_zero(v@cNat(vp), vm), swap_zero(v@cNat(vq), vn)))));
+        result.push_back(data_equation(variable_list({vm, vp}), swap_zero_min(cnat(vp), c0(), vm, c0()), c0()));
+        result.push_back(data_equation(variable_list({vm, vp, vq}), swap_zero_min(cnat(vp), c0(), vm, cnat(vq)), minimum(swap_zero(cnat(vp), vm), cnat(vq))));
+        result.push_back(data_equation(variable_list({vn, vp}), swap_zero_min(c0(), cnat(vp), c0(), vn), c0()));
+        result.push_back(data_equation(variable_list({vn, vp, vq}), swap_zero_min(c0(), cnat(vp), cnat(vq), vn), minimum(cnat(vq), swap_zero(cnat(vp), vn))));
+        result.push_back(data_equation(variable_list({vm, vn, vp, vq}), swap_zero_min(cnat(vp), cnat(vq), vm, vn), swap_zero(minimum(cnat(vp), cnat(vq)), minimum(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
         result.push_back(data_equation(variable_list({vm, vn}), swap_zero_monus(c0(), c0(), vm, vn), monus(vm, vn)));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vp}), swap_zero_monus(v@cNat(vp), c0(), vm, c0()), vm));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vp, vq}), swap_zero_monus(v@cNat(vp), c0(), vm, v@cNat(vq)), swap_zero(v@cNat(vp), monus(swap_zero(v@cNat(vp), vm), v@cNat(vq)))));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), swap_zero_monus(c0(), v@cNat(vp), c0(), vn), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp, vq}), swap_zero_monus(c0(), v@cNat(vp), v@cNat(vq), vn), monus(v@cNat(vq), swap_zero(v@cNat(vp), vn))));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vn, vp, vq}), swap_zero_monus(v@cNat(vp), v@cNat(vq), vm, vn), swap_zero(monus(v@cNat(vp), v@cNat(vq)), monus(swap_zero(v@cNat(vp), vm), swap_zero(v@cNat(vq), vn)))));
+        result.push_back(data_equation(variable_list({vm, vp}), swap_zero_monus(cnat(vp), c0(), vm, c0()), vm));
+        result.push_back(data_equation(variable_list({vm, vp, vq}), swap_zero_monus(cnat(vp), c0(), vm, cnat(vq)), swap_zero(cnat(vp), monus(swap_zero(cnat(vp), vm), cnat(vq)))));
+        result.push_back(data_equation(variable_list({vn, vp}), swap_zero_monus(c0(), cnat(vp), c0(), vn), c0()));
+        result.push_back(data_equation(variable_list({vn, vp, vq}), swap_zero_monus(c0(), cnat(vp), cnat(vq), vn), monus(cnat(vq), swap_zero(cnat(vp), vn))));
+        result.push_back(data_equation(variable_list({vm, vn, vp, vq}), swap_zero_monus(cnat(vp), cnat(vq), vm, vn), swap_zero(monus(cnat(vp), cnat(vq)), monus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
         result.push_back(data_equation(variable_list(), sqrt(c0()), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp}), sqrt(v@cNat(vp)), sqrt_nat_aux_func(v@cNat(vp), c0(), sort_pos::powerlog2_pos(vp))));
-        result.push_back(data_equation(variable_list({v@cNat, vm, vn}), sqrt_nat_aux_func(vn, vm, sort_pos::c1()), if_(less_equal(vn, vm), c0(), v@cNat(sort_pos::c1()))));
-        result.push_back(data_equation(variable_list({v@cNat, vb, vm, vn, vp}), sqrt_nat_aux_func(vn, vm, sort_pos::cdub(vb, vp)), if_(greater(times(sort_nat::plus(v@cNat(sort_pos::cdub(vb, vp)), vm), v@cNat(sort_pos::cdub(vb, vp))), vn), sqrt_nat_aux_func(vn, vm, vp), sort_nat::plus(v@cNat(sort_pos::cdub(vb, vp)), sqrt_nat_aux_func(monus(vn, times(sort_nat::plus(v@cNat(sort_pos::cdub(vb, vp)), vm), v@cNat(sort_pos::cdub(vb, vp)))), plus(vm, v@cNat(sort_pos::cdub(sort_bool::false_(), sort_pos::cdub(vb, vp)))), vp)))));
+        result.push_back(data_equation(variable_list({vp}), sqrt(cnat(vp)), sqrt_nat_aux_func(cnat(vp), c0(), sort_pos::powerlog2_pos(vp))));
+        result.push_back(data_equation(variable_list({vm, vn}), sqrt_nat_aux_func(vn, vm, sort_pos::c1()), if_(less_equal(vn, vm), c0(), cnat(sort_pos::c1()))));
+        result.push_back(data_equation(variable_list({vb, vm, vn, vp}), sqrt_nat_aux_func(vn, vm, sort_pos::cdub(vb, vp)), if_(greater(times(plus(cnat(sort_pos::cdub(vb, vp)), vm), cnat(sort_pos::cdub(vb, vp))), vn), sqrt_nat_aux_func(vn, vm, vp), plus(cnat(sort_pos::cdub(vb, vp)), sqrt_nat_aux_func(monus(vn, times(plus(cnat(sort_pos::cdub(vb, vp)), vm), cnat(sort_pos::cdub(vb, vp)))), plus(vm, cnat(sort_pos::cdub(sort_bool::false_(), sort_pos::cdub(vb, vp)))), vp)))));
         result.push_back(data_equation(variable_list({vm, vn, vu, vv}), equal_to(cpair(vm, vn), cpair(vu, vv)), sort_bool::and_(equal_to(vm, vu), equal_to(vn, vv))));
         result.push_back(data_equation(variable_list({vm, vn, vu, vv}), less(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less(vn, vv)))));
         result.push_back(data_equation(variable_list({vm, vn, vu, vv}), less_equal(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less_equal(vn, vv)))));
         result.push_back(data_equation(variable_list({vm, vn}), first(cpair(vm, vn)), vm));
         result.push_back(data_equation(variable_list({vm, vn}), last(cpair(vm, vn)), vn));
-        result.push_back(data_equation(variable_list({v@cNat}), divmod(sort_pos::c1(), sort_pos::c1()), cpair(v@cNat(sort_pos::c1()), c0())));
-        result.push_back(data_equation(variable_list({v@cNat, vb, vp}), divmod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cpair(c0(), v@cNat(sort_pos::c1()))));
+        result.push_back(data_equation(variable_list(), divmod(sort_pos::c1(), sort_pos::c1()), cpair(cnat(sort_pos::c1()), c0())));
+        result.push_back(data_equation(variable_list({vb, vp}), divmod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cpair(c0(), cnat(sort_pos::c1()))));
         result.push_back(data_equation(variable_list({vb, vp, vq}), divmod(sort_pos::cdub(vb, vp), vq), generalised_divmod(divmod(vp, vq), vb, vq)));
         result.push_back(data_equation(variable_list({vb, vm, vn, vp}), generalised_divmod(cpair(vm, vn), vb, vp), doubly_generalised_divmod(dub(vb, vn), vm, vp)));
         result.push_back(data_equation(variable_list({vn, vp}), doubly_generalised_divmod(c0(), vn, vp), cpair(dub(sort_bool::false_(), vn), c0())));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp, vq}), less(vp, vq), doubly_generalised_divmod(v@cNat(vp), vn, vq), cpair(dub(sort_bool::false_(), vn), v@cNat(vp))));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp, vq}), less_equal(vq, vp), doubly_generalised_divmod(v@cNat(vp), vn, vq), cpair(dub(sort_bool::true_(), vn), gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(variable_list({vn, vp, vq}), less(vp, vq), doubly_generalised_divmod(cnat(vp), vn, vq), cpair(dub(sort_bool::false_(), vn), cnat(vp))));
+        result.push_back(data_equation(variable_list({vn, vp, vq}), less_equal(vq, vp), doubly_generalised_divmod(cnat(vp), vn, vq), cpair(dub(sort_bool::true_(), vn), gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
         return result;
       }
 

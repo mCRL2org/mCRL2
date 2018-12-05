@@ -17,10 +17,9 @@ cons @one <"one">:Pos                                                           
 % The successor constructor should be merged with the successor below, by removing the latter.
 % Currently, this does not work, as the translator to C code does not see that there are multiple
 % successor functions of different types, as this one is a constructor. 
-     @succ <"succ_constructor">:Pos <"arg"> -> Pos                                                                                      internal defined_by_rewrite_rules;
+     succ <"succ">:Pos <"arg"> -> Pos                                                                                                   external defined_by_rewrite_rules;
 
 map  @most_significant_digit <"most_significant_digit">: @word <"arg"> -> Pos                                                           internal defined_by_rewrite_rules;
-     succ <"succ">:Pos <"arg"> -> Pos                                                                                                   external defined_by_rewrite_rules;
      @concat_digit <"concat_digit">: Pos <"arg1"> # @word <"arg2"> -> Pos                                                               internal defined_by_rewrite_rules;
      max <"maximum">: Pos <"left"> # Pos <"right"> -> Pos                                                                               external defined_by_rewrite_rules;
      min <"minimum">: Pos <"left"> # Pos <"right"> -> Pos                                                                               external defined_by_rewrite_rules;
@@ -47,7 +46,6 @@ var  b: Bool;
      w1: @word;
      w2: @word;
 eqn  @one = @most_significant_digit(@one_word);
-     @succ(p) = succ(p);
      succ(@most_significant_digit(w1)) = if(==(w1,@max_word),
                                              @concat_digit(@most_significant_digit(@one_word),@zero_word),
                                              @most_significant_digit(@succ_word(w1)));

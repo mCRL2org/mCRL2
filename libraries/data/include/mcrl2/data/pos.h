@@ -95,57 +95,57 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@succ.
-      /// \return Identifier \@succ.
+      /// \brief Generate identifier succ.
+      /// \return Identifier succ.
       inline
-      const core::identifier_string& succ_constructor_name()
+      const core::identifier_string& succ_name()
       {
-        static core::identifier_string succ_constructor_name = core::identifier_string("@succ");
-        return succ_constructor_name;
+        static core::identifier_string succ_name = core::identifier_string("succ");
+        return succ_name;
       }
 
-      /// \brief Constructor for function symbol \@succ.       
-      /// \return Function symbol succ_constructor.
+      /// \brief Constructor for function symbol succ.       
+      /// \return Function symbol succ.
       inline
-      const function_symbol& succ_constructor()
+      const function_symbol& succ()
       {
-        static function_symbol succ_constructor(succ_constructor_name(), make_function_sort(pos(), pos()));
-        return succ_constructor;
+        static function_symbol succ(succ_name(), make_function_sort(pos(), pos()));
+        return succ;
       }
 
 
-      /// \brief Recogniser for function \@succ.
+      /// \brief Recogniser for function succ.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@succ.
+      /// \return true iff e is the function symbol matching succ.
       inline
-      bool is_succ_constructor_function_symbol(const atermpp::aterm& e)
+      bool is_succ_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == succ_constructor();
+          return atermpp::down_cast<function_symbol>(e) == succ();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@succ.        
+      /// \brief Application of the function symbol succ.        
       /// \param arg0 A data expression. 
-      /// \return Application of \@succ to a number of arguments.
+      /// \return Application of succ to a number of arguments.
       inline
-      application succ_constructor(const data_expression& arg0)
+      application succ(const data_expression& arg0)
       {
-        return sort_pos::succ_constructor()(arg0);
+        return sort_pos::succ()(arg0);
       }
 
-      /// \brief Recogniser for application of \@succ.
+      /// \brief Recogniser for application of succ.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol succ_constructor to a
+      /// \return true iff e is an application of function symbol succ to a
       ///     number of arguments.
       inline
-      bool is_succ_constructor_application(const atermpp::aterm& e)
+      bool is_succ_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_succ_constructor_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_succ_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -156,7 +156,7 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
         result.push_back(sort_pos::one());
-        result.push_back(sort_pos::succ_constructor());
+        result.push_back(sort_pos::succ());
 
         return result;
       }
@@ -166,6 +166,8 @@ namespace mcrl2 {
       function_symbol_vector pos_mCRL2_usable_constructors()
       {
         function_symbol_vector result;
+        result.push_back(sort_pos::succ());
+
         return result;
       }
       // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it
@@ -230,61 +232,6 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_most_significant_digit_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier succ.
-      /// \return Identifier succ.
-      inline
-      const core::identifier_string& succ_name()
-      {
-        static core::identifier_string succ_name = core::identifier_string("succ");
-        return succ_name;
-      }
-
-      /// \brief Constructor for function symbol succ.       
-      /// \return Function symbol succ.
-      inline
-      const function_symbol& succ()
-      {
-        static function_symbol succ(succ_name(), make_function_sort(pos(), pos()));
-        return succ;
-      }
-
-
-      /// \brief Recogniser for function succ.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching succ.
-      inline
-      bool is_succ_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == succ();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol succ.        
-      /// \param arg0 A data expression. 
-      /// \return Application of succ to a number of arguments.
-      inline
-      application succ(const data_expression& arg0)
-      {
-        return sort_pos::succ()(arg0);
-      }
-
-      /// \brief Recogniser for application of succ.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol succ to a
-      ///     number of arguments.
-      inline
-      bool is_succ_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_succ_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -888,7 +835,6 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
         result.push_back(sort_pos::most_significant_digit());
-        result.push_back(sort_pos::succ());
         result.push_back(sort_pos::concat_digit());
         result.push_back(sort_pos::maximum());
         result.push_back(sort_pos::minimum());
@@ -908,7 +854,6 @@ namespace mcrl2 {
       function_symbol_vector pos_mCRL2_usable_mappings()
       {
         function_symbol_vector result;
-        result.push_back(sort_pos::succ());
         result.push_back(sort_pos::maximum());
         result.push_back(sort_pos::minimum());
         result.push_back(sort_pos::plus());
@@ -995,7 +940,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succ_constructor_application(e) || is_most_significant_digit_application(e) || is_succ_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
+        assert(is_succ_application(e) || is_most_significant_digit_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -1026,7 +971,6 @@ namespace mcrl2 {
 
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), one(), most_significant_digit(sort_machine_word::one_word())));
-        result.push_back(data_equation(variable_list({vp}), succ_constructor(vp), succ(vp)));
         result.push_back(data_equation(variable_list({vw1}), succ(most_significant_digit(vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit(sort_machine_word::succ_word(vw1)))));
         result.push_back(data_equation(variable_list({vp, vw1}), succ(concat_digit(vp, vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(succ(vp), sort_machine_word::zero_word()), concat_digit(vp, sort_machine_word::succ_word(vw1)))));
         result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(most_significant_digit(vw1), most_significant_digit(vw2)), equal_to(vw1, vw2)));
