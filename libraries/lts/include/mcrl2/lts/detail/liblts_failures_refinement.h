@@ -289,11 +289,44 @@ void report_statistics(refinement_statistics<T>& stats)
       << ", max: " << stats.max_antichain << ")\n";
 }
 
-/// \brief This function checks using algorithms in the paper mentioned above that
+/// \brief Preprocess the LTS for destructive refinement checking.
+/// \param lts The lts to preprocess.
+/// \param init Any state in this lts.
+/// \return A pair where the first element is the state number of init in the reduced
+///         lts and the second value indicate whether this state in equal to lts.initial_state.
+template<typename LTS_TYPE>
+std::pair<std::size_t, bool> reduce(LTS_TYPE& lts,
+            const refinement_type refinement,
+            const bool weak_reduction,
+            std::size_t init)
+{
+  // For weak-failures and failures-divergence, the existence of tau loops make a difference.
+  // Therefore, we apply bisimulation reduction preserving divergences.
+  // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
+  // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
+  const bool preserve_divergence = weak_reduction && (refinement != trace);
+  lts.clear_state_labels();
+  if (weak_reduction)
+  {
+    // Remove inert tau loops when requested, but preserve divergences for failures and failures-divergence.
+    detail::scc_partitioner<LTS_TYPE> scc_part(lts);
+    init = scc_part.get_eq_class(init);
+    scc_part.replace_transition_system(preserve_divergence);
+  }
+
+  detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(lts, weak_reduction, preserve_divergence);
+  // Assign the reduced LTS, and set init_l2.
+  init = bisim_part.get_eq_class(init);
+  bisim_part.replace_transition_system(weak_reduction, preserve_divergence);
+
+  return std::make_pair(init, bisim_part.in_same_class(init, lts.initial_state()));
+}
+
+/// \brief This function checks using algorithms in the paper mentioned above
 /// whether transition system l1 is included in transition system l2, in the
 /// sense of trace inclusions, failures inclusion and divergence failures
 /// inclusion.
-/// \param weak_reduction If set, it will do so where tau's are included.
+/// \param weak_reduction Remove inert tau loops.
 /// \param generate_counter_example If set, a labelled transition system is generated
 ///        that can act as a counterexample. It consists of a trace, followed by
 ///        outgoing transitions representing a refusal set.
@@ -309,51 +342,29 @@ bool destructive_refinement_checker(
 {
   assert(strategy == exploration_strategy::es_breadth || strategy == exploration_strategy::es_depth); // Need a valid strategy.
 
-  if (!generate_counter_example.is_dummy())  // Counter example is requested, apply bisimulation to l2.
+  if (!generate_counter_example.is_dummy())
   {
-    const bool preserve_divergence=weak_reduction && (refinement!=trace);
-    l2.clear_state_labels();
-    if (weak_reduction)
-    {
-      detail::scc_partitioner<LTS_TYPE> scc_part(l2);
-      scc_part.replace_transition_system(preserve_divergence);
-    }
-
-    detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l2,weak_reduction,preserve_divergence);
-    // Assign the reduced LTS, and set init_l2.
-    bisim_part.replace_transition_system(weak_reduction,preserve_divergence);
+    // Counter example is requested, apply bisimulation to l2.
+    reduce(l2, refinement, weak_reduction, l2.initial_state());
   }
 
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
   l2.clear(); // No use for l2 anymore.
-  // For weak-failures and failures-divergence, the existence of tau loops make a difference.
-  // Therefore, we apply bisimulation reduction preserving divergences.
-  // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
-  // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
   
-  if (generate_counter_example.is_dummy())  // No counter example is requested. We can use bisimulation preprocessing.
+  if (generate_counter_example.is_dummy())
   {
-    const bool preserve_divergence=weak_reduction && (refinement!=trace);
-    l1.clear_state_labels(); 
-    if (weak_reduction)
-    {
-      detail::scc_partitioner<LTS_TYPE> scc_part(l1);
-      init_l2=scc_part.get_eq_class(init_l2);
-      scc_part.replace_transition_system(preserve_divergence);
-    }
+    // No counter example is requested. We can use bisimulation preprocessing.
+    bool initial_equal = false;
+    std::tie(init_l2, initial_equal) = reduce(l1, refinement, weak_reduction, init_l2);
 
-    detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l1,weak_reduction,preserve_divergence);
-    // Assign the reduced LTS, and set init_l2.
-    init_l2=bisim_part.get_eq_class(init_l2);
-    bisim_part.replace_transition_system(weak_reduction,preserve_divergence);
-
-    if (bisim_part.in_same_class(init_l2, l1.initial_state()))
+    if (initial_equal)
     {
-      mCRL2log(log::debug) << "Both LTSs are (divergence-preserving) branching bisimular, so no need to check refinement relation.\n";
+      mCRL2log(log::verbose) << "Both LTSs are (divergence-preserving) branching bisimular, so no need to check refinement relation.\n";
       return true;
     }
   }
+
 
   const detail::lts_cache<LTS_TYPE> weak_property_cache(l1,weak_reduction);
   std::deque< detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > > 
