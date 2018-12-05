@@ -379,8 +379,6 @@ bool destructive_refinement_checker(
                                                            // This line occurs at another place in the code than in 
                                                            // the original algorithm, where insertion in the anti-chain
                                                            // was too late, causing too many impl-spec pairs to be investigated.
-  std::size_t statistics_counter_max = l1.num_states() / 10;
-  std::size_t statistics_counter = statistics_counter_max;
   refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> stats(anti_chain, working);
 
   while (working.size()>0)                            // while working!=empty
@@ -392,13 +390,6 @@ bool destructive_refinement_checker(
     working.pop_front();     // At this point it could be checked whether impl_spec still exists in anti_chain.
                              // Small scale experiments show that this is a little bit more expensive than doing the explicit check below.
 
-    // Periodically report statistics.
-    if (--statistics_counter == 0)
-    {
-      report_statistics(stats);
-      statistics_counter = statistics_counter_max;
-    }
-    
     if (refinement==failures_divergence && weak_property_cache.diverges(impl_spec.state()))
                                                       // if impl diverges
     {
@@ -480,7 +471,7 @@ bool destructive_refinement_checker(
           ++stats.antichain_misses;
           if (strategy == exploration_strategy::es_breadth)
           {
-            working.push_back(impl_spec_counterex);   // push(impl,spec') into working;
+            working.push_back(impl_spec_counterex);   // add(impl,spec') at the bottom of the working;
           }
           else if (strategy == exploration_strategy::es_depth)
           {
@@ -489,7 +480,6 @@ bool destructive_refinement_checker(
         }
       }
     }
-    
   }
 
   report_statistics(stats);
