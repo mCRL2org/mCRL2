@@ -413,7 +413,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       else if (m_optimization == 5 && (aggressive || fatal_attractors_guard(m_iteration_count)))
       {
         simple_structure_graph G(m_graph_builder.m_vertices);
-        detail::fatal_attractors(G, discovered, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+        detail::fatal_attractors(G, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
       }
       if (!todo.empty())
       {

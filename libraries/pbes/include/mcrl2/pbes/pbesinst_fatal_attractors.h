@@ -91,8 +91,6 @@ void insert_in_rank_map(std::map<std::size_t, vertex_set>& U_rank_map, structure
 }
 
 void fatal_attractors(const simple_structure_graph& G,
-                      const std::unordered_set<propositional_variable_instantiation>& discovered,
-                      const std::deque<propositional_variable_instantiation>& todo,
                       vertex_set& S0,
                       vertex_set& S1,
                       std::size_t iteration_count,
@@ -103,27 +101,7 @@ void fatal_attractors(const simple_structure_graph& G,
 
   // count the number of insertions in the sets S0 and S1
   std::size_t insertion_count = 0;
-
   std::size_t n = graph_builder.m_vertices.size();
-
-  // compute todo_
-  boost::dynamic_bitset<> todo_(n);
-  for (const propositional_variable_instantiation& X: todo)
-  {
-    structure_graph::index_type u = graph_builder.find_vertex(X);
-    todo_[u] = true;
-  }
-
-  // compute done
-  vertex_set done(n);
-  for (const propositional_variable_instantiation& X: discovered)
-  {
-    structure_graph::index_type u = graph_builder.find_vertex(X);
-    if (!todo_[u])
-    {
-      done.insert(u);
-    }
-  }
 
   // compute V
   vertex_set V(n);
@@ -134,9 +112,13 @@ void fatal_attractors(const simple_structure_graph& G,
 
   // compute U_j_map, such that U_j_map[j] = U_j
   std::map<std::size_t, vertex_set> U_j_map;
-  for (structure_graph::index_type u: done.vertices())
+  for (structure_graph::index_type u: V.vertices())
   {
     std::size_t j = G.rank(u);
+    if (j == data::undefined_index())
+    {
+      continue;
+    }
     auto alpha = j % 2;
     if ((alpha == 0 && G.decoration(u) == structure_graph::decoration_type::d_false) || (alpha == 1 && G.decoration(u) == structure_graph::decoration_type::d_true))
     {
@@ -145,7 +127,6 @@ void fatal_attractors(const simple_structure_graph& G,
     insert_in_rank_map(U_j_map, u, j, n);
   }
 
-  detail::log_vertex_set(done, "done");
   detail::log_vertex_set(V, "V");
   detail::log_vertex_set(S0, "S0");
   detail::log_vertex_set(S1, "S1");
@@ -160,14 +141,14 @@ void fatal_attractors(const simple_structure_graph& G,
     U_j = set_minus(U_j, S_one_minus_alpha);
     detail::log_vertex_set(U_j, "U_" + std::to_string(j));
     vertex_set U = set_union(U_j, S_alpha);
-    vertex_set X = detail::compute_attractor_set_min_rank(G, U, alpha, done, j);
+    vertex_set X = detail::compute_attractor_set_min_rank(G, U, alpha, V, j);
     vertex_set Y = set_minus(V, compute_attractor_set(G, set_minus(V, X), 1 - alpha));
 
     while (X != Y)
     {
       detail::log_vertex_set(X, "X");
       detail::log_vertex_set(Y, "Y");
-      X = detail::compute_attractor_set_min_rank(G, set_intersection(U, Y), alpha, done, j);
+      X = detail::compute_attractor_set_min_rank(G, set_intersection(U, Y), alpha, V, j);
       Y = set_minus(Y, compute_attractor_set(G, set_minus(Y, X), 1 - alpha));
     }
     detail::log_vertex_set(X, "X (final value)");

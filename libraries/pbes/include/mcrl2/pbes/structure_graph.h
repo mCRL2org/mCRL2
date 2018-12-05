@@ -471,7 +471,7 @@ struct structure_graph_builder
           result.push_back(index[v]);
         }
       }
-        return result;
+      return result;
     };
 
     for (index_type u = 0; u != m_vertices.size(); u++)
