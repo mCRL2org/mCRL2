@@ -69,7 +69,7 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
 
       for (auto v: G.predecessors(u))
       {
-        if (U.contains(v) && (G.rank(v) >= j || (G.rank(u) == data::undefined_index() && G.decoration(u) <= 1)) && !A.contains(v))
+        if (U.contains(v) && (G.rank(v) >= j || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !A.contains(v))
         {
           todo.insert(v);
         }
