@@ -503,6 +503,25 @@ typedef logger mcrl2_logger;
 #define MCRL2_MAX_LOG_LEVEL mcrl2::log::debug
 #endif
 
+/// This macro is equal to the number of arguments in the variadic template arguments up to 2.
+#define MCRL2_NUM_ARGS_(_1, _2, TOTAL, ...) TOTAL
+#define MCRL2_NUM_ARGS(...) MCRL2_NUM_ARGS_(__VA_ARGS__, 2, 1, 0)
+#define MCRL2_CONCAT_(x, y) x ## y
+#define MCRL2_CONCAT(x, y) MCRL2_CONCAT_(x, y)
+
+/// Helper macros for enabling logging with 1 or 2 arguments.
+#define MCRL2_LOG_ENABLED_1(level) (((level) <= MCRL2_MAX_LOG_LEVEL) && ((level) <= (mcrl2::log::mcrl2_logger::get_reporting_level())))
+#define MCRL2_LOG_ENABLED_2(level, hint) (((level) <= MCRL2_MAX_LOG_LEVEL) && ((level) <= (mcrl2::log::mcrl2_logger::get_reporting_level(hint))))
+
+/// This macro is true whenever the logging for the given level (and optionally hint) is enabled.
+#define mCRL2logEnabled(...) MCRL2_CONCAT(MCRL2_LOG_ENABLED_, MCRL2_NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
+
+/// Helper macros for logging with 1 or 2 arguments.
+#define MCRL2_LOG_1(level) \
+  mCRL2logEnabled(level) && mcrl2::log::mcrl2_logger().get(level)
+#define MCRL2_LOG_2(level, hint) \
+  mCRL2logEnabled(level, hint) && mcrl2::log::mcrl2_logger().get(level, hint)
+
 /// mCRL2log(level) provides the function used to log. It performs two
 /// optimisations:
 /// - the first comparison (level > MCRL2_MAX_LOG_LEVEL), compares two constants
@@ -515,13 +534,7 @@ typedef logger mcrl2_logger;
 // (accessed 7/4/2011)
 // We also use the facilities to provide a variable number of arguments to a macro, in order
 // to allow mCRL2log(level) as well as mCRL2log(level, "hint")
-#define mCRL2log(level, ...) \
-if ((level) > MCRL2_MAX_LOG_LEVEL) ; \
-else if ((level) > (mcrl2::log::mcrl2_logger::get_reporting_level(__VA_ARGS__))) ; \
-else mcrl2::log::mcrl2_logger().get(level, ##__VA_ARGS__)
-
-#define mCRL2logEnabled(level, ...) \
-(((level) <= MCRL2_MAX_LOG_LEVEL) && ((level) <= (mcrl2::log::mcrl2_logger::get_reporting_level(__VA_ARGS__))))
+#define mCRL2log(...) MCRL2_CONCAT(MCRL2_LOG_, MCRL2_NUM_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
   } // namespace log
 } // namespace mcrl2
