@@ -54,7 +54,7 @@ bool find_loop(const simple_structure_graph& G,
         if (u == v || find_loop(G, U, v, u, p, visited))
         {
           visited[w] = true;
-          mCRL2log(log::verbose) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
+          mCRL2log(log::debug) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
           return true;
         }
       }
@@ -76,7 +76,7 @@ void find_loops(const simple_structure_graph& G,
                 const detail::structure_graph_builder& graph_builder
 )
 {
-  mCRL2log(log::verbose) << "Apply find loops (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
+  mCRL2log(log::debug) << "Apply find loops (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
 
   // count the number of insertions in the sets S0 and S1
   std::size_t insertion_count = 0;
@@ -110,7 +110,7 @@ void find_loops(const simple_structure_graph& G,
     {
       continue;
     }
-    mCRL2log(log::verbose) << "--- choose u = " << u << std::endl;
+    mCRL2log(log::debug) << "--- choose u = " << u << std::endl;
     auto i = visited.find(u);
     if (i != visited.end())
     {
@@ -124,18 +124,18 @@ void find_loops(const simple_structure_graph& G,
       {
         S0.insert(u);
         insertion_count++;
-        mCRL2log(log::verbose) << "Find loops: insert vertex " << u << " in S0" << std::endl;
+        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S0" << std::endl;
       }
       else
       {
         S1.insert(u);
         insertion_count++;
-        mCRL2log(log::verbose) << "Find loops: insert vertex " << u << " in S1" << std::endl;
+        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S1" << std::endl;
       }
     }
   }
 
-  mCRL2log(log::verbose) << "Find loops: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
+  mCRL2log(log::debug) << "Find loops: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 
 } // namespace detail
