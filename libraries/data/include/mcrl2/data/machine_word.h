@@ -1914,7 +1914,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == rightmost_bit();
+          return atermpp::down_cast<function_symbol>(e) == rightmost_bit();
         }
         return false;
       }
@@ -1986,7 +1986,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == shift_right();
+          return atermpp::down_cast<function_symbol>(e) == shift_right();
         }
         return false;
       }

@@ -1495,8 +1495,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn, vp}), mod(cint(vn), vp), mod(vn, vp)));
         result.push_back(data_equation(variable_list({vp, vq}), mod(cneg(vp), vq), int2nat(minus(vq, sort_nat::succ(mod(pred(vp), vq))))));
         result.push_back(data_equation(variable_list({vm, vn}), exp(cint(vm), vn), cint(exp(vm, vn))));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp}), sort_nat::even(vn), exp(cneg(vp), vn), cint(v@cNat(exp(vp, vn)))));
-        result.push_back(data_equation(variable_list({vn, vp}), sort_bool::not_(sort_nat::even(vn)), exp(cneg(vp), vn), cneg(exp(vp, vn))));
+        result.push_back(data_equation(variable_list({v@cNat, v@even, vn, vp}), v@even(vn), exp(cneg(vp), vn), cint(v@cNat(exp(vp, vn)))));
+        result.push_back(data_equation(variable_list({v@even, vn, vp}), sort_bool::not_(v@even(vn)), exp(cneg(vp), vn), cneg(exp(vp, vn))));
         return result;
       }
 

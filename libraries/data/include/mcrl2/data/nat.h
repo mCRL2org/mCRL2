@@ -66,12 +66,12 @@ namespace mcrl2 {
       inline
       const core::identifier_string& natnatpair_name()
       {
-        static core::identifier_string natnatpair_name = core::identifier_string("@NatPair");
+        static core::identifier_string natnatpair_name = core::identifier_string("@NatNatPair");
         return natnatpair_name;
       }
 
-      /// \brief Constructor for sort expression \@NatPair
-      /// \return Sort expression \@NatPair
+      /// \brief Constructor for sort expression \@NatNatPair
+      /// \return Sort expression \@NatNatPair
       inline
       const basic_sort& natnatpair()
       {
@@ -79,7 +79,7 @@ namespace mcrl2 {
         return natnatpair;
       }
 
-      /// \brief Recogniser for sort expression \@NatPair
+      /// \brief Recogniser for sort expression \@NatNatPair
       /// \param e A sort expression
       /// \return true iff e == natnatpair()
       inline
@@ -131,7 +131,7 @@ namespace mcrl2 {
         return c0_name;
       }
 
-      /// \brief Constructor for function symbol \@c0.
+      /// \brief Constructor for function symbol \@c0.       
       /// \return Function symbol c0.
       inline
       const function_symbol& c0()
@@ -186,8 +186,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol succ.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol succ.        
+      /// \param arg0 A data expression. 
       /// \return Application of succ to a number of arguments.
       inline
       application succ(const data_expression& arg0)
@@ -209,58 +209,114 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@cPair.
-      /// \return Identifier \@cPair.
+      /// \brief Generate identifier \@nnPair.
+      /// \return Identifier \@nnPair.
       inline
-      const core::identifier_string& cpair_name()
+      const core::identifier_string& nnpair_name()
       {
-        static core::identifier_string cpair_name = core::identifier_string("@cPair");
-        return cpair_name;
+        static core::identifier_string nnpair_name = core::identifier_string("@nnPair");
+        return nnpair_name;
       }
 
-      /// \brief Constructor for function symbol \@cPair.
-      /// \return Function symbol cpair.
+      /// \brief Constructor for function symbol \@nnPair.       
+      /// \return Function symbol nnpair.
       inline
-      const function_symbol& cpair()
+      const function_symbol& nnpair()
       {
-        static function_symbol cpair(cpair_name(), make_function_sort(nat(), nat(), natnatpair()));
-        return cpair;
+        static function_symbol nnpair(nnpair_name(), make_function_sort(nat(), nat(), natnatpair()));
+        return nnpair;
       }
 
 
-      /// \brief Recogniser for function \@cPair.
+      /// \brief Recogniser for function \@nnPair.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@cPair.
+      /// \return true iff e is the function symbol matching \@nnPair.
       inline
-      bool is_cpair_function_symbol(const atermpp::aterm& e)
+      bool is_nnpair_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == cpair();
+          return atermpp::down_cast<function_symbol>(e) == nnpair();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@cPair.
+      /// \brief Application of the function symbol \@nnPair.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \return Application of \@cPair to a number of arguments.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@nnPair to a number of arguments.
       inline
-      application cpair(const data_expression& arg0, const data_expression& arg1)
+      application nnpair(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_nat::cpair()(arg0, arg1);
+        return sort_nat::nnpair()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@cPair.
+      /// \brief Recogniser for application of \@nnPair.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol cpair to a
+      /// \return true iff e is an application of function symbol nnpair to a
       ///     number of arguments.
       inline
-      bool is_cpair_application(const atermpp::aterm& e)
+      bool is_nnpair_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_cpair_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_nnpair_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@wnPair.
+      /// \return Identifier \@wnPair.
+      inline
+      const core::identifier_string& wnpair_name()
+      {
+        static core::identifier_string wnpair_name = core::identifier_string("@wnPair");
+        return wnpair_name;
+      }
+
+      /// \brief Constructor for function symbol \@wnPair.       
+      /// \return Function symbol wnpair.
+      inline
+      const function_symbol& wnpair()
+      {
+        static function_symbol wnpair(wnpair_name(), make_function_sort(sort_machine_word::machine_word(), nat(), wordnatpair()));
+        return wnpair;
+      }
+
+
+      /// \brief Recogniser for function \@wnPair.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@wnPair.
+      inline
+      bool is_wnpair_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == wnpair();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@wnPair.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@wnPair to a number of arguments.
+      inline
+      application wnpair(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_nat::wnpair()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@wnPair.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol wnpair to a
+      ///     number of arguments.
+      inline
+      bool is_wnpair_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_wnpair_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -272,7 +328,8 @@ namespace mcrl2 {
         function_symbol_vector result;
         result.push_back(sort_nat::c0());
         result.push_back(sort_nat::succ(nat()));
-        result.push_back(sort_nat::cpair());
+        result.push_back(sort_nat::nnpair());
+        result.push_back(sort_nat::wnpair());
 
         return result;
       }
@@ -306,7 +363,7 @@ namespace mcrl2 {
         return most_significant_digit_nat_name;
       }
 
-      /// \brief Constructor for function symbol \@most_significant_digitNat.
+      /// \brief Constructor for function symbol \@most_significant_digitNat.       
       /// \return Function symbol most_significant_digit_nat.
       inline
       const function_symbol& most_significant_digit_nat()
@@ -329,8 +386,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@most_significant_digitNat.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol \@most_significant_digitNat.        
+      /// \param arg0 A data expression. 
       /// \return Application of \@most_significant_digitNat to a number of arguments.
       inline
       application most_significant_digit_nat(const data_expression& arg0)
@@ -397,9 +454,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@concat_digit.
+      /// \brief Application of the function symbol \@concat_digit.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of \@concat_digit to a number of arguments.
       inline
       application concat_digit(const data_expression& arg0, const data_expression& arg1)
@@ -430,7 +487,7 @@ namespace mcrl2 {
         return pos2nat_name;
       }
 
-      /// \brief Constructor for function symbol Pos2Nat.
+      /// \brief Constructor for function symbol Pos2Nat.       
       /// \return Function symbol pos2nat.
       inline
       const function_symbol& pos2nat()
@@ -453,8 +510,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol Pos2Nat.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol Pos2Nat.        
+      /// \param arg0 A data expression. 
       /// \return Application of Pos2Nat to a number of arguments.
       inline
       application pos2nat(const data_expression& arg0)
@@ -485,7 +542,7 @@ namespace mcrl2 {
         return nat2pos_name;
       }
 
-      /// \brief Constructor for function symbol Nat2Pos.
+      /// \brief Constructor for function symbol Nat2Pos.       
       /// \return Function symbol nat2pos.
       inline
       const function_symbol& nat2pos()
@@ -508,8 +565,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol Nat2Pos.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol Nat2Pos.        
+      /// \param arg0 A data expression. 
       /// \return Application of Nat2Pos to a number of arguments.
       inline
       application nat2pos(const data_expression& arg0)
@@ -584,9 +641,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol max.
+      /// \brief Application of the function symbol max.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of max to a number of arguments.
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
@@ -653,9 +710,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol min.
+      /// \brief Application of the function symbol min.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of min to a number of arguments.
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
@@ -686,7 +743,7 @@ namespace mcrl2 {
         return pred_name;
       }
 
-      /// \brief Constructor for function symbol pred.
+      /// \brief Constructor for function symbol pred.       
       /// \return Function symbol pred.
       inline
       const function_symbol& pred()
@@ -709,8 +766,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol pred.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol pred.        
+      /// \param arg0 A data expression. 
       /// \return Application of pred to a number of arguments.
       inline
       application pred(const data_expression& arg0)
@@ -728,6 +785,61 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_pred_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@pred_whr.
+      /// \return Identifier \@pred_whr.
+      inline
+      const core::identifier_string& pred_whr_name()
+      {
+        static core::identifier_string pred_whr_name = core::identifier_string("@pred_whr");
+        return pred_whr_name;
+      }
+
+      /// \brief Constructor for function symbol \@pred_whr.       
+      /// \return Function symbol pred_whr.
+      inline
+      const function_symbol& pred_whr()
+      {
+        static function_symbol pred_whr(pred_whr_name(), make_function_sort(nat(), nat()));
+        return pred_whr;
+      }
+
+
+      /// \brief Recogniser for function \@pred_whr.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@pred_whr.
+      inline
+      bool is_pred_whr_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == pred_whr();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@pred_whr.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@pred_whr to a number of arguments.
+      inline
+      application pred_whr(const data_expression& arg0)
+      {
+        return sort_nat::pred_whr()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@pred_whr.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol pred_whr to a
+      ///     number of arguments.
+      inline
+      bool is_pred_whr_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_pred_whr_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -785,9 +897,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol +.
+      /// \brief Application of the function symbol +.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of + to a number of arguments.
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
@@ -854,9 +966,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol *.
+      /// \brief Application of the function symbol *.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of * to a number of arguments.
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
@@ -887,7 +999,7 @@ namespace mcrl2 {
         return div_name;
       }
 
-      /// \brief Constructor for function symbol div.
+      /// \brief Constructor for function symbol div.       
       /// \return Function symbol div.
       inline
       const function_symbol& div()
@@ -910,9 +1022,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol div.
+      /// \brief Application of the function symbol div.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of div to a number of arguments.
       inline
       application div(const data_expression& arg0, const data_expression& arg1)
@@ -943,7 +1055,7 @@ namespace mcrl2 {
         return mod_name;
       }
 
-      /// \brief Constructor for function symbol mod.
+      /// \brief Constructor for function symbol mod.       
       /// \return Function symbol mod.
       inline
       const function_symbol& mod()
@@ -966,9 +1078,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol mod.
+      /// \brief Application of the function symbol mod.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of mod to a number of arguments.
       inline
       application mod(const data_expression& arg0, const data_expression& arg1)
@@ -1035,9 +1147,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol exp.
+      /// \brief Application of the function symbol exp.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of exp to a number of arguments.
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
@@ -1068,7 +1180,7 @@ namespace mcrl2 {
         return sqrt_name;
       }
 
-      /// \brief Constructor for function symbol sqrt.
+      /// \brief Constructor for function symbol sqrt.       
       /// \return Function symbol sqrt.
       inline
       const function_symbol& sqrt()
@@ -1091,8 +1203,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol sqrt.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol sqrt.        
+      /// \param arg0 A data expression. 
       /// \return Application of sqrt to a number of arguments.
       inline
       application sqrt(const data_expression& arg0)
@@ -1123,7 +1235,7 @@ namespace mcrl2 {
         return natpred_name;
       }
 
-      /// \brief Constructor for function symbol \@natpred.
+      /// \brief Constructor for function symbol \@natpred.       
       /// \return Function symbol natpred.
       inline
       const function_symbol& natpred()
@@ -1146,8 +1258,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@natpred.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol \@natpred.        
+      /// \param arg0 A data expression. 
       /// \return Application of \@natpred to a number of arguments.
       inline
       application natpred(const data_expression& arg0)
@@ -1178,7 +1290,7 @@ namespace mcrl2 {
         return is_odd_name;
       }
 
-      /// \brief Constructor for function symbol \@is_odd.
+      /// \brief Constructor for function symbol \@is_odd.       
       /// \return Function symbol is_odd.
       inline
       const function_symbol& is_odd()
@@ -1196,13 +1308,13 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == is_odd();
+          return atermpp::down_cast<function_symbol>(e) == is_odd();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@is_odd.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol \@is_odd.        
+      /// \param arg0 A data expression. 
       /// \return Application of \@is_odd to a number of arguments.
       inline
       application is_odd(const data_expression& arg0)
@@ -1233,7 +1345,7 @@ namespace mcrl2 {
         return div2_name;
       }
 
-      /// \brief Constructor for function symbol \@div2.
+      /// \brief Constructor for function symbol \@div2.       
       /// \return Function symbol div2.
       inline
       const function_symbol& div2()
@@ -1251,13 +1363,13 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == div2();
+          return atermpp::down_cast<function_symbol>(e) == div2();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@div2.
-      /// \param arg0 A data expression.
+      /// \brief Application of the function symbol \@div2.        
+      /// \param arg0 A data expression. 
       /// \return Application of \@div2 to a number of arguments.
       inline
       application div2(const data_expression& arg0)
@@ -1288,7 +1400,7 @@ namespace mcrl2 {
         return monus_name;
       }
 
-      /// \brief Constructor for function symbol \@monus.
+      /// \brief Constructor for function symbol \@monus.       
       /// \return Function symbol monus.
       inline
       const function_symbol& monus()
@@ -1311,9 +1423,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@monus.
+      /// \brief Application of the function symbol \@monus.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of \@monus to a number of arguments.
       inline
       application monus(const data_expression& arg0, const data_expression& arg1)
@@ -1344,7 +1456,7 @@ namespace mcrl2 {
         return monus_whr_name;
       }
 
-      /// \brief Constructor for function symbol \@monus_whr.
+      /// \brief Constructor for function symbol \@monus_whr.       
       /// \return Function symbol monus_whr.
       inline
       const function_symbol& monus_whr()
@@ -1367,12 +1479,12 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@monus_whr.
+      /// \brief Application of the function symbol \@monus_whr.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \param arg3 A data expression.
-      /// \param arg4 A data expression.
+      /// \param arg4 A data expression. 
       /// \return Application of \@monus_whr to a number of arguments.
       inline
       application monus_whr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4)
@@ -1403,7 +1515,7 @@ namespace mcrl2 {
         return exp_aux3p_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_aux3p.
+      /// \brief Constructor for function symbol \@exp_aux3p.       
       /// \return Function symbol exp_aux3p.
       inline
       const function_symbol& exp_aux3p()
@@ -1421,15 +1533,15 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_aux3p();
+          return atermpp::down_cast<function_symbol>(e) == exp_aux3p();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_aux3p.
+      /// \brief Application of the function symbol \@exp_aux3p.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@exp_aux3p to a number of arguments.
       inline
       application exp_aux3p(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -1460,7 +1572,7 @@ namespace mcrl2 {
         return exp_aux4p_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_aux4p.
+      /// \brief Constructor for function symbol \@exp_aux4p.       
       /// \return Function symbol exp_aux4p.
       inline
       const function_symbol& exp_aux4p()
@@ -1478,16 +1590,16 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_aux4p();
+          return atermpp::down_cast<function_symbol>(e) == exp_aux4p();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_aux4p.
+      /// \brief Application of the function symbol \@exp_aux4p.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
-      /// \param arg3 A data expression.
+      /// \param arg3 A data expression. 
       /// \return Application of \@exp_aux4p to a number of arguments.
       inline
       application exp_aux4p(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
@@ -1518,7 +1630,7 @@ namespace mcrl2 {
         return exp_aux3n_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_aux3n.
+      /// \brief Constructor for function symbol \@exp_aux3n.       
       /// \return Function symbol exp_aux3n.
       inline
       const function_symbol& exp_aux3n()
@@ -1536,15 +1648,15 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_aux3n();
+          return atermpp::down_cast<function_symbol>(e) == exp_aux3n();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_aux3n.
+      /// \brief Application of the function symbol \@exp_aux3n.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@exp_aux3n to a number of arguments.
       inline
       application exp_aux3n(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -1575,7 +1687,7 @@ namespace mcrl2 {
         return exp_aux4n_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_aux4n.
+      /// \brief Constructor for function symbol \@exp_aux4n.       
       /// \return Function symbol exp_aux4n.
       inline
       const function_symbol& exp_aux4n()
@@ -1593,16 +1705,16 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_aux4n();
+          return atermpp::down_cast<function_symbol>(e) == exp_aux4n();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_aux4n.
+      /// \brief Application of the function symbol \@exp_aux4n.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
-      /// \param arg3 A data expression.
+      /// \param arg3 A data expression. 
       /// \return Application of \@exp_aux4n to a number of arguments.
       inline
       application exp_aux4n(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
@@ -1633,7 +1745,7 @@ namespace mcrl2 {
         return exp_auxtruep_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_auxtruep.
+      /// \brief Constructor for function symbol \@exp_auxtruep.       
       /// \return Function symbol exp_auxtruep.
       inline
       const function_symbol& exp_auxtruep()
@@ -1651,15 +1763,15 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_auxtruep();
+          return atermpp::down_cast<function_symbol>(e) == exp_auxtruep();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_auxtruep.
+      /// \brief Application of the function symbol \@exp_auxtruep.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@exp_auxtruep to a number of arguments.
       inline
       application exp_auxtruep(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -1690,7 +1802,7 @@ namespace mcrl2 {
         return exp_auxtruen_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_auxtruen.
+      /// \brief Constructor for function symbol \@exp_auxtruen.       
       /// \return Function symbol exp_auxtruen.
       inline
       const function_symbol& exp_auxtruen()
@@ -1708,15 +1820,15 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_auxtruen();
+          return atermpp::down_cast<function_symbol>(e) == exp_auxtruen();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_auxtruen.
+      /// \brief Application of the function symbol \@exp_auxtruen.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@exp_auxtruen to a number of arguments.
       inline
       application exp_auxtruen(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -1747,7 +1859,7 @@ namespace mcrl2 {
         return exp_auxfalsep_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_auxfalsep.
+      /// \brief Constructor for function symbol \@exp_auxfalsep.       
       /// \return Function symbol exp_auxfalsep.
       inline
       const function_symbol& exp_auxfalsep()
@@ -1765,15 +1877,15 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_auxfalsep();
+          return atermpp::down_cast<function_symbol>(e) == exp_auxfalsep();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_auxfalsep.
+      /// \brief Application of the function symbol \@exp_auxfalsep.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@exp_auxfalsep to a number of arguments.
       inline
       application exp_auxfalsep(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -1804,7 +1916,7 @@ namespace mcrl2 {
         return exp_auxfalsen_name;
       }
 
-      /// \brief Constructor for function symbol \@exp_auxfalsen.
+      /// \brief Constructor for function symbol \@exp_auxfalsen.       
       /// \return Function symbol exp_auxfalsen.
       inline
       const function_symbol& exp_auxfalsen()
@@ -1822,15 +1934,15 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == exp_auxfalsen();
+          return atermpp::down_cast<function_symbol>(e) == exp_auxfalsen();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@exp_auxfalsen.
+      /// \brief Application of the function symbol \@exp_auxfalsen.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@exp_auxfalsen to a number of arguments.
       inline
       application exp_auxfalsen(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -1852,57 +1964,974 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@even.
-      /// \return Identifier \@even.
+      /// \brief Generate identifier \@div_bold.
+      /// \return Identifier \@div_bold.
       inline
-      const core::identifier_string& even_name()
+      const core::identifier_string& div_bold_name()
       {
-        static core::identifier_string even_name = core::identifier_string("@even");
-        return even_name;
+        static core::identifier_string div_bold_name = core::identifier_string("@div_bold");
+        return div_bold_name;
       }
 
-      /// \brief Constructor for function symbol \@even.
-      /// \return Function symbol even.
+      /// \brief Constructor for function symbol \@div_bold.       
+      /// \return Function symbol div_bold.
       inline
-      const function_symbol& even()
+      const function_symbol& div_bold()
       {
-        static function_symbol even(even_name(), make_function_sort(nat(), sort_bool::bool_()));
-        return even;
+        static function_symbol div_bold(div_bold_name(), make_function_sort(nat(), sort_pos::pos(), sort_machine_word::machine_word()));
+        return div_bold;
       }
 
 
-      /// \brief Recogniser for function \@even.
+      /// \brief Recogniser for function \@div_bold.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@even.
+      /// \return true iff e is the function symbol matching \@div_bold.
       inline
-      bool is_even_function_symbol(const atermpp::aterm& e)
+      bool is_div_bold_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == even();
+          return atermpp::down_cast<function_symbol>(e) == div_bold();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@even.
+      /// \brief Application of the function symbol \@div_bold.        
       /// \param arg0 A data expression.
-      /// \return Application of \@even to a number of arguments.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@div_bold to a number of arguments.
       inline
-      application even(const data_expression& arg0)
+      application div_bold(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_nat::even()(arg0);
+        return sort_nat::div_bold()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@even.
+      /// \brief Recogniser for application of \@div_bold.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol even to a
+      /// \return true iff e is an application of function symbol div_bold to a
       ///     number of arguments.
       inline
-      bool is_even_application(const atermpp::aterm& e)
+      bool is_div_bold_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_even_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_div_bold_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@div_bold_whr.
+      /// \return Identifier \@div_bold_whr.
+      inline
+      const core::identifier_string& div_bold_whr_name()
+      {
+        static core::identifier_string div_bold_whr_name = core::identifier_string("@div_bold_whr");
+        return div_bold_whr_name;
+      }
+
+      /// \brief Constructor for function symbol \@div_bold_whr.       
+      /// \return Function symbol div_bold_whr.
+      inline
+      const function_symbol& div_bold_whr()
+      {
+        static function_symbol div_bold_whr(div_bold_whr_name(), make_function_sort(nat(), sort_machine_word::machine_word(), sort_pos::pos(), sort_machine_word::machine_word(), sort_machine_word::machine_word(), sort_machine_word::machine_word(), sort_machine_word::machine_word()));
+        return div_bold_whr;
+      }
+
+
+      /// \brief Recogniser for function \@div_bold_whr.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@div_bold_whr.
+      inline
+      bool is_div_bold_whr_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == div_bold_whr();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@div_bold_whr.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \param arg4 A data expression.
+      /// \param arg5 A data expression. 
+      /// \return Application of \@div_bold_whr to a number of arguments.
+      inline
+      application div_bold_whr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4, const data_expression& arg5)
+      {
+        return sort_nat::div_bold_whr()(arg0, arg1, arg2, arg3, arg4, arg5);
+      }
+
+      /// \brief Recogniser for application of \@div_bold_whr.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol div_bold_whr to a
+      ///     number of arguments.
+      inline
+      bool is_div_bold_whr_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_div_bold_whr_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@div_whr1.
+      /// \return Identifier \@div_whr1.
+      inline
+      const core::identifier_string& div_whr1_name()
+      {
+        static core::identifier_string div_whr1_name = core::identifier_string("@div_whr1");
+        return div_whr1_name;
+      }
+
+      /// \brief Constructor for function symbol \@div_whr1.       
+      /// \return Function symbol div_whr1.
+      inline
+      const function_symbol& div_whr1()
+      {
+        static function_symbol div_whr1(div_whr1_name(), make_function_sort(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word(), natnatpair(), nat()));
+        return div_whr1;
+      }
+
+
+      /// \brief Recogniser for function \@div_whr1.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@div_whr1.
+      inline
+      bool is_div_whr1_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == div_whr1();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@div_whr1.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@div_whr1 to a number of arguments.
+      inline
+      application div_whr1(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_nat::div_whr1()(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@div_whr1.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol div_whr1 to a
+      ///     number of arguments.
+      inline
+      bool is_div_whr1_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_div_whr1_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@div_whr2.
+      /// \return Identifier \@div_whr2.
+      inline
+      const core::identifier_string& div_whr2_name()
+      {
+        static core::identifier_string div_whr2_name = core::identifier_string("@div_whr2");
+        return div_whr2_name;
+      }
+
+      /// \brief Constructor for function symbol \@div_whr2.       
+      /// \return Function symbol div_whr2.
+      inline
+      const function_symbol& div_whr2()
+      {
+        static function_symbol div_whr2(div_whr2_name(), make_function_sort(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word(), natnatpair(), nat()));
+        return div_whr2;
+      }
+
+
+      /// \brief Recogniser for function \@div_whr2.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@div_whr2.
+      inline
+      bool is_div_whr2_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == div_whr2();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@div_whr2.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@div_whr2 to a number of arguments.
+      inline
+      application div_whr2(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_nat::div_whr2()(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@div_whr2.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol div_whr2 to a
+      ///     number of arguments.
+      inline
+      bool is_div_whr2_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_div_whr2_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@mod_whr1.
+      /// \return Identifier \@mod_whr1.
+      inline
+      const core::identifier_string& mod_whr1_name()
+      {
+        static core::identifier_string mod_whr1_name = core::identifier_string("@mod_whr1");
+        return mod_whr1_name;
+      }
+
+      /// \brief Constructor for function symbol \@mod_whr1.       
+      /// \return Function symbol mod_whr1.
+      inline
+      const function_symbol& mod_whr1()
+      {
+        static function_symbol mod_whr1(mod_whr1_name(), make_function_sort(sort_machine_word::machine_word(), sort_pos::pos(), sort_machine_word::machine_word(), nat(), nat()));
+        return mod_whr1;
+      }
+
+
+      /// \brief Recogniser for function \@mod_whr1.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@mod_whr1.
+      inline
+      bool is_mod_whr1_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == mod_whr1();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@mod_whr1.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@mod_whr1 to a number of arguments.
+      inline
+      application mod_whr1(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_nat::mod_whr1()(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@mod_whr1.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol mod_whr1 to a
+      ///     number of arguments.
+      inline
+      bool is_mod_whr1_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_mod_whr1_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@divmod_aux.
+      /// \return Identifier \@divmod_aux.
+      inline
+      const core::identifier_string& divmod_aux_name()
+      {
+        static core::identifier_string divmod_aux_name = core::identifier_string("@divmod_aux");
+        return divmod_aux_name;
+      }
+
+      /// \brief Constructor for function symbol \@divmod_aux.       
+      /// \return Function symbol divmod_aux.
+      inline
+      const function_symbol& divmod_aux()
+      {
+        static function_symbol divmod_aux(divmod_aux_name(), make_function_sort(nat(), sort_pos::pos(), natnatpair()));
+        return divmod_aux;
+      }
+
+
+      /// \brief Recogniser for function \@divmod_aux.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@divmod_aux.
+      inline
+      bool is_divmod_aux_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == divmod_aux();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@divmod_aux.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@divmod_aux to a number of arguments.
+      inline
+      application divmod_aux(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_nat::divmod_aux()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@divmod_aux.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol divmod_aux to a
+      ///     number of arguments.
+      inline
+      bool is_divmod_aux_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_divmod_aux_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@divmod_aux_whr1.
+      /// \return Identifier \@divmod_aux_whr1.
+      inline
+      const core::identifier_string& divmod_aux_whr1_name()
+      {
+        static core::identifier_string divmod_aux_whr1_name = core::identifier_string("@divmod_aux_whr1");
+        return divmod_aux_whr1_name;
+      }
+
+      /// \brief Constructor for function symbol \@divmod_aux_whr1.       
+      /// \return Function symbol divmod_aux_whr1.
+      inline
+      const function_symbol& divmod_aux_whr1()
+      {
+        static function_symbol divmod_aux_whr1(divmod_aux_whr1_name(), make_function_sort(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word(), natnatpair(), natnatpair()));
+        return divmod_aux_whr1;
+      }
+
+
+      /// \brief Recogniser for function \@divmod_aux_whr1.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@divmod_aux_whr1.
+      inline
+      bool is_divmod_aux_whr1_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == divmod_aux_whr1();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@divmod_aux_whr1.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@divmod_aux_whr1 to a number of arguments.
+      inline
+      application divmod_aux_whr1(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_nat::divmod_aux_whr1()(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@divmod_aux_whr1.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol divmod_aux_whr1 to a
+      ///     number of arguments.
+      inline
+      bool is_divmod_aux_whr1_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_divmod_aux_whr1_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@divmod_aux_whr2.
+      /// \return Identifier \@divmod_aux_whr2.
+      inline
+      const core::identifier_string& divmod_aux_whr2_name()
+      {
+        static core::identifier_string divmod_aux_whr2_name = core::identifier_string("@divmod_aux_whr2");
+        return divmod_aux_whr2_name;
+      }
+
+      /// \brief Constructor for function symbol \@divmod_aux_whr2.       
+      /// \return Function symbol divmod_aux_whr2.
+      inline
+      const function_symbol& divmod_aux_whr2()
+      {
+        static function_symbol divmod_aux_whr2(divmod_aux_whr2_name(), make_function_sort(nat(), sort_machine_word::machine_word(), sort_pos::pos(), sort_machine_word::machine_word(), nat(), natnatpair()));
+        return divmod_aux_whr2;
+      }
+
+
+      /// \brief Recogniser for function \@divmod_aux_whr2.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@divmod_aux_whr2.
+      inline
+      bool is_divmod_aux_whr2_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == divmod_aux_whr2();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@divmod_aux_whr2.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \param arg4 A data expression. 
+      /// \return Application of \@divmod_aux_whr2 to a number of arguments.
+      inline
+      application divmod_aux_whr2(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4)
+      {
+        return sort_nat::divmod_aux_whr2()(arg0, arg1, arg2, arg3, arg4);
+      }
+
+      /// \brief Recogniser for application of \@divmod_aux_whr2.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol divmod_aux_whr2 to a
+      ///     number of arguments.
+      inline
+      bool is_divmod_aux_whr2_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_divmod_aux_whr2_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@divmod_aux_whr3.
+      /// \return Identifier \@divmod_aux_whr3.
+      inline
+      const core::identifier_string& divmod_aux_whr3_name()
+      {
+        static core::identifier_string divmod_aux_whr3_name = core::identifier_string("@divmod_aux_whr3");
+        return divmod_aux_whr3_name;
+      }
+
+      /// \brief Constructor for function symbol \@divmod_aux_whr3.       
+      /// \return Function symbol divmod_aux_whr3.
+      inline
+      const function_symbol& divmod_aux_whr3()
+      {
+        static function_symbol divmod_aux_whr3(divmod_aux_whr3_name(), make_function_sort(nat(), sort_machine_word::machine_word(), sort_pos::pos(), sort_machine_word::machine_word(), nat(), natnatpair()));
+        return divmod_aux_whr3;
+      }
+
+
+      /// \brief Recogniser for function \@divmod_aux_whr3.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@divmod_aux_whr3.
+      inline
+      bool is_divmod_aux_whr3_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == divmod_aux_whr3();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@divmod_aux_whr3.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \param arg4 A data expression. 
+      /// \return Application of \@divmod_aux_whr3 to a number of arguments.
+      inline
+      application divmod_aux_whr3(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4)
+      {
+        return sort_nat::divmod_aux_whr3()(arg0, arg1, arg2, arg3, arg4);
+      }
+
+      /// \brief Recogniser for application of \@divmod_aux_whr3.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol divmod_aux_whr3 to a
+      ///     number of arguments.
+      inline
+      bool is_divmod_aux_whr3_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_divmod_aux_whr3_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@divmod_aux_whr4.
+      /// \return Identifier \@divmod_aux_whr4.
+      inline
+      const core::identifier_string& divmod_aux_whr4_name()
+      {
+        static core::identifier_string divmod_aux_whr4_name = core::identifier_string("@divmod_aux_whr4");
+        return divmod_aux_whr4_name;
+      }
+
+      /// \brief Constructor for function symbol \@divmod_aux_whr4.       
+      /// \return Function symbol divmod_aux_whr4.
+      inline
+      const function_symbol& divmod_aux_whr4()
+      {
+        static function_symbol divmod_aux_whr4(divmod_aux_whr4_name(), make_function_sort(sort_machine_word::machine_word(), sort_pos::pos(), sort_machine_word::machine_word(), natnatpair(), natnatpair()));
+        return divmod_aux_whr4;
+      }
+
+
+      /// \brief Recogniser for function \@divmod_aux_whr4.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@divmod_aux_whr4.
+      inline
+      bool is_divmod_aux_whr4_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == divmod_aux_whr4();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@divmod_aux_whr4.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@divmod_aux_whr4 to a number of arguments.
+      inline
+      application divmod_aux_whr4(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_nat::divmod_aux_whr4()(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@divmod_aux_whr4.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol divmod_aux_whr4 to a
+      ///     number of arguments.
+      inline
+      bool is_divmod_aux_whr4_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_divmod_aux_whr4_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@divmod_aux_whr5.
+      /// \return Identifier \@divmod_aux_whr5.
+      inline
+      const core::identifier_string& divmod_aux_whr5_name()
+      {
+        static core::identifier_string divmod_aux_whr5_name = core::identifier_string("@divmod_aux_whr5");
+        return divmod_aux_whr5_name;
+      }
+
+      /// \brief Constructor for function symbol \@divmod_aux_whr5.       
+      /// \return Function symbol divmod_aux_whr5.
+      inline
+      const function_symbol& divmod_aux_whr5()
+      {
+        static function_symbol divmod_aux_whr5(divmod_aux_whr5_name(), make_function_sort(sort_pos::pos(), sort_machine_word::machine_word(), natnatpair(), nat(), natnatpair()));
+        return divmod_aux_whr5;
+      }
+
+
+      /// \brief Recogniser for function \@divmod_aux_whr5.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@divmod_aux_whr5.
+      inline
+      bool is_divmod_aux_whr5_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == divmod_aux_whr5();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@divmod_aux_whr5.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression. 
+      /// \return Application of \@divmod_aux_whr5 to a number of arguments.
+      inline
+      application divmod_aux_whr5(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      {
+        return sort_nat::divmod_aux_whr5()(arg0, arg1, arg2, arg3);
+      }
+
+      /// \brief Recogniser for application of \@divmod_aux_whr5.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol divmod_aux_whr5 to a
+      ///     number of arguments.
+      inline
+      bool is_divmod_aux_whr5_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_divmod_aux_whr5_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@divmod_aux_whr6.
+      /// \return Identifier \@divmod_aux_whr6.
+      inline
+      const core::identifier_string& divmod_aux_whr6_name()
+      {
+        static core::identifier_string divmod_aux_whr6_name = core::identifier_string("@divmod_aux_whr6");
+        return divmod_aux_whr6_name;
+      }
+
+      /// \brief Constructor for function symbol \@divmod_aux_whr6.       
+      /// \return Function symbol divmod_aux_whr6.
+      inline
+      const function_symbol& divmod_aux_whr6()
+      {
+        static function_symbol divmod_aux_whr6(divmod_aux_whr6_name(), make_function_sort(sort_pos::pos(), sort_machine_word::machine_word(), natnatpair(), nat(), nat(), natnatpair()));
+        return divmod_aux_whr6;
+      }
+
+
+      /// \brief Recogniser for function \@divmod_aux_whr6.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@divmod_aux_whr6.
+      inline
+      bool is_divmod_aux_whr6_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == divmod_aux_whr6();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@divmod_aux_whr6.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \param arg3 A data expression.
+      /// \param arg4 A data expression. 
+      /// \return Application of \@divmod_aux_whr6 to a number of arguments.
+      inline
+      application divmod_aux_whr6(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4)
+      {
+        return sort_nat::divmod_aux_whr6()(arg0, arg1, arg2, arg3, arg4);
+      }
+
+      /// \brief Recogniser for application of \@divmod_aux_whr6.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol divmod_aux_whr6 to a
+      ///     number of arguments.
+      inline
+      bool is_divmod_aux_whr6_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_divmod_aux_whr6_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@msd.
+      /// \return Identifier \@msd.
+      inline
+      const core::identifier_string& msd_name()
+      {
+        static core::identifier_string msd_name = core::identifier_string("@msd");
+        return msd_name;
+      }
+
+      /// \brief Constructor for function symbol \@msd.       
+      /// \return Function symbol msd.
+      inline
+      const function_symbol& msd()
+      {
+        static function_symbol msd(msd_name(), make_function_sort(nat(), sort_machine_word::machine_word()));
+        return msd;
+      }
+
+
+      /// \brief Recogniser for function \@msd.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@msd.
+      inline
+      bool is_msd_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == msd();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@msd.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@msd to a number of arguments.
+      inline
+      application msd(const data_expression& arg0)
+      {
+        return sort_nat::msd()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@msd.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol msd to a
+      ///     number of arguments.
+      inline
+      bool is_msd_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_msd_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@first.
+      /// \return Identifier \@first.
+      inline
+      const core::identifier_string& nnfirst_name()
+      {
+        static core::identifier_string nnfirst_name = core::identifier_string("@first");
+        return nnfirst_name;
+      }
+
+      /// \brief Constructor for function symbol \@first.       
+      /// \return Function symbol nnfirst.
+      inline
+      const function_symbol& nnfirst()
+      {
+        static function_symbol nnfirst(nnfirst_name(), make_function_sort(natnatpair(), nat()));
+        return nnfirst;
+      }
+
+
+      /// \brief Recogniser for function \@first.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@first.
+      inline
+      bool is_nnfirst_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == nnfirst();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@first.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@first to a number of arguments.
+      inline
+      application nnfirst(const data_expression& arg0)
+      {
+        return sort_nat::nnfirst()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@first.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol nnfirst to a
+      ///     number of arguments.
+      inline
+      bool is_nnfirst_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_nnfirst_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@last.
+      /// \return Identifier \@last.
+      inline
+      const core::identifier_string& nnlast_name()
+      {
+        static core::identifier_string nnlast_name = core::identifier_string("@last");
+        return nnlast_name;
+      }
+
+      /// \brief Constructor for function symbol \@last.       
+      /// \return Function symbol nnlast.
+      inline
+      const function_symbol& nnlast()
+      {
+        static function_symbol nnlast(nnlast_name(), make_function_sort(natnatpair(), nat()));
+        return nnlast;
+      }
+
+
+      /// \brief Recogniser for function \@last.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@last.
+      inline
+      bool is_nnlast_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == nnlast();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@last.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@last to a number of arguments.
+      inline
+      application nnlast(const data_expression& arg0)
+      {
+        return sort_nat::nnlast()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@last.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol nnlast to a
+      ///     number of arguments.
+      inline
+      bool is_nnlast_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_nnlast_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@first.
+      /// \return Identifier \@first.
+      inline
+      const core::identifier_string& wnfirst_name()
+      {
+        static core::identifier_string wnfirst_name = core::identifier_string("@first");
+        return wnfirst_name;
+      }
+
+      /// \brief Constructor for function symbol \@first.       
+      /// \return Function symbol wnfirst.
+      inline
+      const function_symbol& wnfirst()
+      {
+        static function_symbol wnfirst(wnfirst_name(), make_function_sort(wordnatpair(), sort_machine_word::machine_word()));
+        return wnfirst;
+      }
+
+
+      /// \brief Recogniser for function \@first.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@first.
+      inline
+      bool is_wnfirst_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == wnfirst();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@first.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@first to a number of arguments.
+      inline
+      application wnfirst(const data_expression& arg0)
+      {
+        return sort_nat::wnfirst()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@first.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol wnfirst to a
+      ///     number of arguments.
+      inline
+      bool is_wnfirst_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_wnfirst_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief Generate identifier \@last.
+      /// \return Identifier \@last.
+      inline
+      const core::identifier_string& wnlast_name()
+      {
+        static core::identifier_string wnlast_name = core::identifier_string("@last");
+        return wnlast_name;
+      }
+
+      /// \brief Constructor for function symbol \@last.       
+      /// \return Function symbol wnlast.
+      inline
+      const function_symbol& wnlast()
+      {
+        static function_symbol wnlast(wnlast_name(), make_function_sort(wordnatpair(), nat()));
+        return wnlast;
+      }
+
+
+      /// \brief Recogniser for function \@last.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@last.
+      inline
+      bool is_wnlast_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == wnlast();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@last.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@last to a number of arguments.
+      inline
+      application wnlast(const data_expression& arg0)
+      {
+        return sort_nat::wnlast()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@last.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol wnlast to a
+      ///     number of arguments.
+      inline
+      bool is_wnlast_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_wnlast_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -1916,7 +2945,7 @@ namespace mcrl2 {
         return swap_zero_name;
       }
 
-      /// \brief Constructor for function symbol \@swap_zero.
+      /// \brief Constructor for function symbol \@swap_zero.       
       /// \return Function symbol swap_zero.
       inline
       const function_symbol& swap_zero()
@@ -1939,9 +2968,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@swap_zero.
+      /// \brief Application of the function symbol \@swap_zero.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of \@swap_zero to a number of arguments.
       inline
       application swap_zero(const data_expression& arg0, const data_expression& arg1)
@@ -1972,7 +3001,7 @@ namespace mcrl2 {
         return swap_zero_add_name;
       }
 
-      /// \brief Constructor for function symbol \@swap_zero_add.
+      /// \brief Constructor for function symbol \@swap_zero_add.       
       /// \return Function symbol swap_zero_add.
       inline
       const function_symbol& swap_zero_add()
@@ -1995,11 +3024,11 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@swap_zero_add.
+      /// \brief Application of the function symbol \@swap_zero_add.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
-      /// \param arg3 A data expression.
+      /// \param arg3 A data expression. 
       /// \return Application of \@swap_zero_add to a number of arguments.
       inline
       application swap_zero_add(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
@@ -2030,7 +3059,7 @@ namespace mcrl2 {
         return swap_zero_min_name;
       }
 
-      /// \brief Constructor for function symbol \@swap_zero_min.
+      /// \brief Constructor for function symbol \@swap_zero_min.       
       /// \return Function symbol swap_zero_min.
       inline
       const function_symbol& swap_zero_min()
@@ -2053,11 +3082,11 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@swap_zero_min.
+      /// \brief Application of the function symbol \@swap_zero_min.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
-      /// \param arg3 A data expression.
+      /// \param arg3 A data expression. 
       /// \return Application of \@swap_zero_min to a number of arguments.
       inline
       application swap_zero_min(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
@@ -2088,7 +3117,7 @@ namespace mcrl2 {
         return swap_zero_monus_name;
       }
 
-      /// \brief Constructor for function symbol \@swap_zero_monus.
+      /// \brief Constructor for function symbol \@swap_zero_monus.       
       /// \return Function symbol swap_zero_monus.
       inline
       const function_symbol& swap_zero_monus()
@@ -2111,11 +3140,11 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@swap_zero_monus.
+      /// \brief Application of the function symbol \@swap_zero_monus.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
-      /// \param arg3 A data expression.
+      /// \param arg3 A data expression. 
       /// \return Application of \@swap_zero_monus to a number of arguments.
       inline
       application swap_zero_monus(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
@@ -2146,7 +3175,7 @@ namespace mcrl2 {
         return sqrt_nat_aux_func_name;
       }
 
-      /// \brief Constructor for function symbol \@sqrt_nat.
+      /// \brief Constructor for function symbol \@sqrt_nat.       
       /// \return Function symbol sqrt_nat_aux_func.
       inline
       const function_symbol& sqrt_nat_aux_func()
@@ -2169,10 +3198,10 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@sqrt_nat.
+      /// \brief Application of the function symbol \@sqrt_nat.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@sqrt_nat to a number of arguments.
       inline
       application sqrt_nat_aux_func(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -2203,7 +3232,7 @@ namespace mcrl2 {
         return dub_name;
       }
 
-      /// \brief Constructor for function symbol \@dub.
+      /// \brief Constructor for function symbol \@dub.       
       /// \return Function symbol dub.
       inline
       const function_symbol& dub()
@@ -2226,9 +3255,9 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@dub.
+      /// \brief Application of the function symbol \@dub.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
+      /// \param arg1 A data expression. 
       /// \return Application of \@dub to a number of arguments.
       inline
       application dub(const data_expression& arg0, const data_expression& arg1)
@@ -2259,7 +3288,7 @@ namespace mcrl2 {
         return gte_subtract_with_borrow_name;
       }
 
-      /// \brief Constructor for function symbol \@gtesubtb.
+      /// \brief Constructor for function symbol \@gtesubtb.       
       /// \return Function symbol gte_subtract_with_borrow.
       inline
       const function_symbol& gte_subtract_with_borrow()
@@ -2282,10 +3311,10 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Application of the function symbol \@gtesubtb.
+      /// \brief Application of the function symbol \@gtesubtb.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
+      /// \param arg2 A data expression. 
       /// \return Application of \@gtesubtb to a number of arguments.
       inline
       application gte_subtract_with_borrow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
@@ -2306,286 +3335,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
-      /// \brief Generate identifier \@first.
-      /// \return Identifier \@first.
-      inline
-      const core::identifier_string& first_name()
-      {
-        static core::identifier_string first_name = core::identifier_string("@first");
-        return first_name;
-      }
-
-      /// \brief Constructor for function symbol \@first.
-      /// \return Function symbol first.
-      inline
-      const function_symbol& first()
-      {
-        static function_symbol first(first_name(), make_function_sort(natnatpair(), nat()));
-        return first;
-      }
-
-
-      /// \brief Recogniser for function \@first.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@first.
-      inline
-      bool is_first_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == first();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@first.
-      /// \param arg0 A data expression.
-      /// \return Application of \@first to a number of arguments.
-      inline
-      application first(const data_expression& arg0)
-      {
-        return sort_nat::first()(arg0);
-      }
-
-      /// \brief Recogniser for application of \@first.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol first to a
-      ///     number of arguments.
-      inline
-      bool is_first_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_first_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@last.
-      /// \return Identifier \@last.
-      inline
-      const core::identifier_string& last_name()
-      {
-        static core::identifier_string last_name = core::identifier_string("@last");
-        return last_name;
-      }
-
-      /// \brief Constructor for function symbol \@last.
-      /// \return Function symbol last.
-      inline
-      const function_symbol& last()
-      {
-        static function_symbol last(last_name(), make_function_sort(natnatpair(), nat()));
-        return last;
-      }
-
-
-      /// \brief Recogniser for function \@last.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@last.
-      inline
-      bool is_last_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == last();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@last.
-      /// \param arg0 A data expression.
-      /// \return Application of \@last to a number of arguments.
-      inline
-      application last(const data_expression& arg0)
-      {
-        return sort_nat::last()(arg0);
-      }
-
-      /// \brief Recogniser for application of \@last.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol last to a
-      ///     number of arguments.
-      inline
-      bool is_last_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_last_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@divmod.
-      /// \return Identifier \@divmod.
-      inline
-      const core::identifier_string& divmod_name()
-      {
-        static core::identifier_string divmod_name = core::identifier_string("@divmod");
-        return divmod_name;
-      }
-
-      /// \brief Constructor for function symbol \@divmod.
-      /// \return Function symbol divmod.
-      inline
-      const function_symbol& divmod()
-      {
-        static function_symbol divmod(divmod_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), natnatpair()));
-        return divmod;
-      }
-
-
-      /// \brief Recogniser for function \@divmod.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@divmod.
-      inline
-      bool is_divmod_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == divmod();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@divmod.
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \return Application of \@divmod to a number of arguments.
-      inline
-      application divmod(const data_expression& arg0, const data_expression& arg1)
-      {
-        return sort_nat::divmod()(arg0, arg1);
-      }
-
-      /// \brief Recogniser for application of \@divmod.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol divmod to a
-      ///     number of arguments.
-      inline
-      bool is_divmod_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_divmod_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@gdivmod.
-      /// \return Identifier \@gdivmod.
-      inline
-      const core::identifier_string& generalised_divmod_name()
-      {
-        static core::identifier_string generalised_divmod_name = core::identifier_string("@gdivmod");
-        return generalised_divmod_name;
-      }
-
-      /// \brief Constructor for function symbol \@gdivmod.
-      /// \return Function symbol generalised_divmod.
-      inline
-      const function_symbol& generalised_divmod()
-      {
-        static function_symbol generalised_divmod(generalised_divmod_name(), make_function_sort(natnatpair(), sort_bool::bool_(), sort_pos::pos(), natnatpair()));
-        return generalised_divmod;
-      }
-
-
-      /// \brief Recogniser for function \@gdivmod.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@gdivmod.
-      inline
-      bool is_generalised_divmod_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == generalised_divmod();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@gdivmod.
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
-      /// \return Application of \@gdivmod to a number of arguments.
-      inline
-      application generalised_divmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return sort_nat::generalised_divmod()(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@gdivmod.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol generalised_divmod to a
-      ///     number of arguments.
-      inline
-      bool is_generalised_divmod_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_generalised_divmod_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@ggdivmod.
-      /// \return Identifier \@ggdivmod.
-      inline
-      const core::identifier_string& doubly_generalised_divmod_name()
-      {
-        static core::identifier_string doubly_generalised_divmod_name = core::identifier_string("@ggdivmod");
-        return doubly_generalised_divmod_name;
-      }
-
-      /// \brief Constructor for function symbol \@ggdivmod.
-      /// \return Function symbol doubly_generalised_divmod.
-      inline
-      const function_symbol& doubly_generalised_divmod()
-      {
-        static function_symbol doubly_generalised_divmod(doubly_generalised_divmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natnatpair()));
-        return doubly_generalised_divmod;
-      }
-
-
-      /// \brief Recogniser for function \@ggdivmod.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@ggdivmod.
-      inline
-      bool is_doubly_generalised_divmod_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == doubly_generalised_divmod();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@ggdivmod.
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
-      /// \return Application of \@ggdivmod to a number of arguments.
-      inline
-      application doubly_generalised_divmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return sort_nat::doubly_generalised_divmod()(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@ggdivmod.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol doubly_generalised_divmod to a
-      ///     number of arguments.
-      inline
-      bool is_doubly_generalised_divmod_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_doubly_generalised_divmod_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
       /// \brief Give all system defined mappings for nat
       /// \return All system defined mappings for nat
       inline
@@ -2601,6 +3350,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::maximum(nat(), nat()));
         result.push_back(sort_nat::minimum(nat(), nat()));
         result.push_back(sort_nat::pred());
+        result.push_back(sort_nat::pred_whr());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
@@ -2623,7 +3373,23 @@ namespace mcrl2 {
         result.push_back(sort_nat::exp_auxtruen());
         result.push_back(sort_nat::exp_auxfalsep());
         result.push_back(sort_nat::exp_auxfalsen());
-        result.push_back(sort_nat::even());
+        result.push_back(sort_nat::div_bold());
+        result.push_back(sort_nat::div_bold_whr());
+        result.push_back(sort_nat::div_whr1());
+        result.push_back(sort_nat::div_whr2());
+        result.push_back(sort_nat::mod_whr1());
+        result.push_back(sort_nat::divmod_aux());
+        result.push_back(sort_nat::divmod_aux_whr1());
+        result.push_back(sort_nat::divmod_aux_whr2());
+        result.push_back(sort_nat::divmod_aux_whr3());
+        result.push_back(sort_nat::divmod_aux_whr4());
+        result.push_back(sort_nat::divmod_aux_whr5());
+        result.push_back(sort_nat::divmod_aux_whr6());
+        result.push_back(sort_nat::msd());
+        result.push_back(sort_nat::nnfirst());
+        result.push_back(sort_nat::nnlast());
+        result.push_back(sort_nat::wnfirst());
+        result.push_back(sort_nat::wnlast());
         result.push_back(sort_nat::swap_zero());
         result.push_back(sort_nat::swap_zero_add());
         result.push_back(sort_nat::swap_zero_min());
@@ -2631,11 +3397,6 @@ namespace mcrl2 {
         result.push_back(sort_nat::sqrt_nat_aux_func());
         result.push_back(sort_nat::dub());
         result.push_back(sort_nat::gte_subtract_with_borrow());
-        result.push_back(sort_nat::first());
-        result.push_back(sort_nat::last());
-        result.push_back(sort_nat::divmod());
-        result.push_back(sort_nat::generalised_divmod());
-        result.push_back(sort_nat::doubly_generalised_divmod());
         return result;
       }
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for nat
@@ -2660,7 +3421,6 @@ namespace mcrl2 {
         result.push_back(sort_nat::exp(sort_pos::pos(), nat()));
         result.push_back(sort_nat::exp(nat(), nat()));
         result.push_back(sort_nat::sqrt());
-        result.push_back(sort_nat::even());
         return result;
       }
 
@@ -2676,6 +3436,18 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument
+      ///        brg5 from an application.
+      /// \param e A data expression.
+      /// \pre brg5 is defined for e.
+      /// \return The argument of e that corresponds to brg5.
+      inline
+      data_expression brg5(const data_expression& e)
+      {
+        assert(is_div_bold_whr_application(e));
+        return atermpp::down_cast<const application>(e)[4];
+      }
+
+      ///\brief Function for projecting out argument
       ///        right from an application.
       /// \param e A data expression.
       /// \pre right is defined for e.
@@ -2683,7 +3455,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_dub_application(e) || is_divmod_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_dub_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2695,7 +3467,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_concat_digit_application(e) || is_monus_whr_application(e) || is_exp_aux3p_application(e) || is_exp_aux4p_application(e) || is_exp_aux3n_application(e) || is_exp_aux4n_application(e) || is_exp_auxtruep_application(e) || is_exp_auxtruen_application(e) || is_exp_auxfalsep_application(e) || is_exp_auxfalsen_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_nnpair_application(e) || is_wnpair_application(e) || is_concat_digit_application(e) || is_monus_whr_application(e) || is_exp_aux3p_application(e) || is_exp_aux4p_application(e) || is_exp_aux3n_application(e) || is_exp_aux4n_application(e) || is_exp_auxtruep_application(e) || is_exp_auxtruen_application(e) || is_exp_auxfalsep_application(e) || is_exp_auxfalsen_application(e) || is_div_bold_application(e) || is_div_bold_whr_application(e) || is_div_whr1_application(e) || is_div_whr2_application(e) || is_mod_whr1_application(e) || is_divmod_aux_application(e) || is_divmod_aux_whr1_application(e) || is_divmod_aux_whr2_application(e) || is_divmod_aux_whr3_application(e) || is_divmod_aux_whr4_application(e) || is_divmod_aux_whr5_application(e) || is_divmod_aux_whr6_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2707,7 +3479,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_concat_digit_application(e) || is_monus_whr_application(e) || is_exp_aux3p_application(e) || is_exp_aux4p_application(e) || is_exp_aux3n_application(e) || is_exp_aux4n_application(e) || is_exp_auxtruep_application(e) || is_exp_auxtruen_application(e) || is_exp_auxfalsep_application(e) || is_exp_auxfalsen_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_nnpair_application(e) || is_wnpair_application(e) || is_concat_digit_application(e) || is_monus_whr_application(e) || is_exp_aux3p_application(e) || is_exp_aux4p_application(e) || is_exp_aux3n_application(e) || is_exp_aux4n_application(e) || is_exp_auxtruep_application(e) || is_exp_auxtruen_application(e) || is_exp_auxfalsep_application(e) || is_exp_auxfalsen_application(e) || is_div_bold_application(e) || is_div_bold_whr_application(e) || is_div_whr1_application(e) || is_div_whr2_application(e) || is_mod_whr1_application(e) || is_divmod_aux_application(e) || is_divmod_aux_whr1_application(e) || is_divmod_aux_whr2_application(e) || is_divmod_aux_whr3_application(e) || is_divmod_aux_whr4_application(e) || is_divmod_aux_whr5_application(e) || is_divmod_aux_whr6_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2719,7 +3491,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_monus_whr_application(e) || is_exp_aux3p_application(e) || is_exp_aux4p_application(e) || is_exp_aux3n_application(e) || is_exp_aux4n_application(e) || is_exp_auxtruep_application(e) || is_exp_auxtruen_application(e) || is_exp_auxfalsep_application(e) || is_exp_auxfalsen_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_monus_whr_application(e) || is_exp_aux3p_application(e) || is_exp_aux4p_application(e) || is_exp_aux3n_application(e) || is_exp_aux4n_application(e) || is_exp_auxtruep_application(e) || is_exp_auxtruen_application(e) || is_exp_auxfalsep_application(e) || is_exp_auxfalsen_application(e) || is_div_bold_whr_application(e) || is_div_whr1_application(e) || is_div_whr2_application(e) || is_mod_whr1_application(e) || is_divmod_aux_whr1_application(e) || is_divmod_aux_whr2_application(e) || is_divmod_aux_whr3_application(e) || is_divmod_aux_whr4_application(e) || is_divmod_aux_whr5_application(e) || is_divmod_aux_whr6_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_gte_subtract_with_borrow_application(e));
         return atermpp::down_cast<const application>(e)[2];
       }
 
@@ -2731,7 +3503,7 @@ namespace mcrl2 {
       inline
       data_expression arg4(const data_expression& e)
       {
-        assert(is_monus_whr_application(e) || is_exp_aux4p_application(e) || is_exp_aux4n_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e));
+        assert(is_monus_whr_application(e) || is_exp_aux4p_application(e) || is_exp_aux4n_application(e) || is_div_bold_whr_application(e) || is_div_whr1_application(e) || is_div_whr2_application(e) || is_mod_whr1_application(e) || is_divmod_aux_whr1_application(e) || is_divmod_aux_whr2_application(e) || is_divmod_aux_whr3_application(e) || is_divmod_aux_whr4_application(e) || is_divmod_aux_whr5_application(e) || is_divmod_aux_whr6_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e));
         return atermpp::down_cast<const application>(e)[3];
       }
 
@@ -2743,8 +3515,20 @@ namespace mcrl2 {
       inline
       data_expression arg5(const data_expression& e)
       {
-        assert(is_monus_whr_application(e));
+        assert(is_monus_whr_application(e) || is_divmod_aux_whr2_application(e) || is_divmod_aux_whr3_application(e) || is_divmod_aux_whr6_application(e));
         return atermpp::down_cast<const application>(e)[4];
+      }
+
+      ///\brief Function for projecting out argument
+      ///        arg6 from an application.
+      /// \param e A data expression.
+      /// \pre arg6 is defined for e.
+      /// \return The argument of e that corresponds to arg6.
+      inline
+      data_expression arg6(const data_expression& e)
+      {
+        assert(is_div_bold_whr_application(e));
+        return atermpp::down_cast<const application>(e)[5];
       }
 
       ///\brief Function for projecting out argument
@@ -2755,7 +3539,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succ_application(e) || is_most_significant_digit_nat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_pred_application(e) || is_sqrt_application(e) || is_natpred_application(e) || is_is_odd_application(e) || is_div2_application(e) || is_even_application(e) || is_first_application(e) || is_last_application(e));
+        assert(is_succ_application(e) || is_most_significant_digit_nat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_pred_application(e) || is_pred_whr_application(e) || is_sqrt_application(e) || is_natpred_application(e) || is_is_odd_application(e) || is_div2_application(e) || is_msd_application(e) || is_nnfirst_application(e) || is_nnlast_application(e) || is_wnfirst_application(e) || is_wnlast_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2767,7 +3551,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_dub_application(e) || is_divmod_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_dub_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2776,18 +3560,24 @@ namespace mcrl2 {
       inline
       data_equation_vector nat_generate_equations_code()
       {
+        variable vb("b",sort_bool::bool_());
         variable vp("p",sort_pos::pos());
         variable vn("n",nat());
         variable vn1("n1",nat());
         variable vn2("n2",nat());
+        variable vm("m",nat());
+        variable vpredp("predp",nat());
+        variable vdiff("diff",nat());
+        variable vshift_n1("shift_n1",nat());
         variable vw("w",sort_machine_word::machine_word());
         variable vw1("w1",sort_machine_word::machine_word());
         variable vw2("w2",sort_machine_word::machine_word());
+        variable vshift_w("shift_w",sort_machine_word::machine_word());
 
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), c0(), most_significant_digit_nat(sort_machine_word::zero_word())));
         result.push_back(data_equation(variable_list({vw}), succ(most_significant_digit_nat(vw)), if_(equal_to(vw, sort_machine_word::max_word()), concat_digit(most_significant_digit_nat(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::succ_word(vw)))));
-        result.push_back(data_equation(variable_list({v@succ, vn, vw}), succ(concat_digit(vn, vw)), if_(equal_to(vw, sort_machine_word::max_word()), concat_digit(v@succ(vn), sort_machine_word::zero_word()), concat_digit(vn, sort_machine_word::succ_word(vw)))));
+        result.push_back(data_equation(variable_list({vn, vw}), succ(concat_digit(vn, vw)), if_(equal_to(vw, sort_machine_word::max_word()), concat_digit(succ(vn), sort_machine_word::zero_word()), concat_digit(vn, sort_machine_word::succ_word(vw)))));
         result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), equal_to(vw1, vw2)));
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), equal_to(concat_digit(vn, vw1), most_significant_digit_nat(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), equal_to(most_significant_digit_nat(vw1), concat_digit(vn, vw2)), sort_bool::false_()));
@@ -2808,9 +3598,9 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn, vp}), maximum(vn, vp), if_(less_equal(vn, pos2nat(vp)), vp, nat2pos(vn))));
         result.push_back(data_equation(variable_list({vm, vn}), maximum(vm, vn), if_(less_equal(vm, vn), vn, vm)));
         result.push_back(data_equation(variable_list({vm, vn}), minimum(vm, vn), if_(less_equal(vm, vn), vm, vn)));
-        result.push_back(data_equation(variable_list({vpred_word, vw}), pred(sort_pos::most_significant_digit(vw)), most_significant_digit_nat(vpred_word(vw))));
-        result.push_back(data_equation(variable_list({v@pred_whr, vp, vpred_word, vw, vzero_word}), pred(concat_digit(vp, vw)), if_(equal_to(vw, vzero_word), v@pred_whr(pred(vp)), concat_digit(pos2nat(vp), vpred_word(vw)))));
-        result.push_back(data_equation(variable_list({v@pred_whr, vmax_word, vpredp, vzero_word}), v@pred_whr(vpredp), if_(equal_to(vpredp, most_significant_digit_nat(vzero_word)), most_significant_digit_nat(vmax_word), concat_digit(vpredp, vmax_word))));
+        result.push_back(data_equation(variable_list({vw}), pred(sort_pos::most_significant_digit(vw)), most_significant_digit_nat(sort_machine_word::pred_word(vw))));
+        result.push_back(data_equation(variable_list({vp, vw}), pred(concat_digit(vp, vw)), if_(equal_to(vw, sort_machine_word::zero_word()), pred_whr(pred(vp)), concat_digit(pos2nat(vp), sort_machine_word::pred_word(vw)))));
+        result.push_back(data_equation(variable_list({vpredp}), pred_whr(vpredp), if_(equal_to(vpredp, most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::max_word()), concat_digit(vpredp, sort_machine_word::max_word()))));
         result.push_back(data_equation(variable_list({vb, vn}), dub(vb, vn), if_(vb, plus(vn, vn), succ(plus(vn, vn)))));
         result.push_back(data_equation(variable_list({vn, vp}), plus(vp, vn), plus(vn, vp)));
         result.push_back(data_equation(variable_list({vw1, vw2}), plus(most_significant_digit_nat(vw1), sort_pos::most_significant_digit(vw2)), if_(equal_to(sort_machine_word::add_overflow_word(vw1, vw2), sort_machine_word::zero_word()), sort_pos::most_significant_digit(sort_machine_word::add_word(vw1, vw2)), concat_digit(sort_pos::most_significant_digit(sort_machine_word::one_word()), sort_machine_word::add_word(vw1, vw2)))));
@@ -2827,45 +3617,71 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn1, vw1, vw2}), monus(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(less(vw1, vw2), if_(equal_to(vn1, most_significant_digit_nat(sort_machine_word::one_word())), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(natpred(vn1), sort_machine_word::minus_word(vw1, vw2))), concat_digit(vn1, sort_machine_word::minus_word(vw1, vw2)))));
         result.push_back(data_equation(variable_list({vn2, vw1, vw2}), monus(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), most_significant_digit_nat(sort_machine_word::zero_word())));
         result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), monus(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), monus_whr(vn1, vw1, vn2, vw2, monus(vn1, vn2))));
-        result.push_back(data_equation(variable_list({vconcat_digit, vdiff, vdiff==most_significant_digitNat, vminus_word, vmost_significant_digitNat, vn1, vn2, vw1, vw1<w2, vw2, vzero_word}), monus_whr(vn1, vw1, vn2, vw2, vdiff), if_(vw1<w2, if_(equal_to(vdiff, most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(vdiff, most_significant_digit_nat(sort_machine_word::one_word())), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(natpred(vdiff), sort_machine_word::minus_word(vw1, vw2)))), if_(vdiff==most_significant_digitNat(vzero_word), vmost_significant_digitNat(vminus_word(vw1, vw2)), vconcat_digit(vdiff, vminus_word(vw1, vw2))))));
-        result.push_back(data_equation(variable_list({vn}), monus(c0(), vn), c0()));
-        result.push_back(data_equation(variable_list({vn}), monus(vn, c0()), vn));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), monus(v@cNat(vp), v@cNat(vq)), gte_subtract_with_borrow(sort_bool::false_(), vp, vq)));
-        result.push_back(data_equation(variable_list({vn}), times(c0(), vn), c0()));
-        result.push_back(data_equation(variable_list({vn}), times(vn, c0()), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), times(v@cNat(vp), v@cNat(vq)), v@cNat(times(vp, vq))));
+        result.push_back(data_equation(variable_list({vdiff, vn1, vn2, vw1, vw2}), monus_whr(vn1, vw1, vn2, vw2, vdiff), if_(less(vw1, vw2), if_(equal_to(vdiff, most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(vdiff, most_significant_digit_nat(sort_machine_word::one_word())), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(natpred(vdiff), sort_machine_word::minus_word(vw1, vw2)))), if_(equal_to(vdiff, most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(vdiff, sort_machine_word::minus_word(vw1, vw2))))));
         result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::times_word(vw1, vw2)), concat_digit(most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vw1, vw2, vzero_word}), times(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(equal_to(vw2, vzero_word), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), concat_digit(times(vn1, most_significant_digit_nat(vw2)), sort_machine_word::times_word(vw1, vw2)), concat_digit(plus(times(vn1, most_significant_digit_nat(vw2)), most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))))));
-        result.push_back(data_equation(variable_list({vn2, vw1, vw2, vzero_word}), times(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), if_(equal_to(vw1, vzero_word), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), concat_digit(times(vn2, most_significant_digit_nat(vw1)), sort_machine_word::times_word(vw1, vw2)), concat_digit(plus(times(vn2, most_significant_digit_nat(vw1)), most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))))));
+        result.push_back(data_equation(variable_list({vn1, vw1, vw2}), times(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(equal_to(vw2, sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), concat_digit(times(vn1, most_significant_digit_nat(vw2)), sort_machine_word::times_word(vw1, vw2)), concat_digit(plus(times(vn1, most_significant_digit_nat(vw2)), most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))))));
+        result.push_back(data_equation(variable_list({vn2, vw1, vw2}), times(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), if_(equal_to(vw1, sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equal_to(sort_machine_word::times_overflow_word(vw1, vw2), sort_machine_word::zero_word()), concat_digit(times(vn2, most_significant_digit_nat(vw1)), sort_machine_word::times_word(vw1, vw2)), concat_digit(plus(times(vn2, most_significant_digit_nat(vw1)), most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))))));
         result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), times(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), plus(concat_digit(times(concat_digit(vn1, vw1), vn2), sort_machine_word::zero_word()), times(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)))));
         result.push_back(data_equation(variable_list({vw}), is_odd(most_significant_digit_nat(vw)), sort_machine_word::rightmost_bit(vw)));
         result.push_back(data_equation(variable_list({vn, vw}), is_odd(concat_digit(vn, vw)), sort_machine_word::rightmost_bit(vw)));
-        result.push_back(data_equation(variable_list({vshift_right, vw}), div2(most_significant_digit_nat(vw)), most_significant_digit_nat(vshift_right(sort_bool::false_(), vw))));
-        result.push_back(data_equation(variable_list({vmost_significant_digitNat, vn, vw}), div2(concat_digit(vn, vw)), if_(equal_to(vn, vmost_significant_digitNat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::shift_right(is_odd(vn), vw)), concat_digit(div2(vn), sort_machine_word::shift_right(is_odd(vn), vw)))));
+        result.push_back(data_equation(variable_list({vw}), div2(most_significant_digit_nat(vw)), most_significant_digit_nat(sort_machine_word::shift_right(sort_bool::false_(), vw))));
+        result.push_back(data_equation(variable_list({vn, vw}), div2(concat_digit(vn, vw)), if_(equal_to(vn, most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::shift_right(is_odd(vn), vw)), concat_digit(div2(vn), sort_machine_word::shift_right(is_odd(vn), vw)))));
+        result.push_back(data_equation(variable_list({vw}), msd(most_significant_digit_nat(vw)), vw));
+        result.push_back(data_equation(variable_list({vn, vw}), msd(concat_digit(vn, vw)), msd(vn)));
         result.push_back(data_equation(variable_list({vn, vw}), exp(vn, most_significant_digit_nat(vw)), exp_aux3n(sort_machine_word::rightmost_bit(vw), vn, vw)));
         result.push_back(data_equation(variable_list({vn, vn1, vw1}), exp(vn, concat_digit(vn1, vw1)), exp_aux4n(sort_machine_word::rightmost_bit(vw1), vn, vn1, vw1)));
         result.push_back(data_equation(variable_list({vn, vw}), exp_aux3n(sort_bool::true_(), vn, vw), if_(equal_to(vw, sort_machine_word::one_word()), vn, times(vn, exp_aux3n(sort_machine_word::rightmost_bit(sort_machine_word::shift_right(sort_bool::false_(), vw)), times(vn, vn), sort_machine_word::shift_right(sort_bool::false_(), vw))))));
-        result.push_back(data_equation(variable_list({vn, vrightmost_bit, vw}), exp_aux3n(sort_bool::false_(), vn, vw), if_(equal_to(vw, sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::one_word()), exp_aux3n(vrightmost_bit(sort_machine_word::shift_right(sort_bool::false_(), vw)), times(vn, vn), sort_machine_word::shift_right(sort_bool::false_(), vw)))));
+        result.push_back(data_equation(variable_list({vn, vw}), exp_aux3n(sort_bool::false_(), vn, vw), if_(equal_to(vw, sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::one_word()), exp_aux3n(sort_machine_word::rightmost_bit(sort_machine_word::shift_right(sort_bool::false_(), vw)), times(vn, vn), sort_machine_word::shift_right(sort_bool::false_(), vw)))));
         result.push_back(data_equation(variable_list({vn, vn1, vw}), exp_aux4n(sort_bool::true_(), vn, vn1, vw), exp_auxtruen(vn, div2(vn1), sort_machine_word::shift_right(is_odd(vn1), vw))));
         result.push_back(data_equation(variable_list({vn, vshift_n1, vshift_w}), exp_auxtruen(vn, vshift_n1, vshift_w), if_(equal_to(vshift_n1, most_significant_digit_nat(sort_machine_word::zero_word())), times(vn, exp_aux3n(sort_machine_word::rightmost_bit(vshift_w), times(vn, vn), vshift_w)), times(vn, exp_aux4n(sort_machine_word::rightmost_bit(vshift_w), times(vn, vn), vshift_n1, vshift_w)))));
         result.push_back(data_equation(variable_list({vn, vn1, vshift_n1, vshift_w, vw}), exp_aux4n(sort_bool::false_(), vn, vn1, vw), exp_auxfalsen(vn, vshift_n1, vshift_w)));
         result.push_back(data_equation(variable_list({vn, vshift_n1, vshift_w}), exp_auxfalsen(vn, vshift_n1, vshift_w), if_(equal_to(vshift_n1, most_significant_digit_nat(sort_machine_word::zero_word())), exp_aux3n(sort_machine_word::rightmost_bit(vshift_w), times(vn, vn), vshift_w), exp_aux4n(sort_machine_word::rightmost_bit(vshift_w), times(vn, vn), vshift_n1, vshift_w))));
-        result.push_back(data_equation(variable_list({v@mrightmost_bit, vp, vw}), exp(vp, most_significant_digit_nat(vw)), exp_aux3p(v@mrightmost_bit(vw), vp, vw)));
+        result.push_back(data_equation(variable_list({vp, vw}), exp(vp, most_significant_digit_nat(vw)), exp_aux3p(sort_machine_word::rightmost_bit(vw), vp, vw)));
         result.push_back(data_equation(variable_list({vn1, vp, vw1}), exp(vp, concat_digit(vn1, vw1)), exp_aux4p(sort_machine_word::rightmost_bit(vw1), vp, vn1, vw1)));
         result.push_back(data_equation(variable_list({vp, vw}), exp_aux3p(sort_bool::true_(), vp, vw), if_(equal_to(vw, sort_machine_word::one_word()), vp, times(vp, exp_aux3p(sort_machine_word::rightmost_bit(sort_machine_word::shift_right(sort_bool::false_(), vw)), times(vp, vp), sort_machine_word::shift_right(sort_bool::false_(), vw))))));
-        result.push_back(data_equation(variable_list({vp, vshift_right, vw}), exp_aux3p(sort_bool::false_(), vp, vw), if_(equal_to(vw, sort_machine_word::zero_word()), sort_pos::most_significant_digit(sort_machine_word::zero_word()), exp_aux3p(sort_machine_word::rightmost_bit(sort_machine_word::shift_right(sort_bool::false_(), vw)), times(vp, vp), vshift_right(sort_bool::false_(), vw)))));
+        result.push_back(data_equation(variable_list({vp, vw}), exp_aux3p(sort_bool::false_(), vp, vw), if_(equal_to(vw, sort_machine_word::zero_word()), sort_pos::most_significant_digit(sort_machine_word::zero_word()), exp_aux3p(sort_machine_word::rightmost_bit(sort_machine_word::shift_right(sort_bool::false_(), vw)), times(vp, vp), sort_machine_word::shift_right(sort_bool::false_(), vw)))));
         result.push_back(data_equation(variable_list({vn1, vp, vw}), exp_aux4p(sort_bool::true_(), vp, vn1, vw), exp_auxtruep(vp, div2(vn1), sort_machine_word::shift_right(is_odd(vn1), vw))));
         result.push_back(data_equation(variable_list({v@exp_aux_truep, vp, vshift_n1, vshift_w}), v@exp_aux_truep(vp, vshift_n1, vshift_w), if_(equal_to(vshift_n1, most_significant_digit_nat(sort_machine_word::zero_word())), times(vp, exp_aux3p(sort_machine_word::rightmost_bit(vshift_w), times(vp, vp), vshift_w)), times(vp, exp_aux4p(sort_machine_word::rightmost_bit(vshift_w), times(vp, vp), vshift_n1, vshift_w)))));
-        result.push_back(data_equation(variable_list({vdiv2, vis_odd, vn1, vp, vshift_right, vw}), exp_aux4p(sort_bool::false_(), vp, vn1, vw), exp_auxfalsep(vp, vdiv2(vn1), vshift_right(vis_odd(vn1), vw))));
+        result.push_back(data_equation(variable_list({vdiv2, vis_odd, vn1, vp, vw}), exp_aux4p(sort_bool::false_(), vp, vn1, vw), exp_auxfalsep(vp, vdiv2(vn1), sort_machine_word::shift_right(vis_odd(vn1), vw))));
         result.push_back(data_equation(variable_list({vp, vshift_n1, vshift_w}), exp_auxfalsep(vp, vshift_n1, vshift_w), if_(equal_to(vshift_n1, most_significant_digit_nat(sort_machine_word::zero_word())), exp_aux3p(sort_machine_word::rightmost_bit(vshift_w), times(vp, vp), vshift_w), exp_aux4p(sort_machine_word::rightmost_bit(vshift_w), times(vp, vp), vshift_n1, vshift_w))));
         result.push_back(data_equation(variable_list({vw1, vw2}), div(most_significant_digit_nat(vw1), sort_pos::most_significant_digit(vw2)), most_significant_digit_nat(sort_machine_word::div_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vw1, vw2}), mod(most_significant_digit_nat(vw1), sort_pos::most_significant_digit(vw2)), most_significant_digit_nat(sort_machine_word::mod_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), div(most_significant_digit_nat(vw1), concat_digit(vp, vw2)), most_significant_digit_nat(sort_machine_word::zero_word())));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), mod(most_significant_digit_nat(vw1), concat_digit(vp, vw2)), most_significant_digit_nat(vw1)));
-        result.push_back(data_equation(variable_list({vn>@most_significant_digitNat, vp}), vn>@most_significant_digitNat(sort_machine_word::zero_word()), div(c0(), vp), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), div(v@cNat(vp), vq), first(divmod(vp, vq))));
-        result.push_back(data_equation(variable_list({vp}), mod(c0(), vp), c0()));
-        result.push_back(data_equation(variable_list({v@cNat, vp, vq}), mod(v@cNat(vp), vq), last(divmod(vp, vq))));
+        result.push_back(data_equation(variable_list({vn, vw1, vw2}), greater(vn, most_significant_digit_nat(sort_machine_word::zero_word())), div(concat_digit(vn, vw1), sort_pos::most_significant_digit(vw2)), div_whr1(vn, vw1, vw2, divmod_aux(vn, sort_pos::most_significant_digit(vw2)))));
+        result.push_back(data_equation(variable_list({vn, vpair_, vw1, vw2}), div_whr1(vn, vw1, vw2, vpair_), if_(less(vn, most_significant_digit_nat(vw2)), most_significant_digit_nat(div_bold(concat_digit(vn, vw1), sort_pos::most_significant_digit(vw2))), if_(equal_to(nnfirst(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(div_bold(if_(equal_to(nnlast(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(vw1), concat_digit(nnlast(vpair_), vw1)), sort_pos::most_significant_digit(vw2))), concat_digit(nnfirst(vpair_), div_bold(if_(equal_to(nnlast(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(vw1), concat_digit(nnlast(vpair_), vw1)), sort_pos::most_significant_digit(vw2)))))));
+        result.push_back(data_equation(variable_list({vn, vw1, vw2}), greater(vn, most_significant_digit_nat(sort_machine_word::zero_word())), mod(concat_digit(vn, vw1), sort_pos::most_significant_digit(vw2)), most_significant_digit_nat(sort_machine_word::mod_doubleword(msd(mod(vn, sort_pos::most_significant_digit(vw2))), vw1, vw2))));
+        result.push_back(data_equation(variable_list({vn, vp, vw1, vw2}), greater(vn, most_significant_digit_nat(sort_machine_word::zero_word())), div(concat_digit(vn, vw1), concat_digit(vp, vw2)), if_(less(vn, pos2nat(concat_digit(vp, vw2))), most_significant_digit_nat(div_bold(concat_digit(vn, vw1), concat_digit(vp, vw2))), div_whr2(vn, vw1, vw2, divmod_aux(vn, concat_digit(vp, vw2))))));
+        result.push_back(data_equation(variable_list({vn, vp, vpair_, vplus, vw1, vw2}), div_whr2(vn, vw1, vw2, vpair_), vplus(if_(equal_to(nnfirst(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(sort_machine_word::zero_word()), concat_digit(nnfirst(vpair_), sort_machine_word::zero_word())), most_significant_digit_nat(div_bold(if_(equal_to(nnlast(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(vw1), concat_digit(nnlast(vpair_), vw1)), concat_digit(vp, vw2))))));
+        result.push_back(data_equation(variable_list({vn, vp, vw1, vw2}), greater(vn, most_significant_digit_nat(sort_machine_word::zero_word())), mod(concat_digit(vn, vw1), concat_digit(vp, vw2)), mod_whr1(vw1, vp, vw2, mod(vn, concat_digit(vp, vw2)))));
+        result.push_back(data_equation(variable_list({vm1, vp, vw1, vw2}), mod_whr1(vw1, vp, vw2, vm1), monus(if_(greater(vm1, most_significant_digit_nat(sort_machine_word::zero_word())), concat_digit(vm1, vw1), most_significant_digit_nat(vw1)), times(concat_digit(pos2nat(vp), vw2), most_significant_digit_nat(div_bold(if_(greater(vm1, most_significant_digit_nat(sort_machine_word::zero_word())), concat_digit(vm1, vw1), most_significant_digit_nat(vw1)), concat_digit(vp, vw2)))))));
+        result.push_back(data_equation(variable_list({vw1, vw2}), divmod_aux(most_significant_digit_nat(vw1), sort_pos::most_significant_digit(vw2)), nnpair(most_significant_digit_nat(sort_machine_word::div_word(vw1, vw2)), most_significant_digit_nat(sort_machine_word::mod_word(vw1, vw2)))));
+        result.push_back(data_equation(variable_list({vp, vw1, vw2}), divmod_aux(most_significant_digit_nat(vw1), concat_digit(vp, vw2)), nnpair(most_significant_digit_nat(sort_machine_word::zero_word()), most_significant_digit_nat(vw1))));
+        result.push_back(data_equation(variable_list({vn, vw1, vw2}), greater(vn, most_significant_digit_nat(sort_machine_word::zero_word())), divmod_aux(concat_digit(vn, vw1), sort_pos::most_significant_digit(vw2)), divmod_aux_whr1(vn, vw1, vw2, divmod_aux(vn, sort_pos::most_significant_digit(vw2)))));
+        result.push_back(data_equation(variable_list({vmod_doubleword, vn, vn<@most_significant_digitNat, vpair_, vw1, vw2}), divmod_aux_whr1(vn, vw1, vw2, vpair_), nnpair(if_(vn<@most_significant_digitNat(vw2), most_significant_digit_nat(div_bold(concat_digit(vn, vw1), sort_pos::most_significant_digit(vw2))), if_(equal_to(nnfirst(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(div_bold(if_(equal_to(nnlast(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(vw1), concat_digit(nnlast(vpair_), vw1)), sort_pos::most_significant_digit(vw2))), concat_digit(nnfirst(vpair_), div_bold(if_(equal_to(nnlast(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(vw1), concat_digit(nnlast(vpair_), vw1)), sort_pos::most_significant_digit(vw2))))), most_significant_digit_nat(vmod_doubleword(msd(nnlast(vpair_)), vw1, vw2)))));
+        result.push_back(data_equation(variable_list({vn, vp, vw1, vw2}), greater(vn, most_significant_digit_nat(sort_machine_word::zero_word())), divmod_aux(concat_digit(vn, vw1), concat_digit(vp, vw2)), if_(less(vn, pos2nat(concat_digit(vp, vw2))), divmod_aux_whr2(vn, vw1, vp, vw2, mod(vn, concat_digit(vp, vw2))), divmod_aux_whr4(vw1, vp, vw2, divmod_aux(vn, concat_digit(vp, vw2))))));
+        result.push_back(data_equation(variable_list({vlp, vn, vp, vw1, vw2}), divmod_aux_whr2(vn, vw1, vp, vw2, vlp), divmod_aux_whr3(vn, vw1, vp, vw2, if_(equal_to(vlp, most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(vw1), concat_digit(vlp, vw1)))));
+        result.push_back(data_equation(variable_list({vm, vn, vp, vw1, vw2}), divmod_aux_whr3(vn, vw1, vp, vw2, vm), nnpair(most_significant_digit_nat(div_bold(concat_digit(vn, vw1), concat_digit(vp, vw2))), monus(vm, times(concat_digit(pos2nat(vp), vw2), most_significant_digit_nat(div_bold(vm, concat_digit(vp, vw2))))))));
+        result.push_back(data_equation(variable_list({vp, vpair_, vw1, vw2}), divmod_aux_whr4(vw1, vp, vw2, vpair_), divmod_aux_whr5(vp, vw2, vpair_, if_(equal_to(nnlast(vpair_), most_significant_digit_nat(sort_machine_word::zero_word())), most_significant_digit_nat(vw1), concat_digit(nnlast(vpair_), vw1)))));
+        result.push_back(data_equation(variable_list({vm, vp, vpair_, vw2}), divmod_aux_whr5(vp, vw2, vpair_, vm), divmod_aux_whr6(vp, vw2, vpair_, vm, most_significant_digit_nat(div_bold(vm, concat_digit(vp, vw2))))));
+        result.push_back(data_equation(variable_list({vm, vm1, vp, vpair_, vplus, vw2}), divmod_aux_whr6(vp, vw2, vpair_, vm, vm1), nnpair(vplus(concat_digit(nnfirst(vpair_), sort_machine_word::zero_word()), vm1), monus(vm, times(concat_digit(pos2nat(vp), vw2), vm1)))));
+        result.push_back(data_equation(variable_list({vw1, vw2}), div_bold(most_significant_digit_nat(vw1), sort_pos::most_significant_digit(vw2)), sort_machine_word::div_word(vw1, vw2)));
+        result.push_back(data_equation(variable_list({vp, vw1, vw2}), div_bold(most_significant_digit_nat(vw1), concat_digit(vp, vw2)), sort_machine_word::zero_word()));
+        result.push_back(data_equation(variable_list({vw1, vw2, vw3}), div_bold(concat_digit(most_significant_digit_nat(vw1), vw2), sort_pos::most_significant_digit(vw3)), sort_machine_word::div_doubleword(vw1, vw2, vw3)));
+        result.push_back(data_equation(variable_list({vw, vw1, vw2, vw3}), div_bold(concat_digit(most_significant_digit_nat(vw), vw1), concat_digit(sort_pos::most_significant_digit(vw2), vw3)), sort_machine_word::div_double_doubleword(vw, vw1, vw2, vw3)));
+        result.push_back(data_equation(variable_list({vw, vw1, vw2, vw3, vw4}), div_bold(concat_digit(concat_digit(most_significant_digit_nat(vw), vw1), vw2), concat_digit(sort_pos::most_significant_digit(vw3), vw4)), sort_machine_word::div_triple_doubleword(vw, vw1, vw2, vw3, vw4)));
+        result.push_back(data_equation(variable_list({vn, vp, vw1, vw2, vw3}), greater(vn, most_significant_digit_nat(sort_machine_word::zero_word())), div_bold(concat_digit(vn, vw1), concat_digit(concat_digit(vp, vw2), vw3)), if_(greater_equal(vn, concat_digit(pos2nat(concat_digit(vp, vw2)), sort_machine_word::zero_word())), sort_machine_word::max_word(), div_bold_whr(vn, vw1, vp, vw2, vw3, div_bold(vn, concat_digit(vp, vw2))))));
+        result.push_back(data_equation(variable_list({vm, vn, vp, vw1, vw2, vw3}), div_bold_whr(vn, vw1, vp, vw2, vw3, vm), if_(greater(times(most_significant_digit_nat(vm), pos2nat(concat_digit(concat_digit(vp, vw2), vw3))), concat_digit(vn, vw1)), sort_machine_word::pred_word(vm), vm)));
+        result.push_back(data_equation(variable_list({vm, vn, vu, vv}), equal_to(nnpair(vm, vn), nnpair(vu, vv)), sort_bool::and_(equal_to(vm, vu), equal_to(vn, vv))));
+        result.push_back(data_equation(variable_list({vm, vn, vu, vv}), less(nnpair(vm, vn), nnpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less(vn, vv)))));
+        result.push_back(data_equation(variable_list({vm, vn, vu, vv}), less_equal(nnpair(vm, vn), nnpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less_equal(vn, vv)))));
+        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), equal_to(wnpair(vw1, vn1), wnpair(vw2, vn2)), sort_bool::and_(equal_to(vw1, vw2), equal_to(vn1, vn2))));
+        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), less(wnpair(vw1, vn1), wnpair(vw2, vn2)), sort_bool::or_(less(vw1, vw2), sort_bool::and_(equal_to(vw1, vw2), less(vn1, vn2)))));
+        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), less_equal(wnpair(vw1, vn1), wnpair(vw2, vn2)), sort_bool::or_(less(vw1, vw2), sort_bool::and_(equal_to(vw1, vw2), less_equal(vn1, vn2)))));
+        result.push_back(data_equation(variable_list({vm, vn}), nnfirst(nnpair(vm, vn)), vm));
+        result.push_back(data_equation(variable_list({vm, vn}), nnlast(nnpair(vm, vn)), vn));
+        result.push_back(data_equation(variable_list({vn, vw}), nnfirst(wnpair(vw, vn)), vw));
+        result.push_back(data_equation(variable_list({vn, vw}), nnlast(wnpair(vw, vn)), vn));
         result.push_back(data_equation(variable_list({vm}), swap_zero(vm, c0()), vm));
         result.push_back(data_equation(variable_list({vn}), swap_zero(c0(), vn), vn));
         result.push_back(data_equation(variable_list({v@cNat, vp}), swap_zero(v@cNat(vp), v@cNat(vp)), c0()));
@@ -2892,18 +3708,6 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({v@cNat, vp}), sqrt(v@cNat(vp)), sqrt_nat_aux_func(v@cNat(vp), c0(), sort_pos::powerlog2_pos(vp))));
         result.push_back(data_equation(variable_list({v@cNat, vm, vn}), sqrt_nat_aux_func(vn, vm, sort_pos::c1()), if_(less_equal(vn, vm), c0(), v@cNat(sort_pos::c1()))));
         result.push_back(data_equation(variable_list({v@cNat, vb, vm, vn, vp}), sqrt_nat_aux_func(vn, vm, sort_pos::cdub(vb, vp)), if_(greater(times(sort_nat::plus(v@cNat(sort_pos::cdub(vb, vp)), vm), v@cNat(sort_pos::cdub(vb, vp))), vn), sqrt_nat_aux_func(vn, vm, vp), sort_nat::plus(v@cNat(sort_pos::cdub(vb, vp)), sqrt_nat_aux_func(monus(vn, times(sort_nat::plus(v@cNat(sort_pos::cdub(vb, vp)), vm), v@cNat(sort_pos::cdub(vb, vp)))), plus(vm, v@cNat(sort_pos::cdub(sort_bool::false_(), sort_pos::cdub(vb, vp)))), vp)))));
-        result.push_back(data_equation(variable_list({vm, vn, vu, vv}), equal_to(cpair(vm, vn), cpair(vu, vv)), sort_bool::and_(equal_to(vm, vu), equal_to(vn, vv))));
-        result.push_back(data_equation(variable_list({vm, vn, vu, vv}), less(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less(vn, vv)))));
-        result.push_back(data_equation(variable_list({vm, vn, vu, vv}), less_equal(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less_equal(vn, vv)))));
-        result.push_back(data_equation(variable_list({vm, vn}), first(cpair(vm, vn)), vm));
-        result.push_back(data_equation(variable_list({vm, vn}), last(cpair(vm, vn)), vn));
-        result.push_back(data_equation(variable_list({v@cNat}), divmod(sort_pos::c1(), sort_pos::c1()), cpair(v@cNat(sort_pos::c1()), c0())));
-        result.push_back(data_equation(variable_list({v@cNat, vb, vp}), divmod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cpair(c0(), v@cNat(sort_pos::c1()))));
-        result.push_back(data_equation(variable_list({vb, vp, vq}), divmod(sort_pos::cdub(vb, vp), vq), generalised_divmod(divmod(vp, vq), vb, vq)));
-        result.push_back(data_equation(variable_list({vb, vm, vn, vp}), generalised_divmod(cpair(vm, vn), vb, vp), doubly_generalised_divmod(dub(vb, vn), vm, vp)));
-        result.push_back(data_equation(variable_list({vn, vp}), doubly_generalised_divmod(c0(), vn, vp), cpair(dub(sort_bool::false_(), vn), c0())));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp, vq}), less(vp, vq), doubly_generalised_divmod(v@cNat(vp), vn, vq), cpair(dub(sort_bool::false_(), vn), v@cNat(vp))));
-        result.push_back(data_equation(variable_list({v@cNat, vn, vp, vq}), less_equal(vq, vp), doubly_generalised_divmod(v@cNat(vp), vn, vq), cpair(dub(sort_bool::true_(), vn), gte_subtract_with_borrow(sort_bool::false_(), vp, vq))));
         return result;
       }
 
