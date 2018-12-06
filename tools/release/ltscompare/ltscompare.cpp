@@ -259,7 +259,7 @@ class ltscompare_tool : public ltscompare_base
       add_option("strategy", make_enum_argument<exploration_strategy>("NAME")
                  .add_value_short(es_breadth, "b", true)
                  .add_value_short(es_depth, "d")
-                 , "explore the state space using strategy NAME:"
+                 , "explore the state space using strategy NAME (only for antichain based algorithms; includes all failures refinements) :"
                  , 's').
       add_option("tau", make_mandatory_argument("ACTNAMES"),
                  "consider actions with a name in the comma separated list ACTNAMES to "
@@ -330,6 +330,15 @@ class ltscompare_tool : public ltscompare_base
         if (tool_options.strategy != es_breadth && tool_options.generate_counter_examples)
         {
           mCRL2log(mcrl2::log::warning) << "Generated counter example might not be the shortest with the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
+        }
+
+        if (tool_options.preorder != lts_pre_trace_anti_chain
+            || tool_options.preorder != lts_pre_weak_trace_anti_chain
+            || tool_options.preorder != lts_pre_failures_refinement
+            || tool_options.preorder != lts_pre_weak_failures_refinement
+            || tool_options.preorder != lts_pre_failures_divergence_refinement)
+        {
+          throw parser.error("strategy can only be chosen for antichain based algorithms.");
         }
       }
 
