@@ -13,6 +13,7 @@
 #define MCRL2_PBES_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H
 
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
@@ -62,42 +63,49 @@ struct quantifiers_inside_forall_builder: public pbes_expression_builder<quantif
     : V(V_)
   {}
 
-  std::set<data::variable> vars(const pbes_expression& x)
-  {
-    return pbes_system::find_free_variables(x);
-  }
-
   pbes_expression apply(const not_& x)
   {
     auto const& phi = x.operand();
     return not_(quantifiers_inside_exists(V, phi));
   }
 
-  pbes_expression apply(const and_& x)
-  {
-    using utilities::detail::set_intersection;
-    auto const& phi = x.left();
-    auto const& psi = x.right();
-    auto vars_phi = vars(phi);
-    auto vars_psi = vars(psi);
-    return and_(quantifiers_inside_forall(set_intersection(V, vars_phi), phi),
-                quantifiers_inside_forall(set_intersection(V, vars_psi), psi)
-               );
-  }
-
   pbes_expression apply(const or_& x)
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
-    auto const& phi = x.left();
-    auto const& psi = x.right();
-    auto vars_phi = vars(phi);
-    auto vars_psi = vars(psi);
-    auto W = set_intersection(set_intersection(V, vars_phi), vars_psi);
+    typedef core::term_traits<pbes_system::pbes_expression> tr;
+
+    std::vector<pbes_expression> X;
+    utilities::detail::split(x, std::back_inserter(X), tr::is_or, tr::left, tr::right);
+    std::vector<std::set<data::variable>> FV;
+    for (const pbes_expression& x_i: X)
+    {
+      FV.push_back(set_intersection(find_free_variables(x_i), V));
+    }
+    auto i = std::min_element(FV.begin(), FV.end(),
+            [&](const std::set<data::variable>& x, const std::set<data::variable>& y)
+            {
+              return x.size() < y.size();
+            }
+           );
+
+    const std::set<data::variable>& W = *i;
+    std::vector<pbes_expression> X1;
+    std::vector<pbes_expression> X2;
+    for (std::size_t j = 0; j < X.size(); j++)
+    {
+      if (std::includes(W.begin(), W.end(), FV[j].begin(), FV[j].end()))
+      {
+        X2.push_back(X[j]);
+      }
+      else
+      {
+        X1.push_back(X[j]);
+      }
+    }
     return make_forall(data::variable_list(W.begin(), W.end()),
-                       or_(quantifiers_inside_forall(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
-                           quantifiers_inside_forall(set_difference(set_intersection(V, vars_psi), vars_phi), psi)
-                          )
+                       or_(quantifiers_inside_forall(set_difference(V, W), join_or(X1.begin(), X1.end())),
+                           join_or(X2.begin(), X2.end()))
                       );
   }
 
@@ -107,8 +115,8 @@ struct quantifiers_inside_forall_builder: public pbes_expression_builder<quantif
     using utilities::detail::set_intersection;
     auto const& phi = x.left();
     auto const& psi = x.right();
-    auto vars_phi = vars(phi);
-    auto vars_psi = vars(psi);
+    auto vars_phi = find_free_variables(phi);
+    auto vars_psi = find_free_variables(psi);
     auto W = set_intersection(set_intersection(V, vars_phi), vars_psi);
     return make_forall(data::variable_list(W.begin(), W.end()),
                        imp(quantifiers_inside_exists(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
@@ -143,7 +151,7 @@ struct quantifiers_inside_forall_builder: public pbes_expression_builder<quantif
   pbes_expression apply_default(const T& x)
   {
     using utilities::detail::set_intersection;
-    auto W = set_intersection(V, vars(x));
+    auto W = set_intersection(V, find_free_variables(x));
     return make_forall(data::variable_list(W.begin(), W.end()), x);
   }
 
@@ -169,11 +177,6 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
     : V(V_)
   {}
 
-  std::set<data::variable> vars(const pbes_expression& x)
-  {
-    return pbes_system::find_free_variables(x);
-  }
-
   pbes_expression apply(const not_& x)
   {
     auto const& phi = x.operand();
@@ -184,28 +187,40 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
   {
     using utilities::detail::set_difference;
     using utilities::detail::set_intersection;
-    auto const& phi = x.left();
-    auto const& psi = x.right();
-    auto vars_phi = vars(phi);
-    auto vars_psi = vars(psi);
-    auto W = set_intersection(set_intersection(V, vars_phi), vars_psi);
-    return make_exists(data::variable_list(W.begin(), W.end()),
-                       and_(quantifiers_inside_exists(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
-                            quantifiers_inside_exists(set_difference(set_intersection(V, vars_psi), vars_phi), psi)
-                           )
-                      );
-  }
+    typedef core::term_traits<pbes_system::pbes_expression> tr;
 
-  pbes_expression apply(const or_& x)
-  {
-    using utilities::detail::set_intersection;
-    auto const& phi = x.left();
-    auto const& psi = x.right();
-    auto vars_phi = vars(phi);
-    auto vars_psi = vars(psi);
-    return or_(quantifiers_inside_exists(set_intersection(V, vars_phi), phi),
-               quantifiers_inside_exists(set_intersection(V, vars_psi), psi)
-              );
+    std::vector<pbes_expression> X;
+    utilities::detail::split(x, std::back_inserter(X), tr::is_and, tr::left, tr::right);
+    std::vector<std::set<data::variable>> FV;
+    for (const pbes_expression& x_i: X)
+    {
+      FV.push_back(set_intersection(find_free_variables(x_i), V));
+    }
+    auto i = std::min_element(FV.begin(), FV.end(),
+                              [&](const std::set<data::variable>& x, const std::set<data::variable>& y)
+                              {
+                                  return x.size() < y.size();
+                              }
+    );
+
+    const std::set<data::variable>& W = *i;
+    std::vector<pbes_expression> X1;
+    std::vector<pbes_expression> X2;
+    for (std::size_t j = 0; j < X.size(); j++)
+    {
+      if (std::includes(W.begin(), W.end(), FV[j].begin(), FV[j].end()))
+      {
+        X2.push_back(X[j]);
+      }
+      else
+      {
+        X1.push_back(X[j]);
+      }
+    }
+    return make_exists(data::variable_list(W.begin(), W.end()),
+                       and_(quantifiers_inside_forall(set_difference(V, W), join_or(X1.begin(), X1.end())),
+                            join_and(X2.begin(), X2.end()))
+    );
   }
 
   pbes_expression apply(const imp& x)
@@ -213,8 +228,8 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
     using utilities::detail::set_intersection;
     auto const& phi = x.left();
     auto const& psi = x.right();
-    auto vars_phi = vars(phi);
-    auto vars_psi = vars(psi);
+    auto vars_phi = find_free_variables(phi);
+    auto vars_psi = find_free_variables(psi);
     return imp(quantifiers_inside_forall(set_intersection(V, vars_phi), phi),
                quantifiers_inside_exists(set_intersection(V, vars_psi), psi)
               );
@@ -246,7 +261,7 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
   pbes_expression apply_default(const T& x)
   {
     using utilities::detail::set_intersection;
-    auto W = set_intersection(V, vars(x));
+    auto W = set_intersection(V, find_free_variables(x));
     return make_exists(data::variable_list(W.begin(), W.end()), x);
   }
 
