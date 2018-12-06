@@ -358,7 +358,7 @@ bool destructive_refinement_checker(
     bool initial_equal = false;
     std::tie(init_l2, initial_equal) = reduce(l1, refinement, weak_reduction, init_l2);
 
-    if (initial_equal)
+    if (initial_equal && weak_reduction)
     {
       mCRL2log(log::verbose) << "Both LTSs are (divergence-preserving) branching bisimular, so no need to check refinement relation.\n";
       return true;
