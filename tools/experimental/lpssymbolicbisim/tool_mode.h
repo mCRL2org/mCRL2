@@ -23,7 +23,7 @@ enum running_mode
 };
 
 inline
-running_mode parse_mode(const std::string& s)
+running_mode parse_tool_mode(const std::string& s)
 {
   if(s == "refine" || s == "r")
   {
@@ -55,7 +55,7 @@ std::istream& operator>>(std::istream& is, running_mode& eq)
   {
     std::string s;
     is >> s;
-    eq = parse_mode(s);
+    eq = parse_tool_mode(s);
   }
   catch(mcrl2::runtime_error&)
   {
@@ -111,6 +111,3 @@ inline std::string description(const running_mode r)
 }
 
 #endif // MCRL2_LPSSYMBOLICBISIM_TOOL_MODE_H
-
-
-

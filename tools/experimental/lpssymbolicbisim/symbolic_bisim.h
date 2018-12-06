@@ -40,12 +40,12 @@
 #include "mcrl2/utilities/logger.h"
 
 #include "simplifier.h"
-#ifndef DBM_PACKAGE_AVAILABLE
-  #define GREEN(C) ""
-  #define YELLOW(C) ""
-  #define RED(C) ""
-  #define NORMAL ""
-#endif
+#define THIN       "0"
+#define BOLD       "1"
+#define GREEN(S)  "\033[" S ";32m"
+#define YELLOW(S) "\033[" S ";33m"
+#define RED(S)    "\033[" S ";31m"
+#define NORMAL    "\033[0;0m"
 #include "find_linear_inequality.h"
 #include "enumerate_block_union.h"
 #include "block_tree.h"
@@ -79,7 +79,6 @@ namespace mcrl2
 namespace data
 {
 
-using namespace mcrl2::log;
 
 template <typename Specification>
 class symbolic_bisim_algorithm: public mcrl2::lps::detail::lps_algorithm<Specification>
@@ -260,7 +259,7 @@ protected:
       }
     }
     arguments_equal = rewr(arguments_equal);
-    // std::cout << "Constructing block expression ..." << std::endl;
+    // mCRL2log(log::verbose) << "Constructing block expression ..." << std::endl;
     data_expression prime_condition =
       arguments_equal == sort_bool::true_() ?
         variable("b'", sort_bool::bool_()) :
@@ -431,10 +430,10 @@ protected:
         int k = 0;
         for(const lps::action_summand& as: m_spec.process().action_summands())
         {
-          // std::cout << "Trying to split " << i << " on " << j << " wrt summand " << k << std::endl;
+          // mCRL2log(log::verbose) << "Trying to split " << i << " on " << j << " wrt summand " << k << std::endl;
           if(split_block(phi_k, phi_l, as))
           {
-            std::cout << "Split " << rewr(phi_k) << " wrt summand\n" << as << "\non block " << rewr(phi_l) << std::endl;
+            mCRL2log(log::verbose) << "Split " << rewr(phi_k) << " wrt summand\n" << as << "\non block " << rewr(phi_l) << std::endl;
             return true;
           }
           k++;
@@ -510,7 +509,7 @@ protected:
     {
       if(rewr(application(block, m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
       {
-        // std::cout << "Found initial block " << block << std::endl;
+        // mCRL2log(log::verbose) << "Found initial block " << block << std::endl;
         return block;
       }
     }
@@ -621,12 +620,12 @@ protected:
     }
 
 
-    std::cout << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
+    mCRL2log(log::verbose) << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
     int i = 0;
     for(const data_expression& block: unreachable)
     {
       split_logger->mark_deleted(rewr(block));
-      std::cout << "  block " << i << "  " << pp(rewr(block)) << std::endl;
+      mCRL2log(log::verbose) << "  block " << i << "  " << pp(rewr(block)) << std::endl;
       i++;
     }
   }
@@ -709,7 +708,7 @@ protected:
     int i = 0;
     for(const data_expression& block: blocks)
     {
-      std::cout << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
+      mCRL2log(log::verbose) << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
       // detail::BDD2Dot bddwriter;
       // bddwriter.output_bdd(atermpp::down_cast<abstraction>(block).body(), ("block" + std::to_string(i) + ".dot").c_str());
       i++;
@@ -743,27 +742,27 @@ public:
     simpl = get_simplifier_instance(rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data());
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = std::chrono::high_resolution_clock::now();
-    std::cout << "Initial partition:" << std::endl;
+    mCRL2log(log::verbose) << "Initial partition:" << std::endl;
     print_partition(partition);
     int num_iterations = 0;
     while(refine())
     {
-      std::cout << GREEN(THIN) << "Partition:" << NORMAL << std::endl;
+      mCRL2log(log::verbose) << GREEN(THIN) << "Partition:" << NORMAL << std::endl;
       print_partition(partition);
       find_reachable_blocks();
       num_iterations++;
-      std::cout << "End of iteration " << num_iterations <<
+      mCRL2log(log::verbose) << "End of iteration " << num_iterations <<
       ".\nRefinement cache entries/hits/misses " << refinement_cache.size() << "/" << refinement_cache_hits << "/" << refinement_cache_misses <<
       ".\nTransition cache entries/hits/misses " << transition_cache.size() << "/" << transition_cache_hits << "/" << transition_cache_misses <<
       ".\nLast minute transition check successes " << last_minute_transition_check <<
       ".\nSplits performed " << refinement_cache_misses - last_minute_transition_check << std::endl;
     }
-    std::cout << "Final partition:" << std::endl;
+    mCRL2log(log::verbose) << "Final partition:" << std::endl;
     print_partition(partition);
     std::set< data_expression > final_partition;
     std::for_each(partition.begin(), partition.end(), [&](const data_expression& block){ final_partition.insert(rewr(block)); });
     split_logger->output_dot("split_tree.dot", final_partition);
-    std::cout << "Partition refinement completed in " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << " seconds" << std::endl;
+    mCRL2log(log::info) << "Partition refinement completed in " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << " seconds" << std::endl;
 
     save_lts();
   }
