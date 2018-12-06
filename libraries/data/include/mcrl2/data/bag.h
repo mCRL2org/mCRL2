@@ -1227,7 +1227,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vb, vf}), bag2set(s, constructor(s, vf, vb)), sort_set::constructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));
         result.push_back(data_equation(variable_list({vh, vs}), set2bag(s, sort_set::constructor(s, vh, vs)), constructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
         result.push_back(data_equation(variable_list({ve}), zero_function(s, ve), sort_nat::c0()));
-        result.push_back(data_equation(variable_list({v@cNat, ve}), one_function(s, ve), v@cNat(sort_pos::c1())));
+        result.push_back(data_equation(variable_list({ve}), one_function(s, ve), sort_nat::most_significant_digit_nat(sort_machine_word::one_word())));
         result.push_back(data_equation(variable_list(), equal_to(zero_function(s), one_function(s)), sort_bool::false_()));
         result.push_back(data_equation(variable_list(), equal_to(one_function(s), zero_function(s)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({ve, vf, vg}), add_function(s, vf, vg)(ve), sort_nat::plus(vf(ve), vg(ve))));
@@ -1244,7 +1244,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({ve, vf}), nat2bool_function(s, vf)(ve), greater(vf(ve), sort_nat::c0())));
         result.push_back(data_equation(variable_list(), nat2bool_function(s, zero_function(s)), sort_set::false_function(s)));
         result.push_back(data_equation(variable_list(), nat2bool_function(s, one_function(s)), sort_set::true_function(s)));
-        result.push_back(data_equation(variable_list({v@cNat, ve, vh}), bool2nat_function(s, vh)(ve), if_(vh(ve), v@cNat(sort_pos::c1()), sort_nat::c0())));
+        result.push_back(data_equation(variable_list({ve, vh}), bool2nat_function(s, vh)(ve), if_(vh(ve), sort_nat::most_significant_digit_nat(sort_machine_word::one_word()), sort_nat::c0())));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::false_function(s)), zero_function(s)));
         result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::true_function(s)), one_function(s)));
         return result;

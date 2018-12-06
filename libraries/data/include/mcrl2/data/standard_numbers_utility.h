@@ -29,6 +29,69 @@ namespace data
 /// \cond INTERNAL_DOCS
 namespace detail
 {
+
+std::vector<std::size_t> add_vector(const std::vector< std::size_t >& v1, 
+                                    const std::vector< std::size_t >& v2)
+{
+  std::vector<std::size_t> result;
+  std::size_t carry=0;
+  for(std::size_t i=0; i<std::max(v1.size(),v2.size()); i++)
+  {
+    std::size_t n1 = (i<v1.size()? v1[i]: 0);
+    std::size_t n2 = (i<v2.size()? v2[i]: 0);
+
+    std::size_t sum = n1+n2+carry;
+    if (sum<n1)  // There is a carry overflow. 
+    {
+      assert(sum<n2);
+      carry=1;
+    }
+    result.push_back(sum);
+  }
+  if (carry==1)
+  {
+    result.push_back(1);
+  }
+  return result;
+}
+
+// Multiply a vector consisting of size_t's with 10 and add the extra value.
+std::vector<size_t> multiply_by10_and_add(const std::vector< size_t >& v, size_t val)
+{
+  std::vector<size_t> val_vector(1,val);
+  assert(val_vector.size()==1);
+  std::vector<size_t> result=add_vector(v,v);   // result is 2 v.
+  result = add_vector(result, result);          // result is 4 v.
+  result = add_vector(result, v);               // result is 5 v.
+  result = add_vector(result, result);          // result is 10 v.
+  result = add_vector(result, val_vector);      // result is 10 v + val.
+  return result;
+}
+
+// Convert to number represented as character array where each character
+// represents a decimal digit
+inline std::vector< size_t > number_string_to_vector_number(const std::string& s)
+{
+  assert(s.size() > 0);
+  std::vector< size_t > result;
+
+  result.reserve(s.size()/18);  // approximately 18 digits fit in one size_t.
+
+  for (char i: s)
+  {
+    if ('0' <= i && i <= '9')
+    {
+       result = multiply_by10_and_add(result, i - '0');
+    }
+    else
+    {
+      throw mcrl2::runtime_error("The string " + s + " is expected to only consist of digits. ");
+    }
+  }
+
+  return result;
+}
+
 // Convert to number represented as character array where each character
 // represents a decimal digit
 inline std::vector< char > string_to_vector_number(const std::string& s)
@@ -180,24 +243,9 @@ template < typename T >
 inline typename std::enable_if<std::is_integral< T >::value, data_expression>::type
 pos(const T t)
 {
+  static_assert(sizeof(T)<=sizeof(std::size_t),"Can only convert numbers up till a size_t.");
   assert(t>0);
-
-  std::vector< bool > bits;
-  bits.reserve(8 * sizeof(T));
-
-  for (T u = t; 1 < u; u /= 2)
-  {
-    bits.push_back(u % 2 != 0);
-  }
-
-  data_expression result(sort_pos::c1());
-
-  for (std::vector< bool >::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i)
-  {
-    result = sort_pos::cdub(sort_bool::bool_(*i), result);
-  }
-
-  return result;
+  return most_significant_digit(machine_number(t));
 }
 
 /// \brief Constructs expression of type Pos from a string
@@ -280,18 +328,27 @@ template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 nat(T t)
 {
-  if (t == 0)
-  {
-    return sort_nat::c0();
-  }
-  return sort_nat::cnat(sort_pos::pos(t));
+  static_assert(sizeof(T)<=sizeof(std::size_t),"Can only convert numbers up till a size_t.");
+  return sort_nat::most_significant_digit_nat(machine_number(t));
 }
 
 /// \brief Constructs expression of type Nat from a string
 /// \param n A string
 inline data_expression nat(const std::string& n)
 {
-  return (n == "0") ? sort_nat::c0() : static_cast< data_expression const& >(sort_nat::cnat(sort_pos::pos(n)));
+  std::vector<std::size_t> number_vector= detail::number_string_to_vector_number(n);
+
+  if (number_vector.empty())
+  {
+    return most_significant_digit_nat(machine_number(0));
+  }
+  data_expression result=most_significant_digit_nat(machine_number(number_vector.back()));
+  for(std::size_t i=number_vector.size()-1; i>0; ++i)
+  {
+    result = sort_nat::concat_digit(sort_nat::nat(),sort_machine_word::machine_word())
+                       (result,machine_number(number_vector.at(i-1)));
+  }
+  return result;
 }
 
 /// \brief Determines whether n is a natural constant

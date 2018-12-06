@@ -78,7 +78,6 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      @first <"wnfirst"> : @wordNatPair <"arg"> -> @word                                                          internal defined_by_rewrite_rules;
      @last <"wnlast"> : @wordNatPair <"arg"> -> Nat                                                              internal defined_by_rewrite_rules;
 % The functions below are auxiliary and might be omitted. 
-%     @even <"even">:Nat <"arg"> -> Bool                                                                          external defined_by_rewrite_rules;
      @swap_zero <"swap_zero">:Nat <"left"> # Nat <"right"> -> Nat                                                internal defined_by_rewrite_rules;
      @swap_zero_add <"swap_zero_add">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat           internal defined_by_rewrite_rules;
      @swap_zero_min <"swap_zero_min">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat           internal defined_by_rewrite_rules;
@@ -97,12 +96,18 @@ var  b:Bool;
      n1:Nat;
      n2:Nat;
      m:Nat;
+     m1:Nat;
+     m2:Nat;
      predp:Nat;
      diff:Nat;
      shift_n1:Nat;
+     pair_:@NatNatPair;
+     lp:@NatNatPair;
      w:@word;
      w1:@word;
      w2:@word;
+     w3:@word;
+     w4:@word;
      shift_w:@word;
 
 eqn  @c0 = @most_significant_digitNat(@zero_word);
@@ -279,21 +284,17 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                  @exp_aux3p(@rightmost_bit(@shift_right(false,w)),*(p,p),@shift_right(false,w)));
 
      @exp_aux4p(true,p,n1,w) = @exp_auxtruep(p,@div2(n1),@shift_right(@is_odd(n1), w));
-     @exp_aux_truep(p,shift_n1,shift_w) =
+     @exp_auxtruep(p,shift_n1,shift_w) =
                            if(==(shift_n1,@most_significant_digitNat(@zero_word)),
                                 *(p,@exp_aux3p(@rightmost_bit(shift_w),*(p,p),shift_w)),
                                 *(p,@exp_aux4p(@rightmost_bit(shift_w),*(p,p),shift_n1,shift_w)));
 
-     @exp_aux4p(false,p,n1,w) = @exp_auxfalsep(p,div2(n1),@shift_right(is_odd(n1),w));
+     @exp_aux4p(false,p,n1,w) = @exp_auxfalsep(p,@div2(n1),@shift_right(@is_odd(n1),w));
      @exp_auxfalsep(p,shift_n1,shift_w) =
                            if(==(shift_n1,@most_significant_digitNat(@zero_word)),
                                 @exp_aux3p(@rightmost_bit(shift_w),*(p,p),shift_w),
                                 @exp_aux4p(@rightmost_bit(shift_w),*(p,p),shift_n1,shift_w));
  
-
-%     @even(@c0) = true;
-%     @even(@cNat(@c1)) = false;
-%     @even(@cNat(@cDub(b,p))) = !(b);
 
     div(@most_significant_digitNat(w1),@most_significant_digit(w2)) = @most_significant_digitNat(@div_word(w1,w2));
     mod(@most_significant_digitNat(w1),@most_significant_digit(w2)) = @most_significant_digitNat(@mod_word(w1,w2));
@@ -330,7 +331,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                   @most_significant_digitNat(@div_bold(@concat_digit(n,w1),@concat_digit(p,w2))),
                                   @div_whr2(n,w1,w2,@divmod_aux(n,@concat_digit(p,w2))));
     @div_whr2(n,w1,w2,pair_) = 
-                          plus(if(==(@first(pair_),@most_significant_digitNat(@zero_word)), 
+                          +(if(==(@first(pair_),@most_significant_digitNat(@zero_word)), 
                                     @most_significant_digitNat(@zero_word),
                                     @concat_digit(@first(pair_),@zero_word)),
                                @most_significant_digitNat(@div_bold(if(==(@last(pair_),@most_significant_digitNat(@zero_word)), 
@@ -359,7 +360,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
     @divmod_aux(@concat_digit(n,w1),@most_significant_digit(w2)) = @divmod_aux_whr1(n,w1,w2,@divmod_aux(n,@most_significant_digit(w2)));
     
     @divmod_aux_whr1(n,w1,w2,pair_) =
-                          @nnPair(if(n<@most_significant_digitNat(w2),
+                          @nnPair(if(<(n,@most_significant_digitNat(w2)),
                                     @most_significant_digitNat(@div_bold(@concat_digit(n,w1),@most_significant_digit(w2))),
                                     if (==(@first(pair_),@most_significant_digitNat(@zero_word)),
                                         @most_significant_digitNat(@div_bold(
@@ -370,7 +371,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                             if(==(@last(pair_),@most_significant_digitNat(@zero_word)), 
                                                  @most_significant_digitNat(w1),
                                                  @concat_digit(@last(pair_),w1)),@most_significant_digit(w2))))),
-                                  @most_significant_digitNat(mod_doubleword(@msd(@last(pair_)),w1,w2)));
+                                  @most_significant_digitNat(@mod_doubleword(@msd(@last(pair_)),w1,w2)));
 
     >(n,@most_significant_digitNat(@zero_word)) ->
     @divmod_aux(@concat_digit(n,w1),@concat_digit(p,w2)) =
@@ -387,7 +388,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
     @divmod_aux_whr5(p,w2,pair_,m) = @divmod_aux_whr6(p,w2,pair_,m,@most_significant_digitNat(@div_bold(m,@concat_digit(p,w2))));
 
     @divmod_aux_whr6(p,w2,pair_,m,m1) = 
-                         @nnPair(plus(@concat_digit(@first(pair_),@zero_word),m1),
+                         @nnPair(+(@concat_digit(@first(pair_),@zero_word),m1),
                                  @monus(m,*(@concat_digit(Pos2Nat(p),w2),m1)));
 
     @div_bold(@most_significant_digitNat(w1),@most_significant_digit(w2)) = @div_word(w1,w2);
@@ -415,9 +416,9 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
 
 % equations for pairs
-     ==(@nnPair(m,n), @nnPair(u,v)) = &&(==(m,u),==(n,v));
-     <(@nnPair(m,n), @nnPair(u,v)) = ||(<(m,u), &&(==(m,u), <(n,v)));
-     <=(@nnPair(m,n), @nnPair(u,v)) = ||(<(m,u), &&(==(m,u), <=(n,v)));
+     ==(@nnPair(n1,n2), @nnPair(m1,m2)) = &&(==(n1,m1),==(n2,m2));
+     <(@nnPair(n1,n2), @nnPair(m1,m2)) = ||(<(n1,m1), &&(==(n1,m1), <(n2,m2)));
+     <=(@nnPair(n1,n2), @nnPair(m1,m2)) = ||(<(n1,m1), &&(==(n1,m1), <=(n2,m2)));
      ==(@wnPair(w1,n1), @wnPair(w2,n2)) = &&(==(w1,w2),==(n1,n2));
      <(@wnPair(w1,n1), @wnPair(w2,n2)) = ||(<(w1,w2), &&(==(w1,w2), <(n1,n2)));
      <=(@wnPair(w1,n1), @wnPair(w2,n2)) = ||(<(w1,w2), &&(==(w1,w2), <=(n1,n2)));
@@ -428,35 +429,79 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
 %Residues. 
 
-     @swap_zero(m,@c0) = m;
-     @swap_zero(@c0,n) = n;
-     @swap_zero(@cNat(p),@cNat(p)) = @c0;
-     !=(p,q) -> @swap_zero(@cNat(p),@cNat(q)) = @cNat(q);
-     @swap_zero_add(@c0, @c0, m, n) = +(m,n);
-     @swap_zero_add(@cNat(p), @c0, m, @c0) = m;
-     @swap_zero_add(@cNat(p), @c0, m, @cNat(q)) = @swap_zero(@cNat(p), +(@swap_zero(@cNat(p),m), @cNat(q)));
-     @swap_zero_add(@c0, @cNat(p), @c0, n) = n;
-     @swap_zero_add(@c0, @cNat(p), @cNat(q), n) = @swap_zero(@cNat(p), +(@cNat(q), @swap_zero(@cNat(p), n)));
-     @swap_zero_add(@cNat(p), @cNat(q), m, n) = @swap_zero(+(@cNat(p), @cNat(q)), +(@swap_zero(@cNat(p),m),@swap_zero(@cNat(q),n)));
-     @swap_zero_min(@c0, @c0, m, n) = min(m,n);
-     @swap_zero_min(@cNat(p), @c0, m, @c0) = @c0;
-     @swap_zero_min(@cNat(p), @c0, m, @cNat(q)) = min(@swap_zero(@cNat(p),m), @cNat(q));
-     @swap_zero_min(@c0, @cNat(p), @c0, n) = @c0;
-     @swap_zero_min(@c0, @cNat(p), @cNat(q), n) = min(@cNat(q), @swap_zero(@cNat(p),n));
-     @swap_zero_min(@cNat(p), @cNat(q), m, n) = @swap_zero(min(@cNat(p), @cNat(q)), min(@swap_zero(@cNat(p), m), @swap_zero(@cNat(q), n)));
-     @swap_zero_monus(@c0, @c0, m, n) = @monus(m,n);
-     @swap_zero_monus(@cNat(p), @c0, m, @c0) = m;
-     @swap_zero_monus(@cNat(p), @c0, m, @cNat(q)) = @swap_zero(@cNat(p), @monus(@swap_zero(@cNat(p), m), @cNat(q)));
-     @swap_zero_monus(@c0, @cNat(p), @c0, n) = @c0;
-     @swap_zero_monus(@c0, @cNat(p), @cNat(q), n) = @monus(@cNat(q), @swap_zero(@cNat(p), n));
-     @swap_zero_monus(@cNat(p), @cNat(q), m, n) = @swap_zero(@monus(@cNat(p),@cNat(q)),@monus(@swap_zero(@cNat(p),m), @swap_zero(@cNat(q),n)));
-     sqrt(@c0) = @c0;
-     sqrt(@cNat(p)) = @sqrt_nat(@cNat(p),@c0,@powerlog2(p));
-     @sqrt_nat(n,m,@c1) = if(<=(n,m),@c0,@cNat(@c1));
-     @sqrt_nat(n,m,@cDub(b,p)) =
-               if(>(*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p))),n),
-                    @sqrt_nat(n,m,p),
-                    +(@cNat(@cDub(b,p)),@sqrt_nat(@monus(n,*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p)))),+(m,@cNat(@cDub(false,@cDub(b,p)))),p)));
+%     @swap_zero(m,@c0) = m;
+%     @swap_zero(@c0,n) = n;
+%     @swap_zero(@cNat(p),@cNat(p)) = @c0;
+%     !=(p,q) -> @swap_zero(@cNat(p),@cNat(q)) = @cNat(q);
+     @swap_zero(m,n) = if(==(n,@most_significant_digitNat(@zero_word)), m,
+                       if(==(m,@most_significant_digitNat(@zero_word)), n,
+                       if(==(n,m), @most_significant_digitNat(@zero_word), n)));
+
+%     @swap_zero_add(@c0, @c0, m, n) = +(m,n);
+%     @swap_zero_add(@c0, @cNat(p), @c0, n) = n;
+%     @swap_zero_add(@c0, @cNat(p), @cNat(q), n) = @swap_zero(@cNat(p), +(@cNat(q), @swap_zero(@cNat(p), n)));
+%     @swap_zero_add(@cNat(p), @c0, m, @c0) = m;
+%     @swap_zero_add(@cNat(p), @c0, m, @cNat(q)) = @swap_zero(@cNat(p), +(@swap_zero(@cNat(p),m), @cNat(q)));
+%     @swap_zero_add(@cNat(p), @cNat(q), m, n) = @swap_zero(+(@cNat(p), @cNat(q)), +(@swap_zero(@cNat(p),m),@swap_zero(@cNat(q),n)));
+     @swap_zero_add(n1,n2,m1,m2) = 
+                       if(==(n1,@most_significant_digitNat(@zero_word)),
+                            if(==(n2,@most_significant_digitNat(@zero_word)), 
+                                 +(m1,m2),
+                                 if(==(m1,@most_significant_digitNat(@zero_word)),
+                                    m2,
+                                    @swap_zero(n2, +(m1, @swap_zero(n2, m2))))),
+                            if(==(n2,@most_significant_digitNat(@zero_word)), 
+                                 if(==(m2,@most_significant_digitNat(@zero_word)),
+                                      n1,
+                                      @swap_zero(n1, +(@swap_zero(n1,m1), m2))),
+                                 @swap_zero(+(n1, n2), +(@swap_zero(n1,m1),@swap_zero(n2,m2)))));
+
+%     @swap_zero_min(@c0, @c0, m, n) = min(m,n);
+%     @swap_zero_min(@c0, @cNat(p), @c0, n) = @c0;
+%     @swap_zero_min(@c0, @cNat(p), @cNat(q), n) = min(@cNat(q), @swap_zero(@cNat(p),n));
+%     @swap_zero_min(@cNat(p), @c0, m, @c0) = @c0;
+%     @swap_zero_min(@cNat(p), @c0, m, @cNat(q)) = min(@swap_zero(@cNat(p),m), @cNat(q));
+%     @swap_zero_min(@cNat(p), @cNat(q), m, n) = @swap_zero(min(@cNat(p), @cNat(q)), min(@swap_zero(@cNat(p), m), @swap_zero(@cNat(q), n)));
+     @swap_zero_min(n1, n2, m1, m2) =
+                       if(==(n1,@most_significant_digitNat(@zero_word)),
+                            if(==(n2,@most_significant_digitNat(@zero_word)), 
+                                 min(m1,m2),
+                                 if(==(m1,@most_significant_digitNat(@zero_word)),
+                                    @most_significant_digitNat(@zero_word),
+                                    min(m1, @swap_zero(n2,m2)))),
+                            if(==(n2,@most_significant_digitNat(@zero_word)), 
+                                 if(==(m2,@most_significant_digitNat(@zero_word)),
+                                      @most_significant_digitNat(@zero_word),
+                                      min(@swap_zero(n1,m1), m2)),
+                                 @swap_zero(min(n1, n2), min(@swap_zero(n1, m1), @swap_zero(n2, m2)))));
+
+%     @swap_zero_monus(@c0, @c0, m, n) = @monus(m,n);
+%     @swap_zero_monus(@c0, @cNat(p), @c0, n) = @c0;
+%     @swap_zero_monus(@c0, @cNat(p), @cNat(q), n) = @monus(@cNat(q), @swap_zero(@cNat(p), n));
+%     @swap_zero_monus(@cNat(p), @c0, m, @c0) = m;
+%     @swap_zero_monus(@cNat(p), @c0, m, @cNat(q)) = @swap_zero(@cNat(p), @monus(@swap_zero(@cNat(p), m), @cNat(q)));
+%     @swap_zero_monus(@cNat(p), @cNat(q), m, n) = @swap_zero(@monus(@cNat(p),@cNat(q)),@monus(@swap_zero(@cNat(p),m), @swap_zero(@cNat(q),n)));
+     @swap_zero_monus(n1, n2, m1, m2) =
+                       if(==(n1,@most_significant_digitNat(@zero_word)),
+                            if(==(n2,@most_significant_digitNat(@zero_word)), 
+                                 @monus(m1,m2),
+                                 if(==(m1,@most_significant_digitNat(@zero_word)),
+                                    @most_significant_digitNat(@zero_word),
+                                    @monus(m1, @swap_zero(n2, m2)))),
+                            if(==(n2,@most_significant_digitNat(@zero_word)), 
+                                 if(==(m2,@most_significant_digitNat(@zero_word)),
+                                      m1,
+                                      @swap_zero(n1, @monus(@swap_zero(n1, m1), m2))),
+                                 @swap_zero(@monus(n1,n2),@monus(@swap_zero(n1,m1), @swap_zero(n2,m2)))));
+
+% TODO:
+%     sqrt(@c0) = @c0;
+%     sqrt(@cNat(p)) = @sqrt_nat(@cNat(p),@c0,@powerlog2(p));
+%     @sqrt_nat(n,m,@c1) = if(<=(n,m),@c0,@cNat(@c1));
+%     @sqrt_nat(n,m,@cDub(b,p)) =
+%               if(>(*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p))),n),
+%                    @sqrt_nat(n,m,p),
+%                    +(@cNat(@cDub(b,p)),@sqrt_nat(@monus(n,*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p)))),+(m,@cNat(@cDub(false,@cDub(b,p)))),p)));
 
 %     @divmod(@c1,@c1) = @nnPair(@cNat(@c1),@c0);
 %     @divmod(@c1,@cDub(b,p)) = @nnPair(@c0, @cNat(@c1));

@@ -94,6 +94,6 @@ eqn ==({}, @fset_cons(d, s))  =  false;
     <(d,e) -> *(@fset_cons(d,s),@fset_cons(e,t)) = *(s,@fset_cons(e,t));
     <(e,d) -> *(@fset_cons(d,s),@fset_cons(e,t)) = *(@fset_cons(d,s),t);
     #({}) = @c0;
-    #(@fset_cons(d,s)) = @cNat(succ(#(s)));
+    #(@fset_cons(d,s)) = +(#(s),@most_significant_digitNat(@one_word));
 % It is odd that the rule below has to be added separately.
     !=(s,t) = !(==(s,t));
