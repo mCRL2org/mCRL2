@@ -16,24 +16,6 @@
 
 \maketitle
 
-\[\begin{array}{l}
-R_{\exists}(V,\neg \phi)=\neg R_{\forall}(V,\phi),\\
-R_{\forall}(V,\bigwedge_i\phi_i) = \exists W.\bigvee_i R_\exists((V \setminus W) \cap \vars(\phi_i), \phi_i),
-\text{ where } W = \bigcap_i(\vars(\phi_i)) \\
-R_{\exists}(V,\phi\vee \psi)=R_{\exists}(V\cap \vars(\phi),\phi)\vee R_{\exists}(V\cap\vars(\psi),\psi),\\
-R_{\exists}(V,\phi\Rightarrow\psi)=
-(R_{\forall}((V\cap \vars(\phi)),\phi)\Rightarrow
-R_{\exists}((V\cap\vars(\psi)),\psi))\\
-R_{\exists}(V,\exists W.\phi)=\exists W.R_{\exists}(V\setminus W,\phi),\\
-R_{\exists}(V,\forall W.\phi)=
-\left\{\begin{array}{ll}
-R_{\exists}(V,\phi)&\textrm{if }W=\emptyset,\\
-\exists V.\forall W.\phi&\textrm{otherwise},
-\end{array}\right.\\
-R_{\exists}(V,\phi)=\exists V\cap\vars(\phi).\phi\textrm{ otherwise}.
-\end{array}
-\]
-
 We define a rewriter that pushes universal and existential quantifiers into an
 expression. A typical example is
 \[ \exists x.\forall y.(f(y,y)\wedge (f(x,y)\vee f(x,x))) \]
@@ -81,17 +63,12 @@ R_{\forall}(V, \bigvee_i \phi_i)&=&
   && \text{where } W = \vars(\phi_j) \cap V \text{ for some $j$ such that $|W|$ is minimal,} \\
   && \text{and where } I_1 = \{ i \mid \vars(\phi_i) \cap V \nsubseteq W \}, I_2 = \{ i \mid \vars(\phi_i) \cap V \subseteq W \} \\
 
-R_{\forall}(V,\phi\Rightarrow\psi)&=&\forall (V\cap\vars(\phi)\cap\vars(\psi)).
-(R_{\exists}((V\cap \vars(\phi))\setminus \vars(\psi),\phi)\Rightarrow{} \\
-&& R_{\forall}((V\cap\vars(\psi))\setminus\vars(\phi),\psi))\\
+R_{\forall}(V,\phi\Rightarrow\psi)&=&
+\forall W.(R_{\exists}(V\setminus W,\phi)\Rightarrow{}
+R_{\forall}(V \setminus W,\psi)), 
+\text{ where } W = V \cap \vars(\phi) \cap \vars(\psi) \\
 
-R_{\forall}(V,\forall W.\phi)&=&\forall W.R_{\forall}(V\setminus W,\phi)\\
-
-R_{\forall}(V,\exists W.\phi)&=&
-\left\{\begin{array}{ll}
-R_{\forall}(V,\phi)&\textrm{if }W=\emptyset\\
-\forall V.\exists W.\phi&\textrm{otherwise}
-\end{array}\right.\\
+R_{\forall}(V,\forall W.\phi)&=&R_{\forall}(V \cup W,\phi) \\
 
 R_{\forall}(V,\phi)&=&\forall V\cap \vars(\phi).\phi\textrm{ otherwise}.
 
@@ -114,16 +91,9 @@ R_{\exists}(V, \bigwedge_i \phi_i)&=&
 R_{\exists}(V,\phi\vee \psi)&=&R_{\exists}(V,\phi)\vee R_{\exists}(V,\psi)\\
 
 R_{\exists}(V,\phi\Rightarrow\psi)&=&
-(R_{\forall}((V\cap \vars(\phi)),\phi)\Rightarrow
-R_{\exists}((V\cap\vars(\psi)),\psi))\\
+R_{\forall}(V,\phi)\Rightarrow R_{\exists}(V,\psi)\\
 
-R_{\exists}(V,\exists W.\phi)&=&\exists W.R_{\exists}(V\setminus W,\phi)\\
-
-R_{\exists}(V,\forall W.\phi)&=&
-\left\{\begin{array}{ll}
-R_{\exists}(V,\phi)&\textrm{if }W=\emptyset\\
-\exists V.\forall W.\phi&\textrm{otherwise}
-\end{array}\right.\\
+R_{\exists}(V,\exists W.\phi)&=&R_{\exists}(V \cup W,\phi)\\
 
 R_{\exists}(V,\phi)&=&\exists V\cap\vars(\phi).\phi\textrm{ otherwise}.
 \end{array}
