@@ -35,9 +35,10 @@ R_{\exists}(V,\phi)=\exists V\cap\vars(\phi).\phi\textrm{ otherwise}.
 \]
 
 We define a rewriter that pushes universal and existential quantifiers into an
-expression. A typical example is \[\exists x{:}D.\forall y{:}D'.(X(y,y)\wedge (X(x,y)\vee X(x,x)))\]
+expression. A typical example is
+\[ \exists x.\forall y.(f(y,y)\wedge (f(x,y)\vee f(x,x))) \]
 which is rewritten to
-\[(\forall y{:}D'.X(y,y)\wedge \exists x{:}D.(\forall y{:}D'.X(x,y)\vee X(x,x))).\]
+\[(\forall y.f(y,y)) \wedge ((\exists x.\forall y.f(x,y)) \vee \exists x.f(x,x)).\]
 If quantifiers are pushed inside formulas as much as possible, quantifier elimination leads to smaller
 expressions and the one-point rewriter is more often applicable. There might be cases where the
 application of this push-quantifiers-inside-rewriter can also have averse effects.
