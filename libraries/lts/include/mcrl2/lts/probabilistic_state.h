@@ -32,7 +32,7 @@ namespace lts
 /** \brief A class that contains a probabilistic state.
     \details A probabilistic state is essentially a sequence
              of pairs of a state and a probability. The probability
-             indicates the likelyhood with which that particular 
+             indicates the likelyhood with which that particular
              state can be reached. The sum of all probabilities
              in a probabilistic state is one.
 */
@@ -41,7 +41,7 @@ template < class STATE, class PROBABILITY >
 class probabilistic_state
 {
   public:
-    
+
     friend std::hash<probabilistic_state>;
 
     typedef typename lps::state_probability_pair< STATE, PROBABILITY > state_probability_pair;
@@ -57,7 +57,7 @@ class probabilistic_state
 
   public:
 
-    /** \brief Default constructor 
+    /** \brief Default constructor
      **/
     probabilistic_state()
     {
@@ -65,8 +65,8 @@ class probabilistic_state
     }
 
     /** \brief Constructor of a probabilistic state from a non probabilistic state.
-     *  \param[in] s A state. 
-     *  \return The generated probabilistic state. 
+     *  \param[in] s A state.
+     *  \return The generated probabilistic state.
      **/
     explicit probabilistic_state(const STATE& s)
       : m_probabilistic_state(1,state_probability_pair(s,PROBABILITY::one()))
@@ -90,9 +90,9 @@ class probabilistic_state
     probabilistic_state(const STATE_PROBABILITY_PAIR_ITERATOR begin, const STATE_PROBABILITY_PAIR_ITERATOR end)
       : m_probabilistic_state(begin,end)
     {
-      assert(begin!=end); 
+      assert(begin!=end);
       shrink_to_fit();
-    };
+    }
 
     /** \brief Standard equality operator.
      *  \result Returns true iff the probabilistic states are equal.
@@ -111,7 +111,7 @@ class probabilistic_state
 
     /** \brief Set this probabilistic state to a single state with probability one.
      * \details It is assumed that the given state probability pair does not have
-               any element. 
+               any element.
      * \param[in] s The state. */
     void set(const STATE& s)
     {
@@ -135,7 +135,7 @@ class probabilistic_state
      */
     void shrink_to_fit()
     {
-      m_probabilistic_state.shrink_to_fit();  
+      m_probabilistic_state.shrink_to_fit();
 #ifndef NDEBUG
       PROBABILITY sum=PROBABILITY::zero();
       for(const state_probability_pair& p: m_probabilistic_state)
@@ -144,8 +144,8 @@ class probabilistic_state
         assert(p.probability()<=PROBABILITY::one());
         sum=sum+p.probability();
       }
-      // SVC studio copies empty probabilistic states. 
-      assert(m_probabilistic_state.size()==0 || sum==PROBABILITY::one()); 
+      // SVC studio copies empty probabilistic states.
+      assert(m_probabilistic_state.size()==0 || sum==PROBABILITY::one());
 #endif
     }
 
@@ -213,7 +213,7 @@ inline std::string pp(const probabilistic_state<STATE, PROBABILITY>& l)
     }
     str << "[" << p.state() << ", " << p.probability() << "]";
   }
-  
+
   return str.str();
 }
 

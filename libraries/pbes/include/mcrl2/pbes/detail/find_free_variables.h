@@ -128,7 +128,7 @@ std::set<data::variable> find_free_variables(const pbes_expression& x, const dat
   find_free_variables_traverser f(bound_variables, search_propositional_variables);
   f.apply(x);
   return f.result;
-};
+}
 
 } // namespace detail
 
