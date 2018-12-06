@@ -279,6 +279,8 @@ bool destructive_compare(LTS_TYPE& l1,
  * \param[in] pre The preorder with respect to which the LTSs will be compared.
  * \param[in] generate_counter_example Indicates whether a file containing a counter example is 
  *            generated when the comparison fails. 
+ * \param[in] strategy Choose breadth-first or depth-first for exploration strategy
+ *            of the antichain algorithms.
  * \retval true if this LTS is smaller than LTS \a l according to
  * preorder \a pre.
  * \retval false otherwise.
@@ -287,7 +289,8 @@ template <class  LTS_TYPE >
 bool compare(const LTS_TYPE&  l1,
              const  LTS_TYPE& l2,
              const lts_preorder pre,
-             const bool generate_counter_example);
+             const bool generate_counter_example,
+             const exploration_strategy strategy = es_breadth);
 
 /** \brief Determinises this LTS. */
 template <class LTS_TYPE>
@@ -760,7 +763,7 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, c
 }
 
 template <class LTS_TYPE>
-bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const exploration_strategy strategy = es_breadth)
+bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const exploration_strategy strategy)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
