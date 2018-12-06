@@ -1,4 +1,4 @@
-// Author(s): David N. Jansen, Institute of Software, Chinese Academy of
+﻿// Author(s): David N. Jansen, Institute of Software, Chinese Academy of
 // Sciences, Beijing, PR China
 //
 // Copyright: see the accompanying file COPYING or copy at
@@ -2210,10 +2210,15 @@ class part_trans_t
                                                                                 ONLY_IF_DEBUG( template<class LTS_TYPE> )
     void adapt_transitions_for_new_block(block_t* const new_block,
         block_t* const old_block,                                               ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-        iterator_or_null<block_bunch_slice_iter_t> new_noninert_block_bunch,
-                        block_bunch_slice_const_iter_t const last_splitter,
+	bool use_splitter_for_new_noninert_block_bunch,
+                        block_bunch_slice_iter_t const last_splitter,
                                     enum new_block_mode_t const new_block_mode)
     {                                                                           assert(last_splitter->is_stable());
+        iterator_or_null<block_bunch_slice_iter_t> new_noninert_block_bunch;
+        if (use_splitter_for_new_noninert_block_bunch)
+        {
+            new_noninert_block_bunch.set(last_splitter);
+        }
         // We begin with a bottom state so the new block gets a sorted list of
         // stable block_bunch-slices.
         permutation_iter_t s_iter = new_block->begin;                           assert(s_iter < new_block->end);
@@ -3762,9 +3767,7 @@ class bisim_partitioner_dnj
                 // Lines 2.29-2.45
                 part_tr.adapt_transitions_for_new_block(blue_block,
                                                                 refine_block,   ONLY_IF_DEBUG( *this, )
-                   extend_from_marked_states_for_init_and_postprocess == mode
-                        ? iterator_or_null<block_bunch_slice_iter_t>(splitter)
-                        : iterator_or_null<block_bunch_slice_iter_t>(),
+                   extend_from_marked_states_for_init_and_postprocess == mode,
                                                   splitter, new_block_is_blue); ONLY_IF_DEBUG(finalise_blue_is_smaller(blue_block,red_block,new_bunch,*this);)
             END_COROUTINE
 
@@ -3872,9 +3875,7 @@ class bisim_partitioner_dnj
                 red_block = refine_block->split_off_block(new_block_is_red);
                 // Lines 2.29-2.45
                 part_tr.adapt_transitions_for_new_block(red_block,refine_block, ONLY_IF_DEBUG( *this, )
-                   extend_from_marked_states_for_init_and_postprocess == mode
-                        ? iterator_or_null<block_bunch_slice_iter_t>(splitter)
-                        : iterator_or_null<block_bunch_slice_iter_t>(),
+                    extend_from_marked_states_for_init_and_postprocess == mode,
                                                    splitter, new_block_is_red); ONLY_IF_DEBUG( finalise_red_is_smaller(refine_block, red_block, *this); )
             END_COROUTINE
         END_COROUTINES_SECTION
