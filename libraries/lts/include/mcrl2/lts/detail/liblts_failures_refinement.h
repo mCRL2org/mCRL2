@@ -756,8 +756,8 @@ namespace detail
         }
         mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";
         // Ready printing acceptance sets.
-        return false;
       }
+      return false;
     }
 
     return true;   
