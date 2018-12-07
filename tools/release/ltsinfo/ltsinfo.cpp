@@ -39,6 +39,7 @@ class ltsinfo_tool : public ltsinfo_base
 
     std::string                 infilename;
     mcrl2::lts::lts_type        intype;
+    bool                        print_action_labels;
     bool                        print_state_labels;
     bool                        print_branching_factor;
 
@@ -69,6 +70,8 @@ class ltsinfo_tool : public ltsinfo_base
       ltsinfo_base::add_options(desc);
 
       desc.
+      add_option("action-label",
+                 "print the labels of actions",'a').
       add_option("in", make_mandatory_argument("FORMAT"),
                  "use FORMAT as the input format", 'i').
       add_option("state-label",
@@ -107,6 +110,7 @@ class ltsinfo_tool : public ltsinfo_base
         }
       }
 
+      print_action_labels = parser.options.count("action-label") > 0;
       print_state_labels = parser.options.count("state-label") > 0;
       print_branching_factor = parser.options.count("branching-factor") > 0;
     }
@@ -116,7 +120,6 @@ class ltsinfo_tool : public ltsinfo_base
     {
       // No probabilistic information is provided for a plain lts.
     }
-
 
     template <class SL, class AL, class PROBABILISTIC_STATE, class BASE>
     static void provide_probabilistic_information(mcrl2::lts::probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>&  l)
@@ -152,6 +155,18 @@ class ltsinfo_tool : public ltsinfo_base
     static bool is_even(T t)
     {
       return t % 2 == 0;
+    }
+
+    template<typename LTS>
+    void print_the_action_labels(const LTS& l) const
+    {
+      if (!print_action_labels) { return; }
+
+      mCRL2log(info) << "The action labels of this transition system: \n";
+      for (auto& action_label : l.action_labels())
+      {
+         mCRL2log(info) << action_label << "\n";
+      }
     }
 
     /// \brief Prints the min, max, median and average of the branching factor for the given LTS.
@@ -292,13 +307,12 @@ class ltsinfo_tool : public ltsinfo_base
 
       provide_probabilistic_information(l);
 
+      print_the_action_labels(l);
       print_the_state_labels(l);
       print_the_branching_factor(l);
 
       return true;
     }
-
-
 
   public:
 
