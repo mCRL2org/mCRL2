@@ -93,7 +93,6 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
     }
     else if(sort_bool::is_and_application(x))
     {
-      using utilities::detail::set_intersection;
       data_expression const& phi = sort_bool::left(x);
       data_expression const& psi = sort_bool::right(x);
       return sort_bool::and_(quantifiers_inside_forall(V, phi), quantifiers_inside_forall(V, psi));
@@ -133,7 +132,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
         }
       }
       return make_forall(data::variable_list(W.begin(), W.end()),
-                         sort_bool::or_(quantifiers_inside_forall(set_difference(V, W), join_or(X1.begin(), X1.end())),
+                         lazy::or_(quantifiers_inside_forall(set_difference(V, W), join_or(X1.begin(), X1.end())),
                              join_or(X2.begin(), X2.end()))
       );
     }
@@ -236,13 +235,12 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
         }
       }
       return make_exists(data::variable_list(W.begin(), W.end()),
-                         sort_bool::and_(quantifiers_inside_exists(set_difference(V, W), join_or(X1.begin(), X1.end())),
-                                        join_or(X2.begin(), X2.end()))
+                         lazy::and_(quantifiers_inside_exists(set_difference(V, W), join_and(X1.begin(), X1.end())),
+                                        join_and(X2.begin(), X2.end()))
       );
     }
     else if(sort_bool::is_or_application(x))
     {
-      using utilities::detail::set_intersection;
       data_expression const& phi = sort_bool::left(x);
       data_expression const& psi = sort_bool::right(x);
       return sort_bool::or_(quantifiers_inside_exists(V, phi), quantifiers_inside_exists(V, psi)
