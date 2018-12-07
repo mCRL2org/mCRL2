@@ -12,10 +12,6 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 
-// Override MCRL2_MAX_LOG_LEVEL
-// Must come before the first include of logger.h
-#define MCRL2_MAX_LOG_LEVEL debug3
-
 #include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2::log;
@@ -55,4 +51,18 @@ BOOST_AUTO_TEST_CASE(test_logging_use_case)
       mCRL2log(debug2) << "the counter is greater then or equal to 2" << std::endl;
     }
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_rhs_evaluation)
+{
+  int n = 0;
+  mCRL2log(debug2) << "this should not be compiled" << ++n << std::endl;
+  BOOST_CHECK(n == 0);
+
+  mcrl2_logger::set_reporting_level(verbose);
+  mCRL2log(debug) << "this should not be evaluated " << ++n << std::endl;
+  BOOST_CHECK(n == 0);
+
+  mCRL2log(verbose) << "this should be evaluated " << ++n << std::endl;
+  BOOST_CHECK(n == 1);
 }

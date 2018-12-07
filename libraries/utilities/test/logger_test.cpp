@@ -110,7 +110,7 @@ std::string test_assert()
 // never be triggered.
 BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_static)
 {
-  BOOST_CHECK(MCRL2_MAX_LOG_LEVEL < debug5);
+  BOOST_CHECK(MCRL2MaxLogLevel < debug5);
   mCRL2log(debug5) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
 }
 
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_static)
 // never be triggered.
 BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_dynamic)
 {
-  BOOST_CHECK(MCRL2_MAX_LOG_LEVEL >= debug);
+  BOOST_CHECK(MCRL2MaxLogLevel >= debug);
   mcrl2_logger::set_reporting_level(verbose);
   mCRL2log(debug) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
 }
@@ -141,3 +141,7 @@ BOOST_AUTO_TEST_CASE(test_multiline_nonewline)
   mCRL2log(info) << "in this message" << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE(test_enabled_constexpr)
+{
+  static_assert(!mCRL2logEnabled(debug3), "This function should evaluate to false at compile time.");
+}
