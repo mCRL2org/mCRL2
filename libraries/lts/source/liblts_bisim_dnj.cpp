@@ -733,7 +733,7 @@ class block_t
                                                                                                 mCRL2log(log::debug,"bisim_dnj") << ", inconsistent: "
                                                                                                              "points to " << (*begin_print)->block->debug_id();
                                                                                             }
-                                                                                            if (begin != (*begin_print)->pos)
+                                                                                            if (begin_print != (*begin_print)->pos)
                                                                                             {
                                                                                                 mCRL2log(log::debug, "bisim_dnj")
                                                                                                                << ", inconsistent pointer to state_info_entry";
@@ -2888,10 +2888,12 @@ class bisim_partitioner_dnj
                 }
                 if (n_square < action_label[label].count)
                 {
-                    mCRL2log(log::warning) << "Some "
-                        << pp(aut.action_label(label)) << "-transitions are "
-                        "duplicated.  I cannot guarantee that branching "
-                        "bisimulation runs in time O(m log n).\n";              ONLY_IF_DEBUG(  if (max_transitions < action_label[label].count)
+                    mCRL2log(log::warning) << "There are "
+                        << action_label[label].count << ' '
+                        << pp(aut.action_label(label)) << "-transitions.  "
+                        "This is more than n^2 (= " << n_square << ").  I "
+                        "cannot guarantee that branching bisimulation runs in "
+                        "time O(m log n).\n";                                   ONLY_IF_DEBUG(  if (max_transitions < action_label[label].count)
                                                                                                     {   max_transitions = action_label[label].count;   }  )
                 }
                 // initialise begin_or_before_end pointers for this
@@ -2919,7 +2921,7 @@ class bisim_partitioner_dnj
                                                                                 assert(next_action_label_begin->begin_or_before_end.is_null()),
                     ++next_action_label_begin,                          true)); assert(next_action_label_begin == part_tr.action_block_inert_begin);
 
-        /* distribute the transitions over the data structures               */ ONLY_IF_DEBUG( bisim_gjkw::check_complexity::init(max_transitions); )
+        /* distribute the transitions over the data structures               */ ONLY_IF_DEBUG( bisim_gjkw::check_complexity::init(2 * max_transitions); )
 
         part_tr.pred.begin()->source = part_st.state_info.end();
         part_tr.pred.begin()->target = part_st.state_info.end();
