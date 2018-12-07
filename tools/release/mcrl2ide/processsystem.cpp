@@ -177,6 +177,18 @@ ProcessThread* ProcessSystem::getProcessThread(ProcessType processType)
   return processThreads[processType];
 }
 
+bool ProcessSystem::isThreadRunning()
+{
+  for (ProcessType processType : PROCESSTYPES)
+  {
+    if (isThreadRunning(processType))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool ProcessSystem::isThreadRunning(ProcessType processType)
 {
   return processThreads[processType]->isRunning();

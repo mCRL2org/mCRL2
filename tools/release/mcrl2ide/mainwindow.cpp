@@ -215,6 +215,7 @@ void MainWindow::setupMenuBar()
   saveIntermediateFilesMenu =
       optionsMenu->addMenu("Save intermediate files to project");
   saveIntermediateFilesMenu->setEnabled(false);
+  saveIntermediateFilesMenu->setToolTipsVisible(true);
 
   for (std::pair<IntermediateFileType, QString> item :
        INTERMEDIATEFILETYPENAMES)
@@ -669,6 +670,26 @@ void MainWindow::changeToolButtons(bool toAbort, ProcessType processType)
     break;
   default:
     break;
+  }
+
+  /* if a process is running, disable "save intermediate files to project"
+   *   options */
+  if (processSystem->isThreadRunning())
+  {
+    for (QAction* option : saveIntermediateFilesMenu->actions())
+    {
+      option->setEnabled(false);
+      option->setToolTip(
+          "Cannot change file location when a process is running");
+    }
+  }
+  else
+  {
+    for (QAction* option : saveIntermediateFilesMenu->actions())
+    {
+      option->setEnabled(true);
+      option->setToolTip("");
+    }
   }
 }
 

@@ -151,6 +151,12 @@ class ProcessSystem : public QObject
   ProcessThread* getProcessThread(ProcessType processType);
 
   /**
+   * @brief isThreadRunning Returns whether any thread is running
+   * @return Whether any thread is running
+   */
+  bool isThreadRunning();
+
+  /**
    * @brief isThreadRunning Returns whether the thread of the given process type
    *   is running
    * @param processType The process type of the thread
