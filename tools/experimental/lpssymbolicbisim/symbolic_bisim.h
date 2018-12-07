@@ -37,6 +37,9 @@
 #include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/smt/solver.h"
+#include "mcrl2/smt/translation_error.h"
+#include "mcrl2/smt/cvc4.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "../pbessymbolicbisim/simplifier_mode.h"
@@ -116,6 +119,7 @@ protected:
   std::list<data_expression>      partition;
   bool                           m_contains_reals;
   simplifier*                    simpl;
+  smt::solver                    m_smt_solver;
 
   typedef std::unordered_set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache_t;
   refinement_cache_t refinement_cache;
@@ -547,6 +551,37 @@ protected:
     throw mcrl2::runtime_error("Initial block not found.");
   }
 
+  bool is_satisfiable(const variable_list& vars, const data_expression& expr)
+  {
+    smt::smt_problem problem;
+    for(const variable& v: vars)
+    {
+      problem.add_variable(v);
+    }
+    problem.add_assertion(expr);
+    try
+    {
+      return m_smt_solver.solve(problem);
+    }
+    catch(const smt::translation_error& e)
+    {
+      mCRL2log(log::warning) << e.what() << std::endl;
+    }
+
+    // The SMT solver failed, so we fallback to the rewriter
+    data_expression is_sat = make_abstraction_reals_inside(exists_binder(), vars, expr);
+    is_sat = rewr(one_point_rule_rewrite(quantifiers_inside_rewrite(is_sat)));
+    if(m_contains_reals)
+    {
+      is_sat = rewr(replace_data_expressions(is_sat, fourier_motzkin_sigma(rewr), true));
+    }
+    if(is_sat != sort_bool::true_() && is_sat != sort_bool::false_())
+    {
+      throw mcrl2::runtime_error("Failed to establish whether " + data::pp(expr) + " is satisfiable");
+    }
+    return is_sat == sort_bool::true_();
+  }
+
   /**
    * \brief Checks whether a transition between src and dest exists based on as
    */
@@ -563,8 +598,8 @@ protected:
     transition_cache_misses++;
 
     // This expression expresses whether there is a transition between src and dest based on this summand
-    data_expression is_succ =
-      exists(m_spec.process().process_parameters() + as.summation_variables(),
+    bool result =
+      is_satisfiable(m_spec.process().process_parameters() + as.summation_variables(),
         rewr(sort_bool::and_(
           application(src, m_spec.process().process_parameters()),
           sort_bool::and_(
@@ -573,11 +608,6 @@ protected:
           )
         ))
       );
-
-    // Do some rewriting before using Fourier-Motzkin elimination
-    is_succ = rewr(one_point_rule_rewrite(quantifiers_inside_rewrite(is_succ)));
-    data_expression succ_result = rewr(replace_data_expressions(is_succ, fourier_motzkin_sigma(rewr), true));
-    bool result = succ_result == sort_bool::true_();
     transition_cache.insert(std::make_pair(std::make_tuple(src, dest, as), result));
     if(!result)
     {
@@ -771,6 +801,7 @@ public:
 #endif
     , m_contains_reals(std::find_if(m_spec.process().process_parameters().begin(), m_spec.process().process_parameters().end(),[](const variable& v){ return v.sort() == sort_real::real_(); }) != m_spec.process().process_parameters().end())
     , simpl(get_simplifier_instance(simplify_strat, rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data()))
+    , m_smt_solver(new smt::smt4_data_specification(spec.data()))
   {}
 
   void run()
