@@ -223,6 +223,8 @@ void MainWindow::setupMenuBar()
     QAction* saveFileAction = saveIntermediateFilesMenu->addAction(item.second);
     saveFileAction->setCheckable(true);
     saveFileAction->setProperty("filetype", item.first);
+    saveFileAction->setToolTip("Changing this will only have effect on "
+                               "processes that have not started yet");
     connect(saveFileAction, SIGNAL(toggled(bool)), fileSystem,
             SLOT(setSaveIntermediateFilesOptions(bool)));
   }
@@ -670,26 +672,6 @@ void MainWindow::changeToolButtons(bool toAbort, ProcessType processType)
     break;
   default:
     break;
-  }
-
-  /* if a process is running, disable "save intermediate files to project"
-   *   options */
-  if (processSystem->isThreadRunning())
-  {
-    for (QAction* option : saveIntermediateFilesMenu->actions())
-    {
-      option->setEnabled(false);
-      option->setToolTip(
-          "Cannot change file location when a process is running");
-    }
-  }
-  else
-  {
-    for (QAction* option : saveIntermediateFilesMenu->actions())
-    {
-      option->setEnabled(true);
-      option->setToolTip("");
-    }
   }
 }
 

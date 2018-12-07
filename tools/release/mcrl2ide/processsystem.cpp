@@ -177,18 +177,6 @@ ProcessThread* ProcessSystem::getProcessThread(ProcessType processType)
   return processThreads[processType];
 }
 
-bool ProcessSystem::isThreadRunning()
-{
-  for (ProcessType processType : PROCESSTYPES)
-  {
-    if (isThreadRunning(processType))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
 bool ProcessSystem::isThreadRunning(ProcessType processType)
 {
   return processThreads[processType]->isRunning();
@@ -248,9 +236,11 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
   subprocess->setProperty("subprocessIndex", subprocessIndex);
   subprocess->setProperty("propertyName", propertyName);
   subprocess->setProperty("evidence", evidence);
-  subprocess->setProperty("reduction", int(reduction));
 
   QString program = "";
+  QString inputFile = "";
+  QString inputFile2 = "";
+  QString outputFile = "";
   QStringList arguments = {};
 
   /* set program, arguments and more connects depending on the type of the
@@ -264,32 +254,34 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
   case SubprocessType::Mcrl22lps:
     program = "mcrl22lps";
-    arguments << fileSystem->specificationFilePath()
-              << fileSystem->lpsFilePath() << "--lin-method=regular"
+    inputFile = fileSystem->specificationFilePath();
+    outputFile = fileSystem->lpsFilePath();
+    arguments << inputFile << outputFile << "--lin-method=regular"
               << "--rewriter=jitty"
               << "--verbose";
     break;
 
   case SubprocessType::Lpsxsim:
     program = "lpsxsim";
-    arguments << fileSystem->lpsFilePath() << "--rewriter=jitty";
+    inputFile = fileSystem->lpsFilePath();
+    arguments << inputFile << "--rewriter=jitty";
     break;
 
   case SubprocessType::Lps2lts:
     program = "lps2lts";
-    arguments << fileSystem->lpsFilePath(evidence, propertyName)
-              << fileSystem->ltsFilePath(
-                     mcrl2::lts::lts_equivalence::lts_eq_none, evidence,
-                     propertyName)
-              << "--rewriter=jitty"
+    inputFile = fileSystem->lpsFilePath(evidence, propertyName);
+    outputFile = fileSystem->ltsFilePath(
+        mcrl2::lts::lts_equivalence::lts_eq_none, evidence, propertyName);
+    arguments << inputFile << outputFile << "--rewriter=jitty"
               << "--strategy=breadth"
               << "--verbose";
     break;
 
   case SubprocessType::Ltsconvert:
     program = "ltsconvert";
-    arguments << fileSystem->ltsFilePath() << fileSystem->ltsFilePath(reduction)
-              << "--verbose"
+    inputFile = fileSystem->ltsFilePath();
+    outputFile = fileSystem->ltsFilePath(reduction);
+    arguments << inputFile << outputFile << "--verbose"
               << "--equivalence=" +
                      QString::fromStdString(
                          mcrl2::lts::print_equivalence(reduction));
@@ -297,7 +289,8 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
   case SubprocessType::Ltsgraph:
     program = "ltsgraph";
-    arguments << fileSystem->ltsFilePath(reduction, evidence, propertyName);
+    inputFile = fileSystem->ltsFilePath(reduction, evidence, propertyName);
+    arguments << inputFile;
     break;
 
   case SubprocessType::ParseMcf:
@@ -307,9 +300,10 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
   case SubprocessType::Lps2pbes:
     program = "lps2pbes";
-    arguments << fileSystem->lpsFilePath()
-              << fileSystem->pbesFilePath(propertyName, evidence)
-              << "--formula=" + fileSystem->propertyFilePath(propertyName)
+    inputFile = fileSystem->lpsFilePath();
+    inputFile2 = fileSystem->propertyFilePath(propertyName);
+    outputFile = fileSystem->pbesFilePath(propertyName, evidence);
+    arguments << inputFile << outputFile << "--formula=" + inputFile2
               << "--out=pbes"
               << "--verbose";
     if (evidence)
@@ -320,16 +314,17 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
   case SubprocessType::Pbessolve:
     program = "pbessolve";
-    arguments << fileSystem->pbesFilePath(propertyName, evidence) << "--in=pbes"
+    inputFile = fileSystem->pbesFilePath(propertyName, evidence);
+    arguments << inputFile << "--in=pbes"
               << "--rewriter=jitty"
               << "--search=breadth-first"
               << "--strategy=0"
               << "--verbose";
     if (evidence)
     {
-      arguments << "--file=" + fileSystem->lpsFilePath(false, "")
-                << "--evidence-file=" +
-                       fileSystem->lpsFilePath(evidence, propertyName);
+      inputFile2 = fileSystem->lpsFilePath();
+      outputFile = fileSystem->lpsFilePath(evidence, propertyName);
+      arguments << "--file=" + inputFile2 << "--evidence-file=" + outputFile;
     }
     else
     {
@@ -341,6 +336,9 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
   subprocess->setProgram(fileSystem->toolPath(program));
   subprocess->setArguments(arguments);
+  subprocess->setProperty("inputFile", inputFile);
+  subprocess->setProperty("inputFile2", inputFile2);
+  subprocess->setProperty("outputFile", outputFile);
 
   return subprocess;
 }
@@ -544,11 +542,11 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
 
       SubprocessType subprocessType = static_cast<SubprocessType>(
           subprocess->property("subprocessType").toInt());
+      QString inputFile = subprocess->property("inputFile").toString();
+      QString inputFile2 = subprocess->property("inputFile2").toString();
+      QString outputFile = subprocess->property("outputFile").toString();
       QString propertyName = subprocess->property("propertyName").toString();
       bool evidence = subprocess->property("evidence").toBool();
-      mcrl2::lts::lts_equivalence reduction =
-          static_cast<mcrl2::lts::lts_equivalence>(
-              subprocess->property("reduction").toInt());
 
       bool noNeedToRun = false;
 
@@ -565,7 +563,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
                                       "##### PARSING SPECIFICATION #####\n");
         }
 
-        if (fileSystem->upToDateLpsFileExists())
+        /* no need to run if there is an up to date lps file with respect to the
+         *   input mcrl2 file */
+        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(
@@ -577,7 +577,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
       case SubprocessType::Mcrl22lps:
         consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
 
-        if (fileSystem->upToDateLpsFileExists())
+        /* no need to run if there is an up to date lps file with respect to the
+         *   input mcrl2 file */
+        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(processType,
@@ -595,9 +597,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
       case SubprocessType::Lps2lts:
         consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
 
-        if (fileSystem->upToDateLtsFileExists(
-                mcrl2::lts::lts_equivalence::lts_eq_none, evidence,
-                propertyName))
+        /* no need to run if there is an up to date lts file with respect to the
+         *   input lps file */
+        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(
@@ -609,7 +611,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
       case SubprocessType::Ltsconvert:
         consoleDock->writeToConsole(processType, "##### REDUCING LTS #####\n");
 
-        if (fileSystem->upToDateLtsFileExists(reduction))
+        /* no need to run if there is an up to date reduced lts file with
+         *   respect to the input unreduced lts file */
+        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(processType,
@@ -638,7 +642,10 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
       case SubprocessType::Lps2pbes:
         consoleDock->writeToConsole(processType, "##### CREATING PBES #####\n");
 
-        if (fileSystem->upToDatePbesFileExists(propertyName, evidence))
+        /* no need to run if there is an up to date pbes file with respect to
+         *   the input lps and property files */
+        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile,
+                                                 inputFile2))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(processType,
@@ -649,8 +656,10 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
       case SubprocessType::Pbessolve:
         consoleDock->writeToConsole(processType, "##### SOLVING PBES #####\n");
 
-        if (evidence &&
-            fileSystem->upToDateLpsFileExists(evidence, propertyName))
+        /* no need to run if there is an up to date evidence lps file with
+         *   respect to the input pbes and lps files */
+        if (evidence && fileSystem->upToDateOutputFileExists(
+                            inputFile, outputFile, inputFile2))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(

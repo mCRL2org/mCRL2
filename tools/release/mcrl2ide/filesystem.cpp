@@ -256,70 +256,18 @@ void FileSystem::setSaveIntermediateFilesOptions(bool checked)
   saveIntermediateFilesOptions[fileType] = checked;
 }
 
-bool FileSystem::upToDateLpsFileExists(bool evidence,
-                                       const QString& propertyName)
+bool FileSystem::upToDateOutputFileExists(const QString& inputFile,
+                                          const QString& outputFile,
+                                          const QString& inputFile2)
 {
-  /* in case of not an evidence lps, an lps file is up to date if the lps file
-   *   exists, the lps file is not empty and the lps file is created after the
-   *   last time the specification file was modified
-   * in case of an evidence lps, an lps file is up to date if the lps file
-   *   exists, the lps file is not empty and the lps file is created after the
-   *   last time the evidence pbes was modified */
-  QFile lpsFile(lpsFilePath(evidence, propertyName));
-  if (!evidence)
-  {
-
-    return lpsFile.exists() && lpsFile.size() > 0 &&
-           QFileInfo(specificationFilePath()).lastModified() <=
-               QFileInfo(lpsFile).lastModified();
-  }
-  else
-  {
-    return lpsFile.exists() && lpsFile.size() > 0 &&
-           QFileInfo(pbesFilePath(propertyName, evidence)).lastModified() <=
-               QFileInfo(lpsFile).lastModified();
-  }
-}
-
-bool FileSystem::upToDateLtsFileExists(mcrl2::lts::lts_equivalence reduction,
-                                       bool evidence,
-                                       const QString& propertyName)
-{
-  /* in case of not a reduced lts, an lts file is up to date if the lts file
-   *   exists, the lts file is not empty and the lts file is created after the
-   *   last time the lps file was modified
-   * in case of a reduced lts, an lts file is up to date if the lts file exists,
-   *   the lts file is not empty and the lts file is created after the last time
-   *   the unreduced lts file was modified
-   */
-  if (reduction == mcrl2::lts::lts_equivalence::lts_eq_none)
-  {
-    QFile unreducedLtsFile(ltsFilePath(reduction, evidence, propertyName));
-    return unreducedLtsFile.exists() && unreducedLtsFile.size() > 0 &&
-           QFileInfo(lpsFilePath(evidence, propertyName)).lastModified() <=
-               QFileInfo(unreducedLtsFile).lastModified();
-  }
-  else
-  {
-    QFile reducedLtsFile(ltsFilePath(reduction));
-    return reducedLtsFile.exists() && reducedLtsFile.size() > 0 &&
-           QFileInfo(ltsFilePath()).lastModified() <=
-               QFileInfo(reducedLtsFile).lastModified();
-  }
-}
-
-bool FileSystem::upToDatePbesFileExists(const QString& propertyName,
-                                        bool evidence)
-{
-  /* a pbes file is up to date if the pbes file exists, the pbes is not empty
-   *   and the pbes file is created after the last time both the lps and the
-   *   property files were modified */
-  QFile pbesFile(pbesFilePath(propertyName, evidence));
-  return pbesFile.exists() && pbesFile.size() > 0 &&
-         QFileInfo(lpsFilePath()).lastModified() <=
-             QFileInfo(pbesFile).lastModified() &&
-         QFileInfo(propertyFilePath(propertyName)).lastModified() <=
-             QFileInfo(pbesFile).lastModified();
+  /* An output file is up to date if it exists and if its modification time is
+   *   larger than the modification time of the input file(s) */
+  QFileInfo outFileInfo(outputFile);
+  return outFileInfo.exists() &&
+         QFileInfo(inputFile).lastModified() <= outFileInfo.lastModified() &&
+         (inputFile2.isEmpty() ? true
+                               : QFileInfo(inputFile2).lastModified() <=
+                                     outFileInfo.lastModified());
 }
 
 void FileSystem::setSpecificationEditorCursor(int row, int column)

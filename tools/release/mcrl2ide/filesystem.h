@@ -258,39 +258,16 @@ class FileSystem : public QObject
   bool propertyNameExists(const QString& propertyName);
 
   /**
-   * @brief upToDateLpsFileExists Checks whether an lps file exists that is
-   *   created from the current specification
-   * @param evidence Whether this is an evidence lps
-   * @param propertyName The property name in case this is an evidence lps
-   * @return Whether an lps file exists that is created from the current
-   *   specification
+   * @brief upToDateOutputFileExists Checks whether there already exists an up
+   *   to date output file, given one or two input files
+   * @param inputFile An input file
+   * @param outputFile The output file
+   * @param inputFile2 An optional second input file
+   * @return Whether there already exists an up to date output file
    */
-  bool upToDateLpsFileExists(bool evidence = false,
-                             const QString& propertyName = "");
-
-  /**
-   * @brief upToDateLtsFileExists Checks whether an lts file exists with a given
-   *   reduction that is created from the current specification
-   * @param reduction The reduction that was applied to the lts
-   * @param evidence Whether this is an evidence lts
-   * @param propertyName The property name in case this is an evidence lts
-   * @return Whether an lts file exists that is created from the current
-   *   specification
-   */
-  bool upToDateLtsFileExists(mcrl2::lts::lts_equivalence reduction,
-                             bool evidence = false,
-                             const QString& propertyName = "");
-
-  /**
-   * @brief upToDatePbesFileExists Checks whether a pbes file exists that is
-   *   created from the current specification and property
-   * @param propertyName The name of the property
-   * @param evidence Whether the pbes has evidence info
-   * @return Whether a pbes file exists that is created from the current
-   *   specification and property
-   */
-  bool upToDatePbesFileExists(const QString& propertyName,
-                              bool evidence = false);
+  bool upToDateOutputFileExists(const QString& inputFile,
+                                const QString& outputFile,
+                                const QString& inputFile2 = "");
 
   /**
    * @brief setSpecificationEditorCursor Puts the cursor in the specification
