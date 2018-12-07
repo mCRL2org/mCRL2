@@ -121,7 +121,7 @@ class ltscompare_tool : public ltscompare_base
         mCRL2log(verbose) << "comparing LTSs using " <<
                      tool_options.equivalence << "..." << std::endl;
 
-        result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
+        result = destructive_compare(l1, l2, tool_options.equivalence,tool_options.generate_counter_examples);
 
         mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ") 
                        << "equal ("
