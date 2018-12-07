@@ -39,7 +39,9 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/utilities/logger.h"
 
-#include "simplifier.h"
+#include "../pbessymbolicbisim/simplifier_mode.h"
+#include "../pbessymbolicbisim/simplifier.h"
+// #include "simplifier.h"
 #define THIN       "0"
 #define BOLD       "1"
 #define GREEN(S)  "\033[" S ";32m"
@@ -79,6 +81,22 @@ namespace mcrl2
 namespace data
 {
 
+core::identifier_string iff_name()
+{
+  static core::identifier_string iff_name = core::identifier_string("<=>");
+  return iff_name;
+}
+
+function_symbol iff()
+{
+  static function_symbol iff(iff_name(), make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
+  return iff;
+}
+
+inline application iff(const data_expression& d1, const data_expression& d2)
+{
+  return iff()(d1, d2);
+}
 
 template <typename Specification>
 class symbolic_bisim_algorithm: public mcrl2::lps::detail::lps_algorithm<Specification>
@@ -95,9 +113,8 @@ protected:
   rewriter proving_rewr;
 
   variable_list                  process_parameters;
-  const data_expression                invariant;
   std::list<data_expression>      partition;
-  data_specification             ad_hoc_data;
+  bool                           m_contains_reals;
   simplifier*                    simpl;
 
   typedef std::unordered_set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache_t;
@@ -139,15 +156,6 @@ protected:
     }
     out << "]";
     return out.str();
-  }
-
-  /**
-   * \brief Reconstructs the rewriter with some useful rules
-   */
-  void add_ad_hoc_rules()
-  {
-    ad_hoc_data = merge_data_specifications(m_spec.data(),simplifier::norm_rules_spec());
-    rewr = rewriter(ad_hoc_data, strat);
   }
 
   /**
@@ -223,6 +231,29 @@ protected:
     }
   }
 
+  data_expression make_abstraction(const binder_type& b, const variable_list& v, const data_expression& body)
+  {
+    return v.empty() ? body : abstraction(b, v, body);
+  }
+
+  data_expression make_abstraction_reals_inside(const binder_type& b, const variable_list& v, const data_expression& body)
+  {
+    variable_list non_real_var;
+    variable_list real_var;
+    for(const variable& var: v)
+    {
+      if(var.sort() == sort_real::real_())
+      {
+        real_var.push_front(var);
+      }
+      else
+      {
+        non_real_var.push_front(var);
+      }
+    }
+    return make_abstraction(b, non_real_var, make_abstraction(b, real_var, body));
+  }
+
   /**
    * \brief Split block phi_k on phi_l wrt summand as
    */
@@ -272,10 +303,10 @@ protected:
         lazy::and_(
           rewr(application(phi_k,process_parameters)),
           lazy::and_(
-            forall(primed_summation_variables,
+            make_abstraction(forall_binder(), primed_summation_variables,
               lazy::implies(
                 rewr(prime_condition),
-                exists(as.summation_variables(),
+                make_abstraction(exists_binder(), as.summation_variables(),
                   rewr(lazy::and_(
                     lazy::and_(
                       as.condition(),
@@ -285,13 +316,13 @@ protected:
                 )
               )
             ),
-            forall(as.summation_variables(),
+            make_abstraction(forall_binder(), as.summation_variables(),
               lazy::implies(
                 rewr(lazy::and_(
                   as.condition(),
                   rewr(application(phi_l, updates))
                 )),
-                exists(primed_summation_variables,
+                make_abstraction(exists_binder(), primed_summation_variables,
                   rewr(lazy::and_(
                     prime_condition,
                     arguments_equal
@@ -715,31 +746,42 @@ protected:
     }
   }
 
+  data_specification add_iff_rules(data_specification spec)
+  {
+    variable vb1("b1", sort_bool::bool_());
+    variable vb2("b2", sort_bool::bool_());
+
+    // Rules for bidirectional implication (iff)
+    spec.add_equation(data_equation(variable_list({vb1}), iff(sort_bool::true_(), vb1), vb1));
+    spec.add_equation(data_equation(variable_list({vb1}), iff(vb1, sort_bool::true_()), vb1));
+    spec.add_equation(data_equation(variable_list({vb1}), iff(sort_bool::false_(), vb1), sort_bool::not_(vb1)));
+    spec.add_equation(data_equation(variable_list({vb1}), iff(vb1, sort_bool::false_()), sort_bool::not_(vb1)));
+    return spec;
+  }
+
 public:
-  symbolic_bisim_algorithm(Specification& spec, const data_expression& inv, const rewrite_strategy& st = jitty)
+  symbolic_bisim_algorithm(Specification& spec, const simplifier_mode& simplify_strat, const rewrite_strategy& st = jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
-    , rewr(spec.data(),jitty)
+    , rewr(add_iff_rules(merge_data_specifications(m_spec.data(),simplifier::norm_rules_spec())), st)
 #ifdef MCRL2_JITTYC_AVAILABLE
     , proving_rewr(spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover)
 #else
     , proving_rewr(spec.data(), jitty_prover)
 #endif
-    , invariant(inv)
-  {
-
-  }
+    , m_contains_reals(std::find_if(m_spec.process().process_parameters().begin(), m_spec.process().process_parameters().end(),[](const variable& v){ return v.sort() == sort_real::real_(); }) != m_spec.process().process_parameters().end())
+    , simpl(get_simplifier_instance(simplify_strat, rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data()))
+  {}
 
   void run()
   {
     mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
 
     process_parameters = m_spec.process().process_parameters();
-    partition.push_front(invariant);
-    split_logger = new block_tree(invariant);
-    add_ad_hoc_rules();
+    data_expression initial_block = lambda(process_parameters, sort_bool::true_());
+    partition.push_front(initial_block);
+    split_logger = new block_tree(initial_block);
     build_summand_maps();
-    simpl = get_simplifier_instance(rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data());
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = std::chrono::high_resolution_clock::now();
     mCRL2log(log::verbose) << "Initial partition:" << std::endl;
