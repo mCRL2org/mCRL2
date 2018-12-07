@@ -48,7 +48,8 @@ struct builder
     derived().enter(x);
     aterm_list result(x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } ) ;
     derived().leave(x);
-    return result;
+
+    return mcrl2::workaround::return_std_move(result);
   }
 
   aterm apply(const aterm_appl& x)
@@ -56,7 +57,8 @@ struct builder
     derived().enter(x);
     aterm_appl result(x.function() , x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } );
     derived().leave(x);
-    return result;
+
+    return mcrl2::workaround::return_std_move(result);
   }
 
   aterm apply(const aterm& x)

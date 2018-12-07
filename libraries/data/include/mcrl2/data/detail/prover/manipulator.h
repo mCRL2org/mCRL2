@@ -187,7 +187,7 @@ class Manipulator
       }
       f_orient[a_term]=v_result;
 
-      return v_result;
+      return workaround::return_std_move(v_result);
     }
 
     /// \brief Initializes the table Manipulator::f_set_true and calls

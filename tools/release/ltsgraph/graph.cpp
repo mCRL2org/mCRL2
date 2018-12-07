@@ -727,7 +727,7 @@ void Graph::load(const QString& filename, const QVector3D& min,
       break;
     }
   }
-  catch (mcrl2::runtime_error e)
+  catch (mcrl2::runtime_error& e)
   {
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
     throw e;

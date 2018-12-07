@@ -235,7 +235,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     equations.push_back(eqn1);
 
     process_instance result(P1, x.actual_parameters());
-    return result;
+    return workaround::return_std_move(result);
   }
 
   process::process_expression apply(const process::process_instance_assignment& x)

@@ -168,7 +168,8 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
     global_variable_counter++;
     condition=sort_bool::and_(condition,equal_to(v,ta));
     vars.push_front(v);
-    return v;
+
+    return workaround::return_std_move(v);
   }
 
   data_expression_vector new_args;
