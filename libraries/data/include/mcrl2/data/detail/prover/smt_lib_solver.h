@@ -354,10 +354,11 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         translate_add_c(a_clause);
       }
-      else if (sort_nat::is_cnat_application(a_clause))
+      /* else if (sort_nat::is_cnat_application(a_clause))
       {
+// TODO NEEDS TO BE ADAPTED FOR THE NEW 64 bits data types.
         translate_c_nat(a_clause);
-      }
+      } */
       else if (sort_int::is_cint_application(a_clause))
       {
         translate_c_int(a_clause);

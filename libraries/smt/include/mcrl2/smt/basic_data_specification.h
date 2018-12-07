@@ -178,7 +178,8 @@ class basic_data_specification: public data_specification
     {
       add_sort_definition(data::sort_nat::nat(), nat_definition);
       m_functions[data::sort_nat::c0()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_nat::nat(), data::sort_nat::c0(), printer));
-      m_functions[data::sort_nat::cnat()] = std::shared_ptr<function_definition>(new identity_function_definition(this));
+      // m_functions[data::sort_nat::cnat()] = std::shared_ptr<function_definition>(new identity_function_definition(this));
+      // TODO: Add most_significant_digit_nat and concat_digit here. 
     }
 
     template<typename Printer>

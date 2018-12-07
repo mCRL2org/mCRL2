@@ -43,7 +43,7 @@ map @cReal <"creal">: Int <"left"> # Pos <"right"> -> Real                      
     ceil <"ceil"> : Real <"arg"> -> Int                                                             external defined_by_rewrite_rules;
     round <"round"> : Real <"arg"> -> Int                                                           external defined_by_rewrite_rules;
     @redfrac <"reduce_fraction"> : Int <"left"> # Int <"right"> -> Real                             internal defined_by_rewrite_rules;
-    @redfracwhr <"reduce_fraction_where"> : Pos <"arg1"> # Int <"arg2"> # Nat <"arg3"> -> Real      internal defined_by_rewrite_rules;
+    @redfracwhr <"reduce_fraction_where"> : Nat <"arg1"> # Int <"arg2"> # Nat <"arg3"> -> Real      internal defined_by_rewrite_rules;
     @redfrachlp <"reduce_fraction_helper"> : Real <"left"> # Int <"right"> -> Real                  internal defined_by_rewrite_rules;
 
 var m:Nat;
@@ -83,7 +83,9 @@ eqn  ==(@cReal(x, p), @cReal(y, q))  =  ==(*(x, @cInt(Pos2Nat(q))), *(y, @cInt(P
      ceil(r)  =  -(floor(-(r)));
      round(r)  =  floor(+(r, @cReal(@cInt(Pos2Nat(@c1)), @cDub(false, @c1))));
      @redfrac(x, @cNeg(p))  =  @redfrac(-(x), @cInt(Pos2Nat(p)));
-     @redfrac(x, @cInt(Pos2Nat(p)))  =  @redfracwhr(p, div(x, p), mod(x, p));
-     @redfracwhr(p, x, @c0)  =  @cReal(x, @c1);
-     @redfracwhr(p, x, Pos2Nat(q))  =  @redfrachlp(@redfrac(@cInt(Pos2Nat(p)), @cInt(Pos2Nat(q))), x);
+     @redfrac(x, @cInt(n))  =  @redfracwhr(n, div(x, Nat2Pos(n)), mod(x, Nat2Pos(n)));
+
+% OLD     @redfracwhr(n, x, @c0)  =  @cReal(x, @c1);
+% OLD     @redfracwhr(n, x, Pos2Nat(q))  =  @redfrachlp(@redfrac(@cInt(n), @cInt(Pos2Nat(q))), x);
+     @redfracwhr(n, x, m)  =  if( ==(m, @most_significant_digitNat(@zero_word)), @cReal(x, @c1), @redfrachlp(@redfrac(@cInt(n), @cInt(m)), x));
      @redfrachlp(@cReal(x, p), y)  =  @cReal(+(@cInt(Pos2Nat(p)), *(y, x)), Int2Pos(x));

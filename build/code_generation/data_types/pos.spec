@@ -17,12 +17,14 @@ cons @one <"one">:Pos                                                           
 % The successor constructor should be merged with the successor below, by removing the latter.
 % Currently, this does not work, as the translator to C code does not see that there are multiple
 % successor functions of different types, as this one is a constructor. 
-     succ <"succ">:Pos <"arg"> -> Pos                                                                                                   external defined_by_rewrite_rules;
+    @succ_pos <"succpos">:Pos <"arg"> -> Pos                                                                                            internal defined_by_rewrite_rules;
 
 map  @most_significant_digit <"most_significant_digit">: @word <"arg"> -> Pos                                                           internal defined_by_rewrite_rules;
      @concat_digit <"concat_digit">: Pos <"arg1"> # @word <"arg2"> -> Pos                                                               internal defined_by_rewrite_rules;
      max <"maximum">: Pos <"left"> # Pos <"right"> -> Pos                                                                               external defined_by_rewrite_rules;
      min <"minimum">: Pos <"left"> # Pos <"right"> -> Pos                                                                               external defined_by_rewrite_rules;
+% There is a special mapping succ, as overloading a constructor is not possible. Therefore the constructor @succ_pos has a unique name. 
+     succ <"succ">: Pos <"arg"> -> Pos                                                                                                  external defined_by_rewrite_rules;
      @pospred <"pos_predecessor">: Pos <"arg"> -> Pos                                                                                   internal defined_by_rewrite_rules;
      + <"plus">: Pos <"left"> # Pos <"right"> -> Pos                                                                                    external defined_by_rewrite_rules;
      * <"times">: Pos <"left"> # Pos <"right"> -> Pos                                                                                   external defined_by_rewrite_rules;
@@ -46,12 +48,13 @@ var  b: Bool;
      w1: @word;
      w2: @word;
 eqn  @one = @most_significant_digit(@one_word);
-     succ(@most_significant_digit(w1)) = if(==(w1,@max_word),
+     @succ_pos(@most_significant_digit(w1)) = if(==(w1,@max_word),
                                              @concat_digit(@most_significant_digit(@one_word),@zero_word),
                                              @most_significant_digit(@succ_word(w1)));
-     succ(@concat_digit(p,w1)) = if(==(w1,@max_word),
-                                            @concat_digit(succ(p),@zero_word),
+     @succ_pos(@concat_digit(p,w1)) = if(==(w1,@max_word),
+                                            @concat_digit(@succ_pos(p),@zero_word),
                                             @concat_digit(p,@succ_word(w1)));
+     succ(p) = @succ_pos(p);
 
      ==(@most_significant_digit(w1),@most_significant_digit(w2)) = ==(w1,w2);
      ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;

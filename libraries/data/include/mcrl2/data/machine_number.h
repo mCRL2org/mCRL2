@@ -85,7 +85,16 @@ inline void swap(machine_number& t1, machine_number& t2)
 }
 //--- end generated class machine_number ---//
 
-/// \brief 
+/// \brief A string representation indicating the maximal machine number + 1. 
+/// \return A string containing the number of available machine numbers. 
+inline std::string max_machine_number_string()
+{
+  std::size_t n=std::numeric_limits<std::size_t>::max();
+  assert(n % 100 != 99); // This is not possible, as n has the shape 2^n-1, but we check it anyhow. 
+  return std::to_string(n/100) + std::to_string(1+n % 100);
+}
+
+
 
 // template function overloads
 std::string pp(const machine_number_list& x);

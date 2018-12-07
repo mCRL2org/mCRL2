@@ -30,67 +30,6 @@ namespace data
 namespace detail
 {
 
-std::vector<std::size_t> add_vector(const std::vector< std::size_t >& v1, 
-                                    const std::vector< std::size_t >& v2)
-{
-  std::vector<std::size_t> result;
-  std::size_t carry=0;
-  for(std::size_t i=0; i<std::max(v1.size(),v2.size()); i++)
-  {
-    std::size_t n1 = (i<v1.size()? v1[i]: 0);
-    std::size_t n2 = (i<v2.size()? v2[i]: 0);
-
-    std::size_t sum = n1+n2+carry;
-    if (sum<n1)  // There is a carry overflow. 
-    {
-      assert(sum<n2);
-      carry=1;
-    }
-    result.push_back(sum);
-  }
-  if (carry==1)
-  {
-    result.push_back(1);
-  }
-  return result;
-}
-
-// Multiply a vector consisting of size_t's with 10 and add the extra value.
-std::vector<size_t> multiply_by10_and_add(const std::vector< size_t >& v, size_t val)
-{
-  std::vector<size_t> val_vector(1,val);
-  assert(val_vector.size()==1);
-  std::vector<size_t> result=add_vector(v,v);   // result is 2 v.
-  result = add_vector(result, result);          // result is 4 v.
-  result = add_vector(result, v);               // result is 5 v.
-  result = add_vector(result, result);          // result is 10 v.
-  result = add_vector(result, val_vector);      // result is 10 v + val.
-  return result;
-}
-
-// Convert to number represented as character array where each character
-// represents a decimal digit
-inline std::vector< size_t > number_string_to_vector_number(const std::string& s)
-{
-  assert(s.size() > 0);
-  std::vector< size_t > result;
-
-  result.reserve(s.size()/18);  // approximately 18 digits fit in one size_t.
-
-  for (char i: s)
-  {
-    if ('0' <= i && i <= '9')
-    {
-       result = multiply_by10_and_add(result, i - '0');
-    }
-    else
-    {
-      throw mcrl2::runtime_error("The string " + s + " is expected to only consist of digits. ");
-    }
-  }
-
-  return result;
-}
 
 // Convert to number represented as character array where each character
 // represents a decimal digit
@@ -232,6 +171,127 @@ inline void decimal_number_increment(std::vector< char >& number)
   number.insert(number.begin(), 1);
 }
 
+// Check whether a number vector is equal to zero.
+inline bool is_zero_number_vector(const std::vector< std::size_t >& v)
+{
+  for(const std::size_t n: v)
+  {
+    if (n>0)
+    {
+      return false;
+    }
+  }
+  // All digits are zero. Thus the number is zero.
+  assert(v.size()<2);  // Zero can only occur as a vector of length 0 or 1. 
+  return true;
+}
+
+// Divide the vector v by two, and yield true if the vector was odd. 
+inline bool div2_number_vector(std::vector< std::size_t >& v)
+{
+  bool carry=false;
+  const std::size_t leftmost_carry_mask = (std::size_t)1 << (8*sizeof(std::size_t)-1);
+
+  for(std::size_t i=v.size(); i>0; --i)
+  {
+    bool next_carry= v.at(i-1) % 2 == 1;
+    v[i-1] = v[i-1]/2; 
+    if (carry)
+    {
+      v[i-1] = v[i-1] | leftmost_carry_mask;
+    }
+    carry = next_carry; 
+  }
+  if (v.size()>0 && v.back()==0) 
+  {
+    v.pop_back();
+  }
+  return carry;
+}
+
+// Add the two number vectors. The least significant digit is at position 0.
+inline std::vector<std::size_t> add_number_vectors(const std::vector< std::size_t >& v1, 
+                                                   const std::vector< std::size_t >& v2)
+{
+  std::vector<std::size_t> result;
+  std::size_t carry=0;
+  for(std::size_t i=0; i<std::max(v1.size(),v2.size()); i++)
+  {
+    std::size_t n1 = (i<v1.size()? v1[i]: 0);
+    std::size_t n2 = (i<v2.size()? v2[i]: 0);
+
+    std::size_t sum = n1+n2+carry;
+    if (sum<n1)  // There is a carry overflow. 
+    {
+      assert(sum<n2);
+      carry=1;
+    }
+    result.push_back(sum);
+  }
+  if (carry==1)
+  {
+    result.push_back(1);
+  }
+  return result;
+}
+
+inline std::vector<size_t> multiply_by10_and_add(const std::vector< size_t >& v, size_t val)
+{
+  std::vector<size_t> val_vector(1,val);
+  assert(val_vector.size()==1);
+  std::vector<size_t> result=add_number_vectors(v,v);   // result is 2 v.
+  result = add_number_vectors(result, result);          // result is 4 v.
+  result = add_number_vectors(result, v);               // result is 5 v.
+  result = add_number_vectors(result, result);          // result is 10 v.
+  result = add_number_vectors(result, val_vector);      // result is 10 v + val.
+  return result;
+}
+
+// Transform a number vector to a string representation of the same number.
+inline std::string number_vector_as_string(const std::vector< std::size_t >& v1)
+{
+  std::vector< std::size_t > v=v1;
+  assert(!detail::is_zero_number_vector(v));
+
+  std::vector< char > result = detail::string_to_vector_number("0");
+
+  while (!detail::is_zero_number_vector(v)) 
+  {
+    detail::decimal_number_multiply_by_two(result);
+    if (detail::div2_number_vector(v))
+    {
+      detail::decimal_number_increment(result);
+    }
+  }
+
+  return detail::vector_number_to_string(result);
+}
+
+
+// Multiply a vector consisting of size_t's with 10 and add the extra value.
+// Convert to number represented as character array where each character
+// represents a decimal digit
+inline std::vector< size_t > number_string_to_vector_number(const std::string& s)
+{
+  assert(s.size() > 0);
+  std::vector< size_t > result;
+
+  result.reserve(s.size()/18);  // approximately 18 digits fit in one size_t.
+
+  for (char i: s)
+  {
+    if ('0' <= i && i <= '9')
+    {
+       result = multiply_by10_and_add(result, i - '0');
+    }
+    else
+    {
+      throw mcrl2::runtime_error("The string " + s + " is expected to only consist of digits. ");
+    }
+  }
+
+  return result;
+}
 } // namespace detail
 /// \endcond
 
@@ -278,10 +338,11 @@ inline data_expression pos(const std::string& n)
 /// \param n A data expression
 inline bool is_positive_constant(const data_expression& n)
 {
-  return sort_pos::is_c1_function_symbol(n) ||
-         (sort_pos::is_cdub_application(n) &&
-          sort_bool::is_boolean_constant(sort_pos::left(n)) &&
-          sort_pos::is_positive_constant(sort_pos::right(n))
+  return (sort_pos::is_most_significant_digit_application(n) &&
+          is_machine_number(arg(n))) ||
+         (sort_pos::is_concat_digit_application(n) &&
+          sort_pos::is_positive_constant(sort_pos::arg1(n)) &&
+          is_machine_number(sort_nat::arg2(n)) 
          );
 }
 
@@ -294,29 +355,19 @@ inline bool is_positive_constant(const data_expression& n)
 inline
 std::string positive_constant_as_string(const data_expression& n_in)
 {
-  std::vector<bool> bits;
+  std::vector<std::size_t> number_vector;
   data_expression n=n_in;
 
-  while (sort_pos::is_cdub_application(n))
+  while (sort_pos::is_concat_digit_application(n))
   {
-    bits.push_back(sort_bool::is_true_function_symbol(sort_pos::left(n)));
-    n = sort_pos::right(n);
+    number_vector.push_back(atermpp::down_cast<machine_number>(sort_pos::arg2(n)).value());
+    n = sort_pos::arg1(n);
   }
 
-  assert(sort_pos::is_c1_function_symbol(n));
+  assert(sort_pos::is_most_significant_digit_application(n));
+  number_vector.push_back(atermpp::down_cast<machine_number>(sort_pos::arg(n)).value());
 
-  std::vector< char > result = detail::string_to_vector_number("1");
-
-  for (std::vector<bool>::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i)
-  {
-    detail::decimal_number_multiply_by_two(result);
-    if (*i)
-    {
-      detail::decimal_number_increment(result);
-    }
-  }
-
-  return detail::vector_number_to_string(result);
+  return detail::number_vector_as_string(number_vector);
 }
 } // namespace sort_pos
 
@@ -355,9 +406,11 @@ inline data_expression nat(const std::string& n)
 /// \param n A data expression
 inline bool is_natural_constant(const data_expression& n)
 {
-  return sort_nat::is_c0_function_symbol(n) ||
-         (sort_nat::is_cnat_application(n) &&
-          sort_pos::is_positive_constant(sort_nat::arg(n))
+  return (sort_nat::is_most_significant_digit_nat_application(n) &&
+          is_machine_number(arg(n))) ||
+         (sort_nat::is_concat_digit_application(n) &&
+          sort_nat::is_natural_constant(sort_nat::arg1(n)) &&
+          is_machine_number(sort_nat::arg2(n)) 
          );
 }
 
@@ -365,17 +418,26 @@ inline bool is_natural_constant(const data_expression& n)
 /// \param n A data expression
 /// \pre is_natural_constant(n)
 /// \return String representation of n
-inline std::string natural_constant_as_string(const data_expression& n)
+inline std::string natural_constant_as_string(const data_expression& n_in)
 {
-  assert(is_natural_constant(n));
-  if (sort_nat::is_c0_function_symbol(n))
+  std::vector<std::size_t> number_vector;
+  data_expression n=n_in;
+  
+  while (sort_nat::is_concat_digit_application(n))
+  { 
+    number_vector.push_back(atermpp::down_cast<machine_number>(sort_nat::arg2(n)).value());
+    n = sort_nat::arg1(n);
+  }
+  
+  assert(sort_nat::is_most_significant_digit_nat_application(n));
+  number_vector.push_back(atermpp::down_cast<machine_number>(sort_nat::arg(n)).value());
+
+  if (detail::is_zero_number_vector(number_vector))
   {
     return "0";
   }
-  else
-  {
-    return sort_pos::positive_constant_as_string(sort_nat::arg(n));
-  }
+
+  return detail::number_vector_as_string(number_vector);
 }
 } // namespace sort_nat
 
@@ -472,6 +534,7 @@ inline data_expression real_(const std::string& n)
   return sort_real::creal(sort_int::int_(n), sort_pos::c1());
 }
 } // namespace sort_real
+
 
 /// \brief Construct numeric expression from a string representing a number in decimal notation
 /// \param s A sort expression

@@ -742,7 +742,7 @@ void basic_data_specification::add_numerical_operators(
   const data::data_expression& pos_one = data::sort_pos::c1();
   data::data_expression pos_two = data::sort_pos::cdub(data::sort_bool::false_(), pos_one);
   const data::data_expression& nat_zero = data::sort_nat::c0();
-  data::data_expression nat_one = data::sort_nat::cnat(pos_one);
+  data::data_expression nat_one = data::sort_nat::nat(1); 
   data::data_expression int_zero = data::sort_int::cint(nat_zero);
   data::data_expression int_one = data::sort_int::cint(nat_one);
   data::data_expression real_zero = data::sort_real::creal(int_zero, pos_one);
@@ -778,7 +778,7 @@ void basic_data_specification::add_numerical_operators(
   add_function_definition(data::sort_nat::minimum(nat, nat), minimum, data::variable_vector({n1, n2}), data::if_(data::less(n1, n2), n1, n2));
   add_function_definition(data::sort_nat::pos2nat(), identity);
   add_function_definition(data::sort_nat::nat2pos(), identity);
-  add_function_definition(data::sort_nat::succ(nat), data::variable_vector({n1}), data::sort_nat::plus(n1, pos_one));
+  add_function_definition(data::sort_nat::succ(nat), data::variable_vector({n1}), data::sort_nat::plus(n1, pos_one));  
   add_function_definition(data::sort_nat::pred(), data::variable_vector({p1}), data::sort_int::int2nat(data::sort_int::minus(p1, pos_one)));
 
   add_function_definition(data::less(int_), less);
@@ -806,7 +806,7 @@ void basic_data_specification::add_numerical_operators(
   add_function_definition(data::sort_int::int2pos(), identity);
   add_function_definition(data::sort_int::nat2int(), identity);
   add_function_definition(data::sort_int::int2nat(), identity);
-  add_function_definition(data::sort_int::succ(int_), data::variable_vector({i1}), data::sort_int::plus(i1, int_one));
+  add_function_definition(data::sort_int::succ(int_), data::variable_vector({i1}), data::sort_int::plus(i1, int_one)); 
   add_function_definition(data::sort_int::pred(nat), data::variable_vector({n1}), data::sort_int::minus(n1, nat_one));
   add_function_definition(data::sort_int::pred(int_), data::variable_vector({i1}), data::sort_int::minus(i1, int_one));
 

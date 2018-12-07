@@ -221,6 +221,26 @@ inline machine_number pred_word(const machine_number& n)
   return machine_number(n.value()-1);
 }
 
+inline const data_expression& rightmost_bit(const machine_number& n)
+{
+  if ((n.value() & 1) == 1)
+  {
+    return sort_bool::true_();
+  }
+  return sort_bool::false_();
+}
+
+inline const data_expression shift_right(const data_expression& e1, const machine_number& n)
+{
+  assert(e1==sort_bool::true_() || e1==sort_bool::false_());
+  std::size_t m = n.value()>>1;
+  if (e1==sort_bool::true_())
+  {
+    return machine_number(m | static_cast<std::size_t>(1)<<((8*sizeof(std::size_t))-1));
+  }
+  return machine_number(m);
+}
+
 } // end namespace detail 
 
 /// \brief The machine number representing 0.
@@ -545,7 +565,7 @@ inline data_expression sqrt_quadrupleword_overflow_manual_implementation(const d
   }
 }
 
-/// \brief The predeccessor function on a machine numbers, that wraps around.
+/// \brief The predecessor function on a machine numbers, that wraps around.
 /// \param e 
 /// \return e-1, or maxword if e is zero.
 inline data_expression pred_word_manual_implementation(const data_expression& e)
@@ -553,7 +573,23 @@ inline data_expression pred_word_manual_implementation(const data_expression& e)
   return detail::pred_word(atermpp::down_cast<machine_number>(e)); 
 }
 
-/// \brief 
+/// \brief The right most bit of a machine number.
+/// \param e 
+/// \return true if the rightmost bit is 1.
+inline data_expression rightmost_bit_manual_implementation(const data_expression& e)
+{
+  return detail::rightmost_bit(atermpp::down_cast<machine_number>(e)); 
+}
+
+/// \brief The machine word shifted one position to the right.
+/// \param e1 A boolean indicating what the left most bit must be.  
+/// \param e2 The value shifted to the right. 
+/// \return The machine number e2 divided by 2 prepended with a bit 1 if e1 is true. 
+inline data_expression shift_right_manual_implementation(const data_expression& e1, const data_expression& e2)
+{
+  return detail::shift_right(e1, atermpp::down_cast<machine_number>(e2)); 
+}
+
 
 } // namespace sort_machine_word
 

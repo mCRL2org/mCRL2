@@ -288,7 +288,7 @@ class specification_basic_type
 
     data_expression real_one()
     {
-      static data_expression one=sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1());
+      static data_expression one=sort_real::creal(sort_int::cint(sort_nat::nat(1)),sort_pos::pos(1));
       return one;
     }
 
@@ -11194,7 +11194,7 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   deadlock_summand_vector deadlock_summands;
   stochastic_distribution initial_distribution(
                               variable_list(),
-                              sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1()));
+                              sort_real::creal(sort_int::cint(sort_nat::nat(1)),sort_pos::pos(1)));
   spec.transform(init,action_summands,deadlock_summands,parameters,initial_state,initial_distribution);
 
   // compute global variables

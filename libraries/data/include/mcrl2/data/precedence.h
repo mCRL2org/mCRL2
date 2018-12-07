@@ -38,7 +38,7 @@ namespace detail {
            || data::sort_int::is_nat2int_application(x)
            || data::sort_real::is_nat2real_application(x)
            || data::sort_real::is_int2real_application(x)
-           || data::sort_nat::is_cnat_application(x)
+//           || data::sort_nat::is_cnat_application(x)
            || data::sort_int::is_cint_application(x)
            || data::sort_real::is_creal_application(x)
            ;
@@ -87,7 +87,7 @@ namespace detail {
   inline
   bool is_divmod(const application& x)
   {
-    return sort_nat::is_divmod_application(remove_numeric_casts(x));
+    return sort_nat::is_divmod_aux_application(remove_numeric_casts(x));
   }
 
   inline

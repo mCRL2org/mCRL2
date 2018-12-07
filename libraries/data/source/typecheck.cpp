@@ -295,7 +295,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-      Par=application(sort_nat::cnat(),Par);
+      Par=application(sort_nat::pos2nat(),Par);
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -315,7 +315,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_pos::pos(),temp))
     {
       data_expression OldPar=Par;
-      Par=application(sort_int::cint(),application(sort_nat::cnat(),Par));
+      Par=application(sort_int::cint(),application(sort_nat::pos2nat(),Par));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -347,7 +347,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     {
       data_expression OldPar=Par;
       Par=application(sort_real::creal(),
-                              application(sort_int::cint(), application(sort_nat::cnat(),Par)),
+                              application(sort_int::cint(), application(sort_nat::pos2nat(),Par)),
                               sort_pos::c1());
       if (warn_upcasting)
       {
@@ -2680,7 +2680,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       else if (TypeMatchA(sort_pos::pos(),ResType,temp))
       {
         NewType=sort_bag::bag(sort_expression(element_sort));
-        Data=application(sort_nat::cnat(),Data);
+        Data=application(sort_nat::pos2nat(),Data);
         DataTerm = abstraction(bag_comprehension_binder(),comprehension_variables,Data);
       }
       else
@@ -3846,7 +3846,7 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_constant(sort_pos::c1());
   add_system_function(sort_pos::cdub());
   add_system_constant(sort_nat::c0());
-  add_system_function(sort_nat::cnat());
+  // add_system_function(sort_nat::cnat()); This function does not exist in 64 bit numbers. 
   add_system_function(sort_nat::pos2nat());
   add_system_function(sort_nat::nat2pos());
   add_system_function(sort_int::cint());

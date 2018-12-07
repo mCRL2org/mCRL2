@@ -530,25 +530,25 @@ namespace mcrl2 {
         return succ_name;
       }
 
-      /// \brief Constructor for function symbol succ.       
-      /// \return Function symbol succ.
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      const function_symbol& succ()
+      function_symbol succ(const sort_expression& s0)
       {
-        static function_symbol succ(succ_name(), make_function_sort(nat(), sort_pos::pos()));
+        sort_expression target_sort(sort_pos::pos());
+        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
         return succ;
       }
 
-
       /// \brief Recogniser for function succ.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching succ.
+      /// \return true iff e is the function symbol matching succ
       inline
       bool is_succ_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == succ();
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
+          return f.name() == succ_name() && function_sort(f.sort()).domain().size() == 1 && (f == succ(nat()) || f == succ(sort_pos::pos()));
         }
         return false;
       }
@@ -559,7 +559,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return sort_nat::succ()(arg0);
+        return sort_nat::succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ.
@@ -1815,7 +1815,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::maximum(nat(), sort_pos::pos()));
         result.push_back(sort_nat::maximum(nat(), nat()));
         result.push_back(sort_nat::minimum(nat(), nat()));
-        result.push_back(sort_nat::succ());
+        result.push_back(sort_nat::succ(nat()));
         result.push_back(sort_nat::pred());
         result.push_back(sort_nat::dub());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
@@ -1854,7 +1854,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::maximum(nat(), sort_pos::pos()));
         result.push_back(sort_nat::maximum(nat(), nat()));
         result.push_back(sort_nat::minimum(nat(), nat()));
-        result.push_back(sort_nat::succ());
+        result.push_back(sort_nat::succ(nat()));
         result.push_back(sort_nat::pred());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
@@ -1997,8 +1997,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp, vq}), maximum(cnat(vp), vq), if_(less_equal(vp, vq), vq, vp)));
         result.push_back(data_equation(variable_list({vm, vn}), maximum(vm, vn), if_(less_equal(vm, vn), vn, vm)));
         result.push_back(data_equation(variable_list({vm, vn}), minimum(vm, vn), if_(less_equal(vm, vn), vm, vn)));
-        result.push_back(data_equation(variable_list(), sort_pos::succ(c0()), sort_pos::c1()));
-        result.push_back(data_equation(variable_list({vp}), sort_pos::succ(cnat(vp)), sort_pos::succ(vp)));
+        result.push_back(data_equation(variable_list(), succ(c0()), sort_pos::c1()));
+        result.push_back(data_equation(variable_list({vp}), succ(cnat(vp)), succ(vp)));
         result.push_back(data_equation(variable_list(), pred(sort_pos::c1()), c0()));
         result.push_back(data_equation(variable_list({vp}), pred(sort_pos::cdub(sort_bool::true_(), vp)), cnat(sort_pos::cdub(sort_bool::false_(), vp))));
         result.push_back(data_equation(variable_list({vp}), pred(sort_pos::cdub(sort_bool::false_(), vp)), dub(sort_bool::true_(), pred(vp))));

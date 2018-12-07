@@ -639,7 +639,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_fbag::is_insert_application(x))
       {
-        arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x))));
+        arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::pos2nat(sort_fbag::arg2(x))));
         x = sort_fbag::arg3(x);
       }
       else // if (sort_fbag::is_fbagcinsert_application(x))
@@ -1202,9 +1202,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (sort_machine_word::is_add_overflow_word_application(x))
     {
       derived().print("((");
-      print_expression(sort_nat::left(x), left_precedence(x));
+      print_expression(sort_machine_word::left(x), left_precedence(x));
       derived().print(" div ");
-      print_expression(sort_nat::right(x), right_precedence(x));
+      print_expression(sort_machine_word::right(x), right_precedence(x));
       derived().print("1) mod (1 + ");
       derived().print(std::to_string(sort_machine_word::detail::max_word().value()));
       derived().print(" ))");
@@ -1238,10 +1238,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            pos
     //-------------------------------------------------------------------//
 
-    // The first cases have been added for machine word based positive numbers. 
     else if (sort_pos::is_most_significant_digit_application(x))
     {
-      print_expression(sort_pos::arg(x));
+      if (data::sort_pos::is_positive_constant(x))
+      {
+        derived().print(data::sort_pos::positive_constant_as_string(x));
+      }
+      else
+      {
+        derived().apply(sort_pos::arg(x));
+      }
     }
     else if (sort_pos::is_concat_digit_application(x))
     {
@@ -1251,10 +1257,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
-        derived().print("PRINT_NUMBER_TODO");
+        derived().print("(" + max_machine_number_string() + "*");
+        derived().apply(sort_pos::arg1(x));
+        derived().print(") + ");
+        derived().apply(sort_pos::arg2(x));
       }
     }
-    // Here the case for machine based numbers ends. 
     else if (sort_pos::is_cdub_application(x))
     {
       if (data::sort_pos::is_positive_constant(x))
@@ -1302,9 +1310,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     else if (sort_nat::is_first_application(x))
     {
-    	// TODO: verify if this is the correct way of dealing with first/divmod
-    	data_expression y = sort_nat::arg(x);
-    	if (!sort_nat::is_divmod_application(y))
+      // TODO: verify if this is the correct way of dealing with first/divmod
+      data_expression y = sort_nat::arg(x);
+      if (!sort_nat::is_divmod_aux_application(y))
       {
         print_function_application(x);
       }
@@ -1319,7 +1327,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       // TODO: verify if this is the correct way of dealing with last/divmod
       data_expression y = sort_nat::arg(x);
-    	if (!sort_nat::is_divmod_application(y))
+      if (!sort_nat::is_divmod_aux_application(y))
       {
         print_function_application(x);
       }
@@ -1335,9 +1343,34 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            nat
     //-------------------------------------------------------------------//
 
-    else if (sort_nat::is_cnat_application(x))
+    /* else if (sort_nat::is_cnat_application(x))  // This case does not exist anymore in 64 bit numbers. 
     {
       derived().apply(sort_nat::arg(x));
+    } */
+    else if (sort_nat::is_most_significant_digit_nat_application(x))
+    {
+      if (data::sort_nat::is_natural_constant(x))
+      {
+        derived().print(data::sort_nat::natural_constant_as_string(x));
+      }
+      else
+      {
+        derived().apply(sort_nat::arg(x));
+      }
+    }
+    else if (sort_nat::is_concat_digit_application(x))
+    {
+      if (data::sort_nat::is_natural_constant(x))
+      {
+        derived().print(data::sort_nat::natural_constant_as_string(x));
+      }
+      else
+      {
+        derived().print("(" + max_machine_number_string() + "*");
+        derived().apply(sort_nat::arg1(x));
+        derived().print(") + ");
+        derived().apply(sort_nat::arg2(x));
+      }
     }
     else if (sort_nat::is_pos2nat_application(x))
     {

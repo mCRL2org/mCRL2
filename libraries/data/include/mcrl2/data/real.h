@@ -821,6 +821,14 @@ namespace mcrl2 {
         {
           target_sort = sort_int::int_();
         }
+        else if (s0 == sort_nat::nat())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if (s0 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + pp(s0));
@@ -839,7 +847,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == succ_name() && function_sort(f.sort()).domain().size() == 1 && (f == succ(real_()) || f == succ(sort_int::int_()));
+          return f.name() == succ_name() && function_sort(f.sort()).domain().size() == 1 && (f == succ(real_()) || f == succ(sort_int::int_()) || f == succ(sort_nat::nat()) || f == succ(sort_pos::pos()));
         }
         return false;
       }
@@ -1550,7 +1558,7 @@ namespace mcrl2 {
       inline
       const function_symbol& reduce_fraction_where()
       {
-        static function_symbol reduce_fraction_where(reduce_fraction_where_name(), make_function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_()));
+        static function_symbol reduce_fraction_where(reduce_fraction_where_name(), make_function_sort(sort_nat::nat(), sort_int::int_(), sort_nat::nat(), real_()));
         return reduce_fraction_where;
       }
 
@@ -1826,7 +1834,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vr, vs}), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
         result.push_back(data_equation(variable_list({vr}), abs(vr), if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
         result.push_back(data_equation(variable_list({vp, vx}), negate(creal(vx, vp)), creal(negate(vx), vp)));
-        result.push_back(data_equation(variable_list({vp, vx}), sort_nat::succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::pos2nat(vp))), vp)));
+        result.push_back(data_equation(variable_list({vp, vx}), succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::pos2nat(vp))), vp)));
         result.push_back(data_equation(variable_list({vp, vx}), pred(creal(vx, vp)), creal(minus(vx, sort_int::cint(sort_nat::pos2nat(vp))), vp)));
         result.push_back(data_equation(variable_list({vp, vq, vx, vy}), plus(creal(vx, vp), creal(vy, vq)), reduce_fraction(plus(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp)))), sort_int::cint(sort_nat::pos2nat(times(vp, vq))))));
         result.push_back(data_equation(variable_list({vp, vq, vx, vy}), minus(creal(vx, vp), creal(vy, vq)), reduce_fraction(minus(times(vx, sort_int::cint(sort_nat::pos2nat(vq))), times(vy, sort_int::cint(sort_nat::pos2nat(vp)))), sort_int::cint(sort_nat::pos2nat(times(vp, vq))))));
@@ -1841,9 +1849,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vr}), ceil(vr), negate(floor(negate(vr)))));
         result.push_back(data_equation(variable_list({vr}), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::pos2nat(sort_pos::c1())), sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))))));
         result.push_back(data_equation(variable_list({vp, vx}), reduce_fraction(vx, sort_int::cneg(vp)), reduce_fraction(negate(vx), sort_int::cint(sort_nat::pos2nat(vp)))));
-        result.push_back(data_equation(variable_list({vp, vx}), reduce_fraction(vx, sort_int::cint(sort_nat::pos2nat(vp))), reduce_fraction_where(vp, sort_int::div(vx, vp), sort_int::mod(vx, vp))));
-        result.push_back(data_equation(variable_list({vp, vx}), reduce_fraction_where(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(variable_list({vp, vq, vx}), reduce_fraction_where(vp, vx, sort_nat::pos2nat(vq)), reduce_fraction_helper(reduce_fraction(sort_int::cint(sort_nat::pos2nat(vp)), sort_int::cint(sort_nat::pos2nat(vq))), vx)));
+        result.push_back(data_equation(variable_list({vn, vx}), reduce_fraction(vx, sort_int::cint(vn)), reduce_fraction_where(vn, sort_int::div(vx, sort_nat::nat2pos(vn)), sort_int::mod(vx, sort_nat::nat2pos(vn)))));
+        result.push_back(data_equation(variable_list({vm, vn, vx}), reduce_fraction_where(vn, vx, vm), if_(equal_to(vm, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), creal(vx, sort_pos::c1()), reduce_fraction_helper(reduce_fraction(sort_int::cint(vn), sort_int::cint(vm)), vx))));
         result.push_back(data_equation(variable_list({vp, vx, vy}), reduce_fraction_helper(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::pos2nat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
         return result;
       }

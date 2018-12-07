@@ -357,7 +357,7 @@ class sort_specification
       else if (sort == sort_nat::nat())
       {
         // Nat requires NatPair.
-        import_system_defined_sort(sort_nat::natpair());
+        import_system_defined_sort(sort_nat::natnatpair());
       }
       else if (is_function_sort(sort))
       {

@@ -16,14 +16,12 @@
 sort Nat <"nat">;
 % Auxiliary sort natpair, pair of natural numbers
      @NatNatPair <"natnatpair">;
-     @wordNatPair <"wordnatpair">;
 
 cons @c0 <"c0"> : Nat                                                                                            internal defined_by_rewrite_rules;
-     succ <"succ"> : Nat <"arg">->Pos                                                                            external defined_by_rewrite_rules;
+     @succ_nat <"succ_nat"> : Nat <"arg">->Nat                                                                   internal defined_by_rewrite_rules;
 % Is the constructor below needed?
 % Constructor for natpair
      @nnPair <"nnpair"> : Nat <"arg1"> # Nat <"arg2"> -> @NatNatPair                                             internal defined_by_rewrite_rules;
-     @wnPair <"wnpair"> : @word <"arg1"> # Nat <"arg2"> -> @wordNatPair                                          internal defined_by_rewrite_rules;
 
 map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> -> Nat                             internal defined_by_rewrite_rules;   
 % concat_digit(p,w) represents (2^N)*p + w.
@@ -31,6 +29,7 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
 
      Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat                                                                    external defined_by_rewrite_rules;
      Nat2Pos <"nat2pos"> : Nat <"arg"> -> Pos                                                                    external defined_by_rewrite_rules;
+     succ <"succ"> : Nat <"arg">->Pos                                                                            external defined_by_rewrite_rules;
      max <"maximum">:Pos <"left"> #Nat <"right">->Pos                                                            external defined_by_rewrite_rules;
      max <"maximum">:Nat <"left"> #Pos <"right">->Pos                                                            external defined_by_rewrite_rules;
      max <"maximum">:Nat <"left"> #Nat <"right">->Nat                                                            external defined_by_rewrite_rules;
@@ -60,9 +59,9 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      @exp_auxfalsep <"exp_auxfalsep">: Pos <"arg1"> # Nat <"arg2"> # @word <"arg3"> -> Nat                       internal defined_by_rewrite_rules;
      @exp_auxfalsen <"exp_auxfalsen">: Nat <"arg1"> # Nat <"arg2"> # @word <"arg3"> -> Nat                       internal defined_by_rewrite_rules;
      @div_bold <"div_bold">: Nat <"arg1"> # Pos <"arg2"> -> @word                                                internal defined_by_rewrite_rules;
-     @div_bold_whr <"div_bold_whr">: Nat <"arg1"> # @word <"arg2"> # Pos <"arg3"> # @word <"arg4"> # @word <"brg5"> # @word <"arg6"> -> @word   internal defined_by_rewrite_rules;
+     @div_bold_whr <"div_bold_whr">: Nat <"arg1"> # @word <"arg2"> # Pos <"arg3"> # @word <"arg4"> # @word <"arg5"> # @word <"arg6"> -> @word   internal defined_by_rewrite_rules;
      @div_whr1 <"div_whr1">: Nat <"arg1"> # @word <"arg2"> # @word <"arg3"> # @NatNatPair <"arg4"> -> Nat        internal defined_by_rewrite_rules;
-     @div_whr2 <"div_whr2">: Nat <"arg1"> # @word <"arg2"> # @word <"arg3"> # @NatNatPair <"arg4"> -> Nat        internal defined_by_rewrite_rules;
+     @div_whr2 <"div_whr2">: Nat <"arg1"> # @word <"arg2"> # Pos <"arg3"> # @word <"arg4"> # @NatNatPair <"arg5"> -> Nat                        internal defined_by_rewrite_rules;
      @mod_whr1 <"mod_whr1">: @word <"arg1"> # Pos <"arg2"> # @word <"arg3"> # Nat <"arg4"> -> Nat               internal defined_by_rewrite_rules; 
      @divmod_aux <"divmod_aux">: Nat <"arg1"> # Pos <"arg2"> -> @NatNatPair                                      internal defined_by_rewrite_rules;
      @divmod_aux_whr1 <"divmod_aux_whr1">: Nat <"arg1"> # @word <"arg2"> # @word <"arg3"> # @NatNatPair <"arg4"> -> @NatNatPair  internal defined_by_rewrite_rules;
@@ -73,10 +72,8 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      @divmod_aux_whr6 <"divmod_aux_whr6">: Pos <"arg1"> # @word <"arg2"> # @NatNatPair <"arg3"> # Nat <"arg4"> # Nat <"arg5"> -> @NatNatPair  internal defined_by_rewrite_rules;
      @msd <"msd">:  Nat <"arg"> -> @word                                                                         internal defined_by_rewrite_rules;
 % functions for pairs.
-     @first <"nnfirst"> : @NatNatPair <"arg"> -> Nat                                                             internal defined_by_rewrite_rules;
-     @last <"nnlast"> : @NatNatPair <"arg"> -> Nat                                                               internal defined_by_rewrite_rules;
-     @first <"wnfirst"> : @wordNatPair <"arg"> -> @word                                                          internal defined_by_rewrite_rules;
-     @last <"wnlast"> : @wordNatPair <"arg"> -> Nat                                                              internal defined_by_rewrite_rules;
+     @first <"first"> : @NatNatPair <"arg"> -> Nat                                                               internal defined_by_rewrite_rules;
+     @last <"last"> : @NatNatPair <"arg"> -> Nat                                                                 internal defined_by_rewrite_rules;
 % The functions below are auxiliary and might be omitted. 
      @swap_zero <"swap_zero">:Nat <"left"> # Nat <"right"> -> Nat                                                internal defined_by_rewrite_rules;
      @swap_zero_add <"swap_zero_add">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat           internal defined_by_rewrite_rules;
@@ -84,7 +81,6 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      @swap_zero_monus <"swap_zero_monus">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat       internal defined_by_rewrite_rules;
      @sqrt_nat <"sqrt_nat_aux_func">:Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> Nat                           internal defined_by_rewrite_rules;
      @dub <"dub">:Bool <"left"> # Nat <"right"> -> Nat                                                           internal defined_by_rewrite_rules;
-     @gtesubtb <"gte_subtract_with_borrow">: Bool <"arg1"> # Pos <"arg2"> # Pos <"arg3"> -> Nat                  internal defined_by_rewrite_rules;
 %     @divmod <"divmod"> : Pos <"left"> # Pos <"right"> -> @NatPair                                               internal defined_by_rewrite_rules;
 %     @gdivmod <"generalised_divmod"> : @NatPair <"arg1"> # Bool <"arg2"> # Pos <"arg3"> -> @NatPair              internal defined_by_rewrite_rules;
 %     @ggdivmod <"doubly_generalised_divmod"> : Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> @NatPair            internal defined_by_rewrite_rules;
@@ -102,7 +98,7 @@ var  b:Bool;
      diff:Nat;
      shift_n1:Nat;
      pair_:@NatNatPair;
-     lp:@NatNatPair;
+     lp:Nat;
      w:@word;
      w1:@word;
      w2:@word;
@@ -111,12 +107,19 @@ var  b:Bool;
      shift_w:@word;
 
 eqn  @c0 = @most_significant_digitNat(@zero_word);
-     succ(@most_significant_digitNat(w)) = if(==(w,@max_word),
+     @succ_nat(@most_significant_digitNat(w)) = if(==(w,@max_word),
                                                     @concat_digit(@most_significant_digitNat(@one_word),@zero_word),
                                                     @most_significant_digitNat(@succ_word(w)));
+     @succ_nat(@concat_digit(n,w)) = if(==(w,@max_word),
+                                           @concat_digit(@succ_nat(n),@zero_word),
+                                           @concat_digit(n,@succ_word(w)));
+
+     succ(@most_significant_digitNat(w)) = if(==(w,@max_word),
+                                                    @concat_digit(@most_significant_digit(@one_word),@zero_word),
+                                                    @most_significant_digit(@succ_word(w)));
      succ(@concat_digit(n,w)) = if(==(w,@max_word),
                                            @concat_digit(succ(n),@zero_word),
-                                           @concat_digit(n,@succ_word(w)));
+                                           @concat_digit(Nat2Pos(n),@succ_word(w)));
 
      ==(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = ==(w1,w2);
      ==(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
@@ -147,7 +150,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                     @most_significant_digitNat(@max_word),
                                     @concat_digit(predp,@max_word));
 % needed?
-     @dub(b,n) = if(b, +(n,n), succ(+(n,n)));
+     @dub(b,n) = if(b, +(n,n), @succ_nat(+(n,n)));
 
      +(p,n) = +(n,p);
      +(@most_significant_digitNat(w1),@most_significant_digit(w2)) =
@@ -209,13 +212,6 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                                @most_significant_digitNat(@minus_word(w1,w2)),
                                                @concat_digit(diff,@minus_word(w1,w2))));
 
-
-%     @gtesubtb(false,p,@c1) = pred(p);
-%     @gtesubtb(true,p,@c1) = pred(Nat2Pos(pred(p)));
-%     @gtesubtb(b,@cDub(c,p),@cDub(c,q)) = @dub(b, @gtesubtb(b,p,q));
-%     @gtesubtb(b,@cDub(false,p),@cDub(true,q)) = @dub(!(b),@gtesubtb(true,p,q));
-%     @gtesubtb(b,@cDub(true,p),@cDub(false,q)) = @dub(!(b),@gtesubtb(false,p,q));
-
      *(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
                            if(==(@times_overflow_word(w1,w2),@zero_word),
                                      @most_significant_digitNat(@times_word(w1,w2)),
@@ -266,7 +262,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                 *(n,@exp_aux3n(@rightmost_bit(shift_w),*(n,n),shift_w)),
                                 *(n,@exp_aux4n(@rightmost_bit(shift_w),*(n,n),shift_n1,shift_w)));
 
-     @exp_aux4n(false,n,n1,w) = @exp_auxfalsen(n,shift_n1,shift_w);
+     @exp_aux4n(false,n,n1,w) = @exp_auxfalsen(n,@div2(n1),@shift_right(@is_odd(n1),w));
      @exp_auxfalsen(n,shift_n1,shift_w) =
                             if(==(shift_n1,@most_significant_digitNat(@zero_word)),
                                 @exp_aux3n(@rightmost_bit(shift_w),*(n,n),shift_w),
@@ -329,8 +325,8 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
     div(@concat_digit(n,w1),@concat_digit(p,w2)) =
                           if(<(n,Pos2Nat(@concat_digit(p,w2))),
                                   @most_significant_digitNat(@div_bold(@concat_digit(n,w1),@concat_digit(p,w2))),
-                                  @div_whr2(n,w1,w2,@divmod_aux(n,@concat_digit(p,w2))));
-    @div_whr2(n,w1,w2,pair_) = 
+                                  @div_whr2(n,w1,p,w2,@divmod_aux(n,@concat_digit(p,w2))));
+    @div_whr2(n,w1,p,w2,pair_) = 
                           +(if(==(@first(pair_),@most_significant_digitNat(@zero_word)), 
                                     @most_significant_digitNat(@zero_word),
                                     @concat_digit(@first(pair_),@zero_word)),
@@ -409,23 +405,18 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                              @max_word,
                              @div_bold_whr(n,w1,p,w2,w3,@div_bold(n,@concat_digit(p,w2))));
 
-    @div_bold_whr(n,w1,p,w2,w3,m) = 
-                             if(>(*(@most_significant_digitNat(m),Pos2Nat(@concat_digit(@concat_digit(p,w2),w3))),@concat_digit(n,w1)),
-                                @pred_word(m),
-                                m);
+    @div_bold_whr(n,w1,p,w2,w3,w) = 
+                             if(>(*(@most_significant_digitNat(w),Pos2Nat(@concat_digit(@concat_digit(p,w2),w3))),@concat_digit(n,w1)),
+                                @pred_word(w),
+                                w);
 
 
 % equations for pairs
      ==(@nnPair(n1,n2), @nnPair(m1,m2)) = &&(==(n1,m1),==(n2,m2));
      <(@nnPair(n1,n2), @nnPair(m1,m2)) = ||(<(n1,m1), &&(==(n1,m1), <(n2,m2)));
      <=(@nnPair(n1,n2), @nnPair(m1,m2)) = ||(<(n1,m1), &&(==(n1,m1), <=(n2,m2)));
-     ==(@wnPair(w1,n1), @wnPair(w2,n2)) = &&(==(w1,w2),==(n1,n2));
-     <(@wnPair(w1,n1), @wnPair(w2,n2)) = ||(<(w1,w2), &&(==(w1,w2), <(n1,n2)));
-     <=(@wnPair(w1,n1), @wnPair(w2,n2)) = ||(<(w1,w2), &&(==(w1,w2), <=(n1,n2)));
      @first(@nnPair(m,n)) = m;
      @last(@nnPair(m,n)) = n;
-     @first(@wnPair(w,n)) = w;
-     @last(@wnPair(w,n)) = n;
 
 %Residues. 
 

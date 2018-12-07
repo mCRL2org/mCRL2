@@ -1116,7 +1116,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vc}), difference(s, empty(s), vc), empty(s)));
         result.push_back(data_equation(variable_list({vb, vc, vd, vp}), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vp, vc)), difference(s, vb, vc)));
         result.push_back(data_equation(variable_list({vb, vc, vd, vp, vq}), less(vp, vq), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), difference(s, vb, vc)));
-        result.push_back(data_equation(variable_list({vb, vc, vd, vp, vq}), less(vq, vp), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_nat::nat2pos(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vp, vq)), difference(s, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, vp, vq}), less(vq, vp), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_nat::nat2pos(sort_nat::monus(vp, vq)), difference(s, vb, vc))));
         result.push_back(data_equation(variable_list({vb, vc, vd, ve, vp, vq}), less(vd, ve), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, vd, vp, difference(s, vb, cons_(s, ve, vq, vc)))));
         result.push_back(data_equation(variable_list({vb, vc, vd, ve, vp, vq}), less(ve, vd), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, difference(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(variable_list({vb}), union_(s, vb, empty(s)), vb));

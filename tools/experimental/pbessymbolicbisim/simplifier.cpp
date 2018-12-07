@@ -72,10 +72,10 @@ data_specification simplifier::norm_rules_spec()
   // Formulate all linear equalities with positive rhs: -1 * x_P <= -5   !(1 * x_P < 5)
   ad_hoc_data.add_equation(data_equation(variable_list({vr1, vp1, vp2}),
     less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
-    sort_bool::not_(less(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
+    sort_bool::not_(less(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::pos2nat(vp1)), vp2)))));
   ad_hoc_data.add_equation(data_equation(variable_list({vr1, vp1, vp2}),
     less(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
-    sort_bool::not_(less_equal(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
+    sort_bool::not_(less_equal(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::pos2nat(vp1)), vp2)))));
   // -1 * (-1 * r) = r
   ad_hoc_data.add_equation(data_equation(variable_list({vr1}), sort_real::times(real_minus_one(), sort_real::times(real_minus_one(), vr1)), vr1));
   // -1 * -r = r
@@ -119,10 +119,10 @@ data_specification simplifier::norm_rules_spec()
     less(vp1, sort_pos::succ(vp1)), sort_bool::true_()));
   // succ(n) < n = false
   ad_hoc_data.add_equation(data_equation(variable_list({vn1}),
-    less(sort_nat::cnat(sort_nat::succ(vn1)), vn1), sort_bool::false_()));
+    less(sort_nat::pos2nat(sort_nat::succ(vn1)), vn1), sort_bool::false_()));
   // n < succ(n) = true
   ad_hoc_data.add_equation(data_equation(variable_list({vn1}),
-    less(vn1, sort_nat::cnat(sort_nat::succ(vn1))), sort_bool::true_()));
+    less(vn1, sort_nat::pos2nat(sort_nat::succ(vn1))), sort_bool::true_()));
 
   return ad_hoc_data;
 }
