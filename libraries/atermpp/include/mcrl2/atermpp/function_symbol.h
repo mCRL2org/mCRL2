@@ -97,7 +97,7 @@ class function_symbol
     {
       assert(m_function_symbol_store_is_defined);
       /* This function must exist in the store */
-      assert(function_symbol_store().count(m_function_symbol->first)>0);
+      assert(function_symbol_store().find(m_function_symbol->first)!=function_symbol_store().end());
       /* The reference count must be larger than 1, which ought to be an invariant
          for all functions_symbols in function_symbol_store. */
       assert(m_function_symbol->second.reference_count()>0);
@@ -191,7 +191,7 @@ class function_symbol
     /// \return The arity of the function symbol.
     std::size_t arity() const
     {
-      assert(is_valid());
+      // assert(is_valid());   This check is very time consuming, and therefore outcommented. 
       return m_function_symbol->first.arity();
     }
 
@@ -202,8 +202,8 @@ class function_symbol
     /// \returns True iff the function symbols are the same.
     bool operator ==(const function_symbol& f) const
     {
-      assert(is_valid());
-      assert(f.is_valid());
+      // assert(is_valid()); This check is very time consuming, and therefore outcommented. 
+      // assert(f.is_valid());
       return m_function_symbol==f.m_function_symbol;
     }
 
@@ -212,8 +212,8 @@ class function_symbol
     /// \returns True iff the function symbols are not equal.
     bool operator !=(const function_symbol& f) const
     {
-      assert(is_valid());
-      assert(f.is_valid());
+      // assert(is_valid()); This check is very time consuming, and therefore outcommented. 
+      // assert(f.is_valid());
       return m_function_symbol!=f.m_function_symbol;
     }
 
@@ -222,8 +222,8 @@ class function_symbol
     /// \returns True iff this function has a lower index than the argument.
     bool operator <(const function_symbol& f) const
     {
-      assert(is_valid());
-      assert(f.is_valid());
+      // assert(is_valid()); This check is very time consuming, and therefore outcommented. 
+      // assert(f.is_valid());
       return m_function_symbol<f.m_function_symbol;
     }
 
@@ -232,8 +232,8 @@ class function_symbol
     /// \returns True iff this function has a higher index than the argument.
     bool operator >(const function_symbol& f) const
     {
-      assert(is_valid());
-      assert(f.is_valid());
+      // assert(is_valid()); This check is very time consuming, and therefore outcommented. 
+      // assert(f.is_valid());
       return m_function_symbol>f.m_function_symbol;
     }
 
@@ -242,8 +242,8 @@ class function_symbol
     /// \returns True iff this function has a lower or equal index than the argument.
     bool operator <=(const function_symbol& f) const
     {
-      assert(is_valid());
-      assert(f.is_valid());
+      // assert(is_valid());  This check is very time consuming, and therefore outcommented. 
+      // assert(f.is_valid());
       return m_function_symbol<=f.m_function_symbol;
     }
 
@@ -252,8 +252,8 @@ class function_symbol
     /// \returns True iff this function has a larger or equal index than the argument.
     bool operator >=(const function_symbol& f) const
     {
-      assert(is_valid());
-      assert(f.is_valid());
+      // assert(is_valid());  This check is very time consuming, and therefore outcommented. 
+      // assert(f.is_valid());
       return m_function_symbol>=f.m_function_symbol;
     }
 

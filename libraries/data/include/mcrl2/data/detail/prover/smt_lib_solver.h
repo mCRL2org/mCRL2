@@ -350,10 +350,10 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         translate_pred(a_clause);
       }
-      else if (sort_pos::is_add_with_carry_application(a_clause))
+      /* else if (sort_pos::is_add_with_carry_application(a_clause))   Removed with move to 64 bit. 
       {
         translate_add_c(a_clause);
-      }
+      } */
       /* else if (sort_nat::is_cnat_application(a_clause))
       {
 // TODO NEEDS TO BE ADAPTED FOR THE NEW 64 bits data types.

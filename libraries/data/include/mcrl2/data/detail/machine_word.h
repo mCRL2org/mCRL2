@@ -13,6 +13,7 @@
 #define MCRL2_DATA_DETAIL_MACHINE_WORD_H
 
 #include <limits>
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/machine_number.h"
 
 namespace mcrl2
@@ -38,6 +39,24 @@ inline const machine_number& zero_word()
 inline const machine_number& one_word()
 {
   static machine_number zero=machine_number(1);
+  return zero;
+}
+
+inline const machine_number& two_word()
+{
+  static machine_number zero=machine_number(2);
+  return zero;
+}
+
+inline const machine_number& three_word()
+{
+  static machine_number zero=machine_number(3);
+  return zero;
+}
+
+inline const machine_number& four_word()
+{
+  static machine_number zero=machine_number(4);
   return zero;
 }
 
@@ -84,7 +103,7 @@ inline machine_number add_overflow_word(const machine_number& n1, const machine_
 {
   const std::size_t v1=n1.value();
   const std::size_t v2=n2.value();
-  return (v1+v2>v1?detail::zero_word():detail::one_word());
+  return (v1+v2>=v1?detail::zero_word():detail::one_word());
 }
 
 inline machine_number times_word(const machine_number& n1, const machine_number& n2)
@@ -122,11 +141,7 @@ inline machine_number mod_word(const machine_number& n1, const machine_number& n
   return machine_number(v1 % v2);
 }
 
-inline machine_number sqrt_word(const machine_number& n)
-{
-  return machine_number(static_cast<std::size_t>(sqrt(n.value())));
-}
-
+// Calculates (base*n1 + n2) div n3.
 inline machine_number div_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3)
 {
   __uint128_t m1=n1.value();
@@ -152,8 +167,18 @@ inline machine_number div_double_doubleword(const machine_number& n1, const mach
   return machine_number(m1 / m3);
 }
 
+inline machine_number mod_double_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4)
+{
+  __uint128_t m1=n1.value();
+  m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
+  __uint128_t m3=n3.value();;
+  m3 = (m3 << std::numeric_limits<std::size_t>::digits) + n4.value();
+  return machine_number(m1 % m3);
+}
+
 inline machine_number div_triple_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4, const machine_number& n5)
 {
+  // TODO 
   static_cast<void>(n5);  // Suppress unused variable warnings.
   __uint128_t m1=n1.value();
   m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
@@ -164,17 +189,14 @@ inline machine_number div_triple_doubleword(const machine_number& n1, const mach
   return machine_number(m1 / m3);
 }
 
-inline machine_number mod_double_doubleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4)
+inline machine_number sqrt_word(const machine_number& n)
 {
-  __uint128_t m1=n1.value();
-  m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
-  __uint128_t m3=n3.value();;
-  m3 = (m3 << std::numeric_limits<std::size_t>::digits) + n4.value();
-  return machine_number(m1 % m3);
+  return machine_number(static_cast<std::size_t>(sqrt(n.value())));
 }
 
 inline machine_number sqrt_doubleword(const machine_number& n1, const machine_number& n2)
 {
+  // TODO 
   __uint128_t m1=n1.value();
   m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
   // unfinished 
@@ -184,6 +206,7 @@ inline machine_number sqrt_doubleword(const machine_number& n1, const machine_nu
 
 inline machine_number sqrt_tripleword(const machine_number& n1, const machine_number& n2, const machine_number& n3)
 {
+  // TODO 
   static_cast<void>(n2);  // Suppress unused variable warnings.
   static_cast<void>(n3);  // Suppress unused variable warnings.
   assert(0);  // Not implemented. 
@@ -192,6 +215,7 @@ inline machine_number sqrt_tripleword(const machine_number& n1, const machine_nu
 
 inline machine_number sqrt_tripleword_overflow(const machine_number& n1, const machine_number& n2, const machine_number& n3)
 {
+  // TODO 
   static_cast<void>(n2);  // Suppress unused variable warnings.
   static_cast<void>(n3);  // Suppress unused variable warnings.
   assert(0);  // Not implemented. 
@@ -200,6 +224,7 @@ inline machine_number sqrt_tripleword_overflow(const machine_number& n1, const m
 
 inline machine_number sqrt_quadrupleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4)
 {
+  // TODO 
   static_cast<void>(n2);  // Suppress unused variable warnings.
   static_cast<void>(n3);  // Suppress unused variable warnings.
   static_cast<void>(n4);  // Suppress unused variable warnings.
@@ -209,6 +234,7 @@ inline machine_number sqrt_quadrupleword(const machine_number& n1, const machine
 
 inline machine_number sqrt_quadrupleword_overflow(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4)
 {
+  // TODO 
   static_cast<void>(n2);  // Suppress unused variable warnings.
   static_cast<void>(n3);  // Suppress unused variable warnings.
   static_cast<void>(n4);  // Suppress unused variable warnings.
@@ -257,6 +283,27 @@ inline const data_expression& one_word_manual_implementation()
   return detail::one_word();
 }
 
+/// \brief The machine number representing 2.
+/// \return The machine number 2.
+inline const data_expression& two_word_manual_implementation()
+{
+  return detail::two_word();
+}
+
+/// \brief The machine number representing 3.
+/// \return The machine number 3.
+inline const data_expression& three_word_manual_implementation()
+{
+  return detail::three_word();
+}
+
+/// \brief The machine number representing 4.
+/// \return The machine number 4.
+inline const data_expression& four_word_manual_implementation()
+{
+  return detail::four_word();
+}
+
 /// \brief The largest representable machine number.
 /// \return The largest number a machine word can hold. 
 inline const data_expression& max_word_manual_implementation()
@@ -283,7 +330,7 @@ inline data_expression equal_word_manual_implementation(const data_expression& e
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   {
-    bool b=detail::equal_word(atermpp::down_cast<machine_number>(e1),atermpp::down_cast<machine_number>(e2));
+    const bool b=detail::equal_word(atermpp::down_cast<machine_number>(e1),atermpp::down_cast<machine_number>(e2));
     return (b? sort_bool::true_(): sort_bool::false_());
   }
 }
@@ -296,7 +343,7 @@ inline data_expression less_word_manual_implementation(const data_expression& e1
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   {
-    bool b=detail::less_word(atermpp::down_cast<machine_number>(e1),atermpp::down_cast<machine_number>(e2));
+    const bool b=detail::less_word(atermpp::down_cast<machine_number>(e1),atermpp::down_cast<machine_number>(e2));
     return (b? sort_bool::true_(): sort_bool::false_());
   }
 }
@@ -309,7 +356,7 @@ inline data_expression lessequal_word_manual_implementation(const data_expressio
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   {
-    bool b=detail::lessequal_word(atermpp::down_cast<machine_number>(e1),atermpp::down_cast<machine_number>(e2));
+    const bool b=detail::lessequal_word(atermpp::down_cast<machine_number>(e1),atermpp::down_cast<machine_number>(e2));
     return (b? sort_bool::true_(): sort_bool::false_());
   }
 }

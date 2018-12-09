@@ -13,6 +13,7 @@
 
 #include <cassert>
 #include "mcrl2/utilities/toolset_version_const.h"
+#include "mcrl2/data/detail/machine_word.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 
@@ -265,6 +266,11 @@ data_expression rewrite_appl_aux(const application& t, RewriterCompilingJitty* t
 static inline
 data_expression rewrite_aux(const data_expression& t, const bool arguments_in_normal_form, RewriterCompilingJitty* this_rewriter)
 {
+  if (is_machine_number(t))
+  {
+    return t;
+  }
+  else 
   if (is_function_symbol(t))
   {
     const std::size_t arity=0;

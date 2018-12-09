@@ -474,6 +474,10 @@ static data_expression subst_values(
             const data_expression& t,
             data::enumerator_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
 {
+  if (is_machine_number(t))
+  {
+    return t;
+  }
   if (is_function_symbol(t))
   {
     return t;
@@ -577,7 +581,7 @@ static bool match_jitty(
                     jitty_assignments_for_a_rewrite_rule& assignments,
                     const bool term_context_guarantees_normal_form)
 {
-  if (is_function_symbol(p))
+  if (is_function_symbol(p) || is_machine_number(p))
   {
     return p==t;
   }
@@ -600,7 +604,7 @@ static bool match_jitty(
   }
   else
   {
-    if (is_function_symbol(t) || is_variable(t) || is_abstraction(t) || is_where_clause(t))
+    if (is_machine_number(t) || is_function_symbol(t) || is_variable(t) || is_abstraction(t) || is_where_clause(t))
     {
       return false;
     }
@@ -933,8 +937,8 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
   {
     if (rule.is_rewrite_index())
     {
-      assert(0); // JFG: I expect that this case is not possible. Remove if not true. 
-                 // If true, then this check does not need to be done and the assert can be lifted up. 
+      // In this case a standalone function symbol is rewritten, which could have arguments. 
+      // It is not needed to rewrite the arguments. 
       break;
     }
     else if (rule.is_cpp_code())
@@ -967,13 +971,13 @@ data_expression RewriterJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-std::cerr << "START REWRITE " << term << "\n" << atermpp::aterm(term) << "\n";
+// std::cerr << "START REWRITE " << term << "\n"; // << atermpp::aterm(term) << "\n";
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
   const data_expression& t=rewrite_aux(term, sigma);
   assert(remove_normal_form_function(t)==t);
-std::cerr << "END REWRITE " << term << "  ---> " << t << "\n" << atermpp::aterm(t) << "\n";
+//  std::cerr << "END REWRITE " << term << "  ---> " << t << "\n"; // << atermpp::aterm(t) << "\n";
   return t;
 }
 

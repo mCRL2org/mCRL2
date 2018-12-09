@@ -847,75 +847,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@dub.
-      /// \return Identifier \@dub.
-      inline
-      const core::identifier_string& dub_name()
-      {
-        static core::identifier_string dub_name = core::identifier_string("@dub");
-        return dub_name;
-      }
-
-      // This function is not intended for public use and therefore not documented in Doxygen.
-      inline
-      function_symbol dub(const sort_expression& s0, const sort_expression& s1)
-      {
-        sort_expression target_sort;
-        if (s0 == sort_bool::bool_() && s1 == int_())
-        {
-          target_sort = int_();
-        }
-        else if (s0 == sort_bool::bool_() && s1 == sort_nat::nat())
-        {
-          target_sort = sort_nat::nat();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for dub with domain sorts " + pp(s0) + ", " + pp(s1));
-        }
-
-        function_symbol dub(dub_name(), make_function_sort(s0, s1, target_sort));
-        return dub;
-      }
-
-      /// \brief Recogniser for function \@dub.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@dub
-      inline
-      bool is_dub_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == dub_name() && function_sort(f.sort()).domain().size() == 2 && (f == dub(sort_bool::bool_(), int_()) || f == dub(sort_bool::bool_(), sort_nat::nat()));
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@dub.        
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression. 
-      /// \return Application of \@dub to a number of arguments.
-      inline
-      application dub(const data_expression& arg0, const data_expression& arg1)
-      {
-        return sort_int::dub(arg0.sort(), arg1.sort())(arg0, arg1);
-      }
-
-      /// \brief Recogniser for application of \@dub.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol dub to a
-      ///     number of arguments.
-      inline
-      bool is_dub_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_dub_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
       /// \brief Generate identifier +.
       /// \return Identifier +.
       inline
@@ -1346,7 +1277,6 @@ namespace mcrl2 {
         result.push_back(sort_int::succ(int_()));
         result.push_back(sort_int::pred(sort_nat::nat()));
         result.push_back(sort_int::pred(int_()));
-        result.push_back(sort_int::dub(sort_bool::bool_(), int_()));
         result.push_back(sort_int::plus(int_(), int_()));
         result.push_back(sort_int::minus(sort_pos::pos(), sort_pos::pos()));
         result.push_back(sort_int::minus(sort_nat::nat(), sort_nat::nat()));
@@ -1410,7 +1340,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -1422,7 +1352,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -1490,15 +1420,12 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn}), pred(vn), if_(equal_to(vn, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), cneg(sort_pos::most_significant_digit(sort_machine_word::one_word())), cint(sort_nat::natpred(vn)))));
         result.push_back(data_equation(variable_list({vn}), pred(cint(vn)), pred(vn)));
         result.push_back(data_equation(variable_list({vp}), pred(cneg(vp)), cneg(succ(vp))));
-        result.push_back(data_equation(variable_list({vb, vn}), dub(vb, cint(vn)), cint(dub(vb, vn))));
-        result.push_back(data_equation(variable_list({vp}), dub(sort_bool::false_(), cneg(vp)), cneg(sort_pos::cdub(sort_bool::false_(), vp))));
-        result.push_back(data_equation(variable_list({vp}), dub(sort_bool::true_(), cneg(vp)), negate(dub(sort_bool::true_(), pred(vp)))));
         result.push_back(data_equation(variable_list({vm, vn}), plus(cint(vm), cint(vn)), cint(plus(vm, vn))));
         result.push_back(data_equation(variable_list({vn, vp}), plus(cint(vn), cneg(vp)), minus(vn, sort_nat::pos2nat(vp))));
         result.push_back(data_equation(variable_list({vn, vp}), plus(cneg(vp), cint(vn)), minus(vn, sort_nat::pos2nat(vp))));
-        result.push_back(data_equation(variable_list({vp, vq}), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
-        result.push_back(data_equation(variable_list({vp, vq}), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::monus(vp, vq))));
-        result.push_back(data_equation(variable_list({vp, vq}), less(vp, vq), minus(vp, vq), negate(sort_nat::monus(vq, vp))));
+        result.push_back(data_equation(variable_list({vp, vq}), plus(cneg(vp), cneg(vq)), cneg(plus(vp, vq))));
+        result.push_back(data_equation(variable_list({vp, vq}), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::monus(sort_nat::pos2nat(vp), sort_nat::pos2nat(vq)))));
+        result.push_back(data_equation(variable_list({vp, vq}), less(vp, vq), minus(vp, vq), negate(sort_nat::monus(sort_nat::pos2nat(vq), sort_nat::pos2nat(vp)))));
         result.push_back(data_equation(variable_list({vm, vn}), less_equal(vn, vm), minus(vm, vn), cint(sort_nat::monus(vm, vn))));
         result.push_back(data_equation(variable_list({vm, vn}), less(vm, vn), minus(vm, vn), negate(sort_nat::monus(vn, vm))));
         result.push_back(data_equation(variable_list({vx, vy}), minus(vx, vy), plus(vx, negate(vy))));

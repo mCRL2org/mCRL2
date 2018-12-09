@@ -9,61 +9,61 @@
 % Specification of the Nat data sort.
 
 #include bool.spec
-#include pos.spec
-#supertypeof Pos
+#include pos_old.spec
+#supertypeof Pos_old
 
-sort Nat <"nat">;
+sort Nat_old <"nat_old">;
 % Auxiliary sort natpair, pair of natural numbers
      @NatPair <"natpair">;
 
-cons @c0 <"c0"> : Nat                                                                                          internal defined_by_rewrite_rules;
-     @cNat <"cnat"> : Pos <"arg"> -> Nat                                                                       internal defined_by_rewrite_rules; 
+cons @c0 <"c0"> : Nat_old                                                                                          internal defined_by_rewrite_rules;
+     @cNat <"cnat"> : Pos_old <"arg"> -> Nat_old                                                                       internal defined_by_rewrite_rules; 
 % Constructor for natpair
-     @cPair <"cpair"> : Nat <"arg1"> # Nat <"arg2"> -> @NatPair                                                internal defined_by_rewrite_rules;
+     @cPair <"cpair"> : Nat_old <"arg1"> # Nat_old <"arg2"> -> @NatPair                                                internal defined_by_rewrite_rules;
 
-map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat                                                                   external defined_by_rewrite_rules;
-    Nat2Pos <"nat2pos"> : Nat <"arg"> -> Pos                                                                   external defined_by_rewrite_rules;
-    max <"maximum">:Pos <"left"> #Nat <"right">->Pos                                                           external defined_by_rewrite_rules;
-    max <"maximum">:Nat <"left"> #Pos <"right">->Pos                                                           external defined_by_rewrite_rules;
-    max <"maximum">:Nat <"left"> #Nat <"right">->Nat                                                           external defined_by_rewrite_rules;
-    min <"minimum">:Nat <"left"> #Nat <"right">->Nat                                                           external defined_by_rewrite_rules;
-    succ <"succ">:Nat <"arg">->Pos                                                                             external defined_by_rewrite_rules;
-    pred <"pred">:Pos <"arg">->Nat                                                                             external defined_by_rewrite_rules;
-    @dub <"dub">:Bool <"left"> # Nat <"right"> -> Nat                                                          internal defined_by_rewrite_rules;
-    + <"plus">:Pos <"left"> #Nat <"right">->Pos                                                                external defined_by_rewrite_rules;
-    + <"plus">:Nat <"left"> #Pos <"right">->Pos                                                                external defined_by_rewrite_rules;
-    + <"plus">:Nat <"left"> #Nat <"right">->Nat                                                                external defined_by_rewrite_rules;
-    @gtesubtb <"gte_subtract_with_borrow">: Bool <"arg1"> # Pos <"arg2"> # Pos <"arg3"> -> Nat                 internal defined_by_rewrite_rules;
-    * <"times">:Nat <"left"> #Nat <"right">->Nat                                                               external defined_by_rewrite_rules;
-    div <"div">: Nat <"left"> # Pos <"right"> -> Nat                                                           external defined_by_rewrite_rules;
-    mod <"mod">:Nat <"left"> # Pos <"right"> -> Nat                                                            external defined_by_rewrite_rules;
-    exp <"exp">:Pos <"left"> # Nat <"right"> -> Pos                                                            external defined_by_rewrite_rules;
-    exp <"exp">:Nat <"left"> # Nat <"right"> -> Nat                                                            external defined_by_rewrite_rules;
-    @even <"even">:Nat <"arg"> -> Bool                                                                         external defined_by_rewrite_rules;
-    @monus <"monus">:Nat <"left"> # Nat <"right"> -> Nat                                                       external defined_by_rewrite_rules;
-    @swap_zero <"swap_zero">:Nat <"left"> # Nat <"right"> -> Nat                                               internal defined_by_rewrite_rules;
-    @swap_zero_add <"swap_zero_add">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat          internal defined_by_rewrite_rules;
-    @swap_zero_min <"swap_zero_min">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat          internal defined_by_rewrite_rules;
-    @swap_zero_monus <"swap_zero_monus">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat      internal defined_by_rewrite_rules;
-    sqrt <"sqrt">:Nat <"arg"> -> Nat                                                                           external defined_by_rewrite_rules;
-    @sqrt_nat <"sqrt_nat_aux_func">:Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> Nat                          internal defined_by_rewrite_rules;
+map Pos2Nat <"pos2nat"> : Pos_old <"arg"> -> Nat_old                                                                   external defined_by_rewrite_rules;
+    Nat2Pos <"nat2pos"> : Nat_old <"arg"> -> Pos_old                                                                   external defined_by_rewrite_rules;
+    max <"maximum">:Pos_old <"left"> #Nat_old <"right">->Pos_old                                                           external defined_by_rewrite_rules;
+    max <"maximum">:Nat_old <"left"> #Pos_old <"right">->Pos_old                                                           external defined_by_rewrite_rules;
+    max <"maximum">:Nat_old <"left"> #Nat_old <"right">->Nat_old                                                           external defined_by_rewrite_rules;
+    min <"minimum">:Nat_old <"left"> #Nat_old <"right">->Nat_old                                                           external defined_by_rewrite_rules;
+    succ <"succ">:Nat_old <"arg">->Pos_old                                                                             external defined_by_rewrite_rules;
+    pred <"pred">:Pos_old <"arg">->Nat_old                                                                             external defined_by_rewrite_rules;
+    @dub <"dub">:Bool <"left"> # Nat_old <"right"> -> Nat_old                                                          internal defined_by_rewrite_rules;
+    + <"plus">:Pos_old <"left"> #Nat_old <"right">->Pos_old                                                                external defined_by_rewrite_rules;
+    + <"plus">:Nat_old <"left"> #Pos_old <"right">->Pos_old                                                                external defined_by_rewrite_rules;
+    + <"plus">:Nat_old <"left"> #Nat_old <"right">->Nat_old                                                                external defined_by_rewrite_rules;
+    @gtesubtb <"gte_subtract_with_borrow">: Bool <"arg1"> # Pos_old <"arg2"> # Pos_old <"arg3"> -> Nat_old                 internal defined_by_rewrite_rules;
+    * <"times">:Nat_old <"left"> #Nat_old <"right">->Nat_old                                                               external defined_by_rewrite_rules;
+    div <"div">: Nat_old <"left"> # Pos_old <"right"> -> Nat_old                                                           external defined_by_rewrite_rules;
+    mod <"mod">:Nat_old <"left"> # Pos_old <"right"> -> Nat_old                                                            external defined_by_rewrite_rules;
+    exp <"exp">:Pos_old <"left"> # Nat_old <"right"> -> Pos_old                                                            external defined_by_rewrite_rules;
+    exp <"exp">:Nat_old <"left"> # Nat_old <"right"> -> Nat_old                                                            external defined_by_rewrite_rules;
+    @even <"even">:Nat_old <"arg"> -> Bool                                                                         external defined_by_rewrite_rules;
+    @monus <"monus">:Nat_old <"left"> # Nat_old <"right"> -> Nat_old                                                       external defined_by_rewrite_rules;
+    @swap_zero <"swap_zero">:Nat_old <"left"> # Nat_old <"right"> -> Nat_old                                               internal defined_by_rewrite_rules;
+    @swap_zero_add <"swap_zero_add">:Nat_old <"arg1"> # Nat_old <"arg2"> # Nat_old <"arg3"> # Nat_old <"arg4"> -> Nat_old          internal defined_by_rewrite_rules;
+    @swap_zero_min <"swap_zero_min">:Nat_old <"arg1"> # Nat_old <"arg2"> # Nat_old <"arg3"> # Nat_old <"arg4"> -> Nat_old          internal defined_by_rewrite_rules;
+    @swap_zero_monus <"swap_zero_monus">:Nat_old <"arg1"> # Nat_old <"arg2"> # Nat_old <"arg3"> # Nat_old <"arg4"> -> Nat_old      internal defined_by_rewrite_rules;
+    sqrt <"sqrt">:Nat_old <"arg"> -> Nat_old                                                                           external defined_by_rewrite_rules;
+    @sqrt_nat <"sqrt_nat_aux_func">:Nat_old <"arg1"> # Nat_old <"arg2"> # Pos_old <"arg3"> -> Nat_old                          internal defined_by_rewrite_rules;
 
 % functions for natpair
-    @first <"first"> : @NatPair <"arg"> -> Nat                                                                 internal defined_by_rewrite_rules;
-    @last <"last"> : @NatPair <"arg"> -> Nat                                                                   internal defined_by_rewrite_rules;
-    @divmod <"divmod"> : Pos <"left"> # Pos <"right"> -> @NatPair                                              internal defined_by_rewrite_rules;
-    @gdivmod <"generalised_divmod"> : @NatPair <"arg1"> # Bool <"arg2"> # Pos <"arg3"> -> @NatPair             internal defined_by_rewrite_rules;
-    @ggdivmod <"doubly_generalised_divmod"> : Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> @NatPair           internal defined_by_rewrite_rules;
+    @first <"first"> : @NatPair <"arg"> -> Nat_old                                                                 internal defined_by_rewrite_rules;
+    @last <"last"> : @NatPair <"arg"> -> Nat_old                                                                   internal defined_by_rewrite_rules;
+    @divmod <"divmod"> : Pos_old <"left"> # Pos_old <"right"> -> @NatPair                                              internal defined_by_rewrite_rules;
+    @gdivmod <"generalised_divmod"> : @NatPair <"arg1"> # Bool <"arg2"> # Pos_old <"arg3"> -> @NatPair             internal defined_by_rewrite_rules;
+    @ggdivmod <"doubly_generalised_divmod"> : Nat_old <"arg1"> # Nat_old <"arg2"> # Pos_old <"arg3"> -> @NatPair           internal defined_by_rewrite_rules;
 
 
 var b:Bool;
     c:Bool;
-    p:Pos;
-    q:Pos;
-    n:Nat;
-    m:Nat;
-    u:Nat;
-    v:Nat;
+    p:Pos_old;
+    q:Pos_old;
+    n:Nat_old;
+    m:Nat_old;
+    u:Nat_old;
+    v:Nat_old;
 eqn ==(@c0, @cNat(p)) = false;
     ==(@cNat(p), @c0) = false;
     ==(@cNat(p), @cNat(q)) = ==(p,q);

@@ -61,9 +61,9 @@ eqn  ==(@cReal(x, p), @cReal(y, q))  =  ==(*(x, @cInt(Pos2Nat(q))), *(y, @cInt(P
      Int2Real(x)  =  @cReal(x, @c1);
      Nat2Real(n)  =  @cReal(@cInt(n), @c1);
      Pos2Real(p)  =  @cReal(@cInt(Pos2Nat(p)), @c1);
-     Real2Int(@cReal(x, @c1))  =  x;
-     Real2Nat(@cReal(x, @c1))  =  Int2Nat(x);
-     Real2Pos(@cReal(x, @c1))  =  Int2Pos(x);
+     ==(p,@c1) -> Real2Int(@cReal(x, p))  =  x;
+     ==(p,@c1) -> Real2Nat(@cReal(x, p))  =  Int2Nat(x);
+     ==(p,@c1) -> Real2Pos(@cReal(x, p))  =  Int2Pos(x);
      min(r, s)  =  if(<(r, s), r, s);
      max(r, s)  =  if(<(r, s), s, r);
      abs(r)  =  if(<(r, @cReal(@cInt(@c0), @c1)), -(r), r);
@@ -81,7 +81,7 @@ eqn  ==(@cReal(x, p), @cReal(y, q))  =  ==(*(x, @cInt(Pos2Nat(q))), *(y, @cInt(P
      !=(x, @cInt(@c0))  ->  exp(@cReal(x, p), @cNeg(q))  =  @redfrac(@cInt(Pos2Nat(exp(p, Pos2Nat(q)))), exp(x, Pos2Nat(q)));
      floor(@cReal(x, p))  =  div(x, p);
      ceil(r)  =  -(floor(-(r)));
-     round(r)  =  floor(+(r, @cReal(@cInt(Pos2Nat(@c1)), @cDub(false, @c1))));
+     round(r)  =  floor(+(r, @cReal(@cInt(Pos2Nat(@c1)), +(@c1, @c1))));
      @redfrac(x, @cNeg(p))  =  @redfrac(-(x), @cInt(Pos2Nat(p)));
      @redfrac(x, @cInt(n))  =  @redfracwhr(n, div(x, Nat2Pos(n)), mod(x, Nat2Pos(n)));
 

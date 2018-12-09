@@ -1080,7 +1080,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vb, vd, vp}), less(empty(s), cons_(s, vd, vp, vb)), sort_bool::true_()));
         result.push_back(data_equation(variable_list({vb, vc, vd, ve, vp, vq}), less(cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), sort_bool::or_(sort_bool::and_(equal_to(vp, vq), less(vb, vc)), sort_bool::and_(less(vp, vq), less_equal(vb, vc))), less_equal(cons_(s, vd, vp, vb), vc)))));
         result.push_back(data_equation(variable_list({vd, vp}), insert(s, vd, vp, empty(s)), cons_(s, vd, vp, empty(s))));
-        result.push_back(data_equation(variable_list({vb, vd, vp, vq}), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, sort_pos::add_with_carry(sort_bool::false_(), vp, vq), vb)));
+        result.push_back(data_equation(variable_list({vb, vd, vp, vq}), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, union_(s, vp, vq), vb)));
         result.push_back(data_equation(variable_list({vb, vd, ve, vp, vq}), less(vd, ve), insert(s, vd, vp, cons_(s, ve, vq, vb)), cons_(s, vd, vp, cons_(s, ve, vq, vb))));
         result.push_back(data_equation(variable_list({vb, vd, ve, vp, vq}), less(ve, vd), insert(s, vd, vp, cons_(s, ve, vq, vb)), cons_(s, ve, vq, insert(s, vd, vp, vb))));
         result.push_back(data_equation(variable_list({vb, vd}), cinsert(s, vd, sort_nat::c0(), vb), vb));
@@ -1121,7 +1121,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vb, vc, vd, ve, vp, vq}), less(ve, vd), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, difference(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(variable_list({vb}), union_(s, vb, empty(s)), vb));
         result.push_back(data_equation(variable_list({vc}), union_(s, empty(s), vc), vc));
-        result.push_back(data_equation(variable_list({vb, vc, vd, vp, vq}), union_(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_pos::add_with_carry(sort_bool::false_(), vp, vq), union_(s, vb, vc))));
+        result.push_back(data_equation(variable_list({vb, vc, vd, vp, vq}), union_(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, union_(s, vp, vq), union_(s, vb, vc))));
         result.push_back(data_equation(variable_list({vb, vc, vd, ve, vp, vq}), less(vd, ve), union_(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, vd, vp, union_(s, vb, cons_(s, ve, vq, vc)))));
         result.push_back(data_equation(variable_list({vb, vc, vd, ve, vp, vq}), less(ve, vd), union_(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, union_(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(variable_list({vb}), intersection(s, vb, empty(s)), empty(s)));
@@ -1131,7 +1131,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vb, vc, vd, ve, vp, vq}), less(ve, vd), intersection(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), intersection(s, cons_(s, vd, vp, vb), vc)));
         result.push_back(data_equation(variable_list(), count_all(s, empty(s)), sort_nat::c0()));
         result.push_back(data_equation(variable_list({vd, vp}), count_all(s, cons_(s, vd, vp, empty(s))), sort_nat::pos2nat(vp)));
-        result.push_back(data_equation(variable_list({vb, vd, ve, vp, vq}), count_all(s, cons_(s, vd, vp, cons_(s, ve, vq, vb))), sort_nat::pos2nat(sort_pos::add_with_carry(sort_bool::false_(), vp, sort_nat::nat2pos(count_all(s, cons_(s, ve, vq, vb)))))));
+        result.push_back(data_equation(variable_list({vb, vd, ve, vp, vq}), count_all(s, cons_(s, vd, vp, cons_(s, ve, vq, vb))), sort_nat::pos2nat(union_(s, vp, sort_nat::nat2pos(count_all(s, cons_(s, ve, vq, vb)))))));
         return result;
       }
 

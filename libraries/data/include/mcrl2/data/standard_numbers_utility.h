@@ -68,7 +68,7 @@ inline std::string vector_number_to_string(const std::vector< char >& v)
 }
 
 /// Type T is an unsigned type
-template< typename T >
+/* template< typename T >
 inline std::string as_decimal_string(T t)
 {
   if (t != 0)
@@ -86,12 +86,12 @@ inline std::string as_decimal_string(T t)
   }
 
   return "0";
-}
+} */
 
 /// \brief Divides a number in decimal notation represented by an array by two
 /// \param[in,out] s the number
 /// A number d0 d1 ... dn is represented as s[0] s[1] ... s[n]
-inline void decimal_number_divide_by_two(std::vector< char >& number)
+/* inline void decimal_number_divide_by_two(std::vector< char >& number)
 {
   assert(0 < number.size());
 
@@ -112,7 +112,7 @@ inline void decimal_number_divide_by_two(std::vector< char >& number)
   result.resize(j - result.begin());
 
   number.swap(result);
-}
+} */
 
 /// \brief Multiplies a number in decimal notation represented by an array by two
 /// \param[in,out] number the number
@@ -187,7 +187,7 @@ inline bool is_zero_number_vector(const std::vector< std::size_t >& v)
 }
 
 // Divide the vector v by two, and yield true if the vector was odd. 
-inline bool div2_number_vector(std::vector< std::size_t >& v)
+/* inline bool div2_number_vector(std::vector< std::size_t >& v)
 {
   bool carry=false;
   const std::size_t leftmost_carry_mask = (std::size_t)1 << (8*sizeof(std::size_t)-1);
@@ -207,7 +207,7 @@ inline bool div2_number_vector(std::vector< std::size_t >& v)
     v.pop_back();
   }
   return carry;
-}
+} */
 
 // Add the two number vectors. The least significant digit is at position 0.
 inline std::vector<std::size_t> add_number_vectors(const std::vector< std::size_t >& v1, 
@@ -247,20 +247,41 @@ inline std::vector<size_t> multiply_by10_and_add(const std::vector< size_t >& v,
   return result;
 }
 
-// Transform a number vector to a string representation of the same number.
-inline std::string number_vector_as_string(const std::vector< std::size_t >& v1)
+
+//CODE BELOW TO BE REMOVED.
+inline std::string pplocal(std::vector< char > v)
 {
-  std::vector< std::size_t > v=v1;
+  std::string result;
+  for(char c: v)
+  {
+     result += c + '0';
+  }
+  return result;
+}
+// END REMOVABLE DEBUG CODE 
+
+// Transform a number vector to a string representation of the same number.
+inline std::string number_vector_as_string(const std::vector< std::size_t >& v)
+{
   assert(!detail::is_zero_number_vector(v));
 
   std::vector< char > result = detail::string_to_vector_number("0");
+  bool is_zero=true; // Avoid doing many multiplications for small numbers. 
 
-  while (!detail::is_zero_number_vector(v)) 
+  for(size_t i=v.size(); i>0 ; --i)
   {
-    detail::decimal_number_multiply_by_two(result);
-    if (detail::div2_number_vector(v))
+    std::size_t n= v.at(i-1);
+    for(std::size_t mask = std::size_t(1)<<(8*sizeof(std::size_t)-1);  mask>0; mask=mask>>1)
     {
-      detail::decimal_number_increment(result);
+      if (!is_zero) 
+      { 
+        detail::decimal_number_multiply_by_two(result);
+      }
+      if ((n & mask) >0)
+      {
+        detail::decimal_number_increment(result);
+        is_zero=false;
+      }
     }
   }
 
@@ -308,34 +329,6 @@ pos(const T t)
   return most_significant_digit(machine_number(t));
 }
 
-/// \brief Constructs expression of type Pos from a string
-/// \param n A string
-inline data_expression pos(const std::string& n)
-{
-  std::vector< char > number_as_vector(detail::string_to_vector_number(n));
-
-  std::vector< bool > bits;
-  bits.reserve(number_as_vector.size());
-
-  while (0 < number_as_vector.size() && !((number_as_vector.size() == 1) && number_as_vector[0] == 1))   // number != 1
-  {
-    bits.push_back((static_cast< int >(*number_as_vector.rbegin()) % 2 != 0));
-
-    detail::decimal_number_divide_by_two(number_as_vector);
-  }
-
-  data_expression result(sort_pos::c1());
-
-  for (std::vector< bool >::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i)
-  {
-    result = sort_pos::cdub(sort_bool::bool_(*i), result);
-  }
-
-  return result;
-}
-
-/// \brief Determines whether n is a positive constant
-/// \param n A data expression
 inline bool is_positive_constant(const data_expression& n)
 {
   return (sort_pos::is_most_significant_digit_application(n) &&
@@ -369,6 +362,25 @@ std::string positive_constant_as_string(const data_expression& n_in)
 
   return detail::number_vector_as_string(number_vector);
 }
+
+/// \brief Constructs expression of type Pos from a string
+/// \param n A string
+inline data_expression pos(const std::string& n)
+{
+  std::vector<std::size_t> number_vector= detail::number_string_to_vector_number(n);
+
+  assert(!detail::is_zero_number_vector(number_vector));
+  
+  data_expression result=most_significant_digit(machine_number(number_vector.back()));
+  for(std::size_t i=number_vector.size()-1; i>0; ++i)
+  {
+    result = sort_pos::concat_digit(result,machine_number(number_vector.at(i-1)));
+  }
+  return result;
+}
+
+/// \brief Determines whether n is a positive constant
+/// \param n A data expression
 } // namespace sort_pos
 
 namespace sort_nat
@@ -381,25 +393,6 @@ nat(T t)
 {
   static_assert(sizeof(T)<=sizeof(std::size_t),"Can only convert numbers up till a size_t.");
   return sort_nat::most_significant_digit_nat(machine_number(t));
-}
-
-/// \brief Constructs expression of type Nat from a string
-/// \param n A string
-inline data_expression nat(const std::string& n)
-{
-  std::vector<std::size_t> number_vector= detail::number_string_to_vector_number(n);
-
-  if (number_vector.empty())
-  {
-    return most_significant_digit_nat(machine_number(0));
-  }
-  data_expression result=most_significant_digit_nat(machine_number(number_vector.back()));
-  for(std::size_t i=number_vector.size()-1; i>0; ++i)
-  {
-    result = sort_nat::concat_digit(sort_nat::nat(),sort_machine_word::machine_word())
-                       (result,machine_number(number_vector.at(i-1)));
-  }
-  return result;
 }
 
 /// \brief Determines whether n is a natural constant
@@ -438,6 +431,24 @@ inline std::string natural_constant_as_string(const data_expression& n_in)
   }
 
   return detail::number_vector_as_string(number_vector);
+}
+
+/// \brief Constructs expression of type Nat from a string
+/// \param n A string
+inline data_expression nat(const std::string& n)
+{
+  std::vector<std::size_t> number_vector= detail::number_string_to_vector_number(n);
+
+  if (number_vector.empty())
+  {
+    return most_significant_digit_nat(machine_number(0));
+  }
+  data_expression result=most_significant_digit_nat(machine_number(number_vector.back()));
+  for(std::size_t i=number_vector.size()-1; i>0; ++i)
+  {
+    result = sort_nat::concat_digit(result,machine_number(number_vector.at(i-1)));
+  }
+  return result;
 }
 } // namespace sort_nat
 

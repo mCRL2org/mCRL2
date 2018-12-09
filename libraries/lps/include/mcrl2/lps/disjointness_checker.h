@@ -77,6 +77,10 @@ inline
 void Disjointness_Checker::process_data_expression(std::size_t n, const data::data_expression& x)
 {
   // This should probably once be replaced by a visitor.
+  if (data::is_machine_number(x))
+  {
+    // Do nothing. 
+  }
   if (data::is_variable(x))
   {
     f_used_parameters_per_summand[n].insert(data::variable(x));
@@ -93,7 +97,7 @@ void Disjointness_Checker::process_data_expression(std::size_t n, const data::da
   }
   else if (data::is_function_symbol(x))
   {
-    // do nothing
+    // Do nothing.
   }
   else if (data::is_application(x))
   {

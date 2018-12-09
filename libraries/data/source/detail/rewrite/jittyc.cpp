@@ -1029,6 +1029,10 @@ class RewriterCompilingJitty::ImplementTree
   ///
   bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars)
   {
+    if (is_machine_number(t))
+    {
+      return true;
+    }
     if (is_function_symbol(t))
     {
       return opid_is_nf(down_cast<function_symbol>(t), 0);
@@ -1515,7 +1519,7 @@ class RewriterCompilingJitty::ImplementTree
       result_type << "data_expression";
       return;
     }
-    if (is_function_symbol(t))
+    if (is_function_symbol(t) || is_machine_number(t))
     {
       // This will never be reached, as it is dealt with in the if clause above.
       assert(0);
@@ -1985,15 +1989,15 @@ public:
   ImplementTree(RewriterCompilingJitty& rewr, function_symbol_vector& function_symbols)
     : m_rewriter(rewr), m_padding(2)
   {
-    for (function_symbol_vector::const_iterator it = function_symbols.begin(); it != function_symbols.end(); ++it)
+    for (const function_symbol& f: function_symbols)
     {
-      const std::size_t max_arity = getArity(*it);
+      const std::size_t max_arity = getArity(f);
       for (std::size_t arity = 0; arity <= max_arity; ++arity)
       {
-        if (arity_is_allowed(it->sort(), arity))
+        if (arity_is_allowed(f.sort(), arity))
         {
           // Register this <symbol, arity, nfs> tuple as a function that needs to be generated
-          static_cast<void>(rewr_function_name(*it, arity));
+          static_cast<void>(rewr_function_name(f, arity));
         }
       }
     }
@@ -2049,14 +2053,39 @@ public:
     }
   }
 
+  void implement_a_cplusplus_defined_function(
+             std::ostream& m_stream,
+             std::size_t arity,
+             const function_symbol& opid,
+             const data_specification& data_spec)
+  {
+    m_stream << m_padding << "// Implement function " << opid << "\n";
+    const std::string cplusplus_function_name = data_spec.cpp_implemented_functions().find(opid)->second.second;
+    m_stream << m_padding << "return " << cplusplus_function_name << "(";  
+    for(size_t i=0; i<arity; ++i)
+    {
+      m_stream << (i>0?",":"");
+      m_stream << "local_rewrite(arg_not_nf" << i << ",this_rewriter)";
+    }
+    m_stream << ");"; 
+  }
+
   void implement_strategy(
              std::ostream& m_stream, 
              match_tree_list strat, 
              std::size_t arity, 
              const function_symbol& opid,
              bracket_level_data& brackets,
-             std::stack<std::string>& auxiliary_code_fragments)
+             std::stack<std::string>& auxiliary_code_fragments,
+             const data_specification& data_spec)
   {
+    // First check whether this is a predefined function with the right arity. 
+    if (data_spec.cpp_implemented_functions().find(opid)!=data_spec.cpp_implemented_functions().end() &&
+        arity==getArity(opid))
+    {
+      implement_a_cplusplus_defined_function(m_stream, arity, opid, data_spec);
+      return;
+    }
     bool added_new_parameters_in_brackets=false;
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
     while (!strat.empty())
@@ -2290,7 +2319,8 @@ public:
              std::ostream& m_stream, 
              const data::function_symbol& func, 
              std::size_t arity, 
-             match_tree_list strategy)
+             match_tree_list strategy,
+             const data_specification& data_spec)
 
   {
     bracket_level_data brackets;
@@ -2301,7 +2331,7 @@ public:
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << "\n" << m_padding << "{\n";
     m_padding.indent();
-    implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments);
+    implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments,data_spec);
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
@@ -2396,7 +2426,7 @@ public:
     m_stream << m_padding << "\n";
   }
 
-  void generate_rewr_functions(std::ostream& m_stream)
+  void generate_rewr_functions(std::ostream& m_stream, const data_specification& data_spec)
   {
     while (!m_rewr_functions.empty())
     {
@@ -2409,7 +2439,7 @@ public:
       else
       {
         const match_tree_list strategy = m_rewriter.create_strategy(m_rewriter.jittyc_eqns[spec.fs()], spec.arity());
-        rewr_function_implementation(m_stream, spec.fs(), spec.arity(), strategy);
+        rewr_function_implementation(m_stream, spec.fs(), spec.arity(), strategy, data_spec);
       }
     }
   }
@@ -2555,7 +2585,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 
   rewr_code << "  // We're declaring static members in a struct rather than simple functions in\n"
                "  // the global scope, so that we don't have to worry about forward declarations.\n";
-  code_generator.generate_rewr_functions(rewr_code);
+  code_generator.generate_rewr_functions(rewr_code,m_data_specification_for_enumeration);
   rewr_code << "};\n"
                "} // namespace\n";
 

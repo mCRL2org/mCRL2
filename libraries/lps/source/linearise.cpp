@@ -1336,6 +1336,11 @@ class specification_basic_type
         return;
       }
 
+      if (is_machine_number(t))
+      {
+        return;
+      }
+
       if (is_abstraction(t))
       {
         // mCRL2log(mcrl2::log::warning) << "filtering of variables expression with binders" << std::endl;
@@ -4619,6 +4624,10 @@ class specification_basic_type
       const variable_list& stochastic_variables)
     {
       if (is_function_symbol(t))
+      {
+        return t;
+      }
+      if (is_machine_number(t))
       {
         return t;
       }

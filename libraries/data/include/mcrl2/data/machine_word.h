@@ -209,8 +209,8 @@ namespace mcrl2 {
       implementation_map machine_word_cpp_implementable_constructors()
       {
         implementation_map result;
-        result[sort_machine_word::zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::zero_word_application,"sort_machine_word::zero_word");
-        result[sort_machine_word::succ_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::succ_word_application,"sort_machine_word::succ_word");
+        result[sort_machine_word::zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::zero_word_application,"sort_machine_word::zero_word_manual_implementation");
+        result[sort_machine_word::succ_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::succ_word_application,"sort_machine_word::succ_word_manual_implementation");
 
         return result;
       }
@@ -260,6 +260,150 @@ namespace mcrl2 {
         assert(is_function_symbol(a));
         assert(a==one_word());
         return one_word_manual_implementation();
+      }
+
+
+      /// \brief Generate identifier \@two_word.
+      /// \return Identifier \@two_word.
+      inline
+      const core::identifier_string& two_word_name()
+      {
+        static core::identifier_string two_word_name = core::identifier_string("@two_word");
+        return two_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@two_word.       
+      /// \return Function symbol two_word.
+      inline
+      const function_symbol& two_word()
+      {
+        static function_symbol two_word(two_word_name(), machine_word());
+        return two_word;
+      }
+
+
+      /// \brief Recogniser for function \@two_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@two_word.
+      inline
+      bool is_two_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == two_word();
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the constant symbol \@two_word.
+      /// \details This function is to be implemented manually.       
+      /// \return The data expression corresponding to an application of \@two_word to a number of arguments.
+      inline
+      const data_expression& two_word_manual_implementation();
+
+      inline
+      data_expression two_word_application(const data_expression& a)
+      {
+        static_cast< void >(a); // suppress unused variable warning.
+        assert(is_function_symbol(a));
+        assert(a==two_word());
+        return two_word_manual_implementation();
+      }
+
+
+      /// \brief Generate identifier \@three_word.
+      /// \return Identifier \@three_word.
+      inline
+      const core::identifier_string& three_word_name()
+      {
+        static core::identifier_string three_word_name = core::identifier_string("@three_word");
+        return three_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@three_word.       
+      /// \return Function symbol three_word.
+      inline
+      const function_symbol& three_word()
+      {
+        static function_symbol three_word(three_word_name(), machine_word());
+        return three_word;
+      }
+
+
+      /// \brief Recogniser for function \@three_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@three_word.
+      inline
+      bool is_three_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == three_word();
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the constant symbol \@three_word.
+      /// \details This function is to be implemented manually.       
+      /// \return The data expression corresponding to an application of \@three_word to a number of arguments.
+      inline
+      const data_expression& three_word_manual_implementation();
+
+      inline
+      data_expression three_word_application(const data_expression& a)
+      {
+        static_cast< void >(a); // suppress unused variable warning.
+        assert(is_function_symbol(a));
+        assert(a==three_word());
+        return three_word_manual_implementation();
+      }
+
+
+      /// \brief Generate identifier \@four_word.
+      /// \return Identifier \@four_word.
+      inline
+      const core::identifier_string& four_word_name()
+      {
+        static core::identifier_string four_word_name = core::identifier_string("@four_word");
+        return four_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@four_word.       
+      /// \return Function symbol four_word.
+      inline
+      const function_symbol& four_word()
+      {
+        static function_symbol four_word(four_word_name(), machine_word());
+        return four_word;
+      }
+
+
+      /// \brief Recogniser for function \@four_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@four_word.
+      inline
+      bool is_four_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == four_word();
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the constant symbol \@four_word.
+      /// \details This function is to be implemented manually.       
+      /// \return The data expression corresponding to an application of \@four_word to a number of arguments.
+      inline
+      const data_expression& four_word_manual_implementation();
+
+      inline
+      data_expression four_word_application(const data_expression& a)
+      {
+        static_cast< void >(a); // suppress unused variable warning.
+        assert(is_function_symbol(a));
+        assert(a==four_word());
+        return four_word_manual_implementation();
       }
 
 
@@ -2039,6 +2183,9 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
         result.push_back(sort_machine_word::one_word());
+        result.push_back(sort_machine_word::two_word());
+        result.push_back(sort_machine_word::three_word());
+        result.push_back(sort_machine_word::four_word());
         result.push_back(sort_machine_word::max_word());
         result.push_back(sort_machine_word::add_word());
         result.push_back(sort_machine_word::add_overflow_word());
@@ -2083,31 +2230,34 @@ namespace mcrl2 {
       implementation_map machine_word_cpp_implementable_mappings()
       {
         implementation_map result;
-        result[sort_machine_word::one_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word");
-        result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word");
-        result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word");
-        result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word");
-        result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word");
-        result[sort_machine_word::times_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word");
-        result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word");
-        result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word");
-        result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word");
-        result[sort_machine_word::sqrt_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word");
-        result[sort_machine_word::div_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_doubleword_application,"sort_machine_word::div_doubleword");
-        result[sort_machine_word::div_double_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_double_doubleword_application,"sort_machine_word::div_double_doubleword");
-        result[sort_machine_word::div_triple_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_triple_doubleword_application,"sort_machine_word::div_triple_doubleword");
-        result[sort_machine_word::mod_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_doubleword_application,"sort_machine_word::mod_doubleword");
-        result[sort_machine_word::sqrt_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_doubleword_application,"sort_machine_word::sqrt_doubleword");
-        result[sort_machine_word::sqrt_tripleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_application,"sort_machine_word::sqrt_tripleword");
-        result[sort_machine_word::sqrt_tripleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_overflow_application,"sort_machine_word::sqrt_tripleword_overflow");
-        result[sort_machine_word::sqrt_quadrupleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_application,"sort_machine_word::sqrt_quadrupleword");
-        result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow");
-        result[sort_machine_word::pred_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word");
-        result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word");
-        result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word");
-        result[sort_machine_word::lessequal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::lessequal_word_application,"sort_machine_word::lessequal_word");
-        result[sort_machine_word::rightmost_bit()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::rightmost_bit_application,"sort_machine_word::rightmost_bit");
-        result[sort_machine_word::shift_right()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::shift_right_application,"sort_machine_word::shift_right");
+        result[sort_machine_word::one_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::one_word_application,"sort_machine_word::one_word_manual_implementation");
+        result[sort_machine_word::two_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::two_word_application,"sort_machine_word::two_word_manual_implementation");
+        result[sort_machine_word::three_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::three_word_application,"sort_machine_word::three_word_manual_implementation");
+        result[sort_machine_word::four_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::four_word_application,"sort_machine_word::four_word_manual_implementation");
+        result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word_manual_implementation");
+        result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word_manual_implementation");
+        result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word_manual_implementation");
+        result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word_manual_implementation");
+        result[sort_machine_word::times_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word_manual_implementation");
+        result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word_manual_implementation");
+        result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word_manual_implementation");
+        result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word_manual_implementation");
+        result[sort_machine_word::sqrt_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word_manual_implementation");
+        result[sort_machine_word::div_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_doubleword_application,"sort_machine_word::div_doubleword_manual_implementation");
+        result[sort_machine_word::div_double_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_double_doubleword_application,"sort_machine_word::div_double_doubleword_manual_implementation");
+        result[sort_machine_word::div_triple_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_triple_doubleword_application,"sort_machine_word::div_triple_doubleword_manual_implementation");
+        result[sort_machine_word::mod_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_doubleword_application,"sort_machine_word::mod_doubleword_manual_implementation");
+        result[sort_machine_word::sqrt_doubleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_doubleword_application,"sort_machine_word::sqrt_doubleword_manual_implementation");
+        result[sort_machine_word::sqrt_tripleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_application,"sort_machine_word::sqrt_tripleword_manual_implementation");
+        result[sort_machine_word::sqrt_tripleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_tripleword_overflow_application,"sort_machine_word::sqrt_tripleword_overflow_manual_implementation");
+        result[sort_machine_word::sqrt_quadrupleword()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_application,"sort_machine_word::sqrt_quadrupleword_manual_implementation");
+        result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow_manual_implementation");
+        result[sort_machine_word::pred_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word_manual_implementation");
+        result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word_manual_implementation");
+        result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word_manual_implementation");
+        result[sort_machine_word::lessequal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::lessequal_word_application,"sort_machine_word::lessequal_word_manual_implementation");
+        result[sort_machine_word::rightmost_bit()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::rightmost_bit_application,"sort_machine_word::rightmost_bit_manual_implementation");
+        result[sort_machine_word::shift_right()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::shift_right_application,"sort_machine_word::shift_right_manual_implementation");
         return result;
       }
       ///\brief Function for projecting out argument

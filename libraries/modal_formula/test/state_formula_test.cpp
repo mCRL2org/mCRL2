@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_parse)
   std::cerr << "--- f ---\n" << state_formulas::pp(f) << "\n\n" << f << std::endl;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
   BOOST_CHECK(ids.find(core::identifier_string("1")) == ids.end());
-  BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());
+  // BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());   This is not valid anymore with the transfer to 64 bit numbers. 
 }
 
 BOOST_AUTO_TEST_CASE(test_count_fixpoints)

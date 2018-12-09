@@ -210,10 +210,11 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
     return true;
   }
 
-  if (data::is_function_symbol(d)||is_variable(d))
+  if (data::is_function_symbol(d)||is_variable(d)||is_machine_number(d))
   {
     return true;
   }
+
 
   assert(0); // Unexpected data_expression.
   return true;
@@ -3844,7 +3845,7 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(greater(data::untyped_sort()));
   //Numbers
   add_system_constant(sort_pos::c1());
-  add_system_function(sort_pos::cdub());
+  // add_system_function(sort_pos::cdub()); This function does not exist since the transfer to 64 bit numbers. 
   add_system_constant(sort_nat::c0());
   // add_system_function(sort_nat::cnat()); This function does not exist in 64 bit numbers. 
   add_system_function(sort_nat::pos2nat());

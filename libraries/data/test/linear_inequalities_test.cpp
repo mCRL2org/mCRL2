@@ -44,6 +44,7 @@ void test_linear_inequality()
   check(li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' to be empty " + pp(li.lhs()));
 
   expr = less_equal(real_zero(), real_zero());
+std::cerr << "REWRITE " << expr << "----> " << rewr(expr) << "\n";
   li = linear_inequality(expr, rewr);
   check(li.is_true(rewr), "Expected '" + pp(expr) + "' to be true");
   check(li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' to be empty");

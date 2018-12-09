@@ -71,19 +71,22 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      @divmod_aux_whr5 <"divmod_aux_whr5">: Pos <"arg1"> # @word <"arg2"> # @NatNatPair <"arg3"> # Nat <"arg4"> -> @NatNatPair  internal defined_by_rewrite_rules;
      @divmod_aux_whr6 <"divmod_aux_whr6">: Pos <"arg1"> # @word <"arg2"> # @NatNatPair <"arg3"> # Nat <"arg4"> # Nat <"arg5"> -> @NatNatPair  internal defined_by_rewrite_rules;
      @msd <"msd">:  Nat <"arg"> -> @word                                                                         internal defined_by_rewrite_rules;
-% functions for pairs.
-     @first <"first"> : @NatNatPair <"arg"> -> Nat                                                               internal defined_by_rewrite_rules;
-     @last <"last"> : @NatNatPair <"arg"> -> Nat                                                                 internal defined_by_rewrite_rules;
-% The functions below are auxiliary and might be omitted. 
      @swap_zero <"swap_zero">:Nat <"left"> # Nat <"right"> -> Nat                                                internal defined_by_rewrite_rules;
      @swap_zero_add <"swap_zero_add">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat           internal defined_by_rewrite_rules;
      @swap_zero_min <"swap_zero_min">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat           internal defined_by_rewrite_rules;
      @swap_zero_monus <"swap_zero_monus">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat       internal defined_by_rewrite_rules;
-     @sqrt_nat <"sqrt_nat_aux_func">:Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> Nat                           internal defined_by_rewrite_rules;
-     @dub <"dub">:Bool <"left"> # Nat <"right"> -> Nat                                                           internal defined_by_rewrite_rules;
-%     @divmod <"divmod"> : Pos <"left"> # Pos <"right"> -> @NatPair                                               internal defined_by_rewrite_rules;
-%     @gdivmod <"generalised_divmod"> : @NatPair <"arg1"> # Bool <"arg2"> # Pos <"arg3"> -> @NatPair              internal defined_by_rewrite_rules;
-%     @ggdivmod <"doubly_generalised_divmod"> : Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> @NatPair            internal defined_by_rewrite_rules;
+     @sqrt_whr1 <"sqrt_whr1">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> Nat          internal defined_by_rewrite_rules;
+     @sqrt_whr2 <"sqrt_whr2">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> # @word <"arg5"> -> Nat          internal defined_by_rewrite_rules;
+     @sqrt_pair <"sqrt_pair">: Nat <"arg"> -> @NatNatPair                                                        internal defined_by_rewrite_rules;
+     @sqrt_pair_whr1 <"sqrt_pair_whr1">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # Nat <"arg4"> -> @NatNatPair  internal defined_by_rewrite_rules;
+     @sqrt_pair_whr2 <"sqrt_pair_whr2">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> # Nat <"arg5"> -> @NatNatPair          internal defined_by_rewrite_rules;
+     @sqrt_pair_whr3 <"sqrt_pair_whr3">: @word <"arg1"> # @word <"arg2"> # @NatNatPair <"arg3"> -> @NatNatPair   internal defined_by_rewrite_rules;
+     @sqrt_pair_whr4 <"sqrt_pair_whr4">: Nat <"arg1"> # @word <"arg2"> # @NatNatPair <"arg3"> # Nat <"arg4"> # Nat <"arg5"> # Nat <"arg6"> -> @NatNatPair          internal defined_by_rewrite_rules;
+     @sqrt_pair_whr5 <"sqrt_pair_whr5">: @NatNatPair <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> # Nat <"arg5"> -> @NatNatPair          internal defined_by_rewrite_rules;
+     @sqrt_pair_whr6 <"sqrt_pair_whr6">: Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> -> @NatNatPair               internal defined_by_rewrite_rules;
+% functions for pairs.
+     @first <"first"> : @NatNatPair <"arg"> -> Nat                                                               internal defined_by_rewrite_rules;
+     @last <"last"> : @NatNatPair <"arg"> -> Nat                                                                 internal defined_by_rewrite_rules;
 
 
 var  b:Bool;
@@ -94,9 +97,16 @@ var  b:Bool;
      m:Nat;
      m1:Nat;
      m2:Nat;
+     m3:Nat;
+     m4:Nat;
+     m5:Nat;
      predp:Nat;
      diff:Nat;
      shift_n1:Nat;
+     solution:Nat;
+     pq:Nat;
+     y:Nat;
+     y_guess:Nat;
      pair_:@NatNatPair;
      lp:Nat;
      w:@word;
@@ -105,34 +115,45 @@ var  b:Bool;
      w3:@word;
      w4:@word;
      shift_w:@word;
+     overflow:@word;
 
 eqn  @c0 = @most_significant_digitNat(@zero_word);
-     @succ_nat(@most_significant_digitNat(w)) = if(==(w,@max_word),
-                                                    @concat_digit(@most_significant_digitNat(@one_word),@zero_word),
-                                                    @most_significant_digitNat(@succ_word(w)));
-     @succ_nat(@concat_digit(n,w)) = if(==(w,@max_word),
-                                           @concat_digit(@succ_nat(n),@zero_word),
-                                           @concat_digit(n,@succ_word(w)));
-
-     succ(@most_significant_digitNat(w)) = if(==(w,@max_word),
-                                                    @concat_digit(@most_significant_digit(@one_word),@zero_word),
-                                                    @most_significant_digit(@succ_word(w)));
-     succ(@concat_digit(n,w)) = if(==(w,@max_word),
-                                           @concat_digit(succ(n),@zero_word),
-                                           @concat_digit(Nat2Pos(n),@succ_word(w)));
-
-     ==(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = ==(w1,w2);
-     ==(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
-     ==(@most_significant_digitNat(w1),@concat_digit(n,w2)) = false;
-     ==(@concat_digit(n1,w1), @concat_digit(n2,w2)) = &&(==(w1,w2), ==(n1,n2));
-     <(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <(w1,w2);
-     <(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
-     <(@most_significant_digitNat(w1),@concat_digit(n,w2)) = true;
-     <(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<(w1,w2),<=(n1,n2),<(n1,n2));
-     <=(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <=(w1,w2);
-     <=(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
-     <=(@most_significant_digitNat(w1),@concat_digit(n,w2)) = true;
-     <=(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<=(w1,w2),<=(n1,n2),<(n1,n2));
+      @succ_nat(@most_significant_digitNat(w)) = if(==(w,@max_word),
+                                                     @concat_digit(@most_significant_digitNat(@one_word),@zero_word),
+                                                     @most_significant_digitNat(@succ_word(w)));
+      @succ_nat(@concat_digit(n,w)) = if(==(w,@max_word),
+                                            @concat_digit(@succ_nat(n),@zero_word),
+                                            @concat_digit(n,@succ_word(w)));
+ 
+      succ(@most_significant_digitNat(w)) = if(==(w,@max_word),
+                                                     @concat_digit(@most_significant_digit(@one_word),@zero_word),
+                                                     @most_significant_digit(@succ_word(w)));
+      succ(@concat_digit(n,w)) = if(==(w,@max_word),
+                                            @concat_digit(succ(n),@zero_word),
+                                            @concat_digit(Nat2Pos(n),@succ_word(w)));
+ 
+% The rules for comparison operators in conjunction with @succ_nat are required in enumerations. 
+      ==(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = ==(w1,w2);
+      ==(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
+      ==(@most_significant_digitNat(w1),@concat_digit(n,w2)) = false;
+      ==(@concat_digit(n1,w1), @concat_digit(n2,w2)) = &&(==(w1,w2), ==(n1,n2));
+      ==(@succ_nat(n1),n2) = &&(!(==(n2,@most_significant_digitNat(@zero_word))),==(n1,@natpred(n2)));
+      ==(n1, @succ_nat(n2)) = &&(!(==(n1,@most_significant_digitNat(@zero_word))),==(@natpred(n1),n2));
+ 
+      <(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <(w1,w2);
+      <(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
+      <(@most_significant_digitNat(w1),@concat_digit(n,w2)) = true;
+      <(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<(w1,w2),<=(n1,n2),<(n1,n2));
+      <(@succ_nat(n1),n2) = &&(<(@most_significant_digitNat(@one_word),n2),<(n1,@natpred(n2)));
+      <(n1, @succ_nat(n2)) = <=(n1,n2);
+ 
+      <=(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <=(w1,w2);
+      <=(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
+      <=(@most_significant_digitNat(w1),@concat_digit(n,w2)) = true;
+      <=(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<=(w1,w2),<=(n1,n2),<(n1,n2));
+      <=(@succ_nat(n1),n2) = <(n1,n2);
+      <=(n1, @succ_nat(n2)) = <=(@natpred(n1),n2);
+ 
      Pos2Nat(@most_significant_digit(w)) = @most_significant_digitNat(w);
      Pos2Nat(@concat_digit(p,w)) = @concat_digit(Pos2Nat(p),w);
      Nat2Pos(@most_significant_digitNat(w)) = @most_significant_digit(w);
@@ -149,8 +170,6 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      @pred_whr(predp) = if(==(predp,@most_significant_digitNat(@zero_word)),
                                     @most_significant_digitNat(@max_word),
                                     @concat_digit(predp,@max_word));
-% needed?
-     @dub(b,n) = if(b, +(n,n), @succ_nat(+(n,n)));
 
      +(p,n) = +(n,p);
      +(@most_significant_digitNat(w1),@most_significant_digit(w2)) =
@@ -276,7 +295,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                 *(p,@exp_aux3p(@rightmost_bit(@shift_right(false,w)),*(p,p),@shift_right(false,w))));
                                 
      @exp_aux3p(false,p,w) = if(==(w,@zero_word),
-                                 @most_significant_digit(@zero_word),
+                                 @most_significant_digit(@one_word),
                                  @exp_aux3p(@rightmost_bit(@shift_right(false,w)),*(p,p),@shift_right(false,w)));
 
      @exp_aux4p(true,p,n1,w) = @exp_auxtruep(p,@div2(n1),@shift_right(@is_odd(n1), w));
@@ -494,10 +513,84 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 %                    @sqrt_nat(n,m,p),
 %                    +(@cNat(@cDub(b,p)),@sqrt_nat(@monus(n,*(+(@cNat(@cDub(b,p)),m),@cNat(@cDub(b,p)))),+(m,@cNat(@cDub(false,@cDub(b,p)))),p)));
 
-%     @divmod(@c1,@c1) = @nnPair(@cNat(@c1),@c0);
-%     @divmod(@c1,@cDub(b,p)) = @nnPair(@c0, @cNat(@c1));
-%     @divmod(@cDub(b,p),q) = @gdivmod(@divmod(p,q),b,q);
-%     @gdivmod(@nnPair(m,n),b,p) = @ggdivmod(@dub(b,n),m,p);
-%     @ggdivmod(@c0,n,p) = @nnPair(@dub(false,n),@c0);
-%     <(p,q) -> @ggdivmod(@cNat(p),n,q) = @nnPair(@dub(false,n),@cNat(p));
-%     <=(q,p) -> @ggdivmod(@cNat(p),n,q) = @nnPair(@dub(true,n),@gtesubtb(false,p,q));
+%sort Nat64_pair = struct pair(first_:Nat64,last_:Nat64);
+%map  sqrt_pair: Nat64->Nat64_pair;
+%
+     sqrt(@most_significant_digitNat(w)) = @most_significant_digitNat(@sqrt_word(w));
+     sqrt(@concat_digit(@most_significant_digitNat(w1),w2)) = @most_significant_digitNat(@sqrt_doubleword(w1,w2));
+     sqrt(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3)) = @sqrt_whr1(w1,w2,w3,@sqrt_tripleword_overflow(w1,w2,w3));
+     @sqrt_whr1(w1,w2,w3,overflow) =
+              if (==(overflow,@zero_word),
+                  @most_significant_digitNat(@sqrt_tripleword(w1,w2,w3)),
+                  @concat_digit(@most_significant_digitNat(overflow),@sqrt_tripleword(w1,w2,w3)));
+
+     sqrt(@concat_digit(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3),w4)) =
+                         @sqrt_whr2(w1,w2,w3,w4,@sqrt_quadrupleword_overflow(w1,w2,w3,w4));
+     @sqrt_whr2(w1,w2,w3,w4,overflow) =
+              if (==(overflow,@zero_word),
+                  @most_significant_digitNat(@sqrt_quadrupleword(w1,w2,w3,w4)),
+                  @concat_digit(@most_significant_digitNat(overflow),@sqrt_quadrupleword(w1,w2,w3,w4)));
+
+     sqrt(@concat_digit(@concat_digit(@concat_digit(@concat_digit(n,w1),w2),w3),w4)) = @first(@sqrt_pair(@concat_digit(@concat_digit(@concat_digit(@concat_digit(n,w1),w2),w3),w4)));
+
+     @sqrt_pair(@most_significant_digitNat(w)) = @nnPair(@most_significant_digitNat(@sqrt_word(w)), @most_significant_digitNat(@minus_word(w,@times_word(@sqrt_word(w),@sqrt_word(w)))));
+     @sqrt_pair(@concat_digit(@most_significant_digitNat(w1),w2)) =
+                 @nnPair(@most_significant_digitNat(@sqrt_doubleword(w1,w2)),
+                         @monus(@concat_digit(@most_significant_digitNat(w1),w2),exp(@most_significant_digitNat(@sqrt_doubleword(w1,w2)),@most_significant_digitNat(@two_word))));
+
+     @sqrt_pair(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3)) =
+                 @sqrt_pair_whr1(w1,w2,w3,sqrt(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3)));
+     @sqrt_pair_whr1(w1,w2,w3,solution) =      
+                    @nnPair(solution,
+                            @monus(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3),*(solution,solution)));
+
+     @sqrt_pair(@concat_digit(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3),w4)) =
+                  @sqrt_pair_whr2(w1,w2,w3,w4,sqrt(@concat_digit(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3),w4))); 
+     @sqrt_pair_whr2(w1,w2,w3,w4,solution) =
+                    @nnPair(solution,
+                            @monus(@concat_digit(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3),w4), *(solution,solution)));
+
+     @sqrt_pair(@concat_digit(@concat_digit(@concat_digit(@concat_digit(n,w1),w2),w3),w4)) =
+                    @sqrt_pair_whr3(w3,w4,@sqrt_pair(@concat_digit(@concat_digit(n,w1),w2)));
+
+% pq = @nnPair(p,q) = sqrt(n).
+     @sqrt_pair_whr3(w3,w4,pq) =
+                 @sqrt_pair_whr4(w3,w4,pq,
+                                 if(==(@first(pq),@most_significant_digitNat(@zero_word)), @most_significant_digitNat(@zero_word), @concat_digit(@first(pq),@zero_word)),
+                                 if(>(@last(pq),@most_significant_digitNat(@zero_word)),
+                                      @concat_digit(@concat_digit(@last(pq),w3),w4),
+                                      if(!=(w3,@zero_word),
+                                            @concat_digit(@most_significant_digitNat(w3),w4),
+                                            @most_significant_digitNat(w4))),
+                                 +(*(@first(pq),@first(pq)),@last(pq)));
+
+
+% m3 = p*base.
+% m2 = q*base^2 + w3*base + w4.
+% m5 = p^2 + q.
+     @sqrt_pair_whr4(w3,w4,pq,m3,m2,m5) = 
+                @sqrt_pair_whr5(pq,m3,m2,
+                            if(>(m5,@most_significant_digitNat(@zero_word)),
+                                 @concat_digit(@concat_digit(m5,w3),w4),
+                                 if(!=(w3,@zero_word),
+                                      @concat_digit(@most_significant_digitNat(w3),w4),
+                                      @most_significant_digitNat(w4))),
+                             div(m2,Nat2Pos(*(@most_significant_digitNat(@two_word),m3))));
+                               
+
+% m4 = (p^2 + q)*base^2 + w3*base + w4.
+% y_guess = (q*base^2 + w3*base + w4) div (2*p*base).
+     @sqrt_pair_whr5(pq,m3,m2,m4,y_guess) = 
+                @sqrt_pair_whr6(m2,
+                                if(<(*(@most_significant_digitNat(@four_word),@first(pq)),
+                                     @concat_digit(@most_significant_digitNat(@three_word), @zero_word)),
+                                   @monus(sqrt(m4),m3),
+                                   if(>(*(+(*(@most_significant_digitNat(@two_word),m3),y_guess),y_guess),m2),
+                                       @natpred(y_guess),
+                                       y_guess)),
+                                if(==(@first(pq),@most_significant_digitNat(@zero_word)),@most_significant_digitNat(@zero_word),@concat_digit(@first(pq),@zero_word)));
+
+
+% m1 = p*base.
+     @sqrt_pair_whr6(m2,y,m1) = 
+                    @nnPair(+(m1,y), @monus(m2, *(+(*(m1,@most_significant_digitNat(@two_word)),y),y)));

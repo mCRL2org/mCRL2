@@ -235,7 +235,7 @@ void test_constructors()
 
   function_symbol_vector constructors(spec.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl);
-  BOOST_CHECK(constructors.size() == 7); // f,g,h, true, false.
+  BOOST_CHECK(constructors.size() == 9); // f,g,h, true, false, succ_pos, one, zero_word, succ_word.
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
@@ -286,8 +286,7 @@ void test_functions()
   data_specification spec1(spec);
   std::for_each(fghl.begin(), fghl.end(), std::bind(&data_specification::add_mapping, &spec1, std::placeholders::_1));
 
-std::cerr << "#mappings " << spec.mappings().size() << "\n";
-  BOOST_CHECK(spec.mappings().size() == 51);
+  BOOST_CHECK(spec.mappings().size() == 89);
 
   function_symbol_vector mappings(spec.mappings());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());
@@ -959,9 +958,9 @@ void test_standard_sorts_mappings_functions()
    data_specification spec;
    spec.get_system_defined_sorts_constructors_and_mappings(sorts, constructors, mappings);
 
-   BOOST_CHECK(sorts.size()==10);
-   BOOST_CHECK(constructors.size()==17);
-   BOOST_CHECK(mappings.size()==225);
+   BOOST_CHECK(sorts.size()==11);
+   BOOST_CHECK(constructors.size()==19);
+   BOOST_CHECK(mappings.size()==292);
 }
 
 int test_main(int argc, char** argv)

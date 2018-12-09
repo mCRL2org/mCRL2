@@ -1192,7 +1192,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (sort_machine_word::is_succ_word_application(x))
     {
       derived().print("(");
-      print_expression(sort_list::arg(x), right_precedence(x));
+      print_expression(sort_machine_word::arg(x), right_precedence(x));
       derived().print(" + 1)");
     }
     else if (sort_machine_word::is_add_word_application(x))
@@ -1263,7 +1263,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().apply(sort_pos::arg2(x));
       }
     }
-    else if (sort_pos::is_cdub_application(x))
+    /* else if (sort_pos::is_cdub_application(x))     Does not exist since the transfer to 64 bits. 
     {
       if (data::sort_pos::is_positive_constant(x))
       {
@@ -1274,13 +1274,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         std::vector<char> number = data::detail::string_to_vector_number("1");
         derived().apply(detail::reconstruct_pos_mult(x, number));
       }
-    }
+    } */
     // TODO: handle @pospred
     else if (sort_pos::is_plus_application(x))
     {
       print_binary_operation(x, " + ");
     }
-    else if (sort_pos::is_add_with_carry_application(x))
+    /* else if (sort_pos::is_add_with_carry_application(x))     Does not exist since transfer to 64 bits. 
     {
       auto b = sort_pos::arg1(x);
       auto x1 = sort_pos::arg2(x);
@@ -1297,7 +1297,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().apply(if_(b, x1, x2));
       }
-    }
+    } */
     else if (sort_pos::is_times_application(x))
     {
       print_binary_operation(x, " * ");

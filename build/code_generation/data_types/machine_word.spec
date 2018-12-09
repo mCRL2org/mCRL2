@@ -17,6 +17,9 @@ cons @zero_word <"zero_word">: @word                                            
 
 %% Core functions that are used by other datatypes.
 map  @one_word <"one_word">: @word                                                                                                                     internal defined_by_code;
+     @two_word <"two_word">: @word                                                                                                                     internal defined_by_code;
+     @three_word <"three_word">: @word                                                                                                                 internal defined_by_code;
+     @four_word <"four_word">: @word                                                                                                                   internal defined_by_code;
      @max_word <"max_word">: @word                                                                                                                     internal defined_by_code;
 
      @add_word <"add_word">: @word <"left"> # @word <"right"> -> @word                                                                                 internal defined_by_code; 

@@ -737,63 +737,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@addc.
-      /// \return Identifier \@addc.
-      inline
-      const core::identifier_string& add_with_carry_name()
-      {
-        static core::identifier_string add_with_carry_name = core::identifier_string("@addc");
-        return add_with_carry_name;
-      }
-
-      /// \brief Constructor for function symbol \@addc.       
-      /// \return Function symbol add_with_carry.
-      inline
-      const function_symbol& add_with_carry()
-      {
-        static function_symbol add_with_carry(add_with_carry_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos()));
-        return add_with_carry;
-      }
-
-
-      /// \brief Recogniser for function \@addc.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@addc.
-      inline
-      bool is_add_with_carry_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == add_with_carry();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@addc.        
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \param arg2 A data expression. 
-      /// \return Application of \@addc to a number of arguments.
-      inline
-      application add_with_carry(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return sort_pos::add_with_carry()(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@addc.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol add_with_carry to a
-      ///     number of arguments.
-      inline
-      bool is_add_with_carry_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_add_with_carry_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
       /// \brief Generate identifier \@c1.
       /// \return Identifier \@c1.
       inline
@@ -825,62 +768,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
-      /// \brief Generate identifier \@cDub.
-      /// \return Identifier \@cDub.
-      inline
-      const core::identifier_string& cdub_name()
-      {
-        static core::identifier_string cdub_name = core::identifier_string("@cDub");
-        return cdub_name;
-      }
-
-      /// \brief Constructor for function symbol \@cDub.       
-      /// \return Function symbol cdub.
-      inline
-      const function_symbol& cdub()
-      {
-        static function_symbol cdub(cdub_name(), make_function_sort(sort_bool::bool_(), pos(), pos()));
-        return cdub;
-      }
-
-
-      /// \brief Recogniser for function \@cDub.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@cDub.
-      inline
-      bool is_cdub_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == cdub();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@cDub.        
-      /// \param arg0 A data expression.
-      /// \param arg1 A data expression. 
-      /// \return Application of \@cDub to a number of arguments.
-      inline
-      application cdub(const data_expression& arg0, const data_expression& arg1)
-      {
-        return sort_pos::cdub()(arg0, arg1);
-      }
-
-      /// \brief Recogniser for application of \@cDub.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol cdub to a
-      ///     number of arguments.
-      inline
-      bool is_cdub_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_cdub_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
       /// \brief Give all system defined mappings for pos
       /// \return All system defined mappings for pos
       inline
@@ -897,9 +784,7 @@ namespace mcrl2 {
         result.push_back(sort_pos::times());
         result.push_back(sort_pos::powerlog2_pos());
         result.push_back(sort_pos::times_whr_mult_overflow());
-        result.push_back(sort_pos::add_with_carry());
         result.push_back(sort_pos::c1());
-        result.push_back(sort_pos::cdub());
         return result;
       }
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for pos
@@ -935,7 +820,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_cdub_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -947,7 +832,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_concat_digit_application(e) || is_times_whr_mult_overflow_application(e) || is_add_with_carry_application(e));
+        assert(is_concat_digit_application(e) || is_times_whr_mult_overflow_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -959,7 +844,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_concat_digit_application(e) || is_times_whr_mult_overflow_application(e) || is_add_with_carry_application(e));
+        assert(is_concat_digit_application(e) || is_times_whr_mult_overflow_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -971,7 +856,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_times_whr_mult_overflow_application(e) || is_add_with_carry_application(e));
+        assert(is_times_whr_mult_overflow_application(e));
         return atermpp::down_cast<const application>(e)[2];
       }
 
@@ -1007,7 +892,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_cdub_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -1026,21 +911,27 @@ namespace mcrl2 {
 
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), one(), most_significant_digit(sort_machine_word::one_word())));
-        result.push_back(data_equation(variable_list({vw1}), succpos(most_significant_digit(vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit(sort_machine_word::succ_word(vw1)))));
-        result.push_back(data_equation(variable_list({vp, vw1}), succpos(concat_digit(vp, vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(succpos(vp), sort_machine_word::zero_word()), concat_digit(vp, sort_machine_word::succ_word(vw1)))));
-        result.push_back(data_equation(variable_list({vp}), succ(vp), succpos(vp)));
+        result.push_back(data_equation(variable_list({vp}), succpos(vp), succ(vp)));
+        result.push_back(data_equation(variable_list({vw1}), succ(most_significant_digit(vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit(sort_machine_word::succ_word(vw1)))));
+        result.push_back(data_equation(variable_list({vp, vw1}), succ(concat_digit(vp, vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(succ(vp), sort_machine_word::zero_word()), concat_digit(vp, sort_machine_word::succ_word(vw1)))));
         result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(most_significant_digit(vw1), most_significant_digit(vw2)), equal_to(vw1, vw2)));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), equal_to(concat_digit(vp, vw1), most_significant_digit(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), equal_to(most_significant_digit(vw1), concat_digit(vp, vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), equal_to(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), sort_bool::and_(equal_to(vp1, vp2), equal_to(vw1, vw2))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), equal_to(succ(vp1), vp2), sort_bool::and_(sort_bool::not_(equal_to(vp2, most_significant_digit(sort_machine_word::one_word()))), equal_to(vp1, pos_predecessor(vp2)))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), equal_to(vp1, succ(vp2)), sort_bool::and_(sort_bool::not_(equal_to(vp1, most_significant_digit(sort_machine_word::one_word()))), equal_to(pos_predecessor(vp1), vp2))));
         result.push_back(data_equation(variable_list({vw1, vw2}), less(most_significant_digit(vw1), most_significant_digit(vw2)), less(vw1, vw2)));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), less(concat_digit(vp, vw1), most_significant_digit(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), less(most_significant_digit(vw1), concat_digit(vp, vw2)), sort_bool::true_()));
         result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), less(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(less(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), less(succ(vp1), vp2), sort_bool::and_(less(most_significant_digit(sort_machine_word::two_word()), vp2), less(vp1, pos_predecessor(vp2)))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), less(vp1, succ(vp2)), less_equal(vp1, vp2)));
         result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(most_significant_digit(vw1), most_significant_digit(vw2)), less_equal(vw1, vw2)));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), less_equal(concat_digit(vp, vw1), most_significant_digit(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), less_equal(most_significant_digit(vw1), concat_digit(vp, vw2)), sort_bool::true_()));
         result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), less_equal(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(less_equal(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), less_equal(succ(vp1), vp2), less(vp1, vp2)));
+        result.push_back(data_equation(variable_list({vp1, vp2}), less_equal(vp1, succ(vp2)), less_equal(pos_predecessor(vp1), vp2)));
         result.push_back(data_equation(variable_list({vp1, vp2}), maximum(vp1, vp2), if_(less_equal(vp1, vp2), vp2, vp1)));
         result.push_back(data_equation(variable_list({vp1, vp2}), minimum(vp1, vp2), if_(less_equal(vp1, vp2), vp1, vp2)));
         result.push_back(data_equation(variable_list({vw1}), pos_predecessor(most_significant_digit(vw1)), if_(equal_to(vw1, sort_machine_word::one_word()), most_significant_digit(sort_machine_word::one_word()), most_significant_digit(sort_machine_word::pred_word(vw1)))));
@@ -1054,11 +945,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp1, vw1, vw2}), times(concat_digit(vp1, vw1), most_significant_digit(vw2)), concat_digit(plus(times(vp1, most_significant_digit(vw2)), most_significant_digit(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp2, vw1, vw2}), times(most_significant_digit(vw1), concat_digit(vp2, vw2)), concat_digit(plus(times(vp2, most_significant_digit(vw1)), most_significant_digit(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), times(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), plus(concat_digit(times(concat_digit(vp1, vw1), vp2), sort_machine_word::zero_word()), times(concat_digit(vp1, vw1), most_significant_digit(vw2)))));
-        result.push_back(data_equation(variable_list({vp1, vp2}), add_with_carry(sort_bool::true_(), vp1, vp2), plus(plus(vp1, vp2), one())));
-        result.push_back(data_equation(variable_list({vp1, vp2}), add_with_carry(sort_bool::false_(), vp1, vp2), plus(vp1, vp2)));
         result.push_back(data_equation(variable_list(), c1(), most_significant_digit(sort_machine_word::one_word())));
-        result.push_back(data_equation(variable_list({vp}), cdub(sort_bool::true_(), vp), plus(plus(vp, vp), one())));
-        result.push_back(data_equation(variable_list({vp}), cdub(sort_bool::false_(), vp), plus(vp, vp)));
         return result;
       }
 

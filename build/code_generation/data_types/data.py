@@ -259,8 +259,8 @@ class function_declaration():
         extra_parameters.append(self.sort_expression.domain.code(spec))
       except:
         pass # in case sort_expression has no domain
-#    return "        result.push_back({0}({1}));\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
-    return "        result[{0}()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>({0}_application,\"{0}\");\n".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters))
+    return "        result[{0}()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>({0}_application,".format(add_namespace(self.label, self.namespace), ", ".join([s.code(spec) for s in sort_params] + extra_parameters)) + \
+                    "\"{0}_manual_implementation\");\n".format(add_namespace(self.label, self.namespace))
 
 
 class internal_external():

@@ -170,7 +170,8 @@ class basic_data_specification: public data_specification
     {
       add_sort_definition(data::sort_pos::pos(), pos_definition);
       m_functions[data::sort_pos::c1()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_pos::pos(), data::sort_pos::c1(), printer));
-      m_functions[data::sort_pos::cdub()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_pos::pos(), data::sort_pos::cdub(), printer));
+      /* This function does not exist anymore since the transfer to 64 bit numbers. 
+ *       m_functions[data::sort_pos::cdub()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_pos::pos(), data::sort_pos::cdub(), printer)); */
     }
 
     template<typename Printer>

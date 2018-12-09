@@ -52,7 +52,7 @@ eqn ==([], |>(d,s)) = false;
     ++([],s) = s;
     ++(|>(d,s), t) = |>(d, ++(s,t));
     ++(s,[]) = s;
-    .(|>(d,s),n) = if(==(n,@most_significant_digitNat(@zero_word)),d,.(s, @natpred(p)));
+    .(|>(d,s),n) = if(==(n,@most_significant_digitNat(@zero_word)),d,.(s, @natpred(n)));
     head(|>(d,s)) = d;
     tail(|>(d,s)) = s;
     rhead(|>(d,[])) = d;

@@ -800,7 +800,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vs}), concat(s, empty(s), vs), vs));
         result.push_back(data_equation(variable_list({vd, vs, vt}), concat(s, cons_(s, vd, vs), vt), cons_(s, vd, concat(s, vs, vt))));
         result.push_back(data_equation(variable_list({vs}), concat(s, vs, empty(s)), vs));
-        result.push_back(data_equation(variable_list({vd, vn, vp, vs}), element_at(s, cons_(s, vd, vs), vn), if_(equal_to(vn, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), vd, element_at(s, vs, sort_nat::natpred(vp)))));
+        result.push_back(data_equation(variable_list({vd, vn, vs}), element_at(s, cons_(s, vd, vs), vn), if_(equal_to(vn, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), vd, element_at(s, vs, sort_nat::natpred(vn)))));
         result.push_back(data_equation(variable_list({vd, vs}), head(s, cons_(s, vd, vs)), vd));
         result.push_back(data_equation(variable_list({vd, vs}), tail(s, cons_(s, vd, vs)), vs));
         result.push_back(data_equation(variable_list({vd}), rhead(s, cons_(s, vd, empty(s))), vd));

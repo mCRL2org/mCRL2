@@ -740,7 +740,7 @@ void basic_data_specification::add_numerical_operators(
   data::variable r2("r2", real);
 
   const data::data_expression& pos_one = data::sort_pos::c1();
-  data::data_expression pos_two = data::sort_pos::cdub(data::sort_bool::false_(), pos_one);
+  data::data_expression pos_two = data::sort_pos::plus(pos_one, pos_one); 
   const data::data_expression& nat_zero = data::sort_nat::c0();
   data::data_expression nat_one = data::sort_nat::nat(1); 
   data::data_expression int_zero = data::sort_int::cint(nat_zero);

@@ -132,6 +132,10 @@ namespace data
                     variable_list& vars,
                     const variable_list& real_parameters)
   {
+    if (is_machine_number(t))
+    {
+      return t;
+    }
     if (is_function_symbol(t))
     {
       return t;

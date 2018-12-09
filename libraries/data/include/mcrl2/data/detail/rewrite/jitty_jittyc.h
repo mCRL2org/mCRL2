@@ -133,7 +133,8 @@ inline std::size_t recursive_number_of_args(const data_expression& t)
   if (is_function_symbol(t) ||
       is_variable(t) ||
       is_where_clause(t) ||
-      is_abstraction(t))
+      is_abstraction(t) ||
+      is_machine_number(t))
   {
     return 0;
   }
@@ -163,7 +164,8 @@ inline const data_expression& get_nested_head(const data_expression& t)
   if (is_function_symbol(t) ||
       is_variable(t) ||
       is_where_clause(t) ||
-      is_abstraction(t))
+      is_abstraction(t)||
+      is_machine_number(t))
   {
     return t;
   }
@@ -174,7 +176,8 @@ inline const data_expression& get_nested_head(const data_expression& t)
   if (is_function_symbol(head) ||
       is_variable(head) ||
       is_where_clause(head) ||
-      is_abstraction(head))
+      is_abstraction(head)||
+      is_machine_number(head))
   {
     return head;
   }

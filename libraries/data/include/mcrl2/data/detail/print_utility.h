@@ -53,7 +53,7 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
     //x is 1; return result
     reconstruction_result = data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos());
   }
-  else if (data::sort_pos::is_cdub_application(x))
+  /* else if (data::sort_pos::is_cdub_application(x))  Does not exist since 64 bit numbers. 
   {
     //x is of the form cDub(b,p); return (result*2)*v(p) + result*v(b)
     data_expression bool_arg = sort_pos::left(x);
@@ -84,7 +84,7 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
                                                     data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(result), data::sort_nat::nat()),
                                                     bool_to_numeric(bool_arg, data::sort_nat::nat())));
     }
-  }
+  } */
   else
   {
     //x is not a Pos constructor

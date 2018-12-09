@@ -48,11 +48,11 @@ void number_test()
   using namespace sort_int;
   using namespace sort_real;
 
-  BOOST_CHECK(data::detail::as_decimal_string(1) == "1");
-  BOOST_CHECK(data::detail::as_decimal_string(2) == "2");
-  BOOST_CHECK(data::detail::as_decimal_string(3) == "3");
-  BOOST_CHECK(data::detail::as_decimal_string(4) == "4");
-  BOOST_CHECK(data::detail::as_decimal_string(144) == "144");
+  // BOOST_CHECK(data::detail::as_decimal_string(1) == "1");
+  // BOOST_CHECK(data::detail::as_decimal_string(2) == "2");
+  // BOOST_CHECK(data::detail::as_decimal_string(3) == "3");
+  // BOOST_CHECK(data::detail::as_decimal_string(4) == "4");
+  // BOOST_CHECK(data::detail::as_decimal_string(144) == "144");
 
   // Test character array arithmetic
   std::vector< char > numbers;
@@ -74,8 +74,8 @@ void number_test()
   data::detail::decimal_number_multiply_by_two(numbers);
   BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "16");
 
-  data::detail::decimal_number_divide_by_two(numbers);
-  BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "8");
+  // data::detail::decimal_number_divide_by_two(numbers);
+  // BOOST_CHECK(data::detail::vector_number_to_string(numbers) == "8");
 
   BOOST_CHECK(sort_pos::positive_constant_as_string(number(sort_pos::pos(), "1")) == "1");
   BOOST_CHECK(sort_pos::positive_constant_as_string(number(sort_pos::pos(), "10")) == "10");
@@ -84,6 +84,7 @@ void number_test()
   BOOST_CHECK(sort_nat::natural_constant_as_string(number(sort_nat::nat(), "10")) == "10");
   BOOST_CHECK(sort_int::integer_constant_as_string(number(sort_int::int_(), "-10")) == "-10");
   BOOST_CHECK(sort_int::integer_constant_as_string(number(sort_int::int_(), "10")) == "10");
+  BOOST_CHECK(sort_int::integer_constant_as_string(number(sort_int::int_(), "-932847982347982347982378947792")) == "-932847982347982347982378947792");
 
   data_specification specification = parse_data_specification("sort A = Real;");
 
@@ -94,16 +95,16 @@ void number_test()
   representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::c1())),specification);
   representation_check(R, normalize_sorts(number(sort_real::real_(), "1"),specification), R(normalize_sorts(pos2real(sort_pos::c1()),specification)),specification);
 
-  representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))),specification);
-  representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))),specification);
-  representation_check(R, nat("18"), R(normalize_sorts(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1()))))),specification)),specification);
-  representation_check(R, nat(12), R(normalize_sorts(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1())))),specification)),specification);
+  // representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))),specification);
+  // representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))),specification);
+  // representation_check(R, nat("18"), R(normalize_sorts(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1()))))),specification)),specification);
+  // representation_check(R, nat(12), R(normalize_sorts(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1())))),specification)),specification);
   representation_check(R, int_("0"), R(nat2int(c0())),specification);
   representation_check(R, int_("-1"), cneg(c1()),specification);
-  representation_check(R, int_(-2), cneg(cdub(false_(), c1())),specification);
+  // representation_check(R, int_(-2), cneg(cdub(false_(), c1())),specification);
   representation_check(R, real_("0"), R(normalize_sorts(nat2real(c0()),specification)),specification);
   representation_check(R, real_("-1"), R(normalize_sorts(int2real(cneg(c1())),specification)),specification);
-  representation_check(R, real_(-2), R(normalize_sorts(int2real(cneg(cdub(false_(), c1()))),specification)),specification);
+  // representation_check(R, real_(-2), R(normalize_sorts(int2real(cneg(cdub(false_(), c1()))),specification)),specification);
 
 }
 
