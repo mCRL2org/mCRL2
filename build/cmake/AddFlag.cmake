@@ -5,7 +5,7 @@ include(CheckCXXCompilerFlag)
 # If it is present, VAR is set to TRUE when the macro finishes
 macro(list_contains VAR VALUE LISTSTR)
   set(${VAR})
-  string(REGEX MATCHALL "[^ ]+\ |[^ ]+$" LISTVAR "${LISTSTR}")
+  string(REGEX MATCHALL "[^ ]+" LISTVAR "${LISTSTR}")
   foreach(OTHER IN LISTS LISTVAR)
     if("${VALUE}" STREQUAL "${OTHER}")
       set(${VAR} TRUE)
