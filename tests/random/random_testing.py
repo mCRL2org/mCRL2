@@ -243,6 +243,7 @@ class PbessolveDepthFirstTest(PbesTest):
         self.set_command_line_options('t5', ['-zdepth-first'])
         self.set_command_line_options('t6', ['-zdepth-first'])
         self.set_command_line_options('t7', ['-zdepth-first'])
+        self.set_command_line_options('t8', ['-zdepth-first'])
 
 class Pbessolve_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization = 0, settings = dict()):
@@ -344,6 +345,8 @@ available_tests = {
     'pbessolve-counter-example-optimization-3'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 3, settings)                            ,
     'pbessolve-counter-example-optimization-4'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 4, settings)                            ,
     'pbessolve-counter-example-optimization-5'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 5, settings)                            ,
+    'pbessolve-counter-example-optimization-6'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 6, settings)                            ,
+    'pbessolve-counter-example-optimization-7'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 7, settings)                            ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,

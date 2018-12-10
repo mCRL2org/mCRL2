@@ -146,6 +146,8 @@ struct vertex_set
 
     vertex_set() = default;
 
+    vertex_set(const vertex_set& other) = default;
+
     explicit vertex_set(std::size_t N)
             : m_include(N)
     {
@@ -176,6 +178,19 @@ struct vertex_set
         m *= 2;
       }
       m_include.resize(m);
+    }
+
+    // truncate the size to n
+    void truncate(std::size_t n)
+    {
+      if (m_include.size() > n)
+      {
+        m_include = boost::dynamic_bitset<>(n);
+        for (auto u: m_vertices)
+        {
+          m_include[u] = true;
+        }
+      }
     }
 
     bool is_empty() const
@@ -291,6 +306,12 @@ vertex_set set_minus(const vertex_set& V, const vertex_set& W)
   return result;
 }
 
+inline
+bool is_subset_of(const vertex_set& V, const vertex_set& W)
+{
+  return V.include().is_subset_of(W.include());
+}
+
 template <typename StructureGraph>
 void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::string& name)
 {
@@ -309,7 +330,7 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
 {
   for (auto v: G.successors(u))
   {
-    if (!(A.contains(v)))
+    if (!A.contains(v))
     {
       return false;
     }
@@ -349,7 +370,7 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, std::siz
     if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
       // set strategy
-      if (G.decoration(u) != (1 - alpha))
+      if (G.decoration(u) == alpha)
       {
         for (auto w: G.successors(u))
         {

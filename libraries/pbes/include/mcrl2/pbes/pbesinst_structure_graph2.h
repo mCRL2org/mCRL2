@@ -15,6 +15,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbesinst_fatal_attractors.h"
 #include "mcrl2/pbes/pbesinst_find_loops.h"
+#include "mcrl2/pbes/pbesinst_partial_solve.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
@@ -221,7 +222,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         {
           return false;
         }
-        const auto& v_ = m_graph_builder.m_vertices[v];
+        const auto& v_ = m_graph_builder.vertex(v);
         if (contains(done, v_.formula))
         {
           return false;
@@ -242,7 +243,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         return;
       }
 
-      simple_structure_graph G(m_graph_builder.m_vertices);
+      simple_structure_graph G(m_graph_builder.vertices());
       std::unordered_set<pbes_expression> todo1{init};
       std::unordered_set<pbes_expression> done1;
 
@@ -252,7 +253,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         todo1.erase(todo1.begin());
         done1.insert(X);
         auto u = m_graph_builder.find_vertex(X);
-        const auto& u_ = m_graph_builder.m_vertices[u];
+        const auto& u_ = m_graph_builder.vertex(u);
 
         if (u_.decoration == structure_graph::d_conjunction && successors_disjoint(G, u, S1))
         {
@@ -262,7 +263,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             {
               continue;
             }
-            const auto& v_ = m_graph_builder.m_vertices[v];
+            const auto& v_ = m_graph_builder.vertex(v);
             const auto& Y = v_.formula;
             if (contains(done1, Y))
             {
@@ -280,7 +281,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             {
               continue;
             }
-            const auto& v_ = m_graph_builder.m_vertices[v];
+            const auto& v_ = m_graph_builder.vertex(v);
             const auto& Y = v_.formula;
             if (contains(done1, Y))
             {
@@ -294,7 +295,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         {
           for (auto v: G.successors(u))
           {
-            const auto& v_ = m_graph_builder.m_vertices[v];
+            const auto& v_ = m_graph_builder.vertex(v);
             const auto& Y = v_.formula;
             todo1.insert(Y);
           }
@@ -347,11 +348,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       super::on_report_equation(X, psi, k);
 
       // The structure graph has just been extended, so S0 and S1 need to be resized.
-      S0.resize(m_graph_builder.m_vertices.size());
-      S1.resize(m_graph_builder.m_vertices.size());
+      S0.resize(m_graph_builder.extent());
+      S1.resize(m_graph_builder.extent());
 
       auto u = m_graph_builder.find_vertex(X);
-      simple_structure_graph G(m_graph_builder.m_vertices);
+      simple_structure_graph G(m_graph_builder.vertices());
 
       if (is_true(b))
       {
@@ -407,13 +408,25 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       if (m_optimization == 4 && (aggressive || find_loops_guard(m_iteration_count)))
       {
-        simple_structure_graph G(m_graph_builder.m_vertices);
+        simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops(G, discovered, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
       }
-      else if (m_optimization == 5 && (aggressive || fatal_attractors_guard(m_iteration_count)))
+      else if ((5 <= m_optimization && m_optimization <= 7) && (aggressive || fatal_attractors_guard(m_iteration_count)))
       {
-        simple_structure_graph G(m_graph_builder.m_vertices);
-        detail::fatal_attractors(G, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+        simple_structure_graph G(m_graph_builder.vertices());
+        if (m_optimization == 5)
+        {
+          detail::fatal_attractors(G, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+        }
+        else if (m_optimization == 6)
+        {
+          detail::fatal_attractors_original(G, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+        }
+        else // m_optimization == 7
+        {
+          m_graph_builder.finalize();
+          detail::partial_solve(m_graph_builder.m_graph, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+        }
       }
       if (!todo.empty())
       {
@@ -422,7 +435,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         {
           std::size_t alpha = S0.contains(u) ? 1 : 0;
 
-          std::size_t n = m_graph_builder.m_vertices.size();
+          std::size_t n = m_graph_builder.extent();
 
           // compute todo_
           vertex_set todo_(n);
@@ -433,7 +446,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
           mCRL2log(log::debug) << "final todo = " << core::detail::print_set(todo_.vertices()) << std::endl;
 
-          simple_structure_graph G(m_graph_builder.m_vertices);
+          simple_structure_graph G(m_graph_builder.vertices());
           todo_ = compute_attractor_set(G, todo_, alpha);
           std::set<structure_graph::index_type> to_be_erased;
           for (structure_graph::index_type v: todo_.vertices())

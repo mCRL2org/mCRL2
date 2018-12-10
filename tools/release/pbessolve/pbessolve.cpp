@@ -57,7 +57,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     std::string ltsfile;
     std::string evidence_file;
 
-    int m_strategy = 0; // can be 0, 1, 2, 3, 4 or 5
+    int m_strategy = 0;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -107,8 +107,12 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       " needed to generate an equation substantially. N.B. This"
                       " optimization may cause stack overflow issues.")
                     .add_value_desc(5, "A generalization of strategy 4, where a so-called"
-                      "fatal attractor is applied."),
-                        "use strategy STRATEGY",
+                      "fatal attractor is applied.")
+                    .add_value_desc(6, "A generalization of strategy 4, where the original"
+                      "fatal attractor computation is applied.")
+                    .add_value_desc(7, "A generalization of strategy 4, where the partial"
+                      "structure graph is solved.")
+                    ,"use strategy STRATEGY",
                  's');
       desc.add_hidden_option("aggressive", "apply optimizations 4 and 5 at every iteration");
     }
@@ -136,7 +140,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       }
       m_search_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       m_strategy = parser.option_argument_as<int>("strategy");
-      if (m_strategy < 0 || m_strategy > 5)
+      if (m_strategy < 0 || m_strategy > 7)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(m_strategy));
       }

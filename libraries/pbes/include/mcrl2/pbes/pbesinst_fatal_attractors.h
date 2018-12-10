@@ -21,15 +21,34 @@ namespace pbes_system {
 
 namespace detail {
 
-// Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
-// alpha = 0: disjunctive
-// alpha = 1: conjunctive
-// StructureGraph is either structure_graph or simple_structure_graph
 template <typename StructureGraph>
-vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+void set_strategy(const StructureGraph& G, const vertex_set& A, structure_graph::index_type u, std::size_t alpha)
 {
+  if (G.decoration(u) == alpha)
+  {
+    for (auto w: G.successors(u))
+    {
+      if ((A.contains(w)))
+      {
+        mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
+        G.find_vertex(u).strategy = w;
+        break;
+      }
+    }
+    if (G.strategy(u) == structure_graph::undefined_vertex)
+    {
+      mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
+    }
+  }
+}
+
+template <typename StructureGraph>
+deque_vertex_set fatal_attractors_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
+{
+  std::size_t n = G.extent();
+
   // put all predecessors of elements in A in todo
-  deque_vertex_set todo(G.all_vertices().size());
+  deque_vertex_set todo(n);
   for (auto v: A.vertices())
   {
     for (auto u: G.predecessors(v))
@@ -40,46 +59,10 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
       }
     }
   }
-
-  while (!todo.is_empty())
-  {
-    // N.B. Use a breadth first search, to minimize counter examples
-    auto u = todo.pop_front();
-
-    if (G.decoration(u) == alpha || includes_successors(G, u, A))
-    {
-      // set strategy
-      if (G.decoration(u) == alpha)
-      {
-        for (auto w: G.successors(u))
-        {
-          if ((A.contains(w)))
-          {
-            mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
-            G.find_vertex(u).strategy = w;
-            break;
-          }
-        }
-        if (G.strategy(u) == structure_graph::undefined_vertex)
-        {
-          mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
-        }
-      }
-      A.insert(u);
-
-      for (auto v: G.predecessors(u))
-      {
-        if (U.contains(v) && (G.rank(v) >= j || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !A.contains(v))
-        {
-          todo.insert(v);
-        }
-      }
-    }
-  }
-
-  return A;
+  return todo;
 }
 
+inline
 void insert_in_rank_map(std::map<std::size_t, vertex_set>& U_rank_map, structure_graph::index_type u, std::size_t j, std::size_t n)
 {
   auto i = U_rank_map.find(j);
@@ -90,25 +73,10 @@ void insert_in_rank_map(std::map<std::size_t, vertex_set>& U_rank_map, structure
   i->second.insert(u);
 }
 
-void fatal_attractors(const simple_structure_graph& G,
-                      vertex_set& S0,
-                      vertex_set& S1,
-                      std::size_t iteration_count,
-                      const detail::structure_graph_builder& graph_builder
-)
+template <typename StructureGraph>
+std::map<std::size_t, vertex_set> compute_U_j_map(const StructureGraph& G, const vertex_set& V)
 {
-  mCRL2log(log::debug) << "Apply fatal attractors (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
-
-  // count the number of insertions in the sets S0 and S1
-  std::size_t insertion_count = 0;
-  std::size_t n = graph_builder.m_vertices.size();
-
-  // compute V
-  vertex_set V(n);
-  for (structure_graph::index_type u = 0; u < n; u++)
-  {
-    V.insert(u);
-  }
+  std::size_t n = G.extent();
 
   // compute U_j_map, such that U_j_map[j] = U_j
   std::map<std::size_t, vertex_set> U_j_map;
@@ -126,6 +94,66 @@ void fatal_attractors(const simple_structure_graph& G,
     }
     insert_in_rank_map(U_j_map, u, j, n);
   }
+  return U_j_map;
+}
+
+// Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
+// StructureGraph is either structure_graph or simple_structure_graph
+template <typename StructureGraph>
+vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+{
+  // put all predecessors of elements in A in todo
+  deque_vertex_set todo = fatal_attractors_todo(G, A, U, j);
+
+  while (!todo.is_empty())
+  {
+    // N.B. Use a breadth first search, to minimize counter examples
+    auto u = todo.pop_front();
+
+    if (G.decoration(u) == alpha || includes_successors(G, u, A))
+    {
+      set_strategy(G, A, u, alpha);
+
+      A.insert(u);
+
+      for (auto v: G.predecessors(u))
+      {
+        if (U.contains(v) && (G.rank(v) >= j || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !A.contains(v))
+        {
+          todo.insert(v);
+        }
+      }
+    }
+  }
+
+  return A;
+}
+
+inline
+void fatal_attractors(const simple_structure_graph& G,
+                      vertex_set& S0,
+                      vertex_set& S1,
+                      std::size_t iteration_count,
+                      const detail::structure_graph_builder& graph_builder
+)
+{
+  mCRL2log(log::debug) << "Apply fatal attractors (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
+
+  // count the number of insertions in the sets S0 and S1
+  std::size_t insertion_count = 0;
+  std::size_t n = G.extent();
+
+  // compute V
+  vertex_set V(n);
+  for (structure_graph::index_type u = 0; u < n; u++)
+  {
+    V.insert(u);
+  }
+
+  // compute U_j_map, such that U_j_map[j] = U_j
+  std::map<std::size_t, vertex_set> U_j_map = compute_U_j_map(G, V);
 
   detail::log_vertex_set(V, "V");
   detail::log_vertex_set(S0, "S0");
@@ -163,6 +191,130 @@ void fatal_attractors(const simple_structure_graph& G,
   S0 = compute_attractor_set(G, S0, 0);
   S1 = compute_attractor_set(G, S1, 1);
   mCRL2log(log::debug) << "Fatal attractors: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
+}
+
+// Returns true if the successors of u are included in A and X
+template <typename StructureGraph>
+bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, const vertex_set& X)
+{
+  for (auto v: G.successors(u))
+  {
+    if (!A.contains(v) && !X.contains(v))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
+// StructureGraph is either structure_graph or simple_structure_graph
+// This version is based on the work of Michael Huth, Jim Huan-Pu Kuo, and Nir Piterman.
+template <typename StructureGraph>
+vertex_set compute_attractor_set_min_rank_original(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+{
+mCRL2log(log::debug) << "compute_attractor_set_min_rank_original A = " << A << std::endl;
+
+  // put all predecessors of elements in A in todo
+  deque_vertex_set todo = fatal_attractors_todo(G, A, U, j);
+
+  vertex_set X(G.extent());
+
+detail::log_vertex_set(X, "X");
+
+  while (!todo.is_empty())
+  {
+    // N.B. Use a breadth first search, to minimize counter examples
+    auto u = todo.pop_front();
+
+    if (G.decoration(u) == alpha || includes_successors(G, u, A, X))
+    {
+      set_strategy(G, A, u, alpha);
+
+      X.insert(u);
+
+      for (auto v: G.predecessors(u))
+      {
+        if (U.contains(v) && (G.rank(v) >= j || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !X.contains(v))
+        {
+          todo.insert(v);
+        }
+      }
+    }
+  }
+
+  return X;
+}
+
+void fatal_attractors_original(const simple_structure_graph& G,
+                               vertex_set& S0,
+                               vertex_set& S1,
+                               std::size_t iteration_count,
+                               const detail::structure_graph_builder& graph_builder
+)
+{
+  mCRL2log(log::debug) << "Apply fatal attractors original (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
+
+  // count the number of insertions in the sets S0 and S1
+  std::size_t insertion_count = 0;
+  std::size_t n = G.extent();
+
+  // compute V
+  vertex_set V(n);
+  for (structure_graph::index_type u = 0; u < n; u++)
+  {
+    V.insert(u);
+  }
+
+  // compute U_j_map, such that U_j_map[j] = U_j
+  std::map<std::size_t, vertex_set> U_j_map = compute_U_j_map(G, V);
+
+  detail::log_vertex_set(V, "V");
+  detail::log_vertex_set(S0, "S0");
+  detail::log_vertex_set(S1, "S1");
+
+  for (auto& p: U_j_map)
+  {
+    std::size_t j = p.first;
+    auto alpha = j % 2;
+    vertex_set& S_alpha = alpha == 0 ? S0 : S1;
+    vertex_set& S_one_minus_alpha = alpha == 0 ? S1 : S0;
+    vertex_set& U_j = p.second;
+    U_j = set_minus(U_j, S_one_minus_alpha);
+
+    vertex_set X(n);
+    detail::log_vertex_set(X, "X");
+
+    while (!U_j.is_empty() && U_j != X)
+    {
+      detail::log_vertex_set(U_j, "U_" + std::to_string(j));
+      X = U_j;
+      detail::log_vertex_set(X, "X");
+      detail::log_vertex_set(set_union(X, S_alpha), "X \\cup S_" + std::to_string(alpha));
+      vertex_set Y = detail::compute_attractor_set_min_rank_original(G, set_union(X, S_alpha), alpha, V, j);
+      detail::log_vertex_set(Y, "Y");
+      if (is_subset_of(U_j, Y))
+      {
+        for (structure_graph::index_type y: Y.vertices())
+        {
+          insertion_count++;
+          S_alpha.insert(y);
+          mCRL2log(log::debug) << "Fatal attractors original: insert vertex " << y << " in S" << alpha << std::endl;
+        }
+        break;
+      }
+      else
+      {
+        U_j = set_intersection(U_j, Y);
+        detail::log_vertex_set(U_j, "U_" + std::to_string(j));
+      }
+    }
+  }
+  S0 = compute_attractor_set(G, S0, 0);
+  S1 = compute_attractor_set(G, S1, 1);
+  mCRL2log(log::debug) << "Fatal attractors original: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 
 } // namespace detail

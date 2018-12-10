@@ -81,7 +81,7 @@ void find_loops(const simple_structure_graph& G,
   // count the number of insertions in the sets S0 and S1
   std::size_t insertion_count = 0;
 
-  std::size_t n = graph_builder.m_vertices.size();
+  std::size_t n = S0.extent();
 
   // compute todo_
   boost::dynamic_bitset<> todo_(n);

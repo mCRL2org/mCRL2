@@ -157,6 +157,11 @@ class structure_graph
       return m_initial_vertex;
     }
 
+    std::size_t extent() const
+    {
+      return m_vertices.size();
+    }
+
     decoration_type decoration(index_type u) const
     {
       return m_vertices[u].decoration;
@@ -325,13 +330,37 @@ struct structure_graph_builder
   typedef structure_graph::index_type index_type;
 
   structure_graph& m_graph;
-  std::vector<structure_graph::vertex> m_vertices;
   std::unordered_map<pbes_expression, index_type> m_vertex_map;
   pbes_expression m_initial_state; // The initial state.
 
   explicit structure_graph_builder(structure_graph& G)
     : m_graph(G), m_initial_state(data::undefined_data_expression())
   {}
+
+  std::size_t extent() const
+  {
+    return m_graph.extent();
+  }
+
+  std::vector<structure_graph::vertex>& vertices()
+  {
+    return m_graph.m_vertices;
+  }
+
+  const std::vector<structure_graph::vertex>& vertices() const
+  {
+    return m_graph.m_vertices;
+  }
+
+  structure_graph::vertex& vertex(index_type u)
+  {
+    return m_graph.m_vertices[u];
+  }
+
+  const structure_graph::vertex& vertex(index_type u) const
+  {
+    return m_graph.m_vertices[u];
+  }
 
   structure_graph::decoration_type decoration(const pbes_expression& x) const
   {
@@ -361,8 +390,8 @@ struct structure_graph_builder
   index_type create_vertex(const pbes_expression& x)
   {
     assert(m_vertex_map.find(x) == m_vertex_map.end());
-    m_vertices.emplace_back(x, decoration(x));
-    index_type index = m_vertices.size() - 1;
+    vertices().emplace_back(x, decoration(x));
+    index_type index = vertices().size() - 1;
     m_vertex_map.insert({ x, index });
     return index;
   }
@@ -372,7 +401,7 @@ struct structure_graph_builder
   {
     auto i = m_vertex_map.find(x);
     index_type ui = i == m_vertex_map.end() ? create_vertex(x) : i->second;
-    auto& u = m_vertices[ui];
+    auto& u = vertex(ui);
     u.decoration = decoration(psi);
     u.rank = k;
     return ui;
@@ -408,8 +437,8 @@ struct structure_graph_builder
   void insert_edge(index_type ui, index_type vi)
   {
     using utilities::detail::contains;
-    auto& u = m_vertices[ui];
-    auto& v = m_vertices[vi];
+    auto& u = vertex(ui);
+    auto& v = vertex(vi);
     if (!contains(u.successors, vi))
     {
       u.successors.push_back(vi);
@@ -422,18 +451,18 @@ struct structure_graph_builder
     m_initial_state = x;
   }
 
+  structure_graph::index_type initial_vertex() const
+  {
+    auto i = m_vertex_map.find(m_initial_state);
+    assert (i != m_vertex_map.end());
+    return i->second;
+  }
+
   // call at the end, to put the results into m_graph
   void finalize()
   {
-    std::size_t N = m_vertices.size();
-
-    std::swap(m_graph.m_vertices, m_vertices);
-
-    auto i = m_vertex_map.find(m_initial_state);
-    assert (i != m_vertex_map.end());
-    m_graph.m_initial_vertex = i->second;
-
-    m_graph.m_exclude = boost::dynamic_bitset<>(N);
+    m_graph.m_initial_vertex = initial_vertex();
+    m_graph.m_exclude = boost::dynamic_bitset<>(m_graph.extent());
   }
 
   index_type find_vertex(const pbes_expression& x) const
@@ -456,7 +485,7 @@ struct structure_graph_builder
     // compute new index for the vertices
     std::vector<index_type> index;
     structure_graph::index_type count = 0;
-    for (index_type u = 0; u != m_vertices.size(); u++)
+    for (index_type u = 0; u != vertices().size(); u++)
     {
       index.push_back(contains(U, u) ? structure_graph::undefined_vertex : count++);
     }
@@ -474,11 +503,11 @@ struct structure_graph_builder
       return result;
     };
 
-    for (index_type u = 0; u != m_vertices.size(); u++)
+    for (index_type u = 0; u != vertices().size(); u++)
     {
       if (index[u] != structure_graph::undefined_vertex)
       {
-        structure_graph::vertex& u_ = m_vertices[u];
+        structure_graph::vertex& u_ = vertex(u);
         u_.predecessors = update(u_.predecessors);
         u_.successors = update(u_.successors);
         if (u_.strategy != structure_graph::undefined_vertex)
@@ -487,12 +516,12 @@ struct structure_graph_builder
         }
         if (index[u] != u)
         {
-          std::swap(m_vertices[u], m_vertices[index[u]]);
+          std::swap(vertex(u), vertex(index[u]));
         }
       }
     }
 
-    m_vertices.erase(m_vertices.begin() + m_vertices.size() - U.size(), m_vertices.end());
+    vertices().erase(vertices().begin() + vertices().size() - U.size(), vertices().end());
   }
 };
 

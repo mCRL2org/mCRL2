@@ -84,10 +84,10 @@ class solve_structure_graph_algorithm
 
     // find a successor of u in U, or a random one if no successor in U exists
     inline
-    structure_graph::index_type succ(const structure_graph& G, int u, const vertex_set& U)
+    structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u, const vertex_set& U)
     {
       auto result = structure_graph::undefined_vertex;
-      for (auto v: G.successors(u))
+      for (structure_graph::index_type v: G.successors(u))
       {
         if (U.contains(v))
         {
@@ -98,6 +98,7 @@ class solve_structure_graph_algorithm
       return result;
     }
 
+  public:
     // computes solve_recursive(G \ A)
     inline
     std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G, const vertex_set& A)
@@ -109,6 +110,7 @@ class solve_structure_graph_algorithm
       return result;
     }
 
+  protected:
     // pre: G does not contain nodes with decoration true or false.
     //
     // N.B. If use_toms_optimization is true, then the oomputed strategy may be incorrect.
@@ -117,7 +119,7 @@ class solve_structure_graph_algorithm
     std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
     {
       mCRL2log(log::debug) << "\n--- solve_recursive input ---\n" << G << std::endl;
-      std::size_t N = G.all_vertices().size();
+      std::size_t N = G.extent();
 
       if (G.is_empty())
       {
@@ -128,7 +130,7 @@ class solve_structure_graph_algorithm
       std::size_t m = std::get<0>(q);
       const vertex_set& U = std::get<2>(q);
 
-      int alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
+      std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
       // set strategy
       for (structure_graph::index_type ui: U.vertices())
@@ -163,12 +165,13 @@ class solve_structure_graph_algorithm
       vertex_set W[2]   = { vertex_set(N), vertex_set(N) };
       vertex_set W_1[2];
 
+      vertex_set A = compute_attractor_set(G, U, alpha);
+      std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
+
       if (use_toms_optimization)
       {
         // More efficient than Zielonka, because some recursive calls are skipped.
         // As a consequence, the computed strategy may be wrong.
-        vertex_set A = compute_attractor_set(G, U, alpha);
-        std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
         vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
         if (W_1[1 - alpha].size() == B.size())
         {
@@ -184,8 +187,6 @@ class solve_structure_graph_algorithm
       else
       {
          // Original Zielonka version
-         vertex_set A = compute_attractor_set(G, U, alpha);
-         std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
          if (W_1[1 - alpha].is_empty())
          {
            W[alpha] = set_union(A, W_1[alpha]);
@@ -212,7 +213,7 @@ class solve_structure_graph_algorithm
     {
       mCRL2log(log::debug) << "\n--- solve_recursive_extended input ---\n" << G << std::endl;
 
-      std::size_t N = G.all_vertices().size();
+      std::size_t N = G.extent();
       vertex_set Vconj(N);
       vertex_set Vdisj(N);
 
@@ -359,6 +360,7 @@ class solve_structure_graph_algorithm
     bool solve(structure_graph& G)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
+      assert(G.extent() > 0);
       auto W = solve_recursive_extended(G);
       bool is_disjunctive;
       if (W.first.contains(G.initial_vertex()))

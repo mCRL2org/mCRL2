@@ -39,6 +39,11 @@ class simple_structure_graph
       return m_vertices[u].decoration;
     }
 
+    std::size_t extent() const
+    {
+      return m_vertices.size();
+    }
+
     std::size_t rank(index_type u) const
     {
       return m_vertices[u].rank;
