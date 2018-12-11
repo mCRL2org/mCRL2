@@ -46,6 +46,27 @@ void split_finite_variables(data::variable_list variables, const data::data_spec
   infinite_variables = data::variable_list(infinite.begin(), infinite.end());
 }
 
+template <typename Rewriter>
+inline
+void split_enumerable_variables(data::variable_list variables, const data::data_specification& data, const Rewriter& rewr, data::variable_list& enumerable_variables, data::variable_list& non_enumerable_variables)
+{
+  std::vector<data::variable> enumerable;
+  std::vector<data::variable> non_enumerable;
+  for (const data::variable& v: variables)
+  {
+    if (is_enumerable(data, rewr, v.sort()))
+    {
+      enumerable.push_back(v);
+    }
+    else
+    {
+      non_enumerable.push_back(v);
+    }
+  }
+  enumerable_variables = data::variable_list(enumerable.begin(), enumerable.end());
+  non_enumerable_variables = data::variable_list(non_enumerable.begin(), non_enumerable.end());
+}
+
 } // namespace detail
 
 } // namespace data
