@@ -81,7 +81,7 @@ void Disjointness_Checker::process_data_expression(std::size_t n, const data::da
   {
     // Do nothing. 
   }
-  if (data::is_variable(x))
+  else if (data::is_variable(x))
   {
     f_used_parameters_per_summand[n].insert(data::variable(x));
   }
