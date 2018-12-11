@@ -144,7 +144,10 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     pbes_expression result;
     if (m_enumerate_infinite_sorts)
     {
-      result = enumerate_forall(x.variables(), x.body());
+      data::variable_list enumerable;
+      data::variable_list non_enumerable;
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::super::R, enumerable, non_enumerable);
+      result = data::optimized_forall_no_empty_domain(non_enumerable, enumerate_forall(enumerable, x.body()));
     }
     else
     {
@@ -169,7 +172,10 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     pbes_expression result;
     if (m_enumerate_infinite_sorts)
     {
-      result = enumerate_exists(x.variables(), x.body());
+      data::variable_list enumerable;
+      data::variable_list non_enumerable;
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::super::R, enumerable, non_enumerable);
+      result = data::optimized_exists_no_empty_domain(non_enumerable, enumerate_exists(enumerable, x.body()));
     }
     else
     {
