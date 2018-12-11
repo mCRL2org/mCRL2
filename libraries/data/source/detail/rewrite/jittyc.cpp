@@ -1896,11 +1896,11 @@ class RewriterCompilingJitty::ImplementTree
   {
     std::stringstream result_type_string;
     m_stream << m_padding
-             << "if (";
+             << "if (atermpp::detail::address(";
     calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true, result_type_string);
-    m_stream << " == sort_bool::true_()) // C\n" << m_padding
+    m_stream << ") == reinterpret_cast<atermpp::detail::_aterm*>(" 
+             << (void*)atermpp::detail::address(sort_bool::true_()) << ")) // C: == true_()\n" << m_padding
              << "{\n";
-
     brackets.bracket_nesting_level++;
     m_padding.indent();
     implement_tree(m_stream, tree.true_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
@@ -1945,9 +1945,10 @@ class RewriterCompilingJitty::ImplementTree
     stringstream result_type_string;
     assert(tree.true_tree().isR());
     m_stream << m_padding
-             << "if (";
+             << "if (atermpp::detail::address(";
     calc_inner_term(m_stream, tree.condition(), 0, variable_or_number_list(), true, result_type_string);
-    m_stream << " == sort_bool::true_()) // C\n" << m_padding
+    m_stream << ") == reinterpret_cast<atermpp::detail::_aterm*>(" 
+             << (void*)atermpp::detail::address(sort_bool::true_()) << ")) // C: == true_()\n" << m_padding
              << "{\n" << m_padding
              << "  return ";
     brackets.bracket_nesting_level++;
@@ -2693,7 +2694,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 #ifdef NDEBUG // In non debug mode clear compiled files directly after loading.
   try
   {
-    rewriter_so->cleanup();
+std::cerr << "WARNING. The jittyc temporary files are not removed.\n";
+//    rewriter_so->cleanup();
   }
   catch (std::runtime_error& error)
   {

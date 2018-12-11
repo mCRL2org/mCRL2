@@ -568,6 +568,62 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@plus_pos.
+      /// \return Identifier \@plus_pos.
+      inline
+      const core::identifier_string& auxiliary_plus_pos_name()
+      {
+        static core::identifier_string auxiliary_plus_pos_name = core::identifier_string("@plus_pos");
+        return auxiliary_plus_pos_name;
+      }
+
+      /// \brief Constructor for function symbol \@plus_pos.       
+      /// \return Function symbol auxiliary_plus_pos.
+      inline
+      const function_symbol& auxiliary_plus_pos()
+      {
+        static function_symbol auxiliary_plus_pos(auxiliary_plus_pos_name(), make_function_sort(pos(), pos(), pos()));
+        return auxiliary_plus_pos;
+      }
+
+
+      /// \brief Recogniser for function \@plus_pos.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@plus_pos.
+      inline
+      bool is_auxiliary_plus_pos_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == auxiliary_plus_pos();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@plus_pos.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@plus_pos to a number of arguments.
+      inline
+      application auxiliary_plus_pos(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_pos::auxiliary_plus_pos()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@plus_pos.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol auxiliary_plus_pos to a
+      ///     number of arguments.
+      inline
+      bool is_auxiliary_plus_pos_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_auxiliary_plus_pos_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
@@ -781,6 +837,7 @@ namespace mcrl2 {
         result.push_back(sort_pos::succ());
         result.push_back(sort_pos::pos_predecessor());
         result.push_back(sort_pos::plus());
+        result.push_back(sort_pos::auxiliary_plus_pos());
         result.push_back(sort_pos::times());
         result.push_back(sort_pos::powerlog2_pos());
         result.push_back(sort_pos::times_whr_mult_overflow());
@@ -797,6 +854,7 @@ namespace mcrl2 {
         result.push_back(sort_pos::minimum());
         result.push_back(sort_pos::succ());
         result.push_back(sort_pos::plus());
+        result.push_back(sort_pos::auxiliary_plus_pos());
         result.push_back(sort_pos::times());
         return result;
       }
@@ -820,7 +878,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_pos_application(e) || is_times_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -892,7 +950,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_pos_application(e) || is_times_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -940,6 +998,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp1, vw1, vw2}), plus(concat_digit(vp1, vw1), most_significant_digit(vw2)), concat_digit(plus(most_significant_digit(sort_machine_word::add_overflow_word(vw1, vw2)), vp1), sort_machine_word::add_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp2, vw1, vw2}), plus(most_significant_digit(vw1), concat_digit(vp2, vw2)), concat_digit(plus(most_significant_digit(sort_machine_word::add_overflow_word(vw1, vw2)), vp2), sort_machine_word::add_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), plus(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), concat_digit(plus(most_significant_digit(sort_machine_word::add_overflow_word(vw1, vw2)), plus(vp1, vp2)), sort_machine_word::add_word(vw1, vw2))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), auxiliary_plus_pos(vp1, vp2), plus(vp1, vp2)));
         result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit(vw1), most_significant_digit(vw2)), times_whr_mult_overflow(vw1, vw2, sort_machine_word::times_word(vw1, vw2), sort_machine_word::times_overflow_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp, vw, vw1, vw2}), times_whr_mult_overflow(vw1, vw2, vp, vw), if_(equal_to(vw, sort_machine_word::zero_word()), most_significant_digit(vp), concat_digit(most_significant_digit(vw), vp))));
         result.push_back(data_equation(variable_list({vp1, vw1, vw2}), times(concat_digit(vp1, vw1), most_significant_digit(vw2)), concat_digit(plus(times(vp1, most_significant_digit(vw2)), most_significant_digit(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))));

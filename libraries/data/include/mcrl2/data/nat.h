@@ -888,6 +888,62 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@plus_nat.
+      /// \return Identifier \@plus_nat.
+      inline
+      const core::identifier_string& auxiliary_plus_nat_name()
+      {
+        static core::identifier_string auxiliary_plus_nat_name = core::identifier_string("@plus_nat");
+        return auxiliary_plus_nat_name;
+      }
+
+      /// \brief Constructor for function symbol \@plus_nat.       
+      /// \return Function symbol auxiliary_plus_nat.
+      inline
+      const function_symbol& auxiliary_plus_nat()
+      {
+        static function_symbol auxiliary_plus_nat(auxiliary_plus_nat_name(), make_function_sort(nat(), nat(), nat()));
+        return auxiliary_plus_nat;
+      }
+
+
+      /// \brief Recogniser for function \@plus_nat.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@plus_nat.
+      inline
+      bool is_auxiliary_plus_nat_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == auxiliary_plus_nat();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@plus_nat.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@plus_nat to a number of arguments.
+      inline
+      application auxiliary_plus_nat(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_nat::auxiliary_plus_nat()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@plus_nat.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol auxiliary_plus_nat to a
+      ///     number of arguments.
+      inline
+      bool is_auxiliary_plus_nat_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_auxiliary_plus_nat_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
       /// \brief Generate identifier *.
       /// \return Identifier *.
       inline
@@ -3565,6 +3621,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
+        result.push_back(sort_nat::auxiliary_plus_nat());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::div());
         result.push_back(sort_nat::mod());
@@ -3631,6 +3688,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
+        result.push_back(sort_nat::auxiliary_plus_nat());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::div());
         result.push_back(sort_nat::mod());
@@ -3659,7 +3717,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_nat_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -3755,7 +3813,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_nat_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -3836,6 +3894,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn1, vw1, vw2}), plus(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), vn1), sort_machine_word::add_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vn2, vw1, vw2}), plus(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), vn2), sort_machine_word::add_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), plus(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), concat_digit(plus(most_significant_digit_nat(sort_machine_word::add_overflow_word(vw1, vw2)), plus(vn1, vn2)), sort_machine_word::add_word(vw1, vw2))));
+        result.push_back(data_equation(variable_list({vn1, vn2}), auxiliary_plus_nat(vn1, vn2), plus(vn1, vn2)));
         result.push_back(data_equation(variable_list({vw}), natpred(most_significant_digit_nat(vw)), if_(equal_to(vw, sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::pred_word(vw)))));
         result.push_back(data_equation(variable_list({vn, vw}), natpred(concat_digit(vn, vw)), if_(equal_to(vw, sort_machine_word::zero_word()), if_(equal_to(vn, most_significant_digit_nat(sort_machine_word::one_word())), most_significant_digit_nat(sort_machine_word::max_word()), concat_digit(natpred(vn), sort_machine_word::max_word())), concat_digit(vn, sort_machine_word::pred_word(vw)))));
         result.push_back(data_equation(variable_list({vw1, vw2}), monus(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(less(vw1, vw2), most_significant_digit_nat(sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)))));

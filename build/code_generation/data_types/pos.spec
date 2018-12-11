@@ -27,6 +27,8 @@ map  @most_significant_digit <"most_significant_digit">: @word <"arg"> -> Pos   
      succ <"succ">: Pos <"arg"> -> Pos                                                                                                  external defined_by_rewrite_rules;
      @pospred <"pos_predecessor">: Pos <"arg"> -> Pos                                                                                   internal defined_by_rewrite_rules;
      + <"plus">: Pos <"left"> # Pos <"right"> -> Pos                                                                                    external defined_by_rewrite_rules;
+% The following function is used when the symbol + is overloaded, such as in fbags. 
+     @plus_pos <"auxiliary_plus_pos">: Pos <"left"> # Pos <"right"> -> Pos                                                              external defined_by_rewrite_rules;
      * <"times">: Pos <"left"> # Pos <"right"> -> Pos                                                                                   external defined_by_rewrite_rules;
      @powerlog2 <"powerlog2_pos">: Pos <"arg"> -> Pos                                                                                   internal defined_by_rewrite_rules;
 % Auxiliary function to implement multiplication that uses where clauses.
@@ -49,34 +51,34 @@ var  b: Bool;
      w2: @word;
 eqn  @one = @most_significant_digit(@one_word);
      @succ_pos(p) = succ(p);
-      succ(@most_significant_digit(w1)) = if(==(w1,@max_word),
+     succ(@most_significant_digit(w1)) = if(==(w1,@max_word),
                                               @concat_digit(@most_significant_digit(@one_word),@zero_word),
                                               @most_significant_digit(@succ_word(w1)));
-      succ(@concat_digit(p,w1)) = if(==(w1,@max_word),
+     succ(@concat_digit(p,w1)) = if(==(w1,@max_word),
                                              @concat_digit(succ(p),@zero_word),
                                              @concat_digit(p,@succ_word(w1)));
  
 % The rules for comparison operators must be explicitly be defined on succ (= @succ_pos) to allow enumeration of positive numbers.
-      ==(@most_significant_digit(w1),@most_significant_digit(w2)) = ==(w1,w2);
-      ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
-      ==(@most_significant_digit(w1),@concat_digit(p,w2)) = false;
-      ==(@concat_digit(p1,w1),@concat_digit(p2,w2)) = &&(==(p1,p2), ==(w1,w2));
-      ==(succ(p1),p2) = &&(!(==(p2,@most_significant_digit(@one_word))),==(p1,@pospred(p2)));
-      ==(p1, succ(p2)) = &&(!(==(p1,@most_significant_digit(@one_word))),==(@pospred(p1),p2));
+     ==(@most_significant_digit(w1),@most_significant_digit(w2)) = ==(w1,w2);
+     ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     ==(@most_significant_digit(w1),@concat_digit(p,w2)) = false;
+     ==(@concat_digit(p1,w1),@concat_digit(p2,w2)) = &&(==(p1,p2), ==(w1,w2));
+     ==(succ(p1),p2) = &&(!(==(p2,@most_significant_digit(@one_word))),==(p1,@pospred(p2)));
+     ==(p1, succ(p2)) = &&(!(==(p1,@most_significant_digit(@one_word))),==(@pospred(p1),p2));
  
-      <(@most_significant_digit(w1),@most_significant_digit(w2)) = <(w1,w2);
-      <(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
-      <(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
-      <(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<(w1,w2),<=(p1,p2),<(p1,p2));
-      <(succ(p1),p2) = &&(<(@most_significant_digit(@two_word),p2),<(p1,@pospred(p2)));
-      <(p1, succ(p2)) = <=(p1,p2);
+     <(@most_significant_digit(w1),@most_significant_digit(w2)) = <(w1,w2);
+     <(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     <(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
+     <(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<(w1,w2),<=(p1,p2),<(p1,p2));
+     <(succ(p1),p2) = &&(<(@most_significant_digit(@two_word),p2),<(p1,@pospred(p2)));
+     <(p1, succ(p2)) = <=(p1,p2);
  
-      <=(@most_significant_digit(w1),@most_significant_digit(w2)) = <=(w1,w2);
-      <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
-      <=(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
-      <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<=(w1,w2),<=(p1,p2),<(p1,p2));
-      <=(succ(p1),p2) = <(p1,p2);
-      <=(p1, succ(p2)) = <=(@pospred(p1),p2);
+     <=(@most_significant_digit(w1),@most_significant_digit(w2)) = <=(w1,w2);
+     <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     <=(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
+     <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<=(w1,w2),<=(p1,p2),<(p1,p2));
+     <=(succ(p1),p2) = <(p1,p2);
+     <=(p1, succ(p2)) = <=(@pospred(p1),p2);
  
      max(p1,p2) = if(<=(p1,p2),p2,p1);
      min(p1,p2) = if(<=(p1,p2),p1,p2);
@@ -100,6 +102,7 @@ eqn  @one = @most_significant_digit(@one_word);
                                                                          @add_word(w1,w2));
      +(@concat_digit(p1,w1),@concat_digit(p2,w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)), +(p1,p2)),
                                                                        @add_word(w1,w2));
+     @plus_pos(p1,p2) = +(p1,p2);
 
 % The definition below uses where clauses. The where clauses are translated away by the introduction of the 
 % function @times_whr_mult_overflow. 

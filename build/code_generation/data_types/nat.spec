@@ -39,6 +39,8 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      + <"plus">:Pos <"left"> #Nat <"right">->Pos                                                                 external defined_by_rewrite_rules;
      + <"plus">:Nat <"left"> #Pos <"right">->Pos                                                                 external defined_by_rewrite_rules;
      + <"plus">:Nat <"left"> #Nat <"right">->Nat                                                                 external defined_by_rewrite_rules;
+% The following function is used when the symbol + is overloaded, such as in fbags.
+     @plus_nat <"auxiliary_plus_nat">: Nat <"left"> # Nat <"right"> -> Nat                                       external defined_by_rewrite_rules;
      * <"times">:Nat <"left"> #Nat <"right">->Nat                                                                external defined_by_rewrite_rules;
      div <"div">: Nat <"left"> # Pos <"right"> -> Nat                                                            external defined_by_rewrite_rules;
      mod <"mod">:Nat <"left"> # Pos <"right"> -> Nat                                                             external defined_by_rewrite_rules;
@@ -200,7 +202,8 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      +(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
                                         @concat_digit(+(@most_significant_digitNat(@add_overflow_word(w1,w2)),+(n1,n2)),
                                                       @add_word(w1,w2));
-
+     @plus_nat(n1,n2) = +(n1,n2);
+ 
      @natpred(@most_significant_digitNat(w)) = if(==(w,@zero_word), @most_significant_digitNat(@zero_word), @most_significant_digitNat(@pred_word(w)));
      @natpred(@concat_digit(n,w)) = if(==(w,@zero_word),
                                        if(==(n,@most_significant_digitNat(@one_word)),

@@ -66,7 +66,7 @@ eqn @bagfbag(b)  =  @bag(@zero_, b);
     @one_(e)  =  @most_significant_digitNat(@one_word);
     ==(@zero_, @one_)  =  false;
     ==(@one_, @zero_)  =  false;
-    @add_(f, g)(e)  =  +(f(e), g(e));
+    @add_(f, g)(e)  =  @plus_nat(f(e), g(e));
     @add_(f, @zero_)  =  f;
     @add_(@zero_, f)  =  f;
     @min_(f, g)(e)  =  min(f(e), g(e));

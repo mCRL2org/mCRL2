@@ -51,15 +51,15 @@ static const data_expression& local_rewrite(const data_expression& t)
 // Forward declarations
 //
 static void set_the_precompiled_rewrite_functions_in_a_lookup_table(RewriterCompilingJitty* this_rewriter);
-static data_expression rewrite_aux(const data_expression& t, const bool arguments_in_normal_form, RewriterCompilingJitty* this_rewriter);
+template<bool arguments_in_normal_form>data_expression rewrite_aux(const data_expression& t, RewriterCompilingJitty* this_rewriter);
 static inline data_expression rewrite_abstraction_aux(const abstraction& a, const data_expression& t, RewriterCompilingJitty* this_rewriter);
 static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
-  return rewrite_aux(t,true, this_rewriter);
+  return rewrite_aux<true>(t, this_rewriter);
 }
 static data_expression rewrite(const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
-  return rewrite_aux(t, false, this_rewriter);
+  return rewrite_aux<false>(t, this_rewriter);
 }
 
 //
@@ -83,7 +83,7 @@ class term_not_in_normal_form
 
     data_expression normal_form() const
     {
-      return rewrite_aux(m_term,false, this_rewriter);
+      return rewrite_aux<false>(m_term, this_rewriter);
     }
 };
 
@@ -123,7 +123,7 @@ struct rewrite_functor
 
   data_expression operator()(const data_expression& arg) const
   {
-    return rewrite_aux(arg,false,this_rewriter);
+    return rewrite_aux<false>(arg,this_rewriter);
   }
 };
 
@@ -165,10 +165,10 @@ uintptr_t uint_address(const atermpp::aterm& t)
 // Rewriting functions
 //
 
-static inline rewriter_function get_precompiled_rewrite_function(
+template <bool arguments_in_normal_form>
+rewriter_function get_precompiled_rewrite_function(
              const function_symbol& f, 
              const std::size_t arity, 
-             const bool arguments_in_normal_form, 
              RewriterCompilingJitty* this_rewriter)
 {
   const std::size_t index = get_index(f);
@@ -216,14 +216,14 @@ data_expression rewrite_appl_aux(const application& t, RewriterCompilingJitty* t
   if (is_function_symbol(thead))
   {
     const std::size_t arity=recursive_number_of_args(t);
-    const rewriter_function f = get_precompiled_rewrite_function(atermpp::down_cast<function_symbol>(thead),arity,false,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function<false>(atermpp::down_cast<function_symbol>(thead),arity,this_rewriter);
     if (f != NULL)
     {
       const data_expression& result=f(t,this_rewriter);
       assert(t.sort()==result.sort());
       return result;
     }
-    return application(rewrite_aux(t.head(),false,this_rewriter), t.begin(), t.end(), rewrite_functor(this_rewriter));
+    return application(rewrite_aux<false>(t.head(),this_rewriter), t.begin(), t.end(), rewrite_functor(this_rewriter));
   }
   // Here the head symbol of, which can be deeply nested, is not a function_symbol.
   const data_expression& head0 = get_nested_head(t);
@@ -252,29 +252,24 @@ data_expression rewrite_appl_aux(const application& t, RewriterCompilingJitty* t
   {
     assert(is_function_symbol(head1));
     const std::size_t arity = recursive_number_of_args(t1);
-    const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head1),arity,false,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function<false>(down_cast<function_symbol>(head1),arity,this_rewriter);
     if (f != NULL)
     {
       const data_expression& result=f(t1,this_rewriter);
       assert(t1.sort()==result.sort());
       return result;
     }
-    return application(rewrite_aux(head1,false,this_rewriter), t1.begin(), t1.end(), rewrite_functor(this_rewriter)); 
+    return application(rewrite_aux<false>(head1,this_rewriter), t1.begin(), t1.end(), rewrite_functor(this_rewriter)); 
   }
 }
 
-static inline
-data_expression rewrite_aux(const data_expression& t, const bool arguments_in_normal_form, RewriterCompilingJitty* this_rewriter)
+template <bool arguments_in_normal_form>
+data_expression rewrite_aux(const data_expression& t, RewriterCompilingJitty* this_rewriter)
 {
-  if (is_machine_number(t))
-  {
-    return t;
-  }
-  else 
   if (is_function_symbol(t))
   {
     const std::size_t arity=0;
-    const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(t), arity, false,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function<false>(down_cast<function_symbol>(t), arity,this_rewriter);
     if (f != NULL)
     {
       const data_expression& result=f(application(),this_rewriter); // The argument is not used.
@@ -291,14 +286,14 @@ data_expression rewrite_aux(const data_expression& t, const bool arguments_in_no
     if (is_function_symbol(head))
     {
       const std::size_t appl_size=appl.size();
-      const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head), appl_size, arguments_in_normal_form,this_rewriter);
+      const rewriter_function f = get_precompiled_rewrite_function<arguments_in_normal_form>(down_cast<function_symbol>(head), appl_size,this_rewriter);
       if (f != NULL)
       {
         const data_expression& result= f(appl,this_rewriter);
         assert(result.sort()==t.sort());
         return result;
       }
-      return application(rewrite_aux(appl.head(),false, this_rewriter), appl.begin(), appl.end(), rewrite_functor(this_rewriter));
+      return application(rewrite_aux<false>(appl.head(),this_rewriter), appl.begin(), appl.end(), rewrite_functor(this_rewriter));
     }
     else
     {
@@ -313,6 +308,11 @@ data_expression rewrite_aux(const data_expression& t, const bool arguments_in_no
     return sigma(this_rewriter)(down_cast<variable>(t));
   }
   else
+  if (is_machine_number(t))
+  {
+    return t;
+  }
+  else 
   if (is_abstraction(t))
   {
     const abstraction& abstr(t);

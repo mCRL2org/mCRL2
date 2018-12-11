@@ -1230,7 +1230,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({ve}), one_function(s, ve), sort_nat::most_significant_digit_nat(sort_machine_word::one_word())));
         result.push_back(data_equation(variable_list(), equal_to(zero_function(s), one_function(s)), sort_bool::false_()));
         result.push_back(data_equation(variable_list(), equal_to(one_function(s), zero_function(s)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({ve, vf, vg}), add_function(s, vf, vg)(ve), sort_nat::plus(vf(ve), vg(ve))));
+        result.push_back(data_equation(variable_list({ve, vf, vg}), add_function(s, vf, vg)(ve), sort_nat::auxiliary_plus_nat(vf(ve), vg(ve))));
         result.push_back(data_equation(variable_list({vf}), add_function(s, vf, zero_function(s)), vf));
         result.push_back(data_equation(variable_list({vf}), add_function(s, zero_function(s), vf), vf));
         result.push_back(data_equation(variable_list({ve, vf, vg}), min_function(s, vf, vg)(ve), sort_nat::minimum(vf(ve), vg(ve))));
