@@ -3868,12 +3868,14 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), less(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(less(vw1, vw2), less_equal(vn1, vn2), less(vn1, vn2))));
         result.push_back(data_equation(variable_list({vn1, vn2}), less(succ_nat(vn1), vn2), sort_bool::and_(less(most_significant_digit_nat(sort_machine_word::one_word()), vn2), less(vn1, natpred(vn2)))));
         result.push_back(data_equation(variable_list({vn1, vn2}), less(vn1, succ_nat(vn2)), less_equal(vn1, vn2)));
+        result.push_back(data_equation(variable_list({vp, vw1}), equal_to(vw1, sort_machine_word::zero_word()), less(vp, sort_pos::most_significant_digit(vw1)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), less_equal(vw1, vw2)));
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), less_equal(concat_digit(vn, vw1), most_significant_digit_nat(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), less_equal(most_significant_digit_nat(vw1), concat_digit(vn, vw2)), sort_bool::true_()));
         result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), less_equal(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(less_equal(vw1, vw2), less_equal(vn1, vn2), less(vn1, vn2))));
         result.push_back(data_equation(variable_list({vn1, vn2}), less_equal(succ_nat(vn1), vn2), less(vn1, vn2)));
         result.push_back(data_equation(variable_list({vn1, vn2}), less_equal(vn1, succ_nat(vn2)), less_equal(natpred(vn1), vn2)));
+        result.push_back(data_equation(variable_list({vn, vw1}), equal_to(vw1, sort_machine_word::zero_word()), less_equal(most_significant_digit_nat(vw1), vn), sort_bool::true_()));
         result.push_back(data_equation(variable_list({vw}), pos2nat(sort_pos::most_significant_digit(vw)), most_significant_digit_nat(vw)));
         result.push_back(data_equation(variable_list({vp, vw}), pos2nat(concat_digit(vp, vw)), concat_digit(pos2nat(vp), vw)));
         result.push_back(data_equation(variable_list({vw}), nat2pos(most_significant_digit_nat(vw)), sort_pos::most_significant_digit(vw)));

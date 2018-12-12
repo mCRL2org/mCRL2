@@ -72,6 +72,7 @@ eqn  @one = @most_significant_digit(@one_word);
      <(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<(w1,w2),<=(p1,p2),<(p1,p2));
      <(succ(p1),p2) = &&(<(@most_significant_digit(@two_word),p2),<(p1,@pospred(p2)));
      <(p1, succ(p2)) = <=(p1,p2);
+     ==(w1,@one_word) ->  <(p,@most_significant_digit(w1)) = false;
  
      <=(@most_significant_digit(w1),@most_significant_digit(w2)) = <=(w1,w2);
      <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
@@ -79,6 +80,7 @@ eqn  @one = @most_significant_digit(@one_word);
      <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<=(w1,w2),<=(p1,p2),<(p1,p2));
      <=(succ(p1),p2) = <(p1,p2);
      <=(p1, succ(p2)) = <=(@pospred(p1),p2);
+     ==(w1,@one_word) ->  <=(@most_significant_digit(w1), p) = true;
  
      max(p1,p2) = if(<=(p1,p2),p2,p1);
      min(p1,p2) = if(<=(p1,p2),p1,p2);

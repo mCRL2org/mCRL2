@@ -524,7 +524,7 @@ template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 real_(T t)
 {
-  return sort_real::creal(sort_int::int_(t), sort_pos::c1());
+  return sort_real::creal(sort_int::int_(t), sort_pos::pos(1));
 }
 
 /// \brief Constructs expression of type pos from an integral type
@@ -542,7 +542,7 @@ real_(T numerator, T denominator)
 /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
 inline data_expression real_(const std::string& n)
 {
-  return sort_real::creal(sort_int::int_(n), sort_pos::c1());
+  return sort_real::creal(sort_int::int_(n), sort_pos::pos(1));
 }
 } // namespace sort_real
 

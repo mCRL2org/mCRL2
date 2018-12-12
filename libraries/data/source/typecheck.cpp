@@ -349,7 +349,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       data_expression OldPar=Par;
       Par=application(sort_real::creal(),
                               application(sort_int::cint(), application(sort_nat::pos2nat(),Par)),
-                              sort_pos::c1());
+                              sort_pos::pos(1));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -362,7 +362,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       data_expression OldPar=Par;
       Par=application(sort_real::creal(),
                              application(sort_int::cint(),Par),
-                             sort_pos::c1());
+                             sort_pos::pos(1));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
@@ -373,7 +373,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     if (TypeMatchA(Type,sort_int::int_(),temp))
     {
       data_expression OldPar=Par;
-      Par=application(sort_real::creal(),Par, sort_pos::c1());
+      Par=application(sort_real::creal(),Par, sort_pos::pos(1));
       if (warn_upcasting)
       {
         was_warning_upcasting=true;

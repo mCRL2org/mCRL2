@@ -148,6 +148,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
       <(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<(w1,w2),<=(n1,n2),<(n1,n2));
       <(@succ_nat(n1),n2) = &&(<(@most_significant_digitNat(@one_word),n2),<(n1,@natpred(n2)));
       <(n1, @succ_nat(n2)) = <=(n1,n2);
+      ==(w1,@zero_word) ->  <(p,@most_significant_digit(w1)) = false;
  
       <=(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <=(w1,w2);
       <=(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
@@ -155,6 +156,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
       <=(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<=(w1,w2),<=(n1,n2),<(n1,n2));
       <=(@succ_nat(n1),n2) = <(n1,n2);
       <=(n1, @succ_nat(n2)) = <=(@natpred(n1),n2);
+      ==(w1,@zero_word) ->  <=(@most_significant_digitNat(w1), n) = true;
  
      Pos2Nat(@most_significant_digit(w)) = @most_significant_digitNat(w);
      Pos2Nat(@concat_digit(p,w)) = @concat_digit(Pos2Nat(p),w);
