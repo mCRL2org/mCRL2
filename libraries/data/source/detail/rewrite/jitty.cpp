@@ -977,7 +977,7 @@ data_expression RewriterJitty::rewrite(
 #endif
   const data_expression& t=rewrite_aux(term, sigma);
   assert(remove_normal_form_function(t)==t);
-//   std::cerr << "END REWRITE " << term << "  ---> " << t << "\n" << atermpp::aterm(t) << "\n";
+// std::cerr << "END REWRITE " << term << "  ---> " << t << "\n"; // << atermpp::aterm(t) << "\n";
   return t;
 }
 

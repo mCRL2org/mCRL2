@@ -450,6 +450,19 @@ inline data_expression nat(const std::string& n)
   }
   return result;
 }
+/// \brief Translate a positive constant to a natural constant;
+/// \returns A natural constant with the same value as the positive constant;
+inline data_expression transform_positive_constant_to_nat(const data_expression& n)
+{
+  if (sort_pos::is_concat_digit_application(n))
+  { 
+    return sort_nat::concat_digit(transform_positive_constant_to_nat(arg1(n)),sort_nat::arg2(n));
+  }
+  
+  assert(sort_pos::is_most_significant_digit_application(n));
+  return sort_nat::most_significant_digit_nat(sort_pos::arg(n));
+
+}
 } // namespace sort_nat
 
 namespace sort_int
