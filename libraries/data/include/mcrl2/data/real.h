@@ -1850,7 +1850,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vr}), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::pos2nat(sort_pos::c1())), plus(sort_pos::c1(), sort_pos::c1()))))));
         result.push_back(data_equation(variable_list({vp, vx}), reduce_fraction(vx, sort_int::cneg(vp)), reduce_fraction(negate(vx), sort_int::cint(sort_nat::pos2nat(vp)))));
         result.push_back(data_equation(variable_list({vn, vx}), reduce_fraction(vx, sort_int::cint(vn)), reduce_fraction_where(vn, sort_int::div(vx, sort_nat::nat2pos(vn)), sort_int::mod(vx, sort_nat::nat2pos(vn)))));
-        result.push_back(data_equation(variable_list({vm, vn, vx}), reduce_fraction_where(vn, vx, vm), if_(equal_to(vm, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), creal(vx, sort_pos::c1()), reduce_fraction_helper(reduce_fraction(sort_int::cint(vn), sort_int::cint(vm)), vx))));
+        result.push_back(data_equation(variable_list({vm, vn, vx}), equal_to(vm, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), reduce_fraction_where(vn, vx, vm), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(variable_list({vm, vn, vx}), greater(vm, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), reduce_fraction_where(vn, vx, vm), reduce_fraction_helper(reduce_fraction(sort_int::cint(vn), sort_int::cint(vm)), vx)));
         result.push_back(data_equation(variable_list({vp, vx, vy}), reduce_fraction_helper(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::pos2nat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
         return result;
       }
