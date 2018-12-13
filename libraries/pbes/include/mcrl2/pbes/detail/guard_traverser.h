@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/unused.h"
 
 #ifdef MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
 #include "mcrl2/pbes/find.h"
@@ -303,12 +304,16 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 
   void leave(const pbes_system::not_& x)
   {
+    utilities::mcrl2_unused(x);
+
     top().negate();
     assert(top().check_guards(x, R));
   }
 
   void leave(const pbes_system::and_& x)
   {
+    utilities::mcrl2_unused(x);
+
     guard_expression right = pop();
     guard_expression left = pop();
     pbes_expression new_condition = data::optimized_and(left.condition, right.condition);
@@ -340,6 +345,8 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 
   void leave(const pbes_system::or_& x)
   {
+    utilities::mcrl2_unused(x);
+
     guard_expression right = pop();
     guard_expression left = pop();
     pbes_expression new_condition = data::optimized_or(left.condition, right.condition);
@@ -371,6 +378,8 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 
   void leave(const pbes_system::imp& x)
   {
+    utilities::mcrl2_unused(x);
+
     guard_expression right = pop();
     guard_expression left = pop();
     left.negate();
