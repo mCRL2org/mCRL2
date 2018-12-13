@@ -1,13 +1,51 @@
-%TCIDATA{Version=5.50.0.2890}
-%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
 
+\setcounter{MaxMatrixCols}{10}
 
-\section{PBES rewriters}
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\newcommand{\ap}{{:}}
+\newcommand{\concat}{\ensuremath{+\!\!+}}
+\newcommand{\tuple}[1]{\ensuremath{\langle {#1} \rangle}}
+\newcommand{\vars}{\mathit{vars}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
 
-In this section we describe two PBES rewriters. We assume that a data
-rewriter $r$ is given that rewrites data terms.
+\begin{document}
 
-\subsection{Simplifying rewriter}
+\title{PBES rewriters}
+\author{Wieger Wesselink, Tim Willemse}
+\maketitle
+
+This document describes several rewriters on PBES expressions. We assume that a data
+rewriter $r$ is given that rewrites data expressions.
+
+\section{Simplifying rewriter}
 
 We define a simplifying PBES rewriter $R$ recursively as follows. We assume
 that $D$ is a non-empty data type, and we denote the free variables
@@ -73,7 +111,8 @@ x=x &\rightarrow &true \\
 y=x &\rightarrow &x=y,\text{ provided }y\succ x
 \end{eqnarray*}
 
-\subsection{The predicate formula normal form (PFNF)}
+\newpage
+\section{PFNF Rewriter}
 
 \begin{definition}
 A predicate formula is said to be in \emph{Predicate Formula Normal Form}
@@ -144,9 +183,7 @@ p(\psi ) & = & \mathsf{Q}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi
 under the assumption that $I^{\varphi }$ and $I^{\psi }$ are disjoint, and $%
 v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\newpage
 
-\subsection{OnePointRule Quantifier Elimination}
-
-\subsubsection{Equalities / inequalities}
+\section{OnePointRule Quantifier Elimination Rewriter}
 
 The function $Eq$ computes a set of equalities and inequalities for an
 expression $\varphi $, such that the following holds:%
@@ -219,8 +256,6 @@ W_{1}=\left\{ d\neq e\in W\mid d\neq x\wedge x\notin FV(e)\right\}%
 \end{array}%
 \end{equation*}
 
-\subsubsection{OnePointRule rewriter}
-
 We define the OnePointRule rewriter $R$ inductively as follows:
 
 \begin{equation*}
@@ -251,10 +286,96 @@ R\left( \varphi \right) & = & \varphi \text{ otherwise}%
 \end{equation*}
 
 \newpage
+\section{Quantifier Inside Rewriter}
 
-\subsection{Quantifier Expansion}
+This rewriter was originally specified by Jan Friso Groote.
+We define a rewriter that pushes universal and existential quantifiers into an
+expression. A typical example is
+\[ \exists x.\forall y.(f(y,y)\wedge (f(x,y)\vee f(x,x))) \]
+which is rewritten to
+\[(\forall y.f(y,y)) \wedge ((\exists x.\forall y.f(x,y)) \vee \exists x.f(x,x)).\]
+If quantifiers are pushed inside formulas as much as possible, quantifier elimination leads to smaller
+expressions and the one-point rewriter is more often applicable. There might be cases where the
+application of this push-quantifiers-inside-rewriter can also have averse effects.
 
-\subsubsection{Conjunctions / disjunctions}
+Below the definition of the rewrite rules are given. It is assumed that it is cheap to obtain the
+free variable in each term, which are denoted by $\vars(\phi)$ for a term $\phi$.
+If not, care needs to be taken as in the formulation below calculating the
+variables of each term recursively on a by need basis can be very expensive.
+
+Let $\phi$ be a pbes expression. We
+define $R(\phi)$ using the functions $R_{\forall}(V,\phi)$ and
+$R_{\exists}(V,\phi)$ where $V$ is a set of typed variables. The
+definition of $R$ employs the structure of a formula:
+\begin{equation*}
+\begin{array}{lll}
+R(\neg \phi)&=&\neg R(\phi)\\
+R(\phi\wedge \psi)&=&R(\phi)\wedge R(\psi)\\
+R(\phi\vee\psi)&=&R(\phi)\vee R(\psi)\\
+R(\phi\Rightarrow\psi)&=&R(\phi)\Rightarrow R(\psi)\\
+R(\forall W.\phi)&=&R_{\forall}(W,R(\phi))\\
+R(\exists W.\phi)&=&R_{\exists}(W,R(\phi))\\
+R(\phi)&=&\phi\textrm{  otherwise}.
+\end{array}
+\end{equation*}
+Here $W$ is a set of typed variables.
+
+The rewrite function $R_{\forall}$ is defined by
+
+\begin{equation*}
+\begin{array}{lll}
+R_{\forall}(V,\neg \phi) &=& \neg R_{\exists}(V,\phi)\\
+
+R_{\forall}(V,\phi\wedge \psi)&=&R_{\forall}(V,\phi)\wedge R_{\forall}(V,\psi)\\
+
+R_{\forall}(V, \bigvee_i \phi_i)&=&
+  \forall W.
+    \left(
+         R_\forall(V \setminus W, \bigvee_{i \in I_1}\phi_i) \lor \bigvee_{i \in I_2}R(\phi_i)
+    \right) \\
+  && \text{where } W = \vars(\phi_j) \cap V \text{ for some $j$ such that $|W|$ is minimal,} \\
+  && \text{and where } I_1 = \{ i \mid \vars(\phi_i) \cap V \nsubseteq W \}, I_2 = \{ i \mid \vars(\phi_i) \cap V \subseteq W \} \\
+
+R_{\forall}(V,\phi\Rightarrow\psi)&=&
+\forall W.(R_{\exists}(V\setminus W,\phi)\Rightarrow{}
+R_{\forall}(V \setminus W,\psi)), 
+\text{ where } W = V \cap \vars(\phi) \cap \vars(\psi) \\
+
+R_{\forall}(V,\forall W.\phi)&=&R_{\forall}(V \cup W,\phi) \\
+
+R_{\forall}(V,\phi)&=&\forall V\cap \vars(\phi).\phi\textrm{ otherwise}.
+
+\end{array}
+\end{equation*}
+
+The rewrite function $R_{\exists}$ is defined by
+\begin{equation*}
+\begin{array}{lll}
+R_{\exists}(V,\neg \phi)&=&\neg R_{\forall}(V,\phi)\\
+
+R_{\exists}(V, \bigwedge_i \phi_i)&=&
+  \exists W.
+    \left(
+         R_\exists(V \setminus W, \bigvee_{i \in I_1}\phi_i) \lor \bigvee_{i \in I_2}R(\phi_i)
+    \right) \\
+  && \text{where } W = \vars(\phi_j) \cap V \text{ for some $j$ such that $|W|$ is minimal,} \\
+  && \text{and where } I_1 = \{ i \mid \vars(\phi_i) \cap V \nsubseteq W \}, I_2 = \{ i \mid \vars(\phi_i) \cap V \subseteq W \} \\
+
+R_{\exists}(V,\phi\vee \psi)&=&R_{\exists}(V,\phi)\vee R_{\exists}(V,\psi)\\
+
+R_{\exists}(V,\phi\Rightarrow\psi)&=&
+R_{\forall}(V,\phi)\Rightarrow R_{\exists}(V,\psi)\\
+
+R_{\exists}(V,\exists W.\phi)&=&R_{\exists}(V \cup W,\phi)\\
+
+R_{\exists}(V,\phi)&=&\exists V\cap\vars(\phi).\phi\textrm{ otherwise}.
+\end{array}
+\end{equation*}
+
+\newpage
+\section{Quantifier Expansion Rewriter}
+
+\subsection{Conjunctions / disjunctions}
 
 The function $CD$ computes a sequence of conjunctions and disjunctions for
 an expression $\varphi $, such that the following holds:%
@@ -307,4 +428,6 @@ W & \text{if }W\neq \emptyset \\
 \end{array}%
 \end{equation*}
 
-N.B. This has not been implemented yet.\newpage
+N.B. This has not been implemented yet.
+
+\end{document}
