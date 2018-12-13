@@ -226,12 +226,17 @@ inline std::vector<std::size_t> add_number_vectors(const std::vector< std::size_
       assert(sum<n2);
       carry=1;
     }
+    else
+    {
+      carry=0;
+    }
     result.push_back(sum);
   }
   if (carry==1)
   {
     result.push_back(1);
   }
+  assert(result.size()<=1 || result.back()!=0);
   return result;
 }
 
@@ -246,19 +251,6 @@ inline std::vector<size_t> multiply_by10_and_add(const std::vector< size_t >& v,
   result = add_number_vectors(result, val_vector);      // result is 10 v + val.
   return result;
 }
-
-
-//CODE BELOW TO BE REMOVED.
-inline std::string pplocal(std::vector< char > v)
-{
-  std::string result;
-  for(char c: v)
-  {
-     result += c + '0';
-  }
-  return result;
-}
-// END REMOVABLE DEBUG CODE 
 
 // Transform a number vector to a string representation of the same number.
 inline std::string number_vector_as_string(const std::vector< std::size_t >& v)
@@ -363,6 +355,8 @@ std::string positive_constant_as_string(const data_expression& n_in)
   return detail::number_vector_as_string(number_vector);
 }
 
+
+
 /// \brief Constructs expression of type Pos from a string
 /// \param n A string
 inline data_expression pos(const std::string& n)
@@ -372,7 +366,7 @@ inline data_expression pos(const std::string& n)
   assert(!detail::is_zero_number_vector(number_vector));
   
   data_expression result=most_significant_digit(machine_number(number_vector.back()));
-  for(std::size_t i=number_vector.size()-1; i>0; ++i)
+  for(std::size_t i=number_vector.size()-1; i>0; --i)
   {
     result = sort_pos::concat_digit(result,machine_number(number_vector.at(i-1)));
   }
@@ -444,7 +438,7 @@ inline data_expression nat(const std::string& n)
     return most_significant_digit_nat(machine_number(0));
   }
   data_expression result=most_significant_digit_nat(machine_number(number_vector.back()));
-  for(std::size_t i=number_vector.size()-1; i>0; ++i)
+  for(std::size_t i=number_vector.size()-1; i>0; --i)
   {
     result = sort_nat::concat_digit(result,machine_number(number_vector.at(i-1)));
   }
@@ -456,7 +450,7 @@ inline data_expression transform_positive_constant_to_nat(const data_expression&
 {
   if (sort_pos::is_concat_digit_application(n))
   { 
-    return sort_nat::concat_digit(transform_positive_constant_to_nat(arg1(n)),sort_nat::arg2(n));
+    return sort_nat::concat_digit(transform_positive_constant_to_nat(sort_pos::arg1(n)),sort_nat::arg2(n));
   }
   
   assert(sort_pos::is_most_significant_digit_application(n));

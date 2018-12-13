@@ -1000,6 +1000,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp1, vw1, vw2}), plus(concat_digit(vp1, vw1), most_significant_digit(vw2)), concat_digit(plus(most_significant_digit(sort_machine_word::add_overflow_word(vw1, vw2)), vp1), sort_machine_word::add_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp2, vw1, vw2}), plus(most_significant_digit(vw1), concat_digit(vp2, vw2)), concat_digit(plus(most_significant_digit(sort_machine_word::add_overflow_word(vw1, vw2)), vp2), sort_machine_word::add_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), plus(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), concat_digit(plus(most_significant_digit(sort_machine_word::add_overflow_word(vw1, vw2)), plus(vp1, vp2)), sort_machine_word::add_word(vw1, vw2))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), plus(succ(vp1), vp2), succ(plus(vp1, vp2))));
+        result.push_back(data_equation(variable_list({vp1, vp2}), plus(vp1, succ(vp2)), succ(plus(vp1, vp2))));
         result.push_back(data_equation(variable_list({vp1, vp2}), auxiliary_plus_pos(vp1, vp2), plus(vp1, vp2)));
         result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit(vw1), most_significant_digit(vw2)), times_whr_mult_overflow(vw1, vw2, sort_machine_word::times_word(vw1, vw2), sort_machine_word::times_overflow_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp, vw, vw1, vw2}), times_whr_mult_overflow(vw1, vw2, vp, vw), if_(equal_to(vw, sort_machine_word::zero_word()), most_significant_digit(vp), concat_digit(most_significant_digit(vw), vp))));

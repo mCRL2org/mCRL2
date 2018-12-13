@@ -29,14 +29,14 @@ void representation_check(Rewriter& R, data_expression const& input, data_expres
 
   if (output != normalize_sorts(expected,spec))
   {
-    std::clog << "--- test failed --- " << data::pp(input) << " ->* " << data::pp(expected) << std::endl
+    std::cerr << "--- test failed --- " << data::pp(input) << " ->* " << data::pp(expected) << std::endl
               << "input    " << data::pp(input) << std::endl
               << "expected " << data::pp(expected) << std::endl
               << "R(input) " << data::pp(output) << std::endl
               << " -- term representations -- " << std::endl
-              << "input    " << input << std::endl
-              << "expected " << normalize_sorts(expected,spec)<< std::endl
-              << "R(input) " << normalize_sorts(output,spec) << std::endl;
+              << "input    " << atermpp::aterm(input) << std::endl
+              << "expected " << atermpp::aterm(normalize_sorts(expected,spec)) << std::endl
+              << "R(input) " << atermpp::aterm(normalize_sorts(output,spec)) << std::endl;
   }
 }
 
@@ -90,21 +90,21 @@ void number_test()
 
   mcrl2::data::rewriter R(specification);
 
-  representation_check(R, number(sort_pos::pos(), "1"), sort_pos::c1(),specification);
-  representation_check(R, number(sort_nat::nat(), "1"), R(normalize_sorts(pos2nat(sort_pos::c1()),specification)),specification);
-  representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::c1())),specification);
+  representation_check(R, number(sort_pos::pos(), "1"), sort_pos::pos(1),specification);
+  representation_check(R, number(sort_nat::nat(), "1"), R(normalize_sorts(pos2nat(sort_pos::pos(1)),specification)),specification);
+  representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::pos(1))),specification);
   representation_check(R, normalize_sorts(number(sort_real::real_(), "1"),specification), R(normalize_sorts(pos2real(sort_pos::c1()),specification)),specification);
 
-  // representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))),specification);
-  // representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))),specification);
-  // representation_check(R, nat("18"), R(normalize_sorts(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1()))))),specification)),specification);
-  // representation_check(R, nat(12), R(normalize_sorts(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1())))),specification)),specification);
+  representation_check(R, pos("11"), sort_pos::pos(11),specification);
+  representation_check(R, pos(12), sort_pos::pos(12),specification);
+  representation_check(R, nat("18"), sort_nat::nat(18),specification);
+  representation_check(R, nat(12), R(pos2nat(sort_pos::pos(12))),specification);
   representation_check(R, int_("0"), R(nat2int(c0())),specification);
-  representation_check(R, int_("-1"), cneg(c1()),specification);
-  // representation_check(R, int_(-2), cneg(cdub(false_(), c1())),specification);
-  representation_check(R, real_("0"), R(normalize_sorts(nat2real(c0()),specification)),specification);
-  representation_check(R, real_("-1"), R(normalize_sorts(int2real(cneg(c1())),specification)),specification);
-  // representation_check(R, real_(-2), R(normalize_sorts(int2real(cneg(cdub(false_(), c1()))),specification)),specification);
+  representation_check(R, int_("-1"), R(cneg(c1())),specification);
+  representation_check(R, int_(-2), int_(-2),specification);
+  representation_check(R, real_("0"), R(nat2real(c0())),specification);
+  representation_check(R, real_("-1"), R(int2real(cneg(c1()))),specification);
+  representation_check(R, real_(-2), R(int2real(cneg(sort_pos::plus(c1(),c1())))),specification);
 
 }
 
@@ -140,8 +140,31 @@ void convert_test()
   BOOST_CHECK(l.size() == al.size());
 }
 
+void number_string_convert_test()
+{
+  std::string s="17989";
+  for(std::size_t i=0; i<30; ++i,  s = s + "043")
+  {
+    BOOST_CHECK(sort_pos::positive_constant_as_string(sort_pos::pos(s)) == s);
+  }
+
+  s="7387";
+  for(std::size_t i=0; i<30; ++i,  s = s + "232")
+  {
+    BOOST_CHECK(sort_nat::natural_constant_as_string(sort_nat::nat(s)) == s);
+  }
+
+  s="-37568";
+  for(std::size_t i=0; i<30; ++i,  s = s + "715")
+  {
+    BOOST_CHECK(sort_int::integer_constant_as_string(sort_int::int_(s)) == s);
+  }
+}
+
 int test_main(int argc, char** argv)
 {
+  number_string_convert_test();
+
   number_test();
 
   list_construction_test();

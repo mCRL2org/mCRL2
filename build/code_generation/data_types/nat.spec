@@ -204,6 +204,10 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      +(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
                                         @concat_digit(+(@most_significant_digitNat(@add_overflow_word(w1,w2)),+(n1,n2)),
                                                       @add_word(w1,w2));
+% The rules below are useful in solving expressions with plus and quantifiers.
+     +(@succ_nat(n1),n2) = @succ_nat(+(n1,n2));
+     +(n1,@succ_nat(n2)) = @succ_nat(+(n1,n2));
+
      @plus_nat(n1,n2) = +(n1,n2);
  
      @natpred(@most_significant_digitNat(w)) = if(==(w,@zero_word), @most_significant_digitNat(@zero_word), @most_significant_digitNat(@pred_word(w)));

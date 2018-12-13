@@ -104,6 +104,10 @@ eqn  @one = @most_significant_digit(@one_word);
                                                                          @add_word(w1,w2));
      +(@concat_digit(p1,w1),@concat_digit(p2,w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)), +(p1,p2)),
                                                                        @add_word(w1,w2));
+% The rules below are useful in solving expressions with plus and quantifiers.
+     +(succ(p1),p2) = succ(+(p1,p2));
+     +(p1,succ(p2)) = succ(+(p1,p2));
+
      @plus_pos(p1,p2) = +(p1,p2);
 
 % The definition below uses where clauses. The where clauses are translated away by the introduction of the 

@@ -971,13 +971,13 @@ data_expression RewriterJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-// std::cerr << "START REWRITE " << term << "\n" << atermpp::aterm(term) << "\n";
+// std::cerr << "START REWRITE " << term << "\n"; // << atermpp::aterm(term) << "\n";
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
   const data_expression& t=rewrite_aux(term, sigma);
   assert(remove_normal_form_function(t)==t);
-// std::cerr << "END REWRITE " << term << "  ---> " << t << "\n"; // << atermpp::aterm(t) << "\n";
+std::cerr << "END REWRITE " << term << "  ---> " << t << "\n"; // << atermpp::aterm(t) << "\n";
   return t;
 }
 
