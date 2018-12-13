@@ -278,8 +278,9 @@ vertex_set set_union(const vertex_set& V, const vertex_set& W)
   return result;
 }
 
-inline
-vertex_set set_intersection(const vertex_set& V, const vertex_set& W)
+// VertexSet can be either vertex_set or deque_vertex_set
+template <typename VertexSet>
+vertex_set set_intersection(const VertexSet& V, const vertex_set& W)
 {
   vertex_set result(V.extent());
   for (structure_graph::index_type v: V.vertices())

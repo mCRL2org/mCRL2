@@ -43,17 +43,33 @@ void set_strategy(const StructureGraph& G, const vertex_set& A, structure_graph:
 }
 
 template <typename StructureGraph>
-deque_vertex_set fatal_attractors_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
+deque_vertex_set attr_min_rank_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
 {
   std::size_t n = G.extent();
-
-  // put all predecessors of elements in A in todo
   deque_vertex_set todo(n);
   for (auto v: A.vertices())
   {
     for (auto u: G.predecessors(v))
     {
       if (U.contains(u) && G.rank(u) >= j && !A.contains(u))
+      {
+        todo.insert(u);
+      }
+    }
+  }
+  return todo;
+}
+
+template <typename StructureGraph>
+deque_vertex_set attr_min_rank_original_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
+{
+  std::size_t n = G.extent();
+  deque_vertex_set todo(n);
+  for (auto v: A.vertices())
+  {
+    for (auto u: G.predecessors(v))
+    {
+      if (U.contains(u) && G.rank(u) >= j)
       {
         todo.insert(u);
       }
@@ -105,7 +121,7 @@ template <typename StructureGraph>
 vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
 {
   // put all predecessors of elements in A in todo
-  deque_vertex_set todo = fatal_attractors_todo(G, A, U, j);
+  deque_vertex_set todo = attr_min_rank_original_todo(G, A, U, j);
 
   while (!todo.is_empty())
   {
@@ -215,14 +231,10 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
 template <typename StructureGraph>
 vertex_set compute_attractor_set_min_rank_original(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
 {
-mCRL2log(log::debug) << "compute_attractor_set_min_rank_original A = " << A << std::endl;
-
   // put all predecessors of elements in A in todo
-  deque_vertex_set todo = fatal_attractors_todo(G, A, U, j);
+  deque_vertex_set todo = attr_min_rank_todo(G, A, U, j);
 
-  vertex_set X(G.extent());
-
-detail::log_vertex_set(X, "X");
+  vertex_set X = set_intersection(todo, A);
 
   while (!todo.is_empty())
   {
@@ -279,22 +291,26 @@ void fatal_attractors_original(const simple_structure_graph& G,
   {
     std::size_t j = p.first;
     auto alpha = j % 2;
+
+    mCRL2log(log::debug) << "--- Iteration j = " << j << " ---" << std::endl;
+
     vertex_set& S_alpha = alpha == 0 ? S0 : S1;
     vertex_set& S_one_minus_alpha = alpha == 0 ? S1 : S0;
     vertex_set& U_j = p.second;
     U_j = set_minus(U_j, S_one_minus_alpha);
 
     vertex_set X(n);
-    detail::log_vertex_set(X, "X");
 
     while (!U_j.is_empty() && U_j != X)
     {
+      mCRL2log(log::debug) << "---------------------------" << std::endl;
       detail::log_vertex_set(U_j, "U_" + std::to_string(j));
       X = U_j;
       detail::log_vertex_set(X, "X");
       detail::log_vertex_set(set_union(X, S_alpha), "X \\cup S_" + std::to_string(alpha));
       vertex_set Y = detail::compute_attractor_set_min_rank_original(G, set_union(X, S_alpha), alpha, V, j);
       detail::log_vertex_set(Y, "Y");
+      mCRL2log(log::debug) << "U_" + std::to_string(j) << " is " << (is_subset_of(U_j, Y) ? "a" : "no") << " subset of Y" << std::endl;
       if (is_subset_of(U_j, Y))
       {
         for (structure_graph::index_type y: Y.vertices())
@@ -308,7 +324,6 @@ void fatal_attractors_original(const simple_structure_graph& G,
       else
       {
         U_j = set_intersection(U_j, Y);
-        detail::log_vertex_set(U_j, "U_" + std::to_string(j));
       }
     }
   }
