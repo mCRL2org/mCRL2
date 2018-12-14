@@ -9,7 +9,7 @@
 /// \file atermpp/source/aterm_io_binary.cpp
 /// \brief This file allows to read and write terms in compact binary aterm`
 ///        format. This code stems largely from the ATerm library designed by
-///        Paul Klint cs.
+///        Paul Klint cs. 
 
 
 /* includes */
@@ -32,12 +32,13 @@
 #include <cassert>
 #include <stdexcept>
 #include <unordered_set>
+#include <unordered_map>
 #include <bitset>
 
 #ifdef MCRL2_PLATFORM_WINDOWS
-  #include <io.h>
-  #include <fcntl.h>
-#endif // MCRL2_PLATFORM_WINDOWS
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 /* Integers in BAF are always exactly 32 or 64 bits.  The size must be fixed so that
  *  *  * BAF terms can be exchanged between platforms. */
@@ -357,7 +358,6 @@ static std::size_t get_fn_symbol_index(const aterm& t, const indexed_set<functio
   return result;
 }
 
-
 /**
  * How many bits are needed to represent <val>
  * Basically, this function is equal to log2(val), except that it maps 0 to 0
@@ -415,7 +415,7 @@ static void add_term(sym_write_entry& entry, const aterm& term,
     entry.top_symbols = std::vector<top_symbols_t>(arity);
   }
 
-  if (entry.id != detail::function_adm.AS_INT)
+  if (entry.id != detail::g_term_pool().as_int())
   {
     // For every argument, check whether the term should be added to the table
     for (std::size_t cur_arg=0; cur_arg<arity; cur_arg++)
@@ -711,7 +711,7 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
       current.callresult = nullptr;
     }
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
-    if (current.sym->sym != detail::function_adm.AS_INT && current.args.size() < current.sym->sym.arity())
+    if (current.sym->sym != detail::g_term_pool().as_int() && current.args.size() < current.sym->sym.arity())
     {
       if (readBits(value, current.sym->sym_width[current.args.size()], is) &&
           value < current.sym->topsyms[current.args.size()].size())
@@ -731,18 +731,18 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
       throw mcrl2::runtime_error("Could not read valid aterm from stream.");
     }
 
-    if (current.sym->sym == detail::function_adm.AS_INT)
+    if (current.sym->sym == detail::g_term_pool().as_int())
     {
       if (readBits(value, INT_SIZE_IN_BAF, is))
       {
         *current.result = aterm_int(value);
       }
     }
-    else if (current.sym->sym==detail::function_adm.AS_EMPTY_LIST)
+    else if (current.sym->sym== detail::g_term_pool().as_empty_list())
     {
       *current.result = aterm_list();
     }
-    else if (current.sym->sym == detail::function_adm.AS_LIST)
+    else if (current.sym->sym == detail::g_term_pool().as_list())
     {
       aterm_list result = atermpp::down_cast<aterm_list>(current.args[1]);
       result.push_front(current.args[0]);
