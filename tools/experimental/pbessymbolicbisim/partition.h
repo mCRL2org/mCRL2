@@ -205,26 +205,12 @@ protected:
   bool refine_step(bool use_optimisations, bool is_positive_pg)
   {
     std::vector<subblock> subblocks = make_subblock_list();
-    // Sorting the blocks within the BFS layers such that the following splits will be tried first:
-    // - In the case of a negative proof graph, conjunctive nodes are split first
-    // - In the case of a positive proof graph, disjunctive nodes are split first
-    m_proof_blocks.sort([is_positive_pg](const block_t& b1, const block_t& b2)
-                          {
-                            return b1.bfs_level < b2.bfs_level || (b1.bfs_level == b2.bfs_level && ((is_positive_pg && !b1.is_conjunctive() && b2.is_conjunctive()) || (!is_positive_pg && b1.is_conjunctive() && !b2.is_conjunctive())));
-                          });
     for(const block_t& phi_k: m_proof_blocks)
     {
       if(use_optimisations && is_valid_approximation(phi_k, is_positive_pg))
       {
         continue;
       }
-      // Sort the blocks within their BFS layers such that edges present in the proof graph
-      // are tried as splitters first.
-      std::list<block_t> proof_blocks(m_proof_blocks);
-      proof_blocks.sort([&](const block_t& b1, const block_t& b2)
-                          {
-                            return b1.bfs_level < b2.bfs_level || (b1.bfs_level == b2.bfs_level && is_in_strategy(phi_k,b1) && !is_in_strategy(phi_k,b2));
-                          });
       for(const block_t& phi_l: m_proof_blocks)
       {
         if(split_block(phi_k, phi_l, subblocks, use_optimisations))
