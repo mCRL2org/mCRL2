@@ -53,8 +53,13 @@ class term_balanced_tree: public aterm_appl
       return empty_term;
     }
 
+    static aterm_appl make_node(const term_balanced_tree& left_tree, const term_balanced_tree& right_tree)
+    {
+      return static_cast<aterm_appl>(detail::g_term_pool().create_appl(tree_node_function(),left_tree,right_tree));
+    }
+
     template < typename ForwardTraversalIterator, class Transformer >
-    detail::_aterm_appl<aterm>* make_tree(ForwardTraversalIterator& p, const std::size_t size, const Transformer& transformer )
+    aterm_appl make_tree(ForwardTraversalIterator& p, const std::size_t size, const Transformer& transformer )
     {
       if (size>1)
       {
@@ -62,16 +67,16 @@ class term_balanced_tree: public aterm_appl
         const term_balanced_tree left_tree(make_tree(p, left_size,transformer));
         std::size_t right_size = size >> 1; // size/2 rounded down.
         const term_balanced_tree right_tree(make_tree(p, right_size,transformer));
-        return reinterpret_cast<detail::_aterm_appl<aterm>*>(detail::term_appl2<term_balanced_tree>(tree_node_function(),left_tree,right_tree));
+        return make_node(left_tree, right_tree);
       }
 
       if (size==1)
       {
-        return  reinterpret_cast<detail::_aterm_appl<aterm>*>(atermpp::detail::address(transformer(*(p++))));
+        return static_cast<aterm_appl>(transformer(*(p++)));
       }
 
       assert(size==0);
-      return reinterpret_cast<detail::_aterm_appl<aterm>*>(atermpp::detail::address(empty_tree())); 
+      return empty_tree();
     }
 
     explicit term_balanced_tree(detail::_aterm_appl<aterm>* t)
@@ -279,8 +284,8 @@ class term_balanced_tree: public aterm_appl
           
             do
             {
-              m_stack[m_top_of_stack++]=atermpp::detail::address((reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[1]));
-              current=atermpp::detail::address(reinterpret_cast<detail::_aterm_appl<aterm> *>(current)->arg[0]);
+              m_stack[m_top_of_stack++]=atermpp::detail::address((reinterpret_cast<detail::_aterm_appl<aterm, 2> *>(current)->arg(1)));
+              current=atermpp::detail::address(reinterpret_cast<detail::_aterm_appl<aterm, 2> *>(current)->arg(0));
             }
             while (current->function()==term_balanced_tree < Term >::tree_node_function());
     
@@ -294,13 +299,13 @@ class term_balanced_tree: public aterm_appl
           {
             return;
           }
-          detail::_aterm_appl<aterm>* current = reinterpret_cast<detail::_aterm_appl<aterm> *>(atermpp::detail::address(tree));
+          detail::_aterm_appl<aterm, 2>* current = reinterpret_cast<detail::_aterm_appl<aterm, 2> *>(atermpp::detail::address(tree));
     
           while (current->function()==term_balanced_tree< Term >::tree_node_function())
           {
             assert(m_top_of_stack+1<maximal_size_of_stack);
-            m_stack[m_top_of_stack++]=atermpp::detail::address(current->arg[1]);
-            current=reinterpret_cast<detail::_aterm_appl<aterm > *>(atermpp::detail::address(current->arg[0]));
+            m_stack[m_top_of_stack++]=atermpp::detail::address(current->arg(1));
+            current=reinterpret_cast<detail::_aterm_appl<aterm, 2> *>(atermpp::detail::address(current->arg(0)));
           }
           assert(m_top_of_stack+1<maximal_size_of_stack);
           m_stack[m_top_of_stack++]=current;
