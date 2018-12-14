@@ -46,7 +46,7 @@ eqn ==([], |>(d,s)) = false;
     in(d,[]) = false;
     in(d,|>(e,s)) = ||(==(d,e), in(d,s));
     #([]) = @c0;
-    #(|>(d,s)) = +(#(s),@most_significant_digitNat(@one_word));
+    #(|>(d,s)) = @succ_nat(#(s));
     <|([],d) = |>(d,[]);
     <|(|>(d,s), e) = |>(d, <|(s,e));
     ++([],s) = s;

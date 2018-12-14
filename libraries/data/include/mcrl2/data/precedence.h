@@ -20,6 +20,7 @@
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 
 namespace mcrl2 {
 
@@ -252,7 +253,7 @@ int left_precedence(const application& x)
   {
     data_expression numerator = sort_real::left(x);
     data_expression denominator = sort_real::right(x);
-    if (sort_pos::is_c1_function_symbol(denominator))
+    if (denominator==sort_pos::pos(1))
     {
       return left_precedence(numerator);
     }

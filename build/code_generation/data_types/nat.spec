@@ -148,7 +148,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
       <(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<(w1,w2),<=(n1,n2),<(n1,n2));
       <(@succ_nat(n1),n2) = &&(<(@most_significant_digitNat(@one_word),n2),<(n1,@natpred(n2)));
       <(n1, @succ_nat(n2)) = <=(n1,n2);
-      ==(w1,@zero_word) ->  <(p,@most_significant_digit(w1)) = false;
+      ==(w1,@zero_word) ->  <(n,@most_significant_digitNat(w1)) = false;
  
       <=(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <=(w1,w2);
       <=(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
@@ -160,6 +160,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
  
      Pos2Nat(@most_significant_digit(w)) = @most_significant_digitNat(w);
      Pos2Nat(@concat_digit(p,w)) = @concat_digit(Pos2Nat(p),w);
+     Pos2Nat(succ(p)) = @succ_nat(Pos2Nat(p));
      Nat2Pos(@most_significant_digitNat(w)) = @most_significant_digit(w);
      Nat2Pos(@concat_digit(p,w)) = @concat_digit(Nat2Pos(p),w);
 % If important the 2 max functions below could be made more efficient by introducing a <=:Pos#Nat and <=:Nat#Pos.
@@ -216,6 +217,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                                @most_significant_digitNat(@max_word),
                                                @concat_digit(@natpred(n),@max_word)),
                                        @concat_digit(n,@pred_word(w)));
+     @natpred(@succ_nat(n)) = n;
 
 
 

@@ -37,6 +37,7 @@ void run_test_case(const std::string& formula, const std::string& lpstext)
   if (formula != pp_formula)
   {
     std::cerr << "Error: " << formula << " is printed as " << pp_formula << std::endl;
+std::cerr << "adflkjsdlfajsfd" << atermpp::aterm(f) << "\n";
   }
   BOOST_CHECK(formula == pp_formula);
 }

@@ -70,7 +70,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   // TODO: check if this test is precise enough
   bool is_one(const data_expression& x) const
   {
-    return sort_pos::is_c1_function_symbol(x);
+    return x==sort_pos::pos(1); 
   }
 
   bool is_infix_operation(const application& x) const

@@ -37,23 +37,25 @@ namespace detail {
 /// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
 /// \return if(BoolExpr, 1, 0) of sort SortExpr
+/*  NOT USED? REMOVE?
 inline
 data::data_expression bool_to_numeric(data::data_expression const& e, data::sort_expression const& s)
 {
   // TODO Maybe enforce that SortExpr is a PNIR sort
   return data::if_(e, data::function_symbol("1", s), data::function_symbol("0", s));
-}
+} */
 
+/*  NOT USED? REMOVE?
 inline
 data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
 {
   data_expression reconstruction_result;
-  if (data::sort_pos::is_c1_function_symbol(x))
+  if (x==data::sort_pos::pos(1))
   {
     //x is 1; return result
     reconstruction_result = data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos());
   }
-  /* else if (data::sort_pos::is_cdub_application(x))  Does not exist since 64 bit numbers. 
+  / * else if (data::sort_pos::is_cdub_application(x))  Does not exist since 64 bit numbers. 
   {
     //x is of the form cDub(b,p); return (result*2)*v(p) + result*v(b)
     data_expression bool_arg = sort_pos::left(x);
@@ -84,7 +86,7 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
                                                     data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(result), data::sort_nat::nat()),
                                                     bool_to_numeric(bool_arg, data::sort_nat::nat())));
     }
-  } */
+  } * /
   else
   {
     //x is not a Pos constructor
@@ -98,7 +100,7 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
     }
   }
   return reconstruction_result;
-}
+} */
 
 } // namespace detail
 
