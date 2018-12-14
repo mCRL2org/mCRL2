@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/aterm_appl_iterator.h
-/// \brief Iterator for term_appl.
 
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_H
