@@ -229,7 +229,7 @@ namespace detail
       }
     }
 
-    return list;
+    return mcrl2::workaround::return_std_move(list);
   }
 
   template <class Term, class Iter, class ATermConverter>
@@ -245,7 +245,7 @@ namespace detail
       list.push_front(convert_to_aterm(*last));
     }
 
-    return list;
+    return mcrl2::workaround::return_std_move(list);
   }
 
   // See the note at make_list_backwards for why there are two almost similar version of make_list_forward.
@@ -305,7 +305,7 @@ namespace detail
       }
     }
 
-    return list;
+    return mcrl2::workaround::return_std_move(list);
   }
 
   template <class Term, class Iter, class ATermConverter>
@@ -352,7 +352,7 @@ namespace detail
       }
     }
 
-    return list;
+    return mcrl2::workaround::return_std_move(list);
   }
 } // detail
 
