@@ -24,7 +24,8 @@
 
 namespace std
 {
-/// \brief specialisation of the hash function.
+
+/// \brief specialization of the standard std::hash function.
 template<>
 struct hash<atermpp::detail::_aterm*>
 {
@@ -32,9 +33,27 @@ struct hash<atermpp::detail::_aterm*>
   hash()
   {}
 
-  std::size_t operator()(const atermpp::detail::_aterm* t) const
+  std::size_t operator()(const atermpp::detail::_aterm* term) const
   {
-    return reinterpret_cast<std::uintptr_t>(t) >> 4;
+    // All terms are 8 bytes aligned which means that the three lowest significant
+    // bits of their pointers are always 0. However, their smallest size is 16 bytes so
+    // the lowest 4 bits do not carry much information.
+    return reinterpret_cast<std::uintptr_t>(term) >> 4;
+  }
+};
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<atermpp::unprotected_aterm>
+{
+  // Default constructor, required for const qualified hash functions.
+  hash()
+  {}
+
+  std::size_t operator()(const atermpp::unprotected_aterm& term) const
+  {
+    std::hash<atermpp::detail::_aterm*> hasher;
+    return hasher(atermpp::detail::address(term));
   }
 };
 
