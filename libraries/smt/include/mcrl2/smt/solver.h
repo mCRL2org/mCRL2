@@ -25,6 +25,7 @@
   #include <stdio.h>
   #include <strsafe.h>
 #else
+  #include <unistd.h>
   #include <sys/wait.h>
 #endif // MCRL2_PLATFORM_WINDOWS
 

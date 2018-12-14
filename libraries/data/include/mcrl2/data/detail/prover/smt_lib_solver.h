@@ -27,6 +27,10 @@
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
 #endif
 
+#ifndef WIN32
+#include <unistd.h>
+#endif
+
 namespace mcrl2
 {
 namespace data
@@ -858,7 +862,6 @@ class binary_smt_solver
     static bool usable();
 };
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
-# include <unistd.h>
 /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
 /// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability
 /// of propositional formulas. To use the solver CVC / the directory containing

@@ -188,7 +188,8 @@ public:
   }
 
   // This class has a non-trivial destructor so explicitly define the copy and move operators.
-  aterm(const aterm& other) noexcept
+  aterm(const aterm& other) noexcept :
+    unprotected_aterm()
   {
     m_term = other.m_term;
     if (defined())
