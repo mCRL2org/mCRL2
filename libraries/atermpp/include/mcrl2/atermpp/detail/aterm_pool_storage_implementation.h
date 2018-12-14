@@ -65,44 +65,20 @@ void ATERM_POOL_STORAGE::add_deletion_hook(atermpp::function_symbol sym, term_ca
 ATERM_POOL_STORAGE_TEMPLATES
 aterm ATERM_POOL_STORAGE::create_int(std::size_t value)
 {
-  auto it = m_term_set.find(value);
-  if (it != m_term_set.end())
-  {
-    return aterm(&(*it));
-  }
-  else
-  {
-    return insert(value);
-  }
+  return insert(value);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
 aterm ATERM_POOL_STORAGE::create_term(const atermpp::function_symbol& symbol)
 {
-  auto it = m_term_set.find(symbol);
-  if (it != m_term_set.end())
-  {
-    return aterm(&(*it));
-  }
-  else
-  {
-    return insert(symbol);
-  }
+  return insert(symbol);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<class ...Terms>
 aterm ATERM_POOL_STORAGE::create_appl(const function_symbol& sym, const Terms&... arguments)
 {
-  auto it = m_term_set.find(sym, arguments...);
-  if (it != m_term_set.end())
-  {
-    return aterm(&(*it));
-  }
-  else
-  {
-    return insert(sym, arguments...);
-  }
+  return insert(sym, arguments...);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -111,15 +87,7 @@ aterm ATERM_POOL_STORAGE::create_appl_iterator(const function_symbol& symbol,
                                         ForwardIterator begin,
                                         ForwardIterator)
 {
-  auto it = m_term_set.find(symbol, begin);
-  if (it != m_term_set.end())
-  {
-    return aterm(&(*it));
-  }
-  else
-  {
-    return insert(symbol, begin);
-  }
+  return insert(symbol, begin);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -130,15 +98,7 @@ aterm ATERM_POOL_STORAGE::create_appl_iterator(const function_symbol& symbol,
                                         InputIterator)
 {
   std::array<unprotected_aterm, N> arguments = construct_arguments<N>(begin, converter);
-  auto it = m_term_set.find(symbol, arguments);
-  if (it != m_term_set.end())
-  {
-    return aterm(&(*it));
-  }
-  else
-  {
-    return insert(symbol, arguments);
-  }
+  return insert(symbol, arguments);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -147,15 +107,7 @@ aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
                                         ForwardIterator begin,
                                         ForwardIterator)
 {
-  auto it = m_term_set.find(symbol, begin);
-  if (it != m_term_set.end())
-  {
-    return aterm(&(*it));
-  }
-  else
-  {
-    return insert(symbol, begin);
-  }
+  return insert(symbol, begin);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -174,16 +126,8 @@ aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
     ++it;
   }
 
-  auto result = m_term_set.find(symbol, arguments);
-  if (result != m_term_set.end())
-  {
-    return aterm(&(*result));
-  }
-  else
-  {
-    // Find or create a new term and return it.
-    return insert(symbol, arguments);
-  }
+  // Find or create a new term and return it.
+  return insert(symbol, arguments);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -332,6 +276,22 @@ typename ATERM_POOL_STORAGE::iterator ATERM_POOL_STORAGE::destroy(iterator it)
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename ...Args>
 aterm ATERM_POOL_STORAGE::insert(Args&&... args)
+{
+  // Moving this existence check out of emplace matters for performance.
+  auto it = m_term_set.find(args...);
+  if (it != m_term_set.end())
+  {
+    return aterm(&(*it));
+  }
+  else
+  {
+    return emplace(args...);
+  }
+}
+
+ATERM_POOL_STORAGE_TEMPLATES
+template<typename ...Args>
+aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
 {
   m_pool.trigger_collection();
 
