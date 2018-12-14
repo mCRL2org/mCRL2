@@ -38,8 +38,6 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
     windowTitle = "Edit Property";
   }
 
-  ui->saveButton->setText("Save");
-
   setWindowTitle(windowTitle);
   setWindowFlags(Qt::Window);
 
@@ -130,21 +128,28 @@ void AddEditPropertyDialog::abortPropertyParsing()
 
 void AddEditPropertyDialog::parseProperty()
 {
-  if (checkInput())
+  /* if a parsing process is running, abort it */
+  if (propertyParsingProcessid >= 0)
   {
-    /* save the property, abort the previous parsing process and parse the
-     *   formula and wait for a reply */
-    ui->parseButton->setEnabled(false);
-    Property property = getProperty();
-    fileSystem->saveProperty(property);
     abortPropertyParsing();
-    propertyParsingProcessid = processSystem->parseProperty(property);
+    ui->parseButton->setText("Parse");
+  }
+  /* else parse the current property */
+  else
+  {
+    if (checkInput())
+    {
+      /* save the property, start a parsing process and wait for a reply */
+      Property property = getProperty();
+      fileSystem->saveProperty(property);
+      propertyParsingProcessid = processSystem->parseProperty(property);
+      ui->parseButton->setText("Abort Parsing");
+    }
   }
 }
 
 void AddEditPropertyDialog::parseResults(int processid)
 {
-  ui->parseButton->setEnabled(true);
   /* check if the process that has finished is the parsing process of this
    *   dialog */
   if (processid == propertyParsingProcessid)
@@ -171,6 +176,8 @@ void AddEditPropertyDialog::parseResults(int processid)
     QMessageBox msgBox(QMessageBox::Information, windowTitle, text,
                        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
     msgBox.exec();
+    ui->parseButton->setText("Parse");
+    propertyParsingProcessid = -1;
   }
 }
 
