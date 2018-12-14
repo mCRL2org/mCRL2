@@ -915,7 +915,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == auxiliary_plus_nat();
+          return atermpp::down_cast<function_symbol>(e) == auxiliary_plus_nat();
         }
         return false;
       }

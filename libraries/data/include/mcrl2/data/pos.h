@@ -63,34 +63,34 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier \@one.
-      /// \return Identifier \@one.
+      /// \brief Generate identifier \@c1.
+      /// \return Identifier \@c1.
       inline
-      const core::identifier_string& one_name()
+      const core::identifier_string& c1_name()
       {
-        static core::identifier_string one_name = core::identifier_string("@one");
-        return one_name;
+        static core::identifier_string c1_name = core::identifier_string("@c1");
+        return c1_name;
       }
 
-      /// \brief Constructor for function symbol \@one.       
-      /// \return Function symbol one.
+      /// \brief Constructor for function symbol \@c1.       
+      /// \return Function symbol c1.
       inline
-      const function_symbol& one()
+      const function_symbol& c1()
       {
-        static function_symbol one(one_name(), pos());
-        return one;
+        static function_symbol c1(c1_name(), pos());
+        return c1;
       }
 
 
-      /// \brief Recogniser for function \@one.
+      /// \brief Recogniser for function \@c1.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@one.
+      /// \return true iff e is the function symbol matching \@c1.
       inline
-      bool is_one_function_symbol(const atermpp::aterm& e)
+      bool is_c1_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == one();
+          return atermpp::down_cast<function_symbol>(e) == c1();
         }
         return false;
       }
@@ -155,7 +155,7 @@ namespace mcrl2 {
       function_symbol_vector pos_generate_constructors_code()
       {
         function_symbol_vector result;
-        result.push_back(sort_pos::one());
+        result.push_back(sort_pos::c1());
         result.push_back(sort_pos::succpos());
 
         return result;
@@ -595,7 +595,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == auxiliary_plus_pos();
+          return atermpp::down_cast<function_symbol>(e) == auxiliary_plus_pos();
         }
         return false;
       }
@@ -680,61 +680,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@powerlog2.
-      /// \return Identifier \@powerlog2.
-      inline
-      const core::identifier_string& powerlog2_pos_name()
-      {
-        static core::identifier_string powerlog2_pos_name = core::identifier_string("@powerlog2");
-        return powerlog2_pos_name;
-      }
-
-      /// \brief Constructor for function symbol \@powerlog2.       
-      /// \return Function symbol powerlog2_pos.
-      inline
-      const function_symbol& powerlog2_pos()
-      {
-        static function_symbol powerlog2_pos(powerlog2_pos_name(), make_function_sort(pos(), pos()));
-        return powerlog2_pos;
-      }
-
-
-      /// \brief Recogniser for function \@powerlog2.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@powerlog2.
-      inline
-      bool is_powerlog2_pos_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == powerlog2_pos();
-        }
-        return false;
-      }
-
-      /// \brief Application of the function symbol \@powerlog2.        
-      /// \param arg0 A data expression. 
-      /// \return Application of \@powerlog2 to a number of arguments.
-      inline
-      application powerlog2_pos(const data_expression& arg0)
-      {
-        return sort_pos::powerlog2_pos()(arg0);
-      }
-
-      /// \brief Recogniser for application of \@powerlog2.
-      /// \param e A data expression.
-      /// \return true iff e is an application of function symbol powerlog2_pos to a
-      ///     number of arguments.
-      inline
-      bool is_powerlog2_pos_application(const atermpp::aterm& e)
-      {
-        if (is_application(e))
-        {
-          return is_powerlog2_pos_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
       /// \brief Generate identifier \@times_whr_mult_overflow.
       /// \return Identifier \@times_whr_mult_overflow.
       inline
@@ -749,7 +694,7 @@ namespace mcrl2 {
       inline
       const function_symbol& times_whr_mult_overflow()
       {
-        static function_symbol times_whr_mult_overflow(times_whr_mult_overflow_name(), make_function_sort(sort_machine_word::machine_word(), sort_machine_word::machine_word(), pos(), sort_machine_word::machine_word(), pos()));
+        static function_symbol times_whr_mult_overflow(times_whr_mult_overflow_name(), make_function_sort(sort_machine_word::machine_word(), sort_machine_word::machine_word(), pos()));
         return times_whr_mult_overflow;
       }
 
@@ -769,14 +714,12 @@ namespace mcrl2 {
 
       /// \brief Application of the function symbol \@times_whr_mult_overflow.        
       /// \param arg0 A data expression.
-      /// \param arg1 A data expression.
-      /// \param arg2 A data expression.
-      /// \param arg3 A data expression. 
+      /// \param arg1 A data expression. 
       /// \return Application of \@times_whr_mult_overflow to a number of arguments.
       inline
-      application times_whr_mult_overflow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
+      application times_whr_mult_overflow(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_pos::times_whr_mult_overflow()(arg0, arg1, arg2, arg3);
+        return sort_pos::times_whr_mult_overflow()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@times_whr_mult_overflow.
@@ -789,38 +732,6 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_times_whr_mult_overflow_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
-      }
-
-      /// \brief Generate identifier \@c1.
-      /// \return Identifier \@c1.
-      inline
-      const core::identifier_string& c1_name()
-      {
-        static core::identifier_string c1_name = core::identifier_string("@c1");
-        return c1_name;
-      }
-
-      /// \brief Constructor for function symbol \@c1.       
-      /// \return Function symbol c1.
-      inline
-      const function_symbol& c1()
-      {
-        static function_symbol c1(c1_name(), pos());
-        return c1;
-      }
-
-
-      /// \brief Recogniser for function \@c1.
-      /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@c1.
-      inline
-      bool is_c1_function_symbol(const atermpp::aterm& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return atermpp::down_cast<function_symbol>(e) == c1();
         }
         return false;
       }
@@ -839,9 +750,7 @@ namespace mcrl2 {
         result.push_back(sort_pos::plus());
         result.push_back(sort_pos::auxiliary_plus_pos());
         result.push_back(sort_pos::times());
-        result.push_back(sort_pos::powerlog2_pos());
         result.push_back(sort_pos::times_whr_mult_overflow());
-        result.push_back(sort_pos::c1());
         return result;
       }
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for pos
@@ -871,18 +780,6 @@ namespace mcrl2 {
         return result;
       }
       ///\brief Function for projecting out argument
-      ///        right from an application.
-      /// \param e A data expression.
-      /// \pre right is defined for e.
-      /// \return The argument of e that corresponds to right.
-      inline
-      data_expression right(const data_expression& e)
-      {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_pos_application(e) || is_times_application(e));
-        return atermpp::down_cast<const application>(e)[1];
-      }
-
-      ///\brief Function for projecting out argument
       ///        arg1 from an application.
       /// \param e A data expression.
       /// \pre arg1 is defined for e.
@@ -907,27 +804,27 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg3 from an application.
+      ///        left from an application.
       /// \param e A data expression.
-      /// \pre arg3 is defined for e.
-      /// \return The argument of e that corresponds to arg3.
+      /// \pre left is defined for e.
+      /// \return The argument of e that corresponds to left.
       inline
-      data_expression arg3(const data_expression& e)
+      data_expression left(const data_expression& e)
       {
-        assert(is_times_whr_mult_overflow_application(e));
-        return atermpp::down_cast<const application>(e)[2];
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_pos_application(e) || is_times_application(e));
+        return atermpp::down_cast<const application>(e)[0];
       }
 
       ///\brief Function for projecting out argument
-      ///        arg4 from an application.
+      ///        right from an application.
       /// \param e A data expression.
-      /// \pre arg4 is defined for e.
-      /// \return The argument of e that corresponds to arg4.
+      /// \pre right is defined for e.
+      /// \return The argument of e that corresponds to right.
       inline
-      data_expression arg4(const data_expression& e)
+      data_expression right(const data_expression& e)
       {
-        assert(is_times_whr_mult_overflow_application(e));
-        return atermpp::down_cast<const application>(e)[3];
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_pos_application(e) || is_times_application(e));
+        return atermpp::down_cast<const application>(e)[1];
       }
 
       ///\brief Function for projecting out argument
@@ -938,19 +835,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succpos_application(e) || is_most_significant_digit_application(e) || is_succ_application(e) || is_pos_predecessor_application(e) || is_powerlog2_pos_application(e));
-        return atermpp::down_cast<const application>(e)[0];
-      }
-
-      ///\brief Function for projecting out argument
-      ///        left from an application.
-      /// \param e A data expression.
-      /// \pre left is defined for e.
-      /// \return The argument of e that corresponds to left.
-      inline
-      data_expression left(const data_expression& e)
-      {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_auxiliary_plus_pos_application(e) || is_times_application(e));
+        assert(is_succpos_application(e) || is_most_significant_digit_application(e) || is_succ_application(e) || is_pos_predecessor_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -968,7 +853,7 @@ namespace mcrl2 {
         variable vw2("w2",sort_machine_word::machine_word());
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list(), one(), most_significant_digit(sort_machine_word::one_word())));
+        result.push_back(data_equation(variable_list(), c1(), most_significant_digit(sort_machine_word::one_word())));
         result.push_back(data_equation(variable_list({vp}), succpos(vp), succ(vp)));
         result.push_back(data_equation(variable_list({vw1}), succ(most_significant_digit(vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(most_significant_digit(sort_machine_word::one_word()), sort_machine_word::zero_word()), most_significant_digit(sort_machine_word::succ_word(vw1)))));
         result.push_back(data_equation(variable_list({vp, vw1}), succ(concat_digit(vp, vw1)), if_(equal_to(vw1, sort_machine_word::max_word()), concat_digit(succ(vp), sort_machine_word::zero_word()), concat_digit(vp, sort_machine_word::succ_word(vw1)))));
@@ -1004,12 +889,11 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp1, vp2}), plus(succ(vp1), vp2), succ(plus(vp1, vp2))));
         result.push_back(data_equation(variable_list({vp1, vp2}), plus(vp1, succ(vp2)), succ(plus(vp1, vp2))));
         result.push_back(data_equation(variable_list({vp1, vp2}), auxiliary_plus_pos(vp1, vp2), plus(vp1, vp2)));
-        result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit(vw1), most_significant_digit(vw2)), times_whr_mult_overflow(vw1, vw2, sort_machine_word::times_word(vw1, vw2), sort_machine_word::times_overflow_word(vw1, vw2))));
-        result.push_back(data_equation(variable_list({vp, vw, vw1, vw2}), times_whr_mult_overflow(vw1, vw2, vp, vw), if_(equal_to(vw, sort_machine_word::zero_word()), most_significant_digit(vp), concat_digit(most_significant_digit(vw), vp))));
+        result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit(vw1), most_significant_digit(vw2)), times_whr_mult_overflow(sort_machine_word::times_word(vw1, vw2), sort_machine_word::times_overflow_word(vw1, vw2))));
+        result.push_back(data_equation(variable_list({vw1, vw2}), times_whr_mult_overflow(vw1, vw2), if_(equal_to(vw2, sort_machine_word::zero_word()), most_significant_digit(vw1), concat_digit(most_significant_digit(vw2), vw1))));
         result.push_back(data_equation(variable_list({vp1, vw1, vw2}), times(concat_digit(vp1, vw1), most_significant_digit(vw2)), concat_digit(plus(times(vp1, most_significant_digit(vw2)), most_significant_digit(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp2, vw1, vw2}), times(most_significant_digit(vw1), concat_digit(vp2, vw2)), concat_digit(plus(times(vp2, most_significant_digit(vw1)), most_significant_digit(sort_machine_word::times_overflow_word(vw1, vw2))), sort_machine_word::times_word(vw1, vw2))));
         result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), times(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), plus(concat_digit(times(concat_digit(vp1, vw1), vp2), sort_machine_word::zero_word()), times(concat_digit(vp1, vw1), most_significant_digit(vw2)))));
-        result.push_back(data_equation(variable_list(), c1(), most_significant_digit(sort_machine_word::one_word())));
         return result;
       }
 
