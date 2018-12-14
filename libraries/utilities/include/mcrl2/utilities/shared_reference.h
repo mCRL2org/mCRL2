@@ -63,7 +63,7 @@ public:
   /// \brief Increment the number of reference count changes.
   static void increment_reference_count_changes()
   {
-    if (EnableReferenceCountStatistics)
+    if (EnableReferenceCountMetrics)
     {
       ++reference_count_changes();
     }

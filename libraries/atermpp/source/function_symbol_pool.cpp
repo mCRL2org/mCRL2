@@ -13,8 +13,8 @@
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
 
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
-#include "mcrl2/utilities/ignore_unused.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/unused.h"
 
 #include <algorithm>
 
@@ -24,8 +24,8 @@ using namespace mcrl2::utilities;
 
 function_symbol_pool::function_symbol_pool()
 {
-  mcrl2::utilities::ignore_unused(m_function_symbols_creates);
-  mcrl2::utilities::ignore_unused(m_function_symbols_hits);
+  mcrl2::utilities::mcrl2_unused(m_function_symbols_creates);
+  mcrl2::utilities::mcrl2_unused(m_function_symbols_hits);
 }
 
 function_symbol_pool::~function_symbol_pool()
@@ -166,7 +166,7 @@ void function_symbol_pool::print_performance_stats() const noexcept
                                 << " %)\n";
   }
 
-  if (EnableReferenceCountStatistics)
+  if (EnableReferenceCountMetrics)
   {
     mCRL2log(mcrl2::log::debug, "Performance") << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
   }

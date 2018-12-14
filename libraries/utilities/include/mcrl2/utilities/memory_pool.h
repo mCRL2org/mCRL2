@@ -27,7 +27,7 @@ namespace mcrl2
 namespace utilities
 {
 
-constexpr static std::uintptr_t FreeListSentinel = std::numeric_limits<std::uintrptr_t>::max();
+constexpr static std::uintptr_t FreeListSentinel = std::numeric_limits<std::uintptr_t>::max();
 
 /// \brief The memory pool allocates elements of size T from blocks.
 /// \details When ThreadSafe is true then the thread-safe guarantees will be satisfied.
@@ -36,6 +36,7 @@ template <class T,
           bool ThreadSafe = false>
 class memory_pool : private mcrl2::utilities::noncopyable
 {
+private:
   /// \brief Stores a given object or an entry in the freelist.
   union Slot
   {
@@ -58,7 +59,7 @@ public:
     {
       Slot* currentSlot = m_first_freeslot;
       m_first_freeslot = currentSlot->next;
-      currentSlot->next = FreeListSentinel;
+      currentSlot->next = reinterpret_cast<Slot*>(FreeListSentinel);
     }
 
     /// For all actual elements stored in the pool trigger the destructor.
@@ -66,7 +67,7 @@ public:
     {
       for (auto& slot : block)
       {
-        if (slot.next != FreeListSentinel)
+        if (slot.next != reinterpret_cast<Slot*>(FreeListSentinel))
         {
           destroy(reinterpret_cast<T*>(&slot));
         }

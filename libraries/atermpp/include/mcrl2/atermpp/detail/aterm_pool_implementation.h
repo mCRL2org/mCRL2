@@ -352,7 +352,7 @@ void aterm_pool::print_performance_statistics() const
 
   m_appl_dynamic_storage.print_performance_stats("arbitrary_function_application_storage");
 
-  if (mcrl2::utilities::EnableReferenceCountStatistics)
+  if (mcrl2::utilities::EnableReferenceCountMetrics)
   {
     mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): all reference counts changed " << _aterm::reference_count_changes() << " times.\n";
   }

@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/detail/aterm_pool.h"
 
 #include "mcrl2/atermpp/detail/aterm_appl.h"
-#include "mcrl2/utilities/ignored_unused.h"
+#include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/logger.h"
 
 #include <algorithm>
@@ -44,7 +44,7 @@ void ATERM_POOL_STORAGE::add_creation_hook(atermpp::function_symbol sym, term_ca
   // should be changed.
   for (const auto& hook : m_creation_hooks)
   {
-    mcrl2::utilities::ignore_unused(hook);
+    mcrl2::utilities::mcrl2_unused(hook);
     assert(hook.first != sym);
   }
   m_creation_hooks.emplace_back(sym, callback);
@@ -56,7 +56,7 @@ void ATERM_POOL_STORAGE::add_deletion_hook(atermpp::function_symbol sym, term_ca
   // See the comments at add_creation_hook.
   for (const auto& hook : m_deletion_hooks)
   {
-    mcrl2::utilities::ignore_unused(hook);
+    mcrl2::utilities::mcrl2_unused(hook);
     assert(hook.first != sym);
   }
   m_deletion_hooks.emplace_back(sym, callback);
