@@ -74,15 +74,15 @@ void test_hooks()
   BOOST_CHECK(variable_count == 1);
   f();
   BOOST_CHECK(variable_count == 2);
-  detail::collect_terms_with_reference_count_0();
+  detail::g_term_pool().collect();
   BOOST_CHECK(variable_count == 1);
   aterm_appl a = g();
   BOOST_CHECK(variable_count == 2);
-  detail::collect_terms_with_reference_count_0();
+  detail::g_term_pool().collect();
   BOOST_CHECK(variable_count == 2);
 }
 
-int test_main(int argc, char* argv[])
+int test_main(int, char*[])
 {
   test_hooks();
 

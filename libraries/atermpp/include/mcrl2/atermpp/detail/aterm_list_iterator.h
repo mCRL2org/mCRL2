@@ -13,6 +13,7 @@
 #define MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/detail/global_aterm_pool.h"
 
 namespace atermpp
 {
@@ -41,7 +42,8 @@ class term_list_iterator
     term_list_iterator(detail::_aterm* l)
       : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l))
     { 
-      assert(l->function()==detail::function_adm.AS_LIST || l->function()==detail::function_adm.AS_EMPTY_LIST);
+      assert(l->function()==detail::g_term_pool().as_list()
+             || l->function()==detail::g_term_pool().as_empty_list());
     } 
 
   public:
@@ -74,21 +76,21 @@ class term_list_iterator
     /// \brief Dereference operator on an iterator
     const Term& operator*() const
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::g_term_pool().as_list());
       return m_list->head;
     }
 
     /// Arrow operator on an iterator
     const Term* operator->() const
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::g_term_pool().as_list());
       return &m_list->head;
     }
     
     /// \brief Prefix increment operator on iterator.
     term_list_iterator& operator++()
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::g_term_pool().as_list());
       m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
       return *this;
     }
@@ -96,7 +98,7 @@ class term_list_iterator
     /// \brief Postfix increment operator on iterator.
     term_list_iterator operator++(int)
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::g_term_pool().as_list());
       const term_list_iterator temp = *this;
       m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
       return temp;
