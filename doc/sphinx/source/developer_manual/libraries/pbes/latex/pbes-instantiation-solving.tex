@@ -948,7 +948,7 @@ original one by Michael Huth, Jim Huan-Pu Kuo, and Nir Piterman.
 \{\textit{compute the $\alpha$-min attractor into the set $A$, restricted to vertices in $U$}\}\\
 todo := \bigcup_{u \in A} (%
 pred^{\geq j}(u, U) ) \\
-X := todo \cap A \\
+X := \{ u \in todo \cap A \mid d(u) = \alpha \vee succ(u) \subseteq A \} \\
 \textbf{while } todo \neq \emptyset \textbf{ do} \\
 \qquad \textbf{choose } u \in todo \\
 \qquad todo := todo \setminus \{u\} \\

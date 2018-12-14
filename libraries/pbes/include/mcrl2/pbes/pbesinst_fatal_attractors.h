@@ -232,9 +232,16 @@ template <typename StructureGraph>
 vertex_set compute_attractor_set_min_rank_original(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
 {
   // put all predecessors of elements in A in todo
-  deque_vertex_set todo = attr_min_rank_todo(G, A, U, j);
+  deque_vertex_set todo = attr_min_rank_original_todo(G, A, U, j);
 
-  vertex_set X = set_intersection(todo, A);
+  vertex_set X(A.extent());
+  for (auto u: todo.vertices())
+  {
+    if (A.contains(u) && (G.decoration(u) == alpha || includes_successors(G, u, A)))
+    {
+      X.insert(u);
+    }
+  }
 
   while (!todo.is_empty())
   {
