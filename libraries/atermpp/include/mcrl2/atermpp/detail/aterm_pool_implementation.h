@@ -290,13 +290,6 @@ aterm aterm_pool::create_appl_dynamic(const function_symbol& sym,
                             InputIterator begin,
                             InputIterator end)
 {
-  // Trigger a deferred garbage collection when it was requested and the protected
-  if (m_creation_depth == 0 && m_deferred_garbage_collect)
-  {
-    mCRL2log(mcrl2::log::debug) << "g_term_pool(): Deferred garbage collection.\n";
-    collect();
-  }
-
   ++m_creation_depth;
 
   const std::size_t arity = sym.arity();
@@ -333,6 +326,14 @@ aterm aterm_pool::create_appl_dynamic(const function_symbol& sym,
   }
 
   --m_creation_depth;
+
+  // Trigger a deferred garbage collection when it was requested and the term has been protected.
+  if (m_creation_depth == 0 && m_deferred_garbage_collect)
+  {
+    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Deferred garbage collection.\n";
+    collect();
+  }
+
   return result;
 }
 
