@@ -1,0 +1,7 @@
+# The global term and function symbol pools leak memory occupied by 
+# its terms and function symbols upon exiting the program. The 
+# creation and deletion hooks are also allocated by these objects.
+leak:global_aterm_pool
+leak:function_symbol_pool
+leak:add_deletion_hook
+leak:add_creation_hook
