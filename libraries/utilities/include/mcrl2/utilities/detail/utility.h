@@ -11,7 +11,7 @@
 
 #include <cassert>
 #include <cstddef>
-#include <limits.h>
+#include <limits>
 #include <type_traits>
 
 namespace mcrl2
@@ -48,7 +48,7 @@ static T round_up_to_power_of_two(T value)
 
   // This for loop essentially sets all bits to the right of a bit that is equal
   // to one to all being ones, i.e. 0x0...010...0 becomes 0x0...011...1.
-  for(T i = 1; i < sizeof(T) * CHAR_BIT; i *= 2) {
+  for(T i = 1; i < sizeof(T) * std::numeric_limits<unsigned char>::digits; i *= 2) {
       value |= value >> i;
   }
 

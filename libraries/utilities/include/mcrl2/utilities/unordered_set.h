@@ -89,7 +89,7 @@ public:
   std::size_t capacity() const noexcept { return m_buckets.size(); }
 
   /// Move and copy constructors.
-  unordered_set& operator=(unordered_set&& other) noexcept = default;
+  unordered_set& operator=(unordered_set&& other) = default;
 
   /// \returns A reference to the local node allocator.
   const NodeAllocator& allocator() const noexcept { return m_allocator; }
