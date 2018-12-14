@@ -27,7 +27,7 @@ namespace detail
 /// \brief This class stores a term followed by N arguments. Where N should be equal to
 ///        the arity of the function symbol. These arguments do have room reserved for them
 ///        during the creation of the _aterm_appl.
-template <class Term, std::size_t N = 1>
+template<std::size_t N = 1>
 class _aterm_appl : public _aterm
 {
 public:
@@ -90,25 +90,28 @@ public:
   }
 
   /// \returns A reference to the arguments at the ith position.
-  Term& arg(std::size_t index)
+  aterm& arg(std::size_t index)
   {
-    return reinterpret_cast<Term&>(m_arguments.data()[index]);
+    return reinterpret_cast<aterm&>(m_arguments.data()[index]);
   }
 
   /// \returns A const reference to the arguments at the ith position.
-  const Term& arg(std::size_t index) const
+  const aterm& arg(std::size_t index) const
   {
-    return reinterpret_cast<const Term&>(m_arguments.data()[index]);
+    return reinterpret_cast<const aterm&>(m_arguments.data()[index]);
   }
 
 private:
   std::array<unprotected_aterm, N> m_arguments; /// \brief Array of arguments.
 };
 
+/// A default instantiation for the underlying term application.
+using _term_appl = _aterm_appl<>;
+
 /// \brief This class allocates _aterm_appl objects where the size is based on the arity of
 ///        the function symbol.
 /// \details The template T is required to be an object that implicitly converts to an _aterm_appl.
-template<typename T = _aterm_appl<aterm>>
+template<typename T = _term_appl>
 class _aterm_appl_allocator
 {
 public:
@@ -116,14 +119,16 @@ public:
   template <class U>
   struct rebind
   {
-      typedef _aterm_appl_allocator<U> other;
+    typedef _aterm_appl_allocator<U> other;
   };
 
+  /// \returns The size (in bytes) of a class T with arity number of arguments placed at the end.
   constexpr static std::uint64_t term_appl_size(std::uint64_t arity)
   {
     return sizeof(T) + (arity - 1) * sizeof(aterm);
   }
 
+  /// \brief Constructs a _aterm_appl where the arity is given by the function symbol.
   template<typename ForwardIterator>
   T* allocate_and_construct(const function_symbol& symbol, ForwardIterator begin)
   {
@@ -133,6 +138,8 @@ public:
     return reinterpret_cast<T*>(newTerm);
   }
 
+  /// \brief Constructs a _aterm_appl where the arity is given by the function symbol and the arguments taken from the arguments.
+  /// \details Assumes that arguments contains symbol.arity() number of terms.
   T* allocate_and_construct(const function_symbol& symbol, unprotected_aterm* arguments)
   {
     // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
@@ -146,7 +153,7 @@ public:
     assert(element != nullptr);
 
     // Only destroy the function symbol.
-    _aterm_appl<aterm>& term = *element;
+    _term_appl& term = *element;
     term.function().~function_symbol();
   }
 
@@ -155,7 +162,7 @@ public:
     assert(element != nullptr);
 
     // Deallocate the memory of this aterm appl.
-    _aterm_appl<aterm>& term = *element;
+    _term_appl& term = *element;
     m_packed_allocator.deallocate(reinterpret_cast<char*>(element), term_appl_size(term.function().arity()));
   }
 
@@ -173,7 +180,7 @@ private:
   std::allocator<char> m_packed_allocator;
 };
 
-static_assert(sizeof(_aterm_appl<aterm>) == sizeof(_aterm) + sizeof(aterm), "Sanity check: aterm_appl size");
+static_assert(sizeof(_term_appl) == sizeof(_aterm) + sizeof(aterm), "Sanity check: aterm_appl size");
 
 template < class Derived, class Base >
 term_appl_iterator<Derived> aterm_appl_iterator_cast(term_appl_iterator<Base> a,

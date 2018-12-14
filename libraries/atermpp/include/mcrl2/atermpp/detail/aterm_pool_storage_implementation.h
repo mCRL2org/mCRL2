@@ -233,7 +233,7 @@ bool ATERM_POOL_STORAGE::verify_mark()
   {
     if (term.is_reachable() && term.function().arity() > 0)
     {
-       _aterm_appl<aterm>& ta = reinterpret_cast<_aterm_appl<aterm>&>(term);
+       _term_appl& ta = reinterpret_cast<_term_appl&>(term);
        for (std::size_t i = 0; i < ta.function().arity(); ++i)
        {
          assert(detail::address(ta.arg(i))->is_reachable());
@@ -320,7 +320,7 @@ void ATERM_POOL_STORAGE::mark_term(_aterm& term)
 
   // (Statically) determine the arity of the function application.
   const std::size_t arity = (Arity == DynamicNumberOfArguments) ? term.function().arity() : N;
-  _aterm_appl<aterm>& term_appl = reinterpret_cast<_aterm_appl<aterm>&>(term);
+  _term_appl& term_appl = reinterpret_cast<_term_appl&>(term);
 
   for (std::size_t i = 0; i < arity; ++i)
   {
@@ -357,7 +357,7 @@ bool ATERM_POOL_STORAGE::verify_term(_aterm& term)
   // Check that all of its arguments are defined.
   if (term.function().arity() > 0)
   {
-    _aterm_appl<aterm>& ta = reinterpret_cast<_aterm_appl<aterm>&>(term);
+    _term_appl& ta = reinterpret_cast<_term_appl&>(term);
     for (std::size_t i = 0; i < ta.function().arity(); ++i)
     {
       assert(ta.arg(i).defined());

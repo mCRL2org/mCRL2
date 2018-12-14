@@ -37,14 +37,14 @@ constexpr static bool EnableGarbageCollection = true && !GlobalThreadSafe;
 /// Define several specializations of the term pool storage objects.
 using integer_term_storage = aterm_pool_storage<_aterm_int, aterm_int_hasher, aterm_int_equals, 0, GlobalThreadSafe>;
 using term_storage = aterm_pool_storage<_aterm, aterm_hasher_finite<0>, aterm_equals_finite<0>, 0, GlobalThreadSafe>;
-using arbitrary_function_application_storage = aterm_pool_storage<_aterm_appl<aterm, 1>,
+using arbitrary_function_application_storage = aterm_pool_storage<_aterm_appl<1>,
   aterm_hasher<DynamicNumberOfArguments>,
   aterm_equals<DynamicNumberOfArguments>,
   DynamicNumberOfArguments,
   GlobalThreadSafe>;
 
 template<std::size_t N>
-using function_application_storage = aterm_pool_storage<_aterm_appl<aterm, N>, aterm_hasher_finite<N>, aterm_equals_finite<N>, N, GlobalThreadSafe>;
+using function_application_storage = aterm_pool_storage<_aterm_appl<N>, aterm_hasher_finite<N>, aterm_equals_finite<N>, N, GlobalThreadSafe>;
 
 /// \brief The interface for the term library. Provides the storage of
 ///        of all classes of terms.

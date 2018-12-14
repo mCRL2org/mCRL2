@@ -32,7 +32,7 @@ class term_appl: public aterm
 {
 protected:
   /// \brief Constructor.
-  explicit term_appl(detail::_aterm_appl<Term> *t): aterm(reinterpret_cast<detail::_aterm*>(t))
+  explicit term_appl(detail::_term_appl *t): aterm(reinterpret_cast<detail::_aterm*>(t))
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
@@ -194,14 +194,14 @@ public:
   /// \return An iterator pointing to the first argument.
   const_iterator begin() const
   {
-    return const_iterator(&(reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg(0)));
+    return const_iterator(&(reinterpret_cast<detail::_term_appl*>(m_term)->arg(0)));
   }
 
   /// \brief Returns a const_iterator pointing past the last argument.
   /// \return A const_iterator pointing past the last argument.
   const_iterator end() const
   {
-    return const_iterator(&reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg(size()));
+    return const_iterator(&reinterpret_cast<detail::_term_appl*>(m_term)->arg(size()));
   }
 
   /// \brief Returns the largest possible number of arguments.
@@ -217,7 +217,7 @@ public:
   const Term& operator[](const size_type i) const
   {
     assert(i < size()); // Check the bounds.
-    return reinterpret_cast<detail::_aterm_appl<Term>*>(m_term)->arg(i);
+    return reinterpret_cast<detail::_term_appl*>(m_term)->arg(i);
   }
 };
 
