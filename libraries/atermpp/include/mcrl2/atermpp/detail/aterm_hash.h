@@ -212,7 +212,7 @@ std::size_t aterm_hasher<N>::operator()(const _aterm& term) const noexcept
   const std::size_t arity = (N == DynamicNumberOfArguments) ? f.arity() : N;
 
   // This is a function application with arguments, hash each argument and combine the result.
-  const _aterm_appl<aterm>& term_appl = reinterpret_cast<const _aterm_appl<aterm>&>(term);
+  const _aterm_appl<>& term_appl = reinterpret_cast<const _aterm_appl<>&>(term);
   for (std::size_t i = 0; i < arity; ++i)
   {
     hnr = combine(hnr, term_appl.arg(i));
@@ -327,8 +327,8 @@ bool aterm_equals<N>::operator()(const _aterm& first, const _aterm& second) cons
     // Check whether the remaining arguments match
     for (std::size_t i = 0; i < arity; ++i)
     {
-      if (reinterpret_cast<const _aterm_appl<aterm>&>(first).arg(i)
-            != reinterpret_cast<const _aterm_appl<aterm>&>(second).arg(i))
+      if (reinterpret_cast<const _term_appl&>(first).arg(i)
+            != reinterpret_cast<const _term_appl&>(second).arg(i))
       {
         return false;
       }
@@ -354,7 +354,7 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
     // Each argument should be equal.
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
-      if (reinterpret_cast<const _aterm_appl<aterm>&>(term).arg(i) != arguments[i])
+      if (reinterpret_cast<const _term_appl&>(term).arg(i) != arguments[i])
       {
         return false;
       }
@@ -378,7 +378,7 @@ inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbo
     // Each argument should be equal.
     for (std::size_t i = 0; i < arity; ++i)
     {
-      if (reinterpret_cast<const _aterm_appl<aterm>&>(term).arg(i) != (*begin))
+      if (reinterpret_cast<const _term_appl&>(term).arg(i) != (*begin))
       {
         return false;
       }
@@ -399,7 +399,7 @@ bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbo
     // Each argument should be equal.
     for (std::size_t i = 0; i < N; ++i)
     {
-      if (reinterpret_cast<const _aterm_appl<aterm, N>&>(term).arg(i) != arguments[i])
+      if (reinterpret_cast<const _aterm_appl<N>&>(term).arg(i) != arguments[i])
       {
         return false;
       }
@@ -414,7 +414,7 @@ bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbo
 template<std::size_t I = 0,
          typename... Tp,
          typename std::enable_if<I == sizeof...(Tp), void>::type* = nullptr>
-bool equal_args(const _aterm_appl<aterm, 8>&, const Tp&...)
+bool equal_args(const _aterm_appl<8>&, const Tp&...)
 {
   return true;
 }
@@ -422,7 +422,7 @@ bool equal_args(const _aterm_appl<aterm, 8>&, const Tp&...)
 template<std::size_t I = 0,
          typename... Tp,
          typename std::enable_if<I < sizeof...(Tp), void>::type* = nullptr>
-bool equal_args(const _aterm_appl<aterm, 8>& term, const Tp&... t)
+bool equal_args(const _aterm_appl<8>& term, const Tp&... t)
 {
   return term.arg(I) == std::get<I>(std::forward_as_tuple(t...)) && equal_args<I+1>(term, t...);
 }
@@ -431,7 +431,7 @@ template<std::size_t N>
 template<typename ...Args>
 bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbol& symbol, const Args&... args) const noexcept
 {
-  return (term.function() == symbol && equal_args(reinterpret_cast<const _aterm_appl<aterm, 8>&>(term), args...));
+  return (term.function() == symbol && equal_args(reinterpret_cast<const _aterm_appl<8>&>(term), args...));
 }
 
 bool aterm_int_equals::operator()(const _aterm_int& first, const _aterm_int& second) const noexcept

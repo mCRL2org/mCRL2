@@ -223,8 +223,12 @@ void aterm_pool::collect()
   assert(m_appl_dynamic_storage.verify_sweep());
 
   // Print some statistics.
-  mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms in "
-    << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count() << " ms.\n";
+  if (EnableGarbageCollectionMetrics)
+  {
+    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms in "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count() << " ms.\n";
+    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): There are " << size() << " terms stored.\n";
+  }
 
   get_symbol_pool().print_performance_stats();
   print_performance_statistics();
@@ -330,7 +334,10 @@ aterm aterm_pool::create_appl_dynamic(const function_symbol& sym,
   // Trigger a deferred garbage collection when it was requested and the term has been protected.
   if (m_creation_depth == 0 && m_deferred_garbage_collect)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Deferred garbage collection.\n";
+    if (EnableGarbageCollectionMetrics)
+    {
+      mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Deferred garbage collection.\n";
+    }
     collect();
   }
 
@@ -339,8 +346,6 @@ aterm aterm_pool::create_appl_dynamic(const function_symbol& sym,
 
 void aterm_pool::print_performance_statistics() const
 {
-  mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): There are " << size() << " terms stored.\n";
-
   m_int_storage.print_performance_stats("integral_storage");
   std::get<0>(m_appl_storage).print_performance_stats("term_storage");
   std::get<1>(m_appl_storage).print_performance_stats("function_application_storage_1");
