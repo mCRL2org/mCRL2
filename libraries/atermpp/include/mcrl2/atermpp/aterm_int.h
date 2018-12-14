@@ -12,68 +12,54 @@
 #ifndef MCRL2_ATERMPP_ATERM_INT_H
 #define MCRL2_ATERMPP_ATERM_INT_H
 
-#include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/detail/aterm_int.h"
+#include "mcrl2/atermpp/detail/global_aterm_pool.h"
 
 namespace atermpp
 {
 
-class aterm_int: public aterm
+/// \brief An integer term stores a single std::size_t value. It carrier
+/// 	       no arguments.
+/// \details A special function symbol is used to identify integer terms
+/// 			 internally.
+class aterm_int : public aterm
 {
-  protected:
-    /// \brief Constructor
-    aterm_int(detail::_aterm_int* t) noexcept 
-     : aterm(reinterpret_cast<detail::_aterm*>(t))
-    {
-    } 
+public:
+  /// \brief Default constructor.
+  aterm_int() noexcept
+  {}
 
-  public:
+  /// \brief Construct an aterm_int from an aterm.
+  /// \details The aterm must be of type AT_INT.
+  explicit aterm_int(const aterm& t) noexcept
+   : aterm(t)
+  {
+    assert(t.type_is_int());
+  }
 
-    /// \brief Default constructor.
-    aterm_int() noexcept
-    {}
+  /// \brief Constructs an integer term from a value.
+  explicit aterm_int(std::size_t value)
+   : aterm(detail::g_term_pool().create_int(value))
+  {}
 
-    /// \brief Construct an aterm_int from an aterm.
-    /// \details The aterm must be of type AT_INT.
-    explicit aterm_int(const aterm& t) noexcept 
-     : aterm(t) 
-    {
-      assert(t.type_is_int());
-    }
-    
-    /// \brief Copy constructor
-    /// \details The aterm must be of type AT_INT.
-    aterm_int(const aterm_int&) noexcept = default;
-    
-    /// \brief Move construct an aterm_int from an aterm.
-    /// \details The aterm must be of type AT_INT.
-    aterm_int(aterm_int&&) noexcept = default;
-    
-    /// \brief Constructor.
-    /// \param value An integer value.
-    explicit aterm_int(std::size_t value)
-     : aterm(detail::aterm_int(value))
-    {}
+  /// This class has user-declared copy constructor so declare default copy and move operators.
+  aterm_int(const aterm_int& other) noexcept = default;
+  aterm_int& operator=(const aterm_int& other) noexcept = default;
+  aterm_int(aterm_int&& other) noexcept = default;
+  aterm_int& operator=(aterm_int&& other) noexcept = default;
 
-    /// \brief Default assignment operator.
-    // \param t A term representing an integer.
-    aterm_int& operator=(const aterm_int&) = default;
+  /// \returns The value of the integer term.
+  std::size_t value() const noexcept
+  {
+    return reinterpret_cast<detail::_aterm_int*>(m_term)->value();
+  }
 
-    /// \brief Default move assignment operator.
-    // \param t A term representing an integer.
-    aterm_int& operator=(aterm_int&&) noexcept = default;
-
-    /// \brief Get the integer value of the aterm_int.
-    /// \return The value of the term.
-    std::size_t value() const
-    {
-      return reinterpret_cast<detail::_aterm_int*>(m_term)->value;
-    }
-
-    void swap(aterm_int& t) noexcept
-    {
-      aterm::swap(t);
-    }
+  /// \brief Swaps two integer terms without changing the protection.
+  void swap(aterm_int& t) noexcept
+  {
+    aterm::swap(t);
+  }
 };
 
 } // namespace atermpp
@@ -88,15 +74,11 @@ namespace std
 ///          be preceded by an empty template declaration.
 /// \param t1 The first term
 /// \param t2 The second term
-
 template <>  
 inline void swap(atermpp::aterm_int& t1, atermpp::aterm_int& t2) noexcept
 {
   t1.swap(t2);
 } 
 } // namespace std 
-
-#include "mcrl2/atermpp/detail/aterm_int.h"
-#include "mcrl2/atermpp/detail/aterm_int_implementation.h"
 
 #endif // MCRL2_ATERMPP_ATERM_INT_H

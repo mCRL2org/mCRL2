@@ -19,17 +19,25 @@ namespace atermpp
 namespace detail
 {
 
-class _aterm_int:public _aterm
+/// \brief The underlying integer term that actually carries the integer data.
+class _aterm_int : public _aterm
 {
-  public:
-    std::size_t value;
+public:
+  /// \brief Constructs the underlying term from a given value.
+  _aterm_int(std::size_t value);
+
+  std::size_t value() const noexcept
+  {
+    return m_value;
+  }
+  
+private:
+  std::size_t m_value;
 };
 
-_aterm *aterm_int(std::size_t val);
+static_assert(sizeof(_aterm_int) == sizeof(_aterm) + sizeof(std::size_t), "Sanity check: _aterm_int size");
 
 } // namespace detail 
-
-static const std::size_t TERM_SIZE_INT = sizeof(detail::_aterm_int)/sizeof(std::size_t);
 
 } // namespace atermpp
 
