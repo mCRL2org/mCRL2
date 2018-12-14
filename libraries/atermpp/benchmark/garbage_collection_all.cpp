@@ -39,7 +39,7 @@ int main(int, char*[])
 
     // Trigger garbage collection.
     stopwatch.reset();
-    detail::collect_terms_with_reference_count_0();
+    detail::g_term_pool().collect();
     garbage_collect_time += stopwatch.time();
   }
 
