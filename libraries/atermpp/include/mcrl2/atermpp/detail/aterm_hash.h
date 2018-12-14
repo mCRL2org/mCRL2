@@ -277,14 +277,14 @@ std::size_t aterm_hasher_finite<N>::operator()(const function_symbol& symbol, st
 }
 
 template<std::size_t I = 0, typename... Tp,
-         typename std::enable_if<I == sizeof...(Tp) - 1, void>::type* = nullptr>
-std::size_t combine_args(std::size_t hnr, const Tp&... t)
+         typename std::enable_if<I == sizeof...(Tp), void>::type* = nullptr>
+std::size_t combine_args(std::size_t hnr, const Tp&...)
 {
-  return combine(hnr, std::get<I>(std::forward_as_tuple(t...)));
+  return hnr;
 }
 
 template<std::size_t I = 0, typename... Tp,
-         typename std::enable_if<I < sizeof...(Tp) - 1, void>::type* = nullptr>
+         typename std::enable_if<I < sizeof...(Tp), void>::type* = nullptr>
 std::size_t combine_args(std::size_t hnr, const Tp&... t)
 {
   return combine_args<I+1>(combine(hnr, std::get<I>(std::forward_as_tuple(t...))), t...);
@@ -413,15 +413,15 @@ bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbo
 
 template<std::size_t I = 0,
          typename... Tp,
-         typename std::enable_if<I == sizeof...(Tp) - 1, void>::type* = nullptr>
-bool equal_args(const _aterm_appl<aterm, 8>& term, const Tp&... t)
+         typename std::enable_if<I == sizeof...(Tp), void>::type* = nullptr>
+bool equal_args(const _aterm_appl<aterm, 8>&, const Tp&...)
 {
-  return term.arg(I) == std::get<I>(std::forward_as_tuple(t...));
+  return true;
 }
 
 template<std::size_t I = 0,
          typename... Tp,
-         typename std::enable_if<I < sizeof...(Tp) - 1, void>::type* = nullptr>
+         typename std::enable_if<I < sizeof...(Tp), void>::type* = nullptr>
 bool equal_args(const _aterm_appl<aterm, 8>& term, const Tp&... t)
 {
   return term.arg(I) == std::get<I>(std::forward_as_tuple(t...)) && equal_args<I+1>(term, t...);
