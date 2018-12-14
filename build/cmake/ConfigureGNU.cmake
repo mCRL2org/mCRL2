@@ -97,7 +97,11 @@ endif()
 if(MCRL2_CLANGPP AND NOT APPLE)
   # We need to add the proper flag to the linker before we try:
   set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
-  try_add_cxx_flag(-fsanitize=address       MAINTAINER)
+  try_add_cxx_flag(-fsanitize=address MAINTAINER)
+
+  # Add a blacklist for the address and leak sanitizer to suppress reports for desired behaviour.
+  get_filename_component(LEAKSANITIZER_SUPPRESS ${CMAKE_SOURCE_DIR}/build/leaksanitizer.suppress ABSOLUTE)
+  try_add_cxx_flag("-fsanitize-blacklist=${LEAKSANITIZER_SUPPRESS}" MAINTAINER)
   unset(CMAKE_REQUIRED_LIBRARIES)
 endif()
 
