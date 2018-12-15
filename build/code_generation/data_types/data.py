@@ -1893,6 +1893,7 @@ class mapping_specification():
     if not self.declarations.empty():
       assert(isinstance(spec, specification))
       sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (str(x).lower()), self.declarations.sort_parameters(spec)), ", ")
+      data_parameters = string.join(map(lambda x: "%s" % (str(x).lower()), self.declarations.sort_parameters(spec)), ", ")
       assert(self.namespace == spec.namespace)
       namespace_string = self.namespace
       if namespace_string == "undefined":
@@ -1910,6 +1911,24 @@ class mapping_specification():
       code += self.declarations.generator_code(spec) + (spec.sort_specification.structured_sort_mapping_code())
       code += "        return result;\n"
       code += "      }\n"
+      code += "      \n"
+
+      code += "      /// \\brief Give all system defined mappings and constructors for %s\n" % (escape(namespace_string))
+      for s in self.declarations.sort_parameters(spec):
+        code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
+      code += "      /// \\return All system defined mappings for %s\n" % (escape(namespace_string))
+      code += "      inline\n"
+      code += "      function_symbol_vector %s_generate_constructors_and_functions_code(%s)\n" % (namespace_string, sort_parameters)
+      code += "      {\n"
+      code += "        function_symbol_vector result=%s_generate_functions_code(%s);\n" % (namespace_string, data_parameters) 
+      if not spec.function_specification.constructor_specification.declarations.empty():   
+        code += "        for(const function_symbol& f: %s_generate_constructors_code(%s))\n" % (namespace_string, data_parameters)
+        code += "        {\n"
+        code += "          result.push_back(f);\n"
+        code += "        }\n"
+      code += "        return result;\n"
+      code += "      }\n"
+      code += "      \n"
 
       code += "      /// \\brief Give all system defined mappings that can be used in mCRL2 specs for %s\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):

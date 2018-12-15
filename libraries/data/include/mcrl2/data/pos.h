@@ -753,6 +753,20 @@ namespace mcrl2 {
         result.push_back(sort_pos::times_whr_mult_overflow());
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for pos
+      /// \return All system defined mappings for pos
+      inline
+      function_symbol_vector pos_generate_constructors_and_functions_code()
+      {
+        function_symbol_vector result=pos_generate_functions_code();
+        for(const function_symbol& f: pos_generate_constructors_code())
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for pos
       /// \return All system defined mappings for that can be used in mCRL2 specificationis pos
       inline

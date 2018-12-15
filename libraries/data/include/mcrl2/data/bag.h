@@ -1126,6 +1126,21 @@ namespace mcrl2 {
         result.push_back(sort_bag::bool2nat_function(s));
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for bag
+      /// \param s A sort expression
+      /// \return All system defined mappings for bag
+      inline
+      function_symbol_vector bag_generate_constructors_and_functions_code(const sort_expression& s)
+      {
+        function_symbol_vector result=bag_generate_functions_code(s);
+        for(const function_symbol& f: bag_generate_constructors_code(s))
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for bag
       /// \param s A sort expression
       /// \return All system defined mappings for that can be used in mCRL2 specificationis bag

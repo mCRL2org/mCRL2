@@ -940,6 +940,21 @@ namespace mcrl2 {
         result.push_back(sort_fbag::count_all(s));
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for fbag
+      /// \param s A sort expression
+      /// \return All system defined mappings for fbag
+      inline
+      function_symbol_vector fbag_generate_constructors_and_functions_code(const sort_expression& s)
+      {
+        function_symbol_vector result=fbag_generate_functions_code(s);
+        for(const function_symbol& f: fbag_generate_constructors_code(s))
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for fbag
       /// \param s A sort expression
       /// \return All system defined mappings for that can be used in mCRL2 specificationis fbag

@@ -874,6 +874,21 @@ namespace mcrl2 {
         result.push_back(sort_set::or_function(s));
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for set_
+      /// \param s A sort expression
+      /// \return All system defined mappings for set_
+      inline
+      function_symbol_vector set_generate_constructors_and_functions_code(const sort_expression& s)
+      {
+        function_symbol_vector result=set_generate_functions_code(s);
+        for(const function_symbol& f: set_generate_constructors_code(s))
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for set_
       /// \param s A sort expression
       /// \return All system defined mappings for that can be used in mCRL2 specificationis set_

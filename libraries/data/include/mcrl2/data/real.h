@@ -1691,6 +1691,20 @@ namespace mcrl2 {
         result.push_back(sort_real::reduce_fraction_helper());
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for real_
+      /// \return All system defined mappings for real_
+      inline
+      function_symbol_vector real_generate_constructors_and_functions_code()
+      {
+        function_symbol_vector result=real_generate_functions_code();
+        for(const function_symbol& f: real_generate_constructors_code())
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for real_
       /// \return All system defined mappings for that can be used in mCRL2 specificationis real_
       inline

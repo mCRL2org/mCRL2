@@ -3671,6 +3671,20 @@ namespace mcrl2 {
         result.push_back(sort_nat::last());
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for nat
+      /// \return All system defined mappings for nat
+      inline
+      function_symbol_vector nat_generate_constructors_and_functions_code()
+      {
+        function_symbol_vector result=nat_generate_functions_code();
+        for(const function_symbol& f: nat_generate_constructors_code())
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for nat
       /// \return All system defined mappings for that can be used in mCRL2 specificationis nat
       inline

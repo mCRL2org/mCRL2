@@ -98,6 +98,18 @@ namespace mcrl2 {
         result.push_back(function_update(s, t));
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for function_update
+      /// \param s A sort expression
+      /// \param t A sort expression
+      /// \return All system defined mappings for function_update
+      inline
+      function_symbol_vector function_update_generate_constructors_and_functions_code(const sort_expression& s, const sort_expression& t)
+      {
+        function_symbol_vector result=function_update_generate_functions_code(s, t);
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for function_update
       /// \param s A sort expression
       /// \param t A sort expression

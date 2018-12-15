@@ -391,6 +391,20 @@ namespace mcrl2 {
         result.push_back(sort_bool::implies());
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for bool_
+      /// \return All system defined mappings for bool_
+      inline
+      function_symbol_vector bool_generate_constructors_and_functions_code()
+      {
+        function_symbol_vector result=bool_generate_functions_code();
+        for(const function_symbol& f: bool_generate_constructors_code())
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for bool_
       /// \return All system defined mappings for that can be used in mCRL2 specificationis bool_
       inline

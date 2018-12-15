@@ -707,6 +707,21 @@ namespace mcrl2 {
         result.push_back(sort_fset::count(s));
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for fset
+      /// \param s A sort expression
+      /// \return All system defined mappings for fset
+      inline
+      function_symbol_vector fset_generate_constructors_and_functions_code(const sort_expression& s)
+      {
+        function_symbol_vector result=fset_generate_functions_code(s);
+        for(const function_symbol& f: fset_generate_constructors_code(s))
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for fset
       /// \param s A sort expression
       /// \return All system defined mappings for that can be used in mCRL2 specificationis fset

@@ -2212,6 +2212,20 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::shift_right());
         return result;
       }
+      
+      /// \brief Give all system defined mappings and constructors for machine_word
+      /// \return All system defined mappings for machine_word
+      inline
+      function_symbol_vector machine_word_generate_constructors_and_functions_code()
+      {
+        function_symbol_vector result=machine_word_generate_functions_code();
+        for(const function_symbol& f: machine_word_generate_constructors_code())
+        {
+          result.push_back(f);
+        }
+        return result;
+      }
+      
       /// \brief Give all system defined mappings that can be used in mCRL2 specs for machine_word
       /// \return All system defined mappings for that can be used in mCRL2 specificationis machine_word
       inline

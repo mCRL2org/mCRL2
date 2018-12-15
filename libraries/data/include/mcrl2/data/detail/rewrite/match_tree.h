@@ -85,6 +85,12 @@ class match_tree:public atermpp::aterm_appl
       return afunF;
     }
 
+    atermpp::function_symbol afunMachineNumber() const
+    {
+      static atermpp::function_symbol afunNumber("@@MachineNumber",3); // Match function ( match_function, true_tree, false_tree )
+      return afunNumber;
+    }
+
     atermpp::function_symbol afunN() const
     {
       static atermpp::function_symbol afunN("@@N",1); // Go to next parameter ( result_tree )
@@ -157,6 +163,11 @@ class match_tree:public atermpp::aterm_appl
     bool isF() const
     {
       return this->function()==afunF();
+    }
+      
+    bool isMachineNumber() const
+    {
+      return this->function()==afunMachineNumber();
     }
       
     bool isN() const
@@ -287,7 +298,7 @@ class match_tree_M:public match_tree
 };
 
 // Match function ( match_function, true_tree, false_tree )
-class match_tree_F:public match_tree
+class match_tree_F: public match_tree
 {
   public:
     match_tree_F()
@@ -306,6 +317,39 @@ class match_tree_F:public match_tree
     const data::function_symbol& function() const
     {
       return atermpp::down_cast<const data::function_symbol>((*this)[0]);
+    }
+
+    const match_tree& true_tree() const
+    {
+      return atermpp::down_cast<const match_tree>((*this)[1]);
+    }
+
+    const match_tree& false_tree() const
+    {
+      return atermpp::down_cast<const match_tree>((*this)[2]);
+    }
+};
+
+// Match function ( match_function, true_tree, false_tree )
+class match_tree_MachineNumber: public match_tree
+{
+  public:
+    match_tree_MachineNumber()
+    {}
+
+    match_tree_MachineNumber(const atermpp::aterm_appl& t):
+          match_tree(t)
+    {
+      assert(isMachineNumber());
+    }
+    
+    match_tree_MachineNumber(const data::machine_number& mn, const match_tree& true_tree, const match_tree& false_tree):
+          match_tree(atermpp::aterm_appl(afunMachineNumber(),mn,true_tree,false_tree))
+    {}
+
+    const data::machine_number& number() const
+    {
+      return atermpp::down_cast<const data::machine_number>((*this)[0]);
     }
 
     const match_tree& true_tree() const
@@ -570,6 +614,11 @@ std::ostream& operator<<(std::ostream& s, const match_tree& t)
   {
     const match_tree_F& tF = down_cast<match_tree_F>(t);
     s << "@@F(" << tF.function() << ", " << tF.true_tree() << ", " << tF.false_tree() << ")";
+  }
+  if (t.isMachineNumber())
+  {
+    const match_tree_MachineNumber& tM = down_cast<match_tree_MachineNumber>(t);
+    s << "@@MachineNumber(" << tM.function() << ", " << tM.true_tree() << ", " << tM.false_tree() << ")";
   }
   else
   if (t.isN())
