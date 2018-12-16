@@ -29,10 +29,15 @@ namespace mcrl2
 namespace data
 {
 
-/// \brief Returns true if the term t is an abstraction
-inline bool is_abstraction(const atermpp::aterm& x)
+/// \brief Returns true if the term t is an abstraction.
+/// \param t The term to be checked.
+/// \param not_a_machine_number True if it can be assumed that t is not a machine number. 
+/// \returns Indicates whether t is an a abstraction. 
+inline bool is_abstraction(const atermpp::aterm& t, const bool not_a_machine_number = false)
 {
-  return !x.type_is_int() && atermpp::down_cast<const atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Binder;
+  assert(!not_a_machine_number||!t.type_is_int());
+  return (not_a_machine_number || !t.type_is_int()) && 
+         atermpp::down_cast<const atermpp::aterm_appl>(t).function() == core::detail::function_symbols::Binder;
 }
 
 /// \brief Returns true if the term t is a lambda abstraction
@@ -71,50 +76,75 @@ inline bool is_untyped_set_or_bag_comprehension(const atermpp::aterm& x)
   return is_abstraction(x) && atermpp::down_cast<const atermpp::aterm_appl>(atermpp::down_cast<const atermpp::aterm_appl>(x)[0]).function() == core::detail::function_symbols::UntypedSetBagComp;
 }
 
-/// \brief Returns true if the term t is a function symbol
-inline bool is_function_symbol(const atermpp::aterm& x)
+/// \brief Returns true if the term t is a function symbol.
+/// \param t The term to be checked.
+/// \param not_a_machine_number True if it can be assumed that x is not a machine number. 
+/// \returns Indicates whether x is an a abstraction. 
+inline bool is_function_symbol(const atermpp::aterm& t, const bool not_a_machine_number = false)
 {
-  return !x.type_is_int() && atermpp::down_cast<const atermpp::aterm_appl>(x).function() == core::detail::function_symbols::OpId;
+  assert(!not_a_machine_number||!t.type_is_int());
+  return (not_a_machine_number || !t.type_is_int()) && 
+         atermpp::down_cast<const atermpp::aterm_appl>(t).function() == core::detail::function_symbols::OpId;
 }
 
-/// \brief Returns true if the term t is a variable
-inline bool is_variable(const atermpp::aterm& x)
+/// \brief Returns true if the term t is a variable.
+/// \param t The term to be checked.
+/// \param not_a_machine_number True if it can be assumed that t is not a machine number. 
+/// \returns Indicates whether t is a variable. 
+inline bool is_variable(const atermpp::aterm& t, const bool not_a_machine_number = false)
 {
-  return !x.type_is_int() && atermpp::down_cast<const atermpp::aterm_appl>(x).function() == core::detail::function_symbols::DataVarId;
+  assert(!not_a_machine_number||!t.type_is_int());
+  return (not_a_machine_number || !t.type_is_int()) && 
+         atermpp::down_cast<const atermpp::aterm_appl>(t).function() == core::detail::function_symbols::DataVarId;
 }
 
 /// \brief Returns true if the term t is a machine number.
 /// \brief Returns true if the term t is a machine number.
-inline bool is_machine_number(const atermpp::aterm& x)
+inline bool is_machine_number(const atermpp::aterm& t)
 {
-  return x.type_is_int();
+  return t.type_is_int();
 }
 
-/// \brief Returns true if the term t is an application
+/// \brief Returns true if the term t is an application.
 /// \details This function is inefficient as the arity of a term must 
 ///          be determined and an inspection must take place in an 
 ///          array of function symbols. Therefore, there is an more efficient overload
-///          is_application(const data_expression& x).
-inline bool is_application(const atermpp::aterm& x)
+///          is_application(const data_expression& t).
+/// \param t The term to be checked.
+/// \param not_a_machine_number True if it can be assumed that x is not a machine number. 
+/// \returns Indicates whether t is an application. 
+inline bool is_application(const atermpp::aterm& t, const bool not_a_machine_number = false)
 {
-  return !x.type_is_int() && core::detail::gsIsDataAppl(atermpp::down_cast<const atermpp::aterm_appl>(x));
+  assert(!not_a_machine_number||!t.type_is_int());
+  return (not_a_machine_number || !t.type_is_int()) && 
+         core::detail::gsIsDataAppl(atermpp::down_cast<const atermpp::aterm_appl>(t));
 }
 
 /// \brief Returns true if the term t is an application, but it does not check
 ///        whether an application symbol of sufficient arity exists, assuming
 ///        this is ok.
-inline bool is_application_no_check(const atermpp::aterm& x)
+/// \param t The term to be checked.
+/// \param not_a_machine_number True if it can be assumed that x is not a machine number. 
+/// \returns Indicates whether t is an application. 
+inline bool is_application_no_check(const atermpp::aterm& t, const bool not_a_machine_number = false)
 {
-  return !x.type_is_int() && core::detail::gsIsDataAppl_no_check(atermpp::down_cast<const atermpp::aterm_appl>(x));
+  assert(!not_a_machine_number||!t.type_is_int());
+  return (not_a_machine_number || !t.type_is_int()) && 
+         core::detail::gsIsDataAppl_no_check(atermpp::down_cast<const atermpp::aterm_appl>(t));
 }
 
-/// \brief Returns true if the term t is a where clause
-inline bool is_where_clause(const atermpp::aterm& x)
+/// \brief Returns true if the term t is a where clause.
+/// \param t The term to be checked.
+/// \param not_a_machine_number True if it can be assumed that t is not a machine number. 
+/// \returns Indicates whether t is a where clause. 
+inline bool is_where_clause(const atermpp::aterm& t, const bool not_a_machine_number = false)
 {
-  return !x.type_is_int() && atermpp::down_cast<const atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Whr;
+  assert(!not_a_machine_number||!t.type_is_int());
+  return (not_a_machine_number || !t.type_is_int()) &&
+         atermpp::down_cast<const atermpp::aterm_appl>(t).function() == core::detail::function_symbols::Whr;
 }
 
-/// \brief Returns true if the term t is an identifier
+/// \brief Returns true if the term t is an identifier.
 inline bool is_untyped_identifier(const atermpp::aterm& x)
 {
   return !x.type_is_int() && atermpp::down_cast<const atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedIdentifier;
