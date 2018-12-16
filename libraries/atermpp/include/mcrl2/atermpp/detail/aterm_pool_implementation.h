@@ -149,16 +149,21 @@ std::size_t aterm_pool::capacity() const noexcept
 void aterm_pool::trigger_collection()
 {
   // Defer garbage collection when it happens too often.
-  if (m_countUntilCollection > 0 || !EnableGarbageCollection)
+  if (!EnableGarbageCollection)
+  {
+    return;
+  }
+
+  if (m_countUntilCollection > 0)
   {
     --m_countUntilCollection;
   }
-  else if (m_countUntilCollection == 0)
+  else
   {
     collect();
 
     // Use some heuristics to determine when the next collection is called.
-    m_countUntilCollection = capacity();
+    m_countUntilCollection = size();
   }
 }
 

@@ -38,7 +38,7 @@ public:
            typename std::enable_if<sizeof...(Terms) == N>::type* = nullptr>
   _aterm_appl(const function_symbol& sym, const Terms& ...arguments)
     : _aterm(sym),
-      m_arguments{arguments...}
+      m_arguments{{arguments...}}
   {
     assert(N == sym.arity()); // The arity of the function symbol matches.
   }

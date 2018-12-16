@@ -35,7 +35,7 @@ class unordered_set
 {
 public:
   /// \brief Combine the bucket list and a lock that locks modifications to the bucket list.
-  struct lockable_bucket : public spinlock, detail::bucket_list<Key, Allocator>
+  struct lockable_bucket : public detail::bucket_list<Key, Allocator>
   {};
 
   using Bucket = lockable_bucket;
