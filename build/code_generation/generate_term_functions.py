@@ -20,7 +20,7 @@ def generate_function_symbol_constructors(rules, declaration_filename, definitio
 inline
 const atermpp::function_symbol& function_symbol_%(name)s()
 {
-  static const atermpp::global_function_symbol function_symbol_%(name)s("%(name)s", %(arity)d);
+  static const atermpp::function_symbol function_symbol_%(name)s = atermpp::function_symbol("%(name)s", %(arity)d);
   return function_symbol_%(name)s;
 }
 

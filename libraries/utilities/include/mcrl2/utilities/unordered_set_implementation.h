@@ -26,15 +26,12 @@ MCRL2_UNORDERED_SET_TEMPLATES
 typename MCRL2_UNORDERED_SET_CLASS::iterator& MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::iterator& it)
 {
   // Find the bucket that is pointed to and remove the key after the before iterator.
-  Bucket& bucket = it.get_bucket();
-
-  // The iterator should now point to the element after the to be erased key.
-  it.increment_key_it();
+  Bucket& bucket = it.bucket();
 
   // Remove the key that is after the before iterator.
-  bucket.erase_after(it.get_key_before_it(), m_allocator);
+  it.key_it() = bucket.erase_after(it.key_before_it(), m_allocator);
 
-  // In the case that key_it becomes the end the next bucket must be selected.
+  // In the case that key_it becomes the end the next bucket must be found.
   it.goto_next_bucket();
 
   // An element was removed from the hash table.
@@ -78,7 +75,7 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(con
     auto& key = *it;
     if (m_equals(key, args...))
     {
-      return iterator(m_buckets.end(), m_buckets.end(), it);
+      return iterator(it);
     }
   }
 
@@ -176,7 +173,7 @@ void MCRL2_UNORDERED_SET_CLASS::resize()
   m_buckets_mask = m_buckets.size() - 1;
   m_number_of_elements = 0;
 
-  /// Fill the new set with all elements of the current unordered set.
+  // Fill the new set with all elements of the current unordered set.
   for (auto&& bucket : old_buckets)
   {
     for (auto it = bucket.begin(); it != bucket.end();)

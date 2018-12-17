@@ -27,11 +27,12 @@ public:
   using bucket_it = typename std::conditional<Constant,
     typename std::vector<Bucket>::const_iterator,
     typename std::vector<Bucket>::iterator>::type;
-  using key_it = typename std::conditional<Constant,
+  using key_it_type = typename std::conditional<Constant,
     typename Bucket::const_iterator,
     typename Bucket::iterator>::type;
 
-  unordered_set_iterator(bucket_it it, bucket_it end, key_it key) :
+  /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
+  unordered_set_iterator(bucket_it it, bucket_it end, key_it_type key) :
     m_key_it(key), m_bucket_it(it), m_bucket_end(end)
   {
     /// Initialize the before it iterator for the first bucket.
@@ -39,8 +40,14 @@ public:
     goto_next_bucket();
   }
 
+  /// \brief Construct the end iterator
   unordered_set_iterator(bucket_it it) :
     m_bucket_it(it)
+  {}
+
+  /// \brief Construct an iterator over the keys in a bucket.
+  unordered_set_iterator(key_it_type it) :
+    m_key_it(it)
   {}
 
   unordered_set_iterator& operator++()
@@ -74,18 +81,12 @@ public:
   }
 
   /// \returns A reference to the before key iterator.
-  key_it& get_key_before_it() { return m_key_before_it; }
+  key_it_type& key_before_it() { return m_key_before_it; }
 
   /// \returns A reference to the key iterator.
-  key_it& get_key_it() { return m_key_it; }
+  key_it_type& key_it() { return m_key_it; }
 
-  /// \brief Will only increment the key iterator, but not the before key it.
-  void increment_key_it()
-  {
-    ++m_key_it;
-  }
-
-  Bucket& get_bucket() { return *m_bucket_it; }
+  Bucket& bucket() { return *m_bucket_it; }
 
   /// \brief Iterate to the next non-empty bucket.
   void goto_next_bucket()
@@ -113,9 +114,9 @@ public:
   }
 
 private:
-  key_it m_key_before_it;
-  key_it m_key_it;
-  key_it m_key_end;
+  key_it_type m_key_before_it;
+  key_it_type m_key_it;
+  key_it_type m_key_end;
   bucket_it m_bucket_it;
   bucket_it m_bucket_end;
 };
