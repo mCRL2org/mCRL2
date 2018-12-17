@@ -5,9 +5,10 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
+//
 
-#ifndef CLHTPP_DETAIL_UTILITY_H_
-#define CLHTPP_DETAIL_UTILITY_H_
+#ifndef MCRL2_UTILITY_POWER_OF_TWO_H_
+#define MCRL2_UTILITY_POWER_OF_TWO_H_
 
 #include <cassert>
 #include <cstddef>
@@ -18,15 +19,13 @@ namespace mcrl2
 {
 namespace utilities
 {
-namespace detail
-{
 
 /// \returns True when the given value is a power of two.
 template<typename T,
          typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
 static constexpr bool is_power_of_two(T value)
 {
-  // It is a power of two whenever only a single bit is one or every bit is zero.
+  // It is a power of two whenever exactly a single bit is one.
   return value != 0 && (value & (value - 1)) == 0;
 }
 
@@ -43,9 +42,6 @@ static T round_up_to_power_of_two(T value)
     return 1;
   }
 
-  // To make sure that a power of two will remain the same.
-  --value;
-
   // This for loop essentially sets all bits to the right of a bit that is equal
   // to one to all being ones, i.e. 0x0...010...0 becomes 0x0...011...1.
   for(T i = 1; i < sizeof(T) * std::numeric_limits<unsigned char>::digits; i *= 2) {
@@ -58,8 +54,7 @@ static T round_up_to_power_of_two(T value)
   return value + 1;
 }
 
-} // namespace detail
 } // namespace utilities
 } // namespace mcrl2`
 
-#endif // CLHTPP_DETAIL_UTILITY_H_
+#endif // MCRL2_UTILITY_POWER_OF_TWO_H_

@@ -12,7 +12,7 @@
 #include "mcrl2/utilities/unordered_set_iterator.h"
 
 #include "mcrl2/utilities/detail/bucket.h"
-#include "mcrl2/utilities/detail/utility.h"
+#include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/spinlock.h"
 
 #include <array>
@@ -50,7 +50,7 @@ public:
   }
 
   unordered_set(std::size_t number_of_elements) :
-    m_buckets(detail::round_up_to_power_of_two(number_of_elements))
+    m_buckets(round_up_to_power_of_two(number_of_elements))
   {
     m_buckets_mask = m_buckets.size() - 1;
   }

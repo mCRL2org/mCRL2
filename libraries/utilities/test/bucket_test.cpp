@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Maurice Laveaux
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file file_utility_test.cpp
-/// \brief Add your file description here.
 
 #include "mcrl2/utilities/detail/bucket.h"
 #include <boost/test/included/unit_test_framework.hpp>
@@ -47,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_list)
   std::size_t count = 10;
   for (Bucket::iterator it = list.before_begin(); it != list.end();)
   {
-    it = list.erase_after(it, allocator);
+    it = list.erase_after(list.before_begin(), allocator);
     --count;
     if (count == 0)
     {
@@ -56,6 +54,14 @@ BOOST_AUTO_TEST_CASE(test_list)
   }
 
   BOOST_CHECK(length(list) == 90);
+
+  /// Clean up the remaining nodes.
+  for (Bucket::iterator it = list.before_begin(); it != list.end();)
+  {
+    it = list.erase_after(list.before_begin(), allocator);
+  }
+
+  BOOST_CHECK(length(list) == 0);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])

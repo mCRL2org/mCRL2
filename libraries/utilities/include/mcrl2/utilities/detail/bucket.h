@@ -14,6 +14,7 @@
 #include <atomic>
 #include <cstddef>
 #include <vector>
+#include <forward_list>
 
 namespace mcrl2
 {
@@ -102,21 +103,21 @@ public:
       return *this;
     }
 
-    template<bool _Constant = Constant>
-    typename std::enable_if<!_Constant, reference>::type operator*()
+    template<bool Constant_ = Constant>
+    typename std::enable_if<!Constant_, reference>::type operator*()
     {
       return m_bucket_node->key();
     }
 
-    template<bool _Constant = Constant>
-    typename std::enable_if<_Constant, reference>::type operator*() const
+    template<bool Constant_ = Constant>
+    typename std::enable_if<Constant_, reference>::type operator*() const
     {
       return m_bucket_node->key();
     }
 
-    bool operator!=(const key_iterator&)
+    bool operator != (const key_iterator& it)
     {
-      return m_bucket_node != nullptr;
+      return m_bucket_node != it.m_bucket_node;
     }
 
     node* get_node() const noexcept
@@ -156,21 +157,23 @@ public:
     m_head.next(node);
   }
 
-  /// \brief Removes the element after the given iterator from the list, keeps
-  ///        the iterator the same.
-  iterator& erase_after(iterator& it, NodeAllocator& allocator)
+  /// \brief Removes the element after the given iterator from the list. The returned iterator
+  iterator erase_after(iterator it, NodeAllocator& allocator)
   {
     node* current_node = it.get_node();
     assert(current_node->next() != nullptr); // Cannot erase after the last node.
 
-    // Clean up the old node at the next element.
-    node* old_node = reinterpret_cast<node*>(current_node->next());
+    // Keep track of the node that we should remove.
+    node* erased_node = reinterpret_cast<node*>(current_node->next());
+    node* next_node = reinterpret_cast<node*>(erased_node->next());
 
-    // Change the next of this node to the element that we should point to.
-    current_node->next(old_node->next());
-    allocator.destroy(old_node);
-    allocator.deallocate(old_node, 1);
-    return it;
+    // Clean up the old node.
+    allocator.destroy(erased_node);
+    allocator.deallocate(erased_node, 1);
+
+    // Update the next pointer of the current node.
+    current_node->next(next_node);
+    return iterator(next_node);
   }
 
   const node_base* head() const noexcept { return &m_head; }
