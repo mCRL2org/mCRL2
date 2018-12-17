@@ -1346,6 +1346,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_pos::is_pos_predecessor_application(x))
     {
+      
+      // derived.apply(  Maak een term en print die. 
       derived().print("(");
       derived().apply(sort_pos::arg(x));
       derived().print(" - 1)");
