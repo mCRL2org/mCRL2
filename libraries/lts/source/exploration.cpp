@@ -172,8 +172,8 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
 
   // Replace all constant expressions t in a specification by a variable x, and set base_substitution(x)=u where u is the normal form of t.
   // This avoids having to rewrite the constant expressions each time they are encountered. This typically saves more than 50% of the total
-  // time to generate a state space. 
-  data::mutable_indexed_substitution<> base_substitution;  // This is the substitution used as base in the state space generation. 
+  // time to generate a state space.
+  data::mutable_indexed_substitution<> base_substitution;  // This is the substitution used as base in the state space generation.
   move_constants_to_substitution(specification, rewriter, base_substitution);
 
   stochastic_action_summand_vector prioritised_summands;
@@ -261,7 +261,7 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
       }
     }
   }
-  m_generator = new next_state_generator(specification, rewriter, base_substitution, m_options.use_enumeration_caching, m_options.use_summand_pruning);  
+  m_generator = new next_state_generator(specification, rewriter, base_substitution, m_options.use_enumeration_caching, m_options.use_summand_pruning);
 
   if (m_use_confluence_reduction)
   {
@@ -791,9 +791,13 @@ void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_g
     }
     filename = filename + ".trc";
     if (save_trace(state, transition, filename))
+    {
       mCRL2log(info) << " and saved to '" << filename << "'";
+    }
     else
+    {
       mCRL2log(info) << " but it could not saved to '" << filename << "'";
+    }
   }
   mCRL2log(info) << std::endl;
 }
