@@ -219,7 +219,7 @@ public:
 
   bool contains_state(const pbes_system::propositional_variable_instantiation& state) const
   {
-    return m_var.name() == state.name() && m_dm.rewr(application(m_char_func, state.parameters())) == sort_bool::true_();
+    return m_var.name() == state.name() && (state.parameters().empty() || m_dm.rewr(application(m_char_func, state.parameters())) == sort_bool::true_());
   }
 
   bool operator==(const subblock& other) const
