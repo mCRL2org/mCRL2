@@ -93,12 +93,25 @@ class data_specification: public sort_specification
       template <typename Container>
       void group_functions_by_target_sort(std::map<sort_expression, std::vector<function_symbol> >& c, const Container& functions)
       {
-        for (typename Container::const_iterator i = functions.begin(); i != functions.end(); ++i)
+        for (const function_symbol& f: functions)
         {
-          sort_expression index_sort(i->sort().target_sort());
-          if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), *i) == c[index_sort].end())
+          const sort_expression s=f.sort();
+          const sort_expression& index_sort = s.target_sort();
+          if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), f) == c[index_sort].end())
           {
-            c[index_sort].push_back(*i);
+            // Insert the constructors, such that those with the smallest number of elements occur first.
+            // As there are in general only few constructors, this linear insertion should not take too much time. 
+            std::vector<function_symbol>& relevant_rhs = c[index_sort]; // .push_back(f);
+            const std::size_t f_arity=(is_function_sort(s)?atermpp::down_cast<function_sort>(s).size():0);
+            std::vector<function_symbol>::iterator i=
+                   std::find_if(relevant_rhs.begin(), 
+                                relevant_rhs.end(),
+                                [f_arity](const function_symbol& g)
+                                          { const std::size_t g_arity=(is_function_sort(g.sort())?
+                                                                atermpp::down_cast<function_sort>(g.sort()).size():0);
+                                            return f_arity<g_arity;
+                                          });
+            relevant_rhs.insert(i,f);
           }
         }
       }
