@@ -56,7 +56,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == function_update_name();
+          return atermpp::down_cast<function_symbol>(e).name() == function_update_name();
         }
         return false;
       }

@@ -88,7 +88,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == c1();
+          return atermpp::down_cast<function_symbol>(e) == c1();
         }
         return false;
       }
@@ -120,7 +120,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == cdub();
+          return atermpp::down_cast<function_symbol>(e) == cdub();
         }
         return false;
       }
@@ -188,7 +188,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == maximum();
+          return atermpp::down_cast<function_symbol>(e) == maximum();
         }
         return false;
       }
@@ -245,7 +245,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == minimum();
+          return atermpp::down_cast<function_symbol>(e) == minimum();
         }
         return false;
       }
@@ -302,7 +302,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == succ();
+          return atermpp::down_cast<function_symbol>(e) == succ();
         }
         return false;
       }
@@ -358,7 +358,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == pos_predecessor();
+          return atermpp::down_cast<function_symbol>(e) == pos_predecessor();
         }
         return false;
       }
@@ -414,7 +414,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == plus();
+          return atermpp::down_cast<function_symbol>(e) == plus();
         }
         return false;
       }
@@ -471,7 +471,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == add_with_carry();
+          return atermpp::down_cast<function_symbol>(e) == add_with_carry();
         }
         return false;
       }
@@ -529,7 +529,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == times();
+          return atermpp::down_cast<function_symbol>(e) == times();
         }
         return false;
       }
@@ -586,7 +586,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == powerlog2_pos();
+          return atermpp::down_cast<function_symbol>(e) == powerlog2_pos();
         }
         return false;
       }

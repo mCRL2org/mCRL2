@@ -88,7 +88,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == constructor_name();
+          return atermpp::down_cast<function_symbol>(e).name() == constructor_name();
         }
         return false;
       }
@@ -156,7 +156,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == bag_fbag_name();
+          return atermpp::down_cast<function_symbol>(e).name() == bag_fbag_name();
         }
         return false;
       }
@@ -212,7 +212,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == bag_comprehension_name();
+          return atermpp::down_cast<function_symbol>(e).name() == bag_comprehension_name();
         }
         return false;
       }
@@ -267,7 +267,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == count_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
@@ -324,7 +324,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == in_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
@@ -402,7 +402,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == union_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
@@ -480,7 +480,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == intersection_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
@@ -558,7 +558,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == difference_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
@@ -616,7 +616,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == bag2set_name();
+          return atermpp::down_cast<function_symbol>(e).name() == bag2set_name();
         }
         return false;
       }
@@ -672,7 +672,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == set2bag_name();
+          return atermpp::down_cast<function_symbol>(e).name() == set2bag_name();
         }
         return false;
       }
@@ -728,7 +728,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == zero_function_name();
+          return atermpp::down_cast<function_symbol>(e).name() == zero_function_name();
         }
         return false;
       }
@@ -784,7 +784,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == one_function_name();
+          return atermpp::down_cast<function_symbol>(e).name() == one_function_name();
         }
         return false;
       }
@@ -840,7 +840,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == add_function_name();
+          return atermpp::down_cast<function_symbol>(e).name() == add_function_name();
         }
         return false;
       }
@@ -897,7 +897,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == min_function_name();
+          return atermpp::down_cast<function_symbol>(e).name() == min_function_name();
         }
         return false;
       }
@@ -954,7 +954,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == monus_function_name();
+          return atermpp::down_cast<function_symbol>(e).name() == monus_function_name();
         }
         return false;
       }
@@ -1011,7 +1011,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == nat2bool_function_name();
+          return atermpp::down_cast<function_symbol>(e).name() == nat2bool_function_name();
         }
         return false;
       }
@@ -1067,7 +1067,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e).name() == bool2nat_function_name();
+          return atermpp::down_cast<function_symbol>(e).name() == bool2nat_function_name();
         }
         return false;
       }

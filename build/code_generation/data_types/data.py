@@ -487,7 +487,7 @@ ${cases}
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e)${getnamef} == ${functionname}${getname}();
+          return atermpp::down_cast<function_symbol>(e)${getnamef} == ${functionname}${getname}();
         }
         return false;
       }
@@ -510,7 +510,7 @@ ${cases}
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == ${functionname}_name()${condition};
         }
         return false;
