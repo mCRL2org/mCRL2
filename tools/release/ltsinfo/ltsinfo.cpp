@@ -187,12 +187,12 @@ class ltsinfo_tool : public ltsinfo_base
       std::uint64_t min = branching_factor.front();
       std::uint64_t max = branching_factor.back();
 
-      double median = branching_factor[branching_factor.size() / 2];
+      double median = static_cast<double>(branching_factor[branching_factor.size() / 2]);
       if (is_even(branching_factor.size()))
       {
         // For even number of observations is even we average the observations left and right of the middle,
         // because indices start at zero the left observation is located at n / 2 - 1.
-        median = (branching_factor[branching_factor.size() / 2 - 1] + branching_factor[branching_factor.size() / 2]) / 2;
+        median = static_cast<double>(branching_factor[branching_factor.size() / 2 - 1] + branching_factor[branching_factor.size() / 2]) / 2.0;
       }
 
       // Calculate the average, (sum i from zero to n of i) divided by n or equivalently sum i from zero to n of i/n.
