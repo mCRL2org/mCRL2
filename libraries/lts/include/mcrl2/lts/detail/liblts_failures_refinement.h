@@ -296,15 +296,10 @@ void report_statistics(refinement_statistics<T>& stats)
 ///         lts and the second value indicate whether this state in equal to lts.initial_state.
 template<typename LTS_TYPE>
 std::pair<std::size_t, bool> reduce(LTS_TYPE& lts,
-            const refinement_type refinement,
             const bool weak_reduction,
+            const bool preserve_divergence,
             std::size_t init)
 {
-  // For weak-failures and failures-divergence, the existence of tau loops make a difference.
-  // Therefore, we apply bisimulation reduction preserving divergences.
-  // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
-  // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
-  const bool preserve_divergence = weak_reduction && (refinement != trace);
   lts.clear_state_labels();
   if (weak_reduction)
   {
@@ -342,10 +337,16 @@ bool destructive_refinement_checker(
 {
   assert(strategy == exploration_strategy::es_breadth || strategy == exploration_strategy::es_depth); // Need a valid strategy.
 
+  // For weak-failures and failures-divergence, the existence of tau loops make a difference.
+  // Therefore, we apply bisimulation reduction preserving divergences.
+  // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
+  // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
+  const bool preserve_divergence = weak_reduction && (refinement != trace);
+
   if (!generate_counter_example.is_dummy())
   {
     // Counter example is requested, apply bisimulation to l2.
-    reduce(l2, refinement, weak_reduction, l2.initial_state());
+    reduce(l2, weak_reduction, preserve_divergence, l2.initial_state());
   }
 
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -356,11 +357,16 @@ bool destructive_refinement_checker(
   {
     // No counter example is requested. We can use bisimulation preprocessing.
     bool initial_equal = false;
-    std::tie(init_l2, initial_equal) = reduce(l1, refinement, weak_reduction, init_l2);
+    std::tie(init_l2, initial_equal) = reduce(l1, weak_reduction, preserve_divergence, init_l2);
 
     if (initial_equal && weak_reduction)
     {
-      mCRL2log(log::verbose) << "Both LTSs are (divergence-preserving) branching bisimular, so no need to check refinement relation.\n";
+      mCRL2log(log::verbose) << "Both LTSs are";
+      if (preserve_divergence)
+      {
+        mCRL2log(log::verbose) << " divergence-preserving";
+      }
+      mCRL2log(log::verbose) << " branching bisimular, so no need to check refinement relation.\n";
       return true;
     }
   }
