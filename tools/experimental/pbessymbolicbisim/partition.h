@@ -245,7 +245,7 @@ protected:
    * \param only_check_proof_blocks Set to true when reachability should only be checked
    * within m_proof_blocks
    */
-  void find_reachable_blocks(const bool& only_check_proof_blocks)
+  void find_reachable_blocks(const bool only_check_proof_blocks)
   {
     std::list<block_t> unreachable(m_proof_blocks.begin(),m_proof_blocks.end());
     if(!only_check_proof_blocks)
@@ -362,7 +362,7 @@ protected:
    * \brief Print the current partition to stdout
    */
   template <typename Container>
-  void print_partition(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr)
+  void print_partition(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr) const
   {
     int i = 0;
     for(const block_t& block: blocks)
@@ -438,14 +438,9 @@ public:
     print_partition(m_proof_blocks);
   }
 
-  std::list< block_t > get_proof_blocks()
+  std::size_t size() const
   {
-    return m_proof_blocks;
-  }
-
-  std::list< block_t > get_other_blocks()
-  {
-    return m_other_blocks;
+    return m_proof_blocks.size() + m_other_blocks.size();
   }
 
   void set_proof(const std::set< sg_index_t >& proof_nodes)
@@ -471,7 +466,7 @@ public:
     }
   }
 
-  void print()
+  void print() const
   {
     mCRL2log(log::verbose) << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
     print_partition(m_proof_blocks);

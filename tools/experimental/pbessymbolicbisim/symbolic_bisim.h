@@ -116,7 +116,7 @@ public:
         num_iterations++;
         mCRL2log(log::status) << "End of iteration " << num_iterations << ", " << (latest_solution ? "positive" : "negative")
          << " proof graph has size " << proof_graph.size()
-         << ", total amount of blocks " << (m_partition.get_proof_blocks().size() + m_partition.get_other_blocks().size()) << "\n";
+         << ", total amount of blocks " << (m_partition.size()) << "\n";
       } while(!m_partition.refine_n_steps(m_num_refine_steps, latest_solution));
       mCRL2log(log::info) << "Partition refinement completed in " <<
           std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
@@ -129,7 +129,7 @@ public:
 
       latest_solution = pbes_system::solve_structure_graph(m_structure_graph);
 
-      mCRL2log(log::status) << "Amount of blocks " << m_partition.get_proof_blocks().size() << "\n";
+      mCRL2log(log::status) << "Amount of blocks " << m_partition.size() << "\n";
       mCRL2log(log::info) << "Partition refinement completed in " <<
           std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
           " seconds.\n" << std::endl;
