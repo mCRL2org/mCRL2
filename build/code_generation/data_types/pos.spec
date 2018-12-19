@@ -41,53 +41,53 @@ var  b: Bool;
      w1: @word;
      w2: @word;
 eqn  @c1 = @most_significant_digit(@one_word);
-     @succ_pos(p) = succ(p);
-     succ(@most_significant_digit(w1)) = if(==(w1,@max_word),
+     succ(p) = @succ_pos(p);
+     @succ_pos(@most_significant_digit(w1)) = if(@equal(w1,@max_word),
                                               @concat_digit(@most_significant_digit(@one_word),@zero_word),
                                               @most_significant_digit(@succ_word(w1)));
-     succ(@concat_digit(p,w1)) = if(==(w1,@max_word),
-                                             @concat_digit(succ(p),@zero_word),
+     @succ_pos(@concat_digit(p,w1)) = if(@equal(w1,@max_word),
+                                             @concat_digit(@succ_pos(p),@zero_word),
                                              @concat_digit(p,@succ_word(w1)));
  
 % The rules for comparison operators must be explicitly be defined on succ (= @succ_pos) to allow enumeration of positive numbers.
-     ==(@most_significant_digit(w1),@most_significant_digit(w2)) = ==(w1,w2);
+     ==(@most_significant_digit(w1),@most_significant_digit(w2)) = @equal(w1,w2);
      ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
      ==(@most_significant_digit(w1),@concat_digit(p,w2)) = false;
-     ==(@concat_digit(p1,w1),@concat_digit(p2,w2)) = &&(==(p1,p2), ==(w1,w2));
-     ==(succ(p1),p2) = &&(!(==(p2,@most_significant_digit(@one_word))),==(p1,@pospred(p2)));
-     ==(p1, succ(p2)) = &&(!(==(p1,@most_significant_digit(@one_word))),==(@pospred(p1),p2));
+     ==(@concat_digit(p1,w1),@concat_digit(p2,w2)) = &&(@equal(w1,w2),==(p1,p2));
+     ==(@succ_pos(p1),p2) = &&(!(==(p2,@most_significant_digit(@one_word))),==(p1,@pospred(p2)));
+     ==(p1, @succ_pos(p2)) = &&(!(==(p1,@most_significant_digit(@one_word))),==(@pospred(p1),p2));
  
-     <(@most_significant_digit(w1),@most_significant_digit(w2)) = <(w1,w2);
+     <(@most_significant_digit(w1),@most_significant_digit(w2)) = @less(w1,w2);
      <(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
      <(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
-     <(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<(w1,w2),<=(p1,p2),<(p1,p2));
-     <(succ(p1),p2) = &&(<(@most_significant_digit(@two_word),p2),<(p1,@pospred(p2)));
-     <(p1, succ(p2)) = <=(p1,p2);
-     ==(w1,@one_word) ->  <(p,@most_significant_digit(w1)) = false;
+     <(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(@less(w1,w2),<=(p1,p2),<(p1,p2));
+     <(@succ_pos(p1),p2) = &&(<(@most_significant_digit(@two_word),p2),<(p1,@pospred(p2)));
+     <(p1, @succ_pos(p2)) = <=(p1,p2);
+     @equal(w1,@one_word) ->  <(p,@most_significant_digit(w1)) = false;
  
-     <=(@most_significant_digit(w1),@most_significant_digit(w2)) = <=(w1,w2);
+     <=(@most_significant_digit(w1),@most_significant_digit(w2)) = @lessequal(w1,w2);
      <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
      <=(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
-     <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(<=(w1,w2),<=(p1,p2),<(p1,p2));
-     <=(succ(p1),p2) = <(p1,p2);
-     <=(p1, succ(p2)) = ||(==(p1,@most_significant_digit(@one_word)),<=(@pospred(p1),p2));
-     ==(w1,@one_word) ->  <=(@most_significant_digit(w1), p) = true;
+     <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(@lessequal(w1,w2),<=(p1,p2),<(p1,p2));
+     <=(@succ_pos(p1),p2) = <(p1,p2);
+     <=(p1, @succ_pos(p2)) = ||(==(p1,@most_significant_digit(@one_word)),<=(@pospred(p1),p2));
+     @equal(w1,@one_word) ->  <=(@most_significant_digit(w1), p) = true;
  
      max(p1,p2) = if(<=(p1,p2),p2,p1);
      min(p1,p2) = if(<=(p1,p2),p1,p2);
 
-     @pospred(@most_significant_digit(w1)) = if(==(w1,@one_word),
+     @pospred(@most_significant_digit(w1)) = if(@equal(w1,@one_word),
                                                          @most_significant_digit(@one_word),
                                                          @most_significant_digit(@pred_word(w1)));
-     @pospred(@concat_digit(p,w1)) = if(==(w1,@zero_word),
+     @pospred(@concat_digit(p,w1)) = if(@equal(w1,@zero_word),
                                             if(==(p,@most_significant_digit(@one_word)),
                                                          @most_significant_digit(@max_word),
                                                          @concat_digit(@pospred(p),@max_word)),
                                             @concat_digit(p,@pred_word(w1)));
-     @pospred(succ(p)) = p;
+     @pospred(@succ_pos(p)) = p;
 
      +(@most_significant_digit(w1),@most_significant_digit(w2)) =
-                                     if(==(@add_overflow_word(w1,w2),@zero_word),
+                                     if(@equal(@add_overflow_word(w1,w2),@zero_word),
                                                     @most_significant_digit(@add_word(w1,w2)),
                                                     @concat_digit(@most_significant_digit(@one_word),(@add_word(w1,w2))));
      +(@concat_digit(p1,w1),@most_significant_digit(w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)),p1),
@@ -97,8 +97,8 @@ eqn  @c1 = @most_significant_digit(@one_word);
      +(@concat_digit(p1,w1),@concat_digit(p2,w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)), +(p1,p2)),
                                                                        @add_word(w1,w2));
 % The rules below are useful in solving expressions with plus and quantifiers.
-     +(succ(p1),p2) = succ(+(p1,p2));
-     +(p1,succ(p2)) = succ(+(p1,p2));
+     +(@succ_pos(p1),p2) = @succ_pos(+(p1,p2));
+     +(p1,@succ_pos(p2)) = @succ_pos(+(p1,p2));
 
      @plus_pos(p1,p2) = +(p1,p2);
 
@@ -114,7 +114,7 @@ eqn  @c1 = @most_significant_digit(@one_word);
      *(@most_significant_digit(w1),@most_significant_digit(w2)) =
                 @times_whr_mult_overflow(@times_word(w1,w2),@times_overflow_word(w1,w2));
 
-     @times_whr_mult_overflow(w1,w2) = if(==(w2,@zero_word),
+     @times_whr_mult_overflow(w1,w2) = if(@equal(w2,@zero_word),
                                               @most_significant_digit(w1),
                                               @concat_digit(@most_significant_digit(w2),w1));
  

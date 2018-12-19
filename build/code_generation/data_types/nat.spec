@@ -120,43 +120,43 @@ var  b:Bool;
      overflow:@word;
 
 eqn  @c0 = @most_significant_digitNat(@zero_word);
-      @succ_nat(@most_significant_digitNat(w)) = if(==(w,@max_word),
+      @succ_nat(@most_significant_digitNat(w)) = if(@equal(w,@max_word),
                                                      @concat_digit(@most_significant_digitNat(@one_word),@zero_word),
                                                      @most_significant_digitNat(@succ_word(w)));
-      @succ_nat(@concat_digit(n,w)) = if(==(w,@max_word),
+      @succ_nat(@concat_digit(n,w)) = if(@equal(w,@max_word),
                                             @concat_digit(@succ_nat(n),@zero_word),
                                             @concat_digit(n,@succ_word(w)));
  
-      succ(@most_significant_digitNat(w)) = if(==(w,@max_word),
+      succ(@most_significant_digitNat(w)) = if(@equal(w,@max_word),
                                                      @concat_digit(@most_significant_digit(@one_word),@zero_word),
                                                      @most_significant_digit(@succ_word(w)));
-      succ(@concat_digit(n,w)) = if(==(w,@max_word),
+      succ(@concat_digit(n,w)) = if(@equal(w,@max_word),
                                             @concat_digit(succ(n),@zero_word),
                                             @concat_digit(Nat2Pos(n),@succ_word(w)));
  
 % The rules for comparison operators in conjunction with @succ_nat are required in enumerations. 
-      ==(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = ==(w1,w2);
+      ==(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = @equal(w1,w2);
       ==(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
       ==(@most_significant_digitNat(w1),@concat_digit(n,w2)) = false;
-      ==(@concat_digit(n1,w1), @concat_digit(n2,w2)) = &&(==(w1,w2), ==(n1,n2));
+      ==(@concat_digit(n1,w1), @concat_digit(n2,w2)) = &&(@equal(w1,w2), ==(n1,n2));
       ==(@succ_nat(n1),n2) = &&(!(==(n2,@most_significant_digitNat(@zero_word))),==(n1,@natpred(n2)));
       ==(n1, @succ_nat(n2)) = &&(!(==(n1,@most_significant_digitNat(@zero_word))),==(@natpred(n1),n2));
  
-      <(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <(w1,w2);
+      <(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = @less(w1,w2);
       <(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
       <(@most_significant_digitNat(w1),@concat_digit(n,w2)) = true;
-      <(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<(w1,w2),<=(n1,n2),<(n1,n2));
+      <(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(@less(w1,w2),<=(n1,n2),<(n1,n2));
       <(@succ_nat(n1),n2) = &&(<(@most_significant_digitNat(@one_word),n2),<(n1,@natpred(n2)));
       <(n1, @succ_nat(n2)) = <=(n1,n2);
-      ==(w1,@zero_word) ->  <(n,@most_significant_digitNat(w1)) = false;
+      @equal(w1,@zero_word) ->  <(n,@most_significant_digitNat(w1)) = false;
  
-      <=(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = <=(w1,w2);
+      <=(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = @lessequal(w1,w2);
       <=(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
       <=(@most_significant_digitNat(w1),@concat_digit(n,w2)) = true;
       <=(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<=(w1,w2),<=(n1,n2),<(n1,n2));
       <=(@succ_nat(n1),n2) = <(n1,n2);
       <=(n1, @succ_nat(n2)) = <=(@natpred(n1),n2);
-      ==(w1,@zero_word) ->  <=(@most_significant_digitNat(w1), n) = true;
+      @equal(w1,@zero_word) ->  <=(@most_significant_digitNat(w1), n) = true;
  
      Pos2Nat(@most_significant_digit(w)) = @most_significant_digitNat(w);
      Pos2Nat(@concat_digit(p,w)) = @concat_digit(Pos2Nat(p),w);
@@ -169,7 +169,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      max(m,n) = if(<=(m,n),n,m);
      min(m,n) = if(<=(m,n),m,n);
      pred(@most_significant_digit(w)) = @most_significant_digitNat(@pred_word(w));
-     pred(@concat_digit(p,w)) = if(==(w,@zero_word),
+     pred(@concat_digit(p,w)) = if(@equal(w,@zero_word),
                                    @pred_whr(pred(p)),
                                    @concat_digit(Pos2Nat(p),@pred_word(w)));
      @pred_whr(predp) = if(==(predp,@most_significant_digitNat(@zero_word)),
@@ -178,7 +178,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
      +(p,n) = +(n,p);
      +(@most_significant_digitNat(w1),@most_significant_digit(w2)) =
-                                     if(==(@add_overflow_word(w1,w2),@zero_word),
+                                     if(@equal(@add_overflow_word(w1,w2),@zero_word),
                                                  @most_significant_digit(@add_word(w1,w2)),
                                                  @concat_digit(@most_significant_digit(@one_word),@add_word(w1,w2)));
      +(@concat_digit(n1,w1),@most_significant_digit(w2)) = @concat_digit(
@@ -193,7 +193,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
 
      +(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
-                                     if(==(@add_overflow_word(w1,w2),@zero_word),
+                                     if(@equal(@add_overflow_word(w1,w2),@zero_word),
                                                  @most_significant_digitNat(@add_word(w1,w2)),
                                                  @concat_digit(@most_significant_digitNat(@one_word),@add_word(w1,w2)));
      +(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = @concat_digit(
@@ -211,8 +211,8 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
      @plus_nat(n1,n2) = +(n1,n2);
  
-     @natpred(@most_significant_digitNat(w)) = if(==(w,@zero_word), @most_significant_digitNat(@zero_word), @most_significant_digitNat(@pred_word(w)));
-     @natpred(@concat_digit(n,w)) = if(==(w,@zero_word),
+     @natpred(@most_significant_digitNat(w)) = if(@equal(w,@zero_word), @most_significant_digitNat(@zero_word), @most_significant_digitNat(@pred_word(w)));
+     @natpred(@concat_digit(n,w)) = if(@equal(w,@zero_word),
                                        if(==(n,@most_significant_digitNat(@one_word)),
                                                @most_significant_digitNat(@max_word),
                                                @concat_digit(@natpred(n),@max_word)),
@@ -222,17 +222,17 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
 
      @monus(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
-                                              if(<(w1,w2),
+                                              if(@less(w1,w2),
                                                     @most_significant_digitNat(@zero_word),
                                                     @most_significant_digitNat(@minus_word(w1,w2)));
-     @monus(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = if(<(w1,w2),
+     @monus(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = if(@less(w1,w2),
                                                                       if(==(n1,@most_significant_digitNat(@one_word)),
                                                                                @most_significant_digitNat(@minus_word(w1,w2)),
                                                                                @concat_digit(@natpred(n1),@minus_word(w1,w2))),
                                                                       @concat_digit(n1,@minus_word(w1,w2)));
      @monus(@most_significant_digitNat(w1),@concat_digit(n2,w2)) = @most_significant_digitNat(@zero_word);
      @monus(@concat_digit(n1,w1),@concat_digit(n2,w2)) = @monus_whr(n1,w1,n2,w2,@monus(n1,n2));
-     @monus_whr(n1,w1,n2,w2,diff) = if(<(w1,w2),
+     @monus_whr(n1,w1,n2,w2,diff) = if(@less(w1,w2),
                                         if(==(diff,@most_significant_digitNat(@zero_word)),
                                                @most_significant_digitNat(@zero_word),
                                                if(==(diff,@most_significant_digitNat(@one_word)),
@@ -243,20 +243,20 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                                @concat_digit(diff,@minus_word(w1,w2))));
 
      *(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
-                           if(==(@times_overflow_word(w1,w2),@zero_word),
+                           if(@equal(@times_overflow_word(w1,w2),@zero_word),
                                      @most_significant_digitNat(@times_word(w1,w2)),
                                      @concat_digit(@most_significant_digitNat(@times_overflow_word(w1,w2)),@times_word(w1,w2)));
      *(@concat_digit(n1,w1),@most_significant_digitNat(w2)) =
-                           if(==(w2,@zero_word),
+                           if(@equal(w2,@zero_word),
                                 @most_significant_digitNat(@zero_word),
-                                if(==(@times_overflow_word(w1,w2),@zero_word),
+                                if(@equal(@times_overflow_word(w1,w2),@zero_word),
                                      @concat_digit(*(n1,@most_significant_digitNat(w2)), @times_word(w1,w2)),
                                      @concat_digit(
                                              +(*(n1,@most_significant_digitNat(w2)),@most_significant_digitNat(@times_overflow_word(w1,w2))),@times_word(w1,w2))));
      *(@most_significant_digitNat(w1),@concat_digit(n2,w2)) =
-                           if(==(w1,@zero_word),
+                           if(@equal(w1,@zero_word),
                                 @most_significant_digitNat(@zero_word),
-                                if(==(@times_overflow_word(w1,w2),@zero_word),
+                                if(@equal(@times_overflow_word(w1,w2),@zero_word),
                                      @concat_digit(*(n2,@most_significant_digitNat(w1)), @times_word(w1,w2)),
                                      @concat_digit(
                                              +(*(n2,@most_significant_digitNat(w1)),@most_significant_digitNat(@times_overflow_word(w1,w2))),@times_word(w1,w2))));
@@ -278,11 +278,11 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      exp(n,@most_significant_digitNat(w)) = @exp_aux3n(@rightmost_bit(w),n,w);
      exp(n,@concat_digit(n1,w1)) = @exp_aux4n(@rightmost_bit(w1),n,n1,w1);
  
-     @exp_aux3n(true,n,w) = if(==(w,@one_word),
+     @exp_aux3n(true,n,w) = if(@equal(w,@one_word),
                                 n,
                                 *(n,@exp_aux3n(@rightmost_bit(@shift_right(false,w)),*(n,n),@shift_right(false,w))));
  
-     @exp_aux3n(false,n,w) = if(==(w,@zero_word),
+     @exp_aux3n(false,n,w) = if(@equal(w,@zero_word),
                                 @most_significant_digitNat(@one_word),
                                 @exp_aux3n(@rightmost_bit(@shift_right(false,w)),*(n,n),@shift_right(false,w)));
  
@@ -301,11 +301,11 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      exp(p,@most_significant_digitNat(w)) = @exp_aux3p(@rightmost_bit(w),p,w);
      exp(p,@concat_digit(n1,w1)) = @exp_aux4p(@rightmost_bit(w1),p,n1,w1);
  
-     @exp_aux3p(true,p,w) = if(==(w,@one_word),
+     @exp_aux3p(true,p,w) = if(@equal(w,@one_word),
                                 p,
                                 *(p,@exp_aux3p(@rightmost_bit(@shift_right(false,w)),*(p,p),@shift_right(false,w))));
                                 
-     @exp_aux3p(false,p,w) = if(==(w,@zero_word),
+     @exp_aux3p(false,p,w) = if(@equal(w,@zero_word),
                                  @most_significant_digit(@one_word),
                                  @exp_aux3p(@rightmost_bit(@shift_right(false,w)),*(p,p),@shift_right(false,w)));
 
@@ -531,14 +531,14 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      sqrt(@concat_digit(@most_significant_digitNat(w1),w2)) = @most_significant_digitNat(@sqrt_doubleword(w1,w2));
      sqrt(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3)) = @sqrt_whr1(w1,w2,w3,@sqrt_tripleword_overflow(w1,w2,w3));
      @sqrt_whr1(w1,w2,w3,overflow) =
-              if (==(overflow,@zero_word),
+              if (@equal(overflow,@zero_word),
                   @most_significant_digitNat(@sqrt_tripleword(w1,w2,w3)),
                   @concat_digit(@most_significant_digitNat(overflow),@sqrt_tripleword(w1,w2,w3)));
 
      sqrt(@concat_digit(@concat_digit(@concat_digit(@most_significant_digitNat(w1),w2),w3),w4)) =
                          @sqrt_whr2(w1,w2,w3,w4,@sqrt_quadrupleword_overflow(w1,w2,w3,w4));
      @sqrt_whr2(w1,w2,w3,w4,overflow) =
-              if (==(overflow,@zero_word),
+              if (@equal(overflow,@zero_word),
                   @most_significant_digitNat(@sqrt_quadrupleword(w1,w2,w3,w4)),
                   @concat_digit(@most_significant_digitNat(overflow),@sqrt_quadrupleword(w1,w2,w3,w4)));
 

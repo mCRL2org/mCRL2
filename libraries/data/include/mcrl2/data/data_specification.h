@@ -368,6 +368,7 @@ class data_specification: public sort_specification
     {
       normalise_data_specification_if_required();
       m_grouped_normalised_constructors.reset(constructors());
+std::cerr << "CONSTRUCTORS " << pp(m_grouped_normalised_constructors.mapping()[normalize_sorts(s,*this)]) << "    " << s << "\n";
       return m_grouped_normalised_constructors.mapping()[normalize_sorts(s,*this)];
     }
 
@@ -1161,11 +1162,11 @@ inline
 std::set<core::identifier_string> function_and_mapping_identifiers(const data_specification& dataspec)
 {
   std::set<core::identifier_string> result;
-  for (auto const& f: dataspec.constructors())
+  for (const function_symbol& f: dataspec.constructors())
   {
     result.insert(f.name());
   }
-  for (auto const& f: dataspec.mappings())
+  for (const function_symbol& f: dataspec.mappings())
   {
     result.insert(f.name());
   }
