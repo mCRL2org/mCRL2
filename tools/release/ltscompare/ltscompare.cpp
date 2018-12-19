@@ -333,10 +333,10 @@ class ltscompare_tool : public ltscompare_base
         }
 
         if (tool_options.preorder != lts_pre_trace_anti_chain
-            || tool_options.preorder != lts_pre_weak_trace_anti_chain
-            || tool_options.preorder != lts_pre_failures_refinement
-            || tool_options.preorder != lts_pre_weak_failures_refinement
-            || tool_options.preorder != lts_pre_failures_divergence_refinement)
+            && tool_options.preorder != lts_pre_weak_trace_anti_chain
+            && tool_options.preorder != lts_pre_failures_refinement
+            && tool_options.preorder != lts_pre_weak_failures_refinement
+            && tool_options.preorder != lts_pre_failures_divergence_refinement)
         {
           throw parser.error("strategy can only be chosen for antichain based algorithms.");
         }
