@@ -35,8 +35,11 @@ public:
   }
 };
 
-/// \brief The pointer to the global aterm pool instance..
-extern global_aterm_pool* g_aterm_pool_instance;
+/// \brief Storage for a global term pool that is not initialized.
+extern typename std::aligned_storage<sizeof(global_aterm_pool), alignof(global_aterm_pool)>::type g_aterm_pool_storage;
+
+/// \brief A reference to the global term pool storage
+static global_aterm_pool& g_aterm_pool_instance = reinterpret_cast<global_aterm_pool&>(g_aterm_pool_storage);
 
 /// \brief Obtain a reference to the global aterm pool.
 /// \param lazy Enable lazy initialization which should be used for instantiating
@@ -46,15 +49,15 @@ inline global_aterm_pool& g_term_pool()
 {
   if (lazy)
   {
-    // Initialize when needed.
-    if (g_aterm_pool_instance == nullptr)
+    static bool initialized = false;
+    if (!initialized)
     {
-      g_aterm_pool_instance = new global_aterm_pool();
+      new (&g_aterm_pool_instance) global_aterm_pool();
+      initialized = true;
     }
   }
 
-  assert(g_aterm_pool_instance != nullptr);
-  return *g_aterm_pool_instance;
+  return g_aterm_pool_instance;
 }
 
 } // namespace detail

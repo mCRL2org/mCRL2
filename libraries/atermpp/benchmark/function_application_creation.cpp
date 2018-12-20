@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     }
   };
 
-  detail::enable_garbage_collection(false);
+  detail::g_term_pool().enable_garbage_collection(false);
   benchmark_threads(number_of_threads, nested_function);
 
   return 0;

@@ -16,7 +16,7 @@ int main(int, char*[])
   std::size_t amount = 1500000;
   std::size_t iterations = 50;
 
-  detail::enable_garbage_collection(false);
+  detail::g_term_pool().enable_garbage_collection(false);
 
   // Keep track of the total time spend on these parts.
   long long creation_time = 0;
@@ -39,7 +39,7 @@ int main(int, char*[])
 
     // Trigger garbage collection.
     stopwatch.reset();
-    detail::collect_terms_with_reference_count_0();
+    detail::g_term_pool().collect();
     garbage_collect_time += stopwatch.time();
   }
 

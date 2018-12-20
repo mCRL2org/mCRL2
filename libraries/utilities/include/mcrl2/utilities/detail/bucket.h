@@ -178,6 +178,9 @@ public:
 
   const node_base* head() const noexcept { return &m_head; }
 
+  /// \brief Empties the bucket list.
+  void clear() { m_head.next(nullptr); }
+
 private:
   /// \brief The first node in the bucket list.
   node_base m_head;
