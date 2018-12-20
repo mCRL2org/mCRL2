@@ -38,11 +38,11 @@ void benchmark_threads(std::size_t number_of_threads, F f)
 
 /// \brief Create a nested function application f_depth. Where f_0 = c and f_i = f(f_i-1,...,f_i-1).
 template<bool with_converter = false>
-aterm_appl create_nested_function(std::string node_name,  std::string leaf_name, std::size_t number_of_arguments, std::size_t depth)
+aterm_appl create_nested_function(const std::string& function_name,  const std::string& leaf_name, std::size_t number_of_arguments, std::size_t depth)
 {
   // Create a suitable function application.
-  function_symbol f("f", number_of_arguments);
-  function_symbol c("c", 0);
+  function_symbol f(function_name, number_of_arguments);
+  function_symbol c(leaf_name, 0);
 
   aterm_appl c_term(c);
 
