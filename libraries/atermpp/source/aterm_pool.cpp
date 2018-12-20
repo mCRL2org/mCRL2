@@ -22,7 +22,7 @@ namespace detail
     m_value(val)
   {}
 
-  global_aterm_pool* g_aterm_pool_instance;
+  typename std::aligned_storage<sizeof(global_aterm_pool), alignof(global_aterm_pool)>::type g_aterm_pool_storage;
 
   aterm g_is_empty_list = aterm_appl(g_as_empty_list);
 }

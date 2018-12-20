@@ -78,6 +78,9 @@ public:
   /// \brief Triggers garbage collection on all storages.
   inline void collect();
 
+  /// \brief Enable garbage collection when passing true and disable otherwise.
+  inline void enable_garbage_collection(bool enable);
+
   /// \brief Creates a integral term with the given value.
   inline aterm create_int(std::size_t val);
 
@@ -160,7 +163,10 @@ private:
   std::size_t m_creation_depth = 0;
 
   /// Defer garbage collection until the creation depth is equal to zero again.
-  bool m_deferred_garbage_collect = false;
+  bool m_deferred_garbage_collection = false;
+
+  /// Enable automatically triggered garbage collection.
+  bool m_enable_garbage_collection = true;
 };
 
 } // namespace detail

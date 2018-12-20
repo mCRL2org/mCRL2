@@ -160,7 +160,10 @@ void aterm_pool::trigger_collection()
   }
   else
   {
-    collect();
+    if (m_enable_garbage_collection)
+    {
+      collect();
+    }
 
     // Use some heuristics to determine when the next collection is called.
     m_countUntilCollection = size();
@@ -169,15 +172,15 @@ void aterm_pool::trigger_collection()
 
 void aterm_pool::collect()
 {
-  auto timestamp = std::chrono::system_clock::now();
-
   if (m_creation_depth > 0)
   {
-    m_deferred_garbage_collect = true;
+    m_deferred_garbage_collection = true;
     return;
   }
 
-  m_deferred_garbage_collect = false;
+  auto timestamp = std::chrono::system_clock::now();
+
+  m_deferred_garbage_collection = false;
   std::size_t old_size = size();
 
   // Marks all terms that are reachable via any reachable term to
@@ -237,6 +240,11 @@ void aterm_pool::collect()
 
   get_symbol_pool().print_performance_stats();
   print_performance_statistics();
+}
+
+void aterm_pool::enable_garbage_collection(bool enable)
+{
+  m_enable_garbage_collection = enable;
 }
 
 aterm aterm_pool::create_int(size_t val)
@@ -337,7 +345,7 @@ aterm aterm_pool::create_appl_dynamic(const function_symbol& sym,
   --m_creation_depth;
 
   // Trigger a deferred garbage collection when it was requested and the term has been protected.
-  if (m_creation_depth == 0 && m_deferred_garbage_collect)
+  if (m_creation_depth == 0 && m_deferred_garbage_collection)
   {
     if (EnableGarbageCollectionMetrics)
     {

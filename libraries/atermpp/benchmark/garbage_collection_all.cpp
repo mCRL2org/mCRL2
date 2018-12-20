@@ -16,7 +16,7 @@ int main(int, char*[])
   std::size_t amount = 1500000;
   std::size_t iterations = 20;
 
-  detail::enable_garbage_collection(false);
+  detail::g_term_pool().enable_garbage_collection(false);
 
   // Keep track of the total time spend on these parts.
   long long creation_time = 0;

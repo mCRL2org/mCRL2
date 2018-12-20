@@ -49,7 +49,7 @@ int main(int, char*[])
 
   };
 
-  detail::enable_garbage_collection(false);
+  detail::g_term_pool().enable_garbage_collection(false);
   benchmark_threads(number_of_threads, create_list);
 
   return 0;
