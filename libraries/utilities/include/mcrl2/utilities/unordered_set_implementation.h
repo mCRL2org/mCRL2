@@ -168,23 +168,36 @@ void MCRL2_UNORDERED_SET_CLASS::resize_if_needed()
 MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::resize()
 {
-  std::vector<Bucket> old_buckets = std::move(m_buckets);
-  m_buckets = std::vector<Bucket>(2 * old_buckets.size());
-  m_buckets_mask = m_buckets.size() - 1;
-  m_number_of_elements = 0;
-
-  // Fill the new set with all elements of the current unordered set.
-  for (auto&& bucket : old_buckets)
+  // Create one bucket list for all elements in the hashtable.
+  Bucket old_keys;
+  for (auto&& bucket : m_buckets)
   {
     for (auto it = bucket.begin(); it != bucket.end();)
     {
-      // Reset the next pointer of the current node, but increment the iterator beforehand.
+      // The insertion will change the current node, which influences the iterator.
       typename Bucket::node* node = it.get_node();
       ++it;
-      node->next(nullptr);
-      insert(node);
+      old_keys.push_front(node);
     }
   }
+
+  std::size_t new_size = m_buckets.size() * 2;
+
+  // Recreate the hash table, but don't move or copy the old elements.
+  m_buckets.clear();
+  m_buckets.resize(2 * new_size);
+  m_buckets_mask = m_buckets.size() - 1;
+
+  // Fill the set with all elements of the previous unordered set.
+  for (auto it = old_keys.begin(); it != old_keys.end(); )
+  {
+    // The insertion will change the current node, which influences the iterator.
+    typename Bucket::node* node = it.get_node();
+    ++it;
+    insert(node);
+  }
+
+  // The number of elements remain the same, so don't change this counter.
 }
 
 #undef MCRL2_UNORDERED_SET_CLASS
