@@ -15,8 +15,8 @@ using namespace atermpp;
 
 int main(int, char*[])
 {
-  std::size_t amount = 200000000;
-  std::size_t iterations = 50000;
+  std::size_t amount = 3000000;
+  std::size_t iterations = 1000;
   std::size_t number_of_threads = 1;
 
   auto create_integers = [amount,iterations,number_of_threads]()
@@ -26,10 +26,14 @@ int main(int, char*[])
 
     for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
     {
-      integers[i] = aterm_int(i);
+      for (std::size_t j = 0; j < amount; ++j)
+      {
+        integers[i] = aterm_int(i);
+      }
     }
   };
 
+  detail::enable_garbage_collection(false);
   benchmark_threads(number_of_threads, create_integers);
 
   return 0;

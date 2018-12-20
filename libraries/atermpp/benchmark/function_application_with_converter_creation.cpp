@@ -14,8 +14,8 @@ using namespace atermpp;
 int main(int argc, char* argv[])
 {
   std::size_t number_of_arguments = 0;
-  std::size_t size = 10000;
-  std::size_t iterations = 10000;
+  std::size_t size = 2000000;
+  std::size_t iterations = 1000;
   std::size_t number_of_threads = 1;
 
   // Accept one argument for the number of arguments.
@@ -30,10 +30,11 @@ int main(int argc, char* argv[])
     aterm_appl f;
     for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
     {
-      f = create_nested_function<true>(number_of_arguments, size);
+      f = create_nested_function<true>("f", "c", number_of_arguments, size / (number_of_arguments + 1));
     }
   };
 
+  detail::enable_garbage_collection(false);
   benchmark_threads(number_of_threads, nested_function);
 
   return 0;

@@ -11,19 +11,19 @@
 
 int main(int, char*[])
 {
-  std::size_t amount = 100000;
+  std::size_t amount = 1500000;
   std::size_t iterations = 20;
 
+  detail::enable_garbage_collection(false);
   for (std::size_t i = 0; i < iterations; ++i)
   {
-    // This block is to ensure that all function applications are protected.
+    // This block is to ensure that they are unprotected when garbage collection is triggered explicitly.
     {
       // Generate various function applications.
-      // TODO: Give them a non-uniform structure.
-      aterm_appl f1 = create_nested_function(1, amount);
-      aterm_appl f2 = create_nested_function(2, amount);
-      aterm_appl f4 = create_nested_function(4, amount);
-      aterm_appl f7 = create_nested_function(7, amount);
+      aterm_appl f1 = create_nested_function("f", "c", 1, 1 * amount);
+      aterm_appl f2 = create_nested_function("g", "d", 2, 4 * amount);
+      aterm_appl f4 = create_nested_function("h", "e", 4, amount/4);
+      aterm_appl f7 = create_nested_function("i", "f", 7, amount/8);
     }
 
     // Trigger garbage collection.

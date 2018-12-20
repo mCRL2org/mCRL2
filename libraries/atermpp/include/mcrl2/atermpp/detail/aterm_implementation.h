@@ -79,6 +79,7 @@ extern std::size_t total_nodes_in_hashtable;
 extern TermInfo *terminfo;
 
 extern std::size_t garbage_collect_count_down;
+extern bool garbage_collect_enabled;
 
 void resize_aterm_hashtable();
 void allocate_block(const std::size_t size);
@@ -173,8 +174,8 @@ inline _aterm* allocate_term(const std::size_t size)
     garbage_collect_count_down--;
   }
 
-  if (garbage_collect_count_down==0 && ti.at_freelist==nullptr) // It is time to collect free terms, and there are
-                                                             // no free terms left.
+  if (garbage_collect_count_down==0 && ti.at_freelist==nullptr && garbage_collect_enabled)
+    // It is time to collect free terms, and there are no free terms left.
   {
     collect_terms_with_reference_count_0();
   }
@@ -191,6 +192,11 @@ inline _aterm* allocate_term(const std::size_t size)
   at->reset_reference_count();
   assert(ti.at_block != nullptr);
   return at;
+}
+
+inline void enable_garbage_collection(bool value)
+{
+  garbage_collect_enabled = value;
 }
 
 inline void remove_from_hashtable(_aterm *t)

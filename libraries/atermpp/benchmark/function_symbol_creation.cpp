@@ -19,7 +19,7 @@ using namespace atermpp;
 /// \brief Benchmark the creation of function symbols
 int main(int, char*[])
 {
-  std::size_t amount = 10000;
+  std::size_t amount = 50000;
   std::size_t iterations = 1000;
   std::size_t number_of_threads = 1;
 

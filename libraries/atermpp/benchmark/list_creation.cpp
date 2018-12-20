@@ -14,7 +14,7 @@ using namespace atermpp;
 
 int main(int, char*[])
 {
-  std::size_t length = 100000;
+  std::size_t length = 1000000;
   std::size_t iterations = 1000;
   std::size_t number_of_threads = 1;
 
@@ -35,6 +35,7 @@ int main(int, char*[])
     }
   };
 
+  detail::enable_garbage_collection(false);
   benchmark_threads(number_of_threads, create_list);
 
   return 0;

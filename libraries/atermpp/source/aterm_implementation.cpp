@@ -97,6 +97,7 @@ _aterm* * aterm_hashtable;
 // The following is not a vector to avoid that it is prematurely destroyed.
 std::size_t terminfo_size=INITIAL_MAX_TERM_SIZE;
 std::size_t garbage_collect_count_down=0;
+bool garbage_collect_enabled=true;
 TermInfo *terminfo;
 
 std::size_t total_nodes_in_hashtable = 0;
