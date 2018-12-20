@@ -109,11 +109,11 @@ private:
   }
 
   /// \brief Inserts a bucket node into the hash table.
+  /// \details Does not increment the m_number_of_elements.
   void insert(typename Bucket::node* node)
   {
     Bucket& bucket = find_bucket(node->key());
     bucket.push_front(node);
-    ++m_number_of_elements;
   }
 
   /// \brief Resizes the hash table if required.
