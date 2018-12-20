@@ -381,7 +381,6 @@ class data_specification: public sort_specification
     {
       normalise_data_specification_if_required();
       m_grouped_normalised_constructors.reset(constructors());
-std::cerr << "CONSTRUCTORS " << pp(m_grouped_normalised_constructors.mapping()[normalize_sorts(s,*this)]) << "    " << s << "\n";
       return m_grouped_normalised_constructors.mapping()[normalize_sorts(s,*this)];
     }
 

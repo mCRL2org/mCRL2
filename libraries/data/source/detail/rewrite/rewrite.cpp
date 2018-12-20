@@ -300,6 +300,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
       const bool t1_is_normal_form,
       substitution_type& sigma)
 {
+// std::cerr << "START EVALUTATING EXISTENTIAL QUANTIFIER\n";
   return quantifier_enumeration(vl, t1, t1_is_normal_form, sigma, exists_binder(), &lazy::or_, sort_bool::false_(), sort_bool::true_());
 }
 
@@ -321,6 +322,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
       const bool t1_is_normal_form,
       substitution_type& sigma)
 {
+// std::cerr << "START EVALUTATING EXISTENTIAL QUANTIFIER\n";
   return quantifier_enumeration(vl, t1, t1_is_normal_form, sigma, forall_binder(), &lazy::and_, sort_bool::true_(), sort_bool::false_());
 }
 
@@ -384,10 +386,12 @@ data_expression Rewriter::quantifier_enumeration(
   {
     if(vl_new_l_other.empty())
     {
+// std::cerr << "END QUANTIFIER ELIMINATION 1\n";
       return t3; // No quantified variables are bound.
     }
     else
     {
+// std::cerr << "END QUANTIFIER ELIMINATION 2\n";
       return abstraction(binder, vl_new_l_other, t3);
     }
   }
@@ -417,7 +421,7 @@ data_expression Rewriter::quantifier_enumeration(
   try
   {
     enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration,
-      wrapped_rewriter, m_generator, max_count, true, is_not(identity_element));
+                               wrapped_rewriter, m_generator, max_count, true, is_not(identity_element));
 
     /* Create a list to store solutions */
     data_expression partial_result = identity_element;
@@ -430,24 +434,29 @@ data_expression Rewriter::quantifier_enumeration(
            sol != enumerator.end();
            ++sol)
     {
+// std::cerr << "SOLUTION " << *sol << "\n";
       partial_result = lazy_op(partial_result, sol->expression());
       loop_upperbound--;
-      if(partial_result == absorbing_element)
+      if (partial_result == absorbing_element)
       {
+// std::cerr << "PARTIAL RESULT IS ABSORBING ELEMENT\n";
         // We found a solution, so prevent the enumerator from doing any unnecessary work
         // Also prevents any further exceptions from the enumerator
+// std::cerr << "END QUANTIFIER ELIMINATION 3\n";
         return absorbing_element;
       }
     }
 
     if (sol == enumerator.end())
     {
-      if(vl_new_l_other.empty())
+      if (vl_new_l_other.empty())
       {
+// std::cerr << "END QUANTIFIER ELIMINATION 4\n";
         return partial_result;
       }
       else
       {
+// std::cerr << "END QUANTIFIER ELIMINATION 5\n";
         return abstraction(binder, vl_new_l_other, partial_result);
       }
     }
@@ -461,6 +470,7 @@ data_expression Rewriter::quantifier_enumeration(
     // the simplified expression
   }
 
+// std::cerr << "END QUANTIFIER ELIMINATION 6\n";
   return abstraction(binder,vl_new_l_enum+vl_new_l_other,rewrite(t3,sigma));
 }
 
