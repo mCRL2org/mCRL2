@@ -189,19 +189,33 @@ inline machine_number div_triple_doubleword(const machine_number& n1, const mach
   return machine_number(m1 / m3);
 }
 
+inline std::size_t sqrt64(const std::size_t n)
+{
+  return static_cast<std::size_t>(sqrt(n.value()));
+}
+
 inline machine_number sqrt_word(const machine_number& n)
 {
-  return machine_number(static_cast<std::size_t>(sqrt(n.value())));
+  return machine_number(sqrt64(n.value()));
 }
 
 inline machine_number sqrt_doubleword(const machine_number& n1, const machine_number& n2)
 {
-  // TODO 
   __uint128_t m1=n1.value();
   m1 = (m1 << std::numeric_limits<std::size_t>::digits) + n2.value();
-  // unfinished 
-  assert(0);
-  return 0;
+  return machine_number(static_cast<std::size_t>(sqrt(m1)));
+
+  std::size_t w1=n1.value();
+  std::size_t w2=n2.value();
+
+  std::size_t p1 = sqrt64(w1);
+  std::size_t q1 = w1 - p1*p1;
+
+  if (p1 > (static_cast<std::size_t>(1)<<32))
+  {
+    y=mod_double_doubleword(q1,w2,2*p*b^1/2) //  TODO.
+  }
+  return p1<<32 + y;
 }
 
 inline machine_number sqrt_tripleword(const machine_number& n1, const machine_number& n2, const machine_number& n3)
@@ -224,6 +238,7 @@ inline machine_number sqrt_tripleword_overflow(const machine_number& n1, const m
 
 inline machine_number sqrt_quadrupleword(const machine_number& n1, const machine_number& n2, const machine_number& n3, const machine_number& n4)
 {
+  
   // TODO 
   static_cast<void>(n2);  // Suppress unused variable warnings.
   static_cast<void>(n3);  // Suppress unused variable warnings.
@@ -584,7 +599,11 @@ inline data_expression sqrt_tripleword_overflow_manual_implementation(const data
 /// \param e3 The third argument. 
 /// \param e4 The fourth argument. 
 /// \return The least significant word of the square root of base*(base*(base*e1+e2)+e3)+e4.
-inline data_expression sqrt_quadrupleword_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4)
+inline data_expression sqrt_quadrupleword_manual_implementation(
+                                      const data_expression& e1, 
+                                      const data_expression& e2, 
+                                      const data_expression& e3, 
+                                      const data_expression& e4)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3) && is_machine_number(e4));
   {
@@ -601,7 +620,11 @@ inline data_expression sqrt_quadrupleword_manual_implementation(const data_expre
 /// \param e3 The third argument. 
 /// \param e4 The fourth argument. 
 /// \return The most significant word of the square root of base*(base*(base*e1+e2)+e3)+e4.
-inline data_expression sqrt_quadrupleword_overflow_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4)
+inline data_expression sqrt_quadrupleword_overflow_manual_implementation(
+                                               const data_expression& e1, 
+                                               const data_expression& e2, 
+                                               const data_expression& e3, 
+                                               const data_expression& e4)
 {
   assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3) && is_machine_number(e4));
   {
