@@ -2879,6 +2879,7 @@ data_expression RewriterCompilingJitty::rewrite(
   const data_expression& result=so_rewr(term, this);
   global_sigma=saved_sigma;
 // std::cerr << "REWRITTEN  " << term << "  -->  " << result << "\n";
+std::cerr << "REWRITTEN  " << " -->  " << result << "\n";
   return result;
 }
 

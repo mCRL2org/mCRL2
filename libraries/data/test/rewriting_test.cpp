@@ -38,7 +38,7 @@ using namespace mcrl2::data::detail;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
 template <typename Rewriter>
-void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output)
+void data_rewrite_test(Rewriter& R, const data_expression& input, const data_expression& expected_output)
 {
   data_expression output = R(input);
 
@@ -540,7 +540,7 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
   std::vector< structured_sort_constructor_argument > arguments;
 
   arguments.push_back(structured_sort_constructor_argument("a0", bool_()));
-  arguments.push_back(structured_sort_constructor_argument(static_cast<sort_expression const&>(bool_())));
+  arguments.push_back(structured_sort_constructor_argument(static_cast<const sort_expression&>(bool_())));
   arguments.push_back(structured_sort_constructor_argument("n0", sort_nat::nat()));
   arguments.push_back(structured_sort_constructor_argument("n1", sort_nat::nat()));
 

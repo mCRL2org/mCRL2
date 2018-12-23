@@ -14,6 +14,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/machine_number.h"
 
 namespace mcrl2
 {
