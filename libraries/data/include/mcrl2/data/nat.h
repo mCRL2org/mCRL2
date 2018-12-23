@@ -3892,7 +3892,7 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn, vw1}), sort_machine_word::equal_word(vw1, sort_machine_word::zero_word()), less_equal(most_significant_digit_nat(vw1), vn), sort_bool::true_()));
         result.push_back(data_equation(variable_list({vw}), pos2nat(sort_pos::most_significant_digit(vw)), most_significant_digit_nat(vw)));
         result.push_back(data_equation(variable_list({vp, vw}), pos2nat(concat_digit(vp, vw)), concat_digit(pos2nat(vp), vw)));
-        result.push_back(data_equation(variable_list({vp}), pos2nat(succ(vp)), succ_nat(pos2nat(vp))));
+        result.push_back(data_equation(variable_list({vp}), pos2nat(sort_pos::succpos(vp)), succ_nat(pos2nat(vp))));
         result.push_back(data_equation(variable_list({vw}), nat2pos(most_significant_digit_nat(vw)), sort_pos::most_significant_digit(vw)));
         result.push_back(data_equation(variable_list({vp, vw}), nat2pos(concat_digit(vp, vw)), concat_digit(nat2pos(vp), vw)));
         result.push_back(data_equation(variable_list({vn, vp}), maximum(vp, vn), if_(less_equal(vn, pos2nat(vp)), vp, nat2pos(vn))));

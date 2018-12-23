@@ -160,7 +160,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
  
      Pos2Nat(@most_significant_digit(w)) = @most_significant_digitNat(w);
      Pos2Nat(@concat_digit(p,w)) = @concat_digit(Pos2Nat(p),w);
-     Pos2Nat(succ(p)) = @succ_nat(Pos2Nat(p));
+     Pos2Nat(@succ_pos(p)) = @succ_nat(Pos2Nat(p));
      Nat2Pos(@most_significant_digitNat(w)) = @most_significant_digit(w);
      Nat2Pos(@concat_digit(p,w)) = @concat_digit(Nat2Pos(p),w);
 % If important the 2 max functions below could be made more efficient by introducing a <=:Pos#Nat and <=:Nat#Pos.
