@@ -36,7 +36,6 @@ map Nat2Int <"nat2int"> : Nat <"arg"> -> Int                  external defined_b
     succ <"succ">:Int <"arg">->Int                            external defined_by_rewrite_rules;
     pred <"pred">:Nat <"arg">->Int                            external defined_by_rewrite_rules;
     pred <"pred">:Int <"arg">->Int                            external defined_by_rewrite_rules;
-%    @dub <"dub">:Bool <"left"> # Int <"right"> -> Int         internal defined_by_rewrite_rules;
     + <"plus">:Int <"left"> #Int <"right">->Int               external defined_by_rewrite_rules;
     - <"minus">:Pos <"left"> # Pos <"right">->Int             external defined_by_rewrite_rules;
     - <"minus">:Nat <"left"> # Nat <"right">->Int             external defined_by_rewrite_rules;
@@ -92,9 +91,6 @@ eqn ==(@cInt(m),@cInt(n)) = ==(m,n);
     pred(n) = if(==(n,@most_significant_digitNat(@zero_word)), @cNeg(@most_significant_digit(@one_word)), @cInt(@natpred(n)));  
     pred(@cInt(n)) = pred(n);
     pred(@cNeg(p)) = @cNeg(succ(p));
-%    @dub(b,@cInt(n)) = @cInt(@dub(b,n));
-%    @dub(false,@cNeg(p)) = @cNeg(@cDub(false,p));
-%    @dub(true,@cNeg(p)) = -(@dub(true,pred(p)));
     +(@cInt(m),@cInt(n)) = @cInt(+(m,n));
     +(@cInt(n),@cNeg(p)) = -(n,Pos2Nat(p));
     +(@cNeg(p),@cInt(n)) = -(n,Pos2Nat(p));

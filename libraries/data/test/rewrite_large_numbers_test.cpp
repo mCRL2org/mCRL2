@@ -24,6 +24,8 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/utilities/text_utility.h"
 
+static const std::size_t number_of_tests =50;
+
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
@@ -37,8 +39,6 @@ void data_rewrite_test(Rewriter& R, const data_expression& input, const data_exp
   data_expression output = R(input);
   data_expression exp_output = R(expected_output);
 
-// std::cerr << "output          " << output << "\nexpected output " << exp_output << "\n\n";
-// std::cerr << "output " << atermpp::aterm(output) << "\nexpected output " << atermpp::aterm(exp_output) << "\n\n";
   BOOST_CHECK(output == exp_output);
 
   if (output != exp_output)
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(multiplication_and_addition_test)
 
     data::data_expression x = sort_nat::nat(107);
     data::data_expression y = sort_nat::nat(10);
-    for (std::size_t i=0; i<50; ++i)
+    for (std::size_t i=0; i<number_of_tests; ++i)
     {
       data_expression lhs = sort_nat::times(sort_nat::plus(x,y),sort_nat::monus(x,y));
       data_expression rhs = sort_nat::monus(sort_nat::times(x,x),sort_nat::times(y,y));
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(mod_and_div_test)
 
     data::data_expression x = sort_nat::nat(235);
     data::data_expression y = sort_pos::pos(78);
-    for (std::size_t i=0; i<50; ++i)
+    for (std::size_t i=0; i<number_of_tests; ++i)
     {
       data_expression lhs = x;
       data_expression rhs = sort_nat::plus(sort_nat::times(sort_nat::div(x,y),sort_nat::pos2nat(y)),sort_nat::mod(x,y));
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(square_root_test)
     data::rewriter R(specification, *strat);
 
     data::data_expression x = sort_nat::nat(831);
-    for (std::size_t i=0; i<10; ++i)
+    for (std::size_t i=0; i<number_of_tests; ++i)
     {
        
       data_expression r = sort_nat::sqrt(x);

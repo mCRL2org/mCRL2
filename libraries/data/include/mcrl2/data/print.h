@@ -1257,12 +1257,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     { 
       print_binary_operation(x, " mod ");
     }
-    else if (sort_machine_word::is_sqrt_word_application(x))
-    { 
-      derived().print("sqrt(");
-      print_expression(sort_machine_word::arg(x), left_precedence(x));
-      derived().print(")"); 
-    }
 
 /* TODO: Handle the following cases. 
  
@@ -1318,39 +1312,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_pos::is_succpos_application(x))
     {
-      derived().print("succ(");
-      derived().apply(sort_pos::arg(x));
-      derived().print(")");
-    }
-    else if (sort_pos::is_succ_application(x))
-    {
-      derived().print("succ(");
-      derived().apply(sort_pos::arg(x));
-      derived().print(")");
-    }
-    else if (sort_pos::is_maximum_application(x))
-    {
-      derived().print("max(");
-      derived().apply(sort_pos::left(x));
-      derived().print(", ");
-      derived().apply(sort_pos::right(x));
-      derived().print(")");
-    }
-    else if (sort_pos::is_minimum_application(x))
-    {
-      derived().print("min(");
-      derived().apply(sort_pos::left(x));
-      derived().print(", ");
-      derived().apply(sort_pos::right(x));
-      derived().print(")");
+      derived().apply(sort_pos::succ(sort_pos::arg(x)));
     }
     else if (sort_pos::is_pos_predecessor_application(x))
     {
-      
-      // derived.apply(  Maak een term en print die. 
-      derived().print("(");
-      derived().apply(sort_pos::arg(x));
-      derived().print(" - 1)");
+      derived().apply(sort_int::int2pos(sort_int::minus(sort_int::pos2int(sort_pos::arg(x)),sort_int::int_(1))));   
+    }
+    else if (sort_pos::is_auxiliary_plus_pos_application(x))
+    {
+      print_binary_operation(x, " + ");
     }
     else if (sort_pos::is_times_whr_mult_overflow_application(x))
     {
@@ -1360,11 +1330,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else 
       {
-        derived().print("(");
-        derived().apply(sort_pos::arg2(x));
-        derived().print(" * " + max_machine_number_string() + ") + ");
-        derived().apply(sort_pos::arg1(x));
-        derived().print(")");
+        derived().apply(sort_pos::plus(sort_pos::most_significant_digit(sort_pos::arg1(x)),
+                                       sort_pos::times(sort_pos::arg2(x),sort_pos::pos(max_machine_number_string()))));
       }
     }
 
@@ -1407,10 +1374,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            nat
     //-------------------------------------------------------------------//
 
-    /* else if (sort_nat::is_cnat_application(x))  // This case does not exist anymore in 64 bit numbers. 
-    {
-      derived().apply(sort_nat::arg(x));
-    } */
     else if (sort_nat::is_most_significant_digit_nat_application(x))
     {
       if (data::sort_nat::is_natural_constant(x))
@@ -1436,38 +1399,96 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().apply(sort_nat::arg2(x));
       }
     }
+    else if (sort_nat::is_succ_nat_application(x))
+    {
+      derived().apply(sort_nat::succ(sort_nat::arg(x)));
+    }
     else if (sort_nat::is_pos2nat_application(x))
     {
-      derived().apply(*x.begin());
+      derived().apply(sort_nat::arg(x));
     }
-    // TODO: handle @dub
+    else if (sort_nat::is_pred_whr_application(x))
+    {
+      derived().apply(sort_nat::plus(sort_nat::times(sort_nat::arg(x),sort_nat::nat(max_machine_number_string())),
+                                     sort_nat::most_significant_digit_nat(sort_machine_word::max_word())));
+    }
     else if (sort_nat::is_plus_application(x))
     {
       print_binary_operation(x, " + ");
     }
-    // TODO: handle @gtesubtb
+    else if (sort_nat::is_auxiliary_plus_nat_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
     else if (sort_nat::is_times_application(x))
     {
       print_binary_operation(x, " * ");
     }
     else if (sort_nat::is_div_application(x))
     {
-      // print_binary_operation(x, " div ");
+      print_binary_operation(x, " div ");
+      /* The code above was outcommented, but seems better than the code below, which should be removed.
       print_expression(sort_nat::left(x), left_precedence(x));
       derived().print(" div ");
-      print_expression(sort_nat::right(x), right_precedence(x));
+      print_expression(sort_nat::right(x), right_precedence(x)); */
     }
     else if (sort_nat::is_mod_application(x))
     {
-      // print_binary_operation(x, " mod ");
+      print_binary_operation(x, " mod ");
+      /* The code above was outcommented, but seems better than the code below, which should be removed.
       print_expression(sort_nat::left(x), left_precedence(x));
       derived().print(" mod ");
-      print_expression(sort_nat::right(x), right_precedence(x));
+      print_expression(sort_nat::right(x), right_precedence(x)); */
     }
-    // TODO: handle @monus
-    // TODO: handle @swap_zero*
-    // TODO: handle @sqrt_nat
-    // TODO: Handle the other functions on type Pos. 
+    else if (sort_nat::is_natpred_application(x))
+    {
+      derived().apply(sort_int::int2nat(sort_int::pred(sort_nat::arg(x))));
+    }
+    else if (sort_nat::is_is_odd_application(x))
+    {
+      derived().apply(equal_to(sort_nat::mod(sort_nat::arg(x),sort_pos::pos(2)),sort_nat::nat(1)));
+    }
+    else if (sort_nat::is_div2_application(x))
+    {
+      derived().apply(sort_nat::div(sort_nat::arg(x),sort_pos::pos(2)));
+    }
+
+    // TODO: handle @monus 
+    // TODO: handle @monus_whr 
+    // TODO: handle @exp_aux3p 
+    // TODO: handle @exp_aux4p 
+    // TODO: handle @exp_aux3n 
+    // TODO: handle @exp_aux4n 
+    // TODO: handle @exp_auxtruep 
+    // TODO: handle @exp_auxtruen 
+    // TODO: handle @exp_auxfalsep 
+    // TODO: handle @exp_auxfalsen 
+    // TODO: handle @div_bold 
+    // TODO: handle @div_bold_whr 
+    // TODO: handle @div_whr1 
+    // TODO: handle @div_whr2 
+    // TODO: handle @mod_whr1 
+    // TODO: handle @divmod_aux 
+    // TODO: handle @divmod_aux_whr1 
+    // TODO: handle @divmod_aux_whr2 
+    // TODO: handle @divmod_aux_whr3 
+    // TODO: handle @divmod_aux_whr4 
+    // TODO: handle @divmod_aux_whr5 
+    // TODO: handle @divmod_aux_whr6 
+    // TODO: handle @msd 
+    // TODO: handle @swap_zero 
+    // TODO: handle @swap_zero_add 
+    // TODO: handle @swap_zero_min 
+    // TODO: handle @swap_zero_monus 
+    // TODO: handle @sqrt_whr1 
+    // TODO: handle @sqrt_whr2 
+    // TODO: handle @sqrt_pair 
+    // TODO: handle @sqrt_pair_whr1 
+    // TODO: handle @sqrt_pair_whr2 
+    // TODO: handle @sqrt_pair_whr3 
+    // TODO: handle @sqrt_pair_whr4 
+    // TODO: handle @sqrt_pair_whr5 
+    // TODO: handle @sqrt_pair_whr6 
 
     //-------------------------------------------------------------------//
     //                            int
@@ -1493,7 +1514,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_unary_operation(x, "-");
     }
-    // TODO: handle @dub
     else if (sort_int::is_plus_application(x))
     {
       print_binary_operation(x, " + ");
@@ -1508,17 +1528,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_int::is_div_application(x))
     {
-      // TODO: make a proper binary operation of div
+      print_binary_operation(x, " div ");
+      /* The code below was active and the line above outcommented, but the rule above appears nicer. If no complications occur the lines below can be removed. 
       print_expression(sort_int::left(x), left_precedence(x));
       derived().print(" div ");
-      print_expression(sort_int::right(x), right_precedence(x));
+      print_expression(sort_int::right(x), right_precedence(x)); */
     }
     else if (sort_int::is_mod_application(x))
     {
-      // print_binary_operation(x, " mod ");
+      print_binary_operation(x, " mod ");
+      /* See comments at the div. Without complications, the lines below can be removed. 
       print_expression(sort_int::left(x), left_precedence(x));
       derived().print(" mod ");
-      print_expression(sort_int::right(x), right_precedence(x));
+      print_expression(sort_int::right(x), right_precedence(x)); */
     }
 
     //-------------------------------------------------------------------//
