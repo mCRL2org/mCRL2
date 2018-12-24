@@ -2864,10 +2864,6 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-// static size_t no_rewrite =0;
-// no_rewrite++;
-// if ((no_rewrite % 10000) ==0) std::cerr << "NR REWRITES " << no_rewrite <<"\n";
-
 // std::cerr << "REWRITE " << term << "\n";
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
@@ -2879,7 +2875,6 @@ data_expression RewriterCompilingJitty::rewrite(
   const data_expression& result=so_rewr(term, this);
   global_sigma=saved_sigma;
 // std::cerr << "REWRITTEN  " << term << "  -->  " << result << "\n";
-std::cerr << "REWRITTEN  " << " -->  " << result << "\n";
   return result;
 }
 

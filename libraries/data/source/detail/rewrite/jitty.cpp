@@ -585,13 +585,12 @@ static bool match_jitty(
   {
     return p==t;
   }
-  if (is_function_symbol(p, true))
+  else if (is_function_symbol(p, true))
   {
     return p==t;
   }
   else if (is_variable(p, true))
   {
-
     for (std::size_t i=0; i<assignments.size; i++)
     {
       if (atermpp::detail::address(p)==assignments.assignment[i].var)
@@ -608,7 +607,11 @@ static bool match_jitty(
   }
   else
   {
-    if (is_machine_number(t) || is_function_symbol(t, true) || is_variable(t, true) || is_abstraction(t, true) || is_where_clause(t, true))
+    if (is_machine_number(t) || 
+        is_function_symbol(t, true) || 
+        is_variable(t, true) || 
+        is_abstraction(t, true) || 
+        is_where_clause(t, true))
     {
       return false;
     }
@@ -622,9 +625,7 @@ static bool match_jitty(
       return false;
     }
 
-
-    if (!match_jitty(ta.head(),
-                     pa.head(),assignments,true))
+    if (!match_jitty(ta.head(), pa.head(),assignments,true))
     {
       return false;
     }
