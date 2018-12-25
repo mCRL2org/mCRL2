@@ -710,8 +710,8 @@ ${cases}
           return ""
         CODE_TEMPLATE = Template('''
       /// \\brief The data expression of an application of the function symbol ${namestring}.
-      /// \\details This function is to be implemented manually. \
-      ${sortparameterstring} \
+      /// \\details This function is to be implemented manually. 
+      ${sortparameterstring} 
       ${dataparameterstring}
       /// \\return The data expression corresponding to an application of ${namestring} to a number of arguments.
       inline
@@ -2283,8 +2283,6 @@ class specification():
     code += "#include \"mcrl2/data/application.h\"\n"
     code += "#include \"mcrl2/data/data_equation.h\"\n"
     code += "#include \"mcrl2/data/standard.h\"\n"
-    code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace())) 
-                 if self.has_cplusplus_implementable_code() else "")
     if self.has_lambda():
       code += "#include \"mcrl2/data/lambda.h\"\n"
     if self.has_forall():
@@ -2316,6 +2314,8 @@ class specification():
       code += "    } // namespace sort_%s\n\n" % (self.get_namespace())
     code += "  } // namespace data\n\n"
     code += "} // namespace mcrl2\n\n"
+    code += ("#include \"mcrl2/data/detail/%s.h\" // This file contains the manual implementations of rewrite functions.\n" % (remove_underscore(self.get_namespace())) 
+                 if self.has_cplusplus_implementable_code() else "")
     code += "#endif // MCRL2_DATA_%s_H\n" % (self.get_namespace().upper())
     code = string.replace(code, "__", "_")
     p = re.compile('sort_([A-Za-z0-9]*)_([ ]|:)')

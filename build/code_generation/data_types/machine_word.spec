@@ -41,8 +41,11 @@ map  @one_word <"one_word">: @word                                              
      @sqrt_quadrupleword_overflow <"sqrt_quadrupleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word          internal defined_by_code;  
      @pred_word <"pred_word">: @word <"arg"> ->@word                                                                                                   internal defined_by_code;   
      @equal <"equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                                   internal defined_by_code;
+     @not_equal <"not_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                           internal defined_by_code;
      @less <"less_word">: @word <"left"> # @word <"right"> -> Bool                                                                                     internal defined_by_code;
-     @lessequal <"lessequal_word">: @word <"left"> # @word <"right"> -> Bool                                                                           internal defined_by_code;
+     @less_equal <"less_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                           internal defined_by_code;
+     @greater <"greater_word">: @word <"left"> # @word <"right"> -> Bool                                                                                     internal defined_by_code;
+     @greater_equal <"greater_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                           internal defined_by_code;
 
      @rightmost_bit <"rightmost_bit">: @word <"arg"> -> Bool                                                                                           internal defined_by_code;
      @shift_right <"shift_right">: Bool <"arg1"> # @word <"arg2"> -> @word                                                                             internal defined_by_code;
@@ -51,4 +54,4 @@ var  w1:@word;
      w2:@word;
 eqn  ==(w1, w2) = @equal(w1, w2);
      <(w1, w2) = @less(w1, w2);
-     <=(w1, w2) = @lessequal(w1, w2);
+     <=(w1, w2) = @less_equal(w1, w2);

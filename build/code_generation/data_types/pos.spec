@@ -65,10 +65,10 @@ eqn  @c1 = @most_significant_digit(@one_word);
      <(p1, @succ_pos(p2)) = <=(p1,p2);
      @equal(w1,@one_word) ->  <(p,@most_significant_digit(w1)) = false;
  
-     <=(@most_significant_digit(w1),@most_significant_digit(w2)) = @lessequal(w1,w2);
+     <=(@most_significant_digit(w1),@most_significant_digit(w2)) = @less_equal(w1,w2);
      <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
      <=(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
-     <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(@lessequal(w1,w2),<=(p1,p2),<(p1,p2));
+     <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(@less_equal(w1,w2),<=(p1,p2),<(p1,p2));
      <=(@succ_pos(p1),p2) = <(p1,p2);
      <=(p1, @succ_pos(p2)) = ||(==(p1,@most_significant_digit(@one_word)),<=(@pospred(p1),p2));
      @equal(w1,@one_word) ->  <=(@most_significant_digit(w1), p) = true;

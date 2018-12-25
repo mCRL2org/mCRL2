@@ -884,10 +884,10 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp1, vp2}), less(succpos(vp1), vp2), sort_bool::and_(less(most_significant_digit(sort_machine_word::two_word()), vp2), less(vp1, pos_predecessor(vp2)))));
         result.push_back(data_equation(variable_list({vp1, vp2}), less(vp1, succpos(vp2)), less_equal(vp1, vp2)));
         result.push_back(data_equation(variable_list({vp, vw1}), sort_machine_word::equal_word(vw1, sort_machine_word::one_word()), less(vp, most_significant_digit(vw1)), sort_bool::false_()));
-        result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(most_significant_digit(vw1), most_significant_digit(vw2)), sort_machine_word::lessequal_word(vw1, vw2)));
+        result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(most_significant_digit(vw1), most_significant_digit(vw2)), sort_machine_word::less_equal_word(vw1, vw2)));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), less_equal(concat_digit(vp, vw1), most_significant_digit(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), less_equal(most_significant_digit(vw1), concat_digit(vp, vw2)), sort_bool::true_()));
-        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), less_equal(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::lessequal_word(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2))));
+        result.push_back(data_equation(variable_list({vp1, vp2, vw1, vw2}), less_equal(concat_digit(vp1, vw1), concat_digit(vp2, vw2)), if_(sort_machine_word::less_equal_word(vw1, vw2), less_equal(vp1, vp2), less(vp1, vp2))));
         result.push_back(data_equation(variable_list({vp1, vp2}), less_equal(succpos(vp1), vp2), less(vp1, vp2)));
         result.push_back(data_equation(variable_list({vp1, vp2}), less_equal(vp1, succpos(vp2)), sort_bool::or_(equal_to(vp1, most_significant_digit(sort_machine_word::one_word())), less_equal(pos_predecessor(vp1), vp2))));
         result.push_back(data_equation(variable_list({vp, vw1}), sort_machine_word::equal_word(vw1, sort_machine_word::one_word()), less_equal(most_significant_digit(vw1), vp), sort_bool::true_()));

@@ -23,7 +23,6 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/detail/machine_word.h" // This file contains the manual implementations of rewrite functions.
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
@@ -167,7 +166,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@succ_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@succ_word to a number of arguments.
       inline
       data_expression succ_word_manual_implementation(const data_expression& arg0);
@@ -512,7 +513,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@add_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_word to a number of arguments.
       inline
@@ -586,7 +589,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@add_overflow_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@add_overflow_word to a number of arguments.
       inline
@@ -660,7 +665,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@times_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@times_word to a number of arguments.
       inline
@@ -734,7 +741,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@times_overflow_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@times_overflow_word to a number of arguments.
       inline
@@ -808,7 +817,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@minus_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@minus_word to a number of arguments.
       inline
@@ -882,7 +893,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@div_word to a number of arguments.
       inline
@@ -956,7 +969,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@mod_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@mod_word to a number of arguments.
       inline
@@ -1029,7 +1044,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_word to a number of arguments.
       inline
       data_expression sqrt_word_manual_implementation(const data_expression& arg0);
@@ -1103,7 +1120,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_doubleword.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@div_doubleword to a number of arguments.
@@ -1180,7 +1199,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_double_doubleword.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \param arg3 A data expression.
@@ -1259,7 +1280,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@div_triple_doubleword.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \param arg3 A data expression.
@@ -1337,7 +1360,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@mod_doubleword.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@mod_doubleword to a number of arguments.
@@ -1412,7 +1437,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_doubleword.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_doubleword to a number of arguments.
       inline
@@ -1487,7 +1514,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_tripleword.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_tripleword to a number of arguments.
@@ -1563,7 +1592,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_tripleword_overflow.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \return The data expression corresponding to an application of \@sqrt_tripleword_overflow to a number of arguments.
@@ -1640,7 +1671,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_quadrupleword.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \param arg3 A data expression.
@@ -1718,7 +1751,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@sqrt_quadrupleword_overflow.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \param arg2 A data expression.
       /// \param arg3 A data expression.
@@ -1793,7 +1828,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@pred_word.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@pred_word to a number of arguments.
       inline
       data_expression pred_word_manual_implementation(const data_expression& arg0);
@@ -1866,7 +1903,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@equal.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@equal to a number of arguments.
       inline
@@ -1880,6 +1919,82 @@ namespace mcrl2 {
         const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==equal_word());
         return equal_word_manual_implementation(a[0], a[1]);
+      }
+
+
+      /// \brief Generate identifier \@not_equal.
+      /// \return Identifier \@not_equal.
+      inline
+      const core::identifier_string& not_equal_word_name()
+      {
+        static core::identifier_string not_equal_word_name = core::identifier_string("@not_equal");
+        return not_equal_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@not_equal.       
+      /// \return Function symbol not_equal_word.
+      inline
+      const function_symbol& not_equal_word()
+      {
+        static function_symbol not_equal_word(not_equal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return not_equal_word;
+      }
+
+
+      /// \brief Recogniser for function \@not_equal.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@not_equal.
+      inline
+      bool is_not_equal_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == not_equal_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@not_equal.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@not_equal to a number of arguments.
+      inline
+      application not_equal_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::not_equal_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@not_equal.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol not_equal_word to a
+      ///     number of arguments.
+      inline
+      bool is_not_equal_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_not_equal_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@not_equal.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@not_equal to a number of arguments.
+      inline
+      data_expression not_equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression not_equal_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==not_equal_word());
+        return not_equal_word_manual_implementation(a[0], a[1]);
       }
 
 
@@ -1940,7 +2055,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@less.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@less to a number of arguments.
       inline
@@ -1957,77 +2074,231 @@ namespace mcrl2 {
       }
 
 
-      /// \brief Generate identifier \@lessequal.
-      /// \return Identifier \@lessequal.
+      /// \brief Generate identifier \@less_equal.
+      /// \return Identifier \@less_equal.
       inline
-      const core::identifier_string& lessequal_word_name()
+      const core::identifier_string& less_equal_word_name()
       {
-        static core::identifier_string lessequal_word_name = core::identifier_string("@lessequal");
-        return lessequal_word_name;
+        static core::identifier_string less_equal_word_name = core::identifier_string("@less_equal");
+        return less_equal_word_name;
       }
 
-      /// \brief Constructor for function symbol \@lessequal.       
-      /// \return Function symbol lessequal_word.
+      /// \brief Constructor for function symbol \@less_equal.       
+      /// \return Function symbol less_equal_word.
       inline
-      const function_symbol& lessequal_word()
+      const function_symbol& less_equal_word()
       {
-        static function_symbol lessequal_word(lessequal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
-        return lessequal_word;
+        static function_symbol less_equal_word(less_equal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return less_equal_word;
       }
 
 
-      /// \brief Recogniser for function \@lessequal.
+      /// \brief Recogniser for function \@less_equal.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@lessequal.
+      /// \return true iff e is the function symbol matching \@less_equal.
       inline
-      bool is_lessequal_word_function_symbol(const atermpp::aterm& e)
+      bool is_less_equal_word_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == lessequal_word();
+          return atermpp::down_cast<function_symbol>(e) == less_equal_word();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@lessequal.        
+      /// \brief Application of the function symbol \@less_equal.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression. 
-      /// \return Application of \@lessequal to a number of arguments.
+      /// \return Application of \@less_equal to a number of arguments.
       inline
-      application lessequal_word(const data_expression& arg0, const data_expression& arg1)
+      application less_equal_word(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_machine_word::lessequal_word()(arg0, arg1);
+        return sort_machine_word::less_equal_word()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@lessequal.
+      /// \brief Recogniser for application of \@less_equal.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol lessequal_word to a
+      /// \return true iff e is an application of function symbol less_equal_word to a
       ///     number of arguments.
       inline
-      bool is_lessequal_word_application(const atermpp::aterm& e)
+      bool is_less_equal_word_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_lessequal_word_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_less_equal_word_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
 
-      /// \brief The data expression of an application of the function symbol \@lessequal.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \brief The data expression of an application of the function symbol \@less_equal.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
-      /// \return The data expression corresponding to an application of \@lessequal to a number of arguments.
+      /// \return The data expression corresponding to an application of \@less_equal to a number of arguments.
       inline
-      data_expression lessequal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+      data_expression less_equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
 
 
       inline
-      data_expression lessequal_word_application(const data_expression& a1)
+      data_expression less_equal_word_application(const data_expression& a1)
       {
         assert(is_application(a1));
         const application& a=atermpp::down_cast<application>(a1);
-        assert(a.head()==lessequal_word());
-        return lessequal_word_manual_implementation(a[0], a[1]);
+        assert(a.head()==less_equal_word());
+        return less_equal_word_manual_implementation(a[0], a[1]);
+      }
+
+
+      /// \brief Generate identifier \@greater.
+      /// \return Identifier \@greater.
+      inline
+      const core::identifier_string& greater_word_name()
+      {
+        static core::identifier_string greater_word_name = core::identifier_string("@greater");
+        return greater_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@greater.       
+      /// \return Function symbol greater_word.
+      inline
+      const function_symbol& greater_word()
+      {
+        static function_symbol greater_word(greater_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return greater_word;
+      }
+
+
+      /// \brief Recogniser for function \@greater.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@greater.
+      inline
+      bool is_greater_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == greater_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@greater.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@greater to a number of arguments.
+      inline
+      application greater_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::greater_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@greater.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol greater_word to a
+      ///     number of arguments.
+      inline
+      bool is_greater_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_greater_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@greater.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@greater to a number of arguments.
+      inline
+      data_expression greater_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression greater_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==greater_word());
+        return greater_word_manual_implementation(a[0], a[1]);
+      }
+
+
+      /// \brief Generate identifier \@greater_equal.
+      /// \return Identifier \@greater_equal.
+      inline
+      const core::identifier_string& greater_equal_word_name()
+      {
+        static core::identifier_string greater_equal_word_name = core::identifier_string("@greater_equal");
+        return greater_equal_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@greater_equal.       
+      /// \return Function symbol greater_equal_word.
+      inline
+      const function_symbol& greater_equal_word()
+      {
+        static function_symbol greater_equal_word(greater_equal_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return greater_equal_word;
+      }
+
+
+      /// \brief Recogniser for function \@greater_equal.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@greater_equal.
+      inline
+      bool is_greater_equal_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == greater_equal_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@greater_equal.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@greater_equal to a number of arguments.
+      inline
+      application greater_equal_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::greater_equal_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@greater_equal.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol greater_equal_word to a
+      ///     number of arguments.
+      inline
+      bool is_greater_equal_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_greater_equal_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@greater_equal.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@greater_equal to a number of arguments.
+      inline
+      data_expression greater_equal_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression greater_equal_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==greater_equal_word());
+        return greater_equal_word_manual_implementation(a[0], a[1]);
       }
 
 
@@ -2087,7 +2358,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@rightmost_bit.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \return The data expression corresponding to an application of \@rightmost_bit to a number of arguments.
       inline
       data_expression rightmost_bit_manual_implementation(const data_expression& arg0);
@@ -2160,7 +2433,9 @@ namespace mcrl2 {
       }
 
       /// \brief The data expression of an application of the function symbol \@shift_right.
-      /// \details This function is to be implemented manually.              /// \param arg0 A data expression.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
       /// \param arg1 A data expression.
       /// \return The data expression corresponding to an application of \@shift_right to a number of arguments.
       inline
@@ -2206,8 +2481,11 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::sqrt_quadrupleword_overflow());
         result.push_back(sort_machine_word::pred_word());
         result.push_back(sort_machine_word::equal_word());
+        result.push_back(sort_machine_word::not_equal_word());
         result.push_back(sort_machine_word::less_word());
-        result.push_back(sort_machine_word::lessequal_word());
+        result.push_back(sort_machine_word::less_equal_word());
+        result.push_back(sort_machine_word::greater_word());
+        result.push_back(sort_machine_word::greater_equal_word());
         result.push_back(sort_machine_word::rightmost_bit());
         result.push_back(sort_machine_word::shift_right());
         return result;
@@ -2268,8 +2546,11 @@ namespace mcrl2 {
         result[sort_machine_word::sqrt_quadrupleword_overflow()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_quadrupleword_overflow_application,"sort_machine_word::sqrt_quadrupleword_overflow_manual_implementation");
         result[sort_machine_word::pred_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::pred_word_application,"sort_machine_word::pred_word_manual_implementation");
         result[sort_machine_word::equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equal_word_application,"sort_machine_word::equal_word_manual_implementation");
+        result[sort_machine_word::not_equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::not_equal_word_application,"sort_machine_word::not_equal_word_manual_implementation");
         result[sort_machine_word::less_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_word_application,"sort_machine_word::less_word_manual_implementation");
-        result[sort_machine_word::lessequal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::lessequal_word_application,"sort_machine_word::lessequal_word_manual_implementation");
+        result[sort_machine_word::less_equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::less_equal_word_application,"sort_machine_word::less_equal_word_manual_implementation");
+        result[sort_machine_word::greater_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::greater_word_application,"sort_machine_word::greater_word_manual_implementation");
+        result[sort_machine_word::greater_equal_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::greater_equal_word_application,"sort_machine_word::greater_equal_word_manual_implementation");
         result[sort_machine_word::rightmost_bit()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::rightmost_bit_application,"sort_machine_word::rightmost_bit_manual_implementation");
         result[sort_machine_word::shift_right()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::shift_right_application,"sort_machine_word::shift_right_manual_implementation");
         return result;
@@ -2282,7 +2563,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
+        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_not_equal_word_application(e) || is_less_word_application(e) || is_less_equal_word_application(e) || is_greater_word_application(e) || is_greater_equal_word_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2366,7 +2647,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_less_word_application(e) || is_lessequal_word_application(e));
+        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_not_equal_word_application(e) || is_less_word_application(e) || is_less_equal_word_application(e) || is_greater_word_application(e) || is_greater_equal_word_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2381,7 +2662,7 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list({vw1, vw2}), equal_to(vw1, vw2), equal_word(vw1, vw2)));
         result.push_back(data_equation(variable_list({vw1, vw2}), less(vw1, vw2), less_word(vw1, vw2)));
-        result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(vw1, vw2), lessequal_word(vw1, vw2)));
+        result.push_back(data_equation(variable_list({vw1, vw2}), less_equal(vw1, vw2), less_equal_word(vw1, vw2)));
         return result;
       }
 
@@ -2391,4 +2672,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
+#include "mcrl2/data/detail/machine_word.h" // This file contains the manual implementations of rewrite functions.
 #endif // MCRL2_DATA_MACHINE_WORD_H
