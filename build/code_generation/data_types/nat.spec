@@ -30,18 +30,20 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat                                                                    external defined_by_rewrite_rules;
      Nat2Pos <"nat2pos"> : Nat <"arg"> -> Pos                                                                    external defined_by_rewrite_rules;
      succ <"succ"> : Nat <"arg">->Pos                                                                            external defined_by_rewrite_rules;
-     max <"maximum">:Pos <"left"> #Nat <"right">->Pos                                                            external defined_by_rewrite_rules;
-     max <"maximum">:Nat <"left"> #Pos <"right">->Pos                                                            external defined_by_rewrite_rules;
-     max <"maximum">:Nat <"left"> #Nat <"right">->Nat                                                            external defined_by_rewrite_rules;
-     min <"minimum">:Nat <"left"> #Nat <"right">->Nat                                                            external defined_by_rewrite_rules;
+     max <"maximum">:Pos <"left"> # Nat <"right">->Pos                                                           external defined_by_rewrite_rules;
+     max <"maximum">:Nat <"left"> # Pos <"right">->Pos                                                           external defined_by_rewrite_rules;
+     max <"maximum">:Nat <"left"> # Nat <"right">->Nat                                                           external defined_by_rewrite_rules;
+     min <"minimum">:Nat <"left"> # Nat <"right">->Nat                                                           external defined_by_rewrite_rules;
      pred <"pred">:Pos <"arg">->Nat                                                                              external defined_by_rewrite_rules;
      @pred_whr <"pred_whr">:Nat <"arg">->Nat                                                                     internal defined_by_rewrite_rules;
-     + <"plus">:Pos <"left"> #Nat <"right">->Pos                                                                 external defined_by_rewrite_rules;
-     + <"plus">:Nat <"left"> #Pos <"right">->Pos                                                                 external defined_by_rewrite_rules;
-     + <"plus">:Nat <"left"> #Nat <"right">->Nat                                                                 external defined_by_rewrite_rules;
+     + <"plus">:Pos <"left"> # Nat <"right">->Pos                                                                external defined_by_rewrite_rules;
+     + <"plus">:Nat <"left"> # Pos <"right">->Pos                                                                external defined_by_rewrite_rules;
+     + <"plus">:Nat <"left"> # Nat <"right">->Nat                                                                external defined_by_rewrite_rules;
+     @plus_with_carry <"plus_with_carry">:Nat <"left"> #Nat <"right">->Nat                                       external defined_by_rewrite_rules;
 % The following function is used when the symbol + is overloaded, such as in fbags.
      @plus_nat <"auxiliary_plus_nat">: Nat <"left"> # Nat <"right"> -> Nat                                       external defined_by_rewrite_rules;
-     * <"times">:Nat <"left"> #Nat <"right">->Nat                                                                external defined_by_rewrite_rules;
+     * <"times">:Nat <"left"> # Nat <"right">->Nat                                                               external defined_by_rewrite_rules;
+     @times_overflow <"times_overflow">: Nat <"arg1"> # @word <"arg2"> # @word <"arg3"> -> Nat                   external defined_by_rewrite_rules;
      div <"div">: Nat <"left"> # Pos <"right"> -> Nat                                                            external defined_by_rewrite_rules;
      mod <"mod">:Nat <"left"> # Pos <"right"> -> Nat                                                             external defined_by_rewrite_rules;
      exp <"exp">:Pos <"left"> # Nat <"right"> -> Pos                                                             external defined_by_rewrite_rules;
@@ -153,7 +155,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
       <=(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = @less_equal(w1,w2);
       <=(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
       <=(@most_significant_digitNat(w1),@concat_digit(n,w2)) = true;
-      <=(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(<=(w1,w2),<=(n1,n2),<(n1,n2));
+      <=(@concat_digit(n1,w1), @concat_digit(n2,w2)) = if(@less_equal(w1,w2),<=(n1,n2),<(n1,n2));
       <=(@succ_nat(n1),n2) = <(n1,n2);
       <=(n1, @succ_nat(n2)) = <=(@natpred(n1),n2);
       @equal(w1,@zero_word) ->  <=(@most_significant_digitNat(w1), n) = true;
@@ -178,33 +180,56 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
      +(p,n) = +(n,p);
      +(@most_significant_digitNat(w1),@most_significant_digit(w2)) =
-                                     if(@equal(@add_overflow_word(w1,w2),@zero_word),
-                                                 @most_significant_digit(@add_word(w1,w2)),
-                                                 @concat_digit(@most_significant_digit(@one_word),@add_word(w1,w2)));
-     +(@concat_digit(n1,w1),@most_significant_digit(w2)) = @concat_digit(
-                                                                   +(n1,@most_significant_digitNat(@add_overflow_word(w1,w2))),
-                                                                   @add_word(w1,w2));
-     +(@most_significant_digitNat(w1),@concat_digit(p,w2)) = @concat_digit(
-                                                                   +(@most_significant_digitNat(@add_overflow_word(w1,w2)), p),
-                                                                   @add_word(w1,w2));
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(@most_significant_digit(@one_word),@add_word(w1,w2)),
+                                              @most_significant_digit(@add_word(w1,w2)));
+     +(@concat_digit(n1,w1),@most_significant_digit(w2)) = 
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(succ(n1),@add_word(w1,w2)),
+                                              @concat_digit(Nat2Pos(n1),@add_word(w1,w2)));
+     +(@most_significant_digitNat(w1),@concat_digit(p,w2)) = 
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(@succ_pos(p),@add_word(w1,w2)),
+                                              @concat_digit(p,@add_word(w1,w2)));
      +(@concat_digit(n1,w1),@concat_digit(p,w2)) =
-                                        @concat_digit(+(@most_significant_digitNat(@add_overflow_word(w1,w2)),+(n1,p)),
-                                                      @add_word(w1,w2));
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(+(succ(n1),p),@add_word(w1,w2)),
+                                              @concat_digit(+(n1,p), @add_word(w1,w2)));
 
 
      +(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
-                                     if(@equal(@add_overflow_word(w1,w2),@zero_word),
-                                                 @most_significant_digitNat(@add_word(w1,w2)),
-                                                 @concat_digit(@most_significant_digitNat(@one_word),@add_word(w1,w2)));
-     +(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = @concat_digit(
-                                                                   +(@most_significant_digitNat(@add_overflow_word(w1,w2)),n1),
-                                                                   @add_word(w1,w2));
-     +(@most_significant_digitNat(w1),@concat_digit(n2,w2)) = @concat_digit(
-                                                                   +(@most_significant_digitNat(@add_overflow_word(w1,w2)), n2),
-                                                                   @add_word(w1,w2));
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(@most_significant_digitNat(@one_word),@add_word(w1,w2)),
+                                              @most_significant_digitNat(@add_word(w1,w2)));
+     @plus_with_carry(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
+                                     if(@add_with_carry_overflow_word(w1,w2),
+                                              @concat_digit(@most_significant_digitNat(@one_word),@add_with_carry_word(w1,w2)),
+                                              @most_significant_digitNat(@add_with_carry_word(w1,w2)));
+     +(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = 
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(@succ_nat(n1),@add_word(w1,w2)),
+                                              @concat_digit(n1,@add_word(w1,w2)));
+     @plus_with_carry(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = 
+                                     if(@add_with_carry_overflow_word(w1,w2),
+                                              @concat_digit(@succ_nat(n1),@add_with_carry_word(w1,w2)),
+                                              @concat_digit(n1,@add_with_carry_word(w1,w2)));
+     +(@most_significant_digitNat(w1),@concat_digit(n2,w2)) = 
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(@succ_nat(n2),@add_word(w1,w2)),
+                                              @concat_digit(n2,@add_word(w1,w2)));
+     @plus_with_carry(@most_significant_digitNat(w1),@concat_digit(n2,w2)) = 
+                                     if(@add_with_carry_overflow_word(w1,w2),
+                                              @concat_digit(@succ_nat(n2),@add_with_carry_word(w1,w2)),
+                                              @concat_digit(n2,@add_with_carry_word(w1,w2)));
      +(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
-                                        @concat_digit(+(@most_significant_digitNat(@add_overflow_word(w1,w2)),+(n1,n2)),
-                                                      @add_word(w1,w2));
+                                     if(@add_overflow_word(w1,w2),
+                                              @concat_digit(@plus_with_carry(n1,n2),@add_word(w1,w2)),
+                                              @concat_digit(+(n1,n2),@add_word(w1,w2)));
+     @plus_with_carry(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
+                                     if(@add_with_carry_overflow_word(w1,w2),
+                                              @concat_digit(@plus_with_carry(n1,n2),@add_with_carry_word(w1,w2)),
+                                              @concat_digit(+(n1,n2),@add_with_carry_word(w1,w2)));
+
 % The rules below are useful in solving expressions with plus and quantifiers.
      +(@succ_nat(n1),n2) = @succ_nat(+(n1,n2));
      +(n1,@succ_nat(n2)) = @succ_nat(+(n1,n2));
@@ -221,10 +246,8 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
 
 
 
-     @monus(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
-                                              if(@less(w1,w2),
-                                                    @most_significant_digitNat(@zero_word),
-                                                    @most_significant_digitNat(@minus_word(w1,w2)));
+     @monus(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) = @most_significant_digitNat(@monus_word(w1,w2));
+
      @monus(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = if(@less(w1,w2),
                                                                       if(==(n1,@most_significant_digitNat(@one_word)),
                                                                                @most_significant_digitNat(@minus_word(w1,w2)),
@@ -248,21 +271,25 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                      @concat_digit(@most_significant_digitNat(@times_overflow_word(w1,w2)),@times_word(w1,w2)));
      *(@concat_digit(n1,w1),@most_significant_digitNat(w2)) =
                            if(@equal(w2,@zero_word),
-                                @most_significant_digitNat(@zero_word),
-                                if(@equal(@times_overflow_word(w1,w2),@zero_word),
-                                     @concat_digit(*(n1,@most_significant_digitNat(w2)), @times_word(w1,w2)),
-                                     @concat_digit(
-                                             +(*(n1,@most_significant_digitNat(w2)),@most_significant_digitNat(@times_overflow_word(w1,w2))),@times_word(w1,w2))));
+                                   @most_significant_digitNat(@zero_word),
+                                   @concat_digit(@times_overflow(n1,w2,@times_overflow_word(w1,w2)),@times_word(w1,w2)));
      *(@most_significant_digitNat(w1),@concat_digit(n2,w2)) =
                            if(@equal(w1,@zero_word),
                                 @most_significant_digitNat(@zero_word),
-                                if(@equal(@times_overflow_word(w1,w2),@zero_word),
-                                     @concat_digit(*(n2,@most_significant_digitNat(w1)), @times_word(w1,w2)),
-                                     @concat_digit(
-                                             +(*(n2,@most_significant_digitNat(w1)),@most_significant_digitNat(@times_overflow_word(w1,w2))),@times_word(w1,w2))));
+                                @concat_digit(@times_overflow(n2,w1,@times_overflow_word(w1,w2)),@times_word(w1,w2)));
      *(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
                            +(@concat_digit(*(@concat_digit(n1,w1),n2),@zero_word),
                                        *(@concat_digit(n1,w1),@most_significant_digitNat(w2)));
+
+     @times_overflow(@most_significant_digitNat(w1),w2,overflow) =
+                           if(@equal(@times_with_carry_overflow_word(w1,w2,overflow),@zero_word),
+                                     @most_significant_digitNat(@times_with_carry_word(w1,w2,overflow)),
+                                     @concat_digit(@most_significant_digitNat(@times_with_carry_overflow_word(w1,w2,overflow)),@times_with_carry_word(w1,w2,overflow)));
+
+     @times_overflow(@concat_digit(n1,w1),w2,overflow) =
+                           if(@equal(w2,@zero_word),
+                                @most_significant_digitNat(overflow),
+                                @concat_digit(@times_overflow(n1,w2,@times_with_carry_overflow_word(w1,w2,overflow)),@times_with_carry_word(w1,w2,overflow)));
 
      @is_odd(@most_significant_digitNat(w)) = @rightmost_bit(w);
      @is_odd(@concat_digit(n,w)) = @rightmost_bit(w);

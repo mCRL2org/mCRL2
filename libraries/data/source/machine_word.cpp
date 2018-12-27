@@ -28,18 +28,19 @@ namespace detail
 
 /* Below standard operations on machine numbers are implemented.  */
 
-std::size_t add_overflow_word(const std::size_t n1, const std::size_t n2)
-{
-  boost::multiprecision::uint128_t m1=n1;
-  boost::multiprecision::uint128_t m2=n2;
-  return static_cast<std::size_t>((m1+m2) >> std::numeric_limits<std::size_t>::digits);
-}
-
 std::size_t times_overflow_word(const std::size_t n1, const std::size_t n2)
 {
   boost::multiprecision::uint128_t m1=n1;
   boost::multiprecision::uint128_t m2=n2;
   return static_cast<std::size_t>((m1*m2) >> std::numeric_limits<std::size_t>::digits);
+}
+
+std::size_t times_with_carry_overflow_word(const std::size_t n1, const std::size_t n2, const std::size_t n3)
+{
+  boost::multiprecision::uint128_t m1=n1;
+  boost::multiprecision::uint128_t m2=n2;
+  boost::multiprecision::uint128_t m3=n3;
+  return static_cast<std::size_t>((m1*m2+m3) >> std::numeric_limits<std::size_t>::digits);
 }
 
 std::size_t div_doubleword(const std::size_t n1, const std::size_t n2, const std::size_t n3)

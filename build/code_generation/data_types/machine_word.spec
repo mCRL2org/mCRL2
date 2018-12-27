@@ -23,10 +23,15 @@ map  @one_word <"one_word">: @word                                              
      @max_word <"max_word">: @word                                                                                                                     internal defined_by_code;
 
      @add_word <"add_word">: @word <"left"> # @word <"right"> -> @word                                                                                 internal defined_by_code; 
-     @add_overflow_word <"add_overflow_word">: @word <"left"> # @word <"right"> -> @word                                                               internal defined_by_code; 
+     @add_with_carry_word <"add_with_carry_word">: @word <"left"> # @word <"right"> -> @word                                                           internal defined_by_code; 
+     @add_overflow_word <"add_overflow_word">: @word <"left"> # @word <"right"> -> Bool                                                                internal defined_by_code; 
+     @add_with_carry_overflow_word <"add_with_carry_overflow_word">: @word <"left"> # @word <"right"> -> Bool                                          internal defined_by_code; 
      @times_word <"times_word">: @word <"left"> # @word <"right"> -> @word                                                                             internal defined_by_code; 
+     @times_with_carry_word <"times_with_carry_word">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                       internal defined_by_code; 
      @times_overflow_word <"times_overflow_word">: @word <"left"> # @word <"right"> -> @word                                                           internal defined_by_code; 
+     @times_with_carry_overflow_word <"times_with_carry_overflow_word">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                     internal defined_by_code; 
      @minus_word <"minus_word">: @word <"left"> # @word <"right"> -> @word                                                                             internal defined_by_code; 
+     @monus_word <"monus_word">: @word <"left"> # @word <"right"> -> @word                                                                             internal defined_by_code; 
      @div_word <"div_word">: @word <"left"> # @word <"right"> -> @word                                                                                 internal defined_by_code; 
      @mod_word <"mod_word">: @word <"left"> # @word <"right"> -> @word                                                                                 internal defined_by_code;
      @sqrt_word <"sqrt_word">: @word <"arg"> -> @word                                                                                                  internal defined_by_code;                            
@@ -43,9 +48,9 @@ map  @one_word <"one_word">: @word                                              
      @equal <"equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                                   internal defined_by_code;
      @not_equal <"not_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                           internal defined_by_code;
      @less <"less_word">: @word <"left"> # @word <"right"> -> Bool                                                                                     internal defined_by_code;
-     @less_equal <"less_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                           internal defined_by_code;
-     @greater <"greater_word">: @word <"left"> # @word <"right"> -> Bool                                                                                     internal defined_by_code;
-     @greater_equal <"greater_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                           internal defined_by_code;
+     @less_equal <"less_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                         internal defined_by_code;
+     @greater <"greater_word">: @word <"left"> # @word <"right"> -> Bool                                                                               internal defined_by_code;
+     @greater_equal <"greater_equal_word">: @word <"left"> # @word <"right"> -> Bool                                                                   internal defined_by_code;
 
      @rightmost_bit <"rightmost_bit">: @word <"arg"> -> Bool                                                                                           internal defined_by_code;
      @shift_right <"shift_right">: Bool <"arg1"> # @word <"arg2"> -> @word                                                                             internal defined_by_code;

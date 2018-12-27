@@ -1296,7 +1296,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
-        derived().print("(" + max_machine_number_string() + "*");
+        derived().print(max_machine_number_string() + "* (");
         derived().apply(sort_pos::arg1(x));
         derived().print(") + ");
         derived().apply(sort_pos::arg2(x));

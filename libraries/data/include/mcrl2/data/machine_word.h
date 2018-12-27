@@ -532,6 +532,82 @@ namespace mcrl2 {
       }
 
 
+      /// \brief Generate identifier \@add_with_carry_word.
+      /// \return Identifier \@add_with_carry_word.
+      inline
+      const core::identifier_string& add_with_carry_word_name()
+      {
+        static core::identifier_string add_with_carry_word_name = core::identifier_string("@add_with_carry_word");
+        return add_with_carry_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@add_with_carry_word.       
+      /// \return Function symbol add_with_carry_word.
+      inline
+      const function_symbol& add_with_carry_word()
+      {
+        static function_symbol add_with_carry_word(add_with_carry_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
+        return add_with_carry_word;
+      }
+
+
+      /// \brief Recogniser for function \@add_with_carry_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@add_with_carry_word.
+      inline
+      bool is_add_with_carry_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == add_with_carry_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@add_with_carry_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@add_with_carry_word to a number of arguments.
+      inline
+      application add_with_carry_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::add_with_carry_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@add_with_carry_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol add_with_carry_word to a
+      ///     number of arguments.
+      inline
+      bool is_add_with_carry_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_add_with_carry_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@add_with_carry_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@add_with_carry_word to a number of arguments.
+      inline
+      data_expression add_with_carry_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression add_with_carry_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==add_with_carry_word());
+        return add_with_carry_word_manual_implementation(a[0], a[1]);
+      }
+
+
       /// \brief Generate identifier \@add_overflow_word.
       /// \return Identifier \@add_overflow_word.
       inline
@@ -546,7 +622,7 @@ namespace mcrl2 {
       inline
       const function_symbol& add_overflow_word()
       {
-        static function_symbol add_overflow_word(add_overflow_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
+        static function_symbol add_overflow_word(add_overflow_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
         return add_overflow_word;
       }
 
@@ -605,6 +681,82 @@ namespace mcrl2 {
         const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==add_overflow_word());
         return add_overflow_word_manual_implementation(a[0], a[1]);
+      }
+
+
+      /// \brief Generate identifier \@add_with_carry_overflow_word.
+      /// \return Identifier \@add_with_carry_overflow_word.
+      inline
+      const core::identifier_string& add_with_carry_overflow_word_name()
+      {
+        static core::identifier_string add_with_carry_overflow_word_name = core::identifier_string("@add_with_carry_overflow_word");
+        return add_with_carry_overflow_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@add_with_carry_overflow_word.       
+      /// \return Function symbol add_with_carry_overflow_word.
+      inline
+      const function_symbol& add_with_carry_overflow_word()
+      {
+        static function_symbol add_with_carry_overflow_word(add_with_carry_overflow_word_name(), make_function_sort(machine_word(), machine_word(), sort_bool::bool_()));
+        return add_with_carry_overflow_word;
+      }
+
+
+      /// \brief Recogniser for function \@add_with_carry_overflow_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@add_with_carry_overflow_word.
+      inline
+      bool is_add_with_carry_overflow_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == add_with_carry_overflow_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@add_with_carry_overflow_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@add_with_carry_overflow_word to a number of arguments.
+      inline
+      application add_with_carry_overflow_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::add_with_carry_overflow_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@add_with_carry_overflow_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol add_with_carry_overflow_word to a
+      ///     number of arguments.
+      inline
+      bool is_add_with_carry_overflow_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_add_with_carry_overflow_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@add_with_carry_overflow_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@add_with_carry_overflow_word to a number of arguments.
+      inline
+      data_expression add_with_carry_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression add_with_carry_overflow_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==add_with_carry_overflow_word());
+        return add_with_carry_overflow_word_manual_implementation(a[0], a[1]);
       }
 
 
@@ -684,6 +836,84 @@ namespace mcrl2 {
       }
 
 
+      /// \brief Generate identifier \@times_with_carry_word.
+      /// \return Identifier \@times_with_carry_word.
+      inline
+      const core::identifier_string& times_with_carry_word_name()
+      {
+        static core::identifier_string times_with_carry_word_name = core::identifier_string("@times_with_carry_word");
+        return times_with_carry_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@times_with_carry_word.       
+      /// \return Function symbol times_with_carry_word.
+      inline
+      const function_symbol& times_with_carry_word()
+      {
+        static function_symbol times_with_carry_word(times_with_carry_word_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
+        return times_with_carry_word;
+      }
+
+
+      /// \brief Recogniser for function \@times_with_carry_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@times_with_carry_word.
+      inline
+      bool is_times_with_carry_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == times_with_carry_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@times_with_carry_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@times_with_carry_word to a number of arguments.
+      inline
+      application times_with_carry_word(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        return sort_machine_word::times_with_carry_word()(arg0, arg1, arg2);
+      }
+
+      /// \brief Recogniser for application of \@times_with_carry_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol times_with_carry_word to a
+      ///     number of arguments.
+      inline
+      bool is_times_with_carry_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_times_with_carry_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@times_with_carry_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \return The data expression corresponding to an application of \@times_with_carry_word to a number of arguments.
+      inline
+      data_expression times_with_carry_word_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+
+
+      inline
+      data_expression times_with_carry_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==times_with_carry_word());
+        return times_with_carry_word_manual_implementation(a[0], a[1], a[2]);
+      }
+
+
       /// \brief Generate identifier \@times_overflow_word.
       /// \return Identifier \@times_overflow_word.
       inline
@@ -760,6 +990,84 @@ namespace mcrl2 {
       }
 
 
+      /// \brief Generate identifier \@times_with_carry_overflow_word.
+      /// \return Identifier \@times_with_carry_overflow_word.
+      inline
+      const core::identifier_string& times_with_carry_overflow_word_name()
+      {
+        static core::identifier_string times_with_carry_overflow_word_name = core::identifier_string("@times_with_carry_overflow_word");
+        return times_with_carry_overflow_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@times_with_carry_overflow_word.       
+      /// \return Function symbol times_with_carry_overflow_word.
+      inline
+      const function_symbol& times_with_carry_overflow_word()
+      {
+        static function_symbol times_with_carry_overflow_word(times_with_carry_overflow_word_name(), make_function_sort(machine_word(), machine_word(), machine_word(), machine_word()));
+        return times_with_carry_overflow_word;
+      }
+
+
+      /// \brief Recogniser for function \@times_with_carry_overflow_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@times_with_carry_overflow_word.
+      inline
+      bool is_times_with_carry_overflow_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == times_with_carry_overflow_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@times_with_carry_overflow_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression. 
+      /// \return Application of \@times_with_carry_overflow_word to a number of arguments.
+      inline
+      application times_with_carry_overflow_word(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        return sort_machine_word::times_with_carry_overflow_word()(arg0, arg1, arg2);
+      }
+
+      /// \brief Recogniser for application of \@times_with_carry_overflow_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol times_with_carry_overflow_word to a
+      ///     number of arguments.
+      inline
+      bool is_times_with_carry_overflow_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_times_with_carry_overflow_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@times_with_carry_overflow_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \param arg2 A data expression.
+      /// \return The data expression corresponding to an application of \@times_with_carry_overflow_word to a number of arguments.
+      inline
+      data_expression times_with_carry_overflow_word_manual_implementation(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2);
+
+
+      inline
+      data_expression times_with_carry_overflow_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==times_with_carry_overflow_word());
+        return times_with_carry_overflow_word_manual_implementation(a[0], a[1], a[2]);
+      }
+
+
       /// \brief Generate identifier \@minus_word.
       /// \return Identifier \@minus_word.
       inline
@@ -833,6 +1141,82 @@ namespace mcrl2 {
         const application& a=atermpp::down_cast<application>(a1);
         assert(a.head()==minus_word());
         return minus_word_manual_implementation(a[0], a[1]);
+      }
+
+
+      /// \brief Generate identifier \@monus_word.
+      /// \return Identifier \@monus_word.
+      inline
+      const core::identifier_string& monus_word_name()
+      {
+        static core::identifier_string monus_word_name = core::identifier_string("@monus_word");
+        return monus_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@monus_word.       
+      /// \return Function symbol monus_word.
+      inline
+      const function_symbol& monus_word()
+      {
+        static function_symbol monus_word(monus_word_name(), make_function_sort(machine_word(), machine_word(), machine_word()));
+        return monus_word;
+      }
+
+
+      /// \brief Recogniser for function \@monus_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@monus_word.
+      inline
+      bool is_monus_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == monus_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@monus_word.        
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression. 
+      /// \return Application of \@monus_word to a number of arguments.
+      inline
+      application monus_word(const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_machine_word::monus_word()(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@monus_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol monus_word to a
+      ///     number of arguments.
+      inline
+      bool is_monus_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_monus_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@monus_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \param arg1 A data expression.
+      /// \return The data expression corresponding to an application of \@monus_word to a number of arguments.
+      inline
+      data_expression monus_word_manual_implementation(const data_expression& arg0, const data_expression& arg1);
+
+
+      inline
+      data_expression monus_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==monus_word());
+        return monus_word_manual_implementation(a[0], a[1]);
       }
 
 
@@ -2463,10 +2847,15 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::four_word());
         result.push_back(sort_machine_word::max_word());
         result.push_back(sort_machine_word::add_word());
+        result.push_back(sort_machine_word::add_with_carry_word());
         result.push_back(sort_machine_word::add_overflow_word());
+        result.push_back(sort_machine_word::add_with_carry_overflow_word());
         result.push_back(sort_machine_word::times_word());
+        result.push_back(sort_machine_word::times_with_carry_word());
         result.push_back(sort_machine_word::times_overflow_word());
+        result.push_back(sort_machine_word::times_with_carry_overflow_word());
         result.push_back(sort_machine_word::minus_word());
+        result.push_back(sort_machine_word::monus_word());
         result.push_back(sort_machine_word::div_word());
         result.push_back(sort_machine_word::mod_word());
         result.push_back(sort_machine_word::sqrt_word());
@@ -2528,10 +2917,15 @@ namespace mcrl2 {
         result[sort_machine_word::four_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::four_word_application,"sort_machine_word::four_word_manual_implementation");
         result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word_manual_implementation");
         result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word_manual_implementation");
+        result[sort_machine_word::add_with_carry_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_with_carry_word_application,"sort_machine_word::add_with_carry_word_manual_implementation");
         result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word_manual_implementation");
+        result[sort_machine_word::add_with_carry_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_with_carry_overflow_word_application,"sort_machine_word::add_with_carry_overflow_word_manual_implementation");
         result[sort_machine_word::times_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_word_application,"sort_machine_word::times_word_manual_implementation");
+        result[sort_machine_word::times_with_carry_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_with_carry_word_application,"sort_machine_word::times_with_carry_word_manual_implementation");
         result[sort_machine_word::times_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_overflow_word_application,"sort_machine_word::times_overflow_word_manual_implementation");
+        result[sort_machine_word::times_with_carry_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::times_with_carry_overflow_word_application,"sort_machine_word::times_with_carry_overflow_word_manual_implementation");
         result[sort_machine_word::minus_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::minus_word_application,"sort_machine_word::minus_word_manual_implementation");
+        result[sort_machine_word::monus_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::monus_word_application,"sort_machine_word::monus_word_manual_implementation");
         result[sort_machine_word::div_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::div_word_application,"sort_machine_word::div_word_manual_implementation");
         result[sort_machine_word::mod_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::mod_word_application,"sort_machine_word::mod_word_manual_implementation");
         result[sort_machine_word::sqrt_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::sqrt_word_application,"sort_machine_word::sqrt_word_manual_implementation");
@@ -2563,7 +2957,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_not_equal_word_application(e) || is_less_word_application(e) || is_less_equal_word_application(e) || is_greater_word_application(e) || is_greater_equal_word_application(e));
+        assert(is_add_word_application(e) || is_add_with_carry_word_application(e) || is_add_overflow_word_application(e) || is_add_with_carry_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_monus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_not_equal_word_application(e) || is_less_word_application(e) || is_less_equal_word_application(e) || is_greater_word_application(e) || is_greater_equal_word_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2575,7 +2969,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e) || is_shift_right_application(e));
+        assert(is_times_with_carry_word_application(e) || is_times_with_carry_overflow_word_application(e) || is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e) || is_shift_right_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -2587,7 +2981,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e) || is_shift_right_application(e));
+        assert(is_times_with_carry_word_application(e) || is_times_with_carry_overflow_word_application(e) || is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e) || is_shift_right_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -2599,7 +2993,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
+        assert(is_times_with_carry_word_application(e) || is_times_with_carry_overflow_word_application(e) || is_div_doubleword_application(e) || is_div_double_doubleword_application(e) || is_div_triple_doubleword_application(e) || is_mod_doubleword_application(e) || is_sqrt_tripleword_application(e) || is_sqrt_tripleword_overflow_application(e) || is_sqrt_quadrupleword_application(e) || is_sqrt_quadrupleword_overflow_application(e));
         return atermpp::down_cast<const application>(e)[2];
       }
 
@@ -2647,7 +3041,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_add_word_application(e) || is_add_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_not_equal_word_application(e) || is_less_word_application(e) || is_less_equal_word_application(e) || is_greater_word_application(e) || is_greater_equal_word_application(e));
+        assert(is_add_word_application(e) || is_add_with_carry_word_application(e) || is_add_overflow_word_application(e) || is_add_with_carry_overflow_word_application(e) || is_times_word_application(e) || is_times_overflow_word_application(e) || is_minus_word_application(e) || is_monus_word_application(e) || is_div_word_application(e) || is_mod_word_application(e) || is_equal_word_application(e) || is_not_equal_word_application(e) || is_less_word_application(e) || is_less_equal_word_application(e) || is_greater_word_application(e) || is_greater_equal_word_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 

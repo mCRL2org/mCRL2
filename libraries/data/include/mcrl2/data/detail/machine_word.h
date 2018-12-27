@@ -92,18 +92,55 @@ inline std::size_t add_word(const std::size_t n1, const std::size_t n2)
   return n1+n2;
 }
 
-std::size_t add_overflow_word(const std::size_t n1, const std::size_t n2);
+inline std::size_t add_with_carry_word(const std::size_t n1, const std::size_t n2)
+{
+  return n1+n2+1;
+}
+
+inline bool add_overflow_word(const std::size_t n1, const std::size_t n2)
+{
+  if (n1+n2<n1)
+  {
+    return true;  // In this case there is an overflow.
+  }
+ return false; // No overflow. 
+}
+
+inline bool add_with_carry_overflow_word(const std::size_t n1, const std::size_t n2)
+{
+  if (n1+n2+1<n1)
+  {
+    return true;  // In this case there is an overflow.
+  }
+  return false; // No overflow. 
+}
 
 inline std::size_t times_word(const std::size_t n1, const std::size_t n2)
 {
   return n1*n2;
 }
 
+inline std::size_t times_with_carry_word(const std::size_t n1, const std::size_t n2, const std::size_t n3)
+{
+  return n1*n2+n3;
+}
+
 std::size_t times_overflow_word(const std::size_t n1, const std::size_t n2);
+
+std::size_t times_with_carry_overflow_word(const std::size_t n1, const std::size_t n2, std::size_t n3);
 
 inline std::size_t minus_word(const std::size_t n1, const std::size_t n2)
 {
   return n1-n2;
+}
+
+inline std::size_t monus_word(const std::size_t n1, const std::size_t n2)
+{
+  if (n1>n2) 
+  { 
+    return n1-n2;
+  }
+  return 0;
 }
 
 inline std::size_t div_word(const std::size_t n1, const std::size_t n2)
@@ -319,16 +356,48 @@ inline data_expression add_word_manual_implementation(const data_expression& e1,
                               atermpp::down_cast<machine_number>(e2).value()));
 }
 
+/// \brief The result of adding two words plus 1 modulo the maximal representable machine word plus 1.
+/// \param e1 The first argument.
+/// \param e2 The second argument. 
+/// \return e1+e2+1 modulo the machine word. 
+inline data_expression add_with_carry_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+{
+  assert(is_machine_number(e1) && is_machine_number(e2));
+  return machine_number(detail::add_with_carry_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value()));
+}
+
 /// \brief An indication whether an overflow occurs when e1 and e2 are added. 
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
-/// \return If e1+e2 is larger than a machine word, than 1, otherwise 0.
+/// \return If e1+e2 is larger than a machine word, then true, else false. 
 inline data_expression add_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  return machine_number(detail::add_overflow_word(
+  if (detail::add_overflow_word(
                               atermpp::down_cast<machine_number>(e1).value(),
-                              atermpp::down_cast<machine_number>(e2).value()));
+                              atermpp::down_cast<machine_number>(e2).value()))
+  {
+    return sort_bool::true_();
+  }
+  return sort_bool::false_();
+}
+
+/// \brief An indication whether an overflow occurs when e1 and e2 are added. 
+/// \param e1 The first argument.
+/// \param e2 The second argument. 
+/// \return If e1+e2+1 is larger than a machine word, then true, else false. 
+inline data_expression add_with_carry_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+{
+  assert(is_machine_number(e1) && is_machine_number(e2));
+  if (detail::add_with_carry_overflow_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value()))
+  {
+    return sort_bool::true_();
+  }
+  return sort_bool::false_();
 }
 
 /// \brief The result of multiplying two words modulo the maximal representable machine word plus 1.
@@ -343,6 +412,19 @@ inline data_expression times_word_manual_implementation(const data_expression& e
                               atermpp::down_cast<machine_number>(e2).value()));
 }
 
+/// \brief The result of multiplying two words and adding the third modulo the maximal representable machine word plus 1.
+/// \param e1 The first argument.
+/// \param e2 The second argument. 
+/// \return e1*e2+e3 modulo the machine word. 
+inline data_expression times_with_carry_word_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+{
+  assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
+  return machine_number(detail::times_with_carry_word(
+                              atermpp::down_cast<machine_number>(e1).value(),
+                              atermpp::down_cast<machine_number>(e2).value(),
+                              atermpp::down_cast<machine_number>(e3).value()));
+}
+
 /// \brief The result of multiplying two words divided by the maximal representable machine word plus 1.
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
@@ -350,11 +432,22 @@ inline data_expression times_word_manual_implementation(const data_expression& e
 inline data_expression times_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  {
-    return machine_number(detail::times_overflow_word(
+  return machine_number(detail::times_overflow_word(
                                 atermpp::down_cast<machine_number>(e1).value(),
                                 atermpp::down_cast<machine_number>(e2).value()));
-  }
+}
+
+/// \brief The result of multiplying two words and adding a third divided by the maximal representable machine word plus 1.
+/// \param e1 The first argument.
+/// \param e2 The second argument. 
+/// \return e1*e2 div the maximal machine word+1. 
+inline data_expression times_with_carry_overflow_word_manual_implementation(const data_expression& e1, const data_expression& e2, const data_expression& e3)
+{
+  assert(is_machine_number(e1) && is_machine_number(e2) && is_machine_number(e3));
+  return machine_number(detail::times_with_carry_overflow_word(
+                                atermpp::down_cast<machine_number>(e1).value(),
+                                atermpp::down_cast<machine_number>(e2).value(),
+                                atermpp::down_cast<machine_number>(e3).value()));
 }
 
 /// \brief The result of subtracting two words modulo the maximal representable machine word plus 1.
@@ -362,6 +455,18 @@ inline data_expression times_overflow_word_manual_implementation(const data_expr
 /// \param e2 The second argument. 
 /// \return e1-e2 modulo the machine word. 
 inline data_expression minus_word_manual_implementation(const data_expression& e1, const data_expression& e2)
+{
+  assert(is_machine_number(e1) && is_machine_number(e2));
+  return machine_number(detail::minus_word(
+                               atermpp::down_cast<machine_number>(e1).value(),
+                               atermpp::down_cast<machine_number>(e2).value()));
+}
+
+/// \brief The result of subtracting two words. If the result is negative 0 is returned. 
+/// \param e1 The first argument.
+/// \param e2 The second argument. 
+/// \return max(0,e1-e2).
+inline data_expression monus_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
   return machine_number(detail::minus_word(
