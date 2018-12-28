@@ -18,6 +18,7 @@
 #include "mcrl2/utilities/unordered_set.h"
 
 #include <limits>
+#include <stack>
 #include <utility>
 #include <vector>
 
@@ -162,8 +163,7 @@ private:
   constexpr bool is_dynamic_storage() const;
 
   /// \brief Marks a term and recursively all arguments that are not reachable.
-  template<std::size_t Arity = N>
-  void mark_term(_aterm& term);
+  void mark_term(_aterm& root);
 
   /// \brief Verify that the given term was constructed properly.
   template<std::size_t Arity = N>
@@ -183,6 +183,9 @@ private:
   std::size_t m_term_hits = 0; // The number of terms that a term was found in the pool.
   std::size_t m_term_creates = 0; // The number of calls to create a term.
   std::size_t m_erasedBlocks = 0; // The number of blocks that have been erased in the block allocator.
+
+  /// A reusable todo stack.
+  std::stack<_aterm*> todo;
 };
 
 } // namespace detail

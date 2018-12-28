@@ -206,6 +206,9 @@ void aterm_pool::collect()
   assert(std::get<7>(m_appl_storage).verify_mark());
   assert(m_appl_dynamic_storage.verify_mark());
 
+  // Keep track of the duration for marking and reset for sweep.
+  auto mark_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
+  timestamp = std::chrono::system_clock::now();
   // Collect all terms that are not reachable or marked.
   m_int_storage.sweep();
   std::get<0>(m_appl_storage).sweep();
@@ -233,9 +236,12 @@ void aterm_pool::collect()
   // Print some statistics.
   if (EnableGarbageCollectionMetrics)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms in "
-      << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count() << " ms.\n";
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): There are " << size() << " terms stored.\n";
+    // Update the times
+    auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
+
+    // Print the relevant information.
+    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms, " << size() << " terms remaining in "
+      << mark_duration + sweep_duration << " ms (marking " << mark_duration << " ms + sweep " << sweep_duration << " ms).\n";
   }
 
   get_symbol_pool().print_performance_stats();
