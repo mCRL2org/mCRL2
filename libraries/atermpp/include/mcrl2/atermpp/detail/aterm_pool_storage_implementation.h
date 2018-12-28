@@ -139,7 +139,10 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
     m_term_set.print_performance_statistics();
   }
 
-  //mCRL2log(mcrl2::log::debug) << "Consolidate removed " << m_erasedBlocks << " in the block allocator.\n";
+  if (EnableGarbageCollectionMetrics && m_erasedBlocks > 0)
+  {
+    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(" << identifier << "): Consolidate removed " << m_erasedBlocks << " blocks.\n";
+  }
 
   if (EnableTermCreationMetrics)
   {
@@ -192,7 +195,7 @@ void ATERM_POOL_STORAGE::sweep()
   }
 
   // Clean up unnecessary blocks.
-  //m_erasedBlocks = allocator.consolidate();
+  //m_erasedBlocks = m_term_set.allocator().consolidate();
 }
 
 /// PRIVATE FUNCTIONS
@@ -212,10 +215,9 @@ void ATERM_POOL_STORAGE::call_creation_hook(aterm term)
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::call_deletion_hook(_aterm* term)
 {
-  const function_symbol& sym = term->function();
   for (auto& pair : m_deletion_hooks)
   {
-    if (pair.first == sym)
+    if (pair.first == term->function())
     {
       // Create a temporary unprotected term to upcast to an actual term.
       unprotected_aterm actual_term(term);
@@ -268,9 +270,7 @@ typename ATERM_POOL_STORAGE::iterator ATERM_POOL_STORAGE::destroy(iterator it)
   call_deletion_hook(&term);
 
   // Remove them from the hash table, will also destroy terms with fixed arity.
-  it = m_term_set.erase(it);
-
-  return it;
+  return m_term_set.erase(it);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -308,41 +308,39 @@ constexpr bool ATERM_POOL_STORAGE::is_dynamic_storage() const
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
-template<std::size_t Arity>
-void ATERM_POOL_STORAGE::mark_term(_aterm& term)
+void ATERM_POOL_STORAGE::mark_term(_aterm& root)
 {
-  if (!term.is_reachable())
-  {
-    // Only mark this term if it current is unreachable, because the marking is applied to
-    // the reference counter.
-    term.mark();
-  }
+  // Do not use the stack, because this might run out of stack memory for large lists.
+  todo.push(&root);
 
-  // (Statically) determine the arity of the function application.
-  const std::size_t arity = (Arity == DynamicNumberOfArguments) ? term.function().arity() : N;
-  _term_appl& term_appl = reinterpret_cast<_term_appl&>(term);
-
-  for (std::size_t i = 0; i < arity; ++i)
+  // Mark the term depth-first to reduce the maximum todo size required.
+  while (!todo.empty())
   {
-    // Marks all arguments that are not already (marked as) reachable, because the current
-    // term is reachable and as such its arguments are reachable as well.
-    _aterm& argument = *detail::address(term_appl.arg(i));
-    if (!argument.is_reachable())
+    _aterm& term = *todo.top();
+    todo.pop();
+
+    // (Statically) determine the arity of the function application.
+    const std::size_t arity = term.function().arity();
+    _term_appl& term_appl = reinterpret_cast<_term_appl&>(term);
+
+    for (std::size_t i = 0; i < arity; ++i)
     {
-      if (argument.function().arity() == N)
+      // Marks all arguments that are not already (marked as) reachable, because the current
+      // term is reachable and as such its arguments are reachable as well.
+      _aterm& argument = *detail::address(term_appl.arg(i));
+      if (!argument.is_reachable())
       {
-        // Use the arity of the storage pool when the arities match.
-        mark_term<N>(argument);
-      }
-      else
-      {
-        // Use the dynamic function to mark the argument.
-        mark_term<DynamicNumberOfArguments>(argument);
+        // Only mark this term if it current is unreachable, because the marking is applied to
+        // the reference counter.
+        argument.mark();
+
+        // Add the argument to be explored as well.
+        todo.push(&argument);
       }
     }
 
     // Each argument should be reachable.
-    assert(argument.is_reachable());
+    assert(term.is_reachable());
   }
 }
 

@@ -10,7 +10,9 @@
 #define MCRL2_UTILITIES_UNORDERED_SET_ITERATOR_H
 
 #include "mcrl2/utilities/spinlock.h"
-#include "mcrl2/utilities/detail/bucket.h"
+#include "mcrl2/utilities/detail/bucket_list.h"
+
+#include <vector>
 
 namespace mcrl2
 {
@@ -32,10 +34,16 @@ public:
     typename Bucket::iterator>::type;
 
   /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
+  unordered_set_iterator(bucket_it it, bucket_it end, key_it_type before_it, key_it_type key) :
+    m_key_before_it(before_it), m_key_it(key), m_bucket_it(it), m_bucket_end(end)
+  {
+    goto_next_bucket();
+  }
+
+  /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
   unordered_set_iterator(bucket_it it, bucket_it end, key_it_type key) :
     m_key_it(key), m_bucket_it(it), m_bucket_end(end)
   {
-    /// Initialize the before it iterator for the first bucket.
     m_key_before_it = (*m_bucket_it).before_begin();
     goto_next_bucket();
   }
@@ -52,13 +60,8 @@ public:
 
   unordered_set_iterator& operator++()
   {
-    if (m_key_it != m_key_end)
-    {
-      // There are more elements in the bucket.
-      ++m_key_it;
-      ++m_key_before_it;
-    }
-
+    ++m_key_it;
+    ++m_key_before_it;
     goto_next_bucket();
     return *this;
   }
@@ -77,7 +80,7 @@ public:
 
   bool operator!=(const unordered_set_iterator& other)
   {
-    return m_bucket_it != other.m_bucket_it || m_key_it != other.m_key_it;
+    return m_key_it != other.m_key_it || m_bucket_it != other.m_bucket_it;
   }
 
   /// \returns A reference to the before key iterator.
@@ -86,13 +89,16 @@ public:
   /// \returns A reference to the key iterator.
   key_it_type& key_it() { return m_key_it; }
 
+  bucket_it& get_bucket_it() { return m_bucket_it; }
+
   Bucket& bucket() { return *m_bucket_it; }
 
+private:
   /// \brief Iterate to the next non-empty bucket.
   void goto_next_bucket()
   {
     // Find the first bucket that is not empty.
-    while(!(m_key_it != m_key_end))
+    while(!(m_key_it != key_it_type::EndIterator))
     {
       // Take the next bucket and reset the key iterator.
       ++m_bucket_it;
@@ -104,19 +110,17 @@ public:
       }
       else
       {
-        // Reached the end the buckets.
+        // Reached the end of the buckets.
         break;
       }
     }
 
     // The current bucket contains elements or we are at the end.
-    assert(m_bucket_it == m_bucket_end || m_key_it != m_key_end);
+    assert(m_bucket_it == m_bucket_end || m_key_it != key_it_type::EndIterator);
   }
 
-private:
   key_it_type m_key_before_it;
-  key_it_type m_key_it;
-  key_it_type m_key_end;
+  key_it_type m_key_it; // Invariant: m_key_it != EndIterator.
   bucket_it m_bucket_it;
   bucket_it m_bucket_end;
 };

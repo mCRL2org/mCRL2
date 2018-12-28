@@ -166,15 +166,9 @@ public:
     m_packed_allocator.deallocate(reinterpret_cast<char*>(element), term_appl_size(term.function().arity()));
   }
 
-  constexpr bool has_free_slots() const noexcept
-  {
-    return false;
-  }
-
-  constexpr std::size_t capacity() const
-  {
-    return 0;
-  }
+  constexpr std::size_t capacity() const { return 0; }
+  constexpr std::size_t consolidate() const noexcept { return 0; }
+  constexpr bool has_free_slots() const noexcept { return false; }
 
 private:
   std::allocator<char> m_packed_allocator;

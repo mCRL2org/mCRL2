@@ -6,15 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MCRL2_UTILITIESPP_DETAIL_BUCKET_H_
-#define MCRL2_UTILITIESPP_DETAIL_BUCKET_H_
+#ifndef MCRL2_UTILITIES_DETAIL_BUCKETLIST_H_
+#define MCRL2_UTILITIES_DETAIL_BUCKETLIST_H_
 
-#include <array>
 #include <assert.h>
 #include <atomic>
 #include <cstddef>
-#include <vector>
-#include <forward_list>
+#include <iterator>
 
 namespace mcrl2
 {
@@ -74,8 +72,12 @@ public:
 
   /// \brief Iterator over all keys in a bucket list.
   template<bool Constant = true>
-  class key_iterator
+  class key_iterator : std::iterator_traits<Key>
   {
+    struct Sentinel{};
+
+    using tag = std::input_iterator_tag;
+
     friend class bucket_list<Key, Allocator>;
     using Bucket = typename std::conditional<Constant, const bucket_list<Key, Allocator>, bucket_list<Key, Allocator>>::type;
     using reference = typename std::conditional<Constant, const Key&, Key&>::type;
@@ -85,6 +87,9 @@ public:
     using node_base_pointer = typename std::conditional<Constant, const node_base*, node_base*>::type;
 
   public:
+    /// \brief A end of the iterator sentinel.
+    static constexpr Sentinel EndIterator{};
+
     key_iterator(node_base_pointer node)
       : m_bucket_node(reinterpret_cast<node_pointer>(node))
     {}
@@ -115,9 +120,14 @@ public:
       return m_bucket_node->key();
     }
 
-    bool operator != (const key_iterator& it)
+    bool operator != (const key_iterator& it) const noexcept
     {
       return m_bucket_node != it.m_bucket_node;
+    }
+
+    bool operator != (Sentinel) const noexcept
+    {
+      return m_bucket_node != nullptr;
     }
 
     node* get_node() const noexcept
@@ -190,4 +200,4 @@ private:
 } // namespace utilities
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIESPP_DETAIL_BUCKET_H_
+#endif // MCRL2_UTILITIES_DETAIL_BUCKETLIST_H_

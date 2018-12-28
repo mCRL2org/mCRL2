@@ -13,6 +13,7 @@
 #define ATYPES_H
 
 #include <cstddef>
+#include <limits>
 
 /* Avoid warnings under windows, by renaming all strdup's into _strdup's,
  * and renaming the _strdup into strdup under other platforms than windows. */
@@ -39,7 +40,7 @@ namespace atermpp
  *    This is used as a replacement of a negative number as an indicator of non
  *       existence */
 
-static const std::size_t npos=(std::size_t)(-1);
+static constexpr std::size_t npos = std::numeric_limits<std::size_t>::max();
 
 } // namespace atermpp
 

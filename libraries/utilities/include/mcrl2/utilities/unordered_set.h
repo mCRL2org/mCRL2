@@ -11,7 +11,7 @@
 
 #include "mcrl2/utilities/unordered_set_iterator.h"
 
-#include "mcrl2/utilities/detail/bucket.h"
+#include "mcrl2/utilities/detail/bucket_list.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/spinlock.h"
 
@@ -74,7 +74,7 @@ public:
 
   /// \brief Erases the element pointed to by the iterator.
   /// \returns An iterator to the next key.
-  iterator& erase(iterator& it);
+  iterator erase(iterator it);
 
   template<typename...Args>
   iterator find(const Args&... args);
@@ -93,6 +93,7 @@ public:
 
   /// \returns A reference to the local node allocator.
   const NodeAllocator& allocator() const noexcept { return m_allocator; }
+  NodeAllocator& allocator() noexcept { return m_allocator; }
 
 private:
 
@@ -100,7 +101,7 @@ private:
   template<typename ...Args>
   Bucket& find_bucket(const Args&... args)
   {
-    std::size_t hash = m_hash(args...);
+    std::size_t hash = Hash()(args...);
     /// n mod 2^i is equal to n & (2^i - 1).
     assert(m_buckets_mask == m_buckets.size() - 1);
     std::size_t buffer = hash & m_buckets_mask;
@@ -122,15 +123,14 @@ private:
   /// \brief Resizes the set to the given number of elements.
   void resize();
 
-  std::vector<Bucket> m_buckets;
+  /// \brief The number of elements stored in this set.
   std::size_t m_number_of_elements = 0;
 
   /// \brief Always equal to m_buckets.size() - 1.
   std::size_t m_buckets_mask;
-  NodeAllocator m_allocator;
 
-  Equals m_equals;
-  Hash m_hash;
+  std::vector<Bucket> m_buckets;
+  NodeAllocator m_allocator;
 };
 
 } // namespace utilities

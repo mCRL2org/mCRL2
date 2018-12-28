@@ -7,12 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
+#ifndef MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H
+#define MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H
+
 #define MCRL2_UNORDERED_SET_TEMPLATES template<typename Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
 #define MCRL2_UNORDERED_SET_CLASS unordered_set<Key, Hash, Equals, Allocator, ThreadSafe>
 
 #include "unordered_set.h"
 
-#include "mcrl2/utilities/detail/bucket.h"
 #include "mcrl2/utilities/logger.h"
 
 #include <iostream>
@@ -23,20 +25,16 @@ namespace utilities
 {
 
 MCRL2_UNORDERED_SET_TEMPLATES
-typename MCRL2_UNORDERED_SET_CLASS::iterator& MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::iterator& it)
+typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::iterator it)
 {
   // Find the bucket that is pointed to and remove the key after the before iterator.
   Bucket& bucket = it.bucket();
 
-  // Remove the key that is after the before iterator.
-  it.key_it() = bucket.erase_after(it.key_before_it(), m_allocator);
-
-  // In the case that key_it becomes the end the next bucket must be found.
-  it.goto_next_bucket();
-
   // An element was removed from the hash table.
   --m_number_of_elements;
-  return it;
+
+  // Remove the key that is after the before iterator.
+  return iterator(it.get_bucket_it(), m_buckets.end(), it.key_before_it(), bucket.erase_after(it.key_before_it(), m_allocator));
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
@@ -48,7 +46,7 @@ void MCRL2_UNORDERED_SET_CLASS::erase(Key& key)
   typename Bucket::iterator before_it = bucket.before_begin();
   for (typename Bucket::iterator it = bucket.begin(); it != bucket.end();)
   {
-    if (m_equals(*it, key))
+    if (Equals()(*it, key))
     {
       // Erase the current element and stop iterating.
       --m_number_of_elements;
@@ -73,7 +71,7 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(con
   for(typename Bucket::iterator it = bucket.begin(); it != bucket.end(); ++it)
   {
     auto& key = *it;
-    if (m_equals(key, args...))
+    if (Equals()(key, args...))
     {
       return iterator(it);
     }
@@ -181,11 +179,15 @@ void MCRL2_UNORDERED_SET_CLASS::resize()
     }
   }
 
+  // Calculate the new size before clearing the old buckets.
   std::size_t new_size = m_buckets.size() * 2;
 
   // Recreate the hash table, but don't move or copy the old elements.
-  m_buckets.clear();
-  m_buckets.resize(2 * new_size);
+  {
+    // clear() doesn't actually free the memory used and still results in an 3n peak.
+    std::vector<Bucket>().swap(m_buckets);
+  }
+  m_buckets.resize(new_size);
   m_buckets_mask = m_buckets.size() - 1;
 
   // Fill the set with all elements of the previous unordered set.
@@ -205,3 +207,5 @@ void MCRL2_UNORDERED_SET_CLASS::resize()
 
 } // namespace utilities
 } // namespace mcrl2
+
+#endif // MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H
