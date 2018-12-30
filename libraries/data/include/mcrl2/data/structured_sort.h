@@ -200,13 +200,13 @@ class structured_sort: public sort_expression
       data_equation_vector result;
 
       // give every constructor an index.
-      std::size_t index = 0;
+      std::size_t index = 1;
       for(structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i, ++index)
       {
         // constructor does not take arguments
         if (i->arguments().empty())
         {
-          result.push_back(data_equation(to_pos_function(s)(i->constructor_function(s)), machine_number(index)));
+          result.push_back(data_equation(to_pos_function(s)(i->constructor_function(s)), sort_pos::pos(index)));
           result.push_back(data_equation(equal_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::true_()));
           result.push_back(data_equation(smaller_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::false_()));
           result.push_back(data_equation(smaller_equal_arguments_function(s)(i->constructor_function(s),i->constructor_function(s)), sort_bool::true_()));
@@ -225,7 +225,7 @@ class structured_sort: public sort_expression
           application instance1(i->constructor_function(s), variables1);
           application instance2(i->constructor_function(s), variables2);
 
-          result.push_back(data_equation(variables1, sort_bool::true_(), to_pos_function(s)(instance1), machine_number(index)));
+          result.push_back(data_equation(variables1, sort_bool::true_(), to_pos_function(s)(instance1), sort_pos::pos(index)));
 
           // constructors are the same, generate right hand sides of equal_arguments_function, etc.
           variable_vector::const_reverse_iterator end(variables1.rend());
@@ -282,14 +282,14 @@ class structured_sort: public sort_expression
       application equal_arguments_xy         = application(equal_arguments_function(s), x, y);
       application smaller_arguments_xy       = application(smaller_arguments_function(s), x, y);
       application smaller_equal_arguments_xy = application(smaller_equal_arguments_function(s), x, y);
-      result.push_back(data_equation(xy, sort_machine_word::equal_word(to_pos_x, to_pos_y),     equal_to(x,y), equal_arguments_xy));
-      result.push_back(data_equation(xy, sort_machine_word::not_equal_word(to_pos_x, to_pos_y), equal_to(x,y), sort_bool::false_()));
-      result.push_back(data_equation(xy, sort_machine_word::less_word(to_pos_x, to_pos_y),      less(x,y), sort_bool::true_()));
-      result.push_back(data_equation(xy, sort_machine_word::equal_word(to_pos_x, to_pos_y),     less(x,y), smaller_arguments_xy));
-      result.push_back(data_equation(xy, sort_machine_word::greater_word(to_pos_x, to_pos_y),      less(x,y), sort_bool::false_()));
-      result.push_back(data_equation(xy, sort_machine_word::less_word(to_pos_x, to_pos_y),         less_equal(x,y), sort_bool::true_()));
-      result.push_back(data_equation(xy, sort_machine_word::equal_word(to_pos_x, to_pos_y),     less_equal(x,y), smaller_equal_arguments_xy));
-      result.push_back(data_equation(xy, sort_machine_word::greater_word(to_pos_x, to_pos_y),      less_equal(x,y), sort_bool::false_()));
+      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     equal_to(x,y), equal_arguments_xy));
+      result.push_back(data_equation(xy, not_equal_to(to_pos_x, to_pos_y), equal_to(x,y), sort_bool::false_()));
+      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),      less(x,y), sort_bool::true_()));
+      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     less(x,y), smaller_arguments_xy));
+      result.push_back(data_equation(xy, greater(to_pos_x, to_pos_y),      less(x,y), sort_bool::false_()));
+      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less_equal(x,y), sort_bool::true_()));
+      result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     less_equal(x,y), smaller_equal_arguments_xy));
+      result.push_back(data_equation(xy, greater(to_pos_x, to_pos_y),      less_equal(x,y), sort_bool::false_()));
       // (JK) The following encoding of the equations would be more desirable; however,
       // rewriting fails if we use this.
 /*

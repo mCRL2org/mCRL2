@@ -1442,7 +1442,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_nat::is_natpred_application(x))
     {
-      derived().apply(sort_int::int2nat(sort_int::pred(sort_nat::arg(x))));
+      // Construction below does not work as the sort of pred can sometimes be untyped, causing an exception. 
+      // This is a problem in the jitty rewriter and ought not to be a problem here. Line of code below should be restored. 
+      // derived().apply(sort_int::int2nat(sort_int::pred(sort_nat::arg(x))));  
+      derived().print("pred(");
+      print_expression(sort_nat::arg(x));
+      derived().print(")");
     }
     else if (sort_nat::is_is_odd_application(x))
     {

@@ -1426,12 +1426,12 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp}), abs(cneg(vp)), sort_nat::pos2nat(vp)));
         result.push_back(data_equation(variable_list({vp}), negate(vp), cneg(vp)));
         result.push_back(data_equation(variable_list(), negate(sort_nat::c0()), cint(sort_nat::c0())));
-        result.push_back(data_equation(variable_list({vn}), negate(vn), if_(equal_to(vn, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), cint(sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), cneg(sort_nat::nat2pos(vn)))));
+        result.push_back(data_equation(variable_list({vn}), negate(vn), if_(sort_nat::equals_zero(vn), cint(sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), cneg(sort_nat::nat2pos(vn)))));
         result.push_back(data_equation(variable_list({vn}), negate(cint(vn)), negate(vn)));
         result.push_back(data_equation(variable_list({vp}), negate(cneg(vp)), cint(sort_nat::pos2nat(vp))));
-        result.push_back(data_equation(variable_list({vn}), succ(cint(vn)), cint(plus(vn, sort_nat::most_significant_digit_nat(sort_machine_word::one_word())))));
+        result.push_back(data_equation(variable_list({vn}), succ(cint(vn)), cint(sort_nat::succ_nat(vn))));
         result.push_back(data_equation(variable_list({vp}), succ(cneg(vp)), negate(pred(vp))));
-        result.push_back(data_equation(variable_list({vn}), pred(vn), if_(equal_to(vn, sort_nat::most_significant_digit_nat(sort_machine_word::zero_word())), cneg(sort_pos::most_significant_digit(sort_machine_word::one_word())), cint(sort_nat::natpred(vn)))));
+        result.push_back(data_equation(variable_list({vn}), pred(vn), if_(sort_nat::equals_zero(vn), cneg(sort_pos::most_significant_digit(sort_machine_word::one_word())), cint(sort_nat::natpred(vn)))));
         result.push_back(data_equation(variable_list({vn}), pred(cint(vn)), pred(vn)));
         result.push_back(data_equation(variable_list({vp}), pred(cneg(vp)), cneg(succ(vp))));
         result.push_back(data_equation(variable_list({vm, vn}), plus(cint(vm), cint(vn)), cint(plus(vm, vn))));

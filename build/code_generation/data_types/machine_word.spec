@@ -22,6 +22,11 @@ map  @one_word <"one_word">: @word                                              
      @four_word <"four_word">: @word                                                                                                                   internal defined_by_code;
      @max_word <"max_word">: @word                                                                                                                     internal defined_by_code;
 
+     @equals_zero_word <"equals_zero_word">: @word <"arg"> -> Bool                                                                                     internal defined_by_code;
+     @not_equals_zero_word <"not_equals_zero_word">: @word <"arg"> -> Bool                                                                             internal defined_by_code;
+     @equals_one_word <"equals_one_word">: @word <"arg"> -> Bool                                                                                       internal defined_by_code;
+     @equals_max_word <"equals_max_word">: @word <"arg"> -> Bool                                                                                       internal defined_by_code;
+
      @add_word <"add_word">: @word <"left"> # @word <"right"> -> @word                                                                                 internal defined_by_code; 
      @add_with_carry_word <"add_with_carry_word">: @word <"left"> # @word <"right"> -> @word                                                           internal defined_by_code; 
      @add_overflow_word <"add_overflow_word">: @word <"left"> # @word <"right"> -> Bool                                                                internal defined_by_code; 

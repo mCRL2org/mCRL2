@@ -286,7 +286,7 @@ void test_functions()
   data_specification spec1(spec);
   std::for_each(fghl.begin(), fghl.end(), std::bind(&data_specification::add_mapping, &spec1, std::placeholders::_1));
 std::cerr << spec.mappings().size() << "\n";
-  BOOST_CHECK(spec.mappings().size() == 91);
+  BOOST_CHECK(spec.mappings().size() == 103);
 
   function_symbol_vector mappings(spec.mappings());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());
@@ -961,7 +961,7 @@ void test_standard_sorts_mappings_functions()
    BOOST_CHECK(sorts.size()==11);
    BOOST_CHECK(constructors.size()==19);
 std::cerr << mappings.size() << "\n";
-   BOOST_CHECK(mappings.size()==295);
+   BOOST_CHECK(mappings.size()==312);
 }
 
 int test_main(int argc, char** argv)

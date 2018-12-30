@@ -724,6 +724,7 @@ data_expression RewriterJitty::rewrite_aux(
     {
       // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
       jitty_argument_rewriter r(sigma,*this);
+
       return application(t,tapp.begin(),tapp.end(),r); // Replacing r by a lambda term requires 16 more bytes on the stack. 
     }
     assert(is_abstraction(t));
@@ -799,7 +800,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         {
           // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
           application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
-// std::cerr << "REWRITABLE term " << rewriteable_term << "\n";
           return rule.rewrite_cpp_code()(rewriteable_term);
 
         }

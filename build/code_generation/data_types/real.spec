@@ -87,6 +87,6 @@ eqn  ==(@cReal(x, p), @cReal(y, q))  =  ==(*(x, @cInt(Pos2Nat(q))), *(y, @cInt(P
 
 % OLD     @redfracwhr(n, x, @c0)  =  @cReal(x, @c1);
 % OLD     @redfracwhr(n, x, Pos2Nat(q))  =  @redfrachlp(@redfrac(@cInt(n), @cInt(Pos2Nat(q))), x);
-     ==(m,@most_significant_digitNat(@zero_word)) -> @redfracwhr(n, x, m)  =  @cReal(x, @c1);
-     >(m,@most_significant_digitNat(@zero_word)) -> @redfracwhr(n, x, m)  =  @redfrachlp(@redfrac(@cInt(n), @cInt(m)), x);
+     @equals_zero(m) -> @redfracwhr(n, x, m)  =  @cReal(x, @c1);
+     @not_equals_zero(m) -> @redfracwhr(n, x, m)  =  @redfrachlp(@redfrac(@cInt(n), @cInt(m)), x);
      @redfrachlp(@cReal(x, p), y)  =  @cReal(+(@cInt(Pos2Nat(p)), *(y, x)), Int2Pos(x));

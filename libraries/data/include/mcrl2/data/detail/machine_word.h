@@ -67,6 +67,21 @@ inline const machine_number& max_word()
   return max;
 }
 
+inline bool equals_zero_word(const std::size_t n)
+{
+  return n==0;
+}
+
+inline bool equals_one_word(const std::size_t n)
+{
+  return n==1;
+}
+
+inline bool equals_max_word(const std::size_t n)
+{
+  return n==std::numeric_limits<std::size_t>::max();
+}
+
 inline std::size_t succ_word(const std::size_t n)
 {
   return 1+n;
@@ -246,6 +261,58 @@ inline const data_expression& max_word_manual_implementation()
   return detail::max_word();
 }
 
+/// \brief Checks whether the argument is equal to 0.
+/// \param e 
+/// \return True if e equals 0, otherwise false.
+inline data_expression equals_zero_word_manual_implementation(const data_expression& e)
+{
+  assert(is_machine_number(e));
+  if (detail::equals_zero_word(atermpp::down_cast<machine_number>(e).value()))
+  {
+    return sort_bool::true_();
+  }
+  return sort_bool::false_();
+}
+
+/// \brief Checks whether the argument is not equal to 0.
+/// \param e 
+/// \return True if e equals 0, otherwise false.
+inline data_expression not_equals_zero_word_manual_implementation(const data_expression& e)
+{
+  assert(is_machine_number(e));
+  if (detail::equals_zero_word(atermpp::down_cast<machine_number>(e).value()))
+  {
+    return sort_bool::false_();
+  }
+  return sort_bool::true_();
+}
+
+/// \brief Checks whether the argument is equal to 1.
+/// \param e 
+/// \return True if e equals 0, otherwise false.
+inline data_expression equals_one_word_manual_implementation(const data_expression& e)
+{
+  assert(is_machine_number(e));
+  if (detail::equals_one_word(atermpp::down_cast<machine_number>(e).value()))
+  {
+    return sort_bool::true_();
+  }
+  return sort_bool::false_();
+}
+
+/// \brief Checks whether the argument is equal to the largest 64 bit number.
+/// \param e 
+/// \return True if e equals the largest 64 number, otherwise false.
+inline data_expression equals_max_word_manual_implementation(const data_expression& e)
+{
+  assert(is_machine_number(e));
+  if (detail::equals_max_word(atermpp::down_cast<machine_number>(e).value()))
+  {
+    return sort_bool::true_();
+  }
+  return sort_bool::false_();
+}
+
 /// \brief The successor function on a machine numbers, that wraps around.
 /// \param e 
 /// \return e+1, or zero if n is the maximum number.
@@ -261,7 +328,7 @@ inline data_expression succ_word_manual_implementation(const data_expression& e)
 /// \return e1==e2.
 inline data_expression equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
-  if (is_machine_number(e1) && is_machine_number(e2))
+  assert(is_machine_number(e1) && is_machine_number(e2));
   {
     const bool b=detail::equal_word(
                             atermpp::down_cast<machine_number>(e1).value(),
@@ -277,7 +344,7 @@ inline data_expression equal_word_manual_implementation(const data_expression& e
 /// \return e1==e2.
 inline data_expression not_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
-  if (is_machine_number(e1) && is_machine_number(e2))
+  assert(is_machine_number(e1) && is_machine_number(e2));
   {
     const bool b=detail::equal_word(
                           atermpp::down_cast<machine_number>(e1).value(),
@@ -293,7 +360,7 @@ inline data_expression not_equal_word_manual_implementation(const data_expressio
 /// \return e1==e2.
 inline data_expression less_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
-  if (is_machine_number(e1) && is_machine_number(e2))
+  assert(is_machine_number(e1) && is_machine_number(e2));
   {
     const bool b=detail::less_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
     return (b? sort_bool::true_(): sort_bool::false_());
@@ -308,7 +375,7 @@ inline data_expression less_word_manual_implementation(const data_expression& e1
 /// \return e1==e2.
 inline data_expression less_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
-  if (is_machine_number(e1) && is_machine_number(e2))
+  assert(is_machine_number(e1) && is_machine_number(e2));
   {
     const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
     return (b? sort_bool::true_(): sort_bool::false_());
@@ -322,7 +389,7 @@ inline data_expression less_equal_word_manual_implementation(const data_expressi
 /// \return e1==e2.
 inline data_expression greater_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
-  if (is_machine_number(e1) && is_machine_number(e2))
+  assert(is_machine_number(e1) && is_machine_number(e2));
   {
     const bool b=detail::less_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
     return (b? sort_bool::true_(): sort_bool::false_());
@@ -336,7 +403,7 @@ inline data_expression greater_word_manual_implementation(const data_expression&
 /// \return e1==e2.
 inline data_expression greater_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
-  if (is_machine_number(e1) && is_machine_number(e2))
+  assert(is_machine_number(e1) && is_machine_number(e2));
   {
     const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
     return (b? sort_bool::true_(): sort_bool::false_());

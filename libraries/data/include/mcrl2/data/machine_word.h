@@ -456,6 +456,302 @@ namespace mcrl2 {
       }
 
 
+      /// \brief Generate identifier \@equals_zero_word.
+      /// \return Identifier \@equals_zero_word.
+      inline
+      const core::identifier_string& equals_zero_word_name()
+      {
+        static core::identifier_string equals_zero_word_name = core::identifier_string("@equals_zero_word");
+        return equals_zero_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@equals_zero_word.       
+      /// \return Function symbol equals_zero_word.
+      inline
+      const function_symbol& equals_zero_word()
+      {
+        static function_symbol equals_zero_word(equals_zero_word_name(), make_function_sort(machine_word(), sort_bool::bool_()));
+        return equals_zero_word;
+      }
+
+
+      /// \brief Recogniser for function \@equals_zero_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@equals_zero_word.
+      inline
+      bool is_equals_zero_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == equals_zero_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@equals_zero_word.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@equals_zero_word to a number of arguments.
+      inline
+      application equals_zero_word(const data_expression& arg0)
+      {
+        return sort_machine_word::equals_zero_word()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@equals_zero_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol equals_zero_word to a
+      ///     number of arguments.
+      inline
+      bool is_equals_zero_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_equals_zero_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@equals_zero_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@equals_zero_word to a number of arguments.
+      inline
+      data_expression equals_zero_word_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression equals_zero_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==equals_zero_word());
+        return equals_zero_word_manual_implementation(a[0]);
+      }
+
+
+      /// \brief Generate identifier \@not_equals_zero_word.
+      /// \return Identifier \@not_equals_zero_word.
+      inline
+      const core::identifier_string& not_equals_zero_word_name()
+      {
+        static core::identifier_string not_equals_zero_word_name = core::identifier_string("@not_equals_zero_word");
+        return not_equals_zero_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@not_equals_zero_word.       
+      /// \return Function symbol not_equals_zero_word.
+      inline
+      const function_symbol& not_equals_zero_word()
+      {
+        static function_symbol not_equals_zero_word(not_equals_zero_word_name(), make_function_sort(machine_word(), sort_bool::bool_()));
+        return not_equals_zero_word;
+      }
+
+
+      /// \brief Recogniser for function \@not_equals_zero_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@not_equals_zero_word.
+      inline
+      bool is_not_equals_zero_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == not_equals_zero_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@not_equals_zero_word.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@not_equals_zero_word to a number of arguments.
+      inline
+      application not_equals_zero_word(const data_expression& arg0)
+      {
+        return sort_machine_word::not_equals_zero_word()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@not_equals_zero_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol not_equals_zero_word to a
+      ///     number of arguments.
+      inline
+      bool is_not_equals_zero_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_not_equals_zero_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@not_equals_zero_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@not_equals_zero_word to a number of arguments.
+      inline
+      data_expression not_equals_zero_word_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression not_equals_zero_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==not_equals_zero_word());
+        return not_equals_zero_word_manual_implementation(a[0]);
+      }
+
+
+      /// \brief Generate identifier \@equals_one_word.
+      /// \return Identifier \@equals_one_word.
+      inline
+      const core::identifier_string& equals_one_word_name()
+      {
+        static core::identifier_string equals_one_word_name = core::identifier_string("@equals_one_word");
+        return equals_one_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@equals_one_word.       
+      /// \return Function symbol equals_one_word.
+      inline
+      const function_symbol& equals_one_word()
+      {
+        static function_symbol equals_one_word(equals_one_word_name(), make_function_sort(machine_word(), sort_bool::bool_()));
+        return equals_one_word;
+      }
+
+
+      /// \brief Recogniser for function \@equals_one_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@equals_one_word.
+      inline
+      bool is_equals_one_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == equals_one_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@equals_one_word.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@equals_one_word to a number of arguments.
+      inline
+      application equals_one_word(const data_expression& arg0)
+      {
+        return sort_machine_word::equals_one_word()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@equals_one_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol equals_one_word to a
+      ///     number of arguments.
+      inline
+      bool is_equals_one_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_equals_one_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@equals_one_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@equals_one_word to a number of arguments.
+      inline
+      data_expression equals_one_word_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression equals_one_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==equals_one_word());
+        return equals_one_word_manual_implementation(a[0]);
+      }
+
+
+      /// \brief Generate identifier \@equals_max_word.
+      /// \return Identifier \@equals_max_word.
+      inline
+      const core::identifier_string& equals_max_word_name()
+      {
+        static core::identifier_string equals_max_word_name = core::identifier_string("@equals_max_word");
+        return equals_max_word_name;
+      }
+
+      /// \brief Constructor for function symbol \@equals_max_word.       
+      /// \return Function symbol equals_max_word.
+      inline
+      const function_symbol& equals_max_word()
+      {
+        static function_symbol equals_max_word(equals_max_word_name(), make_function_sort(machine_word(), sort_bool::bool_()));
+        return equals_max_word;
+      }
+
+
+      /// \brief Recogniser for function \@equals_max_word.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@equals_max_word.
+      inline
+      bool is_equals_max_word_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == equals_max_word();
+        }
+        return false;
+      }
+
+      /// \brief Application of the function symbol \@equals_max_word.        
+      /// \param arg0 A data expression. 
+      /// \return Application of \@equals_max_word to a number of arguments.
+      inline
+      application equals_max_word(const data_expression& arg0)
+      {
+        return sort_machine_word::equals_max_word()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@equals_max_word.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol equals_max_word to a
+      ///     number of arguments.
+      inline
+      bool is_equals_max_word_application(const atermpp::aterm& e)
+      {
+        if (is_application(e))
+        {
+          return is_equals_max_word_function_symbol(atermpp::down_cast<application>(e).head());
+        }
+        return false;
+      }
+
+      /// \brief The data expression of an application of the function symbol \@equals_max_word.
+      /// \details This function is to be implemented manually. 
+       
+      /// \param arg0 A data expression.
+      /// \return The data expression corresponding to an application of \@equals_max_word to a number of arguments.
+      inline
+      data_expression equals_max_word_manual_implementation(const data_expression& arg0);
+
+
+      inline
+      data_expression equals_max_word_application(const data_expression& a1)
+      {
+        assert(is_application(a1));
+        const application& a=atermpp::down_cast<application>(a1);
+        assert(a.head()==equals_max_word());
+        return equals_max_word_manual_implementation(a[0]);
+      }
+
+
       /// \brief Generate identifier \@add_word.
       /// \return Identifier \@add_word.
       inline
@@ -2846,6 +3142,10 @@ namespace mcrl2 {
         result.push_back(sort_machine_word::three_word());
         result.push_back(sort_machine_word::four_word());
         result.push_back(sort_machine_word::max_word());
+        result.push_back(sort_machine_word::equals_zero_word());
+        result.push_back(sort_machine_word::not_equals_zero_word());
+        result.push_back(sort_machine_word::equals_one_word());
+        result.push_back(sort_machine_word::equals_max_word());
         result.push_back(sort_machine_word::add_word());
         result.push_back(sort_machine_word::add_with_carry_word());
         result.push_back(sort_machine_word::add_overflow_word());
@@ -2916,6 +3216,10 @@ namespace mcrl2 {
         result[sort_machine_word::three_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::three_word_application,"sort_machine_word::three_word_manual_implementation");
         result[sort_machine_word::four_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::four_word_application,"sort_machine_word::four_word_manual_implementation");
         result[sort_machine_word::max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::max_word_application,"sort_machine_word::max_word_manual_implementation");
+        result[sort_machine_word::equals_zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equals_zero_word_application,"sort_machine_word::equals_zero_word_manual_implementation");
+        result[sort_machine_word::not_equals_zero_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::not_equals_zero_word_application,"sort_machine_word::not_equals_zero_word_manual_implementation");
+        result[sort_machine_word::equals_one_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equals_one_word_application,"sort_machine_word::equals_one_word_manual_implementation");
+        result[sort_machine_word::equals_max_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::equals_max_word_application,"sort_machine_word::equals_max_word_manual_implementation");
         result[sort_machine_word::add_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_word_application,"sort_machine_word::add_word_manual_implementation");
         result[sort_machine_word::add_with_carry_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_with_carry_word_application,"sort_machine_word::add_with_carry_word_manual_implementation");
         result[sort_machine_word::add_overflow_word()]=std::pair<std::function<data_expression(const data_expression&)>, std::string>(sort_machine_word::add_overflow_word_application,"sort_machine_word::add_overflow_word_manual_implementation");
@@ -3029,7 +3333,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_succ_word_application(e) || is_sqrt_word_application(e) || is_pred_word_application(e) || is_rightmost_bit_application(e));
+        assert(is_succ_word_application(e) || is_equals_zero_word_application(e) || is_not_equals_zero_word_application(e) || is_equals_one_word_application(e) || is_equals_max_word_application(e) || is_sqrt_word_application(e) || is_pred_word_application(e) || is_rightmost_bit_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
