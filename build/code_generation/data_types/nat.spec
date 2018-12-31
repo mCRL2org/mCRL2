@@ -41,7 +41,7 @@ map  @most_significant_digitNat <"most_significant_digit_nat">: @word <"arg"> ->
      + <"plus">:Pos <"left"> # Nat <"right">->Pos                                                                external defined_by_rewrite_rules;
      + <"plus">:Nat <"left"> # Pos <"right">->Pos                                                                external defined_by_rewrite_rules;
      + <"plus">:Nat <"left"> # Nat <"right">->Nat                                                                external defined_by_rewrite_rules;
-     @plus_with_carry <"plus_with_carry">:Nat <"left"> #Nat <"right">->Nat                                       external defined_by_rewrite_rules;
+     @add_with_carry <"add_with_carry">:Nat <"left"> #Nat <"right">->Nat                                         external defined_by_rewrite_rules;
 % The following function is used when the symbol + is overloaded, such as in fbags.
      @plus_nat <"auxiliary_plus_nat">: Nat <"left"> # Nat <"right"> -> Nat                                       external defined_by_rewrite_rules;
      * <"times">:Nat <"left"> # Nat <"right">->Nat                                                               external defined_by_rewrite_rules;
@@ -209,7 +209,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                      if(@add_overflow_word(w1,w2),
                                               @concat_digit(@most_significant_digitNat(@one_word),@add_word(w1,w2)),
                                               @most_significant_digitNat(@add_word(w1,w2)));
-     @plus_with_carry(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
+     @add_with_carry(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
                                      if(@add_with_carry_overflow_word(w1,w2),
                                               @concat_digit(@most_significant_digitNat(@one_word),@add_with_carry_word(w1,w2)),
                                               @most_significant_digitNat(@add_with_carry_word(w1,w2)));
@@ -217,7 +217,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                      if(@add_overflow_word(w1,w2),
                                               @concat_digit(@succ_nat(n1),@add_word(w1,w2)),
                                               @concat_digit(n1,@add_word(w1,w2)));
-     @plus_with_carry(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = 
+     @add_with_carry(@concat_digit(n1,w1),@most_significant_digitNat(w2)) = 
                                      if(@add_with_carry_overflow_word(w1,w2),
                                               @concat_digit(@succ_nat(n1),@add_with_carry_word(w1,w2)),
                                               @concat_digit(n1,@add_with_carry_word(w1,w2)));
@@ -225,17 +225,17 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                      if(@add_overflow_word(w1,w2),
                                               @concat_digit(@succ_nat(n2),@add_word(w1,w2)),
                                               @concat_digit(n2,@add_word(w1,w2)));
-     @plus_with_carry(@most_significant_digitNat(w1),@concat_digit(n2,w2)) = 
+     @add_with_carry(@most_significant_digitNat(w1),@concat_digit(n2,w2)) = 
                                      if(@add_with_carry_overflow_word(w1,w2),
                                               @concat_digit(@succ_nat(n2),@add_with_carry_word(w1,w2)),
                                               @concat_digit(n2,@add_with_carry_word(w1,w2)));
      +(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
                                      if(@add_overflow_word(w1,w2),
-                                              @concat_digit(@plus_with_carry(n1,n2),@add_word(w1,w2)),
+                                              @concat_digit(@add_with_carry(n1,n2),@add_word(w1,w2)),
                                               @concat_digit(+(n1,n2),@add_word(w1,w2)));
-     @plus_with_carry(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
+     @add_with_carry(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
                                      if(@add_with_carry_overflow_word(w1,w2),
-                                              @concat_digit(@plus_with_carry(n1,n2),@add_with_carry_word(w1,w2)),
+                                              @concat_digit(@add_with_carry(n1,n2),@add_with_carry_word(w1,w2)),
                                               @concat_digit(+(n1,n2),@add_with_carry_word(w1,w2)));
 
 % The rules below are useful in solving expressions with plus and quantifiers.
@@ -277,17 +277,21 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                            if(@equals_zero_word(@times_overflow_word(w1,w2)),
                                      @most_significant_digitNat(@times_word(w1,w2)),
                                      @concat_digit(@most_significant_digitNat(@times_overflow_word(w1,w2)),@times_word(w1,w2)));
-     *(@concat_digit(n1,w1),@most_significant_digitNat(w2)) =
-                           if(@equals_zero_word(w2),
-                                   @most_significant_digitNat(@zero_word),
-                                   @concat_digit(@times_overflow(n1,w2,@times_overflow_word(w1,w2)),@times_word(w1,w2)));
+%     *(@concat_digit(n1,w1),@most_significant_digitNat(w2)) =
+%                           if(@equals_zero_word(w2),
+%                                   @most_significant_digitNat(@zero_word),
+%                                   @concat_digit(@times_overflow(n1,w2,@times_overflow_word(w1,w2)),@times_word(w1,w2)));
      *(@most_significant_digitNat(w1),@concat_digit(n2,w2)) =
                            if(@equals_zero_word(w1),
                                 @most_significant_digitNat(@zero_word),
                                 @concat_digit(@times_overflow(n2,w1,@times_overflow_word(w1,w2)),@times_word(w1,w2)));
-     *(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
-                           +(@concat_digit(*(@concat_digit(n1,w1),n2),@zero_word),
-                                       *(@concat_digit(n1,w1),@most_significant_digitNat(w2)));
+%     *(@concat_digit(n1,w1),@concat_digit(n2,w2)) =
+%                           +(@concat_digit(*(@concat_digit(n2,w2),n1),@zero_word),
+%                                       *(@concat_digit(n2,w2),@most_significant_digitNat(w1)));
+
+     *(@concat_digit(n1,w1),n2) = if(@equals_zero(n2),
+                                         n2,
+                                         +(@concat_digit(*(n1,n2),@zero_word), @times_overflow(n2,w1,@zero_word)));
 
      @times_overflow(@most_significant_digitNat(w1),w2,overflow) =
                            if(@equals_zero_word(@times_with_carry_overflow_word(w1,w2,overflow)),

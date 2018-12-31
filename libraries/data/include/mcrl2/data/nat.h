@@ -1053,71 +1053,58 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@plus_with_carry.
-      /// \return Identifier \@plus_with_carry.
+      /// \brief Generate identifier \@add_with_carry.
+      /// \return Identifier \@add_with_carry.
       inline
-      const core::identifier_string& plus_with_carry_name()
+      const core::identifier_string& add_with_carry_name()
       {
-        static core::identifier_string plus_with_carry_name = core::identifier_string("@plus_with_carry");
-        return plus_with_carry_name;
+        static core::identifier_string add_with_carry_name = core::identifier_string("@add_with_carry");
+        return add_with_carry_name;
       }
 
-      // This function is not intended for public use and therefore not documented in Doxygen.
+      /// \brief Constructor for function symbol \@add_with_carry.       
+      /// \return Function symbol add_with_carry.
       inline
-      function_symbol plus_with_carry(const sort_expression& s0, const sort_expression& s1)
+      const function_symbol& add_with_carry()
       {
-        sort_expression target_sort;
-        if (s0 == nat() && s1 == nat())
-        {
-          target_sort = nat();
-        }
-        else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("cannot compute target sort for plus_with_carry with domain sorts " + pp(s0) + ", " + pp(s1));
-        }
-
-        function_symbol plus_with_carry(plus_with_carry_name(), make_function_sort(s0, s1, target_sort));
-        return plus_with_carry;
+        static function_symbol add_with_carry(add_with_carry_name(), make_function_sort(nat(), nat(), nat()));
+        return add_with_carry;
       }
 
-      /// \brief Recogniser for function \@plus_with_carry.
+
+      /// \brief Recogniser for function \@add_with_carry.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@plus_with_carry
+      /// \return true iff e is the function symbol matching \@add_with_carry.
       inline
-      bool is_plus_with_carry_function_symbol(const atermpp::aterm& e)
+      bool is_add_with_carry_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
-          return f.name() == plus_with_carry_name() && function_sort(f.sort()).domain().size() == 2 && (f == plus_with_carry(nat(), nat()) || f == plus_with_carry(sort_pos::pos(), sort_pos::pos()));
+          return function_symbol(e) == add_with_carry();
         }
         return false;
       }
 
-      /// \brief Application of the function symbol \@plus_with_carry.        
+      /// \brief Application of the function symbol \@add_with_carry.        
       /// \param arg0 A data expression.
       /// \param arg1 A data expression. 
-      /// \return Application of \@plus_with_carry to a number of arguments.
+      /// \return Application of \@add_with_carry to a number of arguments.
       inline
-      application plus_with_carry(const data_expression& arg0, const data_expression& arg1)
+      application add_with_carry(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_nat::plus_with_carry(arg0.sort(), arg1.sort())(arg0, arg1);
+        return sort_nat::add_with_carry()(arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@plus_with_carry.
+      /// \brief Recogniser for application of \@add_with_carry.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol plus_with_carry to a
+      /// \return true iff e is an application of function symbol add_with_carry to a
       ///     number of arguments.
       inline
-      bool is_plus_with_carry_application(const atermpp::aterm& e)
+      bool is_add_with_carry_application(const atermpp::aterm& e)
       {
         if (is_application(e))
         {
-          return is_plus_with_carry_function_symbol(atermpp::down_cast<application>(e).head());
+          return is_add_with_carry_function_symbol(atermpp::down_cast<application>(e).head());
         }
         return false;
       }
@@ -3928,7 +3915,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
-        result.push_back(sort_nat::plus_with_carry(nat(), nat()));
+        result.push_back(sort_nat::add_with_carry());
         result.push_back(sort_nat::auxiliary_plus_nat());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::times_overflow(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word()));
@@ -4011,7 +3998,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
-        result.push_back(sort_nat::plus_with_carry(nat(), nat()));
+        result.push_back(sort_nat::add_with_carry());
         result.push_back(sort_nat::auxiliary_plus_nat());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::times_overflow(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word()));
@@ -4042,7 +4029,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_plus_with_carry_application(e) || is_auxiliary_plus_nat_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_auxiliary_plus_nat_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
         return atermpp::down_cast<const application>(e)[1];
       }
 
@@ -4138,7 +4125,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_plus_with_carry_application(e) || is_auxiliary_plus_nat_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_auxiliary_plus_nat_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e));
         return atermpp::down_cast<const application>(e)[0];
       }
 
@@ -4225,13 +4212,13 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vp, vw1, vw2}), plus(most_significant_digit_nat(vw1), concat_digit(vp, vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(sort_pos::succpos(vp), sort_machine_word::add_word(vw1, vw2)), concat_digit(vp, sort_machine_word::add_word(vw1, vw2)))));
         result.push_back(data_equation(variable_list({vn1, vp, vw1, vw2}), plus(concat_digit(vn1, vw1), concat_digit(vp, vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(plus(succ(vn1), vp), sort_machine_word::add_word(vw1, vw2)), concat_digit(plus(vn1, vp), sort_machine_word::add_word(vw1, vw2)))));
         result.push_back(data_equation(variable_list({vw1, vw2}), plus(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(most_significant_digit_nat(sort_machine_word::one_word()), sort_machine_word::add_word(vw1, vw2)), most_significant_digit_nat(sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vw1, vw2}), plus_with_carry(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(most_significant_digit_nat(sort_machine_word::one_word()), sort_machine_word::add_with_carry_word(vw1, vw2)), most_significant_digit_nat(sort_machine_word::add_with_carry_word(vw1, vw2)))));
+        result.push_back(data_equation(variable_list({vw1, vw2}), add_with_carry(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(most_significant_digit_nat(sort_machine_word::one_word()), sort_machine_word::add_with_carry_word(vw1, vw2)), most_significant_digit_nat(sort_machine_word::add_with_carry_word(vw1, vw2)))));
         result.push_back(data_equation(variable_list({vn1, vw1, vw2}), plus(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(succ_nat(vn1), sort_machine_word::add_word(vw1, vw2)), concat_digit(vn1, sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vw1, vw2}), plus_with_carry(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(succ_nat(vn1), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(vn1, sort_machine_word::add_with_carry_word(vw1, vw2)))));
+        result.push_back(data_equation(variable_list({vn1, vw1, vw2}), add_with_carry(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(succ_nat(vn1), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(vn1, sort_machine_word::add_with_carry_word(vw1, vw2)))));
         result.push_back(data_equation(variable_list({vn2, vw1, vw2}), plus(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(succ_nat(vn2), sort_machine_word::add_word(vw1, vw2)), concat_digit(vn2, sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn2, vw1, vw2}), plus_with_carry(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(succ_nat(vn2), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(vn2, sort_machine_word::add_with_carry_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), plus(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(plus_with_carry(vn1, vn2), sort_machine_word::add_word(vw1, vw2)), concat_digit(plus(vn1, vn2), sort_machine_word::add_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), plus_with_carry(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(plus_with_carry(vn1, vn2), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(plus(vn1, vn2), sort_machine_word::add_with_carry_word(vw1, vw2)))));
+        result.push_back(data_equation(variable_list({vn2, vw1, vw2}), add_with_carry(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(succ_nat(vn2), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(vn2, sort_machine_word::add_with_carry_word(vw1, vw2)))));
+        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), plus(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::add_overflow_word(vw1, vw2), concat_digit(add_with_carry(vn1, vn2), sort_machine_word::add_word(vw1, vw2)), concat_digit(plus(vn1, vn2), sort_machine_word::add_word(vw1, vw2)))));
+        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), add_with_carry(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::add_with_carry_overflow_word(vw1, vw2), concat_digit(add_with_carry(vn1, vn2), sort_machine_word::add_with_carry_word(vw1, vw2)), concat_digit(plus(vn1, vn2), sort_machine_word::add_with_carry_word(vw1, vw2)))));
         result.push_back(data_equation(variable_list({vn1, vn2}), plus(succ_nat(vn1), vn2), succ_nat(plus(vn1, vn2))));
         result.push_back(data_equation(variable_list({vn1, vn2}), plus(vn1, succ_nat(vn2)), succ_nat(plus(vn1, vn2))));
         result.push_back(data_equation(variable_list({vn1, vn2}), auxiliary_plus_nat(vn1, vn2), plus(vn1, vn2)));
@@ -4244,9 +4231,8 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), monus(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), monus_whr(vn1, vw1, vn2, vw2, monus(vn1, vn2))));
         result.push_back(data_equation(variable_list({vdiff, vn1, vn2, vw1, vw2}), monus_whr(vn1, vw1, vn2, vw2, vdiff), if_(sort_machine_word::less_word(vw1, vw2), if_(equals_zero(vdiff), most_significant_digit_nat(sort_machine_word::zero_word()), if_(equals_one(vdiff), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(natpred(vdiff), sort_machine_word::minus_word(vw1, vw2)))), if_(equals_zero(vdiff), most_significant_digit_nat(sort_machine_word::minus_word(vw1, vw2)), concat_digit(vdiff, sort_machine_word::minus_word(vw1, vw2))))));
         result.push_back(data_equation(variable_list({vw1, vw2}), times(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::equals_zero_word(sort_machine_word::times_overflow_word(vw1, vw2)), most_significant_digit_nat(sort_machine_word::times_word(vw1, vw2)), concat_digit(most_significant_digit_nat(sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vw1, vw2}), times(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)), if_(sort_machine_word::equals_zero_word(vw2), most_significant_digit_nat(sort_machine_word::zero_word()), concat_digit(times_overflow(vn1, vw2, sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2)))));
         result.push_back(data_equation(variable_list({vn2, vw1, vw2}), times(most_significant_digit_nat(vw1), concat_digit(vn2, vw2)), if_(sort_machine_word::equals_zero_word(vw1), most_significant_digit_nat(sort_machine_word::zero_word()), concat_digit(times_overflow(vn2, vw1, sort_machine_word::times_overflow_word(vw1, vw2)), sort_machine_word::times_word(vw1, vw2)))));
-        result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), times(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), plus(concat_digit(times(concat_digit(vn1, vw1), vn2), sort_machine_word::zero_word()), times(concat_digit(vn1, vw1), most_significant_digit_nat(vw2)))));
+        result.push_back(data_equation(variable_list({vn1, vn2, vw1}), times(concat_digit(vn1, vw1), vn2), if_(equals_zero(vn2), vn2, plus(concat_digit(times(vn1, vn2), sort_machine_word::zero_word()), times_overflow(vn2, vw1, sort_machine_word::zero_word())))));
         result.push_back(data_equation(variable_list({voverflow, vw1, vw2}), times_overflow(most_significant_digit_nat(vw1), vw2, voverflow), if_(sort_machine_word::equals_zero_word(sort_machine_word::times_with_carry_overflow_word(vw1, vw2, voverflow)), most_significant_digit_nat(sort_machine_word::times_with_carry_word(vw1, vw2, voverflow)), concat_digit(most_significant_digit_nat(sort_machine_word::times_with_carry_overflow_word(vw1, vw2, voverflow)), sort_machine_word::times_with_carry_word(vw1, vw2, voverflow)))));
         result.push_back(data_equation(variable_list({vn1, voverflow, vw1, vw2}), times_overflow(concat_digit(vn1, vw1), vw2, voverflow), if_(sort_machine_word::equals_zero_word(vw2), most_significant_digit_nat(voverflow), concat_digit(times_overflow(vn1, vw2, sort_machine_word::times_with_carry_overflow_word(vw1, vw2, voverflow)), sort_machine_word::times_with_carry_word(vw1, vw2, voverflow)))));
         result.push_back(data_equation(variable_list({vw}), is_odd(most_significant_digit_nat(vw)), sort_machine_word::rightmost_bit(vw)));

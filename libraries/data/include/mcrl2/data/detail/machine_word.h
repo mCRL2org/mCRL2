@@ -329,86 +329,67 @@ inline data_expression succ_word_manual_implementation(const data_expression& e)
 inline data_expression equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  {
-    const bool b=detail::equal_word(
+  const bool b=detail::equal_word(
                             atermpp::down_cast<machine_number>(e1).value(),
                             atermpp::down_cast<machine_number>(e2).value());
-    return (b? sort_bool::true_(): sort_bool::false_());
-  }
-  return sort_machine_word::equal_word(e1,e2);
+  return (b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The non equality function on two machine words. 
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
-/// \return e1==e2.
+/// \return e1!=e2.
 inline data_expression not_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  {
-    const bool b=detail::equal_word(
+  const bool b=detail::equal_word(
                           atermpp::down_cast<machine_number>(e1).value(),
                           atermpp::down_cast<machine_number>(e2).value());
-    return (b? sort_bool::false_(): sort_bool::true_());
-  }
-  return sort_machine_word::not_equal_word(e1,e2);
+  return (b? sort_bool::false_(): sort_bool::true_());
 }
 
 /// \brief The less than function on two machine words. 
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
-/// \return e1==e2.
+/// \return e1<e2.
 inline data_expression less_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  {
-    const bool b=detail::less_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
-    return (b? sort_bool::true_(): sort_bool::false_());
-  }
-  return sort_machine_word::less_word(e1,e2);
-  
+  const bool b=detail::less_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
+  return (b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The less than or equal function on two machine words. 
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
-/// \return e1==e2.
+/// \return e1<=e2.
 inline data_expression less_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  {
-    const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
-    return (b? sort_bool::true_(): sort_bool::false_());
-  }
-  return sort_machine_word::less_equal_word(e1,e2);
+  const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e1).value(),atermpp::down_cast<machine_number>(e2).value());
+  return (b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The greater than function on two machine words. 
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
-/// \return e1==e2.
+/// \return e1>e2.
 inline data_expression greater_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  {
-    const bool b=detail::less_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
-    return (b? sort_bool::true_(): sort_bool::false_());
-  }
-  return sort_machine_word::greater_word(e1,e2);
+  const bool b=detail::less_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
+  return (b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The greater than or equal function on two machine words. 
 /// \param e1 The first argument.
 /// \param e2 The second argument. 
-/// \return e1==e2.
+/// \return e1>=e2.
 inline data_expression greater_equal_word_manual_implementation(const data_expression& e1, const data_expression& e2)
 {
   assert(is_machine_number(e1) && is_machine_number(e2));
-  {
-    const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
-    return (b? sort_bool::true_(): sort_bool::false_());
-  }
-  return sort_machine_word::greater_equal_word(e1,e2);
+  const bool b=detail::less_equal_word(atermpp::down_cast<machine_number>(e2).value(),atermpp::down_cast<machine_number>(e1).value());
+  return (b? sort_bool::true_(): sort_bool::false_());
 }
 
 /// \brief The result of adding two words modulo the maximal representable machine word plus 1.

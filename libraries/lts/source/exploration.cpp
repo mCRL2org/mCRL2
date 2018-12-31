@@ -61,7 +61,7 @@ probabilistic_state<std::size_t, probabilistic_data_expression> lps2lts_algorith
                          i=other_probabilities.begin();
                          i!=other_probabilities.end(); ++i)
   {
-    if (!is_application(i->probability()) && 
+    if (!is_application(i->probability()) &&
            !is_function_symbol(atermpp::down_cast<data::application>(i->probability()).head()) &&
                 atermpp::down_cast<data::application>(i->probability()).head()!=data::sort_real::creal())
     {
@@ -176,7 +176,7 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
   // This avoids having to rewrite the constant expressions each time they are encountered. This typically saves more than 50% of the total
   // time to generate a state space.
   data::mutable_indexed_substitution<> base_substitution;  // This is the substitution used as base in the state space generation.
-  move_constants_to_substitution(specification, rewriter, base_substitution);
+  move_constants_to_substitution(specification, rewriter, base_substitution, m_options.outformat==lts_none);  // If there is no output actions do not need to be replaced.
 
   stochastic_action_summand_vector prioritised_summands;
   stochastic_action_summand_vector nonprioritised_summands;
@@ -911,7 +911,7 @@ void lps2lts_algorithm::print_target_distribution_in_aut_format(
     {
       const lps::state probability_destination = i->state();
       const std::pair<std::size_t, bool> probability_destination_state_number=add_target_state(source_state,probability_destination);
-      if (!is_application(i->probability()) && 
+      if (!is_application(i->probability()) &&
              !is_function_symbol(atermpp::down_cast<data::application>(i->probability()).head()) &&
                   atermpp::down_cast<data::application>(i->probability()).head()!=data::sort_real::creal())
       {

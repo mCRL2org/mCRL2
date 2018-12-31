@@ -159,9 +159,9 @@ eqn  @c1 = @most_significant_digit(@one_word);
                                               @most_significant_digit(w1),
                                               @concat_digit(@most_significant_digit(w2),w1));
  
-     *(@concat_digit(p1,w1),@most_significant_digit(w2)) = @concat_digit(
-                                                                  @times_overflow(p1,w2,@times_overflow_word(w1,w2)),
-                                                                  @times_word(w1,w2));
+%     *(@concat_digit(p1,w1),@most_significant_digit(w2)) = @concat_digit(
+%                                                                  @times_overflow(p1,w2,@times_overflow_word(w1,w2)),
+%                                                                  @times_word(w1,w2));
      @times_overflow(@concat_digit(p1,w1),w2,overflow) = 
                                                       @concat_digit(
                                                                   @times_overflow(p1,w2,@times_with_carry_overflow_word(w1,w2,overflow)),
@@ -172,6 +172,5 @@ eqn  @c1 = @most_significant_digit(@one_word);
                                                                   @times_word(w1,w2));
 
 
-     *(@concat_digit(p1,w1),@concat_digit(p2,w2)) = +(@concat_digit(*(@concat_digit(p1,w1),p2),@zero_word),
-                                                           *(@concat_digit(p1,w1),@most_significant_digit(w2)));
+     *(@concat_digit(p1,w1),p2) = +(@concat_digit(*(p1,p2),@zero_word), *(p2,@most_significant_digit(w1)));
 
