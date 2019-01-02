@@ -186,12 +186,12 @@ private:
   /// \brief An array that stores ElementsPerBlock number of objects of type T.
   using Block = std::array<Slot, ElementsPerBlock>;
 
-  /// \brief Indicates the head of the freelist.
-  detail::free_list<T> m_freelist;
-
   /// \brief The last slot in the first block that has never been returned by allocate.
   using SizeType = typename std::conditional<ThreadSafe, std::atomic<std::size_t>, std::size_t>::type;
   SizeType m_current_index = ElementsPerBlock;
+
+  /// \brief Equal to the size of the blocks array to prevent iterating over the block list.
+  SizeType m_number_of_blocks = 0;
 
   /// \brief The list of blocks allocated by this pool.
   std::forward_list<Block> m_blocks;
@@ -199,8 +199,8 @@ private:
   /// \brief Ensures that the block list is only modified by a single thread.
   mcrl2::utilities::spinlock m_block_mutex = {};
 
-  /// \brief Equal to the size of the blocks array to prevent iterating over the block list.
-  SizeType m_number_of_blocks = 0;
+  /// \brief Indicates the head of the freelist.
+  detail::free_list<T> m_freelist;
 
   /// \returns Check whether the pointer is contained in this memory pool.
   bool contains(T* p)

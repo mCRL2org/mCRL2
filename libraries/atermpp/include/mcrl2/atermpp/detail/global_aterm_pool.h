@@ -42,8 +42,8 @@ extern typename std::aligned_storage<sizeof(global_aterm_pool), alignof(global_a
 static global_aterm_pool& g_aterm_pool_instance = reinterpret_cast<global_aterm_pool&>(g_aterm_pool_storage);
 
 /// \brief Obtain a reference to the global aterm pool.
-/// \param lazy Enable lazy initialization which should be used for instantiating
-///        global terms and function symbols.
+/// \details Provides lazy initialization which should be used when instantiating
+///          global terms and function symbols.
 template<bool lazy = false>
 inline global_aterm_pool& g_term_pool()
 {

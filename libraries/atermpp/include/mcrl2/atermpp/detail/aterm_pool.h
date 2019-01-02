@@ -115,19 +115,16 @@ public:
   inline std::size_t size() const;
 
   /// \returns A global term that indicates the empty list.
-  static aterm& is_empty_list() noexcept { return g_is_empty_list; }
-
-  /// \returns A global underlying term that indicates the empty list.
-  static _aterm* is_empty_list_term() noexcept { return detail::address(g_is_empty_list); }
+  aterm& is_empty_list() noexcept { return m_is_empty_list; }
 
   /// \returns The function symbol used by integral terms.
-  static const function_symbol& as_int() noexcept { return function_symbol_pool::as_int(); }
+  const function_symbol& as_int() noexcept { return m_function_symbol_pool.as_int(); }
 
   /// \returns The function symbol used by the list constructor.
-  static const function_symbol& as_list() noexcept { return function_symbol_pool::as_list(); }
+  const function_symbol& as_list() noexcept { return m_function_symbol_pool.as_list(); }
 
   /// \returns The function symbol used by the term indicating the empty list.
-  static const function_symbol& as_empty_list() noexcept { return function_symbol_pool::as_empty_list(); }
+  const function_symbol& as_empty_list() noexcept { return m_function_symbol_pool.as_empty_list(); }
 
   /// \returns The pool of function symbols.
   function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
@@ -167,6 +164,9 @@ private:
 
   /// Enable automatically triggered garbage collection.
   bool m_enable_garbage_collection = true;
+
+  /// Represents an empty list.
+  aterm m_is_empty_list;
 };
 
 } // namespace detail

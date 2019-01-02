@@ -18,17 +18,38 @@
 
 namespace std
 {
-  /// \brief Specialisation of the standard hash function for _function_symbol.
-  template<>
-  struct hash<atermpp::detail::_function_symbol>
+ 
+/// \brief Specialisation of the standard hash function for function_symbol.
+template<>
+struct hash<atermpp::function_symbol>
+{
+  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
+  hash() {}
+
+  std::size_t operator()(const atermpp::function_symbol& f) const
   {
-    std::size_t operator()(const atermpp::detail::_function_symbol& f) const
-    {
-      std::hash<std::string> string_hasher;
-      std::size_t h = string_hasher(f.name());
-      return (h ^ f.arity());
-    }
-  };
+    // Function symbols take 48 bytes in memory, so when they are packed there
+    // are at least 32 bits that do not distinguish two function symbols. As
+    // such these can be removed.
+    return reinterpret_cast<std::uint64_t>(f.m_function_symbol.get()) >> 5;
+  }
+};
+
+/// \brief Specialisation of the standard hash function for _function_symbol.
+template<>
+struct hash<atermpp::detail::_function_symbol>
+{
+  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
+  hash() {}
+
+  std::size_t operator()(const atermpp::detail::_function_symbol& f) const
+  {
+    std::hash<std::string> string_hasher;
+    std::size_t h = string_hasher(f.name());
+    return (h ^ f.arity());
+  }
+};
+
 } // namespace std
 
 namespace atermpp
@@ -56,7 +77,7 @@ struct function_symbol_equals
 
 std::size_t function_symbol_hasher::operator() (const _function_symbol& symbol) const noexcept
 {
-  std::hash<_function_symbol> function_symbol_hasher;
+  const std::hash<_function_symbol> function_symbol_hasher;
   return function_symbol_hasher(symbol);
 }
 

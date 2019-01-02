@@ -27,6 +27,25 @@ namespace atermpp
 namespace detail
 {
 
+/// \brief Construct the proxy where its arguments are given by applying the converter
+///        to each element in the iterator.
+template<std::size_t N,
+         typename InputIterator,
+         typename TermConverter,
+         typename std::enable_if<is_iterator<InputIterator>::value, void>::type* = nullptr>
+static std::array<unprotected_aterm, N> construct_arguments(InputIterator it, TermConverter converter)
+{
+  // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
+  std::array<unprotected_aterm, N> arguments;
+  for (size_t i = 0; i < N; ++i)
+  {
+    arguments[i] = std::forward<TermConverter>(converter)(*it);
+    ++it;
+  }
+
+  return arguments;
+}
+
 #define ATERM_POOL_STORAGE_TEMPLATES template<typename Element, typename Hash, typename Equals, std::size_t N, bool ThreadSafe>
 #define ATERM_POOL_STORAGE aterm_pool_storage<Element, Hash, Equals, N, ThreadSafe>
 

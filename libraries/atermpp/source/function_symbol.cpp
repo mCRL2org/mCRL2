@@ -6,9 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file atermpp/source/function_symbol.cpp
-/// \brief This file provides the data structures for the function symbols occurring in 
-///        the atermpp library. 
 
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
 
@@ -16,9 +13,9 @@
 
 using namespace atermpp;
 
-global_function_symbol detail::g_as_int("<aterm_int>", 0);
-global_function_symbol detail::g_as_list("<list_constructor>", 2);
-global_function_symbol detail::g_as_empty_list("<empty_list>", 0);
+function_symbol detail::g_as_int(detail::g_term_pool<true>().as_int());
+function_symbol detail::g_as_list(detail::g_term_pool<true>().as_list());
+function_symbol detail::g_as_empty_list(detail::g_term_pool<true>().as_empty_list());
 
 function_symbol::function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions) :
   function_symbol(detail::g_term_pool().get_symbol_pool().create(name, arity, check_for_registered_functions))

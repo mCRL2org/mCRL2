@@ -23,6 +23,16 @@ function_symbol_pool::function_symbol_pool()
 {
   mcrl2::utilities::mcrl2_unused(m_function_symbols_creates);
   mcrl2::utilities::mcrl2_unused(m_function_symbols_hits);
+
+  // Initialize the default function symbols.
+  m_as_int = create("<aterm_int>", 0);
+  m_as_list = create("<list_constructor>", 2);
+  m_as_empty_list = create("<empty_list>", 0);
+
+  // Initialize the global copies of these default function symbols.
+  g_as_int = m_as_int;
+  g_as_list = m_as_list;
+  g_as_empty_list = m_as_empty_list;
 }
 
 function_symbol_pool::~function_symbol_pool()

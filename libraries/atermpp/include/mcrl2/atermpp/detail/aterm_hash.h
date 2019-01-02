@@ -10,17 +10,17 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_HASH_H_
 #define MCRL2_ATERMPP_DETAIL_ATERM_HASH_H_
 
+#include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_appl.h"
 #include "mcrl2/atermpp/detail/aterm_int.h"
-#include "mcrl2/atermpp/function_symbol.h"
+#include "mcrl2/atermpp/detail/function_symbol_hash.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
 #include <array>
 #include <functional>
 #include <limits>
 #include <tuple>
-
 
 namespace std
 {
@@ -29,9 +29,8 @@ namespace std
 template<>
 struct hash<atermpp::detail::_aterm*>
 {
-  // Default constructor, required for const qualified hash functions.
-  hash()
-  {}
+  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
+  hash() {}
 
   std::size_t operator()(const atermpp::detail::_aterm* term) const
   {
@@ -46,13 +45,12 @@ struct hash<atermpp::detail::_aterm*>
 template<>
 struct hash<atermpp::unprotected_aterm>
 {
-  // Default constructor, required for const qualified hash functions.
-  hash()
-  {}
+  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
+  hash() {}
 
   std::size_t operator()(const atermpp::unprotected_aterm& term) const
   {
-    std::hash<atermpp::detail::_aterm*> hasher;
+    const std::hash<atermpp::detail::_aterm*> hasher;
     return hasher(atermpp::detail::address(term));
   }
 };
@@ -61,13 +59,12 @@ struct hash<atermpp::unprotected_aterm>
 template<>
 struct hash<atermpp::aterm>
 {
-  // Default constructor, required for const qualified hash functions.
-  hash()
-  {}
+  /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
+  hash() {}
 
   std::size_t operator()(const atermpp::aterm& t) const
   {
-    std::hash<atermpp::detail::_aterm*> aterm_hasher;
+    const std::hash<atermpp::detail::_aterm*> aterm_hasher;
     return aterm_hasher(atermpp::detail::address(t));
   }
 };
@@ -81,27 +78,6 @@ namespace detail
 
 /// \brief Indicates that the number of arguments is not known at compile time.
 constexpr std::size_t DynamicNumberOfArguments = std::numeric_limits<std::size_t>::max();
-
-/// \brief Construct the proxy where its arguments are given by applying the converter
-///        to each element in the iterator.
-template<std::size_t N,
-         typename InputIterator,
-         typename TermConverter,
-         typename std::enable_if<is_iterator<InputIterator>::value, void>::type* = nullptr>
-static std::array<unprotected_aterm, N> construct_arguments(InputIterator it, TermConverter converter)
-{
-  std::array<unprotected_aterm, N> arg;
-  // Copy the arguments.
-  for (size_t i = 0; i < N; ++i)
-  {
-    // Use placement new as the arguments are not default constructed.
-    arg[i] = std::forward<TermConverter>(converter)(*it);
-
-    // Increment the iterator
-    ++it;
-  }
-  return arg;
-}
 
 /// \brief Computes the hash of the given term.
 /// \details Can be optimized with loop unrolling when template parameter N is provided.
@@ -173,31 +149,32 @@ struct aterm_int_equals
   inline bool operator()(const _aterm_int& term, std::size_t value) const noexcept;
 };
 
-/// \brief Auxiliary function to combine seed hnr with value w.
+
+/// \brief Auxiliary function to combine seed with a hash number.
 inline
-std::size_t combine(const std::size_t hnr, const std::size_t w)
+std::size_t combine(const std::size_t seed, const std::size_t hnr)
 {
   // Addition works better than xor, because xor maps equal inputs to 0 which
   // can lead to many collisions. However, with addition we also want to prevent
   // symmetry, i.e a + b equals b + a, so a relative cheap solution is to multiply
-  // one side by a number. For this purpose we chose w + floor(2.5 * hnr);
-  return w + (hnr<<1) + (hnr>>1);
+  // one side by a number. For this purpose we chose hnr + floor(2.5 * seed);
+  return hnr + (seed << 1) + (seed >> 1);
 }
 
 /// \brief Auxiliary function to combine hnr with aterms.
 inline
-std::size_t combine(const std::size_t hnr, const unprotected_aterm& w)
+std::size_t combine(const std::size_t hnr, const unprotected_aterm& term)
 {
-  std::hash<unprotected_aterm> hasher;
-  return combine(hnr,hasher(w));
+  const std::hash<unprotected_aterm> hasher;
+  return combine(hnr, hasher(term));
 }
 
-/// \brief Auxiliary function to combine hnr with _aterm*.
+/// \brief Auxiliary function to combine seed with a given term.
 inline
-std::size_t combine(const std::size_t hnr, const _aterm* w)
+std::size_t combine(const std::size_t hnr, const _aterm* term)
 {
-  std::hash<_aterm*> hasher;
-  return combine(hnr,hasher(w));
+  const std::hash<_aterm*> hasher;
+  return combine(hnr, hasher(term));
 }
 
 /// Implementation
@@ -223,7 +200,7 @@ std::size_t aterm_hasher<N>::operator()(const _aterm& term) const noexcept
 template<std::size_t N>
 std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol) const noexcept
 {
-  std::hash<function_symbol> function_hasher;
+  const std::hash<function_symbol> function_hasher;
   return function_hasher(symbol);
 }
 
@@ -278,16 +255,16 @@ std::size_t aterm_hasher_finite<N>::operator()(const function_symbol& symbol, st
 
 template<std::size_t I = 0, typename... Tp,
          typename std::enable_if<I == sizeof...(Tp), void>::type* = nullptr>
-std::size_t combine_args(std::size_t hnr, const Tp&...)
+std::size_t combine_args(std::size_t seed, const Tp&...)
 {
-  return hnr;
+  return seed;
 }
 
 template<std::size_t I = 0, typename... Tp,
          typename std::enable_if<I < sizeof...(Tp), void>::type* = nullptr>
-std::size_t combine_args(std::size_t hnr, const Tp&... t)
+std::size_t combine_args(std::size_t seed, const Tp&... t)
 {
-  return combine_args<I+1>(combine(hnr, std::get<I>(std::forward_as_tuple(t...))), t...);
+  return combine_args<I+1>(combine(seed, std::get<I>(std::forward_as_tuple(t...))), t...);
 }
 
 template<std::size_t N>

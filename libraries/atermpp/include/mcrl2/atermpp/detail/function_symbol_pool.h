@@ -44,7 +44,7 @@ public:
   /// \param check_for_registered_functions Check whether there is a registered prefix p such that
   ///           name equal pn where n is a number. In that case prevent that pn will be generated
   ///           as a fresh function name.
-  function_symbol create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions);
+  function_symbol create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
 
   /// \brief Frees the memory used by the passed element and remove it from the set.
   void destroy(_function_symbol* f);
@@ -65,13 +65,13 @@ public:
   void print_performance_stats() const noexcept;
 
   /// \returns The function symbol used by integral terms.
-  static const function_symbol& as_int() noexcept { return g_as_int; }
+  const function_symbol& as_int() noexcept { return m_as_int; }
 
   /// \returns The function symbol used by the list constructor.
-  static const function_symbol& as_list() noexcept { return g_as_list; }
+  const function_symbol& as_list() noexcept { return m_as_list; }
 
   /// \returns The function symbol used by the term indicating the empty list.
-  static const function_symbol& as_empty_list() noexcept { return g_as_empty_list; }
+  const function_symbol& as_empty_list() noexcept { return m_as_empty_list; }
 
   /// \returns The number of function symbols stored in this pool.
   std::size_t size() const noexcept { return m_symbol_set.size(); }
@@ -95,6 +95,11 @@ private:
   /// Various performance metrics.
   std::uint64_t m_function_symbols_hits = 0; // The number of function symbols found in the pool.
   std::uint64_t m_function_symbols_creates = 0; // The number of function symbols created.
+
+  // Several default function symbols.
+  function_symbol m_as_int;
+  function_symbol m_as_list;
+  function_symbol m_as_empty_list;
 };
 
 } // namespace detail

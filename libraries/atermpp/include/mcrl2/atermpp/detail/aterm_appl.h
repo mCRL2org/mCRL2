@@ -72,7 +72,6 @@ public:
   {
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
-      // Do not call the copy constructor.
       m_arguments[i] = *it;
       ++it;
     }
@@ -84,7 +83,6 @@ public:
   {
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
-      // Do not call the copy constructor.
       m_arguments[i] = arguments[i];
     }
   }
@@ -166,6 +164,7 @@ public:
     m_packed_allocator.deallocate(reinterpret_cast<char*>(element), term_appl_size(term.function().arity()));
   }
 
+  // These member functions are to ensure parity with the memory_pool.
   constexpr std::size_t capacity() const { return 0; }
   constexpr std::size_t consolidate() const noexcept { return 0; }
   constexpr bool has_free_slots() const noexcept { return false; }
