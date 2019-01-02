@@ -59,14 +59,14 @@ class term_list_iterator
     {}
 
     /// \brief Copy constructor.
-    /// \param l A sequence of terms
+    /// \param other A sequence of terms
     term_list_iterator(const term_list_iterator& other)
       : m_list(other.m_list)
     { 
     } 
 
     /// \brief Assignment
-    /// \param l A sequence of terms
+    /// \param other A sequence of terms
     term_list_iterator& operator=(const term_list_iterator& other)
     { 
       m_list=other.m_list;

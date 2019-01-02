@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/utilities/detail/bucket.h"
+#include "mcrl2/utilities/detail/bucket_list.h"
 #include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2::utilities::detail;

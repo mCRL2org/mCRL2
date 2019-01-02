@@ -270,7 +270,7 @@ public:
   /// \return True iff the list is empty.
   bool empty() const
   {
-    return m_term->function()==detail::g_term_pool().as_empty_list();
+    return m_term->function() == detail::g_term_pool().as_empty_list();
   }
 
   /// \brief Returns a const_iterator pointing to the beginning of the term_list.
@@ -284,7 +284,7 @@ public:
   /// \return The end of the list.
   const_iterator end() const
   {
-    return const_iterator(detail::g_term_pool().is_empty_list_term());
+    return const_iterator(detail::address(detail::g_term_pool().is_empty_list()));
   }
 
   /// \brief Returns the largest possible size of the term_list.

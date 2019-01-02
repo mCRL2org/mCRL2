@@ -17,13 +17,13 @@ namespace atermpp
 {
 namespace detail
 {
-  _aterm_int::_aterm_int(std::size_t val) :
-    _aterm(g_term_pool().get_symbol_pool().as_int()),
-    m_value(val)
-  {}
+  
+_aterm_int::_aterm_int(std::size_t val) :
+  _aterm(g_term_pool().get_symbol_pool().as_int()),
+  m_value(val)
+{}
 
-  typename std::aligned_storage<sizeof(global_aterm_pool), alignof(global_aterm_pool)>::type g_aterm_pool_storage;
+typename std::aligned_storage<sizeof(global_aterm_pool), alignof(global_aterm_pool)>::type g_aterm_pool_storage;
 
-  aterm g_is_empty_list = aterm_appl(g_as_empty_list);
 }
 }

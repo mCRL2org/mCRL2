@@ -241,12 +241,6 @@ protected:
   }
 };
 
-namespace detail
-{
-  /// \brief A term that represents an empty list.
-  extern aterm g_is_empty_list;
-}
-
 template <class Term1, class Term2>
 struct is_convertible : public
     std::conditional<std::is_base_of<aterm, Term1>::value &&
@@ -333,10 +327,8 @@ const Derived& deprecated_cast(const Base& t,
 /// \brief Send the term in textual form to the ostream.
 std::ostream& operator<<(std::ostream& out, const aterm& t);
 
-/// \brief Transform an aterm into a string representation.
-/// \brief This function also prints terms that are derived from aterms.
 /// \param t The input aterm.
-/// \return A string.
+/// \return A string representation of the given term derived from an aterm.
 inline std::string pp(const aterm& t)
 {
   std::ostringstream oss;
