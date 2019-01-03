@@ -9,8 +9,8 @@
 /// \file simplifier.h
 
 
-#ifndef MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
-#define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
+#ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_H
+#define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_H
 
 #include "mcrl2/data/linear_inequalities.h"
 #include "mcrl2/data/merge_data_specifications.h"
@@ -106,4 +106,4 @@ simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter&
 } // namespace mcrl2
 } // namespace data
 
-#endif // MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
+#endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_H

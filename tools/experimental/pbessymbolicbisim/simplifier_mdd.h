@@ -9,8 +9,8 @@
 /// \file simplifier_mdd.h
 
 
-#ifndef MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_MDD_H
-#define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_MDD_H
+#ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MDD_H
+#define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MDD_H
 
 #include "mcrl2/data/enumerator.h"
 
@@ -129,4 +129,4 @@ public:
 } // namespace mcrl2
 } // namespace data
 
-#endif // MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_MDD_H
+#endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MDD_H
