@@ -128,11 +128,6 @@ protected:
   typedef std::unordered_map< std::tuple< data_expression, data_expression, lps::action_summand >, bool> transition_cache_t;
   transition_cache_t transition_cache;
 
-  int refinement_cache_hits = 0;
-  int refinement_cache_misses = 0;
-  int transition_cache_hits = 0;
-  int transition_cache_misses = 0;
-  int last_minute_transition_check = 0;
   block_tree* split_logger;
 
   std::map< lps::action_summand, variable_list > m_primed_summation_variables_map;
@@ -265,16 +260,13 @@ protected:
   {
     if(refinement_cache.find(std::make_tuple(phi_k, phi_l, as)) != refinement_cache.end())
     {
-      refinement_cache_hits++;
       // This split has already been tried before.
       return false;
     }
-    refinement_cache_misses++;
     // Search the cache for information on this transition
     if(!transition_exists(phi_k, phi_l, as))
     {
       // Cache entry found
-      last_minute_transition_check++;
       return false;
     }
 
@@ -592,10 +584,8 @@ protected:
     if(find_result != transition_cache.end())
     {
       // Cache entry found
-      transition_cache_hits++;
       return find_result->second;
     }
-    transition_cache_misses++;
 
     // This expression expresses whether there is a transition between src and dest based on this summand
     bool result =
@@ -824,11 +814,7 @@ public:
       print_partition(partition);
       find_reachable_blocks();
       num_iterations++;
-      mCRL2log(log::verbose) << "End of iteration " << num_iterations <<
-      ".\nRefinement cache entries/hits/misses " << refinement_cache.size() << "/" << refinement_cache_hits << "/" << refinement_cache_misses <<
-      ".\nTransition cache entries/hits/misses " << transition_cache.size() << "/" << transition_cache_hits << "/" << transition_cache_misses <<
-      ".\nLast minute transition check successes " << last_minute_transition_check <<
-      ".\nSplits performed " << refinement_cache_misses - last_minute_transition_check << std::endl;
+      mCRL2log(log::status) << "End of iteration " << num_iterations << ", current number of blocks is " << partition.size() << "\n";
     }
     mCRL2log(log::verbose) << "Final partition:" << std::endl;
     print_partition(partition);
