@@ -15,6 +15,7 @@
 
 #include "mcrl2/utilities/hash_utility.h"
 
+#include "eliminate_real_if.h"
 #include "utilities.h"
 
 namespace mcrl2
@@ -156,6 +157,7 @@ public:
     transition_exists = one_point_rule_rewrite(quantifiers_inside_rewrite(transition_exists));
     if(m_dm.contains_reals)
     {
+      transition_exists = eliminate_real_if(transition_exists);
       transition_exists = replace_data_expressions(transition_exists, fourier_motzkin_sigma(m_dm.rewr), true);
     }
     transition_exists = one_point_rule_rewrite(m_dm.rewr(transition_exists));
