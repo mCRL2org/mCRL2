@@ -16,7 +16,7 @@
 class stopwatch
 {
 public:
-  stopwatch::stopwatch()
+  stopwatch()
   {
     reset();
   }
