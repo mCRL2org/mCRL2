@@ -9,14 +9,23 @@
 
 #include "benchmark_shared.h"
 
+#include "mcrl2/utilities/stopwatch.h"
+
 int main(int, char*[])
 {
   std::size_t amount = 1500000;
   std::size_t iterations = 20;
 
   detail::enable_garbage_collection(false);
+
+  // Keep track of the total time spend on these parts.
+  long long creation_time = 0;
+  long long garbage_collect_time = 0;
+
   for (std::size_t i = 0; i < iterations; ++i)
   {
+    stopwatch stopwatch;
+
     // This block is to ensure that they are unprotected when garbage collection is triggered explicitly.
     {
       // Generate various function applications.
@@ -26,7 +35,14 @@ int main(int, char*[])
       aterm_appl f7 = create_nested_function("i", "f", 7, amount/8);
     }
 
+    creation_time += stopwatch.time();
+
     // Trigger garbage collection.
+    stopwatch.reset();
     detail::collect_terms_with_reference_count_0();
+    garbage_collect_time += stopwatch.time();
   }
+
+  std::cerr << "Creating terms took " << creation_time << " milliseconds.\n";
+  std::cerr << "Garbage collection took " << garbage_collect_time << " milliseconds.\n";
 }

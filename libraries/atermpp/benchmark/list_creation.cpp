@@ -8,7 +8,9 @@
 //
 
 #include "benchmark_shared.h"
+
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 using namespace atermpp;
 
@@ -18,10 +20,15 @@ int main(int, char*[])
   std::size_t iterations = 1000;
   std::size_t number_of_threads = 1;
 
+
   auto create_list = [number_of_threads, iterations, length]()
   {
     function_symbol c("c", 0);
     aterm_appl c_term(c);
+
+    // Track the time that the first iteration (when the term is created) takes.
+    stopwatch stopwatch;
+    bool first_run = true;
 
     aterm_list list;
     for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
@@ -32,7 +39,14 @@ int main(int, char*[])
         tmp_list.push_front(c_term);
       }
       list = tmp_list;
+
+      if (first_run)
+      {
+        first_run = false;
+        std::cerr << "Creating list of length " << length << " took " << stopwatch.time() << " milliseconds.\n";
+      }
     }
+
   };
 
   detail::enable_garbage_collection(false);

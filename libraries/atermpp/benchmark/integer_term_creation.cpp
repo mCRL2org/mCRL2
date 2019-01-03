@@ -10,6 +10,7 @@
 #include "benchmark_shared.h"
 
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 using namespace atermpp;
 
@@ -24,11 +25,21 @@ int main(int, char*[])
     // Store the integers in a vector to prevent them from being deleted.
     std::vector<aterm_int> integers(amount);
 
+    // Track the time that the first iteration (when the terms are created) takes.
+    stopwatch stopwatch;
+    bool first_run = true;
+
     for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
     {
       for (std::size_t j = 0; j < amount; ++j)
       {
         integers[i] = aterm_int(i);
+      }
+
+      if (first_run)
+      {
+        first_run = false;
+        std::cerr << "Creating " << amount << " integers took " << stopwatch.time() << " milliseconds.\n";
       }
     }
   };

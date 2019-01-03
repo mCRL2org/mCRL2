@@ -10,6 +10,7 @@
 #include "benchmark_shared.h"
 
 #include "mcrl2/atermpp/function_symbol.h"
+#include "mcrl2/utilities/stopwatch.h"
 
 #include <vector>
 #include <string>
@@ -28,6 +29,10 @@ int main(int, char*[])
     // Store them in a vector to prevent them from being deleted.
     std::vector<function_symbol> symbols(amount);
 
+    // Track the time that the first iteration (when the terms are created) takes.
+    stopwatch stopwatch;
+    bool first_run = true;
+
     // Generate function symbols f + suffix, where suffix from 0 to amount.
     std::string name("f");
     for (std::size_t k = 0; k < iterations / number_of_threads; ++k)
@@ -35,6 +40,12 @@ int main(int, char*[])
       for (std::size_t i = 0; i < amount; ++i)
       {
         symbols[i] = function_symbol(name + std::to_string(i), 0);
+      }
+
+      if (first_run)
+      {
+        first_run = false;
+        std::cerr << "Creating " << amount << " function symbols took " << stopwatch.time() << " milliseconds.\n";
       }
     }
   };

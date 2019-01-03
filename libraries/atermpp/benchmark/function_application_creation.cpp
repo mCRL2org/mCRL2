@@ -9,6 +9,8 @@
 
 #include "benchmark_shared.h"
 
+#include "mcrl2/utilities/stopwatch.h"
+
 using namespace atermpp;
 
 int main(int argc, char* argv[])
@@ -27,10 +29,20 @@ int main(int argc, char* argv[])
 
   auto nested_function = [iterations, number_of_arguments, size, number_of_threads]()
   {
+    // Track the time that the first iteration (when the term is created) takes.
+    stopwatch stopwatch;
+    bool first_run = true;
+
     aterm_appl f;
     for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
     {
       f = create_nested_function("f", "c", number_of_arguments, size / (number_of_arguments + 1));
+
+      if (first_run)
+      {
+        first_run = false;
+        std::cerr << "Creating nested function application with " << number_of_arguments << " arguments and " << (size / (number_of_arguments + 1)) << " depth took " << stopwatch.time() << " milliseconds.\n";
+      }
     }
   };
 
