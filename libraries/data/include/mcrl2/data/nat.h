@@ -417,7 +417,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == equals_zero();
+          return atermpp::down_cast<function_symbol>(e) == equals_zero();
         }
         return false;
       }
@@ -472,7 +472,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == not_equals_zero();
+          return atermpp::down_cast<function_symbol>(e) == not_equals_zero();
         }
         return false;
       }
@@ -526,7 +526,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == equals_one_name() && function_sort(f.sort()).domain().size() == 1 && (f == equals_one(nat()) || f == equals_one(sort_pos::pos()));
         }
         return false;
@@ -1062,25 +1062,38 @@ namespace mcrl2 {
         return add_with_carry_name;
       }
 
-      /// \brief Constructor for function symbol \@add_with_carry.       
-      /// \return Function symbol add_with_carry.
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      const function_symbol& add_with_carry()
+      function_symbol add_with_carry(const sort_expression& s0, const sort_expression& s1)
       {
-        static function_symbol add_with_carry(add_with_carry_name(), make_function_sort(nat(), nat(), nat()));
+        sort_expression target_sort;
+        if (s0 == nat() && s1 == nat())
+        {
+          target_sort = nat();
+        }
+        else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for add_with_carry with domain sorts " + pp(s0) + ", " + pp(s1));
+        }
+
+        function_symbol add_with_carry(add_with_carry_name(), make_function_sort(s0, s1, target_sort));
         return add_with_carry;
       }
 
-
       /// \brief Recogniser for function \@add_with_carry.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@add_with_carry.
+      /// \return true iff e is the function symbol matching \@add_with_carry
       inline
       bool is_add_with_carry_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == add_with_carry();
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
+          return f.name() == add_with_carry_name() && function_sort(f.sort()).domain().size() == 2 && (f == add_with_carry(nat(), nat()) || f == add_with_carry(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -1092,7 +1105,7 @@ namespace mcrl2 {
       inline
       application add_with_carry(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_nat::add_with_carry()(arg0, arg1);
+        return sort_nat::add_with_carry(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@add_with_carry.
@@ -1273,7 +1286,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          function_symbol f(e);
+          const function_symbol& f = atermpp::down_cast<function_symbol>(e);
           return f.name() == times_overflow_name() && function_sort(f.sort()).domain().size() == 3 && (f == times_overflow(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word()) || f == times_overflow(sort_pos::pos(), sort_machine_word::machine_word(), sort_machine_word::machine_word()));
         }
         return false;
@@ -3915,7 +3928,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
-        result.push_back(sort_nat::add_with_carry());
+        result.push_back(sort_nat::add_with_carry(nat(), nat()));
         result.push_back(sort_nat::auxiliary_plus_nat());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::times_overflow(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word()));
@@ -3998,7 +4011,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
-        result.push_back(sort_nat::add_with_carry());
+        result.push_back(sort_nat::add_with_carry(nat(), nat()));
         result.push_back(sort_nat::auxiliary_plus_nat());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::times_overflow(nat(), sort_machine_word::machine_word(), sort_machine_word::machine_word()));

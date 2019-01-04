@@ -28,7 +28,7 @@ map  @most_significant_digit <"most_significant_digit">: @word <"arg"> -> Pos   
      succ <"succ">: Pos <"arg"> -> Pos                                                                external defined_by_rewrite_rules;
      @pospred <"pos_predecessor">: Pos <"arg"> -> Pos                                                 internal defined_by_rewrite_rules;
      + <"plus">: Pos <"left"> # Pos <"right"> -> Pos                                                  external defined_by_rewrite_rules;
-     @plus_with_carry <"plus_with_carry">: Pos <"left"> # Pos <"right"> -> Pos                        internal defined_by_rewrite_rules;
+     @add_with_carry <"add_with_carry">: Pos <"left"> # Pos <"right"> -> Pos                        internal defined_by_rewrite_rules;
 % The following function is used when the symbol + is overloaded, such as in fbags. 
      @plus_pos <"auxiliary_plus_pos">: Pos <"left"> # Pos <"right"> -> Pos                            external defined_by_rewrite_rules;
      * <"times">: Pos <"left"> # Pos <"right"> -> Pos                                                 external defined_by_rewrite_rules;
@@ -96,7 +96,7 @@ eqn  @c1 = @most_significant_digit(@one_word);
                                      if(@add_overflow_word(w1,w2),
                                                     @concat_digit(@most_significant_digit(@one_word),@add_word(w1,w2)),
                                                     @most_significant_digit(@add_word(w1,w2)));
-     @plus_with_carry(@most_significant_digit(w1),@most_significant_digit(w2)) =
+     @add_with_carry(@most_significant_digit(w1),@most_significant_digit(w2)) =
                                      if(@add_with_carry_overflow_word(w1,w2),
                                                     @concat_digit(@most_significant_digit(@one_word),(@add_with_carry_word(w1,w2))),
                                                     @most_significant_digit(@add_with_carry_word(w1,w2)));
@@ -112,7 +112,7 @@ eqn  @c1 = @most_significant_digit(@one_word);
                    if(@add_overflow_word(w1,w2),
                                        @concat_digit(@succ_pos(p1),@add_word(w1,w2)),
                                        @concat_digit(p1, @add_word(w1,w2)));
-     @plus_with_carry(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
+     @add_with_carry(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
                    if(@add_with_carry_overflow_word(w1,w2),
                                        @concat_digit(@succ_pos(p1),@add_with_carry_word(w1,w2)),
                                        @concat_digit(p1, @add_with_carry_word(w1,w2)));
@@ -121,18 +121,18 @@ eqn  @c1 = @most_significant_digit(@one_word);
                    if(@add_overflow_word(w1,w2),
                                        @concat_digit(@succ_pos(p2),@add_word(w1,w2)),
                                        @concat_digit(p2, @add_word(w1,w2)));
-     @plus_with_carry(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
+     @add_with_carry(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
                    if(@add_with_carry_overflow_word(w1,w2),
                                        @concat_digit(@succ_pos(p2),@add_with_carry_word(w1,w2)),
                                        @concat_digit(p2, @add_with_carry_word(w1,w2)));
 
      +(@concat_digit(p1,w1),@concat_digit(p2,w2)) = 
                    if(@add_overflow_word(w1,w2),
-                                       @concat_digit(@plus_with_carry(p1,p2), @add_word(w1,w2)),
+                                       @concat_digit(@add_with_carry(p1,p2), @add_word(w1,w2)),
                                        @concat_digit(+(p1,p2), @add_word(w1,w2)));
-     @plus_with_carry(@concat_digit(p1,w1),@concat_digit(p2,w2)) = 
+     @add_with_carry(@concat_digit(p1,w1),@concat_digit(p2,w2)) = 
                    if(@add_with_carry_overflow_word(w1,w2),
-                                       @concat_digit(@plus_with_carry(p1,p2), @add_with_carry_word(w1,w2)),
+                                       @concat_digit(@add_with_carry(p1,p2), @add_with_carry_word(w1,w2)),
                                        @concat_digit(+(p1,p2), @add_with_carry_word(w1,w2)));
 
 % The rules below are useful in solving expressions with plus and quantifiers.

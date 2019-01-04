@@ -483,7 +483,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == equals_zero_word();
+          return atermpp::down_cast<function_symbol>(e) == equals_zero_word();
         }
         return false;
       }
@@ -557,7 +557,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == not_equals_zero_word();
+          return atermpp::down_cast<function_symbol>(e) == not_equals_zero_word();
         }
         return false;
       }
@@ -631,7 +631,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == equals_one_word();
+          return atermpp::down_cast<function_symbol>(e) == equals_one_word();
         }
         return false;
       }
@@ -705,7 +705,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == equals_max_word();
+          return atermpp::down_cast<function_symbol>(e) == equals_max_word();
         }
         return false;
       }
@@ -855,7 +855,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == add_with_carry_word();
+          return atermpp::down_cast<function_symbol>(e) == add_with_carry_word();
         }
         return false;
       }
@@ -1007,7 +1007,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == add_with_carry_overflow_word();
+          return atermpp::down_cast<function_symbol>(e) == add_with_carry_overflow_word();
         }
         return false;
       }
@@ -1159,7 +1159,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == times_with_carry_word();
+          return atermpp::down_cast<function_symbol>(e) == times_with_carry_word();
         }
         return false;
       }
@@ -1313,7 +1313,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == times_with_carry_overflow_word();
+          return atermpp::down_cast<function_symbol>(e) == times_with_carry_overflow_word();
         }
         return false;
       }
@@ -1467,7 +1467,7 @@ namespace mcrl2 {
       {
         if (is_function_symbol(e))
         {
-          return function_symbol(e) == monus_word();
+          return atermpp::down_cast<function_symbol>(e) == monus_word();
         }
         return false;
       }
