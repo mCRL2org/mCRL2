@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Author(s): Jan Friso Groote, Maurice Laveaux, Wieger Wesselink.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/aterm.h
-/// \brief The aterm class.
 
 #ifndef MCRL2_ATERMPP_ATERM_H
 #define MCRL2_ATERMPP_ATERM_H
@@ -32,12 +30,6 @@ extern void add_deletion_hook(const function_symbol&, term_callback);
 ///        shared term when it is copied or moved.
 class unprotected_aterm
 {
-public:
-  template < typename T >
-  friend class term_appl;
-
-  template < typename T >
-  friend class term_list;
 
   friend detail::_aterm* detail::address(const unprotected_aterm& t);
 
@@ -336,6 +328,15 @@ inline std::string pp(const aterm& t)
   return oss.str();
 }
 
+namespace detail
+{
+  /// \returns A pointer to the underlying aterm.
+  inline _aterm* address(const unprotected_aterm& t)
+  {
+    return t.m_term;
+  }
+}
+
 } // namespace atermpp
 
 
@@ -374,8 +375,5 @@ inline void swap(atermpp::unprotected_aterm& t1, atermpp::unprotected_aterm& t2)
 }
 
 } // namespace std
-
-
-#include "mcrl2/atermpp/detail/aterm_implementation.h"
 
 #endif // MCRL2_ATERMPP_ATERM_H

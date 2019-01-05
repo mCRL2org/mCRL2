@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Author(s): Jan Friso Groote, Maurice Laveaux.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -7,9 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#pragma once
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
+#pragma once
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
@@ -20,10 +20,10 @@
 namespace atermpp
 {
 
-constexpr std::size_t LengthOfShortList = 10000;  // The length of a short list. If lists
-                                                  // are short the stack can be used for temporary data.
-                                                  // Otherwise the heap must be used to avoid stack overflow.
-                                                  // The chosen value is rather arbitrary.
+constexpr std::size_t LengthOfShortList = 10000;  /// \brief The length of a short list. If lists
+                                                  ///        are short the stack can be used for temporary data.
+                                                  ///        Otherwise the heap must be used to avoid stack overflow.
+                                                  ///        The chosen value is rather arbitrary.
 
 template <class Term>
 void term_list<Term>::push_front(const Term& el)

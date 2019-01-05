@@ -7,9 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#pragma once
 #ifndef ATERMPP_DETAIL_ATERM_POOL_IMPLEMENTATION_H
 #define ATERMPP_DETAIL_ATERM_POOL_IMPLEMENTATION_H
+#pragma once
 
 #include "aterm_pool.h"
 #include "mcrl2/utilities/logger.h"

@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/detail/aterm_appl.h"
 #include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/detail/function_symbol_hash.h"
+#include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
 #include <array>
@@ -149,32 +150,12 @@ struct aterm_int_equals
   inline bool operator()(const _aterm_int& term, std::size_t value) const noexcept;
 };
 
-
-/// \brief Auxiliary function to combine seed with a hash number.
-inline
-std::size_t combine(const std::size_t seed, const std::size_t hnr)
-{
-  // Addition works better than xor, because xor maps equal inputs to 0 which
-  // can lead to many collisions. However, with addition we also want to prevent
-  // symmetry, i.e a + b equals b + a, so a relative cheap solution is to multiply
-  // one side by a number. For this purpose we chose hnr + floor(2.5 * seed);
-  return hnr + (seed << 1) + (seed >> 1);
-}
-
 /// \brief Auxiliary function to combine hnr with aterms.
 inline
 std::size_t combine(const std::size_t hnr, const unprotected_aterm& term)
 {
   const std::hash<unprotected_aterm> hasher;
-  return combine(hnr, hasher(term));
-}
-
-/// \brief Auxiliary function to combine seed with a given term.
-inline
-std::size_t combine(const std::size_t hnr, const _aterm* term)
-{
-  const std::hash<_aterm*> hasher;
-  return combine(hnr, hasher(term));
+  return mcrl2::utilities::detail::hash_combine_cheap(hnr, hasher(term));
 }
 
 /// Implementation
@@ -189,7 +170,7 @@ std::size_t aterm_hasher<N>::operator()(const _aterm& term) const noexcept
   const std::size_t arity = (N == DynamicNumberOfArguments) ? f.arity() : N;
 
   // This is a function application with arguments, hash each argument and combine the result.
-  const _aterm_appl<>& term_appl = reinterpret_cast<const _aterm_appl<>&>(term);
+  const _aterm_appl<>& term_appl = static_cast<const _aterm_appl<>&>(term);
   for (std::size_t i = 0; i < arity; ++i)
   {
     hnr = combine(hnr, term_appl.arg(i));
@@ -304,8 +285,8 @@ bool aterm_equals<N>::operator()(const _aterm& first, const _aterm& second) cons
     // Check whether the remaining arguments match
     for (std::size_t i = 0; i < arity; ++i)
     {
-      if (reinterpret_cast<const _term_appl&>(first).arg(i)
-            != reinterpret_cast<const _term_appl&>(second).arg(i))
+      if (static_cast<const _term_appl&>(first).arg(i)
+            != static_cast<const _term_appl&>(second).arg(i))
       {
         return false;
       }
@@ -331,7 +312,7 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
     // Each argument should be equal.
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
-      if (reinterpret_cast<const _term_appl&>(term).arg(i) != arguments[i])
+      if (static_cast<const _term_appl&>(term).arg(i) != arguments[i])
       {
         return false;
       }
@@ -355,7 +336,7 @@ inline bool aterm_equals<N>::operator()(const _aterm& term, const function_symbo
     // Each argument should be equal.
     for (std::size_t i = 0; i < arity; ++i)
     {
-      if (reinterpret_cast<const _term_appl&>(term).arg(i) != (*begin))
+      if (static_cast<const _term_appl&>(term).arg(i) != (*begin))
       {
         return false;
       }
@@ -376,7 +357,7 @@ bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbo
     // Each argument should be equal.
     for (std::size_t i = 0; i < N; ++i)
     {
-      if (reinterpret_cast<const _aterm_appl<N>&>(term).arg(i) != arguments[i])
+      if (static_cast<const _aterm_appl<N>&>(term).arg(i) != arguments[i])
       {
         return false;
       }
@@ -408,7 +389,7 @@ template<std::size_t N>
 template<typename ...Args>
 bool aterm_equals_finite<N>::operator()(const _aterm& term, const function_symbol& symbol, const Args&... args) const noexcept
 {
-  return (term.function() == symbol && equal_args(reinterpret_cast<const _aterm_appl<8>&>(term), args...));
+  return (term.function() == symbol && equal_args(static_cast<const _aterm_appl<8>&>(term), args...));
 }
 
 bool aterm_int_equals::operator()(const _aterm_int& first, const _aterm_int& second) const noexcept

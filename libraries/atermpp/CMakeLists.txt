@@ -4,7 +4,6 @@ add_mcrl2_library(atermpp
     aterm_implementation.cpp
     aterm_io_binary.cpp
     aterm_io_text.cpp
-    aterm_pool.cpp
     function_symbol.cpp
     function_symbol_pool.cpp
   DEPENDS

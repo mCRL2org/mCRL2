@@ -128,7 +128,6 @@ public:
 
   /// \returns The pool of function symbols.
   function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
-  const function_symbol_pool& get_symbol_pool() const { return m_function_symbol_pool; }
 private:
 
   /// Storage for the function symbols.

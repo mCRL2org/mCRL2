@@ -20,29 +20,30 @@ int main(int, char*[])
   std::size_t iterations = 1000;
   std::size_t number_of_threads = 1;
 
-  auto create_integers = [amount,iterations,number_of_threads]()
-  {
-    // Store the integers in a vector to prevent them from being deleted.
-    std::vector<aterm_int> integers(amount);
-
-    // Track the time that the first iteration (when the terms are created) takes.
-    stopwatch stopwatch;
-    bool first_run = true;
-
-    for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
+  // Define a function that repeatedly creates integers.
+  auto create_integers = [amount, iterations, number_of_threads](void) -> void
     {
-      for (std::size_t j = 0; j < amount; ++j)
-      {
-        integers[i] = aterm_int(i);
-      }
+      // Store the integers in a vector to prevent them from being deleted.
+      std::vector<aterm_int> integers(amount);
 
-      if (first_run)
+      // Track the time that the first iteration (when the terms are created) takes.
+      stopwatch stopwatch;
+      bool first_run = true;
+
+      for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
       {
-        first_run = false;
-        std::cerr << "Creating " << amount << " integers took " << stopwatch.time() << " milliseconds.\n";
+        for (std::size_t j = 0; j < amount; ++j)
+        {
+          integers[i] = aterm_int(i);
+        }
+
+        if (first_run)
+        {
+          first_run = false;
+          std::cerr << "Creating " << amount << " integers took " << stopwatch.time() << " milliseconds.\n";
+        }
       }
-    }
-  };
+    };
 
   detail::g_term_pool().enable_garbage_collection(false);
   benchmark_threads(number_of_threads, create_integers);

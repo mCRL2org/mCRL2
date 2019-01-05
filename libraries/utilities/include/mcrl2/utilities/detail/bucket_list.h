@@ -29,7 +29,7 @@ class bucket_list
 {
 public:
 
-  /// \brief The nodes of the bucket list without carrying any additional informations.
+  /// \brief The nodes of the bucket list without carrying any additional informations
   ///        Mainly used to make no different between the head and the tail of the list.
   class node_base
   {

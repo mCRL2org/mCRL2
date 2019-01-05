@@ -31,10 +31,10 @@ class free_list
 {
 public:
 
+  /// \brief A sentinel value for the next of a slot to indicate that it belonged to the freelist.
   static constexpr std::uintptr_t FreeListSentinel = std::numeric_limits<std::uintptr_t>::max();
 
-  /// \brief The nodes of the bucket list without carrying any additional informations.
-  ///        Mainly used to make no different between the head and the tail of the list.
+  /// \brief The nodes of the free list without.
   union slot
   {
   public:
@@ -52,7 +52,6 @@ public:
 
     /// \returns A reference to the key stored in this node.
     Element& element() noexcept { return m_element; }
-    const Element& element() const noexcept { return m_element; }
 
     /// \returns An implicit conversion to the underlying key.
     operator Element&() { return m_element; }
@@ -61,7 +60,7 @@ public:
     void mark() { m_next = reinterpret_cast<slot*>(FreeListSentinel); }
 
     /// \returns True if and only if this slot is marked.
-    bool is_marked() { return m_next == reinterpret_cast<slot*>(FreeListSentinel); }
+    bool is_marked() const noexcept { return m_next == reinterpret_cast<slot*>(FreeListSentinel); }
   protected:
 
     /// \brief Pointer to the next node.
@@ -145,11 +144,11 @@ public:
   free_list() {}
 
   /// \returns An iterator over the keys of this bucket and successor buckets.
-  iterator begin() { return iterator(m_head.next()); }
+  iterator begin() { return iterator(head().next()); }
   iterator end() { return iterator(); }
 
   /// \return An iterator pointing to the before the head of the list.
-  iterator before_begin() { return iterator(&m_head); }
+  iterator before_begin() { return iterator(&head()); }
 
   /// \returns A const iterator over the keys of this bucket and successor buckets.
   const_iterator begin() const { return const_iterator(*this); }
@@ -157,13 +156,6 @@ public:
 
   /// \return A const iterator pointing to the before the head of the list.
   const_iterator before_begin() const { return const_iterator(&m_head); }
-
-  /// \brief Puts the given node before the head of the list.
-  void push_front(slot* slot)
-  {
-    slot->next(m_head.next());
-    m_head.next(slot);
-  }
 
   /// \brief Removes the element after the given iterator from the list. The returned iterator
   iterator erase_after(iterator it)
@@ -180,10 +172,8 @@ public:
     return iterator(next_node);
   }
 
-  const slot* head() const noexcept { return &m_head; }
-
   /// \brief Empties the bucket list.
-  void clear() { m_head.next(nullptr); }
+  void clear() { head().next(nullptr); }
 
   /// \returns True if the given pointer is already in the freelist.
   bool contains(Element* pointer)
@@ -221,24 +211,46 @@ public:
       current_slot->mark();
     }
 
-    m_head.next(nullptr);
+    head().next(nullptr);
   }
 
   /// \returns True if and only if this list is empty.
-  bool empty() const
+  bool empty() const noexcept
   {
-    return !m_head.has_next();
+    return !head().has_next();
   }
 
+  /// \brief Inserts an element at the position after the iterator.
+  iterator insert_after(iterator it, slot& element)
+  {
+    slot& current = *it.get_slot();
+    element.next(current.next());
+    current.next(&element);
+    return iterator(&element);
+  }
+
+  /// \brief Removes the head of the list and returns a reference to this head slot.
   Element& pop_front()
   {
-    slot* element = m_head.next();
-    m_head.next(element->next());
+    slot* element = head().next();
+    head().next(element->next());
     return element->element();
   }
 
+  /// \brief Puts the given node before the head of the list.
+  void push_front(slot& slot)
+  {
+    slot.next(head().next());
+    head().next(&slot);
+  }
+
 private:
+  /// \brief Provides access to the head as if it was an actual slot.
+  slot& head() noexcept { return m_head; }
+  const slot& head() const noexcept { return m_head; }
+
   /// \brief The first node in the bucket list.
+  /// \details This wastes sizeof(Element) space, because slot can store both an Element or a next pointer.
   slot m_head;
 };
 

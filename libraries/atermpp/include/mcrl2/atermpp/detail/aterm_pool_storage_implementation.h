@@ -7,9 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#pragma once
 #ifndef MCRL2_ATERMPP_ATERM_POOL_STORAGE_IMPLEMENTION_H
 #define MCRL2_ATERMPP_ATERM_POOL_STORAGE_IMPLEMENTION_H
+#pragma once
 
 #include "mcrl2/atermpp/detail/aterm_pool_storage.h"
 #include "mcrl2/atermpp/detail/aterm_pool.h"
@@ -254,7 +254,7 @@ bool ATERM_POOL_STORAGE::verify_mark()
   {
     if (term.is_reachable() && term.function().arity() > 0)
     {
-       _term_appl& ta = reinterpret_cast<_term_appl&>(term);
+       const _term_appl& ta = static_cast<const _term_appl&>(term);
        for (std::size_t i = 0; i < ta.function().arity(); ++i)
        {
          assert(detail::address(ta.arg(i))->is_reachable());
@@ -340,7 +340,7 @@ void ATERM_POOL_STORAGE::mark_term(_aterm& root)
 
     // (Statically) determine the arity of the function application.
     const std::size_t arity = term.function().arity();
-    _term_appl& term_appl = reinterpret_cast<_term_appl&>(term);
+    _term_appl& term_appl = static_cast<_term_appl&>(term);
 
     for (std::size_t i = 0; i < arity; ++i)
     {
@@ -374,7 +374,7 @@ bool ATERM_POOL_STORAGE::verify_term(_aterm& term)
   // Check that all of its arguments are defined.
   if (term.function().arity() > 0)
   {
-    _term_appl& ta = reinterpret_cast<_term_appl&>(term);
+    _term_appl& ta = static_cast<_term_appl&>(term);
     for (std::size_t i = 0; i < ta.function().arity(); ++i)
     {
       assert(ta.arg(i).defined());
