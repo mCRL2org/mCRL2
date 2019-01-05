@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jan Friso Groote, based on the aterm library.
+// Author(s): Wieger Wesselink, Jan Friso Groote, Maurice Laveaux.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //

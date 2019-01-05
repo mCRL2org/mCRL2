@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Maurice Laveaux.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -90,13 +90,19 @@ public:
   /// \returns A reference to the arguments at the ith position.
   aterm& arg(std::size_t index)
   {
-    return reinterpret_cast<aterm&>(m_arguments.data()[index]);
+    return static_cast<aterm&>(m_arguments.data()[index]);
   }
 
   /// \returns A const reference to the arguments at the ith position.
   const aterm& arg(std::size_t index) const
   {
-    return reinterpret_cast<const aterm&>(m_arguments.data()[index]);
+    return static_cast<const aterm&>(m_arguments.data()[index]);
+  }
+
+  /// \brief Convert any known number of arguments aterm_appl<N> to the default _aterm_appl.
+  explicit operator _aterm_appl<1>& ()
+  {
+    return reinterpret_cast<_aterm_appl<1>&>(*this);
   }
 
 private:

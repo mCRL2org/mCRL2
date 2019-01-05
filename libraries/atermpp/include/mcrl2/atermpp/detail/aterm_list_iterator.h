@@ -40,7 +40,7 @@ class term_list_iterator
     /// \brief Constructor from an aterm which must be a list.
     /// \param l A sequence of terms
     term_list_iterator(detail::_aterm* l)
-      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l))
+      : m_list(static_cast<detail::_aterm_list<Term>*>(l))
     { 
       assert(l->function()==detail::g_term_pool().as_list()
              || l->function()==detail::g_term_pool().as_empty_list());
@@ -77,30 +77,30 @@ class term_list_iterator
     const Term& operator*() const
     {
       assert(m_list->function()==detail::g_term_pool().as_list());
-      return m_list->head;
+      return m_list->head();
     }
 
     /// Arrow operator on an iterator
     const Term* operator->() const
     {
       assert(m_list->function()==detail::g_term_pool().as_list());
-      return &m_list->head;
+      return &m_list->head();
     }
     
     /// \brief Prefix increment operator on iterator.
     term_list_iterator& operator++()
     {
-      assert(m_list->function()==detail::g_term_pool().as_list());
-      m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
+      assert(m_list->function() == detail::g_term_pool().as_list());
+      m_list = static_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail()));
       return *this;
     }
 
     /// \brief Postfix increment operator on iterator.
     term_list_iterator operator++(int)
     {
-      assert(m_list->function()==detail::g_term_pool().as_list());
+      assert(m_list->function() == detail::g_term_pool().as_list());
       const term_list_iterator temp = *this;
-      m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
+      m_list = static_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail()));
       return temp;
     }
 

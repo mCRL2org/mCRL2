@@ -23,10 +23,8 @@
 
 namespace mcrl2
 {
-
 namespace utilities
 {
-
 namespace detail
 {
 
@@ -36,6 +34,15 @@ inline std::size_t hash_combine(const std::size_t h1, const std::size_t h2)
   return h1 ^  (h2 + 0x9e3779b9 + (h1<<6) + (h1>>2));
 }
 
+/// \brief Auxiliary function to combine seed with a hash number.
+inline std::size_t hash_combine_cheap(const std::size_t seed, const std::size_t hash_number)
+{
+  // Addition works better than xor, because xor maps equal inputs to 0 which
+  // can lead to many collisions. However, with addition we also want to prevent
+  // symmetry, i.e a + b equals b + a, so a relative cheap solution is to multiply
+  // one side by a number. For this purpose we chose hnr + floor(2.5 * seed);
+  return hash_number + (seed << 1) + (seed >> 1);
+}
 
 } //end namespace detail
 } //end namespace utilities

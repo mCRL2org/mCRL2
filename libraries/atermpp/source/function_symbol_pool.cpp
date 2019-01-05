@@ -9,7 +9,6 @@
 
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
 
-#include "mcrl2/atermpp/detail/aterm_implementation.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/unused.h"
 

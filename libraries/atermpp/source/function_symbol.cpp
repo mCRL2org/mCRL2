@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote
+// Author(s): Maurice Laveaux
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //

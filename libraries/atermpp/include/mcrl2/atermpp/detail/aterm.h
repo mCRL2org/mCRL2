@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef DETAIL_ATERM_H
-#define DETAIL_ATERM_H
+#ifndef MCRL2_ATERMPP_DETAIL_ATERM_H
+#define MCRL2_ATERMPP_DETAIL_ATERM_H
 
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/function_symbol.h"
@@ -21,6 +21,7 @@
 namespace atermpp
 {
 
+// Forward declaration.
 class unprotected_aterm;
 
 constexpr static std::size_t MarkedReferenceCount = std::numeric_limits<std::size_t>::max();
@@ -73,13 +74,17 @@ public:
     increment_reference_count_changes();
   }
 
+  /// \brief During garbage collection a term will be marked whenever it occurs as the argument
+  ///        of a reachable term, but is not protected itself.
   /// \returns True whenever this term has been marked.
   bool is_marked() const noexcept
   {
     return m_reference_count == MarkedReferenceCount;
   }
 
-  /// \returns True whenever the term is reachable, either marked or reference count above zero.
+  /// \brief A term is reachable in the garbage collection graph if it is protected or whenever it occurs
+  ///        as an argument of a reachable term. The latter will be ensured in the marking phase of garbage collection.
+  /// \returns True whenever the term is reachable ie either marked or protected.
   bool is_reachable() const noexcept
   {
     return m_reference_count > 0;
@@ -89,10 +94,9 @@ private:
   function_symbol m_function_symbol;
 };
 
-/// \brief Provides the address where the data belonging to this aterm is stored.
 inline _aterm* address(const unprotected_aterm& t);
 
 } // namespace detail
 } // namespace atermpp
 
-#endif /* DETAIL_ATERM_H */
+#endif /* MCRL2_ATERMPP_DETAIL_ATERM_H */

@@ -37,7 +37,7 @@ template <class T,
 class memory_pool : private mcrl2::utilities::noncopyable
 {
 public:
-  memory_pool()  = default;
+  memory_pool() = default;
 
   /// \brief Triggers the (possibly non-trivial) destructor of all elements stored
   ///        in the pool.
@@ -102,7 +102,7 @@ public:
   void deallocate(T* pointer)
   {
     assert(contains(pointer));
-    m_freelist.push_front(reinterpret_cast<Slot*>(pointer));
+    m_freelist.push_front(reinterpret_cast<Slot&>(*pointer));
   }
 
   /// \brief Call the destructor of the pointed to object.
@@ -205,6 +205,8 @@ private:
   /// \returns Check whether the pointer is contained in this memory pool.
   bool contains(T* p)
   {
+    assert(p != nullptr);
+
     std::uintptr_t pointer = reinterpret_cast<std::uintptr_t>(p);
     for (auto& block : m_blocks)
     {

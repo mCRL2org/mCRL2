@@ -27,24 +27,25 @@ int main(int argc, char* argv[])
     number_of_arguments = static_cast<std::size_t>(std::stoi(argv[1]));
   }
 
-  auto nested_function = [iterations, number_of_arguments, size, number_of_threads]()
-  {
-    // Track the time that the first iteration (when the term is created) takes.
-    stopwatch stopwatch;
-    bool first_run = true;
-
-    aterm_appl f;
-    for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
+  // Define a function that repeatedly creates nested function applications.
+  auto nested_function = [iterations, number_of_arguments, size, number_of_threads](void) -> void
     {
-      f = create_nested_function("f", "c", number_of_arguments, size / (number_of_arguments + 1));
+      // Track the time that the first iteration (when the term is created) takes.
+      stopwatch stopwatch;
+      bool first_run = true;
 
-      if (first_run)
+      aterm_appl f;
+      for (std::size_t i = 0; i < iterations / number_of_threads; ++i)
       {
-        first_run = false;
-        std::cerr << "Creating nested function application with " << number_of_arguments << " arguments and " << (size / (number_of_arguments + 1)) << " depth took " << stopwatch.time() << " milliseconds.\n";
+        f = create_nested_function("f", "c", number_of_arguments, size / (number_of_arguments + 1));
+
+        if (first_run)
+        {
+          first_run = false;
+          std::cerr << "Creating nested function application with " << number_of_arguments << " arguments and " << (size / (number_of_arguments + 1)) << " depth took " << stopwatch.time() << " milliseconds.\n";
+        }
       }
-    }
-  };
+    };
 
   detail::g_term_pool().enable_garbage_collection(false);
   benchmark_threads(number_of_threads, nested_function);

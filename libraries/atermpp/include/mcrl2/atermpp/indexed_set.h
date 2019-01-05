@@ -6,16 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/indexed_set.h
-/// \brief Indexed set.
 
 #ifndef MCRL2_ATERMPP_INDEXED_SET_H
 #define MCRL2_ATERMPP_INDEXED_SET_H
 
+#include "mcrl2/atermpp/detail/atypes.h"
+#include "mcrl2/utilities/exception.h"
+
 #include <vector>
 #include <stack>
 #include <cassert>
-#include "mcrl2/atermpp/detail/aterm_implementation.h"
 
 namespace atermpp
 {

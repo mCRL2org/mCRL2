@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/aterm_int.h
-/// \brief Term containing an integer.
 
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_INT_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_INT_H
@@ -24,7 +22,10 @@ class _aterm_int : public _aterm
 {
 public:
   /// \brief Constructs the underlying term from a given value.
-  _aterm_int(std::size_t value);
+  _aterm_int(std::size_t value) :
+    _aterm(g_as_int),
+    m_value(value)
+  {}
 
   std::size_t value() const noexcept
   {

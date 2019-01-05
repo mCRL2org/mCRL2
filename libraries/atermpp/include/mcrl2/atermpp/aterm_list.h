@@ -233,20 +233,20 @@ public:
   const term_list<Term>& tail() const
   {
     assert(!empty());
-    return (reinterpret_cast<detail::_aterm_list<Term>*>(m_term))->tail;
+    return (static_cast<detail::_aterm_list<Term>&>(*m_term)).tail();
   }
 
   /// \brief Removes the first element of the list.
   void pop_front()
   {
-    *this=tail();
+    *this = tail();
   }
 
   /// \brief Returns the first element of the list.
   /// \return The term at the head of the list.
   const Term& front() const
   {
-    return reinterpret_cast<detail::_aterm_list<Term>*>(m_term)->head;
+    return static_cast<detail::_aterm_list<Term>&>(*m_term).head();
   }
 
   /// \brief Inserts a new element at the beginning of the current list.
@@ -291,7 +291,7 @@ public:
   /// \return The largest possible size of the list.
   size_type max_size() const
   {
-    return (std::numeric_limits<std::size_t>::max)();
+    return std::numeric_limits<std::size_t>::max();
   }
 };
 
@@ -307,14 +307,16 @@ struct is_container_impl< atermpp::term_list< T > > : public std::true_type
 
 
 template <class Term>
-class _aterm_list:public _aterm
+class _aterm_list : public _aterm_appl<2>
 {
-  public:
-    Term head;
-    term_list<Term> tail;
+public:
+  /// \returns A reference to the head of the list.
+  Term& head() { return static_cast<Term&>(arg(0)); };
+
+  /// \returns A reference to the tail of the list.
+  term_list<Term>& tail() { return static_cast<term_list<Term>&>(arg(1)); };
 };
 
-static const std::size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(std::size_t);
 } // namespace detail
 /// \endcond
 
@@ -333,10 +335,10 @@ term_list<Term> reverse(const term_list<Term>& l);
 
 
 /// \brief Returns the concatenation of two lists with convertible element types.
-//  \details The type of the result is either the type of l, if the elements of m
-//           can be converted implicitly to the type of the elements of l. Otherwise if the
-//           elements of l can be converted implicitly to the type of the elements
-//           of m, the result type is that or m.
+///  \details The type of the result is either the type of l, if the elements of m
+///           can be converted implicitly to the type of the elements of l. Otherwise if the
+///           elements of l can be converted implicitly to the type of the elements
+///           of m, the result type is that or m.
 /// \param l A list.
 /// \param m A list.
 /// \details The complexity of this operator is linear in the length of l.
@@ -349,9 +351,9 @@ operator+(const term_list<Term1>& l, const term_list<Term2>& m);
 
 
 /// \brief Appends a new element at the end of the list. Note
-/// that the complexity of this function is O(n), with n the number of
-/// elements in the list!!!
-///  \param l The list to which the term is appended.
+///        that the complexity of this function is O(n), with n the number of
+///        elements in the list!!!
+/// \param l The list to which the term is appended.
 /// \param el A term.
 /// \return The list l with elem appended at the end.
 template <typename Term>

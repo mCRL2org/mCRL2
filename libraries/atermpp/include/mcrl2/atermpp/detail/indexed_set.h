@@ -10,9 +10,9 @@
 /// \brief This file contains some constants and functions shared
 ///        between indexed_sets and tables.
 
-#pragma once
 #ifndef MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
 #define MCRL2_ATERMPP_DETAIL_INDEXED_SET_H
+#pragma once
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/detail/aterm_hash.h"
