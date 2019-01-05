@@ -271,7 +271,7 @@ data_expression rewrite_aux(const data_expression& t, RewriterCompilingJitty* th
     return t;
   }
   else  
-  if (is_function_symbol(t,true))
+  if (is_function_symbol(t))
   {
     const std::size_t arity=0;
     const rewriter_function f = get_precompiled_rewrite_function<false>(down_cast<function_symbol>(t), arity,this_rewriter);
@@ -284,11 +284,11 @@ data_expression rewrite_aux(const data_expression& t, RewriterCompilingJitty* th
     return t;
   }
   else
-  if (is_application_no_check(t,true))
+  if (is_application_no_check(t))
   {
     const application& appl = down_cast<application>(t);
     const data_expression& head = appl.head();
-    if (is_function_symbol(head,true))
+    if (is_function_symbol(head))
     {
       const std::size_t appl_size=appl.size();
       const rewriter_function f = get_precompiled_rewrite_function<arguments_in_normal_form>(down_cast<function_symbol>(head), appl_size,this_rewriter);
@@ -308,12 +308,12 @@ data_expression rewrite_aux(const data_expression& t, RewriterCompilingJitty* th
     }
   }
   else
-  if (is_variable(t,true))
+  if (is_variable(t))
   {
     return sigma(this_rewriter)(down_cast<variable>(t));
   }
   else
-  if (is_abstraction(t,true))
+  if (is_abstraction(t))
   {
     const abstraction& abstr(t);
     const binder_type& binder(abstr.binding_operator());
@@ -334,7 +334,7 @@ data_expression rewrite_aux(const data_expression& t, RewriterCompilingJitty* th
   }
   else
   {
-    assert(is_where_clause(t,true));
+    assert(is_where_clause(t));
     return this_rewriter->rewrite_where(down_cast<where_clause>(t), sigma(this_rewriter));
   }
 }
