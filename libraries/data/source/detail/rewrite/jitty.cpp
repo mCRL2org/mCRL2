@@ -88,18 +88,18 @@ data_expression remove_normal_form_function(const data_expression& t)
     return t;
   }
 
-  if (is_variable(t, true))
+  if (is_variable(t))
   {
     return t;
   }
 
-  if (is_function_symbol(t, true))
+  if (is_function_symbol(t))
   {
     assert(t!=this_term_is_in_normal_form());
     return t;
   }
 
-  if (is_application(t, true))
+  if (is_application(t))
   {
     const application& ta=atermpp::down_cast<application>(t);
     if (ta.head()==this_term_is_in_normal_form())
@@ -112,7 +112,7 @@ data_expression remove_normal_form_function(const data_expression& t)
   }
 
 
-  if (is_where_clause(t, true))
+  if (is_where_clause(t))
   {
     const where_clause& t1=atermpp::down_cast<where_clause>(t);
     const assignment_expression_list& assignments=t1.declarations();
@@ -127,7 +127,7 @@ data_expression remove_normal_form_function(const data_expression& t)
     return where_clause(remove_normal_form_function(body),assignment_list(new_assignments.begin(),new_assignments.end()));
   }
 
-  assert(is_abstraction(t, true));
+  assert(is_abstraction(t));
 
   const abstraction& t1=atermpp::down_cast<abstraction>(t);
   const binder_type& binder=t1.binding_operator();
@@ -478,11 +478,11 @@ static data_expression subst_values(
   {
     return t;
   }
-  if (is_function_symbol(t, true))
+  if (is_function_symbol(t))
   {
     return t;
   }
-  else if (is_variable(t, true))
+  else if (is_variable(t))
   {
     for (std::size_t i=0; i<assignments.size; i++)
     {
@@ -498,7 +498,7 @@ static data_expression subst_values(
     }
     return t;
   }
-  else if (is_abstraction(t, true))
+  else if (is_abstraction(t))
   {
     const abstraction& t1=atermpp::down_cast<abstraction>(t);
     const binder_type& binder=t1.binding_operator();
@@ -536,7 +536,7 @@ static data_expression subst_values(
                                     (sigma_trivial?t1.body():replace_variables(t1.body(),sigma)),
                                     generator));
   }
-  else if (is_where_clause(t, true))
+  else if (is_where_clause(t))
   {
     const where_clause& t1=atermpp::down_cast<where_clause>(t);
     const assignment_expression_list& local_assignments=t1.declarations();
@@ -585,11 +585,11 @@ static bool match_jitty(
   {
     return p==t;
   }
-  else if (is_function_symbol(p, true))
+  else if (is_function_symbol(p))
   {
     return p==t;
   }
-  else if (is_variable(p, true))
+  else if (is_variable(p))
   {
     for (std::size_t i=0; i<assignments.size; i++)
     {
@@ -608,10 +608,10 @@ static bool match_jitty(
   else
   {
     if (is_machine_number(t) || 
-        is_function_symbol(t, true) || 
-        is_variable(t, true) || 
-        is_abstraction(t, true) || 
-        is_where_clause(t, true))
+        is_function_symbol(t) || 
+        is_variable(t) || 
+        is_abstraction(t) || 
+        is_where_clause(t))
     {
       return false;
     }
@@ -652,21 +652,21 @@ data_expression RewriterJitty::rewrite_aux(
   {
     return term;
   }
-  if (is_function_symbol(term, true))
+  if (is_function_symbol(term))
   {
     assert(term!=this_term_is_in_normal_form());
     return rewrite_aux_const_function_symbol(atermpp::down_cast<const function_symbol>(term),sigma);
   }
-  if (is_variable(term, true))
+  if (is_variable(term))
   {
     return sigma(atermpp::down_cast<variable>(term));
   }
-  if (is_where_clause(term, true))
+  if (is_where_clause(term))
   {
     const where_clause& w = atermpp::down_cast<where_clause>(term);
     return rewrite_where(w,sigma);
   }
-  if (is_abstraction(term,true))
+  if (is_abstraction(term))
   {
     const abstraction& ta(term);
     if (is_exists(ta))

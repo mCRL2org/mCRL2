@@ -115,10 +115,13 @@ void Solver::solve(QString specification, QString dataExpression)
           break;
       }
       if (m_abort)
+      {
         mCRL2log(info) << "Abort by user." << std::endl;
+      }
       else
+      {  
         mCRL2log(info) << "Done solving." << std::endl;
-
+      }
     }
     catch (mcrl2::runtime_error e)
     {

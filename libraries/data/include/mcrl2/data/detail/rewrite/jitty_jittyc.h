@@ -131,10 +131,10 @@ inline std::size_t recursive_number_of_args(const data_expression& t)
   // Checking these cases is together more efficient than
   // checking whether t is an application. 
   if (is_machine_number(t) ||
-      is_function_symbol(t, true) ||  // True indicates that we know it is not a machine number.
-      is_variable(t, true) ||
-      is_where_clause(t, true) ||
-      is_abstraction(t, true))
+      is_function_symbol(t) ||  
+      is_variable(t) ||
+      is_where_clause(t) ||
+      is_abstraction(t))
   {
     return 0;
   }
@@ -162,10 +162,10 @@ inline const data_expression& get_nested_head_helper(const application& t)
 inline const data_expression& get_nested_head(const data_expression& t)
 {
   if (is_machine_number(t) ||
-      is_function_symbol(t, true) ||  // True indicates that we know it is not a machine number.
-      is_variable(t, true) ||
-      is_where_clause(t, true) ||
-      is_abstraction(t, true))
+      is_function_symbol(t) || 
+      is_variable(t) ||
+      is_where_clause(t) ||
+      is_abstraction(t))
   {
     return t;
   }
@@ -174,10 +174,10 @@ inline const data_expression& get_nested_head(const data_expression& t)
   const data_expression& head=ta.head();
 
   if (is_machine_number(head) ||
-      is_function_symbol(head, true) ||  // True indicates that we know it is not a machine number.
-      is_variable(head, true) ||
-      is_where_clause(head, true) ||
-      is_abstraction(head, true))
+      is_function_symbol(head) || 
+      is_variable(head) ||
+      is_where_clause(head) ||
+      is_abstraction(head))
   {
     return head;
   }
