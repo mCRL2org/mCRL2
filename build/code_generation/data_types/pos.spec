@@ -28,11 +28,12 @@ map  @most_significant_digit <"most_significant_digit">: @word <"arg"> -> Pos   
      succ <"succ">: Pos <"arg"> -> Pos                                                                external defined_by_rewrite_rules;
      @pospred <"pos_predecessor">: Pos <"arg"> -> Pos                                                 internal defined_by_rewrite_rules;
      + <"plus">: Pos <"left"> # Pos <"right"> -> Pos                                                  external defined_by_rewrite_rules;
-     @add_with_carry <"add_with_carry">: Pos <"left"> # Pos <"right"> -> Pos                        internal defined_by_rewrite_rules;
+     @add_with_carry <"add_with_carry">: Pos <"left"> # Pos <"right"> -> Pos                          internal defined_by_rewrite_rules;
 % The following function is used when the symbol + is overloaded, such as in fbags. 
      @plus_pos <"auxiliary_plus_pos">: Pos <"left"> # Pos <"right"> -> Pos                            external defined_by_rewrite_rules;
      * <"times">: Pos <"left"> # Pos <"right"> -> Pos                                                 external defined_by_rewrite_rules;
      @times_overflow <"times_overflow">: Pos <"arg1"> # @word <"arg2"> # @word <"arg3"> -> Pos        external defined_by_rewrite_rules;
+     @times_ordered <"times_ordered">: Pos <"left"> # Pos <"right"> -> Pos                            external defined_by_rewrite_rules;
 % Auxiliary function to implement multiplication that uses where clauses.
      @times_whr_mult_overflow <"times_whr_mult_overflow">: @word <"arg1"> # @word <"arg2"> -> Pos     internal defined_by_rewrite_rules;
 
@@ -152,25 +153,41 @@ eqn  @c1 = @most_significant_digit(@one_word);
  
      *(@most_significant_digit(w1),@most_significant_digit(w2)) =
                 @times_whr_mult_overflow(@times_word(w1,w2),@times_overflow_word(w1,w2));
-     @times_overflow(@most_significant_digit(w1),w2,overflow) =
-                @times_whr_mult_overflow(@times_with_carry_word(w1,w2,overflow),@times_with_carry_overflow_word(w1,w2,overflow));
+     *(@most_significant_digit(w1),@concat_digit(p2,w2)) = @concat_digit(
+                                                                  @times_overflow(p2,w1,@times_overflow_word(w1,w2)),
+                                                                  @times_word(w1,w2));
+
+     *(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
+                                     @concat_digit(
+                                           @times_overflow(p1,w2,@times_overflow_word(w1,w2)),
+                                           @times_word(w1,w2));
+
+     *(@concat_digit(p1,w1),@concat_digit(p2,w2)) = 
+                              if(<(p1, p2),
+                                     @times_ordered(@concat_digit(p1,w1),@concat_digit(p2,w2)),
+                                     @times_ordered(@concat_digit(p2,w2),@concat_digit(p1,w1)));
+
+% The following case is not needed as the second argument of @times_ordered has always more than one digit. 
+%     @times_ordered(@most_significant_digit(w1),@most_significant_digit(w2)) =
+%                @times_whr_mult_overflow(@times_word(w1,w2),@times_overflow_word(w1,w2));
+
+     @times_ordered(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
+                                                           @concat_digit(
+                                                                  @times_overflow(p2,w1,@times_overflow_word(w1,w2)),
+                                                                  @times_word(w1,w2));
+
+     @times_ordered(@concat_digit(p1,w1),p2) = +(@concat_digit(@times_ordered(p1,p2),@zero_word), @times_overflow(p2,w1,@zero_word));
 
      @times_whr_mult_overflow(w1,w2) = if(@equals_zero_word(w2),
                                               @most_significant_digit(w1),
                                               @concat_digit(@most_significant_digit(w2),w1));
  
-%     *(@concat_digit(p1,w1),@most_significant_digit(w2)) = @concat_digit(
-%                                                                  @times_overflow(p1,w2,@times_overflow_word(w1,w2)),
-%                                                                  @times_word(w1,w2));
+     @times_overflow(@most_significant_digit(w1),w2,overflow) =
+                @times_whr_mult_overflow(@times_with_carry_word(w1,w2,overflow),@times_with_carry_overflow_word(w1,w2,overflow));
+
      @times_overflow(@concat_digit(p1,w1),w2,overflow) = 
-                                                      @concat_digit(
-                                                                  @times_overflow(p1,w2,@times_with_carry_overflow_word(w1,w2,overflow)),
-                                                                  @times_with_carry_word(w1,w2,overflow));
+                                              @concat_digit(
+                                                         @times_overflow(p1,w2,@times_with_carry_overflow_word(w1,w2,overflow)),
+                                                         @times_with_carry_word(w1,w2,overflow));
 
-     *(@most_significant_digit(w1),@concat_digit(p2,w2)) = @concat_digit(
-                                                                  @times_overflow(p2,w1,@times_overflow_word(w1,w2)),
-                                                                  @times_word(w1,w2));
-
-
-     *(@concat_digit(p1,w1),p2) = +(@concat_digit(*(p1,p2),@zero_word), *(p2,@most_significant_digit(w1)));
 
