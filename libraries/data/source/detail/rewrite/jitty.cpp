@@ -681,7 +681,7 @@ data_expression RewriterJitty::rewrite_aux(
     return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
   }
   // Here term has the shape appl(t1,...,tn)
-  assert(is_application(term, true));
+  assert(is_application(term));
   {
     const application& terma=atermpp::down_cast<application>(term);
     if (terma.head()==this_term_is_in_normal_form())
