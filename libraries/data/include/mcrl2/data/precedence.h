@@ -20,6 +20,7 @@
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 
 namespace mcrl2 {
 
@@ -38,7 +39,7 @@ namespace detail {
            || data::sort_int::is_nat2int_application(x)
            || data::sort_real::is_nat2real_application(x)
            || data::sort_real::is_int2real_application(x)
-           || data::sort_nat::is_cnat_application(x)
+//           || data::sort_nat::is_cnat_application(x)
            || data::sort_int::is_cint_application(x)
            || data::sort_real::is_creal_application(x)
            ;
@@ -87,7 +88,7 @@ namespace detail {
   inline
   bool is_divmod(const application& x)
   {
-    return sort_nat::is_divmod_application(remove_numeric_casts(x));
+    return sort_nat::is_divmod_aux_application(remove_numeric_casts(x));
   }
 
   inline
@@ -252,7 +253,7 @@ int left_precedence(const application& x)
   {
     data_expression numerator = sort_real::left(x);
     data_expression denominator = sort_real::right(x);
-    if (sort_pos::is_c1_function_symbol(denominator))
+    if (denominator==sort_pos::pos(1))
     {
       return left_precedence(numerator);
     }

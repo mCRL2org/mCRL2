@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_VARIABLE_H
 #define MCRL2_DATA_VARIABLE_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"
@@ -42,12 +43,12 @@ class variable: public data_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const sort_expression& sort() const
     {
-      return atermpp::down_cast<sort_expression>((*this)[1]);
+      return atermpp::down_cast<sort_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 //--- start user section variable ---//
     /// \brief Default constructor.

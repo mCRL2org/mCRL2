@@ -83,6 +83,11 @@ static const function_symbol& this_term_is_in_normal_form()
 
 data_expression remove_normal_form_function(const data_expression& t)
 {
+  if (is_machine_number(t))
+  {
+    return t;
+  }
+
   if (is_variable(t))
   {
     return t;
@@ -170,8 +175,16 @@ class dependencies_rewrite_rule_pair
     }
 };
 
-strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
+
+
+
+
+// Create a strategy for the rewrite rules belonging to one particular symbol.
+// It is a prerequisite for this function to that all rewrite rules in rules1 have
+// the same main function symbol in the lhs. 
+strategy RewriterJitty::create_a_rewriting_based_strategy(const function_symbol& f, const data_equation_list& rules1)
 {
+  static_cast<void>(f); // Avoid an unused variable warning. 
   data_equation_list rules=rules1;
   std::vector<strategy_rule> strat;
 
@@ -346,7 +359,43 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
     arity++;
   }
   
-  return strategy(max_number_of_variables,atermpp::term_list<data::detail::strategy_rule>(strat.begin(),strat.end()));   
+  return strategy(max_number_of_variables,strat);
+}
+
+// Create an explicit rewrite strategy when rewriting using an explicitly given 
+// C++ function. First rewrite all the arguments, then apply the function. 
+strategy RewriterJitty::create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec)
+{
+  size_t number_of_arguments=0;
+  if (is_function_sort(f.sort()))
+  {
+    number_of_arguments=atermpp::down_cast<function_sort>(f.sort()).domain().size();
+  }
+  // Indicate that all arguments must be rewritten first. 
+  std::vector<strategy_rule> result;
+  for(size_t i=0; i<number_of_arguments; ++i)
+  {
+    result.push_back(strategy_rule(i));
+  }
+  result.push_back(strategy_rule(data_spec.cpp_implemented_functions().find(f)->second.first));
+  
+  return strategy(0,result);
+}
+
+// Create a strategy to rewrite terms. This can either be a strategy that is based on rewrite
+// rules or it can be a strategy based on an explicitly given c++ function for this function symbol. 
+strategy RewriterJitty::create_strategy(const function_symbol& f, const data_equation_list& rules1, const data_specification& data_spec)
+{
+  if (data_spec.cpp_implemented_functions().count(f)==0)    // There is no explicit implementation.
+  {
+    return create_a_rewriting_based_strategy(f, rules1);
+  } 
+  else 
+  {
+    assert(rules1.size()==0);  // There should be no explicit rewrite rules, as this function is implemented by 
+                               // an explicit C++ function. 
+    return create_a_cpp_function_based_strategy(f, data_spec);
+  }
 }
 
 void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
@@ -357,14 +406,24 @@ void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
   }
 }
 
-void RewriterJitty::rebuild_strategy()
+void RewriterJitty::rebuild_strategy(const data_specification& data_spec, const mcrl2::data::used_data_equation_selector& equation_selector)
 {
   jitty_strat.clear();
-  for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
+  function_symbol_vector function_symbols=data_spec.constructors();
+  function_symbols.insert(function_symbols.end(), data_spec.mappings().begin(), data_spec.mappings().end());
+  for(const function_symbol& f: function_symbols)
+  // for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
   {
-    const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(l->first);
-    make_jitty_strat_sufficiently_larger(i);
-    jitty_strat[i] = create_strategy(reverse(l->second));
+    if (equation_selector(f)) 
+    {
+      const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(f);
+      make_jitty_strat_sufficiently_larger(i);
+      std::map< function_symbol, data_equation_list >::const_iterator j=jitty_eqns.find(f);
+      jitty_strat[i] = 
+            (j==jitty_eqns.end()
+                 ?create_strategy(f,data_equation_list(), data_spec)
+                 :create_strategy(f,reverse(j->second), data_spec));
+    }
   }
 
 }
@@ -403,7 +462,7 @@ RewriterJitty::RewriterJitty(
     }
   }
 
-  rebuild_strategy();
+  rebuild_strategy(data_spec, equation_selector);
 }
 
 RewriterJitty::~RewriterJitty()
@@ -415,6 +474,10 @@ static data_expression subst_values(
             const data_expression& t,
             data::enumerator_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
 {
+  if (is_machine_number(t))
+  {
+    return t;
+  }
   if (is_function_symbol(t))
   {
     return t;
@@ -518,13 +581,16 @@ static bool match_jitty(
                     jitty_assignments_for_a_rewrite_rule& assignments,
                     const bool term_context_guarantees_normal_form)
 {
-  if (is_function_symbol(p))
+  if (is_machine_number(p))
+  {
+    return p==t;
+  }
+  else if (is_function_symbol(p))
   {
     return p==t;
   }
   else if (is_variable(p))
   {
-
     for (std::size_t i=0; i<assignments.size; i++)
     {
       if (atermpp::detail::address(p)==assignments.assignment[i].var)
@@ -541,7 +607,11 @@ static bool match_jitty(
   }
   else
   {
-    if (is_function_symbol(t) || is_variable(t) || is_abstraction(t) || is_where_clause(t))
+    if (is_machine_number(t) || 
+        is_function_symbol(t) || 
+        is_variable(t) || 
+        is_abstraction(t) || 
+        is_where_clause(t))
     {
       return false;
     }
@@ -555,9 +625,7 @@ static bool match_jitty(
       return false;
     }
 
-
-    if (!match_jitty(ta.head(),
-                     pa.head(),assignments,true))
+    if (!match_jitty(ta.head(), pa.head(),assignments,true))
     {
       return false;
     }
@@ -578,7 +646,42 @@ data_expression RewriterJitty::rewrite_aux(
                       const data_expression& term,
                       substitution_type& sigma)
 {
-  if (is_application(term))
+// std::cerr << "REWRITE AUX " << term << "                          " << atermpp::aterm(term) << "\n";
+  assert(!sort_pos::is_most_significant_digit_application(term) || atermpp::down_cast<machine_number>(sort_pos::arg(term)).value()>0);
+  if (is_machine_number(term))
+  {
+    return term;
+  }
+  if (is_function_symbol(term))
+  {
+    assert(term!=this_term_is_in_normal_form());
+    return rewrite_aux_const_function_symbol(atermpp::down_cast<const function_symbol>(term),sigma);
+  }
+  if (is_variable(term))
+  {
+    return sigma(atermpp::down_cast<variable>(term));
+  }
+  if (is_where_clause(term))
+  {
+    const where_clause& w = atermpp::down_cast<where_clause>(term);
+    return rewrite_where(w,sigma);
+  }
+  if (is_abstraction(term))
+  {
+    const abstraction& ta(term);
+    if (is_exists(ta))
+    {
+      return existential_quantifier_enumeration(ta,sigma);
+    }
+    if (is_forall(ta))
+    {
+      return universal_quantifier_enumeration(ta,sigma);
+    }
+    assert(is_lambda(ta));
+    return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
+  }
+  // Here term has the shape appl(t1,...,tn)
+  assert(is_application(term));
   {
     const application& terma=atermpp::down_cast<application>(term);
     if (terma.head()==this_term_is_in_normal_form())
@@ -621,6 +724,7 @@ data_expression RewriterJitty::rewrite_aux(
     {
       // return appl(t,t1,...,tn) where t1,...,tn still need to be rewritten.
       jitty_argument_rewriter r(sigma,*this);
+
       return application(t,tapp.begin(),tapp.end(),r); // Replacing r by a lambda term requires 16 more bytes on the stack. 
     }
     assert(is_abstraction(t));
@@ -632,42 +736,10 @@ data_expression RewriterJitty::rewrite_aux(
     }
     if (is_exists_binder(binder))
     {
-      assert(term.size()==1);
       return existential_quantifier_enumeration(t,sigma);
     }
     assert(is_forall_binder(binder));
-    assert(term.size()==1);
     return universal_quantifier_enumeration(head1,sigma);
-  }
-  // Here term does not have the shape appl(t1,...,tn)
-  if (is_function_symbol(term))
-  {
-    assert(term!=this_term_is_in_normal_form());
-    return rewrite_aux_const_function_symbol(atermpp::down_cast<const function_symbol>(term),sigma);
-  }
-  if (is_variable(term))
-  {
-    return sigma(atermpp::down_cast<variable>(term));
-  }
-  if (is_where_clause(term))
-  {
-    const where_clause& w = atermpp::down_cast<where_clause>(term);
-    return rewrite_where(w,sigma);
-  }
-
-  { 
-    assert(is_abstraction(term));
-    const abstraction& ta(term);
-    if (is_exists(ta))
-    {
-      return existential_quantifier_enumeration(ta,sigma);
-    }
-    if (is_forall(ta))
-    {
-      return universal_quantifier_enumeration(ta,sigma);
-    }
-    assert(is_lambda(ta));
-    return rewrite_single_lambda(ta.variables(),ta.body(),false,sigma);
   }
 }
 
@@ -714,6 +786,22 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         else
         {
           break;
+        }
+      }
+      else if (rule.is_cpp_code())
+      {
+        // Here it is assumed that precompiled code only works on the exact right number of arguments and
+        // precompiled functions are not used in a higher order fashion. Maybe this requires an explicit check. 
+        if (arity==0)
+        { 
+          return rule.rewrite_cpp_code()(op);
+        }
+        else 
+        {
+          // application rewriteable_term(op,0,arity,[&rewritten, &rewritten_defined](size_t i){assert(rewritten_defined[i]); return rewritten[i];});
+          application rewriteable_term(op, &rewritten[0], &rewritten[arity]);
+          return rule.rewrite_cpp_code()(rewriteable_term);
+
         }
       }
       else
@@ -850,13 +938,34 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
 
   const std::size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
   make_jitty_strat_sufficiently_larger(op_value);
+
+  // Cache the rhs's as they are rewritten very often. 
+  static std::vector<data_expression> rhs_cache;
+  if (rhs_cache.size()<=op_value)
+  {
+    rhs_cache.resize(op_value+1);
+  }
+  const data_expression& cached_rhs = rhs_cache[op_value];
+  if (cached_rhs!=data_expression())
+  {
+    return cached_rhs;
+  }
+  
   const strategy& strat=jitty_strat[op_value];
 
   for (const strategy_rule& rule: strat.rules)
   {
     if (rule.is_rewrite_index())
     {
+      // In this case a standalone function symbol is rewritten, which could have arguments. 
+      // It is not needed to rewrite the arguments. 
       break;
+    }
+    else if (rule.is_cpp_code())
+    {
+      const data_expression result=rule.rewrite_cpp_code()(op);
+      rhs_cache[op_value]=result;
+      return result;
     }
     else
     {
@@ -871,11 +980,14 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
 
       if (rule1.condition()==sort_bool::true_() || rewrite_aux(rule1.condition(),sigma)==sort_bool::true_())
       {
-        return rewrite_aux(rule1.rhs(),sigma);
+        const data_expression result=rewrite_aux(rule1.rhs(),sigma);
+        rhs_cache[op_value]=result;
+        return result;
       }
     }
   }
 
+  rhs_cache[op_value]=op;
   return op; 
 }
 
@@ -884,11 +996,13 @@ data_expression RewriterJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
+// std::cerr << "START REWRITE " << term << "\n" << atermpp::aterm(term) << "\n";
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
   const data_expression& t=rewrite_aux(term, sigma);
   assert(remove_normal_form_function(t)==t);
+// std::cerr << "END REWRITE " << term << "  ---> " << t << "\n" << atermpp::aterm(t) << "\n";
   return t;
 }
 

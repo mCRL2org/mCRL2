@@ -25,10 +25,10 @@ class untyped_identifier: public data_expression
   public:
     /// \brief Default constructor.
     untyped_identifier()
-      : data_expression(core::detail::default_values::UntypedIdentifier)
+      : data_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedIdentifier)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_identifier(const atermpp::aterm& term)
       : data_expression(term)
@@ -41,7 +41,7 @@ class untyped_identifier: public data_expression
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), name))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     untyped_identifier(const std::string& name)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), core::identifier_string(name)))
     {}
@@ -54,7 +54,7 @@ class untyped_identifier: public data_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 

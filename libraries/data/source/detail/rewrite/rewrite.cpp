@@ -58,15 +58,14 @@ struct is_a_variable
 };
 
 static
-bool occur_check(const variable& v, const atermpp::aterm_appl& e)
+bool occur_check(const variable& v, const data_expression& e)
 {
   if (v==e)
   {
     // The variable is reset. This is ok.
     return true;
   }
-  std::set<variable> s;
-  find_all_if(e,is_a_variable(),std::inserter(s,s.begin()));
+  std::set<variable> s = find_free_variables(e);
   if (s.count(v)>0)
   {
     return false; // Occur check failed.
@@ -356,6 +355,11 @@ data_expression Rewriter::quantifier_enumeration(
   }
 
   const data_expression t2=replace_variables(t1,variable_renaming);
+  // TODO: The term below is rewritten again in the enumerator. This is an overkill.
+  //       especially if rewriting t2 is expensive (for instance containing quantifiers itself).
+  //       Either this should be replaced, or the enumerator should have the option to accept
+  //       terms in normal form. If the code below is removed, note that there are two occurrences
+  //       below of t3 that need to rewritten explicitly. 
   const data_expression t3=(t1_is_normal_form?t2:rewrite(t2,sigma));
 
   // Check whether the bound variables occur free in the rewritten body
@@ -418,7 +422,7 @@ data_expression Rewriter::quantifier_enumeration(
   try
   {
     enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration,
-      wrapped_rewriter, m_generator, max_count, true, is_not(identity_element));
+                               wrapped_rewriter, m_generator, max_count, true, is_not(identity_element));
 
     /* Create a list to store solutions */
     data_expression partial_result = identity_element;
@@ -433,7 +437,7 @@ data_expression Rewriter::quantifier_enumeration(
     {
       partial_result = lazy_op(partial_result, sol->expression());
       loop_upperbound--;
-      if(partial_result == absorbing_element)
+      if (partial_result == absorbing_element)
       {
         // We found a solution, so prevent the enumerator from doing any unnecessary work
         // Also prevents any further exceptions from the enumerator
@@ -443,7 +447,7 @@ data_expression Rewriter::quantifier_enumeration(
 
     if (sol == enumerator.end())
     {
-      if(vl_new_l_other.empty())
+      if (vl_new_l_other.empty())
       {
         return partial_result;
       }
@@ -462,7 +466,7 @@ data_expression Rewriter::quantifier_enumeration(
     // the simplified expression
   }
 
-  return abstraction(binder,vl_new_l_enum+vl_new_l_other,rewrite(t3,sigma));
+  return abstraction(binder,vl_new_l_enum+vl_new_l_other,t3);
 }
 
 

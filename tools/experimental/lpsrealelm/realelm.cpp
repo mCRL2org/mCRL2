@@ -123,6 +123,10 @@ static data_expression replace_linear_inequalities_with_reals_by_variables(
                   variable_list& vars,
                   const variable_list& real_parameters)
 {
+  if (is_machine_number(t)) 
+  {
+    return t;
+  }
   if (is_function_symbol(t))
   {
     return t;

@@ -30,10 +30,10 @@ class bdd_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     bdd_expression()
-      : atermpp::aterm_appl(core::detail::default_values::BddExpression)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddExpression)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit bdd_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -55,15 +55,15 @@ typedef atermpp::term_list<bdd_expression> bdd_expression_list;
 typedef std::vector<bdd_expression>    bdd_expression_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_if(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_if(const atermpp::aterm& x);
 
 /// \brief Test for a bdd_expression expression
 /// \param x A term
 /// \return True if \a x is a bdd_expression expression
 inline
-bool is_bdd_expression(const atermpp::aterm_appl& x)
+bool is_bdd_expression(const atermpp::aterm& x)
 {
   return bdd::is_true(x) ||
          bdd::is_false(x) ||
@@ -96,10 +96,10 @@ class true_: public bdd_expression
   public:
     /// \brief Default constructor.
     true_()
-      : bdd_expression(core::detail::default_values::BddTrue)
+      : bdd_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddTrue)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
       : bdd_expression(term)
@@ -118,9 +118,9 @@ class true_: public bdd_expression
 /// \param x A term
 /// \return True if \a x is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& x)
+bool is_true(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BddTrue;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BddTrue;
 }
 
 // prototype declaration
@@ -149,10 +149,10 @@ class false_: public bdd_expression
   public:
     /// \brief Default constructor.
     false_()
-      : bdd_expression(core::detail::default_values::BddFalse)
+      : bdd_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddFalse)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
       : bdd_expression(term)
@@ -171,9 +171,9 @@ class false_: public bdd_expression
 /// \param x A term
 /// \return True if \a x is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& x)
+bool is_false(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BddFalse;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BddFalse;
 }
 
 // prototype declaration
@@ -202,10 +202,10 @@ class if_: public bdd_expression
   public:
     /// \brief Default constructor.
     if_()
-      : bdd_expression(core::detail::default_values::BddIf)
+      : bdd_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::BddIf)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit if_(const atermpp::aterm& term)
       : bdd_expression(term)
@@ -218,7 +218,7 @@ class if_: public bdd_expression
       : bdd_expression(atermpp::aterm_appl(core::detail::function_symbol_BddIf(), name, left, right))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     if_(const std::string& name, const bdd_expression& left, const bdd_expression& right)
       : bdd_expression(atermpp::aterm_appl(core::detail::function_symbol_BddIf(), core::identifier_string(name), left, right))
     {}
@@ -249,9 +249,9 @@ class if_: public bdd_expression
 /// \param x A term
 /// \return True if \a x is a if expression
 inline
-bool is_if(const atermpp::aterm_appl& x)
+bool is_if(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::BddIf;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::BddIf;
 }
 
 // prototype declaration

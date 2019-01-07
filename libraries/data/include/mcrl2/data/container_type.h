@@ -29,10 +29,10 @@ class container_type: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     container_type()
-      : atermpp::aterm_appl(core::detail::default_values::SortConsType)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortConsType)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit container_type(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -79,10 +79,10 @@ class list_container: public container_type
   public:
     /// \brief Default constructor.
     list_container()
-      : container_type(core::detail::default_values::SortList)
+      : container_type(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortList)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit list_container(const atermpp::aterm& term)
       : container_type(term)
@@ -101,9 +101,9 @@ class list_container: public container_type
 /// \param x A term
 /// \return True if \a x is a list_container expression
 inline
-bool is_list_container(const atermpp::aterm_appl& x)
+bool is_list_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortList;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortList;
 }
 
 // prototype declaration
@@ -132,10 +132,10 @@ class set_container: public container_type
   public:
     /// \brief Default constructor.
     set_container()
-      : container_type(core::detail::default_values::SortSet)
+      : container_type(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortSet)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit set_container(const atermpp::aterm& term)
       : container_type(term)
@@ -154,9 +154,9 @@ class set_container: public container_type
 /// \param x A term
 /// \return True if \a x is a set_container expression
 inline
-bool is_set_container(const atermpp::aterm_appl& x)
+bool is_set_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortSet;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortSet;
 }
 
 // prototype declaration
@@ -185,10 +185,10 @@ class bag_container: public container_type
   public:
     /// \brief Default constructor.
     bag_container()
-      : container_type(core::detail::default_values::SortBag)
+      : container_type(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortBag)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit bag_container(const atermpp::aterm& term)
       : container_type(term)
@@ -207,9 +207,9 @@ class bag_container: public container_type
 /// \param x A term
 /// \return True if \a x is a bag_container expression
 inline
-bool is_bag_container(const atermpp::aterm_appl& x)
+bool is_bag_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortBag;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortBag;
 }
 
 // prototype declaration
@@ -238,10 +238,10 @@ class fset_container: public container_type
   public:
     /// \brief Default constructor.
     fset_container()
-      : container_type(core::detail::default_values::SortFSet)
+      : container_type(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortFSet)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit fset_container(const atermpp::aterm& term)
       : container_type(term)
@@ -260,9 +260,9 @@ class fset_container: public container_type
 /// \param x A term
 /// \return True if \a x is a fset_container expression
 inline
-bool is_fset_container(const atermpp::aterm_appl& x)
+bool is_fset_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortFSet;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortFSet;
 }
 
 // prototype declaration
@@ -291,10 +291,10 @@ class fbag_container: public container_type
   public:
     /// \brief Default constructor.
     fbag_container()
-      : container_type(core::detail::default_values::SortFBag)
+      : container_type(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortFBag)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit fbag_container(const atermpp::aterm& term)
       : container_type(term)
@@ -313,9 +313,9 @@ class fbag_container: public container_type
 /// \param x A term
 /// \return True if \a x is a fbag_container expression
 inline
-bool is_fbag_container(const atermpp::aterm_appl& x)
+bool is_fbag_container(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortFBag;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortFBag;
 }
 
 // prototype declaration

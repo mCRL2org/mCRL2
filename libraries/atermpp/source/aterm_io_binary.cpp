@@ -107,8 +107,9 @@ static const std::size_t BAF_MAGIC = 0xbaf;
 // 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
 // 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
 //  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
+// 24 December 2018  : version changed to 0x0305 (the datatypes for numbers became 64 bit integers)
 
-static const std::size_t BAF_VERSION = 0x0304;
+static const std::size_t BAF_VERSION = 0x0305;
 
 struct top_symbol
 {

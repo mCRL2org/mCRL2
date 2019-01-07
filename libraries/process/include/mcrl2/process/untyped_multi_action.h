@@ -26,10 +26,10 @@ class untyped_multi_action: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     untyped_multi_action()
-      : atermpp::aterm_appl(core::detail::default_values::UntypedMultiAction)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedMultiAction)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_multi_action(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -64,9 +64,9 @@ typedef std::vector<untyped_multi_action>    untyped_multi_action_vector;
 /// \param x A term
 /// \return True if \a x is a untyped_multi_action expression
 inline
-bool is_untyped_multi_action(const atermpp::aterm_appl& x)
+bool is_untyped_multi_action(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedMultiAction;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedMultiAction;
 }
 
 // prototype declaration

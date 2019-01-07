@@ -33,10 +33,10 @@ class action_label: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_label()
-      : atermpp::aterm_appl(core::detail::default_values::ActId)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActId)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit action_label(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -49,7 +49,7 @@ class action_label: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_ActId(), name, sorts)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     action_label(const std::string& name, const data::sort_expression_list& sorts)
       : atermpp::aterm_appl(core::detail::function_symbol_ActId(), core::identifier_string(name), sorts)
     {}
@@ -81,9 +81,9 @@ typedef std::vector<action_label>    action_label_vector;
 /// \param x A term
 /// \return True if \a x is a action_label expression
 inline
-bool is_action_label(const atermpp::aterm_appl& x)
+bool is_action_label(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActId;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActId;
 }
 
 // prototype declaration

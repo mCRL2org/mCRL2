@@ -158,22 +158,21 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
   specification s1 = s0;
   sumelm_algorithm<>(s1).run();
   std::set<variable> parameters = mcrl2::data::find_all_variables(s1.process().process_parameters());
-  const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const action_summand& as: s1.process().action_summands())
   {
-    BOOST_CHECK(i->summation_variables().empty());
+    BOOST_CHECK(as.summation_variables().empty());
 
     // Check that the only data variables in the condition and time
     // are process parameters
-    std::set<variable> condition_vars = data::find_all_variables(i->condition());
+    std::set<variable> condition_vars = data::find_all_variables(as.condition());
     for (const auto & condition_var : condition_vars)
     {
       BOOST_CHECK(parameters.find(condition_var) != parameters.end());
     }
 
-    if (i->has_time())
+    if (as.has_time())
     {
-      std::set<variable> time_vars = data::find_all_variables(i->multi_action().time());
+      std::set<variable> time_vars = data::find_all_variables(as.multi_action().time());
       for (const auto & time_var : time_vars)
       {
         BOOST_CHECK(parameters.find(time_var) != parameters.end());

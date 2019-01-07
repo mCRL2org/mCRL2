@@ -34,10 +34,10 @@ class function_sort: public sort_expression
   public:
     /// \brief Default constructor.
     function_sort()
-      : sort_expression(core::detail::default_values::SortArrow)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortArrow)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit function_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -50,7 +50,7 @@ class function_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), domain, codomain))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
@@ -152,6 +152,46 @@ inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& codomain)
 {
   return function_sort({ dom1, dom2, dom3, dom4 }, codomain);
+}
+
+/// \brief Convenience constructor for function sort with domain size 5
+///
+/// \param[in] dom1 The first sort of the domain.
+/// \param[in] dom2 The second sort of the domain.
+/// \param[in] dom3 The third sort of the domain.
+/// \param[in] dom4 The fourth sort of the domain.
+/// \param[in] dom5 The fourth sort of the domain.
+/// \param[in] codomain The codomain of the sort.
+/// \post *this represents dom1 # dom2 # dom3 # dom4 # dom5 -> codomain
+inline function_sort make_function_sort(const sort_expression& dom1,
+                                        const sort_expression& dom2,
+                                        const sort_expression& dom3,
+                                        const sort_expression& dom4,
+                                        const sort_expression& dom5,
+                                        const sort_expression& codomain)
+{
+  return function_sort({ dom1, dom2, dom3, dom4, dom5 }, codomain);
+}
+
+/// \brief Convenience constructor for function sort with domain size 6
+///
+/// \param[in] dom1 The first sort of the domain.
+/// \param[in] dom2 The second sort of the domain.
+/// \param[in] dom3 The third sort of the domain.
+/// \param[in] dom4 The fourth sort of the domain.
+/// \param[in] dom5 The fourth sort of the domain.
+/// \param[in] dom6 The fourth sort of the domain.
+/// \param[in] codomain The codomain of the sort.
+/// \post *this represents dom1 # dom2 # dom3 # dom4 # dom5 # dom6 -> codomain
+inline function_sort make_function_sort(const sort_expression& dom1,
+                                        const sort_expression& dom2,
+                                        const sort_expression& dom3,
+                                        const sort_expression& dom4,
+                                        const sort_expression& dom5,
+                                        const sort_expression& dom6,
+                                        const sort_expression& codomain)
+{
+  return function_sort({ dom1, dom2, dom3, dom4, dom5, dom6 }, codomain);
 }
 
 } // namespace data

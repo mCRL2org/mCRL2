@@ -26,10 +26,10 @@ class untyped_possible_sorts: public sort_expression
   public:
     /// \brief Default constructor.
     untyped_possible_sorts()
-      : sort_expression(core::detail::default_values::UntypedSortsPossible)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedSortsPossible)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_possible_sorts(const atermpp::aterm& term)
       : sort_expression(term)
@@ -42,7 +42,7 @@ class untyped_possible_sorts: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sorts))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))

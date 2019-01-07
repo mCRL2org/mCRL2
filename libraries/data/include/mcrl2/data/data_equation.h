@@ -39,10 +39,10 @@ class data_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     data_equation()
-      : atermpp::aterm_appl(core::detail::default_values::DataEqn)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::DataEqn)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit data_equation(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -55,7 +55,7 @@ class data_equation: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variables, condition, lhs, rhs)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
@@ -87,7 +87,7 @@ class data_equation: public atermpp::aterm_appl
       return atermpp::down_cast<data_expression>((*this)[3]);
     }
 //--- start user section data_equation ---//
-    /// \brief Constructor
+    /// \brief Constructor.
     ///
     /// \param[in] variables The free variables of the data_equation.
     /// \param[in] lhs The left hand side of the data_equation.
@@ -102,7 +102,7 @@ class data_equation: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
     {}
 
-    /// \brief Constructor
+    /// \brief Constructor.
     ///
     /// \param[in] lhs The left hand side of the data equation.
     /// \param[in] rhs The right hand side of the data equation.
@@ -112,6 +112,7 @@ class data_equation: public atermpp::aterm_appl
                   const data_expression& rhs)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(), sort_bool::true_(), lhs, rhs)
     {}
+
 //--- end user section data_equation ---//
 };
 
@@ -140,6 +141,14 @@ inline void swap(data_equation& t1, data_equation& t2)
   t1.swap(t2);
 }
 //--- end generated class data_equation ---//
+
+/// \brief Recognizer function.
+/// \param[in] t A aterm appl of which it is checked whether it is a data_equation.
+/// \returns True if the provided argument is a data_equation. 
+inline bool is_data_equation(const atermpp::aterm_appl& t)
+{
+  return t.function()==core::detail::function_symbol_DataEqn();
+}
 
 // template function overloads
 std::string pp(const data_equation_list& x);

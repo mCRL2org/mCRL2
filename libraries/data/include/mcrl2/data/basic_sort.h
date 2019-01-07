@@ -33,10 +33,10 @@ class basic_sort: public sort_expression
   public:
     /// \brief Default constructor.
     basic_sort()
-      : sort_expression(core::detail::default_values::SortId)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortId)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit basic_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -49,7 +49,7 @@ class basic_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), name))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     basic_sort(const std::string& name)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), core::identifier_string(name)))
     {}

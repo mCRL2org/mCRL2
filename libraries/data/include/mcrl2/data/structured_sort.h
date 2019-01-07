@@ -71,10 +71,10 @@ class structured_sort: public sort_expression
   public:
     /// \brief Default constructor.
     structured_sort()
-      : sort_expression(core::detail::default_values::SortStruct)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortStruct)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit structured_sort(const atermpp::aterm& term)
       : sort_expression(term)
@@ -87,7 +87,7 @@ class structured_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), constructors))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
@@ -284,7 +284,7 @@ class structured_sort: public sort_expression
       application smaller_equal_arguments_xy = application(smaller_equal_arguments_function(s), x, y);
       result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     equal_to(x,y), equal_arguments_xy));
       result.push_back(data_equation(xy, not_equal_to(to_pos_x, to_pos_y), equal_to(x,y), sort_bool::false_()));
-      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less(x,y), sort_bool::true_()));
+      result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),      less(x,y), sort_bool::true_()));
       result.push_back(data_equation(xy, equal_to(to_pos_x, to_pos_y),     less(x,y), smaller_arguments_xy));
       result.push_back(data_equation(xy, greater(to_pos_x, to_pos_y),      less(x,y), sort_bool::false_()));
       result.push_back(data_equation(xy, less(to_pos_x, to_pos_y),         less_equal(x,y), sort_bool::true_()));
@@ -304,7 +304,7 @@ class structured_sort: public sort_expression
     {
       data_equation_vector result;
 
-      for (const auto & i : constructors())
+      for (const structured_sort_constructor& i : constructors())
       {
         if (!i.arguments().empty())
         {
@@ -315,7 +315,7 @@ class structured_sort: public sort_expression
           std::vector< variable > variables;
 
           // Create variables for equation
-          for (const auto & argument : arguments)
+          for (const structured_sort_constructor_argument& argument : arguments)
           {
             variables.push_back(variable(generator("v"), argument.sort()));
           }
@@ -346,7 +346,7 @@ class structured_sort: public sort_expression
 
       for (structured_sort_constructor_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
       {
-        for (const auto & j : cl)
+        for (const structured_sort_constructor& j : cl)
         {
           if (j.recogniser() != core::empty_identifier_string())
           {

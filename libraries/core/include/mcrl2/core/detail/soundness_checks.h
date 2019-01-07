@@ -405,6 +405,7 @@ bool check_rule_StructProj(Term t)
 template <typename Term>
 bool check_rule_DataExpr(Term t)
 {
+  return true;
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return check_rule_DataVarId(t)
          || check_rule_OpId(t)

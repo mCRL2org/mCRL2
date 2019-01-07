@@ -666,6 +666,7 @@ class linear_inequality: public atermpp::aterm_appl
       }
 
       *this=linear_inequality(divide(lhs,factor,r),rewrite_with_memory(real_divides(rhs,factor), r),comparison);
+std::cerr << "RESULTING LINEAR INEQUALITY A" << this->lhs() << pp(this->comparison()) << this->rhs()  << "\n";
     }
 
     /// \brief constructor.
@@ -708,6 +709,7 @@ class linear_inequality: public atermpp::aterm_appl
       }
 
       *this=linear_inequality(detail::map_to_lhs_type(new_lhs,factor,r),rewrite_with_memory(real_divides(new_rhs,factor), r),comparison);
+std::cerr << "RESULTING LINEAR INEQUALITY B" << this->lhs() << pp(this->comparison()) << this->rhs()  << "\n";
     }
 
 
@@ -723,6 +725,7 @@ class linear_inequality: public atermpp::aterm_appl
     linear_inequality(const data_expression& e,
                       const rewriter& r)
     {
+std::cerr << "MAKE LINEAR INEQUALITY " << e <<  "\n";
       detail::comparison_t comparison;
       bool negate(false);
       if (is_equal_to_application(e))
@@ -755,7 +758,7 @@ class linear_inequality: public atermpp::aterm_appl
       data_expression lhs=data::binary_left(atermpp::down_cast<application>(e));
       data_expression rhs=data::binary_right(atermpp::down_cast<application>(e));
       *this=linear_inequality(lhs,rhs,comparison,r,negate);
-
+std::cerr << "RESULTING LINEAR INEQUALITY " << lhs << pp(comparison) << rhs  << "\n";
     }
 
 
@@ -822,6 +825,10 @@ class linear_inequality: public atermpp::aterm_appl
 
     bool is_true(const rewriter& r) const
     {
+std::cerr << "CHECK TRUE " << lhs() << " RHS  " << rhs()  << "   OP " << pp(comparison()) << "\n";
+std::cerr << "CHECK NEG " <<  is_negative(rhs(),r) << "\n";
+std::cerr << "CHECK ZERO " <<  is_zero(rhs()) << "\n";
+std::cerr << "CHECK POSITIVE " <<  is_positive(rhs(),r) << "\n";
       return lhs().empty() &&
              ((comparison()==detail::less_eq)?!is_negative(rhs(),r):
               ((comparison()==detail::equal)?is_zero(rhs()):is_positive(rhs(),r)));

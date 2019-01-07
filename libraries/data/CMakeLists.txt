@@ -12,6 +12,7 @@ add_mcrl2_library(data
     data.cpp
     data_specification.cpp
     typecheck.cpp
+    machine_word.cpp
     detail/prover/smt_lib_solver.cpp
     detail/rewrite/with_prover.cpp
     detail/rewrite/jitty.cpp

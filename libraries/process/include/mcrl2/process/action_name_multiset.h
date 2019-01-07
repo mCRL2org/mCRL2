@@ -32,10 +32,10 @@ class action_name_multiset: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     action_name_multiset()
-      : atermpp::aterm_appl(core::detail::default_values::MultActName)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::MultActName)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit action_name_multiset(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -70,9 +70,9 @@ typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 /// \param x A term
 /// \return True if \a x is a action_name_multiset expression
 inline
-bool is_action_name_multiset(const atermpp::aterm_appl& x)
+bool is_action_name_multiset(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::MultActName;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::MultActName;
 }
 
 // prototype declaration

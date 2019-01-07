@@ -15,22 +15,22 @@
 
 sort Set(S) <"set_">;
 
-cons @set <"constructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
+cons @set <"constructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S)               internal defined_by_rewrite_rules;
 % map {} <"empty"> : Set(S); Move this to FSet(S);
 % I think that @setfset and @setcomp should not be part of the rewrite system, but
 % become part of the internal generation of set representations. JFG
-map @setfset <"set_fset"> : FSet(S) <"arg"> -> Set(S);
-    @setcomp <"set_comprehension"> : (S -> Bool) <"arg"> -> Set(S);
-    in <"in"> : S <"left"> # Set(S) <"right"> -> Bool;
-    ! <"complement"> : Set(S) <"arg"> -> Set(S);
-    + <"union_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    * <"intersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    - <"difference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    @false_ <"false_function"> : S <"arg"> -> Bool;
-    @true_ <"true_function"> : S <"arg"> -> Bool;
-    @not_ <"not_function"> : (S -> Bool) <"arg"> -> S -> Bool;
-    @and_ <"and_function"> : (S -> Bool) <"left"> # (S -> Bool) <"right"> -> S -> Bool;
-    @or_ <"or_function"> : (S -> Bool) <"left"> # (S -> Bool) <"right"> -> S -> Bool;
+map @setfset <"set_fset"> : FSet(S) <"arg"> -> Set(S)                                        internal defined_by_rewrite_rules;
+    @setcomp <"set_comprehension"> : (S -> Bool) <"arg"> -> Set(S)                           internal defined_by_rewrite_rules;
+    in <"in"> : S <"left"> # Set(S) <"right"> -> Bool                                        external defined_by_rewrite_rules;
+    ! <"complement"> : Set(S) <"arg"> -> Set(S)                                              external defined_by_rewrite_rules;
+    + <"union_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S)                              external defined_by_rewrite_rules;
+    * <"intersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S)                        external defined_by_rewrite_rules;
+    - <"difference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S)                          external defined_by_rewrite_rules;
+    @false_ <"false_function"> : S <"arg"> -> Bool                                           external defined_by_rewrite_rules;
+    @true_ <"true_function"> : S <"arg"> -> Bool                                             internal defined_by_rewrite_rules;
+    @not_ <"not_function"> : (S -> Bool) <"arg"> -> S -> Bool                                internal defined_by_rewrite_rules;
+    @and_ <"and_function"> : (S -> Bool) <"left"> # (S -> Bool) <"right"> -> S -> Bool       internal defined_by_rewrite_rules;
+    @or_ <"or_function"> : (S -> Bool) <"left"> # (S -> Bool) <"right"> -> S -> Bool         internal defined_by_rewrite_rules;
 
 var e : S;
     s : FSet(S);

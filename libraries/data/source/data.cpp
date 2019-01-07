@@ -64,6 +64,7 @@ std::string pp(const data::function_symbol& x) { return data::pp< data::function
 std::string pp(const data::lambda& x) { return data::pp< data::lambda >(x); }
 std::string pp(const data::lambda_binder& x) { return data::pp< data::lambda_binder >(x); }
 std::string pp(const data::list_container& x) { return data::pp< data::list_container >(x); }
+std::string pp(const data::machine_number& x) { return data::pp< data::machine_number >(x); }
 std::string pp(const data::set_comprehension& x) { return data::pp< data::set_comprehension >(x); }
 std::string pp(const data::set_comprehension_binder& x) { return data::pp< data::set_comprehension_binder >(x); }
 std::string pp(const data::set_container& x) { return data::pp< data::set_container >(x); }
@@ -123,6 +124,10 @@ sort_expression data_expression::sort() const
   // is no elegant solution of distributing the implementation of the
   // derived classes (as we need to support requesting the sort of a
   // data_expression we do need to provide an implementation here).
+  if (is_machine_number(*this))
+  {
+    return sort_machine_word::machine_word();
+  }
   if (is_variable(*this))
   {
     const variable& v = atermpp::down_cast<variable>(*this);
@@ -141,47 +146,49 @@ sort_expression data_expression::sort() const
     }
     else if (is_lambda(*this))
     {
-      const atermpp::term_list<aterm_appl> &v_variables = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      const abstraction& a=atermpp::down_cast<abstraction>(*this);
       sort_expression_vector s;
-      for (const auto & v_variable : v_variables)
+      for (const variable& v_variable : a.variables())
       {
-        s.push_back(down_cast<sort_expression>(v_variable[1])); // Push the sort.
+        s.push_back(v_variable.sort()); // Push the sort.
       }
-      return function_sort(sort_expression_list(s.begin(),s.end()), atermpp::down_cast<data_expression>((*this)[2]).sort());
+      return function_sort(sort_expression_list(s.begin(),s.end()), a.body().sort());
     }
     else
     {
       assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_untyped_set_or_bag_comprehension(*this));
-      const atermpp::term_list<aterm_appl> &v_variables  = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      const abstraction& a=atermpp::down_cast<abstraction>(*this);
+      const variable_list& v_variables  = a.variables();
       assert(v_variables.size() == 1);
 
       if (is_bag_comprehension(*this))
       {
-        return container_sort(bag_container(), atermpp::down_cast<const sort_expression>(v_variables.front()[1]));
+        return container_sort(bag_container(), v_variables.front().sort());
       }
       else // If it is not known whether the term is a set or a bag, it returns the type of a set, as there is
            // no setbag type. This can only occur for terms that are not propertly type checked.
       {
-        return container_sort(set_container(), atermpp::down_cast<sort_expression>(v_variables.front()[1]));
+        return container_sort(set_container(), v_variables.front().sort());
       }
     }
   }
   else if (is_where_clause(*this))
   {
-    return atermpp::down_cast<data_expression>((*this)[0]).sort();
+    const where_clause& w=atermpp::down_cast<where_clause>(*this);
+    return w.body().sort();
   }
   else if (is_untyped_identifier(*this))
   {
     return untyped_sort();
   }
 
-  assert(is_application(*this));
-  const data_expression& head = atermpp::down_cast<const data_expression>((*this)[0]);
+  const application& a=atermpp::down_cast<application>(*this);
+  const data_expression& head = a.head();
   sort_expression s(head.sort());
   if (is_function_sort(s))
   {
     const function_sort& fs = atermpp::down_cast<function_sort>(s);
-    assert(fs.domain().size()+1==this->size());
+    assert(fs.domain().size()==a.size());
     return (fs.codomain());
   }
   return s;

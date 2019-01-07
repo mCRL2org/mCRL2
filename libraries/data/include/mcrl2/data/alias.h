@@ -29,10 +29,10 @@ class alias: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     alias()
-      : atermpp::aterm_appl(core::detail::default_values::SortRef)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::SortRef)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit alias(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -72,9 +72,9 @@ typedef std::vector<alias>    alias_vector;
 /// \param x A term
 /// \return True if \a x is a alias expression
 inline
-bool is_alias(const atermpp::aterm_appl& x)
+bool is_alias(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::SortRef;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::SortRef;
 }
 
 // prototype declaration

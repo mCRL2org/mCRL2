@@ -25,10 +25,10 @@ class untyped_sort_variable: public sort_expression
   public:
     /// \brief Default constructor.
     untyped_sort_variable()
-      : sort_expression(core::detail::default_values::UntypedSortVariable)
+      : sort_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::UntypedSortVariable)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit untyped_sort_variable(const atermpp::aterm& term)
       : sort_expression(term)
@@ -63,9 +63,9 @@ class untyped_sort_variable: public sort_expression
 /// \param x A term
 /// \return True if \a x is a untyped_sort_variable expression
 inline
-bool is_untyped_sort_variable(const atermpp::aterm_appl& x)
+bool is_untyped_sort_variable(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedSortVariable;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::UntypedSortVariable;
 }
 
 // prototype declaration

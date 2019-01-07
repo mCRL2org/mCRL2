@@ -98,7 +98,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching get
       inline
-      bool is_get_function_symbol(const atermpp::aterm_appl& e)
+      bool is_get_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -124,7 +124,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol get to a
       ///     number of arguments
       inline
-      bool is_get_application(const atermpp::aterm_appl& e)
+      bool is_get_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -156,7 +156,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching set
       inline
-      bool is_set_function_symbol(const atermpp::aterm_appl& e)
+      bool is_set_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -183,7 +183,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol set to a
       ///     number of arguments
       inline
-      bool is_set_application(const atermpp::aterm_appl& e)
+      bool is_set_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -215,7 +215,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching close
       inline
-      bool is_close_function_symbol(const atermpp::aterm_appl& e)
+      bool is_close_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -239,7 +239,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol close to a
       ///     number of arguments
       inline
-      bool is_close_application(const atermpp::aterm_appl& e)
+      bool is_close_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -271,7 +271,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching close1
       inline
-      bool is_close1_function_symbol(const atermpp::aterm_appl& e)
+      bool is_close1_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -296,7 +296,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol close1 to a
       ///     number of arguments
       inline
-      bool is_close1_application(const atermpp::aterm_appl& e)
+      bool is_close1_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -328,7 +328,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching close2
       inline
-      bool is_close2_function_symbol(const atermpp::aterm_appl& e)
+      bool is_close2_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -354,7 +354,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol close2 to a
       ///     number of arguments
       inline
-      bool is_close2_application(const atermpp::aterm_appl& e)
+      bool is_close2_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -386,7 +386,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching close3
       inline
-      bool is_close3_function_symbol(const atermpp::aterm_appl& e)
+      bool is_close3_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -413,7 +413,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol close3 to a
       ///     number of arguments
       inline
-      bool is_close3_application(const atermpp::aterm_appl& e)
+      bool is_close3_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -445,7 +445,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching consistent
       inline
-      bool is_consistent_function_symbol(const atermpp::aterm_appl& e)
+      bool is_consistent_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -469,7 +469,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol consistent to a
       ///     number of arguments
       inline
-      bool is_consistent_application(const atermpp::aterm_appl& e)
+      bool is_consistent_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -501,7 +501,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching and_d
       inline
-      bool is_and_d_function_symbol(const atermpp::aterm_appl& e)
+      bool is_and_d_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -528,7 +528,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol and_d to a
       ///     number of arguments
       inline
-      bool is_and_d_application(const atermpp::aterm_appl& e)
+      bool is_and_d_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -560,7 +560,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching double_and_d
       inline
-      bool is_double_and_d_function_symbol(const atermpp::aterm_appl& e)
+      bool is_double_and_d_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -588,7 +588,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol double_and_d to a
       ///     number of arguments
       inline
-      bool is_double_and_d_application(const atermpp::aterm_appl& e)
+      bool is_double_and_d_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -620,7 +620,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching and_d1
       inline
-      bool is_and_d1_function_symbol(const atermpp::aterm_appl& e)
+      bool is_and_d1_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -647,7 +647,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol and_d1 to a
       ///     number of arguments
       inline
-      bool is_and_d1_application(const atermpp::aterm_appl& e)
+      bool is_and_d1_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -679,7 +679,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching and_d2
       inline
-      bool is_and_d2_function_symbol(const atermpp::aterm_appl& e)
+      bool is_and_d2_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -707,7 +707,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol and_d2 to a
       ///     number of arguments
       inline
-      bool is_and_d2_application(const atermpp::aterm_appl& e)
+      bool is_and_d2_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -739,7 +739,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching and_not
       inline
-      bool is_and_not_function_symbol(const atermpp::aterm_appl& e)
+      bool is_and_not_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -767,7 +767,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol and_not to a
       ///     number of arguments
       inline
-      bool is_and_not_application(const atermpp::aterm_appl& e)
+      bool is_and_not_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -799,7 +799,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching free
       inline
-      bool is_free_function_symbol(const atermpp::aterm_appl& e)
+      bool is_free_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -824,7 +824,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol free to a
       ///     number of arguments
       inline
-      bool is_free_application(const atermpp::aterm_appl& e)
+      bool is_free_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -856,7 +856,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching free1
       inline
-      bool is_free1_function_symbol(const atermpp::aterm_appl& e)
+      bool is_free1_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -882,7 +882,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol free1 to a
       ///     number of arguments
       inline
-      bool is_free1_application(const atermpp::aterm_appl& e)
+      bool is_free1_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -914,7 +914,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching reset
       inline
-      bool is_reset_function_symbol(const atermpp::aterm_appl& e)
+      bool is_reset_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -940,7 +940,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol reset to a
       ///     number of arguments
       inline
-      bool is_reset_application(const atermpp::aterm_appl& e)
+      bool is_reset_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -972,7 +972,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching reset1
       inline
-      bool is_reset1_function_symbol(const atermpp::aterm_appl& e)
+      bool is_reset1_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -999,7 +999,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol reset1 to a
       ///     number of arguments
       inline
-      bool is_reset1_application(const atermpp::aterm_appl& e)
+      bool is_reset1_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1031,7 +1031,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching shift
       inline
-      bool is_shift_function_symbol(const atermpp::aterm_appl& e)
+      bool is_shift_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1057,7 +1057,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol shift to a
       ///     number of arguments
       inline
-      bool is_shift_application(const atermpp::aterm_appl& e)
+      bool is_shift_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1089,7 +1089,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching shift_range
       inline
-      bool is_shift_range_function_symbol(const atermpp::aterm_appl& e)
+      bool is_shift_range_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1116,7 +1116,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol shift_range to a
       ///     number of arguments
       inline
-      bool is_shift_range_application(const atermpp::aterm_appl& e)
+      bool is_shift_range_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1148,7 +1148,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching shift1
       inline
-      bool is_shift1_function_symbol(const atermpp::aterm_appl& e)
+      bool is_shift1_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1176,7 +1176,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol shift1 to a
       ///     number of arguments
       inline
-      bool is_shift1_application(const atermpp::aterm_appl& e)
+      bool is_shift1_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1208,7 +1208,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching copy
       inline
-      bool is_copy_function_symbol(const atermpp::aterm_appl& e)
+      bool is_copy_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1234,7 +1234,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol copy to a
       ///     number of arguments
       inline
-      bool is_copy_application(const atermpp::aterm_appl& e)
+      bool is_copy_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1266,7 +1266,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching copy1
       inline
-      bool is_copy1_function_symbol(const atermpp::aterm_appl& e)
+      bool is_copy1_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1293,7 +1293,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol copy1 to a
       ///     number of arguments
       inline
-      bool is_copy1_application(const atermpp::aterm_appl& e)
+      bool is_copy1_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1325,7 +1325,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching split
       inline
-      bool is_split_function_symbol(const atermpp::aterm_appl& e)
+      bool is_split_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1353,7 +1353,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol split to a
       ///     number of arguments
       inline
-      bool is_split_application(const atermpp::aterm_appl& e)
+      bool is_split_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1385,7 +1385,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching split_list
       inline
-      bool is_split_list_function_symbol(const atermpp::aterm_appl& e)
+      bool is_split_list_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1413,7 +1413,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol split_list to a
       ///     number of arguments
       inline
-      bool is_split_list_application(const atermpp::aterm_appl& e)
+      bool is_split_list_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1445,7 +1445,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching norm
       inline
-      bool is_norm_function_symbol(const atermpp::aterm_appl& e)
+      bool is_norm_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1470,7 +1470,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol norm to a
       ///     number of arguments
       inline
-      bool is_norm_application(const atermpp::aterm_appl& e)
+      bool is_norm_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1502,7 +1502,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching norm1
       inline
-      bool is_norm1_function_symbol(const atermpp::aterm_appl& e)
+      bool is_norm1_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1528,7 +1528,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol norm1 to a
       ///     number of arguments
       inline
-      bool is_norm1_application(const atermpp::aterm_appl& e)
+      bool is_norm1_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1560,7 +1560,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching norm2
       inline
-      bool is_norm2_function_symbol(const atermpp::aterm_appl& e)
+      bool is_norm2_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1587,7 +1587,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol norm2 to a
       ///     number of arguments
       inline
-      bool is_norm2_application(const atermpp::aterm_appl& e)
+      bool is_norm2_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1619,7 +1619,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching inconsistent
       inline
-      bool is_inconsistent_function_symbol(const atermpp::aterm_appl& e)
+      bool is_inconsistent_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1643,7 +1643,7 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol inconsistent to a
       ///     number of arguments
       inline
-      bool is_inconsistent_application(const atermpp::aterm_appl& e)
+      bool is_inconsistent_application(const data_expression& e)
       {
         if (is_application(e))
         {
@@ -1675,7 +1675,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching N
       inline
-      bool is_N_function_symbol(const atermpp::aterm_appl& e)
+      bool is_N_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1707,7 +1707,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching dbm_inconsistent
       inline
-      bool is_dbm_inconsistent_function_symbol(const atermpp::aterm_appl& e)
+      bool is_dbm_inconsistent_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1739,7 +1739,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching dbm
       inline
-      bool is_dbm_empty_function_symbol(const atermpp::aterm_appl& e)
+      bool is_dbm_empty_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1771,7 +1771,7 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching dbm_zero
       inline
-      bool is_dbm_zero_function_symbol(const atermpp::aterm_appl& e)
+      bool is_dbm_zero_function_symbol(const data_expression& e)
       {
         if (is_function_symbol(e))
         {
@@ -1993,18 +1993,18 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list({vd}), close(vd), close1(vd, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vd, vk}), equal_to(vk, N()), close1(vd, vk), vd));
-        result.push_back(data_equation(variable_list({vd, vk}), less(vk, N()), close1(vd, vk), close1(close2(vd, vk, sort_nat::c0()), sort_real::plus(vk, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vk}), less(vk, N()), close1(vd, vk), close1(close2(vd, vk, sort_nat::c0()), sort_real::plus(vk, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vi, vk}), equal_to(vi, N()), close2(vd, vk, vi), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vk}), less(vi, N()), close2(vd, vk, vi), close2(close3(vd, vk, vi, sort_nat::c0()), vk, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vk}), less(vi, N()), close2(vd, vk, vi), close2(close3(vd, vk, vi, sort_nat::c0()), vk, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vi, vj, vk}), equal_to(vj, N()), close3(vd, vk, vi, vj), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vj, vk}), less(vj, N()), close3(vd, vk, vi, vj), close3(set(vd, vi, vj, sort_bound::min_b(get(vd, vi, vj), sort_bound::add(get(vd, vi, vk), get(vd, vk, vj)))), vk, vi, sort_real::plus(vj, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vj, vk}), less(vj, N()), close3(vd, vk, vi, vj), close3(set(vd, vi, vj, sort_bound::min_b(get(vd, vi, vj), sort_bound::add(get(vd, vi, vk), get(vd, vk, vj)))), vk, vi, sort_real::plus(vj, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vb1, vd, vi, vj}), sort_bool::or_(inconsistent(vd), sort_bound::lt(sort_bound::add(get(vd, vj, vi), vb1), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le()))), and_d(vd, vi, vj, vb1), dbm_inconsistent()));
         result.push_back(data_equation(variable_list({vb1, vd, vi, vj}), sort_bool::and_(sort_bool::not_(inconsistent(vd)), sort_bool::and_(sort_bound::lt(vb1, get(vd, vi, vj)), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vj, vi), vb1), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le()))))), and_d(vd, vi, vj, vb1), and_d1(set(vd, vi, vj, vb1), vi, vj, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vb1, vd, vi, vj}), sort_bool::and_(sort_bool::not_(inconsistent(vd)), sort_bool::and_(sort_bool::not_(sort_bound::lt(vb1, get(vd, vi, vj))), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vj, vi), vb1), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le()))))), and_d(vd, vi, vj, vb1), vd));
         result.push_back(data_equation(variable_list({vd, vi, vj, vk}), equal_to(vk, N()), and_d1(vd, vi, vj, vk), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vj, vk}), less(vk, N()), and_d1(vd, vi, vj, vk), and_d1(and_d2(vd, vi, vj, vk, sort_nat::c0()), vi, vj, sort_real::plus(vk, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vj, vk}), less(vk, N()), and_d1(vd, vi, vj, vk), and_d1(and_d2(vd, vi, vj, vk, sort_nat::c0()), vi, vj, sort_real::plus(vk, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vi, vj, vk, vl}), equal_to(vl, N()), and_d2(vd, vi, vj, vk, vl), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vj, vk, vl}), less(vl, N()), and_d2(vd, vi, vj, vk, vl), and_d2(set(vd, vk, vl, sort_bound::min_b(sort_bound::min_b(get(vd, vk, vl), sort_bound::add(get(vd, vk, vi), get(vd, vi, vl))), sort_bound::add(get(vd, vk, vj), get(vd, vj, vl)))), vi, vj, vk, sort_real::plus(vl, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vj, vk, vl}), less(vl, N()), and_d2(vd, vi, vj, vk, vl), and_d2(set(vd, vk, vl, sort_bound::min_b(sort_bound::min_b(get(vd, vk, vl), sort_bound::add(get(vd, vk, vi), get(vd, vi, vl))), sort_bound::add(get(vd, vk, vj), get(vd, vj, vl)))), vi, vj, vk, sort_real::plus(vl, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vb1, vb2, vd, vi, vj}), sort_bool::or_(sort_bool::or_(inconsistent(vd), sort_bound::lt(sort_bound::add(get(vd, vj, vi), vb1), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le()))), sort_bound::lt(sort_bound::add(get(vd, vi, vj), vb2), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le()))), double_and_d(vd, vi, vj, vb1, vb2), dbm_inconsistent()));
         result.push_back(data_equation(variable_list({vb1, vb2, vd, vi, vj}), sort_bool::and_(sort_bool::and_(sort_bool::and_(sort_bool::and_(sort_bool::not_(inconsistent(vd)), sort_bound::lt(vb1, get(vd, vi, vj))), sort_bool::not_(sort_bound::lt(vb2, get(vd, vj, vi)))), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vj, vi), vb1), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le())))), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vi, vj), vb2), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le())))), double_and_d(vd, vi, vj, vb1, vb2), and_d1(set(vd, vi, vj, vb1), vi, vj, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vb1, vb2, vd, vi, vj}), sort_bool::and_(sort_bool::and_(sort_bool::and_(sort_bool::and_(sort_bool::not_(inconsistent(vd)), sort_bool::not_(sort_bound::lt(vb1, get(vd, vi, vj)))), sort_bound::lt(vb2, get(vd, vj, vi))), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vj, vi), vb1), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le())))), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vi, vj), vb2), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le())))), double_and_d(vd, vi, vj, vb1, vb2), and_d1(set(vd, vj, vi, vb2), vi, vj, sort_nat::c0())));
@@ -2012,33 +2012,33 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vb1, vb2, vd, vi, vj}), sort_bool::and_(sort_bool::and_(sort_bool::and_(sort_bool::and_(sort_bool::not_(inconsistent(vd)), sort_bool::not_(sort_bound::lt(vb1, get(vd, vi, vj)))), sort_bool::not_(sort_bound::lt(vb2, get(vd, vj, vi)))), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vj, vi), vb1), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le())))), sort_bool::not_(sort_bound::lt(sort_bound::add(get(vd, vi, vj), vb2), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le())))), double_and_d(vd, vi, vj, vb1, vb2), vd));
         result.push_back(data_equation(variable_list({vd, vk}), free(vd, vk), free1(vd, vk, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vd, vi, vk}), equal_to(vi, N()), free1(vd, vk, vi), vd));
-        result.push_back(data_equation(variable_list({vd, vi}), less(vi, N()), free1(vd, vi, vi), free1(vd, vi, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
-        result.push_back(data_equation(variable_list({vd, vi, vk}), sort_bool::and_(less(vi, N()), not_equal_to(vi, vk)), free1(vd, vi, vk), free1(set(set(vd, vk, vi, sort_bound::inf()), vi, vk, sort_bound::inf()), vi, sort_real::plus(vk, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi}), less(vi, N()), free1(vd, vi, vi), free1(vd, vi, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vk}), sort_bool::and_(less(vi, N()), not_equal_to(vi, vk)), free1(vd, vi, vk), free1(set(set(vd, vk, vi, sort_bound::inf()), vi, vk, sort_bound::inf()), vi, sort_real::plus(vk, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vk, vr1}), reset(vd, vk, vr1), reset1(vd, vk, vr1, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vd, vi, vk, vr1}), equal_to(vi, N()), reset1(vd, vk, vr1, vi), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vk, vr1}), less(vi, N()), reset1(vd, vk, vr1, vi), reset1(set(set(vd, vk, vi, sort_bound::add(sort_bound::cbound(vr1, sort_inequality::le()), get(vd, sort_nat::c0(), vi))), vi, vk, sort_bound::add(get(vd, vi, sort_nat::c0()), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le()))), vk, vr1, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vk, vr1}), less(vi, N()), reset1(vd, vk, vr1, vi), reset1(set(set(vd, vk, vi, sort_bound::add(sort_bound::cbound(vr1, sort_inequality::le()), get(vd, sort_nat::c0(), vi))), vi, vk, sort_bound::add(get(vd, vi, sort_nat::c0()), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le()))), vk, vr1, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vk, vr1}), shift(vd, vk, vr1), shift_range(vd, vk, vr1, vr1)));
         result.push_back(data_equation(variable_list({vd, vk, vr1, vr2}), shift_range(vd, vk, vr1, vr2), shift1(vd, vk, vr1, vr2, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vd, vi, vk, vr1, vr2}), equal_to(vi, N()), shift1(vd, vk, vr1, vr2, vi), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vr1, vr2}), less(vi, N()), shift1(vd, vi, vr1, vr2, vi), shift1(vd, vi, vr1, vr2, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
-        result.push_back(data_equation(variable_list({vd, vi, vk, vr1, vr2}), sort_bool::and_(less(vi, N()), not_equal_to(vi, vk)), shift1(vd, vk, vr1, vr2, vi), shift1(set(set(vd, vk, vi, sort_bound::add(get(vd, vk, vi), sort_bound::cbound(vr2, sort_inequality::le()))), vi, vk, sort_bound::add(get(vd, vi, vk), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le()))), vk, vr1, vr2, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vr1, vr2}), less(vi, N()), shift1(vd, vi, vr1, vr2, vi), shift1(vd, vi, vr1, vr2, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vk, vr1, vr2}), sort_bool::and_(less(vi, N()), not_equal_to(vi, vk)), shift1(vd, vk, vr1, vr2, vi), shift1(set(set(vd, vk, vi, sort_bound::add(get(vd, vk, vi), sort_bound::cbound(vr2, sort_inequality::le()))), vi, vk, sort_bound::add(get(vd, vi, vk), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le()))), vk, vr1, vr2, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vk, vl}), copy(vd, vk, vl), copy1(vd, vk, vl, sort_nat::c0())));
         result.push_back(data_equation(variable_list({vd, vi, vk, vl}), equal_to(vi, N()), copy1(vd, vk, vl, vi), set(set(vd, vk, vl, sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le())), vl, vk, sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le()))));
-        result.push_back(data_equation(variable_list({vd, vi, vl}), less(vi, N()), copy1(vd, vi, vl, vi), copy1(vd, vi, vl, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
-        result.push_back(data_equation(variable_list({vd, vi, vk, vl}), sort_bool::and_(less(vi, N()), not_equal_to(vi, vk)), copy1(vd, vk, vl, vi), copy1(set(set(vd, vk, vi, get(vd, vl, vi)), vi, vk, get(vd, vi, vl)), vk, vl, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vl}), less(vi, N()), copy1(vd, vi, vl, vi), copy1(vd, vi, vl, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vk, vl}), sort_bool::and_(less(vi, N()), not_equal_to(vi, vk)), copy1(vd, vk, vl, vi), copy1(set(set(vd, vk, vi, get(vd, vl, vi)), vi, vk, get(vd, vi, vl)), vk, vl, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vb1, vd, vi, vj}), split(vd, vi, vj, vb1, sort_bool::true_()), and_d(vd, vi, vj, vb1)));
         result.push_back(data_equation(variable_list({vb1, vd, vi, vj}), split(vd, vi, vj, vb1, sort_bool::false_()), and_d(vd, vj, vi, sort_bound::not_b(vb1))));
         result.push_back(data_equation(variable_list({vb1, vd, vi, vj, vl1}), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(sort_bound::inf(), sort_list::cons_(sort_bound::bound())(vb1, vl1)), sort_nat::c0()), and_d(vd, vi, vj, vb1)));
         result.push_back(data_equation(variable_list({vb1, vd, vi, vj}), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(vb1, sort_list::empty(sort_bound::bound())), sort_nat::c0()), and_d(vd, vj, vi, sort_bound::not_b(vb1))));
         result.push_back(data_equation(variable_list({vb1, vb2, vd, vi, vj, vl1}), not_equal_to(vb1, sort_bound::inf()), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(vb1, sort_list::cons_(sort_bound::bound())(vb2, vl1)), sort_nat::c0()), double_and_d(vd, vi, vj, vb2, sort_bound::not_b(vb1))));
-        result.push_back(data_equation(variable_list({vb1, vd, vi, vj, vk, vl1}), not_equal_to(vk, sort_nat::c0()), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(vb1, vl1), vk), split_list(vd, vi, vj, vl1, sort_int::int2nat(sort_int::minus(vk, sort_nat::cnat(sort_pos::c1()))))));
+        result.push_back(data_equation(variable_list({vb1, vd, vi, vj, vk, vl1}), not_equal_to(vk, sort_nat::c0()), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(vb1, vl1), vk), split_list(vd, vi, vj, vl1, sort_int::int2nat(sort_int::minus(vk, sort_nat::pos2nat(sort_pos::c1()))))));
         result.push_back(data_equation(variable_list({vd, vr1}), norm(vd, vr1), close(norm1(vd, vr1, sort_nat::c0()))));
         result.push_back(data_equation(variable_list({vd, vi, vr1}), equal_to(vi, N()), norm1(vd, vr1, vi), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vr1}), less(vi, N()), norm1(vd, vr1, vi), norm1(norm2(vd, vr1, vi, sort_nat::c0()), vr1, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vr1}), less(vi, N()), norm1(vd, vr1, vi), norm1(norm2(vd, vr1, vi, sort_nat::c0()), vr1, sort_real::plus(vi, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd, vi, vj, vr1}), equal_to(vj, N()), norm2(vd, vr1, vi, vj), vd));
-        result.push_back(data_equation(variable_list({vd, vi, vj, vr1}), sort_bool::and_(less(vj, N()), sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bool::not_(sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(vr1, sort_inequality::le()))))), norm2(vd, vr1, vi, vj), set(norm2(vd, vr1, vi, sort_real::plus(vj, sort_nat::cnat(sort_pos::c1()))), vi, vj, sort_bound::inf())));
-        result.push_back(data_equation(variable_list({vd, vi, vj, vr1}), sort_bool::and_(less(vj, N()), sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le())))), norm2(vd, vr1, vi, vj), set(norm2(vd, vr1, vi, sort_real::plus(vj, sort_nat::cnat(sort_pos::c1()))), vi, vj, sort_bound::cbound(sort_real::negate(vr1), sort_inequality::lt()))));
-        result.push_back(data_equation(variable_list({vd, vi, vj, vr1}), sort_bool::and_(less(vj, N()), sort_bool::and_(sort_bool::not_(sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bool::not_(sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(vr1, sort_inequality::le()))))), sort_bool::not_(sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le())))))), norm2(vd, vr1, vi, vj), norm2(vd, vr1, vi, sort_real::plus(vj, sort_nat::cnat(sort_pos::c1())))));
+        result.push_back(data_equation(variable_list({vd, vi, vj, vr1}), sort_bool::and_(less(vj, N()), sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bool::not_(sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(vr1, sort_inequality::le()))))), norm2(vd, vr1, vi, vj), set(norm2(vd, vr1, vi, sort_real::plus(vj, sort_nat::pos2nat(sort_pos::c1()))), vi, vj, sort_bound::inf())));
+        result.push_back(data_equation(variable_list({vd, vi, vj, vr1}), sort_bool::and_(less(vj, N()), sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le())))), norm2(vd, vr1, vi, vj), set(norm2(vd, vr1, vi, sort_real::plus(vj, sort_nat::pos2nat(sort_pos::c1()))), vi, vj, sort_bound::cbound(sort_real::negate(vr1), sort_inequality::lt()))));
+        result.push_back(data_equation(variable_list({vd, vi, vj, vr1}), sort_bool::and_(less(vj, N()), sort_bool::and_(sort_bool::not_(sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bool::not_(sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(vr1, sort_inequality::le()))))), sort_bool::not_(sort_bool::and_(not_equal_to(get(vd, vi, vj), sort_bound::inf()), sort_bound::lt(get(vd, vi, vj), sort_bound::cbound(sort_real::negate(vr1), sort_inequality::le())))))), norm2(vd, vr1, vi, vj), norm2(vd, vr1, vi, sort_real::plus(vj, sort_nat::pos2nat(sort_pos::c1())))));
         result.push_back(data_equation(variable_list({vd}), inconsistent(vd), not_equal_to(get(vd, sort_nat::c0(), sort_nat::c0()), sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()), sort_pos::c1()), sort_inequality::le()))));
         result.push_back(data_equation(variable_list(), dbm_inconsistent(), set(dbm_zero(), sort_nat::c0(), sort_nat::c0(), sort_bound::cbound(sort_real::creal(sort_int::cneg(sort_pos::c1()), sort_pos::c1()), sort_inequality::lt()))));
         return result;

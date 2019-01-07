@@ -24,6 +24,8 @@ import string
 # U = generate user section
 # X = it is an expression super class
 # W = do not generate swap overload
+# A = this class can be cast to an aterm_appl.
+# i = this clase can be cast to an aterm_int.
 
 CORE_CLASSES = r'''
 identifier_string() : public atermpp::aterm_string | SC | String | An identifier
@@ -71,13 +73,14 @@ untyped_identifier_assignment(const core::identifier_string& lhs, const data_exp
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-data_expression()                                                                                             : public atermpp::aterm_appl   | XCU   | DataExpr          | A data expression
-variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCUs | DataVarId         | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOCUs | OpId              | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSW | DataAppl          | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOU   | Whr               | A where expression
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO    | Binder            | An abstraction expression
-untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EO    | UntypedIdentifier | An untyped identifier
+data_expression()                                                                                             : public atermpp::aterm        | XCU    | DataExpr          | A data expression
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOCUsA | DataVarId         | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EOCUsA | OpId              | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | EOUSWA | DataAppl          | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EOUA   | Whr               | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EOA    | Binder            | An abstraction expression
+machine_number(std::size_t value)                                                                             : public data::data_expression | EOCi   | Number            | A machine number
+untyped_identifier(const core::identifier_string& name)                                                       : public data::data_expression | EOA    | UntypedIdentifier | An untyped identifier
 '''
 
 ABSTRACTION_EXPRESSION_CLASSES = r'''
@@ -98,47 +101,47 @@ untyped_data_parameter(const core::identifier_string& name, const data_expressio
 '''
 
 STATE_FORMULA_CLASSES = r'''
-state_formula()                                                                                                 : public atermpp::aterm_appl           | XICU | StateFrm        | A state formula
-true_()                                                                                                         : public state_formulas::state_formula | EI   | StateTrue       | The value true for state formulas
-false_()                                                                                                        : public state_formulas::state_formula | EI   | StateFalse      | The value false for state formulas
-not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EI   | StateNot        | The not operator for state formulas
-and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StateAnd        | The and operator for state formulas
-or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateOr         | The or operator for state formulas
-imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateImp        | The implication operator for state formulas
-forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateForall     | The universal quantification operator for state formulas
-exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateExists     | The existential quantification operator for state formulas
-must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EI   | StateMust       | The must operator for state formulas
-may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EI   | StateMay        | The may operator for state formulas
-yaled()                                                                                                         : public state_formulas::state_formula | EI   | StateYaled      | The yaled operator for state formulas
-yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateYaledTimed | The timed yaled operator for state formulas
-delay()                                                                                                         : public state_formulas::state_formula | EI   | StateDelay      | The delay operator for state formulas
-delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EI   | StateDelayTimed | The timed delay operator for state formulas
-variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EI   | StateVar        | The state formula variable
-nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateNu         | The nu operator for state formulas
-mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EI   | StateMu         | The mu operator for state formulas
+state_formula()                                                                                                 : public atermpp::aterm                | XICU | StateFrm        | A state formula
+true_()                                                                                                         : public state_formulas::state_formula | EIA  | StateTrue       | The value true for state formulas
+false_()                                                                                                        : public state_formulas::state_formula | EIA  | StateFalse      | The value false for state formulas
+not_(const state_formula& operand)                                                                              : public state_formulas::state_formula | EIA  | StateNot        | The not operator for state formulas
+and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EIA  | StateAnd        | The and operator for state formulas
+or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EIA  | StateOr         | The or operator for state formulas
+imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EIA  | StateImp        | The implication operator for state formulas
+forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EIA  | StateForall     | The universal quantification operator for state formulas
+exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EIA  | StateExists     | The existential quantification operator for state formulas
+must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EIA  | StateMust       | The must operator for state formulas
+may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EIA  | StateMay        | The may operator for state formulas
+yaled()                                                                                                         : public state_formulas::state_formula | EIA  | StateYaled      | The yaled operator for state formulas
+yaled_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EIA  | StateYaledTimed | The timed yaled operator for state formulas
+delay()                                                                                                         : public state_formulas::state_formula | EIA  | StateDelay      | The delay operator for state formulas
+delay_timed(const data::data_expression& time_stamp)                                                            : public state_formulas::state_formula | EIA  | StateDelayTimed | The timed delay operator for state formulas
+variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      : public state_formulas::state_formula | EIA  | StateVar        | The state formula variable
+nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EIA  | StateNu         | The nu operator for state formulas
+mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) : public state_formulas::state_formula | EIA  | StateMu         | The mu operator for state formulas
 '''
 
 REGULAR_FORMULA_CLASSES = r'''
-regular_formula()                                                                                                       : public atermpp::aterm_appl               | XIC | RegFrm        | A regular formula
-seq(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegSeq        | The seq operator for regular formulas
-alt(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EI  | RegAlt        | The alt operator for regular formulas
-trans(const regular_formula& operand)                                                                                   : public regular_formulas::regular_formula | EI  | RegTrans      | The trans operator for regular formulas
-trans_or_nil(const regular_formula& operand)                                                                            : public regular_formulas::regular_formula | EI  | RegTransOrNil | The 'trans or nil' operator for regular formulas
-untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right) : public regular_formulas::regular_formula | EI  | UntypedRegFrm | An untyped regular formula or action formula
+regular_formula()                                                                                                       : public atermpp::aterm                    | XIC | RegFrm        | A regular formula
+seq(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EIA | RegSeq        | The seq operator for regular formulas
+alt(const regular_formula& left, const regular_formula& right)                                                          : public regular_formulas::regular_formula | EIA | RegAlt        | The alt operator for regular formulas
+trans(const regular_formula& operand)                                                                                   : public regular_formulas::regular_formula | EIA | RegTrans      | The trans operator for regular formulas
+trans_or_nil(const regular_formula& operand)                                                                            : public regular_formulas::regular_formula | EIA | RegTransOrNil | The 'trans or nil' operator for regular formulas
+untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right) : public regular_formulas::regular_formula | EIA | UntypedRegFrm | An untyped regular formula or action formula
 '''
 
 ACTION_FORMULA_CLASSES = r'''
-action_formula()                                                            : public atermpp::aterm_appl             | XIC  | ActFrm            | An action formula
-true_()                                                                     : public action_formulas::action_formula | EI   | ActTrue           | The value true for action formulas
-false_()                                                                    : public action_formulas::action_formula | EI   | ActFalse          | The value false for action formulas
-not_(const action_formula& operand)                                         : public action_formulas::action_formula | EI   | ActNot            | The not operator for action formulas
-and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EI   | ActAnd            | The and operator for action formulas
-or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActOr             | The or operator for action formulas
-imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActImp            | The implication operator for action formulas
-forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActForall         | The universal quantification operator for action formulas
-exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists         | The existential quantification operator for action formulas
-at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt             | The at operator for action formulas
-multi_action(const process::action_list& actions)                           : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
+action_formula()                                                            : public atermpp::aterm                  | XIC  | ActFrm            | An action formula
+true_()                                                                     : public action_formulas::action_formula | EIA  | ActTrue           | The value true for action formulas
+false_()                                                                    : public action_formulas::action_formula | EIA  | ActFalse          | The value false for action formulas
+not_(const action_formula& operand)                                         : public action_formulas::action_formula | EIA  | ActNot            | The not operator for action formulas
+and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EIA  | ActAnd            | The and operator for action formulas
+or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EIA  | ActOr             | The or operator for action formulas
+imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EIA  | ActImp            | The implication operator for action formulas
+forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EIA  | ActForall         | The universal quantification operator for action formulas
+exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EIA  | ActExists         | The existential quantification operator for action formulas
+at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EIA  | ActAt             | The at operator for action formulas
+multi_action(const process::action_list& actions)                           : public action_formulas::action_formula | EIA  | ActMultAct        | The multi action for action formulas
 '''
 
 MODAL_FORMULA_CLASSES = r'''
@@ -206,14 +209,14 @@ pbes(const data::data_specification& data, const std::vector<pbes_system::pbes_e
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCI   | PBExpr            | A pbes expression
-propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUIs | PropVarInst       | A propositional variable instantiation
-not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EI    | PBESNot           | The not operator for pbes expressions
-and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EI    | PBESAnd           | The and operator for pbes expressions
-or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESOr            | The or operator for pbes expressions
-imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EI    | PBESImp           | The implication operator for pbes expressions
-forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESForall        | The universal quantification operator for pbes expressions
-exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EI    | PBESExists        | The existential quantification operator for pbes expressions
+pbes_expression()                                                                                                       : public atermpp::aterm               | XCI    | PBExpr            | A pbes expression
+propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECUIsA | PropVarInst       | A propositional variable instantiation
+not_(const pbes_expression& operand)                                                                                    : public pbes_system::pbes_expression | EIA    | PBESNot           | The not operator for pbes expressions
+and_(const pbes_expression& left, const pbes_expression& right)                                                         : public pbes_system::pbes_expression | EIA    | PBESAnd           | The and operator for pbes expressions
+or_(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EIA    | PBESOr            | The or operator for pbes expressions
+imp(const pbes_expression& left, const pbes_expression& right)                                                          : public pbes_system::pbes_expression | EIA    | PBESImp           | The implication operator for pbes expressions
+forall(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EIA    | PBESForall        | The universal quantification operator for pbes expressions
+exists(const data::variable_list& variables, const pbes_expression& body)                                               : public pbes_system::pbes_expression | EIA    | PBESExists        | The existential quantification operator for pbes expressions
 '''
 
 BOOLEAN_CLASSES = r'''
@@ -308,7 +311,7 @@ class Parameter:
             elif '&' in self.modifiers_:
                 postfix = '&'
             else:
-                postfix = '*'
+                postfix = ''
             return '%s%s%s' % (prefix, type1, postfix)
         return type1
 
@@ -415,8 +418,9 @@ class FunctionDeclaration:
 
 # Represents a class member function
 class MemberFunction:
-    def __init__(self, classname, return_type, name, arg):
+    def __init__(self, classname, modifiers, return_type, name, arg):
         self.classname = classname
+        self.modifiers = modifiers
         self.return_type = return_type
         self.name = name
         self.arg  = arg
@@ -429,7 +433,18 @@ class MemberFunction:
         return text
 
     def inline_definition(self):
-        text = '''    const <RETURN_TYPE>& <NAME>() const
+        if 'A' in self.modifiers:
+           text = '''    const <RETURN_TYPE>& <NAME>() const
+    {
+      return atermpp::down_cast<<RETURN_TYPE>>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[<ARG>]);
+    }'''
+        elif 'i' in self.modifiers:
+           text = '''    <RETURN_TYPE> <NAME>() const
+    {
+      return atermpp::down_cast<atermpp::aterm_int>(static_cast<atermpp::aterm>(*this)).value();
+    }'''
+        else:
+           text = '''    const <RETURN_TYPE>& <NAME>() const
     {
       return atermpp::down_cast<<RETURN_TYPE>>((*this)[<ARG>]);
     }'''
@@ -440,7 +455,13 @@ class MemberFunction:
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
+        if 'A' in self.modifiers:
+           text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
+    {
+      return atermpp::down_cast<<RETURN_TYPE>>((atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this)))[<ARG>]);
+    }'''
+        else:
+           text = '''    <INLINE> const<RETURN_TYPE>& <CLASSNAME>::<NAME>() const
     {
       return atermpp::down_cast<<RETURN_TYPE>>((*this)[<ARG>]);
     }'''
@@ -452,8 +473,9 @@ class MemberFunction:
 
 # Represents a class constructor
 class Constructor:
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -478,6 +500,11 @@ class Constructor:
     <CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
+        elif 'i' in self.modifiers:
+            text = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_int(<PARAMETERS>))
+    {}'''
         else:
             text = r'''    /// \\\\brief Constructor.
     <CLASSNAME>(<ARGUMENTS>)
@@ -496,6 +523,11 @@ class Constructor:
     <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
+        elif 'i' in self.modifiers:
+            text = r'''    /// \\\\brief Constructor.
+    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(atermpp::aterm_int(<PARAMETERS>))
+    {}'''
         else:
             text = r'''    /// \\\\brief Constructor.
     <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
@@ -509,8 +541,9 @@ class Constructor:
 
 # Represents a default class constructor
 class DefaultConstructor(Constructor):
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -520,9 +553,15 @@ class DefaultConstructor(Constructor):
         self.template_parameters = template_parameters
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Default constructor.
+        if 'i' in self.modifiers:
+           text = r'''    /// \\\\brief Default constructor.
     <CLASSNAME>()
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::default_values::<ATERM>)
+      : <SUPERCLASS>(atermpp::aterm_int(std::size_t(0)))
+    {}'''
+        else:
+           text = r'''    /// \\\\brief Default constructor.
+    <CLASSNAME>()
+      : <SUPERCLASS>(atermpp::aterm(atermpp::aterm_appl(<ATERM_NAMESPACE>::detail::default_values::<ATERM>)))
     {}'''
         return self.expand_text(text)
 
@@ -532,9 +571,15 @@ class DefaultConstructor(Constructor):
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Default constructor.
+        if 'i' in self.modifiers:
+           text = r'''    /// \\\\brief Default constructor.
     <INLINE><CLASSNAME>::<CLASSNAME>()
-      : <SUPERCLASS>(<ATERM_NAMESPACE>::detail::default_values::<ATERM>)
+      : <SUPERCLASS>(atermpp::aterm_int(std::size_t(0)))
+    {}'''
+        else:
+           text = r'''    /// \\\\brief Default constructor.
+    <INLINE><CLASSNAME>::<CLASSNAME>()
+      : <SUPERCLASS>(atermpp::aterm(atermpp::aterm_appl(<ATERM_NAMESPACE>::detail::default_values::<ATERM>)))
     {}'''
         if inline:
             text = re.sub('<INLINE>',  'inline\n    ', text)
@@ -544,8 +589,9 @@ class DefaultConstructor(Constructor):
 
 # Represents an overloaded class constructor
 class OverloadedConstructor(Constructor):
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -556,30 +602,30 @@ class OverloadedConstructor(Constructor):
 
     def inline_definition(self):
         if self.superclass == 'atermpp::aterm_appl':
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Overloaded constructor.
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Overloaded constructor.
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Overloaded constructor.
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
         if self.superclass == 'atermpp::aterm_appl':
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Overloaded constructor.
     <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>)
     {}'''
         else:
-            text = r'''    /// \\\\brief Constructor.
+            text = r'''    /// \\\\brief Overloaded constructor.
     <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(atermpp::aterm_appl(core::detail::function_symbol_<ATERM>(), <PARAMETERS>))
     {}'''
@@ -597,14 +643,14 @@ class AdditionalConstructor(Constructor):
         self.superclass           = superclass
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor based on <ADDITIONAL_CLASSNAME>.
     <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
       : <SUPERCLASS>(x)
     {}'''
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor based on <ADDITIONAL_CLASSNAME>.
     <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x);'''
         return self.expand_text(text)
 
@@ -615,7 +661,7 @@ class AdditionalConstructor(Constructor):
         return text
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor based on <ADDITIONAL_CLASSNAME>.
     /// \\param term A term
     <INLINE><CLASSNAME>::<CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
       : <SUPERCLASS>(x)
@@ -628,8 +674,9 @@ class AdditionalConstructor(Constructor):
 
 # Represents a class constructor taking an aterm as argument
 class ATermConstructor(Constructor):
-    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+    def __init__(self, classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters):
         self.classname           = classname
+        self.modifiers           = modifiers
         self.arguments           = arguments
         self.superclass          = superclass
         self.namespace           = namespace
@@ -639,7 +686,16 @@ class ATermConstructor(Constructor):
         self.template_parameters = template_parameters
 
     def inline_definition(self):
-        text = r'''    /// \\\\brief Constructor.
+        if 'i' in self.modifiers:
+           text = r'''    /// \\\\brief Constructor based on an aterm.
+    /// \\param term A term
+    explicit <CLASSNAME>(const atermpp::aterm& term)
+      : <SUPERCLASS>(term)
+    {
+      assert(this->type_is_int());
+    }'''
+        else:
+           text = r'''    /// \\\\brief Constructor based on an aterm.
     /// \\param term A term
     explicit <CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
@@ -649,13 +705,22 @@ class ATermConstructor(Constructor):
         return self.expand_text(text)
 
     def declaration(self):
-        text = r'''    /// \\\\brief Constructor.
+        text = r'''    /// \\\\brief Constructor based on an aterm.
     /// \\param term A term
     explicit <CLASSNAME>(const atermpp::aterm& term);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
-        text = r'''    /// \\\\brief Constructor.
+        if 'i' in self.modifiers:
+           text = r'''    /// \\\\brief Constructor based on an aterm.
+    /// \\param term A term
+    explicit <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
+      : <SUPERCLASS>(term)
+    {
+      assert(this->type_is_int());
+    }'''
+        else:
+           text = r'''    /// \\\\brief Constructor based on an aterm.
     /// \\param term A term
     explicit <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
       : <SUPERCLASS>(term)
@@ -755,6 +820,7 @@ class Class:
         add_string_overload_constructor = add_constructor_overloads,
         add_container_overload_constructor = add_constructor_overloads
         classname = self.classname()
+        modifiers = self.modifiers()
         arguments = self.constructor.argument_text()
         superclass = self.superclass()
         superclass_namespace = self.superclass_namespace()
@@ -773,7 +839,7 @@ class Class:
 
         for i, p in enumerate(self.constructor.parameters()):
             parameters.append(p.name())
-            arguments.append('%s %s' % (p.type(), p.name()))
+            arguments.append('%s %s' % (p.type(not 'i' in self.modifiers()), p.name()))
             if p.type(False) == 'core::identifier_string' and add_string_overload_constructor:
                 parameters1.append('core::identifier_string(%s)' % p.name())
                 arguments1.append('const std::string& %s' % p.name())
@@ -804,12 +870,12 @@ class Class:
             superclass = 'atermpp::aterm_appl'
 
         constructors = []
-        constructors.append(DefaultConstructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
-        constructors.append(ATermConstructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
+        constructors.append(DefaultConstructor(classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters))
+        constructors.append(ATermConstructor(classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters))
         if len(self.constructor.parameters()) > 0:
-            constructors.append(Constructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
+            constructors.append(Constructor(classname, modifiers, arguments, superclass, namespace, aterm, parameters, template_parameters))
         if len(self.constructor.parameters()) > 0 and (add_string_overload_constructor or add_container_overload_constructor) and (parameters != parameters1):
-            constructors.append(OverloadedConstructor(classname, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
+            constructors.append(OverloadedConstructor(classname, modifiers, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
         if self.classname(True) in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES:
             for additional_classname in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES[self.classname(True)]:
                 constructors.append(AdditionalConstructor(classname, additional_classname, superclass, additional_classname))
@@ -831,7 +897,7 @@ class Class:
         result = []
         if self.superclass() != None:
             name = self.superclass(include_namespace = True)
-            if not name in ['atermpp::aterm_appl']:
+            if not name in ['atermpp::aterm_appl','atermpp::aterm']:
                 c = all_classes[name]
                 result = c.member_functions(all_classes, False)
                 result = [f.name for f in result]
@@ -853,7 +919,7 @@ class Class:
             name = p[2].strip()
             arg = str(n - 1)
             if not name in skip:
-                result.append(MemberFunction(self.classname(), return_type, name, arg))
+                result.append(MemberFunction(self.classname(), self.modifiers(), return_type, name, arg))
         return result
 
     def move_semantics_text(self):
@@ -916,12 +982,12 @@ bool is_%s(const %s& x)
         if name[-1] == '_':
             name = name[:-1]
         if 'X' in self.modifiers():
-            prototypes = '// prototypes\n' + '\n'.join(['inline bool is_%s(const atermpp::aterm_appl& x);' % re.sub('_$', '', c.classname()) for c in self.derived_classes(all_classes) if c.namespace() == self.namespace()]) + '\n\n'
+            prototypes = '// prototypes\n' + '\n'.join(['inline bool is_%s(const atermpp::aterm& x);' % re.sub('_$', '', c.classname()) for c in self.derived_classes(all_classes) if c.namespace() == self.namespace()]) + '\n\n'
             return_value = ' ||\n         '.join(['%s::is_%s(x)' % (c.namespace(), re.sub('_$', '', c.classname())) for c in self.derived_classes(all_classes)])
         else:
             prototypes = ''
-            return_value = 'x.function() == core::detail::function_symbols::%s' % self.aterm
-        text = text % (prototypes, name, name, name, 'atermpp::aterm_appl', return_value)
+            return_value = 'x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::%s' % self.aterm
+        text = text % (prototypes, name, name, name, 'atermpp::aterm', return_value)
         return text
 
     def is_function_name(self, include_namespace = True):

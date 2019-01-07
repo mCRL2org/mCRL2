@@ -71,6 +71,9 @@ bool is_data_specification(const atermpp::aterm_appl& x)
 
 class data_specification: public sort_specification
 {
+  public:
+    typedef std::map<function_symbol,std::pair<std::function<data_expression(const data_expression&)>, std::string> > implementation_map;
+
   private:
 
     /// \cond INTERNAL_DOCS
@@ -90,12 +93,25 @@ class data_specification: public sort_specification
       template <typename Container>
       void group_functions_by_target_sort(std::map<sort_expression, std::vector<function_symbol> >& c, const Container& functions)
       {
-        for (typename Container::const_iterator i = functions.begin(); i != functions.end(); ++i)
+        for (const function_symbol& f: functions)
         {
-          sort_expression index_sort(i->sort().target_sort());
-          if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), *i) == c[index_sort].end())
+          const sort_expression s=f.sort();
+          const sort_expression& index_sort = s.target_sort();
+          if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), f) == c[index_sort].end())
           {
-            c[index_sort].push_back(*i);
+            // Insert the constructors, such that those with the smallest number of elements occur first.
+            // As there are in general only few constructors, this linear insertion should not take too much time. 
+            std::vector<function_symbol>& relevant_rhs = c[index_sort]; // .push_back(f);
+            const std::size_t f_arity=(is_function_sort(s)?atermpp::down_cast<function_sort>(s).size():0);
+            std::vector<function_symbol>::iterator i=
+                   std::find_if(relevant_rhs.begin(), 
+                                relevant_rhs.end(),
+                                [f_arity](const function_symbol& g)
+                                          { const std::size_t g_arity=(is_function_sort(g.sort())?
+                                                                atermpp::down_cast<function_sort>(g.sort()).size():0);
+                                            return f_arity<g_arity;
+                                          });
+            relevant_rhs.insert(i,f);
           }
         }
       }
@@ -154,10 +170,19 @@ class data_specification: public sort_specification
 
     /// \brief Cache normalised mappings grouped by target sort.
     mutable target_sort_to_function_map m_grouped_normalised_mappings;
-    //
+    
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
     mutable data_equation_vector m_normalised_equations;
+  
+    /// \brief A map that for function symbols gives how it can be implemented.
+    /// \details For each function symbol there is a function : application -> data_expression that
+    ///          when applied to a term in normal form with the function symbol as head symbol
+    ///          returns a function that can be applied to calculate this term. 
+    ///          Furthermore, it provides the name of a function that when applied to the
+    ///          number of arguments that the function expects can be used to rewrite the term.
+    ///          This last string can be used for code generation. 
+    mutable implementation_map m_cpp_implemented_functions;
 
     void data_is_not_necessarily_normalised_anymore() const
     {
@@ -176,7 +201,7 @@ class data_specification: public sort_specification
     inline
     void add_normalised_constructor(const function_symbol& f) const
     {
-      function_symbol g(normalize_sorts(f, *this));
+      const function_symbol g(normalize_sorts(f, *this));
       if (std::find(m_normalised_constructors.begin(),m_normalised_constructors.end(),g)==m_normalised_constructors.end()) // not found
       {
         m_normalised_constructors.push_back(g);
@@ -192,7 +217,7 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_normalised_mapping(const function_symbol& f) const
     {
-      function_symbol g(normalize_sorts(f, *this));
+      const function_symbol g(normalize_sorts(f, *this));
       if (std::find(m_normalised_mappings.begin(),m_normalised_mappings.end(),g)==m_normalised_mappings.end()) // not found
       {
         m_normalised_mappings.push_back(g);
@@ -237,6 +262,16 @@ class data_specification: public sort_specification
         data_specification::add_normalised_equation(*i);
       }
     }
+
+    void add_normalised_cpp_implemented_functions(const implementation_map& c) const
+    {
+      typedef std::pair < function_symbol, std::pair<std::function<data_expression(const data_expression&)>, std::string> > map_result_type;
+      for(const map_result_type& f: c)
+      {
+        const function_symbol g(normalize_sorts(f.first,*this));
+        m_cpp_implemented_functions[g]=f.second;
+      }
+    } 
 
     /// \brief Adds constructors, mappings and equations for a structured sort
     ///        to this specification, and marks them as system defined.
@@ -397,6 +432,18 @@ class data_specification: public sort_specification
       return m_normalised_equations;
     }
 
+    /// \brief Gets all equations in this specification including those that are system defined
+    ///
+    /// \details The time complexity of this operation is the same as that for sort().
+    /// \return All equations in this specification, including those for
+    ///  structured sorts.
+    inline
+    const implementation_map& cpp_implemented_functions() const
+    {
+      normalise_data_specification_if_required();
+      return m_cpp_implemented_functions;
+    }
+
     /// \brief Gets all user defined equations.
     ///
     /// \details The time complexity of this operation is constant.
@@ -463,6 +510,7 @@ class data_specification: public sort_specification
       m_normalised_constructors.clear();
       m_normalised_mappings.clear();
       m_normalised_equations.clear();
+      m_cpp_implemented_functions.clear();
 
       for (const sort_expression& sort: sorts())
       {
@@ -515,6 +563,7 @@ class data_specification: public sort_specification
                        std::set < function_symbol >& constructors,
                        std::set < function_symbol >& mappings,
                        std::set < data_equation >& equations,
+                       implementation_map& cpp_implemented_functions,
                        const bool skip_equations=false) const
     {
       // add sorts, constructors, mappings and equations
@@ -524,6 +573,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(), f.end());
         f = sort_bool::bool_generate_functions_code();
         mappings.insert(f.begin(), f.end());
+        implementation_map f1 = sort_bool::bool_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        f1 = sort_bool::bool_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_bool::bool_generate_equations_code());
@@ -536,6 +589,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_real::real_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        implementation_map f1 = sort_real::real_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        f1 = sort_real::real_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_real::real_generate_equations_code());
@@ -548,6 +605,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_int::int_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        implementation_map f1 = sort_int::int_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        f1 = sort_int::int_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_int::int_generate_equations_code());
@@ -560,6 +621,10 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_nat::nat_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        implementation_map f1 = sort_nat::nat_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        f1 = sort_nat::nat_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_nat::nat_generate_equations_code());
@@ -572,9 +637,29 @@ class data_specification: public sort_specification
         constructors.insert(f.begin(),f.end());
         f = sort_pos::pos_generate_functions_code();
         mappings.insert(f.begin(),f.end());
+        implementation_map f1 = sort_pos::pos_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        f1 = sort_pos::pos_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
         if (!skip_equations)
         {
           data_equation_vector e(sort_pos::pos_generate_equations_code());
+          equations.insert(e.begin(),e.end());
+        }
+      }
+      else if (sort == sort_machine_word::machine_word())
+      {
+        function_symbol_vector f(sort_machine_word::machine_word_generate_constructors_code());
+        constructors.insert(f.begin(),f.end());
+        f = sort_machine_word::machine_word_generate_functions_code();
+        mappings.insert(f.begin(),f.end());
+        implementation_map f1 = sort_machine_word::machine_word_cpp_implementable_mappings();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        f1 = sort_machine_word::machine_word_cpp_implementable_constructors();
+        cpp_implemented_functions.insert(f1.begin(), f1.end());
+        if (!skip_equations)
+        {
+          data_equation_vector e(sort_machine_word::machine_word_generate_equations_code());
           equations.insert(e.begin(),e.end());
         }
       }
@@ -603,6 +688,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_list::list_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          implementation_map f1 = sort_list::list_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
+          f1 = sort_list::list_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
           if (!skip_equations)
           {
             data_equation_vector e(sort_list::list_generate_equations_code(element_sort));
@@ -617,6 +706,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_set::set_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          implementation_map f1 = sort_set::set_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
+          f1 = sort_set::set_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
           if (!skip_equations)
           {
             data_equation_vector e(sort_set::set_generate_equations_code(element_sort));
@@ -629,6 +722,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_fset::fset_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          implementation_map f1 = sort_fset::fset_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
+          f1 = sort_fset::fset_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
           if (!skip_equations)
           {
             data_equation_vector e = sort_fset::fset_generate_equations_code(element_sort);
@@ -643,6 +740,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_bag::bag_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          implementation_map f1 = sort_bag::bag_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
+          f1 = sort_bag::bag_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
           if (!skip_equations)
           {
             data_equation_vector e(sort_bag::bag_generate_equations_code(element_sort));
@@ -655,6 +756,10 @@ class data_specification: public sort_specification
           constructors.insert(f.begin(),f.end());
           f = sort_fbag::fbag_generate_functions_code(element_sort);
           mappings.insert(f.begin(),f.end());
+          implementation_map f1 = sort_fbag::fbag_cpp_implementable_mappings(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
+          f1 = sort_fbag::fbag_cpp_implementable_constructors(element_sort);
+          cpp_implemented_functions.insert(f1.begin(), f1.end());
           if (!skip_equations)
           {
             data_equation_vector e = sort_fbag::fbag_generate_equations_code(element_sort);
@@ -683,12 +788,14 @@ class data_specification: public sort_specification
       std::set < function_symbol > constructors;
       std::set < function_symbol > mappings;
       std::set < data_equation > equations;
-      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations);
+      implementation_map cpp_function_symbols;
+      find_associated_system_defined_data_types_for_a_sort(sort, constructors, mappings, equations, cpp_function_symbols);
 
       // add normalised constructors, mappings and equations
       add_normalised_constructors(constructors.begin(), constructors.end());
       add_normalised_mappings(mappings.begin(), mappings.end());
       add_normalised_equations(equations.begin(), equations.end());
+      add_normalised_cpp_implemented_functions(cpp_function_symbols);
     }
 
   public:
@@ -704,7 +811,11 @@ class data_specification: public sort_specification
                 std::set < function_symbol >& constructors,
                 std::set <function_symbol >& mappings) const
     {
+      implementation_map cpp_implemented_functions;
+   
+      sorts.insert(sort_machine_word::machine_word());
       sorts.insert(sort_bool::bool_());
+      sorts.insert(sort_machine_word::machine_word());
       sorts.insert(sort_pos::pos());
       sorts.insert(sort_nat::nat());
       sorts.insert(sort_int::int_());
@@ -718,7 +829,7 @@ class data_specification: public sort_specification
       std::set < data_equation > dummy_equations;
       for(const sort_expression& s: sorts)
       {
-        find_associated_system_defined_data_types_for_a_sort(s, constructors, mappings, dummy_equations, true);
+        find_associated_system_defined_data_types_for_a_sort(s, constructors, mappings, dummy_equations, cpp_implemented_functions, true);
       }
       assert(dummy_equations.size()==0);
     }
@@ -811,6 +922,7 @@ class data_specification: public sort_specification
         m_normalised_constructors == other.m_normalised_constructors &&
         m_normalised_mappings == other.m_normalised_mappings &&
         m_normalised_equations == other.m_normalised_equations;
+        // m_cpp_implemented_functions == other.m_cpp_implemented_functions; // This does not compile as std::function objects cannot be compared. 
     }
 
     data_specification& operator=(const data_specification& other)
@@ -824,6 +936,7 @@ class data_specification: public sort_specification
       m_grouped_normalised_mappings=other.m_grouped_normalised_mappings;
       m_grouped_normalised_constructors=other.m_grouped_normalised_constructors;
       m_normalised_equations=other.m_normalised_equations;
+      m_cpp_implemented_functions=other.m_cpp_implemented_functions;
       return *this;
     }
 
@@ -1061,11 +1174,11 @@ inline
 std::set<core::identifier_string> function_and_mapping_identifiers(const data_specification& dataspec)
 {
   std::set<core::identifier_string> result;
-  for (auto const& f: dataspec.constructors())
+  for (const function_symbol& f: dataspec.constructors())
   {
     result.insert(f.name());
   }
-  for (auto const& f: dataspec.mappings())
+  for (const function_symbol& f: dataspec.mappings())
   {
     result.insert(f.name());
   }

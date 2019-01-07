@@ -42,12 +42,12 @@ class function_symbol: public data_expression
 
     const core::identifier_string& name() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<core::identifier_string>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const sort_expression& sort() const
     {
-      return atermpp::down_cast<sort_expression>((*this)[1]);
+      return atermpp::down_cast<sort_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 //--- start user section function_symbol ---//
     /// \brief Default constructor.

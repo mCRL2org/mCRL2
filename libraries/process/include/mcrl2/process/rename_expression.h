@@ -31,10 +31,10 @@ class rename_expression: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     rename_expression()
-      : atermpp::aterm_appl(core::detail::default_values::RenameExpr)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::RenameExpr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit rename_expression(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -47,7 +47,7 @@ class rename_expression: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), source, target)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     rename_expression(const std::string& source, const std::string& target)
       : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
     {}
@@ -79,9 +79,9 @@ typedef std::vector<rename_expression>    rename_expression_vector;
 /// \param x A term
 /// \return True if \a x is a rename_expression expression
 inline
-bool is_rename_expression(const atermpp::aterm_appl& x)
+bool is_rename_expression(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::RenameExpr;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::RenameExpr;
 }
 
 // prototype declaration

@@ -39,7 +39,9 @@ void test_expression(const std::string& evaluate, const std::string& expected, d
   if (r(d1)!=r(d2))
   {
     std::cerr << "Evaluating: " << evaluate << "\n";
-    std::cerr << "Result: " << d1 << "\n";
+std::cerr << atermpp::aterm(d1) << "\n";
+    std::cerr << "Result: " << r(d1) << "\n";
+std::cerr << atermpp::aterm(r(d1)) << "\n";
     std::cerr << "Expected result: " << expected << "\n";
     BOOST_CHECK(r(d1) == r(d2));
     std::cerr << "------------------------------------------------------\n";
@@ -81,7 +83,7 @@ void bag_expression_test()
   BOOST_CHECK(sort_fbag::is_cons_application(normaliser(e)));
 
   e = parse_data_expression("{10:count(20,b)}", v);
-  BOOST_CHECK(sort_fbag::is_cinsert_application(normaliser(e)));
+  BOOST_CHECK(is_if_application(normaliser(e)));
 
   // Chect the operation == on bags
   test_expression("{:} == ({true:2} - {true:2})","true",normaliser);  // {true}-{true} is a trick to type {:} == {:}. 

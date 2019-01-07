@@ -33,10 +33,10 @@ class process_equation: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     process_equation()
-      : atermpp::aterm_appl(core::detail::default_values::ProcEqn)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ProcEqn)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit process_equation(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -81,9 +81,9 @@ typedef std::vector<process_equation>    process_equation_vector;
 /// \param x A term
 /// \return True if \a x is a process_equation expression
 inline
-bool is_process_equation(const atermpp::aterm_appl& x)
+bool is_process_equation(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ProcEqn;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ProcEqn;
 }
 
 // prototype declaration

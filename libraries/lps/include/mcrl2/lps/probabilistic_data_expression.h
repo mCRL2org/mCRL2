@@ -91,7 +91,7 @@ class probabilistic_data_expression: public data::data_expression
     static probabilistic_data_expression zero()
     {
       using namespace data;
-      static probabilistic_data_expression zero(sort_real::creal(data::sort_int::cint(sort_nat::c0()),sort_pos::c1()));
+      static probabilistic_data_expression zero(sort_real::creal(data::sort_int::cint(sort_nat::nat(0)),sort_pos::pos(1)));
       return zero;
     }
 
@@ -99,7 +99,7 @@ class probabilistic_data_expression: public data::data_expression
     static probabilistic_data_expression one()
     {
       using namespace data;
-      static probabilistic_data_expression one(sort_real::creal(data::sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1()));
+      static probabilistic_data_expression one(sort_real::creal(data::sort_int::cint(sort_nat::nat(1)),sort_pos::pos(1)));
       return one;
     }
 
@@ -150,6 +150,8 @@ class probabilistic_data_expression: public data::data_expression
       {
         return false;
       }
+std::cerr << "KKKKK " << atermpp::aterm(result) << "\n";
+assert(0);
       throw mcrl2::runtime_error("Equality between fractions does not rewrite to true or false: " + pp(result) + ".");
     }
 

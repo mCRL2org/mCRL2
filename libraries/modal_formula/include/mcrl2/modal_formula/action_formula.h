@@ -31,35 +31,35 @@ namespace action_formulas
 
 //--- start generated classes ---//
 /// \brief An action formula
-class action_formula: public atermpp::aterm_appl
+class action_formula: public atermpp::aterm
 {
   public:
     /// \brief Default constructor.
     action_formula()
-      : atermpp::aterm_appl(core::detail::default_values::ActFrm)
+      : atermpp::aterm(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActFrm)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit action_formula(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm(term)
     {
       assert(core::detail::check_rule_ActFrm(*this));
     }
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::data_expression.
     action_formula(const data::data_expression& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on data::untyped_data_parameter.
     action_formula(const data::untyped_data_parameter& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on process::untyped_multi_action.
     action_formula(const process::untyped_multi_action& x)
-      : atermpp::aterm_appl(x)
+      : atermpp::aterm(x)
     {}
 
     /// Move semantics
@@ -76,22 +76,22 @@ typedef atermpp::term_list<action_formula> action_formula_list;
 typedef std::vector<action_formula>    action_formula_vector;
 
 // prototypes
-inline bool is_true(const atermpp::aterm_appl& x);
-inline bool is_false(const atermpp::aterm_appl& x);
-inline bool is_not(const atermpp::aterm_appl& x);
-inline bool is_and(const atermpp::aterm_appl& x);
-inline bool is_or(const atermpp::aterm_appl& x);
-inline bool is_imp(const atermpp::aterm_appl& x);
-inline bool is_forall(const atermpp::aterm_appl& x);
-inline bool is_exists(const atermpp::aterm_appl& x);
-inline bool is_at(const atermpp::aterm_appl& x);
-inline bool is_multi_action(const atermpp::aterm_appl& x);
+inline bool is_true(const atermpp::aterm& x);
+inline bool is_false(const atermpp::aterm& x);
+inline bool is_not(const atermpp::aterm& x);
+inline bool is_and(const atermpp::aterm& x);
+inline bool is_or(const atermpp::aterm& x);
+inline bool is_imp(const atermpp::aterm& x);
+inline bool is_forall(const atermpp::aterm& x);
+inline bool is_exists(const atermpp::aterm& x);
+inline bool is_at(const atermpp::aterm& x);
+inline bool is_multi_action(const atermpp::aterm& x);
 
 /// \brief Test for a action_formula expression
 /// \param x A term
 /// \return True if \a x is a action_formula expression
 inline
-bool is_action_formula(const atermpp::aterm_appl& x)
+bool is_action_formula(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
          action_formulas::is_true(x) ||
@@ -134,10 +134,10 @@ class true_: public action_formula
   public:
     /// \brief Default constructor.
     true_()
-      : action_formula(core::detail::default_values::ActTrue)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActTrue)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
       : action_formula(term)
@@ -156,9 +156,9 @@ class true_: public action_formula
 /// \param x A term
 /// \return True if \a x is a true expression
 inline
-bool is_true(const atermpp::aterm_appl& x)
+bool is_true(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActTrue;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActTrue;
 }
 
 // prototype declaration
@@ -187,10 +187,10 @@ class false_: public action_formula
   public:
     /// \brief Default constructor.
     false_()
-      : action_formula(core::detail::default_values::ActFalse)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActFalse)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
       : action_formula(term)
@@ -209,9 +209,9 @@ class false_: public action_formula
 /// \param x A term
 /// \return True if \a x is a false expression
 inline
-bool is_false(const atermpp::aterm_appl& x)
+bool is_false(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActFalse;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActFalse;
 }
 
 // prototype declaration
@@ -240,10 +240,10 @@ class not_: public action_formula
   public:
     /// \brief Default constructor.
     not_()
-      : action_formula(core::detail::default_values::ActNot)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActNot)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
       : action_formula(term)
@@ -264,7 +264,7 @@ class not_: public action_formula
 
     const action_formula& operand() const
     {
-      return atermpp::down_cast<action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 
@@ -272,9 +272,9 @@ class not_: public action_formula
 /// \param x A term
 /// \return True if \a x is a not expression
 inline
-bool is_not(const atermpp::aterm_appl& x)
+bool is_not(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActNot;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActNot;
 }
 
 // prototype declaration
@@ -303,10 +303,10 @@ class and_: public action_formula
   public:
     /// \brief Default constructor.
     and_()
-      : action_formula(core::detail::default_values::ActAnd)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActAnd)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
       : action_formula(term)
@@ -327,12 +327,12 @@ class and_: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::down_cast<action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::down_cast<action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -340,9 +340,9 @@ class and_: public action_formula
 /// \param x A term
 /// \return True if \a x is a and expression
 inline
-bool is_and(const atermpp::aterm_appl& x)
+bool is_and(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActAnd;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActAnd;
 }
 
 // prototype declaration
@@ -371,10 +371,10 @@ class or_: public action_formula
   public:
     /// \brief Default constructor.
     or_()
-      : action_formula(core::detail::default_values::ActOr)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActOr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
       : action_formula(term)
@@ -395,12 +395,12 @@ class or_: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::down_cast<action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::down_cast<action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -408,9 +408,9 @@ class or_: public action_formula
 /// \param x A term
 /// \return True if \a x is a or expression
 inline
-bool is_or(const atermpp::aterm_appl& x)
+bool is_or(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActOr;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActOr;
 }
 
 // prototype declaration
@@ -439,10 +439,10 @@ class imp: public action_formula
   public:
     /// \brief Default constructor.
     imp()
-      : action_formula(core::detail::default_values::ActImp)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActImp)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
       : action_formula(term)
@@ -463,12 +463,12 @@ class imp: public action_formula
 
     const action_formula& left() const
     {
-      return atermpp::down_cast<action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const action_formula& right() const
     {
-      return atermpp::down_cast<action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -476,9 +476,9 @@ class imp: public action_formula
 /// \param x A term
 /// \return True if \a x is a imp expression
 inline
-bool is_imp(const atermpp::aterm_appl& x)
+bool is_imp(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActImp;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActImp;
 }
 
 // prototype declaration
@@ -507,10 +507,10 @@ class forall: public action_formula
   public:
     /// \brief Default constructor.
     forall()
-      : action_formula(core::detail::default_values::ActForall)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActForall)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit forall(const atermpp::aterm& term)
       : action_formula(term)
@@ -531,12 +531,12 @@ class forall: public action_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::down_cast<data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const action_formula& body() const
     {
-      return atermpp::down_cast<action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -544,9 +544,9 @@ class forall: public action_formula
 /// \param x A term
 /// \return True if \a x is a forall expression
 inline
-bool is_forall(const atermpp::aterm_appl& x)
+bool is_forall(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActForall;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActForall;
 }
 
 // prototype declaration
@@ -575,10 +575,10 @@ class exists: public action_formula
   public:
     /// \brief Default constructor.
     exists()
-      : action_formula(core::detail::default_values::ActExists)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActExists)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit exists(const atermpp::aterm& term)
       : action_formula(term)
@@ -599,12 +599,12 @@ class exists: public action_formula
 
     const data::variable_list& variables() const
     {
-      return atermpp::down_cast<data::variable_list>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const action_formula& body() const
     {
-      return atermpp::down_cast<action_formula>((*this)[1]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -612,9 +612,9 @@ class exists: public action_formula
 /// \param x A term
 /// \return True if \a x is a exists expression
 inline
-bool is_exists(const atermpp::aterm_appl& x)
+bool is_exists(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActExists;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActExists;
 }
 
 // prototype declaration
@@ -643,10 +643,10 @@ class at: public action_formula
   public:
     /// \brief Default constructor.
     at()
-      : action_formula(core::detail::default_values::ActAt)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActAt)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit at(const atermpp::aterm& term)
       : action_formula(term)
@@ -667,12 +667,12 @@ class at: public action_formula
 
     const action_formula& operand() const
     {
-      return atermpp::down_cast<action_formula>((*this)[0]);
+      return atermpp::down_cast<action_formula>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const data::data_expression& time_stamp() const
     {
-      return atermpp::down_cast<data::data_expression>((*this)[1]);
+      return atermpp::down_cast<data::data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 };
 
@@ -680,9 +680,9 @@ class at: public action_formula
 /// \param x A term
 /// \return True if \a x is a at expression
 inline
-bool is_at(const atermpp::aterm_appl& x)
+bool is_at(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActAt;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActAt;
 }
 
 // prototype declaration
@@ -711,10 +711,10 @@ class multi_action: public action_formula
   public:
     /// \brief Default constructor.
     multi_action()
-      : action_formula(core::detail::default_values::ActMultAct)
+      : action_formula(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::ActMultAct)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit multi_action(const atermpp::aterm& term)
       : action_formula(term)
@@ -735,7 +735,7 @@ class multi_action: public action_formula
 
     const process::action_list& actions() const
     {
-      return atermpp::down_cast<process::action_list>((*this)[0]);
+      return atermpp::down_cast<process::action_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 };
 
@@ -743,9 +743,9 @@ class multi_action: public action_formula
 /// \param x A term
 /// \return True if \a x is a multi_action expression
 inline
-bool is_multi_action(const atermpp::aterm_appl& x)
+bool is_multi_action(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::ActMultAct;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::ActMultAct;
 }
 
 // prototype declaration

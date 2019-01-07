@@ -44,6 +44,10 @@ class Manipulator
                 const data_expression& a_guard,
                 std::unordered_map < data_expression, data_expression >& f_set_true) const
     {
+      if (is_machine_number(a_formula))
+      {
+        return a_formula;
+      }
       if (is_function_symbol(a_formula))
       {
         return a_formula;
@@ -99,6 +103,10 @@ class Manipulator
               const data_expression& a_guard,
               std::unordered_map < data_expression, data_expression >& f_set_false) const
     {
+      if (is_machine_number(a_formula))
+      {
+        return a_formula;
+      }
       if (is_function_symbol(a_formula))
       {
         return a_formula;
@@ -156,7 +164,7 @@ class Manipulator
     /// \brief replaced by t2 == t1 if t1 > t2.
     data_expression orient(const data_expression& a_term)
     {
-      if (is_variable(a_term) || is_function_symbol(a_term) || is_where_clause(a_term))
+      if (is_variable(a_term) || is_function_symbol(a_term) || is_where_clause(a_term) || is_machine_number(a_term))
       {
         return a_term;
       }

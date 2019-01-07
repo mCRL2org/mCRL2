@@ -38,10 +38,10 @@ class propositional_variable: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     propositional_variable()
-      : atermpp::aterm_appl(core::detail::default_values::PropVarDecl)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::PropVarDecl)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit propositional_variable(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -54,7 +54,7 @@ class propositional_variable: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), name, parameters)
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     propositional_variable(const std::string& name, const data::variable_list& parameters)
       : atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(name), parameters)
     {}
@@ -98,9 +98,9 @@ typedef std::vector<propositional_variable>    propositional_variable_vector;
 /// \param x A term
 /// \return True if \a x is a propositional_variable expression
 inline
-bool is_propositional_variable(const atermpp::aterm_appl& x)
+bool is_propositional_variable(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::PropVarDecl;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::PropVarDecl;
 }
 
 // prototype declaration

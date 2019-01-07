@@ -102,6 +102,17 @@ public:
         sort_expression element_sort(*function_sort(head.sort()).domain().begin());
         return sort_fbag::fbag(element_sort, derived().apply(data_expression_list(x.begin(), x.end())));
       }
+      else if (head.name() == sort_nat::pos2nat_name())
+      {
+        // convert pos2nat(number) to a natural number. 
+        data_expression n=derived().apply(x[0]);
+        assert(n.sort()==sort_pos::pos());
+        if (sort_pos::is_positive_constant(n))
+        {
+          return sort_nat::transform_positive_constant_to_nat(n);
+        }
+        return application(sort_nat::pos2nat(),n);
+      }
     }
 
     typedef data::data_expression (Derived::*function_pointer)(const data::data_expression&);

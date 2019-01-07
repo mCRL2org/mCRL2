@@ -25,10 +25,10 @@ class stochastic_distribution: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     stochastic_distribution()
-      : atermpp::aterm_appl(core::detail::default_values::Distribution)
+      : atermpp::aterm_appl(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Distribution)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit stochastic_distribution(const atermpp::aterm& term)
       : atermpp::aterm_appl(term)
@@ -76,9 +76,9 @@ typedef std::vector<stochastic_distribution>    stochastic_distribution_vector;
 /// \param x A term
 /// \return True if \a x is a stochastic_distribution expression
 inline
-bool is_stochastic_distribution(const atermpp::aterm_appl& x)
+bool is_stochastic_distribution(const atermpp::aterm& x)
 {
-  return x.function() == core::detail::function_symbols::Distribution;
+  return x.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(x).function() == core::detail::function_symbols::Distribution;
 }
 
 // prototype declaration

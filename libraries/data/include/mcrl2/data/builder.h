@@ -99,6 +99,14 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
+  data::machine_number apply(const data::machine_number& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+
   data::untyped_identifier apply(const data::untyped_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -291,6 +299,10 @@ struct add_sort_expressions: public Builder<Derived>
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::where_clause>(x));
     }
+    else if (data::is_machine_number(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::machine_number>(x));
+    }
     else if (data::is_untyped_identifier(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_identifier>(x));
@@ -442,6 +454,14 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
+  data::machine_number apply(const data::machine_number& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+
   data::untyped_identifier apply(const data::untyped_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -553,6 +573,10 @@ struct add_data_expressions: public Builder<Derived>
     else if (data::is_where_clause(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::where_clause>(x));
+    }
+    else if (data::is_machine_number(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::machine_number>(x));
     }
     else if (data::is_untyped_identifier(x))
     {
@@ -668,6 +692,14 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
+  data::machine_number apply(const data::machine_number& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+
   data::untyped_identifier apply(const data::untyped_identifier& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -779,6 +811,10 @@ struct add_variables: public Builder<Derived>
     else if (data::is_where_clause(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::where_clause>(x));
+    }
+    else if (data::is_machine_number(x))
+    {
+      result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::machine_number>(x));
     }
     else if (data::is_untyped_identifier(x))
     {

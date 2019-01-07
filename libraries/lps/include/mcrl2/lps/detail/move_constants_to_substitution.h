@@ -38,27 +38,36 @@ void move_constants_to_substitution_helper(lps::stochastic_specification& spec,
                                            data::rewriter& r,
                                            SUBSTITUTION& sigma,
                                            std::unordered_map<data::data_expression, data::variable>& expression_to_variable_map,
-                                           data::set_identifier_generator& identifier_generator
+                                           data::set_identifier_generator& identifier_generator,
+                                           const bool do_not_replace_actions
                                           )
 {
   for(stochastic_action_summand& s: spec.process().action_summands())
   {
-    process::action_vector new_actions;
-    for(const process::action& a: s.multi_action().actions())
+    lps::multi_action new_multi_action;
+    if (do_not_replace_actions)
     {
-      data::data_expression_vector new_parameters;
-      for(const data::data_expression& e: a.arguments())
-      {
-        new_parameters.emplace_back(data::detail::move_constants_to_substitution(e,r,sigma,expression_to_variable_map,identifier_generator));
-      }
-      new_actions.emplace_back(a.label(),data::data_expression_list(new_parameters.begin(),new_parameters.end()));
+      new_multi_action=s.multi_action();
     }
-    lps::multi_action new_multi_action(process::action_list(new_actions.begin(), new_actions.end()),
-                                       data::detail::move_constants_to_substitution(s.multi_action().time(),
-                                                                                    r,
-                                                                                    sigma,
-                                                                                    expression_to_variable_map,
-                                                                                    identifier_generator));
+    else
+    {
+      process::action_vector new_actions;
+      for(const process::action& a: s.multi_action().actions())
+      {
+        data::data_expression_vector new_parameters;
+        for(const data::data_expression& e: a.arguments())
+        {
+          new_parameters.emplace_back(data::detail::move_constants_to_substitution(e,r,sigma,expression_to_variable_map,identifier_generator));
+        }
+        new_actions.emplace_back(a.label(),data::data_expression_list(new_parameters.begin(),new_parameters.end()));
+      }
+      new_multi_action=lps::multi_action(process::action_list(new_actions.begin(), new_actions.end()),
+                                                              data::detail::move_constants_to_substitution(s.multi_action().time(),
+                                                                                                           r,
+                                                                                                           sigma,
+                                                                                                           expression_to_variable_map,
+                                                                                                           identifier_generator));
+    }
 
     data::assignment_vector new_assignments;
     for(const data::assignment&a: s.assignments())
@@ -92,14 +101,16 @@ void move_constants_to_substitution_helper(lps::stochastic_specification& spec,
 /// \param lpsspec A linear process specification.
 /// \param r The rewriter used to calculate a normal form.
 /// \param sigma The substitution into which it is stored which variables represent which terms. 
+/// \param do_not_replace_actions A boolean that if set prevents subterms of actions to be replaced by variables, including the time tag. 
 template <class SUBSTITUTION>
 void move_constants_to_substitution(lps::stochastic_specification& spec,
                                     data::rewriter& r,
-                                    SUBSTITUTION& sigma)
+                                    SUBSTITUTION& sigma,
+                                    const bool do_not_replace_actions)
 {
   std::unordered_map<data::data_expression, data::variable> expression_to_variable_map;
   data::set_identifier_generator identifier_generator;
-  detail::move_constants_to_substitution_helper(spec,r,sigma,expression_to_variable_map,identifier_generator);
+  detail::move_constants_to_substitution_helper(spec,r,sigma,expression_to_variable_map,identifier_generator,do_not_replace_actions);
 }
 
 } // namespace lps

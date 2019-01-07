@@ -70,7 +70,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   // TODO: check if this test is precise enough
   bool is_one(const data_expression& x) const
   {
-    return sort_pos::is_c1_function_symbol(x);
+    return x==sort_pos::pos(1); 
   }
 
   bool is_infix_operation(const application& x) const
@@ -639,7 +639,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_fbag::is_insert_application(x))
       {
-        arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x))));
+        arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::pos2nat(sort_fbag::arg2(x))));
         x = sort_fbag::arg3(x);
       }
       else // if (sort_fbag::is_fbagcinsert_application(x))
@@ -1172,12 +1172,112 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_binary_operation(x, " >= ");
     }
+    
+    //-------------------------------------------------------------------//
+    //                            machine_word
+    //-------------------------------------------------------------------//
+    
+    else if (sort_machine_word::is_zero_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::zero_word().value()));
+    }
+    else if (sort_machine_word::is_one_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::one_word().value()));
+    }
+    else if (sort_machine_word::is_max_word_function_symbol(x))
+    {
+      derived().print(std::to_string(sort_machine_word::detail::max_word().value()));
+    }
+    else if (sort_machine_word::is_succ_word_application(x))
+    {
+      derived().print("((");
+      print_expression(sort_machine_word::arg(x), right_precedence(x));
+      derived().print(" + 1) mod ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_add_word_application(x))
+    {
+      derived().print("((");
+      print_expression(sort_machine_word::left(x), left_precedence(x));
+      derived().print(" + ");
+      print_expression(sort_machine_word::right(x), right_precedence(x));
+      derived().print(") mod ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_add_overflow_word_application(x))
+    {
+      derived().print("((");
+      print_expression(sort_machine_word::left(x), left_precedence(x));
+      derived().print(" + ");
+      print_expression(sort_machine_word::right(x), right_precedence(x));
+      derived().print(") div ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_times_word_application(x))
+    {
+      derived().print("((");
+      print_expression(sort_machine_word::left(x), left_precedence(x));
+      derived().print(" * ");
+      print_expression(sort_machine_word::right(x), right_precedence(x));
+      derived().print(") mod ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_times_overflow_word_application(x))
+    {
+      derived().print("((");
+      print_expression(sort_machine_word::left(x), left_precedence(x));
+      derived().print(" * ");
+      print_expression(sort_machine_word::right(x), right_precedence(x));
+      derived().print(") div ");
+      derived().print(max_machine_number_string());
+      derived().print(" )");
+    }
+    else if (sort_machine_word::is_minus_word_application(x))
+    {
+      derived().print("(if(");
+      print_binary_operation(x, " >= ");
+      derived().print(", ");
+      print_binary_operation(x, " - ");
+      derived().print(", ");
+      derived().print(max_machine_number_string());
+      derived().print(" + ");
+      print_binary_operation(x, " - ");
+      derived().print(")");
+    }
+    else if (sort_machine_word::is_div_word_application(x))
+    { 
+      print_binary_operation(x, " div ");
+    }
+    else if (sort_machine_word::is_mod_word_application(x))
+    { 
+      print_binary_operation(x, " mod ");
+    }
+
+/* TODO: Handle the following cases. 
+ 
+     @div_doubleword <"div_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                  
+     @div_double_doubleword <"div_double_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word                   
+     @div_triple_doubleword <"div_triple_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> # @word <"arg5"> -> @word  
+     @mod_doubleword <"mod_doubleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                  
+     @sqrt_doubleword <"sqrt_doubleword">: @word <"arg1"> # @word <"arg2"> -> @word                                                                 
+     @sqrt_tripleword <"sqrt_tripleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                                                
+     @sqrt_tripleword_overflow <"sqrt_tripleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> -> @word                              
+     @sqrt_quadrupleword <"sqrt_quadrupleword">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word                         
+     @sqrt_quadrupleword_overflow <"sqrt_quadrupleword_overflow">: @word <"arg1"> # @word <"arg2"> # @word <"arg3"> # @word <"arg4"> -> @word       
+     @pred_word <"pred_word">: @word <"arg"> ->@word                                                                                                
+*/
+    
 
     //-------------------------------------------------------------------//
     //                            pos
     //-------------------------------------------------------------------//
 
-    else if (sort_pos::is_cdub_application(x))
+    else if (sort_pos::is_most_significant_digit_application(x))
     {
       if (data::sort_pos::is_positive_constant(x))
       {
@@ -1185,38 +1285,55 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
-        std::vector<char> number = data::detail::string_to_vector_number("1");
-        derived().apply(detail::reconstruct_pos_mult(x, number));
+        derived().apply(sort_pos::arg(x));
       }
     }
-    // TODO: handle @pospred
-    else if (sort_pos::is_plus_application(x))
+    else if (sort_pos::is_concat_digit_application(x))
     {
-      print_binary_operation(x, " + ");
-    }
-    else if (sort_pos::is_add_with_carry_application(x))
-    {
-      auto b = sort_pos::arg1(x);
-      auto x1 = sort_pos::arg2(x);
-      auto x2 = sort_pos::arg3(x);
-      if (b == data::sort_bool::true_())
+      if (data::sort_pos::is_positive_constant(x))
       {
-        derived().apply(sort_pos::succ(sort_pos::plus(x1, x2)));
-      }
-      else if (b == sort_bool::false_())
-      {
-        derived().apply(sort_pos::plus(x1, x2));
+        derived().print(data::sort_pos::positive_constant_as_string(x));
       }
       else
       {
-        derived().apply(if_(b, x1, x2));
+        derived().print(max_machine_number_string() + "* (");
+        derived().apply(sort_pos::arg1(x));
+        derived().print(") + ");
+        derived().apply(sort_pos::arg2(x));
       }
+    }
+    else if (sort_pos::is_plus_application(x))
+    {
+      print_binary_operation(x, " + ");
     }
     else if (sort_pos::is_times_application(x))
     {
       print_binary_operation(x, " * ");
     }
-    // TODO: handle @powerlog2
+    else if (sort_pos::is_succpos_application(x))
+    {
+      derived().apply(sort_pos::succ(sort_pos::arg(x)));
+    }
+    else if (sort_pos::is_pos_predecessor_application(x))
+    {
+      derived().apply(sort_int::int2pos(sort_int::minus(sort_int::pos2int(sort_pos::arg(x)),sort_int::int_(1))));   
+    }
+    else if (sort_pos::is_auxiliary_plus_pos_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
+    else if (sort_pos::is_times_whr_mult_overflow_application(x))
+    {
+      if (atermpp::down_cast<machine_number>(sort_pos::arg2(x)).value()==0)
+      { 
+        derived().apply(sort_pos::arg1(x));
+      }
+      else 
+      {
+        derived().apply(sort_pos::plus(sort_pos::most_significant_digit(sort_pos::arg1(x)),
+                                       sort_pos::times(sort_pos::arg2(x),sort_pos::pos(max_machine_number_string()))));
+      }
+    }
 
     //-------------------------------------------------------------------//
     //                            natpair
@@ -1224,9 +1341,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     else if (sort_nat::is_first_application(x))
     {
-    	// TODO: verify if this is the correct way of dealing with first/divmod
-    	data_expression y = sort_nat::arg(x);
-    	if (!sort_nat::is_divmod_application(y))
+      // TODO: verify if this is the correct way of dealing with first/divmod
+      data_expression y = sort_nat::arg(x);
+      if (!sort_nat::is_divmod_aux_application(y))
       {
         print_function_application(x);
       }
@@ -1241,7 +1358,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       // TODO: verify if this is the correct way of dealing with last/divmod
       data_expression y = sort_nat::arg(x);
-    	if (!sort_nat::is_divmod_application(y))
+      if (!sort_nat::is_divmod_aux_application(y))
       {
         print_function_application(x);
       }
@@ -1257,41 +1374,126 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            nat
     //-------------------------------------------------------------------//
 
-    else if (sort_nat::is_cnat_application(x))
+    else if (sort_nat::is_most_significant_digit_nat_application(x))
     {
-      derived().apply(sort_nat::arg(x));
+      if (data::sort_nat::is_natural_constant(x))
+      {
+        derived().print(data::sort_nat::natural_constant_as_string(x));
+      }
+      else
+      {
+        derived().apply(sort_nat::arg(x));
+      }
+    }
+    else if (sort_nat::is_concat_digit_application(x))
+    {
+      if (data::sort_nat::is_natural_constant(x))
+      {
+        derived().print(data::sort_nat::natural_constant_as_string(x));
+      }
+      else
+      {
+        derived().print("(" + max_machine_number_string() + "*");
+        derived().apply(sort_nat::arg1(x));
+        derived().print(") + ");
+        derived().apply(sort_nat::arg2(x));
+      }
+    }
+    else if (sort_nat::is_succ_nat_application(x))
+    {
+      derived().apply(sort_nat::succ(sort_nat::arg(x)));
     }
     else if (sort_nat::is_pos2nat_application(x))
     {
-      derived().apply(*x.begin());
+      derived().apply(sort_nat::arg(x));
     }
-    // TODO: handle @dub
+    else if (sort_nat::is_pred_whr_application(x))
+    {
+      derived().apply(sort_nat::plus(sort_nat::times(sort_nat::arg(x),sort_nat::nat(max_machine_number_string())),
+                                     sort_nat::most_significant_digit_nat(sort_machine_word::max_word())));
+    }
     else if (sort_nat::is_plus_application(x))
     {
       print_binary_operation(x, " + ");
     }
-    // TODO: handle @gtesubtb
+    else if (sort_nat::is_auxiliary_plus_nat_application(x))
+    {
+      print_binary_operation(x, " + ");
+    }
     else if (sort_nat::is_times_application(x))
     {
       print_binary_operation(x, " * ");
     }
     else if (sort_nat::is_div_application(x))
     {
-      // print_binary_operation(x, " div ");
+      print_binary_operation(x, " div ");
+      /* The code above was outcommented, but seems better than the code below, which should be removed.
       print_expression(sort_nat::left(x), left_precedence(x));
       derived().print(" div ");
-      print_expression(sort_nat::right(x), right_precedence(x));
+      print_expression(sort_nat::right(x), right_precedence(x)); */
     }
     else if (sort_nat::is_mod_application(x))
     {
-      // print_binary_operation(x, " mod ");
+      print_binary_operation(x, " mod ");
+      /* The code above was outcommented, but seems better than the code below, which should be removed.
       print_expression(sort_nat::left(x), left_precedence(x));
       derived().print(" mod ");
-      print_expression(sort_nat::right(x), right_precedence(x));
+      print_expression(sort_nat::right(x), right_precedence(x)); */
     }
-    // TODO: handle @monus
-    // TODO: handle @swap_zero*
-    // TODO: handle @sqrt_nat
+    else if (sort_nat::is_natpred_application(x))
+    {
+      // Construction below does not work as the sort of pred can sometimes be untyped, causing an exception. 
+      // This is a problem in the jitty rewriter and ought not to be a problem here. Line of code below should be restored. 
+      // derived().apply(sort_int::int2nat(sort_int::pred(sort_nat::arg(x))));  
+      derived().print("pred(");
+      print_expression(sort_nat::arg(x));
+      derived().print(")");
+    }
+    else if (sort_nat::is_is_odd_application(x))
+    {
+      derived().apply(equal_to(sort_nat::mod(sort_nat::arg(x),sort_pos::pos(2)),sort_nat::nat(1)));
+    }
+    else if (sort_nat::is_div2_application(x))
+    {
+      derived().apply(sort_nat::div(sort_nat::arg(x),sort_pos::pos(2)));
+    }
+
+    // TODO: handle @monus 
+    // TODO: handle @monus_whr 
+    // TODO: handle @exp_aux3p 
+    // TODO: handle @exp_aux4p 
+    // TODO: handle @exp_aux3n 
+    // TODO: handle @exp_aux4n 
+    // TODO: handle @exp_auxtruep 
+    // TODO: handle @exp_auxtruen 
+    // TODO: handle @exp_auxfalsep 
+    // TODO: handle @exp_auxfalsen 
+    // TODO: handle @div_bold 
+    // TODO: handle @div_bold_whr 
+    // TODO: handle @div_whr1 
+    // TODO: handle @div_whr2 
+    // TODO: handle @mod_whr1 
+    // TODO: handle @divmod_aux 
+    // TODO: handle @divmod_aux_whr1 
+    // TODO: handle @divmod_aux_whr2 
+    // TODO: handle @divmod_aux_whr3 
+    // TODO: handle @divmod_aux_whr4 
+    // TODO: handle @divmod_aux_whr5 
+    // TODO: handle @divmod_aux_whr6 
+    // TODO: handle @msd 
+    // TODO: handle @swap_zero 
+    // TODO: handle @swap_zero_add 
+    // TODO: handle @swap_zero_min 
+    // TODO: handle @swap_zero_monus 
+    // TODO: handle @sqrt_whr1 
+    // TODO: handle @sqrt_whr2 
+    // TODO: handle @sqrt_pair 
+    // TODO: handle @sqrt_pair_whr1 
+    // TODO: handle @sqrt_pair_whr2 
+    // TODO: handle @sqrt_pair_whr3 
+    // TODO: handle @sqrt_pair_whr4 
+    // TODO: handle @sqrt_pair_whr5 
+    // TODO: handle @sqrt_pair_whr6 
 
     //-------------------------------------------------------------------//
     //                            int
@@ -1317,7 +1519,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_unary_operation(x, "-");
     }
-    // TODO: handle @dub
     else if (sort_int::is_plus_application(x))
     {
       print_binary_operation(x, " + ");
@@ -1332,17 +1533,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_int::is_div_application(x))
     {
-      // TODO: make a proper binary operation of div
+      print_binary_operation(x, " div ");
+      /* The code below was active and the line above outcommented, but the rule above appears nicer. If no complications occur the lines below can be removed. 
       print_expression(sort_int::left(x), left_precedence(x));
       derived().print(" div ");
-      print_expression(sort_int::right(x), right_precedence(x));
+      print_expression(sort_int::right(x), right_precedence(x)); */
     }
     else if (sort_int::is_mod_application(x))
     {
-      // print_binary_operation(x, " mod ");
+      print_binary_operation(x, " mod ");
+      /* See comments at the div. Without complications, the lines below can be removed. 
       print_expression(sort_int::left(x), left_precedence(x));
       derived().print(" mod ");
-      print_expression(sort_int::right(x), right_precedence(x));
+      print_expression(sort_int::right(x), right_precedence(x)); */
     }
 
     //-------------------------------------------------------------------//
@@ -1727,6 +1930,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
+  void apply(const machine_number& x)
+  {
+      derived().print(std::to_string(x.value()));
+  }
+ 
   void apply(const data::where_clause& x)
   {
     derived().enter(x);

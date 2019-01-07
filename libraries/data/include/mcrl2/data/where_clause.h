@@ -29,10 +29,10 @@ class where_clause: public data_expression
   public:
     /// \brief Default constructor.
     where_clause()
-      : data_expression(core::detail::default_values::Whr)
+      : data_expression(atermpp::aterm(atermpp::aterm_appl(core::detail::default_values::Whr)))
     {}
 
-    /// \brief Constructor.
+    /// \brief Constructor based on an aterm.
     /// \param term A term
     explicit where_clause(const atermpp::aterm& term)
       : data_expression(term)
@@ -45,7 +45,7 @@ class where_clause: public data_expression
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, declarations))
     {}
 
-    /// \brief Constructor.
+    /// \brief Overloaded constructor.
     template <typename Container>
     where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = nullptr)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
@@ -59,17 +59,17 @@ class where_clause: public data_expression
 
     const data_expression& body() const
     {
-      return atermpp::down_cast<data_expression>((*this)[0]);
+      return atermpp::down_cast<data_expression>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[0]);
     }
 
     const assignment_expression_list& declarations() const
     {
-      return atermpp::down_cast<assignment_expression_list>((*this)[1]);
+      return atermpp::down_cast<assignment_expression_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 //--- start user section where_clause ---//
     const assignment_list& assignments() const
     {
-      return atermpp::down_cast<const assignment_list>((*this)[1]);
+      return atermpp::down_cast<const assignment_list>(atermpp::down_cast<atermpp::aterm_appl>(static_cast<atermpp::aterm>(*this))[1]);
     }
 //--- end user section where_clause ---//
 };
