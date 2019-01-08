@@ -30,6 +30,7 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/basename.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/stopwatch.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/function_symbols.h"
@@ -2621,6 +2622,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
    rewriter_so = std::shared_ptr<uncompiled_library>(new uncompiled_library(compile_script));
 
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
+  stopwatch time;
 
   jittyc_eqns.clear();
   for(std::set < data_equation >::const_iterator it = rewrite_rules.begin(); it != rewrite_rules.end(); ++it)
@@ -2631,7 +2633,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   std::string cpp_file = generate_cpp_filename(reinterpret_cast<std::size_t>(this));
   generate_code(cpp_file);
 
-  mCRL2log(verbose) << "compiling " << cpp_file << "..." << std::endl;
+  mCRL2log(verbose) << "generated " << cpp_file << " in " << time.time() << "ms, compiling..." << std::endl;
+  time.reset();
 
   try
   {
@@ -2643,7 +2646,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     throw mcrl2::runtime_error(std::string("Could not compile rewriter: ") + e.what());
   }
 
-  mCRL2log(verbose) << "loading rewriter..." << std::endl;
+  mCRL2log(verbose) << "compiled in " << time.time() << "ms, loading rewriter..." << std::endl;
 
   bool (*init)(rewriter_interface*, RewriterCompilingJitty* this_rewriter);
   rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this, NULL, NULL };

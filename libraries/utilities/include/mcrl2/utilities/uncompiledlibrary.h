@@ -78,7 +78,7 @@ class uncompiled_library : public dynamic_library
           std::string line(buf);
           assert(*line.rbegin() == '\n');
           line.erase(line.size() - 1);
-          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "  Read line: " << line;
+          mCRL2log(mcrl2::log::debug, "uncompiled_library") << "  Read line: " << line << std::endl;
           
           // Check that reported file exists. If not, produce error message and
           // flush script output to the log.
