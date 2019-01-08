@@ -373,9 +373,9 @@ bool destructive_refinement_checker(
 
 
   const detail::lts_cache<LTS_TYPE> weak_property_cache(l1,weak_reduction);
-  std::deque< detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > > 
+  std::deque<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>>
               working(  // let working be a stack containg the triple (init1,{s|init2-->s},root_index);
-                    { detail::state_states_counter_example_index_triple< COUNTER_EXAMPLE_CONSTRUCTOR >(
+                    { detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(
                                   l1.initial_state(), 
                                   detail::collect_reachable_states_via_taus(init_l2,weak_property_cache,weak_reduction),
                                   generate_counter_example.root_index() ) });
@@ -387,7 +387,7 @@ bool destructive_refinement_checker(
                                                            // was too late, causing too many impl-spec pairs to be investigated.
   refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> stats(anti_chain, working);
 
-  while (working.size()>0)                            // while working!=empty
+  while (!working.empty())                            // while working!=empty
   {
     detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > impl_spec;   // pop (impl,spec) from working;
     impl_spec.swap(working.front());
@@ -396,28 +396,33 @@ bool destructive_refinement_checker(
     working.pop_front();     // At this point it could be checked whether impl_spec still exists in anti_chain.
                              // Small scale experiments show that this is a little bit more expensive than doing the explicit check below.
 
-    if (refinement==failures_divergence && weak_property_cache.diverges(impl_spec.state()))
-                                                      // if impl diverges
+    bool spec_diverges = false;
+    if (refinement == failures_divergence)
     {
-      bool spec_diverges=false;
-      for(const detail::state_type s: impl_spec.states())       // if spec does not diverge
+      // Only compute when the result is required.
+      for (detail::state_type s : impl_spec.states())
       {
         if (weak_property_cache.diverges(s))
         {
-          spec_diverges=true;
+          spec_diverges = true;
           break;
         }
       }
-      if (!spec_diverges)
+    }
+
+    // if not diverges(spec)$ or not CheckDiv (refinement == failures_divergence)
+    if (!spec_diverges || refinement != failures_divergence)
+    {
+      if (weak_property_cache.diverges(impl_spec.state()) && refinement == failures_divergence) // if impl diverges and CheckDiv
       {
         generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1);
         report_statistics(stats);
-        return false;                                 // return false;
+        return false;  // return false;
       }
     }
     else 
     {
-      if (refinement==failures || refinement==failures_divergence)
+      if (refinement == failures || refinement == failures_divergence)
       { 
         detail::label_type offending_action=std::size_t(-1);
         // if refusals(impl) not contained in refusals(spec) then 

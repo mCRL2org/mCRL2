@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(failures_divergence_inclusion_test)
   BOOST_CHECK(preorder_compare(l1,abc_div,lts_pre_weak_trace_anti_chain));
   BOOST_CHECK(!preorder_compare(l1,abc_div,lts_pre_weak_failures_refinement));
   BOOST_CHECK(preorder_compare(abc_div,l1,lts_pre_weak_failures_refinement));
-  BOOST_CHECK(!preorder_compare(l1,abc_div,lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(preorder_compare(l1,abc_div,lts_pre_failures_divergence_refinement));
   BOOST_CHECK(!preorder_compare(abc_div,l1,lts_pre_failures_divergence_refinement));
 }
 
