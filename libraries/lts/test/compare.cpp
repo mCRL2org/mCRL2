@@ -163,10 +163,6 @@ BOOST_AUTO_TEST_CASE(test_ready_sim_1_4)
   BOOST_CHECK(!compare(l1,l4,lts_eq_ready_sim));  
 }
 
-
-
-
-
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2)
 {
   BOOST_CHECK(compare(l1,l2,lts_eq_trace));
@@ -389,8 +385,27 @@ BOOST_AUTO_TEST_CASE(verum_test)
   BOOST_CHECK(!preorder_compare(lts_spec,lts_impl,lts_pre_trace_anti_chain));
 }
 
+// P = a.P + tau.P
+const std::string aPtauP =
+  "des (0,2,1)\n"
+  "(0,\"a\",0)\n"
+  "(0,\"tau\",0)\n";
 
+// P = b.P
+const std::string bP =
+  "des (0,1,1)\n"
+  "(0,\"b\",0)\n";
 
+// Check that diverging behaviour in a specification for failures-divergence refinement is
+// regarded as catastrophic. Meaning that all failures are allowed after a divergence in spec.
+// Furthermore check that for failures refinement that trace refinement holds as well. For
+// failures refinement this does not hold, but here trace refinement is required so it does
+// not hold.
+BOOST_AUTO_TEST_CASE(failures_divergence_incomparable_test)
+{
+  BOOST_CHECK(!preorder_compare(aPtauP, bP, lts_pre_failures_refinement)); // empty = failures(aPtauP) subset failures(bP); traces(aPtauP) nsubset traces(bP).
+  BOOST_CHECK(preorder_compare(bP, aPtauP, lts_pre_failures_divergence_refinement)); // failures(bP) subset failures(aPtau) != empty because divergences.
+}
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
