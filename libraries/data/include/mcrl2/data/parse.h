@@ -75,8 +75,7 @@ struct untyped_data_specification
     {
       dataspec.add_equation(x);
     }
-    data_type_checker type_checker(dataspec);
-    return type_checker.operator()();
+    return dataspec;
   }
 };
 

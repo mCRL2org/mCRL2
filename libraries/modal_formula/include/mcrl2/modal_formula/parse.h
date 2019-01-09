@@ -36,7 +36,7 @@ namespace detail
 
 struct action_formula_actions: public lps::detail::multi_action_actions
 {
-  action_formula_actions(const core::parser& parser_)
+  explicit action_formula_actions(const core::parser& parser_)
     : lps::detail::multi_action_actions(parser_)
   {}
 
@@ -102,7 +102,7 @@ namespace detail
 
 struct regular_formula_actions: public action_formulas::detail::action_formula_actions
 {
-  regular_formula_actions(const core::parser& parser_)
+  explicit regular_formula_actions(const core::parser& parser_)
     : action_formulas::detail::action_formula_actions(parser_)
   {}
 
@@ -175,7 +175,7 @@ struct untyped_state_formula_specification: public data::untyped_data_specificat
 
 struct state_formula_actions: public regular_formulas::detail::regular_formula_actions
 {
-  state_formula_actions(const core::parser& parser_)
+  explicit state_formula_actions(const core::parser& parser_)
     : regular_formulas::detail::regular_formula_actions(parser_)
   {}
 
@@ -430,6 +430,8 @@ state_formula_specification parse_state_formula_specification(const std::string&
                                  )
 {
   state_formula_specification result = detail::parse_state_formula_specification(text);
+  data::typecheck_data_specification(result.data());
+
   data::data_specification dataspec = data::merge_data_specifications(lpsspec.data(), result.data());
   process::action_label_list actspec = process::merge_action_specifications(lpsspec.action_labels(), result.action_labels());
   if (options.type_check)
