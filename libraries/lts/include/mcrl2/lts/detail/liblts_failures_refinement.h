@@ -419,9 +419,7 @@ bool destructive_refinement_checker(
         report_statistics(stats);
         return false;  // return false;
       }
-    }
-    else 
-    {
+
       if (refinement == failures || refinement == failures_divergence)
       { 
         detail::label_type offending_action=std::size_t(-1);
