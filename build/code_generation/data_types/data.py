@@ -405,7 +405,47 @@ class function_declaration_list():
           const='const& ' if sortparams == [] else '',
           static='static ' if sortparams == [] else '')
 
-      def polymorphic_function_constructor(self, fullname, name, sortparams):
+      def plain_polymorphic_function_constructor(self, fullname, name, sortparams):
+        CODE_TEMPLATE = Template('''
+      // This function is not intended for public use and therefore not documented in Doxygen.
+      inline
+      function_symbol const& ${functionname}(${parameters})
+      {
+${cases}
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for ${functionname} with domain sorts \" + ${sortmsg});
+        }
+      }
+''')
+        CASE_TEMPLATE = Template('''        ${elsestr}if (${condition})
+        {
+          static function_symbol ${functionname}(${functionname}_name(), ${sortname});
+          return ${functionname};
+        }''')
+
+        domain_sort_ids = [sort_identifier(identifier("s%s" % i)) for i in range(len(self.sort_expression_list.elements[0].domain.elements))]
+        cases = []
+        for (i,sort) in enumerate(self.sort_expression_list.elements):
+          cases.append(CASE_TEMPLATE.substitute(
+            elsestr = '' if i == 0 else 'else ',
+            condition = ' && '.join(map(lambda (j,domsort): '{0} == {1}'.format(domain_sort_ids[j].code(spec), domsort.code(spec)), enumerate(sort.domain.sorts()))),
+            functionname = escape(name),
+            sortname = sort.code(spec)
+          ))
+
+        parameters = map(lambda x: 'const sort_expression& {0}'.format(x.code()), domain_sort_ids)
+
+        return self.function_name(fullname, name) + CODE_TEMPLATE.substitute(
+          namestring = escape(fullname),
+          sortparameterstring = '\n      '.join(map(lambda x: '/// \\param {0} A sort expression'.format(escape(x.code())), sortparams + domain_sort_ids)),
+          functionname = name,
+          parameters = ', '.join(parameters),
+          cases = '\n'.join(cases),
+          sortmsg = " + \", \" + ".join(['pp({0})'.format(domain_sort_ids[j].code(spec)) for j in range(len(sort.domain.elements))])
+          )
+
+      def templated_polymorphic_function_constructor(self, fullname, name, sortparams):
         CODE_TEMPLATE = Template('''
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
@@ -600,7 +640,12 @@ ${cases}
         else:
           assert self.sort_expression_list.elements > 1
 
-          return self.polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec)) + \
+          is_templated = any(map(lambda x: x.sort_parameters(spec) != [], self.sort_expression_list.elements))
+          if is_templated:
+            function_constructor_code = self.templated_polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec))
+          else:
+            function_constructor_code = self.plain_polymorphic_function_constructor(self.id, self.label, self.sort_expression_list.sort_parameters(spec))
+          return function_constructor_code + \
                  self.polymorphic_function_recogniser(self.id, self.label, self.sort_expression_list.formal_parameters_code(spec)) + \
                  self.function_application_code(self.sort_expression_list.elements[0], True)
 

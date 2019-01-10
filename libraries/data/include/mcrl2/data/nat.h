@@ -355,32 +355,32 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol maximum(const sort_expression& s0, const sort_expression& s1)
+      function_symbol const& maximum(const sort_expression& s0, const sort_expression& s1)
       {
-        sort_expression target_sort;
         if (s0 == sort_pos::pos() && s1 == nat())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol maximum(maximum_name(), make_function_sort(sort_pos::pos(), nat(), sort_pos::pos()));
+          return maximum;
         }
         else if (s0 == nat() && s1 == sort_pos::pos())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol maximum(maximum_name(), make_function_sort(nat(), sort_pos::pos(), sort_pos::pos()));
+          return maximum;
         }
         else if (s0 == nat() && s1 == nat())
         {
-          target_sort = nat();
+          static function_symbol maximum(maximum_name(), make_function_sort(nat(), nat(), nat()));
+          return maximum;
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol maximum(maximum_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+          return maximum;
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
-
-        function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
-        return maximum;
       }
 
       /// \brief Recogniser for function max
@@ -429,24 +429,22 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol minimum(const sort_expression& s0, const sort_expression& s1)
+      function_symbol const& minimum(const sort_expression& s0, const sort_expression& s1)
       {
-        sort_expression target_sort;
         if (s0 == nat() && s1 == nat())
         {
-          target_sort = nat();
+          static function_symbol minimum(minimum_name(), make_function_sort(nat(), nat(), nat()));
+          return minimum;
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol minimum(minimum_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+          return minimum;
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
-
-        function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
-        return minimum;
       }
 
       /// \brief Recogniser for function min
@@ -495,11 +493,22 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol succ(const sort_expression& s0)
+      function_symbol const& succ(const sort_expression& s0)
       {
-        sort_expression target_sort(sort_pos::pos());
-        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
-        return succ;
+        if (s0 == nat())
+        {
+          static function_symbol succ(succ_name(), make_function_sort(nat(), sort_pos::pos()));
+          return succ;
+        }
+        else if (s0 == sort_pos::pos())
+        {
+          static function_symbol succ(succ_name(), make_function_sort(sort_pos::pos(), sort_pos::pos()));
+          return succ;
+        }
+        else
+        {
+          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + pp(s0));
+        }
       }
 
       /// \brief Recogniser for function succ
@@ -652,32 +661,32 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol plus(const sort_expression& s0, const sort_expression& s1)
+      function_symbol const& plus(const sort_expression& s0, const sort_expression& s1)
       {
-        sort_expression target_sort;
         if (s0 == sort_pos::pos() && s1 == nat())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol plus(plus_name(), make_function_sort(sort_pos::pos(), nat(), sort_pos::pos()));
+          return plus;
         }
         else if (s0 == nat() && s1 == sort_pos::pos())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol plus(plus_name(), make_function_sort(nat(), sort_pos::pos(), sort_pos::pos()));
+          return plus;
         }
         else if (s0 == nat() && s1 == nat())
         {
-          target_sort = nat();
+          static function_symbol plus(plus_name(), make_function_sort(nat(), nat(), nat()));
+          return plus;
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol plus(plus_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+          return plus;
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + pp(s0) + ", " + pp(s1));
         }
-
-        function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
-        return plus;
       }
 
       /// \brief Recogniser for function +
@@ -780,24 +789,22 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol times(const sort_expression& s0, const sort_expression& s1)
+      function_symbol const& times(const sort_expression& s0, const sort_expression& s1)
       {
-        sort_expression target_sort;
         if (s0 == nat() && s1 == nat())
         {
-          target_sort = nat();
+          static function_symbol times(times_name(), make_function_sort(nat(), nat(), nat()));
+          return times;
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol times(times_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+          return times;
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + pp(s0) + ", " + pp(s1));
         }
-
-        function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
-        return times;
       }
 
       /// \brief Recogniser for function *
@@ -952,24 +959,22 @@ namespace mcrl2 {
 
       // This function is not intended for public use and therefore not documented in Doxygen.
       inline
-      function_symbol exp(const sort_expression& s0, const sort_expression& s1)
+      function_symbol const& exp(const sort_expression& s0, const sort_expression& s1)
       {
-        sort_expression target_sort;
         if (s0 == sort_pos::pos() && s1 == nat())
         {
-          target_sort = sort_pos::pos();
+          static function_symbol exp(exp_name(), make_function_sort(sort_pos::pos(), nat(), sort_pos::pos()));
+          return exp;
         }
         else if (s0 == nat() && s1 == nat())
         {
-          target_sort = nat();
+          static function_symbol exp(exp_name(), make_function_sort(nat(), nat(), nat()));
+          return exp;
         }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + pp(s0) + ", " + pp(s1));
         }
-
-        function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
-        return exp;
       }
 
       /// \brief Recogniser for function exp
