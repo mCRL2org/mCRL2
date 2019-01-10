@@ -81,11 +81,7 @@ namespace mcrl2 {
       inline
       bool is_function_update_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_function_update_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_function_update_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for function_update
       /// \param s A sort expression

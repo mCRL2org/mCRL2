@@ -143,11 +143,7 @@ namespace mcrl2 {
       inline
       bool is_insert_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_insert_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_insert_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined constructors for fbag
       /// \param s A sort expression
@@ -213,11 +209,7 @@ namespace mcrl2 {
       inline
       bool is_cons_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_cons_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_cons_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@fbag_cinsert
@@ -271,11 +263,7 @@ namespace mcrl2 {
       inline
       bool is_cinsert_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_cinsert_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_cinsert_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier count
@@ -328,11 +316,7 @@ namespace mcrl2 {
       inline
       bool is_count_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_count_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_count_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier in
@@ -385,11 +369,7 @@ namespace mcrl2 {
       inline
       bool is_in_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_in_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_in_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@fbag_join
@@ -444,11 +424,7 @@ namespace mcrl2 {
       inline
       bool is_join_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_join_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_join_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@fbag_inter
@@ -503,11 +479,7 @@ namespace mcrl2 {
       inline
       bool is_fbag_intersect_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_fbag_intersect_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_fbag_intersect_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@fbag_diff
@@ -562,11 +534,7 @@ namespace mcrl2 {
       inline
       bool is_fbag_difference_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_fbag_difference_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_fbag_difference_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@fbag2fset
@@ -619,11 +587,7 @@ namespace mcrl2 {
       inline
       bool is_fbag2fset_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_fbag2fset_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_fbag2fset_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@fset2fbag
@@ -675,11 +639,7 @@ namespace mcrl2 {
       inline
       bool is_fset2fbag_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_fset2fbag_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_fset2fbag_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier +
@@ -732,11 +692,7 @@ namespace mcrl2 {
       inline
       bool is_union_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_union_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_union_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier *
@@ -789,11 +745,7 @@ namespace mcrl2 {
       inline
       bool is_intersection_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier -
@@ -846,11 +798,7 @@ namespace mcrl2 {
       inline
       bool is_difference_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_difference_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_difference_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier #
@@ -902,11 +850,7 @@ namespace mcrl2 {
       inline
       bool is_count_all_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_count_all_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_count_all_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for fbag
       /// \param s A sort expression

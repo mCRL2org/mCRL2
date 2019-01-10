@@ -141,11 +141,7 @@ namespace mcrl2 {
       inline
       bool is_cons_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_cons_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_cons_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined constructors for list
       /// \param s A sort expression
@@ -210,11 +206,7 @@ namespace mcrl2 {
       inline
       bool is_in_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_in_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_in_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier #
@@ -266,11 +258,7 @@ namespace mcrl2 {
       inline
       bool is_count_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_count_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_count_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier <|
@@ -323,11 +311,7 @@ namespace mcrl2 {
       inline
       bool is_snoc_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_snoc_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_snoc_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier ++
@@ -380,11 +364,7 @@ namespace mcrl2 {
       inline
       bool is_concat_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_concat_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_concat_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier .
@@ -437,11 +417,7 @@ namespace mcrl2 {
       inline
       bool is_element_at_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_element_at_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_element_at_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier head
@@ -493,11 +469,7 @@ namespace mcrl2 {
       inline
       bool is_head_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_head_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_head_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier tail
@@ -549,11 +521,7 @@ namespace mcrl2 {
       inline
       bool is_tail_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_tail_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_tail_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier rhead
@@ -605,11 +573,7 @@ namespace mcrl2 {
       inline
       bool is_rhead_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_rhead_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_rhead_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier rtail
@@ -661,11 +625,7 @@ namespace mcrl2 {
       inline
       bool is_rtail_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_rtail_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_rtail_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for list
       /// \param s A sort expression

@@ -184,11 +184,7 @@ namespace mcrl2 {
       inline
       bool is_not_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_not_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_not_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier &&
@@ -241,11 +237,7 @@ namespace mcrl2 {
       inline
       bool is_and_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_and_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_and_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier ||
@@ -298,11 +290,7 @@ namespace mcrl2 {
       inline
       bool is_or_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_or_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_or_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier =>
@@ -355,11 +343,7 @@ namespace mcrl2 {
       inline
       bool is_implies_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_implies_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_implies_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for bool_
       /// \return All system defined mappings for bool_

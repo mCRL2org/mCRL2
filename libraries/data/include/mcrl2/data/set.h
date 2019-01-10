@@ -109,11 +109,7 @@ namespace mcrl2 {
       inline
       bool is_constructor_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_constructor_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_constructor_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined constructors for set_
       /// \param s A sort expression
@@ -176,11 +172,7 @@ namespace mcrl2 {
       inline
       bool is_set_fset_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_set_fset_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_set_fset_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@setcomp
@@ -232,11 +224,7 @@ namespace mcrl2 {
       inline
       bool is_set_comprehension_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_set_comprehension_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_set_comprehension_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier in
@@ -266,7 +254,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == in_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == in_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -289,11 +277,7 @@ namespace mcrl2 {
       inline
       bool is_in_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_in_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_in_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier !
@@ -345,11 +329,7 @@ namespace mcrl2 {
       inline
       bool is_complement_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_complement_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_complement_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier +
@@ -392,7 +372,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == union_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == union_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -415,11 +395,7 @@ namespace mcrl2 {
       inline
       bool is_union_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_union_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_union_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier *
@@ -462,7 +438,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == intersection_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == intersection_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -485,11 +461,7 @@ namespace mcrl2 {
       inline
       bool is_intersection_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier -
@@ -532,7 +504,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == difference_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == difference_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -555,11 +527,7 @@ namespace mcrl2 {
       inline
       bool is_difference_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_difference_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_difference_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@false_
@@ -611,11 +579,7 @@ namespace mcrl2 {
       inline
       bool is_false_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_false_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_false_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@true_
@@ -667,11 +631,7 @@ namespace mcrl2 {
       inline
       bool is_true_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_true_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_true_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@not_
@@ -723,11 +683,7 @@ namespace mcrl2 {
       inline
       bool is_not_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_not_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_not_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@and_
@@ -780,11 +736,7 @@ namespace mcrl2 {
       inline
       bool is_and_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_and_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_and_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@or_
@@ -837,11 +789,7 @@ namespace mcrl2 {
       inline
       bool is_or_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_or_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_or_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for set_
       /// \param s A sort expression

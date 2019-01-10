@@ -428,10 +428,9 @@ class function_declaration_list():
         # If all codomains are equal we have a unique target sort, otherwise
         # this is detemined from the domain_sort_ids
         first_codomain = self.sort_expression_list.elements[0].codomain
-        simple = False
-        if all(map(lambda x: x.codomain == first_codomain, self.sort_expression_list.elements)):
+        simple = all(map(lambda x: x.codomain == first_codomain, self.sort_expression_list.elements))
+        if simple:
           target_sort = 'sort_expression {0}({1});'.format(target_sort_id, first_codomain.code(spec))
-          simple = True
         else:
           CASE_TEMPLATE = Template('''        ${elsestr}if (${condition})
         {
@@ -518,8 +517,8 @@ ${cases}
 ''')
 
         domain_size = len(self.sort_expression_list.elements[0].domain.elements)
-        condition = ' && function_sort(f.sort()).domain().size() == {0}'.format(domain_size)
-        
+        condition = ' && atermpp::down_cast<function_sort>(f.sort()).domain().size() == {0}'.format(domain_size)
+
         if sortparams == '':
           cases = []
           for s in self.sort_expression_list.elements:
@@ -570,11 +569,7 @@ ${cases}
       inline
       bool is_${functionname}_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_${functionname}_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_${functionname}_function_symbol(atermpp::down_cast<application>(e).head());
       }
 ''')
 
@@ -2122,4 +2117,3 @@ class using():
 
   def code(self):
     return str(self)
-

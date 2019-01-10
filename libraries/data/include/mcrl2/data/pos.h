@@ -143,11 +143,7 @@ namespace mcrl2 {
       inline
       bool is_cdub_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_cdub_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_cdub_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined constructors for pos
       /// \return All system defined constructors for pos
@@ -211,11 +207,7 @@ namespace mcrl2 {
       inline
       bool is_maximum_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_maximum_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_maximum_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier min
@@ -268,11 +260,7 @@ namespace mcrl2 {
       inline
       bool is_minimum_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_minimum_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_minimum_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier succ
@@ -324,11 +312,7 @@ namespace mcrl2 {
       inline
       bool is_succ_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_succ_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_succ_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@pospred
@@ -380,11 +364,7 @@ namespace mcrl2 {
       inline
       bool is_pos_predecessor_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_pos_predecessor_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_pos_predecessor_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier +
@@ -437,11 +417,7 @@ namespace mcrl2 {
       inline
       bool is_plus_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_plus_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_plus_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@addc
@@ -495,11 +471,7 @@ namespace mcrl2 {
       inline
       bool is_add_with_carry_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_add_with_carry_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_add_with_carry_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier *
@@ -552,11 +524,7 @@ namespace mcrl2 {
       inline
       bool is_times_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_times_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_times_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@powerlog2
@@ -608,11 +576,7 @@ namespace mcrl2 {
       inline
       bool is_powerlog2_pos_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_powerlog2_pos_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_powerlog2_pos_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for pos
       /// \return All system defined mappings for pos

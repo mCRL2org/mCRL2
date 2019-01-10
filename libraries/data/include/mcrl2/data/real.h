@@ -122,11 +122,7 @@ namespace mcrl2 {
       inline
       bool is_creal_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_creal_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_creal_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Pos2Real
@@ -178,11 +174,7 @@ namespace mcrl2 {
       inline
       bool is_pos2real_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_pos2real_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_pos2real_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Nat2Real
@@ -234,11 +226,7 @@ namespace mcrl2 {
       inline
       bool is_nat2real_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_nat2real_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_nat2real_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Int2Real
@@ -290,11 +278,7 @@ namespace mcrl2 {
       inline
       bool is_int2real_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_int2real_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_int2real_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Real2Pos
@@ -346,11 +330,7 @@ namespace mcrl2 {
       inline
       bool is_real2pos_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_real2pos_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_real2pos_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Real2Nat
@@ -402,11 +382,7 @@ namespace mcrl2 {
       inline
       bool is_real2nat_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_real2nat_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_real2nat_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Real2Int
@@ -458,11 +434,7 @@ namespace mcrl2 {
       inline
       bool is_real2int_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_real2int_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_real2int_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier max
@@ -537,7 +509,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == maximum_name() && function_sort(f.sort()).domain().size() == 2 && (f == maximum(real_(), real_()) || f == maximum(sort_pos::pos(), sort_int::int_()) || f == maximum(sort_int::int_(), sort_pos::pos()) || f == maximum(sort_nat::nat(), sort_int::int_()) || f == maximum(sort_int::int_(), sort_nat::nat()) || f == maximum(sort_int::int_(), sort_int::int_()) || f == maximum(sort_pos::pos(), sort_nat::nat()) || f == maximum(sort_nat::nat(), sort_pos::pos()) || f == maximum(sort_nat::nat(), sort_nat::nat()) || f == maximum(sort_pos::pos(), sort_pos::pos()));
+          return f.name() == maximum_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2 && (f == maximum(real_(), real_()) || f == maximum(sort_pos::pos(), sort_int::int_()) || f == maximum(sort_int::int_(), sort_pos::pos()) || f == maximum(sort_nat::nat(), sort_int::int_()) || f == maximum(sort_int::int_(), sort_nat::nat()) || f == maximum(sort_int::int_(), sort_int::int_()) || f == maximum(sort_pos::pos(), sort_nat::nat()) || f == maximum(sort_nat::nat(), sort_pos::pos()) || f == maximum(sort_nat::nat(), sort_nat::nat()) || f == maximum(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -560,11 +532,7 @@ namespace mcrl2 {
       inline
       bool is_maximum_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_maximum_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_maximum_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier min
@@ -615,7 +583,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == minimum_name() && function_sort(f.sort()).domain().size() == 2 && (f == minimum(real_(), real_()) || f == minimum(sort_int::int_(), sort_int::int_()) || f == minimum(sort_nat::nat(), sort_nat::nat()) || f == minimum(sort_pos::pos(), sort_pos::pos()));
+          return f.name() == minimum_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2 && (f == minimum(real_(), real_()) || f == minimum(sort_int::int_(), sort_int::int_()) || f == minimum(sort_nat::nat(), sort_nat::nat()) || f == minimum(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -638,11 +606,7 @@ namespace mcrl2 {
       inline
       bool is_minimum_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_minimum_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_minimum_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier abs
@@ -685,7 +649,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == abs_name() && function_sort(f.sort()).domain().size() == 1 && (f == abs(real_()) || f == abs(sort_int::int_()));
+          return f.name() == abs_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 1 && (f == abs(real_()) || f == abs(sort_int::int_()));
         }
         return false;
       }
@@ -707,11 +671,7 @@ namespace mcrl2 {
       inline
       bool is_abs_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_abs_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_abs_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier -
@@ -762,7 +722,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == negate_name() && function_sort(f.sort()).domain().size() == 1 && (f == negate(real_()) || f == negate(sort_pos::pos()) || f == negate(sort_nat::nat()) || f == negate(sort_int::int_()));
+          return f.name() == negate_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 1 && (f == negate(real_()) || f == negate(sort_pos::pos()) || f == negate(sort_nat::nat()) || f == negate(sort_int::int_()));
         }
         return false;
       }
@@ -784,11 +744,7 @@ namespace mcrl2 {
       inline
       bool is_negate_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_negate_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_negate_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier succ
@@ -839,7 +795,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == succ_name() && function_sort(f.sort()).domain().size() == 1 && (f == succ(real_()) || f == succ(sort_int::int_()) || f == succ(sort_nat::nat()) || f == succ(sort_pos::pos()));
+          return f.name() == succ_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 1 && (f == succ(real_()) || f == succ(sort_int::int_()) || f == succ(sort_nat::nat()) || f == succ(sort_pos::pos()));
         }
         return false;
       }
@@ -861,11 +817,7 @@ namespace mcrl2 {
       inline
       bool is_succ_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_succ_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_succ_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier pred
@@ -916,7 +868,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == pred_name() && function_sort(f.sort()).domain().size() == 1 && (f == pred(real_()) || f == pred(sort_nat::nat()) || f == pred(sort_int::int_()) || f == pred(sort_pos::pos()));
+          return f.name() == pred_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 1 && (f == pred(real_()) || f == pred(sort_nat::nat()) || f == pred(sort_int::int_()) || f == pred(sort_pos::pos()));
         }
         return false;
       }
@@ -938,11 +890,7 @@ namespace mcrl2 {
       inline
       bool is_pred_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_pred_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_pred_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier +
@@ -1001,7 +949,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == plus_name() && function_sort(f.sort()).domain().size() == 2 && (f == plus(real_(), real_()) || f == plus(sort_int::int_(), sort_int::int_()) || f == plus(sort_pos::pos(), sort_nat::nat()) || f == plus(sort_nat::nat(), sort_pos::pos()) || f == plus(sort_nat::nat(), sort_nat::nat()) || f == plus(sort_pos::pos(), sort_pos::pos()));
+          return f.name() == plus_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2 && (f == plus(real_(), real_()) || f == plus(sort_int::int_(), sort_int::int_()) || f == plus(sort_pos::pos(), sort_nat::nat()) || f == plus(sort_nat::nat(), sort_pos::pos()) || f == plus(sort_nat::nat(), sort_nat::nat()) || f == plus(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -1024,11 +972,7 @@ namespace mcrl2 {
       inline
       bool is_plus_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_plus_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_plus_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier -
@@ -1079,7 +1023,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == minus_name() && function_sort(f.sort()).domain().size() == 2 && (f == minus(real_(), real_()) || f == minus(sort_pos::pos(), sort_pos::pos()) || f == minus(sort_nat::nat(), sort_nat::nat()) || f == minus(sort_int::int_(), sort_int::int_()));
+          return f.name() == minus_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2 && (f == minus(real_(), real_()) || f == minus(sort_pos::pos(), sort_pos::pos()) || f == minus(sort_nat::nat(), sort_nat::nat()) || f == minus(sort_int::int_(), sort_int::int_()));
         }
         return false;
       }
@@ -1102,11 +1046,7 @@ namespace mcrl2 {
       inline
       bool is_minus_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_minus_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_minus_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier *
@@ -1157,7 +1097,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == times_name() && function_sort(f.sort()).domain().size() == 2 && (f == times(real_(), real_()) || f == times(sort_int::int_(), sort_int::int_()) || f == times(sort_nat::nat(), sort_nat::nat()) || f == times(sort_pos::pos(), sort_pos::pos()));
+          return f.name() == times_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2 && (f == times(real_(), real_()) || f == times(sort_int::int_(), sort_int::int_()) || f == times(sort_nat::nat(), sort_nat::nat()) || f == times(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -1180,11 +1120,7 @@ namespace mcrl2 {
       inline
       bool is_times_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_times_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_times_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier exp
@@ -1235,7 +1171,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == exp_name() && function_sort(f.sort()).domain().size() == 2 && (f == exp(real_(), sort_int::int_()) || f == exp(sort_int::int_(), sort_nat::nat()) || f == exp(sort_pos::pos(), sort_nat::nat()) || f == exp(sort_nat::nat(), sort_nat::nat()));
+          return f.name() == exp_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2 && (f == exp(real_(), sort_int::int_()) || f == exp(sort_int::int_(), sort_nat::nat()) || f == exp(sort_pos::pos(), sort_nat::nat()) || f == exp(sort_nat::nat(), sort_nat::nat()));
         }
         return false;
       }
@@ -1258,11 +1194,7 @@ namespace mcrl2 {
       inline
       bool is_exp_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_exp_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_exp_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier /
@@ -1292,7 +1224,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == divides_name() && function_sort(f.sort()).domain().size() == 2 && (f == divides(sort_pos::pos(), sort_pos::pos()) || f == divides(sort_nat::nat(), sort_nat::nat()) || f == divides(sort_int::int_(), sort_int::int_()) || f == divides(real_(), real_()));
+          return f.name() == divides_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2 && (f == divides(sort_pos::pos(), sort_pos::pos()) || f == divides(sort_nat::nat(), sort_nat::nat()) || f == divides(sort_int::int_(), sort_int::int_()) || f == divides(real_(), real_()));
         }
         return false;
       }
@@ -1315,11 +1247,7 @@ namespace mcrl2 {
       inline
       bool is_divides_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_divides_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_divides_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier floor
@@ -1371,11 +1299,7 @@ namespace mcrl2 {
       inline
       bool is_floor_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_floor_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_floor_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier ceil
@@ -1427,11 +1351,7 @@ namespace mcrl2 {
       inline
       bool is_ceil_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_ceil_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_ceil_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier round
@@ -1483,11 +1403,7 @@ namespace mcrl2 {
       inline
       bool is_round_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_round_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_round_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@redfrac
@@ -1540,11 +1456,7 @@ namespace mcrl2 {
       inline
       bool is_reduce_fraction_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_reduce_fraction_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_reduce_fraction_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@redfracwhr
@@ -1598,11 +1510,7 @@ namespace mcrl2 {
       inline
       bool is_reduce_fraction_where_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_reduce_fraction_where_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_reduce_fraction_where_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@redfrachlp
@@ -1655,11 +1563,7 @@ namespace mcrl2 {
       inline
       bool is_reduce_fraction_helper_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_reduce_fraction_helper_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_reduce_fraction_helper_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for real_
       /// \return All system defined mappings for real_

@@ -111,11 +111,7 @@ namespace mcrl2 {
       inline
       bool is_constructor_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_constructor_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_constructor_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined constructors for bag
       /// \param s A sort expression
@@ -178,11 +174,7 @@ namespace mcrl2 {
       inline
       bool is_bag_fbag_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_bag_fbag_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_bag_fbag_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@bagcomp
@@ -234,11 +226,7 @@ namespace mcrl2 {
       inline
       bool is_bag_comprehension_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_bag_comprehension_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_bag_comprehension_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier count
@@ -268,7 +256,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == count_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == count_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -291,11 +279,7 @@ namespace mcrl2 {
       inline
       bool is_count_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_count_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_count_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier in
@@ -325,7 +309,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == in_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == in_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -348,11 +332,7 @@ namespace mcrl2 {
       inline
       bool is_in_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_in_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_in_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier +
@@ -403,7 +383,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == union_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == union_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -426,11 +406,7 @@ namespace mcrl2 {
       inline
       bool is_union_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_union_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_union_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier *
@@ -481,7 +457,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == intersection_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == intersection_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -504,11 +480,7 @@ namespace mcrl2 {
       inline
       bool is_intersection_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_intersection_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier -
@@ -559,7 +531,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           const function_symbol& f = atermpp::down_cast<function_symbol>(e);
-          return f.name() == difference_name() && function_sort(f.sort()).domain().size() == 2;
+          return f.name() == difference_name() && atermpp::down_cast<function_sort>(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -582,11 +554,7 @@ namespace mcrl2 {
       inline
       bool is_difference_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_difference_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_difference_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Bag2Set
@@ -638,11 +606,7 @@ namespace mcrl2 {
       inline
       bool is_bag2set_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_bag2set_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_bag2set_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier Set2Bag
@@ -694,11 +658,7 @@ namespace mcrl2 {
       inline
       bool is_set2bag_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_set2bag_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_set2bag_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@zero_
@@ -750,11 +710,7 @@ namespace mcrl2 {
       inline
       bool is_zero_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_zero_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_zero_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@one_
@@ -806,11 +762,7 @@ namespace mcrl2 {
       inline
       bool is_one_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_one_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_one_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@add_
@@ -863,11 +815,7 @@ namespace mcrl2 {
       inline
       bool is_add_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_add_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_add_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@min_
@@ -920,11 +868,7 @@ namespace mcrl2 {
       inline
       bool is_min_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_min_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_min_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@monus_
@@ -977,11 +921,7 @@ namespace mcrl2 {
       inline
       bool is_monus_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_monus_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_monus_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@Nat2Bool_
@@ -1033,11 +973,7 @@ namespace mcrl2 {
       inline
       bool is_nat2bool_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_nat2bool_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_nat2bool_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier \@Bool2Nat_
@@ -1089,11 +1025,7 @@ namespace mcrl2 {
       inline
       bool is_bool2nat_function_application(const atermpp::aterm_appl& e)
       {
-        if (is_application(e))
-        {
-          return is_bool2nat_function_function_symbol(atermpp::down_cast<application>(e).head());
-        }
-        return false;
+        return is_application(e) && is_bool2nat_function_function_symbol(atermpp::down_cast<application>(e).head());
       }
       /// \brief Give all system defined mappings for bag
       /// \param s A sort expression
