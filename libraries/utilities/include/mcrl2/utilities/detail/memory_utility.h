@@ -26,7 +26,9 @@
 #ifndef MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 
-#ifdef _WIN32
+#include "mcrl2/utilities/platform.h"
+
+#ifdef MCRL2_PLATFORM_WINDOWS
 #include <malloc.h>
 #define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE,SIZE)  (TYPE *) _alloca((SIZE)*sizeof(TYPE))
 #else

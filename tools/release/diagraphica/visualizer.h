@@ -11,21 +11,15 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
+#include "graph.h"
+#include "visutils.h"
+#include "mcrl2/gui/glu.h"
+
 #include <QtCore>
 #include <QtGui>
 #include <QGLWidget>
 
-#ifdef WIN32
-#  include <windows.h>
-#endif
-#ifdef __APPLE__
-#  include <OpenGL/glu.h>
-#else
-#  include <GL/glu.h>
-#endif
 #include <cstddef>
-#include "graph.h"
-#include "visutils.h"
 
 class Visualizer : public QGLWidget
 {

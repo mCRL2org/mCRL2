@@ -14,19 +14,6 @@
 
 /* includes */
 
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-#include <cassert>
-#include <stdexcept>
-#include <unordered_set>
-#include <bitset>
-
-#ifdef WIN32
-#include <io.h>
-#include <fcntl.h>
-#endif
-
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -36,7 +23,21 @@
 
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/unused.h"
+#include "mcrl2/utilities/platform.h"
 
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
+#include <stdexcept>
+#include <unordered_set>
+#include <bitset>
+
+#ifdef MCRL2_PLATFORM_WINDOWS
+  #include <io.h>
+  #include <fcntl.h>
+#endif // MCRL2_PLATFORM_WINDOWS
 
 /* Integers in BAF are always exactly 32 or 64 bits.  The size must be fixed so that
  *  *  * BAF terms can be exchanged between platforms. */
@@ -51,13 +52,11 @@ using detail::writeInt;
 
 using namespace std;
 
-static void aterm_io_init(std::ios&
-#ifdef WIN32 // This suppresses a compiler warning.
-stream
-#endif
-)
+static void aterm_io_init(std::ios& stream)
 {
-#ifdef WIN32
+  mcrl2::utilities::mcrl2_unused(stream);
+
+#ifdef MCRL2_PLATFORM_WINDOWS
   std::string name;
   FILE* handle;
   if (stream.rdbuf() == std::cin.rdbuf())
@@ -90,7 +89,7 @@ stream
       mCRL2log(mcrl2::log::debug) << "Converted " << name << " to binary mode.\n";
     }
   }
-#endif
+#endif // MCRL2_PLATFORM_WINDOWS
 }
 
 static const std::size_t BAF_MAGIC = 0xbaf;

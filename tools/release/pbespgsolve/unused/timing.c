@@ -7,7 +7,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef _WIN32 /* assume POSIX */
+#include "mcrl2/utilities/platform.h"
+
+#ifndef MCRL2_PLATFORM_WINDOWS /* assume POSIX */
 #include <time.h>
 #else
 #include <windows.h>
@@ -15,7 +17,7 @@
 
 double time_now()
 {
-#ifndef _WIN32  /* assume POSIX */
+#ifndef MCRL2_PLATFORM_WINDOWS  /* assume POSIX */
 
     struct timespec tp = { 0, 0 };
     clock_gettime(CLOCK_MONOTONIC, &tp);

@@ -12,12 +12,14 @@
 #ifndef __DYNAMIC_LIBRARY_H
 #define __DYNAMIC_LIBRARY_H
 
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/platform.h"
+
 #include <string>
 #include <sstream>
 #include <stdexcept>
-#include "mcrl2/utilities/logger.h"
 
-#ifdef _WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
   #include <windows.h>
   typedef HMODULE library_handle;
   typedef FARPROC library_proc;

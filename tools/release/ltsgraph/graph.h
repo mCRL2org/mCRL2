@@ -21,12 +21,14 @@
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/state_label_empty.h"
-
-#include <cmath>
+#include "mcrl2/gui/glu.h"
 
 #include <QReadWriteLock>
-#include <utility>
 #include <QVector3D>
+#include <QString>
+
+#include <utility>
+#include <cmath>
 
 namespace Graph
 {

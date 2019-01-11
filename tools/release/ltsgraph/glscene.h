@@ -20,8 +20,10 @@
 #define GLSCENE_H
 
 #include "graph.h"
+#include "mcrl2/gui/glu.h"
 
 #include <QColor>
+#include <QOpenGLWidget>
 #include <QPainter>
 #include <QQuaternion>
 

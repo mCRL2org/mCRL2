@@ -33,10 +33,7 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
-# TODO: check if the following are still needed. (WIN32 can probably be replaced by the compiler-
-#       defined _WIN32, which also avoids clashes with the Windows SDK which also defines WIN32.)
 add_definitions(-DBOOST_ALL_NO_LIB=1)
-add_definitions(-DWIN32)
 
 # increase the stack size
 set(CMAKE_EXE_LINKER_FLAGS "/STACK:32000000000 ${CMAKE_EXE_LINKER_FLAGS}")

@@ -11,25 +11,26 @@
 #ifndef MCRL2_SMT_SOLVER_H
 #define MCRL2_SMT_SOLVER_H
 
-#ifdef WIN32
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/platform.h"
+#include "mcrl2/data/representative_generator.h"
+#include "mcrl2/smt/constructed_sort_definition.h"
+#include "mcrl2/smt/data_specification.h"
+#include "mcrl2/smt/named_function_definition.h"
+#include "mcrl2/smt/sort_definition.h"
+
+#ifdef MCRL2_PLATFORM_WINDOWS
   #include <windows.h>
   #include <tchar.h>
   #include <stdio.h>
   #include <strsafe.h>
 #else
   #include <sys/wait.h>
-#endif
+#endif // MCRL2_PLATFORM_WINDOWS
 
 #include <cstring>
 #include <csignal>
 #include <errno.h>
-
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/representative_generator.h"
-#include "mcrl2/smt/constructed_sort_definition.h"
-#include "mcrl2/smt/data_specification.h"
-#include "mcrl2/smt/named_function_definition.h"
-#include "mcrl2/smt/sort_definition.h"
 
 using namespace mcrl2::log;
 
@@ -43,7 +44,7 @@ class solver
 private:
   data_specification* m_spec;
 
-#ifdef WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
   HANDLE g_hChildStd_IN_Rd = NULL;
   HANDLE g_hChildStd_IN_Wr = NULL;
   HANDLE g_hChildStd_OUT_Rd = NULL;
@@ -52,13 +53,13 @@ private:
   int pipe_stdin[2];
   int pipe_stdout[2];
   int pipe_stderr[2];
-#endif
+#endif // MCRL2_PLATFORM_WINDOWS
 
 private:
 
   void execute(const std::string& command) const
   {
-#ifdef WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
     DWORD dwWritten;
     BOOL bSuccess = FALSE;
 
@@ -67,7 +68,7 @@ private:
     {
       throw mcrl2::runtime_error("Failed to write SMT problem to the solver.\n" + command);
     }
-#else
+#else // MCRL2_PLATFORM_WINDOWS
     if(::write(pipe_stdin[1], command.c_str(), command.size()) < 0)
     {
       throw mcrl2::runtime_error("Failed to write SMT problem to the solver.\n" + command);
@@ -79,7 +80,7 @@ private:
   {
     execute(command);
 
-#ifdef WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
     DWORD dwRead, totalRead;
     CHAR chBuf[256];
     BOOL bSuccess = FALSE;
@@ -145,10 +146,10 @@ private:
 
       throw mcrl2::runtime_error("The SMT prover does not work properly. " + message);
     }
-#endif
+#endif // MCRL2_PLATFORM_WINDOWS
   }
 
-#ifdef WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
   void initialize_solver()
   {
     SECURITY_ATTRIBUTES saAttr;
@@ -277,13 +278,13 @@ private:
       ::close(pipe_stderr[1]);
     }
   }
-#endif
+#endif // MCRL2_PLATFORM_WINDOWS
 
 public:
   solver(data_specification* spec)
   : m_spec(spec)
   {
-#ifndef WIN32
+#ifndef MCRL2_PLATFORM_WINDOWS
     signal(SIGPIPE, SIG_IGN);
 #endif
     initialize_solver();
@@ -295,7 +296,7 @@ public:
   {
     // Clean up the child process
     // It terminates when we close its stdin
-#ifdef WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
     CloseHandle(g_hChildStd_IN_Wr);
 #else
     ::close(pipe_stdin[1]);

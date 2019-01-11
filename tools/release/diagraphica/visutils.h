@@ -11,20 +11,13 @@
 #ifndef VISUTILS_H
 #define VISUTILS_H
 
+#include "mcrl2/gui/glu.h"
+#include "utils.h"
+
 #include <QtCore>
 #include <QtGui>
 
-#ifdef WIN32
-#  include <windows.h>
-#endif
-#ifdef __APPLE__
-#  include <OpenGL/glu.h>
-#else
-#  include <GL/glu.h>
-#endif
 #include <string>
-#include "utils.h"
-
 
 static inline QColor alpha(QColor color, double alpha) { color.setAlphaF(alpha); return color; }
 

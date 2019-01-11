@@ -8,18 +8,12 @@
 //
 /// \file ./shape.cpp
 
-#ifdef WIN32
-#  include <windows.h>
-#endif
-#ifdef __APPLE__
-#  include <OpenGL/glu.h>
-#else
-#  include <GL/glu.h>
-#endif
-
 #include "shape.h"
 #include "diagram.h"
 #include <iostream>
+
+#include "mcrl2/gui/glu.h"
+
 using namespace std;
 
 

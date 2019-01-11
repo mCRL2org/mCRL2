@@ -11,6 +11,7 @@
 
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/platform.h"
 
 #include <QSettings>
 #include <utility>
@@ -81,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent) :
   m_ui.actInformation->setChecked(!informationui->isHidden());
   m_ui.actOutput->setChecked(!m_ui.dockOutput->isHidden());
 
-#ifdef __APPLE__
+#ifdef MCRL2_PLATFORM_MAC
   m_ui.actFullscreen->setShortcut(QString("Meta+Ctrl+F"));
 #else
   m_ui.actFullscreen->setShortcut(QString("F11"));

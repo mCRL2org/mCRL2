@@ -12,18 +12,19 @@
 #ifndef MCRL2_UTILITIES_TOOL_H
 #define MCRL2_UTILITIES_TOOL_H
 
-#include <cstdlib>
-#include <stdexcept>
-#include <string>
-
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/execution_timer.h"
+#include "mcrl2/utilities/platform.h"
 
-#ifdef WIN32
-#include <io.h>
-#include <fcntl.h>
+#include <cstdlib>
+#include <stdexcept>
+#include <string>
+
+#ifdef MCRL2_PLATFORM_WINDOWS
+  #include <io.h>
+  #include <fcntl.h>
 #endif
 
 namespace mcrl2
@@ -189,8 +190,8 @@ class tool
     /// \post If timing was enabled, timer().report() has been called
     int execute(int argc, char* argv[])
     {
-#ifdef WIN32
-	  // All tools expect their std::cin to be binary streams. In Windows, 
+#ifdef MCRL2_PLATFORM_WINDOWS
+      // All tools expect their std::cin to be binary streams. In Windows, 
       // this is the way to guarantee this. In applications that do not have
       // a standard input attached (Windows-mode applications for instance),
       // _fileno(stdin) returns a value less than 0.

@@ -7,10 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <cassert>
-#include <cmath>
-#include <cmath>
-#include <cstdio>
+#include "glscene.h"
+
+#include "mcrl2/gui/arcball.h"
+#include "mcrl2/gui/workarounds.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/gui/glu.h"
 
 #include <QFile>
 #include <QFont>
@@ -18,22 +20,12 @@
 #include <QImage>
 #include <QPainter>
 #include <QScreen>
-
-#ifdef _WINDOWS
-#include <windows.h>
-#endif
 #include <QtOpenGL>
-#ifdef __APPLE__
-#include <OpenGL/glu.h>
-#else
-#include <GL/glu.h>
-#endif
 
-#include "mcrl2/gui/arcball.h"
-#include "mcrl2/gui/workarounds.h"
-#include "mcrl2/utilities/logger.h"
-
-#include "glscene.h"
+#include <cassert>
+#include <cmath>
+#include <cmath>
+#include <cstdio>
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
@@ -658,11 +650,11 @@ void GLScene::init(const QColor& clear)
 
 void GLScene::updateFog()
 {
-#ifndef __APPLE__   // With Apple LLVM version 9.1.0 (clang-902.0.39.1) and Xcode (9E145)
-                    // the code below leads to a crash. Therefore we disable it. 
-                    // This is most probably caused by a bug in the compiler or Qt. 
-                    // This condition should be removed whenever possible as it
-                    // is undesirable to have this unconditional code. 
+#ifndef MCRL2_PLATFORM_MAC // With Apple LLVM version 9.1.0 (clang-902.0.39.1) and Xcode (9E145)
+                           // the code below leads to a crash. Therefore we disable it. 
+                           // This is most probably caused by a bug in the compiler or Qt. 
+                           // This condition should be removed whenever possible as it
+                           // is undesirable to have this unconditional code. 
   if (m_drawfog)
   {
     glFogf(GL_FOG_START, m_fogdistance);

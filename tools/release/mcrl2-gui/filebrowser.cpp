@@ -8,6 +8,9 @@
 //
 
 #include "filebrowser.h"
+
+#include "mcrl2/utilities/platform.h"
+
 #include <QMenu>
 #include <QAction>
 #include <QMessageBox>
@@ -23,7 +26,7 @@ FileBrowser::FileBrowser(QWidget *parent) :
 
   m_model.setReadOnly(false);
 
-#ifdef Q_OS_WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
   m_model.setRootPath(QString());
 #else
   m_model.setRootPath(QDir::rootPath());

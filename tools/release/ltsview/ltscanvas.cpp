@@ -12,12 +12,8 @@
 
 #include <cmath>
 
-#ifdef __APPLE__
-#include <OpenGL/glu.h>
-#else
-#include <GL/glu.h>
-#endif
 #include "mcrl2/gui/arcball.h"
+#include "mcrl2/gui/glu.h"
 #include "mcrl2/gui/workarounds.h"
 
 #include "icons/zoom_cursor.xpm"

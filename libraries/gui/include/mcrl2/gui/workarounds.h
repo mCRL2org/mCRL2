@@ -10,14 +10,12 @@
 #ifndef MCRL2_UTILITIES_WORKAROUNDS_H
 #define MCRL2_UTILITIES_WORKAROUNDS_H
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-#ifdef __APPLE__
-#include <OpenGL/glu.h>
+#include "mcrl2/gui/glu.h"
+#include "mcrl2/utilities/platform.h"
+
+
+#ifdef MCRL2_PLATFORM_MAC
 #include <GLKit/GLKMatrix4.h>
-#else
-#include <GL/glu.h>
 #endif
 
 #include <QMatrix4x4>
@@ -28,7 +26,7 @@
 // these 3 macros replace glu functions deprecated on Mac OS with calls to
 // Apple specific frameworks, so they should be removed once a better,
 // cross-platform solution is adopted
-#ifdef __APPLE__
+#ifdef MCRL2_PLATFORM_MAC
 #define gluOrtho2D(left, right, bottom, top)                                   \
   do                                                                           \
   {                                                                            \
@@ -53,7 +51,7 @@
     glScalef(viewport[2] / delX, viewport[3] / delY, 1.0);                     \
   } while (0)
 
-#endif // __APPLE__
+#endif // MCRL2_PLATFORM_MAC
 
 namespace mcrl2
 {

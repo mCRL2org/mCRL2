@@ -33,10 +33,6 @@ template <typename Specification>
 void save_lps(const Specification& spec, std::ostream& stream, const std::string& target = "")
 {
   mCRL2log(log::verbose) << "Saving LPS" << (target.empty()?"":" to " + target) << ".\n";
-// #ifdef WIN32 This should not be needed, as this is dealt with by the relevant aterm_io library.
-//              This can be removed, when well tested. 
-// set_binary_mode(stream);
-// #endif
   spec.save(stream, true);
 }
 
@@ -49,9 +45,6 @@ template <typename Specification>
 void load_lps(Specification& spec, std::istream& stream, const std::string& source = "")
 {
   mCRL2log(log::verbose) << "Loading LPS" << (source.empty()?"":" from " + source) << ".\n";
-// #ifdef WIN32 This should not be needed, as this is dealt with by the relevant aterm_io library.
-//   set_binary_mode(stream);
-// #endif
   spec.load(stream, true, source);
 }
 
@@ -74,7 +67,6 @@ void save_lps(const Specification& spec, const std::string& filename)
     throw mcrl2::runtime_error("Could not open file " + filename + ".");
   }
   save_lps(spec, ofs, filename);
-// ofs << std::flush;
 }
 
 /// \brief Load LPS from file.

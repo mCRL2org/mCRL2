@@ -12,21 +12,22 @@
 #ifndef MCRL2_BASENAME_H
 #define MCRL2_BASENAME_H
 
+#include "mcrl2/utilities/platform.h"
 
 #include <cstdio>
 #include <string>
 #include <iostream>
 #include "mcrl2/utilities/exception.h"
 
-#ifdef __linux
+#ifdef MCRL2_PLATFORM_LINUX
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
 #include <windows.h>
 #endif
 
-#ifdef __APPLE__
+#ifdef MCRL2_PLATFORM_MAC
 #include <mach-o/dyld.h>
 #endif
 
@@ -41,7 +42,7 @@ namespace utilities
     inline std::string get_executable_basename()
     {
       std::string path;
-#ifdef __linux
+#ifdef MCRL2_PLATFORM_LINUX
       path = "";
       pid_t pid = getpid();
       char buf[10];
@@ -58,9 +59,9 @@ namespace utilities
         std::string::size_type t = path.find_last_of("/");
         path = path.substr(0,t);
       }
-#endif // __linux
+#endif // MCRL2_PLATFORM_LINUX
 
-#ifdef __APPLE__
+#ifdef MCRL2_PLATFORM_MAC
       char* pathbuf = NULL;
       uint32_t bufsize = 0;
       _NSGetExecutablePath(pathbuf, &bufsize);
@@ -73,15 +74,15 @@ namespace utilities
       delete[] pathbuf;
       std::string::size_type t = path.find_last_of("/");
       path = path.substr(0,t);
-#endif //__APPLE__
+#endif //MCRL2_PLATFORM_MAC
 
-#ifdef _WIN32
-      char buffer[MAX_PATH];//always use MAX_PATH for filepaths
-      GetModuleFileName(NULL,buffer,sizeof(buffer));
+#ifdef MCRL2_PLATFORM_WINDOWS
+      char buffer[MAX_PATH];  //always use MAX_PATH for filepaths
+      GetModuleFileName(NULL, buffer, sizeof(buffer));
       path = buffer;
       std::string::size_type t = path.find_last_of("\\");
       path = path.substr(0,t);
-#endif // _WIN32
+#endif // MCRL2_PLATFORM_WINDOWS
 
       return path;
     }

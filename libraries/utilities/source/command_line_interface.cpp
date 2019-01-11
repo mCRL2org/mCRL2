@@ -27,6 +27,7 @@
 #include <boost/xpressive/xpressive_static.hpp>
 
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/platform.h"
 
 /// \cond DUMMY
 // dummy necessary for compiling
@@ -710,7 +711,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
     return;
   }
 
-#if defined(__APPLE__)
+#ifdef MCRL2_PLATFORM_MAC
   if (1 < arguments.size() && arguments[1].substr(0, 7) == "-psn_0_")   // Skip Apple serial number
   {
     ++i;

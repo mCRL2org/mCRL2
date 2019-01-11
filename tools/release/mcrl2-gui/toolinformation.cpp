@@ -8,7 +8,10 @@
 //
 
 #include "toolinformation.h"
+
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/platform.h"
+
 #include <QTextStream>
 
 ToolInformation::ToolInformation(QString name, QString input1, QString input2, QString output, bool guiTool)
@@ -20,7 +23,7 @@ ToolInformation::ToolInformation(QString name, QString input1, QString input2, Q
 
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
   path = appDir.absoluteFilePath(name);
-#ifdef _WIN32
+#ifdef MCRL2_PLATFORM_WINDOWS
   path.append(".exe");
 #endif
 }
