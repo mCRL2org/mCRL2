@@ -29,7 +29,6 @@ struct alphabet_efficient_traverser: public alphabet_traverser<Derived>
   using super::leave;
   using super::apply;
   using super::W;
-  using super::equations;
   using super::push;
 
   Derived& derived()
@@ -48,7 +47,7 @@ struct alphabet_efficient_traverser: public alphabet_traverser<Derived>
     if (!contains(W, x.identifier()))
     {
       W.insert(x.identifier());
-      const process_equation& eqn = find_equation(equations, x.identifier());
+      const process_equation& eqn = find_equation(super::equations, x.identifier());
       derived().apply(eqn.expression());
       // W.erase(x.identifier());
     }
@@ -64,7 +63,7 @@ struct alphabet_efficient_traverser: public alphabet_traverser<Derived>
     if (!contains(W, x.identifier()))
     {
       W.insert(x.identifier());
-      const process_equation& eqn = find_equation(equations, x.identifier());
+      const process_equation& eqn = find_equation(super::equations, x.identifier());
       derived().apply(eqn.expression());
       // W.erase(x.identifier());
     }

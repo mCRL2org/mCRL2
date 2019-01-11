@@ -690,7 +690,7 @@ bool lps2lts_algorithm::search_divergence(
               COUNTER_EXAMPLE_GENERATOR& divergence_loop)
 {
   current_path.insert(state_pair.state());
-  std::vector<detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR> > new_states;
+  std::vector<mcrl2::lts::detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR> > new_states;
   next_state_generator::enumerator_queue_t enumeration_queue;
   for (next_state_generator::iterator j = m_generator->begin(state_pair.state(), m_tau_summands, &enumeration_queue); j != m_generator->end(); j++)
   {
@@ -710,7 +710,7 @@ bool lps2lts_algorithm::search_divergence(
       typename COUNTER_EXAMPLE_GENERATOR::index_type i=divergence_loop.add_transition(action_label_number.first,state_pair.index());
       if (visited.insert(j->target_state()).second)
       {
-        new_states.push_back(detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>(j->target_state(),i));
+        new_states.push_back(mcrl2::lts::detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>(j->target_state(),i));
       }
       else if (current_path.count(j->target_state()) != 0)
       {
@@ -721,7 +721,7 @@ bool lps2lts_algorithm::search_divergence(
     }
   }
 
-  for (const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& p: new_states)
+  for (const mcrl2::lts::detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& p: new_states)
   {
     if (search_divergence(p, current_path, visited,divergence_loop))
     {
