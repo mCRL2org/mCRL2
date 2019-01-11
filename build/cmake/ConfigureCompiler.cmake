@@ -6,8 +6,8 @@ set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_MAINT
 
 # Perform compiler-specific compiler configuration
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 14.0)
-    message(FATAL_ERROR "MSVC version 14.0 (aka MSVC 2015) is required.")
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.10)
+    message(FATAL_ERROR "MSVC version 19.10 (aka MSVC 2017) is required.")
   endif()
   include(ConfigureMSVC)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
