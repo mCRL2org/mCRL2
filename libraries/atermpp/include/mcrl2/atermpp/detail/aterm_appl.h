@@ -52,7 +52,6 @@ public:
   {
     for (std::size_t i = 0; i < N; ++i)
     {
-      // Do not call the copy constructor.
       m_arguments[i] = *it;
       ++it;
     }
@@ -72,7 +71,8 @@ public:
   {
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
-      m_arguments[i] = *it;
+      // Prevent bound checking, the allocator must make sure that symbol.arity() arguments fit.
+      m_arguments.data()[i] = *it;
       ++it;
     }
   }
@@ -83,7 +83,8 @@ public:
   {
     for (std::size_t i = 0; i < symbol.arity(); ++i)
     {
-      m_arguments[i] = arguments[i];
+      // Prevent bound checking, the allocator must make sure that symbol.arity() arguments fit.
+      m_arguments.data()[i] = arguments[i];
     }
   }
 
