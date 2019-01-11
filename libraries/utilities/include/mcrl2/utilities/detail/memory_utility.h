@@ -30,10 +30,10 @@
 
 #ifdef MCRL2_PLATFORM_WINDOWS
 #include <malloc.h>
-#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE,SIZE)  (TYPE *) _alloca((SIZE)*sizeof(TYPE))
+#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) reinterpret_cast<TYPE*>(_alloca((SIZE)*sizeof(TYPE)))
 #else
 #include <alloca.h>
-#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE,SIZE)  (TYPE *) alloca((SIZE)*sizeof(TYPE))
+#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE) reinterpret_cast<TYPE*>(alloca((SIZE)*sizeof(TYPE)))
 #endif 
 
 #endif // MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
