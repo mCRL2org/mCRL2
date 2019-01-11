@@ -240,9 +240,11 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
             LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
             ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
             FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
-    _install_header_files(${TARGET_INCLUDE_FILES})
+    _install_header_files(${TARGET_INCLUDE_FILES})	
+    if (NOT ${ARG_NOTEST} AND ${MCRL2_ENABLE_HEADER_TESTS})
+      _add_header_tests(${TARGET_NAME} "${ARG_NOHEADERTEST}")	
+    endif()
     if (NOT ${ARG_NOTEST} AND ${MCRL2_ENABLE_TESTS})
-      _add_header_tests(${TARGET_NAME} "${ARG_NOHEADERTEST}")
       _add_library_tests(${TARGET_NAME})
     endif()
   elseif(${TARGET_TYPE} STREQUAL "EXECUTABLE")
