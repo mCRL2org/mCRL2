@@ -214,7 +214,7 @@ void ATERM_POOL_STORAGE::sweep()
   }
 
   // Clean up unnecessary blocks.
-  //m_erasedBlocks = m_term_set.allocator().consolidate();
+  m_erasedBlocks = m_term_set.allocator().consolidate();
 }
 
 /// PRIVATE FUNCTIONS

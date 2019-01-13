@@ -244,6 +244,13 @@ public:
     head().next(&slot);
   }
 
+  /// \brief Erases elements in the range (position, last], constant complexity since no destructors
+  ///        will be called.
+  void erase_after(iterator position, iterator last)
+  {
+    position.get_slot()->next(last.get_slot());
+  }
+
 private:
   /// \brief Provides access to the head as if it was an actual slot.
   slot& head() noexcept { return m_head; }
