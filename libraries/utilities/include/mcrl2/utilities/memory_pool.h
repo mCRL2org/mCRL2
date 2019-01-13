@@ -27,8 +27,6 @@ namespace mcrl2
 namespace utilities
 {
 
-constexpr static std::uintptr_t FreeListSentinel = std::numeric_limits<std::uintptr_t>::max();
-
 /// \brief The memory pool allocates elements of size T from blocks.
 /// \details When ThreadSafe is true then the thread-safe guarantees will be satisfied.
 template <class T, 
@@ -88,7 +86,7 @@ public:
     }
 
     // The object was last written as this slot is not part of the freelist.
-    T& slot = m_blocks.front()[m_current_index++].element();
+    T& slot = (m_blocks.front()[m_current_index++]).element();
 
     if (ThreadSafe)
     {
@@ -124,39 +122,39 @@ public:
     {
       Block& block = *it;
 
+      // Keep track of the head of the freelist.
+      FreelistIt old_freelist_head = m_freelist.begin();
+
       // Indicate that current block only contains slots in the freelist.
       bool block_only_freelist = true;
-      for (auto& slot : block)
+      for (Slot& slot : block)
       {
-        if (!slot.is_marked())
+        if (slot.is_marked())
+        {
+          m_freelist.push_front(slot);
+        }
+        else
         {
           // There is one slot that was not part of the freelist.
           block_only_freelist = false;
-          break;
         }
       }
 
       // Erase blocks that only have elements in the freelist.
       if (block_only_freelist)
       {
+        // Remove the slots in the freelist that point into this block.
+        m_freelist.erase_after(m_freelist.before_begin(), old_freelist_head);
+
         // The current block only has elements in the freelist, so erase it.
         it = m_blocks.erase_after(block_before_it);
         --m_number_of_blocks;
       }
       else
       {
-        // Iterate over the slots in a block and reconstruct the freelist.
-        for (auto& slot : block)
-        {
-          if (slot.is_marked())
-          {
-            m_freelist.push_front(&slot);
-          }
-        }
+        block_before_it = it;
         ++it;
       }
-
-      block_before_it = it;
     }
 
     return old_number_of_blocks - m_number_of_blocks;
@@ -181,7 +179,9 @@ public:
   memory_pool& operator=(memory_pool&& other) = default;
 
 private:
-  using Slot = typename detail::free_list<T>::slot;
+  using Freelist = typename detail::free_list<T>;
+  using FreelistIt = typename Freelist::iterator;
+  using Slot = typename Freelist::slot;
 
   /// \brief An array that stores ElementsPerBlock number of objects of type T.
   using Block = std::array<Slot, ElementsPerBlock>;
@@ -200,7 +200,7 @@ private:
   mcrl2::utilities::spinlock m_block_mutex = {};
 
   /// \brief Indicates the head of the freelist.
-  detail::free_list<T> m_freelist;
+  Freelist m_freelist;
 
   /// \returns Check whether the pointer is contained in this memory pool.
   bool contains(T* p)
@@ -211,9 +211,9 @@ private:
     for (auto& block : m_blocks)
     {
       std::uintptr_t firstSlot = reinterpret_cast<std::uintptr_t>(block.data());
-      if (firstSlot <= pointer && pointer < firstSlot + sizeof(T) * ElementsPerBlock)
+      if (firstSlot <= pointer && pointer < firstSlot + sizeof(Slot) * ElementsPerBlock)
       {
-        assert((pointer - firstSlot) % sizeof(T) == 0);
+        assert((pointer - firstSlot) % sizeof(Slot) == 0);
         return true;
       }
     }
