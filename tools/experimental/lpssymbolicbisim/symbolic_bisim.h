@@ -44,7 +44,6 @@
 
 #include "../pbessymbolicbisim/simplifier_mode.h"
 #include "../pbessymbolicbisim/simplifier.h"
-// #include "simplifier.h"
 #define THIN       "0"
 #define BOLD       "1"
 #define GREEN(S)  "\033[" S ";32m"
@@ -53,8 +52,6 @@
 #define NORMAL    "\033[0;0m"
 #include "find_linear_inequality.h"
 #include "enumerate_block_union.h"
-#include "block_tree.h"
-// #include "improved_quantifiers_inside_rewriter.h"
 
 namespace std
 {
@@ -127,8 +124,6 @@ protected:
   reachability_cache_t reachability_cache;
   typedef std::unordered_map< std::tuple< data_expression, data_expression, lps::action_summand >, bool> transition_cache_t;
   transition_cache_t transition_cache;
-
-  block_tree* split_logger;
 
   std::map< lps::action_summand, variable_list > m_primed_summation_variables_map;
   std::map< lps::action_summand, data_expression_list > m_updates_map;
@@ -368,11 +363,9 @@ protected:
     if(new_blocks.size() > 1) {
       partition.remove(phi_k);
       update_caches(phi_k, new_blocks);
-      block_tree* logging_node_phi_k = split_logger->find(rewr(phi_k));
       for(const data_expression& d: new_blocks)
       {
         partition.push_front(d);
-        logging_node_phi_k->add_child(rewr(d));
       }
       return true;
     }
@@ -675,7 +668,6 @@ protected:
     int i = 0;
     for(const data_expression& block: unreachable)
     {
-      split_logger->mark_deleted(rewr(block));
       mCRL2log(log::verbose) << "  block " << i << "  " << pp(rewr(block)) << std::endl;
       i++;
     }
@@ -801,7 +793,6 @@ public:
     process_parameters = m_spec.process().process_parameters();
     data_expression initial_block = lambda(process_parameters, sort_bool::true_());
     partition.push_front(initial_block);
-    split_logger = new block_tree(initial_block);
     build_summand_maps();
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = std::chrono::high_resolution_clock::now();
@@ -820,7 +811,6 @@ public:
     print_partition(partition);
     std::set< data_expression > final_partition;
     std::for_each(partition.begin(), partition.end(), [&](const data_expression& block){ final_partition.insert(rewr(block)); });
-    split_logger->output_dot("split_tree.dot", final_partition);
     mCRL2log(log::info) << "Partition refinement completed in " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << " seconds" << std::endl;
 
     save_lts();
