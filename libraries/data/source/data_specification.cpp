@@ -233,8 +233,8 @@ void sort_specification::check_for_alias_loop(
 }
 
 
-// This function returns the normal form of e, under the two maps map1 and map2.
-// This normal form is obtained by repeatedly applying map1 and map2, until this
+// This function returns the normal form of e, under the the map map1.
+// This normal form is obtained by repeatedly applying map1, until this
 // is not possible anymore. It is assumed that this procedure terminates. There is
 // no check for loops.
 static sort_expression find_normal_form(
@@ -305,7 +305,7 @@ static sort_expression find_normal_form(
 #ifndef NDEBUG
     sorts_already_seen.insert(result_sort);
 #endif
-   return find_normal_form(i1->second,map1,sorts_already_seen);
+    return find_normal_form(i1->second,map1,sorts_already_seen);
   }
   return result_sort;
 }
@@ -368,7 +368,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     const sort_expression rhs=it->second;
     sort_aliases_to_be_investigated.erase(it);
 
-    for(const std::pair< sort_expression, sort_expression >&p: resulting_normalized_sort_aliases)
+    for(const std::pair< sort_expression, sort_expression >& p: resulting_normalized_sort_aliases)
     {
       const sort_expression s1=data::replace_sort_expressions(lhs,sort_expression_assignment(p.first,p.second), true);
 
@@ -429,9 +429,10 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     }
     assert(lhs!=rhs);
     const sort_expression normalised_lhs = find_normal_form(lhs,resulting_normalized_sort_aliases);
-    if (normalised_lhs!=rhs)
+    const sort_expression normalised_rhs = find_normal_form(rhs,resulting_normalized_sort_aliases);
+    if (normalised_lhs!=normalised_rhs)
     {
-      resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression >(normalised_lhs,rhs)); 
+      resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression >(normalised_lhs,normalised_rhs)); 
     }
   }
   // Copy resulting_normalized_sort_aliases into m_normalised_aliases, i.e. from multimap to map.
@@ -442,6 +443,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
   {
     const sort_expression normalised_rhs = find_normal_form(p.second,resulting_normalized_sort_aliases);
     m_normalised_aliases[p.first]=normalised_rhs;
+
     assert(p.first!=normalised_rhs);
   }
 }
