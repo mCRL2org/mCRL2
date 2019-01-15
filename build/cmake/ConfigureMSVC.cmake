@@ -10,15 +10,21 @@ try_add_cxx_flag(/EHs)                # From MSDN:  Although Windows and Visual 
                                       #     that you use ISO-standard C++ exception handling (/EHs or /EHsc) because 
                                       #     it makes code more portable and flexible.
 try_add_cxx_flag(/bigobj)             # Increases object addressable sections capacity to 4,294,967,296 (2^32), possibly required for template heavy code.
-try_add_cxx_flag(/permissive-)        # This option disables permissive behaviors, and sets the /Zc compiler options for strict conformance.
 try_add_cxx_flag(/std:c++14)          # Sets the minimal C++ standard available for conformance checking in Visual Studio 2017.
 try_add_cxx_flag(/W3      MAINTAINER) # Increase the warning level.
 
 try_add_c_flag(/EHs)
 try_add_c_flag(/bigobj)
-try_add_c_flag(/permissive-)
 try_add_c_flag(/std:c++14)
 try_add_c_flag(/W3         MAINTAINER)
+
+if (${Boost_MAJOR_VERSION} LESS 2 AND ${Boost_MINOR_VERSION} LESS 65)
+  # Enabling /permissive- with older boost versions breaks compilation. 
+  message(STATUS "The /permissive- flag will only be added for boost 1.65.0 and higher.")
+else()
+  try_add_cxx_flag(/permissive-) # This option disables permissive behaviors, and sets the /Zc compiler options for strict conformance.
+  try_add_c_flag(/permissive-)
+endif()
 
 add_definitions(-DNOMINMAX)                 # Don't let <windows.h> (re)define min and max
 add_definitions(-D_USE_MATH_DEFINES)        # Make <cmath> define M_PI, M_PI_2 etc.

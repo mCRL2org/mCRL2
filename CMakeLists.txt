@@ -62,11 +62,6 @@ mark_as_advanced(
   MCRL2_SKIP_LONG_TESTS
 )
 
-include(ConfigurePlatform)
-include(ConfigureCompiler)
-include(MCRL2Version)
-include(AddMCRL2Binary)
-
 if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
   find_package(TR         QUIET REQUIRED)
@@ -80,6 +75,14 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   mark_as_advanced(Qt5_DIR Qt5Core_DIR Qt5OpenGL_DIR Qt5Widgets_DIR Qt5Xml_DIR Qt5Gui_DIR)
 endif()
 
+find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
+include(ConfigurePlatform)
+include(ConfigureCompiler)
+include(MCRL2Version)
+include(AddMCRL2Binary)
+
 if(MCRL2_ENABLE_CODE_COVERAGE)
   include(CodeCoverage)
 endif()
@@ -87,9 +90,6 @@ endif()
 if (${MCRL2_ENABLE_BENCHMARKS})
   add_subdirectory(benchmarks)
 endif()
-
-find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 add_subdirectory(3rd-party/dparser)
 
