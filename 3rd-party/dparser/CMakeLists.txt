@@ -30,7 +30,7 @@ add_definitions(
 )
 endif(MSVC AND MSVC_VERSION LESS 1900)
 
-add_library(dparser STATIC
+add_library(dparser
   arg.c
   parse.c
   scan.c

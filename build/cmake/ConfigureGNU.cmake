@@ -105,16 +105,6 @@ if(MCRL2_CLANGPP AND NOT APPLE)
   unset(CMAKE_REQUIRED_LIBRARIES)
 endif()
 
-if(BUILD_SHARED_LIBS)
-  check_cxx_compiler_flag(-fPIC CXX_ACCEPTS_FPIC )
-  check_c_compiler_flag(-fPIC C_ACCEPTS_FPIC )
-  if(CXX_ACCEPTS_FPIC AND C_ACCEPTS_FPIC)
-    set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
-    set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
-    set(BUILD_SHARED_LIBS_OPTION "-fPIC")
-  endif()
-endif()
-
 if(NOT WIN32)
   # Indicates that systems having a GNU compiler the rewriter can be compiled.
   # This flag is not available on MSVC because dynload is not available.
