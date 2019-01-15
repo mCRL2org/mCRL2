@@ -181,9 +181,6 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
 
   set(INCLUDE ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
   file(GLOB_RECURSE TARGET_INCLUDE_FILES ${ARG_INCLUDEDIR}/*.h)
-  if(TARGET_INCLUDE_FILES)
-    add_custom_target(${TARGET_NAME}_headers SOURCES ${TARGET_INCLUDE_FILES})
-  endif()
 
   foreach(SRC ${ARG_SOURCES})
     get_filename_component(SRC_ABS ${SRC} ABSOLUTE)
