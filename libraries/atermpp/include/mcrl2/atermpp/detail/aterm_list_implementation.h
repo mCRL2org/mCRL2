@@ -11,11 +11,13 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 #pragma once
 
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/workarounds.h"
 
 namespace atermpp
 {

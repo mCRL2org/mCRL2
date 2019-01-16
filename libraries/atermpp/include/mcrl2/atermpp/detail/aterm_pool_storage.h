@@ -27,10 +27,6 @@ namespace atermpp
 namespace detail
 {
 
-/// The callback that can be used for term creations and deletions.
-typedef void(*term_callback)(const aterm&);
-typedef std::pair<function_symbol, term_callback> callback_pair;
-
 // Forward declaration
 class aterm_pool;
 
@@ -74,7 +70,7 @@ public:
   aterm create_int(std::size_t value);
 
   /// \brief Creates a term with the given function symbol.
-  aterm create_term(const atermpp::function_symbol& sym);
+  aterm create_term(const function_symbol& sym);
 
   /// \brief Creates a function application with the given function symbol and arguments.
   template<class ...Terms>
@@ -141,6 +137,8 @@ public:
   bool verify_sweep();
 
 private:
+  using callback_pair = std::pair<function_symbol, term_callback>;
+
   /// \brief Calls the creation hook attached to the function symbol of this term.
   void call_creation_hook(aterm term);
 

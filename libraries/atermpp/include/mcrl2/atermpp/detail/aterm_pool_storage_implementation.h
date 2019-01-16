@@ -56,7 +56,7 @@ ATERM_POOL_STORAGE::aterm_pool_storage(aterm_pool& pool) :
 {}
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::add_creation_hook(atermpp::function_symbol sym, term_callback callback)
+void ATERM_POOL_STORAGE::add_creation_hook(function_symbol sym, term_callback callback)
 {
   // The code handling the hooks is currently assuming that there is only one
   // hook per function symbol. If more hooks are allowed, then this code
@@ -70,7 +70,7 @@ void ATERM_POOL_STORAGE::add_creation_hook(atermpp::function_symbol sym, term_ca
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::add_deletion_hook(atermpp::function_symbol sym, term_callback callback)
+void ATERM_POOL_STORAGE::add_deletion_hook(function_symbol sym, term_callback callback)
 {
   // See the comments at add_creation_hook.
   for (const auto& hook : m_deletion_hooks)
@@ -88,7 +88,7 @@ aterm ATERM_POOL_STORAGE::create_int(std::size_t value)
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
-aterm ATERM_POOL_STORAGE::create_term(const atermpp::function_symbol& symbol)
+aterm ATERM_POOL_STORAGE::create_term(const function_symbol& symbol)
 {
   return insert(symbol);
 }
@@ -296,10 +296,13 @@ ATERM_POOL_STORAGE_TEMPLATES
 template<typename ...Args>
 aterm ATERM_POOL_STORAGE::insert(Args&&... args)
 {
+  if (EnableTermCreationMetrics) { ++m_term_creates; }
+
   // Moving this existence check out of emplace matters for performance.
   auto it = m_term_set.find(args...);
   if (it != m_term_set.end())
   {
+    if (EnableTermCreationMetrics) { ++m_term_hits; }
     return aterm(&(*it));
   }
   else

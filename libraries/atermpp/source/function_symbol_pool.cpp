@@ -41,18 +41,12 @@ function_symbol_pool::~function_symbol_pool()
 
 function_symbol function_symbol_pool::create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-  if (EnableFunctionSymbolMetrics)
-  {
-    ++m_function_symbols_creates;
-  }
+  if (EnableFunctionSymbolMetrics) { ++m_function_symbols_creates; }
 
   auto it = m_symbol_set.find(name, arity);
   if (it != m_symbol_set.end())
   {
-    if (EnableFunctionSymbolMetrics)
-    {
-      ++m_function_symbols_hits;
-    }
+    if (EnableFunctionSymbolMetrics) { ++m_function_symbols_hits; }
 
     // The element already exists so return it.
     return function_symbol(_function_symbol::ref(&(*it)));

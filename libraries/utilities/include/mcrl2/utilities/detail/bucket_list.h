@@ -21,6 +21,11 @@ namespace utilities
 namespace detail
 {
 
+struct Sentinel{};
+
+/// \brief A end of the iterator sentinel.
+static constexpr Sentinel EndIterator = {};
+
 /// \brief This essentially implements the std::forward_list, with the difference that
 ///        it does not own the nodes in the list. It just keeps track of the list
 ///        next pointers.
@@ -74,8 +79,6 @@ public:
   template<bool Constant = true>
   class key_iterator : std::iterator_traits<Key>
   {
-    struct Sentinel{};
-
     using tag = std::input_iterator_tag;
 
     friend class bucket_list<Key, Allocator>;
@@ -87,8 +90,6 @@ public:
     using node_base_pointer = typename std::conditional<Constant, const node_base*, node_base*>::type;
 
   public:
-    /// \brief A end of the iterator sentinel.
-    static constexpr Sentinel EndIterator{};
 
     key_iterator(node_base_pointer node)
       : m_bucket_node(reinterpret_cast<node_pointer>(node))

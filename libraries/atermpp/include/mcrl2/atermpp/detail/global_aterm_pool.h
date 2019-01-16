@@ -27,7 +27,7 @@ static aterm_pool& g_aterm_pool_instance = *static_cast<aterm_pool*>(static_cast
 /// \details Provides lazy initialization which should be used when instantiating
 ///          global terms and function symbols.
 template<bool lazy = false>
-inline aterm_pool& g_term_pool()
+static aterm_pool& g_term_pool()
 {
   if (lazy)
   {
