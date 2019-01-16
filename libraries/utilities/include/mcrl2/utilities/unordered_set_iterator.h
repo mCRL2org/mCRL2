@@ -98,7 +98,7 @@ private:
   void goto_next_bucket()
   {
     // Find the first bucket that is not empty.
-    while(!(m_key_it != key_it_type::EndIterator))
+    while(!(m_key_it != detail::EndIterator))
     {
       // Take the next bucket and reset the key iterator.
       ++m_bucket_it;
@@ -116,7 +116,7 @@ private:
     }
 
     // The current bucket contains elements or we are at the end.
-    assert(m_bucket_it == m_bucket_end || m_key_it != key_it_type::EndIterator);
+    assert(m_bucket_it == m_bucket_end || m_key_it != detail::EndIterator);
   }
 
   key_it_type m_key_before_it;

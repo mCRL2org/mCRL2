@@ -12,6 +12,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_LIST_H
 #define MCRL2_ATERMPP_ATERM_LIST_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_list.h"
 
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
@@ -25,7 +26,6 @@
 namespace atermpp
 {
 
-
 template <typename Term>
 class term_list: public aterm
 {
@@ -37,7 +37,6 @@ protected:
   }
 
 public:
-
   /// The type of object, T stored in the term_list.
   typedef Term value_type;
 

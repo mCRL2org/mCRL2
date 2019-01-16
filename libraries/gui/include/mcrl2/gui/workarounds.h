@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_UTILITIES_WORKAROUNDS_H
-#define MCRL2_UTILITIES_WORKAROUNDS_H
+#ifndef MCRL2_GUI_WORKAROUNDS_H_
+#define MCRL2_GUI_WORKAROUNDS_H_
 
 #include "mcrl2/gui/glu.h"
 #include "mcrl2/utilities/platform.h"
@@ -67,4 +67,4 @@ QVector3D unproject(const QVector3D& win, const QMatrix4x4& modelView,
 } // namespace gui
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_WORKAROUNDS_H
+#endif // MCRL2_GUI_WORKAROUNDS_H_
