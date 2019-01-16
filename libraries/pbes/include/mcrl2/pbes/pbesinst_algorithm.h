@@ -114,7 +114,7 @@ class pbesinst_algorithm
     enumerate_quantifiers_rewriter R;
 
     /// \brief The number of generated equations.
-    int m_equation_count;
+    std::size_t m_equation_count;
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::set<propositional_variable_instantiation> todo;

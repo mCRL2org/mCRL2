@@ -17,9 +17,8 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/xpressive/xpressive.hpp>
 #include <iostream>
+#include <regex>
 #include <set>
 #include <string>
 #include <vector>
@@ -45,17 +44,13 @@ bool match_declaration(const std::string& text, const data::variable& d, const d
   {
     throw mcrl2::runtime_error("invalid parameter declaration: '" + text + "'");
   }
-  std::string name = boost::trim_copy(words[0]);
-  std::string type = boost::trim_copy(words[1]);
+  std::string name = utilities::trim_copy(words[0]);
+  std::string type = utilities::trim_copy(words[1]);
   if (name != "*" && core::identifier_string(name) != d.name())
   {
     return false;
   }
-  if (type != "*" && data::parse_sort_expression(type, data_spec) != d.sort())
-  {
-    return false;
-  }
-  return true;
+  return type == "*" || data::parse_sort_expression(type, data_spec) == d.sort();
 }
 
 /// \brief Find parameter declarations that match a given string.
@@ -63,10 +58,10 @@ inline
 std::vector<data::variable> find_matching_parameters(const pbes& p, const std::string& name, const std::set<std::string>& declarations)
 {
   std::set<data::variable> result;
-  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (const pbes_equation& eqn: p.equations())
   {
-    propositional_variable X = i->variable();
-    if (name == "*" || (name == std::string(X.name())))
+    const propositional_variable& X = eqn.variable();
+    if (name == "*" || name == std::string(X.name()))
     {
       for (const data::variable& v: X.parameters())
       {
@@ -89,7 +84,6 @@ std::vector<data::variable> find_matching_parameters(const pbes& p, const std::s
 inline
 pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& text)
 {
-  using namespace boost::xpressive;
   pbes_parameter_map result;
 
   // maps propositional variable name to the corresponding variable declarations, for example:
@@ -97,29 +91,27 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
   //
   // X -> { "b:Bool", "c:C", "d:*" }
   // Y -> { "*:Bool" }
-  typedef std::map<std::string, std::set<std::string> > name_map;
-  name_map parameter_declarations;
+  std::map<std::string, std::set<std::string>> parameter_declarations;
 
   for (const std::string& s: utilities::split(text, ";"))
   {
-    std::string line = boost::trim_copy(s);
+    std::string line = utilities::trim_copy(s);
     if (line.empty())
     {
       continue;
     }
-    sregex sre = sregex::compile("(\\*|\\w*)\\(([:,#*\\s\\w>-]*)\\)\\s*", regex_constants::icase);
-    match_results<std::string::const_iterator> what;
+    std::regex sre(R"((\*|\w*)\(([:,#*\s\w>-]*)\)\s*)", std::regex::icase);
+    std::match_results<std::string::const_iterator> what;
     if (!regex_match(line, what, sre))
     {
       mCRL2log(log::warning) << "ignoring selection '" << line << "'" << std::endl;
       continue;
     }
     std::string X = what[1];
-    boost::trim(X);
+    utilities::trim(X);
     std::string word = what[2];
-    boost::trim(word);
-    std::vector<std::string> parameters = utilities::regex_split(word, "\\s*,\\s*");
-    for (const std::string& parameter: parameters)
+    utilities::trim(word);
+    for (const std::string& parameter: utilities::regex_split(word, "\\s*,\\s*"))
     {
       parameter_declarations[X].insert(parameter);
     }
@@ -138,10 +130,10 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
     }
   }
 
-  for (name_map::const_iterator k = parameter_declarations.begin(); k != parameter_declarations.end(); ++k)
+  for (const auto& decl: parameter_declarations)
   {
-    std::vector<data::variable> variables = find_matching_parameters(p, k->first, k->second);
-    core::identifier_string name(k->first);
+    std::vector<data::variable> variables = find_matching_parameters(p, decl.first, decl.second);
+    core::identifier_string name(decl.first);
     result[name] = variables;
   }
   return result;

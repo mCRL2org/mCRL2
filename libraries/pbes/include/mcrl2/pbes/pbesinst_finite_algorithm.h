@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H
 
 #include "mcrl2/data/consistency.h"
-#include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
@@ -69,33 +68,6 @@ struct empty_parameter_selection: public mcrl2::runtime_error
 namespace detail
 {
 
-template <typename Function1, typename Function2>
-struct compose
-{
-  typedef typename Function1::result_type result_type;
-  typedef typename Function1::argument_type argument_type;
-  typedef typename Function1::variable_type variable_type;
-  typedef typename Function1::expression_type expression_type;
-
-  const Function1& f1_;
-  const Function2& f2_;
-
-  compose(const Function1& f1, const Function2& f2)
-    : f1_(f1), f2_(f2)
-  {}
-
-  result_type operator()(const argument_type& x)
-  {
-    return f1_(f2_(x));
-  }
-};
-
-template <typename Function1, typename Function2>
-compose<Function1, Function2> make_compose(const Function1& f1, const Function2& f2)
-{
-  return compose<Function1, Function2>(f1, f2);
-}
-
 /// \brief Computes the subset with variables of finite sort and infinite.
 /// \param X A propositional variable instantiation
 /// \param index_map a container storing the indices of the variables that
@@ -135,9 +107,6 @@ template <typename DataRewriter, typename SubstitutionFunction>
 struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builder<pbesinst_finite_builder<DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction>
 {
   typedef pbes_system::detail::data_rewriter_builder<pbesinst_finite_builder, DataRewriter, SubstitutionFunction> super;
-  using super::enter;
-  using super::leave;
-  using super::update;
   using super::apply;
   using super::sigma;
 
@@ -188,8 +157,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     {
       return data::true_();
     }
-    typename VariableContainer::const_iterator vi = variables.begin();
-    typename ExpressionContainer::const_iterator ei = expressions.begin();
+    auto vi = variables.begin();
+    auto ei = expressions.begin();
     data::data_expression result = data::equal_to(*vi, *ei);
     ++vi;
     ++ei;
@@ -198,6 +167,18 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
       result = data::and_(result, data::equal_to(*vi, *ei));
     }
     return result;
+  }
+
+  template <typename DataExpressionContainer>
+  data::data_expression_list rewrite_container(const DataExpressionContainer& v, const data::rewriter& rewr)
+  {
+    return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return rewr(x); });
+  }
+
+  template <typename DataExpressionContainer>
+  data::data_expression_list rewrite_container(const DataExpressionContainer& v, const data::rewriter& rewr, const data::mutable_indexed_substitution<>& sigma)
+  {
+    return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return rewr(x, sigma); });
   }
 
   pbes_expression apply(const propositional_variable_instantiation& x)
@@ -225,37 +206,25 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     data::enumerator_identifier_generator id_generator;
     data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R, id_generator);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
-    const data::variable_list vl(di.begin(), di.end());
-    std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::true_()));
+    const data::variable_list di_list(di.begin(), di.end());
+    std::deque<enumerator_element> enumerator_deque(1, enumerator_element(di_list, data::true_()));
     for (auto i = enumerator.begin(local_sigma, enumerator_deque); i != enumerator.end(); ++i)
     {
-      mCRL2log(log::debug1) << "sigma = " << sigma << "\n";
       data::mutable_indexed_substitution<> sigma_i;
-      /* data::data_expression_list::const_iterator k = i->begin();
-      for (auto j = di.begin(); j != di.end(); ++j, ++k)
-      {
-        sigma_i[*j]=*k;
-      } */
-      i->add_assignments(vl,sigma_i,super::R);
-      mCRL2log(log::debug1) << "*i    = " << sigma_i << "\n";
-      data::data_expression_list d_copy = d;
-      data::detail::rewrite_container(d_copy, super::R, sigma);
-      data::data_expression_list e_copy = e;
-      data::detail::rewrite_container(e_copy, super::R, sigma);
+      i->add_assignments(di_list, sigma_i, super::R);
+      data::data_expression_list d_copy = rewrite_container(d, super::R, sigma);
+      data::data_expression_list e_copy = rewrite_container(e, super::R, sigma);
 
-      data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(vl);
+      data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(di_list);
       di_copy = data::replace_free_variables(di_copy, sigma_i);
 
       data::data_expression c = make_condition(di_copy, d_copy);
-      mCRL2log(log::debug1) << "c = " << data::pp(c) << "\n";
 
       core::identifier_string Y = m_rename(Xi, di_copy);
       result.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
     }
 
-    pbes_expression result1 = join_or(result.begin(), result.end());
-    mCRL2log(log::debug1) << "result1 = " << pbes_system::pp(result1) << "\n";
-    return result1;
+    return join_or(result.begin(), result.end());
   }
 
   /// \return Visits the initial state
@@ -264,11 +233,9 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::vector<data::data_expression> finite_parameters_vector;
     std::vector<data::data_expression> infinite_parameters_vector;
     split_parameters(init, m_index_map, finite_parameters_vector, infinite_parameters_vector);
-    data::data_expression_list finite_parameters = data::data_expression_list(finite_parameters_vector.begin(),finite_parameters_vector.end());
-    data::data_expression_list infinite_parameters = data::data_expression_list(infinite_parameters_vector.begin(),infinite_parameters_vector.end());
 
-    data::detail::rewrite_container(finite_parameters, super::R);
-    data::detail::rewrite_container(infinite_parameters, super::R);
+    data::data_expression_list finite_parameters = rewrite_container(finite_parameters_vector, super::R);
+    data::data_expression_list infinite_parameters = rewrite_container(infinite_parameters_vector, super::R);
     core::identifier_string X = m_rename(init.name(), finite_parameters);
     return propositional_variable_instantiation(X, infinite_parameters);
   }
@@ -290,31 +257,24 @@ class pbesinst_finite_algorithm
     data::enumerator_identifier_generator m_id_generator;
 
     /// \brief Returns true if the container contains the given element
-    template <typename Container>
-    bool has_element(const Container& c, const typename Container::value_type& v) const
-    {
-      return std::find(c.begin(), c.end(), v) != c.end();
-    }
-
-    /// \brief Computes the index map corresponding to the given PBES equations and variable map
-    template <typename EquationContainer>
-    void compute_index_map(const EquationContainer& equations,
+    void compute_index_map(const std::vector<pbes_equation>& equations,
                            const pbesinst_variable_map& variable_map,
                            pbesinst_index_map& index_map)
     {
-      for (auto i = equations.begin(); i != equations.end(); ++i)
+      using utilities::detail::contains;
+      for (const pbes_equation& eqn: equations)
       {
-        core::identifier_string name = i->variable().name();
-        data::variable_list parameters = i->variable().parameters();
+        const core::identifier_string& name = eqn.variable().name();
+        const data::variable_list& parameters = eqn.variable().parameters();
 
         std::vector<std::size_t> v;
         auto j = variable_map.find(name);
         if (j != variable_map.end())
         {
           std::size_t index = 0;
-          for (data::variable_list::const_iterator k = parameters.begin(); k != parameters.end(); ++k, ++index)
+          for (auto k = parameters.begin(); k != parameters.end(); ++k, ++index)
           {
-            if (has_element(j->second, *k))
+            if (contains(j->second, *k))
             {
               v.push_back(index);
             }
@@ -340,7 +300,7 @@ class pbesinst_finite_algorithm
 
     /// \brief Constructor.
     /// \param rewriter_strategy Strategy to be used for the data rewriter.
-    pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::jitty)
+    explicit pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::jitty)
       : m_rewriter_strategy(rewriter_strategy)
     {}
 
