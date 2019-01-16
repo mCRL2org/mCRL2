@@ -33,7 +33,7 @@ namespace detail
 {
 
 /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
-typedef std::map<core::identifier_string, std::vector<data::variable> > pbes_parameter_map;
+typedef std::map<core::identifier_string, std::vector<data::variable>> pbes_parameter_map;
 
 /// \brief Returns true if the declaration text matches with the variable d.
 inline
@@ -130,13 +130,43 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
     }
   }
 
+  // create a mapping from PBES variable names to the corresponding parameters
+  std::map<core::identifier_string, data::variable_list> pbes_index;
+  for (const pbes_equation& eqn: p.equations())
+  {
+    const propositional_variable& X = eqn.variable();
+    pbes_index[X.name()] = X.parameters();
+  }
+
   for (const auto& decl: parameter_declarations)
   {
-    std::vector<data::variable> variables = find_matching_parameters(p, decl.first, decl.second);
     core::identifier_string name(decl.first);
+    std::vector<data::variable> variables = find_matching_parameters(p, decl.first, decl.second);
+
+    // sort variables according to their position in the PBES variable
+    std::map<data::variable, std::size_t> m;
+    std::size_t index = 0;
+    for (const data::variable& v: pbes_index[name])
+    {
+      m[v] = index++;
+    }
+    std::sort(variables.begin(), variables.end(), [&](const data::variable& x, const data::variable& y) { return m[x] < m[y]; });
+
     result[name] = variables;
   }
+
   return result;
+}
+
+/// \brief Print a parameter map.
+inline
+std::ostream& print_pbes_parameter_map(std::ostream& out, const pbes_parameter_map& m)
+{
+  for (const auto& p: m)
+  {
+    out << p.first << " -> " << core::detail::print_list(p.second) << std::endl;
+  }
+  return out;
 }
 
 } // namespace detail

@@ -205,7 +205,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::set<pbes_expression> result;
     data::enumerator_identifier_generator id_generator;
     data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R, id_generator);
-    mcrl2::data::mutable_indexed_substitution<> local_sigma;
+    data::mutable_indexed_substitution<> local_sigma;
     const data::variable_list di_list(di.begin(), di.end());
     std::deque<enumerator_element> enumerator_deque(1, enumerator_element(di_list, data::true_()));
     for (auto i = enumerator.begin(local_sigma, enumerator_deque); i != enumerator.end(); ++i)
@@ -307,9 +307,7 @@ class pbesinst_finite_algorithm
     /// \brief Runs the algorithm.
     /// \param p A PBES
     /// \param variable_map A map containing the finite parameters that should be expanded by the algorithm.
-    void run(pbes& p,
-             const pbesinst_variable_map& variable_map
-            )
+    void run(pbes& p, const pbesinst_variable_map& variable_map)
     {
       pbes_system::algorithms::instantiate_global_variables(p);
       m_equation_count = 0;
@@ -331,28 +329,24 @@ class pbesinst_finite_algorithm
 
         typedef data::enumerator_list_element_with_substitution<> enumerator_element;
         data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr, m_id_generator);
-        mcrl2::data::mutable_indexed_substitution<> local_sigma;
-        const data::variable_list vl(finite_parameters.begin(), finite_parameters.end());
-        std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, data::true_()));
+        data::mutable_indexed_substitution<> local_sigma;
+        data::variable_list finite_parameter_list(finite_parameters.begin(), finite_parameters.end());
+        std::deque <enumerator_element> enumerator_deque(1, enumerator_element(finite_parameter_list, data::true_()));
         for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end(); ++j)
         {
           // apply the substitution contained in the enumerated element.
           data::mutable_indexed_substitution<> sigma_j;
-          j->add_assignments(vl,sigma_j,rewr);
+          j->add_assignments(finite_parameter_list, sigma_j, rewr);
 
           std::vector<data::data_expression> finite;
           for (const data::variable& v: finite_parameters)
           {
-            mCRL2log(log::debug1) << "sigma(" << data::pp(v) << ") = " << data::pp(sigma_j(v)) << "\n";
             finite.push_back(sigma_j(v));
           }
           core::identifier_string name = pbesinst_finite_rename()(i->variable().name(), finite);
           propositional_variable X(name, infinite);
-          mCRL2log(log::debug1) << "formula before = " << pbes_system::pp(i->formula()) << "\n";
-          mCRL2log(log::debug1) << "sigma = " << sigma_j << "\n";
           detail::pbesinst_finite_builder<data::rewriter, data::mutable_indexed_substitution<>> visitor(rewr, sigma_j, pbesinst_finite_rename(), p.data(), index_map, variable_map);
           pbes_expression formula = visitor.apply(i->formula());
-          mCRL2log(log::debug1) << "formula after  = " << pbes_system::pp(formula) << "\n";
           pbes_equation eqn(i->symbol(), X, formula);
           equations.push_back(eqn);
           mCRL2log(log::debug, "pbesinst_finite") << print_equation_count(++m_equation_count);
