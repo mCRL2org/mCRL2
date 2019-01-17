@@ -79,7 +79,7 @@ elseif(NOT CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 
-if(NOT CMAKE_BUILD_TYPE MATCHES "(Debug|Maintainer)")
+if(NOT CMAKE_BUILD_TYPE MATCHES "(Debug)")
   message(WARNING "Code coverage results with an optimised (non-Debug) build may be misleading.")
 endif()
 if(NOT MCRL2_ENABLE_TESTS)

@@ -1,9 +1,3 @@
-# Compiler confed on all platforms, on all compilers
-set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${CMAKE_EXE_LINKER_FLAGS_MAINTAINER}")
-set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${CMAKE_EXE_LINKER_FLAGS_MAINTAINER}")
-set(CMAKE_C_FLAGS_MAINTAINER "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS_MAINTAINER}")
-set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_MAINTAINER}")
-
 # Perform compiler-specific compiler configuration
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.10)
@@ -24,40 +18,34 @@ else()
   message(FATAL_ERROR "Unsupported compiler setup (C: ${CMAKE_C_COMPILER_ID} / C++: ${CMAKE_CXX_COMPILER_ID}).")
 endif()
 
+# Make the user aware that the Maintainer build type has been removed. This code can be removed after some time.
+if(CMAKE_BUILD_TYPE)
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Maintainer")
+    message(FATAL_ERROR "The Maintainer build type has been replaced by Debug, choose a valid build type.")
+  endif()
+endif()
+if (CMAKE_CONFIGURATION_TYPES)
+  list(FIND CMAKE_CONFIGURATION_TYPES "Maintainer" index)
+  if (${index} GREATER -1)
+    message(FATAL_ERROR "The Maintainer configuration type has been replaced by Debug, clear CMAKE_CONFIGURATION_TYPES and configure again.")
+  endif()
+endif()
+
+# Sets the default build type if none was provided.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "One of Debug, Release, RelWithDebInfo, MinSizeRel. Defaults to Release." FORCE)
+endif()
+
+if(CMAKE_BUILD_TYPE)
+  # Check that the single configuration build type is valid.
+  if (NOT "${CMAKE_BUILD_TYPE}" MATCHES "(Debug|MinSizeRel|RelWithDebInfo|Release)")
+    message(FATAL_ERROR "Unknown build type ${CMAKE_BUILD_TYPE}.")
+  endif()
+
+  # Enables a selection of build types instead of typing it.
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo") 
+endif()
+
 # Check supported C++11 features
 include(CheckCXX11Features)
-
-# Add Maintainer mode to multi-configuration builds
-if(CMAKE_CONFIGURATION_TYPES)
-  list(APPEND CMAKE_CONFIGURATION_TYPES Maintainer)
-  list(REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
-  "Semicolon separated list of configuration types, only supports Debug, Release, RelSizeMin, RelWithDebInfo, and Maintainer, anything else will be ignored"
-  FORCE)
-endif()
-# Document maintainer mode for single-configuration builds
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  # Default type is set to Release as the performance of the toolset is bad in Debug or Maintainer mode.
-  # The unitialised user of the toolset may not realise that this is the case causing a bad impression.
-  message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "One of Debug, Release, RelWithDebInfo, MinSizeRel, Maintainer. Defaults to Release." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Maintainer" "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
-
-# Mark as debug property to ensure that MSVC links against debug QT libraries
-set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "Debug;Maintainer;RelWithDebInfo")
-
-set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER ${CMAKE_EXE_LINKER_FLAGS_MAINTAINER}
-    CACHE STRING "Flags used for linking binaries ${BUILDTYPE}.")
-set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER ${CMAKE_SHARED_LINKER_FLAGS_MAINTAINER}
-    CACHE STRING "Flags used for linking shared libraries ${BUILDTYPE}.")
-set(CMAKE_C_FLAGS_MAINTAINER ${CMAKE_C_FLAGS_MAINTAINER}
-    CACHE STRING "Flags used for compiling C source files ${BUILDTYPE}.")
-set(CMAKE_CXX_FLAGS_MAINTAINER ${CMAKE_CXX_FLAGS_MAINTAINER}
-    CACHE STRING "Flags used for compiling C++ source files ${BUILDTYPE}.")
-mark_as_advanced(
-  CMAKE_CXX_FLAGS_MAINTAINER
-  CMAKE_C_FLAGS_MAINTAINER
-  CMAKE_EXE_LINKER_FLAGS_MAINTAINER
-  CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
-)
