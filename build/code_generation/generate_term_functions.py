@@ -188,8 +188,9 @@ def find_functions(rules):
 #
 def generate_soundness_check_functions(rules, filename, skip_list):
     CHECK_RULE = '''template <typename Term>
-bool check_rule_%(name)s(Term t)
+bool check_rule_%(name)s(const Term& t)
 {
+  utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
 #else
@@ -201,8 +202,9 @@ bool check_rule_%(name)s(Term t)
 
     CHECK_TERM = '''// %(name)s(%(arguments)s)
 template <typename Term>
-bool %(check_name)s(Term t)
+bool %(check_name)s(const Term& t)
 {
+  utilities::mcrl2_unused(t);
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
 %(body)s
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -246,7 +248,7 @@ bool %(check_name)s(Term t)
             'name'      : name,
             'body'      : body
         }
-        ptext = ptext + 'template <typename Term> bool check_rule_%s(Term t);\n' % rule.name()
+        ptext = ptext + 'template <typename Term> bool check_rule_%s(const Term& t);\n' % rule.name()
 
     for f in functions:
         name = f.name()
@@ -262,7 +264,7 @@ bool %(check_name)s(Term t)
             'arity' : len(f.arguments)
         }
         if arity > 0:
-            body = body + '#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
+            body = body + '#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
             for i in range(arity):
                 arg = f.arguments[i]
                 if arg.repetitions == '':
@@ -275,7 +277,7 @@ bool %(check_name)s(Term t)
                 body = body + '    mCRL2log(log::debug, "soundness_checks") << "%s" << std::endl;\n'                % (arg.check_name())
                 body = body + '    return false;\n'
                 body = body + '  }\n'
-            body = body + '#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
+            body = body + '#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
 
         text = text + CHECK_TERM % {
             'name'       : name,
@@ -283,7 +285,7 @@ bool %(check_name)s(Term t)
             'check_name' : f.check_name(),
             'body'       : body
         }
-        ptext = ptext + 'template <typename Term> bool %s(Term t);\n' % f.check_name()
+        ptext = ptext + 'template <typename Term> bool %s(const Term& t);\n' % f.check_name()
 
     text = string.strip(ptext + '\n' + text)
     text = text + '\n'
