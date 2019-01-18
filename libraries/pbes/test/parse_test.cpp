@@ -51,6 +51,6 @@ BOOST_AUTO_TEST_CASE(test_parse_pbes_expression)
   propositional_variable Y = parse_propositional_variable("Y(n: Nat)", vardecl);
   propvardecl.push_back(X);
   propvardecl.push_back(Y);
-  pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1)", vardecl, propvardecl);
+  pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1)", data::data_specification(), vardecl, propvardecl);
   BOOST_CHECK(pbes_system::pp(x) == "X(true, 2) && Y(n + 1)");
 }

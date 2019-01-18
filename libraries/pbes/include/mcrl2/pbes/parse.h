@@ -213,9 +213,9 @@ propositional_variable parse_propositional_variable(const std::string& text,
  **/
 template <typename VariableContainer, typename PropositionalVariableContainer>
 pbes_expression parse_pbes_expression(const std::string& text,
+                                      const data::data_specification& dataspec,
                                       const VariableContainer& variables,
                                       const PropositionalVariableContainer& propositional_variables,
-                                      const data::data_specification& dataspec = data::data_specification(),
                                       bool type_check = true
                                      )
 {
@@ -230,6 +230,29 @@ pbes_expression parse_pbes_expression(const std::string& text,
     x = pbes_system::typecheck_pbes_expression(x, variables, propositional_variables, dataspec);
   }
   return x;
+}
+
+/** \brief     Parse a pbes expression.
+ *  Throws an exception if something went wrong.
+ *  \param[in] text A string containing a pbes expression.
+ *  \param[in] pbesspec A PBES used as context.
+ *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \param[in] type_check If true the parsed input is also typechecked.
+ *  \return    The parsed PBES expression.
+ **/
+template <typename VariableContainer>
+pbes_expression parse_pbes_expression(const std::string& text,
+                                      const pbes& pbesspec,
+                                      const VariableContainer& variables,
+                                      bool type_check = true
+                                     )
+{
+  std::vector<propositional_variable> propositional_variables;
+  for (const pbes_equation& eqn: pbesspec.equations())
+  {
+    propositional_variables.push_back(eqn.variable());
+  }
+  return parse_pbes_expression(text, pbesspec.data(), variables, propositional_variables, type_check);
 }
 
 } // namespace pbes_system
