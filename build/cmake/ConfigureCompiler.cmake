@@ -34,15 +34,10 @@ endif()
 # Sets the default build type if none was provided.
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "One of Debug, Release, RelWithDebInfo, MinSizeRel. Defaults to Release." FORCE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Sets the build type, defaults to Release." FORCE)
 endif()
 
 if(CMAKE_BUILD_TYPE)
-  # Check that the single configuration build type is valid.
-  if (NOT "${CMAKE_BUILD_TYPE}" MATCHES "(Debug|MinSizeRel|RelWithDebInfo|Release)")
-    message(FATAL_ERROR "Unknown build type ${CMAKE_BUILD_TYPE}.")
-  endif()
-
   # Enables a selection of build types instead of typing it.
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo") 
 endif()
