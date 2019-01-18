@@ -41,7 +41,6 @@ else()
 endif()
 set(MCRL2_MIN_BOOST_VERSION 1.48.0)
 
-option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
 option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OFF)
@@ -49,14 +48,18 @@ option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF
 option(MCRL2_ENABLE_HEADER_TESTS    "Enable generation of headertest targets." OFF)
 option(MCRL2_ENABLE_TESTS           "Enable generation of library, tool and random test targets." OFF)
 option(MCRL2_ENABLE_BENCHMARKS      "Enable generation of benchmark targets." OFF)
-option(MCRL2_ENABLE_CODE_COVERAGE   "Enable generation of code coverage statistics." OFF)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
-option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
+option(MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS "Enable extensive soundness check in the Debug build type." ON)
+option(MCRL2_ENABLE_CODE_COVERAGE   "Enable generation of code coverage statistics." OFF)
+option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
+option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
+
 mark_as_advanced(
   MCRL2_ENABLE_CODE_COVERAGE
+  MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS 
   MCRL2_ENABLE_STABLE
   MCRL2_SKIP_LONG_TESTS
 )

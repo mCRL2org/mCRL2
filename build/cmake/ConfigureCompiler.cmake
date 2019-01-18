@@ -47,5 +47,10 @@ if(CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo") 
 endif()
 
+# Add the definition to disable soundness checks when the configuration is set to OFF.
+if(NOT ${MCRL2_ENABLE_DEBUG_SOUNDNESS_CHECKS})
+  add_definitions(-DMCRL2_NO_SOUNDNESS_CHECKS)
+endif()
+
 # Check supported C++11 features
 include(CheckCXX11Features)
