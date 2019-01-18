@@ -14,7 +14,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE parse_test
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

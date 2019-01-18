@@ -12,7 +12,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/variable_substitution.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/test/included/unit_test_framework.hpp>

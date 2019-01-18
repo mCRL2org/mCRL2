@@ -14,7 +14,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 

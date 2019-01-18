@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/detail/pbessolve.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"

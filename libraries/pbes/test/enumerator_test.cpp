@@ -14,7 +14,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/enumerator.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
 using namespace mcrl2;

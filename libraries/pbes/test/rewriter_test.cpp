@@ -15,7 +15,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"

@@ -17,7 +17,7 @@
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 

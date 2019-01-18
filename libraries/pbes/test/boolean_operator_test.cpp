@@ -12,7 +12,7 @@
 #define BOOST_TEST_MODULE boolean_operator_test
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/optimized_boolean_operators.h"
-#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/detail/parse.h"
 
 using namespace mcrl2;
 
