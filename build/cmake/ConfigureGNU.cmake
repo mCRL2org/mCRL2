@@ -53,6 +53,10 @@ if(MCRL2_CLANG AND NOT APPLE)
   unset(CMAKE_REQUIRED_LIBRARIES)
 endif()
 
+if(BUILD_SHARED_LIBS)
+  try_add_c_flag(-fPIC)
+endif()
+
 ##---------------------------------------------------
 ## Set C++ compile flags
 ##---------------------------------------------------
@@ -104,6 +108,10 @@ if(MCRL2_CLANGPP AND NOT APPLE)
   get_filename_component(LEAKSANITIZER_SUPPRESS ${CMAKE_SOURCE_DIR}/build/leaksanitizer.suppress ABSOLUTE)
   try_add_cxx_flag("-fsanitize-blacklist=${LEAKSANITIZER_SUPPRESS}" DEBUG)
   unset(CMAKE_REQUIRED_LIBRARIES)
+endif()
+
+if(BUILD_SHARED_LIBS)
+  try_add_cxx_flag(-fPIC)
 endif()
 
 if(NOT WIN32)
