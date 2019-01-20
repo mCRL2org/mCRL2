@@ -25,11 +25,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
 
-# TODO: Clean up utilities/workarounds.h
-# TODO: See if we can get rid of the __STDC_VERSION__ define in ltsgraph/ltsview/diagraphica (currently included to prevent qopenglext.h from redefining int32_t etc.)
 # TODO: Remove DEB-dependency on compiler (g++/clang). Instead let mcrl2compilerewriter report a user-friendly error message if no compiler can be found.
 # TODO: Remove trace library (to LPS? or LTS?)
-include_directories(build/workarounds)
 
 if(APPLE)
 # Lower versions of Qt do not support native menu's correctly on Apple.

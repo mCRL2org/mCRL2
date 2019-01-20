@@ -1,7 +1,3 @@
-if(WIN32)
-  add_definitions(-D__STDC_VERSION__=199901L)
-endif()
-
 add_mcrl2_tool(diagraphica
   MENUNAME "DiaGraphica"
   DESCRIPTION "Advanced state space visualisation tool (mCRL2 toolset)"

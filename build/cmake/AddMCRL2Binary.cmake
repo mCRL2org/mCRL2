@@ -105,16 +105,7 @@ endfunction()
 
 function(_prepare_desktop_application TARGET_NAME TOOLNAME DESCRIPTION ICON)
   if(MSVC)
-    if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-      # N.B. using WIN32_EXECUTABLE leads to linker errors in the maintainer build:
-      # error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '0' doesn't match value '2'
-      # It is desirable to have the WIN32_EXECUTABLE property in a release build,
-      # since this prevents the opening of a console even when opening one of the
-      # graphical tools via explorer or the start menu. Always having this console
-      # window open doesn't look nice.
-      set_target_properties(${TARGET_NAME} PROPERTIES
-        WIN32_EXECUTABLE TRUE)
-    endif()
+    set_target_properties(${TARGET_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
   elseif(UNIX AND NOT APPLE)
     set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
     set(COMMANDLINE ${TARGET_NAME})

@@ -1,7 +1,3 @@
-if(WIN32)
-  add_definitions(-D__STDC_VERSION__=199901L)
-endif()
-
 add_mcrl2_tool(ltsview
   MENUNAME "LTSView"
   DESCRIPTION "Visualisation tool for large state spaces (mCRL2 toolset)"
