@@ -139,7 +139,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
   set(VALUE_KW "SOURCEDIR" "INCLUDEDIR" "COMPONENT" "DESCRIPTION" "MENUNAME" "ICON")
   set(LIST_KW "SOURCES" "DEPENDS" "INCLUDE" "RESOURCES" "NOHEADERTEST")
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
-
+  
   if(NOT ARG_COMPONENT)
     if("${TARGET_TYPE}" STREQUAL "LIBRARY")
       set(ARG_COMPONENT "Libraries")
@@ -170,15 +170,13 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     return()
   endif()
 
-  set(INCLUDE ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
-  file(GLOB_RECURSE TARGET_INCLUDE_FILES ${ARG_INCLUDEDIR}/*.h)
-
   foreach(SRC ${ARG_SOURCES})
-    get_filename_component(SRC_ABS ${SRC} ABSOLUTE)
+    get_filename_component(SRC_ABS ${SRC} ABSOLUTE)    
     if(NOT "${SRC_ABS}" STREQUAL "${SRC}")
       get_filename_component(SRC_ABS ${ARG_SOURCEDIR}/${SRC} ABSOLUTE)
     endif()
-    get_filename_component(SRC_EXT ${SRC_ABS} EXT)
+    
+    get_filename_component(SRC_EXT ${SRC_ABS} EXT)    
     if("${SRC_EXT}" STREQUAL ".g")
       # This is a grammar file. Generate a .c file using DParser
       get_filename_component(SRC_BASE ${SRC_ABS} NAME_WE)
@@ -195,7 +193,7 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
       add_custom_target(${LIBNAME}_${SRC_BASE} SOURCES ${SRC_ABS})
       set(SRC_ABS ${PARSER_CODE})
       set(DEPENDS ${DEPENDS} dparser)
-      set(INCLUDE ${INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
+      set(ARG_INCLUDE ${ARG_INCLUDE} ${CMAKE_SOURCE_DIR}/3rd-party/dparser)
     # TODO: In CMake 3.0.0 these could be replaced by enabling the AUTOUIC and AUTORCC
     # properties for the target.
     elseif("${SRC_EXT}" STREQUAL ".ui")
@@ -205,6 +203,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     endif()
     set(SOURCES ${SRC_ABS} ${SOURCES})
   endforeach()
+  
+  file(GLOB_RECURSE TARGET_INCLUDE_FILES ${ARG_INCLUDEDIR}/*.h)
 
   if("${TARGET_TYPE}" STREQUAL "LIBRARY")
     if(NOT SOURCES)
@@ -222,27 +222,32 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     else()
       add_library(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
     endif()
-    target_include_directories(${TARGET_NAME} INTERFACE ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
+        
     install(TARGETS ${TARGET_NAME}
             COMPONENT ${ARG_COMPONENT}
             LIBRARY DESTINATION ${MCRL2_LIBRARY_PATH}
             ARCHIVE DESTINATION ${MCRL2_ARCHIVE_PATH}
             FRAMEWORK DESTINATION ${MCRL2_LIBRARY_PATH})
     _install_header_files(${TARGET_INCLUDE_FILES})	
+    
     if (NOT ${ARG_NOTEST} AND ${MCRL2_ENABLE_HEADER_TESTS})
       _add_header_tests(${TARGET_NAME} "${ARG_NOHEADERTEST}")	
     endif()
+    
     if (NOT ${ARG_NOTEST} AND ${MCRL2_ENABLE_TESTS})
       _add_library_tests(${TARGET_NAME})
     endif()
-  elseif(${TARGET_TYPE} STREQUAL "EXECUTABLE")
+  elseif("${TARGET_TYPE}" STREQUAL "EXECUTABLE")
     if(IS_GUI_BINARY)
       _add_resource_files(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}" SOURCES)
     endif()
+    
     add_executable(${TARGET_NAME} ${SOURCES} ${TARGET_INCLUDE_FILES})
+    
     if(IS_GUI_BINARY)
       _prepare_desktop_application(${TARGET_NAME} "${ARG_MENUNAME}" "${ARG_DESCRIPTION}" "${ARG_ICON}")
     endif()
+    
     _add_man_page(${TARGET_NAME})
     install(TARGETS ${TARGET_NAME}
             COMPONENT ${ARG_COMPONENT}
@@ -250,6 +255,8 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
             BUNDLE DESTINATION ${MCRL2_BUNDLE_PATH})
     get_target_property(IS_BUNDLE ${TARGET_NAME} MACOSX_BUNDLE)
   endif()
+  
+  target_include_directories(${TARGET_NAME} PUBLIC ${ARG_INCLUDEDIR} ${ARG_INCLUDE})
 
   if(DEPENDS)
     target_link_libraries(${TARGET_NAME} ${DEPENDS})
@@ -268,8 +275,6 @@ function(_add_mcrl2_binary TARGET_NAME TARGET_TYPE)
     # Enable the CMake build system to automatically run MOC on source files that need it.
     set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
   endif()
-
-  include_directories(${INCLUDE})
 endfunction()
 
 function(add_mcrl2_library LIBNAME)

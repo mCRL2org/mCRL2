@@ -73,7 +73,6 @@ if(MCRL2_ENABLE_GUI_TOOLS)
 endif()
 
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 include(ConfigurePlatform)
 include(ConfigureCompiler)

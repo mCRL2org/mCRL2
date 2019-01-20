@@ -9,5 +9,7 @@ add_mcrl2_library(utilities
     command_line_interface.cpp
     logger.cpp
     text_utility.cpp
-    toolset_version.cpp
+    toolset_version.cpp  
+  INCLUDE
+    ${Boost_INCLUDE_DIRS}
 )

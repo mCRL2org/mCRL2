@@ -14,4 +14,5 @@ add_mcrl2_library(lps
   INCLUDE
     # TODO: get rid of the trace header dependency
     ${CMAKE_SOURCE_DIR}/libraries/trace/include
+    ${Boost_INCLUDE_DIRS}
 )
