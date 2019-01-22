@@ -38,12 +38,6 @@
 
 .. note::
 
-   The latest release (mCRL2-201808.0) is now available. Major new features are a user-friendly
-   GUI to develop specifications (mcrl2ide) and the possibility to generate counter-examples
-   with the new tool pbessolve. See the respective tool pages for more information.
-
-.. note::
-
    On Coursera four consecutive courses consisting of approximately 60 lectures provide an introduction into the theory and practical
    use of the mCRL2 toolset. It is based on the book 'Modeling and Analysis of Communicating
    Systems' shown above. The courses are:
