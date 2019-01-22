@@ -196,14 +196,20 @@ void PropertyWidget::actionVerifyResult(int processid)
     }
     else
     {
-      verificationWidgets->setCurrentIndex(0);
       styleSheet = "";
     }
 
-    this->setStyleSheet(".PropertyWidget" + styleSheet);
-    propertyNameScrollArea->setStyleSheet(".QScrollArea" + styleSheet);
-    propertyNameLabel->setStyleSheet(".QLabel" + styleSheet);
-
+    if (styleSheet.isEmpty())
+    {
+      resetWidget();
+    }
+    else
+    {
+      this->setStyleSheet(".PropertyWidget" + styleSheet);
+      propertyNameScrollArea->setStyleSheet(".QScrollArea" + styleSheet);
+      propertyNameLabel->setStyleSheet(".QLabel" + styleSheet);
+    }
+    
     editButton->setEnabled(true);
     deleteButton->setEnabled(true);
   }
