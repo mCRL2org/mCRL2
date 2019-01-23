@@ -8,9 +8,8 @@
 //
 /// \file strategy_rule.h
 
-#ifndef __REWR_STRATEGY_RULE_H
-#define __REWR_STRATEGY_RULE_H
-
+#ifndef MCRL2_DATA_DETAIL_REWRITE_STRATEGY_RULE_H
+#define MCRL2_DATA_DETAIL_REWRITE_STRATEGY_RULE_H
 
 #include "mcrl2/data/data_equation.h"
 
@@ -21,7 +20,8 @@ namespace data
 namespace detail
 {
 
-class strategy_rule: public atermpp::aterm
+/// \brief Is either a rewrite rule to be matched or an index that should be rewritten.
+class strategy_rule : public atermpp::aterm
 {
   public:
     strategy_rule(const std::size_t n)
@@ -42,10 +42,10 @@ class strategy_rule: public atermpp::aterm
       return !type_is_int();
     }
 
-    data_equation equation() const
+    const data_equation& equation() const
     {
       assert(is_equation());
-      return atermpp::down_cast<data_equation>(static_cast<atermpp::aterm>(*this));
+      return atermpp::down_cast<data_equation>(*this);
     }
 
     std::size_t rewrite_index() const
@@ -55,24 +55,33 @@ class strategy_rule: public atermpp::aterm
     }
 };
 
-struct strategy
+/// A strategy is a list of rules and the number of variables that occur in it.
+class strategy
 {
-  size_t number_of_variables;
-  atermpp::term_list<strategy_rule> rules;
-
+public:
   strategy(size_t n, const atermpp::term_list<strategy_rule>& r)
-   : number_of_variables(n),
-     rules(r)
+   : m_number_of_variables(n),
+     m_rules(r)
   {}
  
   strategy()
-   : number_of_variables(0)
+   : m_number_of_variables(0)
   {}
+
+  std::size_t number_of_variables() const { return m_number_of_variables; }
+  const atermpp::term_list<strategy_rule>& rules() const { return m_rules; }
+
+private:
+  std::size_t m_number_of_variables;
+  atermpp::term_list<strategy_rule> m_rules;
 };
+
+/// \brief Creates a strategy for given set of rewrite rules with head symbol f.
+strategy create_strategy(data_equation_list rules);
 
 } // namespace detail
 } // namespace data
 } // namespace mcrl2
 
-#endif // __REWR_STRATEGY_RULE_H
+#endif // MCRL2_DATA_DETAIL_REWRITE_STRATEGY_RULE_H
 

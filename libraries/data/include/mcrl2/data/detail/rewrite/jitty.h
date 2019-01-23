@@ -6,10 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/rewrite/jitty.h
 
-#ifndef __REWR_JITTY_H
-#define __REWR_JITTY_H
+#ifndef MCRL2_DATA_DETAIL_REWRITE_JITTY_H
+#define MCRL2_DATA_DETAIL_REWRITE_JITTY_H
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
@@ -39,9 +38,8 @@ class RewriterJitty: public Rewriter
   private:
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
-    std::size_t MAX_LEN; 
+
     data_expression rewrite_aux(const data_expression& term, substitution_type& sigma);
-    void build_strategies();
 
     data_expression rewrite_aux_function_symbol(
                       const function_symbol& op,
@@ -52,18 +50,18 @@ class RewriterJitty: public Rewriter
                       const function_symbol& op,
                       substitution_type& sigma);
 
-    /* Auxiliary function to take care that the array jitty_strat is sufficiently large
-       to access element i */
+    /// \brief Auxiliary function to take care that the array jitty_strat is sufficiently large
+    ///        to access element i.
     void make_jitty_strat_sufficiently_larger(const std::size_t i);
-    strategy create_strategy(const data_equation_list& rules1);
     void rebuild_strategy();
 };
 
 /// \brief removes auxiliary expressions this_term_is_in_normal_form from data_expressions that are being rewritten.
-/// \detail The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
-///         such that it can for instance be pretty printed. This auxiliary function is used internally in terms
-///         when rewriting to avoid to rewrite too often.
+/// \details The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
+///          such that it can for instance be pretty printed. This auxiliary function is used internally in terms
+///          when rewriting to avoid to rewrite too often.
 data_expression remove_normal_form_function(const data_expression& t);
+
 }
 }
 }

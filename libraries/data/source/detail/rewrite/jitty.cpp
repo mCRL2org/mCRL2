@@ -6,7 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file jitty.cpp
 
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
@@ -148,206 +147,6 @@ class jitty_argument_rewriter
   }
 };
 
-class dependencies_rewrite_rule_pair
-{
-  protected:
-    std::set<std::size_t> m_dependencies;
-    data_equation m_equation;
-
-  public:
-    dependencies_rewrite_rule_pair(std::set<std::size_t>& dependencies, const data_equation& eq)
-     : m_dependencies(dependencies), m_equation(eq)
-    {}
-
-    const std::set<std::size_t>& dependencies() const
-    {
-      return m_dependencies;
-    }
-
-    const data_equation equation() const
-    {
-      return m_equation;
-    }
-};
-
-strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
-{
-  data_equation_list rules=rules1;
-  std::vector<strategy_rule> strat;
-
-  std::vector <bool> used;
-
-  std::size_t arity = 0;
-  std::size_t max_number_of_variables = 0;
-  while (!rules.empty())
-  {
-    data_equation_list l;
-    std::vector<dependencies_rewrite_rule_pair> m;
-
-    std::vector<int> args(arity,-1);
-
-    for (const data_equation& this_rule: rules)
-    {
-      max_number_of_variables=std::max(this_rule.variables().size(),max_number_of_variables);
-      const data_expression& this_rule_lhs = this_rule.lhs();
-      if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
-      {
-        const data_expression& cond = this_rule.condition();
-        atermpp::term_list<variable_list> vars = { get_free_vars(cond) };
-
-        std::vector < bool> bs(arity,false);
-
-        for (std::size_t i = 0; i < arity; i++)
-        {
-          const data_expression this_rule_lhs_iplus1_arg=detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(this_rule_lhs),i);
-          if (!is_variable(this_rule_lhs_iplus1_arg))
-          {
-            bs[i] = true;
-            const variable_list evars = get_free_vars(this_rule_lhs_iplus1_arg);
-            for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
-            {
-              int j=0;
-              const atermpp::term_list <variable_list>& next_vars=vars.tail();
-              for (atermpp::term_list <variable_list>::const_iterator o=next_vars.begin(); o!=next_vars.end(); ++o)
-              {
-                if (std::find(o->begin(),o->end(),*v) != o->end())
-                {
-                  bs[j] = true;
-                }
-                j++;
-              }
-            }
-            vars=push_back(vars,get_free_vars(this_rule_lhs_iplus1_arg));
-          }
-          else
-          {
-            int j = -1;
-            bool b = false;
-            for (atermpp::term_list <variable_list>::const_iterator o=vars.begin(); o!=vars.end(); ++o)
-            {
-              if (std::find(o->begin(),o->end(),variable(this_rule_lhs_iplus1_arg)) != o->end())
-              {
-                if (j >= 0)
-                {
-                  bs[j] = true;
-                }
-                b = true;
-              }
-              j++;
-            }
-            if (b)
-            {
-              bs[i] = true;
-            }
-            vars=push_back(vars,get_free_vars(this_rule_lhs_iplus1_arg));
-          }
-        }
-
-        double_variable_traverser<data::variable_traverser> lhs_doubles;
-        double_variable_traverser<data::variable_traverser> rhs_doubles;
-        std::set<variable> condition_vars = find_free_variables(this_rule.condition());
-        lhs_doubles.apply(this_rule.lhs());
-        rhs_doubles.apply(this_rule.rhs());
-
-        std::set<std::size_t> deps;
-        for (std::size_t i = 0; i < arity; i++)
-        {
-          if (i>=used.size())
-          {
-            used.resize(i+1,false);
-          }
-          // Check whether argument i is a variable that occurs more than once in
-          // the left or right hand side, or occurs in the condition. It is not clear whether it is
-          // useful to check that it occurs in the condition, but this is what the jittyc rewriter also does.
-          const data_expression& arg_i = get_argument_of_higher_order_term(atermpp::down_cast<application>(this_rule.lhs()), i);
-          if ((bs[i] ||
-               (is_variable(arg_i) && (lhs_doubles.result().count(atermpp::down_cast<variable>(arg_i)) > 0 ||
-                                       condition_vars.count(atermpp::down_cast<variable>(arg_i)) > 0 ||
-                                       rhs_doubles.result().count(atermpp::down_cast<variable>(arg_i)) > 0))
-              ) && !used[i])
-          {
-            deps.insert(i);
-            args[i] += 1;
-          }
-        }
-
-        m.push_back(dependencies_rewrite_rule_pair(deps,this_rule));
-      }
-      else
-      {
-        l.push_front(this_rule);
-      }
-    }
-
-    while (!m.empty())
-    {
-      std::vector<dependencies_rewrite_rule_pair> m2;
-      for (const dependencies_rewrite_rule_pair& p: m)
-      {
-        if (p.dependencies().empty())
-        {
-          const data_equation rule = p.equation();
-          strat.push_back(strategy_rule(rule));
-          std::size_t len = rule.variables().size();
-          if (len>MAX_LEN)
-          {
-            MAX_LEN=len;
-          }
-        }
-        else
-        {
-          m2.push_back(p);
-        }
-      }
-      m = m2;
-
-      if (m.empty())
-      {
-        break;
-      }
-
-      int max = -1;
-      std::size_t maxidx = 0;
-
-      for (std::size_t i = 0; i < arity; i++)
-      {
-        assert(i<((std::size_t)1)<<(8*sizeof(int)-1));
-        if (args[i] > max)
-        {
-          maxidx = i+1;
-          max = args[i];
-        }
-      }
-
-      if (maxidx > 0)
-      {
-        args[maxidx-1] = -1;
-        if (maxidx>used.size())
-        {
-          used.resize(maxidx,false);
-        }
-        used[maxidx-1] = true;
-
-        const std::size_t k(maxidx-1);
-        strat.push_back(strategy_rule(k));
-        m2.clear();
-        for (const dependencies_rewrite_rule_pair& p: m)
-        {
-          const data_equation eq=p.equation();
-          std::set<std::size_t> dependencies=p.dependencies();
-          dependencies.erase(k);
-          m2.push_back(dependencies_rewrite_rule_pair(dependencies,eq));
-        }
-        m = m2;
-      }
-    }
-
-    rules = reverse(l);
-    arity++;
-  }
-  
-  return strategy(max_number_of_variables,atermpp::term_list<data::detail::strategy_rule>(strat.begin(),strat.end()));   
-}
 
 void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
 {
@@ -366,7 +165,6 @@ void RewriterJitty::rebuild_strategy()
     make_jitty_strat_sufficiently_larger(i);
     jitty_strat[i] = create_strategy(reverse(l->second));
   }
-
 }
 
 RewriterJitty::RewriterJitty(
@@ -374,8 +172,6 @@ RewriterJitty::RewriterJitty(
            const mcrl2::data::used_data_equation_selector& equation_selector):
         Rewriter(data_spec,equation_selector)
 {
-  MAX_LEN=0;
-
   for (const data_equation& eq: data_spec.equations())
   {
     if (equation_selector(eq))
@@ -692,11 +488,11 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   make_jitty_strat_sufficiently_larger(op_value);
   const strategy& strat=jitty_strat[op_value];
 
-  if (!strat.rules.empty())
+  if (!strat.rules().empty())
   {
-    jitty_assignments_for_a_rewrite_rule assignments(MCRL2_SPECIFIC_STACK_ALLOCATOR(jitty_variable_assignment_for_a_rewrite_rule,strat.number_of_variables));
+    jitty_assignments_for_a_rewrite_rule assignments(MCRL2_SPECIFIC_STACK_ALLOCATOR(jitty_variable_assignment_for_a_rewrite_rule, strat.number_of_variables()));
 
-    for (const strategy_rule& rule: strat.rules)
+    for (const strategy_rule& rule : strat.rules())
     {
       if (rule.is_rewrite_index())
       {
@@ -852,7 +648,7 @@ data_expression RewriterJitty::rewrite_aux_const_function_symbol(
   make_jitty_strat_sufficiently_larger(op_value);
   const strategy& strat=jitty_strat[op_value];
 
-  for (const strategy_rule& rule: strat.rules)
+  for (const strategy_rule& rule : strat.rules())
   {
     if (rule.is_rewrite_index())
     {
