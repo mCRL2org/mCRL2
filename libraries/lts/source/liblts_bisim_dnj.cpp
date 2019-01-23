@@ -100,8 +100,10 @@ namespace detail
                                                                                     /// over many code lines.  This macro expands to its arguments in Debug
 // state_type and trans_type are defined in check_complexity.h.                     /// mode and to nothing otherwise.
                                                                                     #define ONLY_IF_DEBUG(...) __VA_ARGS__
+                                                                                    #define ONLY_IF_NOT_DEBUG(...)
                                                                                 #else
                                                                                     #define ONLY_IF_DEBUG(...)
+                                                                                    #define ONLY_IF_NOT_DEBUG(...) __VA_ARGS__
                                                                                 #endif
 /// \brief type used to store label numbers and counts
 typedef std::size_t label_type;
@@ -122,6 +124,7 @@ template <class LTS_TYPE> class bisim_partitioner_dnj;
 /// becomes an iterator.  That point is marked by
 /// calling convert_to_iterator().  The structure may only be destroyed
 /// afterwards, as the destructor assumes it's an iterator.
+
 template <class Iterator>
 union iterator_or_counter
 {
@@ -135,7 +138,7 @@ union iterator_or_counter
     /// \brief Convert the object from counter to iterator
     void convert_to_iterator(const Iterator& other)
     {
-        new(&begin) Iterator(other);
+        new (&begin) Iterator(other);
     }
 
 
@@ -356,7 +359,7 @@ class state_info_entry
         pred_iter_t used_pred;
         succ_const_iter_t blue;
 
-        not__t()  {  new(&used_pred) pred_iter_t();  };
+        not__t()  {  new (&used_pred) pred_iter_t();  };
 
 
         void convert_to_succ_iter_t()
@@ -518,10 +521,6 @@ class block_t
     }
 
 
-    /// \brief destructor
-    ~block_t()  {  }
-
-
     /// provides the number of states in the block
     state_type size() const
     {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
@@ -612,7 +611,6 @@ class block_t
     /// \details This function is called after a refinement function has found
     /// where to split the block into unmarked (blue) and marked (red) states.
     /// It creates a new block for the smaller subblock.
-    /// \param   old_block pointer to the block that needs to be split.
     /// \param   new_block_mode indicates whether the blue or the red block
     ///          should be the new one.  (This parameter is necessary in case
     ///          the two halves have exactly the same size.)
@@ -714,9 +712,9 @@ class block_t
                                                                                     /// \brief print a slice of the partition (typically a block)
                                                                                     /// \details If the slice indicated by the parameters is not empty, the
                                                                                     /// message and the states in this slice will be printed.
-                                                                                    /// \param message text printed as a title if the slice is not empty
-                                                                                    /// \param begin   iterator to the beginning of the slice
-                                                                                    /// \param end     iterator past the end of the slice
+                                                                                    /// \param message      text printed as a title if the slice is not empty
+                                                                                    /// \param begin_print  iterator to the beginning of the slice
+                                                                                    /// \param end_print    iterator past the end of the slice
                                                                                     void print_block(const char* const message, permutation_const_iter_t
                                                                                                   begin_print, const permutation_const_iter_t& end_print) const
                                                                                     {   assert(begin <= begin_print);  assert(end_print <= end);
@@ -828,7 +826,6 @@ class part_state_t
                                                                                     /// \brief print the partition per block
                                                                                     /// \details The function prints all blocks in order.  For each block, it
                                                                                     /// lists its states, separated into nonbottom and bottom states.
-                                                                                    /// \param part_tr partition for the transitions
                                                                                     static void print_part()
                                                                                     {   assert(permutation_entry::perm_begin < permutation_entry::perm_end);
                                                                                         if (!mCRL2logEnabled(log::debug, "bisim_dnj"))  return;
@@ -1145,11 +1142,8 @@ class bunch_t
         {
             sort_key = new_sort_key;
         }
-        ~sort_key_and_label_t()  {  }
-        sort_key_and_label_t(const sort_key_and_label_t&) = delete;
-        void operator=(const sort_key_and_label_t&) = delete;
     } sort_key_and_label;
-//  private:
+
     static bunch_t* first_nontrivial;
     bunch_t* next_nontrivial;
   public:
@@ -1314,10 +1308,9 @@ class block_bunch_slice_t
       public:
         bunch_stability_t(bunch_t* new_bunch, bool is_stable)
           : data(reinterpret_cast<intptr_t>(new_bunch) | (intptr_t) is_stable)
-        {                                                                       assert(sizeof(bunch_t*) == sizeof(intptr_t));
+        {                                                                       static_assert(sizeof(bunch_t*)==sizeof(intptr_t), "size of intptr_t is wrong");
                                                                                 assert(0 == (reinterpret_cast<intptr_t>(new_bunch) & 3));
         }
-        ~bunch_stability_t()  {  }
 
         void operator=(bunch_t* new_bunch)
         {                                                                       assert(0 == (reinterpret_cast<intptr_t>(new_bunch) & 3));
@@ -1396,6 +1389,7 @@ class block_bunch_slice_t
                                                                                                "," + index_string + ") containing transitions from " +
                                                                                                source_block()->debug_id() + " in " + bunch()->debug_id_short();
                                                                                     }
+
 
                                                                                     // \brief add work to transitions starting in bottom states
                                                                                     template <class LTS_TYPE>
@@ -1489,6 +1483,8 @@ class part_trans_t
     /// \brief pointer to the first inert transition in action_block
     action_block_iter_t action_block_inert_begin;
 
+    // state_type number_of_new_bottom_states;
+
     /// \brief list of unstable block_bunch-slices
     std::list<block_bunch_slice_t> unstable_block_bunch;
 
@@ -1514,6 +1510,7 @@ class part_trans_t
         action_block(num_transitions + num_actions - 1),
         block_bunch_inert_begin(block_bunch.end()),
         action_block_inert_begin(action_block.end()),
+        // number_of_new_bottom_states(0),
         unstable_block_bunch(),
         unstable_block_bunch_postprocess_end(unstable_block_bunch.end())
     {
@@ -1532,11 +1529,14 @@ class part_trans_t
                                                                                 #endif
     }
 
+
     /// \brief destructor
     /// \details The destructor also deallocates the bunches, as they are not
     /// directly referenced from anywhere.
     ~part_trans_t()
     {
+        // mCRL2log(log::verbose, "bisim_dnj") << "The algorithm found "
+        //           << number_of_new_bottom_states << " new bottom states.\n";
         action_block_iter_t action_block_iter(action_block.begin());            assert(action_block_iter == action_block_entry::action_block_begin);
         for (;;)
         {
@@ -2138,6 +2138,7 @@ class part_trans_t
         bool became_bottom(false);                                              assert(succ_entry::succ_end->block_bunch->pred->source != source);
         if (source != source->succ_inert.begin->block_bunch->pred->source)
         {
+            // ++number_of_new_bottom_states;
             // make the state a marked bottom state
             if (source->pos >= source_block->marked_nonbottom_begin)
             {
@@ -2370,7 +2371,7 @@ class part_trans_t
                             // Line 2.39: ... Make t --tau--> s non-inert ...
                             if (!make_noninert(pred_iter,
                                                     &new_noninert_block_bunch))
-                                      //< make_noninert() may modify *pred_iter
+                                       // make_noninert() may modify *pred_iter
                             {
                                 // Line 2.39: ... and Mark t
                                 old_block->mark_nonbottom(t->pos);
@@ -2772,7 +2773,7 @@ class bisim_partitioner_dnj
 
 
     /// \brief Check whether two states are in the same equivalence class
-    /// \param s, t states that need to be compared
+    /// \param s and t  states that need to be compared
     /// \returns true iff the two states are in the same equivalence class
     bool in_same_class(state_type s, state_type t) const
     {
@@ -2806,8 +2807,6 @@ class bisim_partitioner_dnj
     /// same slice.)
     void create_initial_partition()
     {
-        // log::mcrl2_logger::set_reporting_level(log::debug);
-
         mCRL2log(log::verbose, "bisim_dnj") << "Strictly O(m log n) "
              << (branching ? (preserve_divergence
                                            ? "divergence-preserving branching "
@@ -3165,8 +3164,8 @@ class bisim_partitioner_dnj
                                                                                                                                          &*block_bunch_slice));
                                                                                                             ++block_bunch_count;
                                                                                                         }
-                                                                                                        else  assert(0); //< all block_bunch-slices should be
-                                                                                                                         //  stable
+                                                                                                        else  assert(0); // i. e. all block_bunch-slices should
+                                                                                                                         // be stable
                                                                                                         unsigned const max_bunch(
                                                                                                                                bunch->max_work_counter(*this));
                                                                                                         succ_const_iter_t const out_slice_begin(
@@ -3841,7 +3840,7 @@ class bisim_partitioner_dnj
                                     if (block_bunch == splitter)
                                     {
                                         goto continuation;
-                                                    //< break and then continue
+                                               // i. e. break and then continue
                                     }
                                     if (*block_bunch->bunch() <
                                                             *splitter->bunch())

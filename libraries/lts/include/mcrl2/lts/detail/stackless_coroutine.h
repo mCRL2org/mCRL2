@@ -118,7 +118,7 @@
 #define _coroutine_ENUMDEF(lblseq)                                            \
                     BOOST_PP_SEQ_FOR_EACH(_coroutine_ENUMDEF_1, , lblseq)
 #define _coroutine_ENUMDEF_1(r,data,label)                                    \
-                    , BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_, label), _enum)
+                    BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_, label), _enum),
 
 
 
@@ -161,8 +161,8 @@
 #define COROUTINE_LABELS(locations)                                           \
             enum {                                                            \
                 _coroutine_2_BEGIN_enum,                                      \
-                _coroutine_1_BEGIN_enum                                       \
                 _coroutine_ENUMDEF(locations)                                 \
+                _coroutine_1_BEGIN_enum                                       \
                 ONLY_IF_DEBUG( , _coroutine_ILLEGAL_enum )                    \
             } _coroutine_location[2] = { _coroutine_2_BEGIN_enum,             \
                                          _coroutine_1_BEGIN_enum },           \
@@ -174,6 +174,7 @@
             ONLY_IF_DEBUG( _coroutine_location[0] = _coroutine_ILLEGAL_enum; )\
             switch (_coroutine_temp_location)                                 \
             {                                                                 \
+                ONLY_IF_NOT_DEBUG( default: )                                 \
                 do { do {{
 
 
@@ -202,7 +203,7 @@
 
 /// \brief Close a section containing coroutines
 #define END_COROUTINES_SECTION                                                \
-            ONLY_IF_DEBUG (case _coroutine_ILLEGAL_enum: ; )                  \
+            ONLY_IF_DEBUG( default: ; )                                       \
                 }} while (0); } while (0);                                    \
             }                                                                 \
             assert(0 && "corrupted coroutine state");                         \
