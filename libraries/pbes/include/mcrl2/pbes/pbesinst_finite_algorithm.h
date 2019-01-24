@@ -74,6 +74,10 @@ struct pbesinst_finite_rename
         {
           dest = id_generator(dest);
         }
+        else
+        {
+          id_generator.add_identifier(dest);
+        }
         m[P] = dest;
         return dest;
       }
