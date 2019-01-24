@@ -23,7 +23,6 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/replace.h"
@@ -90,6 +89,22 @@ class pbesinst_lazy_algorithm
         return out.str();
       }
       return "";
+    }
+
+    /// \brief Creates a substitution function for the pbesinst rewriter.
+    /// \param v A sequence of data variables
+    /// \param e A sequence of data expressions
+    /// \param sigma The substitution that maps the i-th element of \p v to the i-th element of \p e
+    inline
+    void make_substitution(const data::variable_list& v, const data::data_expression_list& e, data::rewriter::substitution_type& sigma)
+    {
+      assert(v.size() == e.size());
+      auto vi = v.begin();
+      auto ei = e.begin();
+      for (; vi != v.end(); ++vi, ++ei)
+      {
+        sigma[*vi] = *ei;
+      }
     }
 
     // instantiates global variables
@@ -235,7 +250,7 @@ class pbesinst_lazy_algorithm
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
         data::rewriter::substitution_type sigma;
-        make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
+        make_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         const auto& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
 
