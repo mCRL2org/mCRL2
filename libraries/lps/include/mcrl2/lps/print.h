@@ -23,8 +23,6 @@ namespace mcrl2
 namespace lps
 {
 
-using core::detail::precedences::max_precedence;
-
 namespace detail
 {
 
@@ -36,6 +34,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   using super::enter;
   using super::leave;
   using super::apply;
+  using super::derived;
   using super::print_action_declarations;
   using super::print_assignments;
   using super::print_condition;
@@ -52,11 +51,6 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   bool& print_summand_numbers()
   {
   	return m_print_summand_numbers;
-  }
-
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
   }
 
   template <typename Container>
@@ -99,7 +93,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     if (x.has_time())
     {
       derived().print(" @ ");
-      print_expression(x.time(), max_precedence);
+      print_expression(x.time(), precedence(x.time()) < core::detail::max_precedence);
     }
     derived().leave(x);
   }
@@ -118,7 +112,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     if (x.has_time())
     {
       derived().print(" @ ");
-      print_expression(x.time(), max_precedence);
+      print_expression(x.time(), precedence(x.time()) < core::detail::max_precedence);
     }
     derived().leave(x);
   }
@@ -127,7 +121,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   {
     derived().enter(x);
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
-    print_condition(x.condition(), " ->\n         ", max_precedence);
+    print_condition(x.condition(), " ->\n         ");
     derived().apply(x.deadlock());
     derived().leave(x);
   }
@@ -164,7 +158,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   {
     derived().enter(x);
     print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
-    print_condition(x.condition(), " ->\n         ", max_precedence);
+    print_condition(x.condition(), " ->\n         ");
     derived().apply(x.multi_action());
     derived().print(" .\n         ");
     print_distribution(x);

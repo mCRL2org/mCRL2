@@ -445,7 +445,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   left = atermpp::down_cast<application>(sort_int::left(x));
   std::cout << "left = " << left << " " << data::pp(left) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left));
-  std::cout << "left_precedence(left) = " << left_precedence(left) << std::endl;
+  std::cout << "precedence(left) = " << precedence(left) << std::endl;
 
   BOOST_CHECK(data::sort_nat::is_nat(x.sort()));
   BOOST_CHECK(data::sort_int::is_mod_application(x));
@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE(test_mod)
   left1 = atermpp::down_cast<application>(detail::remove_numeric_casts(left));
   std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
   BOOST_CHECK(data::detail::is_minus(left1));
-  std::cout << "left_precedence(left1) = " << left_precedence(left1) << std::endl;
+  std::cout << "precedence(left1) = " << precedence(left1) << std::endl;
 
   BOOST_CHECK(data::pp(x) == "(2 - 1) mod 3");
   std::cout << "x = " << x << " " << data::pp(x) << std::endl;
@@ -532,7 +532,7 @@ BOOST_AUTO_TEST_CASE(test_precedence)
 {
   data::data_expression x = parse_data_expression("exists b:Bool. true");
   BOOST_CHECK(is_exists(x));
-  BOOST_CHECK(left_precedence(x) == 1);
+  BOOST_CHECK(precedence(x) == 1);
 
   data::variable a("a", sort_real::real_());
   data::variable b("b", sort_real::real_());

@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/index_traits.h"
@@ -35,8 +34,6 @@ namespace bes
 typedef core::identifier_string boolean_variable_key_type;
 
 template <typename T> std::string pp(const T& x);
-
-using namespace core::detail::precedences;
 
 //--- start generated classes ---//
 /// \brief A boolean expression
@@ -563,66 +560,20 @@ inline void swap(boolean_variable& t1, boolean_variable& t2)
 }
 //--- end generated classes ---//
 
-// From the documentation:
-// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>".
-// The infix operators "&&", "||" and "=>" associate to the right.
-/// \brief Returns the precedence of boolean expressions
-// N.B. The is_base_of construction is needed to make sure that the precedence also works on
-// classes of type 'and_', 'or_' and 'imp'.
-inline int left_precedence(const imp&)    { return 2; }
-inline int left_precedence(const or_&)    { return 3; }
-inline int left_precedence(const and_&)   { return 4; }
-inline int left_precedence(const not_&)   { return 5; }
-inline int left_precedence(const boolean_expression& x)
-{
-       if (is_imp(x)) { return left_precedence(static_cast<const imp&>(x)); }
-  else if (is_or(x))  { return left_precedence(static_cast<const or_&>(x)); }
-  else if (is_and(x)) { return left_precedence(static_cast<const and_&>(x)); }
-  else if (is_not(x)) { return left_precedence(static_cast<const not_&>(x)); }
-  return core::detail::precedences::max_precedence;
-}
-
-inline int right_precedence(const boolean_expression& x)
-{
-  return left_precedence(x);
-}
-
-inline const boolean_expression& unary_operand(const not_& x) { return x.operand(); }
-inline const boolean_expression& binary_left(const and_& x)   { return x.left(); }
-inline const boolean_expression& binary_right(const and_& x)  { return x.right(); }
-inline const boolean_expression& binary_left(const or_& x)    { return x.left(); }
-inline const boolean_expression& binary_right(const or_& x)   { return x.right(); }
-inline const boolean_expression& binary_left(const imp& x)    { return x.left(); }
-inline const boolean_expression& binary_right(const imp& x)   { return x.right(); }
-
-/// \brief Returns true if the operations have the same precedence, but are different
-inline
-bool is_same_different_precedence(const and_&, const boolean_expression& x)
-{
-  return is_or(x);
-}
-
-/// \brief Returns true if the operations have the same precedence, but are different
-inline
-bool is_same_different_precedence(const or_&, const boolean_expression& x)
-{
-  return is_and(x);
-}
-
 namespace accessors
 {
 inline
 const boolean_expression& left(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::down_cast<const boolean_expression>(e[0]);
+  return atermpp::down_cast<boolean_expression>(e[0]);
 }
 
 inline
 const boolean_expression& right(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
-  return atermpp::down_cast<const boolean_expression>(e[1]);
+  return atermpp::down_cast<boolean_expression>(e[1]);
 }
 
 } // namespace accessors
@@ -668,7 +619,7 @@ struct term_traits<bes::boolean_expression>
 
   /// \brief Operator not
   /// \param x A term
-  /// \return Operator not applied to 
+  /// \return Operator not applied to
   static inline
   bes::boolean_expression not_(const bes::boolean_expression& x)
   {

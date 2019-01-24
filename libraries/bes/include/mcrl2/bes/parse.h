@@ -84,26 +84,26 @@ struct bes_actions: public core::default_parser_actions
 };
 
 inline
-boolean_expression parse_boolean_expression_new(const std::string& text)
+boolean_expression parse_boolean_expression(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("BesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  boolean_expression result = bes_actions(p).parse_BesExpr(node);
+  boolean_expression result = detail::bes_actions(p).parse_BesExpr(node);
   return result;
 }
 
 inline
-boolean_equation_system parse_boolean_equation_system_new(const std::string& text)
+boolean_equation_system parse_boolean_equation_system(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("BesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  boolean_equation_system result = bes_actions(p).parse_BesSpec(node);
+  boolean_equation_system result = detail::bes_actions(p).parse_BesSpec(node);
   return result;
 }
 
@@ -128,7 +128,7 @@ std::istream& operator>>(std::istream& from, boolean_equation_system& b)
   {
     boolean_variable v(eqn.variable().name());
     boolean_expression rhs = bes::pbes_expression2boolean_expression(eqn.formula());
-    equations.push_back(boolean_equation(eqn.symbol(), v, rhs));
+    equations.emplace_back(eqn.symbol(), v, rhs);
   }
 
   boolean_expression init = bes::pbes_expression2boolean_expression(p.initial_state());

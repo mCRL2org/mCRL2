@@ -13,7 +13,6 @@
 #define MCRL2_MODAL_FORMULA_ACTION_FORMULA_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/process_expression.h"
@@ -767,48 +766,6 @@ inline void swap(multi_action& t1, multi_action& t2)
   t1.swap(t2);
 }
 //--- end generated classes ---//
-
-//template <typename T>
-//int left_precedence(const T&)
-//{
-//  return core::detail::precedences::max_precedence;
-//}
-inline int left_precedence(const forall&) { return 21; }
-inline int left_precedence(const exists&) { return 21; }
-inline int left_precedence(const imp&)    { return 22; }
-inline int left_precedence(const or_&)    { return 23; }
-inline int left_precedence(const and_&)   { return 24; }
-inline int left_precedence(const at&)     { return 25; }
-inline int left_precedence(const not_&)   { return 26; }
-inline int left_precedence(const action_formula& x)
-{
-  if      (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
-  else if (is_exists(x)) { return left_precedence(static_cast<const exists&>(x)); }
-  else if (is_imp(x))    { return left_precedence(static_cast<const imp&>(x)); }
-  else if (is_or(x))     { return left_precedence(static_cast<const or_&>(x)); }
-  else if (is_and(x))    { return left_precedence(static_cast<const and_&>(x)); }
-  else if (is_at(x))     { return left_precedence(static_cast<const at&>(x)); }
-  else if (is_not(x))    { return left_precedence(static_cast<const not_&>(x)); }
-  return core::detail::precedences::max_precedence;
-}
-
-inline int right_precedence(const forall& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const forall&>(x).body())); }
-inline int right_precedence(const exists& x) { return (std::max)(left_precedence(x), left_precedence(static_cast<const exists&>(x).body())); }
-inline int right_precedence(const action_formula& x)
-{
-  if      (is_forall(x)) { return right_precedence(static_cast<const forall&>(x)); }
-  else if (is_exists(x)) { return right_precedence(static_cast<const exists&>(x)); }
-  return left_precedence(x);
-}
-
-inline const action_formula& unary_operand(const not_& x) { return x.operand(); }
-inline const action_formula& unary_operand(const at& x)   { return x.operand(); }
-inline const action_formula& binary_left(const and_& x)   { return x.left(); }
-inline const action_formula& binary_right(const and_& x)  { return x.right(); }
-inline const action_formula& binary_left(const or_& x)    { return x.left(); }
-inline const action_formula& binary_right(const or_& x)   { return x.right(); }
-inline const action_formula& binary_left(const imp& x)    { return x.left(); }
-inline const action_formula& binary_right(const imp& x)   { return x.right(); }
 
 // template function overloads
 std::set<data::variable> find_all_variables(const action_formulas::action_formula& x);

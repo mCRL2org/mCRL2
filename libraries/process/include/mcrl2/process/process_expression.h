@@ -17,7 +17,6 @@
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/precedence.h"
 #include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/process/action_label.h"
 #include "mcrl2/process/communication_expression.h"
@@ -30,9 +29,6 @@ namespace mcrl2
 
 namespace process
 {
-
-// Needed for argument dependent lookup (?)
-using namespace core::detail::precedences;
 
 //--- start generated classes ---//
 /// \brief A process expression
@@ -1631,61 +1627,6 @@ inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
   t1.swap(t2);
 }
 //--- end generated classes ---//
-
-// From the documentation:
-// The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
-
-/// \brief Defines a precedence relation on process expressions
-inline int left_precedence(const choice&)              { return 1; }
-inline int left_precedence(const sum&)                 { return 2; }
-inline int left_precedence(const stochastic_operator&) { return 2; }
-inline int left_precedence(const merge&)               { return 3; }
-inline int left_precedence(const left_merge&)          { return 4; }
-inline int left_precedence(const if_then&)             { return 5; }
-inline int left_precedence(const if_then_else&)        { return 5; }
-inline int left_precedence(const bounded_init&)        { return 6; }
-inline int left_precedence(const seq&)                 { return 7; }
-inline int left_precedence(const at&)                  { return 8; }
-inline int left_precedence(const sync&)                { return 9; }
-inline int left_precedence(const process_expression& x)
-{
-       if (is_choice(x))              { return left_precedence(static_cast<const choice&>(x)); }
-  else if (is_sum(x))                 { return left_precedence(static_cast<const sum&>(x)); }
-  else if (is_stochastic_operator(x)) { return left_precedence(static_cast<const stochastic_operator&>(x)); }
-  else if (is_merge(x))               { return left_precedence(static_cast<const merge&>(x)); }
-  else if (is_left_merge(x))          { return left_precedence(static_cast<const left_merge>(x)); }
-  else if (is_if_then(x))             { return left_precedence(static_cast<const if_then&>(x)); }
-  else if (is_if_then_else(x))        { return left_precedence(static_cast<const if_then_else&>(x)); }
-  else if (is_bounded_init(x))        { return left_precedence(static_cast<const bounded_init&>(x)); }
-  else if (is_seq(x))                 { return left_precedence(static_cast<const seq&>(x)); }
-  else if (is_at(x))                  { return left_precedence(static_cast<const at&>(x)); }
-  else if (is_sync(x))                { return left_precedence(static_cast<const sync&>(x)); }
-  return core::detail::precedences::max_precedence;
-}
-
-inline int right_precedence(const process_expression& x) { return left_precedence(x); }
-
-inline const process_expression& unary_operand(const sum& x)                 { return x.operand(); }
-inline const process_expression& unary_operand(const stochastic_operator& x) { return x.operand(); }
-inline const process_expression& unary_operand(const block& x)               { return x.operand(); }
-inline const process_expression& unary_operand(const hide& x)                { return x.operand(); }
-inline const process_expression& unary_operand(const rename& x)              { return x.operand(); }
-inline const process_expression& unary_operand(const comm& x)                { return x.operand(); }
-inline const process_expression& unary_operand(const allow& x)               { return x.operand(); }
-inline const process_expression& unary_operand(const at& x)                  { return x.operand(); }
-
-inline const process_expression& binary_left(const sync& x)          { return x.left(); }
-inline const process_expression& binary_right(const sync& x)         { return x.right(); }
-inline const process_expression& binary_left(const seq& x)           { return x.left(); }
-inline const process_expression& binary_right(const seq& x)          { return x.right(); }
-inline const process_expression& binary_left(const bounded_init& x)  { return x.left(); }
-inline const process_expression& binary_right(const bounded_init& x) { return x.right(); }
-inline const process_expression& binary_left(const choice& x)        { return x.left(); }
-inline const process_expression& binary_right(const choice& x)       { return x.right(); }
-inline const process_expression& binary_left(const merge& x)         { return x.left(); }
-inline const process_expression& binary_right(const merge& x)        { return x.right(); }
-inline const process_expression& binary_left(const left_merge& x)    { return x.left(); }
-inline const process_expression& binary_right(const left_merge& x)   { return x.right(); }
 
 // template function overloads
 std::string pp(const process_expression_list& x);

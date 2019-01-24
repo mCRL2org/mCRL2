@@ -19,6 +19,69 @@ namespace mcrl2 {
 
 namespace process {
 
+constexpr inline int precedence(const choice&)              { return 1; }
+constexpr inline int precedence(const sum&)                 { return 2; }
+constexpr inline int precedence(const stochastic_operator&) { return 2; }
+constexpr inline int precedence(const merge&)               { return 3; }
+constexpr inline int precedence(const left_merge&)          { return 4; }
+constexpr inline int precedence(const if_then&)             { return 5; }
+constexpr inline int precedence(const if_then_else&)        { return 5; }
+constexpr inline int precedence(const bounded_init&)        { return 6; }
+constexpr inline int precedence(const seq&)                 { return 7; }
+constexpr inline int precedence(const at&)                  { return 8; }
+constexpr inline int precedence(const sync&)                { return 9; }
+inline int precedence(const process_expression& x)
+{
+  if (is_choice(x))                   { return precedence(atermpp::down_cast<choice>(x)); }
+  else if (is_sum(x))                 { return precedence(atermpp::down_cast<sum>(x)); }
+  else if (is_stochastic_operator(x)) { return precedence(atermpp::down_cast<stochastic_operator>(x)); }
+  else if (is_merge(x))               { return precedence(atermpp::down_cast<merge>(x)); }
+  else if (is_left_merge(x))          { return precedence(atermpp::down_cast<left_merge>(x)); }
+  else if (is_if_then(x))             { return precedence(atermpp::down_cast<if_then>(x)); }
+  else if (is_if_then_else(x))        { return precedence(atermpp::down_cast<if_then_else>(x)); }
+  else if (is_bounded_init(x))        { return precedence(atermpp::down_cast<bounded_init>(x)); }
+  else if (is_seq(x))                 { return precedence(atermpp::down_cast<seq>(x)); }
+  else if (is_at(x))                  { return precedence(atermpp::down_cast<at>(x)); }
+  else if (is_sync(x))                { return precedence(atermpp::down_cast<sync>(x)); }
+  return core::detail::max_precedence;
+}
+
+// only defined for binary operators
+inline bool is_left_associative(const choice&)              { return true; }
+inline bool is_left_associative(const merge&)               { return false; }
+inline bool is_left_associative(const left_merge&)          { return false; }
+inline bool is_left_associative(const bounded_init&)        { return true; }
+inline bool is_left_associative(const seq&)                 { return true; }
+inline bool is_left_associative(const sync&)                { return false; }
+inline bool is_left_associative(const process_expression& x)
+{
+  if (is_choice(x))                   { return is_left_associative(atermpp::down_cast<choice>(x)); }
+  else if (is_merge(x))               { return is_left_associative(atermpp::down_cast<merge>(x)); }
+  else if (is_left_merge(x))          { return is_left_associative(atermpp::down_cast<left_merge>(x)); }
+  else if (is_bounded_init(x))        { return is_left_associative(atermpp::down_cast<bounded_init>(x)); }
+  else if (is_seq(x))                 { return is_left_associative(atermpp::down_cast<seq>(x)); }
+  else if (is_sync(x))                { return is_left_associative(atermpp::down_cast<sync>(x)); }
+  return false;
+}
+
+// only defined for binary operators
+inline bool is_right_associative(const choice&)              { return true; }
+inline bool is_right_associative(const merge&)               { return true; }
+inline bool is_right_associative(const left_merge&)          { return true; }
+inline bool is_right_associative(const bounded_init&)        { return true; }
+inline bool is_right_associative(const seq&)                 { return true; }
+inline bool is_right_associative(const sync&)                { return true; }
+inline bool is_right_associative(const process_expression& x)
+{
+  if (is_choice(x))                   { return is_right_associative(atermpp::down_cast<choice>(x)); }
+  else if (is_merge(x))               { return is_right_associative(atermpp::down_cast<merge>(x)); }
+  else if (is_left_merge(x))          { return is_right_associative(atermpp::down_cast<left_merge>(x)); }
+  else if (is_bounded_init(x))        { return is_right_associative(atermpp::down_cast<bounded_init>(x)); }
+  else if (is_seq(x))                 { return is_right_associative(atermpp::down_cast<seq>(x)); }
+  else if (is_sync(x))                { return is_right_associative(atermpp::down_cast<sync>(x)); }
+  return false;
+}
+
 namespace detail
 {
 
@@ -30,17 +93,13 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
   using super::enter;
   using super::leave;
   using super::apply;
+  using super::derived;
   using super::print_assignments;
-  using super::print_condition;
   using super::print_list;
   using super::print_variables;
   using super::print_expression;
+  using super::print_unary_operand;
   using super::print_binary_operation;
-
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
-  }
 
   void print_initial_state(const process_expression& init)
   {
@@ -49,9 +108,9 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().print(";\n");
   }
 
-  void print_if_then_condition(const data::data_expression& condition, const std::string& arrow = "  ->  ", int precedence = max_precedence)
+  void print_if_then_condition(const data::data_expression& condition, const std::string& arrow = "  ->  ")
   {
-    print_expression(condition, precedence);
+    print_expression(condition, false);
     derived().print(arrow);
   }
 
@@ -233,7 +292,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().print("sum ");
     print_variables(x.variables(), true, true, false, "", "");
     derived().print(". ");
-    print_expression(x.operand(), left_precedence(x));
+    print_unary_operand(x, x.operand());
     derived().leave(x);
   }
 
@@ -245,7 +304,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().print("[");
     derived().apply(x.distribution());
     derived().print("] . ");
-    print_expression(x.operand(), left_precedence(x));
+    print_unary_operand(x, x.operand());
     derived().leave(x);
   }
 
@@ -336,7 +395,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().enter(x);
     derived().apply(x.operand());
     derived().print(" @ ");
-    print_expression(x.time_stamp(), max_precedence);
+    print_expression(x.time_stamp(), precedence(x.time_stamp()) < core::detail::max_precedence);
     derived().leave(x);
   }
 
@@ -347,25 +406,23 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().leave(x);
   }
 
-  // TODO: find out why precedences are hard coded here
   void apply(const process::if_then& x)
   {
     derived().enter(x);
-    print_if_then_condition(x.condition(), " -> ", max_precedence);
-    print_expression(x.then_case());
+    print_if_then_condition(x.condition(), " -> ");
+    print_expression(x.then_case(), precedence(x.then_case()) < precedence(x));
     derived().leave(x);
   }
 
-  // TODO: find out why precedences are hard coded here
   void apply(const process::if_then_else& x)
   {
     derived().enter(x);
-    print_if_then_condition(x.condition(), " -> ", max_precedence);
+    print_if_then_condition(x.condition(), " -> ");
     // N.B. the then case is printed with a higher precedence, since we want the expression a -> b -> c <> d <> e
     // to be printed as a -> (b -> c <> d) <> e
-    print_expression(x.then_case(), left_precedence(x) + 1);
+    print_expression(x.then_case(), precedence(x.then_case()) <= precedence(x));
     derived().print(" <> ");
-    print_expression(x.else_case());
+    print_expression(x.else_case(), precedence(x.else_case()) < precedence(x));
     derived().leave(x);
   }
 

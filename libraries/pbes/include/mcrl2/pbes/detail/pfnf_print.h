@@ -29,17 +29,10 @@ struct pfnf_printer: public pbes_system::detail::printer<Derived>
   using super::enter;
   using super::leave;
   using super::apply;
-
+  using super::derived;
   using super::print_abstraction;
   using super::print_list;
-  using super::print_binary_operation;
-  using super::print_expression;
   using super::print_variables;
-
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
-  }
 
   bool is_abstraction(const pbes_system::pbes_expression& x)
   {

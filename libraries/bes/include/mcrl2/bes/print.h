@@ -20,6 +20,43 @@ namespace mcrl2 {
 
 namespace bes {
 
+/// \brief Returns the precedence of boolean expressions
+constexpr inline int precedence(const imp&)    { return 2; }
+constexpr inline int precedence(const or_&)    { return 3; }
+constexpr inline int precedence(const and_&)   { return 4; }
+constexpr inline int precedence(const not_&)   { return 5; }
+inline int precedence(const boolean_expression& x)
+{
+  if (is_imp(x))      { return precedence(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))  { return precedence(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x)) { return precedence(atermpp::down_cast<and_>(x)); }
+  else if (is_not(x)) { return precedence(atermpp::down_cast<not_>(x)); }
+  return core::detail::max_precedence;
+}
+
+// only defined for binary operators
+inline bool is_left_associative(const imp&)  { return false; }
+inline bool is_left_associative(const or_&)  { return true; }
+inline bool is_left_associative(const and_&) { return true; }
+inline bool is_left_associative(const boolean_expression& x)
+{
+  if (is_imp(x))      { return is_left_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))  { return is_left_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x)) { return is_left_associative(atermpp::down_cast<and_>(x)); }
+  return false;
+}
+
+inline bool is_right_associative(const imp&)  { return true; }
+inline bool is_right_associative(const or_&)  { return true; }
+inline bool is_right_associative(const and_&) { return true; }
+inline bool is_right_associative(const boolean_expression& x)
+{
+  if (is_imp(x))      { return is_right_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))  { return is_right_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x)) { return is_right_associative(atermpp::down_cast<and_>(x)); }
+  return false;
+}
+
 namespace detail {
 
 template <typename Derived>
@@ -30,15 +67,14 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
   using super::enter;
   using super::leave;
   using super::apply;
+  using super::derived;
   using super::print_expression;
-  using super::print_unary_operation;
+  using super::print_unary_left_operation;
   using super::print_binary_operation;
   using super::print_list;
 
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
-  }
+  template <typename T> bool is_left_associative(const T&) { return false; }
+  template <typename T> bool is_right_associative(const T&) { return false; }
 
   void apply(const bes::boolean_equation& x)
   {
@@ -54,7 +90,7 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
   {
     print_list(x.equations(), "pbes\n    ", ";\n\n", ";\n    ");
     derived().print("init ");
-    print_expression(x.initial_state());
+    print_expression(x.initial_state(), false);
     derived().print(";\n");
     derived().leave(x);
   }
@@ -76,7 +112,7 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
   void apply(const bes::not_& x)
   {
     derived().enter(x);
-    print_unary_operation(x, "!");
+    print_unary_left_operation(x, "!");
     derived().leave(x);
   }
 

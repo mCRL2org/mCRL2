@@ -40,7 +40,7 @@ template <class IteratorTag>
 class prepend_iterator_tag_convertor
 {
   public:
-    typedef std::forward_iterator_tag iterator_category; 
+    typedef std::forward_iterator_tag iterator_category;
 };
 
 template <>
@@ -68,7 +68,7 @@ class term_appl_prepend_iterator
     typedef ptrdiff_t difference_type;
     // The iterator category.
     // The iterator category is a forward_iterator, unless Iterator is an input iterator, in which case
-    // it is an input iterator. 
+    // it is an input iterator.
     typedef typename prepend_iterator_tag_convertor<traits::iterator_category>::iterator_category iterator_category;
 
   protected:
@@ -191,9 +191,9 @@ template <typename InputIterator, class ArgumentConverter>
 class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator<InputIterator>
 {
   public:
-    // The transforming_term_appl_prepend_iterator is an input iterator. The iterator can only 
+    // The transforming_term_appl_prepend_iterator is an input iterator. The iterator can only
     // be traversed once, as the an ArgumentConverter is applied when traversing the iterator.
-    // The ArgumentConverter should not be applied multiple times. 
+    // The ArgumentConverter should not be applied multiple times.
     typedef std::input_iterator_tag iterator_category;
 
   protected:
@@ -544,15 +544,6 @@ std::ostream& operator<<(std::ostream& out, const application& x)
   return out << data::pp(x);
 }
 //--- end generated class application ---//
-
-// The precedence function must be declared here. Unfortunately this cannot be done using the include below.
-// #include "mcrl2/data/precedence.h"
-// Instead we do a forward declare of the precedence function. The user must make sure the file precedence.h is actually included.
-// TOOO: fix this by moving the is_??? functions to the file application.h
-int left_precedence(const data_expression& x);
-int right_precedence(const data_expression& x);
-int left_precedence(const application& x);
-int right_precedence(const application& x);
 
 inline
 const data_expression& unary_operand(const application& x)

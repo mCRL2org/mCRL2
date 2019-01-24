@@ -128,7 +128,7 @@ void test_replace_variables_capture_avoiding(const std::string& x_text, const st
 
 void test_replace_variables_capture_avoiding()
 {
-  test_replace_variables_capture_avoiding("sum n: Bool. a(n) . (sum k: Bool. a(k) . a(m))", "m: Bool := n", "sum n1: Bool. a(n1) . (sum k: Bool. a(k) . a(n))");
+  test_replace_variables_capture_avoiding("sum n: Bool. a(n) . sum k: Bool. a(k) . a(m)", "m: Bool := n", "sum n1: Bool. a(n1) . (sum k: Bool. a(k) . a(n))");
 }
 
 void test_process_instance_assignment()

@@ -20,7 +20,47 @@ namespace mcrl2 {
 
 namespace action_formulas {
 
-using core::detail::precedences::max_precedence;
+constexpr inline int precedence(const forall&) { return 21; }
+constexpr inline int precedence(const exists&) { return 21; }
+constexpr inline int precedence(const imp&)    { return 22; }
+constexpr inline int precedence(const or_&)    { return 23; }
+constexpr inline int precedence(const and_&)   { return 24; }
+constexpr inline int precedence(const at&)     { return 25; }
+constexpr inline int precedence(const not_&)   { return 26; }
+inline int precedence(const action_formula& x)
+{
+  if (is_forall(x))      { return precedence(atermpp::down_cast<forall>(x)); }
+  else if (is_exists(x)) { return precedence(atermpp::down_cast<exists>(x)); }
+  else if (is_imp(x))    { return precedence(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))     { return precedence(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x))    { return precedence(atermpp::down_cast<and_>(x)); }
+  else if (is_at(x))     { return precedence(atermpp::down_cast<at>(x)); }
+  else if (is_not(x))    { return precedence(atermpp::down_cast<not_>(x)); }
+  return core::detail::max_precedence;
+}
+
+// only defined for binary operators
+inline bool is_left_associative(const imp&)  { return false; }
+inline bool is_left_associative(const or_&)  { return true; }
+inline bool is_left_associative(const and_&) { return true; }
+inline bool is_left_associative(const action_formula& x)
+{
+  if (is_imp(x))      { return is_left_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))  { return is_left_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x)) { return is_left_associative(atermpp::down_cast<and_>(x)); }
+  return false;
+}
+
+inline bool is_right_associative(const imp&)  { return true; }
+inline bool is_right_associative(const or_&)  { return true; }
+inline bool is_right_associative(const and_&) { return true; }
+inline bool is_right_associative(const action_formula& x)
+{
+  if (is_imp(x))      { return is_right_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))  { return is_right_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x)) { return is_right_associative(atermpp::down_cast<and_>(x)); }
+  return false;
+}
 
 namespace detail
 {
@@ -33,17 +73,13 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
   using super::enter;
   using super::leave;
   using super::apply;
-  using super::print_unary_operation;
-  using super::print_binary_operation;
+  using super::derived;
   using super::print_abstraction;
-  using super::print_expression;
   using super::print_list;
   using super::print_action_declarations;
-
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
-  }
+  using super::print_expression;
+  using super::print_unary_left_operation;
+  using super::print_binary_operation;
 
   void apply(const action_formulas::true_& x)
   {
@@ -62,7 +98,7 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
   void apply(const action_formulas::not_& x)
   {
     derived().enter(x);
-    print_unary_operation(x, "!");
+    print_unary_left_operation(x, "!");
     derived().leave(x);
   }
 
@@ -106,7 +142,7 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
     derived().enter(x);
     derived().apply(x.operand());
     derived().print(" @ ");
-    print_expression(x.time_stamp(), max_precedence);
+    print_expression(x.time_stamp(), precedence(x.time_stamp()) < core::detail::max_precedence);
     derived().leave(x);
   }
 
@@ -148,7 +184,37 @@ std::string pp(const T& t)
 
 namespace regular_formulas {
 
-using core::detail::precedences::max_precedence;
+constexpr inline int precedence(const seq&)          { return 31; }
+constexpr inline int precedence(const alt&)          { return 32; }
+constexpr inline int precedence(const trans&)        { return 33; }
+constexpr inline int precedence(const trans_or_nil&) { return 33; }
+inline int precedence(const regular_formula& x)
+{
+  if (is_seq(x))               { return precedence(atermpp::down_cast<seq>(x)); }
+  else if (is_alt(x))          { return precedence(atermpp::down_cast<alt>(x)); }
+  else if (is_trans(x))        { return precedence(atermpp::down_cast<trans>(x)); }
+  else if (is_trans_or_nil(x)) { return precedence(atermpp::down_cast<trans_or_nil>(x)); }
+  return core::detail::max_precedence;
+}
+
+// only defined for binary operators
+inline bool is_left_associative(const seq&)  { return false; }
+inline bool is_left_associative(const alt&)  { return true; }
+inline bool is_left_associative(const regular_formula& x)
+{
+  if (is_seq(x))      { return is_left_associative(atermpp::down_cast<seq>(x)); }
+  else if (is_alt(x)) { return is_left_associative(atermpp::down_cast<alt>(x)); }
+  return false;
+}
+
+inline bool is_right_associative(const seq&)  { return true; }
+inline bool is_right_associative(const alt&)  { return true; }
+inline bool is_right_associative(const regular_formula& x)
+{
+  if (is_seq(x))      { return is_right_associative(atermpp::down_cast<seq>(x)); }
+  else if (is_alt(x)) { return is_right_associative(atermpp::down_cast<alt>(x)); }
+  return false;
+}
 
 namespace detail
 {
@@ -161,15 +227,13 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
   using super::enter;
   using super::leave;
   using super::apply;
-  using super::print_unary_operation;
-  using super::print_binary_operation;
-  using super::print_expression;
+  using super::derived;
   using super::print_action_declarations;
 
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
-  }
+  using super::print_expression;
+  using super::print_unary_left_operation;
+  using super::print_unary_right_operation;
+  using super::print_binary_operation;
 
   void apply(const regular_formulas::seq& x)
   {
@@ -188,25 +252,23 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
   void apply(const regular_formulas::trans& x)
   {
     derived().enter(x);
-    print_expression(x.operand(), left_precedence(x));
-    derived().print("+");
+    print_unary_right_operation(x, "+");
     derived().leave(x);
   }
 
   void apply(const regular_formulas::trans_or_nil& x)
   {
     derived().enter(x);
-    print_expression(x.operand(), left_precedence(x));
-    derived().print("*");
+    print_unary_right_operation(x, "*");
     derived().leave(x);
   }
 
   void apply(const regular_formulas::untyped_regular_formula& x)
   {
     derived().enter(x);
-    print_expression(x.left());
+    print_expression(x.left(), false);
     derived().print(" " + std::string(x.name()) + " ");
-    print_expression(x.right());
+    print_expression(x.right(), false);
     derived().leave(x);
   }
 };
@@ -234,7 +296,53 @@ std::string pp(const T& t)
 
 namespace state_formulas {
 
-using core::detail::precedences::max_precedence;
+constexpr inline int precedence(const mu&)     { return 41; }
+constexpr inline int precedence(const nu&)     { return 41; }
+constexpr inline int precedence(const forall&) { return 42; }
+constexpr inline int precedence(const exists&) { return 42; }
+constexpr inline int precedence(const imp&)    { return 43; }
+constexpr inline int precedence(const or_&)    { return 44; }
+constexpr inline int precedence(const and_&)   { return 45; }
+constexpr inline int precedence(const must&)   { return 46; }
+constexpr inline int precedence(const may&)    { return 46; }
+constexpr inline int precedence(const not_&)   { return 47; }
+inline int precedence(const state_formula& x)
+{
+  if      (is_mu(x))     { return precedence(atermpp::down_cast<mu>(x)); }
+  else if (is_nu(x))     { return precedence(atermpp::down_cast<nu>(x)); }
+  else if (is_forall(x)) { return precedence(atermpp::down_cast<forall>(x)); }
+  else if (is_exists(x)) { return precedence(atermpp::down_cast<exists>(x)); }
+  else if (is_imp(x))    { return precedence(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))     { return precedence(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x))    { return precedence(atermpp::down_cast<and_>(x)); }
+  else if (is_must(x))   { return precedence(atermpp::down_cast<must>(x)); }
+  else if (is_may(x))    { return precedence(atermpp::down_cast<may>(x)); }
+  else if (is_not(x))    { return precedence(atermpp::down_cast<not_>(x)); }
+  return core::detail::max_precedence;
+}
+
+// only defined for binary operators
+inline bool is_left_associative(const imp&)  { return false; }
+inline bool is_left_associative(const or_&)  { return true; }
+inline bool is_left_associative(const and_&) { return true; }
+inline bool is_left_associative(const state_formula& x)
+{
+  if (is_imp(x))      { return is_left_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))  { return is_left_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x)) { return is_left_associative(atermpp::down_cast<and_>(x)); }
+  return false;
+}
+
+inline bool is_right_associative(const imp&)  { return true; }
+inline bool is_right_associative(const or_&)  { return true; }
+inline bool is_right_associative(const and_&) { return true; }
+inline bool is_right_associative(const state_formula& x)
+{
+  if (is_imp(x))      { return is_right_associative(atermpp::down_cast<imp>(x)); }
+  else if (is_or(x))  { return is_right_associative(atermpp::down_cast<or_>(x)); }
+  else if (is_and(x)) { return is_right_associative(atermpp::down_cast<and_>(x)); }
+  return false;
+}
 
 namespace detail
 {
@@ -247,13 +355,15 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   using super::enter;
   using super::leave;
   using super::apply;
-  using super::print_unary_operation;
-  using super::print_binary_operation;
+  using super::derived;
   using super::print_abstraction;
   using super::print_variables;
-  using super::print_expression;
   using super::print_list;
   using super::print_action_declarations;
+
+  using super::print_expression;
+  using super::print_unary_left_operation;
+  using super::print_binary_operation;
 
   // Determines whether or not data expressions should be wrapped inside 'val'.
   std::vector<bool> val;
@@ -267,11 +377,6 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   {
     assert(!val.empty());
     val.pop_back();
-  }
-
-  Derived& derived()
-  {
-    return static_cast<Derived&>(*this);
   }
 
   void apply(const data::data_expression& x)
@@ -309,7 +414,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   void apply(const state_formulas::not_& x)
   {
     derived().enter(x);
-    print_unary_operation(x, "!");
+    print_unary_left_operation(x, "!");
     derived().leave(x);
   }
 
@@ -385,7 +490,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().enter(x);
     derived().print("yaled");
     derived().print(" @ ");
-    derived().apply(x.time_stamp());
+    print_expression(x.time_stamp(), precedence(x.time_stamp()) < core::detail::max_precedence);
     derived().leave(x);
     enable_val();
   }
@@ -403,7 +508,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().enter(x);
     derived().print("delay");
     derived().print(" @ ");
-    derived().apply(x.time_stamp());
+    print_expression(x.time_stamp(), precedence(x.time_stamp()) < core::detail::max_precedence);
     derived().leave(x);
     enable_val();
   }

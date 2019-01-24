@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_rename)
   formula = rename_predicate_variables(formula, generator);
 
   std::cout << "pp(formula) == " << pp(formula) << std::endl;
-  BOOST_CHECK(pp(formula) == "(mu X1. X1) && mu X. X" || pp(formula) == "(mu X. X) && mu X1. X1");
+  BOOST_CHECK(pp(formula) == "(mu X1. X1) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X1. X1)");
 
   generator = data::set_identifier_generator();
   generator.add_identifiers(lps::find_identifiers(lpsspec));

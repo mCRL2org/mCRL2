@@ -16,7 +16,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/modal_formula/action_formula.h"
@@ -451,31 +450,6 @@ inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2)
   t1.swap(t2);
 }
 //--- end generated classes ---//
-
-inline int left_precedence(const seq&)            { return 31; }
-inline int left_precedence(const alt&)            { return 32; }
-inline int left_precedence(const trans&)          { return 33; }
-inline int left_precedence(const trans_or_nil&)   { return 33; }
-inline int left_precedence(const regular_formula& x)
-{
-  if      (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
-  else if (is_alt(x))          { return left_precedence(static_cast<const alt&>(x)); }
-  else if (is_trans(x))        { return left_precedence(static_cast<const trans&>(x)); }
-  else if (is_trans_or_nil(x)) { return left_precedence(static_cast<const trans_or_nil&>(x)); }
-  return core::detail::precedences::max_precedence;
-}
-
-inline int right_precedence(const regular_formula& x)
-{
-  return left_precedence(x);
-}
-
-inline const regular_formula& unary_operand(const trans& x)        { return x.operand(); }
-inline const regular_formula& unary_operand(const trans_or_nil& x) { return x.operand(); }
-inline const regular_formula& binary_left(const seq& x)            { return x.left(); }
-inline const regular_formula& binary_right(const seq& x)           { return x.right(); }
-inline const regular_formula& binary_left(const alt& x)            { return x.left(); }
-inline const regular_formula& binary_right(const alt& x)           { return x.right(); }
 
 } // namespace regular_formulas
 

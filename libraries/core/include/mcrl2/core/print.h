@@ -13,7 +13,6 @@
 #define MCRL2_CORE_PRINT_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/utilities/exception.h"
@@ -33,11 +32,17 @@ namespace mcrl2
 namespace core
 {
 
-using namespace core::detail::precedences;
-
 /// \cond INTERNAL_DOCS
 namespace detail
 {
+
+const int max_precedence = 10000;
+
+template <typename T>
+int precedence(const T&)
+{
+  return max_precedence;
+}
 
 template <typename Derived>
 struct printer: public core::traverser<Derived>
@@ -66,39 +71,50 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void print_expression(const T& x, int context_precedence, int x_precedence)
+  void print_expression(const T& x, bool needs_parentheses)
   {
-    bool print_parens = (x_precedence < context_precedence);
-    if (print_parens)
+    if (needs_parentheses)
     {
       derived().print("(");
     }
     derived().apply(x);
-    if (print_parens)
+    if (needs_parentheses)
     {
       derived().print(")");
     }
   }
 
-  template <typename T>
-  void print_expression(const T& x, int context_precedence = 5)
+  template <typename T, typename U>
+  void print_unary_operand(const T& x, const U& operand)
   {
-    print_expression(x, context_precedence, left_precedence(x));
+    print_expression(operand, precedence(operand) < precedence(x));
   }
 
   template <typename T>
-  void print_unary_operation(const T& x, const std::string& op)
+  void print_unary_left_operation(const T& x, const std::string& op)
   {
     derived().print(op);
-    print_expression(unary_operand(x), left_precedence(x));
+    print_unary_operand(x, x.operand());
+  }
+
+  template <typename T>
+  void print_unary_right_operation(const T& x, const std::string& op)
+  {
+    print_unary_operand(x, x.operand());
+    derived().print(op);
   }
 
   template <typename T>
   void print_binary_operation(const T& x, const std::string& op)
   {
-    print_expression(binary_left(x), is_same_different_precedence(x, binary_left(x)) ? left_precedence(x) + 1 : left_precedence(x));
+    const auto& x1 = x.left();
+    const auto& x2 = x.right();
+    auto p = precedence(x);
+    auto p1 = precedence(x1);
+    auto p2 = precedence(x2);
+    print_expression(x1, (p1 < p) || (p1 == p && !is_left_associative(x)));
     derived().print(op);
-    print_expression(binary_right(x), is_same_different_precedence(x, binary_right(x)) ? left_precedence(x) + 1 : left_precedence(x), right_precedence(binary_right(x)));
+    print_expression(x2, (p2 < p) || (p2 == p && !is_right_associative(x)));
   }
 
   template <typename Container>
@@ -114,7 +130,7 @@ struct printer: public core::traverser<Derived>
       return;
     }
     derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -201,15 +217,15 @@ struct printer: public core::traverser<Derived>
 };
 
 template <template <class> class Traverser>
-struct apply_printer: public Traverser<apply_printer<Traverser> >
+struct apply_printer: public Traverser<apply_printer<Traverser>>
 {
-  typedef Traverser<apply_printer<Traverser> > super;
+  typedef Traverser<apply_printer<Traverser>> super;
 
   using super::enter;
   using super::leave;
   using super::apply;
 
-  apply_printer(std::ostream& out)
+  explicit apply_printer(std::ostream& out)
   {
     typedef printer<apply_printer<Traverser> > Super;
     static_cast<Super&>(*this).m_out = &out;
