@@ -378,13 +378,13 @@ class enumerator_algorithm
 {
   protected:
     // A rewriter
-    const Rewriter& m_rewr;
+    const Rewriter& R;
 
     /// \brief A data specification.
     const data::data_specification& dataspec;
 
     // Needed for enumerate_expressions
-    const DataRewriter& datar;
+    const DataRewriter& r;
 
     // A name generator
     enumerator_identifier_generator& id_generator;
@@ -400,11 +400,6 @@ class enumerator_algorithm
       std::ostringstream out;
       out << x << ": " << x.sort();
       return out.str();
-    }
-
-    bool is_finite_set(const data::sort_expression& ) const
-    {
-      return false;
     }
 
     template <typename EnumeratorListElement>
@@ -428,7 +423,7 @@ class enumerator_algorithm
                      const data::variable& v,
                      const data::data_expression& e) const
     {
-      auto phi1 = const_cast<Rewriter&>(m_rewr)(phi, sigma);
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
       if (accept(phi1))
       {
         P.emplace_back(EnumeratorListElement(variables, phi1, p, v, e));
@@ -448,7 +443,7 @@ class enumerator_algorithm
                      const data::variable& v,
                      const data::data_expression& e) const
     {
-      auto phi1 = const_cast<Rewriter&>(m_rewr)(phi, sigma);
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
       if (accept(phi1))
       {
         // Additional variables are put at the end of the list!
@@ -470,7 +465,7 @@ class enumerator_algorithm
                      const data::variable& v,
                      const data::data_expression& e) const
     {
-      auto phi1 = const_cast<Rewriter&>(m_rewr)(phi, sigma);
+      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
       if (accept(phi1))
       {
         if (phi1 == phi)
@@ -495,13 +490,10 @@ class enumerator_algorithm
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
-      : m_rewr(R_), dataspec(dataspec_), datar(datar_), id_generator(id_generator_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
+      : R(R_), dataspec(dataspec_), r(datar_), id_generator(id_generator_), m_max_count(max_count), m_throw_exceptions(throw_exceptions)
     {}
 
-  private:
-    // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
-    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&)
-    {}
+    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
 
   public:
     /// \brief Enumerates the front element of the todo list P.
@@ -521,120 +513,120 @@ class enumerator_algorithm
       P.pop_front();
 
       const auto& v1 = v.front();
-      const auto& vtail = v.tail();
-      const auto& sort = v1.sort();
+      const auto& v_tail = v.tail();
+      const auto& v1_sort = v1.sort();
 
-      if (data::is_function_sort(sort))
+      if (data::is_function_sort(v1_sort))
       {
-        const function_sort& function = atermpp::down_cast<function_sort>(sort);
+        const function_sort& function = atermpp::down_cast<function_sort>(v1_sort);
         if (dataspec.is_certainly_finite(function))
         {
           data_expression_vector function_sorts;
           variable_list function_parameter_list;
-          bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, datar, function_sorts, function_parameter_list);
-
+          bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, r, function_sorts, function_parameter_list);
           if (!result)
           {
-            cannot_enumerate(p, "Sort " + data::pp(sort) + " has too many elements to enumerate.");
+            cannot_enumerate(p, "Sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
           }
-          const data_expression old_substituted_value = sigma(v1);
+
+          data_expression sigma_v1 = sigma(v1);
           for (const data_expression& f: function_sorts)
           {
             sigma[v1] = f;
-            add_element(P, sigma, accept, vtail, phi, p, v1, f);
+            add_element(P, sigma, accept, v_tail, phi, p, v1, f);
           }
-          sigma[v1] = old_substituted_value;
+          sigma[v1] = sigma_v1;
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of function sort " + data::pp(sort) + ".");
+          cannot_enumerate(p, "Cannot enumerate elements of function sort " + data::pp(v1_sort) + ".");
         }
       }
-      else if (sort_set::is_set(sort))
+      else if (sort_set::is_set(v1_sort))
       {
-        const sort_expression element_sort = container_sort(sort).element_sort();
+        const sort_expression& element_sort = atermpp::down_cast<container_sort>(v1_sort).element_sort();
         if (dataspec.is_certainly_finite(element_sort))
         {
           const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator(), element_sort) }, sort_bool::false_());
           const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
-          const data_expression term = sort_set::constructor(element_sort, lambda_term, fset_variable);
-          const data_expression old_substituted_value = sigma(v1);
-          sigma[v1] = term;
-          add_element(P, sigma, accept, vtail, { fset_variable }, phi, p, v1, term);
-          sigma[v1] = old_substituted_value;
+          data_expression e = sort_set::constructor(element_sort, lambda_term, fset_variable);
+          data_expression sigma_v1 = sigma(v1);
+          sigma[v1] = e;
+          add_element(P, sigma, accept, v_tail, { fset_variable }, phi, p, v1, e);
+          sigma[v1] = sigma_v1;
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of set sort " + data::pp(sort) + ".");
+          cannot_enumerate(p, "Cannot enumerate elements of set sort " + data::pp(v1_sort) + ".");
           return;
         }
       }
-      else if (sort_fset::is_fset(sort))
+      else if (sort_fset::is_fset(v1_sort))
       {
-        const container_sort& fset = atermpp::down_cast<container_sort>(sort);
+        const auto& fset = atermpp::down_cast<container_sort>(v1_sort);
         if (dataspec.is_certainly_finite(fset.element_sort()))
         {
           data_expression_vector set_elements;
-          bool result = detail::compute_finite_set_elements(fset, dataspec, datar, sigma, set_elements, id_generator);
-
+          bool result = detail::compute_finite_set_elements(fset, dataspec, r, sigma, set_elements, id_generator);
           if (!result)
           {
-            cannot_enumerate(p, "Finite set sort " + data::pp(sort) + " has too many elements to enumerate.");
+            cannot_enumerate(p, "Finite set sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
           }
-          const data_expression old_substituted_value = sigma(v1);
-          for (const data_expression& set_element: set_elements)
+
+          data_expression sigma_v1 = sigma(v1);
+          for (const data_expression& e: set_elements)
           {
-            sigma[v1] = set_element;
-            add_element(P, sigma, accept, vtail, phi, p, v1, set_element);
+            sigma[v1] = e;
+            add_element(P, sigma, accept, v_tail, phi, p, v1, e);
           }
-          sigma[v1] = old_substituted_value;
+          sigma[v1] = sigma_v1;
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of finite set sort " + data::pp(sort) + ".");
+          cannot_enumerate(p, "Cannot enumerate elements of finite set sort " + data::pp(v1_sort) + ".");
           return;
         }
       }
-      else if (sort_bag::is_bag(sort))
+      else if (sort_bag::is_bag(v1_sort))
       {
-        cannot_enumerate(p, "Cannot enumerate elements of bag sort " + data::pp(sort) + ".");
+        cannot_enumerate(p, "Cannot enumerate elements of bag sort " + data::pp(v1_sort) + ".");
         return;
       }
-      else if (sort_fbag::is_fbag(sort))
+      else if (sort_fbag::is_fbag(v1_sort))
       {
-        cannot_enumerate(p, "Cannot enumerate elements of finite bag sort " + data::pp(sort) + ".");
+        cannot_enumerate(p, "Cannot enumerate elements of finite bag sort " + data::pp(v1_sort) + ".");
         return;
       }
       else
       {
-        const function_symbol_vector& C = dataspec.constructors(sort);
+        const function_symbol_vector& C = dataspec.constructors(v1_sort);
         if (!C.empty())
         {
-          for (const function_symbol& constructor: C)
+          for (const function_symbol& c: C)
           {
-            if (data::is_function_sort(constructor.sort()))
+            if (data::is_function_sort(c.sort()))
             {
-              auto const& domain = atermpp::down_cast<data::function_sort>(constructor.sort()).domain();
+              auto const& domain = atermpp::down_cast<data::function_sort>(c.sort()).domain();
               data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s) { return data::variable(id_generator(), s); });
               // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
-              data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
+              data_expression cy = r(application(c, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
-              add_element(P, sigma, accept, vtail, y, phi, p, v1, cy);
+              add_element(P, sigma, accept, v_tail, y, phi, p, v1, cy);
               sigma[v1] = v1;
             }
             else
             {
-              // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
-              auto const e1 = datar(constructor, sigma);
+              // TODO: We want to apply r without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
+              const auto e1 = r(c, sigma);
               sigma[v1] = e1;
-              add_element(P, sigma, accept, vtail, phi, p, v1, e1);
+              add_element(P, sigma, accept, v_tail, phi, p, v1, e1);
               sigma[v1] = v1;
             }
           }
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of sort " + data::pp(sort) + " without constructors.");
+          cannot_enumerate(p, "Cannot enumerate elements of sort " + data::pp(v1_sort) + " without constructors.");
           return;
         }
       }
@@ -783,7 +775,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
     {
       assert(P.size() == 1);
       auto& p = P.front();
-      p.expression() = super::m_rewr(p.expression(), sigma);
+      p.expression() = super::R(p.expression(), sigma);
       if (m_accept(p.expression()))
       {
         return iterator(const_cast<enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>*>(this), &P, &sigma, m_accept);
