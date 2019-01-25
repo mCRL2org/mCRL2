@@ -25,10 +25,15 @@ endif()
 # of recursively used templates. The value 2000 is taken
 # rather arbitrarily, and may need to be increased for more complex
 # rewriters. The default on some compilers appears to be 900.
-
 check_cxx_compiler_flag(-ftemplate-depth=2000 CXX_ACCEPTS_TEMPLATE_DEPTH )
 if (CXX_ACCEPTS_TEMPLATE_DEPTH)
   set(R_CXXFLAGS "${R_CXXFLAGS} -ftemplate-depth=2000")
+endif()
+
+# The resulting shared object always required position independent code.
+check_cxx_compiler_flag(-fPIC CXX_ACCEPTS_PIC)
+if (CXX_ACCEPTS_PIC)
+  set(R_CXXFLAGS "${R_CXXFLAGS} -fPIC")
 endif()
 
 # Add the other definitions that were added using add_definitions to build flags
