@@ -1591,7 +1591,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
-        print_binary_data_operation(y, sort_nat::left(y), sort_nat::right(y), " div ");
+        print_binary_data_operation(y, " div ");
       }
     }
     else if (sort_nat::is_last_application(x))
@@ -1604,7 +1604,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
-        print_binary_data_operation(y, sort_nat::left(y), sort_nat::right(y), " mod ");
+        print_binary_data_operation(y, " mod ");
       }
     }
 
