@@ -400,10 +400,10 @@ class state_info_entry
                                                                                         return "state " + debug_id_short();
                                                                                     }
 
-                                                                                    /// \brief pointer at the first entry in the `state_info` array
+                                                                                    /// \brief pointer at the first non-dummy entry in the `state_info` array
                                                                                     static state_info_const_iter_t s_i_begin;
 
-                                                                                    /// \brief pointer past the last entry in the `state_info` array
+                                                                                    /// \brief pointer past the last non-dummy entry in the `state_info` array
                                                                                     static state_info_const_iter_t s_i_end;
 
                                                                                     mutable bisim_gjkw::check_complexity::state_dnj_counter_t work_counter;
@@ -761,9 +761,8 @@ class part_state_t
     permutation_t permutation;
 
     /// \brief array with all other information about states
-    /// \details We allocate 1 additional ``state'' to allow for the iterators
-    /// past the last transition, as described in the documentation of
-    /// `state_info_entry`.
+    /// \details We allocate 1 additional dummy ``state'' at the end of the
+    /// array, to get an illegal state that can actually be dereferenced.
     bisim_gjkw::fixed_vector<state_info_entry> state_info;
 
     /// \brief constructor
@@ -774,11 +773,11 @@ class part_state_t
     /// \param num_states number of states in the LTS
     part_state_t(state_type num_states)
       : permutation(num_states),
-        state_info(num_states)
+        state_info(num_states + 1)
     {                                                                           assert(1 < num_states);  assert(0 == block_t::nr_of_blocks);
                                                                                 #ifndef NDEBUG
                                                                                     state_info_entry::s_i_begin = state_info.cbegin();
-                                                                                    state_info_entry::s_i_end = state_info.cend();
+                                                                                    state_info_entry::s_i_end = state_info.cend() - 1;
                                                                                     permutation_entry::perm_begin = permutation.cbegin();
                                                                                     permutation_entry::perm_end = permutation.cend();
                                                                                 #endif
@@ -1510,9 +1509,10 @@ class part_trans_t
     /// transitions have which label.)
     /// \param num_transitions  number of transitions of the LTS
     /// \param num_actions      number of action labels of the LTS
-    /// \param illegal_state    an iterator to an illegal state, typically
-    ///                         state_info.end().  This parameter is used to
-    ///                         initialize dummy transitions.
+    /// \param illegal_state    an iterator to a dummy state (which can be
+    ///                         dereferenced, see the implementation of
+    ///                         surely_has_no_transition_in()).  This parameter
+    ///                         is used to initialize dummy transitions.
     part_trans_t(trans_type num_transitions, trans_type num_actions,
                                                state_info_iter_t illegal_state)
       : succ(num_transitions + 2),
@@ -2656,7 +2656,7 @@ class bisim_partitioner_dnj
       : aut(new_aut),
         part_st(new_aut.num_states()),
         part_tr(new_aut.num_transitions(), new_aut.num_action_labels(),
-                                                     part_st.state_info.end()),
+                                                 part_st.state_info.end() - 1),
         action_label(new_aut.num_action_labels()),
         branching(new_branching),
         preserve_divergence(new_preserve_divergence)
@@ -2888,7 +2888,7 @@ class bisim_partitioner_dnj
         pred_iter_t next_pred_begin(part_tr.pred.begin() + 1);                  assert(next_pred_begin == pred_entry::pred_begin);
         succ_iter_t next_succ_begin(part_tr.succ.begin() + 1);                  assert(next_succ_begin == succ_entry::succ_begin);
         state_info_iter_t state_iter(part_st.state_info.begin());               assert(state_iter == state_info_entry::s_i_begin);
-                                                                                assert(state_iter < part_st.state_info.end());
+                                                                                assert(state_iter < part_st.state_info.end() - 1);
         do
         {
             state_iter->block = B;
@@ -2934,7 +2934,7 @@ class bisim_partitioner_dnj
                                                                                 #endif
             next_succ_begin = state_iter->succ_inert.begin;                     // mCRL2complexity(*state_iter, ...) -- subsumed in the call at the end
         }
-        while (++state_iter < part_st.state_info.end());                        assert(state_iter == state_info_entry::s_i_end);
+        while (++state_iter < part_st.state_info.end() - 1);                    assert(state_iter == state_info_entry::s_i_end);
 
         // Line 1.4: Organise the visible transitions in action block-slices
         //           and one block bunch-slice
@@ -3021,10 +3021,6 @@ class bisim_partitioner_dnj
 
         /* distribute the transitions over the data structures               */ ONLY_IF_DEBUG( bisim_gjkw::check_complexity::init(2 * max_transitions); )
 
-        part_tr.pred.begin()->source = part_st.state_info.end();
-        part_tr.pred.begin()->target = part_st.state_info.end();
-        // part_tr.pred.end()[-1].source = part_st.state_info.end();
-        part_tr.pred.end()[-1].target = part_st.state_info.end();
         block_bunch_iter_t next_block_bunch(part_tr.block_bunch.begin() + 1);   assert(next_block_bunch == block_bunch_slice_t::block_bunch_begin);
         for (const transition& t: aut.get_transitions())
         {                                                                       assert(part_st.state_info[t.from()].block == B);
@@ -4274,16 +4270,17 @@ class bisim_partitioner_dnj
                                          refine_block->nonbottom_begin[-1].st); assert(last_bottom_state !=
                 /* Line 3.6: if splitter < splitter' then                    */                          succ_entry::succ_begin[-1].block_bunch->pred->source);
                 if (&*last_bottom_state->current_out_slice.begin[-1].
-                              block_bunch->pred->source != &*last_bottom_state ||
+                            block_bunch->pred->source != &*last_bottom_state ||
                     *last_bottom_state->current_out_slice.begin[-1].bunch() <
                                                           *splitter->bunch() ||
                     (// Line 3.7: splitter := splitter'
                      splitter = last_bottom_state->
-                            current_out_slice.begin[-1].block_bunch->slice(),   //assert(part_tr.unstable_block_bunch_postprocess_end != splitter),
+                            current_out_slice.begin[-1].block_bunch->slice(),
                      !splitter->is_stable() &&
                      // Line 3.8: Mark the bottom states
                      //                      that have a transition in splitter
-                     (refine_block->marked_bottom_begin = std::lower_bound(
+                     (                                                          assert(part_tr.unstable_block_bunch_postprocess_end != splitter),
+                      refine_block->marked_bottom_begin = std::lower_bound(
                        refine_block->begin, refine_block->nonbottom_begin-1,
                           splitter->bunch(), before_current_out_slice_less),    assert(refine_block->marked_bottom_begin->st->
                 /* Line 3.9: end if                                          */                      current_out_slice.begin[-1].bunch() == splitter->bunch()),
@@ -4422,8 +4419,9 @@ class bisim_partitioner_dnj
 /// \memberof state_info_entry
 inline bool state_info_entry::surely_has_transition_in(
                                               const bunch_t* const bunch) const
-{                                                                               assert(this == &*current_out_slice.begin->block_bunch->pred->source);
-                                                                                assert(current_out_slice.begin <= succ_inert.begin);
+{                                                                               assert(current_out_slice.begin <= succ_inert.begin);
+                                                                                assert(current_out_slice.begin == succ_inert.begin ||
+                                                                                                 this == &*current_out_slice.begin->block_bunch->pred->source);
                                                                                 assert(current_out_slice.begin == succ_inert.begin ||
                                                                                      succ_entry::succ_begin == current_out_slice.begin ||
                                                                                      &*current_out_slice.begin[-1].block_bunch->pred->source < this ||
@@ -4439,13 +4437,16 @@ inline bool state_info_entry::surely_has_transition_in(
 /// bunch `NewBu` (which is the immediate successor of the most recent splitter
 /// bunch `bunch`), the function can quickly find out whether the state has a
 /// transition in `bunch`.
+/// Note that here, we will need that the dummy transition at the beginning of
+/// part_tr.pred has a source state iterator that can be dereferenced.
 /// \param bunch bunch of interest
 /// \returns true if the state is known to have _no_ transition in `bunch`
 /// \memberof state_info_entry
 inline bool state_info_entry::surely_has_no_transition_in(
                                               const bunch_t* const bunch) const
-{                                                                               assert(this == &*current_out_slice.begin->block_bunch->pred->source);
-                                                                                assert(current_out_slice.begin <= succ_inert.begin);
+{                                                                               assert(current_out_slice.begin <= succ_inert.begin);
+                                                                                assert(current_out_slice.begin == succ_inert.begin ||
+                                                                                                 this == &*current_out_slice.begin->block_bunch->pred->source);
                                                                                 assert(current_out_slice.begin == succ_inert.begin ||
                                                                                      succ_entry::succ_begin == current_out_slice.begin ||
                                                                                      &*current_out_slice.begin[-1].block_bunch->pred->source < this ||
