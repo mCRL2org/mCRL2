@@ -135,7 +135,9 @@ class ltsconvert_tool : public input_output_tool
 
       if (tool_options.check_reach)
       {
+        timer().start("reachability check");
         reachability_check(l, true); // Remove unreachable states from the input transition system.
+        timer().finish("reachability check");
       }
 
       if (tool_options.remove_state_information)
@@ -147,7 +149,9 @@ class ltsconvert_tool : public input_output_tool
       {
         mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
         mCRL2log(verbose) << "before reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions " << std::endl;
+        timer().start("reduction");
         reduce(l,tool_options.equivalence);
+        timer().finish("reduction");
         mCRL2log(verbose) << "after reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
       }
 
@@ -155,7 +159,9 @@ class ltsconvert_tool : public input_output_tool
       {
         mCRL2log(verbose) << "determinising LTS..." << std::endl;
         mCRL2log(verbose) << "before determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
+        timer().start("determinisation");
         determinise(l);
+        timer().finish("determinisation");
         mCRL2log(verbose) << "after determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
       }
 

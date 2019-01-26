@@ -77,7 +77,7 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
-#include "mcrl2/lts/detail/stackless_coroutine.h"
+#include "mcrl2/lts/detail/coroutine.h"
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
 // #include "mcrl2/lts/transition.h"

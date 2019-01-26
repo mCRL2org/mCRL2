@@ -69,7 +69,7 @@ class execution_timer
     void write_report(std::ostream& s)
     {
       std::ios::fmtflags oldflags = s.setf(std::ios::fixed, std::ios::floatfield);
-      s.precision((std::streamsize) (log10(CLOCKS_PER_SEC) + 0.1));
+      s.precision((std::streamsize) (log10(CLOCKS_PER_SEC) + 0.95));
 
       s << "- tool: " << m_tool_name << std::endl
         << "  timing:" << std::endl;
@@ -114,13 +114,13 @@ class execution_timer
     /// \post The current time has been recorded as starting time of timing_name
     void start(const std::string& timing_name)
     {
-      if (m_timings.find(timing_name) != m_timings.end())
+      std::map<std::string, timing>::iterator t = m_timings.lower_bound(timing_name);
+      if (t != m_timings.end() && t->first == timing_name)
       {
-        throw mcrl2::runtime_error("Starting already known timing: " + timing_name + ". This causes unreliable results.");
+        throw mcrl2::runtime_error("Starting already known timing '" + timing_name + "'. This causes unreliable results.");
       }
-      timing t;
-      t.start = clock();
-      m_timings[timing_name] = t;
+      t = m_timings.insert(t, make_pair(timing_name, timing()));
+      t->second.start = clock();
     }
 
     /// \brief Finish a measurement with a hint
@@ -129,11 +129,17 @@ class execution_timer
     /// \post The current time has been recorded as end time of timing_name
     void finish(const std::string& timing_name)
     {
-      if (m_timings.find(timing_name) == m_timings.end())
+      clock_t finish = clock();
+      const std::map<std::string, timing>::iterator t = m_timings.find(timing_name);
+      if (t == m_timings.end())
       {
         throw mcrl2::runtime_error("Finishing timing '" + timing_name + "' that was not started.");
       }
-      m_timings[timing_name].finish = clock();
+      if (0 != t->second.finish)
+      {
+        throw mcrl2::runtime_error("Finishing timing '" + timing_name + "' for the second time.");
+      }
+      t->second.finish = finish;
     }
 
     /// \brief Write all timing information that has been recorded.

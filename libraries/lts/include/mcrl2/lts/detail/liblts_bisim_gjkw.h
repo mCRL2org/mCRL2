@@ -28,7 +28,6 @@
 
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
-#include "mcrl2/lts/detail/coroutine.h"
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
 
@@ -1951,38 +1950,6 @@ class bisim_partitioner_gjkw
               const bisim_gjkw::B_to_C_descriptor* FromRed,
               bool postprocessing
               ONLY_IF_DEBUG( , const bisim_gjkw::constln_t* NewC = nullptr ) );
-
-    DECLARE_COROUTINE(refine_blue,
-    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
-                            ((const bisim_gjkw::constln_t* const, SpC))
-                            ONLY_IF_DEBUG( ((bool const, postprocessing)) ),
-    /* local variables:  */ ((bisim_gjkw::permutation_iter_t, visited_end))
-                            ((bisim_gjkw::state_info_ptr, s))
-                            ((bisim_gjkw::pred_iter_t, pred_iter))
-                            ((bisim_gjkw::state_info_ptr, s_prime))
-                            ((bisim_gjkw::permutation_iter_t,
-                                                           blue_nonbottom_end))
-                            ((bisim_gjkw::succ_const_iter_t, begin))
-                            ((bisim_gjkw::succ_const_iter_t, end)),
-    /* shared data:      */ struct bisim_gjkw::refine_shared_t, shared_data,
-    /* interrupt locatns:*/ (REFINE_BLUE_PREDECESSOR_HANDLED)
-                            (REFINE_BLUE_TESTING)
-                            (REFINE_BLUE_STATE_HANDLED)
-                            (REFINE_BLUE_COLLECT_BOTTOM))
-
-    DECLARE_COROUTINE(refine_red,
-    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
-                            ((const bisim_gjkw::B_to_C_descriptor* const,
-                                                                      FromRed))
-                            ((bool const, postprocessing)),
-    /* local variables:  */ ((bisim_gjkw::B_to_C_iter_t,fromred_visited_begin))
-                            ((bisim_gjkw::permutation_iter_t, visited_begin))
-                            ((bisim_gjkw::state_info_ptr, s))
-                            ((bisim_gjkw::pred_iter_t, pred_iter)),
-    /* shared data:      */ struct bisim_gjkw::refine_shared_t, shared_data,
-    /* interrupt locatns:*/ (REFINE_RED_COLLECT_FROMRED)
-                            (REFINE_RED_PREDECESSOR_HANDLED)
-                            (REFINE_RED_STATE_HANDLED))
 
     /*--------- PostprocessNewBottom -- Algorithm 4 of [GJKW 2017] ----------*/
 
