@@ -3758,7 +3758,7 @@ class bisim_partitioner_dnj
                                                                                 #endif
                         }
                         else
-                        {                                                       //assert(s->surely_has_no_transition_in(splitter->bunch()));
+                        {                                                       assert(s->surely_has_no_transition_in(splitter->bunch()));
                             // Line 2.9l: Make s a blue state
                             ++blue_visited_end;
                             if ((state_type) (blue_visited_end -
