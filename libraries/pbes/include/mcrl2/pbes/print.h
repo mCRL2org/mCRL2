@@ -114,7 +114,6 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   template <typename T>
   void print_pbes_binary_operation(const T& x, const std::string& op)
   {
-    // N.B. We assume that operators with the same precedence have the same associativity.
     const auto& x1 = x.left();
     const auto& x2 = x.right();
     auto p = precedence(x);

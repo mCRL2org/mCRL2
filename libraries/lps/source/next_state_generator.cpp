@@ -427,7 +427,7 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
     const bool throw_exceptions=true;
     enumerator_type enumerator(m_rewriter, m_specification.data(), m_rewriter, m_id_generator,
                                data::detail::get_enumerator_variable_limit(), throw_exceptions);
-    std::deque<enumerator_list_element_with_substitution<> > enumerator_solution_deque(1,enumerator_list_element_with_substitution<>(dist.variables(), dist.distribution()));
+    data::enumerator_state<enumerator_list_element_with_substitution<> > enumerator_solution_deque(1,enumerator_list_element_with_substitution<>(dist.variables(), dist.distribution()));
     for(enumerator_type::iterator probabilistic_solution = enumerator.begin(sigma, enumerator_solution_deque);
                                   probabilistic_solution != enumerator.end(); ++probabilistic_solution)
     {

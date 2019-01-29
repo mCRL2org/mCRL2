@@ -238,7 +238,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R, id_generator);
     data::mutable_indexed_substitution<> local_sigma;
     const data::variable_list di_list(di.begin(), di.end());
-    std::deque<enumerator_element> enumerator_deque(1, enumerator_element(di_list, data::true_()));
+    data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(di_list, data::true_()));
     for (auto i = enumerator.begin(local_sigma, enumerator_deque); i != enumerator.end(); ++i)
     {
       data::mutable_indexed_substitution<> sigma_i;
@@ -363,7 +363,7 @@ class pbesinst_finite_algorithm
         data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr, m_id_generator);
         data::mutable_indexed_substitution<> local_sigma;
         data::variable_list finite_parameter_list(finite_parameters.begin(), finite_parameters.end());
-        std::deque <enumerator_element> enumerator_deque(1, enumerator_element(finite_parameter_list, data::true_()));
+        data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(finite_parameter_list, data::true_()));
         for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end(); ++j)
         {
           // apply the substitution contained in the enumerated element.

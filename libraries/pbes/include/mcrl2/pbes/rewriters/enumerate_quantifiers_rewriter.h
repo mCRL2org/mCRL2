@@ -101,8 +101,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = true_();
-    std::deque<enumerator_element> P;
-    P.push_back(enumerator_element(v, derived().apply(phi)));
+    data::enumerator_state<enumerator_element> P(1, enumerator_element(v, derived().apply(phi)));
     E.next(P, sigma, is_not_true());
     while (!P.empty())
     {
@@ -122,8 +121,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = false_();
-    std::deque<enumerator_element> P;
-    P.push_back(enumerator_element(v, derived().apply(phi)));
+    data::enumerator_state<enumerator_element> P(1, enumerator_element(v, derived().apply(phi)));
     E.next(P, sigma, is_not_false());
     while (!P.empty())
     {

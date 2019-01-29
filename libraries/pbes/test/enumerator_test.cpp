@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_enumerator)
   data::enumerator_identifier_generator id_generator("x");
   data::enumerator_algorithm<pbes_rewriter> E(R, data_spec, datar, id_generator);
   std::vector<pbes_system::pbes_expression> solutions;
-  std::deque<enumerator_element> P;
+  data::enumerator_state<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
   E.next(P, sigma, is_not_true());
   while (!P.empty())
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_iterator)
   data::enumerator_algorithm_with_iterator<pbes_rewriter, enumerator_element, pbes_system::is_not_true> E(R, data_spec, datar, id_generator, 20);
   std::vector<pbes_system::pbes_expression> solutions;
 
-  std::deque<enumerator_element> P;
+  data::enumerator_state<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
   for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_substitutions)
   data::enumerator_algorithm_with_iterator<pbes_rewriter, enumerator_element, pbes_system::is_not_false> E(R, data_spec, datar, id_generator);
   std::vector<pbes_system::pbes_expression> solutions;
 
-  std::deque<enumerator_element> P;
+  data::enumerator_state<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
   for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {

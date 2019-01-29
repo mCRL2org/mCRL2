@@ -73,9 +73,6 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
   using super::print_binary_operation;
   using super::print_list;
 
-  template <typename T> bool is_left_associative(const T&) { return false; }
-  template <typename T> bool is_right_associative(const T&) { return false; }
-
   void apply(const bes::boolean_equation& x)
   {
     derived().enter(x);

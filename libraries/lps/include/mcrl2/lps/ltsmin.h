@@ -68,7 +68,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   v.push_back(x);
   data::mutable_indexed_substitution<> sigma;
   data::variable_list vl(v.begin(),v.end());
-  std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+  data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
   for (auto i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() ; ++i)
   {
     i->add_assignments(vl, sigma, rewr);
