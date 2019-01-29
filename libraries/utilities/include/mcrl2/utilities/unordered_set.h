@@ -9,16 +9,17 @@
 #ifndef MCRL2_UTILITIES_UNORDERED_SET_H
 #define MCRL2_UTILITIES_UNORDERED_SET_H
 
+#include <array>
+#include <atomic>
+#include <cstddef>
+#include <vector>
+#include <unordered_set>
+
 #include "mcrl2/utilities/unordered_set_iterator.h"
 
 #include "mcrl2/utilities/detail/bucket_list.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/spinlock.h"
-
-#include <array>
-#include <atomic>
-#include <cstddef>
-#include <vector>
 
 namespace mcrl2
 {
