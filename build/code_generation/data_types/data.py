@@ -338,7 +338,7 @@ class function_declaration_list():
       /// \\pre {0} is defined for e
       /// \\return The argument of e that corresponds to {0}
       inline
-      data_expression {1}(const data_expression& e)
+      const data_expression& {1}(const data_expression& e)
       {{
         assert({2});
         {3}
