@@ -114,11 +114,7 @@ void Solver::solve(QString specification, QString dataExpression)
         if (m_abort)
           break;
       }
-      if (m_abort)
-        mCRL2log(info) << "Abort by user." << std::endl;
-      else
-        mCRL2log(info) << "Done solving." << std::endl;
-
+      mCRL2log(info) << (m_abort ? "Abort by user." : "Done solving.") << std::endl;
     }
     catch (mcrl2::runtime_error e)
     {
@@ -137,4 +133,3 @@ void Solver::abort()
 {
   m_abort = true;
 }
-
