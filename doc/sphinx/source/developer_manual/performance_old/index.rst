@@ -1,9 +1,9 @@
-Performance measurements
+Performance measurements (Old)
 ========================
 
-A system has been set up to periodically measure the performance of several
-mCRL2 tools and of compiling the entire toolset. This way, it is possible to see
-how the performance of these processes changes over time.
+The system to perform these benchmarks is no longer available, for the newer benchmarking
+setup see :doc:`../performance`. However, the results and the details of the old benchmarking 
+system are preserved below.
 
 You can view the performance plots for:
 

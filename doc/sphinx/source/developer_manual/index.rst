@@ -29,6 +29,7 @@ Contents
    - `Results of regression testing <http://mcrl2build1.win.tue.nl:8111>`_ (explanation: :doc:`testing`)
    - :doc:`guidelines`
    - :doc:`code_generation`
+   - :doc:`performance`
 
 Old pages
 =========
@@ -38,8 +39,6 @@ Old pages
 
    - :doc:`packaging`
    - :doc:`cronjobs`
-   - :doc:`performance/index`
-..   - `Performance measurements <http://www.mcrl2.org/performance>`_
 
 .. toctree::
    :hidden:
