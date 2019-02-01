@@ -19,7 +19,7 @@ endfunction()
 function(add_benchmark_target NAME SOURCE)
   set(BENCHMARK_TARGET benchmark_target_${NAME})
   add_executable(${BENCHMARK_TARGET} ${SOURCE})
-  add_dependencies(prepare_benchmarks ${BENCHMARK_TARGET})
+  add_dependencies(benchmarks ${BENCHMARK_TARGET})
 
   target_link_libraries(${BENCHMARK_TARGET} mcrl2_atermpp Threads::Threads)
 

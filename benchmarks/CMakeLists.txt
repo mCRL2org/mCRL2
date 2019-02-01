@@ -1,4 +1,7 @@
-# Add a benchmarked named NAME that uses TOOL on the given INPUT.
+# Print a short message on how to perform the benchmarks.
+message(STATUS "To generate the necessary files for benchmarking, build the benchmarks target")
+
+# Add a benchmark named NAME that uses TOOL on the given INPUT.
 function(add_tool_benchmark NAME TOOL INPUT)
   set(TARGET "benchmark_target_${TOOL}_${NAME}")
   set(TEST "benchmark_${TOOL}_${NAME}")
@@ -30,10 +33,8 @@ set(STATESPACE_BENCHMARKS
   )
 
 # This target is used to generate all intermediate files required for benchmarks. 
-# In this case to linearise all the given mcrl2 specifications at once and generate a nodeadlock
-# pbes.
-add_custom_target(prepare_benchmarks)
-add_dependencies(prepare_benchmarks lps2lts pbes2bool pbessolve)
+add_custom_target(benchmarks)
+add_dependencies(benchmarks lps2lts pbes2bool pbessolve)
 
 foreach(benchmark ${STATESPACE_BENCHMARKS})
   # Obtain just <name>.mcrl2, split off <name> for the benchmark name and output lps <name>.lps
@@ -44,12 +45,12 @@ foreach(benchmark ${STATESPACE_BENCHMARKS})
   set(NODEADLOCK_PBES_FILENAME "${BENCHMARK_WORKSPACE}/${NAME}.nodeadlock.pbes")
 
   # Generate the lps for this benchmark.
-  add_custom_command(TARGET prepare_benchmarks 
+  add_custom_command(TARGET benchmarks 
     COMMAND mcrl22lps "${CMAKE_SOURCE_DIR}/${benchmark}" ${LPS_FILENAME}
     )
 
   # Generate a pbes for the nodeadlock property for this benchmark
-  add_custom_command(TARGET prepare_benchmarks
+  add_custom_command(TARGET benchmarks
     COMMAND lps2pbes -f "${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf" ${LPS_FILENAME} ${NODEADLOCK_PBES_FILENAME}
     )
 
@@ -57,8 +58,7 @@ foreach(benchmark ${STATESPACE_BENCHMARKS})
   add_tool_benchmark("${NAME}" mcrl22lps "${CMAKE_SOURCE_DIR}/${benchmark}")
   
   add_tool_benchmark("${NAME}" lps2lts ${LPS_FILENAME} "")
-  add_tool_benchmark("${NAME}_cached" lps2lts ${LPS_FILENAME} "--cached")
-  add_tool_benchmark("${NAME}_jittyc" lps2lts "${BENCHMARK_WORKSPACE}/${NAME}.lps" "--cached" "-rjittyc" "--prune")
+  add_tool_benchmark("${NAME}_jittyc" lps2lts "${BENCHMARK_WORKSPACE}/${NAME}.lps" "-rjittyc")
 
   add_tool_benchmark("${NAME}" pbes2bool ${NODEADLOCK_PBES_FILENAME})
   add_tool_benchmark("${NAME}_jittyc" pbes2bool ${NODEADLOCK_PBES_FILENAME} "-rjittyc")
