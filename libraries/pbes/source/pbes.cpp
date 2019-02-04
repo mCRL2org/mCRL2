@@ -49,7 +49,9 @@ std::string pp(const pbes_system::propositional_variable& x) { return pbes_syste
 std::string pp(const pbes_system::propositional_variable_instantiation& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation >(x); }
 void normalize_sorts(pbes_system::pbes_equation_vector& x, const data::sort_specification& sortspec) { pbes_system::normalize_sorts< pbes_system::pbes_equation_vector >(x, sortspec); }
 void normalize_sorts(pbes_system::pbes& x, const data::sort_specification& /* sortspec */) { pbes_system::normalize_sorts< pbes_system::pbes >(x, x.data()); }
+pbes_system::pbes_expression normalize_sorts(const pbes_system::pbes_expression& x, const data::sort_specification& sortspec) { return pbes_system::normalize_sorts< pbes_system::pbes_expression >(x, sortspec); }
 void translate_user_notation(pbes_system::pbes& x) { pbes_system::translate_user_notation< pbes_system::pbes >(x); }
+pbes_system::pbes_expression translate_user_notation(const pbes_system::pbes_expression& x) { return pbes_system::translate_user_notation< pbes_system::pbes_expression >(x); }
 std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x) { return pbes_system::find_sort_expressions< pbes_system::pbes >(x); }
 std::set<data::variable> find_all_variables(const pbes_system::pbes& x) { return pbes_system::find_all_variables< pbes_system::pbes >(x); }
 std::set<data::variable> find_free_variables(const pbes_system::pbes& x) { return pbes_system::find_free_variables< pbes_system::pbes >(x); }

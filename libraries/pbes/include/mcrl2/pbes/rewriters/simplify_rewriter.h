@@ -114,7 +114,7 @@ struct simplify_data_rewriter
 
   const DataRewriter& R;
 
-  simplify_data_rewriter(const DataRewriter& R_)
+  explicit simplify_data_rewriter(const DataRewriter& R_)
     : R(R_)
   {}
 

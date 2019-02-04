@@ -229,6 +229,8 @@ pbes_expression parse_pbes_expression(const std::string& text,
   {
     x = pbes_system::typecheck_pbes_expression(x, variables, propositional_variables, dataspec);
   }
+  x = pbes_system::translate_user_notation(x);
+  x = pbes_system::normalize_sorts(x, dataspec);
   return x;
 }
 

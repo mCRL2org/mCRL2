@@ -71,6 +71,7 @@ process::process_equation_vector
 process::process_specification
 pbes_system::pbes_equation_vector
 pbes_system::pbes
+pbes_system::pbes_expression
 state_formulas::state_formula
 '''
 
@@ -79,6 +80,7 @@ data::data_expression
 data::data_equation
 lps::multi_action
 pbes_system::pbes
+pbes_system::pbes_expression
 process::action
 process::process_expression
 process::process_specification

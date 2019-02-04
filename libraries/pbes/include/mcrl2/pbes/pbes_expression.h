@@ -643,6 +643,8 @@ std::set<pbes_system::propositional_variable_instantiation> find_propositional_v
 std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expression& x);
 std::set<data::variable> find_free_variables(const pbes_system::pbes_expression& x);
 bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
+pbes_system::pbes_expression normalize_sorts(const pbes_system::pbes_expression& x, const data::sort_specification& sortspec);
+pbes_system::pbes_expression translate_user_notation(const pbes_system::pbes_expression& x);
 
 /// \return Returns the value true
 inline

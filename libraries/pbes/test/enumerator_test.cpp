@@ -120,3 +120,56 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_substitutions)
   std::clog << "solutions = " << core::detail::print_list(solutions) << std::endl;
   BOOST_CHECK(solutions.size() >= 1);
 }
+
+BOOST_AUTO_TEST_CASE(enumerate_callback)
+{
+  typedef pbes_system::simplify_data_rewriter<data::rewriter> pbes_rewriter;
+  typedef data::enumerator_list_element<pbes_expression> enumerator_element;
+  data::enumerator_identifier_generator id_generator;
+  data::data_specification dataspec;
+  dataspec.add_context_sort(data::sort_int::int_());
+  std::size_t max_count = 10;
+  bool throw_exceptions = true;
+  data::rewriter r(dataspec);
+  pbes_rewriter R(r);
+  data::enumerator_algorithm<pbes_rewriter> E(R, dataspec, r, id_generator, max_count, throw_exceptions);
+
+  auto enumerate = [&](const pbes_expression& x)
+  {
+    data::rewriter::substitution_type sigma;
+    pbes_expression result;
+    id_generator.clear();
+    if (is_forall(x))
+    {
+      const auto& x_ = atermpp::down_cast<forall>(x);
+      result = true_();
+      data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), R(x_.body())));
+      E.enumerate_all(P, sigma, is_not_true(),
+                      [&](const enumerator_element& p)
+                      {
+                        std::cout << "solution: " << p << std::endl;
+                        result = data::optimized_and(result, p.expression());
+                        return is_false(result);
+                      }
+      );
+    }
+    else if (is_exists(x))
+    {
+      const auto& x_ = atermpp::down_cast<exists>(x);
+      result = false_();
+      data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), R(x_.body())));
+      E.enumerate_all(P, sigma, is_not_false(),
+                      [&](const enumerator_element& p)
+                      {
+                        std::cout << "solution: " << p << std::endl;
+                        result = data::optimized_or(result, p.expression());
+                        return is_true(result);
+                      }
+      );
+    }
+    return result;
+  };
+
+  BOOST_CHECK_EQUAL(enumerate(parse_pbes_expression("forall n: Nat. val(n < 2)")), false_());
+  BOOST_CHECK_EQUAL(enumerate(parse_pbes_expression("exists n: Nat. val(n < 2)")), true_());
+}
