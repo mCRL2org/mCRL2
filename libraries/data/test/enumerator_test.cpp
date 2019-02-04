@@ -53,7 +53,7 @@ void enumerate(const data_specification& dataspec,
   enumerator_type enumerator(rewr, dataspec, rewr, id_generator);
   std::size_t number_of_solutions = 0;
   mutable_indexed_substitution<> sigma;
-  data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(variables, expression));
+  data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(variables, expression));
   auto i = enumerator.begin(sigma, enumerator_deque);
   for ( ; number_of_solutions < expected_no_of_solutions && i != enumerator.end(); ++i)
   {
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(empty_test)
   enumerator_type enumerator(rewr, dataspec, rewr, id_generator);
 
   mutable_indexed_substitution<> sigma;
-  data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(variables, sort_bool::true_()));
+  data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(variables, sort_bool::true_()));
   for (auto i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end(); ++i)
   {
     count++;
@@ -263,7 +263,7 @@ data_expression_vector generate_values(const data_specification& dataspec, const
   variable_list variables;
   variables.push_front(v);
   mutable_indexed_substitution<> sigma;
-  data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(variables, sort_bool::true_()));
+  data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(variables, sort_bool::true_()));
   for (auto i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() ; ++i)
   {
     i->add_assignments(variables, sigma, rewr);
@@ -371,23 +371,19 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
   data::rewriter R(dataspec);
   data::enumerator_identifier_generator id_generator("x");
   data::enumerator_algorithm<> E(R, dataspec, R, id_generator, (std::numeric_limits<std::size_t>::max)(), true);
-  data::enumerator_state<enumerator_element> P;
+  data::enumerator_queue<enumerator_element> P;
   data::rewriter::substitution_type sigma;
 
   try
   {
     P.push_back(enumerator_element(v, phi));
-    E.next(P, sigma, data::is_not_true());
-    while (!P.empty())
-    {
-      result = data::optimized_and(result, P.front().expression());
-      P.pop_front();
-      if (result == data::sort_bool::false_())
-      {
-        break;
-      }
-      E.next(P, sigma, data::is_not_true());
-    }
+    E.enumerate_all(P, sigma, data::is_not_true(),
+        [&](const enumerator_element& p)
+        {
+          result = data::optimized_and(result, p.expression());
+          return result == data::sort_bool::false_();
+        }
+    );
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -412,7 +408,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
   bool throw_exceptions = true;
   data::enumerator_identifier_generator id_generator;
   data::enumerator_algorithm_with_iterator<rewriter, enumerator_element> E(R, dataspec, R, id_generator, max_count, throw_exceptions);
-  data::enumerator_state<enumerator_element> P(1, enumerator_element(v, phi));
+  data::enumerator_queue<enumerator_element> P(enumerator_element(v, phi));
   try {
     for (auto i = E.begin(sigma, P); i != E.end() ; ++i)
     {

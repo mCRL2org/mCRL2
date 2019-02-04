@@ -149,7 +149,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
           data::mutable_indexed_substitution<> local_sigma;
           const data::variable_list vl = { par };
-          data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
+          data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(vl, data::sort_bool::true_()));
           for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
           {
             j->add_assignments(vl, local_sigma,m_rewriter);

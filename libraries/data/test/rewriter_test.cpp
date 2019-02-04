@@ -20,6 +20,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/utilities/text_utility.h"
 #include <boost/test/minimal.hpp>
 #include <iostream>

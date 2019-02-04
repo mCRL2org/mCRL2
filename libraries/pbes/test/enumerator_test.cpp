@@ -48,18 +48,17 @@ BOOST_AUTO_TEST_CASE(test_enumerator)
   data::mutable_indexed_substitution<> sigma;
   data::enumerator_identifier_generator id_generator("x");
   data::enumerator_algorithm<pbes_rewriter> E(R, data_spec, datar, id_generator);
-  std::vector<pbes_system::pbes_expression> solutions;
-  data::enumerator_state<enumerator_element> P;
-  P.push_back(enumerator_element(v, phi));
-  E.next(P, sigma, is_not_true());
-  while (!P.empty())
-  {
-    solutions.push_back(P.front().expression());
-    P.pop_front();
-    E.next(P, sigma, is_not_true());
-  }
+  std::set<pbes_system::pbes_expression> solutions;
+  data::enumerator_queue<enumerator_element> P(enumerator_element(v, phi));
+  E.enumerate_all(P, sigma, is_not_false(),
+      [&](const enumerator_element& p)
+      {
+        solutions.insert(p.expression());
+        return false; // do not interrupt
+      }
+  );
   std::clog << "solutions = " << core::detail::print_list(solutions) << std::endl;
-  BOOST_CHECK(solutions.size() >= 1);
+  BOOST_CHECK(solutions.size() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(test_enumerator_with_iterator)
@@ -80,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_iterator)
   data::enumerator_algorithm_with_iterator<pbes_rewriter, enumerator_element, pbes_system::is_not_true> E(R, data_spec, datar, id_generator, 20);
   std::vector<pbes_system::pbes_expression> solutions;
 
-  data::enumerator_state<enumerator_element> P;
+  data::enumerator_queue<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
   for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {
@@ -108,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_substitutions)
   data::enumerator_algorithm_with_iterator<pbes_rewriter, enumerator_element, pbes_system::is_not_false> E(R, data_spec, datar, id_generator);
   std::vector<pbes_system::pbes_expression> solutions;
 
-  data::enumerator_state<enumerator_element> P;
+  data::enumerator_queue<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
   for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {

@@ -424,7 +424,7 @@ data_expression Rewriter::quantifier_enumeration(
     data_expression partial_result = identity_element;
 
     std::size_t loop_upperbound = (sorts_are_finite ? npos() : 10);
-    data::enumerator_state<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l_enum, t3));
+    data::enumerator_queue<enumerator_list_element<> > enumerator_solution_deque(enumerator_list_element<>(vl_new_l_enum, t3));
 
     enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
     for( ; loop_upperbound > 0 &&

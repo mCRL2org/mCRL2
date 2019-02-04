@@ -253,8 +253,8 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       enumerator_type enumerator(rewr, spec, rewr, id_generator, 10000, true);
 
       data::mutable_indexed_substitution<> sigma;
-      data::enumerator_state<enumerator_list_element_with_substitution<> >
-           enumerator_deque(1, enumerator_list_element_with_substitution<>(variable_list(vars.begin(), vars.end()), term));
+      data::enumerator_queue<enumerator_list_element_with_substitution<> >
+           enumerator_deque(enumerator_list_element_with_substitution<>(variable_list(vars.begin(), vars.end()), term));
       for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end(); ++i)
       {
         i->add_assignments(vars,sigma,rewr);

@@ -86,7 +86,7 @@ void Solver::solve(QString specification, QString dataExpression)
       enumerator_type enumerator(rewr, m_data_spec, rewr, id_generator, 10000, true);
 
       mutable_indexed_substitution<> sigma;
-      mcrl2::data::enumerator_state<enumerator_element> enumerator_deque(1, enumerator_element(variable_list(m_vars.begin(),m_vars.end()), term));
+      mcrl2::data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(variable_list(m_vars.begin(),m_vars.end()), term));
       for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() && !m_abort; ++i)
       {
         mCRL2log(verbose) << "Solution found" << std::endl;

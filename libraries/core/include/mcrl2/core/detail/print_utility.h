@@ -45,7 +45,7 @@ std::string print_container(const Container& v, const std::string& begin_marker 
     out << " ";
   }
   int index = 0;
-  for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (auto i = v.begin(); i != v.end(); ++i)
   {
     if (print_index)
     {

@@ -101,18 +101,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = true_();
-    data::enumerator_state<enumerator_element> P(1, enumerator_element(v, derived().apply(phi)));
-    E.next(P, sigma, is_not_true());
-    while (!P.empty())
-    {
-      result = data::optimized_and(result, P.front().expression());
-      P.pop_front();
-      if (is_false(result))
-      {
-        break;
-      }
-      E.next(P, sigma, is_not_true());
-    }
+
+    data::enumerator_queue<enumerator_element> P(enumerator_element(v, derived().apply(phi)));
+    E.enumerate_all(P, sigma, is_not_true(),
+                    [&](const enumerator_element& p)
+                    {
+                      result = data::optimized_and(result, p.expression());
+                      return is_false(result);
+                    }
+    );
+
     redo_substitution(v, undo);
     return result;
   }
@@ -121,18 +119,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = false_();
-    data::enumerator_state<enumerator_element> P(1, enumerator_element(v, derived().apply(phi)));
-    E.next(P, sigma, is_not_false());
-    while (!P.empty())
-    {
-      result = data::optimized_or(result, P.front().expression());
-      P.pop_front();
-      if (is_true(result))
-      {
-        break;
-      }
-      E.next(P, sigma, is_not_false());
-    }
+
+    data::enumerator_queue<enumerator_element> P(enumerator_element(v, derived().apply(phi)));
+    E.enumerate_all(P, sigma, is_not_false(),
+                    [&](const enumerator_element& p)
+                    {
+                      result = data::optimized_or(result, p.expression());
+                      return is_true(result);
+                    }
+    );
+
     redo_substitution(v, undo);
     return result;
   }
@@ -144,7 +140,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::super::R, enumerable, non_enumerable);
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
       result = data::optimized_forall_no_empty_domain(non_enumerable, enumerate_forall(enumerable, x.body()));
     }
     else
@@ -172,7 +168,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     {
       data::variable_list enumerable;
       data::variable_list non_enumerable;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::super::R, enumerable, non_enumerable);
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, enumerable, non_enumerable);
       result = data::optimized_exists_no_empty_domain(non_enumerable, enumerate_exists(enumerable, x.body()));
     }
     else

@@ -39,7 +39,7 @@ class next_state_generator
     typedef data::rewriter rewriter_t;
     typedef data::enumerator_algorithm_with_iterator<> enumerator_t;
     typedef enumerator_t::iterator enumerator_iterator_t;
-    typedef data::enumerator_state<data::enumerator_list_element_with_substitution<> > enumerator_queue_t;
+    typedef data::enumerator_queue<data::enumerator_list_element_with_substitution<> > enumerator_queue_t;
 
     typedef data::rewriter::substitution_type substitution_t;
 
