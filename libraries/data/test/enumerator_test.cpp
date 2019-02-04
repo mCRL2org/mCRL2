@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#define BOOST_TEST_MODULE enumerator_test
 #include <set>
 #include <sstream>
 #include <stack>
@@ -14,6 +15,7 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/consistency.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/print_utility.h"
@@ -423,7 +425,51 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
   BOOST_CHECK(false);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(enumerate_callback)
 {
-  return nullptr;
+  typedef data::enumerator_list_element<data_expression> enumerator_element;
+  enumerator_identifier_generator id_generator;
+  data_specification dataspec;
+  dataspec.add_context_sort(data::sort_int::int_());
+  std::size_t max_count = 10;
+  bool throw_exceptions = true;
+  data::rewriter r(dataspec);
+  data::enumerator_algorithm<rewriter> E(r, dataspec, r, id_generator, max_count, throw_exceptions);
+
+  auto enumerate = [&](const data_expression& x)
+  {
+    data::mutable_indexed_substitution<> sigma;
+    data_expression result;
+    id_generator.clear();
+    if (is_forall(x))
+    {
+      const auto& x_ = atermpp::down_cast<forall>(x);
+      result = sort_bool::true_();
+      data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), r(x_.body())));
+      E.enumerate_all(P, sigma, is_not_true(),
+                      [&](const enumerator_element& p)
+                      {
+                        result = data::optimized_and(result, p.expression());
+                        return is_false(result);
+                      }
+      );
+    }
+    else if (is_exists(x))
+    {
+      const auto& x_ = atermpp::down_cast<exists>(x);
+      result = sort_bool::false_();
+      data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), r(x_.body())));
+      E.enumerate_all(P, sigma, is_not_false(),
+                      [&](const enumerator_element& p)
+                      {
+                        result = data::optimized_or(result, p.expression());
+                        return is_true(result);
+                      }
+      );
+    }
+    return result;
+  };
+
+  BOOST_CHECK_EQUAL(enumerate(parse_data_expression("forall n: Nat. n < 2")), false_());
+  BOOST_CHECK_EQUAL(enumerate(parse_data_expression("exists n: Nat. n < 2")), true_());
 }
