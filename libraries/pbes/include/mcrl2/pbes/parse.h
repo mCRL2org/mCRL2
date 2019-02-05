@@ -216,7 +216,9 @@ pbes_expression parse_pbes_expression(const std::string& text,
                                       const data::data_specification& dataspec,
                                       const VariableContainer& variables,
                                       const PropositionalVariableContainer& propositional_variables,
-                                      bool type_check = true
+                                      bool type_check = true,
+                                      bool translate_user_notation = true,
+                                      bool normalize_sorts = true
                                      )
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
@@ -229,8 +231,14 @@ pbes_expression parse_pbes_expression(const std::string& text,
   {
     x = pbes_system::typecheck_pbes_expression(x, variables, propositional_variables, dataspec);
   }
-  x = pbes_system::translate_user_notation(x);
-  x = pbes_system::normalize_sorts(x, dataspec);
+  if (translate_user_notation)
+  {
+    x = pbes_system::translate_user_notation(x);
+  }
+  if (normalize_sorts)
+  {
+    x = pbes_system::normalize_sorts(x, dataspec);
+  }
   return x;
 }
 
@@ -246,7 +254,9 @@ template <typename VariableContainer>
 pbes_expression parse_pbes_expression(const std::string& text,
                                       const pbes& pbesspec,
                                       const VariableContainer& variables,
-                                      bool type_check = true
+                                      bool type_check = true,
+                                      bool translate_user_notation = true,
+                                      bool normalize_sorts = true
                                      )
 {
   std::vector<propositional_variable> propositional_variables;
@@ -254,7 +264,7 @@ pbes_expression parse_pbes_expression(const std::string& text,
   {
     propositional_variables.push_back(eqn.variable());
   }
-  return parse_pbes_expression(text, pbesspec.data(), variables, propositional_variables, type_check);
+  return parse_pbes_expression(text, pbesspec.data(), variables, propositional_variables, type_check, translate_user_notation, normalize_sorts);
 }
 
 } // namespace pbes_system

@@ -41,37 +41,42 @@ Let $R$ be a rewriter on expressions of type $T$, let $r$ be a rewriter on
 data expressions, and let $\sigma $ a substitution on data variables that is
 applied during rewriting with $R$. Furthermore let $P$ be a queue of pairs
 $\left\langle v,\varphi \right\rangle$, with $v$ a non-empty list of variables and
-$\varphi$ an expression. The predicate function $accept$ is used to discard
-expressions. This is not just a cosmetic detail. The termination of the
-enumeration may depend on it.
+$\varphi$ an expression. The predicate function $\mathrm{reject}$ is used to discard
+an expression, so that it does not end up in the queue. The predicate function $\mathrm{accept}$ is used to accept an expression as a solution, even though it
+may still have a non-empty list of variables. By default the accept predicate
+always returns false. The $\mathrm{reject}$ function is not just a cosmetic detail. The termination of the enumeration may depend on it.
+
+Enumeration is often used to find solutions of boolean predicates. Then we typically reject the expression $false$ and accept the expression $true$ or vice versa.
 
 We assume that for each sort $s$ a non-empty set of
 constructor functions $\mathrm{constructors}(s)$ is defined.
 
 \[
 \begin{tabular}{l}
-\textsc{Enumerate}($P,R,r,\sigma, accept)$ \\
+\textsc{Enumerate}($P,R,r,\sigma, \mathrm{reject})$ \\
 \textbf{while} $P\neq \emptyset $ \textbf{do} \\
 \qquad \textbf{let} $\left\langle v,\varphi \right\rangle =\mathrm{head}(P)$ \\
-\qquad \textbf{if } $\neg accept(\varphi)$ \textbf{ then continue} \\
+\qquad \textbf{if } $\mathrm{reject}(\varphi)$ \textbf{ then continue} \\
 %--- finite sorts ---%
 \qquad \textbf{if } $\mathrm{is\_finite}(\mathrm{sort}(v_{1}))$ \textbf{ then} \\
 \qquad \qquad \textbf{for} $e\in \mathrm{values}(\mathrm{sort}(v_{1}))$ \textbf{do} \\
 \qquad \qquad \qquad $\varphi^{\prime}:=R(\varphi,\sigma[v_{1}:=e])$ \\
-\qquad \qquad \qquad \textbf{if } $\neg accept(\varphi')$ \textbf{ then continue} \\
-\qquad \qquad \qquad \textbf{if } $\mathrm{tail}(v) = []$ \textbf{ then} \textsc{ReportSolution}($\varphi', \sigma$) \\
+\qquad \qquad \qquad \textbf{if } $\mathrm{reject}(\varphi')$ \textbf{ then continue} \\
+\qquad \qquad \qquad \textbf{if } $\mathrm{tail}(v) = [] \vee \mathrm{accept}(\varphi')$ \textbf{ then} \textsc{ReportSolution}($\varphi'$) \\
 \qquad \qquad \qquad \textbf{else } $P:=P\concat\lbrack \left\langle \mathrm{tail}(v), \varphi' \right\rangle ]$ \\
 %--- function sort ---%
 \qquad \textbf{else } \\
 \qquad \qquad \textbf{for} $c\in $ $\mathrm{constructors}(\mathrm{sort}(v_{1}))$ \textbf{do} \\
 \qquad \qquad \qquad \textbf{let} $c:D_{1}\times \ldots \times
 D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\
-\qquad \qquad \qquad \textbf{choose }$y_{1},\ldots ,y_{m}$
+\qquad \qquad \qquad \textbf{choose }$y_1,\ldots ,y_m$
 \textbf{such} that $y_i \notin \{ v_1, \ldots ,v_n \} \cup FV(\varphi)$, for $i=1, \cdots, m$ \\
 \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi ,\sigma \lbrack v_{1}:=r(c(y_{1},\ldots ,y_{m}))])$ \\
-\qquad \qquad \qquad \textbf{if } $\neg accept(\varphi')$ \textbf{ then continue} \\
-\qquad \qquad \qquad \textbf{if } $\mathrm{tail}(v) = []$ \textbf{ then} \\
-\qquad \qquad \qquad \qquad \textsc{ReportSolution}($\varphi', \sigma$) \\
+\qquad \qquad \qquad \textbf{if } $\mathrm{reject}(\varphi')$ \textbf{ then continue} \\
+\qquad \qquad \qquad \textbf{if } $\mathrm{accept}(\varphi')
+\vee (\mathrm{tail}(v) = [] \wedge (\varphi = \varphi' \vee [y_1,\ldots ,y_m] = [])) 
+$ \textbf{ then} \\
+\qquad \qquad \qquad \qquad \textsc{ReportSolution}($\varphi'$) \\
 \qquad \qquad \qquad \textbf{else} \\
 \qquad \qquad \qquad \qquad \textbf{if } $\varphi = \varphi'$ \textbf{ then }
 $P:=P\concat\lbrack \left\langle \mathrm{tail}(v),\varphi'\right\rangle ]$ \\

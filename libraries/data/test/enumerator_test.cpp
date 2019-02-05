@@ -379,12 +379,14 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
   try
   {
     P.push_back(enumerator_element(v, phi));
-    E.enumerate_all(P, sigma, data::is_not_true(),
-        [&](const enumerator_element& p)
-        {
-          result = data::optimized_and(result, p.expression());
-          return result == data::sort_bool::false_();
-        }
+    E.enumerate_all(P, sigma,
+                    [&](const enumerator_element& p)
+                    {
+                      result = data::optimized_and(result, p.expression());
+                      return result == data::sort_bool::false_();
+                    },
+                    is_true,
+                    is_false
     );
   }
   catch (mcrl2::runtime_error& e)
@@ -444,27 +446,33 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
     if (is_forall(x))
     {
       const auto& x_ = atermpp::down_cast<forall>(x);
-      result = sort_bool::true_();
+      result = true_();
       data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), r(x_.body())));
-      E.enumerate_all(P, sigma, is_not_true(),
+      E.enumerate_all(P,
+                      sigma,
                       [&](const enumerator_element& p)
                       {
                         result = data::optimized_and(result, p.expression());
                         return is_false(result);
-                      }
+                      },
+                      is_true,
+                      is_false
       );
     }
     else if (is_exists(x))
     {
-      const auto& x_ = atermpp::down_cast<exists>(x);
-      result = sort_bool::false_();
+      const auto& x_ = atermpp::down_cast<forall>(x);
+      result = false_();
       data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), r(x_.body())));
-      E.enumerate_all(P, sigma, is_not_false(),
+      E.enumerate_all(P,
+                      sigma,
                       [&](const enumerator_element& p)
                       {
                         result = data::optimized_or(result, p.expression());
                         return is_true(result);
-                      }
+                      },
+                      is_false,
+                      is_true
       );
     }
     return result;

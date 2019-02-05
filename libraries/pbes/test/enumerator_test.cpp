@@ -50,12 +50,13 @@ BOOST_AUTO_TEST_CASE(test_enumerator)
   data::enumerator_algorithm<pbes_rewriter> E(R, data_spec, datar, id_generator);
   std::set<pbes_system::pbes_expression> solutions;
   data::enumerator_queue<enumerator_element> P(enumerator_element(v, phi));
-  E.enumerate_all(P, sigma, is_not_false(),
+  E.enumerate_all(P, sigma,
       [&](const enumerator_element& p)
       {
         solutions.insert(p.expression());
         return false; // do not interrupt
-      }
+      },
+      is_false
   );
   std::clog << "solutions = " << core::detail::print_list(solutions) << std::endl;
   BOOST_CHECK(solutions.size() == 1);
@@ -141,30 +142,34 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
     id_generator.clear();
     if (is_forall(x))
     {
-      const auto& x_ = atermpp::down_cast<forall>(x);
-      result = true_();
+      const auto& x_ = atermpp::down_cast<pbes_system::forall>(x);
+      result = pbes_system::true_();
       data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), R(x_.body())));
-      E.enumerate_all(P, sigma, is_not_true(),
+      E.enumerate_all(P,
+                      sigma,
                       [&](const enumerator_element& p)
                       {
-                        std::cout << "solution: " << p << std::endl;
                         result = data::optimized_and(result, p.expression());
                         return is_false(result);
-                      }
+                      },
+                      pbes_system::is_true,
+                      pbes_system::is_false
       );
     }
     else if (is_exists(x))
     {
-      const auto& x_ = atermpp::down_cast<exists>(x);
-      result = false_();
+      const auto& x_ = atermpp::down_cast<pbes_system::forall>(x);
+      result = pbes_system::false_();
       data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), R(x_.body())));
-      E.enumerate_all(P, sigma, is_not_false(),
+      E.enumerate_all(P,
+                      sigma,
                       [&](const enumerator_element& p)
                       {
-                        std::cout << "solution: " << p << std::endl;
                         result = data::optimized_or(result, p.expression());
                         return is_true(result);
-                      }
+                      },
+                      pbes_system::is_false,
+                      pbes_system::is_true
       );
     }
     return result;

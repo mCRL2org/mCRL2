@@ -379,7 +379,7 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
 template <typename Expression>
 std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expression>& p)
 {
-  out << "{ variables = [";
+  out << "{ [";
   const auto& variables = p.variables();
   for (auto i = variables.begin(); i != variables.end(); ++i)
   {
@@ -389,7 +389,7 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
     }
     out << *i << ": " << i->sort();
   }
-  return out << "], expression = " << p.expression() << " }";
+  return out << "], " << p.expression() << " }";
 }
 
 /// \brief Contains the enumerator queue.
@@ -414,7 +414,7 @@ class enumerator_queue
     void push_back(const EnumeratorListElement& x)
     {
 #ifdef MCRL2_LOG_ENUMERATOR
-      std::cout << x << std::endl;
+      std::cout << "push_back " << x << std::endl;
 #endif
       P.push_back(x);
     }
@@ -586,6 +586,12 @@ class enumerator_algorithm
 
     enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
 
+    template <typename T>
+    struct always_false
+    {
+      bool operator()(const T&) { return false; }
+    };
+
     /// \brief Enumerates the front element of the todo list P.
     /// \param P The todo list of the algorithm.
     /// \param sigma A mutable substitution that is applied by the rewriter.
@@ -755,7 +761,8 @@ class enumerator_algorithm
     /// The enumeration is interrupted when report_solution returns true for the reported solution.
     /// \param P The todo list of the algorithm.
     /// \param sigma A mutable substitution that is applied by the rewriter.
-    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \param report_solution A callback function that is called whenever a solution is found.
     /// It takes an enumerator element as argument.
     /// If report_solution returns true, the enumeration is interrupted.
@@ -763,8 +770,8 @@ class enumerator_algorithm
     /// was interrupted will be enumerated again.
     /// \pre !P.empty()
     /// \return If the return value is true, enumeration will be interrupted
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename ReportSolution>
-    bool enumerate_front(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept, ReportSolution report_solution) const
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Reject, typename ReportSolution, typename Accept = always_false<typename EnumeratorListElement::expression_type>>
+    bool enumerate_front(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, ReportSolution report_solution, Reject reject, Accept accept = always_false<typename EnumeratorListElement::expression_type>()) const
     {
       assert(!P.empty());
       auto p = P.front();
@@ -776,11 +783,11 @@ class enumerator_algorithm
       )
       {
         auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
-        if (!accept(phi1))
+        if (reject(phi1))
         {
           return false;
         }
-        if (variables.empty())
+        if (variables.empty() || accept(phi1))
         {
           EnumeratorListElement q(variables, phi1, p, v, e);
           return report_solution(q);
@@ -795,31 +802,34 @@ class enumerator_algorithm
                              const data::variable& v,
                              const data::data_expression& e
       )
+      {
+        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+        if (reject(phi1))
         {
-          assert(!added_variables.empty());
-          auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
-            if (phi1 == phi)
-          {
-            if (variables.empty())
-            {
-              EnumeratorListElement q(variables, phi1, p, v, e);
-              return report_solution(q);
-            }
-            // Discard the added_variables, since we know they do not appear in phi1
-            P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
-          }
-          else
-          {
-            // Additional variables are put at the end of the list!
-            P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
-          }
           return false;
+        }
+        if (accept(phi1) || (variables.empty() && (phi1 == phi || added_variables.empty())))
+        {
+          EnumeratorListElement q(variables, phi1, p, v, e);
+          return report_solution(q);
+        }
+        if (phi1 == phi)
+        {
+          // Discard the added_variables, since we know they do not appear in phi1
+          P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
+        }
+        else
+        {
+          // Additional variables are put at the end of the list!
+          P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
+        }
+        return false;
       };
 
       const auto& v = p.variables();
       const auto& phi = p.expression();
 
-      if (!accept(phi))
+      if (reject(phi))
       {
         P.pop_front();
         return false;
@@ -969,16 +979,16 @@ class enumerator_algorithm
     /// The enumeration is interrupted when report_solution returns true for the reported solution.
     /// \param P The todo list of the algorithm.
     /// \param sigma A substitution.
-    /// \param accept Elements p for which accept(p) is false are discarded.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \param report_solution A callback function that is called whenever a solution is found.
     /// It takes an enumerator element as argument.
     /// If report_solution returns true, the enumeration is interrupted.
     /// N.B. If the enumeration is resumed after an interruption, the element p that
     /// was interrupted will be enumerated again.
     /// \return The number of elements that have been processed
-    /// \post Either P.empty() or P.front().is_solution()
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename ReportSolution>
-    std::size_t enumerate_all(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept, ReportSolution report_solution) const
+    template <typename EnumeratorListElement, typename MutableSubstitution, typename Reject, typename ReportSolution, typename Accept = always_false<typename EnumeratorListElement::expression_type>>
+    std::size_t enumerate_all(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, ReportSolution report_solution, Reject reject, Accept accept = always_false<typename EnumeratorListElement::expression_type>()) const
     {
       std::size_t count = 0;
       while (!P.empty())
@@ -987,7 +997,7 @@ class enumerator_algorithm
         {
           break;
         }
-        if (enumerate_front(P, sigma, accept, report_solution))
+        if (enumerate_front(P, sigma, report_solution, reject, accept))
         {
           break;
         }
