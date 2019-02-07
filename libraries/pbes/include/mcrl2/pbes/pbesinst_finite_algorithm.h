@@ -237,30 +237,23 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     data::enumerator_identifier_generator id_generator;
     data::enumerator_algorithm<> E(super::R, m_data_spec, super::R, id_generator);
     const data::variable_list di_list(di.begin(), di.end());
-    if (di_list.empty())
-    {
-      result.insert(x);
-    }
-    else
-    {
-      data::enumerator_queue<enumerator_element> P(enumerator_element(di_list, data::true_()));
-      data::mutable_indexed_substitution<> local_sigma;
-      E.enumerate_all(P,
-                      local_sigma,
-                      [&](const enumerator_element& p) {
-                          data::mutable_indexed_substitution<> sigma_i;
-                          p.add_assignments(di_list, sigma_i, super::R);
-                          data::data_expression_list d_copy = rewrite_container(d, super::R, sigma);
-                          data::data_expression_list e_copy = rewrite_container(e, super::R, sigma);
-                          data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(di_list);
-                          di_copy = data::replace_free_variables(di_copy, sigma_i);
-                          data::data_expression c = make_condition(di_copy, d_copy);
-                          core::identifier_string Y = m_rename(Xi, di_copy);
-                          result.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
-                          return false;
-                      }
-      );
-    }
+    data::enumerator_queue<enumerator_element> P(enumerator_element(di_list, data::true_()));
+    data::mutable_indexed_substitution<> local_sigma;
+    E.enumerate_all(P,
+                    local_sigma,
+                    [&](const enumerator_element& p) {
+                        data::mutable_indexed_substitution<> sigma_i;
+                        p.add_assignments(di_list, sigma_i, super::R);
+                        data::data_expression_list d_copy = rewrite_container(d, super::R, sigma);
+                        data::data_expression_list e_copy = rewrite_container(e, super::R, sigma);
+                        data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(di_list);
+                        di_copy = data::replace_free_variables(di_copy, sigma_i);
+                        data::data_expression c = make_condition(di_copy, d_copy);
+                        core::identifier_string Y = m_rename(Xi, di_copy);
+                        result.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
+                        return false;
+                    }
+    );
     return join_or(result.begin(), result.end());
   }
 
@@ -366,29 +359,55 @@ class pbesinst_finite_algorithm
         data::variable_list infinite(infinite_parameters.begin(), infinite_parameters.end());
 
         typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-        data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr, m_id_generator);
-        data::mutable_indexed_substitution<> local_sigma;
-        data::variable_list finite_parameter_list(finite_parameters.begin(), finite_parameters.end());
-        data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(finite_parameter_list, data::true_()));
-        for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end(); ++j)
-        {
-          // apply the substitution contained in the enumerated element.
-          data::mutable_indexed_substitution<> sigma_j;
-          j->add_assignments(finite_parameter_list, sigma_j, rewr);
 
-          std::vector<data::data_expression> finite;
-          for (const data::variable& v: finite_parameters)
-          {
-            finite.push_back(sigma_j(v));
-          }
-          core::identifier_string name = rename(eqn.variable().name(), data::data_expression_list(finite.begin(), finite.end()));
-          propositional_variable X(name, infinite);
-          detail::pbesinst_finite_builder<data::rewriter, data::mutable_indexed_substitution<>> visitor(rewr, sigma_j, rename, p.data(), index_map, variable_map);
-          pbes_expression formula = visitor.apply(eqn.formula());
-          equations.emplace_back(eqn.symbol(), X, formula);
-          mCRL2log(log::debug, "pbesinst_finite") << print_equation_count(++m_equation_count);
-          mCRL2log(log::debug, "pbesinst_finite") << "Added equation " << pbes_system::pp(eqn) << "\n";
-        }
+//        data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr, m_id_generator);
+//        data::mutable_indexed_substitution<> local_sigma;
+//        data::variable_list finite_parameter_list(finite_parameters.begin(), finite_parameters.end());
+//        data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(finite_parameter_list, data::true_()));
+//        for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end(); ++j)
+//        {
+//          // apply the substitution contained in the enumerated element.
+//          data::mutable_indexed_substitution<> sigma_j;
+//          j->add_assignments(finite_parameter_list, sigma_j, rewr);
+//
+//          std::vector<data::data_expression> finite;
+//          for (const data::variable& v: finite_parameters)
+//          {
+//            finite.push_back(sigma_j(v));
+//          }
+//          core::identifier_string name = rename(eqn.variable().name(), data::data_expression_list(finite.begin(), finite.end()));
+//          propositional_variable X(name, infinite);
+//          detail::pbesinst_finite_builder<data::rewriter, data::mutable_indexed_substitution<>> visitor(rewr, sigma_j, rename, p.data(), index_map, variable_map);
+//          pbes_expression formula = visitor.apply(eqn.formula());
+//          equations.emplace_back(eqn.symbol(), X, formula);
+//          mCRL2log(log::debug, "pbesinst_finite") << print_equation_count(++m_equation_count);
+//          mCRL2log(log::debug, "pbesinst_finite") << "Added equation " << pbes_system::pp(eqn) << "\n";
+//        }
+
+        data::enumerator_algorithm<> E(rewr, p.data(), rewr, m_id_generator);
+        data::variable_list finite_parameter_list(finite_parameters.begin(), finite_parameters.end());
+        data::enumerator_queue<enumerator_element> P(enumerator_element(finite_parameter_list, data::true_()));
+        data::mutable_indexed_substitution<> sigma;
+        E.enumerate_all(P,
+                        sigma,
+                        [&](const enumerator_element& q) {
+                          data::mutable_indexed_substitution<> sigma_j;
+                          q.add_assignments(finite_parameter_list, sigma_j, rewr);
+                          std::vector<data::data_expression> finite;
+                          for (const data::variable& v: finite_parameters)
+                          {
+                            finite.push_back(sigma_j(v));
+                          }
+                          core::identifier_string name = rename(eqn.variable().name(), data::data_expression_list(finite.begin(), finite.end()));
+                          propositional_variable X(name, infinite);
+                          detail::pbesinst_finite_builder<data::rewriter, data::mutable_indexed_substitution<>> visitor(rewr, sigma_j, rename, p.data(), index_map, variable_map);
+                          pbes_expression formula = visitor.apply(eqn.formula());
+                          equations.emplace_back(eqn.symbol(), X, formula);
+                          mCRL2log(log::debug, "pbesinst_finite") << print_equation_count(++m_equation_count);
+                          mCRL2log(log::debug, "pbesinst_finite") << "Added equation " << pbes_system::pp(eqn) << "\n";
+                          return false;
+                        }
+        );
       }
 
       // compute new initial state

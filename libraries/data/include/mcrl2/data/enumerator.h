@@ -785,7 +785,6 @@ class enumerator_algorithm
     {
       assert(!P.empty());
       const auto& p = P.front();
-      assert(!p.variables().empty());
 
       auto add_element = [&](const data::variable_list& variables,
                              const typename EnumeratorListElement::expression_type& phi,
@@ -839,6 +838,13 @@ class enumerator_algorithm
 
       const auto& v = p.variables();
       const auto& phi = p.expression();
+
+      if (v.empty())
+      {
+        bool result = report_solution(p);
+        P.pop_front();
+        return result;
+      }
 
       if (reject(phi))
       {
