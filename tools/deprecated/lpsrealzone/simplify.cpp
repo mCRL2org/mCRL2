@@ -10,7 +10,7 @@
 /// \brief
 
 
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/workarounds.h"

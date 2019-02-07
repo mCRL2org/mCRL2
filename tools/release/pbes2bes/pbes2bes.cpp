@@ -40,7 +40,6 @@
 #include "mcrl2/utilities/execution_timer.h"
 
 //Data Framework
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/data_equation.h"
 
@@ -196,7 +195,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
 
       normalize(p);
       mcrl2::pbes_system::detail::instantiate_global_variables(p);
-  
+
       // data rewriter
       std::set < function_symbol > eqn_symbol_set=mcrl2::pbes_system::find_function_symbols(p.equations());
       std::set < function_symbol > init_symbol_set=mcrl2::pbes_system::find_function_symbols(p.initial_state());

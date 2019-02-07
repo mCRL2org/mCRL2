@@ -15,7 +15,6 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/local_fixpoints.h"
 #include "mcrl2/bes/pbesinst_conversion.h"
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/pbes/algorithms.h"

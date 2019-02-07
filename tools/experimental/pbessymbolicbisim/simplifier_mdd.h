@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MDD_H
 #define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_MDD_H
 
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 
 #include "simplifier.h"
 

@@ -37,7 +37,6 @@
 #include "mcrl2/utilities/execution_timer.h"
 
 //Data Framework
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/data_equation.h"
 
@@ -81,7 +80,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 {
   protected:
     // Tool options.
-    transformation_strategy m_transformation_strategy; // The strategy to substitute the value of variables with 
+    transformation_strategy m_transformation_strategy; // The strategy to substitute the value of variables with
                                                        // a trivial rhs (aka true or false) in other equations when generating a BES.
     search_strategy m_search_strategy;                 // The search strategy (depth first/breadth first)
     solution_strategy_t m_solution_strategy;           // Indicates the solver used to solve the generated BES.
@@ -146,7 +145,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       }
       m_approximate_true          = 0 == parser.options.count("approximate-false");
 
-      if (m_maximal_todo_size==atermpp::npos && !m_approximate_true) 
+      if (m_maximal_todo_size==atermpp::npos && !m_approximate_true)
       {
         throw parser.error("Setting approximate-false only makes sense when setting todo-max. ");
       }
@@ -174,7 +173,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                  .add_value(on_the_fly_with_fixed_points),
                  "use substitution strategy STRAT:",
                  's').
-     add_option("search", 
+     add_option("search",
                  make_enum_argument<search_strategy>("SEARCH")
                    .add_value(breadth_first, true)
                    .add_value(depth_first)
@@ -190,7 +189,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                  "of the lps. An indentation corresponds in general with one (sometimes zero, sometimes more) "
                  "transition. ",
                  'c').
-      add_option("erase", 
+      add_option("erase",
                  make_enum_argument<remove_level>("LEVEL")
                    .add_value(none, true)
                    .add_value(some)
@@ -243,7 +242,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 
       pbes_system::algorithms::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
-      
+
       // data rewriter
       data::rewriter datar;
       if (m_data_elm)
@@ -274,7 +273,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       algorithm.run(p);
       p=algorithm.get_result(!m_construct_counter_example);
       boolean_equation_system bes = pbesinst_conversion(p);
-      
+
       timer().finish("instantiation");
 
       bool result = false;
@@ -284,7 +283,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       switch (m_solution_strategy)
       {
         case gauss:
-          throw mcrl2::runtime_error("Plain gauss elimination is not supported. Use the local fixpoints algorithm instead."); 
+          throw mcrl2::runtime_error("Plain gauss elimination is not supported. Use the local fixpoints algorithm instead.");
         case small_progr_measures:
           result = small_progress_measures(bes);
           break;
@@ -299,7 +298,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 
       if (m_construct_counter_example)
       {
-        print_justification_tree(bes, full_solution, result); 
+        print_justification_tree(bes, full_solution, result);
       }
 
       return true;

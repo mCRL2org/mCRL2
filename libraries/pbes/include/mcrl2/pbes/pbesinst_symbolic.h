@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_PBESINST_SYMBOLIC_H
 #define MCRL2_PBES_PBESINST_SYMBOLIC_H
 
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/find.h"

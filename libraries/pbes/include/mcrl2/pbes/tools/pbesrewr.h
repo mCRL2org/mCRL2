@@ -13,7 +13,6 @@
 #define MCRL2_PBES_TOOLS_PBESREWR_H
 
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/bqnf_traverser.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"

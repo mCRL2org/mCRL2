@@ -13,6 +13,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
@@ -130,10 +131,9 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
   data::data_specification dataspec;
   dataspec.add_context_sort(data::sort_int::int_());
   std::size_t max_count = 10;
-  bool throw_exceptions = true;
   data::rewriter r(dataspec);
   pbes_rewriter R(r);
-  data::enumerator_algorithm<pbes_rewriter> E(R, dataspec, r, id_generator, max_count, throw_exceptions);
+  data::enumerator_algorithm<pbes_rewriter> E(R, dataspec, r, id_generator, max_count);
 
   auto enumerate = [&](const pbes_expression& x)
   {

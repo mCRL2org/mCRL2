@@ -18,7 +18,7 @@
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/io.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/parse.h"

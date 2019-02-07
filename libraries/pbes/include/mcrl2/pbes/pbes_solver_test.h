@@ -21,7 +21,6 @@
 #include "mcrl2/pbes/algorithms.h"
 
 //Data framework
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
 
 //Boolean equation systems
@@ -54,7 +53,7 @@ bool pbes_instantiation_test_algorithm_test(pbes& pbes_spec, const bool expected
   const bool outcome_smp=small_progress_measures(bes);
   const bool outcome_gauss=bes::gauss_elimination(bes);
   if ((outcome_local_fixed==expected_outcome) &&
-      (outcome_smp==expected_outcome) && 
+      (outcome_smp==expected_outcome) &&
       (outcome_gauss==expected_outcome))
   {
     return true;
@@ -71,15 +70,15 @@ bool pbes_instantiation_test_algorithm_test(pbes& pbes_spec, const bool expected
 }
 
 inline
-bool alternative_lazy_algorithm_test(pbes& pbes_spec, 
-                                     const bool expected_outcome, 
-                                     const transformation_strategy trans_strat, 
+bool alternative_lazy_algorithm_test(pbes& pbes_spec,
+                                     const bool expected_outcome,
+                                     const transformation_strategy trans_strat,
                                      const search_strategy search_strat,
                                      const data::rewriter::strategy rewrite_strategy)
 {
   pbes_system::algorithms::instantiate_global_variables(pbes_spec);
 
-  // Generate an enumerator, a data rewriter and a pbes rewriter.
+  // Generate a data rewriter and a pbes rewriter.
   const data::rewriter datar(pbes_spec.data(),
                        mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_system::find_function_symbols(pbes_spec), pbes_spec.global_variables()),
                        rewrite_strategy);
@@ -92,7 +91,7 @@ bool alternative_lazy_algorithm_test(pbes& pbes_spec,
   const bool outcome_smp=small_progress_measures(bes);
   const bool outcome_gauss=gauss_elimination(bes);
   if ((outcome_local_fixed==expected_outcome) &&
-      (outcome_smp==expected_outcome) && 
+      (outcome_smp==expected_outcome) &&
       (outcome_gauss==expected_outcome))
   {
     return true;

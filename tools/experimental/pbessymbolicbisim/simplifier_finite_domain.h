@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_FINITE_DOMAIN_H
 #define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_FINITE_DOMAIN_H
 
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 
 #include "simplifier.h"
 
@@ -58,17 +58,17 @@ protected:
     variable vb3("b3", sort_bool::bool_());
 
     //  a && (b || c) = a && b || a && c
-    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), sort_bool::and_(vb1, sort_bool::or_(vb2, vb3)), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), sort_bool::and_(vb1, sort_bool::or_(vb2, vb3)),
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::and_(vb1,vb3))));
     //  a || (b || c) = (a || b) || c;
     ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), sort_bool::or_(vb1, sort_bool::or_(vb2,vb3)),
       sort_bool::or_(sort_bool::or_(vb1,vb2), vb3)));
     //  a && b || !a && b = b
-    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}),
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::and_(sort_bool::not_(vb1), vb2)),
       vb2));
     //  !a && b || a && b = b
-    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}),
       sort_bool::or_(sort_bool::and_(sort_bool::not_(vb1),vb2), sort_bool::and_(vb1, vb2)),
       vb2));
 
@@ -86,7 +86,7 @@ protected:
     variable vb3("b3", sort_bool::bool_());
 
     //  a && b || a && c = a && (b || c)
-    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), 
+    ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}),
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::and_(vb1,vb3)),
       sort_bool::and_(vb1, sort_bool::or_(vb2, vb3))));
     //  (a && b) && c = a && (b && c);

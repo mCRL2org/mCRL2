@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PARITY_GAME_GENERATOR_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"

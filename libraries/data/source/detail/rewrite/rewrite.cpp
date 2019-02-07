@@ -28,7 +28,7 @@
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
 #include "mcrl2/data/detail/rewriter_wrapper.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 using namespace mcrl2::core;

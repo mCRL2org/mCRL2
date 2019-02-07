@@ -16,7 +16,7 @@
 #include "mcrl2/utilities/logger.h"
 #include <deque>
 
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 #include "mcrl2/lps/detail/lps_algorithm.h"

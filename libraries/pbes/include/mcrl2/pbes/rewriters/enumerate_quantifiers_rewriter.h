@@ -65,7 +65,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                                 const data::data_specification& dataspec, 
                                 data::enumerator_identifier_generator& id_generator, 
                                 bool enumerate_infinite_sorts = true)
-    : super(r, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)(), true)
+    : super(r, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)())
   {
     id_generator.clear();
   }

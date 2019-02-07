@@ -24,7 +24,7 @@
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/lambda.h"

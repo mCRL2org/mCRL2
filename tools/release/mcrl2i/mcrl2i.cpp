@@ -18,7 +18,7 @@
 #include <cassert>
 
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"

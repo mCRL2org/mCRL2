@@ -19,7 +19,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/parse.h"
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
   dataspec.add_context_sort(data::sort_real::real_());
   data::rewriter R(dataspec);
   data::enumerator_identifier_generator id_generator("x");
-  data::enumerator_algorithm<> E(R, dataspec, R, id_generator, (std::numeric_limits<std::size_t>::max)(), true);
+  data::enumerator_algorithm<> E(R, dataspec, R, id_generator, (std::numeric_limits<std::size_t>::max)());
   data::enumerator_queue<enumerator_element> P;
   data::rewriter::substitution_type sigma;
 
@@ -434,9 +434,8 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
   data_specification dataspec;
   dataspec.add_context_sort(data::sort_int::int_());
   std::size_t max_count = 10;
-  bool throw_exceptions = true;
   data::rewriter r(dataspec);
-  data::enumerator_algorithm<rewriter> E(r, dataspec, r, id_generator, max_count, throw_exceptions);
+  data::enumerator_algorithm<rewriter> E(r, dataspec, r, id_generator, max_count);
 
   auto enumerate = [&](const data_expression& x)
   {

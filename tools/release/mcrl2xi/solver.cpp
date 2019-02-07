@@ -12,7 +12,7 @@
 #include "solver.h"
 #include "parsing.h"
 
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/enumerator_with_iterator.h"
 
 Solver::Solver(QThread *atermThread, mcrl2::data::rewrite_strategy strategy):
   m_strategy(strategy)
