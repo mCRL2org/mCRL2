@@ -91,7 +91,7 @@ struct pbesinst_finite_rename
 /// \brief Exception that is used to signal an empty parameter selection
 struct empty_parameter_selection: public mcrl2::runtime_error
 {
-  empty_parameter_selection(const std::string& msg)
+  explicit empty_parameter_selection(const std::string& msg)
     : mcrl2::runtime_error(msg)
   {}
 };
@@ -221,8 +221,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::vector<data::data_expression> infinite_parameters;
     split_parameters(x, m_index_map, finite_parameters, infinite_parameters);
     mCRL2log(log::debug, "pbesinst_finite") << print_parameters(finite_parameters, infinite_parameters);
-    data::data_expression_list d = data::data_expression_list(finite_parameters.begin(),finite_parameters.end());
-    data::data_expression_list e = data::data_expression_list(infinite_parameters.begin(),infinite_parameters.end());
+    data::data_expression_list d(finite_parameters.begin(), finite_parameters.end());
+    data::data_expression_list e(infinite_parameters.begin(), infinite_parameters.end());
     const core::identifier_string& Xi = x.name();
     // x = Xi(d,e)
 
@@ -235,26 +235,32 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
 
     std::set<pbes_expression> result;
     data::enumerator_identifier_generator id_generator;
-    data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R, id_generator);
-    data::mutable_indexed_substitution<> local_sigma;
+    data::enumerator_algorithm<> E(super::R, m_data_spec, super::R, id_generator);
     const data::variable_list di_list(di.begin(), di.end());
-    data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(di_list, data::true_()));
-    for (auto i = enumerator.begin(local_sigma, enumerator_deque); i != enumerator.end(); ++i)
+    if (di_list.empty())
     {
-      data::mutable_indexed_substitution<> sigma_i;
-      i->add_assignments(di_list, sigma_i, super::R);
-      data::data_expression_list d_copy = rewrite_container(d, super::R, sigma);
-      data::data_expression_list e_copy = rewrite_container(e, super::R, sigma);
-
-      data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(di_list);
-      di_copy = data::replace_free_variables(di_copy, sigma_i);
-
-      data::data_expression c = make_condition(di_copy, d_copy);
-
-      core::identifier_string Y = m_rename(Xi, di_copy);
-      result.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
+      result.insert(x);
     }
-
+    else
+    {
+      data::enumerator_queue<enumerator_element> P(enumerator_element(di_list, data::true_()));
+      data::mutable_indexed_substitution<> local_sigma;
+      E.enumerate_all(P,
+                      local_sigma,
+                      [&](const enumerator_element& p) {
+                          data::mutable_indexed_substitution<> sigma_i;
+                          p.add_assignments(di_list, sigma_i, super::R);
+                          data::data_expression_list d_copy = rewrite_container(d, super::R, sigma);
+                          data::data_expression_list e_copy = rewrite_container(e, super::R, sigma);
+                          data::data_expression_list di_copy = atermpp::container_cast<data::data_expression_list>(di_list);
+                          di_copy = data::replace_free_variables(di_copy, sigma_i);
+                          data::data_expression c = make_condition(di_copy, d_copy);
+                          core::identifier_string Y = m_rename(Xi, di_copy);
+                          result.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
+                          return false;
+                      }
+      );
+    }
     return join_or(result.begin(), result.end());
   }
 

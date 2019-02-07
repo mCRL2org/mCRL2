@@ -770,11 +770,22 @@ class enumerator_algorithm
     /// was interrupted will be enumerated again.
     /// \pre !P.empty()
     /// \return If the return value is true, enumeration will be interrupted
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Reject, typename ReportSolution, typename Accept = always_false<typename EnumeratorListElement::expression_type>>
-    bool enumerate_front(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, ReportSolution report_solution, Reject reject, Accept accept = always_false<typename EnumeratorListElement::expression_type>()) const
+    template <typename EnumeratorListElement,
+              typename MutableSubstitution,
+              typename ReportSolution,
+              typename Reject = always_false<typename EnumeratorListElement::expression_type>,
+              typename Accept = always_false<typename EnumeratorListElement::expression_type>
+             >
+    bool enumerate_front(enumerator_queue<EnumeratorListElement>& P,
+                         MutableSubstitution& sigma,
+                         ReportSolution report_solution,
+                         Reject reject = Reject(),
+                         Accept accept = Accept()
+                        ) const
     {
       assert(!P.empty());
-      auto p = P.front();
+      const auto& p = P.front();
+      assert(!p.variables().empty());
 
       auto add_element = [&](const data::variable_list& variables,
                              const typename EnumeratorListElement::expression_type& phi,
@@ -849,8 +860,7 @@ class enumerator_algorithm
           bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, r, function_sorts, function_parameter_list);
           if (!result)
           {
-            cannot_enumerate(p, "Sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
-            return true;
+            throw mcrl2::runtime_error("Sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
           }
 
           data_expression sigma_v1 = sigma(v1);
@@ -866,7 +876,7 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of function sort " + data::pp(v1_sort) + ".");
+          throw mcrl2::runtime_error("Cannot enumerate elements of function sort " + data::pp(v1_sort) + ".");
           return true;
         }
       }
@@ -888,8 +898,7 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of set sort " + data::pp(v1_sort) + ".");
-          return true;
+          throw mcrl2::runtime_error("Cannot enumerate elements of set sort " + data::pp(v1_sort) + ".");
         }
       }
       else if (sort_fset::is_fset(v1_sort))
@@ -901,7 +910,7 @@ class enumerator_algorithm
           bool result = detail::compute_finite_set_elements(fset, dataspec, r, sigma, set_elements, id_generator);
           if (!result)
           {
-            cannot_enumerate(p, "Finite set sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
+            throw mcrl2::runtime_error("Finite set sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
           }
 
           data_expression sigma_v1 = sigma(v1);
@@ -917,19 +926,16 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of finite set sort " + data::pp(v1_sort) + ".");
-          return true;
+          throw mcrl2::runtime_error("Cannot enumerate elements of finite set sort " + data::pp(v1_sort) + ".");
         }
       }
       else if (sort_bag::is_bag(v1_sort))
       {
-        cannot_enumerate(p, "Cannot enumerate elements of bag sort " + data::pp(v1_sort) + ".");
-        return true;
+        throw mcrl2::runtime_error("Cannot enumerate elements of bag sort " + data::pp(v1_sort) + ".");
       }
       else if (sort_fbag::is_fbag(v1_sort))
       {
-        cannot_enumerate(p, "Cannot enumerate elements of finite bag sort " + data::pp(v1_sort) + ".");
-        return true;
+        throw mcrl2::runtime_error("Cannot enumerate elements of finite bag sort " + data::pp(v1_sort) + ".");
       }
       else
       {
@@ -966,8 +972,7 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of sort " + data::pp(v1_sort) + " without constructors.");
-          return true;
+          throw mcrl2::runtime_error("Cannot enumerate elements of sort " + data::pp(v1_sort) + " without constructors.");
         }
       }
 
@@ -987,8 +992,18 @@ class enumerator_algorithm
     /// N.B. If the enumeration is resumed after an interruption, the element p that
     /// was interrupted will be enumerated again.
     /// \return The number of elements that have been processed
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Reject, typename ReportSolution, typename Accept = always_false<typename EnumeratorListElement::expression_type>>
-    std::size_t enumerate_all(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, ReportSolution report_solution, Reject reject, Accept accept = always_false<typename EnumeratorListElement::expression_type>()) const
+    template <typename EnumeratorListElement,
+            typename MutableSubstitution,
+            typename ReportSolution,
+            typename Reject = always_false<typename EnumeratorListElement::expression_type>,
+            typename Accept = always_false<typename EnumeratorListElement::expression_type>
+    >
+    std::size_t enumerate_all(enumerator_queue<EnumeratorListElement>& P,
+                              MutableSubstitution& sigma,
+                              ReportSolution report_solution,
+                              Reject reject = Reject(),
+                              Accept accept = Accept()
+    ) const
     {
       std::size_t count = 0;
       while (!P.empty())
