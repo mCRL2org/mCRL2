@@ -373,20 +373,19 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
   data::rewriter R(dataspec);
   data::enumerator_identifier_generator id_generator("x");
   data::enumerator_algorithm<> E(R, dataspec, R, id_generator, (std::numeric_limits<std::size_t>::max)());
-  data::enumerator_queue<enumerator_element> P;
   data::rewriter::substitution_type sigma;
 
   try
   {
-    P.push_back(enumerator_element(v, phi));
-    E.enumerate_all(P, sigma,
-                    [&](const enumerator_element& p)
-                    {
-                      result = data::optimized_and(result, p.expression());
-                      return result == data::sort_bool::false_();
-                    },
-                    is_true,
-                    is_false
+    E.enumerate(enumerator_element(v, phi),
+                sigma,
+                [&](const enumerator_element& p)
+                {
+                  result = data::optimized_and(result, p.expression());
+                  return result == data::sort_bool::false_();
+                },
+                is_true,
+                is_false
     );
   }
   catch (mcrl2::runtime_error& e)
@@ -446,32 +445,30 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
     {
       const auto& x_ = atermpp::down_cast<forall>(x);
       result = true_();
-      data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), r(x_.body())));
-      E.enumerate_all(P,
-                      sigma,
-                      [&](const enumerator_element& p)
-                      {
-                        result = data::optimized_and(result, p.expression());
-                        return is_false(result);
-                      },
-                      is_true,
-                      is_false
+      E.enumerate(enumerator_element(x_.variables(), r(x_.body())),
+                  sigma,
+                  [&](const enumerator_element& p)
+                  {
+                    result = data::optimized_and(result, p.expression());
+                    return is_false(result);
+                  },
+                  is_true,
+                  is_false
       );
     }
     else if (is_exists(x))
     {
       const auto& x_ = atermpp::down_cast<forall>(x);
       result = false_();
-      data::enumerator_queue<enumerator_element> P(enumerator_element(x_.variables(), r(x_.body())));
-      E.enumerate_all(P,
-                      sigma,
-                      [&](const enumerator_element& p)
-                      {
-                        result = data::optimized_or(result, p.expression());
-                        return is_true(result);
-                      },
-                      is_false,
-                      is_true
+      E.enumerate(enumerator_element(x_.variables(), r(x_.body())),
+                  sigma,
+                  [&](const enumerator_element& p)
+                  {
+                    result = data::optimized_or(result, p.expression());
+                    return is_true(result);
+                  },
+                  is_false,
+                  is_true
       );
     }
     return result;

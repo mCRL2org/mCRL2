@@ -58,12 +58,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   /// \param r A data rewriter.
   /// \param sigma A mutable substitution.
   /// \param dataspec A data specification.
-  /// \param id_generator A generator to generate fresh variable names. 
+  /// \param id_generator A generator to generate fresh variable names.
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well.
-  enumerate_quantifiers_builder(const DataRewriter& r, 
-                                MutableSubstitution& sigma, 
-                                const data::data_specification& dataspec, 
-                                data::enumerator_identifier_generator& id_generator, 
+  enumerate_quantifiers_builder(const DataRewriter& r,
+                                MutableSubstitution& sigma,
+                                const data::data_specification& dataspec,
+                                data::enumerator_identifier_generator& id_generator,
                                 bool enumerate_infinite_sorts = true)
     : super(r, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)())
   {
@@ -101,18 +101,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = true_();
-
-    data::enumerator_queue<enumerator_element> P(enumerator_element(v, derived().apply(phi)));
-    E.enumerate_all(P,
-                    sigma,
-                    [&](const enumerator_element& p)
-                    {
-                      result = data::optimized_and(result, p.expression());
-                      return is_false(result);
-                    },
-                    is_true,
-                    is_false
-                   );
+    E.enumerate(enumerator_element(v, derived().apply(phi)),
+                sigma,
+                [&](const enumerator_element& p)
+                {
+                  result = data::optimized_and(result, p.expression());
+                  return is_false(result);
+                },
+                is_true,
+                is_false
+               );
 
     redo_substitution(v, undo);
     return result;
@@ -122,17 +120,15 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   {
     auto undo = undo_substitution(v);
     pbes_expression result = false_();
-
-    data::enumerator_queue<enumerator_element> P(enumerator_element(v, derived().apply(phi)));
-    E.enumerate_all(P,
-                    sigma,
-                    [&](const enumerator_element& p)
-                    {
-                      result = data::optimized_or(result, p.expression());
-                      return is_true(result);
-                    },
-                    is_false,
-                    is_true
+    E.enumerate(enumerator_element(v, derived().apply(phi)),
+                sigma,
+                [&](const enumerator_element& p)
+                {
+                  result = data::optimized_or(result, p.expression());
+                  return is_true(result);
+                },
+                is_false,
+                is_true
     );
 
     redo_substitution(v, undo);

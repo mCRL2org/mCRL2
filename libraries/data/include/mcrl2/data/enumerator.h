@@ -778,6 +778,35 @@ class enumerator_algorithm
       return count;
     }
 
+    /// \brief Enumerates the element p. Solutions are reported using the callback function report_solution.
+    /// The enumeration is interrupted when report_solution returns true for the reported solution.
+    /// \param p An enumerator element, i.e. an expression with a list of variables.
+    /// \param sigma A substitution.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
+    /// \param report_solution A callback function that is called whenever a solution is found.
+    /// It takes an enumerator element as argument.
+    /// If report_solution returns true, the enumeration is interrupted.
+    /// N.B. If the enumeration is resumed after an interruption, the element p that
+    /// was interrupted will be enumerated again.
+    /// \return The number of elements that have been processed
+    template <typename EnumeratorListElement,
+              typename MutableSubstitution,
+              typename ReportSolution,
+              typename Reject = always_false<typename EnumeratorListElement::expression_type>,
+              typename Accept = always_false<typename EnumeratorListElement::expression_type>
+    >
+    std::size_t enumerate(const EnumeratorListElement& p,
+                          MutableSubstitution& sigma,
+                          ReportSolution report_solution,
+                          Reject reject = Reject(),
+                          Accept accept = Accept()
+    ) const
+    {
+      enumerator_queue<EnumeratorListElement> P(p);
+      return enumerate_all(P, sigma, report_solution, reject, accept);
+    }
+
     std::size_t max_count() const
     {
       return m_max_count;
@@ -800,36 +829,20 @@ data_expression_vector enumerate_expressions(const sort_expression& s,
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
 
-//  enumerator_algorithm_with_iterator<Rewriter, enumerator_element, is_not_false, Rewriter> E(rewr, dataspec, rewr, id_generator);
-//  data_expression_vector result;
-//  mutable_indexed_substitution<> sigma;
-//  const variable v("@var@", s);
-//  const variable_list v_list = { v };
-//  enumerator_queue<enumerator_element> P;
-//  P.push_back(enumerator_element(v_list, sort_bool::true_()));
-//  for (auto i = E.begin(sigma, P); i != E.end(); ++i)
-//  {
-//    i->add_assignments(v_list, sigma, rewr);
-//    result.push_back(sigma(v));
-//  }
-
   enumerator_algorithm<Rewriter, Rewriter> E(rewr, dataspec, rewr, id_generator);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
   const variable_list v_list{ v };
-  enumerator_queue<enumerator_element> P(enumerator_element(v_list, sort_bool::true_()));
-  E.enumerate_all(P,
-                  sigma,
-                  [&](const enumerator_element& p) {
-                      p.add_assignments(v_list, sigma, rewr);
-                      result.push_back(sigma(v));
-                      return false;
-                  },
-                  sort_bool::is_false_function_symbol
+  E.enumerate(enumerator_element(v_list, sort_bool::true_()),
+              sigma,
+              [&](const enumerator_element& p) {
+                  p.add_assignments(v_list, sigma, rewr);
+                  result.push_back(sigma(v));
+                  return false;
+              },
+              sort_bool::is_false_function_symbol
   );
-
-
   return result;
 }
 
