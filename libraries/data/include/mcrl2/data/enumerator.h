@@ -840,8 +840,7 @@ data_expression_vector enumerate_expressions(const sort_expression& s,
                   p.add_assignments(v_list, sigma, rewr);
                   result.push_back(sigma(v));
                   return false;
-              },
-              sort_bool::is_false_function_symbol
+              }
   );
   return result;
 }
