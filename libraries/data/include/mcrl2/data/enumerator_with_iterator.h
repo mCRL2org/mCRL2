@@ -18,6 +18,22 @@ namespace mcrl2 {
 
 namespace data {
 
+struct is_not_false
+{
+  bool operator()(const data_expression& x) const
+  {
+    return !sort_bool::is_false_function_symbol(x);
+  }
+};
+
+struct is_not_true
+{
+  bool operator()(const data_expression& x) const
+  {
+    return !sort_bool::is_true_function_symbol(x);
+  }
+};
+
 /// \brief An enumerator algorithm that generates solutions of a condition.
 template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter>
 class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewriter, DataRewriter>

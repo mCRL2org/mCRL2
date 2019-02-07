@@ -1,3 +1,5 @@
+#include <utility>
+
 // Author(s): Wieger Wesselink, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -222,22 +224,6 @@ static bool is_enumerable(const data_specification& dataspec, const Rewriter& re
   return detail::is_enumerable(dataspec, rewr, sort, parentstack);
 }
 
-struct is_not_false
-{
-  bool operator()(const data_expression& x) const
-  {
-    return !sort_bool::is_false_function_symbol(x);
-  }
-};
-
-struct is_not_true
-{
-  bool operator()(const data_expression& x) const
-  {
-    return !sort_bool::is_true_function_symbol(x);
-  }
-};
-
 /// \brief The default element for the todo list of the enumerator
 template <typename Expression = data::data_expression>
 class enumerator_list_element
@@ -253,26 +239,26 @@ class enumerator_list_element
     enumerator_list_element() = default;
 
     /// \brief Constructs the element (v, phi)
-    enumerator_list_element(const data::variable_list& v_, const Expression& phi_)
-      : v(v_), phi(phi_)
+    enumerator_list_element(data::variable_list v_, const Expression& phi_)
+      : v(std::move(v_)), phi(phi_)
     {}
 
     /// \brief Constructs the element (v, phi)
-    enumerator_list_element(const data::variable_list& v_,
+    enumerator_list_element(data::variable_list v_,
                             const Expression& phi_,
                             const enumerator_list_element&
                            )
-      : v(v_), phi(phi_)
+      : v(std::move(v_)), phi(phi_)
     {}
 
     /// \brief Constructs the element (v, phi)
-    enumerator_list_element(const data::variable_list& v_,
+    enumerator_list_element(data::variable_list v_,
                             const Expression& phi_,
                             const enumerator_list_element&,
                             const data::variable&,
                             const data::data_expression&
                            )
-      : v(v_), phi(phi_)
+      : v(std::move(v_)), phi(phi_)
     {}
 
     const data::variable_list& variables() const
@@ -594,14 +580,11 @@ class enumerator_algorithm
 
       if (v.empty())
       {
-        bool result = report_solution(p);
-        P.pop_front();
-        return result;
+        return report_solution(p);
       }
 
       if (reject(phi))
       {
-        P.pop_front();
         return false;
       }
 
@@ -733,8 +716,6 @@ class enumerator_algorithm
           throw mcrl2::runtime_error("Cannot enumerate elements of sort " + data::pp(v1_sort) + " without constructors.");
         }
       }
-
-      P.pop_front();
       return false;
     }
 
@@ -774,6 +755,7 @@ class enumerator_algorithm
         {
           break;
         }
+        P.pop_front();
       }
       return count;
     }
