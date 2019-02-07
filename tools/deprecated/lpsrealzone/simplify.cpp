@@ -232,8 +232,8 @@ namespace data
        else
        {
          mutable_indexed_substitution<> empty_sigma;
-         data::enumerator_state<enumerator_list_element_with_substitution<> >
-                 enumerator_deque(1, enumerator_list_element_with_substitution<>(replaced_variables,sort_bool::true_()));
+         data::enumerator_queue<enumerator_list_element_with_substitution<> >
+                 enumerator_deque(enumerator_list_element_with_substitution<>(replaced_variables,sort_bool::true_()));
          for (enumerator_algorithm_with_iterator<>::iterator tl = enumerator.begin(empty_sigma, enumerator_deque); tl!= enumerator.end(); ++tl)
          {
            mutable_map_substitution<> sigma;

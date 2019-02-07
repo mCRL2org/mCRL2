@@ -211,7 +211,7 @@ protected:
 
     data::mutable_indexed_substitution<> sigma;
     data::enumerator_queue<enumerator_list_element_with_substitution<> >
-         enumerator_deque(1, enumerator_list_element_with_substitution<>(vars, parent_block));
+         enumerator_deque(enumerator_list_element_with_substitution<>(vars, parent_block));
     for (typename enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end(); ++i)
     {
       i->add_assignments(vars,sigma,rewr);
