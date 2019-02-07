@@ -568,22 +568,22 @@ class linear_inequality: public atermpp::aterm_appl
     {
       if (sort_real::is_minus_application(e))
       {
-        parse_and_store_expression(data::binary_left(atermpp::down_cast<application>(e)),new_lhs,new_rhs,r,negate,factor);
-        parse_and_store_expression(data::binary_right(atermpp::down_cast<application>(e)),new_lhs,new_rhs,r,!negate,factor);
+        parse_and_store_expression(binary_left1(e),new_lhs,new_rhs,r,negate,factor);
+        parse_and_store_expression(binary_right1(e),new_lhs,new_rhs,r,!negate,factor);
       }
       else if (sort_real::is_negate_application(e))
       {
-        parse_and_store_expression(*(atermpp::down_cast<application>(e).begin()),new_lhs,new_rhs,r,!negate,factor);
+        parse_and_store_expression(unary_operand1(e),new_lhs,new_rhs,r,!negate,factor);
       }
       else if (sort_real::is_plus_application(e))
       {
-        parse_and_store_expression(data::binary_left(atermpp::down_cast<application>(e)),new_lhs,new_rhs,r,negate,factor);
-        parse_and_store_expression(data::binary_right(atermpp::down_cast<application>(e)),new_lhs,new_rhs,r,negate,factor);
+        parse_and_store_expression(binary_left1(e),new_lhs,new_rhs,r,negate,factor);
+        parse_and_store_expression(binary_right1(e),new_lhs,new_rhs,r,negate,factor);
       }
       else if (sort_real::is_times_application(e))
       {
-        data_expression lhs = rewrite_with_memory(data::binary_left(atermpp::down_cast<application>(e)),r);
-        data_expression rhs = rewrite_with_memory(data::binary_right(atermpp::down_cast<application>(e)),r);
+        data_expression lhs = rewrite_with_memory(binary_left1(e),r);
+        data_expression rhs = rewrite_with_memory(binary_right1(e),r);
         if (is_closed_real_number(lhs))
         {
           parse_and_store_expression(rhs,new_lhs,new_rhs,r,negate,real_times(lhs,factor));
@@ -1360,7 +1360,7 @@ namespace detail
 
       inequality_inconsistency_cache()
         : m_cache(new inequality_inconsistency_cache_base(false_end_node))
-      {} 
+      {}
 
       ~inequality_inconsistency_cache()
       {
@@ -1368,7 +1368,7 @@ namespace detail
         {
           delete m_cache;
         }
-      } 
+      }
 
       bool is_inconsistent(const std::vector < linear_inequality >& inequalities_in_) const
       {
@@ -1459,7 +1459,7 @@ namespace detail
   class inequality_consistency_cache
   {
     protected:
-      inequality_inconsistency_cache_base* m_cache; 
+      inequality_inconsistency_cache_base* m_cache;
 
       inequality_consistency_cache(const inequality_consistency_cache& )=delete;
       inequality_consistency_cache& operator=(const inequality_consistency_cache& )=delete;
@@ -1469,7 +1469,7 @@ namespace detail
       inequality_consistency_cache()
         : m_cache(new inequality_inconsistency_cache_base(false_end_node))
       {
-      } 
+      }
 
       ~inequality_consistency_cache()
       {
