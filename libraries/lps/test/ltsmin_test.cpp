@@ -47,7 +47,7 @@ struct state_callback_function
   std::size_t state_size;
   std::size_t state_count;
 
-  state_callback_function(std::size_t size)
+  explicit state_callback_function(std::size_t size)
     : state_size(size),
       state_count(0)
   {}
@@ -85,8 +85,9 @@ void test_data_type(lps::pins_data_type& type)
   std::size_t index = 0;
   for (auto i = type.index_begin(); i != type.index_end(); ++i)
   {
-    std::cout << "iterator " << index++ << " -> " << *i << std::endl;
+    std::cout << "iterator " << index << " -> " << *i << std::endl;
     BOOST_CHECK(*i == index);
+    index++;
   }
 }
 

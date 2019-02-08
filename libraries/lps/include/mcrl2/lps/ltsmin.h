@@ -53,31 +53,25 @@ namespace lps {
 inline
 std::vector<std::string> generate_values(const data::data_specification& dataspec, const data::sort_expression& s, std::size_t max_size = 1000)
 {
-  std::vector<std::string> result;
-  std::size_t max_internal_variables = 10000;
-
-  data::rewriter rewr(dataspec);
-
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
 
+  std::vector<std::string> result;
+  std::size_t max_iterations = 10000;
+  data::rewriter rewr(dataspec);
   data::enumerator_identifier_generator id_generator;
-  enumerator_type enumerator(rewr, dataspec, rewr, id_generator, max_internal_variables);
-  data::variable x("x", s);
-  data::variable_vector v;
-  v.push_back(x);
+  data::enumerator_algorithm<data::rewriter, data::rewriter> E(rewr, dataspec, rewr, id_generator, max_iterations);
   data::mutable_indexed_substitution<> sigma;
-  data::variable_list vl(v.begin(),v.end());
-  data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(vl, data::sort_bool::true_()));
-  for (auto i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() ; ++i)
-  {
-    i->add_assignments(vl, sigma, rewr);
-    result.push_back(pp(sigma(vl.front())));
-    if (result.size() >= max_size)
-    {
-      break;
-    }
-  }
+  data::variable x("x", s);
+  data::variable_list v_list{x};
+
+  E.enumerate(enumerator_element(v_list, data::sort_bool::true_()),
+              sigma,
+              [&](const enumerator_element& p) {
+                  p.add_assignments(v_list, sigma, rewr);
+                  result.push_back(data::pp(sigma(x)));
+                  return result.size() >= max_size;
+              }
+  );
   return result;
 }
 
@@ -87,7 +81,6 @@ class pins_data_type
 {
   protected:
     atermpp::indexed_set<atermpp::aterm> m_indexed_set;
-    // lps::next_state_generator& m_generator;
     const data::data_specification& m_data;
     const process::action_label_list& m_action_labels;
     bool m_is_bounded;
@@ -98,14 +91,8 @@ class pins_data_type
     class index_iterator: public boost::iterator_facade<index_iterator, const std::size_t, boost::forward_traversal_tag>
     {
       public:
-        index_iterator(std::size_t max_index)
-          : m_index(0),
-            m_max_index(max_index)
-        {}
-
-        index_iterator(std::size_t index, std::size_t max_index)
-          : m_index(index),
-            m_max_index(max_index)
+        explicit index_iterator(std::size_t index = 0)
+          : m_index(index)
         {}
 
      private:
@@ -132,7 +119,6 @@ class pins_data_type
         }
 
         std::size_t m_index;
-        std::size_t m_max_index;
     };
 
     /// \brief Constructor
@@ -146,8 +132,7 @@ class pins_data_type
     {}
 
     /// \brief Destructor.
-    virtual ~pins_data_type()
-    {}
+    virtual ~pins_data_type() = default;
 
     /// \brief Serializes the i-th value of the data type to a binary string.
     /// It is guaranteed that serialize(deserialize(i)) == i.
@@ -175,7 +160,7 @@ class pins_data_type
     virtual const std::string& name() const = 0;
 
     /// \brief Generates possible values of the data type (at most max_size).
-    virtual std::vector<std::string> generate_values(std::size_t max_size = 1000) const = 0;
+    virtual std::vector<std::string> generate_values(std::size_t max_size) const = 0;
 
     /// \brief Returns true if the number of elements is bounded. If this property can
     /// not be computed for a data type, false is returned.
@@ -193,7 +178,7 @@ class pins_data_type
     /// \brief Returns an iterator to the beginning of the indices
     index_iterator index_begin() const
     {
-      return index_iterator(0, size());
+      return index_iterator(0);
     }
 
     /// \brief Returns an iterator to the end of the indices
@@ -247,7 +232,9 @@ class state_data_type: public pins_data_type
   public:
     state_data_type(const data::data_specification& data,
                     const process::action_label_list& action_labels,
-                    const data::sort_expression& sort, bool sort_is_finite)
+                    const data::sort_expression& sort,
+                    bool sort_is_finite
+                   )
       : pins_data_type(data, action_labels, sort_is_finite),
         m_sort(sort)
     {
@@ -255,35 +242,35 @@ class state_data_type: public pins_data_type
     }
 
     // prints the expression as an ATerm string
-    std::string serialize(int i) const
+    std::string serialize(int i) const override
     {
       data::data_expression e = index2expression(i);
       atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(e));
       return pp(t);
     }
 
-    std::size_t deserialize(const std::string& s)
+    std::size_t deserialize(const std::string& s) override
     {
       atermpp::aterm t = data::detail::add_index(atermpp::read_term_from_string(s));
       return expression2index(atermpp::down_cast<data::data_expression>(t));
     }
 
-    std::string print(int i) const
+    std::string print(int i) const override
     {
       return data::pp(index2expression(i));
     }
 
-    std::size_t parse(const std::string& s)
+    std::size_t parse(const std::string& s) override
     {
       return expression2index(data::parse_data_expression(s, m_data));
     }
 
-    const std::string& name() const
+    const std::string& name() const override
     {
       return m_name;
     }
 
-    std::vector<std::string> generate_values(std::size_t max_size = 1000) const
+    std::vector<std::string> generate_values(std::size_t max_size) const override
     {
       return lps::generate_values(m_data, m_sort, max_size);
     }
@@ -302,34 +289,34 @@ class action_label_data_type: public pins_data_type
       m_name = "action_labels";
     }
 
-    std::string serialize(int i) const
+    std::string serialize(int i) const override
     {
       return pp(m_indexed_set.get(i));
     }
 
-    std::size_t deserialize(const std::string& s)
+    std::size_t deserialize(const std::string& s) override
     {
       return m_indexed_set[atermpp::read_term_from_string(s)];
     }
 
-    std::string print(int i) const
+    std::string print(int i) const override
     {
       return lps::pp(lps::multi_action(atermpp::aterm_appl(m_indexed_set.get(i))));
     }
 
-    std::size_t parse(const std::string& s)
+    std::size_t parse(const std::string& s) override
     {
       lps::multi_action m = lps::parse_multi_action(s, m_action_labels, m_data);
       return m_indexed_set[detail::multi_action_to_aterm(m)];
     }
 
-    const std::string& name() const
+    const std::string& name() const override
     {
       return m_name;
     }
 
     // TODO: get rid of this useless function
-    std::vector<std::string> generate_values(std::size_t) const
+    std::vector<std::string> generate_values(std::size_t) const override
     {
       return std::vector<std::string>();
     }
@@ -734,12 +721,12 @@ class pins
     {
       // make sure the pins data types are not deleted twice
       std::set<pins_data_type*> deleted;
-      for (std::vector<pins_data_type*>::const_iterator i = m_data_types.begin(); i != m_data_types.end(); ++i)
+      for (auto& data_type_ptr: m_data_types)
       {
-        if (deleted.find(*i) == deleted.end())
+        if (deleted.find(data_type_ptr) == deleted.end())
         {
-          delete *i;
-          deleted.insert(*i);
+          delete data_type_ptr;
+          deleted.insert(data_type_ptr);
         }
       }
     }
