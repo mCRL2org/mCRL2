@@ -539,6 +539,15 @@ class block_t
     }
 
 
+    /// \brief provides the number of non-bottom states in the block
+    state_type nonbottom_size() const
+    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
+                                                                                assert(marked_bottom_begin <= nonbottom_begin);
+                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
+        return end - nonbottom_begin;
+    }
+
+
     /// \brief provides the number of marked bottom states in the block
     state_type marked_bottom_size() const
     {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
@@ -2344,7 +2353,7 @@ class part_trans_t
             {
                 state_info_iter_t const s(s_iter->st);                          assert(s->pos == s_iter);  assert(s != pred_entry::pred_begin[-1].target);
                 for (pred_iter_t pred_iter(s->pred_inert.begin);
-                                                  (--pred_iter)->target == s; )
+                                                  s == (--pred_iter)->target; )
                 {                                                               assert(pred_entry::pred_begin <= pred_iter);
                     /* Line 2.34: Create a new action block-slice            */ assert(pred_iter->action_block->succ()->block_bunch->pred == pred_iter);
                     //            if necessary
@@ -3734,41 +3743,38 @@ class bisim_partitioner_dnj
                                                                 need_slow_test)
                     {
                         state_info_iter_t s(blue_visited_end->st);              assert(s->pos == blue_visited_end);
-                        // Line 2.6l: if s has a transition in splitter then
+                        /* Line 2.6l: if s has a transition in splitter then */ ONLY_IF_DEBUG(succ_const_iter_t in_small_splitter(s->current_out_slice.begin);)
                         if (s->surely_has_transition_in(splitter->bunch()))
                         {
                             // Line 2.7l: Make s a red state
                             std::swap(*blue_visited_end,
                                          *--refine_block->marked_bottom_begin);
-                            if (refine_block->marked_size() >
-                                                      refine_block->size() / 2)
-                            {                                                   // refine() has been called from Line 1.30, and this is a bottom state with
-                                ABORT_OTHER_COROUTINE();                        // transitions in both the small and the large splitter.  We should ascribe the
-                            }                                                   // work to the transition in the small splitter.
-                                                                                #ifndef NDEBUG
-                                                                                    succ_const_iter_t in_small_splitter(
-                                                                                                        s->current_out_slice.begin->begin_or_before_end() + 1);
-                                                                                    assert(in_small_splitter->block_bunch->pred->action_block->succ() ==
-                                                                                                                                            in_small_splitter);
-                                                                                    assert(s->current_out_slice.begin < in_small_splitter);
-                                                                                    assert(in_small_splitter < s->succ_inert.begin);
-                                                                                    assert(in_small_splitter->bunch() == new_bunch);
-                                                                                    succ_entry::add_work_to_out_slice(*this, in_small_splitter,
-                        /* Line 2.8l: else                                   */         bisim_gjkw::check_complexity::refine_blue__found_red_bottom_state, 1U);
-                                                                                #endif
+                            if (refine_block->size() / 2 <
+                                                   refine_block->marked_size())
+                            {
+                                ABORT_OTHER_COROUTINE();
+                            }                                                   ONLY_IF_DEBUG( in_small_splitter=in_small_splitter->begin_or_before_end()+1; )
+                        /* Line 2.8l: else                                   */ assert(s->current_out_slice.begin < in_small_splitter);
                         }
                         else
                         {                                                       assert(s->surely_has_no_transition_in(splitter->bunch()));
                             // Line 2.9l: Make s a blue state
                             ++blue_visited_end;
-                            if ((state_type) (blue_visited_end -
-                               refine_block->begin) > refine_block->size() / 2)
+                            if (refine_block->size() / 2 < (state_type)
+                                      (blue_visited_end - refine_block->begin))
                             {
-                                ABORT_THIS_COROUTINE();                         // ascribe the work to the blue bottom state itself:
-                            }                                                   mCRL2complexity(s, add_work(
-                        /* Line 2.10l: end if                                */     bisim_gjkw::check_complexity::refine_blue__found_blue_bottom_state, 1U), );
-                        }
-                    // Line 2.11l: end for
+                                ABORT_THIS_COROUTINE();
+                            }
+                        // Line 2.10l: end if                                   // refine() has been called from Line 1.30.  We should ascribe the
+                        }                                                       // work to the transition in the small splitter.
+                                                                                #ifndef NDEBUG
+                                                                                    assert(in_small_splitter->block_bunch->pred->action_block->succ() ==
+                                                                                                                                            in_small_splitter);
+                                                                                    assert(in_small_splitter < s->succ_inert.begin);
+                                                                                    assert(in_small_splitter->bunch() == new_bunch);
+                                                                                    succ_entry::add_work_to_out_slice(*this, in_small_splitter, bisim_gjkw::
+                    /* Line 2.11l: end for                                   */               check_complexity::refine_blue__handle_transition_in_FromRed, 1U);
+                                                                                #endif
                     }
                     END_COROUTINE_WHILE;
                 // Line 2.12l: end if
@@ -3778,7 +3784,7 @@ class bisim_partitioner_dnj
                     // states as blue, i. e. the whole interval
                     // [refine_block->bottom_begin,
                     // refine_block->marked_bottom_begin).
-                if(refine_block->unmarked_bottom_size()>refine_block->size()/2)
+                if(refine_block->size()/2<refine_block->unmarked_bottom_size())
                 {
                     ABORT_THIS_COROUTINE();
                 }
@@ -3796,100 +3802,105 @@ class bisim_partitioner_dnj
 
                  /*  -  -  -  -  -  -  visit blue states  -  -  -  -  -  -  */
 
-                // Line 2.13l: for all blue states s do
-                blue_visited_end = refine_block->begin;
                 blue_blue_nonbottom_end = refine_block->nonbottom_begin;
-                COROUTINE_DO_WHILE (REFINE_BLUE_STATE_HANDLED,
-                                    blue_visited_end < blue_blue_nonbottom_end)
+                if (0 != refine_block->nonbottom_size())
                 {
-                    // Line 2.14l: for all inert transitions t --tau--> s do
-                    blue_pred_iter = blue_visited_end->st->pred_inert.begin;    assert(pred_entry::pred_begin[-1].target != blue_visited_end->st);
-                    COROUTINE_FOR (REFINE_BLUE_PREDECESSOR_HANDLED, (void) 0,
+                    // Line 2.13l: for all blue states s do
+                    blue_visited_end = refine_block->begin;
+                    COROUTINE_DO_WHILE (REFINE_BLUE_STATE_HANDLED,
+                                    blue_visited_end < blue_blue_nonbottom_end)
+                    {
+                        // Line 2.14l: for all inert transitions t--tau-->s do
+                        blue_pred_iter=blue_visited_end->st->pred_inert.begin;  assert(pred_entry::pred_begin[-1].target != blue_visited_end->st);
+                        COROUTINE_FOR(REFINE_BLUE_PREDECESSOR_HANDLED, (void)0,
                               blue_pred_iter->target == blue_visited_end->st,
                                                               ++blue_pred_iter)
-                    {
-                        blue_t = blue_pred_iter->source;                        assert(refine_block->nonbottom_begin <= blue_t->pos);
-                        /* Line 2.15l: if t is red then  Skip state t        */ assert(blue_t->pos < refine_block->end);
-                        if (refine_block->marked_nonbottom_begin<=blue_t->pos)
                         {
-                            goto continuation;
-                        }
-                        if (notblue_initialised_end <= blue_t->pos)
-                        {
-                            blue_t->not_.blue = blue_t->succ_inert.begin;
-                            std::swap(*blue_t->pos,*notblue_initialised_end++);
-                        }                                                       assert(blue_t != succ_entry::succ_end->block_bunch->pred->source);
-                        // Line 2.16l: notblue [t] := notblue [t] − 1
-                        ++blue_t->not_.blue;
-                        // Line 2.17l: if notblue[t] > 0 then  Skip state t
-                        if (blue_t ==
-                                  blue_t->not_.blue->block_bunch->pred->source)
-                        {
-                            goto continuation;
-                        }
-                        // Line 2.18l: if need_slow_test then
-                        if (need_slow_test)
-                        {
-                            if(blue_t->surely_has_transition_in(
-                                                            splitter->bunch()))
+                            blue_t = blue_pred_iter->source;                    assert(refine_block->nonbottom_begin <= blue_t->pos);
+                            /* Line 2.15l: if t is red then  Skip state t    */ assert(blue_t->pos < refine_block->end);
+                            if (refine_block->marked_nonbottom_begin <=
+                                                                   blue_t->pos)
                             {
                                 goto continuation;
                             }
-                            if (!blue_t->surely_has_no_transition_in(
+                            if (notblue_initialised_end <= blue_t->pos)
+                            {
+                                blue_t->not_.blue = blue_t->succ_inert.begin;
+                                std::swap(*blue_t->pos,
+                                                   *notblue_initialised_end++);
+                            }                                                   assert(blue_t != succ_entry::succ_end->block_bunch->pred->source);
+                            // Line 2.16l: notblue [t] := notblue [t] − 1
+                            ++blue_t->not_.blue;
+                            // Line 2.17l: if notblue[t] > 0 then  Skip state t
+                            if (blue_t ==
+                                  blue_t->not_.blue->block_bunch->pred->source)
+                            {
+                                goto continuation;
+                            }
+                            // Line 2.18l: if need_slow_test then
+                            if (need_slow_test)
+                            {
+                                if(blue_t->surely_has_transition_in(
                                                             splitter->bunch()))
-                            {                                                   assert(blue_t != succ_entry::succ_begin[-1].block_bunch->pred->source);
-                                // Line 2.19l: for all non-inert t --alpha--> u
-                                //             do
-                                blue_end = blue_t->succ_inert.begin;            assert(succ_entry::succ_begin < blue_end);
-                                                                                assert(blue_t == blue_end[-1].block_bunch->pred->source);
-                                COROUTINE_DO_WHILE(REFINE_BLUE_TESTING,blue_t==
-                                        blue_end[-1].block_bunch->pred->source)
                                 {
-                                    blue_end =
+                                    goto continuation;
+                                }
+                                if (!blue_t->surely_has_no_transition_in(
+                                                            splitter->bunch()))
+                                {                                               assert(blue_t != succ_entry::succ_begin[-1].block_bunch->pred->source);
+                                    // Line 2.19l: for all non-inert
+                                    //             t --alpha--> u do
+                                    blue_end = blue_t->succ_inert.begin;        assert(succ_entry::succ_begin < blue_end);
+                                                                                assert(blue_t == blue_end[-1].block_bunch->pred->source);
+                                    COROUTINE_DO_WHILE (REFINE_BLUE_TESTING,
+                                        blue_t ==
+                                        blue_end[-1].block_bunch->pred->source)
+                                    {
+                                        blue_end =
                                             blue_end[-1].begin_or_before_end(); assert(blue_end->block_bunch->pred->source == blue_t);
-                                    // Line 2.20l: if t --alpha--> u in
-                                    //             splitter  then  Skip t
-                                    block_bunch_slice_const_iter_t const
+                                        // Line 2.20l: if t --alpha--> u in
+                                        //             splitter  then  Skip t
+                                        block_bunch_slice_const_iter_t const
                                             block_bunch(
                                                blue_end->block_bunch->slice());
-                                    if (block_bunch == splitter)
-                                    {
-                                        goto continuation;
+                                        if (block_bunch == splitter)
+                                        {
+                                            goto continuation;
                                                // i. e. break and then continue
-                                    }
-                                    if (*block_bunch->bunch() <
+                                        }
+                                        if (*block_bunch->bunch() <
                                                             *splitter->bunch())
-                                    {
-                                        break;
-                                    }                                           ONLY_IF_DEBUG( succ_entry::add_work_to_out_slice(*this, blue_end,
-                                /* Line 2.21l: end for                       */                    bisim_gjkw::check_complexity::refine_blue__slow_test, 1U); )
+                                        {
+                                            break;
+                                        }                                       ONLY_IF_DEBUG( succ_entry::add_work_to_out_slice(*this, blue_end,
+                                    /* Line 2.21l: end for                   */                    bisim_gjkw::check_complexity::refine_blue__slow_test, 1U); )
+                                    }
+                                    END_COROUTINE_DO_WHILE;
+                            // Line 2.22l: end if
                                 }
-                                END_COROUTINE_DO_WHILE;
-                        // Line 2.22l: end if
-                            }
-                        }                                                       assert(blue_blue_nonbottom_end <= blue_t->pos);
-                        /* Line 2.23l: Make t a blue state                   */ assert(blue_t->pos < notblue_initialised_end);
-                        std::swap(*blue_t->pos, *blue_blue_nonbottom_end++);
-                        if (blue_blue_nonbottom_end -
+                            }                                                   assert(blue_blue_nonbottom_end <= blue_t->pos);
+                            /* Line 2.23l: Make t a blue state               */ assert(blue_t->pos < notblue_initialised_end);
+                            std::swap(*blue_t->pos,*blue_blue_nonbottom_end++);
+                            if (refine_block->size()/2<blue_blue_nonbottom_end-
                                     refine_block->nonbottom_begin +
-                                    refine_block->unmarked_bottom_size() >
-                                                      refine_block->size() / 2)
-                        {
-                            ABORT_THIS_COROUTINE();
-                        }
-                    // Line 2.24: end for
+                                          refine_block->unmarked_bottom_size())
+                            {
+                                ABORT_THIS_COROUTINE();
+                            }
+                        // Line 2.24: end for
                     continuation:                                               mCRL2complexity(blue_pred_iter, add_work(bisim_gjkw::
                                                                                    check_complexity::refine_blue__handle_transition_to_blue_state, 1U), *this);
+                        }
+                        END_COROUTINE_FOR;                                      mCRL2complexity(blue_visited_end->st, add_work(bisim_gjkw::
+                    /* Line 2.25l: end for                                   */         check_complexity::refine_blue__find_predecessors_of_blue_state, 1U), );
+                        ++blue_visited_end;
+                        if(refine_block->marked_bottom_begin==blue_visited_end)
+                        {
+                            blue_visited_end = refine_block->nonbottom_begin;
+                        }
                     }
-                    END_COROUTINE_FOR;                                          mCRL2complexity(blue_visited_end->st, add_work(bisim_gjkw::
-                /* Line 2.25l: end for                                       */         check_complexity::refine_blue__find_predecessors_of_blue_state, 1U), );
-                    ++blue_visited_end;
-                    if (refine_block->marked_bottom_begin == blue_visited_end)
-                    {
-                        blue_visited_end = refine_block->nonbottom_begin;
-                    }
+                    END_COROUTINE_DO_WHILE;
                 }
-                END_COROUTINE_DO_WHILE;
 
                 /* -  -  -  -  -  -  split off blue block  -  -  -  -  -  - */
 
@@ -3915,7 +3926,7 @@ class bisim_partitioner_dnj
             /*----------------------- find red states -----------------------*/
 
             COROUTINE
-                if (refine_block->marked_size() > refine_block->size() / 2)
+                if (refine_block->size() / 2 < refine_block->marked_size())
                 {
                     ABORT_THIS_COROUTINE();
                 }
@@ -3927,7 +3938,7 @@ class bisim_partitioner_dnj
                 {
                     // Line 2.5r: for all transitions s --> t in splitter do
                     red_visited_begin.fromred = splitter->end;                  assert(block_bunch_slice_t::block_bunch_begin[-1].slice != splitter);
-                    COROUTINE_DO_WHILE(REFINE_RED_COLLECT_FROMRED,
+                    COROUTINE_DO_WHILE (REFINE_RED_COLLECT_FROMRED,
                                red_visited_begin.fromred[-1].slice == splitter)
                     {                                                           assert(block_bunch_slice_t::block_bunch_begin < red_visited_begin.fromred);
                         --red_visited_begin.fromred;
@@ -3943,7 +3954,7 @@ class bisim_partitioner_dnj
                             std::swap(*s->pos, *--notblue_initialised_end);
                         }
                         if (refine_block->mark(s->pos) &&
-                          refine_block->marked_size() > refine_block->size()/2)
+                          refine_block->size()/2 < refine_block->marked_size())
                         {
                             ABORT_THIS_COROUTINE();
                         }                                                       mCRL2complexity(red_visited_begin.fromred->pred, add_work(bisim_gjkw::
@@ -3962,51 +3973,57 @@ class bisim_partitioner_dnj
 
                 /*-  -  -  -  -  -  -  visit red states  -  -  -  -  -  -  -*/  assert(0 != refine_block->marked_size());
 
-                // Line 2.13r: for all red states s do
-                red_visited_begin.block = refine_block->nonbottom_begin;
-                if (refine_block->marked_bottom_begin==red_visited_begin.block)
+                if (0 != refine_block->nonbottom_size())
                 {
-                    // It may happen that all found states are non-bottom
-                    // states.  (In that case, some of these states will become
-                    // new bottom states.)
-                    red_visited_begin.block = refine_block->end;
-                }
-                COROUTINE_DO_WHILE(REFINE_RED_STATE_HANDLED, refine_block->
-                             marked_nonbottom_begin != red_visited_begin.block)
-                {
-                    --red_visited_begin.block;                                  assert(pred_entry::pred_end->target != red_visited_begin.block->st);
-                    // Line 2.14r: for all inert transitions t --tau--> s do
-                    COROUTINE_FOR(REFINE_RED_PREDECESSOR_HANDLED,red_pred_iter=
-                        red_visited_begin.block->st->pred_inert.begin,
-                        red_pred_iter->target == red_visited_begin.block->st,
-                                                               ++red_pred_iter)
-                    {
-                        state_info_iter_t const t(red_pred_iter->source);       assert(refine_block->nonbottom_begin <= t->pos);
-                        /* Line 2.23r: Make t a red state                    */ assert(t->pos->st == t);  assert(t->pos < refine_block->end);
-                        if (t->pos < notblue_initialised_end)
-                        {
-                            // The state has a transition to a blue state, so
-                            // notblue is initialised; however, now it is
-                            // discovered to be red anyway.
-                            std::swap(*t->pos, *--notblue_initialised_end);
-                        }
-                        if (refine_block->mark_nonbottom(t->pos) &&
-                          refine_block->marked_size() > refine_block->size()/2)
-                        {
-                            ABORT_THIS_COROUTINE();
-                        }                                                       mCRL2complexity(red_pred_iter, add_work(bisim_gjkw::
-                    /* Line 2.24r: end for                                   */      check_complexity::refine_red__handle_transition_to_red_state, 1U), *this);
-                    }
-                    END_COROUTINE_FOR;                                          mCRL2complexity(red_visited_begin.block->st, add_work(bisim_gjkw::
-                /* Line 2.25r: end for                                       */           check_complexity::refine_red__find_predecessors_of_red_state, 1U), );
+                    // Line 2.13r: for all red states s do
+                    red_visited_begin.block = refine_block->nonbottom_begin;
                     if (refine_block->marked_bottom_begin ==
-                                                     red_visited_begin.block &&
-                       red_visited_begin.block < refine_block->nonbottom_begin)
+                                                       red_visited_begin.block)
                     {
+                        // It may happen that all found states are non-bottom
+                        // states.  (In that case, some of these states will
+                        // become new bottom states.)
                         red_visited_begin.block = refine_block->end;
                     }
+                    COROUTINE_DO_WHILE(REFINE_RED_STATE_HANDLED, refine_block->
+                             marked_nonbottom_begin != red_visited_begin.block)
+                    {
+                        --red_visited_begin.block;                              assert(pred_entry::pred_end->target != red_visited_begin.block->st);
+                        // Line 2.14r: for all inert transitions t--tau-->s do
+                        COROUTINE_FOR (REFINE_RED_PREDECESSOR_HANDLED,
+                            red_pred_iter =
+                                red_visited_begin.block->st->pred_inert.begin,
+                            red_pred_iter->target==red_visited_begin.block->st,
+                                                               ++red_pred_iter)
+                        {
+                            state_info_iter_t const t(red_pred_iter->source);   assert(refine_block->nonbottom_begin <= t->pos);
+                            /* Line 2.23r: Make t a red state                */ assert(t->pos->st == t);  assert(t->pos < refine_block->end);
+                            if (t->pos < notblue_initialised_end)
+                            {
+                                // The state has a transition to a blue state,
+                                // so notblue is initialised; however, now it
+                                // is discovered to be red anyway.
+                                std::swap(*t->pos, *--notblue_initialised_end);
+                            }
+                            if (refine_block->mark_nonbottom(t->pos) &&
+                                        refine_block->size() / 2 <
+                                                   refine_block->marked_size())
+                            {
+                                ABORT_THIS_COROUTINE();
+                            }                                                   mCRL2complexity(red_pred_iter, add_work(bisim_gjkw::
+                        /* Line 2.24r: end for                               */      check_complexity::refine_red__handle_transition_to_red_state, 1U), *this);
+                        }
+                        END_COROUTINE_FOR;                                      mCRL2complexity(red_visited_begin.block->st, add_work(bisim_gjkw::
+                    /* Line 2.25r: end for                                   */           check_complexity::refine_red__find_predecessors_of_red_state, 1U), );
+                        if (refine_block->marked_bottom_begin ==
+                                                     red_visited_begin.block &&
+                         red_visited_begin.block<refine_block->nonbottom_begin)
+                        {
+                            red_visited_begin.block = refine_block->end;
+                        }
+                    }
+                    END_COROUTINE_DO_WHILE;
                 }
-                END_COROUTINE_DO_WHILE;
 
                 /*  -  -  -  -  -  -  split off red block  -  -  -  -  -  -  */
 
@@ -4571,10 +4588,6 @@ bunch_t* bunch_t::first_nontrivial;
                                                                                             {
                                                                                                 state_info_const_iter_t const s(s_iter->st);
                                                                                                 mCRL2complexity(s, finalise_work(bisim_gjkw::check_complexity::
-                                                                                                        refine_blue__found_blue_bottom_state, bisim_gjkw::
-                                                                                                        check_complexity::refine__found_blue_bottom_state,
-                                                                                                                                            max_blue_block), );
-                                                                                                mCRL2complexity(s, finalise_work(bisim_gjkw::check_complexity::
                                                                                                         refine_blue__find_predecessors_of_blue_state,
                                                                                                         bisim_gjkw::check_complexity::
                                                                                                         refine__find_predecessors_of_red_or_blue_state,
@@ -4614,6 +4627,12 @@ bunch_t* bunch_t::first_nontrivial;
                                                                                                           bisim_gjkw::check_complexity::
                                                                                                           refine__handle_transition_from_red_or_blue_state,
                                                                                                                                  max_blue_block), partitioner);
+                                                                                                    mCRL2complexity(succ_iter->block_bunch->pred,finalise_work(
+                                                                                                            bisim_gjkw::check_complexity::
+                                                                                                            refine_blue__handle_transition_in_FromRed,
+                                                                                                            bisim_gjkw::check_complexity::
+                                                                                                            refine__handle_transition_in_FromRed,
+                                                                                                                                      max_bunch), partitioner);
                                                                                                 }
                                                                                             }
                                                                                             while (++s_iter < blue_block->end);
@@ -4646,7 +4665,7 @@ bunch_t* bunch_t::first_nontrivial;
                                                                                                 // coroutine that found red states.
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, finalise_work(
                                                                                                         bisim_gjkw::check_complexity::
-                                                                                                        refine_blue__found_red_bottom_state,
+                                                                                                        refine_blue__handle_transition_in_FromRed,
                                                                                                         bisim_gjkw::check_complexity::
                                                                                                         refine__handle_transition_in_FromRed,
                                                                                                                                       max_bunch), partitioner);
@@ -4677,8 +4696,6 @@ bunch_t* bunch_t::first_nontrivial;
                                                                                         {
                                                                                             state_info_const_iter_t const s(s_iter->st);
                                                                                             mCRL2complexity(s, cancel_work(bisim_gjkw::check_complexity::
-                                                                                                                      refine_blue__found_blue_bottom_state), );
-                                                                                            mCRL2complexity(s, cancel_work(bisim_gjkw::check_complexity::
                                                                                                               refine_blue__find_predecessors_of_blue_state), );
                                                                                             assert(s != pred_entry::pred_end->target);
                                                                                             for (pred_const_iter_t pred_iter(s->pred_inert.begin);
@@ -4703,6 +4720,9 @@ bunch_t* bunch_t::first_nontrivial;
                                                                                             for (succ_const_iter_t succ_iter(s->succ_inert.begin);
                                                                                                                s == (--succ_iter)->block_bunch->pred->source; )
                                                                                             {
+                                                                                                mCRL2complexity(succ_iter->block_bunch->pred, cancel_work(
+                                                                                                      bisim_gjkw::check_complexity::
+                                                                                                      refine_blue__handle_transition_in_FromRed), partitioner);
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, cancel_work(
                                                                                                         bisim_gjkw::check_complexity::refine_blue__slow_test),
                                                                                                                                                   partitioner);
@@ -4744,8 +4764,8 @@ bunch_t* bunch_t::first_nontrivial;
                                                                                                 // the following counter actually is work done in the blue
                                                                                                 // coroutine that found red states.
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, cancel_work(
-                                                                                                            bisim_gjkw::check_complexity::
-                                                                                                            refine_blue__found_red_bottom_state), partitioner);
+                                                                                                      bisim_gjkw::check_complexity::
+                                                                                                      refine_blue__handle_transition_in_FromRed), partitioner);
                                                                                                 mCRL2complexity(succ_iter->block_bunch->pred, cancel_work(
                                                                                                         bisim_gjkw::check_complexity::refine_blue__slow_test),
                                                                                                                                                   partitioner);

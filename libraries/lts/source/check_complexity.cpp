@@ -170,9 +170,7 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "create_initial_partition()",
 
     // state counters
-    "refine(), found a blue bottom state",
     "refine(), find predecessors of a red or blue state",
-    "refine(), while blue coroutine runs, found a blue bottom state",
     "refine(), while blue coroutine runs, find predecessors of a blue state",
     "refine(), while red coroutine runs, find predecessors of a red state",
     "prepare_for_postprocessing()",
@@ -193,7 +191,8 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     "refine(), handle a transition from a red or blue state",
     "refine(), handle a transition to a red or blue state",
     "refine(), handle a transition in the small splitter",
-    "refine(), while blue coroutine runs, found a red bottom state",
+    "refine(), while blue coroutine runs, handle a transition in the small "
+                                                                    "splitter",
     "refine(), while blue coroutine runs, handle a transition to a blue state",
     "refine(), while blue coroutine runs, slow test",
     "refine(), while red coroutine runs, handle a transition from a red state",
@@ -321,10 +320,8 @@ void check_complexity::test_work_names()
 
     // state counters
     assert(check_complexity::STATE_dnj_MIN == i);
-    test_work_name(i, refine__found_blue_bottom_state);
     test_work_name(i, refine__find_predecessors_of_red_or_blue_state);
     assert(check_complexity::STATE_dnj_MIN_TEMP == i);
-    test_work_name(i, refine_blue__found_blue_bottom_state);
     test_work_name(i, refine_blue__find_predecessors_of_blue_state);
     test_work_name(i, refine_red__find_predecessors_of_red_state);
     assert(check_complexity::STATE_dnj_MAX_TEMP + 1 == i);
@@ -354,7 +351,7 @@ void check_complexity::test_work_names()
     test_work_name(i, refine__handle_transition_to_red_or_blue_state);
     test_work_name(i, refine__handle_transition_in_FromRed);
     assert(check_complexity::TRANS_dnj_MIN_TEMP == i);
-    test_work_name(i, refine_blue__found_red_bottom_state);
+    test_work_name(i, refine_blue__handle_transition_in_FromRed);
     test_work_name(i, refine_blue__handle_transition_to_blue_state);
     test_work_name(i, refine_blue__slow_test);
     test_work_name(i, refine_red__handle_transition_from_red_state);

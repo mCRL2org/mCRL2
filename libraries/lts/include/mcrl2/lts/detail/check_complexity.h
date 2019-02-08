@@ -280,14 +280,12 @@ class check_complexity
         // state counters
             // If every state of a block is handled by some loop, we
             // abbreviate the counter to a block counter.
-        refine__found_blue_bottom_state,
-                    STATE_dnj_MIN = refine__found_blue_bottom_state,
         refine__find_predecessors_of_red_or_blue_state,
+                  STATE_dnj_MIN=refine__find_predecessors_of_red_or_blue_state,
 
         // temporary state counters (blue):
-        refine_blue__found_blue_bottom_state,
-                STATE_dnj_MIN_TEMP = refine_blue__found_blue_bottom_state,
         refine_blue__find_predecessors_of_blue_state,
+               STATE_dnj_MIN_TEMP=refine_blue__find_predecessors_of_blue_state,
 
         // temporary state counters (red):
         refine_red__find_predecessors_of_red_state,
@@ -326,8 +324,8 @@ class check_complexity
         refine__handle_transition_in_FromRed, // bunch size
 
         // temporary transition counters (blue):
-        refine_blue__found_red_bottom_state, // bunch size
-                   TRANS_dnj_MIN_TEMP = refine_blue__found_red_bottom_state,
+        refine_blue__handle_transition_in_FromRed, // bunch size
+                  TRANS_dnj_MIN_TEMP=refine_blue__handle_transition_in_FromRed,
         refine_blue__handle_transition_to_blue_state, // target block size
         refine_blue__slow_test, // red: new bottom; blue (inert): block size
 
