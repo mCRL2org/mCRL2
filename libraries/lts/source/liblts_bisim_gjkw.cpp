@@ -2987,8 +2987,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                 COROUTINE_WHILE (REFINE_RED_COLLECT_FROMRED,
                                    FromRed->begin != red_fromred_visited_begin)
                 {
-                    // 3.10r (order of lines changed): FromRed := FromRed \
-                    //                                                {s --> t}
+                    // 3.10r (order of lines changed): FromRed := FromRed \ {s --> t}
                         // We can change the order of lines because the
                         // coroutine is not interrupted in between.
                     --red_fromred_visited_begin;
