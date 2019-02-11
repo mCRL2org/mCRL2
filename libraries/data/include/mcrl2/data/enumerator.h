@@ -536,7 +536,7 @@ class enumerator_algorithm
         {
           return false;
         }
-        if (variables.empty() || accept(phi1))
+        else if (variables.empty() || accept(phi1))
         {
           EnumeratorListElement q(variables, phi1, p, v, e);
           return report_solution(q);
@@ -545,35 +545,35 @@ class enumerator_algorithm
         return false;
       };
 
-      auto add_element_with_variables = [&](const data::variable_list& variables,
-                                            const data::variable_list& added_variables,
-                                            const typename EnumeratorListElement::expression_type& phi,
-                                            const data::variable& v,
-                                            const data::data_expression& e
-      )
-      {
-        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
-        if (reject(phi1))
-        {
-          return false;
-        }
-        if (accept(phi1) || (variables.empty() && (phi1 == phi || added_variables.empty())))
-        {
-          EnumeratorListElement q(variables, phi1, p, v, e);
-          return report_solution(q);
-        }
-        if (phi1 == phi)
-        {
-          // Discard the added_variables, since we know they do not appear in phi1
-          P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
-        }
-        else
-        {
-          // Additional variables are put at the end of the list!
-          P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
-        }
-        return false;
-      };
+//      auto add_element_with_variables = [&](const data::variable_list& variables,
+//                                            const data::variable_list& added_variables,
+//                                            const typename EnumeratorListElement::expression_type& phi,
+//                                            const data::variable& v,
+//                                            const data::data_expression& e
+//      )
+//      {
+//        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+//        if (reject(phi1))
+//        {
+//          return false;
+//        }
+//        if (accept(phi1) || (variables.empty() && (phi1 == phi || added_variables.empty())))
+//        {
+//          EnumeratorListElement q(variables, phi1, p, v, e);
+//          return report_solution(q);
+//        }
+//        if (phi1 == phi)
+//        {
+//          // Discard the added_variables, since we know they do not appear in phi1
+//          P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
+//        }
+//        else
+//        {
+//          // Additional variables are put at the end of the list!
+//          P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
+//        }
+//        return false;
+//      };
 
       const auto& v = p.variables();
       const auto& phi = p.expression();
@@ -583,16 +583,15 @@ class enumerator_algorithm
         return report_solution(p);
       }
 
-      if (reject(phi))
-      {
-        return false;
-      }
-
       const auto& v1 = v.front();
       const auto& v_tail = v.tail();
       const auto& v1_sort = v1.sort();
 
-      if (data::is_function_sort(v1_sort))
+      if (reject(phi))
+      {
+        // skip
+      }
+      else if (data::is_function_sort(v1_sort))
       {
         const function_sort& function = atermpp::down_cast<function_sort>(v1_sort);
         if (dataspec.is_certainly_finite(function))
@@ -692,7 +691,10 @@ class enumerator_algorithm
               // TODO: We want to apply r without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = r(application(c, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
-              if (add_element_with_variables(v_tail, y, phi, v1, cy))
+              // N.B. We can't use this optimization, since the function enumerate_expressions imposes
+              // constraints on the result of enumeration!
+              // if (add_element_with_variables(v_tail, y, phi, v1, cy))
+              if (add_element(v_tail + variable_list{ y }, phi, v1, cy))
               {
                 return true;
               }

@@ -477,3 +477,18 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
   BOOST_CHECK_EQUAL(enumerate(parse_data_expression("forall n: Nat. n < 2")), false_());
   BOOST_CHECK_EQUAL(enumerate(parse_data_expression("exists n: Nat. n < 2")), true_());
 }
+
+BOOST_AUTO_TEST_CASE(enumerate_expressions_test)
+{
+  const std::string dataspec_text =
+          "sort D = struct d1(E) | d2(E);\n"
+          "     E = struct e1 | e2;      \n"
+          ;
+  std::string variable_text = "d:D";
+  data_specification dataspec = parse_data_specification(dataspec_text);
+  data::variable v = parse_variable(variable_text, dataspec);
+  rewriter r(dataspec);
+  std::string result = core::detail::print_list(enumerate_expressions(v.sort(), dataspec, r));
+  std::string expected_result = "[ d1(e1), d1(e2), d2(e1), d2(e2) ]";
+  BOOST_CHECK(result == expected_result);
+}
