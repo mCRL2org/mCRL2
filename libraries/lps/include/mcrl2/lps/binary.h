@@ -137,7 +137,8 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
       generator.add_identifiers(data::function_and_mapping_identifiers(m_spec.data()));
-      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter, m_id_generator);
+      bool accept_solutions_with_variables = false;
+      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter, m_id_generator, accept_solutions_with_variables);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (const data::variable& par: process_parameters)
@@ -148,14 +149,16 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
           data::mutable_indexed_substitution<> local_sigma;
-          const data::variable_list vl = { par };
-          data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(vl, data::sort_bool::true_()));
-          for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
-          {
-            j->add_assignments(vl, local_sigma,m_rewriter);
-            enumerated_elements.push_back(local_sigma(par));
-          }
-
+          const data::variable_list vl{ par };
+          enumerator.enumerate(enumerator_element(vl, data::sort_bool::true_()),
+                               local_sigma,
+                               [&](const enumerator_element& p)
+                               {
+                                 p.add_assignments(vl, local_sigma, m_rewriter);
+                                 enumerated_elements.push_back(local_sigma(par));
+                                 return false;
+                               }
+          );
           m_enumerated_elements[par] = enumerated_elements;
 
           //Calculate the number of booleans needed to encode par

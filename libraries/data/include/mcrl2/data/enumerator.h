@@ -471,6 +471,9 @@ class enumerator_algorithm
     /// \brief max_count The enumeration is aborted after max_count iterations
     std::size_t m_max_count;
 
+    /// \brief If true, solutions with a non-empty list of variables may be reported.
+    bool m_accept_solutions_with_variables;
+
     std::string print(const data::variable& x) const
     {
       std::ostringstream out;
@@ -483,9 +486,15 @@ class enumerator_algorithm
                          const data::data_specification& dataspec_,
                          const DataRewriter& datar_,
                          enumerator_identifier_generator& id_generator_,
+                         bool accept_solutions_with_variables,
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)()
     )
-      : R(R_), dataspec(dataspec_), r(datar_), id_generator(id_generator_), m_max_count(max_count)
+      : R(R_),
+        dataspec(dataspec_),
+        r(datar_),
+        id_generator(id_generator_),
+        m_max_count(max_count),
+        m_accept_solutions_with_variables(accept_solutions_with_variables)
     {}
 
     enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
@@ -545,35 +554,35 @@ class enumerator_algorithm
         return false;
       };
 
-//      auto add_element_with_variables = [&](const data::variable_list& variables,
-//                                            const data::variable_list& added_variables,
-//                                            const typename EnumeratorListElement::expression_type& phi,
-//                                            const data::variable& v,
-//                                            const data::data_expression& e
-//      )
-//      {
-//        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
-//        if (reject(phi1))
-//        {
-//          return false;
-//        }
-//        if (accept(phi1) || (variables.empty() && (phi1 == phi || added_variables.empty())))
-//        {
-//          EnumeratorListElement q(variables, phi1, p, v, e);
-//          return report_solution(q);
-//        }
-//        if (phi1 == phi)
-//        {
-//          // Discard the added_variables, since we know they do not appear in phi1
-//          P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
-//        }
-//        else
-//        {
-//          // Additional variables are put at the end of the list!
-//          P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
-//        }
-//        return false;
-//      };
+      auto add_element_with_variables = [&](const data::variable_list& variables,
+                                            const data::variable_list& added_variables,
+                                            const typename EnumeratorListElement::expression_type& phi,
+                                            const data::variable& v,
+                                            const data::data_expression& e
+      )
+      {
+        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+        if (reject(phi1))
+        {
+          return false;
+        }
+        if (accept(phi1) || (variables.empty() && (phi1 == phi || added_variables.empty())))
+        {
+          EnumeratorListElement q(variables, phi1, p, v, e);
+          return report_solution(q);
+        }
+        if (phi1 == phi)
+        {
+          // Discard the added_variables, since we know they do not appear in phi1
+          P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
+        }
+        else
+        {
+          // Additional variables are put at the end of the list!
+          P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
+        }
+        return false;
+      };
 
       const auto& v = p.variables();
       const auto& phi = p.expression();
@@ -691,10 +700,10 @@ class enumerator_algorithm
               // TODO: We want to apply r without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = r(application(c, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
-              // N.B. We can't use this optimization, since the function enumerate_expressions imposes
-              // constraints on the result of enumeration!
-              // if (add_element_with_variables(v_tail, y, phi, v1, cy))
-              if (add_element(v_tail + variable_list{ y }, phi, v1, cy))
+              if (
+                  (m_accept_solutions_with_variables && add_element_with_variables(v_tail, y, phi, v1, cy)) ||
+                  (!m_accept_solutions_with_variables && add_element(v_tail + variable_list{ y }, phi, v1, cy))
+                 )
               {
                 return true;
               }
@@ -813,17 +822,19 @@ data_expression_vector enumerate_expressions(const sort_expression& s,
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
 
-  enumerator_algorithm<Rewriter, Rewriter> E(rewr, dataspec, rewr, id_generator);
+  bool accept_solutions_with_variables = false;
+  enumerator_algorithm<Rewriter, Rewriter> E(rewr, dataspec, rewr, id_generator, accept_solutions_with_variables);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
   const variable_list v_list{ v };
   E.enumerate(enumerator_element(v_list, sort_bool::true_()),
               sigma,
-              [&](const enumerator_element& p) {
-                  p.add_assignments(v_list, sigma, rewr);
-                  result.push_back(sigma(v));
-                  return false;
+              [&](const enumerator_element& p)
+              {
+                p.add_assignments(v_list, sigma, rewr);
+                result.push_back(sigma(v));
+                return false;
               }
   );
   return result;
@@ -840,7 +851,7 @@ data_expression_vector enumerate_expressions(const sort_expression& s,
                                              const Rewriter& rewr)
 {
   enumerator_identifier_generator id_generator;
-  return enumerate_expressions(s,dataspec, rewr, id_generator);
+  return enumerate_expressions(s, dataspec, rewr, id_generator);
 }
 
 } // namespace data

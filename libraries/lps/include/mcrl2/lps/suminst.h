@@ -16,7 +16,7 @@
 #include "mcrl2/utilities/logger.h"
 #include <deque>
 
-#include "mcrl2/data/enumerator_with_iterator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
@@ -50,7 +50,6 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
 {
   typedef detail::lps_algorithm<Specification> super;
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
   typedef typename Specification::process_type process_type;
   typedef typename process_type::action_summand_type action_summand_type;
   typedef std::vector<action_summand_type> action_summand_vector_type;
@@ -65,7 +64,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
 
     /// Rewriter
     DataRewriter m_rewriter;
-    enumerator_type m_enumerator;
+    data::enumerator_algorithm<> m_enumerator;
     data::enumerator_identifier_generator m_id_generator;
 
     /// Statistiscs for verbose output
@@ -113,26 +112,23 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
         try
         {
           mCRL2log(log::debug, "suminst") << "enumerating variables " << vl << " in condition: " << data::pp(s.condition()) << std::endl;
-
-          mcrl2::data::mutable_indexed_substitution<> local_sigma;
-          data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(vl, s.condition()));
-          for (auto i = m_enumerator.begin(local_sigma, enumerator_deque); i != m_enumerator.end(); ++i)
-          {
-            mutable_indexed_substitution<> sigma;
-            i->add_assignments(vl,sigma,m_rewriter);
-            /* data_expression_list::const_iterator k=i->begin();
-            for(auto j=vl.begin(); j!=vl.end(); ++j, ++k)
-            {
-              sigma[*j]=*k;
-            } */
-            mCRL2log(log::debug, "suminst") << "substitutions: " << sigma << std::endl;
-
-            SummandType t(s);
-            t.summation_variables() = new_summation_variables;
-            lps::rewrite(t, m_rewriter, sigma);
-            result.push_back(t);
-            ++nr_summands;
-          }
+          data::mutable_indexed_substitution<> local_sigma;
+          m_enumerator.enumerate(enumerator_element(vl, s.condition()),
+                                 local_sigma,
+                                 [&](const enumerator_element& p)
+                                 {
+                                   mutable_indexed_substitution<> sigma;
+                                   p.add_assignments(vl, sigma, m_rewriter);
+                                   mCRL2log(log::debug, "suminst") << "substitutions: " << sigma << std::endl;
+                                   SummandType t(s);
+                                   t.summation_variables() = new_summation_variables;
+                                   lps::rewrite(t, m_rewriter, sigma);
+                                   result.push_back(t);
+                                   ++nr_summands;
+                                   return false;
+                                 },
+                                 sort_bool::is_false_function_symbol
+          );
         }
         catch (mcrl2::runtime_error const& e)
         {
@@ -196,7 +192,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(r, spec.data(), r, m_id_generator),
+        m_enumerator(r, spec.data(), r, m_id_generator, true),
         m_processed(0),
         m_deleted(0),
         m_added(0)

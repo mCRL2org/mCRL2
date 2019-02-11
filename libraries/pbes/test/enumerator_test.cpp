@@ -48,7 +48,8 @@ BOOST_AUTO_TEST_CASE(test_enumerator)
   pbes_expression phi = parse_pbes_expression("val(n < 2)", VARSPEC);
   data::mutable_indexed_substitution<> sigma;
   data::enumerator_identifier_generator id_generator("x");
-  data::enumerator_algorithm<pbes_rewriter> E(R, data_spec, datar, id_generator);
+  bool accept_solutions_with_variables = true;
+  data::enumerator_algorithm<pbes_rewriter> E(R, data_spec, datar, id_generator, accept_solutions_with_variables);
   std::set<pbes_system::pbes_expression> solutions;
   E.enumerate(enumerator_element(v, phi),
               sigma,

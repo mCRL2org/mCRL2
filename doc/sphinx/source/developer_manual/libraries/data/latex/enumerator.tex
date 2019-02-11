@@ -65,9 +65,9 @@ constructor functions $\mathrm{constructors}(s)$ is defined.
 \qquad \qquad \textbf{for} $e\in \mathrm{values}(\mathrm{sort}(v_{1}))$ \textbf{do} \\
 \qquad \qquad \qquad $\varphi^{\prime}:=R(\varphi,\sigma[v_{1}:=e])$ \\
 \qquad \qquad \qquad \textbf{if } $reject(\varphi')$ \textbf{ then} \\
-\qquad \qquad \qquad \qquad \textbf{skip } \\
+\qquad \qquad \qquad \qquad \textbf{skip} \\
 \qquad \qquad \qquad \textbf{else if } $\mathrm{tail}(v) = [] \vee accept(\varphi')$ \textbf{ then} \\
-\qquad \qquad \qquad \qquad \textbf{if } $report\_solution(\varphi')$ \textbf{ then break} \\
+\qquad \qquad \qquad \qquad \textbf{if } $report\_solution(\varphi)$ \textbf{ then break} \\
 \qquad \qquad \qquad \textbf{else } \\ 
 \qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle \mathrm{tail}(v), \varphi' \right\rangle ]$ \\
 %--- function sort ---%
@@ -80,12 +80,15 @@ D_{m}\rightarrow \mathrm{sort}(v_{1})$ \\
 \qquad \qquad \qquad $\varphi ^{\prime }:=R(\varphi ,\sigma \lbrack v_{1}:=r(c(y_{1},\ldots ,y_{m}))])$ \\
 \qquad \qquad \qquad \textbf{if } $reject(\varphi')$ \textbf{ then} \\
 \qquad \qquad \qquad \qquad \textbf{skip } \\
-\qquad \qquad \qquad \textbf{else if } 
-$(\mathrm{tail}(v) \concat [y_1,\ldots ,y_m] = []) \vee accept(\varphi')$
-\textbf{ then} \\
-\qquad \qquad \qquad \qquad \textbf{if } $report\_solution(\varphi')$ \textbf{ then break} \\
+\qquad \qquad \qquad \textbf{else if } $accept(\varphi')
+\vee (\mathrm{tail}(v) = [] \wedge (\varphi = \varphi' \vee [y_1,\ldots ,y_m] = [])) 
+$ \textbf{ then} \\
+\qquad \qquad \qquad \qquad \textbf{if } $report\_solution(\varphi)$ \textbf{ then break} \\
 \qquad \qquad \qquad \textbf{else} \\
-\qquad \qquad \qquad \qquad $P:=P\concat\lbrack \left\langle \mathrm{tail}(v) \concat [y_{1},\ldots ,y_{m}],\varphi'\right\rangle ]$ \\
+\qquad \qquad \qquad \qquad \textbf{if } $\varphi = \varphi'$ \textbf{ then }
+$P:=P\concat\lbrack \left\langle \mathrm{tail}(v),\varphi'\right\rangle ]$ \\
+\qquad \qquad \qquad \qquad \textbf{else}
+$P:=P\concat\lbrack \left\langle \mathrm{tail}(v) \concat [y_{1},\ldots ,y_{m}],\varphi'\right\rangle ]$ \\
 \qquad $P:=\mathrm{tail}(P)$
 \end{tabular}
 \]
@@ -95,12 +98,16 @@ The algorithm works both for data expressions and PBES expressions.
 \end{remark}
 
 \begin{remark}
-In the case of data expressions, $R$ and $r$ may coincide.%
+In the case of data expressions, $R$ and $r$ may coincide.
 \end{remark}
 
 \begin{remark}
 The algorithm can be extended such that it also returns the assignments
 corresponding to a solution.
+\end{remark}
+
+\begin{remark}
+In some applications of the enumerator solutions with a non-empty list of variables are unwanted. In that case the $\varphi = \varphi'$ cases in the algorithm need to be removed. A boolean setting accept\_solutions\_with\_variables is introduced to control this.
 \end{remark}
 
 \end{document}

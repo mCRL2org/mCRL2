@@ -234,8 +234,9 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     }
 
     std::set<pbes_expression> result;
+    bool accept_solutions_with_variables = false;
     data::enumerator_identifier_generator id_generator;
-    data::enumerator_algorithm<> E(super::R, m_data_spec, super::R, id_generator);
+    data::enumerator_algorithm<> E(super::R, m_data_spec, super::R, id_generator, accept_solutions_with_variables);
     const data::variable_list di_list(di.begin(), di.end());
     data::mutable_indexed_substitution<> local_sigma;
     E.enumerate(enumerator_element(di_list, data::true_()),
@@ -358,7 +359,8 @@ class pbesinst_finite_algorithm
         data::variable_list infinite(infinite_parameters.begin(), infinite_parameters.end());
 
         typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-        data::enumerator_algorithm<> E(rewr, pbesspec.data(), rewr, m_id_generator);
+        bool accept_solutions_with_variables = false;
+        data::enumerator_algorithm<> E(rewr, pbesspec.data(), rewr, m_id_generator, accept_solutions_with_variables);
         data::variable_list finite_parameter_list(finite_parameters.begin(), finite_parameters.end());
         data::mutable_indexed_substitution<> sigma;
         E.enumerate(enumerator_element(finite_parameter_list, data::true_()),
