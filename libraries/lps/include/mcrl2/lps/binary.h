@@ -14,7 +14,7 @@
 
 #include <iterator>
 
-#include "mcrl2/data/enumerator_with_iterator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
@@ -53,7 +53,6 @@ template<typename DataRewriter, typename Specification>
 class binary_algorithm: public detail::lps_algorithm<Specification>
 {
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-  typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
   typedef typename detail::lps_algorithm<Specification> super;
   typedef typename Specification::process_type process_type;
   typedef typename process_type::action_summand_type action_summand_type;
@@ -138,7 +137,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       generator.add_identifiers(lps::find_identifiers(m_spec));
       generator.add_identifiers(data::function_and_mapping_identifiers(m_spec.data()));
       bool accept_solutions_with_variables = false;
-      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter, m_id_generator, accept_solutions_with_variables);
+      data::enumerator_algorithm<> enumerator(m_rewriter, m_spec.data(), m_rewriter, m_id_generator, accept_solutions_with_variables);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (const data::variable& par: process_parameters)

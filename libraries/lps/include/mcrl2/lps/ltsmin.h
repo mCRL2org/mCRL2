@@ -59,17 +59,19 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   std::size_t max_iterations = 10000;
   data::rewriter rewr(dataspec);
   data::enumerator_identifier_generator id_generator;
-  data::enumerator_algorithm<data::rewriter, data::rewriter> E(rewr, dataspec, rewr, id_generator, max_iterations);
+  bool accept_solutions_with_variables = false;
+  data::enumerator_algorithm<data::rewriter, data::rewriter> E(rewr, dataspec, rewr, id_generator, accept_solutions_with_variables, max_iterations);
   data::mutable_indexed_substitution<> sigma;
   data::variable x("x", s);
   data::variable_list v_list{x};
 
   E.enumerate(enumerator_element(v_list, data::sort_bool::true_()),
               sigma,
-              [&](const enumerator_element& p) {
-                  p.add_assignments(v_list, sigma, rewr);
-                  result.push_back(data::pp(sigma(x)));
-                  return result.size() >= max_size;
+              [&](const enumerator_element& p)
+              {
+                p.add_assignments(v_list, sigma, rewr);
+                result.push_back(data::pp(sigma(x)));
+                return result.size() >= max_size;
               }
   );
   return result;
