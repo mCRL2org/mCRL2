@@ -135,7 +135,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
     )
-            : super(R, dataspec, r, id_generator, max_count), m_throw_exceptions(throw_exceptions)
+            : super(R, dataspec, r, id_generator, false, max_count), m_throw_exceptions(throw_exceptions)
     {}
 
     enumerator_algorithm_without_callback(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
