@@ -1,4 +1,5 @@
 set(MCRL2_TOOLS
+  generatelts
   lpstransform
   mcrl2rewrite
   mcrl2transform
