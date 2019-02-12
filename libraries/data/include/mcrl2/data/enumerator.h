@@ -587,7 +587,13 @@ class enumerator_algorithm
 
       if (v.empty())
       {
-        return report_solution(p);
+        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+        if (reject(phi1))
+        {
+          return false;
+        }
+        EnumeratorListElement q(v, phi1, p);
+        return report_solution(q);
       }
 
       const auto& v1 = v.front();

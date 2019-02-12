@@ -57,7 +57,9 @@ constructor functions $\mathrm{constructors}(s)$ is defined.
 \qquad \textbf{let} $\left\langle v,\varphi \right\rangle =\mathrm{head}(P) 
 \textbf{ with } v = [v_1, \ldots, v_n]$\\
 \qquad \textbf{if } $v = []$ \textbf{ then} \\
-\qquad \qquad \textbf{if }$report\_solution(\varphi)$ \textbf{ then break} \\
+\qquad \qquad $\varphi^{\prime}:=R(\varphi,\sigma)$ \\
+\qquad \qquad \textbf{if } $reject(\varphi')$ \textbf{ then skip} \\
+\qquad \qquad \textbf{else if }$report\_solution(\varphi')$ \textbf{ then break} \\
 \qquad \textbf{else if } $reject(\varphi)$ \textbf{ then} \\
 \qquad \qquad \textbf{skip} \\
 %--- finite sorts ---%
