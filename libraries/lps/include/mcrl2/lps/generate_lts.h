@@ -16,9 +16,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/lps/state.h"
 #include "mcrl2/lps/specification.h"
 
 namespace std
@@ -98,25 +100,51 @@ std::ostream& operator<<(std::ostream& out, const labeled_transition_system& x)
   return out;
 }
 
+template <typename StateType, class Transformer>
+data::data_expression_list
+make_state(const data::data_expression_list& x,
+           std::size_t /* n */,
+           Transformer f,
+           typename std::enable_if<std::is_same<StateType, data::data_expression_list>::value>::type* = nullptr)
+{
+  return data::data_expression_list(x.begin(), x.end(), [&](const data::data_expression& x) { return f(x); });
+}
+
+template <typename StateType, class Transformer>
+lps::state
+make_state(const data::data_expression_list& x,
+           std::size_t n,
+           Transformer f,
+           typename std::enable_if<std::is_same<StateType, lps::state>::value>::type* = nullptr)
+{
+  return lps::state(x.begin(), n, [&](const data::data_expression& x) { return f(x); });
+}
+
 /// \brief Simple algorithm to generate an LTS from a linear process specification
 /// \param report_transition Callback function that reports the transtions that are found
 /// \pre lpsspec may not have any 'global' variables
-template <typename ReportTransition>
+template <typename StateType, typename ReportTransition>
 void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportTransition report_transition)
 {
-  typedef data::data_expression_list state_type;
   typedef data::enumerator_list_element_with_substitution<data::data_expression> enumerator_element;
 
   data::mutable_indexed_substitution<> sigma;
   const data::variable_list& process_parameters = lpsspec.process().process_parameters();
-  state_type d0 = lpsspec.initial_process().state(process_parameters);
+  const std::size_t n = process_parameters.size();
+  data::data_expression_list init = lpsspec.initial_process().state(process_parameters);
+  StateType d0 = make_state<StateType>(init, process_parameters.size(), [&](const data::data_expression& x) { return x; });
 
-  std::deque<state_type> todo{d0};
-  std::unordered_set<state_type> explored{d0};
+  std::deque<StateType> todo{d0};
+  std::unordered_set<StateType> explored{d0};
 
   auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
   {
     return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return r(x, sigma); });
+  };
+
+  auto rewrite_state = [&](const data::data_expression_list& v)
+  {
+    return make_state<StateType>(v, n, [&](const data::data_expression& x) { return r(x, sigma); });
   };
 
   auto rewrite_action = [&](const process::action& a)
@@ -143,7 +171,7 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
 
   while (!todo.empty())
   {
-    state_type d = todo.front();
+    StateType d = todo.front();
     todo.pop_front();
 
     auto di = d.begin();
@@ -160,13 +188,9 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
                   sigma,
                   [&](const enumerator_element& p)
                   {
-                    if (!is_true(p.expression()))
-                    {
-                      return false;
-                    }
                     p.add_assignments(variables, sigma, r);
                     multi_action a = rewrite_multi_action(summand.multi_action());
-                    state_type d1 = rewrite_data_expression_list(summand.next_state(process_parameters));
+                    StateType d1 = rewrite_state(summand.next_state(process_parameters));
                     if (explored.find(d1) == explored.end())
                     {
                       todo.push_back(d1);
@@ -182,15 +206,13 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
   }
 }
 
-inline
+template <typename StateType>
 void generate_lts(const specification& lpsspec, const data::rewriter& r, labeled_transition_system& result)
 {
-  typedef data::data_expression_list state_type;
-
-  std::unordered_map<data::data_expression_list, std::size_t> states;
+  std::unordered_map<StateType, std::size_t> states;
   std::unordered_map<lps::multi_action, std::size_t> actions;
 
-  auto add_state = [&](const state_type& s)
+  auto add_state = [&](const StateType& s)
   {
     auto i = states.find(s);
     if (i == states.end())
@@ -214,18 +236,19 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, labeled
   add_action(tau);
 
   const data::variable_list& process_parameters = lpsspec.process().process_parameters();
-  state_type d0 = lpsspec.initial_process().state(process_parameters);
+  data::data_expression_list init = lpsspec.initial_process().state(process_parameters);
+  StateType d0 = make_state<StateType>(init, process_parameters.size(), [&](const data::data_expression& x) { return x; });
   result.initial_state = add_state(d0);
 
-  generate_lts(lpsspec,
-               r,
-               [&](const state_type& d, const lps::multi_action& m, const state_type& d1)
-               {
-                 std::size_t from = states.find(d)->second;
-                 std::size_t label = add_action(m);
-                 std::size_t to = add_state(d1);
-                 result.add_transition(from, label, to);
-               }
+  generate_lts<StateType>(lpsspec,
+                          r,
+                          [&](const StateType& d, const lps::multi_action& m, const StateType& d1)
+                          {
+                            std::size_t from = states.find(d)->second;
+                            std::size_t label = add_action(m);
+                            std::size_t to = add_state(d1);
+                            result.add_transition(from, label, to);
+                          }
   );
 
   result.number_of_states = states.size();

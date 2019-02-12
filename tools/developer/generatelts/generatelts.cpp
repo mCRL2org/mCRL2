@@ -32,6 +32,8 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 {
   typedef rewriter_tool<input_output_tool> super;
 
+  bool m_store_states_as_trees = false;
+
   public:
     generatelts_tool()
       : super("generatelts",
@@ -43,13 +45,33 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
              )
     {}
 
+    void add_options(utilities::interface_description& desc) override
+    {
+      super::add_options(desc);
+      desc.add_option("store-states-as-trees", "store states as trees instead of lists", 's');
+    }
+
+    void parse_options(const utilities::command_line_parser& parser) override
+    {
+      super::parse_options(parser);
+      m_store_states_as_trees = parser.options.count("store-states-as-trees") > 0;
+    }
+
     bool run() override
     {
       lps::labeled_transition_system lts;
       lps::specification lpsspec = lps::detail::load_lps(input_filename());
       lps::detail::instantiate_global_variables(lpsspec);
       data::rewriter r = create_rewriter(lpsspec.data());
-      lps::generate_lts(lpsspec, r, lts);
+
+      if (m_store_states_as_trees)
+      {
+        lps::generate_lts<lps::state>(lpsspec, r, lts);
+      }
+      else
+      {
+        lps::generate_lts<data::data_expression_list>(lpsspec, r, lts);
+      }
       std::ostringstream out;
       out << lts;
       utilities::detail::write_text(output_filename(), out.str());
