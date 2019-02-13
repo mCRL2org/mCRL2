@@ -543,7 +543,7 @@ class enumerator_algorithm
         {
           return false;
         }
-        else if (variables.empty() || accept(phi1))
+        if ((accept(phi1) && m_accept_solutions_with_variables) || variables.empty())
         {
           EnumeratorListElement q(variables, phi1, p, v, e);
           return report_solution(q);
@@ -564,19 +564,18 @@ class enumerator_algorithm
         {
           return false;
         }
-        if (accept(phi1) || (variables.empty() && (phi1 == phi || added_variables.empty())))
+        bool added_variables_empty = added_variables.empty() || (phi1 == phi && m_accept_solutions_with_variables);
+        if ((accept(phi1) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
         {
-          EnumeratorListElement q(variables, phi1, p, v, e);
+          EnumeratorListElement q(variables + added_variables, phi1, p, v, e);
           return report_solution(q);
         }
-        if (phi1 == phi)
+        if (added_variables_empty)
         {
-          // Discard the added_variables, since we know they do not appear in phi1
           P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
         }
         else
         {
-          // Additional variables are put at the end of the list!
           P.push_back(EnumeratorListElement(variables + added_variables, phi1, p, v, e));
         }
         return false;
@@ -704,10 +703,7 @@ class enumerator_algorithm
               // TODO: We want to apply r without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = r(application(c, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
-              if (
-                  (m_accept_solutions_with_variables && add_element_with_variables(v_tail, y, phi, v1, cy)) ||
-                  (!m_accept_solutions_with_variables && add_element(v_tail + variable_list{ y }, phi, v1, cy))
-                 )
+              if (add_element_with_variables(v_tail, y, phi, v1, cy))
               {
                 return true;
               }
