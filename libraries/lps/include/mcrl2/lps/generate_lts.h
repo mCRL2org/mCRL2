@@ -126,7 +126,7 @@ make_state(const data::data_expression_list& x,
 template <typename StateType, typename ReportTransition>
 void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportTransition report_transition)
 {
-  typedef data::enumerator_list_element_with_substitution<data::data_expression> enumerator_element;
+  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
   data::mutable_indexed_substitution<> sigma;
   const data::variable_list& process_parameters = lpsspec.process().process_parameters();
@@ -135,7 +135,7 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
   StateType d0 = make_state<StateType>(init, process_parameters.size(), [&](const data::data_expression& x) { return x; });
 
   std::deque<StateType> todo{d0};
-  std::unordered_set<StateType> explored{d0};
+  std::unordered_set<StateType> discovered{d0};
 
   auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
   {
@@ -165,7 +165,7 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
     }
   };
 
-  bool accept_solutions_with_variables = true;
+  bool accept_solutions_with_variables = false;
   data::enumerator_identifier_generator id_generator;
   data::enumerator_algorithm<data::rewriter, data::rewriter> E(r, lpsspec.data(), r, id_generator, accept_solutions_with_variables);
 
@@ -191,17 +191,20 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
                     p.add_assignments(variables, sigma, r);
                     multi_action a = rewrite_multi_action(summand.multi_action());
                     StateType d1 = rewrite_state(summand.next_state(process_parameters));
-                    if (explored.find(d1) == explored.end())
+                    if (discovered.find(d1) == discovered.end())
                     {
                       todo.push_back(d1);
-                      explored.insert(d1);
+                      discovered.insert(d1);
                     }
                     report_transition(d, a, d1);
                     return false;
                   },
-                  data::is_false,
-                  data::is_true
+                  data::is_false
       );
+      for (const data::variable& v: variables)
+      {
+        sigma[v] = v;
+      }
     }
   }
 }
