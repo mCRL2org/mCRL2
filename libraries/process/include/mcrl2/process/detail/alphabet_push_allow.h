@@ -42,7 +42,7 @@ process_expression construct_allow(const multi_action_name_set& A, const process
   {
     if (!alpha.empty()) // exclude tau
     {
-      v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+      v.emplace_back(core::identifier_string_list(alpha.begin(), alpha.end()));
     }
   }
   action_name_multiset_list B(v.begin(), v.end());
@@ -57,10 +57,9 @@ struct push_allow_node: public alphabet_node
 {
   process_expression expression;
 
-  push_allow_node()
-  {}
+  push_allow_node() = default;
 
-  push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression_ = process_expression())
+  explicit push_allow_node(const multi_action_name_set& alphabet, const process_expression& expression_ = process_expression())
     : alphabet_node(alphabet), expression(expression_)
   {}
 
@@ -113,8 +112,7 @@ struct push_allow_cache
     alphabet_status status;
     process_identifier P;
 
-    alphabet_value()
-    {}
+    alphabet_value() = default;
 
     alphabet_value(const multi_action_name_set& alphabet_, alphabet_status status_, const process_identifier& P_)
      : alphabet(alphabet_), status(status_), P(P_)
@@ -467,7 +465,9 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply_pcrl_node(const process_expression& x)
   {
-    push(push_allow_node(process::alphabet_pcrl(x, W.pcrl_equation_cache), x));
+    push_allow_node node(process::alphabet_pcrl(x, W.pcrl_equation_cache), x);
+    node.apply_allow(A);
+    push(node);
   }
 
   void leave(const process::delta& x)

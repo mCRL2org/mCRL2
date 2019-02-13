@@ -36,7 +36,7 @@ struct alphabet_pcrl_traverser: public process_expression_traverser<alphabet_pcr
   const std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache;
   multi_action_name_set result;
 
-  alphabet_pcrl_traverser(const std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache_)
+  explicit alphabet_pcrl_traverser(const std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache_)
     : pcrl_equation_cache(pcrl_equation_cache_)
   {}
 

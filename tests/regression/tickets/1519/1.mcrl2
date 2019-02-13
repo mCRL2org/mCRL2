@@ -1,0 +1,2 @@
+act a,b;
+init allow({a}, a.b.delta);
