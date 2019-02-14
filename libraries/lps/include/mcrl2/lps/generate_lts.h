@@ -51,6 +51,13 @@ namespace mcrl2 {
 
 namespace lps {
 
+/// \brief The skip operation
+struct skip
+{
+  template <typename T>
+  void operator()(const T&) const {}
+};
+
 // The states are identified by numbers in the interval [0 ... number_of_states).
 // For each transition (from, label, to) we have
 //    0 <= to < number_of_states
@@ -121,10 +128,15 @@ make_state(const data::data_expression_list& x,
 }
 
 /// \brief Simple algorithm to generate an LTS from a linear process specification
+/// \param report_state Callback function that reports the states that are disovered. Every state is reported only once
 /// \param report_transition Callback function that reports the transtions that are found
 /// \pre lpsspec may not have any 'global' variables
-template <typename StateType, typename ReportTransition>
-void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportTransition report_transition)
+template <typename StateType, typename ReportState = skip, typename ReportTransition = skip>
+void generate_lts(const specification& lpsspec,
+                  const data::rewriter& r,
+                  ReportState report_state = ReportState(),
+                  ReportTransition report_transition = ReportTransition()
+                 )
 {
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
@@ -136,6 +148,7 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
 
   std::deque<StateType> todo{d0};
   std::unordered_set<StateType> discovered{d0};
+  report_state(d0);
 
   auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
   {
@@ -195,12 +208,15 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, ReportT
                     {
                       todo.push_back(d1);
                       discovered.insert(d1);
+                      report_state(d1);
                     }
                     report_transition(d, a, d1);
                     return false;
                   },
                   data::is_false
       );
+
+      // TODO: perhaps the enumerator should be responsible for this?
       for (const data::variable& v: variables)
       {
         sigma[v] = v;
@@ -238,18 +254,17 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, labeled
   lps::multi_action tau;
   add_action(tau);
 
-  const data::variable_list& process_parameters = lpsspec.process().process_parameters();
-  data::data_expression_list init = lpsspec.initial_process().state(process_parameters);
-  StateType d0 = make_state<StateType>(init, process_parameters.size(), [&](const data::data_expression& x) { return x; });
-  result.initial_state = add_state(d0);
-
   generate_lts<StateType>(lpsspec,
                           r,
+                          [&](const StateType& d)
+                          {
+                            add_state(d);
+                          },
                           [&](const StateType& d, const lps::multi_action& m, const StateType& d1)
                           {
                             std::size_t from = states.find(d)->second;
                             std::size_t label = add_action(m);
-                            std::size_t to = add_state(d1);
+                            std::size_t to = states.find(d1)->second;
                             result.add_transition(from, label, to);
                           }
   );
