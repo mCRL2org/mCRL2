@@ -9,6 +9,8 @@
 #ifndef MCRL2_UTILITIES_QT_TOOL_H
 #define MCRL2_UTILITIES_QT_TOOL_H
 
+#include <string>
+#include "mcrl2/utilities/toolset_version.h"
 #include <QAction>
 #include <QApplication>
 #include <QDateTime>
@@ -20,8 +22,6 @@
 #include <QString>
 #include <QUrl>
 #include <QtGlobal>
-#include <string>
-#include "mcrl2/utilities/toolset_version.h"
 
 namespace mcrl2
 {
@@ -35,14 +35,14 @@ class HelpMenu : public QMenu
   Q_OBJECT
 
   private:
-    QMainWindow *m_window;
+    QMainWindow* m_window;
     QString m_name;
     QString m_author;
     QString m_description;
     QString m_manualUrl;
 
   public:
-    HelpMenu(QMainWindow *window, const std::string &name, const std::string &author, const std::string &description, const std::string &manualUrl):
+    HelpMenu(QMainWindow* window, const std::string& name, const std::string& author, const std::string& description, const std::string& manualUrl):
       QMenu(window->menuBar()),
       m_window(window),
       m_name(QString::fromStdString(name)),
@@ -50,12 +50,12 @@ class HelpMenu : public QMenu
       m_description(QString::fromStdString(description)),
       m_manualUrl(QString::fromStdString(manualUrl))
     {
-      QAction *actionContents = new QAction(window);
+      QAction* actionContents = new QAction(window);
       actionContents->setText("&Contents");
       actionContents->setShortcut(QString("F1"));
       connect(actionContents, SIGNAL(triggered()), this, SLOT(showContents()));
 
-      QAction *actionAbout = new QAction(window);
+      QAction* actionAbout = new QAction(window);
       actionAbout->setText("&About");
       connect(actionAbout, SIGNAL(triggered()), this, SLOT(showAbout()));
 
@@ -131,12 +131,15 @@ class qt_tool: public Tool
       return true;
     }
 
-    bool show_main_window(QMainWindow *window)
+    bool show_main_window(QMainWindow* window)
     {
-      HelpMenu *menu = new HelpMenu(window, m_name, m_author, m_about_description, m_manual_url);
+      HelpMenu* menu = new HelpMenu(window, m_name, m_author, m_about_description, m_manual_url);
       window->menuBar()->addAction(menu->menuAction());
       window->menuBar()->setNativeMenuBar(true); 
       window->show();
+      window->resize(500,1000);
+      window->show();
+      window->resize(1000,900);
       return m_application->exec() == 0;
     }
 

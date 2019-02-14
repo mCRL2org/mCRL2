@@ -27,31 +27,6 @@
 #include <QPainter>
 #include <QQuaternion>
 
-struct Texture
-{
-  GLuint name;
-  std::size_t width;
-  std::size_t height;
-  QVector3D shape[4];
-  Texture(std::size_t width, std::size_t height, float pixelsize) : width(width), height(height)
-  {
-    glGenTextures(1, &name);
-    resize(pixelsize);
-  }
-  ~Texture()
-  {
-    glDeleteTextures(1, &name);
-  }
-  void resize(float pixelsize)
-  {
-    const GLfloat w = width;
-    const GLfloat h = height;
-    shape[0] = QVector3D(-w, -h, 0.0f) * pixelsize / 2.0;
-    shape[1] = QVector3D(w, -h, 0.0f) * pixelsize / 2.0;
-    shape[2] = QVector3D(w,  h, 0.0f) * pixelsize / 2.0;
-    shape[3] = QVector3D(-w,  h, 0.0f) * pixelsize / 2.0;
-  }
-};
 
 struct VertexData
 {
