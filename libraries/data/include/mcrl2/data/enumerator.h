@@ -358,6 +358,16 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
         result[v_i] = rewriter(sigma(v_i), empty_substitution());
       }
     }
+
+    /// \brief Removes the assignments corresponding with this element from the substitution result.
+    template <typename VariableList, typename MutableSubstitution>
+    void remove_assignments(const VariableList& v, MutableSubstitution& result) const
+    {
+      for (const data::variable& v_i: v)
+      {
+        result[v_i] = v_i;
+      }
+    }
 };
 
 template <typename Expression>
@@ -616,7 +626,6 @@ class enumerator_algorithm
             throw mcrl2::runtime_error("Sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
           }
 
-          data_expression sigma_v1 = sigma(v1);
           for (const data_expression& f: function_sorts)
           {
             sigma[v1] = f;
@@ -625,7 +634,6 @@ class enumerator_algorithm
               return true;
             }
           }
-          sigma[v1] = sigma_v1;
         }
         else
         {
@@ -640,13 +648,11 @@ class enumerator_algorithm
           const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator(), element_sort) }, sort_bool::false_());
           const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
           data_expression e = sort_set::constructor(element_sort, lambda_term, fset_variable);
-          data_expression sigma_v1 = sigma(v1);
           sigma[v1] = e;
           if (add_element(v_tail, phi, v1, e))
           {
             return true;
           }
-          sigma[v1] = sigma_v1;
         }
         else
         {
@@ -665,7 +671,6 @@ class enumerator_algorithm
             throw mcrl2::runtime_error("Finite set sort " + data::pp(v1_sort) + " has too many elements to enumerate.");
           }
 
-          data_expression sigma_v1 = sigma(v1);
           for (const data_expression& e: set_elements)
           {
             sigma[v1] = e;
@@ -674,7 +679,6 @@ class enumerator_algorithm
               return true;
             }
           }
-          sigma[v1] = sigma_v1;
         }
         else
         {
@@ -707,7 +711,6 @@ class enumerator_algorithm
               {
                 return true;
               }
-              sigma[v1] = v1;
             }
             else
             {
@@ -718,7 +721,6 @@ class enumerator_algorithm
               {
                 return true;
               }
-              sigma[v1] = v1;
             }
           }
         }
@@ -727,6 +729,7 @@ class enumerator_algorithm
           throw mcrl2::runtime_error("Cannot enumerate elements of sort " + data::pp(v1_sort) + " without constructors.");
         }
       }
+      sigma[v1] = v1;
       return false;
     }
 

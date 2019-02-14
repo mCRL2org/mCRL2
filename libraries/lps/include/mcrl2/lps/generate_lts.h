@@ -183,6 +183,7 @@ void generate_lts(const specification& lpsspec,
                     p.add_assignments(variables, sigma, r);
                     process::action_list a = rewrite_action_list(summand.multi_action().actions());
                     state_type d1 = rewrite_state(summand.next_state(process_parameters));
+                    p.remove_assignments(variables, sigma);
                     auto j = discovered.put(d1);
                     if (j.second)
                     {
@@ -194,12 +195,6 @@ void generate_lts(const specification& lpsspec,
                   },
                   data::is_false
       );
-
-      // TODO: perhaps the enumerator should be responsible for this?
-      for (const data::variable& v: variables)
-      {
-        sigma[v] = v;
-      }
     }
   }
 }
