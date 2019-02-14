@@ -23,30 +23,6 @@
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/specification.h"
 
-namespace std
-{
-
-/// \brief specialization of the standard std::hash function.
-template<>
-struct hash<mcrl2::lps::multi_action>
-{
-  std::size_t operator()(const mcrl2::lps::multi_action& x) const
-  {
-    std::size_t seed = std::hash<atermpp::aterm>()(x.actions());
-    if (!x.actions().empty())
-    {
-      seed = std::hash<atermpp::aterm>()(x.arguments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-    if (x.has_time())
-    {
-      seed = std::hash<atermpp::aterm>()(x.time()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-    return seed;
-  }
-};
-
-}
-
 namespace mcrl2 {
 
 namespace lps {
@@ -228,10 +204,13 @@ void generate_lts(const specification& lpsspec,
 template <typename StateType>
 void generate_lts(const specification& lpsspec, const data::rewriter& r, labeled_transition_system& result)
 {
-  std::unordered_map<StateType, std::size_t> states;
-  std::unordered_map<lps::multi_action, std::size_t> actions;
+  typedef process::action_list action_type;
+  typedef StateType state_type;
 
-  auto add_state = [&](const StateType& s)
+  std::unordered_map<state_type, std::size_t> states;
+  std::unordered_map<action_type, std::size_t> actions;
+
+  auto add_state = [&](const state_type& s)
   {
     auto i = states.find(s);
     if (i == states.end())
@@ -241,39 +220,39 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, labeled
     return i->second;
   };
 
-  auto add_action = [&](const lps::multi_action& m)
+  auto add_action = [&](const action_type& a)
   {
-    auto i = actions.find(m);
+    auto i = actions.find(a);
     if (i == actions.end())
     {
-      i = actions.emplace(std::make_pair(m, actions.size())).first;
+      i = actions.emplace(std::make_pair(a, actions.size())).first;
     }
     return i->second;
   };
 
   lps::multi_action tau;
-  add_action(tau);
+  add_action(tau.actions());
 
-  generate_lts<StateType>(lpsspec,
-                          r,
-                          [&](const StateType& d)
-                          {
-                            add_state(d);
-                          },
-                          [&](const StateType& d, const lps::multi_action& m, const StateType& d1)
-                          {
-                            std::size_t from = states.find(d)->second;
-                            std::size_t label = add_action(m);
-                            std::size_t to = states.find(d1)->second;
-                            result.add_transition(from, label, to);
-                          }
+  generate_lts<state_type>(lpsspec,
+                           r,
+                           [&](const state_type& d)
+                           {
+                             add_state(d);
+                           },
+                           [&](const state_type& d, const lps::multi_action& m, const state_type& d1)
+                           {
+                             std::size_t from = states.find(d)->second;
+                             std::size_t label = add_action(m.actions());
+                             std::size_t to = states.find(d1)->second;
+                             result.add_transition(from, label, to);
+                           }
   );
 
   result.number_of_states = states.size();
   result.action_labels.resize(actions.size());
   for (const auto& p: actions)
   {
-    result.action_labels[p.second] = lps::pp(p.first);
+    result.action_labels[p.second] = process::pp(p.first);
   }
 }
 
