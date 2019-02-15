@@ -215,7 +215,7 @@ public:
   aterm& operator=(const aterm& other) noexcept
   {
     // Increment first to prevent the same term from becoming reference zero temporarily.
-    increment_reference_count();
+    other.increment_reference_count();
 
     // Decrement the reference from the term that is currently referred to.
     decrement_reference_count();
@@ -247,7 +247,7 @@ protected:
   /// \brief Increment the reference count.
   /// \details This increments the reference count unless the term contains null.
   ///          Use with care as this destroys the reference count mechanism. 
-  void increment_reference_count()
+  void increment_reference_count() const
   {
     if (defined())
     {
@@ -258,7 +258,7 @@ protected:
   /// \brief Decrement the reference count.
   /// \details This decrements the reference count unless the term contains null.
   ///          Use with care as this destroys the reference count mechanism. 
-  void decrement_reference_count()
+  void decrement_reference_count() const
   {
     if (defined())
     {
