@@ -131,301 +131,6 @@ void VertexData::generateVertexData(float handlesize, float nodesize, float arro
       0.3 * arrowheadsize * std::sin(0.0f),
       0.3 * arrowheadsize * std::cos(0.0f));
 }
-//
-// Some auxiliary functions that extend OpenGL
-//
-
-inline
-void glStartName(GLuint objectType, GLuint index=0)
-{
-  glLoadName(objectType);
-  glPushName(index);
-}
-
-inline
-void glEndName()
-{
-  glPopName();
-  glLoadName(GLScene::so_none);
-}
-
-//
-// Functions that actually draw primitives by combining vertex data, textures and colors.
-//
-
-inline
-void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
-{
-  glVertexPointer(3, GL_FLOAT, 0, data.handle);
-  glColor3fv(fill);
-  glDrawArrays(GL_QUADS, 0, 4);
-  glColor3fv(line);
-  glDrawArrays(GL_LINE_LOOP, 0, 4);
-}
-
-inline
-void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool translucent, bool probabilistic)
-{
-  glPushAttrib(GL_LINE_BIT);
-  glLineWidth(2.0);
-
-  if (probabilistic)
-  {
-    Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
-    glColor3fv(blue);
-    glVertexPointer(3, GL_FLOAT, 4*3, data.node);
-    glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
-  }
-
-  glVertexPointer(3, GL_FLOAT, 0, data.node);
-
-  float alpha = translucent ? 0.5 : 1.0;
-  glColor4fv(Color4f(fill, alpha));
-
-  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
-
-  // disable the depth mask temporarily for drawing the border of a node
-  // dragging an initial state in 2D mode over other nodes looks less weird this way
-  // BUT not disabling the depth mask here causes some strange issue on Mac OS
-  glDepthMask(GL_FALSE);
-
-  glColor4fv(Color4f(line, alpha));
-  glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
-
-  // see above
-  glDepthMask(GL_TRUE);
-  glPopAttrib();
-}
-
-
-inline
-void drawWhetherNodeCanBeCollapsedOrExpanded(const VertexData& data, const Color4f& line, bool active)
-{
-  glPushAttrib(GL_LINE_BIT);
-  glLineWidth(2.5);
-  glVertexPointer(3, GL_FLOAT, 0, data.hint);
-  glDepthMask(GL_FALSE);
-  glColor4fv(line);
-  glDrawArrays(GL_LINES, 0, active ? 2 : 4); // Plus or half a plus (minus)
-  glDepthMask(GL_TRUE);
-  glPopAttrib();
-}
-
-inline
-void drawArrowHead(const VertexData& data)
-{
-  glVertexPointer(3, GL_FLOAT, 0, data.arrowhead);
-  glDrawArrays(GL_TRIANGLE_FAN, 0, RES_ARROWHEAD + 1);
-}
-
-inline
-void drawArc(const QVector3D controlpoints[4])
-{
-  glDepthMask(GL_FALSE);
-
-  float cp[3 * 4];
-  for (int i = 0; i < 4; i++)
-  {
-    cp[3 * i + 0] = controlpoints[i].x();
-    cp[3 * i + 1] = controlpoints[i].y();
-    cp[3 * i + 2] = controlpoints[i].z();
-  }
-  glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cp);
-  glEnable(GL_MAP1_VERTEX_3);
-  glMapGrid1f(RES_ARC, 0, 1);
-  glEvalMesh1(GL_LINE, 0, RES_ARC);
-
-  glDepthMask(GL_TRUE);
-}
-
-//
-// GLScene private methods
-//
-
-void GLScene::renderEdge(std::size_t i)
-{
-  Graph::Edge edge = m_graph.edge(i);
-  QVector3D ctrl[4];
-  QVector3D& from = ctrl[0];
-  QVector3D& to = ctrl[3];
-  QVector3D via = m_graph.handle(i).pos();
-  from = m_graph.node(edge.from()).pos();
-  to = m_graph.node(edge.to()).pos();
-
-  // Calculate control points from handle
-  ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
-  ctrl[2] = ctrl[1];
-
-  // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
-  // them in x-y direction.
-  if (edge.from() == edge.to())
-  {
-    if (!m_drawselfloops) {
-      return;
-    }
-    QVector3D diff = ctrl[1] - ctrl[0];
-    diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
-    diff = diff * ((via - from).length() / (diff.length() * 2.0));
-    ctrl[1] = ctrl[1] + diff;
-    ctrl[2] = ctrl[2] - diff;
-  }
-
-  glStartName(so_edge, i);
-  glPushMatrix();
-
-  glColor3f(m_graph.handle(i).selected(), 0.0, 0.0);
-
-  // Draw the arc
-  drawArc(ctrl);
-
-  // Go to arrowhead position
-  glTranslatef(to.x(), to.y(), to.z());
-
-  // Rotate to match the orientation of the arc
-  QVector3D vec = to - ctrl[2];
-  // If ctrl[3] == ctrl[2], then something odd is going on. We'll just
-  // make the executive decision not to draw the arrowhead then, as it
-  // will just clutter the image.
-  if (vec.length() > 0)
-  {
-    vec /= vec.length();
-    QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
-    // If vec is equal to (1,0,0), axis will be (0,0,0).
-    // However, we still need to rotate, in this case 180 degrees.
-    float angle = vec.x() == 1 ? M_PI : std::acos(vec.x());
-    glRotatef(angle * 180.0 / M_PI, axis.x(), axis.y(), axis.z());
-
-    // Draw the arrow head
-    drawArrowHead(m_vertexdata);
-  }
-
-  glPopMatrix();
-  glEndName();
-}
-
-void GLScene::renderNode(GLuint i)
-{
-  Graph::NodeNode& node = m_graph.node(i);
-  Color3f fill;
-  Color3f line;
-  Color4f hint;
-
-  // Node stroke color: red when selected, black otherwise
-  line = Color3f(0.6f * node.selected(), 0.0f, 0.0f);
-
-  bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
-  if (mark) // Initial node fill color: green or dark green (locked)
-  {
-    if (node.locked()) {
-      fill = Color3f(0.1f, 0.7f, 0.1f);
-    }
-    else {
-      fill = Color3f(0.1f, 1.0f, 0.1f);
-    }
-  }
-  else // Normal node fill color: node color or darkened node color (locked)
-  {
-    if (node.locked()) {
-      fill = Color3f(0.7f * node.color()[0], 0.7f * node.color()[1], 0.7f * node.color()[2]);
-    }
-    else {
-      fill = node.color();
-    }
-  }
-
-  glStartName(so_node, i);
-  glPushMatrix();
-
-  m_camera.billboard_spherical(node.pos());
-  drawNode(m_vertexdata, line, fill, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
-
-  if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
-  {
-    float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
-    hint = Color4f(fill.r + s, fill.g + s, fill.b + s, true);
-
-    glTranslatef(0, 0, m_size_node * m_camera.pixelsize);
-    drawWhetherNodeCanBeCollapsedOrExpanded(m_vertexdata, hint, node.active());
-  }
-
-  glPopMatrix();
-  glEndName();
-}
-
-void GLScene::renderTransitionLabel(GLuint i)
-{
-  Graph::Edge edge = m_graph.edge(i);
-  if (edge.from() == edge.to() && !m_drawselfloops) {
-    return;
-  }
-  Graph::LabelNode& label = m_graph.transitionLabel(i);
-  if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty()) {
-    glStartName(so_label, i);
-
-    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
-    glColor3fv(fill);
-    QVector3D eye = worldToEye(label.pos());
-    const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-    drawCenteredText(eye.x(), eye.y(), labelstring);
-    glEndName();
-  }
-}
-
-void GLScene::renderStateLabel(GLuint i)
-{
-  Graph::LabelNode& label = m_graph.stateLabel(i);
-  if (!m_graph.stateLabelstring(label.labelindex()).isEmpty()) {
-    glStartName(so_slabel, i);
-    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
-    glColor3fv(fill);
-    QVector3D eye = worldToEye(label.pos());
-    drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()));
-    glEndName();
-  }
-}
-
-void GLScene::renderStateNumber(GLuint i)
-{
-  Graph::NodeNode& node = m_graph.node(i);
-  glStartName(so_node, i);
-  QVector3D eye = worldToEye(node.pos());
-  drawCenteredText(eye.x(), eye.y(), QString::number(i));
-  glEndName();
-}
-
-QRect GLScene::drawCenteredText(float x, float y, const QString& text)
-{
-  QFontMetrics metrics{m_renderpainter.font()};
-  QRect bounds = metrics.boundingRect(text);
-  qreal w = bounds.width();
-  qreal h = bounds.height();
-  m_renderpainter.drawText(x - w / 2, y - h / 2, text);
-  return bounds;
-}
-
-void GLScene::renderHandle(GLuint i)
-{
-  Graph::Node& handle = m_graph.handle(i);
-  if (handle.selected() > 0.1 || handle.locked())
-  {
-    Color3f line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
-    Color3f fill(1.0f, 1.0f, 1.0f);
-    if (handle.locked()) {
-      fill = Color3f(0.7f, 0.7f, 0.7f);
-    }
-
-    glDisable(GL_LINE_SMOOTH);
-    glStartName(so_handle, i);
-    glPushMatrix();
-
-    m_camera.billboard_cylindrical(handle.pos());
-    drawHandle(m_vertexdata, line, fill);
-
-    glPopMatrix();
-    glEndName();
-    glEnable(GL_LINE_SMOOTH);
-  }
-}
 
 //
 // GLScene public methods
@@ -888,4 +593,294 @@ QString GLScene::tikzEdge(std::size_t i, float aspectRatio)
   ret = ret.arg(extraControls);
 
   return ret;
+}
+
+// Some auxiliary functions that extend OpenGL
+
+inline
+void glStartName(GLuint objectType, GLuint index=0)
+{
+  glLoadName(objectType);
+  glPushName(index);
+}
+
+inline
+void glEndName()
+{
+  glPopName();
+  glLoadName(GLScene::so_none);
+}
+
+// Private functions
+
+inline
+void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
+{
+  glVertexPointer(3, GL_FLOAT, 0, data.handle);
+  glColor3fv(fill);
+  glDrawArrays(GL_QUADS, 0, 4);
+  glColor3fv(line);
+  glDrawArrays(GL_LINE_LOOP, 0, 4);
+}
+
+inline
+void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool translucent, bool probabilistic)
+{
+  glPushAttrib(GL_LINE_BIT);
+  glLineWidth(2.0);
+
+  if (probabilistic)
+  {
+    Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
+    glColor3fv(blue);
+    glVertexPointer(3, GL_FLOAT, 4*3, data.node);
+    glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
+  }
+
+  glVertexPointer(3, GL_FLOAT, 0, data.node);
+
+  float alpha = translucent ? 0.5 : 1.0;
+  glColor4fv(Color4f(fill, alpha));
+
+  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
+
+  // disable the depth mask temporarily for drawing the border of a node
+  // dragging an initial state in 2D mode over other nodes looks less weird this way
+  // BUT not disabling the depth mask here causes some strange issue on Mac OS
+  glDepthMask(GL_FALSE);
+
+  glColor4fv(Color4f(line, alpha));
+  glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
+
+  // see above
+  glDepthMask(GL_TRUE);
+  glPopAttrib();
+}
+
+
+inline
+void drawWhetherNodeCanBeCollapsedOrExpanded(const VertexData& data, const Color4f& line, bool active)
+{
+  glPushAttrib(GL_LINE_BIT);
+  glLineWidth(2.5);
+  glVertexPointer(3, GL_FLOAT, 0, data.hint);
+  glDepthMask(GL_FALSE);
+  glColor4fv(line);
+  glDrawArrays(GL_LINES, 0, active ? 2 : 4); // Plus or half a plus (minus)
+  glDepthMask(GL_TRUE);
+  glPopAttrib();
+}
+
+inline
+void drawArrowHead(const VertexData& data)
+{
+  glVertexPointer(3, GL_FLOAT, 0, data.arrowhead);
+  glDrawArrays(GL_TRIANGLE_FAN, 0, RES_ARROWHEAD + 1);
+}
+
+inline
+void drawArc(const QVector3D controlpoints[4])
+{
+  glDepthMask(GL_FALSE);
+
+  float cp[3 * 4];
+  for (int i = 0; i < 4; i++)
+  {
+    cp[3 * i + 0] = controlpoints[i].x();
+    cp[3 * i + 1] = controlpoints[i].y();
+    cp[3 * i + 2] = controlpoints[i].z();
+  }
+  glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cp);
+  glEnable(GL_MAP1_VERTEX_3);
+  glMapGrid1f(RES_ARC, 0, 1);
+  glEvalMesh1(GL_LINE, 0, RES_ARC);
+
+  glDepthMask(GL_TRUE);
+}
+
+//
+// GLScene private methods
+//
+
+void GLScene::renderEdge(std::size_t i)
+{
+  Graph::Edge edge = m_graph.edge(i);
+  QVector3D ctrl[4];
+  QVector3D& from = ctrl[0];
+  QVector3D& to = ctrl[3];
+  QVector3D via = m_graph.handle(i).pos();
+  from = m_graph.node(edge.from()).pos();
+  to = m_graph.node(edge.to()).pos();
+
+  // Calculate control points from handle
+  ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
+  ctrl[2] = ctrl[1];
+
+  // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
+  // them in x-y direction.
+  if (edge.from() == edge.to())
+  {
+    if (!m_drawselfloops) {
+      return;
+    }
+    QVector3D diff = ctrl[1] - ctrl[0];
+    diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
+    diff = diff * ((via - from).length() / (diff.length() * 2.0));
+    ctrl[1] = ctrl[1] + diff;
+    ctrl[2] = ctrl[2] - diff;
+  }
+
+  glStartName(so_edge, i);
+  glPushMatrix();
+
+  glColor3f(m_graph.handle(i).selected(), 0.0, 0.0);
+
+  // Draw the arc
+  drawArc(ctrl);
+
+  // Go to arrowhead position
+  glTranslatef(to.x(), to.y(), to.z());
+
+  // Rotate to match the orientation of the arc
+  QVector3D vec = to - ctrl[2];
+  // If ctrl[3] == ctrl[2], then something odd is going on. We'll just
+  // make the executive decision not to draw the arrowhead then, as it
+  // will just clutter the image.
+  if (vec.length() > 0)
+  {
+    vec /= vec.length();
+    QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
+    float angle = acos(vec.x());
+    glRotatef(angle * 180.0 / M_PI, axis.x(), axis.y(), axis.z());
+
+    // Draw the arrow head
+    drawArrowHead(m_vertexdata);
+  }
+
+  glPopMatrix();
+  glEndName();
+}
+
+void GLScene::renderNode(GLuint i)
+{
+  Graph::NodeNode& node = m_graph.node(i);
+  Color3f fill;
+  Color3f line;
+  Color4f hint;
+
+  // Node stroke color: red when selected, black otherwise
+  line = Color3f(0.6f * node.selected(), 0.0f, 0.0f);
+
+  bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
+  if (mark) // Initial node fill color: green or dark green (locked)
+  {
+    if (node.locked()) {
+      fill = Color3f(0.1f, 0.7f, 0.1f);
+    }
+    else {
+      fill = Color3f(0.1f, 1.0f, 0.1f);
+    }
+  }
+  else // Normal node fill color: node color or darkened node color (locked)
+  {
+    if (node.locked()) {
+      fill = Color3f(0.7f * node.color()[0], 0.7f * node.color()[1], 0.7f * node.color()[2]);
+    }
+    else {
+      fill = node.color();
+    }
+  }
+
+  glStartName(so_node, i);
+  glPushMatrix();
+
+  m_camera.billboard_spherical(node.pos());
+  drawNode(m_vertexdata, line, fill, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
+
+  if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
+  {
+    float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
+    hint = Color4f(fill.r + s, fill.g + s, fill.b + s, true);
+
+    glTranslatef(0, 0, m_size_node * m_camera.pixelsize);
+    drawWhetherNodeCanBeCollapsedOrExpanded(m_vertexdata, hint, node.active());
+  }
+
+  glPopMatrix();
+  glEndName();
+}
+
+void GLScene::renderTransitionLabel(GLuint i)
+{
+  Graph::Edge edge = m_graph.edge(i);
+  if (edge.from() == edge.to() && !m_drawselfloops) {
+    return;
+  }
+  Graph::LabelNode& label = m_graph.transitionLabel(i);
+  if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty()) {
+    glStartName(so_label, i);
+
+    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
+    glColor3fv(fill);
+    QVector3D eye = worldToEye(label.pos());
+    const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
+    drawCenteredText(eye.x(), eye.y(), labelstring);
+    glEndName();
+  }
+}
+
+void GLScene::renderStateLabel(GLuint i)
+{
+  Graph::LabelNode& label = m_graph.stateLabel(i);
+  if (!m_graph.stateLabelstring(label.labelindex()).isEmpty()) {
+    glStartName(so_slabel, i);
+    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
+    glColor3fv(fill);
+    QVector3D eye = worldToEye(label.pos());
+    drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()));
+    glEndName();
+  }
+}
+
+void GLScene::renderStateNumber(GLuint i)
+{
+  Graph::NodeNode& node = m_graph.node(i);
+  glStartName(so_node, i);
+  QVector3D eye = worldToEye(node.pos());
+  drawCenteredText(eye.x(), eye.y(), QString::number(i));
+  glEndName();
+}
+
+QRect GLScene::drawCenteredText(float x, float y, const QString& text)
+{
+  QFontMetrics metrics{m_renderpainter.font()};
+  QRect bounds = metrics.boundingRect(text);
+  qreal w = bounds.width();
+  qreal h = bounds.height();
+  m_renderpainter.drawText(x - w / 2, y - h / 2, text);
+  return bounds;
+}
+
+void GLScene::renderHandle(GLuint i)
+{
+  Graph::Node& handle = m_graph.handle(i);
+  if (handle.selected() > 0.1 || handle.locked())
+  {
+    Color3f line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
+    Color3f fill(1.0f, 1.0f, 1.0f);
+    if (handle.locked()) {
+      fill = Color3f(0.7f, 0.7f, 0.7f);
+    }
+
+    glDisable(GL_LINE_SMOOTH);
+    glStartName(so_handle, i);
+    glPushMatrix();
+
+    m_camera.billboard_cylindrical(handle.pos());
+    drawHandle(m_vertexdata, line, fill);
+
+    glPopMatrix();
+    glEndName();
+    glEnable(GL_LINE_SMOOTH);
+  }
 }
