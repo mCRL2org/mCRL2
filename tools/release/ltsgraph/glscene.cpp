@@ -9,12 +9,12 @@
 
 #include "glscene.h"
 
+#include "export.h"
 #include "mcrl2/gui/arcball.h"
 #include "mcrl2/gui/workarounds.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/glu.h"
 
-#include <QFile>
 #include <QFont>
 #include <QFontMetrics>
 #include <QImage>
@@ -24,36 +24,12 @@
 
 #include <cassert>
 #include <cmath>
-#include <cmath>
 #include <cstdio>
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
 #define RES_NODE_SLICE 64  ///< Number of segments from which a circle representing a node is constructed.
 #define RES_NODE_STACK  4
-
-struct Color3f
-{
-  GLfloat r, g, b;
-  Color3f() = default;
-  Color3f(GLfloat r, GLfloat g, GLfloat b) : r(r), g(g), b(b) {}
-  Color3f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]) {}
-  operator const GLfloat* () const {
-    return &r;
-  }
-};
-
-struct Color4f
-{
-  GLfloat r, g, b, a;
-  Color4f() = default;
-  Color4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) : r(r), g(g), b(b), a(a) {}
-  Color4f(const Color3f& c, GLfloat a = 1.0) : r(c.r), g(c.g), b(c.b), a(a) {}
-  Color4f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]), a(c[3]) {}
-  operator const GLfloat* () const {
-    return &r;
-  }
-};
 
 void VertexData::clear()
 {
@@ -482,117 +458,6 @@ void GLScene::setTranslation(const QVector3D& translation, std::size_t animation
 void GLScene::setSize(const QVector3D& size, std::size_t animation)
 {
   m_camera.setSize(size, animation);
-}
-
-void GLScene::renderLatexGraphics(const QString& filename, float aspectRatio)
-{
-  QString tikz_code  = "\\documentclass[10pt, a4paper]{article}\n\n";
-  tikz_code += "\\usepackage{tikz}\n";
-  tikz_code += "\\usetikzlibrary{arrows}\n\n";
-
-  tikz_code += "\\begin{document}\n";
-  tikz_code += "\\begin{tikzpicture}\n";
-  tikz_code += "  [scale=2]\n\n";
-  tikz_code += "   \\tikzstyle{state}=[circle, draw]\n";
-  tikz_code += "   \\tikzstyle{initstate}=[state,fill=green]\n";
-  tikz_code += "   \\tikzstyle{transition}=[->,>=stealth']\n";
-
-  m_graph.lock(GRAPH_LOCK_TRACE);
-
-  bool sel = m_graph.hasSelection();
-  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
-
-  for (std::size_t i = 0; i < nodeCount; ++i)
-  {
-    tikz_code += tikzNode(sel ? m_graph.selectionNode(i) : i, aspectRatio);
-  }
-
-  for (std::size_t i = 0; i < edgeCount; ++i)
-  {
-    tikz_code += tikzEdge(sel ? m_graph.selectionEdge(i) : i, aspectRatio);
-  }
-
-  m_graph.unlock(GRAPH_LOCK_TRACE);
-
-  tikz_code += "\n\\end{tikzpicture}\n";
-  tikz_code += "\\end{document}\n";
-
-  QFile file(filename);
-
-  if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
-  {
-    file.write(tikz_code.toLatin1());
-    file.close();
-  }
-}
-
-QString GLScene::tikzNode(std::size_t i, float aspectRatio)
-{
-  Graph::NodeNode& node = m_graph.node(i);
-  Color3f line(node.color());
-
-  QString ret = "\\definecolor{currentcolor}{rgb}{%1,%2,%3}\n\\node at (%4pt, %5pt) [fill=currentcolor, %6state%8] (state%7) {%7};\n";
-
-  ret = ret.arg(line.r, 0, 'f', 3).arg(line.g, 0, 'f', 3).arg(line.b, 0, 'f', 3);
-  ret = ret.arg(node.pos().x() / 10.0f * aspectRatio, 6, 'f').arg(node.pos().y() / 10.0f, 6, 'f');
-  ret = ret.arg(m_graph.initialState() == i ? "init" : "");
-  ret = ret.arg(i);
-  ret = ret.arg(node.active() ? "" : ", dashed");
-
-  return ret;
-}
-
-static QString escapeLatex(const QString& str)
-{
-  QString escaped;
-  QRegExp rx("[#$%_&{}^]");
-  for (QChar x : str) {
-    if (rx.indexIn(x) != -1) {
-      escaped.append('\\');
-    }
-    escaped.append(x);
-  }
-  return escaped;
-}
-
-QString GLScene::tikzEdge(std::size_t i, float aspectRatio)
-{
-  Graph::LabelNode& label = m_graph.transitionLabel(i);
-  Graph::Edge edge = m_graph.edge(i);
-  QVector3D ctrl[4];
-  QVector3D& from = ctrl[0];
-  QVector3D& to = ctrl[3];
-  QVector3D via = m_graph.handle(i).pos();
-  from = m_graph.node(edge.from()).pos();
-  to = m_graph.node(edge.to()).pos();
-
-  // Calculate control points from handle
-  ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
-  ctrl[2] = ctrl[1];
-
-  QString extraControls("");
-
-  // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
-  // them in x-y direction.
-  if (edge.from() == edge.to())
-  {
-    QVector3D diff = ctrl[1] - ctrl[0];
-    diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
-    diff = diff * ((via - from).length() / (diff.length() * 2.0));
-    ctrl[1] = ctrl[1] + diff;
-    ctrl[2] = ctrl[2] - diff;
-
-    extraControls = QString(" and (%1pt, %2pt)").arg(ctrl[2].x() / 10.0f * aspectRatio, 6, 'f').arg(ctrl[2].y() / 10.0f, 6, 'f');
-  }
-
-  QString ret = "\\draw [transition] (state%1) .. node[auto] {%3} controls (%4pt, %5pt)%6 .. (state%2);\n";
-  ret = ret.arg(edge.from()).arg(edge.to());
-  ret = ret.arg(escapeLatex(m_graph.transitionLabelstring(label.labelindex())));
-  ret = ret.arg(ctrl[1].x() / 10.0f * aspectRatio, 6, 'f').arg(ctrl[1].y() / 10.0f, 6, 'f');
-  ret = ret.arg(extraControls);
-
-  return ret;
 }
 
 // Some auxiliary functions that extend OpenGL

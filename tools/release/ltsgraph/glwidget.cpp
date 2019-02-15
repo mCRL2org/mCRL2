@@ -6,12 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-#include <QtOpenGL>
 
 #include "glwidget.h"
+
+#include "export.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/arcball.h"
 #include "ui_glwidget.h"
+
+#include <QtOpenGL>
 
 #include <map>
 
@@ -534,7 +537,7 @@ void GLWidget::endPaint()
 void GLWidget::saveTikz(const QString& filename, float aspectRatio)
 {
   makeCurrent();
-  m_scene->renderLatexGraphics(filename, aspectRatio);
+  export_graph_as_tikz_input(m_graph, filename, aspectRatio);
 }
 
 void GLWidget::saveBitmap(const QString& filename)

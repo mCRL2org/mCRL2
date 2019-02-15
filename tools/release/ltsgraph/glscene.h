@@ -210,11 +210,6 @@ public:
    */
   bool selectObject(Selection& s, int x, int y, SelectableObject type);
 
-  /**
-   * @brief Renders the scene to LaTeX using Tikz.
-   */
-  void renderLatexGraphics(const QString& filename, float aspectRatio = 1.0f);
-
   // Getters and setters
 
   bool drawStateLabels() const { return m_drawstatelabels; }
