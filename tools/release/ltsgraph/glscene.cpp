@@ -234,6 +234,12 @@ void GLScene::render()
   }
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
+
+  GLenum result = glGetError();
+  if (result != GL_NO_ERROR)
+  {
+    mCRL2log(mcrl2::log::debug) << "OpenGL error: " << gluErrorString(result) << "\n";
+  }
 }
 
 void GLScene::resize(std::size_t width, std::size_t height)
