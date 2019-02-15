@@ -17,6 +17,8 @@
 #include <sstream>
 #include <iostream>
 
+#define NEW
+
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
@@ -33,16 +35,23 @@ class unprotected_aterm
 
   friend detail::_aterm* detail::address(const unprotected_aterm& t);
 
+protected:
+  detail::_aterm* m_term;
+
 public:
 
+  /// \brief Default constuctor.
   unprotected_aterm() noexcept :
     m_term(nullptr)
   {}
 
+  /// \brief Constructor.
+  /// \param term The term from which the new term is constructed.
   unprotected_aterm(detail::_aterm* term) noexcept :
     m_term(term)
   {}
 
+  /// \brief Dynamic check whether the term is an aterm_appl. 
   /// \return True iff this term is an term_appl.
   /// \details This function has constant complexity.
   ///          It is defined as !type_is_int() && !type_is_list().
@@ -51,6 +60,7 @@ public:
     return !type_is_int() && !type_is_list();
   }
 
+  /// \brief Dynamic check whether the term is an aterm_int. 
   /// \return True iff this term has internal structure of an aterm_int.
   /// \details This function has constant complexity.
   bool type_is_int() const noexcept
@@ -59,6 +69,7 @@ public:
     return f == detail::g_as_int;
   }
 
+  /// \brief Dynamic check whether the term is an aterm_list. 
   /// \returns True iff this term has the structure of an term_list
   /// \details This function has constant complexity.
   bool type_is_list() const noexcept
@@ -67,16 +78,17 @@ public:
     return f == detail::g_as_list || f == detail::g_as_empty_list;
   }
 
-  /// \return true iff t is equal to the current term.
+  /// \brief Comparison operator.
   /// \details Terms are stored in a maximally shared way. This
   ///         means that this equality operator can be calculated
   ///         in constant time.
+  /// \return true iff t is equal to the current term.
   bool operator ==(const unprotected_aterm& t) const
   {
     return m_term == t.m_term;
   }
 
-  /// \brief Inequality operator on two aterms.
+  /// \brief Inequality operator on two unprotected aterms.
   /// \details See note at the == operator. This operator requires constant time.
   /// \param t A term to which the current term is compared.
   /// \return false iff t is equal to the current term.
@@ -85,7 +97,7 @@ public:
     return m_term!=t.m_term;
   }
 
-  /// \brief Comparison operator for two aterms.
+  /// \brief Comparison operator for two unprotected aterms.
   /// \details This operator requires constant time. It compares
   ///         the addresses where terms are stored. That means
   ///         that the outcome of this operator is only stable
@@ -97,7 +109,7 @@ public:
     return m_term<t.m_term;
   }
 
-  /// \brief Comparison operator for two aterms.
+  /// \brief Comparison operator for two unprotected aterms.
   /// \details This operator requires constant time. See note at the operator <.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is larger than the argument.
@@ -106,7 +118,7 @@ public:
     return m_term>t.m_term;
   }
 
-  /// \brief Comparison operator for two aterms.
+  /// \brief Comparison operator for two unprotected aterms.
   /// \details This operator requires constant time. See note at the operator <.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is smaller or equal than the argument.
@@ -115,7 +127,7 @@ public:
     return m_term<=t.m_term;
   }
 
-  /// \brief Comparison operator for two aterms.
+  /// \brief Comparison operator for two unprotected aterms.
   /// \details This operator requires constant time. See note at the operator <.
   /// \param t A term to which the current term is compared.
   /// \return True iff the current term is larger or equalthan the argument.
@@ -145,6 +157,7 @@ public:
     std::swap(m_term, t.m_term);
   }
 
+  /// \brief Yields the function symbol in an aterm.
   /// \returns The function symbol of the term, which can also be an AS_EMPTY_LIST,
   ///          AS_INT and AS_LIST.
   /// \details This is for internal use only.
@@ -152,16 +165,17 @@ public:
   {
     return m_term->function();
   }
-
-protected:
-  detail::_aterm* m_term;
 };
 
 /// \brief The aterm base class that provides protection of the underlying shared terms.
 class aterm : public unprotected_aterm
 {
 public:
+
+  /// \brief Default constructor.
   aterm() noexcept = default;
+
+  /// \brief Standard destructor. 
   ~aterm()
   {
     if (defined())
@@ -170,7 +184,9 @@ public:
     }
   }
 
-  /// \brief Takes ownership of the passed underlying term.
+  /// \brief Constructor based on an internal term data structure. This is not for public use. 
+  /// \details Takes ownership of the passed underlying term.
+  /// \param t A pointer to an internal aterm data structure.
   /// \todo Should be protected, but this cannot yet be done due to a problem
   ///       in the compiling rewriter.
   explicit aterm(detail::_aterm *t) noexcept
@@ -179,6 +195,8 @@ public:
     m_term = t;
   }
 
+  /// \brief Copy constructor.
+  /// \param other The aterm that is copied. 
   // This class has a non-trivial destructor so explicitly define the copy and move operators.
   aterm(const aterm& other) noexcept :
     unprotected_aterm()
@@ -190,6 +208,18 @@ public:
     }
   }
 
+  /// \brief Copy move constructor.
+  /// \param other The aterm that is moved into the new term. This term may have changed after this operation. 
+  /// \details This operation does not employ increments and decrements of reference counts and is therefore more
+  ///          efficient than the standard copy construct. 
+  aterm(aterm&& other) noexcept
+  {
+    std::swap(m_term, other.m_term);
+  }
+
+  /// \brief Assignment operator. 
+  /// \parameter other The aterm that will be assigned. 
+  /// \return A reference to the assigned term. 
   aterm& operator=(const aterm& other) noexcept
   {
     // Increment first to prevent the same term from becoming reference zero temporarily.
@@ -208,11 +238,10 @@ public:
     return *this;
   }
 
-  aterm(aterm&& other) noexcept
-  {
-    std::swap(m_term, other.m_term);
-  }
-
+  /// \brief Move assignment operator. 
+  /// \brief This move assignment operator 
+  /// \parameter other The aterm that will be assigned. 
+  /// \return A reference to the assigned term. 
   aterm& operator=(aterm&& other) noexcept
   {
     if (defined())
@@ -226,7 +255,10 @@ public:
   }
 
 protected:
-  /// \brief A copy constructor that does not protect the term.
+  /// \brief A function that copies t into the current term, without adapting the reference counts.
+  /// \details This function does not maintain proper bookkeeping of the reference counts, which
+  ///          must be done seperately. It can only be used with care. 
+  /// \param   t The term that is copied in the current term. 
   void copy_term(const aterm& t) noexcept
   {
     m_term = t.m_term;
