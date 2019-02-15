@@ -241,7 +241,6 @@ void GLWidget::updateSelection()
 void GLWidget::initializeGL()
 {
   m_scene->init(Qt::white);
-  m_scene->updateShapes();
   resizeGL(width(), height());
   setMouseTracking(true);
 }
@@ -474,7 +473,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
 void GLWidget::rebuild()
 {
   makeCurrent();
-  m_scene->updateShapes();
   update();
 }
 

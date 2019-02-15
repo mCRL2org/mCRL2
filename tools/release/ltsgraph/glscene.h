@@ -20,16 +20,27 @@
 #include <QPainter>
 #include <QQuaternion>
 
+#include <vector>
+
+/// \brief Keeps track of the vertex data for nodes, arrowhead, handles and hints?
 struct VertexData
 {
   static const int handleSize = 8;
   static const int arrowheadSize = 12;
 
-  QVector3D* node{nullptr}, *hint{nullptr}, *handle{nullptr}, *arrowhead{nullptr}, *transition_labels, *state_labels, *number_labels;
+public:
+  VertexData();
 
-  ~VertexData() { clear(); }
-  void clear();
-  void generateVertexData(float handlesize, float nodesize, float arrowheadsize);
+  const QVector3D* arrowhead() const { return m_arrowhead.data(); }
+  const QVector3D* handle() const { return m_handle; }
+  const QVector3D* hint() const { return m_hint; }
+  const QVector3D* node() const { return m_node.data(); }
+
+private:
+  std::vector<QVector3D> m_arrowhead;
+  std::vector<QVector3D> m_node;
+  QVector3D m_hint[4]; // The plus and minus "hints?".
+  QVector3D m_handle[4]; //
 };
 
 class GLScene
@@ -71,12 +82,6 @@ public:
    *        fog settings have changed.
    */
   void updateFog();
-
-  /**
-   * @brief Rebuilds the shapes for nodes, handles, arrowheads and labels.
-   *        Call whenever the size of a pixel in world coordinates changes.
-   */
-  void updateShapes();
 
   /**
    * @brief Initialises the OpenGL context.
