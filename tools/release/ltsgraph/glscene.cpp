@@ -31,30 +31,21 @@ constexpr int RES_ARC       = 20; /// Amount of segments for edge arc
 constexpr int RES_NODE_SLICE = 64; /// Number of segments from which a circle representing a node is constructed.
 constexpr int RES_NODE_STACK = 4;
 
-void VertexData::clear()
+VertexData::VertexData()
+  : m_arrowhead(RES_ARROWHEAD + 1),
+    m_node(RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2)
 {
-  delete[] node;
-  node      = nullptr;
-  delete[] hint;
-  hint      = nullptr;
-  delete[] handle;
-  handle    = nullptr;
-  delete[] arrowhead;
-  arrowhead = nullptr;
-}
-
-void VertexData::generateVertexData(float handlesize, float nodesize, float arrowheadsize)
-{
-  // Delete old data
-  clear();
-
   // Generate vertices for node border (a line loop drawing a circle)
-  float slice = 0, sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1)),
-        stack = 0, stackd = (float)(M_PI_2 / RES_NODE_STACK);
-  node = new QVector3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
-  for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced) {
-    node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
+  float slice = 0;
+  float sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1));
+  float stack = 0;
+  float stackd = (float)(M_PI_2 / RES_NODE_STACK);
+
+  for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
+  {
+    m_node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
   }
+
   // Generate vertices for node (a quad strip drawing a half sphere)
   slice = 0;
   std::size_t n = RES_NODE_SLICE - 1;
@@ -62,50 +53,47 @@ void VertexData::generateVertexData(float handlesize, float nodesize, float arro
   {
     for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
     {
-      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
+      m_node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
           std::sin((float)(stack + stackd)) * std::cos(slice),
           std::cos((float)(stack + stackd)));
-      node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
+      m_node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
           std::sin(stack) * std::cos(slice),
           std::cos(stack));
     }
-    node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
+    m_node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
         std::sin((float)(stack + stackd)) * std::cos(0.0f),
         std::cos((float)(stack + stackd)));
-    node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
+    m_node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
         std::sin(stack) * std::cos(0.0f),
         std::cos(stack));
   }
-  for (std::size_t i = 0; i < n; ++i) {
-    node[i] *= 0.5 * nodesize;
-  }
 
   // Generate plus (and minus) hint for exploration mode
-  hint = new QVector3D[4];
-  hint[0] = QVector3D(-nodesize * 0.3, 0.0, 0.0);
-  hint[1] = QVector3D(nodesize * 0.3, 0.0, 0.0);
-  hint[2] = QVector3D(0.0, -nodesize * 0.3, 0.0);
-  hint[3] = QVector3D(0.0, nodesize * 0.3, 0.0);
+  m_hint[0] = QVector3D(-0.3, 0.0, 0.0);
+  m_hint[1] = QVector3D(0.3,  0.0, 0.0);
+  m_hint[2] = QVector3D(0.0, -0.3, 0.0);
+  m_hint[3] = QVector3D(0.0,  0.3, 0.0);
 
   // Generate vertices for handle (border + fill, both squares)
-  handle = new QVector3D[4];
-  handle[0] = QVector3D(-handlesize/2.0, -handlesize/2.0, 0.0);
-  handle[1] = QVector3D(handlesize/2.0, -handlesize/2.0, 0.0);
-  handle[2] = QVector3D(handlesize/2.0,  handlesize/2.0, 0.0);
-  handle[3] = QVector3D(-handlesize/2.0,  handlesize/2.0, 0.0);
+  m_handle[0] = QVector3D(-0.5f, -0.5f, 0.0);
+  m_handle[1] = QVector3D(0.5f , 0.5f, 0.0);
+  m_handle[2] = QVector3D(0.5f , 0.5f, 0.0);
+  m_handle[3] = QVector3D(-0.5f, 0.5f, 0.0);
 
   // Generate vertices for arrowhead (a triangle fan drawing a cone)
-  arrowhead = new QVector3D[RES_ARROWHEAD + 1];
-  arrowhead[0] = QVector3D(-nodesize / 2.0, 0.0, 0.0);
+  m_arrowhead[0] = QVector3D(-0.5f, 0.0, 0.0);
   float diff = (float)(M_PI / 20.0), t = 0;
-  for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff) {
-    arrowhead[i] = QVector3D(-nodesize / 2.0 - arrowheadsize,
-        0.3 * arrowheadsize * std::sin(t),
-        0.3 * arrowheadsize * std::cos(t));
+
+  for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
+  {
+    m_arrowhead[i] = QVector3D(-0.5f,
+        0.3 * std::sin(t),
+        0.3 * std::cos(t));
   }
-  arrowhead[RES_ARROWHEAD] = QVector3D(-nodesize / 2.0 - arrowheadsize,
-      0.3 * arrowheadsize * std::sin(0.0f),
-      0.3 * arrowheadsize * std::cos(0.0f));
+
+  m_arrowhead[RES_ARROWHEAD] = QVector3D(-0.5f,
+      0.3 * std::sin(0.0f),
+      0.3 * std::cos(0.0f));
 }
 
 //
@@ -245,12 +233,6 @@ void GLScene::render()
 void GLScene::resize(std::size_t width, std::size_t height)
 {
   m_camera.viewport(width, height);
-  updateShapes();
-}
-
-void GLScene::updateShapes()
-{
-  m_vertexdata.generateVertexData(handleSizeOnScreen(), nodeSizeOnScreen(), arrowheadSizeOnScreen());
 }
 
 QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z) const
@@ -447,7 +429,6 @@ bool GLScene::resizing()
 void GLScene::setZoom(float factor, std::size_t animation)
 {
   m_camera.setZoom(factor, animation);
-  updateShapes();
 }
 
 void GLScene::setRotation(const QQuaternion& rotation, std::size_t animation)
@@ -486,7 +467,7 @@ void glEndName()
 inline
 void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
 {
-  glVertexPointer(3, GL_FLOAT, 0, data.handle);
+  glVertexPointer(3, GL_FLOAT, 0, data.handle());
   glColor3fv(fill);
   glDrawArrays(GL_QUADS, 0, 4);
   glColor3fv(line);
@@ -503,11 +484,11 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   {
     Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
     glColor3fv(blue);
-    glVertexPointer(3, GL_FLOAT, 4*3, data.node);
+    glVertexPointer(3, GL_FLOAT, 4*3, data.node());
     glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
   }
 
-  glVertexPointer(3, GL_FLOAT, 0, data.node);
+  glVertexPointer(3, GL_FLOAT, 0, data.node());
 
   float alpha = translucent ? 0.5 : 1.0;
   glColor4fv(Color4f(fill, alpha));
@@ -533,7 +514,7 @@ void drawWhetherNodeCanBeCollapsedOrExpanded(const VertexData& data, const Color
 {
   glPushAttrib(GL_LINE_BIT);
   glLineWidth(2.5);
-  glVertexPointer(3, GL_FLOAT, 0, data.hint);
+  glVertexPointer(3, GL_FLOAT, 0, data.hint());
   glDepthMask(GL_FALSE);
   glColor4fv(line);
   glDrawArrays(GL_LINES, 0, active ? 2 : 4); // Plus or half a plus (minus)
@@ -544,7 +525,7 @@ void drawWhetherNodeCanBeCollapsedOrExpanded(const VertexData& data, const Color
 inline
 void drawArrowHead(const VertexData& data)
 {
-  glVertexPointer(3, GL_FLOAT, 0, data.arrowhead);
+  glVertexPointer(3, GL_FLOAT, 0, data.arrowhead());
   glDrawArrays(GL_TRIANGLE_FAN, 0, RES_ARROWHEAD + 1);
 }
 
