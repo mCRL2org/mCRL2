@@ -17,8 +17,6 @@
 #include <sstream>
 #include <iostream>
 
-#define NEW
-
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
 {
@@ -41,14 +39,14 @@ protected:
 public:
 
   /// \brief Default constuctor.
-  unprotected_aterm() noexcept :
-    m_term(nullptr)
+  unprotected_aterm() noexcept 
+   : m_term(nullptr)
   {}
 
   /// \brief Constructor.
   /// \param term The term from which the new term is constructed.
-  unprotected_aterm(detail::_aterm* term) noexcept :
-    m_term(term)
+  unprotected_aterm(detail::_aterm* term) noexcept 
+   : m_term(term)
   {}
 
   /// \brief Dynamic check whether the term is an aterm_appl. 
@@ -178,10 +176,7 @@ public:
   /// \brief Standard destructor. 
   ~aterm()
   {
-    if (defined())
-    {
-      m_term->decrement_reference_count();
-    }
+    decrement_reference_count();
   }
 
   /// \brief Constructor based on an internal term data structure. This is not for public use. 
@@ -198,23 +193,20 @@ public:
   /// \brief Copy constructor.
   /// \param other The aterm that is copied. 
   // This class has a non-trivial destructor so explicitly define the copy and move operators.
-  aterm(const aterm& other) noexcept :
-    unprotected_aterm()
+  aterm(const aterm& other) noexcept 
+   : unprotected_aterm(other.m_term)
   {
-    m_term = other.m_term;
-    if (defined())
-    {
-      m_term->increment_reference_count();
-    }
+    increment_reference_count();
   }
 
   /// \brief Copy move constructor.
   /// \param other The aterm that is moved into the new term. This term may have changed after this operation. 
   /// \details This operation does not employ increments and decrements of reference counts and is therefore more
   ///          efficient than the standard copy construct. 
-  aterm(aterm&& other) noexcept
+  aterm(aterm&& other) noexcept 
+   : unprotected_aterm(other.m_term)
   {
-    std::swap(m_term, other.m_term);
+    other.m_term=nullptr;
   }
 
   /// \brief Assignment operator. 
@@ -223,16 +215,10 @@ public:
   aterm& operator=(const aterm& other) noexcept
   {
     // Increment first to prevent the same term from becoming reference zero temporarily.
-    if (other.defined())
-    {
-      other.m_term->increment_reference_count();
-    }
+    increment_reference_count();
 
     // Decrement the reference from the term that is currently referred to.
-    if (defined())
-    {
-      m_term->decrement_reference_count();
-    }
+    decrement_reference_count();
 
     m_term = other.m_term;
     return *this;
@@ -244,13 +230,7 @@ public:
   /// \return A reference to the assigned term. 
   aterm& operator=(aterm&& other) noexcept
   {
-    if (defined())
-    {
-      m_term->decrement_reference_count();
-    }
-
-    m_term = other.m_term;
-    other.m_term = nullptr;
+    std::swap(m_term, other.m_term);
     return *this;
   }
 
@@ -262,6 +242,28 @@ protected:
   void copy_term(const aterm& t) noexcept
   {
     m_term = t.m_term;
+  }
+
+  /// \brief Increment the reference count.
+  /// \details This increments the reference count unless the term contains null.
+  ///          Use with care as this destroys the reference count mechanism. 
+  void increment_reference_count()
+  {
+    if (defined())
+    {
+      m_term->increment_reference_count();
+    }
+  }
+
+  /// \brief Decrement the reference count.
+  /// \details This decrements the reference count unless the term contains null.
+  ///          Use with care as this destroys the reference count mechanism. 
+  void decrement_reference_count()
+  {
+    if (defined())
+    {
+      m_term->decrement_reference_count();
+    }
   }
 };
 

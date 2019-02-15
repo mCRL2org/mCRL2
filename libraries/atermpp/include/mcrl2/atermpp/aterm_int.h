@@ -19,7 +19,7 @@
 namespace atermpp
 {
 
-/// \brief An integer term stores a single std::size_t value. It carrier
+/// \brief An integer term stores a single std::size_t value. It carries
 /// 	       no arguments.
 /// \details A special function symbol is used to identify integer terms
 /// 			 internally.
@@ -31,8 +31,18 @@ public:
   {}
 
   /// \brief Construct an aterm_int from an aterm.
+  /// \param t The term that is copied. 
   /// \details The aterm must be of type AT_INT.
   explicit aterm_int(const aterm& t) noexcept
+   : aterm(t)
+  {
+    assert(t.type_is_int());
+  }
+
+  /// \brief Move construct an aterm_int from an aterm.
+  /// \param t The term that is copied. 
+  /// \details The aterm must be of type AT_INT.
+  explicit aterm_int(const aterm&& t) noexcept
    : aterm(t)
   {
     assert(t.type_is_int());
@@ -49,6 +59,7 @@ public:
   aterm_int(aterm_int&& other) noexcept = default;
   aterm_int& operator=(aterm_int&& other) noexcept = default;
 
+  /// \brief Provide the value stored in an aterm. 
   /// \returns The value of the integer term.
   std::size_t value() const noexcept
   {
@@ -56,6 +67,7 @@ public:
   }
 
   /// \brief Swaps two integer terms without changing the protection.
+  /// \param t The term that is swapped with the current term. 
   void swap(aterm_int& t) noexcept
   {
     aterm::swap(t);
