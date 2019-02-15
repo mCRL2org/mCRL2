@@ -176,25 +176,29 @@ void generate_lts(const specification& lpsspec,
     for (const action_summand& summand: lpsspec.process().action_summands())
     {
       const data::variable_list& variables = summand.summation_variables();
-      E.enumerate(enumerator_element(variables, summand.condition()),
-                  sigma,
-                  [&](const enumerator_element& p)
-                  {
-                    p.add_assignments(variables, sigma, r);
-                    process::action_list a = rewrite_action_list(summand.multi_action().actions());
-                    state_type d1 = rewrite_state(summand.next_state(process_parameters));
-                    p.remove_assignments(variables, sigma);
-                    auto j = discovered.put(d1);
-                    if (j.second)
+      data::data_expression condition = r(summand.condition(), sigma);
+      if (!data::is_false(condition))
+      {
+        E.enumerate(enumerator_element(variables, condition),
+                    sigma,
+                    [&](const enumerator_element& p)
                     {
-                      todo.push_back(j.first);
-                      report_state(d1);
-                    }
-                    report_transition(i, a, j.first);
-                    return false;
-                  },
-                  data::is_false
-      );
+                      p.add_assignments(variables, sigma, r);
+                      process::action_list a = rewrite_action_list(summand.multi_action().actions());
+                      state_type d1 = rewrite_state(summand.next_state(process_parameters));
+                      p.remove_assignments(variables, sigma);
+                      auto j = discovered.put(d1);
+                      if (j.second)
+                      {
+                        todo.push_back(j.first);
+                        report_state(d1);
+                      }
+                      report_transition(i, a, j.first);
+                      return false;
+                    },
+                    data::is_false
+        );
+      }
     }
   }
 }
