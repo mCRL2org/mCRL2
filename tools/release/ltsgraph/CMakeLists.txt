@@ -9,6 +9,7 @@ add_mcrl2_tool(ltsgraph
     information.ui
     dimensionsdialog.ui
     ltsgraph.qrc
+    camera.cpp
     main.cpp
     mainwindow.cpp
     glwidget.cpp
