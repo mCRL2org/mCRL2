@@ -151,8 +151,7 @@ inline
 void fatal_attractors(const simple_structure_graph& G,
                       vertex_set& S0,
                       vertex_set& S1,
-                      std::size_t iteration_count,
-                      const detail::structure_graph_builder& graph_builder
+                      std::size_t iteration_count
 )
 {
   mCRL2log(log::debug) << "Apply fatal attractors (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
@@ -270,8 +269,7 @@ vertex_set compute_attractor_set_min_rank_original(const StructureGraph& G, vert
 void fatal_attractors_original(const simple_structure_graph& G,
                                vertex_set& S0,
                                vertex_set& S1,
-                               std::size_t iteration_count,
-                               const detail::structure_graph_builder& graph_builder
+                               std::size_t iteration_count
 )
 {
   mCRL2log(log::debug) << "Apply fatal attractors original (iteration " << iteration_count << ") to graph:\n" << G << std::endl;

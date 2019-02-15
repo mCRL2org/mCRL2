@@ -416,11 +416,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         simple_structure_graph G(m_graph_builder.vertices());
         if (m_optimization == 5)
         {
-          detail::fatal_attractors(G, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+          detail::fatal_attractors(G, S0, S1, m_iteration_count); // modifies S0 and S1
         }
         else if (m_optimization == 6)
         {
-          detail::fatal_attractors_original(G, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+          detail::fatal_attractors_original(G, S0, S1, m_iteration_count); // modifies S0 and S1
         }
         else // m_optimization == 7
         {
