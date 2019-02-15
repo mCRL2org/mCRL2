@@ -489,6 +489,13 @@ class enumerator_algorithm
       return out.str();
     }
 
+    template <typename Expression, typename MutableSubstitution>
+    inline
+    Expression rewrite(const Expression& phi, MutableSubstitution& sigma) const
+    {
+      return const_cast<Rewriter&>(R)(phi, sigma);
+    }
+
   public:
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
@@ -548,7 +555,7 @@ class enumerator_algorithm
                              const data::data_expression& e
       )
       {
-        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+        auto phi1 = rewrite(phi, sigma);
         if (reject(phi1))
         {
           return false;
@@ -569,7 +576,7 @@ class enumerator_algorithm
                                             const data::data_expression& e
       )
       {
-        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+        auto phi1 = rewrite(phi, sigma);
         if (reject(phi1))
         {
           return false;
@@ -596,7 +603,7 @@ class enumerator_algorithm
 
       if (v.empty())
       {
-        auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+        auto phi1 = rewrite(phi, sigma);
         if (reject(phi1))
         {
           return false;

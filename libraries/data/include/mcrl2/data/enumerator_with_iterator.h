@@ -45,6 +45,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
     using super::dataspec;
     using super::id_generator;
     using super::m_max_count;
+    using super::rewrite;
 
     /// \brief throw_exceptions If true, an exception is thrown when the enumeration is aborted.
     bool m_throw_exceptions;
@@ -70,7 +71,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
                      const data::variable& v,
                      const data::data_expression& e) const
     {
-      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      auto phi1 = rewrite(phi, sigma);
       if (accept(phi1))
       {
         P.push_back(EnumeratorListElement(variables, phi1, p, v, e));
@@ -89,7 +90,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
                      const data::variable& v,
                      const data::data_expression& e) const
     {
-      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      auto phi1 = rewrite(phi, sigma);
       if (accept(phi1))
       {
         // Additional variables are put at the end of the list!
@@ -110,7 +111,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
                      const data::variable& v,
                      const data::data_expression& e) const
     {
-      auto phi1 = const_cast<Rewriter&>(R)(phi, sigma);
+      auto phi1 = rewrite(phi, sigma);
       if (accept(phi1))
       {
         if (phi1 == phi)
@@ -322,11 +323,11 @@ template <typename Rewriter = data::rewriter, typename EnumeratorListElement = e
 class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_callback<Rewriter, DataRewriter>
 {
   protected:
-
     Filter m_accept;
 
   public:
     typedef enumerator_algorithm_without_callback<Rewriter, DataRewriter> super;
+    using super::rewrite;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
@@ -417,7 +418,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_ca
     {
       assert(P.size() == 1);
       auto& p = P.front();
-      p.expression() = super::R(p.expression(), sigma);
+      p.expression() = rewrite(p.expression(), sigma);
       if (m_accept(p.expression()))
       {
         return iterator(const_cast<enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>*>(this), &P, &sigma, m_accept);
