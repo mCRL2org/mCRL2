@@ -245,7 +245,6 @@ class GLWidget : public QOpenGLWidget
     }
     void setNodeSize(int size) {
       m_scene->setNodeSize(size);
-      m_scene->updateShapes();
       update();
     }
     void setFontSize(int size) {
