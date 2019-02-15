@@ -26,10 +26,10 @@
 #include <cmath>
 #include <cstdio>
 
-#define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
-#define RES_ARC        20  ///< Amount of segments for edge arc
-#define RES_NODE_SLICE 64  ///< Number of segments from which a circle representing a node is constructed.
-#define RES_NODE_STACK  4
+constexpr int RES_ARROWHEAD = 30; /// Amount of segments in arrowhead cone
+constexpr int RES_ARC       = 20; /// Amount of segments for edge arc
+constexpr int RES_NODE_SLICE = 64; /// Number of segments from which a circle representing a node is constructed.
+constexpr int RES_NODE_STACK = 4;
 
 void VertexData::clear()
 {
