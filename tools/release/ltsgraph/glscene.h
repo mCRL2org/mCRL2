@@ -315,16 +315,16 @@ private:
   QPainter m_renderpainter;
   QPainter m_selectpainter;
 
-  bool m_drawtransitionlabels;   /// Transition labels are only drawn if this field is true.
-  bool m_drawstatelabels;        /// State labels are only drawn if this field is true.
-  bool m_drawstatenumbers;       /// State numbers are only drawn if this field is true.
-  bool m_drawselfloops;          /// Self loops are only drawn if this field is true.
-  bool m_drawinitialmarking;     /// The initial state is marked if this field is true.
-  std::size_t m_size_node;       /// Variable node size (radius).
-  std::size_t m_fontsize;        /// Variable font size
+  bool m_drawtransitionlabels = true;  /// Transition labels are only drawn if this field is true.
+  bool m_drawstatelabels      = false; /// State labels are only drawn if this field is true.
+  bool m_drawstatenumbers     = false; /// State numbers are only drawn if this field is true.
+  bool m_drawselfloops        = true;  /// Self loops are only drawn if this field is true.
+  bool m_drawinitialmarking   = true;  /// The initial state is marked if this field is true.
+  std::size_t m_size_node     = 20;    /// Variable node size (radius).
+  std::size_t m_fontsize      = 16;    /// Variable font size
 
-  bool m_drawfog;                /// Fog is rendered only if this field is true.
-  float m_fogdistance;           /// The distance at which the fog starts
+  bool m_drawfog              = true;    /// Fog is rendered only if this field is true.
+  float m_fogdistance         = 5500.0f; /// The distance at which the fog starts
 
 };
 

@@ -113,9 +113,8 @@ void VertexData::generateVertexData(float handlesize, float nodesize, float arro
 //
 
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
-  : m_glwidget(glwidget), m_graph(g), m_camera(), m_vertexdata(), m_renderpainter(), m_selectpainter(),
-    m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
-    m_size_node(20), m_fontsize(16), m_drawfog(true), m_fogdistance(5500.0)
+  : m_glwidget(glwidget),
+    m_graph(g)
 {
   setFontSize(m_fontsize);
   setFogDistance(m_fogdistance);
