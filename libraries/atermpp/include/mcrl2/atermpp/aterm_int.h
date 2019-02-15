@@ -42,7 +42,7 @@ public:
   /// \brief Move construct an aterm_int from an aterm.
   /// \param t The term that is copied. 
   /// \details The aterm must be of type AT_INT.
-  explicit aterm_int(const aterm&& t) noexcept
+  explicit aterm_int(aterm&& t) noexcept
    : aterm(t)
   {
     assert(t.type_is_int());
