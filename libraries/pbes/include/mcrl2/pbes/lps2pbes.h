@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_LPS2PBES_H
 #define MCRL2_PBES_LPS2PBES_H
 
+#include <string>
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
@@ -26,7 +27,7 @@
 #include "mcrl2/pbes/detail/term_traits_optimized.h"
 #include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/process/merge_action_specifications.h"
-#include <string>
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -67,6 +68,18 @@ class lps2pbes_algorithm
       }
     }
 
+    /// \brief Prints a warning if formula contains an action that is not used in lpsspec.
+    void check_actions(const state_formulas::state_formula& formula, const lps::specification& lpsspec) const
+    {
+      std::set<process::action_label> used_lps_actions = lps::find_action_labels(lpsspec.process());
+      std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
+      std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, used_lps_actions);
+      if (!diff.empty())
+      {
+        mCRL2log(log::warning) << "Warning: the modal formula contains an action " << *diff.begin() << " that does not appear in the LPS!" << std::endl;
+      }
+    }
+
   public:
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula that represents a property about the system modeled by the given specification
@@ -86,6 +99,8 @@ class lps2pbes_algorithm
              const data::variable& T = data::undefined_real_variable()
             )
     {
+      check_actions(formula, lpsspec);
+
       state_formulas::state_formula f = formula;
 
       std::set<core::identifier_string> lps_ids = lps::find_identifiers(lpsspec);

@@ -1265,6 +1265,7 @@ std::set<data::sort_expression> find_sort_expressions(const state_formulas::stat
 std::set<data::variable> find_all_variables(const state_formulas::state_formula& x);
 std::set<data::variable> find_free_variables(const state_formulas::state_formula& x);
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x);
+std::set<process::action_label> find_action_labels(const state_formulas::state_formula& x);
 bool find_nil(const state_formulas::state_formula& x);
 
 } // namespace state_formulas

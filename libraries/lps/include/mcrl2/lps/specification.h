@@ -333,6 +333,7 @@ std::set<data::variable> find_all_variables(const lps::specification& x);
 std::set<data::variable> find_free_variables(const lps::specification& x);
 std::set<data::function_symbol> find_function_symbols(const lps::specification& x);
 std::set<core::identifier_string> find_identifiers(const lps::specification& x);
+std::set<process::action_label> find_action_labels(const lps::specification& x);
 
 /// \brief Conversion to aterm_appl.
 /// \return The specification converted to aterm format.

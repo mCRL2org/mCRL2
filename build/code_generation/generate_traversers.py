@@ -228,6 +228,9 @@ if __name__ == "__main__":
     # action_label_traverser
     result = make_traverser(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'core::traverser', class_map, all_classes, 'process', 'process::action_label', action_label_dependencies) and result
     result = make_traverser(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'process::action_label_traverser', class_map, all_classes, 'lps', 'process::action_label', action_label_dependencies) and result
+    result = make_traverser(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'lps::action_label_traverser'             , class_map, all_classes, 'action_formulas' , 'process::action_label', action_label_dependencies) and result
+    result = make_traverser(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'action_formulas::action_label_traverser' , class_map, all_classes, 'regular_formulas', 'process::action_label', action_label_dependencies) and result
+    result = make_traverser(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'regular_formulas::action_label_traverser', class_map, all_classes, 'state_formulas'  , 'process::action_label', action_label_dependencies) and result
 
     # boolean_variable_traverser
     result = make_traverser(MCRL2_ROOT + 'libraries/bes/include/mcrl2/bes/traverser.h', 'boolean_variable_traverser', 'add_traverser_boolean_variables', 'core::traverser', class_map, all_classes, 'bes', 'bes::boolean_variable', boolean_variable_dependencies) and result

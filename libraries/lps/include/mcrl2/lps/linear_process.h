@@ -292,7 +292,8 @@ bool is_linear_process(const atermpp::aterm_appl& x)
 // template function overloads
 std::set<data::variable> find_all_variables(const lps::linear_process& x);
 std::set<data::variable> find_free_variables(const lps::linear_process& x);
-
+std::set<process::action_label> find_action_labels(const lps::linear_process& x);
+ 
 } // namespace lps
 
 } // namespace mcrl2

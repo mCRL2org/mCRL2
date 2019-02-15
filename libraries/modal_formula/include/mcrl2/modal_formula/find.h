@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/modal_formula/add_binding.h"
 #include "mcrl2/modal_formula/traverser.h"
 
@@ -569,6 +570,27 @@ std::set<state_formulas::variable> find_free_state_variables(const T& x)
 {
   std::set<state_formulas::variable> result;
   state_formulas::find_free_state_variables(x, std::inserter(result, result.end()));
+  return result;
+}
+
+/// \brief Returns all action labels that occur in an object
+/// \param[in] x an object containing action labels
+/// \param[in,out] o an output iterator to which all action labels occurring in x are written.
+/// \return All action labels that occur in the term x
+template <typename T, typename OutputIterator>
+void find_action_labels(const T& x, OutputIterator o)
+{
+  process::detail::make_find_action_labels_traverser<state_formulas::action_label_traverser>(o).apply(x);
+}
+
+/// \brief Returns all action labels that occur in an object
+/// \param[in] x an object containing action labels
+/// \return All action labels that occur in the object x
+template <typename T>
+std::set<process::action_label> find_action_labels(const T& x)
+{
+  std::set<process::action_label> result;
+  state_formulas::find_action_labels(x, std::inserter(result, result.end()));
   return result;
 }
 

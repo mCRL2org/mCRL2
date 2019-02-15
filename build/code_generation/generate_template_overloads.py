@@ -157,6 +157,13 @@ pbes_system::pbes_expression
 state_formulas::state_formula
 '''
 
+FIND_ACTION_LABELS_CLASSNAMES = '''
+lps::linear_process
+lps::process_initializer
+lps::specification
+state_formulas::state_formula
+'''
+
 SEARCH_VARIABLE_CLASSNAMES = '''
 data::data_expression
 pbes_system::pbes_expression
@@ -255,6 +262,9 @@ generate_traverser_overloads(classnames, 'find_propositional_variable_instantiat
 
 classnames = FIND_IDENTIFIERS_CLASSNAMES.strip().split()
 generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', code_map)
+
+classnames = FIND_ACTION_LABELS_CLASSNAMES.strip().split()
+generate_traverser_overloads(classnames, 'find_action_labels', 'std::set<process::action_label>', code_map)
 
 classnames = SEARCH_VARIABLE_CLASSNAMES.strip().split()
 generate_search_variable_overloads(classnames, 'search_variable', 'bool', code_map)

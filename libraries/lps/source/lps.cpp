@@ -58,6 +58,9 @@ std::set<data::function_symbol> find_function_symbols(const lps::specification& 
 std::set<data::function_symbol> find_function_symbols(const lps::stochastic_specification& x) { return lps::find_function_symbols< lps::stochastic_specification >(x); }
 std::set<core::identifier_string> find_identifiers(const lps::specification& x) { return lps::find_identifiers< lps::specification >(x); }
 std::set<core::identifier_string> find_identifiers(const lps::stochastic_specification& x) { return lps::find_identifiers< lps::stochastic_specification >(x); }
+std::set<process::action_label> find_action_labels(const lps::linear_process& x) { return lps::find_action_labels< lps::linear_process >(x); }
+std::set<process::action_label> find_action_labels(const lps::process_initializer& x) { return lps::find_action_labels< lps::process_initializer >(x); }
+std::set<process::action_label> find_action_labels(const lps::specification& x) { return lps::find_action_labels< lps::specification >(x); }
 //--- end generated lps overloads ---//
 
 data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const

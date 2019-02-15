@@ -86,6 +86,7 @@ std::set<data::sort_expression> find_sort_expressions(const state_formulas::stat
 std::set<data::variable> find_all_variables(const state_formulas::state_formula& x) { return state_formulas::find_all_variables< state_formulas::state_formula >(x); }
 std::set<data::variable> find_free_variables(const state_formulas::state_formula& x) { return state_formulas::find_free_variables< state_formulas::state_formula >(x); }
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
+std::set<process::action_label> find_action_labels(const state_formulas::state_formula& x) { return state_formulas::find_action_labels< state_formulas::state_formula >(x); }
 //--- end generated state_formulas overloads ---//
 
 namespace algorithms {

@@ -795,6 +795,155 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<lps:
 };
 //--- end generated action_formulas::add_traverser_identifier_strings code ---//
 
+//--- start generated action_formulas::add_traverser_action_labels code ---//
+template <template <class> class Traverser, class Derived>
+struct add_traverser_action_labels: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  void apply(const action_formulas::true_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::false_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::not_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::and_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::or_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::forall& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::exists& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::at& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.actions());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const action_formulas::action_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (action_formulas::is_true(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::true_>(x));
+    }
+    else if (action_formulas::is_false(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::false_>(x));
+    }
+    else if (action_formulas::is_not(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::not_>(x));
+    }
+    else if (action_formulas::is_and(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::and_>(x));
+    }
+    else if (action_formulas::is_or(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::or_>(x));
+    }
+    else if (action_formulas::is_imp(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::imp>(x));
+    }
+    else if (action_formulas::is_forall(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::forall>(x));
+    }
+    else if (action_formulas::is_exists(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::exists>(x));
+    }
+    else if (action_formulas::is_at(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::at>(x));
+    }
+    else if (action_formulas::is_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::multi_action>(x));
+    }
+    else if (process::is_untyped_multi_action(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<process::untyped_multi_action>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Traverser class
+template <typename Derived>
+struct action_label_traverser: public add_traverser_action_labels<lps::action_label_traverser, Derived>
+{
+};
+//--- end generated action_formulas::add_traverser_action_labels code ---//
+
 } // namespace action_formulas
 
 namespace regular_formulas
@@ -1274,6 +1423,96 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<acti
 {
 };
 //--- end generated regular_formulas::add_traverser_identifier_strings code ---//
+
+//--- start generated regular_formulas::add_traverser_action_labels code ---//
+template <template <class> class Traverser, class Derived>
+struct add_traverser_action_labels: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  void apply(const regular_formulas::seq& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const regular_formulas::alt& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const regular_formulas::trans& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const regular_formulas::trans_or_nil& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const regular_formulas::regular_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    if (action_formulas::is_action_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<action_formulas::action_formula>(x));
+    }
+    else if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (regular_formulas::is_seq(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::seq>(x));
+    }
+    else if (regular_formulas::is_alt(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::alt>(x));
+    }
+    else if (regular_formulas::is_trans(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans>(x));
+    }
+    else if (regular_formulas::is_trans_or_nil(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::trans_or_nil>(x));
+    }
+    else if (regular_formulas::is_untyped_regular_formula(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<regular_formulas::untyped_regular_formula>(x));
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Traverser class
+template <typename Derived>
+struct action_label_traverser: public add_traverser_action_labels<action_formulas::action_label_traverser, Derived>
+{
+};
+//--- end generated regular_formulas::add_traverser_action_labels code ---//
 
 } // namespace regular_formulas
 
@@ -2928,6 +3167,238 @@ struct regular_formula_traverser: public add_traverser_regular_formula_expressio
 {
 };
 //--- end generated state_formulas::add_traverser_regular_formula_expressions code ---//
+
+//--- start generated state_formulas::add_traverser_action_labels code ---//
+template <template <class> class Traverser, class Derived>
+struct add_traverser_action_labels: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  void apply(const state_formulas::true_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::false_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::not_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::and_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::or_& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::imp& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.left());
+    static_cast<Derived&>(*this).apply(x.right());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::forall& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::exists& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::must& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::may& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::yaled& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::yaled_timed& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::delay& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::delay_timed& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::variable& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::nu& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::mu& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::state_formula& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    if (data::is_data_expression(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
+    }
+    else if (data::is_untyped_data_parameter(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
+    }
+    else if (state_formulas::is_true(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::true_>(x));
+    }
+    else if (state_formulas::is_false(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::false_>(x));
+    }
+    else if (state_formulas::is_not(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::not_>(x));
+    }
+    else if (state_formulas::is_and(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::and_>(x));
+    }
+    else if (state_formulas::is_or(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::or_>(x));
+    }
+    else if (state_formulas::is_imp(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::imp>(x));
+    }
+    else if (state_formulas::is_forall(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::forall>(x));
+    }
+    else if (state_formulas::is_exists(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::exists>(x));
+    }
+    else if (state_formulas::is_must(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::must>(x));
+    }
+    else if (state_formulas::is_may(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::may>(x));
+    }
+    else if (state_formulas::is_yaled(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled>(x));
+    }
+    else if (state_formulas::is_yaled_timed(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::yaled_timed>(x));
+    }
+    else if (state_formulas::is_delay(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay>(x));
+    }
+    else if (state_formulas::is_delay_timed(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::delay_timed>(x));
+    }
+    else if (state_formulas::is_variable(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::variable>(x));
+    }
+    else if (state_formulas::is_nu(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::nu>(x));
+    }
+    else if (state_formulas::is_mu(x))
+    {
+      static_cast<Derived&>(*this).apply(atermpp::down_cast<state_formulas::mu>(x));
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Traverser class
+template <typename Derived>
+struct action_label_traverser: public add_traverser_action_labels<regular_formulas::action_label_traverser, Derived>
+{
+};
+//--- end generated state_formulas::add_traverser_action_labels code ---//
 
 } // namespace state_formulas
 

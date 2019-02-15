@@ -117,7 +117,8 @@ inline void swap(process_initializer& t1, process_initializer& t2)
 
 // template function overloads
 std::set<data::variable> find_free_variables(const lps::process_initializer& x);
-
+std::set<process::action_label> find_action_labels(const lps::process_initializer& x);
+ 
 } // namespace lps
 
 } // namespace mcrl2
