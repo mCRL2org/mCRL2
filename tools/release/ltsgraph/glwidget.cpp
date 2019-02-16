@@ -328,7 +328,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     }
     else if (e->modifiers() == Qt::ShiftModifier)
     {
-      if (e->button() == Qt::LeftButton && m_scene->size().z() > 1) {
+      if (e->button() == Qt::LeftButton && m_scene->is_threedimensional()) {
         m_dragmode = dm_rotate;
       }
     }
@@ -342,7 +342,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     {
       if (m_hover.selectionType == GLScene::so_none)
       {
-        if (e->button() == Qt::RightButton && m_scene->size().z() > 1) {
+        if (e->button() == Qt::RightButton && m_scene->is_threedimensional()) {
           m_dragmode = dm_rotate;
         }
         else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
@@ -460,7 +460,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
         }
       case dm_dragnode:
         {
-          m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z()));
+          //m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z()));
           break;
         }
       case dm_zoom:
@@ -481,15 +481,24 @@ void GLWidget::rebuild()
   update();
 }
 
-void GLWidget::setDepth(float depth, std::size_t animation)
+void GLWidget::setDepth(bool enabled)
 {
+  /*if (enabled)
+  {
+    m_glwidget->setDepth(1000, 25);
+  }
+  else
+  {
+    m_glwidget->setDepth(0, 80);
+  }
+
   makeCurrent();
   QVector3D size = m_scene->size();
   size.setZ(depth);
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(QVector3D(0, 0, 0), animation);
   m_scene->setSize(size, animation);
-  update();
+  update();*/
 }
 
 QVector3D GLWidget::size3()

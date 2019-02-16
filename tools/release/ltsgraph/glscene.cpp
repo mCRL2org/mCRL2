@@ -199,10 +199,12 @@ void GLScene::initialize()
 
 void GLScene::render(QPainter& painter)
 {
+  // Update the state
   m_camera.animate();
 
   // Doc: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
   painter.beginNativePainting();
+
   QColor clear(Qt::white);
   glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -275,7 +277,7 @@ void GLScene::resize(std::size_t width, std::size_t height)
 
 QVector3D GLScene::size()
 {
-  return m_camera.world;
+  return m_worldsize;
 }
 
 GLScene::Selection GLScene::select(int x, int y)
@@ -405,9 +407,7 @@ void GLScene::zoom(float factor)
 
 float GLScene::magnificationFactor() const
 {
-  QVector3D a = worldToEye({0, 0, 0});
-  QVector3D b = worldToEye({1, 0, 0});
-  return a.distanceToPoint(b);
+  return 1.0f;
 }
 
 void GLScene::rotate(const QQuaternion& delta)
