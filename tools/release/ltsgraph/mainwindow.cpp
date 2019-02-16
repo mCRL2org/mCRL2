@@ -33,7 +33,6 @@ MainWindow::MainWindow(QWidget* parent) :
   // Add graph area
 
   m_glwidget = new GLWidget(m_graph, m_ui.frame);
-  m_glwidget->setDepth(0, 0);
   m_ui.widgetLayout->addWidget(m_glwidget);
 
   // Create springlayout algorithm + UI
@@ -145,12 +144,7 @@ void MainWindow::onWidgetResized(const QVector3D& newsize)
 
 void MainWindow::on3DChanged(bool enabled)
 {
-  if (enabled) {
-    m_glwidget->setDepth(1000, 25);
-  }
-  else {
-    m_glwidget->setDepth(0, 80);
-  }
+  m_glwidget->setDepth(true);
 }
 
 void MainWindow::onExplore(bool enabled)

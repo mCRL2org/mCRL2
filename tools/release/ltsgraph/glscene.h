@@ -202,11 +202,11 @@ public:
 
   std::size_t fontSize() const { return m_fontsize; }
 
-  float nodeSizeOnScreen() const { return m_size_node * m_camera.pixelsize * m_device_pixel_ratio; }
+  float nodeSizeOnScreen() const { return m_size_node * m_device_pixel_ratio; }
 
-  float handleSizeOnScreen() const { return VertexData::handleSize * m_camera.pixelsize * m_device_pixel_ratio; }
+  float handleSizeOnScreen() const { return VertexData::handleSize * m_device_pixel_ratio; }
 
-  float arrowheadSizeOnScreen() const { return VertexData::arrowheadSize * m_camera.pixelsize * m_device_pixel_ratio; }
+  float arrowheadSizeOnScreen() const { return VertexData::arrowheadSize * m_device_pixel_ratio; }
 
   float fogDistance() const { return m_fogdistance; }
 
@@ -223,6 +223,8 @@ public:
 
   bool animationFinished() { return m_camera.animationFinished(); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
+
+  bool is_threedimensional() { return false; }
 
 private:
   /**
@@ -279,7 +281,6 @@ private:
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
   /// All opengl related items
-
   CameraAnimation m_camera;  /// Implementation details of the OpenGL camera handling.
   float m_device_pixel_ratio;
   QFont m_font;
@@ -288,7 +289,7 @@ private:
   QGLShaderProgram m_shader; /// The shader to draw everything.
 
   /// Store various settings.
-
+  QVector3D m_worldsize;
   bool m_drawtransitionlabels = true;  /// Transition labels are only drawn if this field is true.
   bool m_drawstatelabels      = false; /// State labels are only drawn if this field is true.
   bool m_drawstatenumbers     = false; /// State numbers are only drawn if this field is true.
