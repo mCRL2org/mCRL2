@@ -117,6 +117,29 @@ void VertexData::initialize()
 // GLScene public methods
 //
 
+namespace
+{
+const char* g_vertexShader =
+  "#version 330\n "
+
+  "in vec4 vertex;"
+
+  "void main( void )"
+  "{"
+  "   gl_Position = vertex;"
+  "}";
+
+const char* g_fragmentShader =
+  "#version 330\n "
+
+  "layout(location = 0, index = 0) out vec4 fragColor;"
+
+  "void main( void )"
+  "{"
+  "   fragColor = vec4( 1.0, 0.0, 0.0, 1.0 );"
+  "}";
+} // unnamed namespace
+
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
   : m_glwidget(glwidget),
     m_graph(g)
@@ -125,10 +148,32 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
   setFogDistance(m_fogdistance);
 }
 
-void GLScene::init(const QColor& clear)
+void GLScene::initialize()
 {
-  // Set clear color to desired color
-  glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 1.0f);
+  // Here we compile the vertex and fragment shaders and combine the results.
+  bool result = m_shader.addShaderFromSourceCode(QGLShader::Vertex, g_vertexShader);
+  if (!result)
+  {
+    mCRL2log(mcrl2::log::error) << m_shader.log().toStdString();
+    std::abort();
+  }
+
+  result = m_shader.addShaderFromSourceCode(QGLShader::Fragment, g_fragmentShader);
+  if (!result)
+  {
+    mCRL2log(mcrl2::log::error) << m_shader.log().toStdString();
+    std::abort();
+  }
+
+  result = m_shader.link();
+  if (!result)
+  {
+    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << m_shader.log().toStdString();
+    std::abort();
+  }
+
+  m_vertexdata.initialize();
+
   // Enable anti-aliasing for lines and points. Anti-aliasing for polygons gives artifacts on
   // OSX when drawing a quadstrip.
   glEnable(GL_LINE_SMOOTH);
@@ -137,20 +182,11 @@ void GLScene::init(const QColor& clear)
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  GLfloat fog_color[4] = {float(clear.redF()), float(clear.greenF()), float(clear.blueF()), 1.0f};
-  glFogf(GL_FOG_MODE, GL_LINEAR);
-  glFogf(GL_FOG_DENSITY, 1);
-  glFogfv(GL_FOG_COLOR, fog_color);
-  const GLubyte* version = glGetString(GL_VERSION);
-  if ((version != nullptr) && ((version[0] == '1' && version[2] >= '4') || version[0] > '1'))
-  {
-    glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
-  }
-  updateFog();
 
   // Enable depth testing, so that we don't have to care too much about
   // rendering in the right order.
   glEnable(GL_DEPTH_TEST);
+
   // We'll be using a lot of glDrawArrays, and all of them use the vertex
   // array. We enable that feature once and leave it untouched.
   glEnableClientState(GL_VERTEX_ARRAY);
