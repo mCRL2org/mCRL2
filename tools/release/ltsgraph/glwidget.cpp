@@ -277,14 +277,6 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
-  // On OSX, there is a mysterious "invalid drawable" error, which seems to correspond
-  // to not having a valid drawing surface in OpenGL. It looks like the paintGL routine
-  // is called after OpenGL is requested to initialize, but before it has finished. As
-  // there seems to be no workaround for this problem, the best we can do is to clear
-  // the OpenGL error buffer before painting, so we don't trigger assert statements
-  // later in the code due to this bug.
-  glGetError();
-
   if (m_paused)
   {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
