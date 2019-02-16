@@ -14,43 +14,52 @@
 #include <QOpenGLWidget>
 #include <QPainter>
 #include <QQuaternion>
+#include <QMatrix4x4>
 
-struct CameraView
+/// \brief The camera view keeps track of the camera position around a point in 3D space. It also keeps track of the
+///        viewport that contains the width and height of the view. From this it computes the necessary projection
+///        and view matrices to draw objects as if they are viewed from this camera.
+class CameraView
 {
-  QQuaternion rotation;   ///< Rotation of the camera
-  QVector3D translation;  ///< Translation of the camera
-  QVector3D world;        ///< The size of the box in which the graph lives
-  float zoom;             ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
-  float pixelsize = 1;
+public:
+  CameraView();
 
-  CameraView()
-    : rotation(QQuaternion(1, 0, 0, 0)), translation(QVector3D(0, 0, 0)),
-    world(QVector3D(1000.0, 1000.0, 1000.0))
-  { }
-
+  /// \brief Update the dimensions of the viewport.
   void viewport(std::size_t width, std::size_t height);
+
   void billboard_spherical(const QVector3D& pos);
   void billboard_cylindrical(const QVector3D& pos);
-  void applyTranslation();
-  void applyFrustum();
-  void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz);
-  /// \brief Converts the given position in world coordinates to a vector in eye space.
-  QVector3D worldToEye(const QVector3D& position) const;
+
+  /// \brief Update the view and projection matrix.
+  void update();
+
+  /// \brief Converts the given position from world coordinates to a vector (in pixels) in viewport coordinates.
+  QVector3D worldToViewport(const QVector3D& position) const;
+
+  /// \brief Converts the given position from eye space to a vector in world coordinates.
+  QVector3D eyeToWorld(const QVector3D& eye) const;
+
+public:
+  QQuaternion rotation;   /// Rotation of the camera
+  QVector3D translation;  /// Translation of the camera
+  float zoom;             /// Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+
+private:
+  QMatrix4x4 m_projectionMatrix; /// \brief The project matrix of this camera.
+  QMatrix4x4 m_viewMatrix;
+  float m_viewdistance;
+  QRect m_viewport;
 };
 
-struct CameraAnimation : public CameraView
+/// \brief Applies an animation to the camera of which the result is this class itself.
+class CameraAnimation : public CameraView
 {
-  CameraView m_source, m_target;
-  std::size_t m_animation{0};
-  std::size_t m_animation_steps{0};
-  bool m_resizing{false};
-
+public:
   void start_animation(std::size_t steps);
   void operator=(const CameraView& other);
   void interpolate_cam(float pos);
   void interpolate_world(float pos);
   void animate();
-  void viewport(std::size_t width, std::size_t height);
   bool resizing();
   void setZoom(float factor, std::size_t animation);
   void setRotation(const QQuaternion& rotation, std::size_t animation);
@@ -59,6 +68,13 @@ struct CameraAnimation : public CameraView
   bool animationFinished() {
     return m_animation_steps == 0 || m_animation >= m_animation_steps;
   }
+
+private:
+  CameraView m_source, m_target;
+  std::size_t m_animation = 0;
+  std::size_t m_animation_steps = 0;
+  bool m_resizing = false;
+
 };
 
 #endif // MCRL2_LTSGRAPH_CAMERA_H

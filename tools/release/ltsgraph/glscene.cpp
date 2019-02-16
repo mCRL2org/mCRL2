@@ -11,7 +11,6 @@
 
 #include "export.h"
 #include "mcrl2/gui/arcball.h"
-#include "mcrl2/gui/workarounds.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/glu.h"
 
@@ -235,24 +234,26 @@ void GLScene::render(QPainter& painter)
   painter.begin(&m_glwidget);
   painter.setFont(m_font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-  /*for (std::size_t i = 0; i < nodeCount; ++i)
+
+  for (std::size_t i = 0; i < nodeCount; ++i)
   {
     if (m_drawstatenumbers)
     {
-      renderStateNumber(sel ? m_graph.selectionNode(i) : i);
+      renderStateNumber(painter, sel ? m_graph.selectionNode(i) : i);
     }
 
     if (m_drawstatelabels)
     {
-      renderStateLabel(sel ? m_graph.selectionNode(i) : i);
+      renderStateLabel(painter, sel ? m_graph.selectionNode(i) : i);
     }
   }
+
 
   if (m_drawtransitionlabels)
   {
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
-      renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
+      renderTransitionLabel(painter, sel ? m_graph.selectionEdge(i) : i);
     }
   }
 
@@ -268,29 +269,6 @@ void GLScene::resize(std::size_t width, std::size_t height)
 {
   m_camera.viewport(width, height);
 }
-
-QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z) const
-{
-  GLint viewport[4];
-  GLfloat projection[16];
-  GLfloat modelview[16];
-  x *= m_device_pixel_ratio;
-  y *= m_device_pixel_ratio;
-  glGetFloatv(GL_PROJECTION_MATRIX, projection);
-  glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  if (z < 0)
-  {
-    glReadPixels(x, viewport[3]-y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
-  }
-  QVector3D eye{float(x), float(viewport[3] - y), float(z)};
-
-  QMatrix4x4 m(modelview);
-  QMatrix4x4 p(projection);
-  QRect v(viewport[0], viewport[1], viewport[2], viewport[3]);
-  return mcrl2::gui::unproject(eye, m.transposed(), p.transposed(), v);
-}
-
 
 QVector3D GLScene::size()
 {
@@ -334,7 +312,9 @@ static bool isOnText(int x, int y, const QString& text, const QVector3D& eye,
   return textbox.contains(x, y);
 }
 
-bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
+bool GLScene::selectObject(GLScene::Selection& s,
+                           int x,
+                           int y,
                            SelectableObject type)
 {
   float bestZ = INFINITY;
@@ -351,7 +331,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     for (std::size_t i = 0; i < nodeCount; i++)
     {
       std::size_t index = sel ? m_graph.selectionNode(i) : i;
-      if (isClose(x, y, worldToEye(m_graph.node(index).pos()), radius, bestZ))
+      if (isClose(x, y, m_camera.worldToViewport(m_graph.node(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;
@@ -365,7 +345,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
-      if (isClose(x, y, worldToEye(m_graph.handle(index).pos()), radius, bestZ))
+      if (isClose(x, y, m_camera.worldToViewport(m_graph.handle(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;
@@ -379,7 +359,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     {
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
-      const QVector3D& eye = worldToEye(label.pos());
+      const QVector3D& eye = m_camera.worldToViewport(label.pos());
       const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
       if (isOnText(x, y, labelstring, eye, metrics))
       {
@@ -396,7 +376,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     {
       std::size_t index = sel ? m_graph.selectionNode(i) : i;
       const Graph::LabelNode& label = m_graph.stateLabel(index);
-      const QVector3D& eye = worldToEye(label.pos());
+      const QVector3D& eye = m_camera.worldToViewport(label.pos());
       const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
       if (isOnText(x, y - nodeSizeOnScreen(), labelstring, eye, metrics))
       {
@@ -555,7 +535,7 @@ void drawArc(const QVector3D controlpoints[4])
  * @brief Renders text, centered around the point at x and y
  */
 inline
-QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color)
+QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
 {
   QFontMetrics metrics(painter.font());
   QRect bounds = metrics.boundingRect(text);
@@ -678,14 +658,13 @@ void GLScene::renderNode(GLuint i)
     float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
     hint = Color4f(fill.r + s, fill.g + s, fill.b + s, true);
 
-    glTranslatef(0, 0, m_size_node * m_camera.pixelsize);
     drawWhetherNodeCanBeCollapsedOrExpanded(m_vertexdata, hint, node.active());
   }
 
   glPopMatrix();
 }
 
-void GLScene::renderTransitionLabel(GLuint i)
+void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
 {
   Graph::Edge edge = m_graph.edge(i);
   if (edge.from() == edge.to() && !m_drawselfloops)
@@ -698,40 +677,30 @@ void GLScene::renderTransitionLabel(GLuint i)
   if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty())
   {
     QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
-    QVector3D eye = worldToEye(label.pos());
+
+    QVector3D eye = m_camera.worldToViewport(label.pos());
     const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-    drawCenteredText(eye.x(), eye.y(), labelstring, color);
+    drawCenteredText(painter, eye.x(), eye.y(), labelstring, color);
   }
 }
 
-void GLScene::renderStateLabel(GLuint i)
+void GLScene::renderStateLabel(QPainter& painter, GLuint i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
   if (!m_graph.stateLabelstring(label.labelindex()).isEmpty())
   {
-    QVector3D eye = worldToEye(label.pos());
+    QVector3D eye = m_camera.worldToViewport(label.pos());
 
     QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
-    drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()), color);
+    drawCenteredText(painter, eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()), color);
   }
 }
 
-void GLScene::renderStateNumber(GLuint i)
+void GLScene::renderStateNumber(QPainter& painter, GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
-  QVector3D eye = worldToEye(node.pos());
-  drawCenteredText(eye.x(), eye.y(), QString::number(i));
-}
-
-QRect GLScene::drawCenteredText(float x, float y, const QString& text, const QColor& color)
-{
-  QFontMetrics metrics(m_renderpainter.font());
-  QRect bounds = metrics.boundingRect(text);
-  qreal w = bounds.width();
-  qreal h = bounds.height();
-  m_renderpainter.setPen(color);
-  m_renderpainter.drawText(x - w / 2, y - h / 2, text);
-  return bounds;
+  QVector3D eye = m_camera.worldToViewport(node.pos());
+  drawCenteredText(painter, eye.x(), eye.y(), QString::number(i));
 }
 
 void GLScene::renderHandle(GLuint i)
