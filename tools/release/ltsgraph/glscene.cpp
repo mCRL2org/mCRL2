@@ -446,22 +446,6 @@ void GLScene::setSize(const QVector3D& size, std::size_t animation)
   m_camera.setSize(size, animation);
 }
 
-// Some auxiliary functions that extend OpenGL
-
-inline
-void glStartName(GLuint objectType, GLuint index=0)
-{
-  glLoadName(objectType);
-  glPushName(index);
-}
-
-inline
-void glEndName()
-{
-  glPopName();
-  glLoadName(GLScene::so_none);
-}
-
 // Private functions
 
 inline
@@ -581,7 +565,6 @@ void GLScene::renderEdge(std::size_t i)
     ctrl[2] = ctrl[2] - diff;
   }
 
-  glStartName(so_edge, i);
   glPushMatrix();
 
   glColor3f(m_graph.handle(i).selected(), 0.0, 0.0);
@@ -609,7 +592,6 @@ void GLScene::renderEdge(std::size_t i)
   }
 
   glPopMatrix();
-  glEndName();
 }
 
 void GLScene::renderNode(GLuint i)
@@ -642,7 +624,6 @@ void GLScene::renderNode(GLuint i)
     }
   }
 
-  glStartName(so_node, i);
   glPushMatrix();
 
   m_camera.billboard_spherical(node.pos());
@@ -658,7 +639,6 @@ void GLScene::renderNode(GLuint i)
   }
 
   glPopMatrix();
-  glEndName();
 }
 
 void GLScene::renderTransitionLabel(GLuint i)
@@ -668,38 +648,33 @@ void GLScene::renderTransitionLabel(GLuint i)
     return;
   }
   Graph::LabelNode& label = m_graph.transitionLabel(i);
-  if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty()) {
-    glStartName(so_label, i);
-
+  if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty())
+  {
     Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
     glColor3fv(fill);
     QVector3D eye = worldToEye(label.pos());
     const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
     drawCenteredText(eye.x(), eye.y(), labelstring);
-    glEndName();
   }
 }
 
 void GLScene::renderStateLabel(GLuint i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
-  if (!m_graph.stateLabelstring(label.labelindex()).isEmpty()) {
-    glStartName(so_slabel, i);
+  if (!m_graph.stateLabelstring(label.labelindex()).isEmpty())
+  {
     Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
     glColor3fv(fill);
     QVector3D eye = worldToEye(label.pos());
     drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()));
-    glEndName();
   }
 }
 
 void GLScene::renderStateNumber(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
-  glStartName(so_node, i);
   QVector3D eye = worldToEye(node.pos());
   drawCenteredText(eye.x(), eye.y(), QString::number(i));
-  glEndName();
 }
 
 QRect GLScene::drawCenteredText(float x, float y, const QString& text)
@@ -724,14 +699,12 @@ void GLScene::renderHandle(GLuint i)
     }
 
     glDisable(GL_LINE_SMOOTH);
-    glStartName(so_handle, i);
     glPushMatrix();
 
     m_camera.billboard_cylindrical(handle.pos());
     drawHandle(m_vertexdata, line, fill);
 
     glPopMatrix();
-    glEndName();
     glEnable(GL_LINE_SMOOTH);
   }
 }
