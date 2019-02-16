@@ -192,26 +192,6 @@ void GLScene::initialize()
   glEnableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLScene::updateFog()
-{
-#ifndef MCRL2_PLATFORM_MAC // With Apple LLVM version 9.1.0 (clang-902.0.39.1) and Xcode (9E145)
-                           // the code below leads to a crash. Therefore we disable it. 
-                           // This is most probably caused by a bug in the compiler or Qt. 
-                           // This condition should be removed whenever possible as it
-                           // is undesirable to have this unconditional code. 
-  if (m_drawfog)
-  {
-    glFogf(GL_FOG_START, m_fogdistance);
-    glFogf(GL_FOG_END, m_fogdistance+1500.0f);
-    glEnable(GL_FOG);
-  }
-  else
-  {
-    glDisable(GL_FOG);
-  }
-#endif
-}
-
 void GLScene::startPainter(QPainter& painter)
 {
   painter.begin(&m_glwidget);
@@ -222,57 +202,61 @@ void GLScene::startPainter(QPainter& painter)
 
 void GLScene::render()
 {
-  // Initialise projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  m_camera.applyFrustum();
   m_camera.animate();
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  m_camera.applyTranslation();
-  mcrl2::gui::applyRotation(m_camera.rotation);
-
+  QColor clear(Qt::white);
+  glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
-  bool sel = m_graph.hasSelection();
+  /*bool sel = m_graph.hasSelection();
   std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  for (std::size_t i = 0; i < nodeCount; ++i) {
+  for (std::size_t i = 0; i < nodeCount; ++i)
+  {
     renderNode(sel ? m_graph.selectionNode(i) : i);
   }
+
   for (std::size_t i = 0; i < edgeCount; ++i) {
     renderEdge(sel ? m_graph.selectionEdge(i) : i);
+  }
+
+  for (std::size_t i = 0; i < edgeCount; ++i)
+  {
+    renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
 
   // text drawing follows
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_FALSE);
+
   startPainter(m_renderpainter);
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
-    if (m_drawstatenumbers) {
+    if (m_drawstatenumbers)
+    {
       renderStateNumber(sel ? m_graph.selectionNode(i) : i);
     }
-    if (m_drawstatelabels) {
+
+    if (m_drawstatelabels)
+    {
       renderStateLabel(sel ? m_graph.selectionNode(i) : i);
     }
   }
+
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
-    if (m_drawtransitionlabels) {
+    if (m_drawtransitionlabels)
+    {
       renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
     }
   }
+
   glDepthMask(GL_TRUE);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  m_renderpainter.end();
-  for (std::size_t i = 0; i < edgeCount; ++i) {
-    renderHandle(sel ? m_graph.selectionEdge(i) : i);
-  }
+  m_renderpainter.end();*/
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
