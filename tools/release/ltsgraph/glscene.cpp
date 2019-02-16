@@ -31,10 +31,14 @@ constexpr int RES_ARC       = 20; /// Amount of segments for edge arc
 constexpr int RES_NODE_SLICE = 64; /// Number of segments from which a circle representing a node is constructed.
 constexpr int RES_NODE_STACK = 4;
 
-VertexData::VertexData()
-  : m_arrowhead(RES_ARROWHEAD + 1),
-    m_node(RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2)
+/// Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
+#define QGLCheck(x) \
+  if (!x) { mCRL2log(mcrl2::log::debug) << #x " failed.\n"; std::abort(); }
+
+void VertexData::initialize()
 {
+  std::vector<QVector3D> node(RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2);
+
   // Generate vertices for node border (a line loop drawing a circle)
   float slice = 0;
   float sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1));
@@ -43,7 +47,7 @@ VertexData::VertexData()
 
   for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
   {
-    m_node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
+    node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
   }
 
   // Generate vertices for node (a quad strip drawing a half sphere)
@@ -53,22 +57,29 @@ VertexData::VertexData()
   {
     for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
     {
-      m_node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
+      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
           std::sin((float)(stack + stackd)) * std::cos(slice),
           std::cos((float)(stack + stackd)));
-      m_node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
+      node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
           std::sin(stack) * std::cos(slice),
           std::cos(stack));
     }
-    m_node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
+
+    node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
         std::sin((float)(stack + stackd)) * std::cos(0.0f),
         std::cos((float)(stack + stackd)));
-    m_node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
+    node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
         std::sin(stack) * std::cos(0.0f),
         std::cos(stack));
   }
 
+  QGLCheck(m_node_vbo.create());
+  m_node_vbo.setUsagePattern(QGLBuffer::StaticDraw);
+  m_node_vbo.allocate(node.data(), node.size());
+
   // Generate plus (and minus) hint for exploration mode
+  QVector3D m_hint[4]; // The plus and minus "hints?".
+  QVector3D m_handle[4]; //
   m_hint[0] = QVector3D(-0.3, 0.0, 0.0f);
   m_hint[1] = QVector3D(0.3,  0.0, 0.0f);
   m_hint[2] = QVector3D(0.0, -0.3, 0.0f);
@@ -81,20 +92,25 @@ VertexData::VertexData()
   m_handle[3] = QVector3D(-0.5f, 0.5f, 0.0f);
 
   // Generate vertices for arrowhead (a triangle fan drawing a cone)
-  m_arrowhead[0] = QVector3D(0.0f, 0.0f, 0.0f);
+  std::vector<QVector3D> arrowhead(RES_ARROWHEAD + 1);
+  arrowhead[0] = QVector3D(0.0f, 0.0f, 0.0f);
   float diff = (float)(M_PI / 20.0f);
   float t = 0.0f;
 
   for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
   {
-    m_arrowhead[i] = QVector3D(-1.0f,
+    arrowhead[i] = QVector3D(-1.0f,
         0.3f * std::sin(t),
         0.3f * std::cos(t));
   }
 
-  m_arrowhead[RES_ARROWHEAD] = QVector3D(-1.0f,
+  arrowhead[RES_ARROWHEAD] = QVector3D(-1.0f,
       0.3f * std::sin(0.0f),
       0.3f * std::cos(0.0f));
+
+  QGLCheck(m_arrowhead_vbo.create());
+  m_arrowhead_vbo.setUsagePattern(QGLBuffer::StaticDraw);
+  m_arrowhead_vbo.allocate(arrowhead.data(), arrowhead.size());
 }
 
 //

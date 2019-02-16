@@ -15,10 +15,10 @@
 
 #include "mcrl2/gui/glu.h"
 
-#include <QColor>
+#include <QGLBuffer>
+#include <QGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QPainter>
-#include <QQuaternion>
 
 #include <vector>
 
@@ -29,18 +29,18 @@ struct VertexData
   static const int arrowheadSize = 12;
 
 public:
-  VertexData();
+  void initialize();
 
-  const QVector3D* arrowhead() const { return m_arrowhead.data(); }
-  const QVector3D* handle() const { return m_handle; }
-  const QVector3D* hint() const { return m_hint; }
-  const QVector3D* node() const { return m_node.data(); }
+  const QVector3D* arrowhead() const { return nullptr; }
+  const QVector3D* handle() const { return nullptr; }
+  const QVector3D* hint() const { return nullptr; }
+  const QVector3D* node() const { return nullptr; }
 
 private:
-  std::vector<QVector3D> m_arrowhead;
-  std::vector<QVector3D> m_node;
-  QVector3D m_hint[4]; // The plus and minus "hints?".
-  QVector3D m_handle[4]; //
+  QGLBuffer m_node_vbo;
+  QGLBuffer m_arrowhead_vbo;
+  QGLBuffer m_hint_vbo;
+  QGLBuffer m_handle_vbo;
 };
 
 class GLScene
