@@ -142,14 +142,19 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
 {
   m_scene = new GLScene(*this, m_graph);
   m_scene->setDevicePixelRatio(devicePixelRatio());
-  QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
-  fmt.setVersion(1, 2);
-  fmt.setDepthBufferSize(1);
-  fmt.setAlphaBufferSize(1);
-  fmt.setStencilBufferSize(1);
-  fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-  fmt.setSwapInterval(1);
-  setFormat(fmt);
+
+  // Create an OpenGL 3.3 surface without depth, alpha and stencil buffers and with vsync enabled.
+  QSurfaceFormat surfaceFormat = QSurfaceFormat::defaultFormat();
+  surfaceFormat.setVersion(3, 3);
+  surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+  surfaceFormat.setVersion(1, 2);
+  surfaceFormat.setDepthBufferSize(1);
+  surfaceFormat.setAlphaBufferSize(1);
+  surfaceFormat.setStencilBufferSize(1);
+  surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  surfaceFormat.setSwapInterval(1);
+
+  setFormat(surfaceFormat);
 }
 
 GLWidget::~GLWidget()
