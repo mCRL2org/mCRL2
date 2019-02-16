@@ -203,6 +203,7 @@ void GLScene::render(QPainter& painter)
   m_camera.animate();
 
   // Doc: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
+  painter.begin(&m_glwidget);
   painter.beginNativePainting();
 
   QColor clear(Qt::white);
@@ -236,7 +237,6 @@ void GLScene::render(QPainter& painter)
   painter.endNativePainting();
 
   // Use the painter to render the remaining text.
-  painter.begin(&m_glwidget);
   painter.setFont(m_font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
