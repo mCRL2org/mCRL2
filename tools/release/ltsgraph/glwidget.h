@@ -112,13 +112,12 @@ public:
    */
   void wheelEvent(QWheelEvent* e) override;
 
-
   /**
    * @brief Sets the depth of the scene using an optional animation.
    * @param depth The new depth.
    * @param animation The number of animation steps to use.
    */
-  void setDepth(float depth, std::size_t animation = 1);
+  void setDepth(bool enabled);
 
   /**
    * @brief Updates all shapes and labels.
