@@ -256,7 +256,7 @@ void GLScene::render(QPainter& painter)
     }
   }
 
-  m_painter.end();
+  painter.end();
   glDepthMask(GL_TRUE);
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
@@ -291,24 +291,6 @@ QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z) const
   return mcrl2::gui::unproject(eye, m.transposed(), p.transposed(), v);
 }
 
-QVector3D GLScene::worldToEye(const QVector3D& world) const
-{
-  GLint viewport[4];
-  GLfloat projection[16];
-  GLfloat modelview[16];
-  glGetFloatv(GL_PROJECTION_MATRIX, projection);
-  glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
-  glGetIntegerv(GL_VIEWPORT, viewport);
-
-  QMatrix4x4 m(modelview);
-  QMatrix4x4 p(projection);
-  QRect v(viewport[0], viewport[1], viewport[2], viewport[3]);
-  QVector3D eye = mcrl2::gui::project(world, m.transposed(), p.transposed(), v);
-
-  return QVector3D(eye.x() / m_device_pixel_ratio,
-                 (viewport[3] - eye.y()) / m_device_pixel_ratio,
-                 eye.z());
-}
 
 QVector3D GLScene::size()
 {
@@ -480,7 +462,9 @@ void GLScene::setSize(const QVector3D& size, std::size_t animation)
   m_camera.setSize(size, animation);
 }
 
-// Private functions
+//
+// Helper functions for drawing.
+//
 
 inline
 void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
@@ -566,6 +550,22 @@ void drawArc(const QVector3D controlpoints[4])
 
   glDepthMask(GL_TRUE);
 }
+
+/**
+ * @brief Renders text, centered around the point at x and y
+ */
+inline
+QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color)
+{
+  QFontMetrics metrics(painter.font());
+  QRect bounds = metrics.boundingRect(text);
+  qreal w = bounds.width();
+  qreal h = bounds.height();
+  painter.setPen(color);
+  painter.drawText(x - w / 2, y - h / 2, text);
+  return bounds;
+}
+
 
 //
 // GLScene private methods

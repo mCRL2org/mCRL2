@@ -74,6 +74,14 @@ void CameraView::applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
   gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
 }
 
+QVector3D CameraView::worldToEye(const QVector3D& world) const
+{
+  QVector3D eye = world.project(m_viewMatrix.transposed(), m_projectionMatrix.transposed(), m_viewport);
+
+  return QVector3D(eye.x() / m_device_pixel_ratio,
+                 (m_viewport.right() - eye.y()) / m_device_pixel_ratio,
+                 eye.z());
+}
 void CameraAnimation::start_animation(std::size_t steps)
 {
   m_source = *this;
