@@ -141,21 +141,24 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   : QOpenGLWidget(parent),
     m_graph(graph)
 {
-  m_scene = new GLScene(*this, m_graph);
-  m_scene->setDevicePixelRatio(devicePixelRatio());
-
   // Create an OpenGL 3.3 surface without depth, alpha and stencil buffers and with vsync enabled.
   QSurfaceFormat surfaceFormat = QSurfaceFormat::defaultFormat();
   surfaceFormat.setVersion(3, 3);
   surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
-  surfaceFormat.setVersion(1, 2);
   surfaceFormat.setDepthBufferSize(1);
   surfaceFormat.setAlphaBufferSize(1);
   surfaceFormat.setStencilBufferSize(1);
   surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
   surfaceFormat.setSwapInterval(1);
 
+  // We use the GL_KHR_debug extension to provide realtime logging of OpenGL errors.
+  surfaceFormat.setOption(QSurfaceFormat::DebugContext);
+
   setFormat(surfaceFormat);
+  setMouseTracking(true);
+
+  m_scene = new GLScene(*this, m_graph);
+  m_scene->setDevicePixelRatio(devicePixelRatio());
 }
 
 GLWidget::~GLWidget()
@@ -246,9 +249,24 @@ void GLWidget::updateSelection()
 
 void GLWidget::initializeGL()
 {
-  m_scene->init(Qt::white);
-  resizeGL(width(), height());
-  setMouseTracking(true);
+  if (!isValid())
+  {
+    mCRL2log(mcrl2::log::error) << "The context was not created succesfully.\n";
+    std::abort();
+  }
+
+  m_logger = new QOpenGLDebugLogger(this);
+  if (!m_logger->initialize())
+  {
+    mCRL2log(mcrl2::log::warning) << "The Qt5 OpenGL debug logger can not be initialized.\n";
+  }
+  else
+  {
+    connect(m_logger, &QOpenGLDebugLogger::messageLogged, this, &GLWidget::logMessage);
+    m_logger->startLogging();
+  }
+
+  m_scene->initialize(Qt::white);
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -537,6 +555,11 @@ void GLWidget::saveBitmap(const QString& filename)
 {
   makeCurrent();
   grabFramebuffer().save(filename);
+}
+
+void GLWidget::logMessage(const QOpenGLDebugMessage& debugMessage)
+{
+  mCRL2log(mcrl2::log::debug) << "OpenGL message: " << debugMessage.message().toStdString() << "\n.";
 }
 
 GLWidgetUi* GLWidget::ui(QWidget* parent)
