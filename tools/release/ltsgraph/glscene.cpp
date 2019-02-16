@@ -145,8 +145,8 @@ const char* g_fragmentShader =
 } // unnamed namespace
 
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
-  : m_glwidget(glwidget),
-    m_graph(g)
+  :  m_glwidget(glwidget),
+     m_graph(g)
 {
   setFontSize(m_fontsize);
   setFogDistance(m_fogdistance);
@@ -195,10 +195,12 @@ void GLScene::initialize()
   glEnableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLScene::render()
+void GLScene::render(QPainter& painter)
 {
   m_camera.animate();
 
+  // Doc: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
+  painter.beginNativePainting();
   QColor clear(Qt::white);
   glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -227,10 +229,12 @@ void GLScene::render()
   */
 
   glDepthMask(GL_FALSE);
+  painter.endNativePainting();
 
-  m_renderpainter.begin(&m_glwidget);
-  m_renderpainter.setFont(m_font);
-  m_renderpainter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+  // Use the painter to render the remaining text.
+  painter.begin(&m_glwidget);
+  painter.setFont(m_font);
+  painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
   /*for (std::size_t i = 0; i < nodeCount; ++i)
   {
     if (m_drawstatenumbers)
@@ -244,15 +248,15 @@ void GLScene::render()
     }
   }
 
-  for (std::size_t i = 0; i < edgeCount; ++i)
+  if (m_drawtransitionlabels)
   {
-    if (m_drawtransitionlabels)
+    for (std::size_t i = 0; i < edgeCount; ++i)
     {
       renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
     }
-  }*/
+  }
 
-  m_renderpainter.end();
+  m_painter.end();
   glDepthMask(GL_TRUE);
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
