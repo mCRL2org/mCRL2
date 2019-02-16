@@ -275,15 +275,10 @@ void GLWidget::paintGL()
     m_scene->setDevicePixelRatio(devicePixelRatio());
     m_scene->render(painter);
 
-    if (!m_scene->animationFinished())
+    if (!m_scene->camera().animationFinished())
     {
       update();
     }
-  }
-
-  if (m_scene->resizing())
-  {
-    emit widgetResized(m_scene->size());
   }
 }
 
@@ -382,8 +377,8 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
 
 void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 {
-  makeCurrent();
   updateSelection();
+
   if (m_dragmode == dm_dragnode)
   {
     NodeMoveRecord* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
@@ -400,19 +395,21 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
     m_dragnode = nullptr;
     update();
   }
+
   m_dragmode = dm_none;
 }
 
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
-  m_scene->zoom(pow(1.0005f, e->delta()));
+  m_scene->camera().setZoom(pow(1.0005f, e->delta()));
   update();
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
-  makeCurrent();
   updateSelection();
+  CameraAnimation& camera = m_scene->camera();
+  
   if (m_dragmode != dm_none)
   {
     QPoint vec = e->pos() - m_dragstart;
@@ -447,7 +444,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
       case dm_rotate_2d:
         {
           QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, e->pos());
-          m_scene->rotate(rotation);
+          camera.setRotation(rotation);
           break;
         }
       case dm_translate:
@@ -455,7 +452,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
           int dx = e->pos().x() - m_dragstart.x();
           int dy = e->pos().y() - m_dragstart.y();
           QVector3D vec3(dx, -dy, 0);
-          m_scene->translate(vec3 / m_scene->magnificationFactor());
+          camera.setTranslation(vec3);
           break;
         }
       case dm_dragnode:
@@ -464,7 +461,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
           break;
         }
       case dm_zoom:
-        m_scene->zoom(pow(1.0005f, vec.y()));
+        camera.setZoom(pow(1.0005f, vec.y()));
         break;
       default:
         break;
@@ -508,10 +505,7 @@ QVector3D GLWidget::size3()
 
 void GLWidget::resetViewpoint(std::size_t animation)
 {
-  makeCurrent();
-  m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
-  m_scene->setTranslation(QVector3D(0, 0, 0), animation);
-  m_scene->setZoom(5.0, animation);
+  m_scene->camera().reset();
   update();
 }
 
