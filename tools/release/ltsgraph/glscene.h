@@ -77,18 +77,8 @@ public:
    */
   GLScene(QOpenGLWidget& glwidget, Graph::Graph& g);
 
-  /**
-   * @brief Applies the current fog settings. Call when the
-   *        fog settings have changed.
-   */
-  void updateFog();
-
-  /**
-   * @brief Initialises the OpenGL context.
-   * @param clear The colour to use as a background colour. This colour is
-   *              also used for the fog in 3D mode if enabled.
-   */
-  void init(const QColor& clear);
+  /// \brief Initializes all state and data required for rendering.
+  void initialize();
 
   /**
    * @brief Initiales the painter and calls painter.begin()
@@ -238,19 +228,10 @@ public:
   void setDrawSelfLoops(bool drawLoops) { m_drawselfloops = drawLoops; }
   void setDrawInitialMarking(bool drawMark) { m_drawinitialmarking = drawMark; }
 
-  void setDrawFog(bool drawFog) {
-    m_drawfog = drawFog;
-    updateFog();
-  }
-
+  void setDrawFog(bool drawFog) { m_drawfog = drawFog; }
   void setNodeSize(std::size_t size) { m_size_node = size; }
   void setFontSize(std::size_t size) { m_font.setPixelSize(m_fontsize = size); }
-
-  void setFogDistance(float dist)
-  {
-    m_fogdistance = dist;
-    updateFog();
-  }
+  void setFogDistance(float dist) { m_fogdistance = dist; }
 
   bool animationFinished() { return m_camera.animationFinished(); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
@@ -313,12 +294,19 @@ private:
 
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
+
+  /// All opengl related items
+
   CameraAnimation m_camera;  /// Implementation details of the OpenGL camera handling.
-  VertexData m_vertexdata;   /// Implementation details storing pre-calculated vertices.
   float m_device_pixel_ratio;
   QFont m_font;
   QPainter m_renderpainter;
   QPainter m_selectpainter;
+
+  VertexData m_vertexdata;   /// Implementation details storing pre-calculated vertices.
+  QGLShaderProgram m_shader; /// The shader to draw everything.
+
+  /// Store various settings.
 
   bool m_drawtransitionlabels = true;  /// Transition labels are only drawn if this field is true.
   bool m_drawstatelabels      = false; /// State labels are only drawn if this field is true.
