@@ -69,31 +69,32 @@ VertexData::VertexData()
   }
 
   // Generate plus (and minus) hint for exploration mode
-  m_hint[0] = QVector3D(-0.3, 0.0, 0.0);
-  m_hint[1] = QVector3D(0.3,  0.0, 0.0);
-  m_hint[2] = QVector3D(0.0, -0.3, 0.0);
-  m_hint[3] = QVector3D(0.0,  0.3, 0.0);
+  m_hint[0] = QVector3D(-0.3, 0.0, 0.0f);
+  m_hint[1] = QVector3D(0.3,  0.0, 0.0f);
+  m_hint[2] = QVector3D(0.0, -0.3, 0.0f);
+  m_hint[3] = QVector3D(0.0,  0.3, 0.0f);
 
   // Generate vertices for handle (border + fill, both squares)
-  m_handle[0] = QVector3D(-0.5f, -0.5f, 0.0);
-  m_handle[1] = QVector3D(0.5f , 0.5f, 0.0);
-  m_handle[2] = QVector3D(0.5f , 0.5f, 0.0);
-  m_handle[3] = QVector3D(-0.5f, 0.5f, 0.0);
+  m_handle[0] = QVector3D(-0.5f, -0.5f, 0.0f);
+  m_handle[1] = QVector3D(0.5f , -0.5f, 0.0f);
+  m_handle[2] = QVector3D(0.5f , 0.5f, 0.0f);
+  m_handle[3] = QVector3D(-0.5f, 0.5f, 0.0f);
 
   // Generate vertices for arrowhead (a triangle fan drawing a cone)
-  m_arrowhead[0] = QVector3D(-0.5f, 0.0, 0.0);
-  float diff = (float)(M_PI / 20.0), t = 0;
+  m_arrowhead[0] = QVector3D(0.0f, 0.0f, 0.0f);
+  float diff = (float)(M_PI / 20.0f);
+  float t = 0.0f;
 
   for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
   {
-    m_arrowhead[i] = QVector3D(-0.5f,
-        0.3 * std::sin(t),
-        0.3 * std::cos(t));
+    m_arrowhead[i] = QVector3D(-1.0f,
+        0.3f * std::sin(t),
+        0.3f * std::cos(t));
   }
 
-  m_arrowhead[RES_ARROWHEAD] = QVector3D(-0.5f,
-      0.3 * std::sin(0.0f),
-      0.3 * std::cos(0.0f));
+  m_arrowhead[RES_ARROWHEAD] = QVector3D(-1.0f,
+      0.3f * std::sin(0.0f),
+      0.3f * std::cos(0.0f));
 }
 
 //
@@ -572,6 +573,13 @@ void GLScene::renderEdge(std::size_t i)
   // Draw the arc
   drawArc(ctrl);
 
+  // Move the arrowhead outside of the node.
+  glTranslatef(-0.5f * nodeSizeOnScreen(), 0.0f, 0.0f);
+
+  // Scale it according to its size.
+  float scale = arrowheadSizeOnScreen();
+  glScalef(scale, scale, scale);
+
   // Go to arrowhead position
   glTranslatef(to.x(), to.y(), to.z());
 
@@ -583,6 +591,7 @@ void GLScene::renderEdge(std::size_t i)
   if (vec.length() > 0)
   {
     vec /= vec.length();
+
     QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
     float angle = acos(vec.x());
     glRotatef(angle * 180.0 / M_PI, axis.x(), axis.y(), axis.z());
@@ -627,6 +636,8 @@ void GLScene::renderNode(GLuint i)
   glPushMatrix();
 
   m_camera.billboard_spherical(node.pos());
+  float nodescale = 0.5f * nodeSizeOnScreen();
+  glScalef(nodescale, nodescale, nodescale);
   drawNode(m_vertexdata, line, fill, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
 
   if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
@@ -702,6 +713,8 @@ void GLScene::renderHandle(GLuint i)
     glPushMatrix();
 
     m_camera.billboard_cylindrical(handle.pos());
+    float scale = handleSizeOnScreen();
+    glScalef(scale, scale, scale);
     drawHandle(m_vertexdata, line, fill);
 
     glPopMatrix();
