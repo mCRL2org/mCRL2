@@ -240,6 +240,11 @@ void GLWidget::initializeGL()
     mCRL2log(mcrl2::log::error) << "The context was not created succesfully.\n";
     std::abort();
   }
+  else
+  {
+    QPair<int, int> version = format().version();
+    mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first << "." << version.second << " Core context.\n";
+  }
 
   m_logger = new QOpenGLDebugLogger(this);
   if (!m_logger->initialize())
@@ -339,8 +344,6 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
         if (e->button() == Qt::RightButton && m_scene->size().z() > 1) {
           m_dragmode = dm_rotate;
         }
-//        else if (e->button() == Qt::RightButton)
-//          m_dragmode = dm_rotate_2d;
         else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
           m_dragmode = dm_zoom;
         }
