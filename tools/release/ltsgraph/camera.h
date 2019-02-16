@@ -33,48 +33,52 @@ public:
   /// \brief Update the view and projection matrix.
   void update();
 
-  /// \brief Converts the given position from world coordinates to a vector (in pixels) in viewport coordinates.
-  QVector3D worldToViewport(const QVector3D& position) const;
+  /// \brief Converts the given position from world coordinates to Qt window coordinates.
+  QVector3D worldToWindow(QVector3D position) const;
 
-  /// \brief Converts the given position from eye space to a vector in world coordinates.
-  QVector3D eyeToWorld(const QVector3D& eye) const;
+  /// \brief Converts the given position from Qt window coordinates to world space coordinates.
+  QVector3D windowToWorld(QVector3D eye) const;
+  
+  bool operator!=(const CameraView& other);
 
+  // Should become protected at some point.
 public:
-  QQuaternion rotation;   /// Rotation of the camera
-  QVector3D translation;  /// Translation of the camera
-  float zoom;             /// Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+  QQuaternion m_rotation;    /// Rotation of the camera
+  QVector3D m_position;      /// Position of the camera
+  float m_zoomfactor = 5.0f; /// Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
 
 private:
   QMatrix4x4 m_projectionMatrix; /// \brief The project matrix of this camera.
   QMatrix4x4 m_viewMatrix;
-  float m_viewdistance;
   QRect m_viewport;
 };
 
 /// \brief Applies an animation to the camera of which the result is this class itself.
 class CameraAnimation : public CameraView
 {
-public:
-  void start_animation(std::size_t steps);
+public:  
+  /// \brief Update the animation progress and the camera matrices.
+  void update();
+
+  /// 
+  void reset();
+  void setZoom(float factor, std::size_t animation = 1);
+  void setRotation(const QQuaternion& rotation, std::size_t animation  = 1);
+  void setTranslation(const QVector3D& translation, std::size_t animation = 1);
+  void setSize(const QVector3D& size, std::size_t animation = 1);
+
+  bool animationFinished() { return m_animation_steps == 0 || m_animation >= m_animation_steps; }
+
   void operator=(const CameraView& other);
-  void interpolate_cam(float pos);
-  void interpolate_world(float pos);
-  void animate();
-  bool resizing();
-  void setZoom(float factor, std::size_t animation);
-  void setRotation(const QQuaternion& rotation, std::size_t animation);
-  void setTranslation(const QVector3D& translation, std::size_t animation);
-  void setSize(const QVector3D& size, std::size_t animation);
-  bool animationFinished() {
-    return m_animation_steps == 0 || m_animation >= m_animation_steps;
-  }
 
 private:
-  CameraView m_source, m_target;
-  std::size_t m_animation = 0;
-  std::size_t m_animation_steps = 0;
-  bool m_resizing = false;
+  void start_animation(std::size_t steps);
 
+  CameraView m_source;
+  CameraView m_target;
+
+  std::size_t m_animation = 0;
+  std::size_t m_animation_steps = 1;
 };
 
 #endif // MCRL2_LTSGRAPH_CAMERA_H

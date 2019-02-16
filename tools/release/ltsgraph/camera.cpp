@@ -15,8 +15,8 @@
 #include <cmath>
 
 CameraView::CameraView()
-  : rotation(QQuaternion(1, 0, 0, 0)),
-    translation(QVector3D(0, 0, 0))
+  : m_rotation(QQuaternion(1, 0, 0, 0)),
+    m_position(QVector3D(0, 0, 0))
 {}
 
 void CameraView::viewport(std::size_t width, std::size_t height)
@@ -50,99 +50,54 @@ void CameraView::billboard_spherical(const QVector3D& pos)
 void CameraView::billboard_cylindrical(const QVector3D& pos)
 {
   glTranslatef(pos.x(), pos.y(), pos.z());
-  mcrl2::gui::applyRotation(rotation, /*reverse=*/true);
+  mcrl2::gui::applyRotation(m_rotation, /*reverse=*/true);
 }
 
 void CameraView::update()
 {
-  QMatrix4x4 viewMatrix;
-  viewMatrix.lookAt(QVector3D(0.0f, 0.0f, -5000.0f * zoom), QVector3D(0.0f, 0.0f, 1.0f), QVector3D(0.0f, 1.0f, 0.0f));
+  m_viewMatrix = QMatrix4x4();
+  m_viewMatrix.lookAt(QVector3D(0.0f, 0.0f, -1000.0f * m_zoomfactor) + m_position, QVector3D(0.0f, 0.0f, 0.0f), QVector3D(0.0f, 0.0f, 1.0f));
 
-  QMatrix4x4 projectionMatrix;
-  projectionMatrix.frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1000.0f);
-
-  m_viewMatrix = viewMatrix;
-  m_projectionMatrix = projectionMatrix;
+  m_projectionMatrix = QMatrix4x4();
+  m_projectionMatrix.frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1000.0f);
 }
 
-
-QVector3D CameraView::worldToViewport(const QVector3D& world) const
+QVector3D CameraView::worldToWindow(QVector3D world) const
 {
-  QVector3D eye = world.project(m_viewMatrix.transposed(), m_projectionMatrix.transposed(), m_viewport);
+  QVector3D eye = world.project(m_viewMatrix, m_projectionMatrix, m_viewport);
 
+  // Flip the y-coordinate as Qt coordinate system is different from OpenGl.
   return QVector3D(eye.x(),
-                 (m_viewport.right() - eye.y()),
+                 (m_viewport.height() - eye.y()),
                  eye.z());
 }
 
-QVector3D CameraView::eyeToWorld(const QVector3D& eye) const
+QVector3D CameraView::windowToWorld(QVector3D eye) const
 {
-  return eye.unproject(m_viewMatrix.transposed(), m_projectionMatrix.transposed(), m_viewport);
+  // Flip the y-coordinate as Qt coordinate system is different from OpenGl.
+  eye.setY(m_viewport.height() - eye.y());
+
+  return eye.unproject(m_viewMatrix, m_projectionMatrix, m_viewport);
+}
+
+
+bool CameraView::operator!=(const CameraView& other)
+{
+  return (m_rotation != other.m_rotation || m_position != other.m_position || m_position != other.m_position);
 }
 
 // Implementation of CameraAnimation
 
-void CameraAnimation::start_animation(std::size_t steps)
+void CameraAnimation::reset()
 {
-  m_source = *this;
-  m_animation_steps = steps;
-  m_animation = 0;
-  if (steps == 0)
-  {
-    operator=(m_target);
-  }
+  m_rotation = QQuaternion(1, 0, 0, 0);
+  m_position = QVector3D(0, 0, 0);
+  m_zoomfactor = 5.0f;
 }
 
-void CameraAnimation::operator=(const CameraView& other)
+void CameraAnimation::update()
 {
-  rotation = other.rotation;
-  translation = other.translation;
-  zoom = other.zoom;
-}
-
-void CameraAnimation::interpolate_cam(float pos)
-{
-  if (pos > 0.999)
-  {
-    rotation = m_target.rotation;
-    translation = m_target.translation;
-    zoom = m_target.zoom;
-  }
-  else
-  {
-    // if this is unsatisfactory, use https://en.wikipedia.org/wiki/Slerp
-    rotation = m_target.rotation * pos + m_source.rotation * (1.0 - pos);
-    translation = m_target.translation * pos + m_source.translation * (1.0 - pos);
-    zoom = m_target.zoom * pos + m_source.zoom * (1.0 - pos);
-  }
-}
-
-void CameraAnimation::interpolate_world(float pos)
-{
-  m_resizing = true;
-  /*if (pos > 0.999)
-  {
-    world = m_target.world;
-  }
-  else
-  {
-    world.setX(m_target.world.x() * pos + m_source.world.x() * (1.0 - pos));
-    world.setY(m_target.world.y() * pos + m_source.world.y() * (1.0 - pos));
-
-    if (m_target.world.z() > m_source.world.z())
-    {
-      world.setZ(m_target.world.z() * sin(M_PI_2 * pos) + m_source.world.z() * (1.0 - sin(M_PI_2 * pos)));
-    }
-    else
-    {
-      world.setZ(m_target.world.z() * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z() * cos(M_PI_2 * pos));
-    }
-  }*/
-}
-
-void CameraAnimation::animate()
-{
-  if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom))
+  /*if (*this != m_source)
   {
     std::size_t halfway = m_animation_steps / 2;
     if (m_animation < halfway)
@@ -155,43 +110,93 @@ void CameraAnimation::animate()
       m_animation_steps -= halfway;
       m_animation = 0;
     }
-  }
-  /*else if (m_target.world != world)
+  }*/
+  
+  /*if (m_target.world != world)
   {
     interpolate_world((float)(++m_animation) / m_animation_steps);
+
+    if (pos > 0.999)
+    {
+    world = m_target.world;
+    }
+    else
+    {
+    world.setX(m_target.world.x() * pos + m_source.world.x() * (1.0 - pos));
+    world.setY(m_target.world.y() * pos + m_source.world.y() * (1.0 - pos));
+
+    if (m_target.world.z() > m_source.world.z())
+    {
+    world.setZ(m_target.world.z() * sin(M_PI_2 * pos) + m_source.world.z() * (1.0 - sin(M_PI_2 * pos)));
+    }
+    else
+    {
+    world.setZ(m_target.world.z() * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z() * cos(M_PI_2 * pos));
+    }
+    }
   }
   else
   {
-    interpolate_cam((float)(++m_animation) / m_animation_steps);
+  if (delta > 0.999)
+  {
+    *this = m_target;
+  }
+  else
+  {
+  }
   }*/
-}
 
-bool CameraAnimation::resizing()
-{
-  bool temp = m_resizing;
-  m_resizing = false;
-  return temp;
+  if (!animationFinished())
+  {
+    float progress = (float)(++m_animation) / m_animation_steps;
+
+    m_rotation.slerp(m_source.m_rotation, m_target.m_rotation, progress);
+    m_position = m_target.m_position * progress + m_source.m_position * (1.0 - progress);
+    m_zoomfactor = m_target.m_zoomfactor * progress + m_source.m_zoomfactor * (1.0 - progress);
+
+    // Update the camera matrices.
+    CameraView::update();
+  }
 }
 
 void CameraAnimation::setZoom(float factor, std::size_t animation)
 {
-  m_target.zoom = factor;
+  m_target.m_zoomfactor += factor;
   start_animation(animation);
 }
 
-void CameraAnimation::setRotation(const QQuaternion& rotation, std::size_t animation)
+void CameraAnimation::setRotation(const QQuaternion& rotation, std::size_t steps)
 {
-  m_target.rotation = rotation;
-  start_animation(animation);
+  m_target.m_rotation += rotation;
+  start_animation(steps);
 }
 
-void CameraAnimation::setTranslation(const QVector3D& translation, std::size_t animation)
+void CameraAnimation::setTranslation(const QVector3D& translation, std::size_t steps)
 {
-  m_target.translation = translation;
-  start_animation(animation);
+  m_target.m_position += translation;
+  start_animation(steps);
 }
 
-void CameraAnimation::setSize(const QVector3D& size, std::size_t animation)
+void CameraAnimation::setSize(const QVector3D& size, std::size_t steps)
 {
-  start_animation(animation);
+  start_animation(steps);
+}
+
+void CameraAnimation::operator=(const CameraView& other)
+{
+  m_rotation = other.m_rotation;
+  m_position = other.m_position;
+  m_zoomfactor = other.m_zoomfactor;
+}
+
+void CameraAnimation::start_animation(std::size_t steps)
+{
+  m_source = *this;
+  m_animation_steps = std::min((int)steps, 1);
+  m_animation = 0;
+
+  if (steps == 0)
+  {
+
+  }
 }
