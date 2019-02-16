@@ -266,7 +266,7 @@ void GLWidget::initializeGL()
     m_logger->startLogging();
   }
 
-  m_scene->initialize(Qt::white);
+  m_scene->initialize();
 }
 
 void GLWidget::resizeGL(int width, int height)
