@@ -19,6 +19,7 @@
 #include <QOpenGLWidget>
 #include <QColorDialog>
 #include <QVector2D>
+#include <QOpenGLDebugLogger>
 #include "ui_glwidget.h"
 
 class GLWidgetImpl;
@@ -187,6 +188,9 @@ public slots:
    */
   void resetViewpoint(std::size_t animation = 0);
 
+  /// \brief Logs the given message to the mCRL2 output.
+  void logMessage(const QOpenGLDebugMessage& debugMessage);
+
   //Getters and setters
   void toggleTransitionLabels(bool show) {
     m_scene->setDrawTransitionLabels(show);
@@ -229,6 +233,7 @@ private:
   GLWidgetUi* m_ui = nullptr; /// The user interface of the class.
   Graph::Graph& m_graph;      /// The current graph.
   GLScene* m_scene;           /// The GLScene which is used to render the contents.
+  QOpenGLDebugLogger* m_logger; /// Logs OpenGL debug messages.
 
   GLScene::Selection m_hover; /// The current object (if any) which is pointed at.
   DragMode m_dragmode;        /// The current drag mode.
@@ -240,6 +245,7 @@ private:
   bool m_paused = false;
 
   std::list<GLScene::Selection> m_selections; /// A list of the objects under the cursor.
+
 
   /**
    * @brief Updates the selected value for all nodes.
