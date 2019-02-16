@@ -83,10 +83,10 @@ void VertexData::initialize()
   // Generate plus (and minus) hint for exploration mode
   QVector3D m_hint[4]; // The plus and minus "hints?".
   QVector3D m_handle[4]; //
-  m_hint[0] = QVector3D(-0.3, 0.0, 0.0f);
-  m_hint[1] = QVector3D(0.3,  0.0, 0.0f);
-  m_hint[2] = QVector3D(0.0, -0.3, 0.0f);
-  m_hint[3] = QVector3D(0.0,  0.3, 0.0f);
+  m_hint[0] = QVector3D(-0.3f, 0.0f, 0.0f);
+  m_hint[1] = QVector3D(0.3f,  0.0f, 0.0f);
+  m_hint[2] = QVector3D(0.0f, -0.3f, 0.0f);
+  m_hint[3] = QVector3D(0.0f,  0.3f, 0.0f);
 
   // Generate vertices for handle (border + fill, both squares)
   m_handle[0] = QVector3D(-0.5f, -0.5f, 0.0f);
@@ -200,7 +200,7 @@ void GLScene::initialize()
 void GLScene::render(QPainter& painter)
 {
   // Update the state
-  m_camera.animate();
+  m_camera.update();
 
   // Doc: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
   painter.begin(&m_glwidget);
@@ -332,11 +332,11 @@ bool GLScene::selectObject(GLScene::Selection& s,
   {
   case so_node:
   {
-    float radius = nodeSizeOnScreen() * magnificationFactor() / 2;
+    float radius = nodeSizeOnScreen() / 2;
     for (std::size_t i = 0; i < nodeCount; i++)
     {
       std::size_t index = sel ? m_graph.selectionNode(i) : i;
-      if (isClose(x, y, m_camera.worldToViewport(m_graph.node(index).pos()), radius, bestZ))
+      if (isClose(x, y, m_camera.worldToWindow(m_graph.node(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;
@@ -346,11 +346,11 @@ bool GLScene::selectObject(GLScene::Selection& s,
   }
   case so_handle:
   {
-    float radius = handleSizeOnScreen() * magnificationFactor() * 2;
+    float radius = handleSizeOnScreen() * 2;
     for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
-      if (isClose(x, y, m_camera.worldToViewport(m_graph.handle(index).pos()), radius, bestZ))
+      if (isClose(x, y, m_camera.worldToWindow(m_graph.handle(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;
@@ -364,7 +364,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
     {
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
-      const QVector3D& eye = m_camera.worldToViewport(label.pos());
+      const QVector3D& eye = m_camera.worldToWindow(label.pos());
       const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
       if (isOnText(x, y, labelstring, eye, metrics))
       {
@@ -381,7 +381,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
     {
       std::size_t index = sel ? m_graph.selectionNode(i) : i;
       const Graph::LabelNode& label = m_graph.stateLabel(index);
-      const QVector3D& eye = m_camera.worldToViewport(label.pos());
+      const QVector3D& eye = m_camera.worldToWindow(label.pos());
       const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
       if (isOnText(x, y - nodeSizeOnScreen(), labelstring, eye, metrics))
       {
@@ -398,31 +398,6 @@ bool GLScene::selectObject(GLScene::Selection& s,
   }
 
   return s.selectionType != so_none;
-}
-
-void GLScene::zoom(float factor)
-{
-  setZoom(m_camera.zoom * factor, 0);
-}
-
-float GLScene::magnificationFactor() const
-{
-  return 1.0f;
-}
-
-void GLScene::rotate(const QQuaternion& delta)
-{
-  setRotation(delta * m_camera.rotation, 0);
-}
-
-void GLScene::translate(const QVector3D& amount)
-{
-  setTranslation(m_camera.translation + amount, 0);
-}
-
-bool GLScene::resizing()
-{
-  return m_camera.resizing();
 }
 
 void GLScene::setZoom(float factor, std::size_t animation)
@@ -681,9 +656,9 @@ void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
   {
     QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
 
-    QVector3D eye = m_camera.worldToViewport(label.pos());
+    QVector3D windowCoordinates = m_camera.worldToWindow(label.pos());
     const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-    drawCenteredText(painter, eye.x(), eye.y(), labelstring, color);
+    drawCenteredText(painter, windowCoordinates.x(), windowCoordinates.y(), labelstring, color);
   }
 }
 
@@ -692,7 +667,7 @@ void GLScene::renderStateLabel(QPainter& painter, GLuint i)
   Graph::LabelNode& label = m_graph.stateLabel(i);
   if (!m_graph.stateLabelstring(label.labelindex()).isEmpty())
   {
-    QVector3D eye = m_camera.worldToViewport(label.pos());
+    QVector3D eye = m_camera.worldToWindow(label.pos());
 
     QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
     drawCenteredText(painter, eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()), color);
@@ -702,7 +677,7 @@ void GLScene::renderStateLabel(QPainter& painter, GLuint i)
 void GLScene::renderStateNumber(QPainter& painter, GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
-  QVector3D eye = m_camera.worldToViewport(node.pos());
+  QVector3D eye = m_camera.worldToWindow(node.pos());
   drawCenteredText(painter, eye.x(), eye.y(), QString::number(i));
 }
 

@@ -92,38 +92,7 @@ public:
    * @param height The new height for the viewport.
    */
   void resize(std::size_t width, std::size_t height);
-
-  /**
-   * @brief Zoom in by @e factor.
-   * @param factor The amount by which to multiply the current zoom factor.
-   */
-  void zoom(float factor);
-
-  /**
-   * @brief Retrieve the current magnification factor
-   */
-  float magnificationFactor() const;
-
-  /**
-   * @brief Rotate by @e delta.
-   * @param delta The rotation quaternion.
-   */
-  void rotate(const QQuaternion& delta);
-
-  /**
-   * @brief Translate by @e amount.
-   * @param amount The translation in world coordinates to add to the current
-   *               translation.
-   */
-  void translate(const QVector3D& amount);
-
-  /**
-   * @brief Returns true if the world size changed since the last call.
-   * @return True if the world size changed since the last call, false
-   *              otherwise.
-   */
-  bool resizing();
-
+  
   /**
    * @brief Set the zoom factor to @e factor, interpolating to the new value
    *        for a number of frames if desired.
@@ -169,18 +138,7 @@ public:
    * @return The current world size in world coordinates.
    */
   QVector3D size();
-
-  /**
-   * @brief Converts viewport coordinates to world coordinates.
-   * @param x The viewport X coordinate.
-   * @param y The viewport Y coordinate (warning: the origin is in the
-   *          bottom left, not the top right as is usual in GUI programming).
-   * @param z The viewport Z coordinate (depth buffer value). If not given, the
-   *          value of the depth buffer at (x, y) is used.
-   * @return The world coordinates corresponding to the eye coordinates provided.
-   */
-  QVector3D eyeToWorld(int x, int y, GLfloat z = -1) const;
-
+  
   /**
    * @brief Retrieve the object at viewport coordinate (x, y).
    * @returns A record that represents the selected object.
@@ -220,11 +178,11 @@ public:
   void setNodeSize(std::size_t size) { m_size_node = size; }
   void setFontSize(std::size_t size) { m_font.setPixelSize(m_fontsize = size); }
   void setFogDistance(float dist) { m_fogdistance = dist; }
-
-  bool animationFinished() { return m_camera.animationFinished(); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
-
+  
   bool is_threedimensional() { return false; }
+
+  CameraAnimation& camera() { return m_camera;  }
 
 private:
   /**
@@ -262,21 +220,7 @@ private:
    * @param i The index of the state number to render.
    */
   void renderStateNumber(QPainter& painter, GLuint i);
-
-  /**
-   * @brief Generates TikZ code for a single edge.
-   * @param i The index of the edge to render.
-   * @param aspectRatio The aspect ratio used for placement.
-   */
-  QString tikzEdge(std::size_t i, float aspectRatio);
-
-  /**
-   * @brief Generates TikZ code for a single node.
-   * @param i The index of the node to render.
-   * @param aspectRatio The aspect ratio used for placement.
-   */
-  QString tikzNode(std::size_t i, float aspectRatio);
-
+  
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
