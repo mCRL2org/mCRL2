@@ -116,7 +116,7 @@ static void writeToStream(const aterm& t, std::ostream& os)
 {
   if (t.type_is_int())
   {
-    os << aterm_int(t).value();
+    os << atermpp::down_cast<aterm_int>(t).value();
   }
   else if (t.type_is_list())
   {

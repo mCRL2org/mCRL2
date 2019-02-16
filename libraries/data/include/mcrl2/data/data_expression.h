@@ -271,6 +271,7 @@ namespace mcrl2
 namespace data
 {
 /// \brief Returns true if the term t is an application.
+/// \param t The variable that is checked. 
 inline bool is_application(const data_expression& t)
 {
   return !(is_function_symbol(t) ||
@@ -280,8 +281,14 @@ inline bool is_application(const data_expression& t)
            is_untyped_identifier(t));
 } 
 
+/// \brief Transform a variable_list into a data_expression_list
+inline 
+const data_expression_list& variable_list_to_data_expression_list(const variable_list& l)
+{
+  return atermpp::down_cast<data_expression_list>(static_cast<const atermpp::aterm&>(l));
+}
 
-/// \brief Apply data expression to a data expression.
+/// \brief Apply a data expression to a data expression.
 inline
 application data_expression::operator()(const data_expression& e) const
 {

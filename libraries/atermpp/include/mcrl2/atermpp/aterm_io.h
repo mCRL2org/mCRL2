@@ -13,7 +13,8 @@
 #define MCRL2_ATERMPP_ATERM_IO_H
 
 #include <iomanip>
-#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_int.h"
 
 namespace atermpp
 {
@@ -48,6 +49,40 @@ aterm read_term_from_text_stream(std::istream& is);
 /// \param s A string
 /// \return The term corresponding to the string.
 aterm read_term_from_string(const std::string& s);
+
+/// \brief Reads an aterm_list from a string. The string can be in either binary or text format.
+/// \param s A string
+/// \details If the input is not a string, an aterm is returned of the wrong type.
+/// \return The term corresponding to the string.
+inline aterm_list read_list_from_string(const std::string& s)
+{
+  const aterm_list l = down_cast<aterm_list>(read_term_from_string(s));
+  assert(l.type_is_list());
+  return l;
+};
+
+/// \brief Reads an aterm_int from a string. The string can be in either binary or text format.
+/// \param s A string
+/// \details If the input is not an int, an aterm is returned of the wrong type.
+/// \return The aterm_int corresponding to the string.
+inline aterm_int read_int_from_string(const std::string& s)
+{
+  const aterm_int n = down_cast<aterm_int>(read_term_from_string(s));
+  assert(n.type_is_int());
+  return n;
+};
+
+/// \brief Reads an aterm_appl from a string. The string can be in either binary or text format.
+/// \param s A string
+/// \details If the input is not an aterm_appl, an aterm is returned of the wrong type.
+/// \return The term corresponding to the string.
+inline aterm_appl read_appl_from_string(const std::string& s)
+{
+  const aterm_appl a = down_cast<aterm_appl>(read_term_from_string(s));
+  assert(a.type_is_appl());
+  return a;
+};
+
 
 } // namespace atermpp
 

@@ -613,7 +613,7 @@ class Trace
 
       resetPosition();
       truncate();
-      aterm_list trace(readATerm(is));
+      aterm_list trace = atermpp::down_cast<aterm_list>(readATerm(is));
       assert(trace.type_is_list());
       for (; !trace.empty(); trace=trace.tail())
       {
@@ -622,24 +622,24 @@ class Trace
 
         if (e.type_is_appl() && lps::is_multi_action(down_cast<aterm_appl>(e)))   // To be compatible with old untimed version
         {
-          addAction(multi_action(process::action_list(down_cast<aterm_appl>(e))));
+          addAction(multi_action(down_cast<process::action_list>(e)));
         }
         else if (e.type_is_appl() && isTimedMAct(down_cast<aterm_appl>(e)))
         {
           if (down_cast<aterm_appl>(e)[1]==data::undefined_real())  // There is no time tag.
           {
-            addAction(multi_action(process::action_list(down_cast<aterm_appl>(e)[0])));
+            addAction(multi_action(down_cast<process::action_list>(down_cast<aterm_appl>(e)[0])));
           }
           else
           {
-            addAction(multi_action(process::action_list(down_cast<aterm_appl>(e)[0]),
-                               mcrl2::data::data_expression(down_cast<aterm_appl>(e)[1])));
+            addAction(multi_action(down_cast<process::action_list>(down_cast<aterm_appl>(e)[0]),
+                                   mcrl2::data::data_expression(down_cast<aterm_appl>(e)[1])));
           }
         }
         else
         {
           // So, e is a list of data expressions.
-          data::data_expression_list l(e);
+          data::data_expression_list l=atermpp::down_cast<data::data_expression_list>(e);
           mcrl2::lps::state s(l.begin(), l.size());
           setState(s);
         }

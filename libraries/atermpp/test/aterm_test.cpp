@@ -27,7 +27,7 @@ void test_aterm()
   atermpp::aterm a = read_term_from_string("f(x)");
   atermpp::aterm label = read_term_from_string("label");
 
-  atermpp::aterm d = aterm_int(10);
+  atermpp::aterm_int d = aterm_int(10);
   BOOST_CHECK(aterm_int(d).value() == 10);
 
   atermpp::aterm e = atermpp::aterm();

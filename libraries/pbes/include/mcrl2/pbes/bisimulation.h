@@ -192,16 +192,16 @@ class bisimulation_algorithm
     /// \param name A
     /// \param parameters A sequence of data variables
     /// \return The created propositional variable
-    propositional_variable_instantiation var(const core::identifier_string& name, data::variable_list const& parameters) const
+    propositional_variable_instantiation var(const core::identifier_string& name, const data::variable_list& parameters) const
     {
-      return propositional_variable_instantiation(name, data::data_expression_list(parameters));
+      return propositional_variable_instantiation(name, atermpp::down_cast<data::data_expression_list>(static_cast<atermpp::aterm>(parameters)));
     }
 
     /// \brief Creates a propositional variable.
     /// \param name A
     /// \param parameters A sequence of data expressions
     /// \return The created propositional variable
-    propositional_variable_instantiation var(const core::identifier_string& name, data::data_expression_list const& parameters) const
+    propositional_variable_instantiation var(const core::identifier_string& name, const data::data_expression_list& parameters) const
     {
       return propositional_variable_instantiation(name, parameters);
     }
@@ -446,7 +446,11 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         data::data_expression cj = j->condition();
         data::variable_list e1 = j->summation_variables();
         data::data_expression_list  gj = j->next_state(q.process_parameters());
-        pbes_expression expr = make_exists(e1, optimized_and(cj, var(Y(p, q, i), data::data_expression_list(d) + gj + data::data_expression_list(e))));
+        pbes_expression expr = make_exists(e1, 
+                                           optimized_and(cj, var(Y(p, q, i), 
+                                           variable_list_to_data_expression_list(d) + 
+                                               gj + 
+                                           data::variable_list_to_data_expression_list(e))));
         v.push_back(expr);
       }
       return optimized_or(optimized_join_or(v.begin(), v.end()), optimized_and(var(X(p, q), d + d1), step(p, q, i)));
@@ -674,7 +678,11 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         data::data_expression cj = j->condition();
         data::variable_list e1 = j->summation_variables();
         data::data_expression_list gj = j->next_state(d1);
-        pbes_expression expr = make_exists(e1, optimized_and(cj, var(Y1(p, q, i), data::data_expression_list(d) + gj + data::data_expression_list(e))));
+        pbes_expression expr = make_exists(e1, optimized_and(cj, 
+                                                             var(Y1(p, q, i), 
+                                                                 data::variable_list_to_data_expression_list(d) + 
+                                                                 gj + 
+                                                                 data::variable_list_to_data_expression_list(e))));
         v.push_back(expr);
       }
       return optimized_or(optimized_join_or(v.begin(), v.end()), step(p, q, i));

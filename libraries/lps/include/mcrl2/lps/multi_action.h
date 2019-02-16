@@ -57,7 +57,8 @@ class multi_action
     {
       const atermpp::aterm_appl& t = atermpp::down_cast<atermpp::aterm_appl>(t1);
       assert(process::is_action(t) || lps::is_multi_action(t));
-      m_actions = process::is_action(t) ? process::action_list(t) : process::action_list(t[0]);
+      m_actions = process::is_action(t) ? atermpp::down_cast<process::action_list>(t1) 
+                                        : atermpp::down_cast<process::action_list>(t[0]);
     }
 
     /// \brief Constructor

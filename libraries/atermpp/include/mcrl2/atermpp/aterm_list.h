@@ -63,7 +63,7 @@ public:
 
   /// Default constructor. Creates an empty list.
   term_list() noexcept
-    : aterm(detail::g_term_pool().is_empty_list())
+    : aterm(detail::g_term_pool().empty_list())
   {}
 
   /// \brief Copy constructor.
@@ -85,18 +85,6 @@ public:
   /// This class has user-declared copy constructor so declare copy and move assignment.
   term_list& operator=(const term_list& other) noexcept = default;
   term_list& operator=(term_list&& other) noexcept = default;
-
-  /// \brief Explicit construction from an aterm.
-  /// \param t An aterm.
-  explicit term_list(const aterm& t) noexcept
-   : aterm(t)
-  {
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
-    // Term list can be undefined; Generally, this is used to indicate an error situation.
-    // This use should be discouraged. For this purpose exceptions ought to be used.
-    assert(!defined() || type_is_list());
-  }
 
   /// \brief Creates a term_list with the elements from first to last.
   /// \details It is assumed that the range can be traversed from last to first.
@@ -283,7 +271,7 @@ public:
   /// \return The end of the list.
   const_iterator end() const
   {
-    return const_iterator(detail::address(detail::g_term_pool().is_empty_list()));
+    return const_iterator(detail::address(detail::g_term_pool().empty_list()));
   }
 
   /// \brief Returns the largest possible size of the term_list.

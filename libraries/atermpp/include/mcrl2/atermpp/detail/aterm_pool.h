@@ -115,7 +115,7 @@ public:
   inline std::size_t size() const;
 
   /// \returns A global term that indicates the empty list.
-  aterm& is_empty_list() noexcept { return m_is_empty_list; }
+  aterm& empty_list() noexcept { return m_empty_list; }
 
   /// \returns The function symbol used by integral terms.
   const function_symbol& as_int() noexcept { return m_function_symbol_pool.as_int(); }
@@ -165,7 +165,7 @@ private:
   bool m_enable_garbage_collection = true;
 
   /// Represents an empty list.
-  aterm m_is_empty_list;
+  aterm m_empty_list;
 };
 
 } // namespace detail

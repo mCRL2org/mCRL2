@@ -88,11 +88,11 @@ class pbes
       atermpp::aterm_appl::iterator i = t.begin();
       m_data = atermpp::aterm_appl(*i++);
 
-      data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
+      data::variable_list global_variables = atermpp::down_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
 
       atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
-      atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec[0]);
+      atermpp::aterm_list eqn = atermpp::down_cast<atermpp::aterm_list>(eqn_spec[0]);
       m_equations.clear();
       for (const atermpp::aterm& j: eqn)
       {

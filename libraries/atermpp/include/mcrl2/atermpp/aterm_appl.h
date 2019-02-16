@@ -69,11 +69,12 @@ public:
 
   /// \brief Explicit constructor from an aterm.
   /// \param t The aterm.
-  explicit term_appl(const aterm& t) : aterm(t)
+  explicit term_appl(const aterm& t) 
+   : aterm(t)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
-  }
+  } 
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
   term_appl(const term_appl& other) noexcept = default;

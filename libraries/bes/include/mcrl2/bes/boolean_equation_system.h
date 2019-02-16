@@ -60,7 +60,7 @@ class boolean_equation_system
     void init_term(const atermpp::aterm_appl& t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      atermpp::term_list<atermpp::aterm_appl> equations = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
+      atermpp::aterm_list equations = atermpp::down_cast<atermpp::aterm_list>(*i++);
       m_initial_state = boolean_expression(*i);
       m_equations.reserve(equations.size());
       for (const atermpp::aterm& eqn: equations)

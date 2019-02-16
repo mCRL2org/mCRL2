@@ -74,10 +74,10 @@ class process_specification
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data            = data::data_specification(atermpp::aterm_appl(*i++));
-      m_action_labels   = static_cast<process::action_label_list>(atermpp::aterm_appl(*i++)[0]);
-      data::variable_list global_variables = static_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
+      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::aterm_appl(*i++)[0]);
+      data::variable_list global_variables = atermpp::down_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
-      process_equation_list l = static_cast<process_equation_list>(atermpp::aterm_appl(*i++)[0]);
+      process_equation_list l = atermpp::down_cast<process_equation_list>(atermpp::aterm_appl(*i++)[0]);
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
       m_initial_process = process_expression(atermpp::aterm_appl(init[0]));
       m_equations       = std::vector<process_equation>(l.begin(), l.end());

@@ -1174,7 +1174,7 @@ class RewriterCompilingJitty::ImplementTree
     }
     else
     {
-      s << "static_cast<data_expression>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))";
+      s << "static_cast<const data_expression&>(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(v) << "))";
       result_type << "data_expression";
       return;
     }
@@ -1203,7 +1203,7 @@ class RewriterCompilingJitty::ImplementTree
     }
     if (rewr)
     {
-      s << "static_cast<data_expression>(this_rewriter->" << rewriter_function << "("
+      s << "static_cast<const data_expression&>(this_rewriter->" << rewriter_function << "("
            "this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
       calc_inner_term(s, a.body(), startarg, nnfvars, true, result_type);
       s << ", true, sigma(this_rewriter)))";

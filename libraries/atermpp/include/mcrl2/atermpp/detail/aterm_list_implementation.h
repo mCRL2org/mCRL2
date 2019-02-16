@@ -30,7 +30,7 @@ constexpr std::size_t LengthOfShortList = 10000;  /// \brief The length of a sho
 template <class Term>
 void term_list<Term>::push_front(const Term& el)
 {
-  *this = term_list<Term>(detail::g_term_pool().create_appl(detail::g_term_pool().as_list(), el, *this));
+  *this = down_cast<term_list<Term>>(detail::g_term_pool().create_appl(detail::g_term_pool().as_list(), el, *this));
 }
 
 template <typename Term>
@@ -220,7 +220,7 @@ namespace detail
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
-    aterm_list list(detail::g_term_pool().is_empty_list());
+    aterm_list list;
     while (first != last)
     {
       --last;
@@ -240,7 +240,7 @@ namespace detail
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
-    aterm_list list(detail::g_term_pool().is_empty_list());
+    aterm_list list;
     while (first != last)
     {
       --last;
@@ -258,7 +258,7 @@ namespace detail
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     // The list that will be returned.
-    aterm_list list(detail::g_term_pool().is_empty_list());
+    aterm_list list;
 
     const std::size_t len = std::distance(first,last);
     if (len < LengthOfShortList)  // If the list is sufficiently short, use the stack.
@@ -317,7 +317,7 @@ namespace detail
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     // The list that will be returned.
-    aterm_list list(detail::g_term_pool().is_empty_list());
+    aterm_list list;
 
     const std::size_t len = std::distance(first,last);
     if (len < LengthOfShortList) // If the list is sufficiently short, use the stack.

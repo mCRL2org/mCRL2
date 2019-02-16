@@ -38,7 +38,7 @@ aterm_pool::aterm_pool() :
   m_countUntilCollection = capacity();
   
   // Initialize the empty list.
-  m_is_empty_list = create_appl(m_function_symbol_pool.as_empty_list());
+  m_empty_list = create_appl(m_function_symbol_pool.as_empty_list());
 }
 
 aterm_pool::~aterm_pool()

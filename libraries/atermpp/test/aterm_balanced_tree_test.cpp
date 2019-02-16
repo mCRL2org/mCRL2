@@ -32,7 +32,7 @@ struct counter
 
   void operator()(const atermpp::aterm& t) const
   {
-    m_sum += aterm_int(t).value();
+    m_sum += down_cast<aterm_int>(t).value();
   }
 };
 
@@ -40,7 +40,7 @@ struct increment
 {
   atermpp::aterm operator()(const atermpp::aterm& t) const
   {
-    return aterm_int(aterm_int(t).value() + 1);
+    return aterm_int(down_cast<aterm_int>(t).value() + 1);
   }
 };
 
@@ -63,8 +63,8 @@ static void test_aterm_balanced_tree()
   aterm_balanced_tree empty_tree;
   BOOST_CHECK(empty_tree.begin() == empty_tree.end());
 
-  aterm_list q(read_term_from_string("[0,1,2,3,4,5,6,7,8,9]"));
-  aterm_list r(read_term_from_string("[0,1,2,3,4,6,1,7,8,9]"));
+  aterm_list q = read_list_from_string("[0,1,2,3,4,5,6,7,8,9]");
+  aterm_list r(read_list_from_string("[0,1,2,3,4,6,1,7,8,9]"));
   aterm_balanced_tree qtree(q.begin(),10);
   aterm_balanced_tree rtree(r.begin(),10);
 

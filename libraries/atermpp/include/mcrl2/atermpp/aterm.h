@@ -192,14 +192,14 @@ public:
 
   /// \brief Copy constructor.
   /// \param other The aterm that is copied. 
-  // This class has a non-trivial destructor so explicitly define the copy and move operators.
+  /// \details  This class has a non-trivial destructor so explicitly define the copy and move operators.
   aterm(const aterm& other) noexcept 
    : unprotected_aterm(other.m_term)
   {
     increment_reference_count();
   }
 
-  /// \brief Copy move constructor.
+  /// \brief Move constructor.
   /// \param other The aterm that is moved into the new term. This term may have changed after this operation. 
   /// \details This operation does not employ increments and decrements of reference counts and is therefore more
   ///          efficient than the standard copy construct. 
@@ -210,7 +210,7 @@ public:
   }
 
   /// \brief Assignment operator. 
-  /// \parameter other The aterm that will be assigned. 
+  /// \param other The aterm that will be assigned. 
   /// \return A reference to the assigned term. 
   aterm& operator=(const aterm& other) noexcept
   {
@@ -226,7 +226,7 @@ public:
 
   /// \brief Move assignment operator. 
   /// \brief This move assignment operator 
-  /// \parameter other The aterm that will be assigned. 
+  /// \param other The aterm that will be assigned. 
   /// \return A reference to the assigned term. 
   aterm& operator=(aterm&& other) noexcept
   {

@@ -30,7 +30,7 @@ int test_main(int argc, char* argv[])
 {
   atermpp::aterm t      = read_term_from_string("[1,2]");
   aterm_appl a (read_term_from_string("f(x)"));
-  aterm_list l (read_term_from_string("[3]"));
+  aterm_list l = read_list_from_string("[3]");
   aterm T      = t;
   aterm_appl A  = a;
   aterm_list L  = l;

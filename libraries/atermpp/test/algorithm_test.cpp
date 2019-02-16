@@ -110,15 +110,15 @@ void test_operators()
   }
 
   {
-    aterm_int a1 (read_term_from_string("1"));
-    aterm_int a2 (read_term_from_string("2"));
+    aterm_int a1 = read_int_from_string("1");
+    aterm_int a2 = read_int_from_string("2");
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }
 
   {
-    aterm_list a1 (read_term_from_string("[1,2]"));
-    aterm_list a2 (read_term_from_string("[3,2]"));
+    aterm_list a1 = read_list_from_string("[1,2]");
+    aterm_list a2 = read_list_from_string("[3,2]");
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }

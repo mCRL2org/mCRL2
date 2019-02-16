@@ -516,7 +516,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& l, const std::string& filename)
     for (const atermpp::aterm_appl& t: input_lts.get_action_label_declarations())
     {
       assert(t.function()==temporary_multi_action_header());
-      const lps::multi_action action=lps::multi_action(process::action_list(t[0]), data::data_expression(t[1]));
+      const lps::multi_action action=lps::multi_action(down_cast<process::action_list>(t[0]), down_cast<data::data_expression>(t[1]));
       if (!action.actions().empty() || action.has_time()) // The empty label is tau, which is present by default.
       {
         l.add_action(action_label_lts(action)); 

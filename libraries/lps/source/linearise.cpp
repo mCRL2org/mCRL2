@@ -494,7 +494,7 @@ class specification_basic_type
     std::size_t addMultiAction(const process_expression& multiAction, bool& isnew)
     {
       const process::action_label_list actionnames=getnames(multiAction);
-      std::size_t n=addObject((aterm_appl)(aterm_list)actionnames,isnew);
+      std::size_t n=addObject(atermpp::down_cast<aterm_appl>(static_cast<const aterm&>(actionnames)),isnew);
 
       if (isnew)
       {
@@ -506,7 +506,7 @@ class specification_basic_type
         // must separate assignment below as
         // objectdata may change as a side effect of make
         // multiaction.
-        const action_list tempvar=makemultiaction(actionnames, data_expression_list(objectdata[n].parameters));
+        const action_list tempvar=makemultiaction(actionnames, variable_list_to_data_expression_list(objectdata[n].parameters));
         objectdata[n].processbody=action_list_to_process(tempvar);
         objectdata[n].free_variables=std::set<variable>(objectdata[n].parameters.begin(), objectdata[n].parameters.end());
         objectdata[n].free_variables_defined=true;
@@ -1463,13 +1463,13 @@ class specification_basic_type
       if (is_sum(p))
       {
         if (strict)
-          return occursintermlist(var,data_expression_list(sum(p).variables()))||
+          return occursintermlist(var,variable_list_to_data_expression_list(sum(p).variables())) ||
                  occursinpCRLterm(var,sum(p).operand(),strict);
         /* below appears better? , but leads
            to errors. Should be investigated. */
         else
           return
-            (!occursintermlist(var,data_expression_list(sum(p).variables()))) &&
+            (!occursintermlist(var,variable_list_to_data_expression_list(sum(p).variables()))) &&
             occursinpCRLterm(var,sum(p).operand(),strict);
       }
       if (is_stochastic_operator(p))
@@ -1477,13 +1477,13 @@ class specification_basic_type
         const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(p);
         if (strict)
         {
-          return occursintermlist(var,data_expression_list(sto.variables()))||
+          return occursintermlist(var,variable_list_to_data_expression_list(sto.variables())) ||
                       occursinterm(var,sto.distribution()) ||
                       occursinpCRLterm(var,sto.operand(),strict);
         }
         else
         {
-          return (!occursintermlist(var,data_expression_list(sto.variables()))) &&
+          return (!occursintermlist(var,variable_list_to_data_expression_list(sto.variables()))) &&
                       (occursinterm(var,sto.distribution()) ||
                        occursinpCRLterm(var,sto.operand(),strict));
         }
@@ -1569,7 +1569,7 @@ class specification_basic_type
       for (variable_list::const_iterator l=sumvars.begin() ; l!=sumvars.end() ; ++l)
       {
         const variable var= *l;
-        if (occursintermlist(var,data_expression_list(occurvars)) ||
+        if (occursintermlist(var,variable_list_to_data_expression_list(occurvars)) ||
             occursintermlist(var,occurterms))
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
@@ -4462,7 +4462,7 @@ class specification_basic_type
       if (!options.binary)
       {
         const std::size_t e=create_enumeratedtype(stack.no_of_states);
-        function_symbol_list l(enumeratedtypes[e].elementnames);
+        data_expression_list l=enumeratedtypes[e].elementnames;
         for (; i>0 ; i--)
         {
           assert(l.size()>0);
@@ -4514,7 +4514,7 @@ class specification_basic_type
       if (!options.binary)
       {
         const std::size_t e=create_enumeratedtype(stack.no_of_states);
-        function_symbol_list l(enumeratedtypes[e].elementnames);
+        data_expression_list l(enumeratedtypes[e].elementnames);
         for (; i>0 ; i--)
         {
           l.pop_front();
@@ -8121,7 +8121,7 @@ class specification_basic_type
       if (multiaction.empty())
       {
         tuple_list t;
-        t.conditions.push_back((r_is_null)?static_cast<data_expression>(sort_bool::true_()):psi(r,comm_table));
+        t.conditions.push_back((r_is_null)?static_cast<const data_expression&>(sort_bool::true_()):psi(r,comm_table));
         t.actions.push_back(action_list());
         return t;
       }
@@ -8316,7 +8316,7 @@ class specification_basic_type
       if (is_variable(actiontime))
       {
         const variable& t = atermpp::down_cast<variable>(actiontime);
-        if (occursintermlist(t, data_expression_list(sumvars)) && !occursinterm(t, condition))
+        if (occursintermlist(t, variable_list_to_data_expression_list(sumvars)) && !occursinterm(t, condition))
         {
           return true;
         }
@@ -9549,7 +9549,7 @@ class specification_basic_type
         variable_list sumvars=sum(t).variables();
         maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
 
-        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
+        alphaconvert(sumvars,local_sigma,variable_list(),variable_list_to_data_expression_list(parameters));
         return sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters, local_sigma));
       }
 
@@ -9559,7 +9559,7 @@ class specification_basic_type
         variable_list sumvars=sto.variables();
         maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
 
-        alphaconvert(sumvars,local_sigma,variable_list(),data_expression_list(parameters));
+        alphaconvert(sumvars,local_sigma,variable_list(),variable_list_to_data_expression_list(parameters));
         return stochastic_operator(
                        sumvars,
                        replace_variables_capture_avoiding_alt(sto.distribution(), sigma),

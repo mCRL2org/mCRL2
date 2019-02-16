@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(replace_test1)
 {
   BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(a)"))) == read_term_from_string("f(a)"));
   BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("f(x)"));
-  BOOST_CHECK(replace(atermpp::aterm_list(read_term_from_string("[x]")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("[f(x)]"));
+  BOOST_CHECK(replace(read_list_from_string("[x]"), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("[f(x)]"));
 
   aterm_appl a(read_term_from_string("f(f(x))"));
   aterm_appl b(replace(a, atermpp::aterm_appl(read_term_from_string("f(x)")), atermpp::aterm_appl(read_term_from_string("x"))));

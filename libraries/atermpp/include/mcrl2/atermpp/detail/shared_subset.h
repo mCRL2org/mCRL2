@@ -96,17 +96,17 @@ class shared_subset
 
         std::size_t bit()
         {
-          return atermpp::aterm_int((*this)[0]).value();
+          return down_cast<aterm_int>((*this)[0]).value();
         }
 
         bdd_node true_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)[1]));
+          return bdd_node(down_cast<aterm_appl>((*this)[1]));
         }
 
         bdd_node false_node()
         {
-          return bdd_node(atermpp::aterm_appl((*this)[2]));
+          return bdd_node(down_cast<aterm_appl>((*this)[2]));
         }
     };
 

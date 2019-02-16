@@ -558,7 +558,7 @@ static void write_term(const aterm& t, ostream& os,
     if (current.term.type_is_int())
     {
       // If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
-      writeBits(aterm_int(current.term).value(), INT_SIZE_IN_BAF, os);
+      writeBits(atermpp::down_cast<aterm_int>(current.term).value(), INT_SIZE_IN_BAF, os);
     }
     else if (current.arg < get_function_symbol(current.term).arity())
     {

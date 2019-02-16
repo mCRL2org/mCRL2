@@ -228,8 +228,10 @@ class Induction
       {
         data_expression v_hypotheses_1 = create_hypotheses(a_hypothesis, v_list_of_variables, v_list_of_dummies);
         data_expression v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, a_list_of_dummies);
-        return data_expression_list(sort_bool::implies(v_hypotheses_1, v_formula_1))+
-                   data_expression_list(sort_bool::implies(v_hypotheses_2, v_formula_2));
+        data_expression_list result;
+        result.push_front(sort_bool::implies(v_hypotheses_2, v_formula_2));
+        result.push_front(sort_bool::implies(v_hypotheses_1, v_formula_1));
+        return result;
       }
     }
 
