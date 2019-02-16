@@ -26,7 +26,23 @@ class ltsgraph_tool : public ltsgraph_base
                     "When INFILE is -, an LTS is read from standard input.",
                     "Draws a labelled transition system (LTS). A convential graph drawing is provided either in 2D or 3D.",
                     "http://www.mcrl2.org/web/user_manual/tools/release/ltsgraph.html")
-    {}
+    {
+      // Qt: Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance
+      //     is mandatory on some platforms (for example, macOS) when an OpenGL core profile context is requested.
+
+      // Create an OpenGL 3.3 surface without depth, alpha and stencil buffers and with vsync enabled.
+      QSurfaceFormat surfaceFormat = QSurfaceFormat::defaultFormat();
+      surfaceFormat.setVersion(3, 3);
+      surfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
+      surfaceFormat.setAlphaBufferSize(1);
+      surfaceFormat.setStencilBufferSize(1);
+      surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+      surfaceFormat.setSwapInterval(1);
+
+      // We use the GL_KHR_debug extension to provide realtime logging of OpenGL errors.
+      surfaceFormat.setOption(QSurfaceFormat::DebugContext);
+      QSurfaceFormat::setDefaultFormat(surfaceFormat);
+    }
 
     bool run() override
     {
