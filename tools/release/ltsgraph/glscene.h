@@ -182,21 +182,13 @@ public:
   QVector3D eyeToWorld(int x, int y, GLfloat z = -1) const;
 
   /**
-   * @brief Converts world coordinates to viewport coordinates.
-   * @param world The world coordinates.
-   * @returns The eye coordinates, where the origin is at the bottom left. The
-   *          Z value is the value of the depth buffer at the requested location.
-   */
-  QVector3D worldToEye(const QVector3D& world) const;
-
-  /**
    * @brief Retrieve the object at viewport coordinate (x, y).
    * @returns A record that represents the selected object.
    */
   Selection select(int x, int y);
 
   /**
-   * @brief Select an object of type @type
+   * @brief Select an object of type @type on (pixel) viewport coordinates x, y.
    * @returns true if an object was selected
    */
   bool selectObject(Selection& s, int x, int y, SelectableObject type);
@@ -255,19 +247,19 @@ private:
    * @brief Renders a single edge label.
    * @param i The index of the edge of the label to render.
    */
-  void renderTransitionLabel(GLuint i);
+  void renderTransitionLabel(QPainter& painter, GLuint i);
 
   /**
    * @brief Renders a single state label.
    * @param i The index of the state of the label to render.
    */
-  void renderStateLabel(GLuint i);
+  void renderStateLabel(QPainter& painter, GLuint i);
 
   /**
    * @brief Renders a single state number.
    * @param i The index of the state number to render.
    */
-  void renderStateNumber(GLuint i);
+  void renderStateNumber(QPainter& painter, GLuint i);
 
   /**
    * @brief Generates TikZ code for a single edge.

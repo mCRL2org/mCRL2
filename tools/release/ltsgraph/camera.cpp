@@ -14,23 +14,26 @@
 
 #include <cmath>
 
+CameraView::CameraView()
+  : rotation(QQuaternion(1, 0, 0, 0)),
+    translation(QVector3D(0, 0, 0))
+{}
+
 void CameraView::viewport(std::size_t width, std::size_t height)
 {
-  glViewport(0, 0, width, height);
-  pixelsize = 1000.0 / (width < height ? height : width);
-  world.setX(width * pixelsize);
-  world.setY(height * pixelsize);
+  m_viewport = QRect(0, 0, width, height);
 }
 
 void CameraView::billboard_spherical(const QVector3D& pos)
 {
   QVector3D rt, up, lk;
-  GLfloat mm[16];
 
-  glGetFloatv(GL_MODELVIEW_MATRIX, mm);
+  // I don't know what this operation is.
+  /*QMatrix4x4& mm(m_viewMatrix);
   lk.setX(mm[0] * pos.x() + mm[4] * pos.y() + mm[8] * pos.z() + mm[12]);
   lk.setY(mm[1] * pos.x() + mm[5] * pos.y() + mm[9] * pos.z() + mm[13]);
   lk.setZ(mm[2] * pos.x() + mm[6] * pos.y() + mm[10] * pos.z() + mm[14]);
+  */
 
   lk /= lk.length();
   rt = QVector3D::crossProduct(lk, QVector3D(0, 1, 0));
@@ -50,44 +53,42 @@ void CameraView::billboard_cylindrical(const QVector3D& pos)
   mcrl2::gui::applyRotation(rotation, /*reverse=*/true);
 }
 
-void CameraView::applyTranslation()
+void CameraView::update()
 {
-  float viewdepth = world.length() + 2 * pixelsize * 10;
-  glTranslatef(0, 0, -5000.0005 - 0.5 * viewdepth);
-  glTranslatef(translation.x(), translation.y(), translation.z());
+  QMatrix4x4 viewMatrix;
+  viewMatrix.lookAt(QVector3D(0.0f, 0.0f, -5000.0f * zoom), QVector3D(0.0f, 0.0f, 1.0f), QVector3D(0.0f, 1.0f, 0.0f));
+
+  QMatrix4x4 projectionMatrix;
+  projectionMatrix.frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1000.0f);
+
+  m_viewMatrix = viewMatrix;
+  m_projectionMatrix = projectionMatrix;
 }
 
-void CameraView::applyFrustum()
-{
-  float viewdepth = world.length() + 2 * pixelsize * 10;
-  float f = 2 * zoom * (10000.0 + (viewdepth - world.z())) / 10000.0;
-  float nearPlane = 1000;
-  float farPlane = viewdepth + 10000;
-  glFrustum(-world.x() / f, world.x() / f, -world.y() / f, world.y() / f, nearPlane, farPlane);
-}
 
-void CameraView::applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
-{
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  // Viewport is always (0, 0, width, height)
-  gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
-}
-
-QVector3D CameraView::worldToEye(const QVector3D& world) const
+QVector3D CameraView::worldToViewport(const QVector3D& world) const
 {
   QVector3D eye = world.project(m_viewMatrix.transposed(), m_projectionMatrix.transposed(), m_viewport);
 
-  return QVector3D(eye.x() / m_device_pixel_ratio,
-                 (m_viewport.right() - eye.y()) / m_device_pixel_ratio,
+  return QVector3D(eye.x(),
+                 (m_viewport.right() - eye.y()),
                  eye.z());
 }
+
+QVector3D CameraView::eyeToWorld(const QVector3D& eye) const
+{
+  return eye.unproject(m_viewMatrix.transposed(), m_projectionMatrix.transposed(), m_viewport);
+}
+
+// Implementation of CameraAnimation
+
 void CameraAnimation::start_animation(std::size_t steps)
 {
   m_source = *this;
   m_animation_steps = steps;
   m_animation = 0;
-  if (steps == 0) {
+  if (steps == 0)
+  {
     operator=(m_target);
   }
 }
@@ -97,8 +98,6 @@ void CameraAnimation::operator=(const CameraView& other)
   rotation = other.rotation;
   translation = other.translation;
   zoom = other.zoom;
-  world = other.world;
-  pixelsize = other.pixelsize;
 }
 
 void CameraAnimation::interpolate_cam(float pos)
@@ -121,7 +120,7 @@ void CameraAnimation::interpolate_cam(float pos)
 void CameraAnimation::interpolate_world(float pos)
 {
   m_resizing = true;
-  if (pos > 0.999)
+  /*if (pos > 0.999)
   {
     world = m_target.world;
   }
@@ -129,45 +128,42 @@ void CameraAnimation::interpolate_world(float pos)
   {
     world.setX(m_target.world.x() * pos + m_source.world.x() * (1.0 - pos));
     world.setY(m_target.world.y() * pos + m_source.world.y() * (1.0 - pos));
-    if (m_target.world.z() > m_source.world.z()) {
+
+    if (m_target.world.z() > m_source.world.z())
+    {
       world.setZ(m_target.world.z() * sin(M_PI_2 * pos) + m_source.world.z() * (1.0 - sin(M_PI_2 * pos)));
     }
-    else {
+    else
+    {
       world.setZ(m_target.world.z() * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z() * cos(M_PI_2 * pos));
     }
-  }
+  }*/
 }
 
 void CameraAnimation::animate()
 {
-  if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom) &&
-      (m_target.world != world))
+  if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom))
   {
     std::size_t halfway = m_animation_steps / 2;
-    if (m_animation < halfway) {
+    if (m_animation < halfway)
+    {
       interpolate_cam((float)(++m_animation) / halfway);
     }
+
     if (m_animation == halfway)
     {
       m_animation_steps -= halfway;
       m_animation = 0;
     }
   }
-  else if (m_target.world != world)
+  /*else if (m_target.world != world)
   {
     interpolate_world((float)(++m_animation) / m_animation_steps);
   }
-  else {
+  else
+  {
     interpolate_cam((float)(++m_animation) / m_animation_steps);
-  }
-}
-
-void CameraAnimation::viewport(std::size_t width, std::size_t height)
-{
-  CameraView::viewport(width, height);
-  m_target.world.setX(world.x());
-  m_target.world.setY(world.y());
-  m_target.pixelsize = pixelsize;
+  }*/
 }
 
 bool CameraAnimation::resizing()
@@ -197,6 +193,5 @@ void CameraAnimation::setTranslation(const QVector3D& translation, std::size_t a
 
 void CameraAnimation::setSize(const QVector3D& size, std::size_t animation)
 {
-  m_target.world = size;
   start_animation(animation);
 }
