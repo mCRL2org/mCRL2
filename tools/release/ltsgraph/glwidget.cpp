@@ -138,7 +138,8 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
-  : QOpenGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true)
+  : QOpenGLWidget(parent),
+    m_graph(graph)
 {
   m_scene = new GLScene(*this, m_graph);
   m_scene->setDevicePixelRatio(devicePixelRatio());
