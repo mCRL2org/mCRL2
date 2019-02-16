@@ -105,7 +105,7 @@ class action_rename_rule
     /// \param t1 A term
     explicit action_rename_rule(const atermpp::aterm& t1)
     {
-      const atermpp::aterm_appl t(t1);
+      const atermpp::aterm_appl t=atermpp::down_cast<atermpp::aterm_appl>(t1);
       assert(core::detail::check_rule_ActionRenameRule(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_variables       = atermpp::down_cast<data::variable_list>(*i++);
@@ -199,10 +199,10 @@ class action_rename_specification
     {
       assert(core::detail::check_rule_ActionRenameSpec(t));
       atermpp::aterm_appl::iterator i = t.begin();
-      m_data            = atermpp::aterm_appl(*i++);
-      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::aterm_appl(*i++)[0]);
+      m_data            = atermpp::down_cast<atermpp::aterm_appl>(*i++);
+      m_action_labels   = atermpp::down_cast<process::action_label_list>(atermpp::down_cast<atermpp::aterm_appl>(*i++)[0]);
 
-      atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>(atermpp::aterm_appl(*i)[0]);
+      atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>(atermpp::down_cast<atermpp::aterm_appl>(*i)[0]);
       for (const atermpp::aterm& r: rules_list)
       {
         m_rules.push_back(action_rename_rule(r));

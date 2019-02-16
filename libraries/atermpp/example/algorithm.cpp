@@ -27,7 +27,7 @@ struct is_f
 {
   bool operator()(const atermpp::aterm& t) const
   {
-    return (t.type_is_appl()) && aterm_appl(t).function().name() == "f";
+    return (t.type_is_appl()) && down_cast<aterm_appl>(t).function().name() == "f";
   }
 };
 
@@ -37,13 +37,13 @@ struct is_a_or_b
   bool operator()(const atermpp::aterm& t) const
   {
     return (t.type_is_appl()) &&
-           (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");
+           (down_cast<aterm_appl>(t).function().name() == "a" || down_cast<aterm_appl>(t).function().name() == "b");
   }
 };
 
 void test_find()
 {
-  aterm_appl a(read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
+  aterm_appl a(read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
   assert(t == read_term_from_string("f(y)"));
@@ -56,8 +56,8 @@ void test_find()
 
 void test_replace()
 {
-  aterm_appl a (read_term_from_string("f(f(x))"));
-  aterm_appl b = replace(a, aterm_appl(read_term_from_string("f(x)")), aterm_appl(read_term_from_string("x")));
+  aterm_appl a (read_appl_from_string("f(f(x))"));
+  aterm_appl b = replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x"));
   assert(b == read_term_from_string("f(x)"));
 }
 

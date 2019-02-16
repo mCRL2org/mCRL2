@@ -177,7 +177,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
 {
   public:
     aterm_labelled_transition_system(const aterm& a)
-      : aterm_appl(a)
+      : aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(a))
     {}
 
     aterm_labelled_transition_system(

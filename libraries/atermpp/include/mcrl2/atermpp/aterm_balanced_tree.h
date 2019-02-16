@@ -39,7 +39,7 @@ class term_balanced_tree : public aterm_appl
 
     static aterm_appl make_node(const term_balanced_tree& left_tree, const term_balanced_tree& right_tree)
     {
-      return static_cast<aterm_appl>(detail::g_term_pool().create_appl(tree_node_function(), left_tree, right_tree));
+      return down_cast<aterm_appl>(detail::g_term_pool().create_appl(tree_node_function(), left_tree, right_tree));
     }
 
     template < typename ForwardTraversalIterator, class Transformer >
@@ -56,7 +56,7 @@ class term_balanced_tree : public aterm_appl
 
       if (size==1)
       {
-        return static_cast<aterm_appl>(transformer(*(p++)));
+        return down_cast<aterm_appl>(static_cast<const aterm&>(transformer(*(p++))));
       }
 
       assert(size==0);
@@ -106,7 +106,7 @@ class term_balanced_tree : public aterm_appl
 
     /// \brief Construction from aterm.
     explicit term_balanced_tree(const aterm& tree) 
-       : aterm_appl(tree)
+       : aterm_appl(down_cast<aterm_appl>(tree))
     {
     }
 

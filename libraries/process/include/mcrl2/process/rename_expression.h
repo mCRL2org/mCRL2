@@ -37,7 +37,7 @@ class rename_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term
     explicit rename_expression(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
     {
       assert(core::detail::check_term_RenameExpr(*this));
     }

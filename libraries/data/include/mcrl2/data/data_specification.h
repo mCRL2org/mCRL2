@@ -841,7 +841,7 @@ class data_specification: public sort_specification
       {
         throw mcrl2::runtime_error("Input stream does not contain a data specification");
       }
-      build_from_aterm(atermpp::aterm_appl(t));
+      build_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
     }
 
     /// \brief Writes the data specification to a stream.

@@ -100,33 +100,33 @@ struct fg_partial_replacer
 
 BOOST_AUTO_TEST_CASE(find_test)
 {
-  aterm_appl a(read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
+  aterm_appl a(read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
   aterm_appl t = find_if(a, is_f());
-  BOOST_CHECK(t == read_term_from_string("f(y)"));
+  BOOST_CHECK(t == read_appl_from_string("f(y)"));
 
-  aterm_appl a1(read_term_from_string("h(g(x),g(f(y)))"));
+  aterm_appl a1(read_appl_from_string("h(g(x),g(f(y)))"));
   t = partial_find_if(a1, is_f(), is_g());
   BOOST_CHECK(t == aterm_appl());
   t = partial_find_if(a1, is_f(), is_z());
-  BOOST_CHECK(t == read_term_from_string("f(y)"));
+  BOOST_CHECK(t == read_appl_from_string("f(y)"));
 
   std::vector< aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
-  BOOST_CHECK(v.front() == read_term_from_string("f(y)"));
-  BOOST_CHECK(v.back() == read_term_from_string("f(z)"));
+  BOOST_CHECK(v.front() == read_appl_from_string("f(y)"));
+  BOOST_CHECK(v.back() == read_appl_from_string("f(z)"));
 }
 
 BOOST_AUTO_TEST_CASE(replace_test1)
 {
-  BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(a)"))) == read_term_from_string("f(a)"));
-  BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("f(x)"));
-  BOOST_CHECK(replace(read_list_from_string("[x]"), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("[f(x)]"));
+  BOOST_CHECK(replace(read_appl_from_string("x"), read_appl_from_string("x"), read_appl_from_string("f(a)")) == read_term_from_string("f(a)"));
+  BOOST_CHECK(replace(read_appl_from_string("x"), read_appl_from_string("x"), read_appl_from_string("f(x)")) == read_term_from_string("f(x)"));
+  BOOST_CHECK(replace(read_list_from_string("[x]"), read_term_from_string("x"), read_appl_from_string("f(x)")) == read_term_from_string("[f(x)]"));
 
-  aterm_appl a(read_term_from_string("f(f(x))"));
-  aterm_appl b(replace(a, atermpp::aterm_appl(read_term_from_string("f(x)")), atermpp::aterm_appl(read_term_from_string("x"))));
-  BOOST_CHECK(b == read_term_from_string("f(x)"));
-  b = bottom_up_replace(a, atermpp::aterm_appl(read_term_from_string("f(x)")), atermpp::aterm_appl(read_term_from_string("x")));
+  aterm_appl a(read_appl_from_string("f(f(x))"));
+  aterm_appl b(replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x")));
+  BOOST_CHECK(b == read_appl_from_string("f(x)"));
+  b = bottom_up_replace(a, read_appl_from_string("f(x)"), read_appl_from_string("x"));
   BOOST_CHECK(b == read_term_from_string("x"));
 
   atermpp::aterm f = read_term_from_string("[]");

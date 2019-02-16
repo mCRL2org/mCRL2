@@ -131,11 +131,11 @@ class boolean_equation_system
       atermpp::aterm t = core::load_aterm(stream, binary, "BES", source);
       std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
       t = bes::detail::add_index(t, cache);
-      if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
+      if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::down_cast<atermpp::aterm_appl>(t)))
       {
         throw mcrl2::runtime_error("The loaded ATerm is not a BES.");
       }
-      init_term(atermpp::aterm_appl(t));
+      init_term(atermpp::down_cast<atermpp::aterm_appl>(t));
       if (!is_well_typed())
       {
         throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::load())");

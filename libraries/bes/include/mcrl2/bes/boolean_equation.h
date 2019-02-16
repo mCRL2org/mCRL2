@@ -63,11 +63,11 @@ class boolean_equation
     /// \param t1 A term
     explicit boolean_equation(const atermpp::aterm &t1)
     {
-      atermpp::aterm_appl t(t1);
+      atermpp::aterm_appl t = atermpp::down_cast<atermpp::aterm_appl>(t1);
       assert(core::detail::check_rule_BooleanEquation(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);
-      atermpp::aterm_appl var(*i++);
+      atermpp::aterm_appl var = atermpp::down_cast<atermpp::aterm_appl>(*i++);
       m_variable = boolean_variable(var);
       m_formula  = boolean_expression(*i);
     }
@@ -80,7 +80,7 @@ class boolean_equation
       assert(core::detail::check_rule_BooleanEquation(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);
-      atermpp::aterm_appl var(*i++);
+      atermpp::aterm_appl var = atermpp::down_cast<atermpp::aterm_appl>(*i++);
       m_variable = boolean_variable(var);
       m_formula  = boolean_expression(*i);
     }

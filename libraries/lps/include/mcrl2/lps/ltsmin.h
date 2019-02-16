@@ -303,7 +303,7 @@ class action_label_data_type: public pins_data_type
 
     std::string print(int i) const override
     {
-      return lps::pp(lps::multi_action(atermpp::aterm_appl(m_indexed_set.get(i))));
+      return lps::pp(lps::multi_action(atermpp::down_cast<atermpp::aterm_appl>(m_indexed_set.get(i))));
     }
 
     std::size_t parse(const std::string& s) override

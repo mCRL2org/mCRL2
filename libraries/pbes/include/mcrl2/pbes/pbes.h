@@ -86,12 +86,12 @@ class pbes
     void init_term(const atermpp::aterm_appl& t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      m_data = atermpp::aterm_appl(*i++);
+      m_data = atermpp::down_cast<atermpp::aterm_appl>(*i++);
 
-      data::variable_list global_variables = atermpp::down_cast<data::variable_list>(atermpp::aterm_appl(*i++)[0]);
+      data::variable_list global_variables = atermpp::down_cast<data::variable_list>(atermpp::down_cast<atermpp::aterm_appl>(*i++)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
 
-      atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
+      atermpp::aterm_appl eqn_spec = atermpp::down_cast<atermpp::aterm_appl>(*i++);
       atermpp::aterm_list eqn = atermpp::down_cast<atermpp::aterm_list>(eqn_spec[0]);
       m_equations.clear();
       for (const atermpp::aterm& j: eqn)
@@ -99,7 +99,7 @@ class pbes
         m_equations.emplace_back(j);
       }
 
-      atermpp::aterm_appl init = atermpp::aterm_appl(*i);
+      atermpp::aterm_appl init = atermpp::down_cast<atermpp::aterm_appl>(*i);
       m_initial_state = atermpp::down_cast<propositional_variable_instantiation>(init[0]);
     }
 
@@ -257,11 +257,11 @@ class pbes
       atermpp::aterm t = core::load_aterm(stream, binary, "PBES", source);
       std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
       t = pbes_system::detail::add_index(t, cache);
-      if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
+      if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::down_cast<atermpp::aterm_appl>(t)))
       {
         throw mcrl2::runtime_error("The loaded ATerm is not a PBES.");
       }
-      init_term(atermpp::aterm_appl(t));
+      init_term(atermpp::down_cast<atermpp::aterm_appl>(t));
       m_data.declare_data_specification_to_be_type_checked();
       complete_data_specification(*this); // Add all the sorts that are used in the specification
       // to the data specification. This is important for those

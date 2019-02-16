@@ -44,7 +44,7 @@ class pbes_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term
     explicit pbes_expression(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
     {
       assert(core::detail::check_rule_PBExpr(*this));
     }
@@ -243,7 +243,7 @@ class not_: public pbes_expression
     /// \brief Constructor.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
-      : pbes_expression(term)
+      : pbes_expression(atermpp::down_cast<pbes_expression>(term))
     {
       assert(core::detail::check_term_PBESNot(*this));
     }
@@ -306,7 +306,7 @@ class and_: public pbes_expression
     /// \brief Constructor.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
-      : pbes_expression(term)
+      : pbes_expression(atermpp::down_cast<pbes_expression>(term))
     {
       assert(core::detail::check_term_PBESAnd(*this));
     }
@@ -374,7 +374,7 @@ class or_: public pbes_expression
     /// \brief Constructor.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
-      : pbes_expression(term)
+      : pbes_expression(atermpp::down_cast<pbes_expression>(term))
     {
       assert(core::detail::check_term_PBESOr(*this));
     }
@@ -442,7 +442,7 @@ class imp: public pbes_expression
     /// \brief Constructor.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
-      : pbes_expression(term)
+      : pbes_expression(atermpp::down_cast<pbes_expression>(term))
     {
       assert(core::detail::check_term_PBESImp(*this));
     }
@@ -510,7 +510,7 @@ class forall: public pbes_expression
     /// \brief Constructor.
     /// \param term A term
     explicit forall(const atermpp::aterm& term)
-      : pbes_expression(term)
+      : pbes_expression(atermpp::down_cast<pbes_expression>(term))
     {
       assert(core::detail::check_term_PBESForall(*this));
     }
@@ -578,7 +578,7 @@ class exists: public pbes_expression
     /// \brief Constructor.
     /// \param term A term
     explicit exists(const atermpp::aterm& term)
-      : pbes_expression(term)
+      : pbes_expression(atermpp::down_cast<pbes_expression>(term))
     {
       assert(core::detail::check_term_PBESExists(*this));
     }

@@ -61,7 +61,7 @@ inline void swap(identifier_string& t1, identifier_string& t2)
 inline
 bool is_identifier_string(const atermpp::aterm& t)
 {
-  return t.type_is_appl() && atermpp::aterm_appl(t).size() == 0;
+  return t.type_is_appl() && atermpp::down_cast<atermpp::aterm_appl>(t).size() == 0;
 }
 
 /// \brief Provides the empty identifier string.

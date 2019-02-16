@@ -36,8 +36,8 @@ struct is_f
 
 void test_algorithm()
 {
-  aterm_appl a (read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
-  aterm_appl b (read_term_from_string("h(g(x),p(a(x,y),q(g(z))))"));
+  aterm_appl a (read_appl_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
+  aterm_appl b (read_appl_from_string("h(g(x),p(a(x,y),q(g(z))))"));
 
   aterm_appl t = find_if(a, is_f());
   BOOST_CHECK(t == read_term_from_string("f(y)"));
@@ -79,7 +79,7 @@ struct for_each_proc
 
 void test_for_each()
 {
-  aterm_appl t (read_term_from_string("h(g(x),f(y))"));
+  aterm_appl t (read_appl_from_string("h(g(x),f(y))"));
   std::set<std::string> names;
   atermpp::for_each(t, for_each_proc(names));
   for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
@@ -96,8 +96,8 @@ void test_for_each()
 void test_operators()
 {
   {
-    aterm_appl a1 (read_term_from_string("a1"));
-    aterm_appl a2 (read_term_from_string("a2"));
+    aterm_appl a1 (read_appl_from_string("a1"));
+    aterm_appl a2 (read_appl_from_string("a2"));
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }

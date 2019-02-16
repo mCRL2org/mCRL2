@@ -157,7 +157,7 @@ class specification_base
       {
         throw mcrl2::runtime_error("Input stream does not contain an LPS");
       }
-      construct_from_aterm(atermpp::aterm_appl(t));
+      construct_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
       // The well typedness check is only done in debug mode, since for large LPSs it takes too much
       // time
     }

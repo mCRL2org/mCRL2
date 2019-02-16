@@ -32,7 +32,7 @@ class untyped_possible_sorts: public sort_expression
     /// \brief Constructor.
     /// \param term A term
     explicit untyped_possible_sorts(const atermpp::aterm& term)
-      : sort_expression(term)
+      : sort_expression(atermpp::down_cast<sort_expression>(term))
     {
       assert(core::detail::check_term_UntypedSortsPossible(*this));
     }

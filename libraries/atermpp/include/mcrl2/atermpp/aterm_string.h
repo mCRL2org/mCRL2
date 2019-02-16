@@ -28,7 +28,7 @@ public:
   /// \brief Constructor.
   /// \param t A term without arguments of type appl. The string is given by the function symbol.
   explicit aterm_string(const aterm& t)
-    : aterm_appl(t)
+    : aterm_appl(down_cast<aterm_appl>(t))
   {
     assert(size() == 0);
   }

@@ -73,7 +73,7 @@ class pbes_equation
     /// \param t1 A term
     explicit pbes_equation(const atermpp::aterm& t1)
     {
-      atermpp::aterm_appl t(t1);
+      atermpp::aterm_appl t=atermpp::down_cast<atermpp::aterm_appl>(t1);
       assert(core::detail::check_rule_PBEqn(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);

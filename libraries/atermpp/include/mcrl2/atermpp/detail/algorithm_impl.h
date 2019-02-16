@@ -228,7 +228,7 @@ void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicat
     const aterm_appl& a = down_cast<aterm_appl>(t);
     if (match(a))
     {
-      *destBegin++ = aterm_appl(t);
+      *destBegin++ = down_cast<aterm_appl>(t);
     }
     if (stop(a))
     {

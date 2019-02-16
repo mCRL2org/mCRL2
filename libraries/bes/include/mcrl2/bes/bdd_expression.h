@@ -36,7 +36,7 @@ class bdd_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term
     explicit bdd_expression(const atermpp::aterm& term)
-      : atermpp::aterm_appl(term)
+      : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
     {
       assert(core::detail::check_rule_BddExpression(*this));
     }
@@ -102,7 +102,7 @@ class true_: public bdd_expression
     /// \brief Constructor.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
-      : bdd_expression(term)
+      : bdd_expression(atermpp::down_cast<bdd_expression>(term))
     {
       assert(core::detail::check_term_BddTrue(*this));
     }
@@ -155,7 +155,7 @@ class false_: public bdd_expression
     /// \brief Constructor.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
-      : bdd_expression(term)
+      : bdd_expression(atermpp::down_cast<bdd_expression>(term))
     {
       assert(core::detail::check_term_BddFalse(*this));
     }
@@ -208,7 +208,7 @@ class if_: public bdd_expression
     /// \brief Constructor.
     /// \param term A term
     explicit if_(const atermpp::aterm& term)
-      : bdd_expression(term)
+      : bdd_expression(atermpp::down_cast<bdd_expression>(term))
     {
       assert(core::detail::check_term_BddIf(*this));
     }
