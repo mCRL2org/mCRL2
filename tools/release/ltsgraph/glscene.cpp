@@ -226,7 +226,7 @@ void GLScene::render()
   GLenum result = glGetError();
   if (result != GL_NO_ERROR)
   {
-    mCRL2log(mcrl2::log::debug) << "OpenGL error: " << gluErrorString(result) << "\n";
+    mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(result) << "\n";
   }
 }
 
