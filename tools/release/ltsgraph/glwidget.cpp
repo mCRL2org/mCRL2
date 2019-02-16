@@ -268,20 +268,21 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
-  if (m_paused)
-  {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  }
-  else
+  QPainter painter;
+
+  if (!m_paused)
   {
     m_scene->setDevicePixelRatio(devicePixelRatio());
-    m_scene->render();
+    m_scene->render(painter);
+
     if (!m_scene->animationFinished())
     {
       update();
     }
   }
-  if (m_scene->resizing()) {
+
+  if (m_scene->resizing())
+  {
     emit widgetResized(m_scene->size());
   }
 }

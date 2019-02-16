@@ -19,6 +19,7 @@
 #include <QGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QPainter>
+#include <QOpenGLFunctions_3_3_Core>
 
 #include <vector>
 
@@ -43,7 +44,7 @@ private:
   QGLBuffer m_handle_vbo;
 };
 
-class GLScene
+class GLScene : private QOpenGLFunctions_3_3_Core
 {
 public:
 
@@ -81,14 +82,9 @@ public:
   void initialize();
 
   /**
-   * @brief Initiales the painter and calls painter.begin()
-   */
-  void startPainter(QPainter& painter);
-
-  /**
    * @brief Render the scene.
    */
-  void render();
+  void render(QPainter& painter);
 
   /**
    * @brief Resize the OpenGL viewport.
@@ -300,7 +296,6 @@ private:
   CameraAnimation m_camera;  /// Implementation details of the OpenGL camera handling.
   float m_device_pixel_ratio;
   QFont m_font;
-  QPainter m_renderpainter;
 
   VertexData m_vertexdata;   /// Implementation details storing pre-calculated vertices.
   QGLShaderProgram m_shader; /// The shader to draw everything.
