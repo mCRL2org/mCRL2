@@ -283,7 +283,6 @@ void GLWidget::paintGL()
   }
   else
   {
-    m_scene->init(Qt::white);
     m_scene->setDevicePixelRatio(devicePixelRatio());
     m_scene->render();
     if (!m_scene->animationFinished())
@@ -539,7 +538,6 @@ void GLWidget::endPaint()
 
 void GLWidget::saveTikz(const QString& filename, float aspectRatio)
 {
-  makeCurrent();
   export_graph_as_tikz_input(m_graph, filename, aspectRatio);
 }
 
