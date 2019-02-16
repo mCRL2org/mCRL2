@@ -32,8 +32,12 @@ constexpr int RES_NODE_SLICE = 64; /// Number of segments from which a circle re
 constexpr int RES_NODE_STACK = 4;
 
 /// Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
-#define QGLCheck(x) \
+#define MCRL2_QGL_VERIFY(x) \
   if (!x) { mCRL2log(mcrl2::log::debug) << #x " failed.\n"; std::abort(); }
+
+/// Executes x and checks for glGetError
+#define MCRL2_OGL_CHECK() \
+  { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(result) << "\n"; } }
 
 void VertexData::initialize()
 {
@@ -73,7 +77,7 @@ void VertexData::initialize()
         std::cos(stack));
   }
 
-  QGLCheck(m_node_vbo.create());
+  MCRL2_QGL_VERIFY(m_node_vbo.create());
   m_node_vbo.setUsagePattern(QGLBuffer::StaticDraw);
   m_node_vbo.allocate(node.data(), node.size());
 
@@ -108,7 +112,7 @@ void VertexData::initialize()
       0.3f * std::sin(0.0f),
       0.3f * std::cos(0.0f));
 
-  QGLCheck(m_arrowhead_vbo.create());
+  MCRL2_QGL_VERIFY(m_arrowhead_vbo.create());
   m_arrowhead_vbo.setUsagePattern(QGLBuffer::StaticDraw);
   m_arrowhead_vbo.allocate(arrowhead.data(), arrowhead.size());
 }
@@ -182,7 +186,6 @@ void GLScene::initialize()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
   // Enable depth testing, so that we don't have to care too much about
   // rendering in the right order.
   glEnable(GL_DEPTH_TEST);
@@ -190,14 +193,6 @@ void GLScene::initialize()
   // We'll be using a lot of glDrawArrays, and all of them use the vertex
   // array. We enable that feature once and leave it untouched.
   glEnableClientState(GL_VERTEX_ARRAY);
-}
-
-void GLScene::startPainter(QPainter& painter)
-{
-  painter.begin(&m_glwidget);
-  painter.setPen(Qt::black);
-  painter.setFont(m_font);
-  painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 }
 
 void GLScene::render()
@@ -210,11 +205,11 @@ void GLScene::render()
 
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
-  /*bool sel = m_graph.hasSelection();
+  bool sel = m_graph.hasSelection();
   std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  for (std::size_t i = 0; i < nodeCount; ++i)
+  /*for (std::size_t i = 0; i < nodeCount; ++i)
   {
     renderNode(sel ? m_graph.selectionNode(i) : i);
   }
@@ -229,11 +224,14 @@ void GLScene::render()
   }
 
   // text drawing follows
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  */
+
   glDepthMask(GL_FALSE);
 
-  startPainter(m_renderpainter);
-  for (std::size_t i = 0; i < nodeCount; ++i)
+  m_renderpainter.begin(&m_glwidget);
+  m_renderpainter.setFont(m_font);
+  m_renderpainter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+  /*for (std::size_t i = 0; i < nodeCount; ++i)
   {
     if (m_drawstatenumbers)
     {
@@ -252,19 +250,14 @@ void GLScene::render()
     {
       renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
     }
-  }
+  }*/
 
+  m_renderpainter.end();
   glDepthMask(GL_TRUE);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  m_renderpainter.end();*/
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
-  GLenum result = glGetError();
-  if (result != GL_NO_ERROR)
-  {
-    mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(result) << "\n";
-  }
+  MCRL2_OGL_CHECK();
 }
 
 void GLScene::resize(std::size_t width, std::size_t height)
@@ -362,8 +355,8 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   bool sel = m_graph.hasSelection();
   std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
-  startPainter(m_selectpainter);
-  QFontMetrics metrics{m_selectpainter.font()};
+
+  QFontMetrics metrics(m_font);
   switch (type)
   {
   case so_node:
@@ -430,9 +423,9 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_edge:
   case so_none:
-  Q_UNREACHABLE();
+    Q_UNREACHABLE();
   }
-  m_selectpainter.end();
+
   return s.selectionType != so_none;
 }
 
@@ -691,17 +684,19 @@ void GLScene::renderNode(GLuint i)
 void GLScene::renderTransitionLabel(GLuint i)
 {
   Graph::Edge edge = m_graph.edge(i);
-  if (edge.from() == edge.to() && !m_drawselfloops) {
+  if (edge.from() == edge.to() && !m_drawselfloops)
+  {
     return;
   }
+
   Graph::LabelNode& label = m_graph.transitionLabel(i);
+
   if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty())
   {
-    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
-    glColor3fv(fill);
+    QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
     QVector3D eye = worldToEye(label.pos());
     const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-    drawCenteredText(eye.x(), eye.y(), labelstring);
+    drawCenteredText(eye.x(), eye.y(), labelstring, color);
   }
 }
 
@@ -710,10 +705,10 @@ void GLScene::renderStateLabel(GLuint i)
   Graph::LabelNode& label = m_graph.stateLabel(i);
   if (!m_graph.stateLabelstring(label.labelindex()).isEmpty())
   {
-    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
-    glColor3fv(fill);
     QVector3D eye = worldToEye(label.pos());
-    drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()));
+
+    QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
+    drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()), color);
   }
 }
 
@@ -724,12 +719,13 @@ void GLScene::renderStateNumber(GLuint i)
   drawCenteredText(eye.x(), eye.y(), QString::number(i));
 }
 
-QRect GLScene::drawCenteredText(float x, float y, const QString& text)
+QRect GLScene::drawCenteredText(float x, float y, const QString& text, const QColor& color)
 {
-  QFontMetrics metrics{m_renderpainter.font()};
+  QFontMetrics metrics(m_renderpainter.font());
   QRect bounds = metrics.boundingRect(text);
   qreal w = bounds.width();
   qreal h = bounds.height();
+  m_renderpainter.setPen(color);
   m_renderpainter.drawText(x - w / 2, y - h / 2, text);
   return bounds;
 }
