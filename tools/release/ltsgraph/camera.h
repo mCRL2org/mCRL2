@@ -34,6 +34,8 @@ struct CameraView
   void applyTranslation();
   void applyFrustum();
   void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz);
+  /// \brief Converts the given position in world coordinates to a vector in eye space.
+  QVector3D worldToEye(const QVector3D& position) const;
 };
 
 struct CameraAnimation : public CameraView
