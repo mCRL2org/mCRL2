@@ -153,6 +153,9 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
 
 void GLScene::initialize()
 {
+  // Makes sure that we can call gl* functions after this.
+  initializeOpenGLFunctions();
+
   // Here we compile the vertex and fragment shaders and combine the results.
   bool result = m_shader.addShaderFromSourceCode(QGLShader::Vertex, g_vertexShader);
   if (!result)
