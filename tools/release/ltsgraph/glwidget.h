@@ -14,7 +14,6 @@
 #include "glscene.h"
 
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/gui/workarounds.h"
 
 #include <QOpenGLWidget>
 #include <QColorDialog>
