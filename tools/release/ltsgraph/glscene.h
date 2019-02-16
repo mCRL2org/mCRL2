@@ -276,7 +276,7 @@ private:
   /**
    * @brief Renders text, centered around the point at x and y
    */
-  QRect drawCenteredText(float x, float y, const QString& text);
+  QRect drawCenteredText(float x, float y, const QString& text, const QColor& color = Qt::black);
 
   /**
    * @brief Generates TikZ code for a single edge.
@@ -301,7 +301,6 @@ private:
   float m_device_pixel_ratio;
   QFont m_font;
   QPainter m_renderpainter;
-  QPainter m_selectpainter;
 
   VertexData m_vertexdata;   /// Implementation details storing pre-calculated vertices.
   QGLShaderProgram m_shader; /// The shader to draw everything.
