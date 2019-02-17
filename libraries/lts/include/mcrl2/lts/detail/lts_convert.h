@@ -244,7 +244,7 @@ inline action_label_lts translate_label_aux(const action_label_string& l1,
                                             lps::multi_action_type_checker& typechecker)
 {
   std::string l(l1);
-  action_label_lts al;
+  
   // Remove quotes, if present in the action label string.
   if ((l.size()>=2) &&
       (l.substr(0,1)=="\"") &&
@@ -255,13 +255,13 @@ inline action_label_lts translate_label_aux(const action_label_string& l1,
 
   try
   {
-    al=parse_lts_action(l,data,typechecker);
+    const action_label_lts al=parse_lts_action(l,data,typechecker);
+    return al;
   }
   catch (mcrl2::runtime_error& e)
   {
     throw mcrl2::runtime_error("Parse error in action label " + l1 + ".\n" + e.what());
   }
-  return al;
 }
 
 // ======================  lts -> lts  =============================
