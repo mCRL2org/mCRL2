@@ -44,19 +44,7 @@ setup:
 .. admonition:: Mac OS X
    :class: platform-specific mac
 
-   - *XCode* must be installed. It can be found on the OS X installation DVDs.
-     Consult the following table for the required version.
-
-     +-----------------+-----------------+
-     | OS X version    |  XCode version  |
-     +=================+=================+
-     | 10.5            | 3.1             |
-     +-----------------+-----------------+
-     | 10.6            | 3.2.5           |
-     +-----------------+-----------------+
-     | 10.7            | 4.2.1           |
-     +-----------------+-----------------+
-
+   - *XCode* must be installed. It can be obtained from Apple's developer website. 
 
    - |cmakeosx|_ or higher.
 
@@ -133,7 +121,9 @@ QT
 
 The mCRL2 toolset requires |qt|_ or higher for compilation of the graphical tools
 (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
-:ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`, :ref:`tool-mcrl2xi`).
+:ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`, :ref:`tool-mcrl2xi`). 
+Qt version 5.12.0 does not work properly and results in non functioning graphical
+tools. Qt version 5.12.1 appears to work fine.  
 
 .. admonition:: Windows
    :class: platform-specific win
