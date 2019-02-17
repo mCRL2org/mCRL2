@@ -18,35 +18,18 @@
 #include <QGLBuffer>
 #include <QGLShaderProgram>
 #include <QOpenGLWidget>
-#include <QPainter>
 #include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLVertexArrayObject>
+#include <QPainter>
 
 #include <vector>
 
-/// \brief Keeps track of the vertex data for nodes, arrowhead, handles and hints?
-struct VertexData
-{
-  static const int handleSize = 8;
-  static const int arrowheadSize = 12;
-
-public:
-  void initialize();
-
-  const QVector3D* arrowhead() const { return nullptr; }
-  const QVector3D* handle() const { return nullptr; }
-  const QVector3D* hint() const { return nullptr; }
-  const QVector3D* node() const { return nullptr; }
-
-private:
-  QGLBuffer m_node_vbo;
-  QGLBuffer m_arrowhead_vbo;
-  QGLBuffer m_hint_vbo;
-  QGLBuffer m_handle_vbo;
-};
-
+/// \brief Contains all information required to render a given Graph.
 class GLScene : private QOpenGLFunctions_3_3_Core
 {
 public:
+  static const int handleSize = 8;
+  static const int arrowheadSize = 12;
 
   /**
    * @brief An enumeration that identifies the types of objects that
@@ -162,9 +145,9 @@ public:
 
   float nodeSizeOnScreen() const { return m_size_node * m_device_pixel_ratio; }
 
-  float handleSizeOnScreen() const { return VertexData::handleSize * m_device_pixel_ratio; }
+  float handleSizeOnScreen() const { return handleSize * m_device_pixel_ratio; }
 
-  float arrowheadSizeOnScreen() const { return VertexData::arrowheadSize * m_device_pixel_ratio; }
+  float arrowheadSizeOnScreen() const { return arrowheadSize * m_device_pixel_ratio; }
 
   float fogDistance() const { return m_fogdistance; }
 
@@ -229,8 +212,7 @@ private:
   float m_device_pixel_ratio;
   QFont m_font;
 
-  VertexData m_vertexdata;   /// Implementation details storing pre-calculated vertices.
-  QGLShaderProgram m_shader; /// The shader to draw everything.
+  QGLShaderProgram m_shader;                /// The shader to draw everything.
 
   /// Store various settings.
   QVector3D m_worldsize;
@@ -245,6 +227,11 @@ private:
   bool m_drawfog              = true;    /// Fog is rendered only if this field is true.
   float m_fogdistance         = 5500.0f; /// The distance at which the fog starts
 
+  QOpenGLVertexArrayObject m_node_vao;  /// The vertex layout for nodes.
+  QGLBuffer m_node_vbo;
+  QGLBuffer m_arrowhead_vbo;
+  QGLBuffer m_hint_vbo;
+  QGLBuffer m_handle_vbo;
 };
 
 #endif // MCRL2_LTSGRAPH_GLSCENE_H

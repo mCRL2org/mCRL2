@@ -32,100 +32,22 @@ constexpr int RES_NODE_STACK = 4;
 
 /// Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
 #define MCRL2_QGL_VERIFY(x) \
-  if (!x) { mCRL2log(mcrl2::log::debug) << #x " failed.\n"; std::abort(); }
+  if (!x) { mCRL2log(mcrl2::log::error) << #x " failed.\n"; std::abort(); }
 
-/// Executes x and checks for glGetError
+/// \brief Checks for OpenGL errors, prints it and aborts.
 #define MCRL2_OGL_CHECK() \
-  { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(result) << "\n"; } }
+  { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(result) << "\n"; std::abort(); } }
 
-void VertexData::initialize()
-{
-  std::vector<QVector3D> node(RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2);
-
-  // Generate vertices for node border (a line loop drawing a circle)
-  float slice = 0;
-  float sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1));
-  float stack = 0;
-  float stackd = (float)(M_PI_2 / RES_NODE_STACK);
-
-  for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
-  {
-    node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
-  }
-
-  // Generate vertices for node (a quad strip drawing a half sphere)
-  slice = 0;
-  std::size_t n = RES_NODE_SLICE - 1;
-  for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
-  {
-    for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
-    {
-      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
-          std::sin((float)(stack + stackd)) * std::cos(slice),
-          std::cos((float)(stack + stackd)));
-      node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
-          std::sin(stack) * std::cos(slice),
-          std::cos(stack));
-    }
-
-    node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
-        std::sin((float)(stack + stackd)) * std::cos(0.0f),
-        std::cos((float)(stack + stackd)));
-    node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
-        std::sin(stack) * std::cos(0.0f),
-        std::cos(stack));
-  }
-
-  MCRL2_QGL_VERIFY(m_node_vbo.create());
-  m_node_vbo.setUsagePattern(QGLBuffer::StaticDraw);
-  m_node_vbo.allocate(node.data(), node.size());
-
-  // Generate plus (and minus) hint for exploration mode
-  QVector3D m_hint[4]; // The plus and minus "hints?".
-  QVector3D m_handle[4]; //
-  m_hint[0] = QVector3D(-0.3f, 0.0f, 0.0f);
-  m_hint[1] = QVector3D(0.3f,  0.0f, 0.0f);
-  m_hint[2] = QVector3D(0.0f, -0.3f, 0.0f);
-  m_hint[3] = QVector3D(0.0f,  0.3f, 0.0f);
-
-  // Generate vertices for handle (border + fill, both squares)
-  m_handle[0] = QVector3D(-0.5f, -0.5f, 0.0f);
-  m_handle[1] = QVector3D(0.5f , -0.5f, 0.0f);
-  m_handle[2] = QVector3D(0.5f , 0.5f, 0.0f);
-  m_handle[3] = QVector3D(-0.5f, 0.5f, 0.0f);
-
-  // Generate vertices for arrowhead (a triangle fan drawing a cone)
-  std::vector<QVector3D> arrowhead(RES_ARROWHEAD + 1);
-  arrowhead[0] = QVector3D(0.0f, 0.0f, 0.0f);
-  float diff = (float)(M_PI / 20.0f);
-  float t = 0.0f;
-
-  for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
-  {
-    arrowhead[i] = QVector3D(-1.0f,
-        0.3f * std::sin(t),
-        0.3f * std::cos(t));
-  }
-
-  arrowhead[RES_ARROWHEAD] = QVector3D(-1.0f,
-      0.3f * std::sin(0.0f),
-      0.3f * std::cos(0.0f));
-
-  MCRL2_QGL_VERIFY(m_arrowhead_vbo.create());
-  m_arrowhead_vbo.setUsagePattern(QGLBuffer::StaticDraw);
-  m_arrowhead_vbo.allocate(arrowhead.data(), arrowhead.size());
-}
-
-//
-// GLScene public methods
-//
+/// Executes x and checks for errors afterwards.
+#define MCRL2_OGL_VERIFY(x) \
+  x; { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " #x " failed with " << gluErrorString(result) << "\n"; std::abort(); } }
 
 namespace
 {
 const char* g_vertexShader =
   "#version 330\n "
 
-  "in vec4 vertex;"
+  "layout(location = 0) in vec4 vertex;"
 
   "void main( void )"
   "{"
@@ -178,7 +100,88 @@ void GLScene::initialize()
     std::abort();
   }
 
-  m_vertexdata.initialize();
+  std::vector<QVector3D> node(RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2);
+
+  // Generate vertices for node border (a line loop drawing a circle)
+  float slice = 0;
+  float sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1));
+  float stack = 0;
+  float stackd = (float)(M_PI_2 / RES_NODE_STACK);
+
+  for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
+  {
+    node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
+  }
+
+  // Generate vertices for node (a quad strip drawing a half sphere)
+  slice = 0;
+  std::size_t n = RES_NODE_SLICE - 1;
+  for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
+  {
+    for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
+    {
+      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
+          std::sin((float)(stack + stackd)) * std::cos(slice),
+          std::cos((float)(stack + stackd)));
+      node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
+          std::sin(stack) * std::cos(slice),
+          std::cos(stack));
+    }
+
+    node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
+        std::sin((float)(stack + stackd)) * std::cos(0.0f),
+        std::cos((float)(stack + stackd)));
+    node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
+        std::sin(stack) * std::cos(0.0f),
+        std::cos(stack));
+  }
+
+  MCRL2_QGL_VERIFY(m_node_vbo.create());
+  m_node_vbo.bind();
+  m_node_vbo.setUsagePattern(QGLBuffer::StaticDraw);
+  m_node_vbo.allocate(node.data(), node.size());
+
+  // The vertex array object stores the layout of the vertex data that we use (vec3 float).
+  MCRL2_QGL_VERIFY(m_node_vao.create());
+  m_node_vao.bind();
+  MCRL2_OGL_VERIFY(glEnableVertexAttribArray(0));
+  m_node_vbo.bind();
+  MCRL2_OGL_VERIFY(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
+
+  // Generate plus (and minus) hint for exploration mode
+  QVector3D m_hint[4]; // The plus and minus "hints?".
+  QVector3D m_handle[4]; //
+  m_hint[0] = QVector3D(-0.3f, 0.0f, 0.0f);
+  m_hint[1] = QVector3D(0.3f,  0.0f, 0.0f);
+  m_hint[2] = QVector3D(0.0f, -0.3f, 0.0f);
+  m_hint[3] = QVector3D(0.0f,  0.3f, 0.0f);
+
+  // Generate vertices for handle (border + fill, both squares)
+  m_handle[0] = QVector3D(-0.5f, -0.5f, 0.0f);
+  m_handle[1] = QVector3D(0.5f , -0.5f, 0.0f);
+  m_handle[2] = QVector3D(0.5f , 0.5f, 0.0f);
+  m_handle[3] = QVector3D(-0.5f, 0.5f, 0.0f);
+
+  // Generate vertices for arrowhead (a triangle fan drawing a cone)
+  std::vector<QVector3D> arrowhead(RES_ARROWHEAD + 1);
+  arrowhead[0] = QVector3D(0.0f, 0.0f, 0.0f);
+  float diff = (float)(M_PI / 20.0f);
+  float t = 0.0f;
+
+  for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
+  {
+    arrowhead[i] = QVector3D(-1.0f,
+        0.3f * std::sin(t),
+        0.3f * std::cos(t));
+  }
+
+  arrowhead[RES_ARROWHEAD] = QVector3D(-1.0f,
+      0.3f * std::sin(0.0f),
+      0.3f * std::cos(0.0f));
+
+  MCRL2_QGL_VERIFY(m_arrowhead_vbo.create());
+  m_arrowhead_vbo.setUsagePattern(QGLBuffer::StaticDraw);
+  m_arrowhead_vbo.allocate(arrowhead.data(), arrowhead.size());
 
   // Enable anti-aliasing for lines and points. Anti-aliasing for polygons gives artifacts on
   // OSX when drawing a quadstrip.
@@ -191,10 +194,6 @@ void GLScene::initialize()
   // Enable depth testing, so that we don't have to care too much about
   // rendering in the right order.
   glEnable(GL_DEPTH_TEST);
-
-  // We'll be using a lot of glDrawArrays, and all of them use the vertex
-  // array. We enable that feature once and leave it untouched.
-  glEnableClientState(GL_VERTEX_ARRAY);
 }
 
 void GLScene::render(QPainter& painter)
@@ -207,7 +206,7 @@ void GLScene::render(QPainter& painter)
   painter.beginNativePainting();
 
   QColor clear(Qt::white);
-  glClearColor(clear.redF(), clear.greenF(), clear.blueF(), 1.0f);
+  glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
@@ -216,12 +215,15 @@ void GLScene::render(QPainter& painter)
   std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  /*for (std::size_t i = 0; i < nodeCount; ++i)
+  // All nodes share the same shader.
+  m_shader.bind();
+
+  for (std::size_t i = 0; i < nodeCount; ++i)
   {
     renderNode(sel ? m_graph.selectionNode(i) : i);
   }
 
-  for (std::size_t i = 0; i < edgeCount; ++i) {
+  /*for (std::size_t i = 0; i < edgeCount; ++i) {
     renderEdge(sel ? m_graph.selectionEdge(i) : i);
   }
 
@@ -424,7 +426,7 @@ void GLScene::setSize(const QVector3D& size, std::size_t animation)
 // Helper functions for drawing.
 //
 
-inline
+/*inline
 void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
 {
   glVertexPointer(3, GL_FLOAT, 0, data.handle());
@@ -444,16 +446,15 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   {
     Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
     glColor3fv(blue);
-    glVertexPointer(3, GL_FLOAT, 4*3, data.node());
+    //glVertexPointer(3, GL_FLOAT, 4*3, data.node());
     glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
   }
 
-  glVertexPointer(3, GL_FLOAT, 0, data.node());
+  //glVertexPointer(3, GL_FLOAT, 0, data.node());
 
   float alpha = translucent ? 0.5 : 1.0;
   glColor4fv(Color4f(fill, alpha));
 
-  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
 
   // disable the depth mask temporarily for drawing the border of a node
   // dragging an initial state in 2D mode over other nodes looks less weird this way
@@ -507,7 +508,7 @@ void drawArc(const QVector3D controlpoints[4])
   glEvalMesh1(GL_LINE, 0, RES_ARC);
 
   glDepthMask(GL_TRUE);
-}
+}*/
 
 /**
  * @brief Renders text, centered around the point at x and y
@@ -562,7 +563,7 @@ void GLScene::renderEdge(std::size_t i)
   glColor3f(m_graph.handle(i).selected(), 0.0, 0.0);
 
   // Draw the arc
-  drawArc(ctrl);
+  //drawArc(ctrl);
 
   // Move the arrowhead outside of the node.
   glTranslatef(-0.5f * nodeSizeOnScreen(), 0.0f, 0.0f);
@@ -588,7 +589,7 @@ void GLScene::renderEdge(std::size_t i)
     glRotatef(angle * 180.0 / M_PI, axis.x(), axis.y(), axis.z());
 
     // Draw the arrow head
-    drawArrowHead(m_vertexdata);
+    //drawArrowHead(m_vertexdata);
   }
 
   glPopMatrix();
@@ -597,7 +598,7 @@ void GLScene::renderEdge(std::size_t i)
 void GLScene::renderNode(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
-  Color3f fill;
+  /*Color3f fill;
   Color3f line;
   Color4f hint;
 
@@ -622,24 +623,22 @@ void GLScene::renderNode(GLuint i)
     else {
       fill = node.color();
     }
-  }
+  }*/
 
-  glPushMatrix();
+  //m_camera.billboard_spherical(node.pos());
+  QMatrix4x4 modelMatrix;
+  modelMatrix.scale(0.5f * nodeSizeOnScreen());
 
-  m_camera.billboard_spherical(node.pos());
-  float nodescale = 0.5f * nodeSizeOnScreen();
-  glScalef(nodescale, nodescale, nodescale);
-  drawNode(m_vertexdata, line, fill, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
+  m_node_vao.bind();
+  MCRL2_OGL_VERIFY(glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2));
 
-  if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
+ /* if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
   {
     float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
     hint = Color4f(fill.r + s, fill.g + s, fill.b + s, true);
 
     drawWhetherNodeCanBeCollapsedOrExpanded(m_vertexdata, hint, node.active());
-  }
-
-  glPopMatrix();
+  }*/
 }
 
 void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
@@ -698,7 +697,7 @@ void GLScene::renderHandle(GLuint i)
     m_camera.billboard_cylindrical(handle.pos());
     float scale = handleSizeOnScreen();
     glScalef(scale, scale, scale);
-    drawHandle(m_vertexdata, line, fill);
+    //drawHandle(m_vertexdata, line, fill);
 
     glPopMatrix();
     glEnable(GL_LINE_SMOOTH);
