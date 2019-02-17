@@ -54,6 +54,36 @@ namespace detail
           return m_index;
         }
     };
+
+    // The class below is used to get a unique number for a multi-action which can contain time. 
+    // The class is a little complex because a multi-action is a pair of actions and time, and
+    // not by itself an aterm. 
+    class multi_action_indexed_set 
+    {
+      protected:
+        atermpp::indexed_set<atermpp::aterm> storage;
+      
+      public:
+        inline
+        std::pair<std::size_t, bool> put(const lps::multi_action& ma) 
+        {
+          if (ma.time()==data::undefined_real())
+          {
+            // If the time is undefined, which means the multi-action can take place
+            // at any time, we find a number based on the actions. 
+            return storage.put(ma.actions());
+          }
+          else 
+          { 
+            // When the time is non trivial we put the time as the first element of the 
+            // list of actions. This is not very elegant but it works. 
+            atermpp::aterm_list l=atermpp::down_cast<atermpp::aterm_list>(static_cast<const atermpp::aterm&>(ma.actions()));
+            l.push_front(ma.time()); 
+            return storage.put(l);
+          }
+        }
+    };
+
 } // end namespace detail
 
 class lps2lts_algorithm
@@ -74,7 +104,7 @@ class lps2lts_algorithm
     bit_hash_table m_bit_hash_table;
 
     probabilistic_lts_lts_t m_output_lts;
-    atermpp::indexed_set<process::action_list> m_action_label_numbers;
+    detail::multi_action_indexed_set m_action_label_numbers;
     std::ofstream m_aut_file;
 
     bool m_maintain_traces;
@@ -102,7 +132,7 @@ class lps2lts_algorithm
       m_generator(nullptr),
       m_must_abort(false)
     {
-      m_action_label_numbers.put(action_label_lts::tau_action().actions());  // The action tau has index 0 by default.
+      m_action_label_numbers.put(action_label_lts::tau_action());  // The action tau has index 0 by default.
     }
 
     ~lps2lts_algorithm()

@@ -696,7 +696,7 @@ bool lps2lts_algorithm::search_divergence(
   {
     assert(is_hidden_summand(j->action().actions(),m_options.actions_internal_for_divergencies));
 
-    std::pair<std::size_t, bool> action_label_number = m_action_label_numbers.put(j->action().actions());
+    std::pair<std::size_t, bool> action_label_number = m_action_label_numbers.put(j->action());
     if (action_label_number.second)
     {
       assert(j->action().actions().size() != 0);
@@ -943,7 +943,6 @@ void lps2lts_algorithm::print_target_distribution_in_aut_format(
 
 bool lps2lts_algorithm::add_transition(const lps::state& source_state, const next_state_generator::transition_t& transition)
 {
-
   std::size_t source_state_number;
   if (m_options.bithashing)
   {
@@ -980,7 +979,7 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, const nex
   }
   else
   {
-    std::pair<std::size_t, bool> action_label_number = m_action_label_numbers.put(transition.action().actions());
+    std::pair<std::size_t, bool> action_label_number = m_action_label_numbers.put(transition.action());
     if (action_label_number.second)
     {
       assert(transition.action().actions().size() != 0);
