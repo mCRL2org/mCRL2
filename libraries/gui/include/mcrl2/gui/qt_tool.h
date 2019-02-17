@@ -145,7 +145,13 @@ class qt_tool: public Tool
 
     virtual ~qt_tool()
     {
+#ifndef MCRL2_PLATFORM_MAC
+      // For the mac this call leads to a crash in QtCore`QObject::thread() (February 2019, Qt5.12.1). 
+      // Therefore, for the moment cleaning up m_application is skipped. If this crash does not happen
+      // with newer versions of Qt (if that is the cause) or the cause for the crash is found, this 
+      // code should be reenabled on the MAC platform. 
       delete m_application;
+#endif
     }
 };
 
