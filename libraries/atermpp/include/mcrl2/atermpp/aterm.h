@@ -39,17 +39,17 @@ protected:
 public:
 
   /// \brief Default constuctor.
-  unprotected_aterm() noexcept 
+  unprotected_aterm() noexcept
    : m_term(nullptr)
   {}
 
   /// \brief Constructor.
   /// \param term The term from which the new term is constructed.
-  unprotected_aterm(detail::_aterm* term) noexcept 
+  unprotected_aterm(detail::_aterm* term) noexcept
    : m_term(term)
   {}
 
-  /// \brief Dynamic check whether the term is an aterm_appl. 
+  /// \brief Dynamic check whether the term is an aterm_appl.
   /// \return True iff this term is an term_appl.
   /// \details This function has constant complexity.
   ///          It is defined as !type_is_int() && !type_is_list().
@@ -58,7 +58,7 @@ public:
     return !type_is_int() && !type_is_list();
   }
 
-  /// \brief Dynamic check whether the term is an aterm_int. 
+  /// \brief Dynamic check whether the term is an aterm_int.
   /// \return True iff this term has internal structure of an aterm_int.
   /// \details This function has constant complexity.
   bool type_is_int() const noexcept
@@ -67,7 +67,7 @@ public:
     return f == detail::g_as_int;
   }
 
-  /// \brief Dynamic check whether the term is an aterm_list. 
+  /// \brief Dynamic check whether the term is an aterm_list.
   /// \returns True iff this term has the structure of an term_list
   /// \details This function has constant complexity.
   bool type_is_list() const noexcept
@@ -173,13 +173,13 @@ public:
   /// \brief Default constructor.
   aterm() noexcept = default;
 
-  /// \brief Standard destructor. 
+  /// \brief Standard destructor.
   ~aterm()
   {
     decrement_reference_count();
   }
 
-  /// \brief Constructor based on an internal term data structure. This is not for public use. 
+  /// \brief Constructor based on an internal term data structure. This is not for public use.
   /// \details Takes ownership of the passed underlying term.
   /// \param t A pointer to an internal aterm data structure.
   /// \todo Should be protected, but this cannot yet be done due to a problem
@@ -191,27 +191,27 @@ public:
   }
 
   /// \brief Copy constructor.
-  /// \param other The aterm that is copied. 
+  /// \param other The aterm that is copied.
   /// \details  This class has a non-trivial destructor so explicitly define the copy and move operators.
-  aterm(const aterm& other) noexcept 
+  aterm(const aterm& other) noexcept
    : unprotected_aterm(other.m_term)
   {
     increment_reference_count();
   }
 
   /// \brief Move constructor.
-  /// \param other The aterm that is moved into the new term. This term may have changed after this operation. 
+  /// \param other The aterm that is moved into the new term. This term may have changed after this operation.
   /// \details This operation does not employ increments and decrements of reference counts and is therefore more
-  ///          efficient than the standard copy construct. 
-  aterm(aterm&& other) noexcept 
+  ///          efficient than the standard copy construct.
+  aterm(aterm&& other) noexcept
    : unprotected_aterm(other.m_term)
   {
     other.m_term=nullptr;
   }
 
-  /// \brief Assignment operator. 
-  /// \param other The aterm that will be assigned. 
-  /// \return A reference to the assigned term. 
+  /// \brief Assignment operator.
+  /// \param other The aterm that will be assigned.
+  /// \return A reference to the assigned term.
   aterm& operator=(const aterm& other) noexcept
   {
     // Increment first to prevent the same term from becoming reference zero temporarily.
@@ -224,10 +224,10 @@ public:
     return *this;
   }
 
-  /// \brief Move assignment operator. 
-  /// \brief This move assignment operator 
-  /// \param other The aterm that will be assigned. 
-  /// \return A reference to the assigned term. 
+  /// \brief Move assignment operator.
+  /// \brief This move assignment operator
+  /// \param other The aterm that will be assigned.
+  /// \return A reference to the assigned term.
   aterm& operator=(aterm&& other) noexcept
   {
     std::swap(m_term, other.m_term);
@@ -235,18 +235,9 @@ public:
   }
 
 protected:
-  /// \brief A function that copies t into the current term, without adapting the reference counts.
-  /// \details This function does not maintain proper bookkeeping of the reference counts, which
-  ///          must be done seperately. It can only be used with care. 
-  /// \param   t The term that is copied in the current term. 
-  void copy_term(const aterm& t) noexcept
-  {
-    m_term = t.m_term;
-  }
-
   /// \brief Increment the reference count.
   /// \details This increments the reference count unless the term contains null.
-  ///          Use with care as this destroys the reference count mechanism. 
+  ///          Use with care as this destroys the reference count mechanism.
   void increment_reference_count() const
   {
     if (defined())
@@ -257,7 +248,7 @@ protected:
 
   /// \brief Decrement the reference count.
   /// \details This decrements the reference count unless the term contains null.
-  ///          Use with care as this destroys the reference count mechanism. 
+  ///          Use with care as this destroys the reference count mechanism.
   void decrement_reference_count() const
   {
     if (defined())

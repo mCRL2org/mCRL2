@@ -177,22 +177,6 @@ class propositional_variable_instantiation: public pbes_expression
         ))
     {}
 
-    /// \brief Type of the parameters.
-    typedef data::data_expression parameter_type;
-
-    /// \brief Constructor.
-    /// \param s A string
-    propositional_variable_instantiation(std::string const& s)
-    {
-      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
-      core::identifier_string name(p.first);
-      data::data_expression_list parameters = p.second;
-      copy_term(atermpp::aterm_appl(core::detail::function_symbol_PropVarInst(),
-        name,
-        parameters,
-        atermpp::aterm_int(core::index_traits<propositional_variable_instantiation, propositional_variable_key_type, 2>::insert(std::make_pair(name, parameters)))
-      ));
-    }
 //--- end user section propositional_variable_instantiation ---//
 };
 
