@@ -13,16 +13,23 @@
 #define MCRL2_LPS_GENERATE_LTS_H
 
 #include <deque>
-#include <unordered_map>
-#include <unordered_set>
+#include <iomanip>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lps/one_point_rule_rewrite.h"
+#include "mcrl2/lps/replace_constants_by_variables.h"
+#include "mcrl2/lps/resolve_name_clashes.h"
+#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/detail/io.h"
 
 namespace mcrl2 {
 
@@ -59,7 +66,7 @@ struct labeled_transition_system
     std::size_t to;
 
     transition(std::size_t from_, std::size_t label_, std::size_t to_)
-            : from(from_), label(label_), to(to_)
+      : from(from_), label(label_), to(to_)
     {}
 
     bool operator<(const transition& other) const
@@ -92,6 +99,7 @@ std::ostream& operator<<(std::ostream& out, const labeled_transition_system& x)
 }
 
 template <typename StateType, class Transformer>
+inline
 data::data_expression_list
 make_state(const data::data_expression_list& x,
            std::size_t /* n */,
@@ -102,6 +110,7 @@ make_state(const data::data_expression_list& x,
 }
 
 template <typename StateType, class Transformer>
+inline
 lps::state
 make_state(const data::data_expression_list& x,
            std::size_t n,
@@ -111,13 +120,32 @@ make_state(const data::data_expression_list& x,
   return lps::state(x.begin(), n, [&](const data::data_expression& x) { return f(x); });
 }
 
+struct generate_lts_options
+{
+  data::rewrite_strategy rewrite_strategy = data::jitty;
+  bool one_point_rule_rewrite = false;
+  bool replace_constants_by_variables = false;
+  bool resolve_summand_variable_name_clashes = false;
+  bool store_states_as_trees = true;
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const generate_lts_options& options)
+{
+  out << "one_point_rule_rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
+  out << "resolve_summand_variable_name_clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
+  out << "replace_constants_by_variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
+  out << "rewrite_strategy = " << std::boolalpha << options.rewrite_strategy << std::endl;
+  out << "store_states_as_trees = " << std::boolalpha << options.store_states_as_trees << std::endl;
+  return out;
+}
+
 /// \brief Simple algorithm to generate an LTS from a linear process specification
 /// \param report_state Callback function that reports the states that are disovered. Every state is reported only once.
 /// \param report_transition Callback function that reports the transitions that are found.
-/// \pre lpsspec may not have any 'global' variables
 template <typename StateType, typename ReportState = skip1, typename ReportTransition = skip3>
-void generate_lts(const specification& lpsspec,
-                  const data::rewriter& r,
+void generate_lts(const specification& lpsspec_,
+                  const generate_lts_options& options,
                   ReportState report_state = ReportState(),
                   ReportTransition report_transition = ReportTransition()
                  )
@@ -125,12 +153,22 @@ void generate_lts(const specification& lpsspec,
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef StateType state_type;
 
+  specification lpsspec = lpsspec_;
   atermpp::indexed_set<state_type> discovered;
   std::deque<std::size_t> todo;
   data::mutable_indexed_substitution<> sigma;
   const data::variable_list& process_parameters = lpsspec.process().process_parameters();
   const std::size_t n = process_parameters.size();
   bool accept_solutions_with_variables = false;
+
+  data::rewriter r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy);
+
+  // preprocessing
+  detail::instantiate_global_variables(lpsspec);
+  if (options.resolve_summand_variable_name_clashes)  { resolve_summand_variable_name_clashes(lpsspec); }
+  if (options.one_point_rule_rewrite)                 { one_point_rule_rewrite(lpsspec); }
+  if (options.replace_constants_by_variables)         { replace_constants_by_variables(lpsspec, r, sigma); }
+
   data::enumerator_identifier_generator id_generator;
   data::enumerator_algorithm<data::rewriter, data::rewriter> E(r, lpsspec.data(), r, id_generator, accept_solutions_with_variables);
 
@@ -154,8 +192,7 @@ void generate_lts(const specification& lpsspec,
     return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
   };
 
-  data::data_expression_list init = lpsspec.initial_process().state(process_parameters);
-  state_type d0 = make_state<state_type>(init, process_parameters.size(), [&](const data::data_expression& x) { return x; });
+  state_type d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
   report_state(d0);
   auto k = discovered.put(d0);
   todo.push_back(k.first);
@@ -204,7 +241,10 @@ void generate_lts(const specification& lpsspec,
 }
 
 template <typename StateType>
-void generate_lts(const specification& lpsspec, const data::rewriter& r, labeled_transition_system& result)
+void generate_labeled_transition_system(const specification& lpsspec,
+                                        const generate_lts_options& options,
+                                        labeled_transition_system& result
+                                       )
 {
   typedef process::action_list action_type;
   typedef StateType state_type;
@@ -226,7 +266,7 @@ void generate_lts(const specification& lpsspec, const data::rewriter& r, labeled
   add_action(tau.actions());
 
   generate_lts<state_type>(lpsspec,
-                           r,
+                           options,
                            [&](const state_type&)
                            {
                              number_of_states++;
