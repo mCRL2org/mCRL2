@@ -26,9 +26,9 @@ using namespace mcrl2::pbes_system;
 
 BOOST_AUTO_TEST_CASE(test_normalize1)
 {
-  pbes_expression x = propositional_variable_instantiation("x:X");
-  pbes_expression y = propositional_variable_instantiation("y:Y");
-  pbes_expression z = propositional_variable_instantiation("z:Z");
+  pbes_expression x = propositional_variable_instantiation{core::identifier_string("X"), data::data_expression_list()};
+  pbes_expression y = propositional_variable_instantiation{core::identifier_string("Y"), data::data_expression_list()};
+  pbes_expression z = propositional_variable_instantiation{core::identifier_string("Z"), data::data_expression_list()};
   pbes_expression f;
   pbes_expression f1;
   pbes_expression f2;
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_normalize1)
   std::cout << "y = " << y << std::endl;
 
   data::variable_list ab = { data::variable("s", data::basic_sort("S")) };
-  x = propositional_variable_instantiation("x:X");
+  x = propositional_variable_instantiation{core::identifier_string("X"), data::data_expression_list()};
   y = and_(x, imp(pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), false_(), false_())), false_()));
   z = pbes_system::normalize(y);
   std::cout << "y = " << y << std::endl;

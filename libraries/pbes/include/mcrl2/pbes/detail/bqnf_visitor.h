@@ -461,7 +461,7 @@ struct bqnf_visitor
   /// \return true if the expression e is in BQNF.
   virtual bool visit_bqnf_expression(const pbes_expression& e)
   {
-    bool result = visit_bqnf_expression(fixpoint_symbol::nu(), propositional_variable("X"), e);
+    bool result = visit_bqnf_expression(fixpoint_symbol::nu(), propositional_variable(core::identifier_string("X"), data::variable_list()), e);
     return result;
   }
 

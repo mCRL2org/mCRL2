@@ -413,7 +413,7 @@ void lts_info::compute_transition_groups()
     ppg_visitor checker;
 
     std::string name = "true";
-    propositional_variable t(name);
+    propositional_variable t{core::identifier_string(name), data::variable_list()};
     this->variables[name] = t;
     this->variable_type[name] = type;
     this->variable_symbol[name] = symbol;
@@ -432,7 +432,7 @@ void lts_info::compute_transition_groups()
     name = "false";
     type = parity_game_generator::PGAME_OR;
     symbol = fixpoint_symbol::mu();
-    propositional_variable f(name);
+    propositional_variable f{core::identifier_string(name), data::variable_list()};
     this->variables[name] = f;
     this->variable_type[name] = type;
     this->variable_symbol[name] = symbol;

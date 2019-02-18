@@ -38,10 +38,10 @@ namespace pbes_system
 {
 
 /// \brief Data structure for storing the indices of the variables that should be expanded by the finite pbesinst algorithm.
-typedef std::map<core::identifier_string, std::vector<std::size_t> > pbesinst_index_map;
+typedef std::map<core::identifier_string, std::vector<std::size_t>> pbesinst_index_map;
 
 /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
-typedef std::map<core::identifier_string, std::vector<data::variable> > pbesinst_variable_map;
+typedef std::map<core::identifier_string, std::vector<data::variable>> pbesinst_variable_map;
 
 /// \brief Function object for renaming a propositional variable instantiation
 struct pbesinst_finite_rename
@@ -105,18 +105,17 @@ namespace detail
 ///        should be expanded by the finite pbesinst algorithm.
 /// \param finite A sequence of data expressions
 /// \param infinite A sequence of data expressions
-template <typename PropositionalVariable>
+template <typename PropositionalVariable, typename Parameter>
 void split_parameters(const PropositionalVariable& X,
                       const pbesinst_index_map& index_map,
-                      std::vector<typename PropositionalVariable::parameter_type>& finite,
-                      std::vector<typename PropositionalVariable::parameter_type>& infinite
+                      std::vector<Parameter>& finite,
+                      std::vector<Parameter>& infinite
                      )
 {
-  typedef typename PropositionalVariable::parameter_type parameter_type;
   auto pi = index_map.find(X.name());
   assert(pi != index_map.end());
   const std::vector<std::size_t>& v = pi->second;
-  typename atermpp::term_list<parameter_type>::const_iterator i = X.parameters().begin();
+  auto i = X.parameters().begin();
   std::size_t index = 0;
   auto j = v.begin();
   for (; i != X.parameters().end(); ++i, ++index)
