@@ -32,11 +32,24 @@ class term_appl: public aterm
 {
 protected:
   /// \brief Constructor.
-  explicit term_appl(detail::_term_appl *t): aterm(reinterpret_cast<detail::_aterm*>(t))
+  /// \param t A pointer internal data structure from which the term is constructed.
+  /// \detail This function is explicitly protected such that is not used in common code. 
+  explicit term_appl(detail::_term_appl *t)
+   : aterm(reinterpret_cast<detail::_aterm*>(t))
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
   }
+
+  /// \brief Explicit constructor from an aterm.
+  /// \param t The aterm from which the term is constructed.
+  /// \details This function is explicitly protected, to avoid its use in general code. 
+  explicit term_appl(const aterm& t) 
+   : aterm(t)
+  {
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
+  } 
 
 public:
   /// The type of object, T stored in the term_appl.
@@ -66,16 +79,6 @@ public:
   /// \brief Default constructor.
   term_appl():aterm()
   {}
-
-  /// \brief Explicit constructor from an aterm.
-  /// \param t The aterm.
-/*  explicit term_appl(const aterm& t) 
-   : aterm(t)
-  {
-    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-    static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
-  } 
-*/
 
   /// This class has user-declared copy constructor so declare default copy and move operators.
   term_appl(const term_appl& other) noexcept = default;

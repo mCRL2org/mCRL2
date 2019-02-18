@@ -48,7 +48,7 @@ class boolean_expression: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term
     explicit boolean_expression(const atermpp::aterm& term)
-      : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
+      : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_BooleanExpression(*this));
     }
@@ -122,7 +122,7 @@ class true_: public boolean_expression
     /// \brief Constructor.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
-      : boolean_expression(atermpp::down_cast<boolean_expression>(term))
+      : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanTrue(*this));
     }
@@ -175,7 +175,7 @@ class false_: public boolean_expression
     /// \brief Constructor.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
-      : boolean_expression(atermpp::down_cast<boolean_expression>(term))
+      : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanFalse(*this));
     }
@@ -228,7 +228,7 @@ class not_: public boolean_expression
     /// \brief Constructor.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
-      : boolean_expression(atermpp::down_cast<boolean_expression>(term))
+      : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanNot(*this));
     }
@@ -291,7 +291,7 @@ class and_: public boolean_expression
     /// \brief Constructor.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
-      : boolean_expression(atermpp::down_cast<boolean_expression>(term))
+      : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanAnd(*this));
     }
@@ -359,7 +359,7 @@ class or_: public boolean_expression
     /// \brief Constructor.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
-      : boolean_expression(atermpp::down_cast<boolean_expression>(term))
+      : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanOr(*this));
     }
@@ -427,7 +427,7 @@ class imp: public boolean_expression
     /// \brief Constructor.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
-      : boolean_expression(atermpp::down_cast<boolean_expression>(term))
+      : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanImp(*this));
     }

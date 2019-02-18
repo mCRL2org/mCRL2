@@ -642,7 +642,7 @@ class ATermConstructor(Constructor):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
     explicit <CLASSNAME>(const atermpp::aterm& term)
-      : <SUPERCLASS>(atermpp::down_cast<<SUPERCLASS>>(term))
+      : <SUPERCLASS>(term)
     {
       assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''
@@ -658,7 +658,7 @@ class ATermConstructor(Constructor):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
     explicit <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm& term)
-      : <SUPERCLASS>(atermpp::down_cast<<SUPERCLASS>>(term))
+      : <SUPERCLASS>(term)
     {
       assert(<ATERM_NAMESPACE>::detail::check_term_<ATERM>(*this));
     }'''

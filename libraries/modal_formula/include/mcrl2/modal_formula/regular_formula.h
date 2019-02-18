@@ -41,7 +41,7 @@ class regular_formula: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term
     explicit regular_formula(const atermpp::aterm& term)
-      : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
+      : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_RegFrm(*this));
     }
@@ -123,7 +123,7 @@ class seq: public regular_formula
     /// \brief Constructor.
     /// \param term A term
     explicit seq(const atermpp::aterm& term)
-      : regular_formula(atermpp::down_cast<regular_formula>(term))
+      : regular_formula(term)
     {
       assert(core::detail::check_term_RegSeq(*this));
     }
@@ -191,7 +191,7 @@ class alt: public regular_formula
     /// \brief Constructor.
     /// \param term A term
     explicit alt(const atermpp::aterm& term)
-      : regular_formula(atermpp::down_cast<regular_formula>(term))
+      : regular_formula(term)
     {
       assert(core::detail::check_term_RegAlt(*this));
     }
@@ -259,7 +259,7 @@ class trans: public regular_formula
     /// \brief Constructor.
     /// \param term A term
     explicit trans(const atermpp::aterm& term)
-      : regular_formula(atermpp::down_cast<regular_formula>(term))
+      : regular_formula(term)
     {
       assert(core::detail::check_term_RegTrans(*this));
     }
@@ -322,7 +322,7 @@ class trans_or_nil: public regular_formula
     /// \brief Constructor.
     /// \param term A term
     explicit trans_or_nil(const atermpp::aterm& term)
-      : regular_formula(atermpp::down_cast<regular_formula>(term))
+      : regular_formula(term)
     {
       assert(core::detail::check_term_RegTransOrNil(*this));
     }
@@ -385,7 +385,7 @@ class untyped_regular_formula: public regular_formula
     /// \brief Constructor.
     /// \param term A term
     explicit untyped_regular_formula(const atermpp::aterm& term)
-      : regular_formula(atermpp::down_cast<regular_formula>(term))
+      : regular_formula(term)
     {
       assert(core::detail::check_term_UntypedRegFrm(*this));
     }

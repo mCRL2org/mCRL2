@@ -41,7 +41,7 @@ class state_formula: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param term A term
     explicit state_formula(const atermpp::aterm& term)
-      : atermpp::aterm_appl(atermpp::down_cast<atermpp::aterm_appl>(term))
+      : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_StateFrm(*this));
     }
@@ -152,7 +152,7 @@ class true_: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit true_(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateTrue(*this));
     }
@@ -205,7 +205,7 @@ class false_: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit false_(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateFalse(*this));
     }
@@ -258,7 +258,7 @@ class not_: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit not_(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateNot(*this));
     }
@@ -321,7 +321,7 @@ class and_: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit and_(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateAnd(*this));
     }
@@ -389,7 +389,7 @@ class or_: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit or_(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateOr(*this));
     }
@@ -457,7 +457,7 @@ class imp: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit imp(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateImp(*this));
     }
@@ -525,7 +525,7 @@ class forall: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit forall(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateForall(*this));
     }
@@ -593,7 +593,7 @@ class exists: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit exists(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateExists(*this));
     }
@@ -661,7 +661,7 @@ class must: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit must(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateMust(*this));
     }
@@ -729,7 +729,7 @@ class may: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit may(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateMay(*this));
     }
@@ -797,7 +797,7 @@ class yaled: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit yaled(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateYaled(*this));
     }
@@ -850,7 +850,7 @@ class yaled_timed: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit yaled_timed(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateYaledTimed(*this));
     }
@@ -913,7 +913,7 @@ class delay: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit delay(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateDelay(*this));
     }
@@ -966,7 +966,7 @@ class delay_timed: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit delay_timed(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateDelayTimed(*this));
     }
@@ -1029,7 +1029,7 @@ class variable: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit variable(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateVar(*this));
     }
@@ -1102,7 +1102,7 @@ class nu: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit nu(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateNu(*this));
     }
@@ -1180,7 +1180,7 @@ class mu: public state_formula
     /// \brief Constructor.
     /// \param term A term
     explicit mu(const atermpp::aterm& term)
-      : state_formula(atermpp::down_cast<state_formula>(term))
+      : state_formula(term)
     {
       assert(core::detail::check_term_StateMu(*this));
     }

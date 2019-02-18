@@ -38,7 +38,7 @@ class container_sort: public sort_expression
     /// \brief Constructor.
     /// \param term A term
     explicit container_sort(const atermpp::aterm& term)
-      : sort_expression(atermpp::down_cast<sort_expression>(term))
+      : sort_expression(term)
     {
       assert(core::detail::check_term_SortCons(*this));
     }
