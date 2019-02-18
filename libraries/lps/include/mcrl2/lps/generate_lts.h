@@ -21,12 +21,11 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
+#include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
-#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/detail/io.h"
@@ -165,6 +164,7 @@ void generate_lts(const specification& lpsspec_,
 
   // preprocessing
   detail::instantiate_global_variables(lpsspec);
+  lps::order_summand_variables(lpsspec);
   if (options.resolve_summand_variable_name_clashes)  { resolve_summand_variable_name_clashes(lpsspec); }
   if (options.one_point_rule_rewrite)                 { one_point_rule_rewrite(lpsspec); }
   if (options.replace_constants_by_variables)         { replace_constants_by_variables(lpsspec, r, sigma); }
