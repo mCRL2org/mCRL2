@@ -368,6 +368,16 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
         result[v_i] = v_i;
       }
     }
+
+    /// \brief Returns the right hand sides corresponding to the variables v
+    /// \pre variables in v must be contained in variables()
+    template <typename VariableList, typename Rewriter>
+    data::data_expression_list assign_expressions(const VariableList& v, const Rewriter& rewriter) const
+    {
+      data::enumerator_substitution sigma(m_variables, m_expressions);
+      sigma.revert();
+      return data_expression_list(v.begin(), v.end(), [&](const data::variable& v_i) { return rewriter(sigma(v_i), empty_substitution()); });
+    }
 };
 
 template <typename Expression>

@@ -91,12 +91,11 @@ struct enumerator_substitution: public std::unary_function<data::variable, data:
   data::variable_list variables;
   data::data_expression_list expressions;
 
-  enumerator_substitution()
-  {}
+  enumerator_substitution() = default;
 
-  enumerator_substitution(const data::variable_list& variables_, const data::data_expression_list& expressions_)
-    : variables(variables_),
-      expressions(expressions_)
+  enumerator_substitution(data::variable_list variables_, data::data_expression_list expressions_)
+    : variables(std::move(variables_)),
+      expressions(std::move(expressions_))
   {
     assert(variables.size() == expressions.size());
   }

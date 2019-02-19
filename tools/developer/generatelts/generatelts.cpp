@@ -46,16 +46,18 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
-      desc.add_option("store-states-as-trees", "store states as trees instead of lists", 's');
+      desc.add_option("cached", "cache enumerator solutions");
       desc.add_option("one-point-rule-rewrite", "apply the one point rule rewriter");
       desc.add_option("replace-constants-by-variables", "move constant expressions to a substitution");
       desc.add_option("resolve-summand-variable-name-clashes", "resolve summand variable name clashes");
+      desc.add_option("store-states-as-trees", "store states as trees instead of lists", 's');
       options.rewrite_strategy = rewrite_strategy();
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+      options.cached                                = parser.options.find("cached") != parser.options.end();
       options.store_states_as_trees                 = parser.options.find("store-states-as-trees") != parser.options.end();
       options.one_point_rule_rewrite                = parser.options.find("one-point-rule-rewrite") != parser.options.end();
       options.replace_constants_by_variables        = parser.options.find("replace-constants-by-variables") != parser.options.end();
