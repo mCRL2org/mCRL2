@@ -15,8 +15,8 @@
 
 #include "mcrl2/gui/glu.h"
 
-#include <QGLBuffer>
-#include <QGLShaderProgram>
+#include <QOpenGLBuffer>
+#include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLVertexArrayObject>
@@ -24,7 +24,11 @@
 
 #include <vector>
 
-/// \brief Contains all information required to render a given Graph.
+/// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
+///        all the necessary OpenGL calls to render this graph as if shown from the camera. It assumes
+///        to be the only place where OpenGL calls are performed as it does not keep track or reset the internal OpenGL
+///        state between calls to render.
+/// \todo The select functionality should be removed from this class as it does not rely on OpenGL.
 class GLScene : private QOpenGLFunctions_3_3_Core
 {
 public:
@@ -149,8 +153,6 @@ public:
 
   float arrowheadSizeOnScreen() const { return arrowheadSize * m_device_pixel_ratio; }
 
-  float fogDistance() const { return m_fogdistance; }
-
   void setDrawTransitionLabels(bool drawLabels) { m_drawtransitionlabels = drawLabels; }
   void setDrawStateLabels(bool drawLabels) { m_drawstatelabels = drawLabels; }
   void setDrawStateNumbers(bool drawLabels) { m_drawstatenumbers = drawLabels; }
@@ -165,7 +167,7 @@ public:
   
   bool is_threedimensional() { return false; }
 
-  CameraAnimation& camera() { return m_camera;  }
+  CameraView& camera() { return m_camera;  }
 
 private:
   /**
@@ -208,14 +210,14 @@ private:
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
   /// All opengl related items
-  CameraAnimation m_camera;  /// Implementation details of the OpenGL camera handling.
+  CameraView m_camera;  /// Implementation details of the OpenGL camera handling.
   float m_device_pixel_ratio;
   QFont m_font;
 
-  QGLShaderProgram m_shader;                /// The shader to draw everything.
+  QOpenGLShaderProgram m_shader;                /// The shader to draw everything.
 
   /// Store various settings.
-  QVector3D m_worldsize;
+  QVector3D m_worldsize = QVector3D(1000.0f, 1000.0f, 0.0f);
   bool m_drawtransitionlabels = true;  /// Transition labels are only drawn if this field is true.
   bool m_drawstatelabels      = false; /// State labels are only drawn if this field is true.
   bool m_drawstatenumbers     = false; /// State numbers are only drawn if this field is true.
@@ -228,10 +230,10 @@ private:
   float m_fogdistance         = 5500.0f; /// The distance at which the fog starts
 
   QOpenGLVertexArrayObject m_node_vao;  /// The vertex layout for nodes.
-  QGLBuffer m_node_vbo;
-  QGLBuffer m_arrowhead_vbo;
-  QGLBuffer m_hint_vbo;
-  QGLBuffer m_handle_vbo;
+  QOpenGLBuffer m_node_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_arrowhead_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_hint_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  QOpenGLBuffer m_handle_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 };
 
 #endif // MCRL2_LTSGRAPH_GLSCENE_H
