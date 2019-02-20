@@ -78,9 +78,6 @@ void GLScene::initialize()
   // Makes sure that we can call gl* functions after this.
   initializeOpenGLFunctions();
 
-  // We are going to use vertex buffer and vertex array objects.
-  glEnableClientState(GL_VERTEX_ARRAY);
-
   // Here we compile the vertex and fragment shaders and combine the results.
   if (!m_shader.addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShader))
   {
@@ -137,16 +134,19 @@ void GLScene::initialize()
   }
 
   MCRL2_QGL_VERIFY(m_node_vbo.create());
-  m_node_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
   MCRL2_QGL_VERIFY(m_node_vbo.bind());
+  m_node_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
   m_node_vbo.allocate(node.data(), node.size() * sizeof(QVector3D));
 
   // The vertex array object stores the layout of the vertex data that we use (vec3 float).
-  MCRL2_QGL_VERIFY(m_node_vao.create());
-  m_node_vao.bind();
-  MCRL2_OGL_VERIFY(glEnableVertexAttribArray(0));
-  m_node_vbo.bind();
-  MCRL2_OGL_VERIFY(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
+  {
+    MCRL2_QGL_VERIFY(m_node_vao.create());
+    MCRL2_OGL_VERIFY(QOpenGLVertexArrayObject::Binder bind_vao(&m_node_vao));
+    MCRL2_OGL_VERIFY(glEnableVertexAttribArray(0));
+
+    m_node_vbo.bind();
+    MCRL2_OGL_VERIFY(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
+  }
 
   // Generate plus (and minus) hint for exploration mode
   QVector3D m_hint[4]; // The plus and minus "hints?".
