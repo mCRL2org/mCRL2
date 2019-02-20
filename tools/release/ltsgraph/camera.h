@@ -10,23 +10,18 @@
 #ifndef MCRL2_LTSGRAPH_CAMERA_H
 #define MCRL2_LTSGRAPH_CAMERA_H
 
-#include <QColor>
-#include <QOpenGLWidget>
-#include <QPainter>
 #include <QQuaternion>
 #include <QMatrix4x4>
+#include <QVector3D>
 
-/// \brief The camera view keeps track of the camera position around a point in 3D space. It also keeps track of the
-///        viewport that contains the width and height of the view. From this it computes the necessary projection
-///        and view matrices to draw objects as if they are viewed from this camera.
+/// \brief The camera view keeps track of a camera rotating around a 3D position in space. It also keeps track of the
+///        viewport that contains the width and height of the window. From this it computes the necessary projection
+///        and view matrices to draw objects as if they are viewed from this camera. The assumption is that the camera
+///        is always upright towards the z-axis. It also uses a frustum projection where objects further away appear
+///        smaller, but the
 class CameraView
 {
 public:
-  CameraView();
-
-  /// \brief Update the dimensions of the viewport.
-  void viewport(std::size_t width, std::size_t height);
-
   void billboard_spherical(const QVector3D& pos);
   void billboard_cylindrical(const QVector3D& pos);
 
@@ -38,47 +33,38 @@ public:
 
   /// \brief Converts the given position from Qt window coordinates to world space coordinates.
   QVector3D windowToWorld(QVector3D eye) const;
-  
-  bool operator!=(const CameraView& other);
 
-  // Should become protected at some point.
-public:
-  QQuaternion m_rotation;    /// Rotation of the camera
-  QVector3D m_position;      /// Position of the camera
-  float m_zoomfactor = 5.0f; /// Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+  /// \brief Set the distance to the camera position.
+  void zoom(float zoom) { m_zoom = zoom; }
+  float zoom() const { return m_zoom; }
+
+  /// \brief Set the rotation around the camera position.
+  void rotation(const QQuaternion& rotation) { m_rotation = rotation; }
+  const QQuaternion& rotation() const { return m_rotation; }
+
+  /// \brief Set the position of the camera.
+  void position(const QVector3D& position) { m_position = position; }
+  const QVector3D& position() const { return m_position; }
+
+  /// \brief Set the dimensions of the viewport.
+  void viewport(std::size_t width, std::size_t height) { m_viewport = QRect(0, 0, width, height); }
+
+  const QMatrix4x4 viewMatrix() const { return m_viewMatrix; }
+  const QMatrix4x4 projectionMatrix() const { return m_projectionMatrix; }
+
+  /// \brief Sets the position and orientation of the camera to its default values.
+  void reset();
 
 private:
+  QVector3D m_position = QVector3D(0.0f, 0.0f, 0.0f);           /// Position of the camera.
+  QQuaternion m_rotation = QQuaternion(1.0f, 0.0f, 0.0f, 0.0f); /// Rotation of the camera around the given position.
+  float m_zoom = 500.0f;     /// The distance to the position.
+  float m_viewdistance = 1000.0f; /// The maximum view distance of the camera.
+  float m_vert_fieldofview = 70.0f;
+
   QMatrix4x4 m_projectionMatrix; /// \brief The project matrix of this camera.
   QMatrix4x4 m_viewMatrix;
   QRect m_viewport;
-};
-
-/// \brief Applies an animation to the camera of which the result is this class itself.
-class CameraAnimation : public CameraView
-{
-public:  
-  /// \brief Update the animation progress and the camera matrices.
-  void update();
-
-  /// 
-  void reset();
-  void setZoom(float factor, std::size_t animation = 1);
-  void setRotation(const QQuaternion& rotation, std::size_t animation  = 1);
-  void setTranslation(const QVector3D& translation, std::size_t animation = 1);
-  void setSize(const QVector3D& size, std::size_t animation = 1);
-
-  bool animationFinished() { return m_animation_steps == 0 || m_animation >= m_animation_steps; }
-
-  void operator=(const CameraView& other);
-
-private:
-  void start_animation(std::size_t steps);
-
-  CameraView m_source;
-  CameraView m_target;
-
-  std::size_t m_animation = 0;
-  std::size_t m_animation_steps = 1;
 };
 
 #endif // MCRL2_LTSGRAPH_CAMERA_H
