@@ -262,8 +262,7 @@ void GLWidget::initializeGL()
 
 void GLWidget::resizeGL(int width, int height)
 {
-  m_scene->resize(width, height);
-  emit widgetResized(m_scene->size());
+  m_scene->camera().viewport(width, height);
 }
 
 void GLWidget::paintGL()
@@ -274,17 +273,12 @@ void GLWidget::paintGL()
   {
     m_scene->setDevicePixelRatio(devicePixelRatio());
     m_scene->render(painter);
-
-    if (!m_scene->camera().animationFinished())
-    {
-      update();
-    }
+    update();
   }
 }
 
 void GLWidget::mousePressEvent(QMouseEvent* e)
 {
-  makeCurrent();
   updateSelection();
   if (m_painting)
   {
@@ -401,14 +395,15 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
-  m_scene->camera().setZoom(pow(1.0005f, e->delta()));
+  CameraView& camera = m_scene->camera();
+  camera.zoom(camera.zoom() + 5 * e->delta());
   update();
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
   updateSelection();
-  CameraAnimation& camera = m_scene->camera();
+  CameraView& camera = m_scene->camera();
   
   if (m_dragmode != dm_none)
   {
@@ -444,7 +439,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
       case dm_rotate_2d:
         {
           QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, e->pos());
-          camera.setRotation(rotation);
+          camera.rotation(camera.rotation() * rotation);
           break;
         }
       case dm_translate:
@@ -452,16 +447,16 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
           int dx = e->pos().x() - m_dragstart.x();
           int dy = e->pos().y() - m_dragstart.y();
           QVector3D vec3(dx, -dy, 0);
-          camera.setTranslation(vec3);
+          camera.position(camera.position() + vec3);
           break;
         }
       case dm_dragnode:
         {
-          //m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z()));
+          //m_dragnode->move(camera.windowToWorld(e->pos().x(), e->pos().y(), camera.worldToWindow(m_dragnode->pos()).z()));
           break;
         }
       case dm_zoom:
-        camera.setZoom(pow(1.0005f, vec.y()));
+        camera.zoom(camera.zoom() + pow(1.0005f, vec.y()));
         break;
       default:
         break;
