@@ -180,10 +180,10 @@ class lts_generator
       {}
 
       /// \brief Returns all valuations of variables that make condition become true.
-      virtual const std::list<data::data_expression_list>& generate_solutions(const data::enumerator_algorithm<data::rewriter, data::rewriter>& E,
-                                                                              const data::rewriter& r,
-                                                                              data::mutable_indexed_substitution<>& sigma
-                                                                             )
+      const std::list<data::data_expression_list>& generate_solutions(const data::enumerator_algorithm<data::rewriter, data::rewriter>& E,
+                                                                      const data::rewriter& r,
+                                                                      data::mutable_indexed_substitution<>& sigma
+                                                                     )
       {
         solutions.clear();
         data::data_expression c = r(condition, sigma);
@@ -200,6 +200,26 @@ class lts_generator
           );
         }
         return solutions;
+      }
+
+      process::action_list action(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma) const
+      {
+        auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
+        {
+          return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return r(x, sigma); });
+        };
+
+        auto rewrite_action = [&](const process::action& a)
+        {
+          return process::action(a.label(), rewrite_data_expression_list(a.arguments()));
+        };
+
+        return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
+      }
+
+      state_type state(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma, std::size_t n) const
+      {
+        return make_state<state_type>(next_state, n, [&](const data::data_expression& x) { return r(x, sigma); });
       }
 
       void add_assignments(data::mutable_indexed_substitution<>& sigma, const data::data_expression_list& e) const
@@ -227,41 +247,90 @@ class lts_generator
     {
       typedef next_state_summand super;
       using super::solutions;
+      using super::next_state;
 
-      std::unordered_map<data::data_expression_list, std::list<data::data_expression_list>> solution_cache;
-      data::variable_list free_variables; // process parameters that occur free in condition
+      // cache for condition, action and next state computations
+      std::unordered_map<data::data_expression_list, std::list<data::data_expression_list>> C;
+//      std::unordered_map<data::data_expression_list, process::action_list> F;
+//      std::unordered_map<data::data_expression_list, state_type> G;
+      data::variable_list keyC;
+//      data::variable_list keyF;
+//      data::variable_list keyG;
 
-      next_state_summand_with_caching(const lps::action_summand& summand, const data::variable_list& process_parameters)
-        : super(summand, process_parameters)
+      data::data_expression_list substitute(const data::variable_list& v, const data::mutable_indexed_substitution<>& sigma) const
+      {
+        return data::data_expression_list{v.begin(), v.end(), [&](const data::variable& x) { return sigma(x); }};
+      }
+
+      template <typename T>
+      data::variable_list make_key(const T& x)
+      {
+        std::set<data::variable> FV = data::find_free_variables(x);
+        return data::variable_list{FV.begin(), FV.end()};
+      }
+
+      template <typename T>
+      data::variable_list make_key(const T& x, const data::variable_list& variables)
       {
         using utilities::detail::contains;
-        std::set<data::variable> FV = data::find_free_variables(summand.condition());
+        std::set<data::variable> FV = data::find_free_variables(x);
         std::vector<data::variable> result;
-        for (const data::variable& v: process_parameters)
+        for (const data::variable& v: variables)
         {
           if (contains(FV, v))
           {
             result.push_back(v);
           }
         }
-        free_variables = data::variable_list(result.begin(), result.end());
+        return data::variable_list{result.begin(), result.end()};
+      }
+
+      next_state_summand_with_caching(const lps::action_summand& summand, const data::variable_list& process_parameters)
+        : super(summand, process_parameters)
+      {
+        keyC = make_key(summand.condition(), process_parameters);
+//        keyF = make_key(summand.multi_action().actions());
+//        keyG = make_key(next_state);
       }
 
       const std::list<data::data_expression_list>& generate_solutions(const data::enumerator_algorithm<data::rewriter, data::rewriter>& E,
                                                                       const data::rewriter& r,
                                                                       data::mutable_indexed_substitution<>& sigma
-                                                                     ) override
+                                                                     )
       {
-        data::data_expression_list key{free_variables.begin(), free_variables.end(), [&](const data::variable& x) { return sigma(x); }};
-        auto i = solution_cache.find(key);
-        if (i != solution_cache.end())
+        data::data_expression_list key = substitute(keyC, sigma);
+        auto i = C.find(key);
+        if (i != C.end())
         {
           return i->second;
         }
-        super::generate_solutions(E, r, sigma);
-        solution_cache[key] = solutions;
-        return solutions;
+        auto j = C.insert({key, super::generate_solutions(E, r, sigma)});
+        return j.first->second;
       }
+
+//      const process::action_list& action(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma)
+//      {
+//        data::data_expression_list key = substitute(keyF, sigma);
+//        auto i = F.find(key);
+//        if (i != F.end())
+//        {
+//          return i->second;
+//        }
+//        auto j = F.insert({key, super::action(r, sigma)});
+//        return j.first->second;
+//      }
+//
+//      const state_type& state(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma, std::size_t n)
+//      {
+//        data::data_expression_list key = substitute(keyG, sigma);
+//        auto i = G.find(key);
+//        if (i != G.end())
+//        {
+//          return i->second;
+//        }
+//        auto j = G.insert({key, super::state(r, sigma, n)});
+//        return j.first->second;
+//      }
     };
 
     template <typename NextStateSummand, typename ReportState = skip1, typename ReportTransition = skip3>
@@ -284,24 +353,9 @@ class lts_generator
       std::deque<std::size_t> todo;
       const std::size_t n = process_parameters.size();
 
-      auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
-      {
-        return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return r(x, sigma); });
-      };
-
       auto rewrite_state = [&](const data::data_expression_list& v)
       {
         return make_state<state_type>(v, n, [&](const data::data_expression& x) { return r(x, sigma); });
-      };
-
-      auto rewrite_action = [&](const process::action& a)
-      {
-        return process::action(a.label(), rewrite_data_expression_list(a.arguments()));
-      };
-
-      auto rewrite_action_list = [&](const process::action_list& actions)
-      {
-        return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
       };
 
       state_type d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
@@ -327,8 +381,8 @@ class lts_generator
           for (const data::data_expression_list& e: summand.generate_solutions(E, r, sigma))
           {
             summand.add_assignments(sigma, e);
-            process::action_list a = rewrite_action_list(summand.actions);
-            state_type d1 = rewrite_state(summand.next_state);
+            process::action_list a = summand.action(r, sigma);
+            state_type d1 = summand.state(r, sigma, process_parameters.size());
             auto j = discovered.put(d1);
             if (j.second)
             {
