@@ -78,23 +78,23 @@ void GLScene::initialize()
   // Makes sure that we can call gl* functions after this.
   initializeOpenGLFunctions();
 
+  // We are going to use vertex buffer and vertex array objects.
+  glEnableClientState(GL_VERTEX_ARRAY);
+
   // Here we compile the vertex and fragment shaders and combine the results.
-  bool result = m_shader.addShaderFromSourceCode(QGLShader::Vertex, g_vertexShader);
-  if (!result)
+  if (!m_shader.addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShader))
   {
     mCRL2log(mcrl2::log::error) << m_shader.log().toStdString();
     std::abort();
   }
 
-  result = m_shader.addShaderFromSourceCode(QGLShader::Fragment, g_fragmentShader);
-  if (!result)
+  if (!m_shader.addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShader))
   {
     mCRL2log(mcrl2::log::error) << m_shader.log().toStdString();
     std::abort();
   }
 
-  result = m_shader.link();
-  if (!result)
+  if (!m_shader.link())
   {
     mCRL2log(mcrl2::log::error) << "Could not link shader program:" << m_shader.log().toStdString();
     std::abort();
@@ -137,9 +137,9 @@ void GLScene::initialize()
   }
 
   MCRL2_QGL_VERIFY(m_node_vbo.create());
-  m_node_vbo.bind();
-  m_node_vbo.setUsagePattern(QGLBuffer::StaticDraw);
-  m_node_vbo.allocate(node.data(), node.size());
+  m_node_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  MCRL2_QGL_VERIFY(m_node_vbo.bind());
+  m_node_vbo.allocate(node.data(), node.size() * sizeof(QVector3D));
 
   // The vertex array object stores the layout of the vertex data that we use (vec3 float).
   MCRL2_QGL_VERIFY(m_node_vao.create());
@@ -180,20 +180,8 @@ void GLScene::initialize()
       0.3f * std::cos(0.0f));
 
   MCRL2_QGL_VERIFY(m_arrowhead_vbo.create());
-  m_arrowhead_vbo.setUsagePattern(QGLBuffer::StaticDraw);
-  m_arrowhead_vbo.allocate(arrowhead.data(), arrowhead.size());
-
-  // Enable anti-aliasing for lines and points. Anti-aliasing for polygons gives artifacts on
-  // OSX when drawing a quadstrip.
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_POINT_SMOOTH);
-  glEnable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  // Enable depth testing, so that we don't have to care too much about
-  // rendering in the right order.
-  glEnable(GL_DEPTH_TEST);
+  m_arrowhead_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  m_arrowhead_vbo.allocate(arrowhead.data(), arrowhead.size() * sizeof(QVector3D));
 }
 
 void GLScene::render(QPainter& painter)
@@ -235,7 +223,6 @@ void GLScene::render(QPainter& painter)
   // text drawing follows
   */
 
-  glDepthMask(GL_FALSE);
   painter.endNativePainting();
 
   // Use the painter to render the remaining text.
@@ -265,16 +252,10 @@ void GLScene::render(QPainter& painter)
   }
 
   painter.end();
-  glDepthMask(GL_TRUE);
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
   MCRL2_OGL_CHECK();
-}
-
-void GLScene::resize(std::size_t width, std::size_t height)
-{
-  m_camera.viewport(width, height);
 }
 
 QVector3D GLScene::size()
@@ -400,26 +381,6 @@ bool GLScene::selectObject(GLScene::Selection& s,
   }
 
   return s.selectionType != so_none;
-}
-
-void GLScene::setZoom(float factor, std::size_t animation)
-{
-  m_camera.setZoom(factor, animation);
-}
-
-void GLScene::setRotation(const QQuaternion& rotation, std::size_t animation)
-{
-  m_camera.setRotation(rotation, animation);
-}
-
-void GLScene::setTranslation(const QVector3D& translation, std::size_t animation)
-{
-  m_camera.setTranslation(translation, animation);
-}
-
-void GLScene::setSize(const QVector3D& size, std::size_t animation)
-{
-  m_camera.setSize(size, animation);
 }
 
 //
@@ -694,7 +655,7 @@ void GLScene::renderHandle(GLuint i)
     glDisable(GL_LINE_SMOOTH);
     glPushMatrix();
 
-    m_camera.billboard_cylindrical(handle.pos());
+    //m_camera.billboard_cylindrical(handle.pos());
     float scale = handleSizeOnScreen();
     glScalef(scale, scale, scale);
     //drawHandle(m_vertexdata, line, fill);
