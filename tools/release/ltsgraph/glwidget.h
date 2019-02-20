@@ -173,10 +173,6 @@ public:
 
   std::size_t nodeSize() const { return m_scene->nodeSize(); }
   std::size_t fontSize() const { return m_scene->fontSize(); }
-  float fogDistance() const { return m_scene->fogDistance(); }
-
-signals:
-  void widgetResized(const QVector3D& newsize);
 
 public slots:
 
