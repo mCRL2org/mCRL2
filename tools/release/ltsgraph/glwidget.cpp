@@ -235,26 +235,28 @@ void GLWidget::updateSelection()
 
 void GLWidget::initializeGL()
 {
-  if (!isValid())
-  {
-    mCRL2log(mcrl2::log::error) << "The context was not created succesfully.\n";
-    std::abort();
-  }
-  else
+  // Check whether context creation succeeded and print the OpenGL major.minor version.
+  if (isValid())
   {
     QPair<int, int> version = format().version();
     mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first << "." << version.second << " Core context.\n";
   }
-
-  m_logger = new QOpenGLDebugLogger(this);
-  if (!m_logger->initialize())
-  {
-    mCRL2log(mcrl2::log::warning) << "The Qt5 OpenGL debug logger can not be initialized.\n";
-  }
   else
+  {
+    mCRL2log(mcrl2::log::error) << "The context was not created succesfully.\n";
+    std::abort();
+  }
+
+  // Enable real-time logging of OpenGL errors when the GL_KHR_debug extension is available.
+  m_logger = new QOpenGLDebugLogger(this);
+  if (m_logger->initialize())
   {
     connect(m_logger, &QOpenGLDebugLogger::messageLogged, this, &GLWidget::logMessage);
     m_logger->startLogging();
+  }
+  else
+  {
+    mCRL2log(mcrl2::log::debug) << "The Qt5 OpenGL debug logger can not be initialized.\n";
   }
 
   m_scene->initialize();
@@ -537,7 +539,7 @@ void GLWidget::saveBitmap(const QString& filename)
 
 void GLWidget::logMessage(const QOpenGLDebugMessage& debugMessage)
 {
-  mCRL2log(mcrl2::log::debug) << "OpenGL message: " << debugMessage.message().toStdString() << "\n.";
+  mCRL2log(mcrl2::log::debug) << "OpenGL message: " << debugMessage.message().toStdString() << ".\n";
 }
 
 GLWidgetUi* GLWidget::ui(QWidget* parent)
