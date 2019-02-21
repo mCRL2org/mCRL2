@@ -23,27 +23,19 @@ namespace data
 
 data_specification simplifier::norm_rules_spec()
 {
-  data_specification ad_hoc_data = parse_data_specification(
-    "var "
-      "r1,r2,r3:Real;"
-    "eqn "
-      "r2 > r3 -> !(r1 < r2) && r1 < r3 = false;"
-      "r2 > r3 -> r1 < r3 && !(r1 < r2) = false;"
-      "r2 < r3 -> !(r1 < r2) || r1 < r3 = true;"
-      "r2 < r3 -> r1 < r3 || !(r1 < r2) = true;"
-    );
+  data_specification ad_hoc_data;
 
-  variable vb1("b1", sort_bool::bool_());
-  variable vb2("b2", sort_bool::bool_());
-  variable vb3("b3", sort_bool::bool_());
-  variable vp1("p1", sort_pos::pos());
-  variable vp2("p2", sort_pos::pos());
-  variable vn1("n1", sort_nat::nat());
-  variable vn2("n2", sort_nat::nat());
-  variable vn3("n3", sort_nat::nat());
-  variable vr1("r1", sort_real::real_());
-  variable vr2("r2", sort_real::real_());
-  variable vr3("r3", sort_real::real_());
+  variable vb1("@b1", sort_bool::bool_());
+  variable vb2("@b2", sort_bool::bool_());
+  variable vb3("@b3", sort_bool::bool_());
+  variable vp1("@p1", sort_pos::pos());
+  variable vp2("@p2", sort_pos::pos());
+  variable vn1("@n1", sort_nat::nat());
+  variable vn2("@n2", sort_nat::nat());
+  variable vn3("@n3", sort_nat::nat());
+  variable vr1("@r1", sort_real::real_());
+  variable vr2("@r2", sort_real::real_());
+  variable vr3("@r3", sort_real::real_());
 
   // !a || a = true;
   ad_hoc_data.add_equation(data_equation(variable_list({vb1}), sort_bool::or_(sort_bool::not_(vb1),vb1), sort_bool::true_()));
@@ -53,14 +45,14 @@ data_specification simplifier::norm_rules_spec()
   ad_hoc_data.add_equation(data_equation(variable_list({vb1}), sort_bool::and_(sort_bool::not_(vb1),vb1), sort_bool::false_()));
   // a && !a = false;
   ad_hoc_data.add_equation(data_equation(variable_list({vb1}), sort_bool::and_(vb1,sort_bool::not_(vb1)), sort_bool::false_()));
-  //  a && a = a;
+  // a && a = a;
   ad_hoc_data.add_equation(data_equation(variable_list({vb1}), sort_bool::and_(vb1, vb1), vb1));
-  //  a && (a && b) = a && b;
+  // a && (a && b) = a && b;
   ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
   ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), sort_bool::and_(vb1, sort_bool::and_(vb2, vb1)), sort_bool::and_(vb1, vb2)));
-  //  a || a = a;
+  // a || a = a;
   ad_hoc_data.add_equation(data_equation(variable_list({vb1}), sort_bool::or_(vb1, vb1), vb1));
-  //  a => b = !a || b;
+  // a => b = !a || b;
   ad_hoc_data.add_equation(data_equation(variable_list({vb1, vb2}), sort_bool::implies(vb1, vb2), sort_bool::or_(sort_bool::not_(vb1), vb2)));
   // a && (!a || b) = a && b
   ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2}), sort_bool::and_(vb1, sort_bool::or_(sort_bool::not_(vb1), vb2)), sort_bool::and_(vb1, vb2)));
@@ -69,6 +61,7 @@ data_specification simplifier::norm_rules_spec()
   // Pushing not inside
   ad_hoc_data.add_equation(data_equation(variable_list({vb1, vb2}), sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
   ad_hoc_data.add_equation(data_equation(variable_list({vb1, vb2}), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
+
   // Formulate all linear equalities with positive rhs: -1 * x_P <= -5   !(1 * x_P < 5)
   ad_hoc_data.add_equation(data_equation(variable_list({vr1, vp1, vp2}),
     less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
@@ -91,6 +84,19 @@ data_specification simplifier::norm_rules_spec()
   // !(r2 == r1) = r1 > r2 || r1 < r2
   ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2}), sort_bool::not_(equal_to(vr2,vr1)), sort_bool::or_(greater(vr1, vr2), less(vr1, vr2))));
 
+  // r2 > r3 -> !(r1 < r2) && r1 < r3 = false
+  ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2,vr3}), greater(vr2, vr3),
+      sort_bool::and_(sort_bool::not_(less(vr1, vr2)), less(vr1, vr3)), sort_bool::false_()));
+  // r2 > r3 -> r1 < r3 && !(r1 < r2) = false
+  ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2,vr3}), greater(vr2, vr3),
+      sort_bool::and_(less(vr1, vr3), sort_bool::not_(less(vr1, vr2))), sort_bool::false_()));
+  // r2 < r3 -> !(r1 < r2) || r1 < r3 = true
+  ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2,vr3}), less(vr2, vr3),
+      sort_bool::or_(sort_bool::not_(less(vr1, vr2)), less(vr1, vr3)), sort_bool::true_()));
+  // r2 < r3 -> r1 < r3 || !(r1 < r2) = true
+  ad_hoc_data.add_equation(data_equation(variable_list({vr1,vr2,vr3}), less(vr2, vr3),
+      sort_bool::or_(less(vr1, vr3), sort_bool::not_(less(vr1, vr2))), sort_bool::true_()));
+
   // if(a,b,c) = (a && b) || (!a && c);
   ad_hoc_data.add_equation(data_equation(variable_list({vb1,vb2,vb3}), if_(vb1, vb2, vb3),
     sort_bool::or_(sort_bool::and_(vb1, vb2), sort_bool::and_(sort_bool::not_(vb1), vb3))));
@@ -111,6 +117,15 @@ data_specification simplifier::norm_rules_spec()
   ad_hoc_data.add_equation(data_equation(variable_list({vn1,vn2,vn3}), not_equal_to(vn1,vn2),
     sort_bool::and_(equal_to(vn3,vn1), equal_to(vn3,vn2)), sort_bool::false_()));
 
+  // pred(succ(n)) = n
+  ad_hoc_data.add_equation(data_equation(variable_list({vn1}),
+    sort_nat::pred(sort_nat::succ(vn1)), vn1));
+  // pred(succ(p)) = p
+  ad_hoc_data.add_equation(data_equation(variable_list({vp1}),
+    sort_nat::pred(sort_nat::succ(vp1)), vp1));
+  // succ(pred(p)) = p
+  ad_hoc_data.add_equation(data_equation(variable_list({vp1}),
+    sort_nat::succ(sort_nat::succ(vp1)), vp1));
   // succ(p) < p = false
   ad_hoc_data.add_equation(data_equation(variable_list({vp1}),
     less(sort_pos::succ(vp1), vp1), sort_bool::false_()));
