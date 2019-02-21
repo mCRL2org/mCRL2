@@ -517,6 +517,10 @@ public:
       mCRL2log(log::verbose) << "Final partition:" << std::endl;
       print_partition(m_proof_blocks);
     }
+    if(num_steps == 0)
+    {
+      mCRL2log(log::info) << "Number of iterations " << num_iterations+1 << std::endl;
+    }
     return num_iterations == 0;
   }
 

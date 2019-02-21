@@ -132,7 +132,7 @@ public:
       mCRL2log(log::status) << "Amount of blocks " << m_partition.size() << "\n";
       mCRL2log(log::info) << "Partition refinement completed in " <<
           std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
-          " seconds.\n" << std::endl;
+          " seconds." << std::endl;
     }
 
     // m_partition.save_bes();
