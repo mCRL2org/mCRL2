@@ -39,7 +39,7 @@ setup:
 .. admonition:: Windows
    :class: platform-specific win
 
-   Visual Studio 2015 or higher with C++ development
+   Visual Studio 2017 with C++ development
 
 .. admonition:: Mac OS X
    :class: platform-specific mac
@@ -113,13 +113,10 @@ link to any boost libraries.
 
 .. _build_prerequisites_qt:
 
-QT
+Qt
 --
 
-.. |qt| replace:: *QT 5.5*
-.. _qt: https://www.qt.io
-
-The mCRL2 toolset requires |qt|_ or higher for compilation of the graphical tools
+The mCRL2 toolset requires Qt for compilation of the graphical tools
 (:ref:`tool-diagraphica`, :ref:`tool-ltsgraph`, :ref:`tool-ltsview`,
 :ref:`tool-lpsxsim`, :ref:`tool-mcrl2-gui`, :ref:`tool-mcrl2xi`). 
 Qt version 5.12.0 does not work properly and results in non functioning graphical
@@ -127,12 +124,14 @@ tools. Qt version 5.12.1 appears to work fine.
 
 .. admonition:: Windows
    :class: platform-specific win
-
+   
+   For Windows the minimum Qt version supported is 5.9.
    Download and install Qt from https://www.qt.io/download-qt-installer.
 
 .. admonition:: Mac OS X
    :class: platform-specific mac
 
+   For MacOS the minimum Qt version supported is 5.10.
    QT can be installed using MacPorts by doing the following:
 
    - First go to http://www.macports.org/.
@@ -152,6 +151,7 @@ tools. Qt version 5.12.1 appears to work fine.
 .. admonition:: Linux
    :class: platform-specific linux
 
+   For Linux the minimum Qt version supported is 5.5.
    Binary development versions are available in the package manager in most
    distributions (for instance the ``qtbase5-dev`` package in Ubuntu).
 
