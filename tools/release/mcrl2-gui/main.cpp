@@ -40,7 +40,7 @@ class mcrl2_gui_tool : public mcrl2_gui_base
       //Show the splashscreen for 2 seconds
       splash.show();
       QTimer::singleShot(2000, &splash, SLOT(hide()));
-      MainWindow *window = new MainWindow();
+      MainWindow window;
       return show_main_window(window);
     }
 };

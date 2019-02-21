@@ -65,7 +65,7 @@ class FileBrowser : public QTreeView
   private:
     enum CopyMode { cm_none, cm_copy, cm_cut };
 
-    void freeToolActions();
+    void removeToolActions();
     void rememberSelection();
     QAction* addConditionalAction(QMenu* menu, QString action, bool condition);
     void createContextMenu(QList<QFileInfo> info);

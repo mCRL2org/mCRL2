@@ -25,11 +25,11 @@ class diagraphica_tool : public diagraphica_base
 
     bool run()
     {
-      MainWindow *window = new MainWindow();
+      MainWindow window;
 
       if (!m_input_filename.empty())
       {
-        window->open(QString::fromStdString(m_input_filename));
+        window.open(QString::fromStdString(m_input_filename));
       }
 
       return show_main_window(window);

@@ -52,11 +52,11 @@ class ltsview_tool : public ltsview_base
       QThread atermThread;
       atermThread.start();
 
-      MainWindow *window = new MainWindow(&atermThread);
+      MainWindow window(&atermThread);
 
       if (!m_input_filename.empty())
       {
-        QMetaObject::invokeMethod(window, "open", Qt::QueuedConnection,
+        QMetaObject::invokeMethod(&window, "open", Qt::QueuedConnection,
                            Q_ARG(QString, QString::fromStdString(m_input_filename)));
       }
 

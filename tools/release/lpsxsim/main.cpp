@@ -47,11 +47,11 @@ class lpsxsim_tool : public lpsxsim_base
       QThread* atermThread = new QThread;
       atermThread->start();
 
-      MainWindow *window = new MainWindow(atermThread, rewrite_strategy(), m_do_not_use_dummies);
+      MainWindow window(atermThread, rewrite_strategy(), m_do_not_use_dummies);
 
       if (!m_input_filename.empty())
       {
-        window->openSpecification(QString::fromStdString(m_input_filename));
+        window.openSpecification(QString::fromStdString(m_input_filename));
       }
 
       return show_main_window(window);

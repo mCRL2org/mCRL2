@@ -30,11 +30,11 @@ class ltsgraph_tool : public ltsgraph_base
 
     bool run() override
     {
-      MainWindow* window = new MainWindow();
+      MainWindow window;
 
       if (!m_input_filename.empty())
       {
-        window->delayedOpenFile(QString::fromStdString(m_input_filename));
+        window.delayedOpenFile(QString::fromStdString(m_input_filename));
       }
 
       return show_main_window(window);

@@ -131,21 +131,21 @@ class qt_tool: public Tool
       return true;
     }
 
-    bool show_main_window(QMainWindow* window)
+    bool show_main_window(QMainWindow& window)
     {
-      HelpMenu* menu = new HelpMenu(window, m_name, m_author, m_about_description, m_manual_url);
-      window->menuBar()->addAction(menu->menuAction());
-      window->menuBar()->setNativeMenuBar(true); 
-      window->show();
-      window->resize(500,1000);
-      window->show();
-      window->resize(1000,900);
+      HelpMenu* menu = new HelpMenu(&window, m_name, m_author, m_about_description, m_manual_url);
+      window.menuBar()->addAction(menu->menuAction());
+      window.menuBar()->setNativeMenuBar(true);
+      window.show();
+      window.resize(500,1000);
+      window.show();
+      window.resize(1000,900);
       return m_application->exec() == 0;
     }
 
     virtual ~qt_tool()
     {
-      m_application->deleteLater();
+      delete m_application;
     }
 };
 

@@ -76,38 +76,20 @@ FileBrowser::FileBrowser(QWidget *parent) :
 
 FileBrowser::~FileBrowser()
 {
-  freeToolActions();
   delete m_menu;
-  delete m_actOpenFiles;
-  delete m_sep1;
-  delete m_actNewFile;
-  delete m_actNewFolder;
-  delete m_sep2;
-  delete m_sep3;
-  delete m_actCopyFiles;
-  delete m_actCutFiles;
-  delete m_actPasteFiles;
-  delete m_actRenameFile;
-  delete m_actFileProperties;
 }
 
-void FileBrowser::freeToolActions()
+void FileBrowser::removeToolActions()
 {
-  for (auto cat = m_categories.begin(); cat != m_categories.end(); ++cat)
+  for (QMenu* category : m_categories)
   {
-    m_menu->removeAction((*cat)->menuAction());
-    QList<QAction*> actions = (*cat)->actions();
-    for (auto action = actions.begin(); action != actions.end(); ++action)
-    {
-      delete *action;
-    }
-    delete *cat;
+    m_menu->removeAction(category->menuAction());
   }
 }
 
 void FileBrowser::setCatalog(ToolCatalog catalog)
 {
-  freeToolActions();
+  removeToolActions();
   m_catalog = catalog;
   QStringList categories = m_catalog.categories();
   for (auto cat = categories.begin(); cat != categories.end(); ++cat)

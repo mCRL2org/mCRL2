@@ -36,11 +36,11 @@ class mcrl2xi_tool : public mcrl2xi_base
       atermThread->start();
       atermThread->setPriority(QThread::IdlePriority);
 
-      MainWindow *window = new MainWindow(atermThread, rewrite_strategy());
+      MainWindow window(atermThread, rewrite_strategy());
 
       if (!m_input_filename.empty())
       {
-        window->openDocument(QString::fromStdString(m_input_filename));
+        window.openDocument(QString::fromStdString(m_input_filename));
       }
 
       return show_main_window(window);
