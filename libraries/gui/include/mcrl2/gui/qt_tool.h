@@ -9,7 +9,6 @@
 #ifndef MCRL2_UTILITIES_QT_TOOL_H
 #define MCRL2_UTILITIES_QT_TOOL_H
 
-#include <string>
 #include "mcrl2/utilities/toolset_version.h"
 #include <QAction>
 #include <QApplication>
@@ -22,6 +21,9 @@
 #include <QString>
 #include <QUrl>
 #include <QtGlobal>
+
+#include <string>
+#include <memory>
 
 namespace mcrl2
 {
@@ -41,6 +43,9 @@ class HelpMenu : public QMenu
     QString m_description;
     QString m_manualUrl;
 
+    QAction m_actionContents;
+    QAction m_actionAbout;
+
   public:
     HelpMenu(QMainWindow* window, const std::string& name, const std::string& author, const std::string& description, const std::string& manualUrl):
       QMenu(window->menuBar()),
@@ -48,22 +53,22 @@ class HelpMenu : public QMenu
       m_name(QString::fromStdString(name)),
       m_author(QString::fromStdString(author)),
       m_description(QString::fromStdString(description)),
-      m_manualUrl(QString::fromStdString(manualUrl))
+      m_manualUrl(QString::fromStdString(manualUrl)),
+      m_actionContents(window),
+      m_actionAbout(window)
     {
-      QAction* actionContents = new QAction(window);
-      actionContents->setText("&Contents");
-      actionContents->setShortcut(QString("F1"));
-      connect(actionContents, SIGNAL(triggered()), this, SLOT(showContents()));
+      m_actionContents.setText("&Contents");
+      m_actionContents.setShortcut(QString("F1"));
+      connect(&m_actionContents, SIGNAL(triggered()), this, SLOT(showContents()));
 
-      QAction* actionAbout = new QAction(window);
-      actionAbout->setText("&About");
-      connect(actionAbout, SIGNAL(triggered()), this, SLOT(showAbout()));
+      m_actionAbout.setText("&About");
+      connect(&m_actionAbout, SIGNAL(triggered()), this, SLOT(showAbout()));
 
       setTitle("&Help");
-      addAction(actionContents);
-      window->addAction(actionContents);
+      addAction(&m_actionContents);
+      window->addAction(&m_actionContents);
       addSeparator();
-      addAction(actionAbout);
+      addAction(&m_actionAbout);
     }
 
   protected slots:
@@ -91,7 +96,7 @@ template <typename Tool>
 class qt_tool: public Tool
 {
   protected:
-    QApplication* m_application;
+    std::unique_ptr<QApplication> m_application;
     std::string m_name;
     std::string m_author;
     std::string m_about_description;
@@ -107,7 +112,6 @@ class qt_tool: public Tool
             std::string known_issues = ""
            )
       : Tool(name, author, what_is, tool_description, known_issues),
-        m_application(NULL),
         m_name(name),
         m_author(author), 
         m_about_description(about_description),
@@ -126,27 +130,21 @@ class qt_tool: public Tool
       // to here, since creating it in execute would make it
       // impossible to view the help text in an environment
       // without display server
-      m_application = new QApplication(argc, argv);
+      m_application = std::unique_ptr<QApplication>(new QApplication(argc, argv));
       qsrand(QDateTime::currentDateTime().toTime_t());
       return true;
     }
 
     bool show_main_window(QMainWindow& window)
     {
-      HelpMenu* menu = new HelpMenu(&window, m_name, m_author, m_about_description, m_manual_url);
-      window.menuBar()->addAction(menu->menuAction());
+      HelpMenu menu(&window, m_name, m_author, m_about_description, m_manual_url);
+      window.menuBar()->addAction(menu.menuAction());
       window.menuBar()->setNativeMenuBar(true);
       window.show();
-      window.resize(500,1000);
-      window.show();
-      window.resize(1000,900);
       return m_application->exec() == 0;
     }
 
-    virtual ~qt_tool()
-    {
-      delete m_application;
-    }
+    virtual ~qt_tool() {}
 };
 
 } // namespace qt
