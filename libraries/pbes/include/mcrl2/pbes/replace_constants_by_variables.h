@@ -52,11 +52,11 @@ void replace_constants_by_variables(T& x,
 /// with the assignment v := r(c). This can be used in rewriting, to avoid that c is rewritten by the rewriter
 /// multiple times.
 template <typename T>
-T replace_variables(const T& x,
-                    const data::rewriter& r,
-                    data::mutable_indexed_substitution<>& sigma,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                   )
+T replace_constants_by_variables(const T& x,
+                                 const data::rewriter& r,
+                                 data::mutable_indexed_substitution<>& sigma,
+                                 typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                )
 {
   detail::replace_constants_by_variables_builder f(r, sigma);
   return f.apply(x);
