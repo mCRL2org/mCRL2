@@ -186,78 +186,6 @@ namespace detail
               const LTS_TYPE& l,
               const bool provide_a_counter_example);
 
-  /* Construct a path to state s using the backward map, and return it in result */
-  inline
-  void reconstruct_path(const state_type s, 
-                        const std::map<state_type, std::pair<label_type,state_type> >& backward_map, 
-                        std::vector<label_type>& result)
-  {
-    if (backward_map.count(s)==0)
-    {
-      return;
-    }
-    const std::pair<label_type,state_type> p=backward_map.at(s);
-    {
-      reconstruct_path(p.second, backward_map, result);
-      result.push_back(p.first);
-    }
-  }
-
-  template < class LTS_TYPE >
-  std::vector<label_type> find_path_to_stable_state_without_action_in_impl(const label_type offending_action, 
-                                                                           const state_type s, 
-                                                                           const lts_cache<LTS_TYPE>& lts_cache,
-                                                                           const LTS_TYPE& l,
-                                                                           const bool find_trace_with_taus)
-  {
-    set_of_states visited;
-    visited.insert(s);
-    std::deque<state_type> todo_stack={s};
-    std::map<state_type, std::pair<label_type,state_type> > backward_map;
-    while (todo_stack.size()>0)  
-    {
-      state_type current_state=todo_stack.front();
-      todo_stack.pop_front();
-
-      if (lts_cache.stable(current_state))  
-      {
-        // Check that the current state does not occur in all outgoing transitions. 
-        bool found=false;
-        for(const transition& t: lts_cache.transitions(current_state))
-        {
-          if (t.label()==offending_action)
-          {
-            found=true;
-            break;
-          }
-        }
-        if (!found)
-        { 
-          std::vector<label_type> resulting_path;
-          reconstruct_path(current_state, backward_map, resulting_path);
-          assert(find_trace_with_taus || resulting_path.empty()); // There are no tau's in the path if taus were not requested. 
-          return resulting_path;
-        }
-      }
-      else // The current state is not stable. 
-      {
-        for(const transition& t: lts_cache.transitions(current_state))
-        {
-          if (find_trace_with_taus && l.is_tau(l.apply_hidden_label_map(t.label())))
-          {
-            if (visited.insert(t.to()).second)  // The state to() was not yet explored.
-            {
-              todo_stack.push_back(t.to());
-              backward_map[t.to()]=std::pair<label_type,state_type>(t.label(), t.from()); // Store how the to state could be reached.
-            }
-          }
-        }
-      }
-    }
-    // The action was not found. Do not return a path. 
-    return std::vector<label_type>();
-  }
-
 } // namespace detail
 
 enum refinement_type { trace, failures, failures_divergence };
@@ -431,17 +359,7 @@ bool destructive_refinement_checker(
                                            l1,
                                            !generate_counter_example.is_dummy()))   
         {
-          std::vector<detail::label_type> counter_example_extension;
-          if (offending_action!=std::size_t(-1))
-          { 
-            counter_example_extension = 
-                       detail::find_path_to_stable_state_without_action_in_impl(offending_action, 
-                                                                                impl_spec.state(),
-                                                                                weak_property_cache,
-                                                                                l1, 
-                                                                                failures_divergence || weak_reduction);
-          }
-          generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1, counter_example_extension);
+          generate_counter_example.save_counter_example(impl_spec.counter_example_index(), l1);
           report_statistics(stats);
           return false;                               // return false;
         }
