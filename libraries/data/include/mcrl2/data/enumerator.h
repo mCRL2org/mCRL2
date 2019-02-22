@@ -648,6 +648,7 @@ class enumerator_algorithm
             sigma[v1] = f;
             if (add_element(v_tail, phi, v1, f))
             {
+              sigma[v1] = v1;
               return true;
             }
           }
@@ -668,6 +669,7 @@ class enumerator_algorithm
           sigma[v1] = e;
           if (add_element(v_tail, phi, v1, e))
           {
+            sigma[v1] = v1;
             return true;
           }
         }
@@ -693,6 +695,7 @@ class enumerator_algorithm
             sigma[v1] = e;
             if (add_element(v_tail, phi, v1, e))
             {
+              sigma[v1] = v1;
               return true;
             }
           }
@@ -726,6 +729,7 @@ class enumerator_algorithm
               sigma[v1] = cy;
               if (add_element_with_variables(v_tail, y, phi, v1, cy))
               {
+                sigma[v1] = v1;
                 return true;
               }
             }
@@ -736,6 +740,7 @@ class enumerator_algorithm
               sigma[v1] = e1;
               if (add_element(v_tail, phi, v1, e1))
               {
+                sigma[v1] = v1;
                 return true;
               }
             }
