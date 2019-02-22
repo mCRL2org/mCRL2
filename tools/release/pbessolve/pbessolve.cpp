@@ -53,6 +53,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     // if true, apply optimization 4 and 5 at every iteration
     bool aggressive = false;
 
+    bool replace_constants_by_variables = false;
+
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;
@@ -114,6 +116,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       "structure graph is solved.")
                     ,"use strategy STRATEGY",
                  's');
+      desc.add_option("replace-constants-by-variables", "move constant expressions to a substitution. "
+                     "This is an experimental feature that can save some rewriting."
+      );
       desc.add_hidden_option("aggressive", "apply optimizations 4 and 5 at every iteration");
     }
 
@@ -148,6 +153,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         aggressive = true;
       }
+      replace_constants_by_variables = parser.options.find("replace-constants-by-variables") != parser.options.end();
     }
 
     std::set<utilities::file_format> available_input_formats() const override
@@ -171,11 +177,11 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {}
 
     template <typename PbesInstAlgorithm>
-    void run_algorithm(PbesInstAlgorithm& algorithm, const pbes_system::pbes& pbesspec, structure_graph& G)
+    void run_algorithm(PbesInstAlgorithm& algorithm, const pbes_system::pbes& pbesspec, structure_graph& G, bool replace_constants_by_variables)
     {
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       timer().start("instantiation");
-      algorithm.run();
+      algorithm.run(replace_constants_by_variables);
       timer().finish("instantiation");
 
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: " << G.all_vertices().size() << std::endl;
@@ -231,13 +237,13 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       if (m_strategy <= 1)
       {
         pbesinst_structure_graph_algorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_strategy);
-        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G, replace_constants_by_variables);
       }
       else
       {
         pbesinst_structure_graph_algorithm2 algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_strategy);
         algorithm.enable_aggressive_mode(aggressive);
-        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G, replace_constants_by_variables);
       }
       return true;
     }

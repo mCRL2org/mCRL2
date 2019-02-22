@@ -1,6 +1,4 @@
-// Author(s): Jan Friso Groote
-//            Xiao Qi
-//            Wieger Wesselink 2017-2018
+// Author(s): Wieger Wesselink 2017-2019
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -26,6 +24,7 @@
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/replace_constants_by_variables.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
@@ -45,8 +44,7 @@ namespace mcrl2
 namespace pbes_system
 {
 
-/// \brief An alternative lazy algorithm for instantiating a PBES, ported from
-///         bes_deprecated.h.
+/// \brief A PBES instantiation algorithm that uses a lazy strategy
 class pbesinst_lazy_algorithm
 {
   protected:
@@ -91,12 +89,12 @@ class pbesinst_lazy_algorithm
       return "";
     }
 
-    /// \brief Creates a substitution function for the pbesinst rewriter.
+    /// \brief Adds the assignments [v := e] to sigma
     /// \param v A sequence of data variables
     /// \param e A sequence of data expressions
     /// \param sigma The substitution that maps the i-th element of \p v to the i-th element of \p e
     inline
-    void make_substitution(const data::variable_list& v, const data::data_expression_list& e, data::rewriter::substitution_type& sigma)
+    void add_assignments(const data::variable_list& v, const data::data_expression_list& e, data::mutable_indexed_substitution<>& sigma)
     {
       assert(v.size() == e.size());
       auto vi = v.begin();
@@ -104,6 +102,16 @@ class pbesinst_lazy_algorithm
       for (; vi != v.end(); ++vi, ++ei)
       {
         sigma[*vi] = *ei;
+      }
+    }
+
+    /// \brief Removes assignments to variables in v from sigma
+    inline
+    void remove_assignments(const data::variable_list& v, data::mutable_indexed_substitution<>& sigma)
+    {
+      for (const data::variable& v_i: v)
+      {
+        sigma[v_i] = v_i;
       }
     }
 
@@ -227,16 +235,21 @@ class pbesinst_lazy_algorithm
                        std::deque<propositional_variable_instantiation>& /* todo */,
                        std::size_t /* regeneration_period */
                       )
-    { }
+    {}
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    virtual void run()
+    virtual void run(bool replace_constants_by_variables = true)
     {
       using utilities::detail::contains;
 
       m_iteration_count = 0;
+      data::mutable_indexed_substitution<> sigma;
+      if (replace_constants_by_variables)
+      {
+        pbes_system::replace_constants_by_variables(m_pbes, datar, sigma);
+      }
 
-      init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
+      init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state(), sigma));
       todo.push_back(init);
       discovered.insert(init);
       while (!todo.empty())
@@ -249,10 +262,10 @@ class pbesinst_lazy_algorithm
 
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
-        data::rewriter::substitution_type sigma;
-        make_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         const auto& phi = eqn.formula();
+        add_assignments(eqn.variable().parameters(), X_e.parameters(), sigma);
         pbes_expression psi_e = R(phi, sigma);
+        remove_assignments(eqn.variable().parameters(), sigma);
 
         // optional step
         psi_e = rewrite_psi(eqn.symbol(), X_e, psi_e);

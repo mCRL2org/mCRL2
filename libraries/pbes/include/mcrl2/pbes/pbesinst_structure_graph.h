@@ -119,9 +119,9 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       SG0(X, psi, k);
     }
 
-    void run() override
+    void run(bool replace_constants_by_variables = true) override
     {
-      pbesinst_lazy_algorithm::run();
+      pbesinst_lazy_algorithm::run(replace_constants_by_variables);
       m_graph_builder.finalize();
     }
 };
