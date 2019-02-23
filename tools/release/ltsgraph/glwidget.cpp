@@ -138,17 +138,16 @@ struct NodeMoveRecord : public MoveRecord
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   : QOpenGLWidget(parent),
-    m_graph(graph)
+    m_graph(graph),
+    m_scene(*this, m_graph)
 {
   setMouseTracking(true);
 
-  m_scene = new GLScene(*this, m_graph);
-  m_scene->setDevicePixelRatio(devicePixelRatio());
+  m_scene.setDevicePixelRatio(devicePixelRatio());
 }
 
 GLWidget::~GLWidget()
 {
-  delete m_scene;
   delete m_ui;
 }
 
@@ -185,7 +184,7 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
 
 void GLWidget::updateSelection()
 {
-  m_scene->setDevicePixelRatio(devicePixelRatio());
+  m_scene.setDevicePixelRatio(devicePixelRatio());
   Graph::Node* selnode;
   for (std::list<GLScene::Selection>::iterator it = m_selections.begin(); it != m_selections.end();)
   {
@@ -205,7 +204,7 @@ void GLWidget::updateSelection()
   QPoint pos = mapFromGlobal(QCursor::pos());
 
   GLScene::Selection prev = m_hover;
-  m_hover = m_scene->select(pos.x(), pos.y());
+  m_hover = m_scene.select(pos.x(), pos.y());
   bool needupdate = prev.selectionType != m_hover.selectionType || prev.index != m_hover.index;
   selnode = select_object(m_hover, m_graph);
   if (selnode != nullptr)
@@ -258,12 +257,12 @@ void GLWidget::initializeGL()
     mCRL2log(mcrl2::log::debug) << "The Qt5 OpenGL debug logger can not be initialized.\n";
   }
 
-  m_scene->initialize();
+  m_scene.initialize();
 }
 
 void GLWidget::resizeGL(int width, int height)
 {
-  m_scene->camera().viewport(width, height);
+  m_scene.camera().viewport(width, height);
 }
 
 void GLWidget::paintGL()
@@ -272,8 +271,8 @@ void GLWidget::paintGL()
 
   if (!m_paused)
   {
-    m_scene->setDevicePixelRatio(devicePixelRatio());
-    m_scene->render(painter);
+    m_scene.setDevicePixelRatio(devicePixelRatio());
+    m_scene.render(painter);
     update();
   }
 }
@@ -318,7 +317,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     }
     else if (e->modifiers() == Qt::ShiftModifier)
     {
-      if (e->button() == Qt::LeftButton && m_scene->is_threedimensional()) {
+      if (e->button() == Qt::LeftButton && m_scene.is_threedimensional()) {
         m_dragmode = dm_rotate;
       }
     }
@@ -332,7 +331,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     {
       if (m_hover.selectionType == GLScene::so_none)
       {
-        if (e->button() == Qt::RightButton && m_scene->is_threedimensional()) {
+        if (e->button() == Qt::RightButton && m_scene.is_threedimensional()) {
           m_dragmode = dm_rotate;
         }
         else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
@@ -396,7 +395,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
-  CameraView& camera = m_scene->camera();
+  CameraView& camera = m_scene.camera();
   camera.zoom(camera.zoom() + 5 * e->delta());
   update();
 }
@@ -404,7 +403,7 @@ void GLWidget::wheelEvent(QWheelEvent* e)
 void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
   updateSelection();
-  CameraView& camera = m_scene->camera();
+  CameraView& camera = m_scene.camera();
   
   if (m_dragmode != dm_none)
   {
@@ -496,12 +495,12 @@ void GLWidget::setDepth(bool enabled)
 
 QVector3D GLWidget::size3()
 {
-  return m_scene->size();
+  return m_scene.size();
 }
 
 void GLWidget::resetViewpoint(std::size_t animation)
 {
-  m_scene->camera().reset();
+  m_scene.camera().reset();
   update();
 }
 

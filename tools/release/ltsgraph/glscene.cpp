@@ -23,8 +23,6 @@
 
 constexpr int RES_ARROWHEAD = 30; /// Amount of segments in arrowhead cone
 constexpr int RES_ARC       = 20; /// Amount of segments for edge arc
-constexpr int RES_NODE_SLICE = 64; /// Number of segments from which a circle representing a node is constructed.
-constexpr int RES_NODE_STACK = 4;
 
 /// Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
 #define MCRL2_QGL_VERIFY(x) \
@@ -43,24 +41,23 @@ namespace
 const char* g_vertexShader =
   "#version 330\n"
 
-  "uniform mat4 g_worldViewProjMatrix;\n"
+  "uniform mat4 worldViewProjMatrix;\n"
 
   "layout(location = 0) in vec3 vertex;\n"
 
   "void main(void)\n"
   "{\n"
-  "   gl_Position = g_worldViewProjMatrix * vec4(vertex, 1.0f);\n"
+  "   gl_Position = worldViewProjMatrix * vec4(vertex, 1.0f);\n"
   "}";
 
 const char* g_fragmentShader =
   "#version 330\n "
 
   "out vec4 fragColor;\n"
-  "uniform vec4 test;\n"
 
   "void main(void)\n"
   "{\n"
-  "   fragColor = test;//vec4(1.0, 0.0, 0.0, 1.0);\n"
+  "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
   "}";
 } // unnamed namespace
 
@@ -85,13 +82,12 @@ bool GlobalShader::link()
     std::abort();
   }
 
-  // Read the compiled shader to figure out the positions of uniforms (parameters).
-  m_worldViewProjMatrix_location = attributeLocation("g_test");
+  // This would be preferable, but does not work.
+  m_worldViewProjMatrix_location = uniformLocation("worldViewProjMatrix");
   if (m_worldViewProjMatrix_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The shader has no uniform named g_worldViewProjMatrix.\n";
+    mCRL2log(mcrl2::log::warning) << "The global shader has no uniform named worldViewProjMatrix.\n";
   }
-
 
   return true;
 }
@@ -108,6 +104,11 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
   setFontSize(m_fontsize);
   setFogDistance(m_fogdistance);
 }
+/// \brief Number of orthogonal slices from which a circle representing a node is constructed.
+constexpr int RES_NODE_SLICE = 64;
+
+/// \brief Number of vertical planes from which a circle representing a node is constructed.
+constexpr int RES_NODE_STACK = 4;
 
 void GLScene::initialize()
 {
@@ -122,8 +123,6 @@ void GLScene::initialize()
   // Generate vertices for node border (a line loop drawing a circle)
   float slice = 0;
   float sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1));
-  float stack = 0;
-  float stackd = (float)(M_PI_2 / RES_NODE_STACK);
 
   for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
   {
@@ -132,6 +131,8 @@ void GLScene::initialize()
 
   // Generate vertices for node (a quad strip drawing a half sphere)
   slice = 0;
+  float stack = 0;
+  float stackd = (float)(M_PI_2 / RES_NODE_STACK);
   std::size_t n = RES_NODE_SLICE - 1;
   for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
   {
@@ -139,18 +140,18 @@ void GLScene::initialize()
     {
       node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
           std::sin((float)(stack + stackd)) * std::cos(slice),
-          std::cos((float)(stack + stackd)));
+          -std::cos((float)(stack + stackd)));
       node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
           std::sin(stack) * std::cos(slice),
-          std::cos(stack));
+          -std::cos(stack));
     }
 
     node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
         std::sin((float)(stack + stackd)) * std::cos(0.0f),
-        std::cos((float)(stack + stackd)));
+        -std::cos((float)(stack + stackd)));
     node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
         std::sin(stack) * std::cos(0.0f),
-        std::cos(stack));
+        -std::cos(stack));
   }
 
   MCRL2_QGL_VERIFY(m_node_vbo.create());
@@ -218,11 +219,12 @@ void GLScene::render(QPainter& painter)
   // OSX when drawing a quadstrip.
   //glEnable(GL_LINE_SMOOTH);
   //glEnable(GL_POINT_SMOOTH);
-  //glEnable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
 
   // Enable depth testing, so that we don't have to care too much about
   // rendering in the right order.
   //glEnable(GL_DEPTH_TEST);
+  //glClearDepth(0.0f);
 
   QColor clear(Qt::white);
   glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
@@ -234,8 +236,9 @@ void GLScene::render(QPainter& painter)
   std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  // All nodes share the same shader.
+  // All nodes share the same shader and vertex layout.
   m_shader.bind();
+  m_node_vao.bind();
 
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
@@ -614,15 +617,15 @@ void GLScene::renderNode(GLuint i)
 
   //m_camera.billboard_spherical(node.pos());
   QMatrix4x4 worldMatrix;
-  worldMatrix.scale(0.5f * nodeSizeOnScreen());
-  worldMatrix.translate(node.pos());
 
-  worldMatrix *= m_camera.viewMatrix();
-  worldMatrix *= m_camera.projectionMatrix();
+  //worldMatrix.scale(0.5f * nodeSizeOnScreen());
+  //worldMatrix.translate(node.pos());
+  worldMatrix.translate(0.0f, 0.0f, 50.0f);
 
-  m_shader.setWorldViewProjMatrix(worldMatrix);
+  QMatrix4x4 worldViewProjMatrix = worldMatrix * m_camera.projectionMatrix() *  m_camera.viewMatrix();
 
-  m_node_vao.bind();
+  m_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+
   MCRL2_OGL_VERIFY(glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2));
 
  /* if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
