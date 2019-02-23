@@ -14,11 +14,10 @@
 #include "mcrl2/gui/arcball.h"
 #include "ui_glwidget.h"
 
-#include <QtOpenGL>
-
 #include <map>
 
-#define DRAG_MIN_DIST 20.0f ///< Minimum distance for a drag to be registered (pixels)
+/// \brief Minimum distance for a drag to be registered (pixels)
+constexpr float DRAG_MIN_DIST = 20.0f;
 
 struct MoveRecord
 {
