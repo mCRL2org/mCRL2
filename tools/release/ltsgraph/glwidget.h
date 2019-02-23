@@ -59,7 +59,6 @@ public:
    */
   ~GLWidget() override;
 
-
   /**
    * @brief Initialises the OpenGL context.
    */
@@ -171,8 +170,8 @@ public:
 
   //Getters and setters
 
-  std::size_t nodeSize() const { return m_scene->nodeSize(); }
-  std::size_t fontSize() const { return m_scene->fontSize(); }
+  std::size_t nodeSize() const { return m_scene.nodeSize(); }
+  std::size_t fontSize() const { return m_scene.fontSize(); }
 
 public slots:
 
@@ -187,46 +186,46 @@ public slots:
 
   //Getters and setters
   void toggleTransitionLabels(bool show) {
-    m_scene->setDrawTransitionLabels(show);
+    m_scene.setDrawTransitionLabels(show);
     update();
   }
   void toggleStateLabels(bool show) {
-    m_scene->setDrawStateLabels(show);
+    m_scene.setDrawStateLabels(show);
     update();
   }
   void toggleStateNumbers(bool show) {
-    m_scene->setDrawStateNumbers(show);
+    m_scene.setDrawStateNumbers(show);
     update();
   }
   void toggleSelfLoops(bool show) {
-    m_scene->setDrawSelfLoops(show);
+    m_scene.setDrawSelfLoops(show);
     update();
   }
   void toggleInitialMarking(bool show) {
-    m_scene->setDrawInitialMarking(show);
+    m_scene.setDrawInitialMarking(show);
     update();
   }
   void toggleFog(bool show) {
-    m_scene->setDrawFog(show);
+    m_scene.setDrawFog(show);
     update();
   }
   void setNodeSize(int size) {
-    m_scene->setNodeSize(size);
+    m_scene.setNodeSize(size);
     update();
   }
   void setFontSize(int size) {
-    m_scene->setFontSize(size);
+    m_scene.setFontSize(size);
     update();
   }
   void setFogDistance(int dist) {
-    m_scene->setFogDistance(dist);
+    m_scene.setFogDistance(dist);
     update();
   }
 
 private:
   GLWidgetUi* m_ui = nullptr; /// The user interface of the class.
   Graph::Graph& m_graph;      /// The current graph.
-  GLScene* m_scene;           /// The GLScene which is used to render the contents.
+  GLScene m_scene;           /// The GLScene which is used to render the contents.
   QOpenGLDebugLogger* m_logger; /// Logs OpenGL debug messages.
 
   GLScene::Selection m_hover; /// The current object (if any) which is pointed at.

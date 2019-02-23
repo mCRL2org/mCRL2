@@ -49,8 +49,8 @@ public:
   /// \brief Set the dimensions of the viewport.
   void viewport(std::size_t width, std::size_t height) { m_viewport = QRect(0, 0, width, height); }
 
-  const QMatrix4x4 viewMatrix() const { return m_viewMatrix; }
-  const QMatrix4x4 projectionMatrix() const { return m_projectionMatrix; }
+  const QMatrix4x4& viewMatrix() const { return m_viewMatrix; }
+  const QMatrix4x4& projectionMatrix() const { return m_projectionMatrix; }
 
   /// \brief Sets the position and orientation of the camera to its default values.
   void reset();
@@ -59,7 +59,7 @@ private:
   QVector3D m_position = QVector3D(0.0f, 0.0f, 0.0f);           /// Position of the camera.
   QQuaternion m_rotation = QQuaternion(1.0f, 0.0f, 0.0f, 0.0f); /// Rotation of the camera around the given position.
   float m_zoom = 500.0f;     /// The distance to the position.
-  float m_viewdistance = 1000.0f; /// The maximum view distance of the camera.
+  float m_viewdistance = 10000.0f; /// The maximum view distance of the camera.
   float m_vert_fieldofview = 70.0f;
 
   QMatrix4x4 m_projectionMatrix; /// \brief The project matrix of this camera.
