@@ -10,16 +10,12 @@
 #include "glscene.h"
 
 #include "export.h"
-#include "mcrl2/gui/arcball.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/gui/glu.h"
 
 #include <QFont>
 #include <QFontMetrics>
 #include <QImage>
 #include <QPainter>
-#include <QScreen>
-#include <QtOpenGL>
 
 #include <cassert>
 #include <cmath>
@@ -45,25 +41,65 @@ constexpr int RES_NODE_STACK = 4;
 namespace
 {
 const char* g_vertexShader =
-  "#version 330\n "
+  "#version 330\n"
 
-  "layout(location = 0) in vec4 vertex;"
+  "uniform mat4 g_worldViewProjMatrix;\n"
 
-  "void main( void )"
-  "{"
-  "   gl_Position = vertex;"
+  "layout(location = 0) in vec3 vertex;\n"
+
+  "void main(void)\n"
+  "{\n"
+  "   gl_Position = g_worldViewProjMatrix * vec4(vertex, 1.0f);\n"
   "}";
 
 const char* g_fragmentShader =
   "#version 330\n "
 
-  "layout(location = 0, index = 0) out vec4 fragColor;"
+  "out vec4 fragColor;\n"
+  "uniform vec4 test;\n"
 
-  "void main( void )"
-  "{"
-  "   fragColor = vec4( 1.0, 0.0, 0.0, 1.0 );"
+  "void main(void)\n"
+  "{\n"
+  "   fragColor = test;//vec4(1.0, 0.0, 0.0, 1.0);\n"
   "}";
 } // unnamed namespace
+
+bool GlobalShader::link()
+{
+  // Here we compile the vertex and fragment shaders and combine the results.
+  if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShader))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShader))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!QOpenGLShaderProgram::link())
+  {
+    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    std::abort();
+  }
+
+  // Read the compiled shader to figure out the positions of uniforms (parameters).
+  m_worldViewProjMatrix_location = attributeLocation("g_test");
+  if (m_worldViewProjMatrix_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The shader has no uniform named g_worldViewProjMatrix.\n";
+  }
+
+
+  return true;
+}
+
+void GlobalShader::setWorldViewProjMatrix(const QMatrix4x4& matrix)
+{
+  setUniformValue(m_worldViewProjMatrix_location, matrix);
+}
 
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
   :  m_glwidget(glwidget),
@@ -78,24 +114,8 @@ void GLScene::initialize()
   // Makes sure that we can call gl* functions after this.
   initializeOpenGLFunctions();
 
-  // Here we compile the vertex and fragment shaders and combine the results.
-  if (!m_shader.addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShader))
-  {
-    mCRL2log(mcrl2::log::error) << m_shader.log().toStdString();
-    std::abort();
-  }
-
-  if (!m_shader.addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShader))
-  {
-    mCRL2log(mcrl2::log::error) << m_shader.log().toStdString();
-    std::abort();
-  }
-
-  if (!m_shader.link())
-  {
-    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << m_shader.log().toStdString();
-    std::abort();
-  }
+  // Initialize the shader.
+  m_shader.link();
 
   std::vector<QVector3D> node(RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2);
 
@@ -134,7 +154,7 @@ void GLScene::initialize()
   }
 
   MCRL2_QGL_VERIFY(m_node_vbo.create());
-  MCRL2_QGL_VERIFY(m_node_vbo.bind());
+  m_node_vbo.bind();
   m_node_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
   m_node_vbo.allocate(node.data(), node.size() * sizeof(QVector3D));
 
@@ -180,6 +200,7 @@ void GLScene::initialize()
       0.3f * std::cos(0.0f));
 
   MCRL2_QGL_VERIFY(m_arrowhead_vbo.create());
+  m_arrowhead_vbo.bind();
   m_arrowhead_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
   m_arrowhead_vbo.allocate(arrowhead.data(), arrowhead.size() * sizeof(QVector3D));
 }
@@ -192,6 +213,16 @@ void GLScene::render(QPainter& painter)
   // Doc: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
   painter.begin(&m_glwidget);
   painter.beginNativePainting();
+
+  // Enable anti-aliasing for lines and points. Anti-aliasing for polygons gives artifacts on
+  // OSX when drawing a quadstrip.
+  //glEnable(GL_LINE_SMOOTH);
+  //glEnable(GL_POINT_SMOOTH);
+  //glEnable(GL_CULL_FACE);
+
+  // Enable depth testing, so that we don't have to care too much about
+  // rendering in the right order.
+  //glEnable(GL_DEPTH_TEST);
 
   QColor clear(Qt::white);
   glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
@@ -242,7 +273,6 @@ void GLScene::render(QPainter& painter)
     }
   }
 
-
   if (m_drawtransitionlabels)
   {
     for (std::size_t i = 0; i < edgeCount; ++i)
@@ -251,16 +281,12 @@ void GLScene::render(QPainter& painter)
     }
   }
 
+
   painter.end();
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
   MCRL2_OGL_CHECK();
-}
-
-QVector3D GLScene::size()
-{
-  return m_worldsize;
 }
 
 GLScene::Selection GLScene::select(int x, int y)
@@ -587,8 +613,14 @@ void GLScene::renderNode(GLuint i)
   }*/
 
   //m_camera.billboard_spherical(node.pos());
-  QMatrix4x4 modelMatrix;
-  modelMatrix.scale(0.5f * nodeSizeOnScreen());
+  QMatrix4x4 worldMatrix;
+  worldMatrix.scale(0.5f * nodeSizeOnScreen());
+  worldMatrix.translate(node.pos());
+
+  worldMatrix *= m_camera.viewMatrix();
+  worldMatrix *= m_camera.projectionMatrix();
+
+  m_shader.setWorldViewProjMatrix(worldMatrix);
 
   m_node_vao.bind();
   MCRL2_OGL_VERIFY(glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2));

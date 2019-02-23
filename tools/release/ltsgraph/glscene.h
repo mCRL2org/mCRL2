@@ -13,8 +13,6 @@
 #include "graph.h"
 #include "camera.h"
 
-#include "mcrl2/gui/glu.h"
-
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
@@ -23,6 +21,20 @@
 #include <QPainter>
 
 #include <vector>
+
+/// \brief A simple shader that can be used to render three dimensional objects.
+class GlobalShader : public QOpenGLShaderProgram
+{
+public:
+  /// \brief Sets the sources, links the program and extracts the required information.
+  bool link() override;
+
+  /// \brief Sets the world view projection matrix used to transform the object.
+  void setWorldViewProjMatrix(const QMatrix4x4& matrix);
+
+private:
+  int m_worldViewProjMatrix_location;
+};
 
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
 ///        all the necessary OpenGL calls to render this graph as if shown from the camera. It assumes
@@ -35,10 +47,8 @@ public:
   static const int handleSize = 8;
   static const int arrowheadSize = 12;
 
-  /**
-   * @brief An enumeration that identifies the types of objects that
-            can be selected. The order determines priority during selection.
-   */
+  /// \brief An enumeration that identifies the types of objects that
+  ///        can be selected. The order determines priority during selection.
   enum SelectableObject
   {
     so_none,     ///< Nothing was selected.
@@ -124,7 +134,7 @@ public:
    * @brief Returns the current world size.
    * @return The current world size in world coordinates.
    */
-  QVector3D size();
+  QVector3D size() { return m_worldsize; }
   
   /**
    * @brief Retrieve the object at viewport coordinate (x, y).
@@ -165,7 +175,7 @@ public:
   void setFogDistance(float dist) { m_fogdistance = dist; }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
   
-  bool is_threedimensional() { return false; }
+  bool is_threedimensional() { return m_worldsize.z() > 0.0f; }
 
   CameraView& camera() { return m_camera;  }
 
@@ -209,27 +219,34 @@ private:
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
-  /// All opengl related items
-  CameraView m_camera;  /// Implementation details of the OpenGL camera handling.
+  CameraView m_camera;
   float m_device_pixel_ratio;
   QFont m_font;
 
-  QOpenGLShaderProgram m_shader;                /// The shader to draw everything.
+  /// \brief The shader to draw everything.
+  GlobalShader m_shader;
 
-  /// Store various settings.
+  /// \brief The dimensions of a cube in which the scene lives.
   QVector3D m_worldsize = QVector3D(1000.0f, 1000.0f, 0.0f);
-  bool m_drawtransitionlabels = true;  /// Transition labels are only drawn if this field is true.
-  bool m_drawstatelabels      = false; /// State labels are only drawn if this field is true.
-  bool m_drawstatenumbers     = false; /// State numbers are only drawn if this field is true.
-  bool m_drawselfloops        = true;  /// Self loops are only drawn if this field is true.
+
+  /// \brief Transition labels are only drawn if this field is true.
+  bool m_drawtransitionlabels = true;
+  /// \brief State labels are only drawn if this field is true.
+  bool m_drawstatelabels      = false;
+  /// \brief State numbers are only drawn if this field is true.
+  bool m_drawstatenumbers     = false;
+  /// \brief Self loops are only drawn if this field is true.
+  bool m_drawselfloops        = true;
   bool m_drawinitialmarking   = true;  /// The initial state is marked if this field is true.
   std::size_t m_size_node     = 20;    /// Variable node size (radius).
   std::size_t m_fontsize      = 16;    /// Variable font size
 
-  bool m_drawfog              = true;    /// Fog is rendered only if this field is true.
-  float m_fogdistance         = 5500.0f; /// The distance at which the fog starts
+  /// Fog is rendered only if this field is true.
+  bool m_drawfog              = true;
+  float m_fogdistance         = 5500.0f;
 
-  QOpenGLVertexArrayObject m_node_vao;  /// The vertex layout for nodes.
+  /// The vertex layout for nodes.
+  QOpenGLVertexArrayObject m_node_vao;
   QOpenGLBuffer m_node_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
   QOpenGLBuffer m_arrowhead_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
   QOpenGLBuffer m_hint_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);

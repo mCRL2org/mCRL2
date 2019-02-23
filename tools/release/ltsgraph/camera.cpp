@@ -17,8 +17,9 @@
 void CameraView::update()
 {
   m_viewMatrix.setToIdentity();
+  m_viewMatrix.translate(QVector3D(0.0f, 0.0f, m_zoom));
+  m_viewMatrix.rotate(m_rotation);
   m_viewMatrix.translate(m_position);
-  m_viewMatrix.lookAt(QVector3D(0.0f, 0.0f, m_zoom), QVector3D(0.0f, 0.0f, 0.0f), QVector3D(0.0f, 0.0f, 1.0f));
 
   m_projectionMatrix.setToIdentity();
   m_projectionMatrix.perspective(m_vert_fieldofview, static_cast<float>(m_viewport.width()) / static_cast<float>(m_viewport.height()), 1.0f, m_viewdistance);
