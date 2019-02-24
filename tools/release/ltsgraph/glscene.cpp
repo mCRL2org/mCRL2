@@ -34,6 +34,29 @@
 constexpr float PI = 3.14159265358979323846f;
 constexpr float PI_2 = PI * 0.5f;
 
+/// \brief Number of orthogonal slices from which a circle representing a node is constructed.
+constexpr int RES_NODE_SLICE = 64;
+
+/// \brief Number of vertical planes from which a circle representing a node is constructed.
+constexpr int RES_NODE_STACK = 4;
+
+/// \brief Amount of segments in arrowhead cone
+constexpr int RES_ARROWHEAD = 30;
+
+/// \brief Amount of segments for edge arc
+constexpr int RES_ARC       = 20;
+
+/// This should match the layout of m_vertexbuffer.
+constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE - 1;
+constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
+constexpr int VERTICES_HINT = 4;
+constexpr int VERTICES_HANDLE = 4;
+constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
+
+constexpr int OFFSET_NODE_SPHERE = VERTICES_NODE_BORDER;
+constexpr int OFFSET_HANDLE = VERTICES_NODE_BORDER + VERTICES_NODE_SPHERE + VERTICES_HINT;
+constexpr int OFFSET_ARROWHEAD = VERTICES_NODE_BORDER + VERTICES_NODE_SPHERE + VERTICES_HINT + VERTICES_HANDLE;
+
 namespace
 {
 const char* g_vertexShader =
@@ -116,27 +139,6 @@ GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
 {
   setFontSize(m_fontsize);
 }
-/// \brief Number of orthogonal slices from which a circle representing a node is constructed.
-constexpr int RES_NODE_SLICE = 64;
-
-/// \brief Number of vertical planes from which a circle representing a node is constructed.
-constexpr int RES_NODE_STACK = 4;
-
-/// \brief Amount of segments in arrowhead cone
-constexpr int RES_ARROWHEAD = 30;
-
-/// \brief Amount of segments for edge arc
-constexpr int RES_ARC       = 20;
-
-/// This should match the layout of m_vertexbuffer.
-constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE - 1;
-constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
-constexpr int VERTICES_HINT = 4;
-constexpr int VERTICES_HANDLE = 4;
-constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
-
-constexpr int OFFSET_NODE_SPHERE = VERTICES_NODE_BORDER;
-constexpr int OFFSET_ARROWHEAD = VERTICES_NODE_BORDER + VERTICES_NODE_SPHERE + VERTICES_HINT + VERTICES_HANDLE;
 
 void GLScene::initialize()
 {
@@ -283,6 +285,10 @@ void GLScene::render(QPainter& painter)
     renderNode(sel ? m_graph.selectionNode(i) : i, viewProjMatrix);
   }
 
+  // All arrowheads and arcs are black.
+  QVector3D arrowhead_color(0.0f, 0.0f, 0.0f);
+  m_shader.setColor(arrowhead_color);
+
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     renderEdge(sel ? m_graph.selectionEdge(i) : i, viewProjMatrix);
@@ -290,7 +296,7 @@ void GLScene::render(QPainter& painter)
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
-    //renderHandle(sel ? m_graph.selectionEdge(i) : i);
+    renderHandle(sel ? m_graph.selectionEdge(i) : i, viewProjMatrix);
   }
 
   painter.endNativePainting();
@@ -455,11 +461,6 @@ bool GLScene::selectObject(GLScene::Selection& s,
 /*inline
 void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
 {
-  glVertexPointer(3, GL_FLOAT, 0, data.handle());
-  glColor3fv(fill);
-  glDrawArrays(GL_QUADS, 0, 4);
-  glColor3fv(line);
-  glDrawArrays(GL_LINE_LOOP, 0, 4);
 }
 
 inline
@@ -620,6 +621,40 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   }
 }
 
+void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
+{
+  Graph::Node& handle = m_graph.handle(i);
+  if (handle.selected() > 0.1 || handle.locked())
+  {
+    QVector3D line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
+    QVector3D fill(1.0f, 1.0f, 1.0f);
+
+    if (handle.locked())
+    {
+      fill = QVector3D(0.7f, 0.7f, 0.7f);
+    }
+
+    //m_camera.billboard_cylindrical(handle.pos());
+
+    // Move the handle to the correct position and with the correct scale.
+    QMatrix4x4 worldMatrix;
+    worldMatrix.translate(handle.pos());
+    worldMatrix.scale(handleSizeOnScreen());
+
+    // Update the shader parameters.
+    QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
+    m_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+
+    // First draw the inner quad.
+    m_shader.setColor(fill);
+    glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_HANDLE, VERTICES_HANDLE);
+
+    // Draw the outer lines.
+    m_shader.setColor(line);
+    glDrawArrays(GL_LINE_LOOP, OFFSET_HANDLE, VERTICES_HANDLE);
+  }
+}
+
 void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
 {
   Graph::NodeNode& node = m_graph.node(i);
@@ -715,24 +750,4 @@ void GLScene::renderStateNumber(QPainter& painter, GLuint i)
   Graph::NodeNode& node = m_graph.node(i);
   QVector3D eye = m_camera.worldToWindow(node.pos());
   drawCenteredText(painter, eye.x(), eye.y(), QString::number(i));
-}
-
-void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
-{
-  Graph::Node& handle = m_graph.handle(i);
-  if (handle.selected() > 0.1 || handle.locked())
-  {
-    Color3f line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
-    Color3f fill(1.0f, 1.0f, 1.0f);
-
-    if (handle.locked())
-    {
-      fill = Color3f(0.7f, 0.7f, 0.7f);
-    }
-
-    //m_camera.billboard_cylindrical(handle.pos());
-    float scale = handleSizeOnScreen();
-    glScalef(scale, scale, scale);
-    //drawHandle(m_vertexdata, line, fill);
-  }
 }
