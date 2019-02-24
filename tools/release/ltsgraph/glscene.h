@@ -40,6 +40,13 @@ private:
   int m_color_location;
 };
 
+/// \brief A shader that constructs an arc from given control points using the vertex shader.
+class ArcShader : public QOpenGLShaderProgram
+{
+  /// \brief Sets the sources, links the program and extracts the required information.
+  bool link() override;
+};
+
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
 ///        all the necessary OpenGL calls to render this graph as if shown from the camera. It assumes
 ///        to be the only place where OpenGL calls are performed as it does not keep track or reset the internal OpenGL
@@ -176,7 +183,7 @@ public:
 
   void setDrawFog(bool drawFog) { m_drawfog = drawFog; }
   void setNodeSize(std::size_t size) { m_size_node = size; }
-  void setFontSize(std::size_t size) { m_font.setPixelSize(m_fontsize = size); }
+  void setFontSize(std::size_t size) { m_fontsize = size; m_font.setPixelSize(m_fontsize); }
   void setFogDistance(float dist) { m_fogdistance = dist; }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
 
@@ -184,23 +191,22 @@ public:
   void setDepth(float depth) { m_worldsize.setZ(depth); }
 
 private:
+
   /**
    * @brief Renders a single edge.
    * @param i The index of the edge to render.
    */
-  void renderEdge(std::size_t i);
+  void renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix);
 
   /**
    * @brief Renders a single edge handle.
    * @param i The index of the edge of the handle to render.
    */
-  void renderHandle(GLuint i);
+  void renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix);
 
-  /**
-   * @brief Renders a single node.
-   * @param i The index of the node to render.
-   */
-  void renderNode(GLuint i);
+  /// \brief Renders a single node.
+  /// \param i The index of the node to render.
+  void renderNode(GLuint i, const QMatrix4x4& viewProjMatrix);
 
   /**
    * @brief Renders a single edge label.
@@ -249,12 +255,9 @@ private:
   bool m_drawfog              = true;
   float m_fogdistance         = 5500.0f;
 
-  /// The vertex layout for nodes.
-  QOpenGLVertexArrayObject m_node_vao;
-  QOpenGLBuffer m_node_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-  QOpenGLBuffer m_arrowhead_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-  QOpenGLBuffer m_hint_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-  QOpenGLBuffer m_handle_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+  /// The vertex layout and vertex buffer object for all objects with the 3 float per vertex layout.
+  QOpenGLVertexArrayObject m_vertexarray;
+  QOpenGLBuffer m_vertexbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 };
 
 #endif // MCRL2_LTSGRAPH_GLSCENE_H
