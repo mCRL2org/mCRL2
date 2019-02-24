@@ -47,18 +47,24 @@ constexpr int RES_ARROWHEAD = 30;
 constexpr int RES_ARC       = 20;
 
 /// This should match the layout of m_vertexbuffer.
-constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE - 1;
+constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE;
 constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
 constexpr int VERTICES_HINT = 4;
 constexpr int VERTICES_HANDLE = 4;
 constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
+constexpr int VERTICES_ARC = RES_ARC;
 
-constexpr int OFFSET_NODE_SPHERE = VERTICES_NODE_BORDER;
-constexpr int OFFSET_HANDLE = VERTICES_NODE_BORDER + VERTICES_NODE_SPHERE + VERTICES_HINT;
-constexpr int OFFSET_ARROWHEAD = VERTICES_NODE_BORDER + VERTICES_NODE_SPHERE + VERTICES_HINT + VERTICES_HANDLE;
+constexpr int OFFSET_NODE_BORDER = 0;
+constexpr int OFFSET_NODE_SPHERE = OFFSET_NODE_BORDER + VERTICES_NODE_BORDER;
+constexpr int OFFSET_HINT       = OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE;
+constexpr int OFFSET_HANDLE     = OFFSET_HINT + VERTICES_HINT;
+constexpr int OFFSET_ARROWHEAD  = OFFSET_HANDLE + VERTICES_HANDLE;
+constexpr int OFFSET_ARC        = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
 
 namespace
 {
+
+/// \brief A simple vertex shader just transforms the 3D vertices using a worldViewProjection matrix.
 const char* g_vertexShader =
   "#version 330\n"
 
@@ -71,6 +77,7 @@ const char* g_vertexShader =
   "   gl_Position = g_worldViewProjMatrix * vec4(vertex, 1.0f);\n"
   "}";
 
+/// \brief A simple fragment shader that uses g_color as a fill color for the polygons.
 const char* g_fragmentShader =
   "#version 330\n "
 
@@ -105,7 +112,6 @@ bool GlobalShader::link()
     std::abort();
   }
 
-  // This would be preferable, but does not work.
   m_worldViewProjMatrix_location = uniformLocation("g_worldViewProjMatrix");
   if (m_worldViewProjMatrix_location == -1)
   {
@@ -121,17 +127,71 @@ bool GlobalShader::link()
   return true;
 }
 
+/// \brief A vertex shader that produces a cubic Bezier curve.
 const char* g_arcVertexShader =
   "#version 330\n"
 
-  "uniform mat4 g_worldViewProjMatrix;\n"
+  "uniform mat4 g_viewProjMatrix;\n"
+
+  "uniform vec3 g_controlPoint[4];"
 
   "layout(location = 0) in vec3 vertex;\n"
 
+  "// Calculates the position on a cubic Bezier curve with 0 <= t <= 1.\n"
+  "vec3 cubicBezier(float t)\n"
+  "{"
+  "   return pow(t - 1.0f, 3.0f) * g_controlPoint[0]"
+  "     + 3 * pow(t - 1.0f, 2.0f) * t * g_controlPoint[1]"
+  "     + 3 * (t - 1.0f) * pow(t, 2.0f) * g_controlPoint[2]"
+  "     + pow(t, 3.0f) * g_controlPoint[3];"
+  "}\n"
+
   "void main(void)\n"
   "{\n"
-  "   gl_Position = g_worldViewProjMatrix * vec4(vertex, 1.0f);\n"
+  "   gl_Position = g_viewProjMatrix * vec4(cubicBezier(vertex.x), 1.0f);\n"
   "}";
+
+bool ArcShader::link()
+{
+  // Here we compile the vertex and fragment shaders and combine the results.
+  if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_arcVertexShader))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShader))
+  {
+    mCRL2log(mcrl2::log::error) << log().toStdString();
+    std::abort();
+  }
+
+  if (!QOpenGLShaderProgram::link())
+  {
+    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    std::abort();
+  }
+
+  m_viewProjMatrix_location = uniformLocation("g_viewProjMatrix");
+  if (m_viewProjMatrix_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewProjMatrix.\n";
+  }
+
+  m_controlPoints_location = uniformLocation("g_controlPoint");
+  if (m_controlPoints_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_controlPoint.\n";
+  }
+
+  m_color_location = uniformLocation("g_color");
+  if (m_color_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_color.\n";
+  }
+
+  return true;
+}
 
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
   :  m_glwidget(glwidget),
@@ -146,17 +206,22 @@ void GLScene::initialize()
   initializeOpenGLFunctions();
 
   // Initialize the global shader.
-  m_shader.link();
+  m_global_shader.link();
 
-  // Generate vertices for node border (a line loop drawing a circle)
+  // Initialize the arc shader.
+  m_arc_shader.link();
+
+  // Generate vertices for node border (A slightly larger circle with polygons GL_TRIANGLE_FAN)
   std::vector<QVector3D> nodeborder(VERTICES_NODE_BORDER);
   {
     float slice = 0;
     float sliced = 2.0f * PI / VERTICES_NODE_BORDER;
 
-    for (int i = 0; i < VERTICES_NODE_BORDER; ++i, slice += sliced)
+    // The center of the circle, followed by the vertices on the edge.
+    nodeborder[0] = QVector3D(0.0f, 0.0f, 0.0f);
+    for (int i = 1; i < VERTICES_NODE_BORDER; ++i, slice -= sliced)
     {
-      nodeborder[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
+      nodeborder[i] = QVector3D(1.1f * std::sin(slice), 1.1f * std::cos(slice), 0.0f);
     }
   }
 
@@ -223,6 +288,15 @@ void GLScene::initialize()
         0.3f * std::cos(0.0f));
   }
 
+  // Generate vertices for the arc, these will be moved to the correct position by the vertex shader using the x coordinate as t.
+  std::vector<QVector3D> arc(VERTICES_ARC);
+  {
+    for (int i = 0; i < VERTICES_ARC; ++i)
+    {
+      arc[i] = QVector3D(static_cast<float>(i) / (VERTICES_ARC - 1), 0.0f, 0.0f);
+    }
+  }
+
   // We are going to store all vertices in the same buffer and keep track of the offsets.
   std::vector<QVector3D> vertices;
   vertices.insert(vertices.end(), nodeborder.begin(), nodeborder.end());
@@ -230,6 +304,7 @@ void GLScene::initialize()
   vertices.insert(vertices.end(), hint.begin(), hint.end());
   vertices.insert(vertices.end(), handle.begin(), handle.end());
   vertices.insert(vertices.end(), arrowhead.begin(), arrowhead.end());
+  vertices.insert(vertices.end(), arc.begin(), arc.end());
 
   MCRL2_QGL_VERIFY(m_vertexbuffer.create());
   m_vertexbuffer.bind();
@@ -274,8 +349,8 @@ void GLScene::render(QPainter& painter)
   std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  // All nodes share the same shader and vertex layout.
-  m_shader.bind();
+  // All other objects share the same shader and vertex layout.
+  m_global_shader.bind();
   m_vertexarray.bind();
 
   QMatrix4x4 viewProjMatrix = m_camera.projectionMatrix() *  m_camera.viewMatrix();
@@ -287,7 +362,7 @@ void GLScene::render(QPainter& painter)
 
   // All arrowheads and arcs are black.
   QVector3D arrowhead_color(0.0f, 0.0f, 0.0f);
-  m_shader.setColor(arrowhead_color);
+  m_global_shader.setColor(arrowhead_color);
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
@@ -331,6 +406,7 @@ void GLScene::render(QPainter& painter)
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
+  // Check that no OpenGL error has occured.
   MCRL2_OGL_CHECK();
 }
 
@@ -458,24 +534,13 @@ bool GLScene::selectObject(GLScene::Selection& s,
 // Helper functions for drawing.
 //
 
-/*inline
-void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
-{
-}
-
+/*
 inline
 void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool translucent, bool probabilistic)
 {
   glPushAttrib(GL_LINE_BIT);
   glLineWidth(2.0);
 
-  if (probabilistic)
-  {
-    Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
-    glColor3fv(blue);
-    //glVertexPointer(3, GL_FLOAT, 4*3, data.node());
-    glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
-  }
 
   //glVertexPointer(3, GL_FLOAT, 0, data.node());
 
@@ -508,31 +573,9 @@ void drawWhetherNodeCanBeCollapsedOrExpanded(const VertexData& data, const Color
   glDrawArrays(GL_LINES, 0, active ? 2 : 4); // Plus or half a plus (minus)
   glDepthMask(GL_TRUE);
   glPopAttrib();
-}
-
-inline
-void drawArc(const QVector3D controlpoints[4])
-{
-  glDepthMask(GL_FALSE);
-
-  float cp[3 * 4];
-  for (int i = 0; i < 4; i++)
-  {
-    cp[3 * i + 0] = controlpoints[i].x();
-    cp[3 * i + 1] = controlpoints[i].y();
-    cp[3 * i + 2] = controlpoints[i].z();
-  }
-  glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cp);
-  glEnable(GL_MAP1_VERTEX_3);
-  glMapGrid1f(RES_ARC, 0, 1);
-  glEvalMesh1(GL_LINE, 0, RES_ARC);
-
-  glDepthMask(GL_TRUE);
 }*/
 
-/**
- * @brief Renders text, centered around the point at x and y
- */
+/// \brief Renders text, centered around the point at x and y
 inline
 QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
 {
@@ -555,17 +598,17 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   Graph::Edge edge = m_graph.edge(i);
 
   // We define four control points of a spline.
-  QVector3D ctrl[4];
-  QVector3D& from = ctrl[0];
-  QVector3D& to = ctrl[3];
+  std::array<QVector3D, 4> control;
+  QVector3D& from = control[0];
+  QVector3D& to = control[3];
 
   // Calculate control points from handle
   QVector3D via = m_graph.handle(i).pos();
   from = m_graph.node(edge.from()).pos();
   to = m_graph.node(edge.to()).pos();
 
-  ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
-  ctrl[2] = ctrl[1];
+  control[1] = via * 1.33333f - (from + to) / 6.0f;
+  control[2] = control[1];
 
   // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
   // them in x-y direction.
@@ -575,20 +618,28 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     {
       return;
     }
-    QVector3D diff = ctrl[1] - ctrl[0];
+    QVector3D diff = control[1] - control[0];
     diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
     diff = diff * ((via - from).length() / (diff.length() * 2.0));
-    ctrl[1] = ctrl[1] + diff;
-    ctrl[2] = ctrl[2] - diff;
+    control[1] = control[1] + diff;
+    control[2] = control[2] - diff;
   }
 
-  //glColor3f(m_graph.handle(i).selected(), 0.0, 0.0);
+  // Use the arc shader to draw the arcs.
+  m_arc_shader.bind();
 
-  // Draw the arc
-  //drawArc(ctrl);
+  QVector3D arcColor(m_graph.handle(i).selected(), 0.0f, 0.0f);
+  m_arc_shader.setControlPoints(control);
+  m_arc_shader.setColor(arcColor);
+  m_arc_shader.setViewProjMatrix(viewProjMatrix);
+
+  glDrawArrays(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC);
+
+  // Reset the shader
+  m_global_shader.bind();
 
   // Rotate to match the orientation of the arc
-  QVector3D vec = to - ctrl[2];
+  QVector3D vec = to - control[2];
 
   // If to == ctrl[2], then something odd is going on. We'll just
   // make the executive decision not to draw the arrowhead then, as it
@@ -616,7 +667,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
 
     // Draw the arrow head
-    m_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+    m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
     glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD);
   }
 }
@@ -643,14 +694,14 @@ void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
 
     // Update the shader parameters.
     QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
-    m_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+    m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
 
     // First draw the inner quad.
-    m_shader.setColor(fill);
+    m_global_shader.setColor(fill);
     glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_HANDLE, VERTICES_HANDLE);
 
     // Draw the outer lines.
-    m_shader.setColor(line);
+    m_global_shader.setColor(line);
     glDrawArrays(GL_LINE_LOOP, OFFSET_HANDLE, VERTICES_HANDLE);
   }
 }
@@ -659,11 +710,10 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
 {
   Graph::NodeNode& node = m_graph.node(i);
   QVector3D fill;
-  //Color3f line;
   //Color4f hint;
 
   // Node stroke color: red when selected, black otherwise
-  //line = Color3f(0.6f * node.selected(), 0.0f, 0.0f);
+  QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
 
   bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
   if (mark) // Initial node fill color: green or dark green (locked)
@@ -692,6 +742,12 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
     }
   }
 
+  //if (node.is_probabilistic())
+  //{
+  // Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
+  //  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
+  //}
+
   //m_camera.billboard_spherical(node.pos());
   QMatrix4x4 worldMatrix;
   worldMatrix.translate(node.pos());
@@ -699,10 +755,13 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
 
   QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
 
-  m_shader.setWorldViewProjMatrix(worldViewProjMatrix);
-  m_shader.setColor(fill);
+  m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
 
-  MCRL2_OGL_VERIFY(glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE));
+  m_global_shader.setColor(line);
+  glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
+
+  m_global_shader.setColor(fill);
+  glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
 
  /* if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
   {
