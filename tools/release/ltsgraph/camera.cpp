@@ -17,7 +17,7 @@
 void CameraView::update()
 {
   m_viewMatrix.setToIdentity();
-  m_viewMatrix.translate(QVector3D(0.0f, 0.0f, m_zoom));
+  m_viewMatrix.translate(QVector3D(0.0f, 0.0f, -m_zoom));
   m_viewMatrix.rotate(m_rotation);
   m_viewMatrix.translate(m_position);
 

@@ -30,10 +30,14 @@ public:
   bool link() override;
 
   /// \brief Sets the world view projection matrix used to transform the object.
-  void setWorldViewProjMatrix(const QMatrix4x4& matrix);
+  void setWorldViewProjMatrix(const QMatrix4x4& matrix) { setUniformValue(m_worldViewProjMatrix_location, matrix); }
+
+  /// \brief Sets the color that this shader outputs.
+  void setColor(const QVector3D& color) { setUniformValue(m_color_location, color); }
 
 private:
   int m_worldViewProjMatrix_location;
+  int m_color_location;
 };
 
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
@@ -148,20 +152,21 @@ public:
    */
   bool selectObject(Selection& s, int x, int y, SelectableObject type);
 
-  // Getters and setters
+  /// Getters
 
   bool drawStateLabels() const { return m_drawstatelabels; }
   bool drawTransitionLabels() const { return m_drawtransitionlabels; }
-
   std::size_t nodeSize() const { return m_size_node; }
-
   std::size_t fontSize() const { return m_fontsize; }
-
   float nodeSizeOnScreen() const { return m_size_node * m_device_pixel_ratio; }
-
   float handleSizeOnScreen() const { return handleSize * m_device_pixel_ratio; }
-
   float arrowheadSizeOnScreen() const { return arrowheadSize * m_device_pixel_ratio; }
+
+  bool is_threedimensional() { return m_worldsize.z() > 0.0f; }
+
+  CameraView& camera() { return m_camera;  }
+
+  /// Setters
 
   void setDrawTransitionLabels(bool drawLabels) { m_drawtransitionlabels = drawLabels; }
   void setDrawStateLabels(bool drawLabels) { m_drawstatelabels = drawLabels; }
@@ -174,10 +179,9 @@ public:
   void setFontSize(std::size_t size) { m_font.setPixelSize(m_fontsize = size); }
   void setFogDistance(float dist) { m_fogdistance = dist; }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
-  
-  bool is_threedimensional() { return m_worldsize.z() > 0.0f; }
 
-  CameraView& camera() { return m_camera;  }
+  /// \brief Sets the depth of the cube in which the scene lives (the z-coordinate)
+  void setDepth(float depth) { m_worldsize.setZ(depth); }
 
 private:
   /**
