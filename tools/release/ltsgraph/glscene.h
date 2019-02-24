@@ -32,19 +32,34 @@ public:
   /// \brief Sets the world view projection matrix used to transform the object.
   void setWorldViewProjMatrix(const QMatrix4x4& matrix) { setUniformValue(m_worldViewProjMatrix_location, matrix); }
 
-  /// \brief Sets the color that this shader outputs.
+  /// \brief Sets the fill color of this object.
   void setColor(const QVector3D& color) { setUniformValue(m_color_location, color); }
 
 private:
-  int m_worldViewProjMatrix_location;
-  int m_color_location;
+  int m_worldViewProjMatrix_location = -1;
+  int m_color_location = -1;
 };
 
 /// \brief A shader that constructs an arc from given control points using the vertex shader.
 class ArcShader : public QOpenGLShaderProgram
 {
+public:
   /// \brief Sets the sources, links the program and extracts the required information.
   bool link() override;
+
+  /// \brief Sets the control points used by this shader.
+  void setControlPoints(const std::array<QVector3D, 4>& points) { setUniformValueArray(m_controlPoints_location, points.data(), 4); }
+
+  /// \brief Sets the world view projection matrix used to transform the object.
+  void setViewProjMatrix(const QMatrix4x4& matrix) { setUniformValue(m_viewProjMatrix_location, matrix); }
+
+  /// \brief Sets the color of the arc.
+  void setColor(const QVector3D& color) { setUniformValue(m_color_location, color); }
+
+private:
+  int m_viewProjMatrix_location = -1;
+  int m_color_location = -1;
+  int m_controlPoints_location = -1;
 };
 
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
@@ -233,8 +248,11 @@ private:
   float m_device_pixel_ratio;
   QFont m_font;
 
-  /// \brief The shader to draw everything.
-  GlobalShader m_shader;
+  /// \brief The shader to draw uniformly filled three dimensional objects.
+  GlobalShader m_global_shader;
+
+  /// \brief The shader to draw arcs, uses control points to position the vertices.
+  ArcShader m_arc_shader;
 
   /// \brief The dimensions of a cube in which the scene lives.
   QVector3D m_worldsize = QVector3D(1000.0f, 1000.0f, 0.0f);
