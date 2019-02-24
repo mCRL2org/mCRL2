@@ -41,23 +41,25 @@ namespace
 const char* g_vertexShader =
   "#version 330\n"
 
-  "uniform mat4 worldViewProjMatrix;\n"
+  "uniform mat4 g_worldViewProjMatrix;\n"
 
   "layout(location = 0) in vec3 vertex;\n"
 
   "void main(void)\n"
   "{\n"
-  "   gl_Position = worldViewProjMatrix * vec4(vertex, 1.0f);\n"
+  "   gl_Position = g_worldViewProjMatrix * vec4(vertex, 1.0f);\n"
   "}";
 
 const char* g_fragmentShader =
   "#version 330\n "
 
+  "uniform vec3 g_color = vec3(1.0f, 1.0f, 1.0f);\n"
+
   "out vec4 fragColor;\n"
 
   "void main(void)\n"
   "{\n"
-  "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+  "   fragColor = vec4(g_color, 1.0);\n"
   "}";
 } // unnamed namespace
 
@@ -83,18 +85,19 @@ bool GlobalShader::link()
   }
 
   // This would be preferable, but does not work.
-  m_worldViewProjMatrix_location = uniformLocation("worldViewProjMatrix");
+  m_worldViewProjMatrix_location = uniformLocation("g_worldViewProjMatrix");
   if (m_worldViewProjMatrix_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The global shader has no uniform named worldViewProjMatrix.\n";
+    mCRL2log(mcrl2::log::warning) << "The global shader has no uniform named g_worldViewProjMatrix.\n";
+  }
+
+  m_color_location = uniformLocation("g_color");
+  if (m_color_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The global shader has no uniform named g_color.\n";
   }
 
   return true;
-}
-
-void GlobalShader::setWorldViewProjMatrix(const QMatrix4x4& matrix)
-{
-  setUniformValue(m_worldViewProjMatrix_location, matrix);
 }
 
 GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
@@ -140,18 +143,18 @@ void GLScene::initialize()
     {
       node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
           std::sin((float)(stack + stackd)) * std::cos(slice),
-          -std::cos((float)(stack + stackd)));
+          std::cos((float)(stack + stackd)));
       node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
           std::sin(stack) * std::cos(slice),
-          -std::cos(stack));
+          std::cos(stack));
     }
 
     node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
         std::sin((float)(stack + stackd)) * std::cos(0.0f),
-        -std::cos((float)(stack + stackd)));
+        std::cos((float)(stack + stackd)));
     node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
         std::sin(stack) * std::cos(0.0f),
-        -std::cos(stack));
+        std::cos(stack));
   }
 
   MCRL2_QGL_VERIFY(m_node_vbo.create());
@@ -211,7 +214,7 @@ void GLScene::render(QPainter& painter)
   // Update the state
   m_camera.update();
 
-  // Doc: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
+  // Qt: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
   painter.begin(&m_glwidget);
   painter.beginNativePainting();
 
@@ -224,10 +227,10 @@ void GLScene::render(QPainter& painter)
   // Enable depth testing, so that we don't have to care too much about
   // rendering in the right order.
   //glEnable(GL_DEPTH_TEST);
-  //glClearDepth(0.0f);
 
   QColor clear(Qt::white);
   glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
+  glClearDepth(1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
@@ -245,17 +248,15 @@ void GLScene::render(QPainter& painter)
     renderNode(sel ? m_graph.selectionNode(i) : i);
   }
 
-  /*for (std::size_t i = 0; i < edgeCount; ++i) {
-    renderEdge(sel ? m_graph.selectionEdge(i) : i);
+  for (std::size_t i = 0; i < edgeCount; ++i)
+  {
+    //renderEdge(sel ? m_graph.selectionEdge(i) : i);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
-    renderHandle(sel ? m_graph.selectionEdge(i) : i);
+    //renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
-
-  // text drawing follows
-  */
 
   painter.endNativePainting();
 
@@ -523,14 +524,17 @@ QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text,
 void GLScene::renderEdge(std::size_t i)
 {
   Graph::Edge edge = m_graph.edge(i);
+
+  // We define four control points of a spline.
   QVector3D ctrl[4];
   QVector3D& from = ctrl[0];
   QVector3D& to = ctrl[3];
+
+  // Calculate control points from handle
   QVector3D via = m_graph.handle(i).pos();
   from = m_graph.node(edge.from()).pos();
   to = m_graph.node(edge.to()).pos();
 
-  // Calculate control points from handle
   ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
   ctrl[2] = ctrl[1];
 
@@ -538,7 +542,8 @@ void GLScene::renderEdge(std::size_t i)
   // them in x-y direction.
   if (edge.from() == edge.to())
   {
-    if (!m_drawselfloops) {
+    if (!m_drawselfloops)
+    {
       return;
     }
     QVector3D diff = ctrl[1] - ctrl[0];
@@ -588,43 +593,49 @@ void GLScene::renderEdge(std::size_t i)
 void GLScene::renderNode(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
-  /*Color3f fill;
-  Color3f line;
-  Color4f hint;
+  QVector3D fill;
+  //Color3f line;
+  //Color4f hint;
 
   // Node stroke color: red when selected, black otherwise
-  line = Color3f(0.6f * node.selected(), 0.0f, 0.0f);
+  //line = Color3f(0.6f * node.selected(), 0.0f, 0.0f);
 
   bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
   if (mark) // Initial node fill color: green or dark green (locked)
   {
-    if (node.locked()) {
-      fill = Color3f(0.1f, 0.7f, 0.1f);
+    if (node.locked())
+    {
+      fill = QVector3D(0.1f, 0.7f, 0.1f);
     }
-    else {
-      fill = Color3f(0.1f, 1.0f, 0.1f);
+    else
+    {
+      fill = QVector3D(0.1f, 1.0f, 0.1f);
     }
   }
   else // Normal node fill color: node color or darkened node color (locked)
   {
-    if (node.locked()) {
-      fill = Color3f(0.7f * node.color()[0], 0.7f * node.color()[1], 0.7f * node.color()[2]);
+    if (node.locked())
+    {
+      fill = QVector3D(0.7f * node.color()[0], 0.7f * node.color()[1], 0.7f * node.color()[2]);
     }
-    else {
-      fill = node.color();
+    else
+    {
+      GLfloat* color = node.color();
+      assert(color != nullptr);
+      fill = QVector3D(color[0], color[1], color[2]);
     }
-  }*/
+  }
 
   //m_camera.billboard_spherical(node.pos());
   QMatrix4x4 worldMatrix;
 
-  //worldMatrix.scale(0.5f * nodeSizeOnScreen());
-  //worldMatrix.translate(node.pos());
-  worldMatrix.translate(0.0f, 0.0f, 50.0f);
+  worldMatrix.translate(node.pos());
+  worldMatrix.scale(0.5f * nodeSizeOnScreen());
 
-  QMatrix4x4 worldViewProjMatrix = worldMatrix * m_camera.projectionMatrix() *  m_camera.viewMatrix();
+  QMatrix4x4 worldViewProjMatrix = m_camera.projectionMatrix() *  m_camera.viewMatrix() * worldMatrix;
 
   m_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+  m_shader.setColor(fill);
 
   MCRL2_OGL_VERIFY(glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2));
 
@@ -662,10 +673,10 @@ void GLScene::renderStateLabel(QPainter& painter, GLuint i)
   Graph::LabelNode& label = m_graph.stateLabel(i);
   if (!m_graph.stateLabelstring(label.labelindex()).isEmpty())
   {
-    QVector3D eye = m_camera.worldToWindow(label.pos());
+    QVector3D window = m_camera.worldToWindow(label.pos());
 
     QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
-    drawCenteredText(painter, eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()), color);
+    drawCenteredText(painter, window.x(), window.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()), color);
   }
 }
 
@@ -687,15 +698,9 @@ void GLScene::renderHandle(GLuint i)
       fill = Color3f(0.7f, 0.7f, 0.7f);
     }
 
-    glDisable(GL_LINE_SMOOTH);
-    glPushMatrix();
-
     //m_camera.billboard_cylindrical(handle.pos());
     float scale = handleSizeOnScreen();
     glScalef(scale, scale, scale);
     //drawHandle(m_vertexdata, line, fill);
-
-    glPopMatrix();
-    glEnable(GL_LINE_SMOOTH);
   }
 }

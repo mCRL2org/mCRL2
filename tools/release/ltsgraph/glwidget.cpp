@@ -215,16 +215,21 @@ void GLWidget::updateSelection()
     selnode->selected() = 1.0f;
 
   }
+
   if (m_hover.selectionType == GLScene::so_label || m_hover.selectionType == GLScene::so_edge)
   {
     GLScene::Selection s = m_hover;
     s.selectionType = GLScene::so_handle;
     selnode = select_object(s, m_graph);
-    if (selnode->selected() <= 0) {
+
+    if (selnode->selected() <= 0)
+    {
       m_selections.push_back(s);
     }
+
     selnode->selected() = 0.5f;
   }
+
   if (needupdate)
   {
     update();
@@ -273,7 +278,6 @@ void GLWidget::paintGL()
   {
     m_scene.setDevicePixelRatio(devicePixelRatio());
     m_scene.render(painter);
-    update();
   }
 }
 
@@ -452,7 +456,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
         }
       case dm_dragnode:
         {
-          //m_dragnode->move(camera.windowToWorld(e->pos().x(), e->pos().y(), camera.worldToWindow(m_dragnode->pos()).z()));
+          QVector3D position(e->pos().x(), e->pos().y(), camera.worldToWindow(m_dragnode->pos()).z());
+          m_dragnode->move(camera.windowToWorld(position));
           break;
         }
       case dm_zoom:
@@ -475,22 +480,16 @@ void GLWidget::rebuild()
 
 void GLWidget::setDepth(bool enabled)
 {
-  /*if (enabled)
+  if (enabled)
   {
-    m_glwidget->setDepth(1000, 25);
+    m_scene.setDepth(1000);
   }
   else
   {
-    m_glwidget->setDepth(0, 80);
+    m_scene.setDepth(0);
   }
 
-  makeCurrent();
-  QVector3D size = m_scene->size();
-  size.setZ(depth);
-  m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
-  m_scene->setTranslation(QVector3D(0, 0, 0), animation);
-  m_scene->setSize(size, animation);
-  update();*/
+  update();
 }
 
 QVector3D GLWidget::size3()
@@ -588,10 +587,12 @@ void GLWidgetUi::selectColor(const QColor& color)
 
 void GLWidgetUi::togglePaintMode(bool paint)
 {
-  if (paint) {
+  if (paint)
+  {
     m_widget.startPaint();
   }
-  else {
+  else
+  {
     m_widget.endPaint();
   }
 }
