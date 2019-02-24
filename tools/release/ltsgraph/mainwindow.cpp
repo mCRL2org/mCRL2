@@ -143,7 +143,7 @@ void MainWindow::onWidgetResized(const QVector3D& newsize)
 
 void MainWindow::on3DChanged(bool enabled)
 {
-  m_glwidget->setDepth(true);
+  m_glwidget->setDepth(enabled);
 }
 
 void MainWindow::onExplore(bool enabled)
