@@ -39,7 +39,7 @@ constexpr float PI_2 = PI * 0.5f;
 constexpr int RES_NODE_SLICE = 64;
 
 /// \brief Number of vertical planes from which a circle representing a node is constructed.
-constexpr int RES_NODE_STACK = 4;
+constexpr int RES_NODE_STACK = 1;
 
 /// \brief Amount of segments in arrowhead cone
 constexpr int RES_ARROWHEAD = 30;
@@ -48,11 +48,12 @@ constexpr int RES_ARROWHEAD = 30;
 constexpr int RES_ARC       = 20;
 
 /// This should match the layout of m_vertexbuffer.
-constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE;
+constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE + 1;
 constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
 constexpr int VERTICES_HINT = 4;
 constexpr int VERTICES_HANDLE = 4;
 constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
+constexpr int VERTICES_ARROWHEAD_BASE = RES_ARROWHEAD + 1;
 constexpr int VERTICES_ARC = RES_ARC;
 
 constexpr int OFFSET_NODE_BORDER = 0;
@@ -60,7 +61,8 @@ constexpr int OFFSET_NODE_SPHERE = OFFSET_NODE_BORDER + VERTICES_NODE_BORDER;
 constexpr int OFFSET_HINT       = OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE;
 constexpr int OFFSET_HANDLE     = OFFSET_HINT + VERTICES_HINT;
 constexpr int OFFSET_ARROWHEAD  = OFFSET_HANDLE + VERTICES_HANDLE;
-constexpr int OFFSET_ARC        = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
+constexpr int OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
+constexpr int OFFSET_ARC        = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
 
 namespace
 {
@@ -215,14 +217,12 @@ void GLScene::initialize()
   // Generate vertices for node border (A slightly larger circle with polygons GL_TRIANGLE_FAN)
   std::vector<QVector3D> nodeborder(VERTICES_NODE_BORDER);
   {
-    float slice = 0;
-    float sliced = 2.0f * PI / VERTICES_NODE_BORDER;
-
     // The center of the circle, followed by the vertices on the edge.
     nodeborder[0] = QVector3D(0.0f, 0.0f, 0.0f);
-    for (int i = 1; i < VERTICES_NODE_BORDER; ++i, slice -= sliced)
+    for (int i = 0; i < RES_NODE_SLICE; ++i)
     {
-      nodeborder[i] = QVector3D(1.1f * std::sin(slice), 1.1f * std::cos(slice), 0.0f);
+      float t = -i * 2.0f * PI / (RES_NODE_SLICE - 1);
+      nodeborder[i+1] = QVector3D(1.2f * std::sin(t), 1.2f * std::cos(t), 0.0f);
     }
   }
 
@@ -274,19 +274,27 @@ void GLScene::initialize()
   std::vector<QVector3D> arrowhead(VERTICES_ARROWHEAD);
   {
     arrowhead[0] = QVector3D(0.0f, 0.0f, 0.0f);
-    float diff = (float)(M_PI / 20.0f);
-    float t = 0.0f;
 
-    for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
+    for (int i = 0; i < RES_ARROWHEAD; ++i)
     {
-      arrowhead[i] = QVector3D(-1.0f,
+      float t = -i * 2.0f * PI / (RES_ARROWHEAD - 1);
+      arrowhead[i+1] = QVector3D(-1.0f,
           0.3f * std::sin(t),
           0.3f * std::cos(t));
     }
+  }
 
-    arrowhead[RES_ARROWHEAD] = QVector3D(-1.0f,
-        0.3f * std::sin(0.0f),
-        0.3f * std::cos(0.0f));
+  std::vector<QVector3D> arrowhead_base(VERTICES_ARROWHEAD_BASE);
+  {
+    arrowhead_base[0] = QVector3D(-1.0f, 0.0f, 0.0f);
+
+    for (int i = 0; i < RES_ARROWHEAD; ++i)
+    {
+      float t = i * 2.0f * PI / (RES_ARROWHEAD - 1);
+      arrowhead_base[i+1] = QVector3D(-1.0f,
+          0.3f * std::sin(t),
+          0.3f * std::cos(t));
+    }
   }
 
   // Generate vertices for the arc, these will be moved to the correct position by the vertex shader using the x coordinate as t.
@@ -305,6 +313,7 @@ void GLScene::initialize()
   vertices.insert(vertices.end(), hint.begin(), hint.end());
   vertices.insert(vertices.end(), handle.begin(), handle.end());
   vertices.insert(vertices.end(), arrowhead.begin(), arrowhead.end());
+  vertices.insert(vertices.end(), arrowhead_base.begin(), arrowhead_base.end());
   vertices.insert(vertices.end(), arc.begin(), arc.end());
 
   MCRL2_QGL_VERIFY(m_vertexbuffer.create());
@@ -400,7 +409,6 @@ void GLScene::render(QPainter& painter)
       renderTransitionLabel(painter, sel ? m_graph.selectionEdge(i) : i);
     }
   }
-
 
   painter.end();
 
@@ -563,12 +571,11 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   to = m_graph.node(edge.to()).pos();
 
   control[1] = via * 1.33333f - (from + to) / 6.0f;
-  control[2] = control[1];
 
-  // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
-  // them in x-y direction.
   if (edge.from() == edge.to())
   {
+    // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
+    // them in x-y direction.
     if (!m_drawselfloops)
     {
       return;
@@ -578,6 +585,11 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     diff = diff * ((via - from).length() / (diff.length() * 2.0));
     control[1] = control[1] + diff;
     control[2] = control[2] - diff;
+  }
+  else
+  {
+    // Else we use the same position for both points (effectively a quadratic curve).
+    control[2] = control[1];
   }
 
   // Use the arc shader to draw the arcs.
@@ -590,7 +602,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 
   glDrawArrays(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC);
 
-  // Reset the shader
+  // Reset the shader.
   m_global_shader.bind();
 
   // Rotate to match the orientation of the arc
@@ -624,6 +636,9 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     // Draw the arrow head
     m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
     glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD);
+
+    // Draw a circle to enclose the arrowhead.
+    glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE, VERTICES_ARROWHEAD_BASE);
   }
 }
 
@@ -693,7 +708,6 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
       GLfloat* color = node.color();
       assert(color != nullptr);
       fill = QVector3D(color[0], color[1], color[2]);
-      fill = QVector3D(1.0f, 0.0f, 0.0f);
     }
   }
 
@@ -712,11 +726,11 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
 
   m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
 
-  m_global_shader.setColor(line);
-  glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
-
   m_global_shader.setColor(fill);
   glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
+
+  m_global_shader.setColor(line);
+  glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
 
  /* if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
   {
