@@ -334,15 +334,13 @@ void GLScene::initialize()
 
 void GLScene::render(QPainter& painter)
 {
-  // Update the state
+  // Update the state of the camera.
   m_camera.update();
 
   // Qt: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
-  painter.begin(&m_glwidget);
   painter.beginNativePainting();
 
-  // Enable anti-aliasing for lines and points. Anti-aliasing for polygons gives artifacts on
-  // OSX when drawing a quadstrip.
+  // Cull polygons that are facing away from the camera.
   glEnable(GL_CULL_FACE);
 
   // Enable depth testing, so that we don't have to care too much about rendering in the right order.
@@ -386,6 +384,8 @@ void GLScene::render(QPainter& painter)
   painter.endNativePainting();
 
   // Use the painter to render the remaining text.
+  glDisable(GL_DEPTH_TEST);
+
   painter.setFont(m_font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
@@ -409,8 +409,6 @@ void GLScene::render(QPainter& painter)
       renderTransitionLabel(painter, sel ? m_graph.selectionEdge(i) : i);
     }
   }
-
-  painter.end();
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
@@ -613,7 +611,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   // will just clutter the image.
   if (vec.length() > 0)
   {
-    vec /= vec.length();
+    vec.normalize();
 
     QMatrix4x4 worldMatrix;
 
@@ -622,8 +620,8 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 
     // Rotate the arrowhead to orient it to the end of the arc.
     QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
-    float angle = acos(vec.x());
-    worldMatrix.rotate(angle, axis);
+    float degrees = (180.0f / PI) * acos(vec.x());
+    worldMatrix.rotate(degrees, axis);
 
     // Move the arrowhead outside of the node.
     worldMatrix.translate(-0.5f * nodeSizeOnScreen(), 0.0f, 0.0f);
