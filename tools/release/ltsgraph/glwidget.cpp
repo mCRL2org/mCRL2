@@ -209,9 +209,11 @@ void GLWidget::updateSelection()
   selnode = select_object(m_hover, m_graph);
   if (selnode != nullptr)
   {
-    if (selnode->selected() <= 0) {
+    if (selnode->selected() <= 0)
+    {
       m_selections.push_back(m_hover);
     }
+
     selnode->selected() = 1.0f;
 
   }
@@ -400,7 +402,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
   CameraView& camera = m_scene.camera();
-  camera.zoom(camera.zoom() + 5 * e->delta());
+  camera.zoom(camera.zoom() * pow(1.0005f, e->delta()));
   update();
 }
 
@@ -489,10 +491,11 @@ void GLWidget::setDepth(bool enabled)
     m_scene.setDepth(0);
   }
 
+  m_scene.camera().reset();
   update();
 }
 
-QVector3D GLWidget::size3()
+QVector3D GLWidget::worldSize()
 {
   return m_scene.size();
 }
@@ -536,7 +539,7 @@ void GLWidget::saveBitmap(const QString& filename)
 
 void GLWidget::logMessage(const QOpenGLDebugMessage& debugMessage)
 {
-  mCRL2log(mcrl2::log::debug) << "OpenGL message: " << debugMessage.message().toStdString() << ".\n";
+  mCRL2log(mcrl2::log::debug) << "OpenGL: " << debugMessage.message().toStdString() << "\n";
 }
 
 GLWidgetUi* GLWidget::ui(QWidget* parent)

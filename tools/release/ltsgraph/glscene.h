@@ -14,12 +14,13 @@
 #include "camera.h"
 
 #include <QOpenGLBuffer>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
+#include <QOpenGLWidget>
 #include <QPainter>
 
+#include <array>
 #include <vector>
 
 /// \brief A simple shader that can be used to render three dimensional objects.
@@ -85,93 +86,36 @@ public:
     so_node      ///< A node was selected.
   };
 
-  /**
-   * @brief A structure that identifies a selectable object from m_graph.
-   */
+  /// \brief A structure that identifies a selectable object from m_graph.
   struct Selection
   {
     SelectableObject selectionType; ///< The type of object.
     std::size_t index;              ///< The index of the object in m_graph.
   };
 
-  /**
-   * @brief Constructor.
-   * @param glwidget The widget where this scene is drawn
-   * @param g The graph that is to be visualised by this object.
-   */
+  /// \brief Constructor.
+  /// \param glwidget The widget where this scene is drawn
+  /// \param g The graph that is to be visualised by this object.
   GLScene(QOpenGLWidget& glwidget, Graph::Graph& g);
 
   /// \brief Initializes all state and data required for rendering.
   void initialize();
 
-  /**
-   * @brief Render the scene.
-   */
+  /// \brief Render the scene.
   void render(QPainter& painter);
 
-  /**
-   * @brief Resize the OpenGL viewport.
-   * @param width The new width for the viewport.
-   * @param height The new height for the viewport.
-   */
+  /// \brief Resize the OpenGL viewport.
   void resize(std::size_t width, std::size_t height);
   
-  /**
-   * @brief Set the zoom factor to @e factor, interpolating to the new value
-   *        for a number of frames if desired.
-   * @param factor The new zoom factor.
-   * @param animation The amount of frames to animate. 0 means apply
-   *        immediately, 1 applies the change in the next frame. Higher
-   *        values cause a gradual change.
-   */
-  void setZoom(float factor, std::size_t animation = 1);
-
-  /**
-   * @brief Set the rotation quaternion to @e rotation, interpolating to the
-   *        new value for a number of frames if desired.
-   * @param rotation The new rotation.
-   * @param animation The amount of frames to animate. 0 means apply
-   *        immediately, 1 applies the change in the next frame. Higher
-   *        values cause a gradual change.
-   */
-  void setRotation(const QQuaternion& rotation, std::size_t animation = 1);
-
-  /**
-   * @brief Set the translation to @e amount, interpolating to the new value
-   *        for a number of frames if desired.
-   * @param translation The new translation.
-   * @param animation The amount of frames to animate. 0 means apply
-   *        immediately, 1 applies the change in the next frame. Higher
-   *        values cause a gradual change.
-   */
-  void setTranslation(const QVector3D& translation, std::size_t animation = 1);
-
-  /**
-   * @brief Set the world size to @e size, interpolating to the new value
-   *        for a number of frames if desired.
-   * @param size The new world size.
-   * @param animation The amount of frames to animate. 0 means apply
-   *        immediately, 1 applies the change in the next frame. Higher
-   *        values cause a gradual change.
-   */
-  void setSize(const QVector3D& size, std::size_t animation = 1);
-
-  /**
-   * @brief Returns the current world size.
-   * @return The current world size in world coordinates.
-   */
+  /// \returns The current world size in world coordinates.
   QVector3D size() { return m_worldsize; }
   
-  /**
-   * @brief Retrieve the object at viewport coordinate (x, y).
-   * @returns A record that represents the selected object.
-   */
+  /// \brief Retrieve the object at viewport coordinate (x, y).
+  /// \returns A record that represents the selected object.
   Selection select(int x, int y);
 
-  /**
-   * @brief Select an object of type @type on (pixel) viewport coordinates x, y.
-   * @returns true if an object was selected
-   */
+  /// \brief Select an object of type @type on (pixel) viewport coordinates x, y.
+  /// \returns true if an object was selected.
   bool selectObject(Selection& s, int x, int y, SelectableObject type);
 
   /// Getters
@@ -207,38 +151,28 @@ public:
 
 private:
 
-  /**
-   * @brief Renders a single edge.
-   * @param i The index of the edge to render.
-   */
+  /// \brief Renders a single edge.
+  /// \param i The index of the edge to render.
   void renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix);
 
-  /**
-   * @brief Renders a single edge handle.
-   * @param i The index of the edge of the handle to render.
-   */
+  /// \brief Renders a single edge handle.
+  /// \param i The index of the edge of the handle to render.
   void renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix);
 
   /// \brief Renders a single node.
   /// \param i The index of the node to render.
   void renderNode(GLuint i, const QMatrix4x4& viewProjMatrix);
 
-  /**
-   * @brief Renders a single edge label.
-   * @param i The index of the edge of the label to render.
-   */
+  /// \brief Renders a single edge label.
+  /// \param i The index of the edge of the label to render.
   void renderTransitionLabel(QPainter& painter, GLuint i);
 
-  /**
-   * @brief Renders a single state label.
-   * @param i The index of the state of the label to render.
-   */
+  /// \brief Renders a single state label.
+  /// \param i The index of the state of the label to render.
   void renderStateLabel(QPainter& painter, GLuint i);
 
-  /**
-   * @brief Renders a single state number.
-   * @param i The index of the state number to render.
-   */
+  /// \brief Renders a single state number.
+  /// \param i The index of the state number to render.
   void renderStateNumber(QPainter& painter, GLuint i);
   
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
@@ -265,9 +199,12 @@ private:
   bool m_drawstatenumbers     = false;
   /// \brief Self loops are only drawn if this field is true.
   bool m_drawselfloops        = true;
-  bool m_drawinitialmarking   = true;  /// The initial state is marked if this field is true.
-  std::size_t m_size_node     = 20;    /// Variable node size (radius).
-  std::size_t m_fontsize      = 16;    /// Variable font size
+  /// \brief The initial state is marked if this field is true.
+  bool m_drawinitialmarking   = true;
+  /// \brief The size of a node (radius).
+  std::size_t m_size_node     = 20;
+  /// \brief The size of the font.
+  std::size_t m_fontsize      = 16;
 
   /// Fog is rendered only if this field is true.
   bool m_drawfog              = true;
