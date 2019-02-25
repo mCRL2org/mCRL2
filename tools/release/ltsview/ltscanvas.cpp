@@ -14,7 +14,6 @@
 
 #include "mcrl2/gui/arcball.h"
 #include "mcrl2/gui/glu.h"
-#include "mcrl2/gui/workarounds.h"
 
 #include "icons/zoom_cursor.xpm"
 #include "icons/pan_cursor.xpm"
