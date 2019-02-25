@@ -141,10 +141,10 @@ const char* g_arcVertexShader =
   "// Calculates the position on a cubic Bezier curve with 0 <= t <= 1.\n"
   "vec3 cubicBezier(float t)\n"
   "{"
-  "   return pow(t - 1.0f, 3.0f) * g_controlPoint[0]"
-  "     + 3 * pow(t - 1.0f, 2.0f) * t * g_controlPoint[1]"
-  "     + 3 * (t - 1.0f) * pow(t, 2.0f) * g_controlPoint[2]"
-  "     + pow(t, 3.0f) * g_controlPoint[3];"
+  "   return pow(1 - t, 3) * g_controlPoint[0]"
+  "        + 3 * pow(1 - t, 2) * t * g_controlPoint[1]"
+  "        + 3 * (1 - t) * pow(t, 2) * g_controlPoint[2]"
+  "        + pow(t, 3) * g_controlPoint[3];"
   "}\n"
 
   "void main(void)\n"
@@ -337,11 +337,10 @@ void GLScene::render(QPainter& painter)
   glEnable(GL_CULL_FACE);
 
   // Enable depth testing, so that we don't have to care too much about rendering in the right order.
-  //glEnable(GL_DEPTH_TEST);
+  glEnable(GL_DEPTH_TEST);
 
   QColor clear(Qt::white);
   glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
-  glClearDepth(1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
@@ -530,51 +529,6 @@ bool GLScene::selectObject(GLScene::Selection& s,
 
   return s.selectionType != so_none;
 }
-
-//
-// Helper functions for drawing.
-//
-
-/*
-inline
-void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool translucent, bool probabilistic)
-{
-  glPushAttrib(GL_LINE_BIT);
-  glLineWidth(2.0);
-
-
-  //glVertexPointer(3, GL_FLOAT, 0, data.node());
-
-  float alpha = translucent ? 0.5 : 1.0;
-  glColor4fv(Color4f(fill, alpha));
-
-
-  // disable the depth mask temporarily for drawing the border of a node
-  // dragging an initial state in 2D mode over other nodes looks less weird this way
-  // BUT not disabling the depth mask here causes some strange issue on Mac OS
-  glDepthMask(GL_FALSE);
-
-  glColor4fv(Color4f(line, alpha));
-  glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
-
-  // see above
-  glDepthMask(GL_TRUE);
-  glPopAttrib();
-}
-
-
-inline
-void drawWhetherNodeCanBeCollapsedOrExpanded(const VertexData& data, const Color4f& line, bool active)
-{
-  glPushAttrib(GL_LINE_BIT);
-  glLineWidth(2.5);
-  glVertexPointer(3, GL_FLOAT, 0, data.hint());
-  glDepthMask(GL_FALSE);
-  glColor4fv(line);
-  glDrawArrays(GL_LINES, 0, active ? 2 : 4); // Plus or half a plus (minus)
-  glDepthMask(GL_TRUE);
-  glPopAttrib();
-}*/
 
 /// \brief Renders text, centered around the point at x and y
 inline
