@@ -177,10 +177,11 @@ void MainWindow::openFile(const QString& fileName)
     {
       bool hadSelection = m_graph.hasSelection();
       m_ui.actLayout->setChecked(false);
+
       m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
-      const double scaling = 0.5;
-      QVector3D limit = m_glwidget->size3() / 2.0 * scaling;
+
+      QVector3D limit = m_glwidget->worldSize() / 4.0f;
       // The argument '-' means we should read from stdin, the lts library
       // does that when supplied an empty string as the input file name
       m_graph.load(fileName == "-" ? "" : fileName, -limit, limit);
