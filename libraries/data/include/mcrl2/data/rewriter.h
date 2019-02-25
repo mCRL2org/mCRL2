@@ -87,6 +87,14 @@ class basic_rewriter
 
 class rewriter: public basic_rewriter<data_expression>
 {
+  protected:
+    // cache the empty substitution, since it is expensive to construct
+    static substitution_type& empty_substitution()
+    {
+      static substitution_type result;
+      return result;
+    }
+
   public:
     typedef basic_rewriter<data_expression>::substitution_type substitution_type;
 
@@ -125,16 +133,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \return The normal form of d.
     data_expression operator()(const data_expression& d) const
     {
-      substitution_type sigma;
-#ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(log::debug) << "REWRITE: " << d;
-#endif
-      data_expression result(m_rewriter->rewrite(d,sigma));
-
-#ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(log::debug) << " ------------> " << result << std::endl;
-#endif
-      return result;
+      return (*this)(d, empty_substitution());
     }
 
     /// \brief Rewrites the data expression d, and on the fly applies a substitution function
@@ -149,7 +148,7 @@ class rewriter: public basic_rewriter<data_expression>
       mCRL2log(log::debug) << "REWRITE " << d << "\n";
 #endif
       substitution_type sigma_with_iterator;
-      std::set < variable > free_variables=data::find_free_variables(d);
+      std::set<variable> free_variables = data::find_free_variables(d);
       for(const variable& free_variable: free_variables)
       {
         sigma_with_iterator[free_variable]=sigma(free_variable);

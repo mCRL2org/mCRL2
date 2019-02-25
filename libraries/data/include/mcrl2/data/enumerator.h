@@ -302,13 +302,6 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     data::variable_list m_variables;
     data::data_expression_list m_expressions;
 
-    // TODO: this is a hack to solve an efficiency problem in the data rewriter
-    static mutable_indexed_substitution<>& empty_substitution()
-    {
-      static mutable_indexed_substitution<> result;
-      return result;
-    }
-
   public:
     typedef Expression expression_type;
 
@@ -355,7 +348,7 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
       sigma.revert();
       for (const data::variable& v_i: v)
       {
-        result[v_i] = rewriter(sigma(v_i), empty_substitution());
+        result[v_i] = rewriter(sigma(v_i));
       }
     }
 
@@ -376,7 +369,7 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     {
       data::enumerator_substitution sigma(m_variables, m_expressions);
       sigma.revert();
-      return data_expression_list(v.begin(), v.end(), [&](const data::variable& v_i) { return rewriter(sigma(v_i), empty_substitution()); });
+      return data_expression_list(v.begin(), v.end(), [&](const data::variable& v_i) { return rewriter(sigma(v_i)); });
     }
 };
 
@@ -738,8 +731,7 @@ class enumerator_algorithm
             {
               auto const& domain = atermpp::down_cast<data::function_sort>(c.sort()).domain();
               data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s) { return data::variable(id_generator(), s); });
-              // TODO: We want to apply r without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
-              data_expression cy = r(application(c, y.begin(), y.end()), sigma);
+              data_expression cy = r(application(c, y.begin(), y.end()));
               sigma[v1] = cy;
               if (add_element_with_variables(v_tail, y, phi, v1, cy))
               {
@@ -749,8 +741,7 @@ class enumerator_algorithm
             }
             else
             {
-              // TODO: We want to apply r without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
-              const auto e1 = r(c, sigma);
+              const auto e1 = r(c);
               sigma[v1] = e1;
               if (add_element(v_tail, phi, v1, e1))
               {
