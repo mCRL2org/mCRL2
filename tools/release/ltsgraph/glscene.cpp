@@ -17,7 +17,6 @@
 #include <QImage>
 #include <QPainter>
 
-#include <array>
 #include <cassert>
 
 /// Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.

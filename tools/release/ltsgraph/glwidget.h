@@ -159,7 +159,7 @@ public:
   /**
    * @brief Returns the world size in 3D coordinates.
    */
-  QVector3D size3();
+  QVector3D worldSize();
 
   /**
    * @brief Returns the user interface object. If no user interface is available,
