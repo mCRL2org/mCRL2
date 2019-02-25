@@ -272,7 +272,7 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
-  QPainter painter;
+  QPainter painter(this);
 
   if (!m_paused)
   {
