@@ -47,10 +47,10 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     {
       super::add_options(desc);
       desc.add_option("cached", "cache enumerator solutions");
-      desc.add_option("one-point-rule-rewrite", "apply the one point rule rewriter");
-      desc.add_option("replace-constants-by-variables", "move constant expressions to a substitution");
-      desc.add_option("resolve-summand-variable-name-clashes", "resolve summand variable name clashes");
-      desc.add_option("store-states-as-trees", "store states as trees instead of lists", 's');
+      desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
+      desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
+      desc.add_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
+      desc.add_option("no-store-states-as-trees", "do not store states as trees");
       options.rewrite_strategy = rewrite_strategy();
     }
 
@@ -58,10 +58,10 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
       options.cached                                = parser.options.find("cached") != parser.options.end();
-      options.store_states_as_trees                 = parser.options.find("store-states-as-trees") != parser.options.end();
-      options.one_point_rule_rewrite                = parser.options.find("one-point-rule-rewrite") != parser.options.end();
-      options.replace_constants_by_variables        = parser.options.find("replace-constants-by-variables") != parser.options.end();
-      options.resolve_summand_variable_name_clashes = parser.options.find("resolve-summand-variable-name-clashes") != parser.options.end();
+      options.one_point_rule_rewrite                = parser.options.find("no-one-point-rule-rewrite") == parser.options.end();
+      options.replace_constants_by_variables        = parser.options.find("no-replace-constants-by-variables") == parser.options.end();
+      options.resolve_summand_variable_name_clashes = parser.options.find("no-resolve-summand-variable-name-clashes") == parser.options.end();
+      options.store_states_as_trees                 = parser.options.find("no-store-states-as-trees") == parser.options.end();
     }
 
     bool run() override
