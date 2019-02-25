@@ -804,7 +804,7 @@ class stategraph_algorithm
         m_use_alternative_gcfp_consistency(options.use_alternative_gcfp_consistency),
         m_options(options)
     {
-      m_pbes = stategraph_pbes(p);
+      m_pbes = stategraph_pbes(p, m_datar);
     }
 
     /// \brief Returns the connected components of the global control flow graph.

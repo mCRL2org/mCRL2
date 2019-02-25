@@ -195,7 +195,7 @@ class stategraph_equation: public pbes_equation
           }
           else if (data::is_not(v_i))
           {
-            data::data_expression narg(data::sort_bool::arg(v_i));
+            const data::data_expression& narg = data::sort_bool::arg(v_i);
             if (data::is_variable(narg) && data::is_bool(v_i.sort()) && std::find(d.begin(), d.end(), data::variable(narg)) != d.end())
             {
               const auto& v = atermpp::down_cast<data::variable>(narg);
@@ -328,12 +328,12 @@ class stategraph_equation: public pbes_equation
     }
 
   public:
-    stategraph_equation(const pbes_equation& eqn, const data::data_specification& dataspec)
+    stategraph_equation(const pbes_equation& eqn, const data::rewriter& rewr)
       : pbes_equation(eqn)
     {
-      pbes_system::detail::guard_traverser f(dataspec);
+      pbes_system::detail::guard_traverser f(rewr);
       f.apply(eqn.formula());
-      const std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >& guards = f.expression_stack.back().guards;
+      const std::vector<std::pair<propositional_variable_instantiation, pbes_expression>>& guards = f.expression_stack.back().guards;
       for (const auto& guard: guards)
       {
         m_predvars.emplace_back(guard.first, guard.second);
@@ -504,13 +504,13 @@ class stategraph_pbes
 
     /// \brief Constructor
     /// \pre The pbes p must be in STATEGRAPH format
-    explicit stategraph_pbes(const pbes& p)
+    stategraph_pbes(const pbes& p, const data::rewriter& rewr)
       : m_data(p.data()), m_global_variables(p.global_variables()), m_initial_state(p.initial_state())
     {
       const std::vector<pbes_equation>& equations = p.equations();
       for (const pbes_equation& equation: equations)
       {
-        m_equations.emplace_back(equation, m_data);
+        m_equations.emplace_back(equation, rewr);
       }
     }
 
