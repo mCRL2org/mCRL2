@@ -418,6 +418,8 @@ class lts_generator
       }
     }
 
+    ~lts_generator() = default;
+
     template <typename ReportState = skip1, typename ReportTransition = skip3>
     void generate(const generate_lts_options& options, ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
