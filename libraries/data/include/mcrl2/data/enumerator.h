@@ -492,6 +492,10 @@ class enumerator_algorithm
     /// \brief If true, solutions with a non-empty list of variables may be reported.
     bool m_accept_solutions_with_variables;
 
+#ifdef MCRL2_ENUMERATOR_COUNT_REWRITE_CALLS
+    mutable std::size_t rewrite_calls = 0;
+#endif
+
     std::string print(const data::variable& x) const
     {
       std::ostringstream out;
@@ -503,6 +507,9 @@ class enumerator_algorithm
     inline
     Expression rewrite(const Expression& phi, MutableSubstitution& sigma) const
     {
+#ifdef MCRL2_ENUMERATOR_COUNT_REWRITE_CALLS
+      rewrite_calls++;
+#endif
       return const_cast<Rewriter&>(R)(phi, sigma);
     }
 
@@ -523,6 +530,13 @@ class enumerator_algorithm
     {}
 
     enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
+
+    ~enumerator_algorithm()
+    {
+#ifdef MCRL2_ENUMERATOR_COUNT_REWRITE_CALLS
+      std::cout << "number of enumerator rewrite calls: " << rewrite_calls << std::endl;
+#endif
+    }
 
     template <typename T>
     struct always_false
