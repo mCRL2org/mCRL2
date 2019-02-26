@@ -98,28 +98,6 @@ std::ostream& operator<<(std::ostream& out, const labeled_transition_system& x)
   return out;
 }
 
-template <typename StateType, class Transformer>
-inline
-data::data_expression_list
-make_state(const data::data_expression_list& x,
-           std::size_t /* n */,
-           Transformer f,
-           typename std::enable_if<std::is_same<StateType, data::data_expression_list>::value>::type* = nullptr)
-{
-  return data::data_expression_list(x.begin(), x.end(), [&](const data::data_expression& x) { return f(x); });
-}
-
-template <typename StateType, class Transformer>
-inline
-lps::state
-make_state(const data::data_expression_list& x,
-           std::size_t n,
-           Transformer f,
-           typename std::enable_if<std::is_same<StateType, lps::state>::value>::type* = nullptr)
-{
-  return lps::state(x.begin(), n, [&](const data::data_expression& x) { return f(x); });
-}
-
 struct generate_lts_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
@@ -142,102 +120,98 @@ std::ostream& operator<<(std::ostream& out, const generate_lts_options& options)
   return out;
 }
 
-template <typename StateType>
-struct next_state_summand
-{
-  typedef StateType state_type;
-  data::variable_list variables;
-  data::data_expression condition;
-  process::action_list actions;
-  data::data_expression_list next_state;
-
-  data::variable_list keyC; // used for caching
-
-  next_state_summand(const lps::action_summand& summand, const data::variable_list& process_parameters)
-    : variables(summand.summation_variables()),
-      condition(summand.condition()),
-      actions(summand.multi_action().actions()),
-      next_state(summand.next_state(process_parameters))
-  {
-    keyC = free_variables(summand.condition(), process_parameters);
-  }
-
-  process::action_list action(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma) const
-  {
-    auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
-    {
-      return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return r(x, sigma); });
-    };
-
-    auto rewrite_action = [&](const process::action& a)
-    {
-      return process::action(a.label(), rewrite_data_expression_list(a.arguments()));
-    };
-
-    return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
-  }
-
-  state_type state(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma, std::size_t n) const
-  {
-    return make_state<state_type>(next_state, n, [&](const data::data_expression& x) { return r(x, sigma); });
-  }
-
-  void add_assignments(data::mutable_indexed_substitution<>& sigma, const data::data_expression_list& e) const
-  {
-    assert(variables.size() == e.size());
-    auto vi = variables.begin();
-    auto ei = e.begin();
-    for (; vi != variables.end(); ++vi, ++ei)
-    {
-      sigma[*vi] = *ei;
-    }
-  }
-
-  void remove_assignments(data::mutable_indexed_substitution<>& sigma) const
-  {
-    for (const data::variable& v: variables)
-    {
-      sigma[v] = v;
-    }
-  }
-
-  data::data_expression_list substitute(data::mutable_indexed_substitution<>& sigma) const
-  {
-    return data::data_expression_list{keyC.begin(), keyC.end(), [&](const data::variable& x) { return sigma(x); }};
-  }
-
-  template <typename T>
-  data::variable_list free_variables(const T& x, const data::variable_list& variables)
-  {
-    using utilities::detail::contains;
-    std::set<data::variable> FV = data::find_free_variables(x);
-    std::vector<data::variable> result;
-    for (const data::variable& v: variables)
-    {
-      if (contains(FV, v))
-      {
-        result.push_back(v);
-      }
-    }
-    return data::variable_list{result.begin(), result.end()};
-  }
-};
-
-template <typename StateType>
 class lts_generator
 {
   protected:
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-    typedef StateType state_type;
+
+    struct next_state_summand
+    {
+      data::variable_list variables;
+      data::data_expression condition;
+      process::action_list actions;
+      data::data_expression_list next_state;
+
+      data::variable_list gamma; // used for caching
+
+      next_state_summand(const lps::action_summand& summand, const data::variable_list& process_parameters)
+        : variables(summand.summation_variables()),
+          condition(summand.condition()),
+          actions(summand.multi_action().actions()),
+          next_state(summand.next_state(process_parameters))
+      {
+        gamma = free_variables(summand.condition(), process_parameters);
+      }
+
+      process::action_list action(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma) const
+      {
+        auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
+        {
+          return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return r(x, sigma); });
+        };
+
+        auto rewrite_action = [&](const process::action& a)
+        {
+          return process::action(a.label(), rewrite_data_expression_list(a.arguments()));
+        };
+
+        return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
+      }
+
+      lps::state state(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma, std::size_t n) const
+      {
+        return lps::state(next_state.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
+      }
+
+      void add_assignments(data::mutable_indexed_substitution<>& sigma, const data::data_expression_list& e) const
+      {
+        assert(variables.size() == e.size());
+        auto vi = variables.begin();
+        auto ei = e.begin();
+        for (; vi != variables.end(); ++vi, ++ei)
+        {
+          sigma[*vi] = *ei;
+        }
+      }
+
+      void remove_assignments(data::mutable_indexed_substitution<>& sigma) const
+      {
+        for (const data::variable& v: variables)
+        {
+          sigma[v] = v;
+        }
+      }
+
+      data::data_expression_list substitute(data::mutable_indexed_substitution<>& sigma) const
+      {
+        return data::data_expression_list{gamma.begin(), gamma.end(), [&](const data::variable& x) { return sigma(x); }};
+      }
+
+      template <typename T>
+      data::variable_list free_variables(const T& x, const data::variable_list& variables)
+      {
+        using utilities::detail::contains;
+        std::set<data::variable> FV = data::find_free_variables(x);
+        std::vector<data::variable> result;
+        for (const data::variable& v: variables)
+        {
+          if (contains(FV, v))
+          {
+            result.push_back(v);
+          }
+        }
+        return data::variable_list{result.begin(), result.end()};
+      }
+    };
 
     specification lpsspec;
     data::rewriter r;
     mutable data::mutable_indexed_substitution<> sigma;
     data::enumerator_identifier_generator id_generator;
     data::enumerator_algorithm<data::rewriter, data::rewriter> E;
-    std::vector<next_state_summand<StateType>> next_state_summands;
+    std::vector<next_state_summand> next_state_summands;
 
-    void preprocess(specification& lpsspec, const generate_lts_options& options) const
+    void preprocess(const generate_lts_options& options)
     {
       detail::instantiate_global_variables(lpsspec);
       lps::order_summand_variables(lpsspec);
@@ -268,7 +242,7 @@ class lts_generator
 
       auto rewrite_state = [&](const data::data_expression_list& v)
       {
-        return make_state<state_type>(v, n, [&](const data::data_expression& x) { return r(x, sigma); });
+        return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
       };
 
       auto rewrite_action = [&](const process::action& a)
@@ -281,10 +255,10 @@ class lts_generator
         return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
       };
 
-      atermpp::indexed_set<state_type> discovered;
+      atermpp::indexed_set<lps::state> discovered;
       std::deque<std::size_t> todo;
 
-      state_type d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
+      lps::state d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
       report_state(d0);
       auto k = discovered.put(d0);
       todo.push_back(k.first);
@@ -292,7 +266,7 @@ class lts_generator
       {
         std::size_t i = todo.front();
         todo.pop_front();
-        const state_type& d = discovered.get(i);
+        const lps::state& d = discovered.get(i);
 
         auto di = d.begin();
         auto pi = process_parameters.begin();
@@ -312,7 +286,7 @@ class lts_generator
                         {
                           p.add_assignments(summand.variables, sigma, r);
                           process::action_list a = rewrite_action_list(summand.actions);
-                          state_type d1 = rewrite_state(summand.next_state);
+                          lps::state d1 = rewrite_state(summand.next_state);
                           p.remove_assignments(summand.variables, sigma);
                           auto j = discovered.put(d1);
                           if (j.second)
@@ -341,13 +315,13 @@ class lts_generator
 
       auto rewrite_state = [&](const data::data_expression_list& v)
       {
-        return make_state<state_type>(v, n, [&](const data::data_expression& x) { return r(x, sigma); });
+        return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
       };
 
-      atermpp::indexed_set<state_type> discovered;
+      atermpp::indexed_set<lps::state> discovered;
       std::deque<std::size_t> todo;
 
-      state_type d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
+      lps::state d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
       report_state(d0);
       auto k = discovered.put(d0);
       todo.push_back(k.first);
@@ -355,7 +329,7 @@ class lts_generator
       {
         std::size_t i = todo.front();
         todo.pop_front();
-        const state_type& d = discovered.get(i);
+        const lps::state& d = discovered.get(i);
 
         auto di = d.begin();
         auto pi = process_parameters.begin();
@@ -390,7 +364,7 @@ class lts_generator
           {
             summand.add_assignments(sigma, e);
             process::action_list a = summand.action(r, sigma);
-            state_type d1 = summand.state(r, sigma, process_parameters.size());
+            lps::state d1 = summand.state(r, sigma, process_parameters.size());
             auto j = discovered.put(d1);
             if (j.second)
             {
@@ -410,7 +384,7 @@ class lts_generator
         r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy),
         E(r, lpsspec.data(), r, id_generator, false)
     {
-      preprocess(lpsspec, options);
+      preprocess(options);
       const data::variable_list& process_parameters = lpsspec.process().process_parameters();
       for (const action_summand& summand: lpsspec.process().action_summands())
       {
@@ -434,14 +408,12 @@ class lts_generator
     }
 };
 
-template <typename StateType>
 void generate_labeled_transition_system(const specification& lpsspec,
                                         const generate_lts_options& options,
                                         labeled_transition_system& result
                                        )
 {
   typedef process::action_list action_type;
-  typedef StateType state_type;
 
   std::size_t number_of_states = 0;
   std::unordered_map<action_type, std::size_t> actions;
@@ -459,9 +431,9 @@ void generate_labeled_transition_system(const specification& lpsspec,
   lps::multi_action tau;
   add_action(tau.actions());
 
-  lts_generator<state_type> generator(lpsspec, options);
+  lts_generator generator(lpsspec, options);
   generator.generate(options,
-                     [&](const state_type&)
+                     [&](const lps::state&)
                      {
                        number_of_states++;
                      },

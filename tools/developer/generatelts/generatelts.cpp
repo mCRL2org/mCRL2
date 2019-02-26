@@ -50,7 +50,6 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
-      desc.add_option("no-store-states-as-trees", "do not store states as trees");
       options.rewrite_strategy = rewrite_strategy();
     }
 
@@ -61,23 +60,13 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.one_point_rule_rewrite                = parser.options.find("no-one-point-rule-rewrite") == parser.options.end();
       options.replace_constants_by_variables        = parser.options.find("no-replace-constants-by-variables") == parser.options.end();
       options.resolve_summand_variable_name_clashes = parser.options.find("no-resolve-summand-variable-name-clashes") == parser.options.end();
-      options.store_states_as_trees                 = parser.options.find("no-store-states-as-trees") == parser.options.end();
     }
 
     bool run() override
     {
       lps::labeled_transition_system lts;
       lps::specification lpsspec = lps::detail::load_lps(input_filename());
-
-      if (options.store_states_as_trees)
-      {
-        lps::generate_labeled_transition_system<lps::state>(lpsspec, options, lts);
-      }
-      else
-      {
-        lps::generate_labeled_transition_system<data::data_expression_list>(lpsspec, options, lts);
-      }
-
+      lps::generate_labeled_transition_system(lpsspec, options, lts);
       std::ostringstream out;
       out << lts;
       utilities::detail::write_text(output_filename(), out.str());
