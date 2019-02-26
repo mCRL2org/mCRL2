@@ -47,6 +47,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     {
       super::add_options(desc);
       desc.add_option("cached", "cache enumerator solutions");
+      desc.add_option("confluence", "apply confluence reduction", 'c');
       desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
@@ -57,6 +58,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
       options.cached                                = parser.options.find("cached") != parser.options.end();
+      options.confluence                            = parser.options.find("confluence") != parser.options.end();
       options.one_point_rule_rewrite                = parser.options.find("no-one-point-rule-rewrite") == parser.options.end();
       options.replace_constants_by_variables        = parser.options.find("no-replace-constants-by-variables") == parser.options.end();
       options.resolve_summand_variable_name_clashes = parser.options.find("no-resolve-summand-variable-name-clashes") == parser.options.end();

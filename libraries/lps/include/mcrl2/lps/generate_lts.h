@@ -106,12 +106,14 @@ struct generate_lts_options
   bool resolve_summand_variable_name_clashes = false;
   bool store_states_as_trees = true;
   bool cached = false;
+  bool confluence = false;
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const generate_lts_options& options)
 {
   out << "cached = " << std::boolalpha << options.cached << std::endl;
+  out << "confluence = " << std::boolalpha << options.confluence << std::endl;
   out << "one_point_rule_rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "resolve_summand_variable_name_clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
   out << "replace_constants_by_variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
@@ -120,10 +122,45 @@ std::ostream& operator<<(std::ostream& out, const generate_lts_options& options)
   return out;
 }
 
+template <typename StateType>
+inline
+void add_assignments(data::mutable_indexed_substitution<>& sigma, const data::variable_list& v, const StateType& e)
+{
+  assert(v.size() == e.size());
+  auto vi = v.begin();
+  auto ei = e.begin();
+  for (; vi != v.end(); ++vi, ++ei)
+  {
+    sigma[*vi] = *ei;
+  }
+}
+
+inline
+void remove_assignments(data::mutable_indexed_substitution<>& sigma, const data::variable_list& v)
+{
+  for (const data::variable& vi: v)
+  {
+    sigma[vi] = vi;
+  }
+}
+
 class lts_generator
 {
   protected:
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+    struct next_state_summand;
+
+    specification lpsspec;
+    data::rewriter r;
+    mutable data::mutable_indexed_substitution<> sigma;
+    data::enumerator_identifier_generator id_generator;
+    data::enumerator_algorithm<data::rewriter, data::rewriter> E;
+    const data::variable_list& process_parameters;
+    std::size_t n;
+    bool apply_confluence_reduction;
+
+    std::vector<next_state_summand> next_state_summands;
+    std::vector<next_state_summand> confluent_summands;
 
     struct next_state_summand
     {
@@ -143,73 +180,27 @@ class lts_generator
         gamma = free_variables(summand.condition(), process_parameters);
       }
 
-      process::action_list action(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma) const
+      data::data_expression_list substitute(data::mutable_indexed_substitution<>& rho) const
       {
-        auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
-        {
-          return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return r(x, sigma); });
-        };
-
-        auto rewrite_action = [&](const process::action& a)
-        {
-          return process::action(a.label(), rewrite_data_expression_list(a.arguments()));
-        };
-
-        return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
-      }
-
-      lps::state state(const data::rewriter& r, data::mutable_indexed_substitution<>& sigma, std::size_t n) const
-      {
-        return lps::state(next_state.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
-      }
-
-      void add_assignments(data::mutable_indexed_substitution<>& sigma, const data::data_expression_list& e) const
-      {
-        assert(variables.size() == e.size());
-        auto vi = variables.begin();
-        auto ei = e.begin();
-        for (; vi != variables.end(); ++vi, ++ei)
-        {
-          sigma[*vi] = *ei;
-        }
-      }
-
-      void remove_assignments(data::mutable_indexed_substitution<>& sigma) const
-      {
-        for (const data::variable& v: variables)
-        {
-          sigma[v] = v;
-        }
-      }
-
-      data::data_expression_list substitute(data::mutable_indexed_substitution<>& sigma) const
-      {
-        return data::data_expression_list{gamma.begin(), gamma.end(), [&](const data::variable& x) { return sigma(x); }};
+        return data::data_expression_list{gamma.begin(), gamma.end(), [&](const data::variable& x) { return rho(x); }};
       }
 
       template <typename T>
-      data::variable_list free_variables(const T& x, const data::variable_list& variables)
+      data::variable_list free_variables(const T& x, const data::variable_list& v)
       {
         using utilities::detail::contains;
         std::set<data::variable> FV = data::find_free_variables(x);
         std::vector<data::variable> result;
-        for (const data::variable& v: variables)
+        for (const data::variable& vi: v)
         {
-          if (contains(FV, v))
+          if (contains(FV, vi))
           {
-            result.push_back(v);
+            result.push_back(vi);
           }
         }
         return data::variable_list{result.begin(), result.end()};
       }
     };
-
-    specification lpsspec;
-    data::rewriter r;
-    mutable data::mutable_indexed_substitution<> sigma;
-    data::enumerator_identifier_generator id_generator;
-    data::enumerator_algorithm<data::rewriter, data::rewriter> E;
-    std::vector<next_state_summand> next_state_summands;
 
     void preprocess(const generate_lts_options& options)
     {
@@ -229,32 +220,102 @@ class lts_generator
       }
     }
 
+    // Confluence reduction based on S.C.C. Blom, Partial tau-confluence for
+    // Efficient State Space Generation, Technical Report SEN-R0123, CWI, Amsterdam, 2001
+    lps::state find_representative(const lps::state& state) const
+    {
+      lps::state u = state;
+
+      std::map<lps::state, std::size_t> depth;
+      std::map<lps::state, std::size_t> low;
+      std::map<lps::state, std::list<lps::state>> successors;
+      std::map<lps::state, lps::state> predecessor;
+
+      std::size_t d = 0;
+      depth[u] = 0;
+
+      while (true)
+      {
+        if (depth[u] == 0)
+        {
+          d++;
+          depth[u] = d;
+          low[u] = d;
+          successors[u] = std::list<lps::state>();
+
+          add_assignments(sigma, process_parameters, u);
+          for (const auto& summand: confluent_summands)
+          {
+            data::data_expression c = r(summand.condition, sigma);
+            if (!data::is_false(c))
+            {
+              E.enumerate(enumerator_element(summand.variables, c),
+                          sigma,
+                          [&](const enumerator_element& p)
+                          {
+                            p.add_assignments(summand.variables, sigma, r);
+                            lps::state v = rewrite_state(summand.next_state);
+                            successors[u].push_back(v);
+                            if (depth.find(v) == depth.end())
+                            {
+                              depth[v] = 0;
+                            }
+                            p.remove_assignments(summand.variables, sigma);
+                            return false;
+                          },
+                          data::is_false
+              );
+            }
+          }
+        }
+        if (successors[u].empty())
+        {
+          if (depth[u] == low[u])
+          {
+            return u;
+          }
+          lps::state w = predecessor[u];
+          low[w] = std::min(low[u], low[w]);
+          u = w;
+        }
+        else
+        {
+          lps::state v = successors[u].front();
+          successors[u].pop_front();
+          if (depth[v] == 0)
+          {
+            predecessor[v] = u;
+            u = v;
+          }
+          else if (depth[v] < depth[u])
+          {
+            low[u] = std::min(low[u], depth[v]);
+          }
+        }
+      }
+    }
+
+    lps::state rewrite_state(const data::data_expression_list& v) const
+    {
+      return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
+    };
+
+    process::action_list rewrite_action_list(const process::action_list& actions) const
+    {
+      return process::action_list(
+        actions.begin(),
+        actions.end(),
+        [&](const process::action& a)
+        {
+          const auto& args = a.arguments();
+          return process::action(a.label(), data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return r(x, sigma); }));
+        }
+      );
+    };
+
     template <typename ReportState = skip1, typename ReportTransition = skip3>
     void generate_default(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
-      const data::variable_list& process_parameters = lpsspec.process().process_parameters();
-      std::size_t n = process_parameters.size();
-
-      auto rewrite_data_expression_list = [&](const data::data_expression_list& v)
-      {
-        return data::data_expression_list(v.begin(), v.end(), [&](const data::data_expression& x) { return r(x, sigma); });
-      };
-
-      auto rewrite_state = [&](const data::data_expression_list& v)
-      {
-        return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
-      };
-
-      auto rewrite_action = [&](const process::action& a)
-      {
-        return process::action(a.label(), rewrite_data_expression_list(a.arguments()));
-      };
-
-      auto rewrite_action_list = [&](const process::action_list& actions)
-      {
-        return process::action_list(actions.begin(), actions.end(), [&](const process::action& a) { return rewrite_action(a); });
-      };
-
       atermpp::indexed_set<lps::state> discovered;
       std::deque<std::size_t> todo;
 
@@ -268,13 +329,7 @@ class lts_generator
         todo.pop_front();
         const lps::state& d = discovered.get(i);
 
-        auto di = d.begin();
-        auto pi = process_parameters.begin();
-        for (; di != d.end(); ++di, ++pi)
-        {
-          sigma[*pi] = *di;
-        }
-
+        add_assignments(sigma, process_parameters, d);
         for (const auto& summand: next_state_summands)
         {
           data::data_expression c = r(summand.condition, sigma);
@@ -287,6 +342,13 @@ class lts_generator
                           p.add_assignments(summand.variables, sigma, r);
                           process::action_list a = rewrite_action_list(summand.actions);
                           lps::state d1 = rewrite_state(summand.next_state);
+
+                          if (apply_confluence_reduction)
+                          {
+                            d1 = find_representative(d1);
+                            add_assignments(sigma, process_parameters, d); // N.B. find_representative contaminates sigma
+                          }
+
                           p.remove_assignments(summand.variables, sigma);
                           auto j = discovered.put(d1);
                           if (j.second)
@@ -307,16 +369,8 @@ class lts_generator
     template <typename ReportState = skip1, typename ReportTransition = skip3>
     void generate_cached(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
-      const data::variable_list& process_parameters = lpsspec.process().process_parameters();
-      std::size_t n = process_parameters.size();
-
       // global cache for solutions of conditions
       std::unordered_map<data::data_expression_list, std::list<data::data_expression_list>> enumerator_cache;
-
-      auto rewrite_state = [&](const data::data_expression_list& v)
-      {
-        return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
-      };
 
       atermpp::indexed_set<lps::state> discovered;
       std::deque<std::size_t> todo;
@@ -331,13 +385,7 @@ class lts_generator
         todo.pop_front();
         const lps::state& d = discovered.get(i);
 
-        auto di = d.begin();
-        auto pi = process_parameters.begin();
-        for (; di != d.end(); ++di, ++pi)
-        {
-          sigma[*pi] = *di;
-        }
-
+        add_assignments(sigma, process_parameters, d);
         for (auto& summand: next_state_summands)
         {
           data::data_expression_list key = summand.substitute(sigma);
@@ -362,9 +410,16 @@ class lts_generator
           }
           for (const data::data_expression_list& e: q->second)
           {
-            summand.add_assignments(sigma, e);
-            process::action_list a = summand.action(r, sigma);
-            lps::state d1 = summand.state(r, sigma, process_parameters.size());
+            add_assignments(sigma, summand.variables, e);
+            process::action_list a = rewrite_action_list(summand.actions);
+            lps::state d1 = rewrite_state(summand.next_state);
+
+            if (apply_confluence_reduction)
+            {
+              d1 = find_representative(d1);
+              add_assignments(sigma, process_parameters, d); // N.B. find_representative contaminates sigma
+            }
+
             auto j = discovered.put(d1);
             if (j.second)
             {
@@ -373,7 +428,7 @@ class lts_generator
             }
             report_transition(i, a, j.first);
           }
-          summand.remove_assignments(sigma);
+          remove_assignments(sigma, summand.variables);
         }
       }
     }
@@ -382,13 +437,23 @@ class lts_generator
     lts_generator(const specification& lpsspec_, const generate_lts_options& options)
       : lpsspec(lpsspec_),
         r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy),
-        E(r, lpsspec.data(), r, id_generator, false)
+        E(r, lpsspec.data(), r, id_generator, false),
+        process_parameters(lpsspec.process().process_parameters()),
+        n(process_parameters.size()),
+        apply_confluence_reduction(options.confluence)
     {
       preprocess(options);
-      const data::variable_list& process_parameters = lpsspec.process().process_parameters();
+      core::identifier_string ctau{"ctau"};
       for (const action_summand& summand: lpsspec.process().action_summands())
       {
-        next_state_summands.emplace_back(summand, process_parameters);
+        if (summand.multi_action().actions().size() == 1 && summand.multi_action().actions().front().label().name() == ctau)
+        {
+          confluent_summands.emplace_back(summand, process_parameters);
+        }
+        else
+        {
+          next_state_summands.emplace_back(summand, process_parameters);
+        }
       }
     }
 
