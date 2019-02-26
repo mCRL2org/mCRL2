@@ -279,6 +279,7 @@ void GLWidget::paintGL()
   if (!m_paused)
   {
     m_scene.setDevicePixelRatio(devicePixelRatio());
+    m_scene.update();
     m_scene.render(painter);
   }
 }
@@ -401,7 +402,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
-  CameraView& camera = m_scene.camera();
+  ArcballCameraView& camera = m_scene.camera();
   camera.zoom(camera.zoom() * pow(1.0005f, e->delta()));
   update();
 }
@@ -409,7 +410,7 @@ void GLWidget::wheelEvent(QWheelEvent* e)
 void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
   updateSelection();
-  CameraView& camera = m_scene.camera();
+  ArcballCameraView& camera = m_scene.camera();
   
   if (m_dragmode != dm_none)
   {
@@ -453,7 +454,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
           int dx = e->pos().x() - m_dragstart.x();
           int dy = e->pos().y() - m_dragstart.y();
           QVector3D vec3(dx, -dy, 0);
-          camera.position(camera.position() + vec3);
+          camera.center(camera.center() + vec3);
           break;
         }
       case dm_dragnode:
@@ -533,7 +534,6 @@ void GLWidget::saveTikz(const QString& filename, float aspectRatio)
 
 void GLWidget::saveBitmap(const QString& filename)
 {
-  makeCurrent();
   grabFramebuffer().save(filename);
 }
 
@@ -580,10 +580,8 @@ GLWidgetUi::~GLWidgetUi()
 void GLWidgetUi::selectColor(const QColor& color)
 {
   QPixmap icon(16, 16);
-  QPainter painter;
-  painter.begin(&icon);
+  QPainter painter(&icon);
   painter.fillRect(icon.rect(), color);
-  painter.end();
   m_ui.btnSelectColor->setIcon(QIcon(icon));
   m_widget.setPaint(color);
 }
