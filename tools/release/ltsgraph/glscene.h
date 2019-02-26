@@ -51,15 +51,23 @@ public:
   /// \brief Sets the control points used by this shader.
   void setControlPoints(const std::array<QVector3D, 4>& points) { setUniformValueArray(m_controlPoints_location, points.data(), 4); }
 
-  /// \brief Sets the world view projection matrix used to transform the object.
+  /// \brief Sets the view projection matrix used to transform the object.
   void setViewProjMatrix(const QMatrix4x4& matrix) { setUniformValue(m_viewProjMatrix_location, matrix); }
+
+  /// \brief Sets the view matrix used to transform the object.
+  void setViewMatrix(const QMatrix4x4& matrix) { setUniformValue(m_viewMatrix_location, matrix); }
 
   /// \brief Sets the color of the arc.
   void setColor(const QVector3D& color) { setUniformValue(m_color_location, color); }
 
+  /// \brief Sets the fog density used.
+  void setFogDensity(float density) { setUniformValue(m_fogdensity_location, density); }
+
 private:
   int m_viewProjMatrix_location = -1;
+  int m_viewMatrix_location = -1;
   int m_color_location = -1;
+  int m_fogdensity_location = -1;
   int m_controlPoints_location = -1;
 };
 
@@ -142,11 +150,11 @@ public:
   void setDrawStateNumbers(bool drawLabels) { m_drawstatenumbers = drawLabels; }
   void setDrawSelfLoops(bool drawLoops) { m_drawselfloops = drawLoops; }
   void setDrawInitialMarking(bool drawMark) { m_drawinitialmarking = drawMark; }
+  void setDrawFog(bool enabled) { m_drawfog = enabled; }
 
-  void setDrawFog(bool drawFog) { m_drawfog = drawFog; }
   void setNodeSize(std::size_t size) { m_size_node = size; }
   void setFontSize(std::size_t size) { m_fontsize = size; m_font.setPixelSize(m_fontsize); }
-  void setFogDistance(float dist) { m_fogdistance = dist; }
+  void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
 
   /// \brief Sets the depth of the cube in which the scene lives (the z-coordinate)
@@ -178,6 +186,12 @@ private:
   /// \param i The index of the state number to render.
   void renderStateNumber(QPainter& painter, GLuint i);
 
+  /// \returns The amount of fog that a given world coordinate receives.
+  float fogAmount(const QVector3D& position);
+
+  /// \returns The color of an object received fogAmount amount of fog.
+  QVector3D applyFog(const QVector3D& color, float fogAmount);
+
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
@@ -204,18 +218,21 @@ private:
   bool m_drawselfloops        = true;
   /// \brief The initial state is marked if this field is true.
   bool m_drawinitialmarking   = true;
+  /// \brief Enable drawing fog.
+  bool m_drawfog = false;
   /// \brief The size of a node (radius).
   std::size_t m_size_node     = 20;
   /// \brief The size of the font.
   std::size_t m_fontsize      = 16;
 
   /// Fog is rendered only if this field is true.
-  bool m_drawfog              = true;
-  float m_fogdistance         = 5500.0f;
+  float m_fogdensity = 0.0005f;
 
   /// The vertex layout and vertex buffer object for all objects with the 3 float per vertex layout.
   QOpenGLVertexArrayObject m_vertexarray;
   QOpenGLBuffer m_vertexbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+
+  QVector3D m_clearColor = QVector3D(1.0f, 1.0f, 1.0f);
 };
 
 #endif // MCRL2_LTSGRAPH_GLSCENE_H

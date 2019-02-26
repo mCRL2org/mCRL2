@@ -569,7 +569,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   connect(m_ui.cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
   connect(m_ui.spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
   connect(m_ui.spinFontSize, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFontSize(int)));
-  connect(m_ui.spinFog, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFogDistance(int)));
+  connect(m_ui.spinFog, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFogDensity(int)));
 }
 
 GLWidgetUi::~GLWidgetUi()
@@ -620,8 +620,6 @@ void GLWidgetUi::setSettings(QByteArray state)
     m_ui.spinFog->setValue(fogDistance);
     m_ui.spinFontSize->setValue(fontSize);
     m_ui.btnPaint->setChecked(paint);
-    // always show the transition labels
-    // m_ui.cbTransitionLabels->setChecked(transitionLabels);
     m_ui.cbStateLabels->setChecked(stateLabels);
     m_ui.cbStateNumbers->setChecked(stateNumbers);
     m_ui.cbSelfLoops->setChecked(selfLoops);
