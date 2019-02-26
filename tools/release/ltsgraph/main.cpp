@@ -39,6 +39,9 @@ class ltsgraph_tool : public ltsgraph_base
       surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
       surfaceFormat.setSwapInterval(1);
 
+      // Enable a surface with multisampling.
+      surfaceFormat.setSamples(4);
+
       // We use the GL_KHR_debug extension to provide realtime logging of OpenGL errors.
       surfaceFormat.setOption(QSurfaceFormat::DebugContext);
       QSurfaceFormat::setDefaultFormat(surfaceFormat);
