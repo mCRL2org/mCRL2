@@ -18,6 +18,7 @@
 #include <QPainter>
 
 #include <cassert>
+#include <cmath>
 
 /// Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
 #define MCRL2_QGL_VERIFY(x) \
@@ -129,15 +130,23 @@ bool GlobalShader::link()
   return true;
 }
 
+namespace
+{
+
 /// \brief A vertex shader that produces a cubic Bezier curve.
 const char* g_arcVertexShader =
   "#version 330\n"
 
   "uniform mat4 g_viewProjMatrix;\n"
+  "uniform mat4 g_viewMatrix;\n"
 
   "uniform vec3 g_controlPoint[4];"
 
+  "uniform float g_density = 0.0001f;"
+
   "layout(location = 0) in vec3 vertex;\n"
+
+  "out float fogAmount;\n"
 
   "// Calculates the position on a cubic Bezier curve with 0 <= t <= 1.\n"
   "vec3 cubicBezier(float t)\n"
@@ -150,8 +159,32 @@ const char* g_arcVertexShader =
 
   "void main(void)\n"
   "{\n"
-  "   gl_Position = g_viewProjMatrix * vec4(cubicBezier(vertex.x), 1.0f);\n"
+  "   // Calculate the actual position of the vertex.\n"
+  "   vec4 position = vec4(cubicBezier(vertex.x), 1.0f);\n"
+
+  "   // Apply the fog calculation to the resulting position.\n"
+  "   float distance = length(g_viewMatrix * position);\n"
+  "   fogAmount = (1.0f - exp(-1.0f * pow(distance * g_density, 2)));\n"
+
+  "   // Calculate the actual vertex position in clip space.\n"
+  "   gl_Position = g_viewProjMatrix * position;\n"
   "}";
+
+/// \brief A fragment shader that uses g_color as a fill color for the polygons and applies per vertex fogging.
+const char* g_arcFragmentShader =
+  "#version 330\n "
+
+  "uniform vec3 g_color = vec3(1.0f, 1.0f, 1.0f);\n"
+
+  "in float fogAmount;\n"
+
+  "out vec4 fragColor;\n"
+
+  "void main(void)\n"
+  "{\n"
+  "   fragColor = vec4(mix(g_color, vec3(1.0f, 1.0f, 1.0f), fogAmount), 1.0);\n"
+  "}";
+} // unnamed namespace
 
 bool ArcShader::link()
 {
@@ -162,7 +195,7 @@ bool ArcShader::link()
     std::abort();
   }
 
-  if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShader))
+  if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_arcFragmentShader))
   {
     mCRL2log(mcrl2::log::error) << log().toStdString();
     std::abort();
@@ -180,6 +213,12 @@ bool ArcShader::link()
     mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewProjMatrix.\n";
   }
 
+  m_viewMatrix_location = uniformLocation("g_viewMatrix");
+  if (m_viewMatrix_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewMatrix.\n";
+  }
+
   m_controlPoints_location = uniformLocation("g_controlPoint");
   if (m_controlPoints_location == -1)
   {
@@ -190,6 +229,12 @@ bool ArcShader::link()
   if (m_color_location == -1)
   {
     mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_color.\n";
+  }
+
+  m_fogdensity_location = uniformLocation("g_density");
+  if (m_fogdensity_location == -1)
+  {
+    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_density.\n";
   }
 
   return true;
@@ -540,6 +585,8 @@ bool GLScene::selectObject(GLScene::Selection& s,
   return s.selectionType != so_none;
 }
 
+/// Helper functions
+
 /// \brief Renders text, centered around the point at x and y
 inline
 QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
@@ -596,10 +643,13 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   // Use the arc shader to draw the arcs.
   m_arc_shader.bind();
 
+  m_arc_shader.setViewMatrix(m_camera.viewMatrix());
+  m_arc_shader.setViewProjMatrix(viewProjMatrix);
+  m_arc_shader.setFogDensity(m_drawfog * m_fogdensity);
+
   QVector3D arcColor(m_graph.handle(i).selected(), 0.0f, 0.0f);
   m_arc_shader.setControlPoints(control);
   m_arc_shader.setColor(arcColor);
-  m_arc_shader.setViewProjMatrix(viewProjMatrix);
 
   glDrawArrays(GL_LINE_STRIP, OFFSET_ARC, VERTICES_ARC);
 
@@ -616,30 +666,37 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   {
     vec.normalize();
 
-    QMatrix4x4 worldMatrix;
+    float fog = fogAmount(to);
+    if (fog <= 1.0f)
+    {
+      // Apply the fog color.
+      m_global_shader.setColor(applyFog(QVector3D(0, 0, 0), fog));
 
-    // Go to arrowhead position
-    worldMatrix.translate(to.x(), to.y(), to.z());
+      QMatrix4x4 worldMatrix;
 
-    // Rotate the arrowhead to orient it to the end of the arc.
-    QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
-    float degrees = (180.0f / PI) * acos(vec.x());
-    worldMatrix.rotate(degrees, axis);
+      // Go to arrowhead position
+      worldMatrix.translate(to.x(), to.y(), to.z());
 
-    // Move the arrowhead outside of the node.
-    worldMatrix.translate(-0.5f * nodeSizeOnScreen(), 0.0f, 0.0f);
+      // Rotate the arrowhead to orient it to the end of the arc.
+      QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
+      float degrees = (180.0f / PI) * acos(vec.x());
+      worldMatrix.rotate(degrees, axis);
 
-    // Scale it according to its size.
-    worldMatrix.scale(arrowheadSizeOnScreen());
+      // Move the arrowhead outside of the node.
+      worldMatrix.translate(-0.5f * nodeSizeOnScreen(), 0.0f, 0.0f);
 
-    QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
+      // Scale it according to its size.
+      worldMatrix.scale(arrowheadSizeOnScreen());
 
-    // Draw the arrow head
-    m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
-    glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD);
+      QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
 
-    // Draw a circle to enclose the arrowhead.
-    glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE, VERTICES_ARROWHEAD_BASE);
+      // Draw the arrow head
+      m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+      glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD, VERTICES_ARROWHEAD);
+
+      // Draw a circle to enclose the arrowhead.
+      glDrawArrays(GL_TRIANGLE_FAN, OFFSET_ARROWHEAD_BASE, VERTICES_ARROWHEAD_BASE);
+    }
   }
 }
 
@@ -681,10 +738,6 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
 {
   Graph::NodeNode& node = m_graph.node(i);
   QVector3D fill;
-  //Color4f hint;
-
-  // Node stroke color: red when selected, black otherwise
-  QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
 
   bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
   if (mark) // Initial node fill color: green or dark green (locked)
@@ -719,27 +772,42 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
   //}
 
   //m_camera.billboard_spherical(node.pos());
-  QMatrix4x4 worldMatrix;
-  worldMatrix.translate(node.pos());
-  worldMatrix.scale(0.5f * nodeSizeOnScreen());
 
-  QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
-
-  m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
-
-  m_global_shader.setColor(fill);
-  glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
-
-  m_global_shader.setColor(line);
-  glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
-
- /* if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
+  float fog = fogAmount(node.pos());
+  if (fog <= 1.0f) // Check if these elements are visible.
   {
-    float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
-    hint = Color4f(fill.r + s, fill.g + s, fill.b + s, true);
+    QMatrix4x4 worldMatrix;
+    worldMatrix.translate(node.pos());
+    worldMatrix.scale(0.5f * nodeSizeOnScreen());
 
-    drawWhetherNodeCanBeCollapsedOrExpanded(m_vertexdata, hint, node.active());
-  }*/
+    QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
+
+    m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+
+    // Apply fogging the node color and draw the node.
+    m_global_shader.setColor(applyFog(fill, fog));
+    glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
+
+    // Node stroke color: red when selected, black otherwise. Apply fogging afterwards.
+    QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
+    m_global_shader.setColor(applyFog(line, fog));
+    glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
+
+    if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
+    {
+      float s = (fill.x() < 0.5 && fill.y() < 0.5 && fill.z() < 0.5) ? 0.2f : -0.2f;
+      QVector3D hint = QVector3D(fill.x() + s, fill.y() + s, fill.z() + s);
+
+      m_global_shader.setColor(hint);
+      glDrawArrays(GL_LINES, OFFSET_HINT, VERTICES_HINT);
+    }
+  }
+
+}
+
+QColor vectorToColor(const QVector3D& vector)
+{
+  return QColor(vector.x() * 255, vector.y() * 255, vector.z() * 255);
 }
 
 void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
@@ -754,11 +822,20 @@ void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
 
   if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty())
   {
-    QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
+    float fog = fogAmount(label.pos());
+    if (fog <= 1.0f) // The text is visible.
+    {
+      QVector3D color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
 
-    QVector3D windowCoordinates = m_camera.worldToWindow(label.pos());
-    const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-    drawCenteredText(painter, windowCoordinates.x(), windowCoordinates.y(), labelstring, color);
+      QVector3D window = m_camera.worldToWindow(label.pos());
+
+      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
+      drawCenteredText(painter,
+        window.x(),
+        window.y(),
+        labelstring,
+        vectorToColor(applyFog(color, fog)));
+    }
   }
 }
 
@@ -767,16 +844,61 @@ void GLScene::renderStateLabel(QPainter& painter, GLuint i)
   Graph::LabelNode& label = m_graph.stateLabel(i);
   if (!m_graph.stateLabelstring(label.labelindex()).isEmpty())
   {
-    QVector3D window = m_camera.worldToWindow(label.pos());
+    float fog = fogAmount(label.pos());
+    if (fog <= 1.0f) // The text is visible.
+    {
+      QVector3D window = m_camera.worldToWindow(label.pos());
 
-    QColor color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
-    drawCenteredText(painter, window.x(), window.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()), color);
+      QVector3D color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
+
+      drawCenteredText(painter,
+        window.x(),
+        window.y() + nodeSizeOnScreen(),
+        m_graph.stateLabelstring(label.labelindex()),
+        vectorToColor(applyFog(color, fog)));
+    }
   }
 }
 
 void GLScene::renderStateNumber(QPainter& painter, GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
-  QVector3D eye = m_camera.worldToWindow(node.pos());
-  drawCenteredText(painter, eye.x(), eye.y(), QString::number(i));
+
+  float fog = fogAmount(node.pos());
+  if (fog <= 1.0f) // The text is visible.
+  {
+    QVector3D eye = m_camera.worldToWindow(node.pos());
+
+    QVector3D color(0.0f, 0.0f, 0.0f);
+
+    drawCenteredText(painter,
+      eye.x(),
+      eye.y(),
+      QString::number(i),
+      vectorToColor(applyFog(color, fog)));
+  }
+}
+
+float GLScene::fogAmount(const QVector3D& position)
+{
+  float distance = (m_camera.position() - position).length();
+  return m_drawfog * (1.01f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
+}
+
+/// \returns The given value clamped between a min and a max.
+template<typename T>
+T clamp(T value, T min, T max)
+{
+  return std::min(std::max(value, min), max);
+}
+
+/// \returns A linear interpolation between a and b using the given value.
+QVector3D mix(float value, QVector3D a, QVector3D b)
+{
+  return (1 - value) * a + (value * b);
+}
+
+QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
+{
+  return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
 }

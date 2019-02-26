@@ -205,8 +205,8 @@ public slots:
     m_scene.setDrawInitialMarking(show);
     update();
   }
-  void toggleFog(bool show) {
-    m_scene.setDrawFog(show);
+  void toggleFog(bool enabled) {
+    m_scene.setDrawFog(enabled);
     update();
   }
   void setNodeSize(int size) {
@@ -217,8 +217,8 @@ public slots:
     m_scene.setFontSize(size);
     update();
   }
-  void setFogDistance(int dist) {
-    m_scene.setFogDistance(dist);
+  void setFogDensity(int value) {
+    m_scene.setFogDistance(value);
     update();
   }
 
