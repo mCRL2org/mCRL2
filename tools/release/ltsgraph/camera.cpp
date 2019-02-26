@@ -14,18 +14,18 @@
 
 #include <cmath>
 
-void CameraView::update()
+void ArcballCameraView::update()
 {
   m_viewMatrix.setToIdentity();
   m_viewMatrix.translate(QVector3D(0.0f, 0.0f, -m_zoom));
   m_viewMatrix.rotate(m_rotation);
-  m_viewMatrix.translate(m_position);
+  m_viewMatrix.translate(m_center);
 
   m_projectionMatrix.setToIdentity();
   m_projectionMatrix.perspective(m_vert_fieldofview, static_cast<float>(m_viewport.width()) / static_cast<float>(m_viewport.height()), 1.0f, m_viewdistance);
 }
 
-QVector3D CameraView::worldToWindow(QVector3D world) const
+QVector3D ArcballCameraView::worldToWindow(QVector3D world) const
 {
   QVector3D eye = world.project(m_viewMatrix, m_projectionMatrix, m_viewport);
 
@@ -35,7 +35,7 @@ QVector3D CameraView::worldToWindow(QVector3D world) const
                  eye.z());
 }
 
-QVector3D CameraView::windowToWorld(QVector3D eye) const
+QVector3D ArcballCameraView::windowToWorld(QVector3D eye) const
 {
   // Flip the y-coordinate as Qt coordinate system is different from OpenGl.
   eye.setY(m_viewport.height() - eye.y());
@@ -43,10 +43,15 @@ QVector3D CameraView::windowToWorld(QVector3D eye) const
   return eye.unproject(m_viewMatrix, m_projectionMatrix, m_viewport);
 }
 
-void CameraView::reset()
+QVector3D ArcballCameraView::position() const
 {
-  CameraView default_camera;
-  m_position = default_camera.m_position;
+  return QVector3D(m_viewMatrix.column(3));
+}
+
+void ArcballCameraView::reset()
+{
+  ArcballCameraView default_camera;
+  m_center = default_camera.m_center;
   m_rotation = default_camera.m_rotation;
   m_zoom = default_camera.m_zoom;
 }

@@ -331,11 +331,13 @@ void GLScene::initialize()
   }
 }
 
+void GLScene::update()
+{
+  m_camera.update();
+}
+
 void GLScene::render(QPainter& painter)
 {
-  // Update the state of the camera.
-  m_camera.update();
-
   // Qt: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
   painter.beginNativePainting();
 
@@ -547,7 +549,6 @@ QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text,
   painter.drawText(x - w / 2, y - h / 2, text);
   return bounds;
 }
-
 
 //
 // GLScene private methods

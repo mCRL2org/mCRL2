@@ -14,22 +14,20 @@
 #include <QMatrix4x4>
 #include <QVector3D>
 
-/// \brief The camera view keeps track of a camera rotating around a 3D position in space. It also keeps track of the
-///        viewport that contains the width and height of the window. From this it computes the necessary projection
+/// \brief The arcball is a camera that moves along the surface of three-dimensional sphere of radius 'zoom'. The center
+///        of the sphere can move and the camera can move along the surface by applying a rotation. This viewport
+///        also contains the width and height of the window. From this it computes the necessary projection
 ///        and view matrices to draw objects as if they are viewed from this camera. The assumption is that the camera
-///        is always upright towards the z-axis. It also uses a frustum projection where objects further away appear
-///        smaller, but the
-class CameraView
+///        is always upright towards the z-axis. It also uses a perspective projection where objects further away appear
+///        smaller.
+class ArcballCameraView
 {
 public:
-  void billboard_spherical(const QVector3D& pos);
-  void billboard_cylindrical(const QVector3D& pos);
-
   /// \brief Update the view and projection matrix.
   void update();
 
   /// \brief Converts the given position from world coordinates to Qt window coordinates.
-  QVector3D worldToWindow(QVector3D position) const;
+  QVector3D worldToWindow(QVector3D center) const;
 
   /// \brief Converts the given position from Qt window coordinates to world space coordinates.
   QVector3D windowToWorld(QVector3D eye) const;
@@ -43,11 +41,14 @@ public:
   const QQuaternion& rotation() const { return m_rotation; }
 
   /// \brief Set the position of the camera.
-  void position(const QVector3D& position) { m_position = position; }
-  const QVector3D& position() const { return m_position; }
+  void center(const QVector3D& position) { m_center = position; }
+  const QVector3D& center() const { return m_center; }
 
   /// \brief Set the dimensions of the viewport.
   void viewport(std::size_t width, std::size_t height) { m_viewport = QRect(0, 0, width, height); }
+
+  /// \returns The actual position in world coordinates of this camera.
+  QVector3D position() const;
 
   const QMatrix4x4& viewMatrix() const { return m_viewMatrix; }
   const QMatrix4x4& projectionMatrix() const { return m_projectionMatrix; }
@@ -56,13 +57,21 @@ public:
   void reset();
 
 private:
-  QVector3D m_position = QVector3D(0.0f, 0.0f, 0.0f);           /// Position of the camera.
-  QQuaternion m_rotation = QQuaternion(1.0f, 0.0f, 0.0f, 0.0f); /// Rotation of the camera around the given position.
-  float m_zoom = 500.0f;     /// The distance to the position.
-  float m_viewdistance = 10000.0f; /// The maximum view distance of the camera.
+
+  /// \brief Center of the arcball.
+  QVector3D m_center = QVector3D(0.0f, 0.0f, 0.0f);
+
+  /// \brief Rotation around the center.
+  QQuaternion m_rotation = QQuaternion(1.0f, 0.0f, 0.0f, 0.0f);
+
+  /// \brief Distance to the center.
+  float m_zoom = 500.0f;
+
+  float m_viewdistance = 10000.0f;
   float m_vert_fieldofview = 70.0f;
 
-  QMatrix4x4 m_projectionMatrix; /// \brief The project matrix of this camera.
+  /// The resulting matrices and viewports.
+  QMatrix4x4 m_projectionMatrix;
   QMatrix4x4 m_viewMatrix;
   QRect m_viewport;
 };
