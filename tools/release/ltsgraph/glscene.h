@@ -101,6 +101,9 @@ public:
   /// \brief Initializes all state and data required for rendering.
   void initialize();
 
+  /// \brief Updates the state of the scene.
+  void update();
+
   /// \brief Render the scene.
   void render(QPainter& painter);
 
@@ -130,7 +133,7 @@ public:
 
   bool is_threedimensional() { return m_worldsize.z() > 0.0f; }
 
-  CameraView& camera() { return m_camera;  }
+  ArcballCameraView& camera() { return m_camera;  }
 
   /// Setters
 
@@ -174,11 +177,11 @@ private:
   /// \brief Renders a single state number.
   /// \param i The index of the state number to render.
   void renderStateNumber(QPainter& painter, GLuint i);
-  
+
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
-  CameraView m_camera;
+  ArcballCameraView m_camera;
   float m_device_pixel_ratio;
   QFont m_font;
 
