@@ -347,6 +347,9 @@ void GLScene::render(QPainter& painter)
   // Enable depth testing, so that we don't have to care too much about rendering in the right order.
   glEnable(GL_DEPTH_TEST);
 
+  // Enable multisample antialiasing.
+  glEnable(GL_MULTISAMPLE);
+
   QColor clear(Qt::white);
   glClearColor(clear.red(), clear.green(), clear.blue(), 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
