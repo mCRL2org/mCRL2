@@ -70,10 +70,16 @@ private:
   float m_viewdistance = 10000.0f;
   float m_vert_fieldofview = 70.0f;
 
-  /// The resulting matrices and viewports.
+  /// The resulting matrices and viewports, are updated when calling update().
   QMatrix4x4 m_projectionMatrix;
   QMatrix4x4 m_viewMatrix;
+  QMatrix4x4 m_invertedViewMatrix;
   QRect m_viewport;
+};
+
+class ArcballCameraController
+{
+
 };
 
 #endif // MCRL2_LTSGRAPH_CAMERA_H
