@@ -35,16 +35,16 @@ constexpr float PI = 3.14159265358979323846f;
 constexpr float PI_2 = PI * 0.5f;
 
 /// \brief Number of orthogonal slices from which a circle representing a node is constructed.
-constexpr int RES_NODE_SLICE = 64;
+constexpr int RES_NODE_SLICE = 32;
 
 /// \brief Number of vertical planes from which a circle representing a node is constructed.
 constexpr int RES_NODE_STACK = 1;
 
 /// \brief Amount of segments in arrowhead cone
-constexpr int RES_ARROWHEAD = 30;
+constexpr int RES_ARROWHEAD = 16;
 
 /// \brief Amount of segments for edge arc
-constexpr int RES_ARC       = 20;
+constexpr int RES_ARC       = 16;
 
 /// This should match the layout of m_vertexbuffer.
 constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE + 1;
