@@ -149,17 +149,18 @@ class lts_generator
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
     struct next_state_summand;
 
-    specification lpsspec;
+    generate_lts_options options;
     data::rewriter r;
     mutable data::mutable_indexed_substitution<> sigma;
     data::enumerator_identifier_generator id_generator;
     data::enumerator_algorithm<data::rewriter, data::rewriter> E;
-    const data::variable_list& process_parameters;
-    std::size_t n;
-    bool apply_confluence_reduction;
+    data::variable_list process_parameters;
+    std::size_t n; // n = process_parameters.size()
+    data::data_expression_list initial_state;
 
-    std::vector<next_state_summand> next_state_summands;
+    std::vector<next_state_summand> summands;
     std::vector<next_state_summand> confluent_summands;
+    atermpp::indexed_set<lps::state> discovered;
 
     struct next_state_summand
     {
@@ -196,22 +197,24 @@ class lts_generator
       }
     };
 
-    void preprocess(const generate_lts_options& options)
+    lps::specification preprocess(const specification& lpsspec)
     {
-      detail::instantiate_global_variables(lpsspec);
-      lps::order_summand_variables(lpsspec);
+      lps::specification result = lpsspec;
+      detail::instantiate_global_variables(result);
+      lps::order_summand_variables(result);
       if (options.resolve_summand_variable_name_clashes)
       {
-        resolve_summand_variable_name_clashes(lpsspec);
+        resolve_summand_variable_name_clashes(result);
       }
       if (options.one_point_rule_rewrite)
       {
-        one_point_rule_rewrite(lpsspec);
+        one_point_rule_rewrite(result);
       }
       if (options.replace_constants_by_variables)
       {
-        replace_constants_by_variables(lpsspec, r, sigma);
+        replace_constants_by_variables(result, r, sigma);
       }
+      return result;
     }
 
     // Confluence reduction based on S.C.C. Blom, Partial tau-confluence for
@@ -310,14 +313,20 @@ class lts_generator
       );
     };
 
-    template <typename ReportState = skip, typename ReportTransition = skip>
-    void generate_default(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
+    template <typename SummandIterator, typename ReportState = skip, typename ReportTransition = skip>
+    void generate_default(
+      const data::data_expression_list& init,
+      SummandIterator first,
+      SummandIterator last,
+      ReportState report_state = ReportState(),
+      ReportTransition report_transition = ReportTransition()
+    )
     {
-      atermpp::indexed_set<lps::state> discovered;
       std::deque<std::size_t> todo;
+      discovered.clear();
 
-      lps::state d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
-      if (apply_confluence_reduction)
+      lps::state d0 = rewrite_state(init);
+      if (options.confluence)
       {
         d0 = find_representative(d0);
       }
@@ -331,8 +340,9 @@ class lts_generator
         const lps::state& d = discovered.get(i);
 
         add_assignments(sigma, process_parameters, d);
-        for (const auto& summand: next_state_summands)
+        for (SummandIterator iter = first; iter != last; ++iter)
         {
+          const next_state_summand& summand = *iter;
           data::data_expression c = r(summand.condition, sigma);
           if (!data::is_false(c))
           {
@@ -343,7 +353,7 @@ class lts_generator
                           p.add_assignments(summand.variables, sigma, r);
                           process::action_list a = rewrite_action_list(summand.actions);
                           lps::state d1 = rewrite_state(summand.next_state);
-                          if (apply_confluence_reduction)
+                          if (options.confluence)
                           {
                             d1 = find_representative(d1);
                           }
@@ -364,17 +374,22 @@ class lts_generator
       }
     }
 
-    template <typename ReportState = skip, typename ReportTransition = skip>
-    void generate_cached(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
+    template <typename SummandIterator, typename ReportState = skip, typename ReportTransition = skip>
+    void generate_cached(
+      const data::data_expression_list& init,
+      SummandIterator first,
+      SummandIterator last,
+      ReportState report_state = ReportState(),
+      ReportTransition report_transition = ReportTransition())
     {
       // global cache for solutions of conditions
       std::unordered_map<data::data_expression_list, std::list<data::data_expression_list>> enumerator_cache;
 
-      atermpp::indexed_set<lps::state> discovered;
       std::deque<std::size_t> todo;
+      discovered.clear();
 
-      lps::state d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
-      if (apply_confluence_reduction)
+      lps::state d0 = rewrite_state(init);
+      if (options.confluence)
       {
         d0 = find_representative(d0);
       }
@@ -388,8 +403,9 @@ class lts_generator
         const lps::state& d = discovered.get(i);
 
         add_assignments(sigma, process_parameters, d);
-        for (auto& summand: next_state_summands)
+        for (SummandIterator iter = first; iter != last; ++iter)
         {
+          const next_state_summand& summand = *iter;
           data::data_expression_list key = substitute(sigma, summand.gamma);
           key.push_front(summand.condition);
           auto q = enumerator_cache.find(key);
@@ -415,7 +431,7 @@ class lts_generator
             add_assignments(sigma, summand.variables, e);
             process::action_list a = rewrite_action_list(summand.actions);
             lps::state d1 = rewrite_state(summand.next_state);
-            if (apply_confluence_reduction)
+            if (options.confluence)
             {
               d1 = find_representative(d1);
             }
@@ -432,18 +448,36 @@ class lts_generator
       }
     }
 
+    template <typename SummandIterator, typename ReportState = skip, typename ReportTransition = skip>
+    void generate(
+      const data::data_expression_list& init,
+      SummandIterator first,
+      SummandIterator last,
+      ReportState report_state = ReportState(),
+      ReportTransition report_transition = ReportTransition())
+    {
+      if (options.cached)
+      {
+        generate_cached(init, first, last, report_state, report_transition);
+      }
+      else
+      {
+        generate_default(init, first, last, report_state, report_transition);
+      }
+    }
+
   public:
-    lts_generator(const specification& lpsspec_, const generate_lts_options& options)
-      : lpsspec(lpsspec_),
+    lts_generator(const specification& lpsspec, const generate_lts_options& options_)
+      : options(options_),
         r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy),
         E(r, lpsspec.data(), r, id_generator, false),
         process_parameters(lpsspec.process().process_parameters()),
         n(process_parameters.size()),
-        apply_confluence_reduction(options.confluence)
+        initial_state(lpsspec.initial_process().state(process_parameters))
     {
-      preprocess(options);
+      lps::specification lpsspec_ = preprocess(lpsspec);
       core::identifier_string ctau{"ctau"};
-      for (const action_summand& summand: lpsspec.process().action_summands())
+      for (const action_summand& summand: lpsspec_.process().action_summands())
       {
         if (summand.multi_action().actions().size() == 1 && summand.multi_action().actions().front().label().name() == ctau)
         {
@@ -451,24 +485,59 @@ class lts_generator
         }
         else
         {
-          next_state_summands.emplace_back(summand, process_parameters);
+          summands.emplace_back(summand, process_parameters);
         }
       }
     }
 
     ~lts_generator() = default;
 
+    /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
+    /// functions.
     template <typename ReportState = skip, typename ReportTransition = skip>
-    void generate(const generate_lts_options& options, ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
+    void generate(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
-      if (options.cached)
-      {
-        generate_cached(report_state, report_transition);
-      }
-      else
-      {
-        generate_default(report_state, report_transition);
-      }
+      generate(initial_state, summands.begin(), summands.end(), report_state, report_transition);
+    }
+
+    /// \brief Returns all outgoing transitions from the state init.
+    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init)
+    {
+      std::vector<std::pair<lps::multi_action, lps::state>> result;
+      generate(
+        init,
+        summands.begin(),
+        summands.end(),
+        skip(),
+        [&](std::size_t /* from */, const process::action_list& a, std::size_t to)
+        {
+          result.emplace_back(lps::multi_action(a), discovered.get(to));
+        }
+      );
+      return result;
+    }
+
+    /// \brief Returns all outgoing transitions from the state init generated by the summand with indexe summand_index.
+    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init, std::size_t summand_index)
+    {
+      std::vector<std::pair<lps::multi_action, lps::state>> result;
+      generate(
+        init,
+        summands.begin() + summand_index,
+        summands.begin() + summand_index + 1,
+        skip(),
+        [&](std::size_t /* from */, const process::action_list& a, std::size_t to)
+        {
+          result.emplace_back(lps::multi_action(a), discovered.get(to));
+        }
+      );
+      return result;
+    }
+
+    /// \brief Returns a mapping from discovered states to their corresponding index.
+    const atermpp::indexed_set<lps::state>& discovered_states() const
+    {
+      return discovered;
     }
 };
 
@@ -496,8 +565,7 @@ void generate_labeled_transition_system(const specification& lpsspec,
   add_action(tau.actions());
 
   lts_generator generator(lpsspec, options);
-  generator.generate(options,
-                     [&](const lps::state&)
+  generator.generate([&](const lps::state&)
                      {
                        number_of_states++;
                      },
