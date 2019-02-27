@@ -192,6 +192,9 @@ private:
   /// \returns The color of an object received fogAmount amount of fog.
   QVector3D applyFog(const QVector3D& color, float fogAmount);
 
+  /// \brief Renders text at a given world position, facing the camera and center aligned.
+  void drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color);
+
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
 
@@ -218,14 +221,14 @@ private:
   bool m_drawselfloops        = true;
   /// \brief The initial state is marked if this field is true.
   bool m_drawinitialmarking   = true;
-  /// \brief Enable drawing fog.
-  bool m_drawfog = false;
   /// \brief The size of a node (radius).
   std::size_t m_size_node     = 20;
   /// \brief The size of the font.
   std::size_t m_fontsize      = 16;
 
-  /// Fog is rendered only if this field is true.
+  /// \brief Enable drawing fog.
+  bool m_drawfog = true;
+  /// \brief The density of the fog.
   float m_fogdensity = 0.0005f;
 
   /// The vertex layout and vertex buffer object for all objects with the 3 float per vertex layout.
