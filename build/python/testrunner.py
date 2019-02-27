@@ -37,6 +37,8 @@ class TestRunner(object):
             try:
                 self.run(self._args.run)
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 sys.exit(str(e))
 
     def run(self, testnum):
