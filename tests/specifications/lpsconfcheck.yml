@@ -6,9 +6,13 @@ nodes:
   l3:
     type: LPS
   l4:
-    type: LTS
+    type: AUT
   l5:
-    type: LTS
+    type: AUT
+  l6:
+    type: AUT
+  l7:
+    type: AUT
 
 tools:
   t1:
@@ -36,6 +40,26 @@ tools:
     output: []
     args: [-ebranching-bisim]
     name: ltscompare
+  t6:
+    input: [l2]
+    output: [l6]
+    args: []
+    name: generatelts
+  t7:
+    input: [l3]
+    output: [l7]
+    args: [-c]
+    name: generatelts
+  t8:
+    input: [l6, l7]
+    output: []
+    args: [-ebranching-bisim]
+    name: ltscompare
+  t9:
+    input: [l4, l7]
+    output: []
+    args: [-ebranching-bisim]
+    name: ltscompare
 
 result: |
-  result = t5.value['result']
+  result = t5.value['result'] and t8.value['result'] and t9.value['result']
