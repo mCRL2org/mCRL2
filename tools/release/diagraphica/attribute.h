@@ -16,14 +16,14 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <string>
+#include <limits>
 #include <map>
+#include <string>
 #include <vector>
+
 #include "value.h"
 
-#ifndef NON_EXISTING
-#define NON_EXISTING (std::size_t)(-1)
-#endif
+constexpr std::size_t NON_EXISTING = std::numeric_limits<std::size_t>::max();
 
 class Attribute : public QObject
 {

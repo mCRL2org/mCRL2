@@ -1441,44 +1441,32 @@ void ArcDiagram::updateMarkBundles()
 
   if (currIdxDgrm != NON_EXISTING)
   {
-    Cluster* clst;
-    Node* node;
-    Edge* edge = 0;
-
-    clst = framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]];
-    for (std::size_t j = 0; j < clst->getSizeNodes(); ++j)
+    Cluster* cluster = framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]];
+    for (std::size_t j = 0; j < cluster->getSizeNodes(); ++j)
     {
-      node = clst->getNode(j);
+      Node* node = cluster->getNode(j);
+      for (std::size_t k = 0; k < node->getSizeInEdges(); ++k)
       {
-        for (std::size_t k = 0; k < node->getSizeInEdges(); ++k)
+        Edge* edge = node->getInEdge(k);
+        if (edge != nullptr &&
+            edge->getBundle()->getIndex() != NON_EXISTING &&
+            markBundles.size() > edge->getBundle()->getIndex())
         {
-          edge = node->getInEdge(k);
-          if (edge != 0 &&
-              edge->getBundle()->getIndex() != NON_EXISTING &&
-              markBundles.size() > edge->getBundle()->getIndex())
-          {
-            markBundles[edge->getBundle()->getIndex()] = true;
-          }
+          markBundles[edge->getBundle()->getIndex()] = true;
         }
-
       }
+
+      for (std::size_t k = 0; k < node->getSizeOutEdges(); ++k)
       {
-        for (std::size_t k = 0; k < node->getSizeOutEdges(); ++k)
+        Edge* edge = node->getOutEdge(k);
+        if (edge != nullptr &&
+            edge->getBundle()->getIndex() != NON_EXISTING &&
+            markBundles.size() > edge->getBundle()->getIndex())
         {
-          edge = node->getOutEdge(k);
-          if (edge != 0 &&
-              edge->getBundle()->getIndex() != NON_EXISTING &&
-              markBundles.size() > edge->getBundle()->getIndex())
-          {
-            markBundles[edge->getBundle()->getIndex()] = true;
-          }
+          markBundles[edge->getBundle()->getIndex()] = true;
         }
       }
     }
-
-    edge = 0;
-    node = 0;
-    clst = 0;
   }
 }
 

@@ -1772,6 +1772,7 @@ void Graph::updateBundles()
       }
 
       temp[idxFr][idxTo]->addEdge(edges[i]);
+      edges[i]->setBundle(temp[idxFr][idxTo]);
     }
   }
 
