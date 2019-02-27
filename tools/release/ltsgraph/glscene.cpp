@@ -585,21 +585,6 @@ bool GLScene::selectObject(GLScene::Selection& s,
   return s.selectionType != so_none;
 }
 
-/// Helper functions
-
-/// \brief Renders text, centered around the point at x and y
-inline
-QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
-{
-  QFontMetrics metrics(painter.font());
-  QRect bounds = metrics.boundingRect(text);
-  qreal w = bounds.width();
-  qreal h = bounds.height();
-  painter.setPen(color);
-  painter.drawText(x - w / 2, y - h / 2, text);
-  return bounds;
-}
-
 //
 // GLScene private methods
 //
@@ -713,8 +698,6 @@ void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
       fill = QVector3D(0.7f, 0.7f, 0.7f);
     }
 
-    //m_camera.billboard_cylindrical(handle.pos());
-
     // Move the handle to the correct position and with the correct scale.
     QMatrix4x4 worldMatrix;
     worldMatrix.translate(handle.pos());
@@ -819,64 +802,23 @@ void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
   }
 
   Graph::LabelNode& label = m_graph.transitionLabel(i);
+  QVector3D fill((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
+  drawCenteredText3D(painter, m_graph.stateLabelstring(label.labelindex()), label.pos(), fill);
 
-  if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty())
-  {
-    float fog = fogAmount(label.pos());
-    if (fog <= 1.0f) // The text is visible.
-    {
-      QVector3D color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
-
-      QVector3D window = m_camera.worldToWindow(label.pos());
-
-      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-      drawCenteredText(painter,
-        window.x(),
-        window.y(),
-        labelstring,
-        vectorToColor(applyFog(color, fog)));
-    }
-  }
 }
 
 void GLScene::renderStateLabel(QPainter& painter, GLuint i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
-  if (!m_graph.stateLabelstring(label.labelindex()).isEmpty())
-  {
-    float fog = fogAmount(label.pos());
-    if (fog <= 1.0f) // The text is visible.
-    {
-      QVector3D window = m_camera.worldToWindow(label.pos());
-
-      QVector3D color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
-
-      drawCenteredText(painter,
-        window.x(),
-        window.y() + nodeSizeOnScreen(),
-        m_graph.stateLabelstring(label.labelindex()),
-        vectorToColor(applyFog(color, fog)));
-    }
-  }
+  QVector3D color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
+  drawCenteredText3D(painter, m_graph.stateLabelstring(label.labelindex()), label.pos(), color);
 }
 
 void GLScene::renderStateNumber(QPainter& painter, GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
-
-  float fog = fogAmount(node.pos());
-  if (fog <= 1.0f) // The text is visible.
-  {
-    QVector3D eye = m_camera.worldToWindow(node.pos());
-
-    QVector3D color(0.0f, 0.0f, 0.0f);
-
-    drawCenteredText(painter,
-      eye.x(),
-      eye.y(),
-      QString::number(i),
-      vectorToColor(applyFog(color, fog)));
-  }
+  QVector3D color(0.0f, 0.0f, 0.0f);
+  drawCenteredText3D(painter, QString::number(i), node.pos(), color);
 }
 
 float GLScene::fogAmount(const QVector3D& position)
@@ -901,4 +843,40 @@ QVector3D mix(float value, QVector3D a, QVector3D b)
 QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
 {
   return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
+}
+/// Helper functions
+
+/// \brief Renders text, centered around the point at x and y
+inline
+QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
+{
+  QFontMetrics metrics(painter.font());
+  QRect bounds = metrics.boundingRect(text);
+  qreal w = bounds.width();
+  qreal h = bounds.height();
+  painter.setPen(color);
+  painter.drawText(x - w / 2, y - h / 2, text);
+  return bounds;
+}
+
+void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color)
+{
+  if (!text.isEmpty())
+  {
+    QVector3D window = m_camera.worldToWindow(position);
+    if (window.z() <= 1.0f) // Not behind the camera.
+    {
+      float fog = fogAmount(position);
+      if (fog <= 1.0f) // The text is visible.
+      {
+        drawCenteredText(painter,
+          window.x(),
+          window.y(),
+          text,
+          vectorToColor(applyFog(color, fog)));
+      }
+
+    }
+  }
+
 }
