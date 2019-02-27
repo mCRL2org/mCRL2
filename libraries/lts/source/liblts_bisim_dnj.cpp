@@ -3635,7 +3635,7 @@ class bisim_partitioner_dnj
     /// function with settings that lead to an empty red subblock.  (An empty
     /// blue subblock is ok.)
     block_t* refine(block_t* const refine_block,
-        const block_bunch_slice_iter_t&splitter, enum refine_mode_t const mode  ONLY_IF_DEBUG( , const bunch_t* const new_bunch = nullptr )
+        const block_bunch_slice_iter_t& splitter, enum refine_mode_t const mode ONLY_IF_DEBUG( , const bunch_t* const new_bunch = nullptr )
                                                                               )
     {                                                                           assert(refine_block == splitter->source_block());
                                                                                 #ifndef NDEBUG
@@ -3863,7 +3863,7 @@ class bisim_partitioner_dnj
                                         block_bunch_slice_const_iter_t const
                                             block_bunch(
                                                blue_end->block_bunch->slice());
-                                        if (block_bunch == splitter)
+                                        if (&*block_bunch == &*splitter)
                                         {
                                             goto continuation;
                                                // i. e. break and then continue
