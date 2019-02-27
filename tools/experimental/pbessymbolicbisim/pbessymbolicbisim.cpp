@@ -45,6 +45,7 @@ protected:
   std::size_t m_num_refine_steps;
   bool m_fine_initial_partition;
   bool m_early_termination;
+  bool m_randomize;
 
   /// Parse the non-default options.
   void parse_options(const command_line_parser& parser)
@@ -58,6 +59,7 @@ protected:
     }
     m_fine_initial_partition = parser.options.count("fine-initial") > 0;
     m_early_termination = parser.options.count("no-early-termination") == 0;
+    m_randomize = parser.options.count("randomize") > 0;
   }
 
   void add_options(interface_description& desc)
@@ -83,6 +85,8 @@ protected:
                "Using this option might lead to a larger proof graph, although the runtime might become "
                "lower since the overhead of early termination checking is avoided.",
                't');
+    desc.add_option("randomize",
+               "randomly shuffle blocks between splits");
   }
 
 public:
@@ -113,7 +117,7 @@ public:
     spec.load(in);
     in.close();
 
-    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode, m_fine_initial_partition, m_early_termination).run();
+    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode, m_fine_initial_partition, m_early_termination, m_randomize).run();
 
     return true;
   }

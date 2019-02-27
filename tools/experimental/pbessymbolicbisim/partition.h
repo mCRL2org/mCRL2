@@ -73,6 +73,7 @@ protected:
   std::vector<block_t> m_block_index;
 
   bool m_early_termination;
+  bool m_randomize;
 
   bool is_valid_approximation(const block_t& src, bool is_positive_pg) const
   {
@@ -247,10 +248,14 @@ protected:
    */
   void find_reachable_blocks(const bool only_check_proof_blocks)
   {
-    std::list<block_t> unreachable(m_proof_blocks.begin(),m_proof_blocks.end());
+    std::vector<block_t> unreachable(m_proof_blocks.begin(),m_proof_blocks.end());
     if(!only_check_proof_blocks)
     {
       unreachable.insert(unreachable.end(), m_other_blocks.begin(), m_other_blocks.end());
+    }
+    if(m_randomize)
+    {
+      std::random_shuffle(unreachable.begin(), unreachable.end());
     }
     std::queue<block_t> open_set;
 
@@ -273,7 +278,7 @@ protected:
       open_set.pop();
 
       // Look for possible successors of block in the set of unreachable blocks
-      for(std::list<block_t>::iterator i = unreachable.begin(); i != unreachable.end();)
+      for(auto i = unreachable.begin(); i != unreachable.end();)
       {
         if(block.has_transition(*i))
         {
@@ -416,12 +421,13 @@ public:
 
   dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec,
     const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode,
-    pbes_system::structure_graph& sg, bool fine_initial, bool early_termination)
+    pbes_system::structure_graph& sg, bool fine_initial, bool early_termination, bool randomize)
   : m_spec(spec)
   , m_dm(r, pr, spec.data())
   , m_structure_graph(sg)
   , m_sg_builder(sg)
   , m_early_termination(early_termination)
+  , m_randomize(randomize)
   {
     m_dm.contains_reals = false;
     for(const equation_type_t& eq: m_spec.equations())

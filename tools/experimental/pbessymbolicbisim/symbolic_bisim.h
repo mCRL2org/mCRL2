@@ -68,7 +68,7 @@ protected:
 public:
   symbolic_bisim_algorithm(const pbes_system::pbes& spec, const std::size_t& refine_steps,
     const rewrite_strategy& st = jitty, const simplifier_mode& mode = simplify_auto,
-    bool fine_initial = false, bool early_termination = true)
+    bool fine_initial = false, bool early_termination = true, bool randomize = false)
     : rewr(make_rewriter(spec, merge_data_specifications(spec.data(),simplifier::norm_rules_spec()),st))
 #ifdef MCRL2_JITTYC_AVAILABLE
     , proving_rewr(make_rewriter(spec, spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover))
@@ -76,7 +76,7 @@ public:
     , proving_rewr(make_rewriter(spec, spec.data(), jitty_prover))
 #endif
     , m_spec(pbes_system::detail::ppg_pbes(spec).simplify(rewr))
-    , m_partition(m_spec, rewr, proving_rewr, mode, m_structure_graph, fine_initial, early_termination)
+    , m_partition(m_spec, rewr, proving_rewr, mode, m_structure_graph, fine_initial, early_termination, randomize)
     , m_num_refine_steps(refine_steps)
   {}
 
