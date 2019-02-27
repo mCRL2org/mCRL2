@@ -35,18 +35,11 @@ namespace mcrl2 {
 
 namespace lps {
 
-/// \brief The skip operation with one argument
-struct skip1
+/// \brief The skip operation with a variable number of arguments
+struct skip
 {
-  template <typename T>
-  void operator()(const T&) const {}
-};
-
-/// \brief The skip operation with three arguments
-struct skip3
-{
-  template <typename T1, typename T2, typename T3>
-  void operator()(const T1&, const T2&, const T3&) const {}
+  template<typename... Args>
+  void operator()(const Args&...) const {}
 };
 
 // The states are identified by numbers in the interval [0 ... number_of_states).
@@ -144,6 +137,12 @@ void remove_assignments(data::mutable_indexed_substitution<>& sigma, const data:
   }
 }
 
+inline
+data::data_expression_list substitute(data::mutable_indexed_substitution<>& sigma, const data::variable_list& v)
+{
+  return data::data_expression_list{v.begin(), v.end(), [&](const data::variable& x) { return sigma(x); }};
+}
+
 class lts_generator
 {
   protected:
@@ -178,11 +177,6 @@ class lts_generator
           next_state(summand.next_state(process_parameters))
       {
         gamma = free_variables(summand.condition(), process_parameters);
-      }
-
-      data::data_expression_list substitute(data::mutable_indexed_substitution<>& rho) const
-      {
-        return data::data_expression_list{gamma.begin(), gamma.end(), [&](const data::variable& x) { return rho(x); }};
       }
 
       template <typename T>
@@ -224,6 +218,7 @@ class lts_generator
     // Efficient State Space Generation, Technical Report SEN-R0123, CWI, Amsterdam, 2001
     lps::state find_representative(const lps::state& state) const
     {
+      data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
       lps::state u = state;
 
       std::map<lps::state, std::size_t> depth;
@@ -272,6 +267,8 @@ class lts_generator
         {
           if (depth[u] == low[u])
           {
+            // undo changes to sigma
+            add_assignments(sigma, process_parameters, process_parameter_values);
             return u;
           }
           lps::state w = predecessor[u];
@@ -313,13 +310,17 @@ class lts_generator
       );
     };
 
-    template <typename ReportState = skip1, typename ReportTransition = skip3>
+    template <typename ReportState = skip, typename ReportTransition = skip>
     void generate_default(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
       atermpp::indexed_set<lps::state> discovered;
       std::deque<std::size_t> todo;
 
       lps::state d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
+      if (apply_confluence_reduction)
+      {
+        d0 = find_representative(d0);
+      }
       report_state(d0);
       auto k = discovered.put(d0);
       todo.push_back(k.first);
@@ -342,13 +343,10 @@ class lts_generator
                           p.add_assignments(summand.variables, sigma, r);
                           process::action_list a = rewrite_action_list(summand.actions);
                           lps::state d1 = rewrite_state(summand.next_state);
-
                           if (apply_confluence_reduction)
                           {
                             d1 = find_representative(d1);
-                            add_assignments(sigma, process_parameters, d); // N.B. find_representative contaminates sigma
                           }
-
                           p.remove_assignments(summand.variables, sigma);
                           auto j = discovered.put(d1);
                           if (j.second)
@@ -366,7 +364,7 @@ class lts_generator
       }
     }
 
-    template <typename ReportState = skip1, typename ReportTransition = skip3>
+    template <typename ReportState = skip, typename ReportTransition = skip>
     void generate_cached(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
       // global cache for solutions of conditions
@@ -376,6 +374,10 @@ class lts_generator
       std::deque<std::size_t> todo;
 
       lps::state d0 = rewrite_state(lpsspec.initial_process().state(process_parameters));
+      if (apply_confluence_reduction)
+      {
+        d0 = find_representative(d0);
+      }
       report_state(d0);
       auto k = discovered.put(d0);
       todo.push_back(k.first);
@@ -388,7 +390,7 @@ class lts_generator
         add_assignments(sigma, process_parameters, d);
         for (auto& summand: next_state_summands)
         {
-          data::data_expression_list key = summand.substitute(sigma);
+          data::data_expression_list key = substitute(sigma, summand.gamma);
           key.push_front(summand.condition);
           auto q = enumerator_cache.find(key);
           if (q == enumerator_cache.end())
@@ -413,13 +415,10 @@ class lts_generator
             add_assignments(sigma, summand.variables, e);
             process::action_list a = rewrite_action_list(summand.actions);
             lps::state d1 = rewrite_state(summand.next_state);
-
             if (apply_confluence_reduction)
             {
               d1 = find_representative(d1);
-              add_assignments(sigma, process_parameters, d); // N.B. find_representative contaminates sigma
             }
-
             auto j = discovered.put(d1);
             if (j.second)
             {
@@ -459,7 +458,7 @@ class lts_generator
 
     ~lts_generator() = default;
 
-    template <typename ReportState = skip1, typename ReportTransition = skip3>
+    template <typename ReportState = skip, typename ReportTransition = skip>
     void generate(const generate_lts_options& options, ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
       if (options.cached)
