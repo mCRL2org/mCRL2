@@ -217,82 +217,82 @@ class lts_generator
       return result;
     }
 
-    // Confluence reduction based on S.C.C. Blom, Partial tau-confluence for
-    // Efficient State Space Generation, Technical Report SEN-R0123, CWI, Amsterdam, 2001
-    lps::state find_representative(const lps::state& state) const
+    lps::state find_representative(const lps::state& u0) const
     {
       data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
-      lps::state u = state;
 
-      std::map<lps::state, std::size_t> depth;
+      std::vector<lps::state> stack;
       std::map<lps::state, std::size_t> low;
-      std::map<lps::state, std::list<lps::state>> successors;
-      std::map<lps::state, lps::state> predecessor;
+      std::map<lps::state, std::size_t> disc;
+      std::vector<lps::state> result;
 
-      std::size_t d = 0;
-      depth[u] = 0;
-
-      while (true)
+      // Recursive implementation of Tarjan
+      // TODO: make this implementation iterative
+      std::function<void(lps::state)> scc = [&](const lps::state& u)
       {
-        if (depth[u] == 0)
-        {
-          d++;
-          depth[u] = d;
-          low[u] = d;
-          successors[u] = std::list<lps::state>();
+        using utilities::detail::contains;
 
-          add_assignments(sigma, process_parameters, u);
-          for (const auto& summand: confluent_summands)
+        std::size_t k = disc.size();
+        disc[u] = k;
+        low[u] = k;
+        stack.push_back(u);
+
+        add_assignments(sigma, process_parameters, u);
+        for (const auto& summand: confluent_summands)
+        {
+          data::data_expression c = r(summand.condition, sigma);
+          if (!data::is_false(c))
           {
-            data::data_expression c = r(summand.condition, sigma);
-            if (!data::is_false(c))
-            {
-              E.enumerate(enumerator_element(summand.variables, c),
-                          sigma,
-                          [&](const enumerator_element& p)
+            E.enumerate(enumerator_element(summand.variables, c),
+                        sigma,
+                        [&](const enumerator_element& p)
+                        {
+                          p.add_assignments(summand.variables, sigma, r);
+                          lps::state v = rewrite_state(summand.next_state);
+                          if (low.find(v) == low.end())
                           {
-                            p.add_assignments(summand.variables, sigma, r);
-                            lps::state v = rewrite_state(summand.next_state);
-                            successors[u].push_back(v);
-                            if (depth.find(v) == depth.end())
-                            {
-                              depth[v] = 0;
-                            }
-                            p.remove_assignments(summand.variables, sigma);
-                            return false;
-                          },
-                          data::is_false
-              );
+                            scc(v);
+                            low[u] = std::min(low[u], low[v]);
+                          }
+                          else if (contains(stack, v))
+                          {
+                            low[u] = std::min(low[u], disc[v]);
+                          }
+                          p.remove_assignments(summand.variables, sigma);
+                          return false;
+                        },
+                        data::is_false
+            );
+          }
+        }
+
+        if (low[u] == disc[u] && result.empty())
+        {
+          // a component has been found; return the smallest node in this component
+          lps::state representative = u;
+          while (true)
+          {
+            const auto& v = stack.back();
+            if (v == u)
+            {
+              break;
             }
+            if (v < representative)
+            {
+              representative = v;
+            }
+            stack.pop_back();
           }
+          result.push_back(representative);
         }
-        if (successors[u].empty())
-        {
-          if (depth[u] == low[u])
-          {
-            // undo changes to sigma
-            add_assignments(sigma, process_parameters, process_parameter_values);
-            return u;
-          }
-          lps::state w = predecessor[u];
-          low[w] = std::min(low[u], low[w]);
-          u = w;
-        }
-        else
-        {
-          lps::state v = successors[u].front();
-          successors[u].pop_front();
-          if (depth[v] == 0)
-          {
-            predecessor[v] = u;
-            u = v;
-          }
-          else if (depth[v] < depth[u])
-          {
-            low[u] = std::min(low[u], depth[v]);
-          }
-        }
-      }
+      };
+
+      scc(u0);
+
+      // undo changes to sigma
+      add_assignments(sigma, process_parameters, process_parameter_values);
+
+      return result.front();
     }
 
     lps::state rewrite_state(const data::data_expression_list& v) const
