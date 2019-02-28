@@ -4,10 +4,10 @@ Publications
 ============
 
 .. note::
-  
+
   If you refer to mCRL2 in your academic paper, we would appreciate it if you
   use the following references:
-  
+
     * [CGK+13]_ for the *mCRL2 toolset*, and
     * [GM14]_ for the *mCRL2 language*.
 
@@ -15,7 +15,7 @@ Publications
 General
 -------
 
-.. [GM14] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014. 
+.. [GM14] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
 .. [CGK+13] S\. Cranen, J.F. Groote, J.J.A. Keiren, F.P.M. Stappers, E.P. de Vink, J. W. Wesselink, T.A.C. Willemse. An Overview of the mCRL2 Toolset and Its Recent Advances. TACAS 2013, pages 199-213. `(DOI) <http://dx.doi.org/10.1007/978-3-642-36742-7_15>`__
 .. [GKS+11] J.F. Groote, J.J.A. Keiren, F.P.M. Stappers, J.W. Wesselink and T.A.C. Willemse. Experiences in developing the mCRL2 toolset. In Software: Practice and Experience, 41(2): 143-153, 2011. `(DOI) <http://dx.doi.org/10.1002/spe.1021>`__
 .. [GMR+08] J.F. Groote, A. Mathijssen, M.A. Reniers, Y.S. Usenko, M.J. van Weerdenburg. Analysis of distributed systems with mCRL2. In M. Alexander, W. Gardner (Eds.), Process Algebra for Parallel and Distributed Processing, pages 99-128. Chapman and Hall, 2008
@@ -27,12 +27,15 @@ General
 Research
 --------
 
+.. [NWG18] T. Neele, T.A.C. Willemse and J.F. Groote. Solving Parameterised Boolean Equation Systems with Infinite Data Through Quotienting. In FACS 2018. LNCS, vol. 11222, pp 216-236. `(DOI) <https://dx.doi.org/10.1007/978-3-030-02146-7_11>`__
+.. [WW18] J. W. Wesselink and T. A. C. Willemse. Evidence Extraction from Parameterised Boolean Equation Systems. In ARQNL 2018, CEUR workshop proceedings, vol. 2095, pp. 86–100. (`link <http://ceur-ws.org/Vol-2095/paper6.pdf>`__)
+.. [KWZ15] R. P. J. Koolen, T. A. C. Willemse, and H. Zantema. Using SMT for Solving Fragments of Parameterised Boolean Equation Systems. In ATVA 2015, LNCS vol. 9364, pp. 14–30. `(DOI) <https://doi.org/10.1007/978-3-319-24953-7_3>`__
 .. [KWW13] J.J.A. Keiren, J.W. Wesselink, and T.A.C. Willemse. Improved Static Analysis of Parameterised Boolean Equation Systems using Control Flow Reconstruction. arXiv.org [cs.LO] No. 1304.6482. 2013. `(DOI) <http://arxiv.org/abs/1304.6482>`__
 .. [KRW12] J.J.A. Keiren, M.A. Reniers and T.A.C. Willemse. Structural Analysis of Boolean Equation Systems. In ACM Transactions on Computational Logic 13(1): 8-1/35, 2012. `(DOI) <http://doi.acm.org/10.1145/2071368.2071376>`__
 .. [GW12] M.\ Gazda and T.A.C. Willemse. Consistent Consequence for Boolean Equation Systems. In M. Bielikova et al. (eds), 38th International Conference on Current Trends in Theory and Practice of Computer Science, SOFSEM 2012, Lecture Notes in Computer Science 7147, Springer, pp. 277--288, 2012. `(DOI) <http://dx.doi.org/10.1007/978-3-642-27660-6_23>`__
 .. [CKW12] S.\ Cranen, J.J.A. Keiren and T.A.C. Willemse, A Cure for Stuttering Parity Games. In A. Roychoudhury, M. D'Souza (eds.), Theoretical Aspects of Computing - 9th International Colloqium, ICTAC 2012, Lecture Notes in Computer Science 7521, Springer-Verlag, pp.198-212, 2012. The full version containing detailed proofs is available as a `technical report <http://alexandria.tue.nl/repository/books/732149.pdf>`__. 2012. `(DOI) <http://dx.doi.org/10.1007/978-3-642-32943-2_16>`__
 .. [CKW11] S.\ Cranen, J.J.A. Keiren and T.A.C. Willemse. Stuttering Mostly Speeds Up Solving Parity Games. In M. Gheorghiu Bobaru, K. Havelund, G.J. Holzmann, R. Joshi (eds.), NASA Formal Methods - Third International Symposium, NFM 2011, Lecture Notes in Computer Science 6617, Springer-Verlag, pp. 207–221, 2011. See also this `arXiv preprint <http://arxiv.org/abs/1102.2366>`_. 2011. `(DOI) <http://dx.doi.org/10.1007/978-3-642-20398-5_16>`__
-.. [PWW11] B.\ Ploeger, J.W. Wesselink and T.A.C. Willemse. Verification of Reactive Systems via Instantiation of Parameterised Boolean Equation Systems. In Information and Computation, 209(4):637-663. 2011. An extended abstract appeared in `ICTAC 2008 <http://dx.doi.org/10.1007/978-3-540-85762-4_30>`_, see also the `technical report <http://alexandria.tue.nl/repository/books/636103.pdf>`__. `(DOI) <http://dx.doi.org/10.1016/j.ic.2010.11.025>`__ 
+.. [PWW11] B.\ Ploeger, J.W. Wesselink and T.A.C. Willemse. Verification of Reactive Systems via Instantiation of Parameterised Boolean Equation Systems. In Information and Computation, 209(4):637-663. 2011. An extended abstract appeared in `ICTAC 2008 <http://dx.doi.org/10.1007/978-3-540-85762-4_30>`_, see also the `technical report <http://alexandria.tue.nl/repository/books/636103.pdf>`__. `(DOI) <http://dx.doi.org/10.1016/j.ic.2010.11.025>`__
 .. [KW11] J.J.A. Keiren and T.A.C. Willemse. Bisimulation Minimisations for Boolean Equation Systems. In K. Namjoshi, A. Zeller & A. Ziv (Eds.), Hardware and Software: Verification and Testing (5th International Haifa Verification Conference, HVC 2009. Lecture Notes in Computer Science, Vol. 6405, pp. 102-116. Springer. 2011. `(DOI) <http://dx.doi.org/10.1007/978-3-642-19237-1_12>`__
 .. [KR11] J.J.A. Keiren, M.A. Reniers. Type checking mCRL2. Computer Science Report No. 11-11, Eindhoven: Technische Universiteit Eindhoven, 21 pp. 2011. (http://alexandria.tue.nl/repository/books/716663.pdf).
 .. [Wil10] T.A.C. Willemse. Consistent Correlations for Parameterised Boolean Equation Systems with Applications in Correctness Proofs for Manipulations. In P. Gastin and F. Laroussinie (eds.), Concurrency Theory, 21st International Conference, CONCUR 2010, Paris, France, Lecture Notes in Computer Science 6269, Springer-Verlag, pp. 584--598, 2010. `(DOI) <http://dx.doi.org/10.1007/978-3-642-15375-4_40>`__
@@ -54,6 +57,7 @@ Research
 Applications
 ------------
 
+.. [BGH+17] R. van Beusekom, J. F. Groote, P. Hoogendijk, R. Howe, J. W. Wesselink, R. Wieringa, and T. A. C. Willemse. Formalising the Dezyne Modelling Language in mCRL2. In FMICS-AVoCS 2017, LNCS vol. 10471, pp. 217–233. `(DOI) <https://doi.org/10.1007/978-3-319-67113-0_14>`__
 .. [RTW+13] Daniela Remenska, Jeff Templon, Tim A.C. Willemse, Philip Homburg, Kees Verstoep , Adria Casajus and Henri Bal. From UML to Process Algebra and Back: An Automated Approach to Model-Checking Software Design Artifacts of Concurrent Systems. In Guillaume Brat, Neha Rungta, Arnaud Venet (eds.), NFM 2013, Lecture Notes in Computer Science 7871, Springer, pp. 244-260, 2013. `(DOI) <http://dx.doi.org/10.1007/978-3-642-38088-4_17>`__
 .. [HKV+13] Y.L. Hwong, J.J.A. Keiren, V.J.J. Kusters, S. Leemans, T.A.C. Willemse. Formalising and Analysing the Control Software of the Compact Muon Solenoid Experiment at the Large Hadron Collider. Accepted for publication in Science of Computer Programming. 2013. An extended abstract appeared at `FSEN 2011 <http://dx.doi.org/10.1007/978-3-642-29320-7_12>`_ and as `CoRR abs/1101.5324 <http://arxiv.org/abs/1101.5324>`_. See also :ref:`showcase-cms` and `(DOI) <http://dx.doi.org/10.1016/j.scico.2012.11.009>`__
 .. [RTV+12] D.\ Remenska, T.A.C. Willemse, K. Verstoep, W. Fokkink, J. Templon, H. Bal, Using Model Checking to Analyze the System Behavior of the LHC Production Grid. In 12th IEEE/ACM International Symposium on Cluster, Cloud and Grid Computing, CCGrid 2012, pp. 335-343, 2012. `(DOI) <http://doi.ieeecomputersociety.org/10.1109/CCGrid.2012.90>`__
@@ -80,7 +84,7 @@ Applications
 Course material
 ---------------
 
-.. [GM14duplicate] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014. 
+.. [GM14duplicate] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014.
 .. [GMPR06] J.F. Groote, A. Mathijssen, B. Ploeger, M.A. Reniers, M.J. van Weerdenburg, J. van der Wulp. Process Algebra and mCRL2 , IPA Basic Course on Formal Methods 2006.
 
 Presentations
