@@ -284,6 +284,7 @@ class lts_generator
           const lps::state& v = succ[j];
           if (disc.find(v) == disc.end())
           {
+            successors[v] = ctau_successors(v);
             work.emplace_back(std::make_pair(u, j + 1));
             work.emplace_back(std::make_pair(v, 0));
             recurse = true;
