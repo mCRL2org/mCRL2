@@ -217,59 +217,91 @@ class lts_generator
       return result;
     }
 
+    std::vector<lps::state> ctau_successors(const lps::state& u) const
+    {
+      std::vector<lps::state> result;
+      add_assignments(sigma, process_parameters, u);
+      for (const auto& summand: confluent_summands)
+      {
+        data::data_expression c = r(summand.condition, sigma);
+        if (!data::is_false(c))
+        {
+          E.enumerate(enumerator_element(summand.variables, c),
+                      sigma,
+                      [&](const enumerator_element& p)
+                      {
+                        p.add_assignments(summand.variables, sigma, r);
+                        lps::state v = rewrite_state(summand.next_state);
+                        result.push_back(v);
+                        p.remove_assignments(summand.variables, sigma);
+                        return false;
+                      },
+                      data::is_false
+          );
+        }
+      }
+      return result;
+    }
+
+    // This function is based an iterative version of Tarjan's strongly connected components algorithm.
+    // It returns the smallest node of the first SCC that is detected. The first SCC is a TSCC, meaning
+    // that it has no outgoing edges. In a confluent tau graph there is only one TSCC, so this should
+    // guarantee a unique representative.
+    // N.B. The implementation is based on https://llbit.se/?p=3379
     lps::state find_representative(const lps::state& u0) const
     {
+      using utilities::detail::contains;
       data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
 
       std::vector<lps::state> stack;
       std::map<lps::state, std::size_t> low;
       std::map<lps::state, std::size_t> disc;
-      std::vector<lps::state> result;
 
-      // Recursive implementation of Tarjan
-      // TODO: make this implementation iterative
-      std::function<void(lps::state)> scc = [&](const lps::state& u)
+      std::map<lps::state, std::vector<lps::state>> successors;
+      std::vector<std::pair<lps::state, std::size_t>> work;
+
+      successors[u0] = ctau_successors(u0);
+      work.emplace_back(std::make_pair(u0, 0));
+
+      while (!work.empty())
       {
-        using utilities::detail::contains;
+        lps::state u = work.back().first;
+        std::size_t i = work.back().second;
+        work.pop_back();
 
-        std::size_t k = disc.size();
-        disc[u] = k;
-        low[u] = k;
-        stack.push_back(u);
-
-        add_assignments(sigma, process_parameters, u);
-        for (const auto& summand: confluent_summands)
+        if (i == 0)
         {
-          data::data_expression c = r(summand.condition, sigma);
-          if (!data::is_false(c))
-          {
-            E.enumerate(enumerator_element(summand.variables, c),
-                        sigma,
-                        [&](const enumerator_element& p)
-                        {
-                          p.add_assignments(summand.variables, sigma, r);
-                          lps::state v = rewrite_state(summand.next_state);
-                          if (low.find(v) == low.end())
-                          {
-                            scc(v);
-                            low[u] = std::min(low[u], low[v]);
-                          }
-                          else if (contains(stack, v))
-                          {
-                            low[u] = std::min(low[u], disc[v]);
-                          }
-                          p.remove_assignments(summand.variables, sigma);
-                          return false;
-                        },
-                        data::is_false
-            );
-          }
+          std::size_t k = disc.size();
+          disc[u] = k;
+          low[u] = k;
+          stack.push_back(u);
         }
 
-        if (low[u] == disc[u] && result.empty())
+        bool recurse = false;
+        const std::vector<lps::state>& succ = successors[u];
+        for (std::size_t j = i; j < succ.size(); j++)
         {
-          // a component has been found; return the smallest node in this component
-          lps::state representative = u;
+          const lps::state& v = succ[j];
+          if (disc.find(v) == disc.end())
+          {
+            work.emplace_back(std::make_pair(u, j + 1));
+            work.emplace_back(std::make_pair(v, 0));
+            recurse = true;
+            break;
+          }
+          else if (contains(stack, v))
+          {
+            low[u] = std::min(low[u], disc[v]);
+          }
+        }
+        if (recurse)
+        {
+          continue;
+        }
+        if (disc[u] == low[u])
+        {
+          // an SCC has been found; return the node with the minimum value in this SCC
+          lps::state result = u;
           while (true)
           {
             const auto& v = stack.back();
@@ -277,22 +309,25 @@ class lts_generator
             {
               break;
             }
-            if (v < representative)
+            if (v < result)
             {
-              representative = v;
+              result = v;
             }
             stack.pop_back();
           }
-          result.push_back(representative);
+
+          // undo changes to sigma
+          add_assignments(sigma, process_parameters, process_parameter_values);
+          return result;
         }
-      };
-
-      scc(u0);
-
-      // undo changes to sigma
-      add_assignments(sigma, process_parameters, process_parameter_values);
-
-      return result.front();
+        if (!work.empty())
+        {
+          lps::state v = u;
+          u = work.back().first;
+          low[u] = std::min(low[u], low[v]);
+        }
+      }
+      throw mcrl2::runtime_error("find_representative did not find a solution");
     }
 
     lps::state rewrite_state(const data::data_expression_list& v) const
