@@ -70,15 +70,18 @@ class Popen(subprocess.Popen):
         self.__maxVirt = 0
         self.__maxResident = 0
 
-        # workaround for interface changes in psutil
-        process = psutil.Process(self.pid)
-        if "get_cpu_times" in dir(process):
-            self.__perfThread = threading.Thread(target=self.__measure_old)
-        else:
-            self.__perfThread = threading.Thread(target=self.__measure_new)
+        try:
+          # workaround for interface changes in psutil
+          process = psutil.Process(self.pid)
+          if "get_cpu_times" in dir(process):
+              self.__perfThread = threading.Thread(target=self.__measure_old)
+          else:
+              self.__perfThread = threading.Thread(target=self.__measure_new)
 
-        self.__perfThread.daemon = True
-        self.__perfThread.start()
+          self.__perfThread.daemon = True
+          self.__perfThread.start()
+        except psutil.NoSuchProcess:
+          pass
 
     # uses old interface of psutil
     def __measure_old(self):
