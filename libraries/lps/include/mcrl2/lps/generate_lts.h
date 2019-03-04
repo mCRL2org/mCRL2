@@ -160,7 +160,7 @@ class lts_generator
 
     std::vector<next_state_summand> summands;
     std::vector<next_state_summand> confluent_summands;
-    atermpp::indexed_set<lps::state> discovered;
+    std::unordered_map<data::data_expression_list, std::list<data::data_expression_list>> enumerator_cache;
 
     struct next_state_summand
     {
@@ -217,29 +217,20 @@ class lts_generator
       return result;
     }
 
-    std::vector<lps::state> ctau_successors(const lps::state& u) const
+    std::vector<lps::state> ctau_successors(const lps::state& u)
     {
       std::vector<lps::state> result;
-      add_assignments(sigma, process_parameters, u);
-      for (const auto& summand: confluent_summands)
-      {
-        data::data_expression c = r(summand.condition, sigma);
-        if (!data::is_false(c))
-        {
-          E.enumerate(enumerator_element(summand.variables, c),
-                      sigma,
-                      [&](const enumerator_element& p)
-                      {
-                        p.add_assignments(summand.variables, sigma, r);
-                        lps::state v = rewrite_state(summand.next_state);
-                        result.push_back(v);
-                        p.remove_assignments(summand.variables, sigma);
-                        return false;
-                      },
-                      data::is_false
-          );
-        }
-      }
+      atermpp::indexed_set<lps::state> discovered;
+      generate(const_cast<lps::state&>(u),
+               discovered,
+               false,
+               confluent_summands.begin(),
+               confluent_summands.end(),
+               [&](const lps::state& v)
+               {
+                 result.push_back(v);
+               }
+      );
       return result;
     }
 
@@ -248,7 +239,7 @@ class lts_generator
     // that it has no outgoing edges. In a confluent tau graph there is only one TSCC, so this should
     // guarantee a unique representative.
     // N.B. The implementation is based on https://llbit.se/?p=3379
-    lps::state find_representative(const lps::state& u0) const
+    lps::state find_representative(lps::state& u0)
     {
       using utilities::detail::contains;
       data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
@@ -349,9 +340,12 @@ class lts_generator
       );
     };
 
+    // pre: d0 is in normal form
     template <typename SummandIterator, typename ReportState = skip, typename ReportTransition = skip>
     void generate_default(
-      const data::data_expression_list& init,
+      lps::state& d0,
+      atermpp::indexed_set<lps::state>& discovered,
+      bool use_confluence_reduction,
       SummandIterator first,
       SummandIterator last,
       ReportState report_state = ReportState(),
@@ -361,8 +355,7 @@ class lts_generator
       std::deque<std::size_t> todo;
       discovered.clear();
 
-      lps::state d0 = rewrite_state(init);
-      if (options.confluence)
+      if (use_confluence_reduction)
       {
         d0 = find_representative(d0);
       }
@@ -389,7 +382,7 @@ class lts_generator
                           p.add_assignments(summand.variables, sigma, r);
                           process::action_list a = rewrite_action_list(summand.actions);
                           lps::state d1 = rewrite_state(summand.next_state);
-                          if (options.confluence)
+                          if (use_confluence_reduction)
                           {
                             d1 = find_representative(d1);
                           }
@@ -410,22 +403,21 @@ class lts_generator
       }
     }
 
+    // pre: d0 is in normal form
     template <typename SummandIterator, typename ReportState = skip, typename ReportTransition = skip>
     void generate_cached(
-      const data::data_expression_list& init,
+      lps::state& d0,
+      atermpp::indexed_set<lps::state>& discovered,
+      bool use_confluence_reduction,
       SummandIterator first,
       SummandIterator last,
       ReportState report_state = ReportState(),
       ReportTransition report_transition = ReportTransition())
     {
-      // global cache for solutions of conditions
-      std::unordered_map<data::data_expression_list, std::list<data::data_expression_list>> enumerator_cache;
-
       std::deque<std::size_t> todo;
       discovered.clear();
 
-      lps::state d0 = rewrite_state(init);
-      if (options.confluence)
+      if (use_confluence_reduction)
       {
         d0 = find_representative(d0);
       }
@@ -467,7 +459,7 @@ class lts_generator
             add_assignments(sigma, summand.variables, e);
             process::action_list a = rewrite_action_list(summand.actions);
             lps::state d1 = rewrite_state(summand.next_state);
-            if (options.confluence)
+            if (use_confluence_reduction)
             {
               d1 = find_representative(d1);
             }
@@ -484,9 +476,12 @@ class lts_generator
       }
     }
 
+    // pre: d0 is in normal form
     template <typename SummandIterator, typename ReportState = skip, typename ReportTransition = skip>
     void generate(
-      const data::data_expression_list& init,
+      lps::state& d0,
+      atermpp::indexed_set<lps::state>& discovered,
+      bool use_confluence_reduction,
       SummandIterator first,
       SummandIterator last,
       ReportState report_state = ReportState(),
@@ -494,12 +489,26 @@ class lts_generator
     {
       if (options.cached)
       {
-        generate_cached(init, first, last, report_state, report_transition);
+        generate_cached(d0, discovered, use_confluence_reduction, first, last, report_state, report_transition);
       }
       else
       {
-        generate_default(init, first, last, report_state, report_transition);
+        generate_default(d0, discovered, use_confluence_reduction, first, last, report_state, report_transition);
       }
+    }
+
+    template <typename SummandIterator, typename ReportState = skip, typename ReportTransition = skip>
+    void generate(
+      const data::data_expression_list& init,
+      atermpp::indexed_set<lps::state>& discovered,
+      bool use_confluence_reduction,
+      SummandIterator first,
+      SummandIterator last,
+      ReportState report_state = ReportState(),
+      ReportTransition report_transition = ReportTransition())
+    {
+      lps::state d0 = rewrite_state(init);
+      generate(d0, discovered, use_confluence_reduction, first, last, report_state, report_transition);
     }
 
   public:
@@ -533,15 +542,19 @@ class lts_generator
     template <typename ReportState = skip, typename ReportTransition = skip>
     void generate(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
     {
-      generate(initial_state, summands.begin(), summands.end(), report_state, report_transition);
+      atermpp::indexed_set<lps::state> discovered;
+      generate(initial_state, discovered, options.confluence, summands.begin(), summands.end(), report_state, report_transition);
     }
 
     /// \brief Returns all outgoing transitions from the state init.
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init)
     {
       std::vector<std::pair<lps::multi_action, lps::state>> result;
+      atermpp::indexed_set<lps::state> discovered;
       generate(
         init,
+        discovered,
+        options.confluence,
         summands.begin(),
         summands.end(),
         skip(),
@@ -557,8 +570,11 @@ class lts_generator
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init, std::size_t summand_index)
     {
       std::vector<std::pair<lps::multi_action, lps::state>> result;
+      atermpp::indexed_set<lps::state> discovered;
       generate(
         init,
+        discovered,
+        options.confluence,
         summands.begin() + summand_index,
         summands.begin() + summand_index + 1,
         skip(),
@@ -568,12 +584,6 @@ class lts_generator
         }
       );
       return result;
-    }
-
-    /// \brief Returns a mapping from discovered states to their corresponding index.
-    const atermpp::indexed_set<lps::state>& discovered_states() const
-    {
-      return discovered;
     }
 };
 

@@ -66,6 +66,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
     bool run() override
     {
+      mCRL2log(log::verbose) << options << std::endl;
       lps::labeled_transition_system lts;
       lps::specification lpsspec = lps::detail::load_lps(input_filename());
       lps::generate_labeled_transition_system(lpsspec, options, lts);
