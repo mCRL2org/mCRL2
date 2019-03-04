@@ -160,7 +160,10 @@ class lts_generator
 
     std::vector<next_state_summand> summands;
     std::vector<next_state_summand> confluent_summands;
-    std::unordered_map<data::data_expression_list, std::list<data::data_expression_list>> enumerator_cache;
+
+    // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
+    std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> enumerator_cache;
+
     atermpp::indexed_set<lps::state> discovered;
 
     struct next_state_summand
@@ -171,6 +174,7 @@ class lts_generator
       data::data_expression_list next_state;
 
       data::variable_list gamma; // used for caching
+      atermpp::function_symbol f_gamma; // used for caching
 
       next_state_summand(const lps::action_summand& summand, const data::variable_list& process_parameters)
         : variables(summand.summation_variables()),
@@ -179,6 +183,23 @@ class lts_generator
           next_state(summand.next_state(process_parameters))
       {
         gamma = free_variables(summand.condition(), process_parameters);
+        f_gamma = atermpp::function_symbol("@gamma", gamma.size());
+      }
+
+      atermpp::term_appl<data::data_expression> compute_key(data::mutable_indexed_substitution<>& sigma) const
+      {
+        bool is_first_element = true;
+        return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
+          [&](const data::variable& x)
+          {
+            if (is_first_element)
+            {
+              is_first_element = false;
+              return condition;
+            }
+            return sigma(x);
+          }
+        );
       }
 
       template <typename T>
@@ -187,6 +208,7 @@ class lts_generator
         using utilities::detail::contains;
         std::set<data::variable> FV = data::find_free_variables(x);
         std::vector<data::variable> result;
+        result.emplace_back(data::variable());
         for (const data::variable& vi: v)
         {
           if (contains(FV, vi))
@@ -234,8 +256,7 @@ class lts_generator
         for (SummandIterator iter = first; iter != last; ++iter)
         {
           const next_state_summand& summand = *iter;
-          data::data_expression_list key = substitute(sigma, summand.gamma);
-          key.push_front(summand.condition);
+          auto key = summand.compute_key(sigma);
           auto q = enumerator_cache.find(key);
           if (q == enumerator_cache.end())
           {
@@ -305,8 +326,7 @@ class lts_generator
         for (SummandIterator iter = first; iter != last; ++iter)
         {
           const next_state_summand& summand = *iter;
-          data::data_expression_list key = substitute(sigma, summand.gamma);
-          key.push_front(summand.condition);
+          auto key = summand.compute_key(sigma);
           auto q = enumerator_cache.find(key);
           if (q == enumerator_cache.end())
           {
@@ -501,8 +521,7 @@ class lts_generator
           const next_state_summand& summand = *iter;
           if (options.cached)
           {
-            data::data_expression_list key = substitute(sigma, summand.gamma);
-            key.push_front(summand.condition);
+            auto key = summand.compute_key(sigma);
             auto q = enumerator_cache.find(key);
             if (q == enumerator_cache.end())
             {
