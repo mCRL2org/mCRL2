@@ -92,6 +92,7 @@ class rewriter: public basic_rewriter<data_expression>
     static substitution_type& empty_substitution()
     {
       static substitution_type result;
+      assert(result.empty());    // This static substitution should always become empty again after use. 
       return result;
     }
 
