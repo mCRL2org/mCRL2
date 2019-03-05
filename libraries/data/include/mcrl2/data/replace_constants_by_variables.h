@@ -13,6 +13,8 @@
 #define MCRL2_DATA_REPLACE_CONSTANTS_BY_VARIABLES_H
 
 #include <unordered_map>
+
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
