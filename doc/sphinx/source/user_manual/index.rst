@@ -52,12 +52,14 @@
 
 .. note::
 
-   mCRL2 received a prize for the distinguished user-assistance tool feature in the
-   `VerifyThis verification challenge <http://etaps2015.verifythis.org/>`_
-   held at `ETAPS2015 <http://www.etaps.org/>`_, in London. mCRL2 combined a rich specification
-   language with excellent automatic reasoning
-   features that made it an excellent tool to obtain
-   insight in complex data structures and behaviours.
+   .. image::Verum-2-Logo-Vert-Colour.png
+          :align: right
+          :alt: Verum is the industry leader in reliable software design.
+          :target: https://www.verum.com
+   mCRL2 is used by the company `Verum <https://www.verum.com>`_ as their verification engine. 
+   Verum provides model based software development environments for the languages ASD and Dezyne that
+   allow to program proven correct embedded software with much less effort than "classical" programming. 
+   As it stands Verum is the industry leader in reliable software design. 
 
 .. note::
 

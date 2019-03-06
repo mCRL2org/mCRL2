@@ -193,7 +193,7 @@ static std::bitset<128> read_write_buffer(0);
 
 /**
  * \brief Reverse the order of bits in val.
- * \detail In BAF version 0x0304 the bits are written in reverse order. When bumping
+ * \details In BAF version 0x0304 the bits are written in reverse order. When bumping
  * the version number, one should also consider to remove this reversal.
  */
 static void reverse_bit_order(std::size_t& val)
@@ -337,7 +337,7 @@ static void write_symbol(const function_symbol& sym, ostream& os)
 
 /**
  * \brief Get the function symbol from an aterm
- * \detail This function is necessary only becuase aterm::function() is protected
+ * \details This function is necessary only becuase aterm::function() is protected
  */
 static const function_symbol& get_function_symbol(const aterm& t)
 {
@@ -348,7 +348,7 @@ static const function_symbol& get_function_symbol(const aterm& t)
 /**
  * \brief Retrieve the index into the sym_write_entry table belonging to the top symbol
  * of a term. Could be a special symbol (AS_INT, etc) when the term is not an application.
- * \detail sym_entries[result].id == t.function()
+ * \details sym_entries[result].id == t.function()
  */
 static std::size_t get_fn_symbol_index(const aterm& t, const indexed_set<function_symbol>& index)
 {
