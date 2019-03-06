@@ -12,6 +12,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <mcrl2/lps/generate_lts.h>
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
@@ -47,6 +48,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     {
       super::add_options(desc);
       desc.add_option("cached", "cache enumerator solutions");
+      desc.add_option("global-cache", "use a global cache");
       desc.add_option("confluence", "apply confluence reduction", 'c');
       desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
@@ -58,6 +60,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
       options.cached                                = parser.options.find("cached") != parser.options.end();
+      options.global_cache                          = parser.options.find("global-cache") != parser.options.end();
       options.confluence                            = parser.options.find("confluence") != parser.options.end();
       options.one_point_rule_rewrite                = parser.options.find("no-one-point-rule-rewrite") == parser.options.end();
       options.replace_constants_by_variables        = parser.options.find("no-replace-constants-by-variables") == parser.options.end();

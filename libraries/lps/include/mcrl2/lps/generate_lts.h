@@ -91,6 +91,20 @@ std::ostream& operator<<(std::ostream& out, const labeled_transition_system& x)
   return out;
 }
 
+enum class caching { none, local, global };
+
+std::ostream& operator<<(std::ostream& os, caching c)
+{
+  switch(c)
+  {
+    case caching::none: os << "none"; break;
+    case caching::local: os << "local"; break;
+    case caching::global: os << "global"; break;
+    default    : os.setstate(std::ios_base::failbit);
+  }
+  return os;
+}
+
 struct generate_lts_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
@@ -99,6 +113,7 @@ struct generate_lts_options
   bool resolve_summand_variable_name_clashes = false;
   bool store_states_as_trees = true;
   bool cached = false;
+  bool global_cache = false;
   bool confluence = false;
 };
 
@@ -106,6 +121,7 @@ inline
 std::ostream& operator<<(std::ostream& out, const generate_lts_options& options)
 {
   out << "cached = " << std::boolalpha << options.cached << std::endl;
+  out << "global-cache = " << std::boolalpha << options.global_cache << std::endl;
   out << "confluence = " << std::boolalpha << options.confluence << std::endl;
   out << "one_point_rule_rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "resolve_summand_variable_name_clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
@@ -170,7 +186,7 @@ class lts_generator
     std::vector<next_state_summand> confluent_summands;
 
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
-    std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> enumerator_cache;
+    std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
 
     atermpp::indexed_set<lps::state> discovered;
 
@@ -181,33 +197,25 @@ class lts_generator
       process::action_list actions;
       std::vector<data::data_expression> next_state;
 
-      std::vector<data::variable> gamma; // used for caching
-      atermpp::function_symbol f_gamma; // used for caching
+      // attributes for caching
+      caching cache_strategy;
+      std::vector<data::variable> gamma;
+      atermpp::function_symbol f_gamma;
+      mutable std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
 
-      next_state_summand(const lps::action_summand& summand, const data::variable_list& process_parameters)
+      next_state_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, caching cache_strategy_)
         : variables(summand.summation_variables()),
           condition(summand.condition()),
           actions(summand.multi_action().actions()),
-          next_state(make_data_expression_vector(summand.next_state(process_parameters)))
+          next_state(make_data_expression_vector(summand.next_state(process_parameters))),
+          cache_strategy(cache_strategy_)
       {
         gamma = free_variables(summand.condition(), process_parameters);
+        if (cache_strategy_ == caching::global)
+        {
+          gamma.insert(gamma.begin(), data::variable());
+        }
         f_gamma = atermpp::function_symbol("@gamma", gamma.size());
-      }
-
-      atermpp::term_appl<data::data_expression> compute_key(data::mutable_indexed_substitution<>& sigma) const
-      {
-        bool is_first_element = true;
-        return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
-          [&](const data::variable& x)
-          {
-            if (is_first_element)
-            {
-              is_first_element = false;
-              return condition;
-            }
-            return sigma(x);
-          }
-        );
       }
 
       template <typename T>
@@ -216,7 +224,6 @@ class lts_generator
         using utilities::detail::contains;
         std::set<data::variable> FV = data::find_free_variables(x);
         std::vector<data::variable> result;
-        result.emplace_back(data::variable());
         for (const data::variable& vi: v)
         {
           if (contains(FV, vi))
@@ -225,6 +232,34 @@ class lts_generator
           }
         }
         return result;
+      }
+
+      atermpp::term_appl<data::data_expression> compute_key(data::mutable_indexed_substitution<>& sigma) const
+      {
+        if (cache_strategy == caching::global)
+        {
+          bool is_first_element = true;
+          return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
+                                                           [&](const data::variable& x)
+                                                           {
+                                                             if (is_first_element)
+                                                             {
+                                                               is_first_element = false;
+                                                               return condition;
+                                                             }
+                                                             return sigma(x);
+                                                           }
+          );
+        }
+        else
+        {
+          return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
+                                                           [&](const data::variable& x)
+                                                           {
+                                                             return sigma(x);
+                                                           }
+          );
+        }
       }
     };
 
@@ -255,41 +290,9 @@ class lts_generator
       std::vector<lps::state> result;
       add_assignments(sigma, process_parameters, d0);
 
-      if (options.cached)
+      for (const next_state_summand& summand: summands)
       {
-        for (const next_state_summand& summand: summands)
-        {
-          auto key = summand.compute_key(sigma);
-          auto q = enumerator_cache.find(key);
-          if (q == enumerator_cache.end())
-          {
-            data::data_expression condition = r(summand.condition, sigma);
-            std::list<data::data_expression_list> solutions;
-            if (!data::is_false(condition))
-            {
-              E.enumerate(enumerator_element(summand.variables, condition),
-                          sigma,
-                          [&](const enumerator_element& p) {
-                            solutions.push_back(p.assign_expressions(summand.variables, r));
-                            return false;
-                          },
-                          data::is_false
-              );
-            }
-            q = enumerator_cache.insert({key, solutions}).first;
-          }
-          for (const data::data_expression_list& e: q->second)
-          {
-            add_assignments(sigma, summand.variables, e);
-            lps::state d1 = rewrite_state(summand.next_state);
-            result.push_back(d1);
-          }
-          remove_assignments(sigma, summand.variables);
-        }
-      }
-      else
-      {
-        for (const next_state_summand& summand: summands)
+        if (summand.cache_strategy == caching::none)
         {
           data::data_expression condition = r(summand.condition, sigma);
           if (!data::is_false(condition))
@@ -306,26 +309,13 @@ class lts_generator
                         data::is_false
             );
           }
-          remove_assignments(sigma, summand.variables);
         }
-      }
-      return result;
-    }
-
-    // pre: d0 is in normal form
-    template <typename SummandSequence>
-    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const lps::state& d0, const SummandSequence& summands)
-    {
-      std::vector<std::pair<lps::multi_action, lps::state>> result;
-      add_assignments(sigma, process_parameters, d0);
-
-      if (options.cached)
-      {
-        for (const next_state_summand& summand: summands)
+        else
         {
           auto key = summand.compute_key(sigma);
-          auto q = enumerator_cache.find(key);
-          if (q == enumerator_cache.end())
+          auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+          auto q = cache.find(key);
+          if (q == cache.end())
           {
             data::data_expression condition = r(summand.condition, sigma);
             std::list<data::data_expression_list> solutions;
@@ -340,21 +330,31 @@ class lts_generator
                           data::is_false
               );
             }
-            q = enumerator_cache.insert({key, solutions}).first;
+            q = cache.insert({key, solutions}).first;
           }
           for (const data::data_expression_list& e: q->second)
           {
             add_assignments(sigma, summand.variables, e);
-            process::action_list a = rewrite_action_list(summand.actions);
             lps::state d1 = rewrite_state(summand.next_state);
-            result.emplace_back(lps::multi_action(a), d1);
+            result.push_back(d1);
           }
-          remove_assignments(sigma, summand.variables);
         }
+        remove_assignments(sigma, summand.variables);
       }
-      else
+
+      return result;
+    }
+
+    // pre: d0 is in normal form
+    template <typename SummandSequence>
+    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const lps::state& d0, const SummandSequence& summands)
+    {
+      std::vector<std::pair<lps::multi_action, lps::state>> result;
+      add_assignments(sigma, process_parameters, d0);
+
+      for (const next_state_summand& summand: summands)
       {
-        for (const next_state_summand& summand: summands)
+        if (summand.cache_strategy == caching::none)
         {
           data::data_expression condition = r(summand.condition, sigma);
           if (!data::is_false(condition))
@@ -372,8 +372,38 @@ class lts_generator
                         data::is_false
             );
           }
-          remove_assignments(sigma, summand.variables);
         }
+        else
+        {
+          auto key = summand.compute_key(sigma);
+          auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+          auto q = cache.find(key);
+          if (q == cache.end())
+          {
+            data::data_expression condition = r(summand.condition, sigma);
+            std::list<data::data_expression_list> solutions;
+            if (!data::is_false(condition))
+            {
+              E.enumerate(enumerator_element(summand.variables, condition),
+                          sigma,
+                          [&](const enumerator_element& p) {
+                            solutions.push_back(p.assign_expressions(summand.variables, r));
+                            return false;
+                          },
+                          data::is_false
+              );
+            }
+            q = cache.insert({key, solutions}).first;
+          }
+          for (const data::data_expression_list& e: q->second)
+          {
+            add_assignments(sigma, summand.variables, e);
+            process::action_list a = rewrite_action_list(summand.actions);
+            lps::state d1 = rewrite_state(summand.next_state);
+            result.emplace_back(lps::multi_action(a), d1);
+          }
+        }
+        remove_assignments(sigma, summand.variables);
       }
       return result;
     }
@@ -514,46 +544,7 @@ class lts_generator
         add_assignments(sigma, process_parameters, d);
         for (const next_state_summand& summand: summands)
         {
-          if (options.cached)
-          {
-            auto key = summand.compute_key(sigma);
-            auto q = enumerator_cache.find(key);
-            if (q == enumerator_cache.end())
-            {
-              data::data_expression condition = r(summand.condition, sigma);
-              std::list<data::data_expression_list> solutions;
-              if (!data::is_false(condition))
-              {
-                E.enumerate(enumerator_element(summand.variables, condition),
-                            sigma,
-                            [&](const enumerator_element& p) {
-                              solutions.push_back(p.assign_expressions(summand.variables, r));
-                              return false;
-                            },
-                            data::is_false
-                );
-              }
-              q = enumerator_cache.insert({key, solutions}).first;
-            }
-            for (const data::data_expression_list& e: q->second)
-            {
-              add_assignments(sigma, summand.variables, e);
-              process::action_list a = rewrite_action_list(summand.actions);
-              lps::state d1 = rewrite_state(summand.next_state);
-              if (use_confluence_reduction)
-              {
-                d1 = find_representative(d1);
-              }
-              auto j = discovered.put(d1);
-              if (j.second)
-              {
-                todo.push_back(j.first);
-                report_state(d1);
-              }
-              report_transition(i, a, j.first);
-            }
-          }
-          else
+          if (summand.cache_strategy == caching::none)
           {
             data::data_expression condition = r(summand.condition, sigma);
             if (!data::is_false(condition))
@@ -581,6 +572,46 @@ class lts_generator
               );
             }
           }
+          else
+          {
+            auto key = summand.compute_key(sigma);
+            auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+            auto q = cache.find(key);
+            if (q == cache.end())
+            {
+              data::data_expression condition = r(summand.condition, sigma);
+              std::list<data::data_expression_list> solutions;
+              if (!data::is_false(condition))
+              {
+                E.enumerate(enumerator_element(summand.variables, condition),
+                            sigma,
+                            [&](const enumerator_element& p) {
+                              solutions.push_back(p.assign_expressions(summand.variables, r));
+                              return false;
+                            },
+                            data::is_false
+                );
+              }
+              q = cache.insert({key, solutions}).first;
+            }
+            for (const data::data_expression_list& e: q->second)
+            {
+              add_assignments(sigma, summand.variables, e);
+              process::action_list a = rewrite_action_list(summand.actions);
+              lps::state d1 = rewrite_state(summand.next_state);
+              if (use_confluence_reduction)
+              {
+                d1 = find_representative(d1);
+              }
+              auto j = discovered.put(d1);
+              if (j.second)
+              {
+                todo.push_back(j.first);
+                report_state(d1);
+              }
+              report_transition(i, a, j.first);
+            }
+          }
           remove_assignments(sigma, summand.variables);
         }
       }
@@ -600,13 +631,14 @@ class lts_generator
       core::identifier_string ctau{"ctau"};
       for (const action_summand& summand: lpsspec_.process().action_summands())
       {
+        auto cache_strategy = options.cached ? (options.global_cache ? lps::caching::global : lps::caching::local) : lps::caching::none;
         if (summand.multi_action().actions().size() == 1 && summand.multi_action().actions().front().label().name() == ctau)
         {
-          confluent_summands.emplace_back(summand, lpsspec_.process().process_parameters());
+          confluent_summands.emplace_back(summand, lpsspec_.process().process_parameters(), cache_strategy);
         }
         else
         {
-          summands.emplace_back(summand, lpsspec_.process().process_parameters());
+          summands.emplace_back(summand, lpsspec_.process().process_parameters(), cache_strategy);
         }
       }
     }
