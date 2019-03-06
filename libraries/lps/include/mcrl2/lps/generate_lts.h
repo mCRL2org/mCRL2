@@ -292,6 +292,7 @@ class lts_generator
 
       for (const next_state_summand& summand: summands)
       {
+        id_generator.clear();
         if (summand.cache_strategy == caching::none)
         {
           data::data_expression condition = r(summand.condition, sigma);
@@ -354,6 +355,7 @@ class lts_generator
 
       for (const next_state_summand& summand: summands)
       {
+        id_generator.clear();
         if (summand.cache_strategy == caching::none)
         {
           data::data_expression condition = r(summand.condition, sigma);
@@ -544,6 +546,7 @@ class lts_generator
         add_assignments(sigma, process_parameters, d);
         for (const next_state_summand& summand: summands)
         {
+          id_generator.clear();
           if (summand.cache_strategy == caching::none)
           {
             data::data_expression condition = r(summand.condition, sigma);
