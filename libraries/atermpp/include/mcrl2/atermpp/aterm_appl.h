@@ -33,7 +33,7 @@ class term_appl: public aterm
 protected:
   /// \brief Constructor.
   /// \param t A pointer internal data structure from which the term is constructed.
-  /// \detail This function is explicitly protected such that is not used in common code. 
+  /// \details This function is explicitly protected such that is not used in common code. 
   explicit term_appl(detail::_term_appl *t)
    : aterm(reinterpret_cast<detail::_aterm*>(t))
   {

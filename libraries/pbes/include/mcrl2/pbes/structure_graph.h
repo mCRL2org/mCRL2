@@ -570,7 +570,7 @@ struct manual_structure_graph_builder
   }
 
   /// \brief call at the end, to put the results into m_graph
-  /// \detail May be called more than once. Does not invalidate this builder.
+  /// \details May be called more than once. Does not invalidate this builder.
   void finalize()
   {
     m_graph.m_vertices = m_vertices;
