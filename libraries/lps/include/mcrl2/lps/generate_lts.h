@@ -93,6 +93,7 @@ std::ostream& operator<<(std::ostream& out, const labeled_transition_system& x)
 
 enum class caching { none, local, global };
 
+inline
 std::ostream& operator<<(std::ostream& os, caching c)
 {
   switch(c)
@@ -285,133 +286,6 @@ class lps_explorer
       return result;
     }
 
-    // pre: d0 is in normal form
-    template <typename SummandSequence>
-    std::vector<lps::state> generate_successors(const lps::state& d0, const SummandSequence& summands)
-    {
-      std::vector<lps::state> result;
-      add_assignments(sigma, process_parameters, d0);
-
-      for (const next_state_summand& summand: summands)
-      {
-        id_generator.clear();
-        if (summand.cache_strategy == caching::none)
-        {
-          data::data_expression condition = r(summand.condition, sigma);
-          if (!data::is_false(condition))
-          {
-            E.enumerate(enumerator_element(summand.variables, condition),
-                        sigma,
-                        [&](const enumerator_element& p)
-                        {
-                          p.add_assignments(summand.variables, sigma, r);
-                          lps::state d1 = rewrite_state(summand.next_state);
-                          result.push_back(d1);
-                          return false;
-                        },
-                        data::is_false
-            );
-          }
-        }
-        else
-        {
-          auto key = summand.compute_key(sigma);
-          auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-          auto q = cache.find(key);
-          if (q == cache.end())
-          {
-            data::data_expression condition = r(summand.condition, sigma);
-            std::list<data::data_expression_list> solutions;
-            if (!data::is_false(condition))
-            {
-              E.enumerate(enumerator_element(summand.variables, condition),
-                          sigma,
-                          [&](const enumerator_element& p) {
-                            solutions.push_back(p.assign_expressions(summand.variables, r));
-                            return false;
-                          },
-                          data::is_false
-              );
-            }
-            q = cache.insert({key, solutions}).first;
-          }
-          for (const data::data_expression_list& e: q->second)
-          {
-            add_assignments(sigma, summand.variables, e);
-            lps::state d1 = rewrite_state(summand.next_state);
-            result.push_back(d1);
-          }
-        }
-        remove_assignments(sigma, summand.variables);
-      }
-
-      return result;
-    }
-
-    // pre: d0 is in normal form
-    template <typename SummandSequence>
-    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const lps::state& d0, const SummandSequence& summands)
-    {
-      std::vector<std::pair<lps::multi_action, lps::state>> result;
-      add_assignments(sigma, process_parameters, d0);
-
-      for (const next_state_summand& summand: summands)
-      {
-        id_generator.clear();
-        if (summand.cache_strategy == caching::none)
-        {
-          data::data_expression condition = r(summand.condition, sigma);
-          if (!data::is_false(condition))
-          {
-            E.enumerate(enumerator_element(summand.variables, condition),
-                        sigma,
-                        [&](const enumerator_element& p)
-                        {
-                          p.add_assignments(summand.variables, sigma, r);
-                          process::action_list a = rewrite_action_list(summand.actions);
-                          lps::state d1 = rewrite_state(summand.next_state);
-                          result.emplace_back(lps::multi_action(a), d1);
-                          return false;
-                        },
-                        data::is_false
-            );
-          }
-        }
-        else
-        {
-          auto key = summand.compute_key(sigma);
-          auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-          auto q = cache.find(key);
-          if (q == cache.end())
-          {
-            data::data_expression condition = r(summand.condition, sigma);
-            std::list<data::data_expression_list> solutions;
-            if (!data::is_false(condition))
-            {
-              E.enumerate(enumerator_element(summand.variables, condition),
-                          sigma,
-                          [&](const enumerator_element& p) {
-                            solutions.push_back(p.assign_expressions(summand.variables, r));
-                            return false;
-                          },
-                          data::is_false
-              );
-            }
-            q = cache.insert({key, solutions}).first;
-          }
-          for (const data::data_expression_list& e: q->second)
-          {
-            add_assignments(sigma, summand.variables, e);
-            process::action_list a = rewrite_action_list(summand.actions);
-            lps::state d1 = rewrite_state(summand.next_state);
-            result.emplace_back(lps::multi_action(a), d1);
-          }
-        }
-        remove_assignments(sigma, summand.variables);
-      }
-      return result;
-    }
-
     // This function is based an iterative version of Tarjan's strongly connected components algorithm.
     // It returns the smallest node of the first SCC that is detected. The first SCC is a TSCC, meaning
     // that it has no outgoing edges. In a confluent tau graph there is only one TSCC, so this should
@@ -504,7 +378,7 @@ class lps_explorer
     lps::state rewrite_state(const DataExpressionSequence& v) const
     {
       return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
-    };
+    }
 
     process::action_list rewrite_action_list(const process::action_list& actions) const
     {
@@ -517,7 +391,97 @@ class lps_explorer
           return process::action(a.label(), data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return r(x, sigma); }));
         }
       );
-    };
+    }
+
+    // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
+    // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
+    template <typename ReportTransition = skip>
+    void generate_transitions(
+      const next_state_summand& summand,
+      bool use_confluence_reduction,
+      ReportTransition report_transition = ReportTransition()
+    )
+    {
+      id_generator.clear();
+      if (summand.cache_strategy == caching::none)
+      {
+        data::data_expression condition = r(summand.condition, sigma);
+        if (!data::is_false(condition))
+        {
+          E.enumerate(enumerator_element(summand.variables, condition),
+                      sigma,
+                      [&](const enumerator_element& p) {
+                        p.add_assignments(summand.variables, sigma, r);
+                        process::action_list a = rewrite_action_list(summand.actions);
+                        lps::state d1 = rewrite_state(summand.next_state);
+                        if (use_confluence_reduction)
+                        {
+                          d1 = find_representative(d1);
+                        }
+                        report_transition(a, d1);
+                        return false;
+                      },
+                      data::is_false
+          );
+        }
+      }
+      else
+      {
+        auto key = summand.compute_key(sigma);
+        auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+        auto q = cache.find(key);
+        if (q == cache.end())
+        {
+          data::data_expression condition = r(summand.condition, sigma);
+          std::list<data::data_expression_list> solutions;
+          if (!data::is_false(condition))
+          {
+            E.enumerate(enumerator_element(summand.variables, condition),
+                        sigma,
+                        [&](const enumerator_element& p) {
+                          solutions.push_back(p.assign_expressions(summand.variables, r));
+                          return false;
+                        },
+                        data::is_false
+            );
+          }
+          q = cache.insert({key, solutions}).first;
+        }
+        for (const data::data_expression_list& e: q->second)
+        {
+          add_assignments(sigma, summand.variables, e);
+          process::action_list a = rewrite_action_list(summand.actions);
+          lps::state d1 = rewrite_state(summand.next_state);
+          if (use_confluence_reduction)
+          {
+            d1 = find_representative(d1);
+          }
+          report_transition(a, d1);
+        }
+      }
+      remove_assignments(sigma, summand.variables);
+    }
+
+    // pre: d0 is in normal form
+    template <typename SummandSequence>
+    std::vector<lps::state> generate_successors(const lps::state& d0, const SummandSequence& summands)
+    {
+      std::vector<lps::state> result;
+      add_assignments(sigma, process_parameters, d0);
+      for (const next_state_summand& summand: summands)
+      {
+        generate_transitions(
+          summand,
+          false,
+          [&](const process::action_list& a, const lps::state& d1)
+          {
+            result.push_back(d1);
+          }
+        );
+        remove_assignments(sigma, summand.variables);
+      }
+      return result;
+    }
 
     // pre: d0 is in normal form
     template <typename SummandSequence, typename ReportState = skip, typename ReportTransition = skip>
@@ -548,66 +512,11 @@ class lps_explorer
         add_assignments(sigma, process_parameters, d);
         for (const next_state_summand& summand: summands)
         {
-          id_generator.clear();
-          if (summand.cache_strategy == caching::none)
-          {
-            data::data_expression condition = r(summand.condition, sigma);
-            if (!data::is_false(condition))
+          generate_transitions(
+            summand,
+            use_confluence_reduction,
+            [&](const process::action_list& a, const lps::state& d1)
             {
-              E.enumerate(enumerator_element(summand.variables, condition),
-                          sigma,
-                          [&](const enumerator_element& p) {
-                            p.add_assignments(summand.variables, sigma, r);
-                            process::action_list a = rewrite_action_list(summand.actions);
-                            lps::state d1 = rewrite_state(summand.next_state);
-                            if (use_confluence_reduction)
-                            {
-                              d1 = find_representative(d1);
-                            }
-                            auto j = discovered.put(d1);
-                            if (j.second)
-                            {
-                              todo.push_back(j.first);
-                              report_state(d1);
-                            }
-                            report_transition(i, a, j.first);
-                            return false;
-                          },
-                          data::is_false
-              );
-            }
-          }
-          else
-          {
-            auto key = summand.compute_key(sigma);
-            auto& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-            auto q = cache.find(key);
-            if (q == cache.end())
-            {
-              data::data_expression condition = r(summand.condition, sigma);
-              std::list<data::data_expression_list> solutions;
-              if (!data::is_false(condition))
-              {
-                E.enumerate(enumerator_element(summand.variables, condition),
-                            sigma,
-                            [&](const enumerator_element& p) {
-                              solutions.push_back(p.assign_expressions(summand.variables, r));
-                              return false;
-                            },
-                            data::is_false
-                );
-              }
-              q = cache.insert({key, solutions}).first;
-            }
-            for (const data::data_expression_list& e: q->second)
-            {
-              add_assignments(sigma, summand.variables, e);
-              process::action_list a = rewrite_action_list(summand.actions);
-              lps::state d1 = rewrite_state(summand.next_state);
-              if (use_confluence_reduction)
-              {
-                d1 = find_representative(d1);
-              }
               auto j = discovered.put(d1);
               if (j.second)
               {
@@ -616,8 +525,7 @@ class lps_explorer
               }
               report_transition(i, a, j.first);
             }
-          }
-          remove_assignments(sigma, summand.variables);
+          );
         }
       }
     }
@@ -663,7 +571,39 @@ class lps_explorer
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init)
     {
       lps::state d0 = rewrite_state(init);
-      return generate_transitions(d0, summands);
+      std::vector<std::pair<lps::multi_action, lps::state>> result;
+      add_assignments(sigma, process_parameters, d0);
+      for (const next_state_summand& summand: summands)
+      {
+        generate_transitions(
+          summand,
+          false,
+          [&](const process::action_list& a, const lps::state& d1)
+          {
+            result.emplace_back(lps::multi_action(a), d1);
+          }
+        );
+        remove_assignments(sigma, summand.variables);
+      }
+      return result;
+    }
+
+    /// \brief Generates outgoing transitions for a given state, reachable via the summand with index i.
+    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init, std::size_t i)
+    {
+      lps::state d0 = rewrite_state(init);
+      std::vector<std::pair<lps::multi_action, lps::state>> result;
+      add_assignments(sigma, process_parameters, d0);
+      generate_transitions(
+        summands[i],
+        false,
+        [&](const process::action_list& a, const lps::state& d1)
+        {
+          result.emplace_back(lps::multi_action(a), d1);
+        }
+      );
+      remove_assignments(sigma, summands[i].variables);
+      return result;
     }
 
     /// \brief Abort the function generate_state_space.
