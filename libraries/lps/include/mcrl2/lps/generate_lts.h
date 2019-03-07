@@ -167,7 +167,7 @@ std::vector<data::data_expression> make_data_expression_vector(const data::data_
   return std::vector<data::data_expression>(v.begin(), v.end());
 }
 
-class lts_generator
+class lps_explorer
 {
   protected:
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
@@ -177,7 +177,7 @@ class lts_generator
     data::rewriter r;
     mutable data::mutable_indexed_substitution<> sigma;
     data::enumerator_identifier_generator id_generator;
-    data::enumerator_algorithm<data::rewriter, data::rewriter> E;
+    data::enumerator_algorithm<> E;
     std::vector<data::variable> process_parameters;
     std::size_t n; // n = process_parameters.size()
     data::data_expression_list initial_state;
@@ -189,6 +189,8 @@ class lts_generator
     std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
 
     atermpp::indexed_set<lps::state> discovered;
+
+    volatile bool must_abort = false;
 
     struct next_state_summand
     {
@@ -537,7 +539,7 @@ class lts_generator
       auto k = discovered.put(d0);
       todo.push_back(k.first);
 
-      while (!todo.empty())
+      while (!todo.empty() && !must_abort)
       {
         std::size_t i = todo.front();
         todo.pop_front();
@@ -621,7 +623,7 @@ class lts_generator
     }
 
   public:
-    lts_generator(const specification& lpsspec, const generate_lts_options& options_)
+    lps_explorer(const specification& lpsspec, const generate_lts_options& options_)
       : options(options_),
         r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy),
         E(r, lpsspec.data(), r, id_generator, false)
@@ -646,7 +648,7 @@ class lts_generator
       }
     }
 
-    ~lts_generator() = default;
+    ~lps_explorer() = default;
 
     /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
     /// functions.
@@ -663,52 +665,70 @@ class lts_generator
       lps::state d0 = rewrite_state(init);
       return generate_transitions(d0, summands);
     }
+
+    /// \brief Abort the function generate_state_space.
+    void abort()
+    {
+      must_abort = true;
+    }
 };
 
-void generate_labeled_transition_system(const specification& lpsspec,
-                                        const generate_lts_options& options,
-                                        labeled_transition_system& result
-                                       )
+class lts_generator: protected lps_explorer
 {
-  typedef process::action_list action_type;
+  protected:
+    typedef lps_explorer super;
 
-  std::size_t number_of_states = 0;
-  std::unordered_map<action_type, std::size_t> actions;
+  public:
+    lts_generator(const specification& lpsspec, const generate_lts_options& options)
+      : super(lpsspec, options)
+    {}
 
-  auto add_action = [&](const action_type& a)
-  {
-    auto i = actions.find(a);
-    if (i == actions.end())
+    void generate_labeled_transition_system(labeled_transition_system& result)
     {
-      i = actions.emplace(std::make_pair(a, actions.size())).first;
+      typedef process::action_list action_type;
+
+      std::size_t number_of_states = 0;
+      std::unordered_map<action_type, std::size_t> actions;
+
+      auto add_action = [&](const action_type& a)
+      {
+        auto i = actions.find(a);
+        if (i == actions.end())
+        {
+          i = actions.emplace(std::make_pair(a, actions.size())).first;
+        }
+        return i->second;
+      };
+
+      lps::multi_action tau;
+      add_action(tau.actions());
+
+      generate_state_space(
+        [&](const lps::state&)
+        {
+          number_of_states++;
+        },
+        [&](std::size_t from, const action_type& a, std::size_t to)
+        {
+          std::size_t label = add_action(a);
+          result.add_transition(from, label, to);
+        }
+      );
+
+      result.initial_state = 0;
+      result.number_of_states = number_of_states;
+      result.action_labels.resize(actions.size());
+      for (const auto& p: actions)
+      {
+        result.action_labels[p.second] = lps::pp(lps::multi_action(p.first));
+      }
     }
-    return i->second;
-  };
 
-  lps::multi_action tau;
-  add_action(tau.actions());
-
-  lts_generator generator(lpsspec, options);
-  generator.generate_state_space(
-    [&](const lps::state&)
+    void abort()
     {
-      number_of_states++;
-    },
-    [&](std::size_t from, const action_type& a, std::size_t to)
-    {
-      std::size_t label = add_action(a);
-      result.add_transition(from, label, to);
+      lps_explorer::abort();
     }
-  );
-
-  result.initial_state = 0;
-  result.number_of_states = number_of_states;
-  result.action_labels.resize(actions.size());
-  for (const auto& p: actions)
-  {
-    result.action_labels[p.second] = lps::pp(lps::multi_action(p.first));
-  }
-}
+};
 
 } // namespace lps
 

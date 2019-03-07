@@ -8,8 +8,10 @@
 //
 /// \file transform.cpp
 
+#include <csignal>
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <mcrl2/lps/generate_lts.h>
@@ -32,6 +34,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
   typedef rewriter_tool<input_output_tool> super;
 
   lps::generate_lts_options options;
+  lps::lts_generator* current_generator = nullptr; // used for making the tool abortable
 
   public:
     generatelts_tool()
@@ -72,15 +75,36 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       mCRL2log(log::verbose) << options << std::endl;
       lps::labeled_transition_system lts;
       lps::specification lpsspec = lps::detail::load_lps(input_filename());
-      lps::generate_labeled_transition_system(lpsspec, options, lts);
+      lps::lts_generator generator(lpsspec, options);
+      current_generator = &generator;
+      generator.generate_labeled_transition_system(lts);
       std::ostringstream out;
       out << lts;
       utilities::detail::write_text(output_filename(), out.str());
       return true;
     }
+
+    void abort()
+    {
+      current_generator->abort();
+    }
 };
 
-int main(int argc, char* argv[])
+std::unique_ptr<generatelts_tool> tool_instance;
+
+static
+void premature_termination_handler(int)
 {
-  return generatelts_tool().execute(argc, argv);
+  // Reset signal handlers.
+  signal(SIGABRT, nullptr);
+  signal(SIGINT, nullptr);
+  tool_instance->abort();
+}
+
+int main(int argc, char** argv)
+{
+  tool_instance = std::make_unique<generatelts_tool>();
+  signal(SIGABRT, premature_termination_handler);
+  signal(SIGINT, premature_termination_handler); // At ^C invoke the termination handler.
+  return tool_instance->execute(argc, argv);
 }
