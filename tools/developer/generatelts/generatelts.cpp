@@ -103,7 +103,7 @@ void premature_termination_handler(int)
 
 int main(int argc, char** argv)
 {
-  tool_instance = std::make_unique<generatelts_tool>();
+  tool_instance = std::unique_ptr<generatelts_tool>(new generatelts_tool());
   signal(SIGABRT, premature_termination_handler);
   signal(SIGINT, premature_termination_handler); // At ^C invoke the termination handler.
   return tool_instance->execute(argc, argv);
