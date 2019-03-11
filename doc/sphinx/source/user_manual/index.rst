@@ -52,7 +52,7 @@
 
 .. note::
 
-   .. image:: Verum-2-Logo-Vert-Colour.pdf
+   .. image:: Verum-2-Logo-Vert-Colour.jpg
           :align: right
           :alt: Verum is the industry leader in reliable software design.
           :target: https://www.verum.com
