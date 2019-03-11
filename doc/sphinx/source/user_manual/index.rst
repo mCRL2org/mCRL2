@@ -54,6 +54,7 @@
 
    .. image:: Verum-2-Logo-Vert-Colour.jpg
           :align: right
+          :width: 90px
           :alt: Verum is the industry leader in reliable software design.
           :target: https://www.verum.com
    mCRL2 is used by the company `Verum <https://www.verum.com>`_ as their verification engine. 
