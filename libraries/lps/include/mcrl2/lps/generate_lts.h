@@ -18,7 +18,6 @@
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
-#include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
@@ -141,7 +140,7 @@ class lps_explorer
     // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
     std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
 
-    atermpp::indexed_set<lps::state> discovered;
+    std::unordered_map<lps::state, std::size_t> discovered;
 
     volatile bool must_abort = false;
 
@@ -450,7 +449,7 @@ class lps_explorer
       ReportState report_state = ReportState(),
       ReportTransition report_transition = ReportTransition())
     {
-      std::deque<std::size_t> todo;
+      std::deque<lps::state> todo;
       discovered.clear();
 
       if (use_confluence_reduction)
@@ -458,14 +457,15 @@ class lps_explorer
         d0 = find_representative(d0);
       }
       report_state(d0);
-      auto k = discovered.put(d0);
-      todo.push_back(k.first);
+      std::size_t k = discovered.size();
+      discovered.insert(std::make_pair(d0, k));
+      todo.push_back(d0);
 
       while (!todo.empty() && !must_abort)
       {
-        std::size_t i = todo.front();
+        const lps::state& d = todo.front();
         todo.pop_front();
-        const lps::state& d = discovered.get(i);
+        std::size_t from = discovered.find(d)->second;
 
         add_assignments(sigma, process_parameters, d);
         for (const next_state_summand& summand: summands)
@@ -475,13 +475,16 @@ class lps_explorer
             use_confluence_reduction,
             [&](const process::timed_multi_action& a, const lps::state& d1)
             {
-              auto j = discovered.put(d1);
-              if (j.second)
+              auto j = discovered.find(d1);
+              if (j == discovered.end())
               {
-                todo.push_back(j.first);
+                std::size_t k = discovered.size();
+                j = discovered.insert(std::make_pair(d1, k)).first;
+                todo.push_back(d1);
                 report_state(d1);
               }
-              report_transition(i, a, j.first);
+              std::size_t to = j->second;
+              report_transition(from, a, to);
             }
           );
         }
@@ -565,7 +568,7 @@ class lps_explorer
     }
 
     /// \brief Returns a mapping containing all discovered states.
-    const atermpp::indexed_set<lps::state>& state_map() const
+    const std::unordered_map<lps::state, std::size_t>& state_map() const
     {
       return discovered;
     }

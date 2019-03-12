@@ -14,8 +14,6 @@
 #include <memory>
 #include <string>
 #include <sstream>
-#include <mcrl2/lps/generate_lts.h>
-
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/generate_lts.h"

@@ -52,7 +52,7 @@ struct lts_builder
   virtual void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) = 0;
 
   // Add actions and states to the LTS
-  virtual void finalize(const atermpp::indexed_set<lps::state>& state_map) = 0;
+  virtual void finalize(const std::unordered_map<lps::state, std::size_t>& state_map) = 0;
 
   // Save the LTS to a file
   virtual void save(const std::string& filename) = 0;
@@ -74,7 +74,7 @@ class lts_aut_builder: public lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const atermpp::indexed_set<lps::state>& state_map) override
+    void finalize(const std::unordered_map<lps::state, std::size_t>& state_map) override
     {
       // add actions
       m_lts.set_num_action_labels(m_actions.size());
@@ -107,7 +107,7 @@ class lts_lts_builder: public lts_builder
     }
 
     // Add actions and states to the LTS
-    void finalize(const atermpp::indexed_set<lps::state>& state_map) override
+    void finalize(const std::unordered_map<lps::state, std::size_t>& state_map) override
     {
       // add actions
       m_lts.set_num_action_labels(m_actions.size());
@@ -117,9 +117,10 @@ class lts_lts_builder: public lts_builder
       }
 
       // add states
-      for (std::size_t i = 0; i < state_map.size(); i++)
+      m_lts.set_num_states(state_map.size());
+      for (const auto& p: state_map)
       {
-        m_lts.add_state(state_label_lts(state_map.get(i)));
+        m_lts.set_state_label(p.second, state_label_lts(p.first));
       }
     }
 
