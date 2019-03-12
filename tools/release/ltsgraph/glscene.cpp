@@ -469,7 +469,9 @@ void GLScene::renderEdge(std::size_t i)
   {
     vec /= vec.length();
     QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
-    float angle = acos(vec.x());
+    // If vec is equal to (1,0,0), axis will be (0,0,0).
+    // However, we still need to rotate, in this case 180 degrees.
+    float angle = vec.x() == 1 ? M_PI : std::acos(vec.x());
     glRotatef(angle * 180.0 / M_PI, axis.x(), axis.y(), axis.z());
 
     // Draw the arrow head
