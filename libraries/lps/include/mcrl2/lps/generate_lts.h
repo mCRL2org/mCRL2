@@ -28,6 +28,7 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/process/timed_multi_action.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/detail/io.h"
 
@@ -41,55 +42,6 @@ struct skip
   template<typename... Args>
   void operator()(const Args&...) const {}
 };
-
-// The states are identified by numbers in the interval [0 ... number_of_states).
-// For each transition (from, label, to) we have
-//    0 <= to < number_of_states
-//    0 <= label < action_labels.size()
-//    0 <= from < number_of_states.
-//
-// The special action "tau" is always at the front of action_labels.
-/// \brief Simple LTS class
-struct labeled_transition_system
-{
-  struct transition
-  {
-    std::size_t from;
-    std::size_t label;
-    std::size_t to;
-
-    transition(std::size_t from_, std::size_t label_, std::size_t to_)
-      : from(from_), label(label_), to(to_)
-    {}
-
-    bool operator<(const transition& other) const
-    {
-      return std::tie(from, label, to) < std::tie(other.from, other.label, other.to);
-    }
-  };
-
-  std::vector<transition> transitions;
-  std::vector<std::string> action_labels;
-  std::size_t initial_state = 0;
-  std::size_t number_of_states = 0;
-
-  void add_transition(std::size_t from, std::size_t label, std::size_t to)
-  {
-    transitions.emplace_back(from, label, to);
-  }
-};
-
-/// \brief Print a labeled_transition_system in .aut format.
-inline
-std::ostream& operator<<(std::ostream& out, const labeled_transition_system& x)
-{
-  out << "des (" << x.initial_state << ',' << x.transitions.size() << ',' << x.number_of_states << ")\n";
-  for (const auto& t: x.transitions)
-  {
-    out << '(' << t.from << ",\"" << x.action_labels[t.label] << "\"," << t.to << ")\n";
-  }
-  return out;
-}
 
 enum class caching { none, local, global };
 
@@ -197,7 +149,7 @@ class lps_explorer
     {
       data::variable_list variables;
       data::data_expression condition;
-      process::action_list actions;
+      process::timed_multi_action actions;
       std::vector<data::data_expression> next_state;
 
       // attributes for caching
@@ -209,7 +161,7 @@ class lps_explorer
       next_state_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, caching cache_strategy_)
         : variables(summand.summation_variables()),
           condition(summand.condition()),
-          actions(summand.multi_action().actions()),
+          actions(summand.multi_action().actions(), summand.multi_action().time()),
           next_state(make_data_expression_vector(summand.next_state(process_parameters))),
           cache_strategy(cache_strategy_)
       {
@@ -380,17 +332,23 @@ class lps_explorer
       return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
     }
 
-    process::action_list rewrite_action_list(const process::action_list& actions) const
+    process::timed_multi_action rewrite_action_list(const process::timed_multi_action& a) const
     {
-      return process::action_list(
-        actions.begin(),
-        actions.end(),
-        [&](const process::action& a)
-        {
-          const auto& args = a.arguments();
-          return process::action(a.label(), data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return r(x, sigma); }));
-        }
-      );
+      const process::action_list& actions = a.actions();
+      const data::data_expression& time = a.time();
+      return
+        process::timed_multi_action(
+          process::action_list(
+            actions.begin(),
+            actions.end(),
+            [&](const process::action& a)
+            {
+              const auto& args = a.arguments();
+              return process::action(a.label(), data::data_expression_list(args.begin(), args.end(), [&](const data::data_expression& x) { return r(x, sigma); }));
+            }
+          ),
+          a.has_time() ? r(time, sigma) : time
+        );
     }
 
     // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
@@ -412,7 +370,7 @@ class lps_explorer
                       sigma,
                       [&](const enumerator_element& p) {
                         p.add_assignments(summand.variables, sigma, r);
-                        process::action_list a = rewrite_action_list(summand.actions);
+                        process::timed_multi_action a = rewrite_action_list(summand.actions);
                         lps::state d1 = rewrite_state(summand.next_state);
                         if (use_confluence_reduction)
                         {
@@ -450,7 +408,7 @@ class lps_explorer
         for (const data::data_expression_list& e: q->second)
         {
           add_assignments(sigma, summand.variables, e);
-          process::action_list a = rewrite_action_list(summand.actions);
+          process::timed_multi_action a = rewrite_action_list(summand.actions);
           lps::state d1 = rewrite_state(summand.next_state);
           if (use_confluence_reduction)
           {
@@ -473,7 +431,7 @@ class lps_explorer
         generate_transitions(
           summand,
           false,
-          [&](const process::action_list& a, const lps::state& d1)
+          [&](const process::timed_multi_action& /* a */, const lps::state& d1)
           {
             result.push_back(d1);
           }
@@ -515,7 +473,7 @@ class lps_explorer
           generate_transitions(
             summand,
             use_confluence_reduction,
-            [&](const process::action_list& a, const lps::state& d1)
+            [&](const process::timed_multi_action& a, const lps::state& d1)
             {
               auto j = discovered.put(d1);
               if (j.second)
@@ -578,7 +536,7 @@ class lps_explorer
         generate_transitions(
           summand,
           false,
-          [&](const process::action_list& a, const lps::state& d1)
+          [&](const process::timed_multi_action& a, const lps::state& d1)
           {
             result.emplace_back(lps::multi_action(a), d1);
           }
@@ -597,7 +555,7 @@ class lps_explorer
       generate_transitions(
         summands[i],
         false,
-        [&](const process::action_list& a, const lps::state& d1)
+        [&](const process::timed_multi_action& a, const lps::state& d1)
         {
           result.emplace_back(lps::multi_action(a), d1);
         }
@@ -606,67 +564,16 @@ class lps_explorer
       return result;
     }
 
+    /// \brief Returns a mapping containing all discovered states.
+    const atermpp::indexed_set<lps::state>& state_map() const
+    {
+      return discovered;
+    }
+
     /// \brief Abort the function generate_state_space.
     void abort()
     {
       must_abort = true;
-    }
-};
-
-class lts_generator: protected lps_explorer
-{
-  protected:
-    typedef lps_explorer super;
-
-  public:
-    lts_generator(const specification& lpsspec, const generate_lts_options& options)
-      : super(lpsspec, options)
-    {}
-
-    void generate_labeled_transition_system(labeled_transition_system& result)
-    {
-      typedef process::action_list action_type;
-
-      std::size_t number_of_states = 0;
-      std::unordered_map<action_type, std::size_t> actions;
-
-      auto add_action = [&](const action_type& a)
-      {
-        auto i = actions.find(a);
-        if (i == actions.end())
-        {
-          i = actions.emplace(std::make_pair(a, actions.size())).first;
-        }
-        return i->second;
-      };
-
-      lps::multi_action tau;
-      add_action(tau.actions());
-
-      generate_state_space(
-        [&](const lps::state&)
-        {
-          number_of_states++;
-        },
-        [&](std::size_t from, const action_type& a, std::size_t to)
-        {
-          std::size_t label = add_action(a);
-          result.add_transition(from, label, to);
-        }
-      );
-
-      result.initial_state = 0;
-      result.number_of_states = number_of_states;
-      result.action_labels.resize(actions.size());
-      for (const auto& p: actions)
-      {
-        result.action_labels[p.second] = lps::pp(lps::multi_action(p.first));
-      }
-    }
-
-    void abort()
-    {
-      lps_explorer::abort();
     }
 };
 

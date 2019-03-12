@@ -1135,6 +1135,14 @@ const atermpp::function_symbol& function_symbol_Tau()
   return function_symbol_Tau;
 }
 
+// TimedMultAct
+inline
+const atermpp::function_symbol& function_symbol_TimedMultAct()
+{
+  static const atermpp::global_function_symbol function_symbol_TimedMultAct("TimedMultAct", 2);
+  return function_symbol_TimedMultAct;
+}
+
 // UntypedDataParameter
 inline
 const atermpp::function_symbol& function_symbol_UntypedDataParameter()
@@ -1232,7 +1240,7 @@ struct function_symbols
 {
 //--- start generated variables ---//
 static const atermpp::function_symbol BooleanOr;
-  static const atermpp::function_symbol StateOr;
+  static const atermpp::function_symbol ProcEqn;
   static const atermpp::function_symbol Hide;
   static const atermpp::function_symbol SortArrow;
   static const atermpp::function_symbol ProcessAssignment;
@@ -1261,7 +1269,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol LinearProcessSummand;
   static const atermpp::function_symbol SortSpec;
   static const atermpp::function_symbol ActionRenameRules;
-  static const atermpp::function_symbol BddFalse;
+  static const atermpp::function_symbol ActAnd;
   static const atermpp::function_symbol BooleanEquation;
   static const atermpp::function_symbol ConsSpec;
   static const atermpp::function_symbol SortList;
@@ -1283,6 +1291,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol BagComp;
   static const atermpp::function_symbol StateDelay;
   static const atermpp::function_symbol RegAlt;
+  static const atermpp::function_symbol BddFalse;
   static const atermpp::function_symbol StructCons;
   static const atermpp::function_symbol Mu;
   static const atermpp::function_symbol PBEqnSpec;
@@ -1329,7 +1338,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol Seq;
   static const atermpp::function_symbol DataVarIdInit;
   static const atermpp::function_symbol Process;
-  static const atermpp::function_symbol ActAnd;
+  static const atermpp::function_symbol TimedMultAct;
   static const atermpp::function_symbol ActionRenameSpec;
   static const atermpp::function_symbol PBES;
   static const atermpp::function_symbol StateVar;
@@ -1346,7 +1355,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol MultActName;
   static const atermpp::function_symbol IfThenElse;
   static const atermpp::function_symbol UntypedSortVariable;
-  static const atermpp::function_symbol ProcEqn;
+  static const atermpp::function_symbol StateOr;
   static const atermpp::function_symbol StructProj;
   static const atermpp::function_symbol PBEqn;
   static const atermpp::function_symbol Whr;

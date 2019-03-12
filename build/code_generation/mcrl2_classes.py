@@ -170,6 +170,7 @@ rename_expression(core::identifier_string& source, core::identifier_string& targ
 communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm_appl | CI   | CommExpr           | A communication expression
 action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm_appl | CI   | MultActName        | A multiset of action names
 untyped_multi_action(const data::untyped_data_parameter_list& actions)                                                                                                           : public atermpp::aterm_appl | CI   | UntypedMultiAction | An untyped multi action or data application
+timed_multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                       : public atermpp::aterm_appl | CIU  | TimedMultAct       | A timed multi-action
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''

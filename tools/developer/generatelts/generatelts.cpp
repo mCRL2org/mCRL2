@@ -20,6 +20,8 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/generate_lts.h"
 #include "mcrl2/lps/detail/lps_io.h"
+#include "mcrl2/lts/lts_builder.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/detail/transform_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -34,7 +36,8 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
   typedef rewriter_tool<input_output_tool> super;
 
   lps::generate_lts_options options;
-  lps::lts_generator* current_generator = nullptr; // used for making the tool abortable
+  lts::lts_type output_format = lts::lts_none;
+  lps::lps_explorer* current_explorer = nullptr;
 
   public:
     generatelts_tool()
@@ -56,6 +59,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
+      desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "save the output in the specified FORMAT. ", 'o');
       options.rewrite_strategy = rewrite_strategy();
     }
 
@@ -68,31 +72,63 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.one_point_rule_rewrite                = parser.options.find("no-one-point-rule-rewrite") == parser.options.end();
       options.replace_constants_by_variables        = parser.options.find("no-replace-constants-by-variables") == parser.options.end();
       options.resolve_summand_variable_name_clashes = parser.options.find("no-resolve-summand-variable-name-clashes") == parser.options.end();
+      if (parser.options.find("out") != parser.options.end())
+      {
+        output_format = lts::detail::parse_format(parser.option_argument("out"));
+        if (output_format == lts::lts_none)
+        {
+          parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
+        }
+      }
+      if (output_format == lts::lts_none)
+      {
+        output_format = lts::detail::guess_format(output_filename());
+        if (output_format == lts::lts_none)
+        {
+          mCRL2log(log::warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
+          output_format = lts::lts_lts;
+        }
+      }
+    }
+
+    std::unique_ptr<lts::lts_builder> create_builder()
+    {
+      switch (output_format)
+      {
+        case lts::lts_aut: return std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
+        case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder());
+        case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder());
+        default: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder());
+      }
     }
 
     bool run() override
     {
       mCRL2log(log::verbose) << options << std::endl;
-      lps::labeled_transition_system lts;
       lps::specification lpsspec = lps::detail::load_lps(input_filename());
-      lps::lts_generator generator(lpsspec, options);
-      current_generator = &generator;
-      generator.generate_labeled_transition_system(lts);
-      std::ostringstream out;
-      out << lts;
-      utilities::detail::write_text(output_filename(), out.str());
+      std::unique_ptr<lts::lts_builder> builder = create_builder();
+      lps::lps_explorer explorer(lpsspec, options);
+      current_explorer = &explorer;
+      explorer.generate_state_space(
+        lps::skip(),
+        [&](std::size_t from, const process::timed_multi_action& a, std::size_t to)
+        {
+          builder->add_transition(from, a, to);
+        }
+      );
+      builder->finalize(explorer.state_map());
+      builder->save(output_filename());
       return true;
     }
 
     void abort()
     {
-      current_generator->abort();
+      current_explorer->abort();
     }
 };
 
 std::unique_ptr<generatelts_tool> tool_instance;
 
-static
 void premature_termination_handler(int)
 {
   // Reset signal handlers.

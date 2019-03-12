@@ -65,7 +65,7 @@ atermpp::aterm_list default_value_List(const atermpp::aterm& t)
 
 //--- start generated constructors ---//
 const atermpp::aterm_appl& default_value_BooleanOr();
-const atermpp::aterm_appl& default_value_StateOr();
+const atermpp::aterm_appl& default_value_ProcEqn();
 const atermpp::aterm_appl& default_value_Hide();
 const atermpp::aterm_appl& default_value_SortArrow();
 const atermpp::aterm_appl& default_value_ProcessAssignment();
@@ -94,7 +94,7 @@ const atermpp::aterm_appl& default_value_DataEqnSpec();
 const atermpp::aterm_appl& default_value_LinearProcessSummand();
 const atermpp::aterm_appl& default_value_SortSpec();
 const atermpp::aterm_appl& default_value_ActionRenameRules();
-const atermpp::aterm_appl& default_value_BddFalse();
+const atermpp::aterm_appl& default_value_ActAnd();
 const atermpp::aterm_appl& default_value_BooleanEquation();
 const atermpp::aterm_appl& default_value_ConsSpec();
 const atermpp::aterm_appl& default_value_SortList();
@@ -116,6 +116,7 @@ const atermpp::aterm_appl& default_value_PropVarInst();
 const atermpp::aterm_appl& default_value_BagComp();
 const atermpp::aterm_appl& default_value_StateDelay();
 const atermpp::aterm_appl& default_value_RegAlt();
+const atermpp::aterm_appl& default_value_BddFalse();
 const atermpp::aterm_appl& default_value_StructCons();
 const atermpp::aterm_appl& default_value_Mu();
 const atermpp::aterm_appl& default_value_PBEqnSpec();
@@ -162,7 +163,7 @@ const atermpp::aterm_appl& default_value_StateMust();
 const atermpp::aterm_appl& default_value_Seq();
 const atermpp::aterm_appl& default_value_DataVarIdInit();
 const atermpp::aterm_appl& default_value_Process();
-const atermpp::aterm_appl& default_value_ActAnd();
+const atermpp::aterm_appl& default_value_TimedMultAct();
 const atermpp::aterm_appl& default_value_ActionRenameSpec();
 const atermpp::aterm_appl& default_value_PBES();
 const atermpp::aterm_appl& default_value_StateVar();
@@ -179,7 +180,7 @@ const atermpp::aterm_appl& default_value_PBESTrue();
 const atermpp::aterm_appl& default_value_MultActName();
 const atermpp::aterm_appl& default_value_IfThenElse();
 const atermpp::aterm_appl& default_value_UntypedSortVariable();
-const atermpp::aterm_appl& default_value_ProcEqn();
+const atermpp::aterm_appl& default_value_StateOr();
 const atermpp::aterm_appl& default_value_StructProj();
 const atermpp::aterm_appl& default_value_PBEqn();
 const atermpp::aterm_appl& default_value_Whr();
@@ -230,11 +231,11 @@ const atermpp::aterm_appl& default_value_BooleanOr()
   return t;
 }
 
-// StateOr
+// ProcEqn
 inline
-const atermpp::aterm_appl& default_value_StateOr()
+const atermpp::aterm_appl& default_value_ProcEqn()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateOr(), default_value_StateFrm(), default_value_StateFrm());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ProcEqn(), default_value_ProcVarId(), default_value_List(), default_value_ProcExpr());
   return t;
 }
 
@@ -462,11 +463,11 @@ const atermpp::aterm_appl& default_value_ActionRenameRules()
   return t;
 }
 
-// BddFalse
+// ActAnd
 inline
-const atermpp::aterm_appl& default_value_BddFalse()
+const atermpp::aterm_appl& default_value_ActAnd()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddFalse());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ActAnd(), default_value_ActFrm(), default_value_ActFrm());
   return t;
 }
 
@@ -635,6 +636,14 @@ inline
 const atermpp::aterm_appl& default_value_RegAlt()
 {
   static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_RegAlt(), default_value_RegFrm(), default_value_RegFrm());
+  return t;
+}
+
+// BddFalse
+inline
+const atermpp::aterm_appl& default_value_BddFalse()
+{
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_BddFalse());
   return t;
 }
 
@@ -1006,11 +1015,11 @@ const atermpp::aterm_appl& default_value_Process()
   return t;
 }
 
-// ActAnd
+// TimedMultAct
 inline
-const atermpp::aterm_appl& default_value_ActAnd()
+const atermpp::aterm_appl& default_value_TimedMultAct()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ActAnd(), default_value_ActFrm(), default_value_ActFrm());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_TimedMultAct(), default_value_List(), default_value_DataExpr());
   return t;
 }
 
@@ -1142,11 +1151,11 @@ const atermpp::aterm_appl& default_value_UntypedSortVariable()
   return t;
 }
 
-// ProcEqn
+// StateOr
 inline
-const atermpp::aterm_appl& default_value_ProcEqn()
+const atermpp::aterm_appl& default_value_StateOr()
 {
-  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_ProcEqn(), default_value_ProcVarId(), default_value_List(), default_value_ProcExpr());
+  static const atermpp::aterm_appl t = atermpp::aterm_appl(function_symbol_StateOr(), default_value_StateFrm(), default_value_StateFrm());
   return t;
 }
 
@@ -1469,7 +1478,7 @@ struct default_values
 {
 //--- start generated variables ---//
 static const atermpp::aterm_appl BooleanOr;
-  static const atermpp::aterm_appl StateOr;
+  static const atermpp::aterm_appl ProcEqn;
   static const atermpp::aterm_appl Hide;
   static const atermpp::aterm_appl SortArrow;
   static const atermpp::aterm_appl ProcessAssignment;
@@ -1498,7 +1507,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl LinearProcessSummand;
   static const atermpp::aterm_appl SortSpec;
   static const atermpp::aterm_appl ActionRenameRules;
-  static const atermpp::aterm_appl BddFalse;
+  static const atermpp::aterm_appl ActAnd;
   static const atermpp::aterm_appl BooleanEquation;
   static const atermpp::aterm_appl ConsSpec;
   static const atermpp::aterm_appl SortList;
@@ -1520,6 +1529,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl BagComp;
   static const atermpp::aterm_appl StateDelay;
   static const atermpp::aterm_appl RegAlt;
+  static const atermpp::aterm_appl BddFalse;
   static const atermpp::aterm_appl StructCons;
   static const atermpp::aterm_appl Mu;
   static const atermpp::aterm_appl PBEqnSpec;
@@ -1566,7 +1576,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl Seq;
   static const atermpp::aterm_appl DataVarIdInit;
   static const atermpp::aterm_appl Process;
-  static const atermpp::aterm_appl ActAnd;
+  static const atermpp::aterm_appl TimedMultAct;
   static const atermpp::aterm_appl ActionRenameSpec;
   static const atermpp::aterm_appl PBES;
   static const atermpp::aterm_appl StateVar;
@@ -1583,7 +1593,7 @@ static const atermpp::aterm_appl BooleanOr;
   static const atermpp::aterm_appl MultActName;
   static const atermpp::aterm_appl IfThenElse;
   static const atermpp::aterm_appl UntypedSortVariable;
-  static const atermpp::aterm_appl ProcEqn;
+  static const atermpp::aterm_appl StateOr;
   static const atermpp::aterm_appl StructProj;
   static const atermpp::aterm_appl PBEqn;
   static const atermpp::aterm_appl Whr;

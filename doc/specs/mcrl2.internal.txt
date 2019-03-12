@@ -116,6 +116,7 @@
 
 //multiaction
 <MultAct>      ::= MultAct(<Action>*)
+<TimedMultAct> ::= TimedMultAct(<Action>*, <DataExpr>)
 
 //untyped multiaction
 <UntypedMultiAction> ::= UntypedMultiAction(<UntypedDataParameter>*)
