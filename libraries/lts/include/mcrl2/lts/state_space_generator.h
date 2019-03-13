@@ -25,7 +25,7 @@ struct state_space_generator
   lps::explorer explorer;
   std::map<lps::state, lps::state> backpointers;
   std::size_t saved_trace_count = 0;
-  std::vector<bool> detect_action_info;
+  std::vector<bool> is_detect_action_summand;
 
   state_space_generator(const lps::specification& lpsspec, const lps::generate_lts_options& options_)
     : options(options_), explorer(lpsspec, options_)
@@ -52,10 +52,10 @@ struct state_space_generator
     if (options.detect_action)
     {
       const auto& summands = lpsspec.process().action_summands();
-      detect_action_info.reserve(summands.size());
+      is_detect_action_summand.reserve(summands.size());
       for (const auto& summand: summands)
       {
-        detect_action_info.push_back(match_action(summand));
+        is_detect_action_summand.push_back(match_action(summand));
       }
     }
   }
@@ -136,49 +136,49 @@ struct state_space_generator
     }
   }
 
-  void detect_action(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1, std::size_t summand_index)
+  std::string detect_action_filename(const lps::multi_action& a) const
+  {
+    std::string filename = options.trace_prefix + "_act_" + std::to_string(saved_trace_count);
+    if (utilities::detail::contains(options.trace_multiactions, a))
+    {
+      filename = filename + "_" + lps::pp(a);
+    }
+    for (const process::action& a_i: a.actions())
+    {
+      if (utilities::detail::contains(options.trace_actions, a_i.label().name()))
+      {
+        filename = filename + "_" + core::pp(a_i.label().name());
+      }
+    }
+    filename = filename + ".trc";
+    return filename;
+  }
+
+  void detect_action(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1)
   {
     using utilities::detail::contains;
 
-    if (detect_action_info[summand_index])
+    if (options.generate_traces && saved_trace_count < options.max_traces)
     {
-      if (options.generate_traces && saved_trace_count < options.max_traces)
+      mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ")";
       {
-        mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ")";
+        trace::Trace tr = construct_trace(s0);
+        tr.setState(s1);
+        tr.addAction(a);
+        std::string filename = detect_action_filename(a);
+        if (save_trace(tr, filename))
         {
-          trace::Trace tr = construct_trace(s0);
-          tr.setState(s1);
-          tr.addAction(a);
-
-          // generate filename
-          std::string filename = options.trace_prefix + "_act_" + std::to_string(saved_trace_count);
-          if (contains(options.trace_multiactions, a))
-          {
-            filename = filename + "_" + lps::pp(a);
-          }
-          for (const process::action& a_i: a.actions())
-          {
-            if (contains(options.trace_actions, a_i.label().name()))
-            {
-              filename = filename + "_" + core::pp(a_i.label().name());
-            }
-          }
-          filename = filename + ".trc";
-
-          if (save_trace(tr, filename))
-          {
-            mCRL2log(log::info) << " and saved to '" << filename << "'.\n";
-          }
-          else
-          {
-            mCRL2log(log::info) << " but it could not be saved to '" << filename << "'.\n";
-          }
+          mCRL2log(log::info) << " and saved to '" << filename << "'.\n";
+        }
+        else
+        {
+          mCRL2log(log::info) << " but it could not be saved to '" << filename << "'.\n";
         }
       }
-      else
-      {
-        mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ").\n";
-      }
+    }
+    else
+    {
+      mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ").\n";
     }
   }
 
@@ -203,9 +203,9 @@ struct state_space_generator
       {
         builder.add_transition(s0_index, a, s1_index);
         has_outgoing_transitions = true;
-        if (options.detect_action)
+        if (options.detect_action && is_detect_action_summand[summand_index])
         {
-          detect_action(*source, s0_index, lps::multi_action(a.actions(), a.time()), s1, summand_index);
+          detect_action(*source, s0_index, lps::multi_action(a.actions(), a.time()), s1);
         }
       },
 
