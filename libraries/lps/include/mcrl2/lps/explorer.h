@@ -9,8 +9,8 @@
 /// \file mcrl2/lps/generate_lts.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_GENERATE_LTS_H
-#define MCRL2_LPS_GENERATE_LTS_H
+#ifndef MCRL2_LPS_EXPLORER_H
+#define MCRL2_LPS_EXPLORER_H
 
 #include <deque>
 #include <iomanip>
@@ -149,7 +149,7 @@ std::vector<data::data_expression> make_data_expression_vector(const data::data_
   return std::vector<data::data_expression>(v.begin(), v.end());
 }
 
-class lps_explorer
+class explorer
 {
   protected:
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
@@ -532,7 +532,7 @@ class lps_explorer
     }
 
   public:
-    lps_explorer(const specification& lpsspec, const generate_lts_options& options_)
+    explorer(const specification& lpsspec, const generate_lts_options& options_)
       : options(options_),
         r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy),
         E(r, lpsspec.data(), r, id_generator, false)
@@ -557,7 +557,7 @@ class lps_explorer
       }
     }
 
-    ~lps_explorer() = default;
+    ~explorer() = default;
 
     /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
     /// functions.
@@ -644,4 +644,4 @@ class lps_explorer
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_GENERATE_LTS_H
+#endif // MCRL2_LPS_EXPLORER_H

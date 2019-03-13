@@ -22,7 +22,7 @@ namespace lts {
 struct state_space_generator
 {
   const lps::generate_lts_options& options;
-  lps::lps_explorer explorer;
+  lps::explorer explorer;
   std::map<lps::state, lps::state> backpointers;
   std::size_t trace_count = 0; // the number of saved traces
 

@@ -14,7 +14,7 @@
 
 #include <unordered_map>
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/lps/generate_lts.h"
+#include "mcrl2/lps/explorer.h"
 #include "mcrl2/process/timed_multi_action.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_aut.h"

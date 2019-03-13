@@ -16,7 +16,7 @@
 #include <sstream>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/lps/generate_lts.h"
+#include "mcrl2/lps/explorer.h"
 #include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
@@ -36,7 +36,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
   lps::generate_lts_options options;
   lts::lts_type output_format = lts::lts_none;
-  lps::lps_explorer* current_explorer = nullptr;
+  lps::explorer* current_explorer = nullptr;
 
   public:
     generatelts_tool()
