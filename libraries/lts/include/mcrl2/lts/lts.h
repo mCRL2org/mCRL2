@@ -147,6 +147,22 @@ class lts: public LTS_BASE
       return m_nstates;
     }
 
+    /** \brief Provides access to the state labels of the LTS.
+        \return The state labels of the LTS.
+    */
+    std::vector<STATE_LABEL_T>& state_labels()
+    {
+      return m_state_labels;
+    }
+
+    /** \brief Provides access to the state labels of the LTS.
+        \return The state labels of the LTS.
+    */
+    const std::vector<STATE_LABEL_T>& state_labels() const
+    {
+      return m_state_labels;
+    }
+
     /** \brief Gets the number of state labels of this LTS.
      *  \details As states do not need to have state labels,
      *  the number of state labels can differ from the number of
