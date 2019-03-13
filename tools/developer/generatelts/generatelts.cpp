@@ -89,14 +89,14 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       }
     }
 
-    std::unique_ptr<lts::lts_builder> create_builder()
+    std::unique_ptr<lts::lts_builder> create_builder(const lps::specification& lpsspec)
     {
       switch (output_format)
       {
         case lts::lts_aut: return std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
-        case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder());
-        case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder());
-        default: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder());
+        case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder(lpsspec.data(), lpsspec.action_labels()));
+        case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder(lpsspec.data(), lpsspec.action_labels()));
+        default: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels()));
       }
     }
 
@@ -104,7 +104,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     {
       mCRL2log(log::verbose) << options << std::endl;
       lps::specification lpsspec = lps::detail::load_lps(input_filename());
-      std::unique_ptr<lts::lts_builder> builder = create_builder();
+      std::unique_ptr<lts::lts_builder> builder = create_builder(lpsspec);
       lps::lps_explorer explorer(lpsspec, options);
       current_explorer = &explorer;
       explorer.generate_state_space(

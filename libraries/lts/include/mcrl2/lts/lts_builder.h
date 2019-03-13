@@ -56,6 +56,8 @@ struct lts_builder
 
   // Save the LTS to a file
   virtual void save(const std::string& filename) = 0;
+
+  virtual ~lts_builder() = default;
 };
 
 
@@ -98,7 +100,11 @@ class lts_lts_builder: public lts_builder
     lts_lts_t m_lts;
 
   public:
-    lts_lts_builder() = default;
+    lts_lts_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels)
+    {
+      m_lts.set_data(dataspec);
+      m_lts.set_action_label_declarations(action_labels);
+    }
 
     void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
     {
@@ -117,11 +123,14 @@ class lts_lts_builder: public lts_builder
       }
 
       // add states
-      m_lts.set_num_states(state_map.size());
+      std::vector<state_label_lts> state_labels(state_map.size());
       for (const auto& p: state_map)
       {
-        m_lts.set_state_label(p.second, state_label_lts(p.first));
+        state_labels[p.second] = state_label_lts(p.first);
       }
+      // TODO: uncomment this after the interface of lts has been changed
+      // m_lts.state_labels() = std::move(state_labels);
+      m_lts.set_num_states(state_map.size(), true);
     }
 
     void save(const std::string& filename) override
@@ -133,6 +142,11 @@ class lts_lts_builder: public lts_builder
 class lts_dot_builder: public lts_lts_builder
 {
   public:
+    typedef lts_lts_builder super;
+    lts_dot_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels)
+      : super(dataspec, action_labels)
+    { }
+
     void save(const std::string& filename) override
     {
       lts_dot_t dot;
@@ -144,6 +158,11 @@ class lts_dot_builder: public lts_lts_builder
 class lts_fsm_builder: public lts_lts_builder
 {
   public:
+    typedef lts_lts_builder super;
+    lts_fsm_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels)
+      : super(dataspec, action_labels)
+    { }
+
     void save(const std::string& filename) override
     {
       lts_fsm_t fsm;
