@@ -350,13 +350,13 @@ class lps_explorer
         );
     }
 
-    // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
+    // Generates outgoing transitions for a summand, and reports them via the callback function examine_transition.
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
-    template <typename ReportTransition = skip>
+    template <typename ExamineTransition = skip>
     void generate_transitions(
       const next_state_summand& summand,
       bool use_confluence_reduction,
-      ReportTransition report_transition = ReportTransition()
+      ExamineTransition examine_transition = ExamineTransition()
     )
     {
       id_generator.clear();
@@ -375,7 +375,7 @@ class lps_explorer
                         {
                           d1 = find_representative(d1);
                         }
-                        report_transition(a, d1);
+                        examine_transition(a, d1);
                         return false;
                       },
                       data::is_false
@@ -413,7 +413,7 @@ class lps_explorer
           {
             d1 = find_representative(d1);
           }
-          report_transition(a, d1);
+          examine_transition(a, d1);
         }
       }
       remove_assignments(sigma, summand.variables);
@@ -441,13 +441,21 @@ class lps_explorer
     }
 
     // pre: d0 is in normal form
-    template <typename SummandSequence, typename ReportState = skip, typename ReportTransition = skip>
+    template <typename SummandSequence,
+              typename DiscoverState = skip,
+              typename ExamineTransition = skip,
+              typename StartState = skip,
+              typename FinishState = skip
+             >
     void generate_state_space(
       lps::state& d0,
       bool use_confluence_reduction,
       const SummandSequence& summands,
-      ReportState report_state = ReportState(),
-      ReportTransition report_transition = ReportTransition())
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      StartState start_state = StartState(),
+      FinishState finish_state = FinishState()
+    )
     {
       std::deque<lps::state> todo;
       discovered.clear();
@@ -456,7 +464,7 @@ class lps_explorer
       {
         d0 = find_representative(d0);
       }
-      report_state(d0);
+      discover_state(d0);
       std::size_t k = discovered.size();
       discovered.insert(std::make_pair(d0, k));
       todo.push_back(d0);
@@ -464,6 +472,7 @@ class lps_explorer
       while (!todo.empty() && !must_abort)
       {
         const lps::state& d = todo.front();
+        start_state(d);
         todo.pop_front();
         std::size_t from = discovered.find(d)->second;
 
@@ -481,13 +490,14 @@ class lps_explorer
                 std::size_t k = discovered.size();
                 j = discovered.insert(std::make_pair(d1, k)).first;
                 todo.push_back(d1);
-                report_state(d1);
+                discover_state(d1);
               }
               std::size_t to = j->second;
-              report_transition(from, a, to);
+              examine_transition(from, a, to);
             }
           );
         }
+        finish_state(d);
       }
     }
 
@@ -521,11 +531,25 @@ class lps_explorer
 
     /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
     /// functions.
-    template <typename ReportState = skip, typename ReportTransition = skip>
-    void generate_state_space(ReportState report_state = ReportState(), ReportTransition report_transition = ReportTransition())
+    /// \param discover_state Is invoked when a state is encountered for the first time.
+    /// \param examine_transition Is invoked on every transition.
+    /// \param start_state Is invoked on a state right before its outgoing transitions are being explored.
+    /// \param finish_state Is invoked on a state after all of its outgoing transitions have been explored.
+    template <
+      typename DiscoverState = skip,
+      typename ExamineTransition = skip,
+      typename StartState = skip,
+      typename FinishState = skip
+    >
+    void generate_state_space(
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      StartState start_state = StartState(),
+      FinishState finish_state = FinishState()
+    )
     {
       lps::state d0 = rewrite_state(initial_state);
-      generate_state_space(d0, options.confluence, summands, report_state, report_transition);
+      generate_state_space(d0, options.confluence, summands, discover_state, examine_transition, start_state, finish_state);
     }
 
     /// \brief Generates outgoing transitions for a given state.

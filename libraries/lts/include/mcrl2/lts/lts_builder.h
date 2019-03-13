@@ -128,8 +128,7 @@ class lts_lts_builder: public lts_builder
       {
         state_labels[p.second] = state_label_lts(p.first);
       }
-      // TODO: uncomment this after the interface of lts has been changed
-      // m_lts.state_labels() = std::move(state_labels);
+      m_lts.state_labels() = std::move(state_labels);
       m_lts.set_num_states(state_map.size(), true);
     }
 
