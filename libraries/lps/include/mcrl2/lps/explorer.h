@@ -180,6 +180,7 @@ class explorer
       data::data_expression condition;
       process::timed_multi_action actions;
       std::vector<data::data_expression> next_state;
+      std::size_t index;
 
       // attributes for caching
       caching cache_strategy;
@@ -187,11 +188,12 @@ class explorer
       atermpp::function_symbol f_gamma;
       mutable std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
 
-      next_state_summand(const lps::action_summand& summand, const data::variable_list& process_parameters, caching cache_strategy_)
+      next_state_summand(const lps::action_summand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
         : variables(summand.summation_variables()),
           condition(summand.condition()),
           actions(summand.multi_action().actions(), summand.multi_action().time()),
           next_state(make_data_expression_vector(summand.next_state(process_parameters))),
+          index(summand_index),
           cache_strategy(cache_strategy_)
       {
         gamma = free_variables(summand.condition(), process_parameters);
@@ -523,7 +525,7 @@ class explorer
                 todo.push_back(s1);
               }
               std::size_t s1_index = j->second;
-              examine_transition(s_index, a, s1_index);
+              examine_transition(s_index, a, s1_index, s1, summand.index);
             }
           );
         }
@@ -543,16 +545,18 @@ class explorer
       n = process_parameters.size();
       initial_state = lpsspec_.initial_process().state(lpsspec_.process().process_parameters());
       core::identifier_string ctau{"ctau"};
-      for (const action_summand& summand: lpsspec_.process().action_summands())
+      const auto& lpsspec_summands = lpsspec_.process().action_summands();
+      for (std::size_t i = 0; i < lpsspec_summands.size(); i++)
       {
+        const action_summand& summand = lpsspec_summands[i];
         auto cache_strategy = options.cached ? (options.global_cache ? lps::caching::global : lps::caching::local) : lps::caching::none;
         if (summand.multi_action().actions().size() == 1 && summand.multi_action().actions().front().label().name() == ctau)
         {
-          confluent_summands.emplace_back(summand, lpsspec_.process().process_parameters(), cache_strategy);
+          confluent_summands.emplace_back(summand, i, lpsspec_.process().process_parameters(), cache_strategy);
         }
         else
         {
-          summands.emplace_back(summand, lpsspec_.process().process_parameters(), cache_strategy);
+          summands.emplace_back(summand, i, lpsspec_.process().process_parameters(), cache_strategy);
         }
       }
     }
@@ -585,6 +589,8 @@ class explorer
     /// \brief Generates outgoing transitions for a given state.
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const lps::state& d0)
     {
+      data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
+
       std::vector<std::pair<lps::multi_action, lps::state>> result;
       add_assignments(sigma, process_parameters, d0);
       for (const next_state_summand& summand: summands)
@@ -599,6 +605,9 @@ class explorer
         );
         remove_assignments(sigma, summand.variables);
       }
+
+      // undo changes to sigma
+      add_assignments(sigma, process_parameters, process_parameter_values);
       return result;
     }
 
@@ -612,6 +621,8 @@ class explorer
     /// \brief Generates outgoing transitions for a given state, reachable via the summand with index i.
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init, std::size_t i)
     {
+      data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
+
       lps::state d0 = rewrite_state(init);
       std::vector<std::pair<lps::multi_action, lps::state>> result;
       add_assignments(sigma, process_parameters, d0);
@@ -624,6 +635,9 @@ class explorer
         }
       );
       remove_assignments(sigma, summands[i].variables);
+
+      // undo changes to sigma
+      add_assignments(sigma, process_parameters, process_parameter_values);
       return result;
     }
 

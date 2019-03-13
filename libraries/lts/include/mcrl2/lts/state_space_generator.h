@@ -24,11 +24,41 @@ struct state_space_generator
   const lps::generate_lts_options& options;
   lps::explorer explorer;
   std::map<lps::state, lps::state> backpointers;
-  std::size_t trace_count = 0; // the number of saved traces
+  std::size_t saved_trace_count = 0;
+  std::vector<bool> detect_action_info;
 
   state_space_generator(const lps::specification& lpsspec, const lps::generate_lts_options& options_)
     : options(options_), explorer(lpsspec, options_)
-  {}
+  {
+    initialize_detected_action_summands(lpsspec);
+  }
+
+  bool match_action(const lps::action_summand& summand) const
+  {
+    using utilities::detail::contains;
+    for (const process::action& a: summand.multi_action().actions())
+    {
+      if (contains(options.trace_actions, a.label().name()))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void initialize_detected_action_summands(const lps::specification& lpsspec)
+  {
+    using utilities::detail::contains;
+    if (options.detect_action)
+    {
+      const auto& summands = lpsspec.process().action_summands();
+      detect_action_info.reserve(summands.size());
+      for (const auto& summand: summands)
+      {
+        detect_action_info.push_back(match_action(summand));
+      }
+    }
+  }
 
   // Finds a transition s0 --a--> s1, and returns a.
   lps::multi_action find_action(const lps::state& s0, const lps::state& s1)
@@ -76,6 +106,7 @@ struct state_space_generator
     try
     {
       tr.save(filename);
+      saved_trace_count++;
       return true;
     }
     catch(...)
@@ -84,15 +115,14 @@ struct state_space_generator
     }
   }
 
-  void report_deadlock(const lps::state& s, std::size_t s_index)
+  void detect_deadlock(const lps::state& s, std::size_t s_index)
   {
-    if (options.generate_traces && trace_count <= options.max_traces)
+    if (options.generate_traces && saved_trace_count < options.max_traces)
     {
       trace::Trace tr = construct_trace(s);
-      std::string filename = options.trace_prefix + "_dlk_" + std::to_string(trace_count) + ".trc";
+      std::string filename = options.trace_prefix + "_dlk_" + std::to_string(saved_trace_count) + ".trc";
       if (save_trace(tr, filename))
       {
-        trace_count++;
         mCRL2log(log::info) << "deadlock-detect: deadlock found and saved to '" << filename << "' (state index: " << s_index << ").\n";
       }
       else
@@ -103,6 +133,52 @@ struct state_space_generator
     else
     {
       mCRL2log(log::info) << "deadlock-detect: deadlock found (state index: " << s_index <<  ").\n";
+    }
+  }
+
+  void detect_action(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1, std::size_t summand_index)
+  {
+    using utilities::detail::contains;
+
+    if (detect_action_info[summand_index])
+    {
+      if (options.generate_traces && saved_trace_count < options.max_traces)
+      {
+        mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ")";
+        {
+          trace::Trace tr = construct_trace(s0);
+          tr.setState(s1);
+          tr.addAction(a);
+
+          // generate filename
+          std::string filename = options.trace_prefix + "_act_" + std::to_string(saved_trace_count);
+          if (contains(options.trace_multiactions, a))
+          {
+            filename = filename + "_" + lps::pp(a);
+          }
+          for (const process::action& a_i: a.actions())
+          {
+            if (contains(options.trace_actions, a_i.label().name()))
+            {
+              filename = filename + "_" + core::pp(a_i.label().name());
+            }
+          }
+          filename = filename + ".trc";
+
+          if (save_trace(tr, filename))
+          {
+            mCRL2log(log::info) << " and saved to '" << filename << "'.\n";
+          }
+          else
+          {
+            mCRL2log(log::info) << " but it could not be saved to '" << filename << "'.\n";
+          }
+        }
+      }
+      else
+      {
+        mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ").\n";
+      }
     }
   }
 
@@ -123,10 +199,14 @@ struct state_space_generator
       },
 
       // examine_transition
-      [&](std::size_t from, const process::timed_multi_action& a, std::size_t to)
+      [&](std::size_t s0_index, const process::timed_multi_action& a, std::size_t s1_index, const lps::state& s1, std::size_t summand_index)
       {
-        builder.add_transition(from, a, to);
+        builder.add_transition(s0_index, a, s1_index);
         has_outgoing_transitions = true;
+        if (options.detect_action)
+        {
+          detect_action(*source, s0_index, lps::multi_action(a.actions(), a.time()), s1, summand_index);
+        }
       },
 
       // start_state
@@ -139,9 +219,9 @@ struct state_space_generator
       // finish_state
       [&](const lps::state& d, std::size_t i)
       {
-        if (!has_outgoing_transitions && options.detect_deadlock)
+        if (options.detect_deadlock && !has_outgoing_transitions)
         {
-          report_deadlock(d, i);
+          detect_deadlock(d, i);
         }
       }
     );
