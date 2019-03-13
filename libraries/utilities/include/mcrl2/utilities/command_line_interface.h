@@ -824,6 +824,12 @@ class command_line_parser
     /// \brief The list of arguments that have not been matched with an option
     argument_list const&    arguments;
 
+    /// \brief Returns true if option is set.
+    bool has_option(const std::string& option) const
+    {
+      return options.find(option) != options.end();
+    }
+
   private:
 
     /// \brief Parses string as if it is an unparsed command line

@@ -14,6 +14,7 @@
 
 #include <deque>
 #include <iomanip>
+#include <limits>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
@@ -21,6 +22,7 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+// #include "mcrl2/lps/exploration_strategy.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
@@ -60,6 +62,7 @@ std::ostream& operator<<(std::ostream& os, caching c)
 struct generate_lts_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
+  // exploration_strategy expl_strat;
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;
   bool resolve_summand_variable_name_clashes = false;
@@ -67,19 +70,46 @@ struct generate_lts_options
   bool cached = false;
   bool global_cache = false;
   bool confluence = false;
+  bool detect_deadlock = false;
+  bool detect_nondeterminism = false;
+  bool detect_divergence = false;
+  bool detect_action = false;
+  bool generate_traces = false;
+  std::size_t max_states = std::numeric_limits<std::size_t>::max();
+  std::size_t max_traces = 0;
+  std::string priority_action;
+  std::string trace_prefix;
+  std::set<core::identifier_string> trace_actions;
+  std::set<std::string> trace_multiaction_strings;
+  std::set<lps::multi_action> trace_multiactions;
+  std::set<core::identifier_string> actions_internal_for_divergencies;
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const generate_lts_options& options)
 {
+  out << "rewrite_strategy = " << options.rewrite_strategy << std::endl;
+// out << "expl_strat = " << options.expl_strat << std::endl;
   out << "cached = " << std::boolalpha << options.cached << std::endl;
   out << "global-cache = " << std::boolalpha << options.global_cache << std::endl;
   out << "confluence = " << std::boolalpha << options.confluence << std::endl;
   out << "one_point_rule_rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "resolve_summand_variable_name_clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
   out << "replace_constants_by_variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
-  out << "rewrite_strategy = " << std::boolalpha << options.rewrite_strategy << std::endl;
   out << "store_states_as_trees = " << std::boolalpha << options.store_states_as_trees << std::endl;
+  out << "detect_deadlock = " << std::boolalpha << options.detect_deadlock << std::endl;
+  out << "detect_nondeterminism = " << std::boolalpha << options.detect_nondeterminism << std::endl;
+  out << "detect_divergence = " << std::boolalpha << options.detect_divergence << std::endl;
+  out << "detect_action = " << std::boolalpha << options.detect_action << std::endl;
+  out << "generate_traces = " << std::boolalpha << options.generate_traces << std::endl;
+  out << "max_states = " << options.max_states << std::endl;
+  out << "max_traces = " << options.max_traces << std::endl;
+  out << "priority_action = " << options.priority_action << std::endl;
+  out << "trace_prefix = " << options.trace_prefix << std::endl;
+  out << "trace_actions = " << core::detail::print_set(options.trace_actions) << std::endl;
+  out << "trace_multiaction_strings = " << core::detail::print_set(options.trace_multiaction_strings) << std::endl;
+  out << "trace_multiactions = " << core::detail::print_set(options.trace_multiactions) << std::endl;
+  out << "actions_internal_for_divergencies = " << core::detail::print_set(options.actions_internal_for_divergencies) << std::endl;
   return out;
 }
 
@@ -125,7 +155,7 @@ class lps_explorer
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
     struct next_state_summand;
 
-    generate_lts_options options;
+    const generate_lts_options& options;
     data::rewriter r;
     mutable data::mutable_indexed_substitution<> sigma;
     data::enumerator_identifier_generator id_generator;
@@ -464,40 +494,40 @@ class lps_explorer
       {
         d0 = find_representative(d0);
       }
-      discover_state(d0);
-      std::size_t k = discovered.size();
-      discovered.insert(std::make_pair(d0, k));
+      std::size_t d0_index = discovered.size();
+      discovered.insert(std::make_pair(d0, d0_index));
+      discover_state(d0, d0_index);
       todo.push_back(d0);
 
       while (!todo.empty() && !must_abort)
       {
-        const lps::state& d = todo.front();
-        start_state(d);
+        const lps::state& s = todo.front();
         todo.pop_front();
-        std::size_t from = discovered.find(d)->second;
+        std::size_t s_index = discovered.find(s)->second;
+        start_state(s, s_index);
 
-        add_assignments(sigma, process_parameters, d);
+        add_assignments(sigma, process_parameters, s);
         for (const next_state_summand& summand: summands)
         {
           generate_transitions(
             summand,
             use_confluence_reduction,
-            [&](const process::timed_multi_action& a, const lps::state& d1)
+            [&](const process::timed_multi_action& a, const lps::state& s1)
             {
-              auto j = discovered.find(d1);
+              auto j = discovered.find(s1);
               if (j == discovered.end())
               {
                 std::size_t k = discovered.size();
-                j = discovered.insert(std::make_pair(d1, k)).first;
-                todo.push_back(d1);
-                discover_state(d1);
+                j = discovered.insert(std::make_pair(s1, k)).first;
+                discover_state(s1, k);
+                todo.push_back(s1);
               }
-              std::size_t to = j->second;
-              examine_transition(from, a, to);
+              std::size_t s1_index = j->second;
+              examine_transition(s_index, a, s1_index);
             }
           );
         }
-        finish_state(d);
+        finish_state(s, s_index);
       }
     }
 
@@ -553,9 +583,8 @@ class lps_explorer
     }
 
     /// \brief Generates outgoing transitions for a given state.
-    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init)
+    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const lps::state& d0)
     {
-      lps::state d0 = rewrite_state(init);
       std::vector<std::pair<lps::multi_action, lps::state>> result;
       add_assignments(sigma, process_parameters, d0);
       for (const next_state_summand& summand: summands)
@@ -571,6 +600,13 @@ class lps_explorer
         remove_assignments(sigma, summand.variables);
       }
       return result;
+    }
+
+    /// \brief Generates outgoing transitions for a given state.
+    std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init)
+    {
+      lps::state d0 = rewrite_state(init);
+      return generate_transitions(d0);
     }
 
     /// \brief Generates outgoing transitions for a given state, reachable via the summand with index i.

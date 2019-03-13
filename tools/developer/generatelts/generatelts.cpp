@@ -10,7 +10,7 @@
 
 #include <csignal>
 #include <iostream>
-#include <fstream>
+#include <limits>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -20,6 +20,7 @@
 #include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/state_space_generator.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/detail/transform_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -51,26 +52,105 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
-      desc.add_option("cached", "cache enumerator solutions");
       desc.add_option("global-cache", "use a global cache");
-      desc.add_option("confluence", "apply confluence reduction", 'c');
       desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
+
+      // copied from lps2lts
+      desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
+      desc.add_option("max", utilities::make_mandatory_argument("NUM"), "explore at most NUM states", 'l');
+      desc.add_option("nondeterminism", "detect nondeterministic states, i.e. states with outgoing transitions with the same label to different states. ", 'n');
+      desc.add_option("deadlock", "detect deadlocks (i.e. for every deadlock a message is printed). ", 'D');
+      desc.add_option("divergence",
+                   "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed). "
+                   "The algorithm to detect the divergences is linear for every state, "
+                   "so state space exploration becomes quadratic with this option on, causing a state "
+                   "space exploration to become slow when this option is enabled. ", 'F');
+      desc.add_option("action", utilities::make_mandatory_argument("NAMES"),
+                   "report whether an action from NAMES occurs in the transitions system, "
+                   "where NAMES is a comma-separated list. A message "
+                   "is printed for every occurrence of one of these action names. "
+                   "With the -t flag traces towards these actions are generated. "
+                   "When using -tN only N traces are generated after which the generation of the state space stops. ", 'a');
+      desc.add_option("multiaction", utilities::make_mandatory_argument("NAMES"),
+                 "detect and report multiactions in the transitions system "
+                 "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
+                 "are matched exactly, including data parameters. ", 'm');
+      desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
+                 "Write a shortest trace to each state that is reached with an action from NAMES "
+                 "with the option --action, is a deadlock with the option --deadlock, is nondeterministic with the option --nondeterminism, or is a "
+                 "divergence with the option --divergence to a file. "
+                 "No more than NUM traces will be written. If NUM is not supplied the number of "
+                 "traces is unbounded. "
+                 "For each trace that is to be written a unique file with extension .trc (trace) "
+                 "will be created containing a shortest trace from the initial state to the deadlock "
+                 "state. The traces can be pretty printed and converted to other formats using tracepp. ", 't');
+      desc.add_option("confluence", utilities::make_optional_argument("NAME", "ctau"),
+                 "apply prioritization of transitions with the action label NAME. "
+                 "(when no NAME is supplied (i.e., '-c') priority is given to the action 'ctau'. To give priority to "
+                 "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
+                 "state space is necessarily branching bisimilar to the state space of the lps. The generation "
+                 "algorithm that is used does not require the linear process to be tau convergent. ", 'c');
       desc.add_option("out", utilities::make_mandatory_argument("FORMAT"), "save the output in the specified FORMAT. ", 'o');
+      desc.add_option("tau", utilities::make_mandatory_argument("ACTNAMES"),
+                 "consider actions with a name in the comma separated list ACTNAMES to be internal. "
+                 "This list is only used and allowed when searching for divergencies. ");
       options.rewrite_strategy = rewrite_strategy();
+    }
+
+    std::list<std::string> split_actions(const std::string& s)
+    {
+      std::size_t count = 0;
+      std::string a;
+      std::list<std::string> result;
+      for (char ch: s)
+      {
+        if (ch == ',' && count == 0)
+        {
+          result.push_back(a);
+          a.clear();
+        }
+        else
+        {
+          if (ch == '(')
+          {
+            ++count;
+          }
+          else if (ch == ')')
+          {
+            --count;
+          }
+          a.push_back(ch);
+        }
+      }
+      if (!a.empty())
+      {
+        result.push_back(a);
+      }
+      return result;
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
-      options.cached                                = parser.options.find("cached") != parser.options.end();
-      options.global_cache                          = parser.options.find("global-cache") != parser.options.end();
-      options.confluence                            = parser.options.find("confluence") != parser.options.end();
-      options.one_point_rule_rewrite                = parser.options.find("no-one-point-rule-rewrite") == parser.options.end();
-      options.replace_constants_by_variables        = parser.options.find("no-replace-constants-by-variables") == parser.options.end();
-      options.resolve_summand_variable_name_clashes = parser.options.find("no-resolve-summand-variable-name-clashes") == parser.options.end();
-      if (parser.options.find("out") != parser.options.end())
+      options.cached                                = parser.has_option("cached");
+      options.global_cache                          = parser.has_option("global-cache");
+      options.confluence                            = parser.has_option("confluence");
+      options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
+      options.replace_constants_by_variables        = !parser.has_option("no-replace-constants-by-variables");
+      options.resolve_summand_variable_name_clashes = !parser.has_option("no-resolve-summand-variable-name-clashes");
+      options.detect_deadlock                       = parser.has_option("deadlock");
+      options.detect_nondeterminism                 = parser.has_option("nondeterminism");
+      options.detect_divergence                     = parser.has_option("divergence");
+      // options.expl_strat = parser.option_argument_as<lps::exploration_strategy>("strategy");
+
+      if (parser.options.count("max"))
+      {
+        options.max_states = parser.option_argument_as<std::size_t> ("max");
+      }
+
+      if (parser.has_option("out"))
       {
         output_format = lts::detail::parse_format(parser.option_argument("out"));
         if (output_format == lts::lts_none)
@@ -86,6 +166,50 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
           mCRL2log(log::warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
           output_format = lts::lts_lts;
         }
+      }
+
+      if (parser.has_option("action"))
+      {
+        options.detect_action = true;
+        for (const std::string& s: split_actions(parser.option_argument("action")))
+        {
+          options.trace_actions.insert(core::identifier_string(s));
+        }
+      }
+
+      if (parser.has_option("multiaction"))
+      {
+        std::list<std::string> actions = split_actions(parser.option_argument("multiaction"));
+        options.trace_multiaction_strings.insert(actions.begin(), actions.end());
+      }
+
+      if (parser.has_option("trace"))
+      {
+        options.generate_traces = true;
+        options.max_traces = parser.option_argument_as<std::size_t>("trace");
+      }
+
+      if (parser.has_option("tau"))
+      {
+        if (parser.options.count("divergence")==0)
+        {
+          parser.error("Option --tau requires the option --divergence.");
+        }
+        std::list<std::string> actions = split_actions(parser.option_argument("tau"));
+        for (const std::string& s: actions)
+        {
+          options.actions_internal_for_divergencies.insert(mcrl2::core::identifier_string(s));
+        }
+      }
+
+      if (parser.has_option("confluence"))
+      {
+        options.priority_action = parser.option_argument("confluence");
+      }
+
+      if (2 < parser.arguments.size())
+      {
+        parser.error("Too many file arguments.");
       }
     }
 
@@ -103,18 +227,12 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     bool run() override
     {
       mCRL2log(log::verbose) << options << std::endl;
+      options.trace_prefix = input_filename();
       lps::specification lpsspec = lps::detail::load_lps(input_filename());
       std::unique_ptr<lts::lts_builder> builder = create_builder(lpsspec);
-      lps::lps_explorer explorer(lpsspec, options);
-      current_explorer = &explorer;
-      explorer.generate_state_space(
-        lps::skip(),
-        [&](std::size_t from, const process::timed_multi_action& a, std::size_t to)
-        {
-          builder->add_transition(from, a, to);
-        }
-      );
-      builder->finalize(explorer.state_map());
+      lts::state_space_generator generator(lpsspec, options);
+      current_explorer = &generator.explorer;
+      generator.explore(*builder);
       builder->save(output_filename());
       return true;
     }
