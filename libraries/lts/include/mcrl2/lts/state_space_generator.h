@@ -192,7 +192,7 @@ struct state_space_generator
       // discover_state
       [&](const lps::state& d, std::size_t /* d_index */)
       {
-        if (source)
+        if (options.generate_traces && source)
         {
           backpointers[d] = *source;
         }

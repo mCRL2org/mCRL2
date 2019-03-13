@@ -149,6 +149,31 @@ std::vector<data::data_expression> make_data_expression_vector(const data::data_
   return std::vector<data::data_expression>(v.begin(), v.end());
 }
 
+// This class automatically undoes assignments to variables in the substitution sigma
+// as soon as it goes out of scope.
+template <typename VariableSequence>
+struct substitution_undo
+{
+  data::mutable_indexed_substitution<>& sigma;
+  const VariableSequence& variables;
+  std::vector<data::data_expression> expressions;
+
+  substitution_undo(data::mutable_indexed_substitution<>& sigma_, const VariableSequence & variables_)
+    : sigma(sigma_), variables(variables_)
+  {
+    expressions.reserve(variables_.size());
+    for (const data::variable& v: variables_)
+    {
+      expressions.push_back(sigma(v));
+    }
+  }
+
+  ~substitution_undo()
+  {
+    add_assignments(sigma, variables, expressions);
+  }
+};
+
 class explorer
 {
   protected:
@@ -277,7 +302,7 @@ class explorer
     lps::state find_representative(lps::state& u0)
     {
       using utilities::detail::contains;
-      data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
+      substitution_undo<std::vector<data::variable>>(sigma, process_parameters);
 
       std::vector<lps::state> stack;
       std::map<lps::state, std::size_t> low;
@@ -342,9 +367,6 @@ class explorer
             }
             stack.pop_back();
           }
-
-          // undo changes to sigma
-          add_assignments(sigma, process_parameters, process_parameter_values);
           return result;
         }
         if (!work.empty())
@@ -589,8 +611,7 @@ class explorer
     /// \brief Generates outgoing transitions for a given state.
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const lps::state& d0)
     {
-      data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
-
+      substitution_undo<std::vector<data::variable>>(sigma, process_parameters);
       std::vector<std::pair<lps::multi_action, lps::state>> result;
       add_assignments(sigma, process_parameters, d0);
       for (const next_state_summand& summand: summands)
@@ -605,9 +626,6 @@ class explorer
         );
         remove_assignments(sigma, summand.variables);
       }
-
-      // undo changes to sigma
-      add_assignments(sigma, process_parameters, process_parameter_values);
       return result;
     }
 
@@ -621,8 +639,7 @@ class explorer
     /// \brief Generates outgoing transitions for a given state, reachable via the summand with index i.
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init, std::size_t i)
     {
-      data::data_expression_list process_parameter_values = substitute(sigma, process_parameters);
-
+      substitution_undo<std::vector<data::variable>>(sigma, process_parameters);
       lps::state d0 = rewrite_state(init);
       std::vector<std::pair<lps::multi_action, lps::state>> result;
       add_assignments(sigma, process_parameters, d0);
@@ -635,9 +652,6 @@ class explorer
         }
       );
       remove_assignments(sigma, summands[i].variables);
-
-      // undo changes to sigma
-      add_assignments(sigma, process_parameters, process_parameter_values);
       return result;
     }
 
