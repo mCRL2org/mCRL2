@@ -147,16 +147,16 @@ class lts: public LTS_BASE
       return m_nstates;
     }
 
-    /** \brief Provides access to the state labels of the LTS.
-        \return The state labels of the LTS.
+    /** \brief Provides the state labels of an LTS.
+     ** \return A reference to the state label vector of the LTS.
     */
     std::vector<STATE_LABEL_T>& state_labels()
     {
       return m_state_labels;
     }
 
-    /** \brief Provides access to the state labels of the LTS.
-        \return The state labels of the LTS.
+    /** \brief Provides the state labels of an LTS.
+     ** \return A reference to the state label vector of the LTS.
     */
     const std::vector<STATE_LABEL_T>& state_labels() const
     {

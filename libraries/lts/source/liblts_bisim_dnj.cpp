@@ -2800,9 +2800,10 @@ class bisim_partitioner_dnj
     }
 
 
-    /// \brief Check whether two states are in the same equivalence class
-    /// \param s and t  states that need to be compared
-    /// \returns true iff the two states are in the same equivalence class
+    /// \brief Check whether two states are in the same equivalence class.
+    /// \param s first state that needs to be compared.
+    /// \param t second state that needs to be compared.
+    /// \returns true iff the two states are in the same equivalence class.
     bool in_same_class(state_type s, state_type t) const
     {
         return part_st.block(s) == part_st.block(t);

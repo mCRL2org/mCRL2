@@ -359,7 +359,7 @@ static std::size_t get_fn_symbol_index(const aterm& t, const indexed_set<functio
 }
 
 /**
- * How many bits are needed to represent <val>
+ * How many bits are needed to represent val?
  * Basically, this function is equal to log2(val), except that it maps 0 to 0
  */
 static std::size_t bit_width(std::size_t val)
