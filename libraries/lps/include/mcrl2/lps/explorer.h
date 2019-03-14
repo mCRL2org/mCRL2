@@ -54,7 +54,7 @@ std::ostream& operator<<(std::ostream& os, caching c)
     case caching::none: os << "none"; break;
     case caching::local: os << "local"; break;
     case caching::global: os << "global"; break;
-    default    : os.setstate(std::ios_base::failbit);
+    default: os.setstate(std::ios_base::failbit);
   }
   return os;
 }
@@ -136,13 +136,6 @@ void remove_assignments(data::mutable_indexed_substitution<>& sigma, const Varia
   }
 }
 
-template <typename VariableSequence>
-inline
-data::data_expression_list substitute(data::mutable_indexed_substitution<>& sigma, const VariableSequence & v)
-{
-  return data::data_expression_list{v.begin(), v.end(), [&](const data::variable& x) { return sigma(x); }};
-}
-
 inline
 std::vector<data::data_expression> make_data_expression_vector(const data::data_expression_list& v)
 {
@@ -176,31 +169,8 @@ struct substitution_undo
 
 class explorer
 {
-  protected:
-    typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-    struct next_state_summand;
-
-    const generate_lts_options& options;
-    data::rewriter r;
-    mutable data::mutable_indexed_substitution<> sigma;
-    data::enumerator_identifier_generator id_generator;
-    data::enumerator_algorithm<> E;
-    std::vector<data::variable> m_process_parameters;
-    std::size_t n; // n = process_parameters.size()
-    data::data_expression_list m_initial_state;
-
-    std::vector<next_state_summand> m_regular_summands;
-    std::vector<next_state_summand> m_confluent_summands;
-    std::vector<next_state_summand> m_empty_summands;
-
-    // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
-    std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
-
-    std::unordered_map<lps::state, std::size_t> m_discovered;
-
-    volatile bool must_abort = false;
-
-    struct next_state_summand
+  public:
+    struct explorer_summand
     {
       data::variable_list variables;
       data::data_expression condition;
@@ -214,7 +184,7 @@ class explorer
       atermpp::function_symbol f_gamma;
       mutable std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
 
-      next_state_summand(const lps::action_summand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
+      explorer_summand(const lps::action_summand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
         : variables(summand.summation_variables()),
           condition(summand.condition()),
           actions(summand.multi_action().actions(), summand.multi_action().time()),
@@ -275,6 +245,29 @@ class explorer
       }
     };
 
+  protected:
+    typedef data::enumerator_list_element_with_substitution<> enumerator_element;
+
+    const generate_lts_options& options;
+    data::rewriter r;
+    mutable data::mutable_indexed_substitution<> sigma;
+    data::enumerator_identifier_generator id_generator;
+    data::enumerator_algorithm<> E;
+    std::vector<data::variable> m_process_parameters;
+    std::size_t n; // n = process_parameters.size()
+    data::data_expression_list m_initial_state;
+    bool m_recursive = false;
+
+    std::vector<explorer_summand> m_regular_summands;
+    std::vector<explorer_summand> m_confluent_summands;
+
+    // N.B. The keys are stored in term_appl instead of data_expression_list for performance reasons.
+    std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> global_cache;
+
+    std::unordered_map<lps::state, std::size_t> m_discovered;
+
+    volatile bool must_abort = false;
+
     lps::specification preprocess(const specification& lpsspec)
     {
       lps::specification result = lpsspec;
@@ -304,7 +297,7 @@ class explorer
     lps::state find_representative(lps::state& u0, const SummandSequence& summands)
     {
       using utilities::detail::contains;
-      data::data_expression_list process_parameter_undo = substitute(sigma, m_process_parameters);
+      data::data_expression_list process_parameter_undo = process_parameter_values();
 
       std::vector<lps::state> stack;
       std::map<lps::state, std::size_t> low;
@@ -369,7 +362,7 @@ class explorer
             }
             stack.pop_back();
           }
-          add_assignments(sigma, m_process_parameters, process_parameter_undo);
+          set_process_parameter_values(process_parameter_undo);
           return result;
         }
         if (!work.empty())
@@ -411,12 +404,15 @@ class explorer
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
     template <typename SummandSequence, typename ExamineTransition = skip>
     void generate_transitions(
-      const next_state_summand& summand,
+      const explorer_summand& summand,
       const SummandSequence& confluent_summands,
       ExamineTransition examine_transition = ExamineTransition()
     )
     {
-      id_generator.clear();
+      if (!m_recursive)
+      {
+        id_generator.clear();
+      }
       if (summand.cache_strategy == caching::none)
       {
         data::data_expression condition = r(summand.condition, sigma);
@@ -431,6 +427,10 @@ class explorer
                         if (!confluent_summands.empty())
                         {
                           d1 = find_representative(d1, confluent_summands);
+                        }
+                        if (m_recursive)
+                        {
+                          remove_assignments(sigma, summand.variables);
                         }
                         examine_transition(a, d1);
                         return false;
@@ -470,10 +470,17 @@ class explorer
           {
             d1 = find_representative(d1, confluent_summands);
           }
+          if (m_recursive)
+          {
+            remove_assignments(sigma, summand.variables);
+          }
           examine_transition(a, d1);
         }
       }
-      remove_assignments(sigma, summand.variables);
+      if (!m_recursive)
+      {
+        remove_assignments(sigma, summand.variables);
+      }
     }
 
     // pre: d0 is in normal form
@@ -486,7 +493,7 @@ class explorer
     {
       std::vector<lps::state> result;
       add_assignments(sigma, m_process_parameters, d0);
-      for (const next_state_summand& summand: summands)
+      for (const explorer_summand& summand: summands)
       {
         generate_transitions(
           summand,
@@ -539,7 +546,8 @@ class explorer
       typename FinishState = skip
     >
     void generate_state_space(
-      lps::state& d0,
+      bool recursive,
+      const lps::state& d0,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
       std::unordered_map<lps::state, std::size_t>& discovered,
@@ -549,14 +557,10 @@ class explorer
       FinishState finish_state = FinishState()
     )
     {
+      m_recursive = recursive;
       std::deque<lps::state> todo;
       discovered.clear();
-
-      if (!confluent_summands.empty())
-      {
-        d0 = find_representative(d0, confluent_summands);
-      }
-      std::size_t d0_index = discovered.size();
+      std::size_t d0_index = 0;
       discovered.insert(std::make_pair(d0, d0_index));
       discover_state(d0, d0_index);
       todo.push_back(d0);
@@ -567,9 +571,8 @@ class explorer
         todo.pop_front();
         std::size_t s_index = discovered.find(s)->second;
         start_state(s, s_index);
-
         add_assignments(sigma, m_process_parameters, s);
-        for (const next_state_summand& summand: regular_summands)
+        for (const explorer_summand& summand: regular_summands)
         {
           generate_transitions(
             summand,
@@ -606,6 +609,7 @@ class explorer
       typename FinishState = skip
     >
     void generate_state_space(
+      bool recursive,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
       StartState start_state = StartState(),
@@ -613,28 +617,32 @@ class explorer
     )
     {
       lps::state d0 = rewrite_state(m_initial_state);
-      generate_state_space(d0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, examine_transition, start_state, finish_state);
+      if (!m_confluent_summands.empty())
+      {
+        d0 = find_representative(d0, m_confluent_summands);
+      }
+      generate_state_space(recursive, d0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, examine_transition, start_state, finish_state);
     }
 
     /// \brief Generates outgoing transitions for a given state.
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const lps::state& d0)
     {
-      data::data_expression_list process_parameter_undo = substitute(sigma, m_process_parameters);
+      data::data_expression_list process_parameter_undo = process_parameter_values();
       std::vector<std::pair<lps::multi_action, lps::state>> result;
       add_assignments(sigma, m_process_parameters, d0);
-      for (const next_state_summand& summand: m_regular_summands)
+      for (const explorer_summand& summand: m_regular_summands)
       {
         generate_transitions(
           summand,
           m_confluent_summands,
           [&](const process::timed_multi_action& a, const lps::state& d1)
           {
-            result.emplace_back(lps::multi_action(a), d1);
+            result.emplace_back(lps::multi_action(a.actions(), a.time()), d1);
           }
         );
-        remove_assignments(sigma, summand.variables);
+        // remove_assignments(sigma, summand.variables);
       }
-      add_assignments(sigma, m_process_parameters, process_parameter_undo);
+      set_process_parameter_values(process_parameter_undo);
       return result;
     }
 
@@ -648,7 +656,7 @@ class explorer
     /// \brief Generates outgoing transitions for a given state, reachable via the summand with index i.
     std::vector<std::pair<lps::multi_action, lps::state>> generate_transitions(const data::data_expression_list& init, std::size_t i)
     {
-      data::data_expression_list process_parameter_undo = substitute(sigma, m_process_parameters);
+      data::data_expression_list process_parameter_undo = process_parameter_values();
       lps::state d0 = rewrite_state(init);
       std::vector<std::pair<lps::multi_action, lps::state>> result;
       add_assignments(sigma, m_process_parameters, d0);
@@ -661,7 +669,7 @@ class explorer
         }
       );
       remove_assignments(sigma, m_regular_summands[i].variables);
-      add_assignments(sigma, m_process_parameters, process_parameter_undo);
+      set_process_parameter_values(process_parameter_undo);
       return result;
     }
 
@@ -676,7 +684,38 @@ class explorer
     {
       must_abort = true;
     }
+
+    const std::vector<explorer_summand>& regular_summands() const
+    {
+      return m_regular_summands;
+    }
+
+    const std::vector<explorer_summand>& confluent_summands() const
+    {
+      return m_confluent_summands;
+    }
+
+    const std::vector<data::variable>& process_parameters() const
+    {
+      return m_process_parameters;
+    }
+
+    data::data_expression_list process_parameter_values() const
+    {
+      return data::data_expression_list{m_process_parameters.begin(), m_process_parameters.end(), [&](const data::variable& x) { return sigma(x); }};
+    }
+
+    void set_process_parameter_values(const data::data_expression_list& values)
+    {
+      add_assignments(sigma, m_process_parameters, values);
+    }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const explorer::explorer_summand& s)
+{
+  return out << "(" << s.condition << ") -> " << s.actions << " . P(" << core::detail::print_arguments(s.next_state) << ")";
+}
 
 } // namespace lps
 

@@ -36,12 +36,12 @@ class enumerator_identifier_generator
     /// \brief Constructor
     /// \param prefix The prefix of the generated generated strings
     /// \pre The prefix may not be empty, and it may not have trailing digits
-    enumerator_identifier_generator(const std::string& prefix = "x_")
+    explicit enumerator_identifier_generator(const std::string& prefix = "x_")
       : f(prefix)
     { }
     
     /// \brief Generates a unique function symbol with the given prefix followed by a number.
-    core::identifier_string operator()(void)
+    core::identifier_string operator()()
     {
       return core::identifier_string(f());
     }
