@@ -130,6 +130,7 @@ class lts_lts_builder: public lts_builder
       }
       m_lts.state_labels() = std::move(state_labels);
       m_lts.set_num_states(state_map.size(), true);
+      m_lts.set_initial_state(0);
     }
 
     void save(const std::string& filename) override

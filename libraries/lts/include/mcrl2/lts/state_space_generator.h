@@ -12,7 +12,7 @@
 #ifndef MCRL2_LTS_STATE_SPACE_GENERATOR_H
 #define MCRL2_LTS_STATE_SPACE_GENERATOR_H
 
-#include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/trace/trace.h"
 
 namespace mcrl2 {
@@ -25,7 +25,8 @@ struct state_space_generator
   lps::explorer explorer;
   std::map<lps::state, lps::state> backpointers;
   std::size_t saved_trace_count = 0;
-  std::vector<bool> is_detect_action_summand;
+  std::vector<bool> summand_has_detect_actions;
+  std::map<lps::multi_action, lps::state> detect_nondeterminism_map;
 
   state_space_generator(const lps::specification& lpsspec, const lps::generate_lts_options& options_)
     : options(options_), explorer(lpsspec, options_)
@@ -52,10 +53,10 @@ struct state_space_generator
     if (options.detect_action)
     {
       const auto& summands = lpsspec.process().action_summands();
-      is_detect_action_summand.reserve(summands.size());
+      summand_has_detect_actions.reserve(summands.size());
       for (const auto& summand: summands)
       {
-        is_detect_action_summand.push_back(match_action(summand));
+        summand_has_detect_actions.push_back(match_action(summand));
       }
     }
   }
@@ -101,38 +102,37 @@ struct state_space_generator
     return tr;
   }
 
-  bool save_trace(trace::Trace& tr, const std::string& filename)
+  void save_trace(trace::Trace& tr, const std::string& filename, const std::string& message_prefix, const std::string& message_postfix)
   {
     try
     {
       tr.save(filename);
       saved_trace_count++;
-      return true;
+      mCRL2log(log::info) << message_prefix << " and saved to '" << filename << "'" << message_postfix;
     }
     catch(...)
     {
-      return false;
+      mCRL2log(log::info) << message_prefix << ", but its trace could not be saved to '" << filename << "'" << message_postfix;
     }
   }
 
   void detect_deadlock(const lps::state& s, std::size_t s_index)
   {
-    if (options.generate_traces && saved_trace_count < options.max_traces)
+    std::string message_prefix = "deadlock-detect: deadlock found";
+    std::string message_postfix = " (state index: " + std::to_string(s_index) + ").\n";
+
+    if (options.generate_traces)
     {
-      trace::Trace tr = construct_trace(s);
-      std::string filename = options.trace_prefix + "_dlk_" + std::to_string(saved_trace_count) + ".trc";
-      if (save_trace(tr, filename))
+      if (saved_trace_count < options.max_traces)
       {
-        mCRL2log(log::info) << "deadlock-detect: deadlock found and saved to '" << filename << "' (state index: " << s_index << ").\n";
-      }
-      else
-      {
-        mCRL2log(log::info) << "deadlock-detect: deadlock found, but its trace could not be saved to '" << filename << "' (state index: " << s_index << ").\n";
+        trace::Trace tr = construct_trace(s);
+        std::string filename = options.trace_prefix + "_dlk_" + std::to_string(saved_trace_count) + ".trc";
+        save_trace(tr, filename, message_prefix, message_postfix);
       }
     }
     else
     {
-      mCRL2log(log::info) << "deadlock-detect: deadlock found (state index: " << s_index <<  ").\n";
+      mCRL2log(log::info) << message_prefix << message_postfix;
     }
   }
 
@@ -157,28 +157,53 @@ struct state_space_generator
   void detect_action(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1)
   {
     using utilities::detail::contains;
+    std::string message_prefix = "Detected action '" + lps::pp(a) + "'";
+    std::string message_postfix = " (state index: " + std::to_string(s0_index) + ").\n";
 
-    if (options.generate_traces && saved_trace_count < options.max_traces)
+    if (options.generate_traces)
     {
-      mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ")";
+      if (saved_trace_count < options.max_traces)
       {
         trace::Trace tr = construct_trace(s0);
         tr.setState(s1);
         tr.addAction(a);
         std::string filename = detect_action_filename(a);
-        if (save_trace(tr, filename))
-        {
-          mCRL2log(log::info) << " and saved to '" << filename << "'.\n";
-        }
-        else
-        {
-          mCRL2log(log::info) << " but it could not be saved to '" << filename << "'.\n";
-        }
+        save_trace(tr, filename, message_prefix, message_postfix);
       }
     }
     else
     {
-      mCRL2log(log::info) << "Detected action '" << a << "' (state index " << s0_index << ").\n";
+      mCRL2log(log::info) << message_prefix << message_postfix;
+    }
+  }
+
+  void detect_nondeterminism(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1)
+  {
+    auto i = detect_nondeterminism_map.find(a);
+    if (i != detect_nondeterminism_map.end() && i->second != s1) // nondeterminism detected
+    {
+      std::string message_prefix = "Nondeterministic state found";
+      std::string message_postfix = " (state index: " + std::to_string(s0_index) + ").\n";
+
+      if (options.generate_traces)
+      {
+        if (saved_trace_count < options.max_traces)
+        {
+          trace::Trace tr = construct_trace(s0);
+          tr.setState(s1);
+          tr.addAction(a);
+          std::string filename = options.trace_prefix + "_nondeterministic_" + std::to_string(saved_trace_count) + ".trc";
+          save_trace(tr, filename, message_prefix, message_postfix);
+        }
+      }
+      else
+      {
+        mCRL2log(log::info) << message_prefix << message_postfix;
+      }
+    }
+    else
+    {
+      detect_nondeterminism_map.insert(i, std::make_pair(a, s1));
     }
   }
 
@@ -189,6 +214,7 @@ struct state_space_generator
     const lps::state* source = nullptr;
 
     explorer.generate_state_space(
+
       // discover_state
       [&](const lps::state& d, std::size_t /* d_index */)
       {
@@ -203,9 +229,13 @@ struct state_space_generator
       {
         builder.add_transition(s0_index, a, s1_index);
         has_outgoing_transitions = true;
-        if (options.detect_action && is_detect_action_summand[summand_index])
+        if (options.detect_action && summand_has_detect_actions[summand_index])
         {
           detect_action(*source, s0_index, lps::multi_action(a.actions(), a.time()), s1);
+        }
+        if (options.detect_nondeterminism)
+        {
+          detect_nondeterminism(*source, s0_index, lps::multi_action(a.actions(), a.time()), s1);
         }
       },
 
@@ -214,6 +244,10 @@ struct state_space_generator
       {
         source = &d;
         has_outgoing_transitions = false;
+        if (options.detect_nondeterminism)
+        {
+          detect_nondeterminism_map.clear();
+        }
       },
 
       // finish_state
