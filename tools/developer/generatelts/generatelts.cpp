@@ -198,7 +198,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         std::list<std::string> actions = split_actions(parser.option_argument("tau"));
         for (const std::string& s: actions)
         {
-          options.actions_internal_for_divergencies.insert(mcrl2::core::identifier_string(s));
+          options.actions_internal_for_divergencies.insert(core::identifier_string(s));
         }
       }
 

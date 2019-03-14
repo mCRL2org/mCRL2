@@ -118,7 +118,7 @@ struct state_space_generator
 
   void detect_deadlock(const lps::state& s, std::size_t s_index)
   {
-    std::string message_prefix = "deadlock-detect: deadlock found";
+    std::string message_prefix = "Deadlock found";
     std::string message_postfix = " (state index: " + std::to_string(s_index) + ").\n";
 
     if (options.generate_traces)
@@ -157,7 +157,7 @@ struct state_space_generator
   void detect_action(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1)
   {
     using utilities::detail::contains;
-    std::string message_prefix = "Detected action '" + lps::pp(a) + "'";
+    std::string message_prefix = "Action '" + lps::pp(a) + "' found";
     std::string message_postfix = " (state index: " + std::to_string(s0_index) + ").\n";
 
     if (options.generate_traces)
@@ -216,11 +216,11 @@ struct state_space_generator
     explorer.generate_state_space(
 
       // discover_state
-      [&](const lps::state& d, std::size_t /* d_index */)
+      [&](const lps::state& s, std::size_t /* s_index */)
       {
         if (options.generate_traces && source)
         {
-          backpointers[d] = *source;
+          backpointers[s] = *source;
         }
       },
 
@@ -240,9 +240,9 @@ struct state_space_generator
       },
 
       // start_state
-      [&](const lps::state& d, std::size_t /* i */)
+      [&](const lps::state& s, std::size_t /* s_index */)
       {
-        source = &d;
+        source = &s;
         has_outgoing_transitions = false;
         if (options.detect_nondeterminism)
         {
@@ -251,11 +251,11 @@ struct state_space_generator
       },
 
       // finish_state
-      [&](const lps::state& d, std::size_t i)
+      [&](const lps::state& s, std::size_t s_index)
       {
         if (options.detect_deadlock && !has_outgoing_transitions)
         {
-          detect_deadlock(d, i);
+          detect_deadlock(s, s_index);
         }
       }
     );
