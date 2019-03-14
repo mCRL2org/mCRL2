@@ -180,7 +180,11 @@ struct state_space_generator
   void detect_nondeterminism(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1)
   {
     auto i = detect_nondeterminism_map.find(a);
-    if (i != detect_nondeterminism_map.end() && i->second != s1) // nondeterminism detected
+    if (i == detect_nondeterminism_map.end())
+    {
+      detect_nondeterminism_map.insert(std::make_pair(a, s1));
+    }
+    else if (i->second != s1) // nondeterminism detected
     {
       std::string message_prefix = "Nondeterministic state found";
       std::string message_postfix = " (state index: " + std::to_string(s0_index) + ").\n";
@@ -200,10 +204,6 @@ struct state_space_generator
       {
         mCRL2log(log::info) << message_prefix << message_postfix;
       }
-    }
-    else
-    {
-      detect_nondeterminism_map.insert(i, std::make_pair(a, s1));
     }
   }
 
