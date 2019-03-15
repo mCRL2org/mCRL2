@@ -316,8 +316,9 @@ struct state_space_generator
               trace::Trace tr_loop = construct_trace(s0, backpointers);
               tr_loop.setState(s1);
               tr_loop.addAction(lps::multi_action(a.actions(), a.time()));
-              for (const lps::state& u: tr_loop.states())
+              for (const auto& p: discovered)
               {
+                const lps::state& u = p.first;
                 if (u != s && explorer.state_map().find(u) == explorer.state_map().end())
                 {
                   divergent_states[u] = s_index;
