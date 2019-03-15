@@ -95,7 +95,7 @@ class explorer
     {
       data::variable_list variables;
       data::data_expression condition;
-      process::timed_multi_action actions;
+      process::timed_multi_action multi_action;
       std::vector<data::data_expression> next_state;
       std::size_t index;
 
@@ -108,7 +108,7 @@ class explorer
       explorer_summand(const lps::action_summand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
         : variables(summand.summation_variables()),
           condition(summand.condition()),
-          actions(summand.multi_action().actions(), summand.multi_action().time()),
+          multi_action(summand.multi_action().actions(), summand.multi_action().time()),
           next_state(make_data_expression_vector(summand.next_state(process_parameters))),
           index(summand_index),
           cache_strategy(cache_strategy_)
@@ -302,7 +302,7 @@ class explorer
       return lps::state(v.begin(), n, [&](const data::data_expression& x) { return r(x, sigma); });
     }
 
-    process::timed_multi_action rewrite_action_list(const process::timed_multi_action& a) const
+    process::timed_multi_action rewrite_action(const process::timed_multi_action& a) const
     {
       const process::action_list& actions = a.actions();
       const data::data_expression& time = a.time();
@@ -343,7 +343,7 @@ class explorer
                       sigma,
                       [&](const enumerator_element& p) {
                         p.add_assignments(summand.variables, sigma, r);
-                        process::timed_multi_action a = rewrite_action_list(summand.actions);
+                        process::timed_multi_action a = rewrite_action(summand.multi_action);
                         lps::state d1 = rewrite_state(summand.next_state);
                         if (!confluent_summands.empty())
                         {
@@ -385,7 +385,7 @@ class explorer
         for (const data::data_expression_list& e: q->second)
         {
           add_assignments(sigma, summand.variables, e);
-          process::timed_multi_action a = rewrite_action_list(summand.actions);
+          process::timed_multi_action a = rewrite_action(summand.multi_action);
           lps::state d1 = rewrite_state(summand.next_state);
           if (!confluent_summands.empty())
           {
@@ -488,7 +488,7 @@ class explorer
 
       while (!todo.empty() && !must_abort)
       {
-        const lps::state& s = todo.front();
+        lps::state s = todo.front();
         todo.pop_front();
         std::size_t s_index = discovered.find(s)->second;
         start_state(s, s_index);
@@ -636,7 +636,7 @@ class explorer
 inline
 std::ostream& operator<<(std::ostream& out, const explorer::explorer_summand& s)
 {
-  return out << "(" << s.condition << ") -> " << s.actions << " . P(" << core::detail::print_arguments(s.next_state) << ")";
+  return out << "(" << s.condition << ") -> " << s.multi_action << " . P(" << core::detail::print_arguments(s.next_state) << ")";
 }
 
 } // namespace lps

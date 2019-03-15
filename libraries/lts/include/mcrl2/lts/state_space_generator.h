@@ -74,7 +74,7 @@ struct state_space_generator
 
     auto is_hidden = [&](const lps::explorer::explorer_summand& summand)
     {
-      for (const process::action& a: summand.actions.actions())
+      for (const process::action& a: summand.multi_action.actions())
       {
         if (!contains(options.actions_internal_for_divergencies, a.label().name()))
         {
