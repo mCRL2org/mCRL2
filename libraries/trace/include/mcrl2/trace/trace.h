@@ -86,8 +86,8 @@ class Trace
     // in the sense that if a state, or action, at position n exists, then also the
     // states and actions at positions n'<n exist.
 
-    std::vector < mcrl2::lps::state > states;
-    std::vector < mcrl2::lps::multi_action > actions;
+    std::vector < mcrl2::lps::state > m_states;
+    std::vector < mcrl2::lps::multi_action > m_actions;
     std::size_t pos; // Invariant: pos <= actions.size().
 
     mcrl2::data::data_specification m_spec;
@@ -227,15 +227,15 @@ class Trace
 
     bool operator <(const Trace& t) const
     {
-      return ((states<t.states) ||
-              (states==t.states && actions<t.actions));
+      return ((m_states<t.m_states) ||
+              (m_states==t.m_states && m_actions<t.m_actions));
     }
 
     /// \brief Set the current position back to the beginning of the trace
     /// \details The trace itself remains unaltered.
     void resetPosition()
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
       pos = 0;
     }
 
@@ -243,7 +243,7 @@ class Trace
     /// \details The initial position corresponds to pos=0.
     void increasePosition()
     {
-      if (pos < actions.size())
+      if (pos < m_actions.size())
       {
         ++pos;
       }
@@ -265,7 +265,7 @@ class Trace
     /// \param[in] pos The new position in the trace.
     void setPosition(std::size_t pos)
     {
-      if (pos <= actions.size())
+      if (pos <= m_actions.size())
       {
         this->pos = pos;
       }
@@ -277,7 +277,7 @@ class Trace
     /// \return The current position of the trace.
     std::size_t getPosition() const
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
       return pos;
     }
 
@@ -285,31 +285,31 @@ class Trace
     /// \return A positive number indicating the number of actions in the trace.
     std::size_t number_of_actions() const
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      return actions.size();
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      return m_actions.size();
     }
 
     /// \brief Get the number of states in the current trace.
     /// \return A positive number indicating the number of states in the trace.
     std::size_t number_of_states() const
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      return states.size();
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      return m_states.size();
     }
 
     /// \brief Remove the current state and all states following it.
     void clear_current_state()
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      states.resize(pos);
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      m_states.resize(pos);
     }
 
     /// \brief Indicate whether a current state exists.
     /// \return A boolean indicating whether the current state exists.
     bool current_state_exists() const
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      return states.size()>pos;
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      return m_states.size()>pos;
     }
 
     /// \brief Get the state at the current position in the trace.
@@ -319,12 +319,12 @@ class Trace
     /// \return The state at the current position of the trace.
     const mcrl2::lps::state& nextState() const
     {
-      assert(actions.size()+1 >= states.size() && pos+1 <=actions.size());
-      if (pos>=states.size())
+      assert(m_actions.size()+1 >= m_states.size() && pos+1 <=m_actions.size());
+      if (pos>=m_states.size())
       {
         throw mcrl2::runtime_error("Requesting a state in a trace at a non existing position " + std::to_string(pos+1) + ".");
       }
-      return states[pos+1];
+      return m_states[pos+1];
     }
 
     /// \brief Get the state at the current position in the trace.
@@ -334,12 +334,12 @@ class Trace
     /// \return The state at the current position of the trace.
     const mcrl2::lps::state& currentState() const
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      if (pos>=states.size())
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      if (pos>=m_states.size())
       {
         throw mcrl2::runtime_error("Requesting a state in a trace at a non existing position " + std::to_string(pos) + ".");
       }
-      return states[pos];
+      return m_states[pos];
     }
 
     /// \brief Get the outgoing action from the current position in the trace.
@@ -349,9 +349,9 @@ class Trace
     /// trace.
     mcrl2::lps::multi_action currentAction()
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      assert(pos < actions.size());
-      return actions[pos];
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      assert(pos < m_actions.size());
+      return m_actions[pos];
     }
 
     /// \brief Get the time of the current state in the trace.
@@ -360,8 +360,8 @@ class Trace
     /// \return A data_expression representing the current time, or a default data_expression if the time is not defined.
     mcrl2::data::data_expression currentTime()
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      return actions[pos].time();
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      return m_actions[pos].time();
     }
 
     /// \brief Truncates the trace at the current position.
@@ -370,10 +370,10 @@ class Trace
     /// position remain untouched.
     void truncate()
     {
-      actions.resize(pos);
-      if (pos+1<states.size())  // Only throw states away that exist.
+      m_actions.resize(pos);
+      if (pos+1<m_states.size())  // Only throw states away that exist.
       {
-        states.resize(pos+1);
+        m_states.resize(pos+1);
       }
     }
 
@@ -385,10 +385,10 @@ class Trace
 
     void addAction(const mcrl2::lps::multi_action& action)
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
       truncate(); // Take care that actions and states have the appropriate size.
       pos++;
-      actions.push_back(action);
+      m_actions.push_back(action);
     }
 
     /// \brief Set the state at the current position.
@@ -397,20 +397,20 @@ class Trace
     /// \param [in] s The new state.
     void setState(const mcrl2::lps::state& s)
     {
-      assert(actions.size()+1 >= states.size() && pos <=actions.size());
-      if (pos>states.size())
+      assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
+      if (pos>m_states.size())
       {
         throw mcrl2::runtime_error("Setting a state in a trace at a position " + std::to_string(pos) + 
                                    " where there are no states at earlier positions.");
       }
 
-      if (states.size()==pos)
+      if (m_states.size()==pos)
       {
-        states.push_back(s);
+        m_states.push_back(s);
       }
       else
       {
-        states[pos] = s;
+        m_states[pos] = s;
       }
     }
 
@@ -542,6 +542,16 @@ class Trace
       }
 
       os.close();
+    }
+
+    const std::vector<lps::state>& states() const
+    {
+      return m_states;
+    }
+
+    const std::vector<lps::multi_action>& actions() const
+    {
+      return m_actions;
     }
 
   private:
@@ -689,24 +699,24 @@ class Trace
 
     void saveMcrl2(std::ostream& os)
     {
-      assert(actions.size()+1 >= states.size());
+      assert(m_actions.size()+1 >= m_states.size());
       atermpp::aterm_list trace;
 
-      std::size_t i=actions.size()+1;
+      std::size_t i=m_actions.size()+1;
       while (i > 0)
       {
         i--;
-        if (i<actions.size())
+        if (i<m_actions.size())
         {
-          assert(actions.size()>i);
-          trace.push_front(atermpp::aterm(makeTimedMAct(actions[i])));
+          assert(m_actions.size()>i);
+          trace.push_front(atermpp::aterm(makeTimedMAct(m_actions[i])));
         }
-        if (states.size()>i)
+        if (m_states.size()>i)
         {
           using namespace mcrl2::lps;
           // Translate the vector into a list of aterms representing data expressions.
           atermpp::aterm_list l;
-          const state& s=states[i];
+          const state& s=m_states[i];
           for(mcrl2::lps::state::iterator j=s.begin(); j!=s.end(); ++j)
           {
             l.push_front(atermpp::aterm(*j));
@@ -734,9 +744,9 @@ class Trace
 
     void savePlain(std::ostream& os)
     {
-      for (std::size_t i=0; i<actions.size(); i++)
+      for (std::size_t i=0; i<m_actions.size(); i++)
       {
-        os << pp(actions[i]);
+        os << pp(m_actions[i]);
         os << std::endl;
         if (os.bad())
         {

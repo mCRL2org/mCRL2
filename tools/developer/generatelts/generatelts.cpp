@@ -34,7 +34,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 {
   typedef rewriter_tool<input_output_tool> super;
 
-  lps::generate_lts_options options;
+  lps::explorer_options options;
   lts::lts_type output_format = lts::lts_none;
   lps::explorer* current_explorer = nullptr;
 

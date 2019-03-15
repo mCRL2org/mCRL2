@@ -21,16 +21,17 @@ namespace lts {
 
 struct state_space_generator
 {
-  const lps::generate_lts_options& options;
+  const lps::explorer_options& options;
   lps::explorer explorer;
   std::map<lps::state, lps::state> m_backpointers;
   std::size_t saved_trace_count = 0;
   std::vector<bool> summand_has_detect_actions;
   std::map<lps::multi_action, lps::state> detect_nondeterminism_map;
+  std::unordered_map<lps::state, std::size_t> divergent_states;
   std::vector<lps::explorer::explorer_summand> divergence_summands;
   std::vector<lps::explorer::explorer_summand> divergence_confluent_summands;
 
-  state_space_generator(const lps::specification& lpsspec, const lps::generate_lts_options& options_)
+  state_space_generator(const lps::specification& lpsspec, const lps::explorer_options& options_)
     : options(options_), explorer(lpsspec, options_)
   {
     if (options.detect_action)
@@ -141,37 +142,60 @@ struct state_space_generator
     return tr;
   }
 
-  void save_trace(trace::Trace& tr, const std::string& filename, const std::string& message_prefix, const std::string& message_postfix)
+  void save_trace(
+    const std::string& message,
+    trace::Trace& tr,
+    const std::string& filename
+  )
   {
     try
     {
       tr.save(filename);
       saved_trace_count++;
-      mCRL2log(log::info) << message_prefix << " and saved to '" << filename << "'" << message_postfix;
+      mCRL2log(log::info) << message << " and saved to '" << filename << "'.\n";
     }
     catch(...)
     {
-      mCRL2log(log::info) << message_prefix << ", but its trace could not be saved to '" << filename << "'" << message_postfix;
+      mCRL2log(log::info) << message << ", but its trace could not be saved to '" << filename << "'.\n";
+    }
+  }
+
+  void save_traces(
+    const std::string& message,
+    trace::Trace& tr,
+    const std::string& filename,
+    trace::Trace& tr_loop,
+    const std::string& loop_filename
+  )
+  {
+    try
+    {
+      tr.save(filename);
+      tr_loop.save(loop_filename);
+      saved_trace_count++;
+      mCRL2log(log::info) << message << " and saved to '" << filename << "' and '" << loop_filename << "'.\n";
+    }
+    catch(...)
+    {
+      mCRL2log(log::info) << message << ", but its trace could not be saved to '" << filename << "'.\n";
     }
   }
 
   void detect_deadlock(const lps::state& s, std::size_t s_index)
   {
-    std::string message_prefix = "Deadlock found";
-    std::string message_postfix = " (state index: " + std::to_string(s_index) + ").\n";
-
+    std::string message = "Deadlock found (state index: " + std::to_string(s_index) + ")";
     if (options.generate_traces)
     {
       if (saved_trace_count < options.max_traces)
       {
         trace::Trace tr = construct_trace(s, m_backpointers);
         std::string filename = options.trace_prefix + "_dlk_" + std::to_string(saved_trace_count) + ".trc";
-        save_trace(tr, filename, message_prefix, message_postfix);
+        save_trace(message, tr, filename);
       }
     }
     else
     {
-      mCRL2log(log::info) << message_prefix << message_postfix;
+      mCRL2log(log::info) << message << ".\n";
     }
   }
 
@@ -196,9 +220,7 @@ struct state_space_generator
   void detect_action(const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, const lps::state& s1)
   {
     using utilities::detail::contains;
-    std::string message_prefix = "Action '" + lps::pp(a) + "' found";
-    std::string message_postfix = " (state index: " + std::to_string(s0_index) + ").\n";
-
+    std::string message = "Action '" + lps::pp(a) + "'found (state index: " + std::to_string(s0_index) + ")";
     if (options.generate_traces)
     {
       if (saved_trace_count < options.max_traces)
@@ -207,12 +229,12 @@ struct state_space_generator
         tr.setState(s1);
         tr.addAction(a);
         std::string filename = detect_action_filename(a);
-        save_trace(tr, filename, message_prefix, message_postfix);
+        save_trace(message, tr, filename);
       }
     }
     else
     {
-      mCRL2log(log::info) << message_prefix << message_postfix;
+      mCRL2log(log::info) << message << ".\n";
     }
   }
 
@@ -225,9 +247,7 @@ struct state_space_generator
     }
     else if (i->second != s1) // nondeterminism detected
     {
-      std::string message_prefix = "Nondeterministic state found";
-      std::string message_postfix = " (state index: " + std::to_string(s0_index) + ").\n";
-
+      std::string message = "Nondeterministic state found (state index: " + std::to_string(s0_index) + ")";
       if (options.generate_traces)
       {
         if (saved_trace_count < options.max_traces)
@@ -236,18 +256,27 @@ struct state_space_generator
           tr.setState(s1);
           tr.addAction(a);
           std::string filename = options.trace_prefix + "_nondeterministic_" + std::to_string(saved_trace_count) + ".trc";
-          save_trace(tr, filename, message_prefix, message_postfix);
+          save_trace(message, tr, filename);
         }
       }
       else
       {
-        mCRL2log(log::info) << message_prefix << message_postfix;
+        mCRL2log(log::info) << message << ".\n";
       }
     }
   }
 
   void detect_divergence(const lps::state& s, std::size_t s_index)
   {
+    auto q = divergent_states.find(s);
+    if (q != divergent_states.end())
+    {
+      std::string message = "Divergent state found (state index: " + std::to_string(s_index) + "), reachable from divergent state with index " + std::to_string(q->second);
+      mCRL2log(log::info) << message << ".\n";
+      divergent_states.erase(q);
+      return;
+    }
+
     std::unordered_map<lps::state, std::size_t> discovered;
     std::map<lps::state, lps::state> backpointers;
     const lps::state* source = nullptr;
@@ -274,24 +303,36 @@ struct state_space_generator
       // examine_transition
       [&](std::size_t /* s0_index */, const process::timed_multi_action& a, std::size_t /* s1_index */, const lps::state& s1, std::size_t /* summand_index */)
       {
-        if (s1 != last_discovered || s1 == s) // found a loop, hence s is divergent
+        if (s1 != last_discovered || s1 == s) // found a loop, hence s is a divergent state
         {
-          std::string message_prefix = "Divergent state found";
-          std::string message_postfix = " (state index: " + std::to_string(s_index) + ").\n";
+          std::string message = "Divergent state found (state index: " + std::to_string(s_index) + ")";
 
           if (options.generate_traces)
           {
             if (saved_trace_count < options.max_traces)
             {
+              const lps::state& s0 = *source;
               trace::Trace tr = construct_trace(s, m_backpointers);
+              trace::Trace tr_loop = construct_trace(s0, backpointers);
+              tr_loop.setState(s1);
+              tr_loop.addAction(lps::multi_action(a.actions(), a.time()));
+              for (const lps::state& u: tr_loop.states())
+              {
+                if (u != s && explorer.state_map().find(u) == explorer.state_map().end())
+                {
+                  divergent_states[u] = s_index;
+                }
+              }
               std::string filename = options.trace_prefix + "_divergence_" + std::to_string(saved_trace_count) + ".trc";
-              save_trace(tr, filename, message_prefix, message_postfix);
+              std::string loop_filename = options.trace_prefix + "_divergence_loop" + std::to_string(saved_trace_count) + ".trc";
+              save_traces(message, tr, filename, tr_loop, loop_filename);
             }
           }
           else
           {
-            mCRL2log(log::info) << message_prefix << message_postfix;
+            mCRL2log(log::info) << message << ".\n";
           }
+          explorer.abort();
         }
       },
 

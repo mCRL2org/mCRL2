@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/generate_lts.h
+/// \file mcrl2/lps/explorer.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_LPS_EXPLORER_H
@@ -22,7 +22,7 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-// #include "mcrl2/lps/exploration_strategy.h"
+#include "mcrl2/lps/explorer_options.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
@@ -59,60 +59,6 @@ std::ostream& operator<<(std::ostream& os, caching c)
   return os;
 }
 
-struct generate_lts_options
-{
-  data::rewrite_strategy rewrite_strategy = data::jitty;
-  // exploration_strategy expl_strat;
-  bool one_point_rule_rewrite = false;
-  bool replace_constants_by_variables = false;
-  bool resolve_summand_variable_name_clashes = false;
-  bool store_states_as_trees = true;
-  bool cached = false;
-  bool global_cache = false;
-  bool confluence = false;
-  bool detect_deadlock = false;
-  bool detect_nondeterminism = false;
-  bool detect_divergence = false;
-  bool detect_action = false;
-  bool generate_traces = false;
-  std::size_t max_states = std::numeric_limits<std::size_t>::max();
-  std::size_t max_traces = 0;
-  std::string priority_action;
-  std::string trace_prefix;
-  std::set<core::identifier_string> trace_actions;
-  std::set<std::string> trace_multiaction_strings;
-  std::set<lps::multi_action> trace_multiactions;
-  std::set<core::identifier_string> actions_internal_for_divergencies;
-};
-
-inline
-std::ostream& operator<<(std::ostream& out, const generate_lts_options& options)
-{
-  out << "rewrite_strategy = " << options.rewrite_strategy << std::endl;
-// out << "expl_strat = " << options.expl_strat << std::endl;
-  out << "cached = " << std::boolalpha << options.cached << std::endl;
-  out << "global-cache = " << std::boolalpha << options.global_cache << std::endl;
-  out << "confluence = " << std::boolalpha << options.confluence << std::endl;
-  out << "one_point_rule_rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
-  out << "resolve_summand_variable_name_clashes = " << std::boolalpha << options.resolve_summand_variable_name_clashes << std::endl;
-  out << "replace_constants_by_variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
-  out << "store_states_as_trees = " << std::boolalpha << options.store_states_as_trees << std::endl;
-  out << "detect_deadlock = " << std::boolalpha << options.detect_deadlock << std::endl;
-  out << "detect_nondeterminism = " << std::boolalpha << options.detect_nondeterminism << std::endl;
-  out << "detect_divergence = " << std::boolalpha << options.detect_divergence << std::endl;
-  out << "detect_action = " << std::boolalpha << options.detect_action << std::endl;
-  out << "generate_traces = " << std::boolalpha << options.generate_traces << std::endl;
-  out << "max_states = " << options.max_states << std::endl;
-  out << "max_traces = " << options.max_traces << std::endl;
-  out << "priority_action = " << options.priority_action << std::endl;
-  out << "trace_prefix = " << options.trace_prefix << std::endl;
-  out << "trace_actions = " << core::detail::print_set(options.trace_actions) << std::endl;
-  out << "trace_multiaction_strings = " << core::detail::print_set(options.trace_multiaction_strings) << std::endl;
-  out << "trace_multiactions = " << core::detail::print_set(options.trace_multiactions) << std::endl;
-  out << "actions_internal_for_divergencies = " << core::detail::print_set(options.actions_internal_for_divergencies) << std::endl;
-  return out;
-}
-
 template <typename VariableSequence, typename DataExpressionSequence>
 inline
 void add_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v, const DataExpressionSequence& e)
@@ -141,31 +87,6 @@ std::vector<data::data_expression> make_data_expression_vector(const data::data_
 {
   return std::vector<data::data_expression>(v.begin(), v.end());
 }
-
-// This class automatically undoes assignments to variables in the substitution sigma
-// as soon as it goes out of scope.
-template <typename VariableSequence>
-struct substitution_undo
-{
-  data::mutable_indexed_substitution<>& sigma;
-  const VariableSequence& variables;
-  std::vector<data::data_expression> expressions;
-
-  substitution_undo(data::mutable_indexed_substitution<>& sigma_, const VariableSequence & variables_)
-    : sigma(sigma_), variables(variables_)
-  {
-    expressions.reserve(variables_.size());
-    for (const data::variable& v: variables_)
-    {
-      expressions.push_back(sigma(v));
-    }
-  }
-
-  ~substitution_undo()
-  {
-    add_assignments(sigma, variables, expressions);
-  }
-};
 
 class explorer
 {
@@ -248,7 +169,7 @@ class explorer
   protected:
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
-    const generate_lts_options& options;
+    const explorer_options& options;
     data::rewriter r;
     mutable data::mutable_indexed_substitution<> sigma;
     data::enumerator_identifier_generator id_generator;
@@ -509,13 +430,13 @@ class explorer
     }
 
   public:
-    explorer(const specification& lpsspec, const generate_lts_options& options_)
+    explorer(const specification& lpsspec, const explorer_options& options_)
       : options(options_),
         r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy),
         E(r, lpsspec.data(), r, id_generator, false)
     {
       lps::specification lpsspec_ = preprocess(lpsspec);
-      auto params = lpsspec_.process().process_parameters();
+      const auto& params = lpsspec_.process().process_parameters();
       m_process_parameters = std::vector<data::variable>(params.begin(), params.end());
       n = m_process_parameters.size();
       m_initial_state = lpsspec_.initial_process().state(lpsspec_.process().process_parameters());
@@ -594,6 +515,7 @@ class explorer
         }
         finish_state(s, s_index);
       }
+      must_abort = false;
     }
 
     /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
