@@ -56,6 +56,10 @@ public:
   /// \brief Sets the position and orientation of the camera to its default values.
   void reset();
 
+  /// \returns The maximum view distance of this camera.
+  float viewdistance() const { return m_viewdistance; }
+  void viewdistance(float viewdistance) { m_viewdistance = viewdistance; }
+
 private:
 
   /// \brief Center of the arcball.
@@ -73,7 +77,7 @@ private:
   /// The resulting matrices and viewports, are updated when calling update().
   QMatrix4x4 m_projectionMatrix;
   QMatrix4x4 m_viewMatrix;
-  QMatrix4x4 m_invertedViewMatrix;
+  QVector3D  m_worldPosition;
   QRect m_viewport;
 };
 

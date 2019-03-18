@@ -39,7 +39,7 @@ constexpr float PI_2 = PI * 0.5f;
 constexpr int RES_NODE_SLICE = 32;
 
 /// \brief Number of vertical planes from which a circle representing a node is constructed.
-constexpr int RES_NODE_STACK = 1;
+constexpr int RES_NODE_STACK = 2;
 
 /// \brief Amount of segments in arrowhead cone
 constexpr int RES_ARROWHEAD = 16;
@@ -50,7 +50,7 @@ constexpr int RES_ARC       = 16;
 /// This should match the layout of m_vertexbuffer.
 constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE + 1;
 constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
-constexpr int VERTICES_HINT = 4;
+constexpr int VERTICES_HINT = 8;
 constexpr int VERTICES_HANDLE = 4;
 constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
 constexpr int VERTICES_ARROWHEAD_BASE = RES_ARROWHEAD + 1;
@@ -273,16 +273,15 @@ void GLScene::initialize()
   // Generate vertices for node (a quad strip drawing a half sphere)
   std::vector<QVector3D> node(VERTICES_NODE_SPHERE);
   {
-    float slice = 0;
-    float sliced = 2.0f * PI / VERTICES_NODE_BORDER;
     float stack = 0;
     float stackd = PI_2 / RES_NODE_STACK;
 
     std::size_t n = 0;
     for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
     {
-      for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
+      for (int i = 0; i < RES_NODE_SLICE - 1; ++i)
       {
+        float slice = i * 2.0f * PI / (RES_NODE_SLICE - 2);
         node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
             std::sin((float)(stack + stackd)) * std::cos(slice),
             std::cos((float)(stack + stackd)));
@@ -301,18 +300,18 @@ void GLScene::initialize()
   }
 
   // Generate plus (and minus) hint for exploration mode
-  std::vector<QVector3D> hint(4);
-  hint[0] = QVector3D(-0.3f, 0.0f, 0.0f);
-  hint[1] = QVector3D(0.3f,  0.0f, 0.0f);
-  hint[2] = QVector3D(0.0f, -0.3f, 0.0f);
-  hint[3] = QVector3D(0.0f,  0.3f, 0.0f);
+  std::vector<QVector3D> hint(8);
+  hint[0] = QVector3D(-1.0f,  0.2f, 0.0f);
+  hint[1] = QVector3D( 1.0f,  0.2f, 0.0f);
+  hint[2] = QVector3D( 1.0f, -0.2f, 0.0f);
+  hint[3] = QVector3D(-1.0f, -0.2f, 0.0f);
 
   // Generate vertices for handle (border + fill, both squares)
   std::vector<QVector3D> handle(4);
-  handle[0] = QVector3D(-0.5f, -0.5f, 0.0f);
-  handle[1] = QVector3D(0.5f , -0.5f, 0.0f);
-  handle[2] = QVector3D(0.5f , 0.5f, 0.0f);
-  handle[3] = QVector3D(-0.5f, 0.5f, 0.0f);
+  handle[0] = QVector3D(-1.0f, -1.0f, 0.0f);
+  handle[1] = QVector3D( 1.0f, -1.0f, 0.0f);
+  handle[2] = QVector3D( 1.0f,  1.0f, 0.0f);
+  handle[3] = QVector3D(-1.0f,  1.0f, 0.0f);
 
   // Generate vertices for arrowhead (a triangle fan drawing a cone)
   std::vector<QVector3D> arrowhead(VERTICES_ARROWHEAD);
@@ -434,6 +433,11 @@ void GLScene::render(QPainter& painter)
 
   // Use the painter to render the remaining text.
   glDisable(GL_DEPTH_TEST);
+
+  if (m_drawfog)
+  {
+    glEnable(GL_BLEND);
+  }
 
   painter.setFont(m_font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -589,6 +593,12 @@ bool GLScene::selectObject(GLScene::Selection& s,
 // GLScene private methods
 //
 
+/// \returns The angle in degrees [0, 180] from a given angle in radians [0, PI].
+inline static float radiansToDegrees(float radians)
+{
+  return 180.0f / PI * radians;
+}
+
 void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
   Graph::Edge edge = m_graph.edge(i);
@@ -651,8 +661,8 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   {
     vec.normalize();
 
-    float fog = fogAmount(to);
-    if (fog <= 1.0f)
+    float fog = 0.0f;
+    if (fogAmount(to, fog))
     {
       // Apply the fog color.
       m_global_shader.setColor(applyFog(QVector3D(0, 0, 0), fog));
@@ -664,8 +674,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 
       // Rotate the arrowhead to orient it to the end of the arc.
       QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
-      float degrees = (180.0f / PI) * acos(vec.x());
-      worldMatrix.rotate(degrees, axis);
+      worldMatrix.rotate(radiansToDegrees(acos(vec.x())), axis);
 
       // Move the arrowhead outside of the node.
       worldMatrix.translate(-0.5f * nodeSizeOnScreen(), 0.0f, 0.0f);
@@ -748,20 +757,13 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
     }
   }
 
-  //if (node.is_probabilistic())
-  //{
-  // Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
-  //  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
-  //}
-
-  //m_camera.billboard_spherical(node.pos());
-
-  float fog = fogAmount(node.pos());
-  if (fog <= 1.0f) // Check if these elements are visible.
+  float fog = 0.0f;
+  if (fogAmount(node.pos(), fog)) // Check if these elements are visible.
   {
     QMatrix4x4 worldMatrix;
     worldMatrix.translate(node.pos());
     worldMatrix.scale(0.5f * nodeSizeOnScreen());
+    worldMatrix.rotate(sphericalBillboard(node.pos()));
 
     QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
 
@@ -784,10 +786,18 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
       m_global_shader.setColor(hint);
       glDrawArrays(GL_LINES, OFFSET_HINT, VERTICES_HINT);
     }
-  }
 
+    if (node.is_probabilistic())
+    {
+      QVector3D blue(0.1f, 0.1f, 0.7f);
+
+      m_global_shader.setColor(applyFog(blue, fog));
+      glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
+    }
+  }
 }
 
+/// \brief Converts a QVector3D of floats [0,1] to a QColor object with integers [0,255] for colors.
 QColor vectorToColor(const QVector3D& vector)
 {
   return QColor(vector.x() * 255, vector.y() * 255, vector.z() * 255);
@@ -821,21 +831,23 @@ void GLScene::renderStateNumber(QPainter& painter, GLuint i)
   drawCenteredText3D(painter, QString::number(i), node.pos(), color);
 }
 
-float GLScene::fogAmount(const QVector3D& position)
+bool GLScene::fogAmount(const QVector3D& position, float& fogamount)
 {
+  // Should match the vertex shader: fogAmount = (1.0f - exp(-1.0f * pow(distance * g_density, 2)));
   float distance = (m_camera.position() - position).length();
-  return m_drawfog * (1.01f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
+  fogamount = m_drawfog * (1.0f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
+  return (distance < m_camera.viewdistance());
 }
 
 /// \returns The given value clamped between a min and a max.
 template<typename T>
-T clamp(T value, T min, T max)
+inline static T clamp(T value, T min, T max)
 {
   return std::min(std::max(value, min), max);
 }
 
 /// \returns A linear interpolation between a and b using the given value.
-QVector3D mix(float value, QVector3D a, QVector3D b)
+inline static QVector3D mix(float value, QVector3D a, QVector3D b)
 {
   return (1 - value) * a + (value * b);
 }
@@ -844,11 +856,52 @@ QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
 {
   return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
 }
+
+QQuaternion GLScene::sphericalBillboard(const QVector3D& position)
+{
+  // A vector from the camera to the world position.
+  QVector3D posToCamera = position - m_camera.position();
+
+  // We assume that the object points towards the negative z-axis and its up vector is the y-axis.
+  QVector3D frontVector(0.0f, 0.0f, -1.0f);
+  QQuaternion rotation;
+
+  // Rotate the object around its up (either (0,-1,0) or (0,1,0)) axis towards the camera.
+  QVector3D posToCameraXZ(posToCamera.x(), 0.0f, posToCamera.z());
+  posToCameraXZ.normalize();
+
+  float degrees_z = radiansToDegrees(std::acos(QVector4D::dotProduct(frontVector, posToCameraXZ)));
+  if (posToCameraXZ.x() > 0.0f)
+  {
+    rotation = QQuaternion::fromAxisAndAngle(QVector3D(0.0f, -1.0f, 0.0f), degrees_z);
+  }
+  else
+  {
+    rotation = QQuaternion::fromAxisAndAngle(QVector3D(0.0f, 1.0f, 0.0f), degrees_z);
+  }
+
+  // Tilt the object around its right axis (either (1,0,0) or (-1,0,0)) to face the camera.
+  QVector3D posToCameraYZ(0.0f, posToCamera.y(), posToCamera.z());
+  posToCameraYZ.normalize();
+
+  float degrees_x = radiansToDegrees(std::acos(QVector3D::dotProduct(frontVector, posToCameraYZ)));
+  if (posToCameraYZ.y() > 0.0f)
+  {
+    rotation *= QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), degrees_x);
+  }
+  else
+  {
+    rotation *= QQuaternion::fromAxisAndAngle(QVector3D(-1.0f, 0.0f, 0.0f), degrees_x);
+  }
+
+  return rotation;
+}
+
 /// Helper functions
 
 /// \brief Renders text, centered around the point at x and y
-inline
-QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
+inline static
+void drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
 {
   QFontMetrics metrics(painter.font());
   QRect bounds = metrics.boundingRect(text);
@@ -856,7 +909,6 @@ QRect drawCenteredText(QPainter& painter, float x, float y, const QString& text,
   qreal h = bounds.height();
   painter.setPen(color);
   painter.drawText(x - w / 2, y - h / 2, text);
-  return bounds;
 }
 
 void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color)
@@ -866,14 +918,17 @@ void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const Q
     QVector3D window = m_camera.worldToWindow(position);
     if (window.z() <= 1.0f) // Not behind the camera.
     {
-      float fog = fogAmount(position);
-      if (fog <= 1.0f) // The text is visible.
+      float fog = 0.0f;
+      if (fogAmount(position, fog)) // The text is visible.
       {
+        QColor qcolor = vectorToColor(color);
+        qcolor.setAlpha(255 * (1.0f - fog));
+
         drawCenteredText(painter,
           window.x(),
           window.y(),
           text,
-          vectorToColor(applyFog(color, fog)));
+          qcolor);
       }
 
     }
