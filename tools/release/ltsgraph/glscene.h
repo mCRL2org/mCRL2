@@ -79,7 +79,7 @@ private:
 class GLScene : private QOpenGLFunctions_3_3_Core
 {
 public:
-  static const int handleSize = 8;
+  static const int handleSize = 4;
   static const int arrowheadSize = 12;
 
   /// \brief An enumeration that identifies the types of objects that
@@ -187,10 +187,13 @@ private:
   void renderStateNumber(QPainter& painter, GLuint i);
 
   /// \returns The amount of fog that a given world coordinate receives.
-  float fogAmount(const QVector3D& position);
+  bool fogAmount(const QVector3D& position, float& fog);
 
   /// \returns The color of an object received fogAmount amount of fog.
   QVector3D applyFog(const QVector3D& color, float fogAmount);
+
+  /// \returns A rotation such that an object at the given position faces the camera.
+  QQuaternion sphericalBillboard(const QVector3D& position);
 
   /// \brief Renders text at a given world position, facing the camera and center aligned.
   void drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color);

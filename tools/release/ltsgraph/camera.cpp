@@ -21,7 +21,8 @@ void ArcballCameraView::update()
   m_viewMatrix.rotate(m_rotation);
   m_viewMatrix.translate(m_center);
 
-  m_invertedViewMatrix = m_viewMatrix.inverted();
+  QMatrix4x4 invertedViewMatrix = m_viewMatrix.inverted();
+  m_worldPosition = QVector3D(invertedViewMatrix.column(3));
 
   m_projectionMatrix.setToIdentity();
   m_projectionMatrix.perspective(m_vert_fieldofview, static_cast<float>(m_viewport.width()) / static_cast<float>(m_viewport.height()), 1.0f, m_viewdistance);
@@ -47,7 +48,7 @@ QVector3D ArcballCameraView::windowToWorld(QVector3D eye) const
 
 QVector3D ArcballCameraView::position() const
 {
-  return QVector3D(m_invertedViewMatrix.column(3));
+  return m_worldPosition;
 }
 
 void ArcballCameraView::reset()
