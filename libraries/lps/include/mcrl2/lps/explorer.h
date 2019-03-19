@@ -509,7 +509,7 @@ class explorer
                 todo.push_back(s1);
               }
               std::size_t s1_index = j->second;
-              examine_transition(s_index, a, s1_index, s1, summand.index);
+              examine_transition(s, s_index, a, s1, s1_index, summand.index);
             }
           );
         }
