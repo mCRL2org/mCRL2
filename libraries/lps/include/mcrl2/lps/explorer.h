@@ -39,7 +39,7 @@ namespace lps {
 
   struct enumerator_error: public mcrl2::runtime_error
   {
-    enumerator_error(const std::string& message): mcrl2::runtime_error(message)
+    explicit enumerator_error(const std::string& message): mcrl2::runtime_error(message)
     { }
   };
 
@@ -473,10 +473,24 @@ class explorer
       }
     }
 
+    std::set<data::function_symbol> add_less_equal_symbol(std::set<data::function_symbol> s) const
+    {
+      std::set<data::function_symbol> result = std::move(s);
+      result.insert(data::less_equal(data::sort_real::real_()));
+      return result;
+    }
+
+    bool less_equal(const data::data_expression& t0, const data::data_expression& t1)
+    {
+      return r(data::less_equal(t0, t1)) == data::sort_bool::true_();
+    }
+
   public:
     explorer(const specification& lpsspec, const explorer_options& options_)
       : options(options_),
-        r(lpsspec.data(), data::used_data_equation_selector(lpsspec.data(), lps::find_function_symbols(lpsspec), lpsspec.global_variables()), options.rewrite_strategy),
+        r(lpsspec.data(),
+          data::used_data_equation_selector(lpsspec.data(), add_less_equal_symbol(lps::find_function_symbols(lpsspec)), lpsspec.global_variables()),
+          options.rewrite_strategy),
         E(r, lpsspec.data(), r, id_generator, false)
     {
       lps::specification lpsspec_ = preprocess(lpsspec);
@@ -561,12 +575,6 @@ class explorer
       must_abort = false;
     }
 
-    bool less_time(const data::data_expression& t0, const data::data_expression& t1)
-    {
-std::cout << "LESS (" << t0 << ", " << t1 << ") = " << r(data::less(t0, t1)) << std::endl;
-      return r(data::less(t0, t1)) == data::sort_bool::true_();
-    }
-
     // pre: d0 is in normal form
     template <typename SummandSequence,
       typename DiscoverState = skip,
@@ -610,7 +618,7 @@ std::cout << "LESS (" << t0 << ", " << t1 << ") = " << r(data::less(t0, t1)) << 
             confluent_summands,
             [&](const process::timed_multi_action& a, const lps::state& s1)
             {
-              if (a.has_time() && less_time(a.time(), T))
+              if (a.has_time() && less_equal(a.time(), T))
               {
                 return;
               }
@@ -621,7 +629,7 @@ std::cout << "LESS (" << t0 << ", " << t1 << ") = " << r(data::less(t0, t1)) << 
                 std::size_t k = discovered.size();
                 j = discovered.insert(std::make_pair(s1, k)).first;
                 discover_state(s1, k);
-                todo.emplace_back(s1, T);
+                todo.emplace_back(s1, T1);
               }
               std::size_t s1_index = j->second;
               examine_transition(s, s_index, a, s1, s1_index, summand.index);
