@@ -320,10 +320,12 @@ class divergence_detector
     std::vector<lps::explorer::explorer_summand> m_confluent_summands;
     std::size_t m_trace_count = 0;
     std::size_t m_max_trace_count;
+    bool m_timed;
 
   public:
     divergence_detector(
       lps::explorer& explorer_,
+      bool timed,
       const std::set<core::identifier_string>& actions,
       const std::string& filename_prefix_,
       std::size_t max_trace_count
@@ -331,7 +333,8 @@ class divergence_detector
       : explorer(explorer_),
         filename_prefix(filename_prefix_),
         m_local_trace_constructor(explorer),
-        m_max_trace_count(max_trace_count)
+        m_max_trace_count(max_trace_count),
+        m_timed(timed)
     {
       using utilities::detail::contains;
 
@@ -385,6 +388,7 @@ class divergence_detector
 
       data::data_expression_list process_parameter_undo = explorer.process_parameter_values();
       explorer.generate_state_space(
+        m_timed,
         true,
         s,
         m_regular_summands,
@@ -531,6 +535,7 @@ struct state_space_generator
   detail::nondeterminism_detector m_nondeterminism_detector;
   std::unique_ptr<detail::divergence_detector> m_divergence_detector;
   detail::progress_monitor m_progress_monitor;
+  bool m_timed;
 
   state_space_generator(const lps::specification& lpsspec, const lps::explorer_options& options_)
     : options(options_), 
@@ -541,9 +546,10 @@ struct state_space_generator
       m_nondeterminism_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
       m_progress_monitor(options.search_strategy)
   {
+    m_timed = lpsspec.process().has_time();
     if (options.detect_divergence)
     {
-      m_divergence_detector = std::unique_ptr<detail::divergence_detector>(new detail::divergence_detector(explorer, options.actions_internal_for_divergencies, options.trace_prefix, options.max_traces));
+      m_divergence_detector = std::unique_ptr<detail::divergence_detector>(new detail::divergence_detector(explorer, m_timed, options.actions_internal_for_divergencies, options.trace_prefix, options.max_traces));
     }
   }
 
@@ -554,6 +560,7 @@ struct state_space_generator
     const lps::state* source = nullptr;
 
     explorer.generate_state_space(
+      m_timed,
       false,
 
       // discover_state

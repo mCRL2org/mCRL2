@@ -429,7 +429,8 @@ class explorer
       return result;
     }
 
-    lps::state next_todo(std::deque<lps::state>& todo)
+    template <typename T>
+    T next_todo(std::deque<T>& todo)
     {
       if (options.search_strategy == es_breadth)
       {
@@ -482,7 +483,7 @@ class explorer
       typename StartState = skip,
       typename FinishState = skip
     >
-    void generate_state_space(
+    void generate_untimed_state_space(
       bool recursive,
       const lps::state& d0,
       const SummandSequence& regular_summands,
@@ -533,6 +534,108 @@ class explorer
       must_abort = false;
     }
 
+    bool less_time(const data::data_expression& t0, const data::data_expression& t1)
+    {
+std::cout << "LESS (" << t0 << ", " << t1 << ") = " << r(data::less(t0, t1)) << std::endl;
+      return r(data::less(t0, t1)) == data::sort_bool::true_();
+    }
+
+    // pre: d0 is in normal form
+    template <typename SummandSequence,
+      typename DiscoverState = skip,
+      typename ExamineTransition = skip,
+      typename StartState = skip,
+      typename FinishState = skip
+    >
+    void generate_timed_state_space(
+      bool recursive,
+      const lps::state& d0,
+      const SummandSequence& regular_summands,
+      const SummandSequence& confluent_summands,
+      std::unordered_map<lps::state, std::size_t>& discovered,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      StartState start_state = StartState(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      m_recursive = recursive;
+      std::deque<std::pair<lps::state, data::data_expression>> todo;
+      discovered.clear();
+      std::size_t d0_index = 0;
+      discovered.insert(std::make_pair(d0, d0_index));
+      discover_state(d0, d0_index);
+      data::data_expression zero = data::sort_real::creal(data::sort_int::cint(data::sort_nat::c0()), data::sort_pos::c1());
+      todo.emplace_back(d0, zero);
+
+      while (!todo.empty() && !must_abort)
+      {
+        std::pair<lps::state, data::data_expression> q = next_todo(todo);
+        const lps::state& s = q.first;
+        const data::data_expression& T = q.second;
+        std::size_t s_index = discovered.find(s)->second;
+        start_state(s, s_index);
+        add_assignments(sigma, m_process_parameters, s);
+        for (const explorer_summand& summand: regular_summands)
+        {
+          generate_transitions(
+            summand,
+            confluent_summands,
+            [&](const process::timed_multi_action& a, const lps::state& s1)
+            {
+              if (a.has_time() && less_time(a.time(), T))
+              {
+                return;
+              }
+              data::data_expression T1 = a.has_time() ? a.time() : T;
+              auto j = discovered.find(s1);
+              if (j == discovered.end())
+              {
+                std::size_t k = discovered.size();
+                j = discovered.insert(std::make_pair(s1, k)).first;
+                discover_state(s1, k);
+                todo.emplace_back(s1, T);
+              }
+              std::size_t s1_index = j->second;
+              examine_transition(s, s_index, a, s1, s1_index, summand.index);
+            }
+          );
+        }
+        finish_state(s, s_index, todo.size());
+      }
+      must_abort = false;
+    }
+
+    // pre: d0 is in normal form
+    template <typename SummandSequence,
+      typename DiscoverState = skip,
+      typename ExamineTransition = skip,
+      typename StartState = skip,
+      typename FinishState = skip
+    >
+    void generate_state_space(
+      bool timed,
+      bool recursive,
+      const lps::state& d0,
+      const SummandSequence& regular_summands,
+      const SummandSequence& confluent_summands,
+      std::unordered_map<lps::state, std::size_t>& discovered,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      StartState start_state = StartState(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      if (timed)
+      {
+        generate_timed_state_space(recursive, d0, regular_summands, confluent_summands, discovered, discover_state, examine_transition, start_state, finish_state);
+      }
+      else
+      {
+        generate_untimed_state_space(recursive, d0, regular_summands, confluent_summands, discovered, discover_state, examine_transition, start_state, finish_state);
+      }
+    }
+
     /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
     /// functions.
     /// \param discover_state Is invoked when a state is encountered for the first time.
@@ -546,6 +649,7 @@ class explorer
       typename FinishState = skip
     >
     void generate_state_space(
+      bool timed,
       bool recursive,
       DiscoverState discover_state = DiscoverState(),
       ExamineTransition examine_transition = ExamineTransition(),
@@ -558,7 +662,7 @@ class explorer
       {
         d0 = find_representative(d0, m_confluent_summands);
       }
-      generate_state_space(recursive, d0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, examine_transition, start_state, finish_state);
+      generate_state_space(timed, recursive, d0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, examine_transition, start_state, finish_state);
     }
 
     /// \brief Generates outgoing transitions for a given state.
