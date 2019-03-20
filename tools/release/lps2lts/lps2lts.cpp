@@ -199,7 +199,7 @@ class lps2lts_tool : public lps2lts_base
                  "to tau use the flag -ctau. Note that if the linear process is not tau-confluent, the generated "
                  "state space is necessarily branching bisimilar to the state space of the lps. The generation "
                  "algorithm that is used does not require the linear process to be tau convergent. ", 'c').
-      add_option("strategy", make_enum_argument<exploration_strategy>("NAME")
+      add_option("strategy", make_enum_argument<mcrl2::lps::exploration_strategy>("NAME")
                  .add_value_short(es_breadth, "b", true)
                  .add_value_short(es_depth, "d")
                  .add_value_short(es_value_prioritized, "p")
@@ -307,7 +307,7 @@ class lps2lts_tool : public lps2lts_base
         m_options.priority_action = parser.option_argument("confluence");
       }
 
-      m_options.expl_strat = parser.option_argument_as<exploration_strategy>("strategy");
+      m_options.expl_strat = parser.option_argument_as<mcrl2::lps::exploration_strategy>("strategy");
 
       if (parser.options.count("out"))
       {

@@ -8,13 +8,13 @@
 //
 /// \file lts/detail/liblts_failures_refinement.h
 
-// This file contains an implementation of 
+// This file contains an implementation of
 // T. Wang, S. Song, J. Sun, Y. Liu, J.S. Dong, X. Wang and S. Li.
 // More Anti-Chain Based Refinement Checking. In proceedings ICFEM 2012, editors T. Aoki and K. Tagushi,
 // Lecture Notes in Computer Science no 7635, pages 364-380, 2012.
 //
 // There are six algorithms. One for trace inclusion, one for failures inclusion and one for failures-divergence inclusion.
-// All algorithms come in a variant with and without internal steps. 
+// All algorithms come in a variant with and without internal steps.
 // It is possible to generate a counter transition system in case the inclusion is answered by no.
 
 #ifndef LIBLTS_FAILURES_REFINEMENT_H
@@ -22,7 +22,7 @@
 
 #include "unordered_set"
 #include "mcrl2/lts/detail/counter_example.h"
-#include "mcrl2/lts/detail/exploration_strategy.h"
+#include "mcrl2/lps/exploration_strategy.h"
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 
 namespace mcrl2
@@ -51,8 +51,8 @@ namespace detail
 
       /// \brief Constructor.
       state_states_counter_example_index_triple(
-              const state_type state, 
-              const set_of_states& states, 
+              const state_type state,
+              const set_of_states& states,
               const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type& counter_example_index)
        : m_state(state),
          m_states(states),
@@ -84,10 +84,10 @@ namespace detail
         return m_counter_example_index;
       }
   };
- 
+
   template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
   inline bool antichain_insert(
-                  anti_chain_type& anti_chain, 
+                  anti_chain_type& anti_chain,
                   const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& impl_spec);
 
   // The class below recalls what the stable states and the states with a divergent
@@ -101,21 +101,21 @@ namespace detail
       std::vector<std::vector<transition> > m_sorted_transitions;
       std::vector<bool> m_divergent;
       std::vector<action_label_set> m_enabled_actions;
-      
+
     private:
       void calculate_weak_property_cache(const bool weak_reduction)
       {
         scc_partitioner<LTS_TYPE> strongly_connected_component_partitioner(m_l);
-        for(const transition& t: m_l.get_transitions()) 
+        for(const transition& t: m_l.get_transitions())
         {
           assert(t.from()<m_l.num_states());
           if (m_l.is_tau(m_l.apply_hidden_label_map(t.label())) && weak_reduction)
           {
-            m_tau_reachable_states[t.from()].push_back(t.to());  // There is an outgoing tau. 
+            m_tau_reachable_states[t.from()].push_back(t.to());  // There is an outgoing tau.
           }
           m_sorted_transitions[t.from()].push_back(t);
-         
-          if (weak_reduction && m_l.is_tau(m_l.apply_hidden_label_map(t.label())) && 
+
+          if (weak_reduction && m_l.is_tau(m_l.apply_hidden_label_map(t.label())) &&
               strongly_connected_component_partitioner.in_same_class(t.from(),t.to()))
           {
             m_divergent[t.from()]=true;  // There is a self loop.
@@ -125,14 +125,14 @@ namespace detail
       }
 
     public:
-      
+
       lts_cache(/* const */ LTS_TYPE& l, const bool weak_reduction)    /* l is not changed, but the use of the scc partitioner requires l to be non const */
         : m_l(l),
           m_tau_reachable_states(l.num_states()),
           m_sorted_transitions(l.num_states()),
           m_divergent(l.num_states(),false),
           m_enabled_actions(l.num_states())
-      { 
+      {
         calculate_weak_property_cache(weak_reduction);
       }
 
@@ -165,13 +165,13 @@ namespace detail
 
   template < class LTS_TYPE >
   set_of_states collect_reachable_states_via_taus(
-                 const state_type s, 
+                 const state_type s,
                  const lts_cache<LTS_TYPE>& weak_property_cache,
                  const bool weak_reduction);
 
   template < class LTS_TYPE >
   set_of_states collect_reachable_states_via_an_action(
-                 const state_type s, 
+                 const state_type s,
                  const label_type e,
                  const lts_cache<LTS_TYPE>& weak_property_cache,
                  const bool weak_reduction,
@@ -179,8 +179,8 @@ namespace detail
 
   template < class LTS_TYPE >
   bool refusals_contained_in(
-              const state_type impl, 
-              const set_of_states& spec, 
+              const state_type impl,
+              const set_of_states& spec,
               const lts_cache<LTS_TYPE>& weak_property_cache,
               label_type& culprit,
               const LTS_TYPE& l,
@@ -256,14 +256,14 @@ std::pair<std::size_t, bool> reduce(LTS_TYPE& lts,
 /// \param strategy Choose between breadth and depth first.
 template < class LTS_TYPE, class COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor >
 bool destructive_refinement_checker(
-                        LTS_TYPE& l1, 
-                        LTS_TYPE& l2, 
-                        const refinement_type refinement, 
+                        LTS_TYPE& l1,
+                        LTS_TYPE& l2,
+                        const refinement_type refinement,
                         const bool weak_reduction,
-                        const exploration_strategy strategy,
+                        const lps::exploration_strategy strategy,
                         COUNTER_EXAMPLE_CONSTRUCTOR generate_counter_example = detail::dummy_counter_example_constructor())
 {
-  assert(strategy == exploration_strategy::es_breadth || strategy == exploration_strategy::es_depth); // Need a valid strategy.
+  assert(strategy == lps::exploration_strategy::es_breadth || strategy == lps::exploration_strategy::es_depth); // Need a valid strategy.
 
   // For weak-failures and failures-divergence, the existence of tau loops make a difference.
   // Therefore, we apply bisimulation reduction preserving divergences.
@@ -280,7 +280,7 @@ bool destructive_refinement_checker(
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
   l2.clear(); // No use for l2 anymore.
-  
+
   if (generate_counter_example.is_dummy())
   {
     // No counter example is requested. We can use bisimulation preprocessing.
@@ -304,13 +304,13 @@ bool destructive_refinement_checker(
   std::deque<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>>
               working(  // let working be a stack containg the triple (init1,{s|init2-->s},root_index);
                     { detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>(
-                                  l1.initial_state(), 
+                                  l1.initial_state(),
                                   detail::collect_reachable_states_via_taus(init_l2,weak_property_cache,weak_reduction),
                                   generate_counter_example.root_index() ) });
                                                       // let antichain := emptyset;
   detail::anti_chain_type anti_chain;
-  detail::antichain_insert(anti_chain, working.front());   // antichain := antichain united with (impl,spec); 
-                                                           // This line occurs at another place in the code than in 
+  detail::antichain_insert(anti_chain, working.front());   // antichain := antichain united with (impl,spec);
+                                                           // This line occurs at another place in the code than in
                                                            // the original algorithm, where insertion in the anti-chain
                                                            // was too late, causing too many impl-spec pairs to be investigated.
   refinement_statistics<detail::state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>> stats(anti_chain, working);
@@ -349,22 +349,22 @@ bool destructive_refinement_checker(
       }
 
       if (refinement == failures || refinement == failures_divergence)
-      { 
+      {
         detail::label_type offending_action=std::size_t(-1);
-        // if refusals(impl) not contained in refusals(spec) then 
+        // if refusals(impl) not contained in refusals(spec) then
         if (!detail::refusals_contained_in(impl_spec.state(),
                                            impl_spec.states(),
                                            weak_property_cache,
                                            offending_action,
                                            l1,
-                                           !generate_counter_example.is_dummy()))   
+                                           !generate_counter_example.is_dummy()))
         {
           generate_counter_example.save_counter_example(impl_spec.counter_example_index(), l1);
           report_statistics(stats);
           return false;                               // return false;
         }
       }
-      
+
       for(const transition& t: weak_property_cache.transitions(impl_spec.state()))
       {
         const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index=
@@ -376,7 +376,7 @@ bool destructive_refinement_checker(
         }
         else
         {                                           // spec' := {s' | exists s in spec. s-e->s'};
-          for(const detail::state_type s: impl_spec.states())  
+          for(const detail::state_type s: impl_spec.states())
           {
             detail::set_of_states reachable_states_from_s_via_e=
                     detail::collect_reachable_states_via_an_action(s,l1.apply_hidden_label_map(t.label()),weak_property_cache,weak_reduction,l1);
@@ -391,16 +391,16 @@ bool destructive_refinement_checker(
         }
                                                     // if (impl',spec') in antichain is not true then
         ++stats.antichain_inserts;
-        const detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > 
+        const detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR >
                           impl_spec_counterex(t.to(),spec_prime,new_counterexample_index);
-        if (detail::antichain_insert(anti_chain, impl_spec_counterex))   
+        if (detail::antichain_insert(anti_chain, impl_spec_counterex))
         {
           ++stats.antichain_misses;
-          if (strategy == exploration_strategy::es_breadth)
+          if (strategy == lps::exploration_strategy::es_breadth)
           {
             working.push_back(impl_spec_counterex);   // add(impl,spec') at the bottom of the working;
           }
-          else if (strategy == exploration_strategy::es_depth)
+          else if (strategy == lps::exploration_strategy::es_depth)
           {
             working.push_front(impl_spec_counterex);   // push(impl,spec') into working;
           }
@@ -422,8 +422,8 @@ namespace detail
   */
   template < class LTS_TYPE >
   set_of_states collect_reachable_states_via_taus(
-              const set_of_states& s, 
-              const lts_cache<LTS_TYPE>& weak_property_cache, 
+              const set_of_states& s,
+              const lts_cache<LTS_TYPE>& weak_property_cache,
               const bool weak_reduction)
   {
     set_of_states result(s);
@@ -437,7 +437,7 @@ namespace detail
     {
       state_type current_state=todo_stack.front();
       todo_stack.pop_front();
-      for(const state_type s: weak_property_cache.tau_reachable_states(current_state)) 
+      for(const state_type s: weak_property_cache.tau_reachable_states(current_state))
       {
         if (visited.insert(s).second)  // The element has been inserted.
         {
@@ -446,14 +446,14 @@ namespace detail
         }
       }
     }
-    
+
     return result;
   }
 
   template < class LTS_TYPE >
   set_of_states collect_reachable_states_via_taus(
-                  const state_type s, 
-                  const lts_cache<LTS_TYPE>& weak_property_cache, 
+                  const state_type s,
+                  const lts_cache<LTS_TYPE>& weak_property_cache,
                   const bool weak_reduction)
   {
     set_of_states set_with_s({s});
@@ -476,7 +476,7 @@ namespace detail
       {
         {
           if (l.apply_hidden_label_map(t.label())==e)
-          { 
+          {
             assert(set_before_action_e.count(t.from())>0);
             states_reachable_via_e.insert(t.to());
           }
@@ -488,17 +488,17 @@ namespace detail
 
   /* This function implements the insertion of <p,state(), p.states()> in the anti_chain.
      Concretely, this means that p.states() is inserted among the sets s1,...,sn associated to p.state().
-     It is important that an anti_chain contains for each state a set of states of which 
+     It is important that an anti_chain contains for each state a set of states of which
      no set is a subset of another. The idea is that if such two sets occur, it is enough
      to keep the smallest.
      If p.states() is smaller than a set si associated to p.state(), this set is removed.
      If p.states() is larger than a set si, there is no need to add p.states(), as a better candidate
-     is already there. 
+     is already there.
      This function returns true if insertion was succesful, and false otherwise.
    */
   template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
   inline bool antichain_insert(
-                  anti_chain_type& anti_chain, 
+                  anti_chain_type& anti_chain,
                   const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& impl_spec)
   {
     // First check whether there is a set in the antichain for impl_spec.state() which is smaller than impl_spec.states().
@@ -506,23 +506,23 @@ namespace detail
     for(anti_chain_type::const_iterator i=anti_chain.lower_bound(impl_spec.state()); i!=anti_chain.upper_bound(impl_spec.state()); ++i)
     {
       const set_of_states s=i->second;
-      // If s is included in impl_spec.states() 
+      // If s is included in impl_spec.states()
       if (std::includes(impl_spec.states().begin(), impl_spec.states().end(), s.begin(),s.end()))
       {
         return false;
       }
     }
 
-    // Here impl_spec.states() must be inserted in the antichain. Moreover, all sets in the antichain that 
+    // Here impl_spec.states() must be inserted in the antichain. Moreover, all sets in the antichain that
     // are a superset of impl_spec.states() must be removed.
     for(anti_chain_type::iterator i=anti_chain.lower_bound(impl_spec.state()); i!=anti_chain.upper_bound(impl_spec.state()); )
     {
       const set_of_states s=i->second;
-      // if s is a superset of impl_spec.states() 
-      // if (std::includes(impl_spec.states().begin(),impl_spec.states().end(),s.begin(),s.end()))  
-      if (std::includes(s.begin(), s.end(), impl_spec.states().begin(),impl_spec.states().end()))  
+      // if s is a superset of impl_spec.states()
+      // if (std::includes(impl_spec.states().begin(),impl_spec.states().end(),s.begin(),s.end()))
+      if (std::includes(s.begin(), s.end(), impl_spec.states().begin(),impl_spec.states().end()))
       {
-        // set s must be removed. 
+        // set s must be removed.
         i=anti_chain.erase(i);
       }
       else
@@ -533,11 +533,11 @@ namespace detail
     anti_chain.insert(std::pair<detail::state_type,detail::set_of_states>(impl_spec.state(),impl_spec.states()));
     return true;
   }
-  
+
   /* Calculate the states that are stable and reachable through tau-steps */
   template < class LTS_TYPE >
   const set_of_states& calculate_tau_reachable_states(
-        const set_of_states& states, 
+        const set_of_states& states,
         const lts_cache<LTS_TYPE>& weak_property_cache)
   {
     static std::map<set_of_states, set_of_states> cache;
@@ -556,7 +556,7 @@ namespace detail
     for(const state_type s: states)
     {
       if (weak_property_cache.stable(s))
-      { 
+      {
         // Put the outgoing action labels in a set and put these in the result.
         result.insert(s);
       }
@@ -566,23 +566,23 @@ namespace detail
         todo_stack.push(s);
       }
     }
-    
+
     while (todo_stack.size()>0)
     {
       const state_type current_state=todo_stack.top();
       todo_stack.pop();
-      // Consider the states reachable in one tau step. 
-      for(const state_type s: weak_property_cache.tau_reachable_states(current_state)) 
+      // Consider the states reachable in one tau step.
+      for(const state_type s: weak_property_cache.tau_reachable_states(current_state))
       {
         if (weak_property_cache.stable(s))
-        { 
+        {
           // Put the outgoing action labels in a set and put these in the result.
           result.insert(s);
         }
         else
         {
           if (visited.insert(s).second) // t.to() is a new state.
-          { 
+          {
             todo_stack.push(s);
           }
         }
@@ -601,8 +601,8 @@ namespace detail
   ///          It can be used to construct an extended counterexample.
   template < class LTS_TYPE >
   bool refusals_contained_in(
-              const state_type impl, 
-              const set_of_states& spec, 
+              const state_type impl,
+              const set_of_states& spec,
               const lts_cache<LTS_TYPE>& weak_property_cache,
               label_type& culprit,
               const LTS_TYPE& l,
@@ -687,10 +687,10 @@ namespace detail
       return false;
     }
 
-    return true;   
+    return true;
   }
-  
-  
+
+
 } // namespace detail
 } // namespace lts
 } // namespace mcrl2

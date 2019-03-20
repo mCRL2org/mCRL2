@@ -258,7 +258,7 @@ class pbesinst_lazy_algorithm
         mCRL2log(log::status) << print_equation_count(m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
 
-        auto const& X_e = next_todo();
+        propositional_variable_instantiation X_e = next_todo();
 
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];

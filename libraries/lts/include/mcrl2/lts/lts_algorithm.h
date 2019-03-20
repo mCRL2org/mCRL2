@@ -99,7 +99,7 @@ bool destructive_compare(LTS_TYPE& l1,
       return false;
     case lts_eq_bisim:
     {
-      if (generate_counter_examples) 
+      if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "The default bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
         return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
@@ -116,7 +116,7 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_branching_bisim:
     {
-      if (generate_counter_examples) 
+      if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
         return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
@@ -133,7 +133,7 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
-      if (generate_counter_examples) 
+      if (generate_counter_examples)
       {
         mCRL2log(mcrl2::log::warning) << "The default divergence preserving branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
         return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
@@ -193,7 +193,7 @@ bool destructive_compare(LTS_TYPE& l1,
       rsp.partitioning_algorithm();
 
       return rsp.in_same_class(l1.initial_state(),init_l2);
-    }    
+    }
     case lts_eq_trace:
     {
       // Determinise first LTS
@@ -254,8 +254,8 @@ bool compare(const LTS_TYPE& l1,
  * \param[in] l2 The second LTS to be compared.
  * \param[in] pre The preorder with respect to which the LTSs will be
  * compared.
- * \param[in] generate_counter_example Indicates whether a file containing a counter example is 
- *            generated when the comparison fails. 
+ * \param[in] generate_counter_example Indicates whether a file containing a counter example is
+ *            generated when the comparison fails.
  * \retval true if LTS \a l1 is smaller than LTS \a l2 according to
  * preorder \a pre.
  * \retval false otherwise.
@@ -277,8 +277,8 @@ bool destructive_compare(LTS_TYPE& l1,
  * \param[in] l1 The first LTS to be compared.
  * \param[in] l2 The second LTS to be compared.
  * \param[in] pre The preorder with respect to which the LTSs will be compared.
- * \param[in] generate_counter_example Indicates whether a file containing a counter example is 
- *            generated when the comparison fails. 
+ * \param[in] generate_counter_example Indicates whether a file containing a counter example is
+ *            generated when the comparison fails.
  * \param[in] strategy Choose breadth-first or depth-first for exploration strategy
  *            of the antichain algorithms.
  * \retval true if this LTS is smaller than LTS \a l according to
@@ -290,7 +290,7 @@ bool compare(const LTS_TYPE&  l1,
              const  LTS_TYPE& l2,
              const lts_preorder pre,
              const bool generate_counter_example,
-             const exploration_strategy strategy = es_breadth);
+             const lps::exploration_strategy strategy = lps::es_breadth);
 
 /** \brief Determinises this LTS. */
 template <class LTS_TYPE>
@@ -315,7 +315,7 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
-  
+
   visited[l.initial_state()]=true;
   todo.push(l.initial_state());
 
@@ -423,12 +423,12 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
-  
+
   for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
   {
     visited[s.state()]=true;
     todo.push(s.state());
-  } 
+  }
 
   while (!todo.empty())
   {
@@ -714,8 +714,8 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 
       reachability_check(l,true);
 
-      return;      
-    }        
+      return;
+    }
     case lts_eq_trace:
       detail::bisimulation_reduce(l,false);
       determinise(l);
@@ -763,7 +763,7 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, c
 }
 
 template <class LTS_TYPE>
-bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const exploration_strategy strategy)
+bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
@@ -771,7 +771,7 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, con
 }
 
 template <class LTS_TYPE>
-bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const exploration_strategy strategy = es_breadth)
+bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy = lps::es_breadth)
 {
   switch (pre)
   {
@@ -806,11 +806,11 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       l2.clear();
 
       // Run the partitioning algorithm on this prepropcessed LTS
-      detail::ready_sim_partitioner<LTS_TYPE> rsp(l1);      
+      detail::ready_sim_partitioner<LTS_TYPE> rsp(l1);
       rsp.partitioning_algorithm();
 
       return rsp.in_preorder(l1.initial_state(),init_l2);
-    }    
+    }
     case lts_pre_trace:
     {
       // Preprocessing: reduce modulo strong bisimulation equivalence.
@@ -907,8 +907,8 @@ bool is_deterministic(const LTS_TYPE& l)
   {
     outgoing_transitions_per_state_action_t::const_iterator i_next=i;
     i_next++;
-    if (i_next!=trans_lut.end() && 
-                  from(i)==from(i_next) && 
+    if (i_next!=trans_lut.end() &&
+                  from(i)==from(i_next) &&
                   label(i)==label(i_next) &&
                   to(i)!=to(i_next))
     {

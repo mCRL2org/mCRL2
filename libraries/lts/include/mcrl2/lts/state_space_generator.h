@@ -165,13 +165,13 @@ class action_detector
       std::string filename = filename_prefix + "_act_" + std::to_string(m_trace_count++);
       if (utilities::detail::contains(trace_multiactions, a))
       {
-        filename = filename + "_" + lps::pp(a);
+        filename += "_" + lps::pp(a);
       }
       for (const process::action& a_i: a.actions())
       {
         if (utilities::detail::contains(trace_actions, a_i.label().name()))
         {
-          filename = filename + "_" + core::pp(a_i.label().name());
+          filename += "_" + core::pp(a_i.label().name());
         }
       }
       filename = filename + ".trc";
@@ -380,7 +380,6 @@ class divergence_detector
       }
 
       std::unordered_map<lps::state, std::size_t> discovered;
-      std::map<lps::state, lps::state> backpointers;
       const lps::state* source = nullptr;
       lps::state last_discovered;
 

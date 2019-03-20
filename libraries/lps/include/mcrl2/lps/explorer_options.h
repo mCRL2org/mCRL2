@@ -14,7 +14,7 @@
 
 #include <iomanip>
 #include "mcrl2/lps/multi_action.h"
-// #include "mcrl2/lps/exploration_strategy.h"
+#include "mcrl2/lps/exploration_strategy.h"
 
 namespace mcrl2 {
 
@@ -23,7 +23,7 @@ namespace lps {
 struct explorer_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
-  // exploration_strategy expl_strat;
+  exploration_strategy search_strategy;
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;
   bool resolve_summand_variable_name_clashes = false;
@@ -50,7 +50,7 @@ inline
 std::ostream& operator<<(std::ostream& out, const explorer_options& options)
 {
   out << "rewrite_strategy = " << options.rewrite_strategy << std::endl;
-// out << "expl_strat = " << options.expl_strat << std::endl;
+  out << "search_strategy = " << options.search_strategy << std::endl;
   out << "cached = " << std::boolalpha << options.cached << std::endl;
   out << "global-cache = " << std::boolalpha << options.global_cache << std::endl;
   out << "confluence = " << std::boolalpha << options.confluence << std::endl;

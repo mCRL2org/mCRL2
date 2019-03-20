@@ -96,6 +96,12 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("tau", utilities::make_mandatory_argument("ACTNAMES"),
                  "consider actions with a name in the comma separated list ACTNAMES to be internal. "
                  "This list is only used and allowed when searching for divergencies. ");
+      desc.add_option("strategy", utilities::make_enum_argument<lps::exploration_strategy>("NAME")
+                   .add_value_short(lps::es_breadth, "b", true)
+                   .add_value_short(lps::es_depth, "d")
+        , "explore the state space using strategy NAME:"
+        , 's');
+
       options.rewrite_strategy = rewrite_strategy();
     }
 
@@ -143,7 +149,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.detect_deadlock                       = parser.has_option("deadlock");
       options.detect_nondeterminism                 = parser.has_option("nondeterminism");
       options.detect_divergence                     = parser.has_option("divergence");
-      // options.expl_strat = parser.option_argument_as<lps::exploration_strategy>("strategy");
+      options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 
       if (parser.options.count("max"))
       {

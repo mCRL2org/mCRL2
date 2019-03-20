@@ -429,6 +429,22 @@ class explorer
       return result;
     }
 
+    lps::state next_todo(std::deque<lps::state>& todo)
+    {
+      if (options.search_strategy == es_breadth)
+      {
+        auto s = todo.front();
+        todo.pop_front();
+        return s;
+      }
+      else
+      {
+        auto s = todo.back();
+        todo.pop_back();
+        return s;
+      }
+    }
+
   public:
     explorer(const specification& lpsspec, const explorer_options& options_)
       : options(options_),
@@ -488,8 +504,7 @@ class explorer
 
       while (!todo.empty() && !must_abort)
       {
-        lps::state s = todo.front();
-        todo.pop_front();
+        lps::state s = next_todo(todo);
         std::size_t s_index = discovered.find(s)->second;
         start_state(s, s_index);
         add_assignments(sigma, m_process_parameters, s);

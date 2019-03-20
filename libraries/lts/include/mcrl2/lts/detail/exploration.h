@@ -21,7 +21,7 @@
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
 #include "mcrl2/lts/detail/lts_generation_options.h"
-#include "mcrl2/lts/detail/exploration_strategy.h"
+#include "mcrl2/lps/exploration_strategy.h"
 
 
 namespace mcrl2

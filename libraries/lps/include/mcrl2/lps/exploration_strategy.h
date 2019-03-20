@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef MCRL2_LTS_DETAIL_EXPLORATION_STRATEGY_H
-#define MCRL2_LTS_DETAIL_EXPLORATION_STRATEGY_H
+#ifndef MCRL2_LPS_EXPLORATION_STRATEGY_H
+#define MCRL2_LPS_EXPLORATION_STRATEGY_H
 
 #include <iostream>
 #include <string>
@@ -16,7 +16,7 @@
 
 namespace mcrl2
 {
-namespace lts
+namespace lps
 {
 
 enum exploration_strategy { es_none,
@@ -115,7 +115,7 @@ inline std::string description(const exploration_strategy strat)
   }
 }
 
-} // namespace lts
+} // namespace lps
 } // namespace mcrl2
 
-#endif // MCRL2_LTS_DETAIL_EXPLORATION_STRATEGY_H
+#endif // MCRL2_LPS_EXPLORATION_STRATEGY_H

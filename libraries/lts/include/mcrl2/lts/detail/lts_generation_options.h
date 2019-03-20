@@ -14,7 +14,7 @@
 
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/detail/exploration_strategy.h"
+#include "mcrl2/lps/exploration_strategy.h"
 #include "mcrl2/process/action_parse.h"
 
 namespace mcrl2
@@ -38,7 +38,7 @@ class lts_generation_options
     bool removeunused;
 
     mcrl2::data::rewriter::strategy strat;
-    exploration_strategy expl_strat;
+    lps::exploration_strategy expl_strat;
     std::string priority_action;
     std::size_t todo_max;
     std::size_t max_states;
@@ -73,7 +73,7 @@ class lts_generation_options
       usedummies(true),
       removeunused(true),
       strat(mcrl2::data::jitty),
-      expl_strat(es_breadth),
+      expl_strat(lps::es_breadth),
       todo_max((std::numeric_limits< std::size_t >::max)()),
       max_states(default_max_states),
       initial_table_size(default_init_tsize),

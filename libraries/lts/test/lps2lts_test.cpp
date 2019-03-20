@@ -37,7 +37,7 @@ using namespace mcrl2::lps;
 
 template <class LTS_TYPE>
 LTS_TYPE translate_lps_to_lts(lps::stochastic_specification const& specification,
-                              lts::exploration_strategy const strategy = lts::es_breadth,
+                              lps::exploration_strategy const strategy = lps::es_breadth,
                               mcrl2::data::rewrite_strategy const rewrite_strategy = mcrl2::data::jitty,
                               const std::string& priority_action = "")
 {
@@ -67,15 +67,15 @@ typedef mcrl2::data::rewrite_strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
 // Configure exploration strategies to be tested;
-typedef std::vector< lts::exploration_strategy > exploration_strategy_vector;
+typedef std::vector< lps::exploration_strategy > exploration_strategy_vector;
 
 static inline
 exploration_strategy_vector initialise_exploration_strategies()
 {
   exploration_strategy_vector result;
-  result.push_back(lts::es_breadth);
-  result.push_back(lts::es_depth);
-  //result.push_back(lts::es_random);
+  result.push_back(lps::es_breadth);
+  result.push_back(lps::es_depth);
+  //result.push_back(lps::es_random);
   return result;
 }
 
