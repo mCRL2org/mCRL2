@@ -77,6 +77,9 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                  "detect and report multiactions in the transitions system "
                  "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
                  "are matched exactly, including data parameters. ", 'm');
+      desc.add_option("error-trace",
+                 "if an error occurs during exploration, save a trace to the state that could "
+                 "not be explored. ");
       desc.add_option("trace", utilities::make_optional_argument("NUM", std::to_string(std::numeric_limits<std::size_t>::max())),
                  "Write a shortest trace to each state that is reached with an action from NAMES "
                  "with the option --action, is a deadlock with the option --deadlock, is nondeterministic with the option --nondeterminism, or is a "
@@ -152,6 +155,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.detect_deadlock                       = parser.has_option("deadlock");
       options.detect_nondeterminism                 = parser.has_option("nondeterminism");
       options.detect_divergence                     = parser.has_option("divergence");
+      options.save_error_trace                      = parser.has_option("error-trace");
       options.suppress_progress_messages            = parser.has_option("suppress");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 

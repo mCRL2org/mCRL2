@@ -559,68 +559,83 @@ struct state_space_generator
     bool has_outgoing_transitions;
     const lps::state* source = nullptr;
 
-    explorer.generate_state_space(
-      m_timed,
-      false,
+    try
+    {
+      explorer.generate_state_space(
+        m_timed,
+        false,
 
-      // discover_state
-      [&](const lps::state& s, std::size_t s_index)
-      {
-        if (options.generate_traces && source)
+        // discover_state
+        [&](const lps::state& s, std::size_t s_index)
         {
-          m_trace_constructor.add_edge(*source, s);
-        }
-        if (options.detect_divergence)
-        {
-          m_divergence_detector->detect_divergence(s, s_index, m_trace_constructor);
-        }
-      },
+          if (options.generate_traces && source)
+          {
+            m_trace_constructor.add_edge(*source, s);
+          }
+          if (options.detect_divergence)
+          {
+            m_divergence_detector->detect_divergence(s, s_index, m_trace_constructor);
+          }
+        },
 
-      // examine_transition
-      [&](const lps::state& s0, std::size_t s0_index, const process::timed_multi_action& a, const lps::state& s1, std::size_t s1_index, std::size_t summand_index)
-      {
-        builder.add_transition(s0_index, a, s1_index);
-        has_outgoing_transitions = true;
-        if (options.detect_action)
+        // examine_transition
+        [&](const lps::state& s0, std::size_t s0_index, const process::timed_multi_action& a, const lps::state& s1, std::size_t s1_index, std::size_t summand_index)
         {
-          m_action_detector.detect_action(s0, s0_index, lps::multi_action(a.actions(), a.time()), s1, summand_index);
-        }
-        if (options.detect_nondeterminism)
-        {
-          m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, lps::multi_action(a.actions(), a.time()), s1);
-        }
-        if (!options.suppress_progress_messages)
-        {
-          m_progress_monitor.examine_transition();
-        }
-      },
+          builder.add_transition(s0_index, a, s1_index);
+          has_outgoing_transitions = true;
+          if (options.detect_action)
+          {
+            m_action_detector.detect_action(s0, s0_index, lps::multi_action(a.actions(), a.time()), s1, summand_index);
+          }
+          if (options.detect_nondeterminism)
+          {
+            m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, lps::multi_action(a.actions(), a.time()), s1);
+          }
+          if (!options.suppress_progress_messages)
+          {
+            m_progress_monitor.examine_transition();
+          }
+        },
 
-      // start_state
-      [&](const lps::state& s, std::size_t /* s_index */)
-      {
-        source = &s;
-        has_outgoing_transitions = false;
-        if (options.detect_nondeterminism)
+        // start_state
+        [&](const lps::state& s, std::size_t /* s_index */)
         {
-          m_nondeterminism_detector.start_state();
-        }
-      },
+          source = &s;
+          has_outgoing_transitions = false;
+          if (options.detect_nondeterminism)
+          {
+            m_nondeterminism_detector.start_state();
+          }
+        },
 
-      // finish_state
-      [&](const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
+        // finish_state
+        [&](const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
+        {
+          if (options.detect_deadlock && !has_outgoing_transitions)
+          {
+            m_deadlock_detector.detect_deadlock(s, s_index);
+          }
+          if (!options.suppress_progress_messages)
+          {
+            m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size);
+          }
+        }
+      );
+      m_progress_monitor.finish_exploration(explorer.state_map().size());
+      builder.finalize(explorer.state_map());
+    }
+    catch (const lps::enumerator_error& e)
+    {
+      mCRL2log(log::error) << "Error while exploring state space: " << e.what() << "\n";
+      if (options.save_error_trace)
       {
-        if (options.detect_deadlock && !has_outgoing_transitions)
-        {
-          m_deadlock_detector.detect_deadlock(s, s_index);
-        }
-        if (!options.suppress_progress_messages)
-        {
-          m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size);
-        }
+        const lps::state& s = *source;
+        trace::Trace tr = m_trace_constructor.construct_trace(s);
+        std::string filename = options.trace_prefix + "_error.trc";
+        detail::save_trace(tr, filename);
       }
-    );
-    m_progress_monitor.finish_exploration(explorer.state_map().size());
-    builder.finalize(explorer.state_map());
+      mCRL2log(log::info) << ".\n";
+    }
   }
 };
 

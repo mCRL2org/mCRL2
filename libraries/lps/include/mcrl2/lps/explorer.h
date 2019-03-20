@@ -37,6 +37,12 @@ namespace mcrl2 {
 
 namespace lps {
 
+  struct enumerator_error: public mcrl2::runtime_error
+  {
+    enumerator_error(const std::string& message): mcrl2::runtime_error(message)
+    { }
+  };
+
 /// \brief The skip operation with a variable number of arguments
 struct skip
 {
@@ -321,6 +327,25 @@ class explorer
         );
     }
 
+    void check_enumerator_solution(const enumerator_element& p, const explorer_summand& summand)
+    {
+      if (p.expression() != data::sort_bool::true_())
+      {
+        data::data_expression condition = data::replace_variables(summand.condition, sigma);
+
+        remove_assignments(sigma, m_process_parameters);
+        remove_assignments(sigma, summand.variables);
+        data::data_expression reduced_condition = r(summand.condition, sigma);
+
+        std::string printed_condition = data::pp(condition).substr(0, 300);
+
+        throw enumerator_error("Expression " + data::pp(reduced_condition) +
+                               " does not rewrite to true or false in the condition "
+                               + printed_condition
+                               + (printed_condition.size() >= 300 ? "..." : ""));
+      }
+    }
+
     // Generates outgoing transitions for a summand, and reports them via the callback function examine_transition.
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
     template <typename SummandSequence, typename ExamineTransition = skip>
@@ -342,6 +367,7 @@ class explorer
           E.enumerate(enumerator_element(summand.variables, condition),
                       sigma,
                       [&](const enumerator_element& p) {
+                        check_enumerator_solution(p, summand);
                         p.add_assignments(summand.variables, sigma, r);
                         process::timed_multi_action a = rewrite_action(summand.multi_action);
                         lps::state d1 = rewrite_state(summand.next_state);
@@ -374,6 +400,7 @@ class explorer
             E.enumerate(enumerator_element(summand.variables, condition),
                         sigma,
                         [&](const enumerator_element& p) {
+                          check_enumerator_solution(p, summand);
                           solutions.push_back(p.assign_expressions(summand.variables, r));
                           return false;
                         },
