@@ -36,6 +36,7 @@ struct explorer_options
   bool detect_divergence = false;
   bool detect_action = false;
   bool generate_traces = false;
+  bool suppress_progress_messages = false;
   std::size_t max_states = std::numeric_limits<std::size_t>::max();
   std::size_t max_traces = 0;
   std::string priority_action;
@@ -63,6 +64,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "detect_divergence = " << std::boolalpha << options.detect_divergence << std::endl;
   out << "detect_action = " << std::boolalpha << options.detect_action << std::endl;
   out << "generate_traces = " << std::boolalpha << options.generate_traces << std::endl;
+  out << "suppress_progress_messages = " << std::boolalpha << options.suppress_progress_messages << std::endl;
   out << "max_states = " << options.max_states << std::endl;
   out << "max_traces = " << options.max_traces << std::endl;
   out << "priority_action = " << options.priority_action << std::endl;

@@ -528,7 +528,7 @@ class explorer
             }
           );
         }
-        finish_state(s, s_index);
+        finish_state(s, s_index, todo.size());
       }
       must_abort = false;
     }

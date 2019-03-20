@@ -438,6 +438,86 @@ class divergence_detector
     }
 };
 
+class progress_monitor
+{
+  protected:
+    std::size_t level = 1;    // the current exploration level
+    std::size_t level_up = 1; // when count reaches level_up, the level is increased
+    std::size_t count = 0;
+    std::size_t transition_count = 0;
+
+    std::size_t last_state_count = 0;
+    std::size_t last_transition_count = 0;
+    time_t last_log_time = time(nullptr) - 1;
+    time_t new_log_time;
+
+    lps::exploration_strategy search_strategy;
+
+  public:
+    explicit progress_monitor(lps::exploration_strategy search_strategy_)
+      : search_strategy(search_strategy_)
+    {}
+
+    void examine_transition()
+    {
+      transition_count++;
+    }
+
+    void finish_state(std::size_t state_count, std::size_t todo_list_size)
+    {
+      if (search_strategy == lps::es_breadth)
+      {
+        if (++count == level_up)
+        {
+          mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
+          level++;
+          level_up = count + todo_list_size;
+          last_state_count = state_count;
+          last_transition_count = transition_count;
+        }
+
+        if (time(&new_log_time) > last_log_time)
+        {
+          last_log_time = new_log_time;
+          std::size_t lvl_states = state_count - last_state_count;
+          std::size_t lvl_transitions = transition_count - last_transition_count;
+          mCRL2log(log::status) << std::fixed << std::setprecision(2)
+                                << state_count << "st, " << transition_count << "tr"
+                                << ", explored " << 100.0 * ((float) count / state_count)
+                                << "%. Last level: " << level << ", " << lvl_states << "st, " << lvl_transitions
+                                << "tr.\n";
+        }
+      }
+      else
+      {
+        if (++count % 1000 == 0)
+        {
+          mCRL2log(log::verbose) << "monitor: currently explored "
+                            << count << " state" << ((count==1)?"":"s")
+                            << " and " << transition_count << " transition" << ((transition_count==1)?"":"s")
+                            << std::endl;
+        }
+      }
+    }
+
+    void finish_exploration(std::size_t state_count)
+    {
+      if (search_strategy == lps::es_breadth)
+      {
+        mCRL2log(log::verbose) << "done with state space generation ("
+                               << level-1 << " level" << ((level==2)?"":"s") << ", "
+                               << state_count << " state" << ((state_count == 1)?"":"s")
+                               << " and " << transition_count << " transition" << ((transition_count==1)?"":"s") << ")" << std::endl;
+      }
+      else
+      {
+        mCRL2log(log::verbose) << "done with state space generation ("
+                          << state_count << " state" << ((state_count == 1)?"":"s")
+                          << " and " << transition_count << " transition" << ((transition_count==1)?"":"s") << ")" << std::endl;
+      }
+    }
+};
+
 } // namespace detail
 
 struct state_space_generator
@@ -450,6 +530,7 @@ struct state_space_generator
   detail::deadlock_detector m_deadlock_detector;
   detail::nondeterminism_detector m_nondeterminism_detector;
   std::unique_ptr<detail::divergence_detector> m_divergence_detector;
+  detail::progress_monitor m_progress_monitor;
 
   state_space_generator(const lps::specification& lpsspec, const lps::explorer_options& options_)
     : options(options_), 
@@ -457,7 +538,8 @@ struct state_space_generator
       m_trace_constructor(explorer),
       m_action_detector(lpsspec, m_trace_constructor, options.trace_actions, options.trace_multiactions, options.trace_prefix, options.max_traces),
       m_deadlock_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
-      m_nondeterminism_detector(m_trace_constructor, options.trace_prefix, options.max_traces)
+      m_nondeterminism_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
+      m_progress_monitor(options.search_strategy)
   {
     if (options.detect_divergence)
     {
@@ -500,6 +582,10 @@ struct state_space_generator
         {
           m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, lps::multi_action(a.actions(), a.time()), s1);
         }
+        if (!options.suppress_progress_messages)
+        {
+          m_progress_monitor.examine_transition();
+        }
       },
 
       // start_state
@@ -514,14 +600,19 @@ struct state_space_generator
       },
 
       // finish_state
-      [&](const lps::state& s, std::size_t s_index)
+      [&](const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
       {
         if (options.detect_deadlock && !has_outgoing_transitions)
         {
           m_deadlock_detector.detect_deadlock(s, s_index);
         }
+        if (!options.suppress_progress_messages)
+        {
+          m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size);
+        }
       }
     );
+    m_progress_monitor.finish_exploration(explorer.state_map().size());
     builder.finalize(explorer.state_map());
   }
 };

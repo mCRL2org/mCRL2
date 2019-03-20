@@ -101,7 +101,10 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                    .add_value_short(lps::es_depth, "d")
         , "explore the state space using strategy NAME:"
         , 's');
-
+      desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions. "
+                            "For large state spaces the number of progress messages can be quite "
+                            "horrendous. This feature helps to suppress those. Other verbose messages, "
+                            "such as the total number of states explored, just remain visible. ");
       options.rewrite_strategy = rewrite_strategy();
     }
 
@@ -149,6 +152,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.detect_deadlock                       = parser.has_option("deadlock");
       options.detect_nondeterminism                 = parser.has_option("nondeterminism");
       options.detect_divergence                     = parser.has_option("divergence");
+      options.suppress_progress_messages            = parser.has_option("suppress");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 
       if (parser.options.count("max"))
