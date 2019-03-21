@@ -108,6 +108,8 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                             "For large state spaces the number of progress messages can be quite "
                             "horrendous. This feature helps to suppress those. Other verbose messages, "
                             "such as the total number of states explored, just remain visible. ");
+      desc.add_option("no-store", "save the resulting LTS to disk while generating. Currently this only works "
+                              "for .aut files.");
       options.rewrite_strategy = rewrite_strategy();
     }
 
@@ -146,6 +148,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+      options.no_store                              = parser.has_option("no-store");
       options.cached                                = parser.has_option("cached");
       options.global_cache                          = parser.has_option("global-cache");
       options.confluence                            = parser.has_option("confluence");
@@ -225,13 +228,23 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       {
         parser.error("Too many file arguments.");
       }
+
+      if (options.no_store && (output_filename().empty() || output_format != lts::lts_aut))
+      {
+        options.no_store = false;
+        mCRL2log(log::warning) << "Ignoring the no-store option.";
+      }
     }
 
     std::unique_ptr<lts::lts_builder> create_builder(const lps::specification& lpsspec)
     {
       switch (output_format)
       {
-        case lts::lts_aut: return std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
+        case lts::lts_aut:
+          {
+            return options.no_store ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
+                                    : std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
+          }
         case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder(lpsspec.data(), lpsspec.action_labels()));
         case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder(lpsspec.data(), lpsspec.action_labels()));
         default: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels()));

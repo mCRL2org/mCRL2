@@ -94,6 +94,43 @@ class lts_aut_builder: public lts_builder
     }
 };
 
+// Write transitions immediately to disk, and add the AUT header later.
+class lts_aut_disk_builder: public lts_builder
+{
+  protected:
+    std::ofstream out;
+
+  public:
+    explicit lts_aut_disk_builder(const std::string& filename)
+    {
+      mCRL2log(log::verbose) << "writing state space in AUT format to '" << filename << "'." << std::endl;
+      out.open(filename.c_str());
+      if (!out.is_open())
+      {
+        mCRL2log(log::error) << "cannot open '" << filename << "' for writing" << std::endl;
+        std::exit(EXIT_FAILURE);
+      }
+      out << "des                                                \n"; // write a dummy header that will be overwritten
+    }
+
+    void add_transition(std::size_t from, const process::timed_multi_action& a, std::size_t to) override
+    {
+      out << "(" << from << ",\"" << process::pp(a) << "\"," << to << ")\n";
+    }
+
+    // Add actions and states to the LTS
+    void finalize(const std::unordered_map<lps::state, std::size_t>& state_map) override
+    {
+      out.flush();
+      out.seekp(0);
+      out << "des (0," << m_actions.size() << "," << state_map.size() << ")";
+      out.close();
+    }
+
+    void save(const std::string& /* filename */) override
+    { }
+};
+
 class lts_lts_builder: public lts_builder
 {
   protected:
