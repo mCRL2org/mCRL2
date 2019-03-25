@@ -60,6 +60,10 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       // copied from lps2lts
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
       desc.add_option("max", utilities::make_mandatory_argument("NUM"), "explore at most NUM states", 'l');
+      desc.add_option("todo-max", utilities::make_mandatory_argument("NUM"),
+                 "keep at most NUM states in todo lists; this option is only relevant for "
+                 "highway search, where NUM is the maximum number of states per "
+                 "level. ");
       desc.add_option("nondeterminism", "detect nondeterministic states, i.e. states with outgoing transitions with the same label to different states. ", 'n');
       desc.add_option("deadlock", "detect deadlocks (i.e. for every deadlock a message is printed). ", 'D');
       desc.add_option("divergence",
@@ -102,6 +106,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("strategy", utilities::make_enum_argument<lps::exploration_strategy>("NAME")
                    .add_value_short(lps::es_breadth, "b", true)
                    .add_value_short(lps::es_depth, "d")
+                   .add_value_short(lps::es_highway, "h")
         , "explore the state space using strategy NAME:"
         , 's');
       desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions. "
@@ -162,9 +167,14 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.suppress_progress_messages            = parser.has_option("suppress");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 
-      if (parser.options.count("max"))
+      if (parser.has_option("max"))
       {
         options.max_states = parser.option_argument_as<std::size_t> ("max");
+      }
+
+      if (parser.has_option("todo-max"))
+      {
+        options.todo_max = parser.option_argument_as<std::size_t>("todo-max");
       }
 
       if (parser.has_option("out"))
@@ -233,6 +243,12 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       {
         options.no_store = false;
         mCRL2log(log::warning) << "Ignoring the no-store option.";
+      }
+
+      if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
+      {
+        // TODO: apparently parser.error does not throw!?
+        throw mcrl2::runtime_error("Search strategy 'highway' requires that the option todo-max is set");
       }
     }
 

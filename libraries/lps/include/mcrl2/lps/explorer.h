@@ -15,6 +15,7 @@
 #include <deque>
 #include <iomanip>
 #include <limits>
+#include <random>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
@@ -93,6 +94,129 @@ std::vector<data::data_expression> make_data_expression_vector(const data::data_
 {
   return std::vector<data::data_expression>(v.begin(), v.end());
 }
+
+class todo_set
+{
+  protected:
+    std::deque<lps::state> todo;
+
+  public:
+    explicit todo_set(const lps::state& init)
+      : todo{init}
+    {}
+
+    virtual lps::state choose_element() = 0;
+
+    virtual void insert(const lps::state& s) = 0;
+
+    virtual void finish_state()
+    { }
+
+    bool empty() const
+    {
+      return todo.empty();
+    }
+
+    std::size_t size() const
+    {
+      return todo.size();
+    }
+};
+
+class breadth_first_todo_set: public todo_set
+{
+  public:
+    explicit breadth_first_todo_set(const lps::state& init)
+      : todo_set(init)
+    {}
+
+    lps::state choose_element() override
+    {
+      auto s = todo.front();
+      todo.pop_front();
+      return s;
+    }
+
+    void insert(const lps::state& s) override
+    {
+      todo.push_back(s);
+    }
+};
+
+class depth_first_todo_set: public todo_set
+{
+  public:
+    explicit depth_first_todo_set(const lps::state& init)
+      : todo_set(init)
+    {}
+
+    lps::state choose_element() override
+    {
+      auto s = todo.back();
+      todo.pop_back();
+      return s;
+    }
+
+    void insert(const lps::state& s) override
+    {
+      todo.push_back(s);
+    }
+};
+
+class highway_todo_set: public todo_set
+{
+  protected:
+    std::size_t N;
+    std::size_t n;
+    std::size_t L;
+    std::random_device device;
+    std::mt19937 generator;
+
+  public:
+    explicit highway_todo_set(const lps::state& init, std::size_t N_)
+      : todo_set(init),
+        N(N_),
+        n(0),
+        L(1),
+        generator(device())
+    { }
+
+    lps::state choose_element() override
+    {
+      auto s = todo.front();
+      todo.pop_front();
+      return s;
+    }
+
+    void insert(const lps::state& s) override
+    {
+      n++;
+      if (n <= N)
+      {
+        todo.push_back(s);
+      }
+      else
+      {
+        std::uniform_int_distribution<> distribution(1, n);
+        std::size_t k = distribution(generator);
+        if (k <= N)
+        {
+          todo[todo.size() - k] = s;
+        }
+      }
+    }
+
+    void finish_state() override
+    {
+      L--;
+      if (L == 0)
+      {
+        L = todo.size();
+        n = 0;
+      }
+    }
+};
+
 
 class explorer
 {
@@ -459,23 +583,6 @@ class explorer
       return result;
     }
 
-    template <typename T>
-    T next_todo(std::deque<T>& todo)
-    {
-      if (options.search_strategy == es_breadth)
-      {
-        auto s = todo.front();
-        todo.pop_front();
-        return s;
-      }
-      else
-      {
-        auto s = todo.back();
-        todo.pop_back();
-        return s;
-      }
-    }
-
     std::set<data::function_symbol> add_less_equal_symbol(std::set<data::function_symbol> s) const
     {
       std::set<data::function_symbol> result = std::move(s);
@@ -486,6 +593,17 @@ class explorer
     bool less_equal(const data::data_expression& t0, const data::data_expression& t1)
     {
       return r(data::less_equal(t0, t1)) == data::sort_bool::true_();
+    }
+
+    std::unique_ptr<todo_set> make_todo_set(const lps::state& init) const
+    {
+      switch (options.search_strategy)
+      {
+        case lps::es_breadth: return std::unique_ptr<todo_set>(new breadth_first_todo_set(init));
+        case lps::es_depth: return std::unique_ptr<todo_set>(new depth_first_todo_set(init));
+        case lps::es_highway: return std::unique_ptr<todo_set>(new highway_todo_set(init, options.todo_max));
+        default: throw mcrl2::runtime_error("unsupported search strategy");
+      }
     }
 
   public:
@@ -541,16 +659,15 @@ class explorer
     )
     {
       m_recursive = recursive;
-      std::deque<lps::state> todo;
+      std::unique_ptr<todo_set> todo = make_todo_set(d0);
       discovered.clear();
       std::size_t d0_index = 0;
       discovered.insert(std::make_pair(d0, d0_index));
       discover_state(d0, d0_index);
-      todo.push_back(d0);
 
-      while (!todo.empty() && !must_abort)
+      while (!todo->empty() && !must_abort)
       {
-        lps::state s = next_todo(todo);
+        lps::state s = todo->choose_element();
         std::size_t s_index = discovered.find(s)->second;
         start_state(s, s_index);
         add_assignments(sigma, m_process_parameters, s);
@@ -567,14 +684,15 @@ class explorer
                 std::size_t k = discovered.size();
                 j = discovered.insert(std::make_pair(s1, k)).first;
                 discover_state(s1, k);
-                todo.push_back(s1);
+                todo->insert(s1);
               }
               std::size_t s1_index = j->second;
               examine_transition(s, s_index, a, s1, s1_index, summand.index);
             }
           );
         }
-        finish_state(s, s_index, todo.size());
+        finish_state(s, s_index, todo->size());
+        todo->finish_state();
       }
       must_abort = false;
     }
@@ -607,16 +725,15 @@ class explorer
     )
     {
       m_recursive = recursive;
-      std::deque<lps::state> todo;
+      std::unique_ptr<todo_set> todo = make_todo_set(d0);
       discovered.clear();
       std::size_t d0_index = 0;
       discovered.insert(std::make_pair(d0, d0_index));
       discover_state(d0, d0_index);
-      todo.emplace_back(d0);
 
-      while (!todo.empty() && !must_abort)
+      while (!todo->empty() && !must_abort)
       {
-        lps::state s_at_t = next_todo(todo);
+        lps::state s_at_t = todo->choose_element();
         const data::data_expression& t = s_at_t[n];
         std::size_t s_index = discovered.find(s_at_t)->second;
         start_state(s_at_t, s_index);
@@ -640,14 +757,14 @@ class explorer
                 std::size_t k = discovered.size();
                 j = discovered.insert(std::make_pair(s1_at_t1, k)).first;
                 discover_state(s1_at_t1, k);
-                todo.emplace_back(s1_at_t1);
+                todo->insert(s1_at_t1);
               }
               std::size_t s1_index = j->second;
               examine_transition(s_at_t, s_index, a, j->first, s1_index, summand.index);
             }
           );
         }
-        finish_state(s_at_t, s_index, todo.size());
+        finish_state(s_at_t, s_index, todo->size());
       }
       must_abort = false;
     }

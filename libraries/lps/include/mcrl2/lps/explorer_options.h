@@ -40,6 +40,7 @@ struct explorer_options
   bool no_store = false;
   std::size_t max_states = std::numeric_limits<std::size_t>::max();
   std::size_t max_traces = 0;
+  std::size_t todo_max = std::numeric_limits<std::size_t>::max();
   std::string priority_action;
   std::string trace_prefix;
   std::set<core::identifier_string> trace_actions;
@@ -69,6 +70,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "no-store = " << std::boolalpha << options.no_store << std::endl;
   out << "max-states = " << options.max_states << std::endl;
   out << "max-traces = " << options.max_traces << std::endl;
+  out << "todo-max = " << options.todo_max << std::endl;
   out << "priority-action = " << options.priority_action << std::endl;
   out << "trace-prefix = " << options.trace_prefix << std::endl;
   out << "trace-actions = " << core::detail::print_set(options.trace_actions) << std::endl;
