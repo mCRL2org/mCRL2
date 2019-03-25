@@ -69,7 +69,7 @@ template <typename VariableSequence, typename DataExpressionSequence>
 inline
 void add_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v, const DataExpressionSequence& e)
 {
-  assert(v.size() == e.size());
+  assert(v.size() <= e.size());
   auto vi = v.begin();
   auto ei = e.begin();
   for (; vi != v.end(); ++vi, ++ei)
@@ -194,6 +194,9 @@ class explorer
     std::unordered_map<lps::state, std::size_t> m_discovered;
 
     volatile bool must_abort = false;
+
+    // used by make_timed_state, to avoid needless creation of vectors
+    std::vector<data::data_expression> timed_state;
 
     lps::specification preprocess(const specification& lpsspec)
     {
@@ -497,6 +500,7 @@ class explorer
       const auto& params = lpsspec_.process().process_parameters();
       m_process_parameters = std::vector<data::variable>(params.begin(), params.end());
       n = m_process_parameters.size();
+      timed_state.resize(n + 1);
       m_initial_state = lpsspec_.initial_process().state(lpsspec_.process().process_parameters());
       core::identifier_string ctau{"ctau"};
       const auto& lpsspec_summands = lpsspec_.process().action_summands();
@@ -575,7 +579,15 @@ class explorer
       must_abort = false;
     }
 
-    // pre: d0 is in normal form
+    // Returns the concatenation of s and [t]
+    lps::state make_timed_state(const lps::state& s, const data::data_expression& t)
+    {
+      std::copy(s.begin(), s.end(), timed_state.begin());
+      timed_state.back() = t;
+      return lps::state(timed_state.begin(), n + 1);
+    }
+
+    // pre: d0 is a timed state in normal form
     template <typename SummandSequence,
       typename DiscoverState = skip,
       typename ExamineTransition = skip,
@@ -595,22 +607,20 @@ class explorer
     )
     {
       m_recursive = recursive;
-      std::deque<std::pair<lps::state, data::data_expression>> todo;
+      std::deque<lps::state> todo;
       discovered.clear();
       std::size_t d0_index = 0;
       discovered.insert(std::make_pair(d0, d0_index));
       discover_state(d0, d0_index);
-      data::data_expression zero = data::sort_real::creal(data::sort_int::cint(data::sort_nat::c0()), data::sort_pos::c1());
-      todo.emplace_back(d0, zero);
+      todo.emplace_back(d0);
 
       while (!todo.empty() && !must_abort)
       {
-        std::pair<lps::state, data::data_expression> q = next_todo(todo);
-        const lps::state& s = q.first;
-        const data::data_expression& T = q.second;
-        std::size_t s_index = discovered.find(s)->second;
-        start_state(s, s_index);
-        add_assignments(sigma, m_process_parameters, s);
+        lps::state s_at_t = next_todo(todo);
+        const data::data_expression& t = s_at_t[n];
+        std::size_t s_index = discovered.find(s_at_t)->second;
+        start_state(s_at_t, s_index);
+        add_assignments(sigma, m_process_parameters, s_at_t);
         for (const explorer_summand& summand: regular_summands)
         {
           generate_transitions(
@@ -618,25 +628,26 @@ class explorer
             confluent_summands,
             [&](const process::timed_multi_action& a, const lps::state& s1)
             {
-              if (a.has_time() && less_equal(a.time(), T))
+              if (a.has_time() && less_equal(a.time(), t))
               {
                 return;
               }
-              data::data_expression T1 = a.has_time() ? a.time() : T;
+              data::data_expression t1 = a.has_time() ? a.time() : t;
               auto j = discovered.find(s1);
               if (j == discovered.end())
               {
+                lps::state s1_at_t1 = make_timed_state(s1, t1);
                 std::size_t k = discovered.size();
-                j = discovered.insert(std::make_pair(s1, k)).first;
-                discover_state(s1, k);
-                todo.emplace_back(s1, T1);
+                j = discovered.insert(std::make_pair(s1_at_t1, k)).first;
+                discover_state(s1_at_t1, k);
+                todo.emplace_back(s1_at_t1);
               }
               std::size_t s1_index = j->second;
-              examine_transition(s, s_index, a, s1, s1_index, summand.index);
+              examine_transition(s_at_t, s_index, a, j->first, s1_index, summand.index);
             }
           );
         }
-        finish_state(s, s_index, todo.size());
+        finish_state(s_at_t, s_index, todo.size());
       }
       must_abort = false;
     }
@@ -696,6 +707,11 @@ class explorer
       if (!m_confluent_summands.empty())
       {
         d0 = find_representative(d0, m_confluent_summands);
+      }
+      if (timed)
+      {
+        data::data_expression zero = data::sort_real::creal(data::sort_int::cint(data::sort_nat::c0()), data::sort_pos::c1());
+        d0 = make_timed_state(d0, zero);
       }
       generate_state_space(timed, recursive, d0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, examine_transition, start_state, finish_state);
     }
