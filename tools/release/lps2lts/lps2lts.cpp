@@ -245,7 +245,7 @@ class lps2lts_tool : public lps2lts_base
       {
         if (parser.options.count("dummy") > 1)
         {
-          parser.error("Multiple use of option -y/--dummy; only one occurrence is allowed.");
+          throw parser.error("Multiple use of option -y/--dummy; only one occurrence is allowed.");
         }
         std::string dummy_str(parser.option_argument("dummy"));
         if (dummy_str == "yes")
@@ -258,7 +258,7 @@ class lps2lts_tool : public lps2lts_base
         }
         else
         {
-          parser.error("Option -y/--dummy has illegal argument '" + dummy_str + "'.");
+          throw parser.error("Option -y/--dummy has illegal argument '" + dummy_str + "'.");
         }
       }
 
@@ -289,7 +289,7 @@ class lps2lts_tool : public lps2lts_base
       {
         if (parser.options.count("divergence")==0)
         {
-          parser.error("Option --tau requires the option --divergence.");
+          throw parser.error("Option --tau requires the option --divergence.");
         }
         std::list<std::string> actions = split_actions(parser.option_argument("tau"));
         for (const std::string& s: actions)
@@ -315,7 +315,7 @@ class lps2lts_tool : public lps2lts_base
 
         if (m_options.outformat == lts_none)
         {
-          parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
+          throw parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
       if (parser.options.count("init-tsize"))
@@ -333,12 +333,12 @@ class lps2lts_tool : public lps2lts_base
 
       if (parser.options.count("suppress") && !mCRL2logEnabled(verbose))
       {
-        parser.error("Option --suppress requires --verbose (of -v).");
+        throw parser.error("Option --suppress requires --verbose (of -v).");
       }
 
       if (2 < parser.arguments.size())
       {
-        parser.error("Too many file arguments.");
+        throw parser.error("Too many file arguments.");
       }
       if (0 < parser.arguments.size())
       {

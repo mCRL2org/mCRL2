@@ -28,9 +28,11 @@ class runtime_error : public std::runtime_error
 public:
   /// \brief Constructor
   /// \param[in] message the exception message
-  runtime_error(const std::string& message) : std::runtime_error(message)
+  explicit runtime_error(const std::string& message) : std::runtime_error(message)
   {
   }
+
+  runtime_error(const runtime_error&) noexcept = default;
 };
 
 /**
@@ -41,7 +43,7 @@ class command_line_error : public runtime_error
 private:
   std::string m_msg;
 public:
-  command_line_error(const std::string& name, const std::string& message) throw()
+  command_line_error(const std::string& name, const std::string& message) noexcept
     : runtime_error("")
   {
     // We're storing the message in a separate string because we cannot
@@ -53,12 +55,13 @@ public:
       << "Try '" << name << " --help' for more information.";
     m_msg = s.str();
   }
-  virtual const char* what() const throw()
+
+  const char* what() const noexcept override
   {
     return m_msg.c_str();
   }
-  virtual ~command_line_error() throw()
-  {}
+
+  ~command_line_error() noexcept override = default;
 };
 
 } // namespace mcrl2

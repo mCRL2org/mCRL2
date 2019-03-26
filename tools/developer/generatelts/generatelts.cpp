@@ -182,7 +182,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         output_format = lts::detail::parse_format(parser.option_argument("out"));
         if (output_format == lts::lts_none)
         {
-          parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
+          throw parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
       if (output_format == lts::lts_none)
@@ -220,7 +220,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       {
         if (parser.options.count("divergence")==0)
         {
-          parser.error("Option --tau requires the option --divergence.");
+          throw parser.error("Option --tau requires the option --divergence.");
         }
         std::list<std::string> actions = split_actions(parser.option_argument("tau"));
         for (const std::string& s: actions)
@@ -236,7 +236,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       if (2 < parser.arguments.size())
       {
-        parser.error("Too many file arguments.");
+        throw parser.error("Too many file arguments.");
       }
 
       if (options.no_store && (output_filename().empty() || output_format != lts::lts_aut))
@@ -247,8 +247,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
       {
-        // TODO: apparently parser.error does not throw!?
-        throw mcrl2::runtime_error("Search strategy 'highway' requires that the option todo-max is set");
+        throw parser.error("Search strategy 'highway' requires that the option todo-max is set");
       }
     }
 
