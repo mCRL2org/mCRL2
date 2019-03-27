@@ -1,0 +1,4 @@
+pbes nu X1(c: Bool) =
+       (X1(c) => val(c)) => val(c);
+
+init X1(false);

@@ -1,0 +1,22 @@
+nodes:
+  l1:
+    type: TEXT
+  l2:
+    type: PBES
+  l3:
+    type: TEXT
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: pbespp
+
+result: |
+  result = l1.value == l3.value
