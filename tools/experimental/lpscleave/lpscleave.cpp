@@ -54,7 +54,7 @@ std::list<std::string> split_actions(const std::string& s)
   return result;
 }
 
-/// \brief Prints the parameters of the given LPS.
+/// \brief Prints the parameters of the given LPS as comma separated values.
 void print_parameters(const stochastic_specification& spec)
 {
   bool first = true;
@@ -71,8 +71,9 @@ void print_parameters(const stochastic_specification& spec)
   mCRL2log(log_level_t::info) << "\n";
 }
 
-/// \returns The list of parameters based on the given names.
-data::variable_list verify_parameters(data::variable_list& param_list, const std::list<std::string>& parameters)
+/// \brief Projects a list of parameters based on a list of names.
+/// \returns A list that only contains those parameters of the given parameter list that are contained in the list of names.
+data::variable_list get_parameters(data::variable_list& param_list, const std::list<std::string>& parameters)
 {
   data::variable_list result;
   for (const std::string& param : parameters)
@@ -91,13 +92,15 @@ data::variable_list verify_parameters(data::variable_list& param_list, const std
   return result;
 }
 
+/// \brief Given a list of assignments and parameters returns a list of assignments that only contain the assignments
+///        for the given parameters and not for the potential other variables.
+/// \returns A list of assignments only over the given parameters.
 data::assignment_list project(const data::assignment_list& assignments, const data::variable_list& parameters)
 {
-  // Project the values of the initial process onto the cleave.
   data::assignment_list result;
   for (auto& assignment : assignments)
   {
-    // If the variable is part of the cleave, then copy the assignment.
+    // If the variable is in the parameters then copy the assignment.
     if (std::find_if(parameters.begin(), parameters.end(), [&](const data::variable& param) -> bool { return param == assignment.lhs(); } ) != parameters.end())
     {
       result.push_front(assignment);
@@ -107,8 +110,64 @@ data::assignment_list project(const data::assignment_list& assignments, const da
   return result;
 }
 
-/// \brief Performs the a naive cleave (synchronizes over all parameters)
-stochastic_specification cleave(const stochastic_specification& spec, const data::variable_list& parameters)
+/// \brief Creates a single summand for the cleave process.
+template<bool owning = false>
+lps::stochastic_action_summand cleave_summand(const lps::stochastic_action_summand& summand,
+  std::size_t summand_index,
+  const data::variable_list& parameters,
+  const data::variable_list& other_parameters,
+  std::vector<process::action_label>& sync_labels)
+{
+
+  // Add a summation for every parameter of the other process.
+  data::variable_list variables = summand.summation_variables();
+  for (auto& variable : other_parameters)
+  {
+    variables.push_front(variable);
+  }
+
+  // Create the actsync(p, e_i) action
+  data::data_expression_list values;
+  data::sort_expression_list sorts;
+  for (auto& param : parameters)
+  {
+    values.push_front(data::data_expression(param));
+    sorts.push_front(param.sort());
+  }
+
+  for (auto& param : other_parameters)
+  {
+    values.push_front(data::data_expression(param));
+    sorts.push_front(param.sort());
+  }
+
+  for (auto& variable : summand.summation_variables())
+  {
+    values.push_front(data::data_expression(variable));
+    sorts.push_front(variable.sort());
+  }
+
+  sync_labels.emplace_back(std::string("actsync_") += std::to_string(summand_index), sorts);
+
+  lps::multi_action action;
+  if (owning)
+  {
+    process::action_list actions = summand.multi_action().actions();
+    actions.push_front(process::action(sync_labels.back(), values));
+    action = lps::multi_action(actions);
+  }
+  else
+  {
+    process::action_list actions;
+    actions.push_front(process::action(sync_labels.back(), values));
+    action = lps::multi_action(actions);
+  }
+
+  return lps::stochastic_action_summand(variables, summand.condition(), action, project(summand.assignments(), parameters), summand.distribution());
+}
+
+/// \brief Performs the a naive cleave.
+stochastic_specification cleave(const stochastic_specification& spec, const data::variable_list& parameters, const std::list<std::size_t>& indices)
 {
   // Check sanity conditions, no timed or stochastic processes.
   auto& process = spec.process();
@@ -135,47 +194,33 @@ stochastic_specification cleave(const stochastic_specification& spec, const data
   // Change the summands to include the parameters of the other process and added the sync action.
   lps::stochastic_action_summand_vector cleave_summands;
 
-  std::size_t summand_index = 0;
-  for (auto& summand : process.action_summands())
+  // Add the summands that generate the action label.
+  for (auto& index : indices)
   {
-    // Add a summation for every parameter of the other process.
-    data::variable_list variables = summand.summation_variables();
-    for (auto& variable : other_parameters)
+    cleave_summands.push_back(cleave_summand<true>(process.action_summands()[index], index, parameters, other_parameters, sync_labels));
+  }
+
+  // Add the other summand that do not own the action. Indices should be sorted before this loop.
+  auto it = indices.begin();
+  for (std::size_t index = 0; index < process.action_summands().size(); ++index)
+  {
+    // Invariant: The index of *it is always higher than the loop index or it is the end
+    if (it != indices.end())
     {
-      variables.push_front(variable);
+      if (*it < index)
+      {
+        // We have past the last index of the array.
+        ++it;
+      }
+      if (it != indices.end() && *it == index)
+      {
+        // This summand was already created above.
+        continue;
+      }
     }
 
-    // Create the actsync(p, e_i) action
-    data::data_expression_list values;
-    data::sort_expression_list sorts;
-    for (auto& param : parameters)
-    {
-      values.push_front(data::data_expression(param));
-      sorts.push_front(param.sort());
-    }
-
-    for (auto& param : other_parameters)
-    {
-      values.push_front(data::data_expression(param));
-      sorts.push_front(param.sort());
-    }
-
-    for (auto& variable : summand.summation_variables())
-    {
-      values.push_front(data::data_expression(variable));
-      sorts.push_front(variable.sort());
-    }
-
-    sync_labels.emplace_back(std::string("actsync_") += std::to_string(summand_index), sorts);
-
-    process::action_list actions = summand.multi_action().actions();
-    actions.push_front(process::action(sync_labels[summand_index], values));
-    lps::multi_action action(actions);
-
-    lps::stochastic_action_summand cleave_summand(variables, summand.condition(), action, project(summand.assignments(), parameters), summand.distribution());
-    cleave_summands.push_back(cleave_summand);
-
-    ++summand_index;
+    // Index is not an element of indices.
+    cleave_summands.push_back(cleave_summand<false>(process.action_summands()[index], index, parameters, other_parameters, sync_labels));
   }
 
   // Add the labels to the LPS action specification.
@@ -221,10 +266,11 @@ class lpscleave_tool : public input_output_tool
         // Here, we should decide on a good cleaving.
 
         // For now, the parameters are given by the user.
-        auto parameters = verify_parameters(spec.process().process_parameters(), m_parameters);
+        auto parameters = get_parameters(spec.process().process_parameters(), m_parameters);
 
-        // Cleave the process.
-        stochastic_specification left_cleave = cleave(spec, parameters);
+        // Cleave the process, requires the indices to be sorted.
+        m_indices.sort();
+        stochastic_specification left_cleave = cleave(spec, parameters, m_indices);
 
         // Save the resulting cleave.
         std::ofstream file(output_filename(), std::ios::binary);
@@ -240,6 +286,7 @@ class lpscleave_tool : public input_output_tool
       super::add_options(desc);
 
       desc.add_option("parameters", utilities::make_mandatory_argument("PARAMS"), "A comma separated list of PARAMS that are used for the left process of the cleave.", 'p');
+      desc.add_option("summands", utilities::make_mandatory_argument("INDICEs"), "A comma separated list of INDICES of summands where the left process generates the action.", 's');
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -250,11 +297,21 @@ class lpscleave_tool : public input_output_tool
       {
         m_parameters = split_actions(parser.option_argument("parameters"));
       }
+
+      if (parser.options.count("summands"))
+      {
+        std::list<std::string> indices = split_actions(parser.option_argument("summands"));
+        for (auto& index : indices)
+        {
+          m_indices.push_back(std::atoi(index.c_str()));
+        }
+      }
     }
 
   private:
 
     std::list<std::string> m_parameters;
+    std::list<std::size_t> m_indices;
 };
 
 } // namespace mcrl2
