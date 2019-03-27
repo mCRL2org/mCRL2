@@ -11,6 +11,7 @@
 #include "markstateruledialog.h"
 #include "lts.h"
 #include <QList>
+#include <QMessageBox>
 
 MarkDock::MarkDock(QWidget *parent, MarkManager *markManager):
   QWidget(parent),
@@ -143,7 +144,7 @@ void MarkDock::setStateMatchStyle(MatchStyle style)
 
 void MarkDock::addMarkRule()
 {
-  if (m_markManager->lts())
+  if (m_markManager->lts() && m_markManager->lts()->getNumParameters() > 0)
   {
     QColor color = m_markRuleColors[m_markRuleNextColorIndex];
     m_markRuleNextColorIndex = (m_markRuleNextColorIndex + 1) % m_markRuleColors.size();
@@ -160,6 +161,12 @@ void MarkDock::addMarkRule()
       m_markManager->addMarkRule(rule);
       m_markManager->setMarkStyle(MARK_STATES);
     }
+  }
+  else if(m_markManager->lts())
+  {
+      QMessageBox msgBox(QMessageBox::Information, "LtsView", "State marking for AUT files is not supported, since they do not contained detailed state information.",
+                         QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+      msgBox.exec();
   }
 }
 
