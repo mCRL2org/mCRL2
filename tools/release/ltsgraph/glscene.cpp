@@ -51,7 +51,8 @@ constexpr int RES_ARC       = 16;
 constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE + 1;
 constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
 constexpr int VERTICES_HINT = 8;
-constexpr int VERTICES_HANDLE = 4;
+constexpr int VERTICES_HANDLE_BODY = 4;
+constexpr int VERTICES_HANDLE_OUTLINE = 4;
 constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
 constexpr int VERTICES_ARROWHEAD_BASE = RES_ARROWHEAD + 1;
 constexpr int VERTICES_ARC = RES_ARC;
@@ -59,8 +60,9 @@ constexpr int VERTICES_ARC = RES_ARC;
 constexpr int OFFSET_NODE_BORDER = 0;
 constexpr int OFFSET_NODE_SPHERE = OFFSET_NODE_BORDER + VERTICES_NODE_BORDER;
 constexpr int OFFSET_HINT       = OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE;
-constexpr int OFFSET_HANDLE     = OFFSET_HINT + VERTICES_HINT;
-constexpr int OFFSET_ARROWHEAD  = OFFSET_HANDLE + VERTICES_HANDLE;
+constexpr int OFFSET_HANDLE_BODY= OFFSET_HINT + VERTICES_HINT;
+constexpr int OFFSET_HANDLE_OUTLINE = OFFSET_HANDLE_BODY + VERTICES_HANDLE_BODY;
+constexpr int OFFSET_ARROWHEAD  = OFFSET_HANDLE_OUTLINE + VERTICES_HANDLE_OUTLINE;
 constexpr int OFFSET_ARROWHEAD_BASE = OFFSET_ARROWHEAD + VERTICES_ARROWHEAD;
 constexpr int OFFSET_ARC        = OFFSET_ARROWHEAD_BASE + VERTICES_ARROWHEAD_BASE;
 
@@ -307,11 +309,16 @@ void GLScene::initialize()
   hint[3] = QVector3D(-1.0f, -0.2f, 0.0f);
 
   // Generate vertices for handle (border + fill, both squares)
-  std::vector<QVector3D> handle(4);
-  handle[0] = QVector3D(-1.0f, -1.0f, 0.0f);
-  handle[1] = QVector3D( 1.0f, -1.0f, 0.0f);
-  handle[2] = QVector3D( 1.0f,  1.0f, 0.0f);
-  handle[3] = QVector3D(-1.0f,  1.0f, 0.0f);
+  std::vector<QVector3D> handle_body(4);
+  handle_body[0] = QVector3D(1.0f, -1.0f, 0.0f);
+  handle_body[1] = QVector3D(1.0f , 1.0f, 0.0f);
+  handle_body[2] = QVector3D(-1.0f , -1.0f, 0.0f);
+  handle_body[3] = QVector3D(-1.0f, 1.0f, 0.0f);
+  std::vector<QVector3D> handle_outline(4);
+  handle_outline[0] = QVector3D(-1.0f, -1.0f, 0.0f);
+  handle_outline[1] = QVector3D(1.0f , -1.0f, 0.0f);
+  handle_outline[2] = QVector3D(1.0f , 1.0f, 0.0f);
+  handle_outline[3] = QVector3D(-1.0f, 1.0f, 0.0f);
 
   // Generate vertices for arrowhead (a triangle fan drawing a cone)
   std::vector<QVector3D> arrowhead(VERTICES_ARROWHEAD);
@@ -354,7 +361,8 @@ void GLScene::initialize()
   vertices.insert(vertices.end(), nodeborder.begin(), nodeborder.end());
   vertices.insert(vertices.end(), node.begin(), node.end());
   vertices.insert(vertices.end(), hint.begin(), hint.end());
-  vertices.insert(vertices.end(), handle.begin(), handle.end());
+  vertices.insert(vertices.end(), handle_body.begin(), handle_body.end());
+  vertices.insert(vertices.end(), handle_outline.begin(), handle_outline.end());
   vertices.insert(vertices.end(), arrowhead.begin(), arrowhead.end());
   vertices.insert(vertices.end(), arrowhead_base.begin(), arrowhead_base.end());
   vertices.insert(vertices.end(), arc.begin(), arc.end());
@@ -718,11 +726,11 @@ void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
 
     // First draw the inner quad.
     m_global_shader.setColor(fill);
-    glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_HANDLE, VERTICES_HANDLE);
+    glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_HANDLE_BODY, VERTICES_HANDLE_BODY);
 
     // Draw the outer lines.
     m_global_shader.setColor(line);
-    glDrawArrays(GL_LINE_LOOP, OFFSET_HANDLE, VERTICES_HANDLE);
+    glDrawArrays(GL_LINE_LOOP, OFFSET_HANDLE_OUTLINE, VERTICES_HANDLE_OUTLINE);
   }
 }
 
