@@ -112,43 +112,92 @@ data::assignment_list project(const data::assignment_list& assignments, const da
 
 /// \brief Creates a single summand for the cleave process.
 template<bool owning = false>
-lps::stochastic_action_summand cleave_summand(const lps::stochastic_action_summand& summand,
+lps::stochastic_action_summand cleave_summand(
+  const lps::stochastic_specification& spec,
   std::size_t summand_index,
   const data::variable_list& parameters,
   const data::variable_list& other_parameters,
   std::vector<process::action_label>& sync_labels)
 {
+  lps::stochastic_action_summand summand = spec.process().action_summands()[summand_index];
 
-  // Add a summation for every parameter of the other process.
+  // Find the dependencies of the condition.
+  std::set<data::variable> dependencies = data::find_free_variables(summand.condition());
+
+  // Find the dependencies of the action that are not parameters of this process.
+  std::set<data::variable> action_dependencies;
+  for (auto& action : summand.multi_action().actions())
+  {
+    auto dependencies = data::find_free_variables(action);
+    action_dependencies.insert(dependencies.begin(), dependencies.end());
+  }
+
+  // Find the dependencies of the assignments of the other process.
+  std::set<data::variable> assignment_dependencies;
+  std::set<data::variable> other_assignment_dependencies;
+  for (auto& assignment : summand.assignments())
+  {
+    auto dependencies = data::find_free_variables(assignment.rhs());
+    if (std::find(parameters.begin(), parameters.end(), assignment.lhs()) != parameters.end())
+    {
+      // This is an assignment for our parameters
+      assignment_dependencies.insert(dependencies.begin(), dependencies.end());
+    }
+    else
+    {
+      other_assignment_dependencies.insert(dependencies.begin(), dependencies.end());
+    }
+  }
+
+  // Remove our own parameters from our own assignments and our action dependencies.
+  for (auto& param : parameters)
+  {
+    action_dependencies.erase(param);
+    assignment_dependencies.erase(param);
+  }
+
+  // Remove the other parameters from its assignments.
+  for (auto& param : other_parameters)
+  {
+    other_assignment_dependencies.erase(param);
+  }
+
+  // Gather all the necessary dependencies.
+  dependencies.insert(action_dependencies.begin(), action_dependencies.end());
+  dependencies.insert(assignment_dependencies.begin(), assignment_dependencies.end());
+  dependencies.insert(other_assignment_dependencies.begin(), other_assignment_dependencies.end());
+
+  // Remove the global variables.
+
+  // This version crashes, but would be nicer/more efficient:
+  // dependencies.erase(spec.global_variables().begin(), spec.global_variables().end());
+  for (auto& variable : spec.global_variables())
+  {
+    dependencies.erase(variable);
+  }
+
+  // Add a summation for every parameter of the other process that we depend on.
   data::variable_list variables = summand.summation_variables();
   for (auto& variable : other_parameters)
   {
-    variables.push_front(variable);
+    if (dependencies.count(variable) > 0)
+    {
+      variables.push_front(variable);
+    }
   }
 
-  // Create the actsync(p, e_i) action
+  // Create the actsync(p, e_i) action for our dependencies p and e_i
   data::data_expression_list values;
   data::sort_expression_list sorts;
-  for (auto& param : parameters)
+  for (auto& dependency : dependencies)
   {
-    values.push_front(data::data_expression(param));
-    sorts.push_front(param.sort());
-  }
-
-  for (auto& param : other_parameters)
-  {
-    values.push_front(data::data_expression(param));
-    sorts.push_front(param.sort());
-  }
-
-  for (auto& variable : summand.summation_variables())
-  {
-    values.push_front(data::data_expression(variable));
-    sorts.push_front(variable.sort());
+    values.push_front(data::data_expression(dependency));
+    sorts.push_front(dependency.sort());
   }
 
   sync_labels.emplace_back(std::string("actsync_") += std::to_string(summand_index), sorts);
 
+  // These are three different cases.
   lps::multi_action action;
   if (owning)
   {
@@ -166,7 +215,7 @@ lps::stochastic_action_summand cleave_summand(const lps::stochastic_action_summa
   return lps::stochastic_action_summand(variables, summand.condition(), action, project(summand.assignments(), parameters), summand.distribution());
 }
 
-/// \brief Performs the a naive cleave.
+/// \brief Performs the a dependency cleave based on the given parameters V, and the indices J.
 stochastic_specification cleave(const stochastic_specification& spec, const data::variable_list& parameters, const std::list<std::size_t>& indices)
 {
   // Check sanity conditions, no timed or stochastic processes.
@@ -197,7 +246,10 @@ stochastic_specification cleave(const stochastic_specification& spec, const data
   // Add the summands that generate the action label.
   for (auto& index : indices)
   {
-    cleave_summands.push_back(cleave_summand<true>(process.action_summands()[index], index, parameters, other_parameters, sync_labels));
+    if (index < process.action_summands().size())
+    {
+      cleave_summands.push_back(cleave_summand<true>(spec, index, parameters, other_parameters, sync_labels));
+    }
   }
 
   // Add the other summand that do not own the action. Indices should be sorted before this loop.
@@ -220,7 +272,7 @@ stochastic_specification cleave(const stochastic_specification& spec, const data
     }
 
     // Index is not an element of indices.
-    cleave_summands.push_back(cleave_summand<false>(process.action_summands()[index], index, parameters, other_parameters, sync_labels));
+    cleave_summands.push_back(cleave_summand<false>(spec, index, parameters, other_parameters, sync_labels));
   }
 
   // Add the labels to the LPS action specification.
@@ -272,7 +324,7 @@ class lpscleave_tool : public input_output_tool
         m_indices.sort();
         stochastic_specification left_cleave = cleave(spec, parameters, m_indices);
 
-        // Save the resulting cleave.
+        // Save the resulting left-cleave.
         std::ofstream file(output_filename(), std::ios::binary);
         left_cleave.save(file, true);
       }
@@ -286,7 +338,8 @@ class lpscleave_tool : public input_output_tool
       super::add_options(desc);
 
       desc.add_option("parameters", utilities::make_mandatory_argument("PARAMS"), "A comma separated list of PARAMS that are used for the left process of the cleave.", 'p');
-      desc.add_option("summands", utilities::make_mandatory_argument("INDICEs"), "A comma separated list of INDICES of summands where the left process generates the action.", 's');
+      desc.add_option("summands", utilities::make_mandatory_argument("INDICES"), "A comma separated list of INDICES of summands where the left process generates the action.", 's');
+      desc.add_option("right", "The output is the right component of the cleave and the left component otherwise", 'r');
     }
 
     void parse_options(const utilities::command_line_parser& parser) override
@@ -306,12 +359,18 @@ class lpscleave_tool : public input_output_tool
           m_indices.push_back(std::atoi(index.c_str()));
         }
       }
+
+      if (parser.options.count("right"))
+      {
+        m_right = true;
+      }
     }
 
   private:
 
     std::list<std::string> m_parameters;
     std::list<std::size_t> m_indices;
+    bool m_right = false;
 };
 
 } // namespace mcrl2
