@@ -468,7 +468,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
           std::size_t index = 0;
           for (const process::action& a: summand.multi_action().actions())
           {
-            process::action a1(a.label(), data::data_expression_list(&e1[n + index], &e1[n + index + a.arguments().size()]));
+            process::action a1(a.label(), data::data_expression_list(e1.begin() + n + index, e1.begin() + n + index + a.arguments().size()));
             actions.push_back(a1);
             index = index + a.arguments().size();
           }
