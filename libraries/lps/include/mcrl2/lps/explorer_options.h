@@ -13,6 +13,8 @@
 #define MCRL2_LPS_EXPLORER_OPTIONS_H
 
 #include <iomanip>
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/exploration_strategy.h"
 
