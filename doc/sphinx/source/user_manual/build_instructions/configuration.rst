@@ -9,9 +9,8 @@ exists before continuing with the following steps. There are three ways to
 configure CMake:
 
 *Graphically*
-  A graphical user interface is available on all platforms, either as
-  ``CMakeSetup.exe`` in Windows (should be in the start menu), or as
-  ``cmake-gui`` in Linux (you may have to install it separately, it is, e.g., currently
+  A graphical user interface ``cmake-gui`` is available on all platforms 
+  (in Linux you may have to install it separately, it is, e.g., currently
   in the ``cmake-qt-gui`` package in the PPA for Ubuntu installations).
   Use of this user interface is mostly self-explanatory.
 
@@ -39,6 +38,11 @@ configure CMake:
   issue the command::
 
     cmake <mcrl2>/src -DCMAKE_INSTALL_PREFIX=<installdir>
+	
+.. admonition:: Windows
+   :class: platform-specific win
+
+   When configuring on Windows, use the generator ``Visual Studio 15 2017 Win64``.
 
 All three methods allow you to change the value of CMake configuration
 variables. Below, we describe the meaning of these variables. Note that in the
