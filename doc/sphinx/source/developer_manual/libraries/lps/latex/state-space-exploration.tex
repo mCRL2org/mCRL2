@@ -243,8 +243,9 @@ $\While |todo| > 0$ \Do \\
 \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
 \qquad \qquad \qquad \qquad \colorbox{lightgray}{\Else} \\
 \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$k := random(\{ 1, \ldots, c\})$} \\
-\qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$discovered := discovered \setminus \{todo[|todo| - k]\}$} \\
-\qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{\If $k \leq N$ \Then $todo[|todo| - k] := s'$} \\
+\qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$\If k \leq N \Space \Then$} \\
+\qquad \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$discovered := discovered \setminus \{todo[|todo| - k]\}$} \\
+\qquad \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo[|todo| - k] := s'$} \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
 \qquad \colorbox{lightgray}{$L := L - 1$} \\
