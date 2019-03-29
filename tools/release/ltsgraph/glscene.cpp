@@ -266,7 +266,7 @@ void GLScene::initialize()
     for (int i = 0; i < RES_NODE_SLICE; ++i)
     {
       float t = -i * 2.0f * PI / (RES_NODE_SLICE - 1);
-      nodeborder[i+1] = QVector3D(1.2f * std::sin(t), 1.2f * std::cos(t), 0.0f);
+      nodeborder[i+1] = QVector3D(std::sin(t), std::cos(t), 0.0f);
     }
   }
 
@@ -762,12 +762,11 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
   {
     QMatrix4x4 worldMatrix;
     worldMatrix.translate(node.pos());
-    worldMatrix.scale(0.5f * nodeSizeOnScreen());
     worldMatrix.rotate(sphericalBillboard(node.pos()));
 
-    QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
-
-    m_global_shader.setWorldViewProjMatrix(worldViewProjMatrix);
+    QMatrix4x4 nodeMatrix(worldMatrix);
+    nodeMatrix.scale(0.5f * nodeSizeOnScreen());
+    m_global_shader.setWorldViewProjMatrix(viewProjMatrix * nodeMatrix);
 
     // Apply fogging the node color and draw the node.
     m_global_shader.setColor(applyFog(fill, fog));
@@ -776,6 +775,12 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
     // Node stroke color: red when selected, black otherwise. Apply fogging afterwards.
     QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
     m_global_shader.setColor(applyFog(line, fog));
+
+    // Scale the border such that they are of constant width.
+    QMatrix4x4 borderMatrix(worldMatrix);
+    float width = 1.0f;
+    borderMatrix.scale(0.5f * (nodeSizeOnScreen() + width));
+    m_global_shader.setWorldViewProjMatrix(viewProjMatrix * borderMatrix);
     glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
 
     if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
