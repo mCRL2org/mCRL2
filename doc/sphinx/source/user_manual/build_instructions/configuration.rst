@@ -42,7 +42,11 @@ configure CMake:
 .. admonition:: Windows
    :class: platform-specific win
 
-   When configuring on Windows, use the generator ``Visual Studio 15 2017 Win64``.
+   When configuring on Windows, the 64-bit generator of Visual Studio 2017 is 
+   needed. In case of CMake version 3.13 or lower, in cmake-gui select the 
+   generator ``Visual Studio 15 2017 Win64``. In case of CMake version 3.14 or
+   higher, in cmake-gui select the generator ``Visual Studio 15 2017`` and 
+   select ``x64`` as the ``Optional platform for generator''.
 
 All three methods allow you to change the value of CMake configuration
 variables. Below, we describe the meaning of these variables. Note that in the
