@@ -92,6 +92,7 @@ $\While todo \neq \emptyset \Space \Do$ \\
 \qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
 \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
@@ -138,6 +139,7 @@ $\While todo \neq \emptyset \Space \Do$ \\
 \qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
 \qquad \qquad \qquad $\If \colorbox{lightgray}{$t' \aftertime s'$} \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad $todo := todo \cup \{ \colorbox{lightgray}{$t' \aftertime s'$} \}$ \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{ \colorbox{lightgray}{$t' \aftertime s'$} \}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}( t' \aftertime s' )$ \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(t \aftertime s, a \at t', t' \aftertime s')$ \\
 \qquad $\textsf{finish\_state}(t \aftertime s)$ \\
@@ -172,6 +174,7 @@ $\While \colorbox{lightgray}{$|todo| > 0$} \Do$ \\
 \qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
 \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
@@ -199,6 +202,7 @@ $\While \colorbox{lightgray}{$|todo| > 0$} \Do$ \\
 \qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
 \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
@@ -218,7 +222,7 @@ $todo := [rewr(d_0, [\:])]$ \\
 $discovered := \emptyset$ \\
 \colorbox{lightgray}{$L := |todo|$} \\
 \colorbox{lightgray}{$c := 0$} \\
-$\While |todo| > 0 \Do$ \\
+$\While |todo| > 0$ \Do \\
 \qquad $s := todo[0]$ \\
 \qquad $todo := todo[1:|todo|]$ \\
 \qquad $discovered := discovered \cup \{s\}$ \\
@@ -232,12 +236,14 @@ $\While |todo| > 0 \Do$ \\
 \qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
 \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad $todo := todo \concat [s']$ \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
 \qquad \qquad \qquad \qquad \colorbox{lightgray}{$c := c + 1$} \\
 \qquad \qquad \qquad \qquad \colorbox{lightgray}{\If $c \leq N$ \Then} \\
 \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
 \qquad \qquad \qquad \qquad \colorbox{lightgray}{\Else} \\
 \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$k := random(\{ 1, \ldots, c\})$} \\
+\qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$discovered := discovered \setminus \{todo[|todo| - k]\}$} \\
 \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{\If $k \leq N$ \Then $todo[|todo| - k] := s'$} \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
@@ -247,7 +253,8 @@ $\While |todo| > 0 \Do$ \\
 \qquad \qquad \colorbox{lightgray}{$c := 0$}
 \end{tabular}
 \]
-In Algorithm 1 of \cite{DBLP:journals/jlp/EngelsGWW09}, the set $Q_d$ stores todo elements corresponding to the current level, and the set $Q_{d+1}$ stores todo elements corresponding to the next level. The algorithm above uses only one list $todo$ that stores both of them. At each iteration of the while loop the first $L$ elements of $todo$ list belong to the current level, and the remaining elements belong to the next level. The algorithm above contains only one application of a random generator, compared to two applications in the original version. The element $k$ is chosen randomly in the range $[1, \ldots, c]$. There is an $N/c$ probability that this value is in the range $[1, \ldots, N]$. If $k$ is inside the range, the element in the $todo$ list with index $k$ (counting from the end) is overwritten. This behaviour matches with the original version.
+In Algorithm 1 of \cite{DBLP:journals/jlp/EngelsGWW09}, the set $Q_d$ stores todo elements corresponding to the current level, and the set $Q_{d+1}$ stores todo elements corresponding to the next level. The algorithm above uses only one list $todo$ that stores both of them. At each iteration of the while loop the first $L$ elements of $todo$ list belong to the current level, and the remaining elements belong to the next level. Furthermore, the algorithm above contains only one application of a random generator, compared to two applications in the original version. The element $k$ is chosen randomly in the range $[1, \ldots, c]$. There is an $N/c$ probability that this value is in the range $[1, \ldots, N]$. If $k$ is inside the range, the element in the $todo$ list with index $k$ (counting from the end) is overwritten. This behaviour matches with the original version.
+A subtle aspect of highway search is the states in the next level $Q_{d+1}$ that are overwritten are not added to the set of discovered states $V$. In the algorithm above this is achieved by removing the overwritten states from the set $discovered$.
 
 \newpage
 \section{Caching}
@@ -284,6 +291,7 @@ $\While todo \neq \emptyset \Space \Do$ \\
 \qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
 \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
@@ -318,6 +326,7 @@ $\While todo \neq \emptyset \Space \Do$ \\
 \qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
 \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$
@@ -351,6 +360,7 @@ $discovered := \emptyset$ \\
 \qquad \qquad \qquad $s' := \colorbox{lightgray}{$\textsc{FindRepresentative}(rewr(g_i(d,e_i), [d:=s,e_i:=t]))$}$ \\
 \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
 \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
 \qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
 \qquad $\textsf{finish\_state}(s)$

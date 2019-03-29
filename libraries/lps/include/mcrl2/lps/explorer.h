@@ -167,15 +167,17 @@ class highway_todo_set: public todo_set
 {
   protected:
     std::size_t N;
+    std::unordered_map<lps::state, std::size_t>& discovered;
     std::size_t n;
     std::size_t L;
     std::random_device device;
     std::mt19937 generator;
 
   public:
-    explicit highway_todo_set(const lps::state& init, std::size_t N_)
+    explicit highway_todo_set(const lps::state& init, std::unordered_map<lps::state, std::size_t>& discovered_, std::size_t N_)
       : todo_set(init),
         N(N_),
+        discovered(discovered_),
         n(0),
         L(1),
         generator(device())
@@ -201,6 +203,7 @@ class highway_todo_set: public todo_set
         std::size_t k = distribution(generator);
         if (k <= N)
         {
+          discovered.erase(todo[todo.size() - k]);
           todo[todo.size() - k] = s;
         }
       }
@@ -595,13 +598,13 @@ class explorer
       return r(data::less_equal(t0, t1)) == data::sort_bool::true_();
     }
 
-    std::unique_ptr<todo_set> make_todo_set(const lps::state& init) const
+    std::unique_ptr<todo_set> make_todo_set(const lps::state& init, std::unordered_map<lps::state, std::size_t>& discovered)
     {
       switch (options.search_strategy)
       {
         case lps::es_breadth: return std::unique_ptr<todo_set>(new breadth_first_todo_set(init));
         case lps::es_depth: return std::unique_ptr<todo_set>(new depth_first_todo_set(init));
-        case lps::es_highway: return std::unique_ptr<todo_set>(new highway_todo_set(init, options.todo_max));
+        case lps::es_highway: return std::unique_ptr<todo_set>(new highway_todo_set(init, discovered, options.todo_max));
         default: throw mcrl2::runtime_error("unsupported search strategy");
       }
     }
@@ -659,7 +662,7 @@ class explorer
     )
     {
       m_recursive = recursive;
-      std::unique_ptr<todo_set> todo = make_todo_set(d0);
+      std::unique_ptr<todo_set> todo = make_todo_set(d0, discovered);
       discovered.clear();
       std::size_t d0_index = 0;
       discovered.insert(std::make_pair(d0, d0_index));
@@ -725,7 +728,7 @@ class explorer
     )
     {
       m_recursive = recursive;
-      std::unique_ptr<todo_set> todo = make_todo_set(d0);
+      std::unique_ptr<todo_set> todo = make_todo_set(d0, discovered);
       discovered.clear();
       std::size_t d0_index = 0;
       discovered.insert(std::make_pair(d0, d0_index));
