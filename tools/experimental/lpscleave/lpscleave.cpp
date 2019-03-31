@@ -110,6 +110,12 @@ data::assignment_list project(const data::assignment_list& assignments, const da
   return result;
 }
 
+bool is_independent(const data::variable_list& parameters, const std::set<data::variable>& dependencies, const data::assignment_list& other_assignments)
+{
+  // We are independent whenever all dependencies are included in our own parameters and the other process does no assignments.
+  return std::includes(parameters.begin(), parameters.end(), dependencies.begin(), dependencies.end()) && other_assignments.empty();
+}
+
 /// \brief Creates a single summand for the cleave process.
 template<bool owning = false>
 lps::stochastic_action_summand cleave_summand(
@@ -197,22 +203,39 @@ lps::stochastic_action_summand cleave_summand(
 
   sync_labels.emplace_back(std::string("actsync_") += std::to_string(summand_index), sorts);
 
-  // These are three different cases.
+  // Remove the dependencies on local variables for checking parameter dependencies.
+  data::variable_list variables_summand = summand.summation_variables();
+  for (auto& variable : variables_summand)
+  {
+    dependencies.erase(variable);
+  }
+
+  auto other_assignments = project(summand.assignments(), other_parameters);
+  auto assignments = project(summand.assignments(), parameters);
+
   lps::multi_action action;
   if (owning)
   {
+    // Here the action is performed by the current process.
     process::action_list actions = summand.multi_action().actions();
-    actions.push_front(process::action(sync_labels.back(), values));
+
+    if (!is_independent(parameters, dependencies, other_assignments))
+    {
+      // This summand is dependent on the other process.
+      actions.push_front(process::action(sync_labels.back(), values));
+    }
+
     action = lps::multi_action(actions);
   }
-  else
+  else if (!is_independent(other_parameters, dependencies, assignments))
   {
+    // The other process depends on our parameters and we do not perform state updates.
     process::action_list actions;
     actions.push_front(process::action(sync_labels.back(), values));
     action = lps::multi_action(actions);
   }
 
-  return lps::stochastic_action_summand(variables, summand.condition(), action, project(summand.assignments(), parameters), summand.distribution());
+  return lps::stochastic_action_summand(variables, summand.condition(), action, assignments, summand.distribution());
 }
 
 /// \brief Performs the a dependency cleave based on the given parameters V, and the indices J.
