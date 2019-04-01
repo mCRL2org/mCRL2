@@ -501,7 +501,7 @@ QVector3D GLWidget::worldSize()
   return m_scene.size();
 }
 
-void GLWidget::resetViewpoint(std::size_t animation)
+void GLWidget::resetViewpoint(std::size_t)
 {
   m_scene.camera().reset();
   update();

@@ -670,7 +670,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     vec.normalize();
 
     float fog = 0.0f;
-    if (fogAmount(to, fog))
+    if (isVisible(to, fog))
     {
       // Apply the fog color.
       m_global_shader.setColor(applyFog(QVector3D(0, 0, 0), fog));
@@ -767,7 +767,7 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
   }
 
   float fog = 0.0f;
-  if (fogAmount(node.pos(), fog)) // Check if these elements are visible.
+  if (isVisible(node.pos(), fog)) // Check if these elements are visible.
   {
     QMatrix4x4 worldMatrix;
     worldMatrix.translate(node.pos());
@@ -845,12 +845,12 @@ void GLScene::renderStateNumber(QPainter& painter, GLuint i)
   drawCenteredText3D(painter, QString::number(i), node.pos(), color);
 }
 
-bool GLScene::fogAmount(const QVector3D& position, float& fogamount)
+bool GLScene::isVisible(const QVector3D& position, float& fogamount)
 {
   // Should match the vertex shader: fogAmount = (1.0f - exp(-1.0f * pow(distance * g_density, 2)));
   float distance = (m_camera.position() - position).length();
   fogamount = m_drawfog * (1.0f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
-  return (distance < m_camera.viewdistance());
+  return (distance < m_camera.viewdistance() && fogamount < 0.99f);
 }
 
 /// \returns The given value clamped between a min and a max.
@@ -900,25 +900,18 @@ void drawCenteredText(QPainter& painter, float x, float y, const QString& text, 
 
 void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color)
 {
-  if (!text.isEmpty())
+  QVector3D window = m_camera.worldToWindow(position);
+  float fog = 0.0f;
+  if (!text.isEmpty() && window.z() <= 1.0f && isVisible(position, fog)) // There is text, that is not behind the camera and it is visible.
   {
-    QVector3D window = m_camera.worldToWindow(position);
-    if (window.z() <= 1.0f) // Not behind the camera.
-    {
-      float fog = 0.0f;
-      if (fogAmount(position, fog)) // The text is visible.
-      {
-        QColor qcolor = vectorToColor(color);
-        qcolor.setAlpha(255 * (1.0f - fog));
+     QColor qcolor = vectorToColor(color);
+     qcolor.setAlpha(255 * (1.0f - fog));
 
-        drawCenteredText(painter,
-          window.x(),
-          window.y(),
-          text,
-          qcolor);
-      }
-
-    }
+     drawCenteredText(painter,
+       window.x(),
+       window.y(),
+       text,
+       qcolor);
   }
 
 }

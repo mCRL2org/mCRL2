@@ -186,10 +186,11 @@ private:
   /// \param i The index of the state number to render.
   void renderStateNumber(QPainter& painter, GLuint i);
 
-  /// \returns The amount of fog that a given world coordinate receives.
-  bool fogAmount(const QVector3D& position, float& fog);
+  /// \returns Whether the given point (no radius) is visible based on the camera viewdistance and fog amount (if enabled).
+  /// \param fog The amount of fog that a given point receives.
+  bool isVisible(const QVector3D& position, float& fog);
 
-  /// \returns The color of an object received fogAmount amount of fog.
+  /// \returns The color of an object receiving fogAmount amount of fog.
   QVector3D applyFog(const QVector3D& color, float fogAmount);
 
   /// \returns A rotation such that an object at the given position faces the camera.
@@ -214,30 +215,22 @@ private:
   /// \brief The dimensions of a cube in which the scene lives.
   QVector3D m_worldsize = QVector3D(1000.0f, 1000.0f, 0.0f);
 
-  /// \brief Transition labels are only drawn if this field is true.
-  bool m_drawtransitionlabels = true;
-  /// \brief State labels are only drawn if this field is true.
-  bool m_drawstatelabels      = false;
-  /// \brief State numbers are only drawn if this field is true.
-  bool m_drawstatenumbers     = false;
-  /// \brief Self loops are only drawn if this field is true.
-  bool m_drawselfloops        = true;
-  /// \brief The initial state is marked if this field is true.
-  bool m_drawinitialmarking   = true;
-  /// \brief The size of a node (radius).
-  std::size_t m_size_node     = 20;
-  /// \brief The size of the font.
-  std::size_t m_fontsize      = 16;
+  bool m_drawtransitionlabels = true;   ///< Transition labels are only drawn if this field is true.
+  bool m_drawstatelabels      = false;  ///< State labels are only drawn if this field is true.
+  bool m_drawstatenumbers     = false;  ///< State numbers are only drawn if this field is true.
+  bool m_drawselfloops        = true;   ///< Self loops are only drawn if this field is true.
+  bool m_drawinitialmarking   = true; ///< The initial state is marked if this field is true.
+  std::size_t m_size_node     = 20; ///< The size of a node (radius).
+  std::size_t m_fontsize      = 16; ///< The size of the font.
 
-  /// \brief Enable drawing fog.
-  bool m_drawfog = true;
-  /// \brief The density of the fog.
-  float m_fogdensity = 0.0005f;
+  bool m_drawfog = true; ///< Enable drawing fog.
+  float m_fogdensity = 0.0005f; ///< The density of the fog.
 
   /// The vertex layout and vertex buffer object for all objects with the 3 float per vertex layout.
   QOpenGLVertexArrayObject m_vertexarray;
   QOpenGLBuffer m_vertexbuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 
+  /// \brief The background color of the scene.
   QVector3D m_clearColor = QVector3D(1.0f, 1.0f, 1.0f);
 };
 
