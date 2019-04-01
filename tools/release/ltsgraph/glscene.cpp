@@ -718,6 +718,7 @@ void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
     // Move the handle to the correct position and with the correct scale.
     QMatrix4x4 worldMatrix;
     worldMatrix.translate(handle.pos());
+    worldMatrix.rotate(sphericalBillboard(handle.pos()));
     worldMatrix.scale(handleSizeOnScreen());
 
     // Update the shader parameters.
