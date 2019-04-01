@@ -872,42 +872,15 @@ QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
 
 QQuaternion GLScene::sphericalBillboard(const QVector3D& position)
 {
-  // A vector from the camera to the world position.
-  QVector3D posToCamera = position - m_camera.position();
+  // A vector from the world position to the camera.
+  QVector3D posToCamera = m_camera.position() - position;
+  posToCamera.normalize();
 
-  // We assume that the object points towards the negative z-axis and its up vector is the y-axis.
-  QVector3D frontVector(0.0f, 0.0f, -1.0f);
-  QQuaternion rotation;
-
-  // Rotate the object around its up (either (0,-1,0) or (0,1,0)) axis towards the camera.
-  QVector3D posToCameraXZ(posToCamera.x(), 0.0f, posToCamera.z());
-  posToCameraXZ.normalize();
-
-  float degrees_z = radiansToDegrees(std::acos(QVector4D::dotProduct(frontVector, posToCameraXZ)));
-  if (posToCameraXZ.x() > 0.0f)
-  {
-    rotation = QQuaternion::fromAxisAndAngle(QVector3D(0.0f, -1.0f, 0.0f), degrees_z);
-  }
-  else
-  {
-    rotation = QQuaternion::fromAxisAndAngle(QVector3D(0.0f, 1.0f, 0.0f), degrees_z);
-  }
-
-  // Tilt the object around its right axis (either (1,0,0) or (-1,0,0)) to face the camera.
-  QVector3D posToCameraYZ(0.0f, posToCamera.y(), posToCamera.z());
-  posToCameraYZ.normalize();
-
-  float degrees_x = radiansToDegrees(std::acos(QVector3D::dotProduct(frontVector, posToCameraYZ)));
-  if (posToCameraYZ.y() > 0.0f)
-  {
-    rotation *= QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), degrees_x);
-  }
-  else
-  {
-    rotation *= QQuaternion::fromAxisAndAngle(QVector3D(-1.0f, 0.0f, 0.0f), degrees_x);
-  }
-
-  return rotation;
+  // We assume that the object points towards the positive z-axis
+  QVector3D frontVector(0.0f, 0.0f, 1.0f);
+  // Use cross product to compute axis and dot product to compute the angle of rotation
+  return QQuaternion::fromAxisAndAngle(QVector3D::crossProduct(frontVector, posToCamera),
+      radiansToDegrees(std::acos(QVector3D::dotProduct(frontVector, posToCamera))));
 }
 
 /// Helper functions
