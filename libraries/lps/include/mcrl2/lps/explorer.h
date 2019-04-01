@@ -105,6 +105,8 @@ class todo_set
       : todo{init}
     {}
 
+    virtual ~todo_set() {}
+  
     virtual lps::state choose_element() = 0;
 
     virtual void insert(const lps::state& s) = 0;
