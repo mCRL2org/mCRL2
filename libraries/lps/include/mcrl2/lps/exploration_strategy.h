@@ -118,7 +118,7 @@ inline std::string description(const exploration_strategy strat)
     case es_value_random_prioritized:
       return "prioritize actions on its first argument being of sort Nat (see option --prioritized), and randomly select one of these to obtain a prioritized random simulation (option is experimental)";
     case es_highway:
-      return "highway search. Only part of the state space is explored, by restricting the size of the todo list";
+      return "highway search. Only part of the state space is explored, by restricting the size of the todo list. N.B. The implementation deviates slightly from the published version.";
     default:
       throw mcrl2::runtime_error("unknown exploration_strategy");
   }
