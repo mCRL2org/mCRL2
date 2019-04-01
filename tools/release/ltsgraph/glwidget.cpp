@@ -446,7 +446,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
       case dm_rotate_2d:
         {
           QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, e->pos());
-          camera.rotation(camera.rotation() * rotation);
+          camera.rotation(rotation * camera.rotation());
           break;
         }
       case dm_translate:

@@ -22,15 +22,19 @@ namespace mcrl2
 namespace gui
 {
 
+/// \brief Compute the projection of the point p on a sphere that covers the viewport
 static QVector3D arcballVector(const QPoint& p)
 {
   float x, y, z;
   const float radius = 1.5f;
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
+
+  // Compute x and y relative to the middle of the viewport
   x = (float)p.x() / viewport[2] * 2.0f - 1.0f;
   y = (float)p.y() / viewport[3] * 2.0f - 1.0f;
   y = -y;
+
   float squared = x * x + y * y;
   if (squared <= radius * radius)
   {
