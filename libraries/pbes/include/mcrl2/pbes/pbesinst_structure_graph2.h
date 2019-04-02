@@ -238,7 +238,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       using utilities::detail::contains;
 
-      if (!reset_guard(regeneration_period) && !aggressive)
+      if (!reset_guard(regeneration_period) && !aggressive && !todo.empty())
       {
         return;
       }
@@ -246,6 +246,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       simple_structure_graph G(m_graph_builder.vertices());
       std::unordered_set<pbes_expression> todo1{init};
       std::unordered_set<pbes_expression> done1;
+      std::deque<propositional_variable_instantiation> new_todo;
 
       while (!todo1.empty())
       {
@@ -300,16 +301,14 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             todo1.insert(Y);
           }
         }
-      }
 
-      std::deque<propositional_variable_instantiation> new_todo;
-      for (const propositional_variable_instantiation& X: todo)
-      {
-        if (contains(done1, X))
+        if (u_.decoration == structure_graph::d_none && u_.successors.empty())
         {
-          new_todo.push_back(X);
+          assert(is_propositional_variable_instantiation(u_.formula));
+          new_todo.push_back(atermpp::down_cast<propositional_variable_instantiation>(u_.formula));
         }
       }
+
       std::swap(todo, new_todo);
     };
 
