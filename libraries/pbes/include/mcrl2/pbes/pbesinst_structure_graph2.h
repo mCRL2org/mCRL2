@@ -238,7 +238,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       using utilities::detail::contains;
 
-      if (!reset_guard(regeneration_period))
+      if (!reset_guard(regeneration_period) && !aggressive)
       {
         return;
       }

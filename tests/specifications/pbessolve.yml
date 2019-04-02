@@ -53,7 +53,12 @@ tools:
   t10:
     input: [l2]
     output: []
+    args: [-s2, --aggressive]
+    name: pbessolve
+  t11:
+    input: [l2]
+    output: []
     args: []
     name: pbespgsolve
 result: |
-  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution'] == t8.value['solution'] == t9.value['solution'] == t10.value['solution']
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution'] == t6.value['solution'] == t7.value['solution'] == t8.value['solution'] == t9.value['solution'] == t10.value['solution'] == t11.value['solution']
