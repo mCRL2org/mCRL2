@@ -114,9 +114,8 @@ public:
   /**
    * @brief Sets the depth of the scene using an optional animation.
    * @param depth The new depth.
-   * @param animation The number of animation steps to use.
    */
-  void setDepth(bool enabled);
+  void set3D(bool enabled);
 
   /**
    * @brief Updates all shapes and labels.

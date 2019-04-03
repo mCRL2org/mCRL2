@@ -77,12 +77,6 @@ class MainWindow : public QMainWindow
     void onExportXML();
 
     /**
-     * @brief Updates the Graph and SpringLayout such that the graph fits in the given @e newsize.
-     * @param newsize The new size of the GLWidget.
-     */
-    void onWidgetResized(const QVector3D& newsize);
-
-    /**
      * @brief Enables or disables the 3D mode of the GLWidget.
      * @param enabled Indicates wether the 3D mode should be enabled.
      */
