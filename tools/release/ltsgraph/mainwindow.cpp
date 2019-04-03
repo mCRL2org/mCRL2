@@ -129,21 +129,21 @@ MainWindow::~MainWindow()
   delete m_glwidget;
 }
 
-void MainWindow::onWidgetResized(const QVector3D& newsize)
+void MainWindow::on3DChanged(bool enabled)
 {
+  m_glwidget->resetViewpoint(0);
+  m_glwidget->set3D(enabled);
+
+  // For 3D mode there is no limit and otherwise the z-dimension is limited to 0.
   QVector3D limit{INFINITY, INFINITY, INFINITY};
-  if (newsize.z() == 0.0)
+  if (!enabled)
   {
     limit.setZ(0.0);
   }
   m_graph.clip(-limit, limit);
-  m_layout->setClipRegion(-limit, limit, newsize.z());
-  m_glwidget->update();
-}
 
-void MainWindow::on3DChanged(bool enabled)
-{
-  m_glwidget->setDepth(enabled);
+  // Here, 1000 is an arbitrary value chosen to move the nodes in the z-dimension when 3D is enabled.
+  m_layout->setClipRegion(-limit, limit, enabled ? 1000.0f : 0);
 }
 
 void MainWindow::onExplore(bool enabled)
@@ -205,6 +205,7 @@ void MainWindow::openFile(const QString& fileName)
       }
 
       m_glwidget->rebuild();
+      on3DChanged(false);
       m_glwidget->resume();
       m_information->update();
       setWindowTitle(QString("LTSGraph - ") + fileName);

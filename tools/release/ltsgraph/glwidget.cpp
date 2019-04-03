@@ -481,10 +481,9 @@ void GLWidget::rebuild()
   update();
 }
 
-void GLWidget::setDepth(bool enabled)
+void GLWidget::set3D(bool enabled)
 {
   m_is_threedimensional = enabled;
-  m_scene.camera().reset();
   update();
 }
 
