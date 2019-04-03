@@ -181,7 +181,9 @@ void MainWindow::openFile(const QString& fileName)
       m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
 
-      QVector3D limit = m_glwidget->worldSize() / 4.0f;
+      // We limit the initial positions of the nodes.
+      QVector3D limit = QVector3D(1000.0, 1000.0f, 0.0f) / 4.0f;
+
       // The argument '-' means we should read from stdin, the lts library
       // does that when supplied an empty string as the input file name
       m_graph.load(fileName == "-" ? "" : fileName, -limit, limit);

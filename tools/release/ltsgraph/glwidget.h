@@ -157,11 +157,6 @@ public:
   void endPaint();
 
   /**
-   * @brief Returns the world size in 3D coordinates.
-   */
-  QVector3D worldSize();
-
-  /**
    * @brief Returns the user interface object. If no user interface is available,
    *        one is created using the provided @e parent.
    * @param The parent of the user inferface in the case none exists yet.

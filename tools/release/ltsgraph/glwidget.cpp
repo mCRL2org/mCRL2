@@ -324,7 +324,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     }
     else if (e->modifiers() == Qt::ShiftModifier)
     {
-      if (e->button() == Qt::LeftButton && m_scene.is_threedimensional()) {
+      if (e->button() == Qt::LeftButton && m_is_threedimensional) {
         m_dragmode = dm_rotate;
       }
     }
@@ -338,7 +338,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     {
       if (m_hover.selectionType == GLScene::so_none)
       {
-        if (e->button() == Qt::RightButton && m_scene.is_threedimensional()) {
+        if (e->button() == Qt::RightButton && m_is_threedimensional) {
           m_dragmode = dm_rotate;
         }
         else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
@@ -483,22 +483,9 @@ void GLWidget::rebuild()
 
 void GLWidget::setDepth(bool enabled)
 {
-  if (enabled)
-  {
-    m_scene.setDepth(1000);
-  }
-  else
-  {
-    m_scene.setDepth(0);
-  }
-
+  m_is_threedimensional = enabled;
   m_scene.camera().reset();
   update();
-}
-
-QVector3D GLWidget::worldSize()
-{
-  return m_scene.size();
 }
 
 void GLWidget::resetViewpoint(std::size_t)
