@@ -528,6 +528,8 @@ void GLWidget::logMessage(const QOpenGLDebugMessage& debugMessage)
   mCRL2log(mcrl2::log::debug) << "OpenGL: " << debugMessage.message().toStdString() << "\n";
 }
 
+/// Source code for the GLWidgetUI
+
 GLWidgetUi* GLWidget::ui(QWidget* parent)
 {
   if (m_ui == nullptr) {
@@ -545,7 +547,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   selectColor(initialcolor);
 
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
-  connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
+  connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(setPaintMode(bool)));
   connect(m_ui.btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
   connect(m_ui.cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
   connect(m_ui.cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));
@@ -572,7 +574,7 @@ void GLWidgetUi::selectColor(const QColor& color)
   m_widget.setPaint(color);
 }
 
-void GLWidgetUi::togglePaintMode(bool paint)
+void GLWidgetUi::setPaintMode(bool paint)
 {
   if (paint)
   {

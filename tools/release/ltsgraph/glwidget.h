@@ -118,7 +118,7 @@ public:
   void set3D(bool enabled);
 
   /**
-   * @brief Updates all shapes and labels.
+   * @brief Should be called whenever the graph changes.
    */
   void rebuild();
 
@@ -162,11 +162,6 @@ public:
    */
   GLWidgetUi* ui(QWidget* parent = nullptr);
 
-  //Getters and setters
-
-  std::size_t nodeSize() const { return m_scene.nodeSize(); }
-  std::size_t fontSize() const { return m_scene.fontSize(); }
-
 public slots:
 
   /**
@@ -178,61 +173,37 @@ public slots:
   /// \brief Logs the given message to the mCRL2 output.
   void logMessage(const QOpenGLDebugMessage& debugMessage);
 
-  //Getters and setters
-  void toggleTransitionLabels(bool show) {
-    m_scene.setDrawTransitionLabels(show);
-    update();
-  }
-  void toggleStateLabels(bool show) {
-    m_scene.setDrawStateLabels(show);
-    update();
-  }
-  void toggleStateNumbers(bool show) {
-    m_scene.setDrawStateNumbers(show);
-    update();
-  }
-  void toggleSelfLoops(bool show) {
-    m_scene.setDrawSelfLoops(show);
-    update();
-  }
-  void toggleInitialMarking(bool show) {
-    m_scene.setDrawInitialMarking(show);
-    update();
-  }
-  void toggleFog(bool enabled) {
-    m_scene.setDrawFog(enabled);
-    update();
-  }
-  void setNodeSize(int size) {
-    m_scene.setNodeSize(size);
-    update();
-  }
-  void setFontSize(int size) {
-    m_scene.setFontSize(size);
-    update();
-  }
-  void setFogDensity(int value) {
-    m_scene.setFogDistance(value);
-    update();
-  }
+  /// Signals for various UI interactions.
+
+  void toggleTransitionLabels(bool show) { m_scene.setDrawTransitionLabels(show); update(); }
+  void toggleStateLabels(bool show) { m_scene.setDrawStateLabels(show); update(); }
+  void toggleStateNumbers(bool show) { m_scene.setDrawStateNumbers(show); update(); }
+  void toggleSelfLoops(bool show) { m_scene.setDrawSelfLoops(show); update(); }
+  void toggleInitialMarking(bool show) { m_scene.setDrawInitialMarking(show); update(); }
+  void toggleFog(bool enabled) { m_scene.setDrawFog(enabled); update(); }
+
+  void setNodeSize(int size) { m_scene.setNodeSize(size); update(); }
+  void setFontSize(int size) { m_scene.setFontSize(size); update(); }
+  void setFogDensity(int value) { m_scene.setFogDistance(value); update();}
 
 private:
-  GLWidgetUi* m_ui = nullptr; /// The user interface of the class.
-  Graph::Graph& m_graph;      /// The current graph.
-  GLScene m_scene;           /// The GLScene which is used to render the contents.
-  QOpenGLDebugLogger* m_logger; /// Logs OpenGL debug messages.
+  GLWidgetUi* m_ui = nullptr;   ///< The user interface of the class.
+  Graph::Graph& m_graph;        ///< The current graph.
+  GLScene m_scene;              ///< The GLScene which is used to render the contents.
+  QOpenGLDebugLogger* m_logger; ///< Logs OpenGL debug messages.
 
-  GLScene::Selection m_hover; /// The current object (if any) which is pointed at.
-  DragMode m_dragmode;        /// The current drag mode.
-  MoveRecord* m_dragnode;     /// The current node (if any) which is being dragged.
-  QPoint m_dragstart;         /// The coordinate at which the dragging started.
-  QVector2D m_draglength;     /// The accumulated distance reached while dragging.
-  QColor m_paintcolor;        /// The color of the paint operation.
-  bool m_painting = false;    /// Boolean indicating if painting is enabled.
-  bool m_paused = false;
+  GLScene::Selection m_hover; ///< The current object (if any) which is pointed at.
+  DragMode m_dragmode;        ///< The current drag mode.
+  MoveRecord* m_dragnode;     ///< The current node (if any) which is being dragged.
+  QPoint m_dragstart;         ///< The coordinate at which the dragging started.
+  QVector2D m_draglength;     ///< The accumulated distance reached while dragging.
+  QColor m_paintcolor;        ///< The color of the paint operation.
 
-  std::list<GLScene::Selection> m_selections; /// A list of the objects under the cursor.
+  bool m_painting = false;    ///< Indicates wheter painting node by the used is enabled.
+  bool m_paused = false;      ///< Indicates whether rendering of the scene is paused (for example while updating the graph).
+  bool m_is_threedimensional = false; ///< Indicates that the scene should be viewed in 3D, as opposed to 2D.
 
+  std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
 
   /**
    * @brief Updates the selected value for all nodes.
@@ -272,7 +243,7 @@ class GLWidgetUi : public QDockWidget
      * @brief Slot which processes the selection or deselection of the paint button.
      * @param paint Indicates the painting should be enabled if true, disabled otherwise.
      */
-    void togglePaintMode(bool paint);
+    void setPaintMode(bool paint);
 
     /**
      * @brief Get the current state of the settings.
