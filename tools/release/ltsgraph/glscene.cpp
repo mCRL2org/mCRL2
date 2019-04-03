@@ -405,7 +405,8 @@ void GLScene::render(QPainter& painter)
   // Qt: Direct OpenGL commands can still be issued. However, you must make sure these are enclosed by a call to the painter's beginNativePainting() and endNativePainting().
   painter.beginNativePainting();
 
-  // Cull polygons that are facing away from the camera.
+  // Cull polygons that are facing away (back) from the camera, where their front is defined as counter clockwise by default, see glFrontFace, meaning that the
+  // vertices that make up a triangle should be oriented counter clockwise to show the triangle.
   glEnable(GL_CULL_FACE);
 
   // Enable depth testing, so that we don't have to care too much about rendering in the right order.
