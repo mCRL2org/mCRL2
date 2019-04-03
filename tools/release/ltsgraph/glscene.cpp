@@ -50,7 +50,7 @@ constexpr int RES_ARC       = 16;
 /// This should match the layout of m_vertexbuffer.
 constexpr int VERTICES_NODE_BORDER = RES_NODE_SLICE + 1;
 constexpr int VERTICES_NODE_SPHERE = RES_NODE_SLICE * RES_NODE_STACK * 2;
-constexpr int VERTICES_HINT = 8;
+constexpr int VERTICES_HINT = 12;
 constexpr int VERTICES_HANDLE_BODY = 4;
 constexpr int VERTICES_HANDLE_OUTLINE = 4;
 constexpr int VERTICES_ARROWHEAD = RES_ARROWHEAD + 1;
@@ -301,12 +301,24 @@ void GLScene::initialize()
     }
   }
 
-  // Generate plus (and minus) hint for exploration mode
-  std::vector<QVector3D> hint(8);
-  hint[0] = QVector3D(-1.0f,  0.2f, 0.0f);
-  hint[1] = QVector3D( 1.0f,  0.2f, 0.0f);
-  hint[2] = QVector3D( 1.0f, -0.2f, 0.0f);
-  hint[3] = QVector3D(-1.0f, -0.2f, 0.0f);
+  // Generate plus (and minus) hint for exploration mode, we generate 4 triangles as a
+  // triangle strip cannot handle the disconnect between the two rectangles of the plus.
+  std::vector<QVector3D> hint(12);
+  hint[0] = QVector3D(-0.6f,  0.1f, 1.0f);
+  hint[1] = QVector3D(-0.6f, -0.1f, 1.0f);
+  hint[2] = QVector3D( 0.6f,  0.1f, 1.0f);
+
+  hint[3] = QVector3D( 0.6f,  0.1f, 1.0f);
+  hint[4] = QVector3D(-0.6f, -0.1f, 1.0f);
+  hint[5] = QVector3D( 0.6f, -0.1f, 1.0f);
+
+  hint[6] = QVector3D(-0.1f,  0.6f, 1.0f);
+  hint[7] = QVector3D(-0.1f, -0.6f, 1.0f);
+  hint[8] = QVector3D( 0.1f,  0.6f, 1.0f);
+
+  hint[9]  = QVector3D(-0.1f, -0.6f, 1.0f);
+  hint[10] = QVector3D( 0.1f, -0.6f, 1.0f);
+  hint[11] = QVector3D( 0.1f,  0.6f, 1.0f);
 
   // Generate vertices for handle (border + fill, both squares)
   std::vector<QVector3D> handle_body(4);
@@ -798,7 +810,10 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
       QVector3D hint = QVector3D(fill.x() + s, fill.y() + s, fill.z() + s);
 
       m_global_shader.setColor(hint);
-      glDrawArrays(GL_LINES, OFFSET_HINT, VERTICES_HINT);
+
+      // When the node is active, which means that its successors are shown in exploration mode, only the "minus" is drawn
+      // by omitting the vertical rectangle of the whole "plus" shape.
+      glDrawArrays(GL_TRIANGLES, OFFSET_HINT, node.active() ? VERTICES_HINT / 2 : VERTICES_HINT);
     }
 
     if (node.is_probabilistic())
