@@ -118,9 +118,6 @@ public:
   /// \brief Resize the OpenGL viewport.
   void resize(std::size_t width, std::size_t height);
   
-  /// \returns The current world size in world coordinates.
-  QVector3D size() { return m_worldsize; }
-  
   /// \brief Retrieve the object at viewport coordinate (x, y).
   /// \returns A record that represents the selected object.
   Selection select(int x, int y);
@@ -139,8 +136,6 @@ public:
   float handleSizeOnScreen() const { return handleSize * m_device_pixel_ratio; }
   float arrowheadSizeOnScreen() const { return arrowheadSize * m_device_pixel_ratio; }
 
-  bool is_threedimensional() { return m_worldsize.z() > 0.0f; }
-
   ArcballCameraView& camera() { return m_camera;  }
 
   /// Setters
@@ -156,9 +151,6 @@ public:
   void setFontSize(std::size_t size) { m_fontsize = size; m_font.setPixelSize(m_fontsize); }
   void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
-
-  /// \brief Sets the depth of the cube in which the scene lives (the z-coordinate)
-  void setDepth(float depth) { m_worldsize.setZ(depth); }
 
 private:
 
@@ -211,9 +203,6 @@ private:
 
   /// \brief The shader to draw arcs, uses control points to position the vertices.
   ArcShader m_arc_shader;
-
-  /// \brief The dimensions of a cube in which the scene lives.
-  QVector3D m_worldsize = QVector3D(1000.0f, 1000.0f, 0.0f);
 
   bool m_drawtransitionlabels = true;   ///< Transition labels are only drawn if this field is true.
   bool m_drawstatelabels      = false;  ///< State labels are only drawn if this field is true.
