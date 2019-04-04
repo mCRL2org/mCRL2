@@ -132,6 +132,9 @@ class pbes_input_tool: public Tool
       : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
+    /// \brief Destructor.
+    virtual ~pbes_input_tool() = default;
+
     /// \brief Returns the input file format
     /// \return The input format
     utilities::file_format pbes_input_format() const

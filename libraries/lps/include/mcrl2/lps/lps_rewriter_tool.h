@@ -103,6 +103,9 @@ class lps_rewriter_tool: public Tool
       : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
+    /// \brief Destructor.
+    virtual ~lps_rewriter_tool() = default;
+
     /// \brief Returns the rewriter type
     /// \return The rewriter type
     lps::lps_rewriter_type rewriter_type() const

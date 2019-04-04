@@ -127,6 +127,9 @@ class pbes_output_tool: public Tool
       : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
+    /// \brief Destructor.
+    virtual ~pbes_output_tool() = default;
+
     /// \brief Returns the output format
     /// \return The output format
     utilities::file_format pbes_output_format() const

@@ -797,6 +797,7 @@ class stategraph_algorithm
       mCRL2log(log::verbose, "stategraph") << out.str() << std::endl;
     }
 
+    /// \brief Constructor.
     stategraph_algorithm(const pbes& p, const pbesstategraph_options& options)
       : m_datar(p.data(), options.rewrite_strategy),
         m_use_alternative_lcfp_criterion(options.use_alternative_lcfp_criterion),
@@ -806,6 +807,9 @@ class stategraph_algorithm
     {
       m_pbes = stategraph_pbes(p, m_datar);
     }
+
+    /// \brief Destructor.
+    virtual ~stategraph_algorithm() = default;
 
     /// \brief Returns the connected components of the global control flow graph.
     const std::vector<std::set<std::size_t> >& connected_components() const

@@ -61,7 +61,7 @@ struct replace_constants_by_variables_builder: public Builder<replace_constants_
       data::variable v(id_generator("@rewr_var"), x.sort());
       substitutions[x] = v;
       sigma[v] = r(x, sigma);
-      return v;
+      return std::move(v);
     }
     else
     {

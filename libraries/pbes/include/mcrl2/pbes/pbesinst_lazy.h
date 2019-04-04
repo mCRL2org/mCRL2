@@ -186,6 +186,8 @@ class pbesinst_lazy_algorithm
        m_optimization(optimization)
     { }
 
+    virtual ~pbesinst_lazy_algorithm() = default;
+
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
     virtual void on_report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)

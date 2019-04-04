@@ -38,12 +38,10 @@ class identifier_generator
 
   public:
     /// \brief Constructor.
-    identifier_generator()
-    {}
+    identifier_generator() = default;
 
     /// \brief Destructor.
-    virtual ~identifier_generator()
-    {}
+    virtual ~identifier_generator() = default;
 
     /// \brief Clears the context.
     virtual void clear_context() = 0;
