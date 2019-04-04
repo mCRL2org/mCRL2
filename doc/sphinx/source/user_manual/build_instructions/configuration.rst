@@ -46,7 +46,7 @@ configure CMake:
    needed. In case of CMake version 3.13 or lower, in cmake-gui select the 
    generator ``Visual Studio 15 2017 Win64``. In case of CMake version 3.14 or
    higher, in cmake-gui select the generator ``Visual Studio 15 2017`` and 
-   select ``x64`` as the ``Optional platform for generator''.
+   select ``x64`` as the "Optional platform for generator".
 
 All three methods allow you to change the value of CMake configuration
 variables. Below, we describe the meaning of these variables. Note that in the
@@ -178,7 +178,7 @@ graphical user interfaces, some advanced settings are initially hidden.
   ======= ======================================================================
   ``ON``  Compile graphical tools (:ref:`tool-diagraphica`,
           :ref:`tool-ltsgraph`, :ref:`tool-ltsview`, :ref:`tool-mcrl2-gui`,
-          :ref:`tool-lpsxsim`).
+          :ref:`tool-lpsxsim`, :ref:`tool-mcrl2ide`).
   ------- ----------------------------------------------------------------------
   ``OFF`` Do not compile graphical tools.
   ======= ======================================================================
