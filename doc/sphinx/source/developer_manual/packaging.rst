@@ -72,10 +72,10 @@ Testing is done by running (a platform specific variation of)::
                            -DMCRL2_ENABLE_RANDOM_TEST_TARGETS="ON"
   $ make install
   $ ctest
-  $ mkdir mcrl2-maintainer-build
-  $ cd mcrl2-maintainer-build
-  $ cmake ../mcrl2-release -DCMAKE_INSTALL_PREFIX="/tmp/mcrl2-maintainer-build/install" \
-                           -DCMAKE_BUILD_TYPE="Maintainer" \
+  $ mkdir mcrl2-debug-build
+  $ cd mcrl2-debug-build
+  $ cmake ../mcrl2-release -DCMAKE_INSTALL_PREFIX="/tmp/mcrl2-debug-build/install" \
+                           -DCMAKE_BUILD_TYPE="Debug" \
                            -DMCRL2_ENABLE_TEST_TARGETS="ON" \
                            -DMCRL2_ENABLE_EXPERIMENTAL="ON" \
                            -DMCRL2_ENABLE_DEPRECATED="ON" \

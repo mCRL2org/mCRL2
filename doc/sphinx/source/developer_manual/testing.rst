@@ -9,10 +9,10 @@ The results of the regression tests can be found at `<http://mcrl2build1.win.tue
 
 In TeamCity there are two top-level projects that are of importance:
 
-- *Maintainer* is a continuous build that is run on all supported platforms
-  in Maintainer mode after every SVN commit to ``trunk``.
-- *Nightly* is a build that is run every night and builds ``trunk``
-  on all supported platforms in Release mode. The resulting builds are packaged.
+- *Debug* is a continuous build that is run on all supported platforms
+  in Debug mode after every commit to any branch (includes pull requests).
+- *Nightly* is a build that is run every night and builds the ``master`` branch
+  on all supported platforms in Release mode, after which the resulting builds are packaged.
   Nightly also builds the website including the documentation from the Sphinx sources.
   When all builds pass, the website, documentation and nightly packages are uploaded to `<http://mcrl2.org>`_.
 
@@ -56,7 +56,7 @@ For the mCRL2 toolset, the TeamCity projects are structured as follows:
   This project also contains all build configuration templates used in the child projects.
 
 - **Build type level** -
-  These projects contain the configuration specific to the build types *Maintainer* or *Nightly*.
+  These projects contain the configuration specific to the build types *Debug* or *Nightly*.
   On this level, environment variables are configured that configure the correct build types in the CMake files.
   There is also a *Release* project on this level but this is not used right now.
 
@@ -123,7 +123,7 @@ The *configure* build step is a Meta-runner_ called ``mcrl2_Conf`` with the foll
 
 This meta-runner executes the *CMake Configure* build runner from the `TeamCity CMake plugin`_ with additional parameters:
 
-- ``cfg_buildtype`` - CMake build type. Either ``Release`` or ``Maintainer``. Configured on the **Build type level** projects.
+- ``cfg_buildtype`` - CMake build type. Either ``Release`` or ``Debug``. Configured on the **Build type level** projects.
 - ``cfg_mcrl2_options`` - Additional mCRL2 build options. For example ``-DMCRL2_ENABLE_EXPERIMENTAL=ON -DMCRL2_ENABLE_DEPRECATED=ON -DMCRL2_SKIP_LONG_TESTS=ON``. Configured on various levels.
 - ``cfg_compiler`` - The compiler to use. For example ``-DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6``. Configured on the **Build tool level** projects.
 - ``cfg_developer_warnings`` - Enable or disable developer warnings. Either ``true`` or ``false``. Configured on the **Build type level** projects.

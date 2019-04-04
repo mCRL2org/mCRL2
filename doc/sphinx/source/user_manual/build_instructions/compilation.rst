@@ -87,9 +87,8 @@ and installation flags.
    :class: platform-specific mac
 
    The Apple clang compiler versions 7.2 and 8.0 have a problem compiling the toolset
-   in MAINTAINER and DEBUG mode. This leads to problems with asserts. A solution is to add the
-   flag ``-fsanitize=address`` to the compiler flags in CMAKE_CXX_FLAGS_MAINTAINER,
-   CMAKE_C_FLAGS_MAINTAINER, CMAKE_EXE_LINKER_FLAGS_MAINTAINER, CMAKE_CXX_FLAGS_DEBUG,
+   in DEBUG mode. This leads to problems with asserts. A solution is to add the
+   flag ``-fsanitize=address`` to the compiler flags in CMAKE_CXX_FLAGS_DEBUG,
    CMAKE_C_FLAGS_DEBUG and CMAKE_EXE_LINKER_FLAGS_DEBUG. The problem does
    not occur when no -DNDEBUG is used. Also other compilers or platform do not appear
    to have this issue.

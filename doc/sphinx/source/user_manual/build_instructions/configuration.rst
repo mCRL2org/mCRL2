@@ -102,9 +102,6 @@ graphical user interfaces, some advanced settings are initially hidden.
   ------------------ ---------------------------------------------------------
   ``MinSizeRel``     Same as ``Release``, but instructs the compiler to
                      optimise for size.
-  ------------------ ---------------------------------------------------------
-  ``Maintainer``     Same as ``Debug``, except that code coverage tests are
-                     generated (and executed when running tests).
   ================== =========================================================
 
 ``CMAKE_INSTALL_PREFIX``
