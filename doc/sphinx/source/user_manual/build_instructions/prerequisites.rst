@@ -62,7 +62,7 @@ setup:
 Boost
 -----
 
-.. |boost| replace:: *Boost 1.36*
+.. |boost| replace:: *Boost 1.48.0*
 .. _boost: http://www.boost.org
 
 The mCRL2 sources use libraries from the |boost|_ collection (or a more recent
