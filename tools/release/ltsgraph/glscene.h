@@ -12,64 +12,16 @@
 
 #include "graph.h"
 #include "camera.h"
+#include "shaders.h"
 
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions_3_3_Core>
-#include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
 #include <QPainter>
 
 #include <array>
 #include <vector>
-
-/// \brief A simple shader that can be used to render three dimensional objects.
-class GlobalShader : public QOpenGLShaderProgram
-{
-public:
-  /// \brief Sets the sources, links the program and extracts the required information.
-  bool link() override;
-
-  /// \brief Sets the world view projection matrix used to transform the object.
-  void setWorldViewProjMatrix(const QMatrix4x4& matrix) { setUniformValue(m_worldViewProjMatrix_location, matrix); }
-
-  /// \brief Sets the fill color of this object.
-  void setColor(const QVector3D& color) { setUniformValue(m_color_location, color); }
-
-private:
-  int m_worldViewProjMatrix_location = -1;
-  int m_color_location = -1;
-};
-
-/// \brief A shader that constructs an arc from given control points using the vertex shader.
-class ArcShader : public QOpenGLShaderProgram
-{
-public:
-  /// \brief Sets the sources, links the program and extracts the required information.
-  bool link() override;
-
-  /// \brief Sets the control points used by this shader.
-  void setControlPoints(const std::array<QVector3D, 4>& points) { setUniformValueArray(m_controlPoints_location, points.data(), 4); }
-
-  /// \brief Sets the view projection matrix used to transform the object.
-  void setViewProjMatrix(const QMatrix4x4& matrix) { setUniformValue(m_viewProjMatrix_location, matrix); }
-
-  /// \brief Sets the view matrix used to transform the object.
-  void setViewMatrix(const QMatrix4x4& matrix) { setUniformValue(m_viewMatrix_location, matrix); }
-
-  /// \brief Sets the color of the arc.
-  void setColor(const QVector3D& color) { setUniformValue(m_color_location, color); }
-
-  /// \brief Sets the fog density used.
-  void setFogDensity(float density) { setUniformValue(m_fogdensity_location, density); }
-
-private:
-  int m_viewProjMatrix_location = -1;
-  int m_viewMatrix_location = -1;
-  int m_color_location = -1;
-  int m_fogdensity_location = -1;
-  int m_controlPoints_location = -1;
-};
 
 /// \brief The scene contains the graph that is shown and the camera from which the graph is viewed. It performs
 ///        all the necessary OpenGL calls to render this graph as if shown from the camera. It assumes
