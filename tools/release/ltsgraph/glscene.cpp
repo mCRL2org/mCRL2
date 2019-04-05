@@ -322,15 +322,15 @@ void GLScene::initialize()
 
   // Generate vertices for handle (border + fill, both squares)
   std::vector<QVector3D> handle_body(4);
-  handle_body[0] = QVector3D(1.0f, -1.0f, 0.0f);
-  handle_body[1] = QVector3D(1.0f , 1.0f, 0.0f);
-  handle_body[2] = QVector3D(-1.0f , -1.0f, 0.0f);
-  handle_body[3] = QVector3D(-1.0f, 1.0f, 0.0f);
+  handle_body[0] = QVector3D(1.0f, -1.0f, 0.3f);
+  handle_body[1] = QVector3D(1.0f , 1.0f, 0.3f);
+  handle_body[2] = QVector3D(-1.0f , -1.0f, 0.3f);
+  handle_body[3] = QVector3D(-1.0f, 1.0f, 0.3f);
   std::vector<QVector3D> handle_outline(4);
-  handle_outline[0] = QVector3D(-1.0f, -1.0f, 0.0f);
-  handle_outline[1] = QVector3D(1.0f , -1.0f, 0.0f);
-  handle_outline[2] = QVector3D(1.0f , 1.0f, 0.0f);
-  handle_outline[3] = QVector3D(-1.0f, 1.0f, 0.0f);
+  handle_outline[0] = QVector3D(-1.0f, -1.0f, 0.3f);
+  handle_outline[1] = QVector3D(1.0f , -1.0f, 0.3f);
+  handle_outline[2] = QVector3D(1.0f , 1.0f, 0.3f);
+  handle_outline[3] = QVector3D(-1.0f, 1.0f, 0.3f);
 
   // Generate vertices for arrowhead (a triangle fan drawing a cone)
   std::vector<QVector3D> arrowhead(VERTICES_ARROWHEAD);
