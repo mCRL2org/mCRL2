@@ -7,6 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifndef MCRL2_LTSGRAPH_UTILITY_H
+#define MCRL2_LTSGRAPH_UTILITY_H
+
 #include <QPainter>
 #include <QVector3D>
 
@@ -81,3 +84,5 @@ static bool isClose(int x, int y, const QVector3D& pos, float threshold, float& 
 
   return false;
 }
+
+#endif // MCRL2_LTSGRAPH_UTILITY_H

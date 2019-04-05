@@ -7,6 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#ifndef MCRL2_LTSGRAPH_SHADERS_H
+#define MCRL2_LTSGRAPH_SHADERS_H
+
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 
@@ -57,3 +60,5 @@ private:
   int m_fogdensity_location = -1;
   int m_controlPoints_location = -1;
 };
+
+#endif // MCRL2_LTSGRAPH_SHADERS_H
