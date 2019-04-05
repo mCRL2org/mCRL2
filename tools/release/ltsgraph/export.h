@@ -18,39 +18,16 @@
 #include <QString>
 #include <QFile>
 
-struct Color3f
-{
-  GLfloat r, g, b;
-  Color3f() = default;
-  Color3f(GLfloat r, GLfloat g, GLfloat b) : r(r), g(g), b(b) {}
-  Color3f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]) {}
-  operator const GLfloat* () const {
-    return &r;
-  }
-};
-
-struct Color4f
-{
-  GLfloat r, g, b, a;
-  Color4f() = default;
-  Color4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) : r(r), g(g), b(b), a(a) {}
-  Color4f(const Color3f& c, GLfloat a = 1.0) : r(c.r), g(c.g), b(c.b), a(a) {}
-  Color4f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]), a(c[3]) {}
-  operator const GLfloat* () const {
-    return &r;
-  }
-};
-
 namespace
 {
 QString tikzNode(Graph::Graph& graph, std::size_t i, float aspectRatio)
 {
   Graph::NodeNode& node = graph.node(i);
-  Color3f line(node.color());
+  QVector3D line(node.color());
 
   QString ret = "\\definecolor{currentcolor}{rgb}{%1,%2,%3}\n\\node at (%4pt, %5pt) [fill=currentcolor, %6state%8] (state%7) {%7};\n";
 
-  ret = ret.arg(line.r, 0, 'f', 3).arg(line.g, 0, 'f', 3).arg(line.b, 0, 'f', 3);
+  ret = ret.arg(line.x(), 0, 'f', 3).arg(line.y(), 0, 'f', 3).arg(line.z(), 0, 'f', 3);
   ret = ret.arg(node.pos().x() / 10.0f * aspectRatio, 6, 'f').arg(node.pos().y() / 10.0f, 6, 'f');
   ret = ret.arg(graph.initialState() == i ? "init" : "");
   ret = ret.arg(i);

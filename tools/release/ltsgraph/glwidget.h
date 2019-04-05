@@ -143,7 +143,7 @@ public:
   /**
    * @brief Gets the paint color.
    */
-  const QColor& getPaint() const;
+  const QVector3D& getPaint() const;
 
   /**
    * @brief Enables painting with the color set by @fn setPaint.
@@ -197,7 +197,7 @@ private:
   MoveRecord* m_dragnode;     ///< The current node (if any) which is being dragged.
   QPoint m_dragstart;         ///< The coordinate at which the dragging started.
   QVector2D m_draglength;     ///< The accumulated distance reached while dragging.
-  QColor m_paintcolor;        ///< The color of the paint operation.
+  QVector3D m_paintcolor;     ///< The color of the paint operation.
 
   bool m_painting = false;    ///< Indicates wheter painting node by the used is enabled.
   bool m_paused = false;      ///< Indicates whether rendering of the scene is paused (for example while updating the graph).

@@ -582,7 +582,7 @@ void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
 
 void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
-  Graph::NodeNode& node = m_graph.node(i);
+  const Graph::NodeNode& node = m_graph.node(i);
   QVector3D fill;
 
   bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
@@ -601,13 +601,11 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
   {
     if (node.locked())
     {
-      fill = QVector3D(0.7f * node.color()[0], 0.7f * node.color()[1], 0.7f * node.color()[2]);
+      fill = 0.7f * node.color();
     }
     else
     {
-      GLfloat* color = node.color();
-      assert(color != nullptr);
-      fill = QVector3D(color[0], color[1], color[2]);
+      fill = node.color();
     }
   }
 
@@ -674,7 +672,7 @@ void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
   }
 
   Graph::LabelNode& label = m_graph.transitionLabel(i);
-  QVector3D fill((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
+  QVector3D fill(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
   drawCenteredText3D(painter, m_graph.stateLabelstring(label.labelindex()), label.pos(), fill);
 
 }
@@ -682,7 +680,7 @@ void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
-  QVector3D color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
+  QVector3D color(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
   drawCenteredText3D(painter, m_graph.stateLabelstring(label.labelindex()), label.pos(), color);
 }
 

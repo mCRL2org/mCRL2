@@ -922,8 +922,7 @@ void Graph::loadXML(const QString& filename)
           e.attribute("locked").toInt() != 0, // anchored is equal to locked.
           e.attribute("locked").toInt() != 0,
           0.0f, // selected
-          e.attribute("red").toFloat(), e.attribute("green").toFloat(),
-          e.attribute("blue").toFloat(),
+          QVector3D(e.attribute("red").toFloat(), e.attribute("green").toFloat(), e.attribute("blue").toFloat()),
           e.attribute("is_probabilistic").toInt() != 0);
 
       if (e.attribute("isInitial").toInt() != 0)
@@ -939,8 +938,8 @@ void Graph::loadXML(const QString& filename)
           e.attribute("locked").toInt() != 0, // anchored is equal to locked.
           e.attribute("locked").toInt() != 0,
           0.0f, // selected
-          e.attribute("red").toFloat(), e.attribute("green").toFloat(),
-          e.attribute("blue").toFloat(), e.attribute("labelindex").toInt());
+          QVector3D(e.attribute("red").toFloat(), e.attribute("green").toFloat(), e.attribute("blue").toFloat()),
+          e.attribute("labelindex").toInt());
     }
 
     if (e.tagName() == "TransitionLabel")
@@ -967,8 +966,8 @@ void Graph::loadXML(const QString& filename)
           e.attribute("locked").toInt() != 0, // anchored is equal to locked.
           e.attribute("locked").toInt() != 0,
           0.0f, // selected
-          e.attribute("red").toFloat(), e.attribute("green").toFloat(),
-          e.attribute("blue").toFloat(), e.attribute("labelindex").toInt());
+          QVector3D(e.attribute("red").toFloat(), e.attribute("green").toFloat(), e.attribute("blue").toFloat()),
+          e.attribute("labelindex").toInt());
     }
 
     node = node.nextSibling();
@@ -1014,9 +1013,9 @@ void Graph::saveXML(const QString& filename)
     state.setAttribute("z", node(i).pos().z());
     state.setAttribute("locked", static_cast<int>(node(i).locked()));
     state.setAttribute("isInitial", (int)(i == initialState()));
-    state.setAttribute("red", node(i).color(0));
-    state.setAttribute("green", node(i).color(1));
-    state.setAttribute("blue", node(i).color(2));
+    state.setAttribute("red", node(i).color().x());
+    state.setAttribute("green", node(i).color().y());
+    state.setAttribute("blue", node(i).color().z());
     state.setAttribute("is_probabilistic", static_cast<int>(node(i).is_probabilistic()));
     root.appendChild(state);
 
@@ -1027,9 +1026,9 @@ void Graph::saveXML(const QString& filename)
     stateL.setAttribute("y", stateLabel(i).pos().y());
     stateL.setAttribute("z", stateLabel(i).pos().z());
     stateL.setAttribute("locked", static_cast<int>(stateLabel(i).locked()));
-    stateL.setAttribute("red", stateLabel(i).color(0));
-    stateL.setAttribute("green", stateLabel(i).color(1));
-    stateL.setAttribute("blue", stateLabel(i).color(2));
+    stateL.setAttribute("red", stateLabel(i).color().x());
+    stateL.setAttribute("green", stateLabel(i).color().y());
+    stateL.setAttribute("blue", stateLabel(i).color().z());
     root.appendChild(stateL);
   }
 
@@ -1060,9 +1059,9 @@ void Graph::saveXML(const QString& filename)
     edgL.setAttribute("y", transitionLabel(i).pos().y());
     edgL.setAttribute("z", transitionLabel(i).pos().z());
     edgL.setAttribute("locked", static_cast<int>(transitionLabel(i).locked()));
-    edgL.setAttribute("red", transitionLabel(i).color(0));
-    edgL.setAttribute("green", transitionLabel(i).color(1));
-    edgL.setAttribute("blue", transitionLabel(i).color(2));
+    edgL.setAttribute("red", transitionLabel(i).color().x());
+    edgL.setAttribute("green", transitionLabel(i).color().y());
+    edgL.setAttribute("blue", transitionLabel(i).color().z());
     root.appendChild(edgL);
   }
 
