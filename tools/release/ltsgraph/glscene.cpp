@@ -9,7 +9,7 @@
 
 #include "glscene.h"
 
-#include "export.h"
+#include "utility.h"
 #include "mcrl2/utilities/logger.h"
 
 #include <QFont>
@@ -19,21 +19,6 @@
 
 #include <cassert>
 #include <cmath>
-
-/// Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
-#define MCRL2_QGL_VERIFY(x) \
-  if (!x) { mCRL2log(mcrl2::log::error) << #x " failed.\n"; std::abort(); }
-
-/// \brief Checks for OpenGL errors, prints it and aborts.
-#define MCRL2_OGL_CHECK() \
-  { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(result) << "\n"; std::abort(); } }
-
-/// Executes x and checks for errors afterwards.
-#define MCRL2_OGL_VERIFY(x) \
-  x; { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " #x " failed with " << gluErrorString(result) << "\n"; std::abort(); } }
-
-constexpr float PI = 3.14159265358979323846f;
-constexpr float PI_2 = PI * 0.5f;
 
 /// \brief Number of orthogonal slices from which a circle representing a node is constructed.
 constexpr int RES_NODE_SLICE = 32;
@@ -325,17 +310,6 @@ GLScene::Selection GLScene::select(int x, int y)
   return s;
 }
 
-static bool isClose(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
-{
-  float distance = std::sqrt(std::pow(pos.x() - x, 2) + std::pow(pos.y() - y, 2));
-  if (distance < threshold && pos.z() < bestZ)
-  {
-    bestZ = pos.z();
-    return true;
-  }
-  return false;
-}
-
 static bool isOnText(int x, int y, const QString& text, const QVector3D& eye,
     const QFontMetrics& metrics)
 {
@@ -445,12 +419,6 @@ float GLScene::sizeOnScreen(const QVector3D& pos, float length) const
 //
 // GLScene private methods
 //
-
-/// \returns The angle in degrees [0, 180] from a given angle in radians [0, PI].
-inline static float radiansToDegrees(float radians)
-{
-  return 180.0f / PI * radians;
-}
 
 void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
@@ -657,12 +625,6 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
   }
 }
 
-/// \brief Converts a QVector3D of floats [0,1] to a QColor object with integers [0,255] for colors.
-QColor vectorToColor(const QVector3D& vector)
-{
-  return QColor(vector.x() * 255, vector.y() * 255, vector.z() * 255);
-}
-
 void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 {
   Graph::Edge edge = m_graph.edge(i);
@@ -699,19 +661,6 @@ bool GLScene::isVisible(const QVector3D& position, float& fogamount)
   return (distance < m_camera.viewdistance() && fogamount < 0.99f);
 }
 
-/// \returns The given value clamped between a min and a max.
-template<typename T>
-inline static T clamp(T value, T min, T max)
-{
-  return std::min(std::max(value, min), max);
-}
-
-/// \returns A linear interpolation between a and b using the given value.
-inline static QVector3D mix(float value, QVector3D a, QVector3D b)
-{
-  return (1 - value) * a + (value * b);
-}
-
 QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
 {
   return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
@@ -734,20 +683,6 @@ QQuaternion GLScene::sphericalBillboard(const QVector3D& position) const
   // Return the combination of both rotations
   // NB: the order of this multiplication is important
   return perspectiveRotation * centerRotation;
-}
-
-/// Helper functions
-
-/// \brief Renders text, centered around the point at x and y
-inline static
-void drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)
-{
-  QFontMetrics metrics(painter.font());
-  QRect bounds = metrics.boundingRect(text);
-  qreal w = bounds.width();
-  qreal h = bounds.height();
-  painter.setPen(color);
-  painter.drawText(x - w / 2, y - h / 2, text);
 }
 
 void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color)
