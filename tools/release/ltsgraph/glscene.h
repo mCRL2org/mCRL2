@@ -117,7 +117,7 @@ public:
 
   /// \brief Resize the OpenGL viewport.
   void resize(std::size_t width, std::size_t height);
-  
+
   /// \brief Retrieve the object at viewport coordinate (x, y).
   /// \returns A record that represents the selected object.
   Selection select(int x, int y);
@@ -132,9 +132,13 @@ public:
   bool drawTransitionLabels() const { return m_drawtransitionlabels; }
   std::size_t nodeSize() const { return m_size_node; }
   std::size_t fontSize() const { return m_fontsize; }
-  float nodeSizeOnScreen() const { return m_size_node * m_device_pixel_ratio; }
-  float handleSizeOnScreen() const { return handleSize * m_device_pixel_ratio; }
-  float arrowheadSizeOnScreen() const { return arrowheadSize * m_device_pixel_ratio; }
+  float nodeSizeScaled() const { return nodeSize() * m_device_pixel_ratio; }
+  float fontSizeScaled() const { return fontSize() * m_device_pixel_ratio; }
+  float handleSizeScaled() const { return handleSize * m_device_pixel_ratio; }
+  float arrowheadSizeScaled() const { return arrowheadSize * m_device_pixel_ratio; }
+
+  /// \brief Computes how long the world vector (length, 0, 0) at pos is when drawn on the screen
+  float sizeOnScreen(const QVector3D& pos, float length) const;
 
   ArcballCameraView& camera() { return m_camera;  }
 
@@ -186,7 +190,7 @@ private:
   QVector3D applyFog(const QVector3D& color, float fogAmount);
 
   /// \returns A rotation such that an object at the given position faces the camera.
-  QQuaternion sphericalBillboard(const QVector3D& position);
+  QQuaternion sphericalBillboard(const QVector3D& position) const;
 
   /// \brief Renders text at a given world position, facing the camera and center aligned.
   void drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color);
