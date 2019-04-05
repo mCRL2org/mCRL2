@@ -608,6 +608,7 @@ void GLWidgetUi::setSettings(QByteArray state)
     m_ui.spinFog->setValue(fogDistance);
     m_ui.spinFontSize->setValue(fontSize);
     m_ui.btnPaint->setChecked(paint);
+    m_ui.cbTransitionLabels->setChecked(transitionLabels);
     m_ui.cbStateLabels->setChecked(stateLabels);
     m_ui.cbStateNumbers->setChecked(stateNumbers);
     m_ui.cbSelfLoops->setChecked(selfLoops);
