@@ -542,11 +542,12 @@ bool GLScene::selectObject(GLScene::Selection& s,
   {
   case so_node:
   {
-    float radius = nodeSizeOnScreen() / 2;
     for (std::size_t i = 0; i < nodeCount; i++)
     {
       std::size_t index = sel ? m_graph.selectionNode(i) : i;
-      if (isClose(x, y, m_camera.worldToWindow(m_graph.node(index).pos()), radius, bestZ))
+      QVector3D screenPos = m_camera.worldToWindow(m_graph.node(index).pos());
+      float radius = sizeOnScreen(m_graph.node(index).pos(), nodeSizeScaled()) / 2.0f;
+      if (isClose(x, y, screenPos, radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;
@@ -556,11 +557,12 @@ bool GLScene::selectObject(GLScene::Selection& s,
   }
   case so_handle:
   {
-    float radius = handleSizeOnScreen() * 2;
     for (std::size_t i = 0; i < edgeCount; i++)
     {
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
-      if (isClose(x, y, m_camera.worldToWindow(m_graph.handle(index).pos()), radius, bestZ))
+      QVector3D screenPos = m_camera.worldToWindow(m_graph.handle(index).pos());
+      float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled()) * 1.4f;
+      if (isClose(x, y, screenPos, radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;
@@ -593,7 +595,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
       const Graph::LabelNode& label = m_graph.stateLabel(index);
       const QVector3D& eye = m_camera.worldToWindow(label.pos());
       const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
-      if (isOnText(x, y - nodeSizeOnScreen(), labelstring, eye, metrics))
+      if (isOnText(x, y - sizeOnScreen(label.pos(), nodeSizeScaled()), labelstring, eye, metrics))
       {
         s.selectionType = type;
         s.index = index;
@@ -608,6 +610,12 @@ bool GLScene::selectObject(GLScene::Selection& s,
   }
 
   return s.selectionType != so_none;
+}
+
+float GLScene::sizeOnScreen(const QVector3D& pos, float length) const
+{
+  QVector3D rightPoint = sphericalBillboard(pos) * QVector3D(length, 0.0f, 0.0f);
+  return (m_camera.worldToWindow(pos) - m_camera.worldToWindow(pos + rightPoint)).length();
 }
 
 //
@@ -698,10 +706,10 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
       worldMatrix.rotate(radiansToDegrees(acos(vec.x())), axis);
 
       // Move the arrowhead outside of the node.
-      worldMatrix.translate(-0.5f * nodeSizeOnScreen(), 0.0f, 0.0f);
+      worldMatrix.translate(-0.5f * nodeSizeScaled(), 0.0f, 0.0f);
 
       // Scale it according to its size.
-      worldMatrix.scale(arrowheadSizeOnScreen());
+      worldMatrix.scale(arrowheadSizeScaled());
 
       QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
 
@@ -732,7 +740,7 @@ void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
     QMatrix4x4 worldMatrix;
     worldMatrix.translate(handle.pos());
     worldMatrix.rotate(sphericalBillboard(handle.pos()));
-    worldMatrix.scale(handleSizeOnScreen());
+    worldMatrix.scale(handleSizeScaled());
 
     // Update the shader parameters.
     QMatrix4x4 worldViewProjMatrix = viewProjMatrix * worldMatrix;
@@ -787,7 +795,7 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
     worldMatrix.rotate(sphericalBillboard(node.pos()));
 
     QMatrix4x4 nodeMatrix(worldMatrix);
-    nodeMatrix.scale(0.5f * nodeSizeOnScreen());
+    nodeMatrix.scale(0.5f * nodeSizeScaled());
     m_global_shader.setWorldViewProjMatrix(viewProjMatrix * nodeMatrix);
 
     // Apply fogging the node color and draw the node.
@@ -801,7 +809,7 @@ void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
     // Scale the border such that they are of constant width.
     QMatrix4x4 borderMatrix(worldMatrix);
     float width = 1.0f;
-    borderMatrix.scale(0.5f * (nodeSizeOnScreen() + width));
+    borderMatrix.scale(0.5f * (nodeSizeScaled() + width));
     m_global_shader.setWorldViewProjMatrix(viewProjMatrix * borderMatrix);
     glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
 
@@ -887,7 +895,7 @@ QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
   return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
 }
 
-QQuaternion GLScene::sphericalBillboard(const QVector3D& position)
+QQuaternion GLScene::sphericalBillboard(const QVector3D& position) const
 {
   // Take the conjugated rotation of the camera to position the node in the right direction
   QQuaternion centerRotation = m_camera.rotation().conjugated();
