@@ -889,15 +889,21 @@ QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
 
 QQuaternion GLScene::sphericalBillboard(const QVector3D& position)
 {
-  // A vector from the world position to the camera.
+  // Take the conjugated rotation of the camera to position the node in the right direction
+  QQuaternion centerRotation = m_camera.rotation().conjugated();
+
+  // And compensate for the perspective of the camera on the object if its not in the center of the screen
   QVector3D posToCamera = m_camera.position() - position;
   posToCamera.normalize();
+  QVector3D camera = m_camera.position();
+  camera.normalize();
+  // Compute the roration with the cross product and the dot product (aka inproduct)
+  QQuaternion perspectiveRotation = QQuaternion::fromAxisAndAngle(QVector3D::crossProduct(camera, posToCamera),
+     radiansToDegrees(std::acos(QVector3D::dotProduct(camera, posToCamera))));
 
-  // We assume that the object points towards the positive z-axis
-  QVector3D frontVector(0.0f, 0.0f, 1.0f);
-  // Use cross product to compute axis and dot product to compute the angle of rotation
-  return QQuaternion::fromAxisAndAngle(QVector3D::crossProduct(frontVector, posToCamera),
-      radiansToDegrees(std::acos(QVector3D::dotProduct(frontVector, posToCamera))));
+  // Return the combination of both rotations
+  // NB: the order of this multiplication is important
+  return perspectiveRotation * centerRotation;
 }
 
 /// Helper functions
