@@ -3,29 +3,30 @@ add_mcrl2_tool(ltsgraph
   DESCRIPTION "Visualisation tool for small state spaces (mCRL2 toolset)"
   ICON "mcrl2-green"
   SOURCES
-    mainwindow.ui
-    glwidget.ui
-    springlayout.ui
-    information.ui
-    dimensionsdialog.ui
-    ltsgraph.qrc
     camera.cpp
+    dimensionsdialog.cpp
+    dimensionsdialog.ui
+    glscene.cpp
+    glwidget.cpp
+    glwidget.ui
+    graph.cpp
+    information.cpp
+    information.ui
+    ltsgraph.qrc
     main.cpp
     mainwindow.cpp
-    glwidget.cpp
-    glscene.cpp
-    graph.cpp
+    mainwindow.ui
+    shaders.cpp
     springlayout.cpp
-    information.cpp
-    dimensionsdialog.cpp
+    springlayout.ui
   DEPENDS
-    mcrl2_lts
-    mcrl2_gui
     Qt5::Core
     Qt5::Gui
     Qt5::OpenGL
     Qt5::Widgets
     Qt5::Xml
+    mcrl2_gui
+    mcrl2_lts
     ${OPENGL_LIBRARIES}
   INCLUDE
     ${OPENGL_INCLUDE_DIR}
