@@ -104,7 +104,7 @@ class Node
     Node(QVector3D  pos,
          const bool anchored,
          const bool locked,
-         const float& selected)
+         const float selected)
       : m_pos(pos),
         m_anchored(anchored),
         m_locked(locked),
@@ -166,7 +166,7 @@ class Node
 class NodeWithColor : public Node
 {
   protected:
-    GLfloat m_color[3];       ///< The (painted) color of the node.
+    QVector3D m_color;       ///< The (painted) color of the node.
 
   public:
 
@@ -174,48 +174,24 @@ class NodeWithColor : public Node
     NodeWithColor()=default;
 
     /// \brief Constructor
-    NodeWithColor(const QVector3D& pos)
+    NodeWithColor(QVector3D pos)
       : Node(pos)
-    {
-      m_color[0]=0.0f;
-      m_color[1]=0.0f;
-      m_color[2]=0.0f;
-    }
+    {}
 
     /// \brief Constructor
     NodeWithColor(
-      const QVector3D& pos,
-      const bool anchored,
-      const bool locked,
-      const float& selected,
-      const GLfloat& color0,
-      const GLfloat& color1,
-      const GLfloat& color2)
-      : Node(pos, anchored, locked, selected)
-    {
-      m_color[0]=color0;
-      m_color[1]=color1;
-      m_color[2]=color2;
-    }
+      QVector3D pos,
+      bool anchored,
+      bool locked,
+      float selected,
+      QVector3D color)
+      : Node(pos, anchored, locked, selected),
+        m_color(color)
+    {}
 
     /// \brief Get the color.
-    GLfloat* color()
-    {
-      return m_color;
-    }
-
-    /// \brief Get the color.
-    const GLfloat& color(std::size_t i) const
-    {
-      return m_color[i];
-    }
-
-    /// \brief Get a reference to the color.
-    GLfloat& color(std::size_t i)
-    {
-      return m_color[i];
-    }
-
+    QVector3D& color() { return m_color; }
+    const QVector3D& color() const { return m_color; }
 };
 
 
@@ -265,22 +241,19 @@ class LabelNode : public NodeWithColor
     LabelNode() = default;
 
     /// \brief Constructor
-    LabelNode(const QVector3D& p, const std::size_t labelindex)
+    LabelNode(QVector3D p, std::size_t labelindex)
       : NodeWithColor(p), m_labelindex(labelindex)
     {}
 
     /// \brief Constructor
-    LabelNode(const QVector3D& pos,
+    LabelNode(QVector3D pos,
               bool anchored,
               bool locked,
-              const float& selected,
-              const GLfloat& color0,
-              const GLfloat& color1,
-              const GLfloat& color2,
-              const std::size_t labelindex)
-      : NodeWithColor(pos,anchored,locked,selected,color0,color1,color2), m_labelindex(labelindex)
-    {
-    }
+              float selected,
+              QVector3D color,
+              std::size_t labelindex)
+      : NodeWithColor(pos, anchored, locked, selected, color), m_labelindex(labelindex)
+    {}
 
     /// \brief Get the value of labelindex.
     std::size_t labelindex() const
@@ -306,7 +279,7 @@ class NodeNode : public NodeWithColor
 
   protected:
     bool m_is_probabilistic;  ///< Indicates that this is a probabilistic state.
-    bool m_active;            ///< Indicates that this node was activated (see toggleActive).
+    bool m_active;            ///< Indicates that this node was activated in exploration mode (see toggleActive).
 
   public:
     /// \brief Default constructor.
@@ -318,24 +291,19 @@ class NodeNode : public NodeWithColor
     {
       if (!m_is_probabilistic) // Color action states white (probabilistic states remain black)
       {
-        m_color[0]=1.0f;
-        m_color[1]=1.0f;
-        m_color[2]=1.0f;
+        m_color = QVector3D(1.0f, 1.0f, 1.0f);
       }
     }
 
     /// \brief Constructor
-    NodeNode(const QVector3D& pos,
+    NodeNode(QVector3D pos,
              bool anchored,
              bool locked,
-             const float& selected,
-             const GLfloat& color0,
-             const GLfloat& color1,
-             const GLfloat& color2,
+             float selected,
+             QVector3D color,
              bool is_probabilistic)
-      : NodeWithColor(pos,anchored,locked,selected,color0,color1,color2), m_is_probabilistic(is_probabilistic)
-    {
-    }
+      : NodeWithColor(pos, anchored, locked, selected, color), m_is_probabilistic(is_probabilistic)
+    {}
 
     /// \brief Get whether the node is probabilistic.
     bool is_probabilistic() const

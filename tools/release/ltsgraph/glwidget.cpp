@@ -292,23 +292,17 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     if (m_hover.selectionType == GLScene::so_node)
     {
       Graph::NodeNode& node = m_graph.node(m_hover.index);
-      node.color(0) = m_paintcolor.redF();
-      node.color(1) = m_paintcolor.greenF();
-      node.color(2) = m_paintcolor.blueF();
+      node.color() = m_paintcolor;
     }
     if (m_hover.selectionType == GLScene::so_label)
     {
       Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
-      node.color(0) = m_paintcolor.redF();
-      node.color(1) = m_paintcolor.greenF();
-      node.color(2) = m_paintcolor.blueF();
+      node.color() = m_paintcolor;
     }
     if (m_hover.selectionType == GLScene::so_slabel)
     {
       Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
-      node.color(0) = m_paintcolor.redF();
-      node.color(1) = m_paintcolor.greenF();
-      node.color(2) = m_paintcolor.blueF();
+      node.color() = m_paintcolor;
     }
     m_dragmode = dm_paint;
   }
@@ -423,23 +417,17 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
         if (m_hover.selectionType == GLScene::so_node)
         {
           Graph::NodeNode& node = m_graph.node(m_hover.index);
-          node.color(0) = m_paintcolor.redF();
-          node.color(1) = m_paintcolor.greenF();
-          node.color(2) = m_paintcolor.blueF();
+          node.color() = m_paintcolor;
         }
         if (m_hover.selectionType == GLScene::so_label)
         {
           Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
-          node.color(0) = m_paintcolor.redF();
-          node.color(1) = m_paintcolor.greenF();
-          node.color(2) = m_paintcolor.blueF();
+          node.color() = m_paintcolor;
         }
         if (m_hover.selectionType == GLScene::so_slabel)
         {
           Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
-          node.color(0) = m_paintcolor.redF();
-          node.color(1) = m_paintcolor.greenF();
-          node.color(2) = m_paintcolor.blueF();
+          node.color() = m_paintcolor;
         }
         break;
       case dm_rotate:
@@ -495,10 +483,10 @@ void GLWidget::resetViewpoint(std::size_t)
 
 void GLWidget::setPaint(const QColor& color)
 {
-  m_paintcolor = color;
+  m_paintcolor = QVector3D(color.redF(), color.greenF(), color.blueF());
 }
 
-const QColor& GLWidget::getPaint() const
+const QVector3D& GLWidget::getPaint() const
 {
   return m_paintcolor;
 }
@@ -634,7 +622,7 @@ QByteArray GLWidgetUi::settings()
       << bool(m_ui.cbSelfLoops->isChecked())
       << bool(m_ui.cbInitial->isChecked())
       << bool(m_ui.cbFog->isChecked())
-      << QColor(m_widget.getPaint())
+      << QVector3D(m_widget.getPaint())
       ;
 
   return result;
