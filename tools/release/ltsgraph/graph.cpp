@@ -684,11 +684,6 @@ std::size_t Graph::initialState() const
   return m_initialState;
 }
 
-bool Graph::isTau(std::size_t labelindex) const
-{
-  return m_transitionLabels[labelindex].is_tau();
-}
-
 void Graph::clear()
 {
   m_nodes.clear();
@@ -1077,11 +1072,6 @@ void Graph::saveXML(const QString& filename)
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);
 }
 
-Edge Graph::edge(std::size_t index) const
-{
-  return m_edges[index];
-}
-
 NodeNode& Graph::node(std::size_t index)
 {
   return m_nodes[index];
@@ -1098,6 +1088,31 @@ LabelNode& Graph::transitionLabel(std::size_t edge)
 }
 
 LabelNode& Graph::stateLabel(std::size_t index)
+{
+  return m_stateLabelnodes[index];
+}
+
+const Edge& Graph::edge(std::size_t index) const
+{
+  return m_edges[index];
+}
+
+const NodeNode& Graph::node(std::size_t index) const
+{
+  return m_nodes[index];
+}
+
+const Node& Graph::handle(std::size_t edge) const
+{
+  return m_handles[edge];
+}
+
+const LabelNode& Graph::transitionLabel(std::size_t edge) const
+{
+  return m_transitionLabelnodes[edge];
+}
+
+const LabelNode& Graph::stateLabel(std::size_t index) const
 {
   return m_stateLabelnodes[index];
 }

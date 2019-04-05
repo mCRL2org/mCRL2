@@ -202,7 +202,6 @@ class NodeWithColor : public Node
 struct LabelString
 {
   protected:
-    bool m_isTau;             ///< Indicates that the label is tau.
     QString m_label;          ///< The string representation of the label.
 
   public:
@@ -211,14 +210,8 @@ struct LabelString
 
     /// \brief Constructor. If isTau is true, set the label to the the greek symbol tau.
     LabelString(bool isTau, const QString& label)
-      : m_isTau(isTau), m_label(isTau?QChar(0x03C4):label)
+      : m_label(isTau ? QChar(0x03C4) : label)
     {}
-
-    /// \brief Get whether this label is equal to tau.
-    bool is_tau() const
-    {
-      return m_isTau;
-    }
 
     /// \brief Get the label in this string.
     const QString& label() const
@@ -461,14 +454,20 @@ class Graph
      */
     const QString& stateLabelstring(std::size_t labelindex) const;
 
+    /// Accessors
 
-    // Getters and setters
-    Edge edge(std::size_t index) const;
-    NodeNode& node(std::size_t index);
     Node& handle(std::size_t edge);
-    LabelNode& transitionLabel(std::size_t edge);
+    NodeNode& node(std::size_t index);
     LabelNode& stateLabel(std::size_t index);
-    bool isTau(std::size_t labelindex) const;
+    LabelNode& transitionLabel(std::size_t edge);
+
+    /// Getters
+
+    const Edge& edge(std::size_t index) const;
+    const Node& handle(std::size_t edge) const;
+    const NodeNode& node(std::size_t index) const;
+    const LabelNode& stateLabel(std::size_t index) const;
+    const LabelNode& transitionLabel(std::size_t edge) const;
     bool isBridge(std::size_t index) const; ///< Returns whether a given node forms a bridge in the selection
 
     std::size_t initialState() const;
