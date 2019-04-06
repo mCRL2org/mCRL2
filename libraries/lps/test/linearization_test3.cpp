@@ -116,9 +116,9 @@ BOOST_AUTO_TEST_CASE(type_checking_a_finite_set_with_numbers_can_go_astray)
 {
   const std::string spec =
      "act sendInt, rcvInt, transferInt:Int;\n"
-     "
+     "\n"
      "proc P (bg:Bag(Int))=(count(2,bg)<2)->sum i:Int.rcvInt(i).P(Set2Bag({i})+bg);\n"
-     "     Px(c:Nat)= (c<2)->sum x:Int.(x<3&&x>-2)->sendInt(x).Px(c+1);\n
+     "     Px(c:Nat)= (c<2)->sum x:Int.(x<3&&x>-2)->sendInt(x).Px(c+1);\n"
      "     Py(c:Nat)= (c<2)->sum x:Int.(x<3&&x>-2)->sendInt(x).Py(c+1);\n"
      "\n"
      "init allow({transferInt},\n"
