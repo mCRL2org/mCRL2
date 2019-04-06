@@ -2924,6 +2924,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
         }
 
+
         // Type is now the most generic type to be used.
         assert(Type.defined());
         assert(NewTypeDefined);
@@ -3242,7 +3243,17 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
     if (is_function_sort(UnwindType(NewType)))
     {
-      return atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain();
+      // Code below is a hack as sometimes the type of the returned numeral is not equal
+      // to the PosType that is requested. Hence, a typecast must be added explicitly. 
+      const sort_expression s=DataTerm.sort();
+      if (PosType !=data::untyped_sort() && s != PosType && 
+             (s == sort_int::int_() || s == sort_pos::pos() || s == sort_nat::nat() || s == sort_real::real_())) 
+      {
+        return UpCastNumericType(PosType, atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain(),
+                                       DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+      }
+      // end of the explicit upcast hack. Continuing with the original code. 
+      return atermpp::down_cast<function_sort>(UnwindType(NewType)).codomain();  
     }
 
     sort_expression temp_type;
