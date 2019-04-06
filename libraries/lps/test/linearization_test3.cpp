@@ -109,6 +109,25 @@ BOOST_AUTO_TEST_CASE(Moving_a_distribution_out_of_a_process_is_tricky)
   run_linearisation_test_case(spec,true);
 }
 
+/* The test below failed with type checking (only in debug mode). The reason
+ * is that the set {0,1} would obtain terms with different types (int, nat),
+ * which is not a well typed set. This was reported by Muhammad Atif, error #1526. */
+BOOST_AUTO_TEST_CASE(type_checking_a_finite_set_with_numbers_can_go_astray)
+{
+  const std::string spec =
+     "act sendInt, rcvInt, transferInt:Int;\n"
+     "
+     "proc P (bg:Bag(Int))=(count(2,bg)<2)->sum i:Int.rcvInt(i).P(Set2Bag({i})+bg);\n"
+     "     Px(c:Nat)= (c<2)->sum x:Int.(x<3&&x>-2)->sendInt(x).Px(c+1);\n
+     "     Py(c:Nat)= (c<2)->sum x:Int.(x<3&&x>-2)->sendInt(x).Py(c+1);\n"
+     "\n"
+     "init allow({transferInt},\n"
+     "       comm({sendInt|rcvInt->transferInt},\n"
+     "           P(Set2Bag({0,1}))||Px(0)||Py(0) ));\n";
+
+  run_linearisation_test_case(spec,true);
+}
+
 #ifndef MCRL2_SKIP_LONG_TESTS 
 
 BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
