@@ -152,7 +152,7 @@ public:
   void setDrawFog(bool enabled) { m_drawfog = enabled; }
 
   void setNodeSize(std::size_t size) { m_size_node = size; }
-  void setFontSize(std::size_t size) { m_fontsize = size; m_font.setPixelSize(m_fontsize); }
+  void setFontSize(int size) { m_fontsize = size; m_font.setPixelSize(m_fontsize); }
   void setFogDistance(int value) { m_fogdensity = 1.0f / (value + 1); }
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
 
@@ -164,23 +164,23 @@ private:
 
   /// \brief Renders a single edge handle.
   /// \param i The index of the edge of the handle to render.
-  void renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix);
+  void renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix);
 
   /// \brief Renders a single node.
   /// \param i The index of the node to render.
-  void renderNode(GLuint i, const QMatrix4x4& viewProjMatrix);
+  void renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix);
 
   /// \brief Renders a single edge label.
   /// \param i The index of the edge of the label to render.
-  void renderTransitionLabel(QPainter& painter, GLuint i);
+  void renderTransitionLabel(QPainter& painter, std::size_t i);
 
   /// \brief Renders a single state label.
   /// \param i The index of the state of the label to render.
-  void renderStateLabel(QPainter& painter, GLuint i);
+  void renderStateLabel(QPainter& painter, std::size_t i);
 
   /// \brief Renders a single state number.
   /// \param i The index of the state number to render.
-  void renderStateNumber(QPainter& painter, GLuint i);
+  void renderStateNumber(QPainter& painter, std::size_t i);
 
   /// \returns Whether the given point (no radius) is visible based on the camera viewdistance and fog amount (if enabled).
   /// \param fog The amount of fog that a given point receives.
@@ -214,7 +214,7 @@ private:
   bool m_drawselfloops        = true;   ///< Self loops are only drawn if this field is true.
   bool m_drawinitialmarking   = true; ///< The initial state is marked if this field is true.
   std::size_t m_size_node     = 20; ///< The size of a node (radius).
-  std::size_t m_fontsize      = 16; ///< The size of the font.
+  int m_fontsize              = 16; ///< The size of the font.
 
   bool m_drawfog = true; ///< Enable drawing fog.
   float m_fogdensity = 0.0005f; ///< The density of the fog.

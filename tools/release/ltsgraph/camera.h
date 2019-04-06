@@ -45,7 +45,7 @@ public:
   const QVector3D& center() const { return m_center; }
 
   /// \brief Set the dimensions of the viewport.
-  void viewport(std::size_t width, std::size_t height) { m_viewport = QRect(0, 0, width, height); }
+  void viewport(int width, int height) { m_viewport = QRect(0, 0, width, height); }
 
   /// \returns The actual position in world coordinates of this camera.
   QVector3D position() const;
