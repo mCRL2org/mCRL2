@@ -382,7 +382,7 @@ void GLScene::initialize()
   MCRL2_QGL_VERIFY(m_vertexbuffer.create());
   m_vertexbuffer.bind();
   m_vertexbuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  m_vertexbuffer.allocate(vertices.data(), vertices.size() * sizeof(QVector3D));
+  m_vertexbuffer.allocate(vertices.data(), static_cast<int>(vertices.size() * sizeof(QVector3D)));
 
   // The vertex array object stores the layout of the vertex data that we use (vec3 float).
   {
@@ -723,7 +723,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   }
 }
 
-void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
+void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
   Graph::Node& handle = m_graph.handle(i);
   if (handle.selected() > 0.1 || handle.locked())
@@ -756,7 +756,7 @@ void GLScene::renderHandle(GLuint i, const QMatrix4x4& viewProjMatrix)
   }
 }
 
-void GLScene::renderNode(GLuint i, const QMatrix4x4& viewProjMatrix)
+void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
   Graph::NodeNode& node = m_graph.node(i);
   QVector3D fill;
@@ -841,7 +841,7 @@ QColor vectorToColor(const QVector3D& vector)
   return QColor(vector.x() * 255, vector.y() * 255, vector.z() * 255);
 }
 
-void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
+void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 {
   Graph::Edge edge = m_graph.edge(i);
   if (edge.from() == edge.to() && !m_drawselfloops)
@@ -855,14 +855,14 @@ void GLScene::renderTransitionLabel(QPainter& painter, GLuint i)
 
 }
 
-void GLScene::renderStateLabel(QPainter& painter, GLuint i)
+void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
   QVector3D color(std::max(label.color(0), label.selected()), std::min(label.color(1), 1.0f - label.selected()), std::min(label.color(2), 1.0f - label.selected()));
   drawCenteredText3D(painter, m_graph.stateLabelstring(label.labelindex()), label.pos(), color);
 }
 
-void GLScene::renderStateNumber(QPainter& painter, GLuint i)
+void GLScene::renderStateNumber(QPainter& painter, std::size_t i)
 {
   Graph::NodeNode& node = m_graph.node(i);
   QVector3D color(0.0f, 0.0f, 0.0f);
