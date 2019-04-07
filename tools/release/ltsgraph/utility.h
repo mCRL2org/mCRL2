@@ -47,6 +47,7 @@ void drawCenteredText(QPainter& painter, float x, float y, const QString& text, 
 }
 
 /// \brief Converts a QVector3D of floats [0,1] to a QColor object with integers [0,255] for colors.
+inline static
 QColor vectorToColor(const QVector3D& vector)
 {
   return QColor(vector.x() * 255, vector.y() * 255, vector.z() * 255);
@@ -54,26 +55,37 @@ QColor vectorToColor(const QVector3D& vector)
 
 /// \returns The given value clamped in a range [min, max] (given by min and max values).
 template<typename T>
-inline static T clamp(T value, T min, T max)
+inline static
+T clamp(T value, T min, T max)
 {
   return std::min(std::max(value, min), max);
 }
 
 /// \returns A linear interpolation between a and b using the given value. Often called lerp, but called mix in GLSL.
-inline static QVector3D mix(float value, QVector3D a, QVector3D b)
+inline static
+QVector3D mix(float value, QVector3D a, QVector3D b)
 {
   return (1 - value) * a + (value * b);
 }
 
 /// \returns The angle in degrees [0, 180] from a given angle in radians [0, PI].
-inline static float radiansToDegrees(float radians)
+inline static
+float radiansToDegrees(float radians)
 {
   return 180.0f / PI * radians;
 }
 
+/// \returns The angle in radians [0, pi] from a given angle in degrees [0, 180].
+inline static
+float degreesToRadians(float degrees)
+{
+  return degrees / 180.0f * PI;
+}
+
 /// \returns True whenever the given window coordinates (and device coordinate depth), given by pos, is within a circle of radius threshold
-/// centered at (x, y) in window coordinates. Returns the smallest Z coordinate that is close.
-static bool isClose(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
+///          centered at (x, y) in window coordinates. Returns the smallest Z coordinate that is close.
+inline static
+bool isClose(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
   float distance = std::sqrt(std::pow(pos.x() - x, 2) + std::pow(pos.y() - y, 2));
   if (distance < threshold && pos.z() < bestZ)
@@ -84,5 +96,26 @@ static bool isClose(int x, int y, const QVector3D& pos, float threshold, float& 
 
   return false;
 }
+
+/// \returns True whenever the given (x, y) position (in pixels) is on the text positioned at the window coordinates.
+inline static
+bool isOnText(int x,
+  int y,
+  const QString& text,
+  const QVector3D& window,
+  const QFontMetrics& metrics)
+{
+  if (text.isEmpty())
+  {
+    return false;
+  }
+
+  QRect bounds = metrics.boundingRect(text);
+  int w = bounds.width() / 2;
+  int h = bounds.height() / 2;
+  bounds.adjust(window.x() - w, window.y() - h, window.x() - w, window.y() - h);
+  return bounds.contains(x, y);
+}
+
 
 #endif // MCRL2_LTSGRAPH_UTILITY_H
