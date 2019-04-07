@@ -36,14 +36,14 @@ public:
 
   /// \brief An enumeration that identifies the types of objects that
   ///        can be selected. The order determines priority during selection.
-  enum SelectableObject
+  enum class SelectableObject
   {
-    so_none,     ///< Nothing was selected.
-    so_edge,     ///< An edge was selected.
-    so_label,    ///< An edge label was selected.
-    so_slabel,   ///< An state label was selected.
-    so_handle,   ///< An edge handle was selected.
-    so_node      ///< A node was selected.
+    none,     ///< Nothing was selected.
+    edge,     ///< An edge was selected.
+    label,    ///< An edge label was selected.
+    slabel,   ///< An state label was selected.
+    handle,   ///< An edge handle was selected.
+    node      ///< A node was selected.
   };
 
   /// \brief A structure that identifies a selectable object from m_graph.
