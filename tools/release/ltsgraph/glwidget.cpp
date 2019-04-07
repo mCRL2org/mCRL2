@@ -185,14 +185,19 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
 void GLWidget::updateSelection()
 {
   m_scene.setDevicePixelRatio(devicePixelRatio());
-  Graph::Node* selnode;
+
+  /// Indicates that the rendering should be updated because the selection changed.
+  bool needupdate = false;
+
+  /// Reduce the selection percentage for all selected items by 5 percent and remove them from the selection when it goes below 5 percent.
   for (std::list<GLScene::Selection>::iterator it = m_selections.begin(); it != m_selections.end();)
   {
-    selnode = select_object(*it, m_graph);
+    Graph::Node* selnode = select_object(*it, m_graph);
     if (selnode->selected() > 0.05f)
     {
       selnode->selected() -= 0.05f;
       ++it;
+      needupdate = true;
     }
     else
     {
@@ -201,12 +206,16 @@ void GLWidget::updateSelection()
     }
   }
 
+  /// Determine the mouse position relative for the GLWidget.
   QPoint pos = mapFromGlobal(QCursor::pos());
 
   GLScene::Selection prev = m_hover;
   m_hover = m_scene.select(pos.x(), pos.y());
-  bool needupdate = prev.selectionType != m_hover.selectionType || prev.index != m_hover.index;
-  selnode = select_object(m_hover, m_graph);
+
+  /// The selection item itself changed.
+  needupdate |= prev.selectionType != m_hover.selectionType || prev.index != m_hover.index;
+
+  Graph::Node* selnode = select_object(m_hover, m_graph);
   if (selnode != nullptr)
   {
     if (selnode->selected() <= 0)
@@ -215,9 +224,9 @@ void GLWidget::updateSelection()
     }
 
     selnode->selected() = 1.0f;
-
   }
 
+  /// If the selected item was a label or edge we also mark the edge handle to be selected for 50 percent.
   if (m_hover.selectionType == GLScene::so_label || m_hover.selectionType == GLScene::so_edge)
   {
     GLScene::Selection s = m_hover;
