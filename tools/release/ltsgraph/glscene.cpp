@@ -603,7 +603,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
       std::size_t index = sel ? m_graph.selectionNode(i) : i;
       QVector3D screenPos = m_camera.worldToWindow(m_graph.node(index).pos());
       float radius = sizeOnScreen(m_graph.node(index).pos(), nodeSizeScaled()) / 2.0f;
-      if (isClose(x, y, screenPos, radius, bestZ))
+      if (isCloseCircle(x, y, screenPos, radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;
@@ -618,7 +618,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
       QVector3D screenPos = m_camera.worldToWindow(m_graph.handle(index).pos());
       float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled()) * 1.4f;
-      if (isClose(x, y, screenPos, radius, bestZ))
+      if (isCloseSquare(x, y, screenPos, radius, bestZ))
       {
         s.selectionType = type;
         s.index = index;

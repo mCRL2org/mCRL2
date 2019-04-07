@@ -85,7 +85,7 @@ float degreesToRadians(float degrees)
 /// \returns True whenever the given window coordinates (and device coordinate depth), given by pos, is within a circle of radius threshold
 ///          centered at (x, y) in window coordinates. Returns the smallest Z coordinate that is close.
 inline static
-bool isClose(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
+bool isCloseCircle(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
   float distance = std::sqrt(std::pow(pos.x() - x, 2) + std::pow(pos.y() - y, 2));
   if (distance < threshold && pos.z() < bestZ)
@@ -96,6 +96,20 @@ bool isClose(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 
   return false;
 }
+
+/// \returns True whenever the given window coordinate, given by pos, is within a square
+/// centered at (x,y) with a width and height of 2*threshold. The smallest Z coordinate that is close is stored in bestZ.
+inline static
+bool isCloseSquare(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
+{
+  if(std::abs(x - pos.x()) < threshold && std::abs(y - pos.y()) < threshold && pos.z() < bestZ)
+  {
+    bestZ = pos.z();
+    return true;
+  }
+  return false;
+}
+
 
 /// \returns True whenever the given (x, y) position (in pixels) is on the text positioned at the window coordinates.
 inline static
