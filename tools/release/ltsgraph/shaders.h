@@ -13,6 +13,8 @@
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 
+#include <array>
+
 /// \brief A simple shader that can be used to render three dimensional objects with solid colors.
 class GlobalShader : public QOpenGLShaderProgram
 {
