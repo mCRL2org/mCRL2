@@ -310,21 +310,6 @@ GLScene::Selection GLScene::select(int x, int y)
   return s;
 }
 
-static bool isOnText(int x, int y, const QString& text, const QVector3D& eye,
-    const QFontMetrics& metrics)
-{
-  if (text.isEmpty())
-  {
-    return false;
-  }
-  QRect bounds = metrics.boundingRect(text);
-  int w = bounds.width();
-  int h = bounds.height();
-  // TODO why 4 / 3
-  QRect textbox = {(int)eye.x() - w / 2, (int)eye.y() - 4 * h / 3, w, h};
-  return textbox.contains(x, y);
-}
-
 bool GLScene::selectObject(GLScene::Selection& s,
                            int x,
                            int y,
@@ -374,9 +359,9 @@ bool GLScene::selectObject(GLScene::Selection& s,
     {
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
-      const QVector3D& eye = m_camera.worldToWindow(label.pos());
+      QVector3D window = m_camera.worldToWindow(label.pos());
       const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-      if (isOnText(x, y, labelstring, eye, metrics))
+      if (isOnText(x, y, labelstring, window, metrics))
       {
         s.selectionType = type;
         s.index = index;
@@ -391,9 +376,9 @@ bool GLScene::selectObject(GLScene::Selection& s,
     {
       std::size_t index = sel ? m_graph.selectionNode(i) : i;
       const Graph::LabelNode& label = m_graph.stateLabel(index);
-      const QVector3D& eye = m_camera.worldToWindow(label.pos());
+      QVector3D window = m_camera.worldToWindow(label.pos());
       const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
-      if (isOnText(x, y - sizeOnScreen(label.pos(), nodeSizeScaled()), labelstring, eye, metrics))
+      if (isOnText(x, y, labelstring, window, metrics))
       {
         s.selectionType = type;
         s.index = index;
