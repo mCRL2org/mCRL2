@@ -310,91 +310,6 @@ GLScene::Selection GLScene::select(int x, int y)
   return s;
 }
 
-bool GLScene::selectObject(GLScene::Selection& s,
-                           int x,
-                           int y,
-                           SelectableObject type)
-{
-  float bestZ = INFINITY;
-  bool sel = m_graph.hasSelection();
-  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
-
-  QFontMetrics metrics(m_font);
-  switch (type)
-  {
-  case SelectableObject::node:
-  {
-    for (std::size_t i = 0; i < nodeCount; i++)
-    {
-      std::size_t index = sel ? m_graph.selectionNode(i) : i;
-      QVector3D screenPos = m_camera.worldToWindow(m_graph.node(index).pos());
-      float radius = sizeOnScreen(m_graph.node(index).pos(), nodeSizeScaled()) / 2.0f;
-      if (isClose(x, y, screenPos, radius, bestZ))
-      {
-        s.selectionType = type;
-        s.index = index;
-      }
-    }
-    break;
-  }
-  case SelectableObject::handle:
-  {
-    for (std::size_t i = 0; i < edgeCount; i++)
-    {
-      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
-      QVector3D screenPos = m_camera.worldToWindow(m_graph.handle(index).pos());
-      float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled()) * 1.4f;
-      if (isClose(x, y, screenPos, radius, bestZ))
-      {
-        s.selectionType = type;
-        s.index = index;
-      }
-    }
-    break;
-  }
-  case SelectableObject::label:
-  {
-    for (std::size_t i = 0; i < edgeCount; i++)
-    {
-      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
-      const Graph::LabelNode& label = m_graph.transitionLabel(index);
-      QVector3D window = m_camera.worldToWindow(label.pos());
-      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-      if (isOnText(x, y, labelstring, window, metrics))
-      {
-        s.selectionType = type;
-        s.index = index;
-        break;
-      }
-    }
-    break;
-  }
-  case SelectableObject::slabel:
-  {
-    for (std::size_t i = 0; i < nodeCount; i++)
-    {
-      std::size_t index = sel ? m_graph.selectionNode(i) : i;
-      const Graph::LabelNode& label = m_graph.stateLabel(index);
-      QVector3D window = m_camera.worldToWindow(label.pos());
-      const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
-      if (isOnText(x, y, labelstring, window, metrics))
-      {
-        s.selectionType = type;
-        s.index = index;
-        break;
-      }
-    }
-    break;
-  }
-  case SelectableObject::edge:
-  case SelectableObject::none:
-    Q_UNREACHABLE();
-  }
-
-  return s.selectionType != SelectableObject::none;
-}
-
 float GLScene::sizeOnScreen(const QVector3D& pos, float length) const
 {
   QVector3D rightPoint = sphericalBillboard(pos) * QVector3D(length, 0.0f, 0.0f);
@@ -404,6 +319,36 @@ float GLScene::sizeOnScreen(const QVector3D& pos, float length) const
 //
 // GLScene private methods
 //
+
+QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
+{
+  return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
+}
+
+void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color)
+{
+  QVector3D window = m_camera.worldToWindow(position);
+  float fog = 0.0f;
+  if (!text.isEmpty() && window.z() <= 1.0f && isVisible(position, fog)) // There is text, that is not behind the camera and it is visible.
+  {
+     QColor qcolor = vectorToColor(color);
+     qcolor.setAlpha(255 * (1.0f - fog));
+
+     drawCenteredText(painter,
+       window.x(),
+       window.y(),
+       text,
+       qcolor);
+  }
+}
+
+bool GLScene::isVisible(const QVector3D& position, float& fogamount)
+{
+  // Should match the vertex shader: fogAmount = (1.0f - exp(-1.0f * pow(distance * g_density, 2)));
+  float distance = (m_camera.position() - position).length();
+  fogamount = m_drawfog * (1.0f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
+  return (distance < m_camera.viewdistance() && fogamount < 0.99f);
+}
 
 void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
@@ -638,17 +583,89 @@ void GLScene::renderStateNumber(QPainter& painter, std::size_t i)
   drawCenteredText3D(painter, QString::number(i), node.pos(), color);
 }
 
-bool GLScene::isVisible(const QVector3D& position, float& fogamount)
+bool GLScene::selectObject(GLScene::Selection& s,
+                           int x,
+                           int y,
+                           SelectableObject type)
 {
-  // Should match the vertex shader: fogAmount = (1.0f - exp(-1.0f * pow(distance * g_density, 2)));
-  float distance = (m_camera.position() - position).length();
-  fogamount = m_drawfog * (1.0f - std::exp(-1.0f * std::pow(distance * m_fogdensity, 2.0f)));
-  return (distance < m_camera.viewdistance() && fogamount < 0.99f);
-}
+  float bestZ = INFINITY;
+  bool sel = m_graph.hasSelection();
+  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-QVector3D GLScene::applyFog(const QVector3D& color, float fogAmount)
-{
-  return mix(clamp(fogAmount, 0.0f, 1.0f), color, m_clearColor);
+  QFontMetrics metrics(m_font);
+  switch (type)
+  {
+  case SelectableObject::node:
+  {
+    for (std::size_t i = 0; i < nodeCount; i++)
+    {
+      std::size_t index = sel ? m_graph.selectionNode(i) : i;
+      QVector3D screenPos = m_camera.worldToWindow(m_graph.node(index).pos());
+      float radius = sizeOnScreen(m_graph.node(index).pos(), nodeSizeScaled()) / 2.0f;
+      if (isClose(x, y, screenPos, radius, bestZ))
+      {
+        s.selectionType = type;
+        s.index = index;
+      }
+    }
+    break;
+  }
+  case SelectableObject::handle:
+  {
+    for (std::size_t i = 0; i < edgeCount; i++)
+    {
+      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
+      QVector3D screenPos = m_camera.worldToWindow(m_graph.handle(index).pos());
+      float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled()) * 1.4f;
+      if (isClose(x, y, screenPos, radius, bestZ))
+      {
+        s.selectionType = type;
+        s.index = index;
+      }
+    }
+    break;
+  }
+  case SelectableObject::label:
+  {
+    for (std::size_t i = 0; i < edgeCount; i++)
+    {
+      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
+      const Graph::LabelNode& label = m_graph.transitionLabel(index);
+      QVector3D window = m_camera.worldToWindow(label.pos());
+      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
+      if (isOnText(x, y, labelstring, window, metrics))
+      {
+        s.selectionType = type;
+        s.index = index;
+        break;
+      }
+    }
+    break;
+  }
+  case SelectableObject::slabel:
+  {
+    for (std::size_t i = 0; i < nodeCount; i++)
+    {
+      std::size_t index = sel ? m_graph.selectionNode(i) : i;
+      const Graph::LabelNode& label = m_graph.stateLabel(index);
+      QVector3D window = m_camera.worldToWindow(label.pos());
+      const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
+      if (isOnText(x, y, labelstring, window, metrics))
+      {
+        s.selectionType = type;
+        s.index = index;
+        break;
+      }
+    }
+    break;
+  }
+  case SelectableObject::edge:
+  case SelectableObject::none:
+    Q_UNREACHABLE();
+  }
+
+  return s.selectionType != SelectableObject::none;
 }
 
 QQuaternion GLScene::sphericalBillboard(const QVector3D& position) const
@@ -668,22 +685,4 @@ QQuaternion GLScene::sphericalBillboard(const QVector3D& position) const
   // Return the combination of both rotations
   // NB: the order of this multiplication is important
   return perspectiveRotation * centerRotation;
-}
-
-void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color)
-{
-  QVector3D window = m_camera.worldToWindow(position);
-  float fog = 0.0f;
-  if (!text.isEmpty() && window.z() <= 1.0f && isVisible(position, fog)) // There is text, that is not behind the camera and it is visible.
-  {
-     QColor qcolor = vectorToColor(color);
-     qcolor.setAlpha(255 * (1.0f - fog));
-
-     drawCenteredText(painter,
-       window.x(),
-       window.y(),
-       text,
-       qcolor);
-  }
-
 }

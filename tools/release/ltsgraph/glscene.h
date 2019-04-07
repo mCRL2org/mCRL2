@@ -74,10 +74,6 @@ public:
   /// \returns A record that represents the selected object.
   Selection select(int x, int y);
 
-  /// \brief Select an object of type @type on (pixel) viewport coordinates x, y.
-  /// \returns true if an object was selected.
-  bool selectObject(Selection& s, int x, int y, SelectableObject type);
-
   /// Getters
 
   bool drawStateLabels() const { return m_drawstatelabels; }
@@ -109,6 +105,15 @@ public:
   void setDevicePixelRatio(float device_pixel_ratio) { m_device_pixel_ratio = device_pixel_ratio; }
 
 private:
+  /// \returns The color of an object receiving fogAmount amount of fog.
+  QVector3D applyFog(const QVector3D& color, float fogAmount);
+
+  /// \brief Renders text at a given world position, facing the camera and center aligned.
+  void drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color);
+
+  /// \returns Whether the given point (no radius) is visible based on the camera viewdistance and fog amount (if enabled).
+  /// \param fog The amount of fog that a given point receives.
+  bool isVisible(const QVector3D& position, float& fog);
 
   /// \brief Renders a single edge.
   /// \param i The index of the edge to render.
@@ -134,18 +139,12 @@ private:
   /// \param i The index of the state number to render.
   void renderStateNumber(QPainter& painter, std::size_t i);
 
-  /// \returns Whether the given point (no radius) is visible based on the camera viewdistance and fog amount (if enabled).
-  /// \param fog The amount of fog that a given point receives.
-  bool isVisible(const QVector3D& position, float& fog);
-
-  /// \returns The color of an object receiving fogAmount amount of fog.
-  QVector3D applyFog(const QVector3D& color, float fogAmount);
+  /// \brief Select an object of type @type on (pixel) viewport coordinates x, y.
+  /// \returns true if an object was selected.
+  bool selectObject(Selection& s, int x, int y, SelectableObject type);
 
   /// \returns A rotation such that an object at the given position faces the camera.
   QQuaternion sphericalBillboard(const QVector3D& position) const;
-
-  /// \brief Renders text at a given world position, facing the camera and center aligned.
-  void drawCenteredText3D(QPainter& painter, const QString& text, const QVector3D& position, const QVector3D& color);
 
   QOpenGLWidget& m_glwidget; /// The widget where this scene is drawn
   Graph::Graph& m_graph;     /// The graph that is being visualised.
