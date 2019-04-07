@@ -301,11 +301,11 @@ void GLScene::render(QPainter& painter)
 
 GLScene::Selection GLScene::select(int x, int y)
 {
-  Selection s{so_none, 0};
-  selectObject(s, x, y, so_node)
-    || selectObject(s, x, y, so_handle)
-    || selectObject(s, x, y, so_label)
-    || selectObject(s, x, y, so_slabel)
+  Selection s{SelectableObject::none, 0};
+  selectObject(s, x, y, SelectableObject::node)
+    || selectObject(s, x, y, SelectableObject::handle)
+    || selectObject(s, x, y, SelectableObject::label)
+    || selectObject(s, x, y, SelectableObject::slabel)
     ;
   return s;
 }
@@ -323,7 +323,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
   QFontMetrics metrics(m_font);
   switch (type)
   {
-  case so_node:
+  case SelectableObject::node:
   {
     for (std::size_t i = 0; i < nodeCount; i++)
     {
@@ -338,7 +338,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
     }
     break;
   }
-  case so_handle:
+  case SelectableObject::handle:
   {
     for (std::size_t i = 0; i < edgeCount; i++)
     {
@@ -353,7 +353,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
     }
     break;
   }
-  case so_label:
+  case SelectableObject::label:
   {
     for (std::size_t i = 0; i < edgeCount; i++)
     {
@@ -370,7 +370,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
     }
     break;
   }
-  case so_slabel:
+  case SelectableObject::slabel:
   {
     for (std::size_t i = 0; i < nodeCount; i++)
     {
@@ -387,12 +387,12 @@ bool GLScene::selectObject(GLScene::Selection& s,
     }
     break;
   }
-  case so_edge:
-  case so_none:
+  case SelectableObject::edge:
+  case SelectableObject::none:
     Q_UNREACHABLE();
   }
 
-  return s.selectionType != so_none;
+  return s.selectionType != SelectableObject::none;
 }
 
 float GLScene::sizeOnScreen(const QVector3D& pos, float length) const

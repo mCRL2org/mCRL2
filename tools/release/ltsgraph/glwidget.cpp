@@ -169,13 +169,13 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
 {
   switch (s.selectionType)
   {
-    case GLScene::so_label:
+    case GLScene::SelectableObject::label:
       return &g.transitionLabel(s.index);
-    case GLScene::so_slabel:
+    case GLScene::SelectableObject::slabel:
       return &g.stateLabel(s.index);
-    case GLScene::so_handle:
+    case GLScene::SelectableObject::handle:
       return &g.handle(s.index);
-    case GLScene::so_node:
+    case GLScene::SelectableObject::node:
       return &g.node(s.index);
     default:
       return nullptr;
@@ -227,10 +227,10 @@ void GLWidget::updateSelection()
   }
 
   /// If the selected item was a label or edge we also mark the edge handle to be selected for 50 percent.
-  if (m_hover.selectionType == GLScene::so_label || m_hover.selectionType == GLScene::so_edge)
+  if (m_hover.selectionType == GLScene::SelectableObject::label || m_hover.selectionType == GLScene::SelectableObject::edge)
   {
     GLScene::Selection s = m_hover;
-    s.selectionType = GLScene::so_handle;
+    s.selectionType = GLScene::SelectableObject::handle;
     selnode = select_object(s, m_graph);
 
     if (selnode->selected() <= 0)
@@ -298,17 +298,17 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
   updateSelection();
   if (m_painting)
   {
-    if (m_hover.selectionType == GLScene::so_node)
+    if (m_hover.selectionType == GLScene::SelectableObject::node)
     {
       Graph::NodeNode& node = m_graph.node(m_hover.index);
       node.color() = m_paintcolor;
     }
-    if (m_hover.selectionType == GLScene::so_label)
+    if (m_hover.selectionType == GLScene::SelectableObject::label)
     {
       Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
       node.color() = m_paintcolor;
     }
-    if (m_hover.selectionType == GLScene::so_slabel)
+    if (m_hover.selectionType == GLScene::SelectableObject::slabel)
     {
       Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
       node.color() = m_paintcolor;
@@ -339,7 +339,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     }
     else
     {
-      if (m_hover.selectionType == GLScene::so_none)
+      if (m_hover.selectionType == GLScene::SelectableObject::none)
       {
         if (e->button() == Qt::RightButton && m_is_threedimensional) {
           m_dragmode = dm_rotate;
@@ -353,16 +353,16 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
         m_dragmode = dm_dragnode;
         switch (m_hover.selectionType)
         {
-          case GLScene::so_node:
+          case GLScene::SelectableObject::node:
             m_dragnode = new NodeMoveRecord;
             break;
-          case GLScene::so_handle:
+          case GLScene::SelectableObject::handle:
             m_dragnode = new HandleMoveRecord;
             break;
-          case GLScene::so_label:
+          case GLScene::SelectableObject::label:
             m_dragnode = new LabelMoveRecord;
             break;
-          case GLScene::so_slabel:
+          case GLScene::SelectableObject::slabel:
             m_dragnode = new StateLabelMoveRecord;
             break;
           default:
@@ -386,7 +386,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
   if (m_dragmode == dm_dragnode)
   {
     NodeMoveRecord* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
-    if (m_hover.selectionType == GLScene::so_node && e->button() == Qt::LeftButton
+    if (m_hover.selectionType == GLScene::SelectableObject::node && e->button() == Qt::LeftButton
         && (noderec != nullptr) && m_draglength.length() < DRAG_MIN_DIST)
     {
       // A node has been clicked (not dragged):
@@ -423,17 +423,17 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
     switch (m_dragmode)
     {
       case dm_paint:
-        if (m_hover.selectionType == GLScene::so_node)
+        if (m_hover.selectionType == GLScene::SelectableObject::node)
         {
           Graph::NodeNode& node = m_graph.node(m_hover.index);
           node.color() = m_paintcolor;
         }
-        if (m_hover.selectionType == GLScene::so_label)
+        if (m_hover.selectionType == GLScene::SelectableObject::label)
         {
           Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
           node.color() = m_paintcolor;
         }
-        if (m_hover.selectionType == GLScene::so_slabel)
+        if (m_hover.selectionType == GLScene::SelectableObject::slabel)
         {
           Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
           node.color() = m_paintcolor;
