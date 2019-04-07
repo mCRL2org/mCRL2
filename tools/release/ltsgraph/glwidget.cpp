@@ -290,6 +290,9 @@ void GLWidget::paintGL()
     m_scene.setDevicePixelRatio(devicePixelRatio());
     m_scene.update();
     m_scene.render(painter);
+
+    // Updates the selection percentage (and checks for new selections under the cursor).
+    updateSelection();
   }
 }
 
