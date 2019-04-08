@@ -51,6 +51,14 @@ public:
   {
     SelectableObject selectionType; ///< The type of object.
     std::size_t index;              ///< The index of the object in m_graph.
+
+    /// \returns True whenever this is a valid selection.
+    bool has_selection() { return selectionType != SelectableObject::none; }
+
+    bool operator!=(const Selection& other)
+    {
+      return index != other.index || selectionType != other.selectionType;
+    }
   };
 
   /// \brief Constructor.
