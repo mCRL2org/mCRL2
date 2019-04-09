@@ -617,7 +617,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
     {
       std::size_t index = sel ? m_graph.selectionEdge(i) : i;
       QVector3D screenPos = m_camera.worldToWindow(m_graph.handle(index).pos());
-      float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled()) * 1.4f;
+      float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled());
       if (isCloseSquare(x, y, screenPos, radius, bestZ))
       {
         s.selectionType = type;
