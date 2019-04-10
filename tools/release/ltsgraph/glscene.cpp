@@ -565,8 +565,7 @@ void GLScene::renderTransitionLabel(QPainter& painter, std::size_t i)
 
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   QVector3D fill(std::max(label.color().x(), label.selected()), std::min(label.color().y(), 1.0f - label.selected()), std::min(label.color().z(), 1.0f - label.selected()));
-  drawCenteredText3D(painter, m_graph.stateLabelstring(label.labelindex()), label.pos(), fill);
-
+  drawCenteredText3D(painter, m_graph.transitionLabelstring(label.labelindex()), label.pos(), fill);
 }
 
 void GLScene::renderStateLabel(QPainter& painter, std::size_t i)
