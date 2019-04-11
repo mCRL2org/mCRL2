@@ -105,6 +105,11 @@ class structure_graph
       {
         successors.erase(std::remove(successors.begin(), successors.end(), u), successors.end());
       }
+
+      bool is_defined() const
+      {
+        return decoration != structure_graph::d_none && rank != data::undefined_index();
+      }
     };
 
   protected:
@@ -238,6 +243,12 @@ class structure_graph
       // This requires boost 1.56
       // return m_exclude.all();
       return detail::call_dynamic_bitset_all(m_exclude);
+    }
+
+    // Returns true if all vertices have a rank and a decoration
+    bool is_defined() const
+    {
+      return std::all_of(m_vertices.begin(), m_vertices.end(), [](const vertex& u) { return u.is_defined(); });
     }
 };
 

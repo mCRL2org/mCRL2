@@ -424,7 +424,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         else // m_optimization == 7
         {
           m_graph_builder.finalize();
-          detail::partial_solve(m_graph_builder.m_graph, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+          detail::partial_solve(m_graph_builder.m_graph, S0, S1, m_iteration_count); // modifies S0 and S1
         }
       }
       if (!todo.empty())

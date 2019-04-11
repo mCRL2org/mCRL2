@@ -24,11 +24,9 @@ namespace detail {
 
 inline
 void partial_solve(structure_graph& G,
-                   const std::deque<propositional_variable_instantiation>& todo,
                    vertex_set& S0,
                    vertex_set& S1,
-                   std::size_t iteration_count,
-                   const detail::structure_graph_builder& graph_builder
+                   std::size_t iteration_count
                   )
 {
   mCRL2log(log::debug) << "Apply partial solve (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
@@ -45,14 +43,17 @@ void partial_solve(structure_graph& G,
   S0 = compute_attractor_set(G, S0, 0);
   S1 = compute_attractor_set(G, S1, 1);
 
-  // compute Si_todo = Si \cup todo
+  // compute Si_todo = Si \cup { v \in V | v.is_defined() }
   vertex_set S0_todo = S0;
   vertex_set S1_todo = S1;
-  for (const propositional_variable_instantiation& X: todo)
+  for (structure_graph::index_type u = 0; u < G.all_vertices().size(); u++)
   {
-    structure_graph::index_type u = graph_builder.find_vertex(X);
-    S0_todo.insert(u);
-    S1_todo.insert(u);
+    const structure_graph::vertex& u_ = G.find_vertex(u);
+    if (!u_.is_defined())
+    {
+      S0_todo.insert(u);
+      S1_todo.insert(u);
+    }
   }
 
   bool check_strategy = false;
