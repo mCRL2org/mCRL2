@@ -29,8 +29,7 @@ public:
   /// \brief Constructor
   /// \param[in] message the exception message
   runtime_error(const std::string& message) : std::runtime_error(message)
-  {
-  }
+  {}
 };
 
 /**
@@ -40,25 +39,22 @@ class command_line_error : public runtime_error
 {
 private:
   std::string m_msg;
-public:
-  command_line_error(const std::string& name, const std::string& message) throw()
-    : runtime_error("")
+
+  /// \returns A string that contains "<name>: <message>" followed by a message pointing to --help on the next line.
+  static std::string format(const std::string& name, const std::string& message)
   {
-    // We're storing the message in a separate string because we cannot
-    // alter the string that is used by std::runtime_error::what(). The
-    // inheritance relation between command_line_error and runtime_error
-    // is therefore only logical, not functional.
     std::stringstream s;
     s << name << ": " << message << "\n"
       << "Try '" << name << " --help' for more information.";
-    m_msg = s.str();
+    return s.str();
   }
-  virtual const char* what() const throw()
-  {
-    return m_msg.c_str();
-  }
-  virtual ~command_line_error() throw()
+
+public:
+  command_line_error(const std::string& name, const std::string& message) throw()
+    : runtime_error(format(name, message))
   {}
+
+  virtual ~command_line_error() throw() {}
 };
 
 } // namespace mcrl2
