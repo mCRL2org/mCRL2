@@ -598,7 +598,7 @@ class besconvert_tool: public super
         equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
         if (a.allowed_eqs().count(equivalence) == 0)
         {
-          throw parser.error("option -e/--equivalence has illegal argument '" +
+          parser.error("option -e/--equivalence has illegal argument '" +
                        parser.option_argument("equivalence") + "'");
         }
       }
@@ -625,13 +625,13 @@ class besconvert_tool: public super
         }
         else
         {
-          throw parser.error("option -t/--translation has illegal argument `" + str_translation + "'");
+          parser.error("option -t/--translation has illegal argument `" + str_translation + "'");
         }
       }
 
       if (equivalence != bes_reduction_algorithm::eq_bisim && m_translation == bes_reduction_algorithm::to_lts_outgoing_transition)
       {
-        throw parser.error("option --translation=successor can only be used with --equivalence=bisim");
+        parser.error("option --translation=successor can only be used with --equivalence=bisim");
       }
 
       m_no_reduction = parser.options.count("noreduction") > 0;

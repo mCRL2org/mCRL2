@@ -92,20 +92,20 @@ class ltsinfo_tool : public ltsinfo_base
       }
       if (1 < parser.arguments.size())
       {
-        throw parser.error("Too many file arguments.");
+        parser.error("Too many file arguments.");
       }
 
       if (parser.options.count("in"))
       {
         if (1 < parser.options.count("in"))
         {
-          throw parser.error("Multiple input formats specified; can only use one.");
+          parser.error("Multiple input formats specified; can only use one.");
         }
 
         intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
         if (intype == lts_none || intype == lts_dot)
         {
-          throw parser.error("Option -i/--in has illegal argument '" +
+          parser.error("Option -i/--in has illegal argument '" +
                        parser.option_argument("in") + "'.");
         }
       }

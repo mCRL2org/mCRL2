@@ -137,7 +137,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
 
       if (m_maximal_todo_size==atermpp::npos && !m_approximate_true)
       {
-        throw parser.error("Setting approximate-false only makes sense when setting todo-max. ");
+        parser.error("Setting approximate-false only makes sense when setting todo-max. ");
       }
     }
 

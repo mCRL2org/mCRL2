@@ -64,9 +64,9 @@ class torx_tool : public rewriter_tool< input_tool >
       m_use_dummies = 0 < parser.options.count("dummy");
 
       if (parser.arguments.size() == 0) {
-        throw parser.error("no INFILE specified");
+        parser.error("no INFILE specified");
       } else if (parser.arguments.size() != 1) {
-        throw parser.error("too many file arguments");
+        parser.error("too many file arguments");
       }
     }
 

@@ -330,12 +330,12 @@ class ltsconvert_tool : public input_output_tool
 
     if (tool_options.determinise && (tool_options.equivalence != lts_probabilistic_eq_none))
     {
-      throw parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
+      parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
     }
 
     if (2 < parser.arguments.size())
     {
-      throw parser.error("too many file arguments");
+      parser.error("too many file arguments");
     }
     else
     {

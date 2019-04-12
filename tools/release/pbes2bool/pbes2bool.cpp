@@ -147,17 +147,17 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 
       if (m_maximal_todo_size==atermpp::npos && !m_approximate_true)
       {
-        throw parser.error("Setting approximate-false only makes sense when setting todo-max. ");
+        parser.error("Setting approximate-false only makes sense when setting todo-max. ");
       }
 
       if (m_construct_counter_example && m_erase_unused_bes_variables!=mcrl2::bes::none)
       {
-        throw parser.error("Generating a counter example cannot be combined with erasing bes variables. ");
+        parser.error("Generating a counter example cannot be combined with erasing bes variables. ");
       }
 
       if (m_construct_counter_example && m_solution_strategy!=local_fixed_point)
       {
-        throw parser.error("Generating a counter example only works with the local fixed point algorithm to solve the boolean equation system. ");
+        parser.error("Generating a counter example only works with the local fixed point algorithm to solve the boolean equation system. ");
       }
     }
 

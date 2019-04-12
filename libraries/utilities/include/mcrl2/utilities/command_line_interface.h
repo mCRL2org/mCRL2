@@ -938,7 +938,7 @@ class command_line_parser
      *
      * \code
      *  try {
-     *    throw error("Parse error: option -b unknown");
+     *    error("Parse error: option -b unknown");
      *  }
      *  catch (std::exception& e) {
      *    std::cerr << e.what();
@@ -953,7 +953,7 @@ class command_line_parser
      **/
     mcrl2::command_line_error error(std::string const& message) const
     {
-      return mcrl2::command_line_error(m_interface.m_name, message);
+      throw mcrl2::command_line_error(m_interface.m_name, message);
     }
 
     /**

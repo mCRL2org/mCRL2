@@ -182,7 +182,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
         output_format = lts::detail::parse_format(parser.option_argument("out"));
         if (output_format == lts::lts_none)
         {
-          throw parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
+          parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
       if (output_format == lts::lts_none)
@@ -218,9 +218,9 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       if (parser.has_option("tau"))
       {
-        if (parser.options.count("divergence")==0)
+        if (!parser.has_option("divergence"))
         {
-          throw parser.error("Option --tau requires the option --divergence.");
+          parser.error("Option --tau requires the option --divergence.");
         }
         std::list<std::string> actions = split_actions(parser.option_argument("tau"));
         for (const std::string& s: actions)
@@ -236,7 +236,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       if (2 < parser.arguments.size())
       {
-        throw parser.error("Too many file arguments.");
+        parser.error("Too many file arguments.");
       }
 
       if (options.no_store && (output_filename().empty() || output_format != lts::lts_aut))
@@ -247,7 +247,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
 
       if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
       {
-        throw parser.error("Search strategy 'highway' requires that the option todo-max is set");
+        parser.error("Search strategy 'highway' requires that the option todo-max is set");
       }
     }
 

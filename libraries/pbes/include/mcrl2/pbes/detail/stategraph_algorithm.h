@@ -699,7 +699,7 @@ class stategraph_algorithm
       return result;
     }
 
-    std::string print_data_parameters(const core::identifier_string& X, std::set<std::size_t> I) const
+    std::string print_data_parameters(const core::identifier_string& X, const std::set<std::size_t>& I) const
     {
       std::ostringstream out;
       out << "  data parameters for vertex " << X << ":";

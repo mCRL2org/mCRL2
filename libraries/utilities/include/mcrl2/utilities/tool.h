@@ -102,11 +102,11 @@ class tool
       {
         if (parser.options.count("debug"))
         {
-          throw parser.error("options -q/--quiet and -d/--debug cannot be used together\n");
+          parser.error("options -q/--quiet and -d/--debug cannot be used together\n");
         }
         if (parser.options.count("verbose"))
         {
-          throw parser.error("options -q/--quiet and -v/--verbose cannot be used together\n");
+          parser.error("options -q/--quiet and -v/--verbose cannot be used together\n");
         }
       }
 #ifndef MCRL2_TOOL_CLASSES_NO_CORE

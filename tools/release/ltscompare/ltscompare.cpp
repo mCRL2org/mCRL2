@@ -202,7 +202,7 @@ class ltscompare_tool : public ltscompare_base
     {
       if (2 < parser.arguments.size())
       {
-        throw parser.error("too many file arguments");
+        parser.error("too many file arguments");
       }
     }
 
@@ -275,12 +275,12 @@ class ltscompare_tool : public ltscompare_base
 
       if (parser.options.count("equivalence") > 1)
       {
-        throw parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
+        parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
       }
 
       if (parser.options.count("preorder") > 1)
       {
-        throw parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
+        parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
       }
 
       tool_options.equivalence = parser.option_argument_as<lts_equivalence>("equivalence");
@@ -290,19 +290,19 @@ class ltscompare_tool : public ltscompare_base
       {
         if (tool_options.preorder==lts_pre_sim)
         {
-          throw parser.error("counter examples cannot be used with simulation pre-order");
+          parser.error("counter examples cannot be used with simulation pre-order");
         }
         if (tool_options.preorder==lts_pre_ready_sim)
         {
-          throw parser.error("counter examples cannot be used with ready simulation pre-order");
+          parser.error("counter examples cannot be used with ready simulation pre-order");
         }
         if (tool_options.preorder==lts_pre_trace)
         {
-          throw parser.error("counter examples cannot be used with the plain trace pre-order (use trace-ac instead)");
+          parser.error("counter examples cannot be used with the plain trace pre-order (use trace-ac instead)");
         }
         if (tool_options.preorder==lts_pre_weak_trace)
         {
-          throw parser.error("counter examples cannot be used with the plain weak trace pre-order (use weak-trace-ac instead");
+          parser.error("counter examples cannot be used with the plain weak trace pre-order (use weak-trace-ac instead");
         }
       }
 
@@ -338,7 +338,7 @@ class ltscompare_tool : public ltscompare_base
             && tool_options.preorder != lts_pre_weak_failures_refinement
             && tool_options.preorder != lts_pre_failures_divergence_refinement)
         {
-          throw parser.error("strategy can only be chosen for antichain based algorithms.");
+          parser.error("strategy can only be chosen for antichain based algorithms.");
         }
       }
 
