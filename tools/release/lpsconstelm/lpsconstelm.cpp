@@ -26,23 +26,23 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
 
     typedef rewriter_tool<input_output_tool> super;
 
-    bool m_instantiate_free_variables;
-    bool m_ignore_conditions;
-    bool m_remove_trivial_summands;
-    bool m_remove_singleton_sorts;
+    bool m_instantiate_free_variables = false;
+    bool m_ignore_conditions = false;
+    bool m_remove_trivial_summands = false;
+    bool m_remove_singleton_sorts = false;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
-      m_instantiate_free_variables = parser.options.count("instantiate-free-variables") > 0;
-      m_ignore_conditions          = parser.options.count("ignore-conditions") > 0;
-      m_remove_trivial_summands    = parser.options.count("remove-trivial-summands") > 0;
-      m_remove_singleton_sorts     = parser.options.count("remove-singleton-sorts") > 0;
+      m_instantiate_free_variables = parser.has_option("instantiate-free-variables");
+      m_ignore_conditions          = parser.has_option("ignore-conditions");
+      m_remove_trivial_summands    = parser.has_option("remove-trivial-summands");
+      m_remove_singleton_sorts     = parser.has_option("remove-singleton-sorts");
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc
@@ -77,7 +77,7 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
 
     ///Reads a specification from input_file,
     ///applies instantiation of sums to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {
       lpsconstelm(input_filename(),
                   output_filename(),
