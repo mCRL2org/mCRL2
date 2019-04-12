@@ -34,7 +34,7 @@ set(STATESPACE_BENCHMARKS
 
 # This target is used to generate all intermediate files required for benchmarks. 
 add_custom_target(benchmarks)
-add_dependencies(benchmarks lps2lts pbes2bool pbessolve)
+add_dependencies(benchmarks lps2lts pbes2bool pbessolve generatelts)
 
 foreach(benchmark ${STATESPACE_BENCHMARKS})
   # Obtain just <name>.mcrl2, split off <name> for the benchmark name and output lps <name>.lps
@@ -59,6 +59,9 @@ foreach(benchmark ${STATESPACE_BENCHMARKS})
   
   add_tool_benchmark("${NAME}" lps2lts ${LPS_FILENAME} "")
   add_tool_benchmark("${NAME}_jittyc" lps2lts "${BENCHMARK_WORKSPACE}/${NAME}.lps" "-rjittyc")
+
+  add_tool_benchmark("${NAME}" generatelts ${LPS_FILENAME} "")
+  add_tool_benchmark("${NAME}_jittyc" generatelts "${BENCHMARK_WORKSPACE}/${NAME}.lps" "-rjittyc")
 
   add_tool_benchmark("${NAME}" pbes2bool ${NODEADLOCK_PBES_FILENAME})
   add_tool_benchmark("${NAME}_jittyc" pbes2bool ${NODEADLOCK_PBES_FILENAME} "-rjittyc")
