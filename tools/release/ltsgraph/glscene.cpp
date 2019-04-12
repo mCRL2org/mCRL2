@@ -550,7 +550,8 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
       QVector3D blue(0.1f, 0.1f, 0.7f);
 
       m_global_shader.setColor(applyFog(blue, fog));
-      glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
+      // Draw only only the inner part of the half sphere that makes up a node in blue
+      glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE / RES_NODE_STACK);
     }
   }
 }
@@ -675,7 +676,7 @@ QQuaternion GLScene::sphericalBillboard(const QVector3D& position) const
   // And compensate for the perspective of the camera on the object if its not in the center of the screen
   QVector3D posToCamera = m_camera.position() - position;
   posToCamera.normalize();
-  QVector3D camera = m_camera.position();
+  QVector3D camera = centerRotation.rotatedVector(QVector3D(0.0f, 0.0f, 1.0f));
   camera.normalize();
   // Compute the roration with the cross product and the dot product (aka inproduct)
   QQuaternion perspectiveRotation = QQuaternion::fromAxisAndAngle(QVector3D::crossProduct(camera, posToCamera),
