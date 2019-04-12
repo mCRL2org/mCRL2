@@ -99,13 +99,11 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
 
   public:
     pbesinst_structure_graph_algorithm(
-         const pbes& p,
-         structure_graph& G,
-         data::rewriter::strategy rewrite_strategy = data::jitty,
-         search_strategy search_strategy = breadth_first,
-         int optimization = 0
-        )
-      : pbesinst_lazy_algorithm(p, rewrite_strategy, search_strategy, optimization),
+      const pbessolve_options& options,
+      const pbes& p,
+      structure_graph& G
+    )
+      : pbesinst_lazy_algorithm(options, p),
         m_graph_builder(G)
     {}
 
@@ -119,9 +117,9 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       SG0(X, psi, k);
     }
 
-    void run(bool replace_constants_by_variables = true) override
+    void run() override
     {
-      pbesinst_lazy_algorithm::run(replace_constants_by_variables);
+      pbesinst_lazy_algorithm::run();
       m_graph_builder.finalize();
     }
 };

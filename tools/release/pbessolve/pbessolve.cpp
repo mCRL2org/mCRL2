@@ -16,6 +16,7 @@
 #include "mcrl2/lps/detail/lps_io.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
+#include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesinst_structure_graph2.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
@@ -45,21 +46,12 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
   protected:
     typedef rewriter_tool<pbes_input_tool<input_tool>> super;
 
-    search_strategy m_search_strategy;
+    pbessolve_options options;
 
-    // for doing a consistency check on the computed strategy
-    bool m_check_strategy = false;
-
-    // if true, apply optimization 4 and 5 at every iteration
-    bool aggressive = false;
-
-    bool replace_constants_by_variables = false;
 
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;
-
-    int m_strategy = 0;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -78,6 +70,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  "extension of the file should be .lps in case of an LPS file, in all other cases it is assumed to "
                  "be an LTS.",
                  'f');
+      desc.add_option("prune-todo-list", "Prune the todo list periodically (experimental). ");
       desc.add_option("evidence-file",
                       utilities::make_file_argument("NAME"),
                       "The file to which the evidence is written. If not set, a default name will be chosen.");
@@ -126,7 +119,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
-      m_check_strategy = parser.options.count("check-strategy") > 0;
+      options.check_strategy = parser.options.count("check-strategy") > 0;
       if (parser.options.count("file") > 0)
       {
         std::string filename = parser.option_argument("file");
@@ -143,17 +136,17 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         evidence_file = parser.option_argument("evidence-file");
       }
-      m_search_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
-      m_strategy = parser.option_argument_as<int>("strategy");
-      if (m_strategy < 0 || m_strategy > 7)
+      options.exploration_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
+      options.optimization = parser.option_argument_as<int>("strategy");
+      if (options.optimization < 0 || options.optimization > 7)
       {
-        throw mcrl2::runtime_error("Invalid strategy " + std::to_string(m_strategy));
+        throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.optimization));
       }
       if (parser.options.count("aggressive") > 0)
       {
-        aggressive = true;
+        options.aggressive = true;
       }
-      replace_constants_by_variables = parser.options.find("replace-constants-by-variables") != parser.options.end();
+      options.replace_constants_by_variables = parser.options.find("replace-constants-by-variables") != parser.options.end();
     }
 
     std::set<utilities::file_format> available_input_formats() const override
@@ -172,16 +165,15 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
               "which is then solved using Zielonka's algorithm. "
               "It supports the generation of a witness or counter "
               "example for the property encoded by the PBES."
-             ),
-      m_search_strategy(breadth_first)
+             )
     {}
 
     template <typename PbesInstAlgorithm>
-    void run_algorithm(PbesInstAlgorithm& algorithm, const pbes_system::pbes& pbesspec, structure_graph& G, bool replace_constants_by_variables)
+    void run_algorithm(PbesInstAlgorithm& algorithm, const pbes_system::pbes& pbesspec, structure_graph& G)
     {
       mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
       timer().start("instantiation");
-      algorithm.run(replace_constants_by_variables);
+      algorithm.run();
       timer().finish("instantiation");
 
       mCRL2log(log::verbose) << "Number of vertices in the structure graph: " << G.all_vertices().size() << std::endl;
@@ -222,7 +214,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       else
       {
         timer().start("solving");
-        bool result = solve_structure_graph(G, m_check_strategy);
+        bool result = solve_structure_graph(G, options.check_strategy);
         timer().finish("solving");
         std::cout << (result ? "true" : "false") << std::endl;
       }
@@ -234,16 +226,15 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       pbes_system::algorithms::normalize(pbesspec);
 
       structure_graph G;
-      if (m_strategy <= 1)
+      if (options.optimization <= 1)
       {
-        pbesinst_structure_graph_algorithm algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_strategy);
-        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G, replace_constants_by_variables);
+        pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm>(algorithm, pbesspec, G);
       }
       else
       {
-        pbesinst_structure_graph_algorithm2 algorithm(pbesspec, G, rewrite_strategy(), m_search_strategy, m_strategy);
-        algorithm.enable_aggressive_mode(aggressive);
-        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G, replace_constants_by_variables);
+        pbesinst_structure_graph_algorithm2 algorithm(options, pbesspec, G);
+        run_algorithm<pbesinst_structure_graph_algorithm2>(algorithm, pbesspec, G);
       }
       return true;
     }

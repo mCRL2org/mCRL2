@@ -21,21 +21,31 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-struct explorer_options
+struct pbessolve_options
 {
   data::rewrite_strategy rewrite_strategy = data::jitty;
   bool replace_constants_by_variables = false;
   bool reset_todo = false;
-  search_strategy search_strategy;
+  search_strategy exploration_strategy = breadth_first;
+  int optimization = 0;
+
+  // if true, apply optimization 4 and 5 at every iteration
+  bool aggressive = false;
+
+  // for doing a consistency check on the computed strategy
+  bool check_strategy = false;
 };
 
 inline
-std::ostream& operator<<(std::ostream& out, const explorer_options& options)
+std::ostream& operator<<(std::ostream& out, const pbessolve_options& options)
 {
   out << "rewrite-strategy = " << options.rewrite_strategy << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "reset-todo = " << std::boolalpha << options.reset_todo << std::endl;
-  out << "search-strategy = " << options.search_strategy << std::endl;
+  out << "search-strategy = " << options.exploration_strategy << std::endl;
+  out << "optimization = " << options.optimization << std::endl;
+  out << "aggressive = " << std::boolalpha << options.aggressive << std::endl;
+  out << "check-strategy = " << std::boolalpha << options.check_strategy << std::endl;
   return out;
 }
 

@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/replace_constants_by_variables.h"
@@ -131,6 +132,9 @@ class pbesinst_lazy_todo
 class pbesinst_lazy_algorithm
 {
   protected:
+    /// \brief Algorithm options.
+    const pbessolve_options& m_options;
+
     /// \brief Data rewriter.
     data::rewriter datar;
 
@@ -152,13 +156,8 @@ class pbesinst_lazy_algorithm
     /// \brief The initial value (after rewriting).
     propositional_variable_instantiation init;
 
-    /// \brief The search strategy to use when exploring the state space.
-    search_strategy m_search_strategy;
-
     // \brief The number of iterations
     std::size_t m_iteration_count = 0;
-
-    int m_optimization = 0;
 
     /// \brief Prints a log message for every 1000-th equation
     std::string print_equation_count(std::size_t size) const
@@ -256,17 +255,14 @@ class pbesinst_lazy_algorithm
     /// \param search_strategy The search strategy used to explore the pbes, typically depth or breadth first.
     /// \param optimization An indication of the optimisation level. 
     explicit pbesinst_lazy_algorithm(
-            const pbes& p,
-            data::rewriter::strategy rewrite_strategy = data::jitty,
-            search_strategy search_strategy = breadth_first,
-            int optimization = 0
+      const pbessolve_options& options,
+      const pbes& p
     )
-     : datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
+     : m_options(options),
+       datar(p.data(), data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), options.rewrite_strategy),
        m_pbes(preprocess(p)),
        m_equation_index(p),
-       R(datar, p.data()),
-       m_search_strategy(search_strategy),
-       m_optimization(optimization)
+       R(datar, p.data())
     { }
 
     virtual ~pbesinst_lazy_algorithm() = default;
@@ -282,7 +278,7 @@ class pbesinst_lazy_algorithm
 
     propositional_variable_instantiation next_todo()
     {
-      if (m_search_strategy == breadth_first)
+      if (m_options.exploration_strategy == breadth_first)
       {
         auto X_e = todo.front();
         todo.pop_front();
@@ -307,7 +303,7 @@ class pbesinst_lazy_algorithm
                                         const pbes_expression& psi
                                        )
     {
-      return m_optimization >= 1 ? rewrite_true_false(symbol, X, psi) : psi;
+      return m_options.optimization >= 1 ? rewrite_true_false(symbol, X, psi) : psi;
     }
 
     virtual bool solution_found(const propositional_variable_instantiation& /* init */) const
@@ -323,13 +319,13 @@ class pbesinst_lazy_algorithm
     {}
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    virtual void run(bool replace_constants_by_variables = true)
+    virtual void run()
     {
       using utilities::detail::contains;
 
       m_iteration_count = 0;
       data::mutable_indexed_substitution<> sigma;
-      if (replace_constants_by_variables)
+      if (m_options.replace_constants_by_variables)
       {
         pbes_system::replace_constants_by_variables(m_pbes, datar, sigma);
       }

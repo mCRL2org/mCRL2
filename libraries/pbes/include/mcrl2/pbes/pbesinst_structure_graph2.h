@@ -80,7 +80,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     detail::computation_guard find_loops_guard;
     detail::computation_guard fatal_attractors_guard;
     detail::periodic_guard reset_guard;
-    bool aggressive = false; // if true, apply optimization 4 and 5 at every iteration
 
     template<typename T>
     pbes_expression expr(const T& x) const
@@ -238,7 +237,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       using utilities::detail::contains;
 
-      if (!reset_guard(regeneration_period) && !aggressive && !todo.empty())
+      if (!reset_guard(regeneration_period) && !m_options.aggressive && !todo.empty())
       {
         return;
       }
@@ -316,20 +315,13 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     typedef pbesinst_structure_graph_algorithm super;
 
     pbesinst_structure_graph_algorithm2(
-        const pbes& p,
-        structure_graph& G,
-        data::rewriter::strategy rewrite_strategy = data::jitty,
-        search_strategy search_strategy = breadth_first,
-        int optimization = 0
+      const pbessolve_options& options,
+      const pbes& p,
+      structure_graph& G
     )
-      : pbesinst_structure_graph_algorithm(p, G, rewrite_strategy, search_strategy, optimization),
+      : pbesinst_structure_graph_algorithm(options, p, G),
         find_loops_guard(2), fatal_attractors_guard(2)
     {}
-
-    void enable_aggressive_mode(bool enabled = true)
-    {
-      aggressive = enabled;
-    }
 
     // Optimization 2 is implemented by overriding the function rewrite_psi.
     pbes_expression rewrite_psi(const fixpoint_symbol& symbol,
@@ -356,7 +348,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       if (is_true(b))
       {
         S0.insert(u);
-        if (m_optimization > 2)
+        if (m_options.optimization > 2)
         {
           // Compute the attractor set U of u, and add it to S0
           auto N = G.size();
@@ -375,7 +367,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       else if (is_false(b))
       {
         S1.insert(u);
-        if (m_optimization > 2)
+        if (m_options.optimization > 2)
         {
           // Compute the attractor set U of u, and add it to S1
           auto N = G.size();
@@ -405,19 +397,19 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       using utilities::detail::contains;
 
-      if (m_optimization == 4 && (aggressive || find_loops_guard(m_iteration_count)))
+      if (m_options.optimization == 4 && (m_options.aggressive || find_loops_guard(m_iteration_count)))
       {
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops(G, discovered, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
       }
-      else if ((5 <= m_optimization && m_optimization <= 7) && (aggressive || fatal_attractors_guard(m_iteration_count)))
+      else if ((5 <= m_options.optimization && m_options.optimization <= 7) && (m_options.aggressive || fatal_attractors_guard(m_iteration_count)))
       {
         simple_structure_graph G(m_graph_builder.vertices());
-        if (m_optimization == 5)
+        if (m_options.optimization == 5)
         {
           detail::fatal_attractors(G, S0, S1, m_iteration_count); // modifies S0 and S1
         }
-        else if (m_optimization == 6)
+        else if (m_options.optimization == 6)
         {
           detail::fatal_attractors_original(G, S0, S1, m_iteration_count); // modifies S0 and S1
         }

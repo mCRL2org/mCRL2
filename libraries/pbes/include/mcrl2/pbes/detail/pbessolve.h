@@ -24,10 +24,11 @@ namespace detail {
 
 bool pbessolve(const pbes& p)
 {
+  pbessolve_options options;
   pbes pbesspec = p;
   pbes_system::algorithms::normalize(pbesspec);
   structure_graph G;
-  pbesinst_structure_graph_algorithm algorithm(pbesspec, G);
+  pbesinst_structure_graph_algorithm algorithm(options, pbesspec, G);
   algorithm.run();
   return solve_structure_graph(G);
 }
