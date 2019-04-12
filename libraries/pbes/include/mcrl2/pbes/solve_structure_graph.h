@@ -361,7 +361,7 @@ class solve_structure_graph_algorithm
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
       assert(G.extent() > 0);
-      // assert(G.is_defined());
+      assert(G.is_defined());
       auto W = solve_recursive_extended(G);
       bool is_disjunctive;
       if (W.first.contains(G.initial_vertex()))

@@ -70,7 +70,7 @@ bool find_loop(const simple_structure_graph& G,
 
 void find_loops(const simple_structure_graph& G,
                 const std::unordered_set<propositional_variable_instantiation>& discovered,
-                const std::deque<propositional_variable_instantiation>& todo,
+                const pbesinst_lazy_todo& todo,
                 vertex_set& S0,
                 vertex_set& S1,
                 std::size_t iteration_count,
@@ -86,7 +86,7 @@ void find_loops(const simple_structure_graph& G,
 
   // compute todo_
   boost::dynamic_bitset<> todo_(n);
-  for (const propositional_variable_instantiation& X: todo)
+  for (const propositional_variable_instantiation& X: todo.all_elements())
   {
     structure_graph::index_type u = graph_builder.find_vertex(X);
     todo_[u] = true;

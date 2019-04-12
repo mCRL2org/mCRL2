@@ -24,9 +24,11 @@ namespace detail {
 
 inline
 void partial_solve(structure_graph& G,
+                   const pbesinst_lazy_todo& todo,
                    vertex_set& S0,
                    vertex_set& S1,
-                   std::size_t iteration_count
+                   std::size_t iteration_count,
+                   const detail::structure_graph_builder& graph_builder
                   )
 {
   mCRL2log(log::debug) << "Apply partial solve (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
@@ -46,14 +48,11 @@ void partial_solve(structure_graph& G,
   // compute Si_todo = Si \cup { v \in V | v.is_defined() }
   vertex_set S0_todo = S0;
   vertex_set S1_todo = S1;
-  for (structure_graph::index_type u = 0; u < G.all_vertices().size(); u++)
+  for (const propositional_variable_instantiation& X: todo.all_elements())
   {
-    const structure_graph::vertex& u_ = G.find_vertex(u);
-    if (!u_.is_defined())
-    {
-      S0_todo.insert(u);
-      S1_todo.insert(u);
-    }
+    structure_graph::index_type u = graph_builder.find_vertex(X);
+    S0_todo.insert(u);
+    S1_todo.insert(u);
   }
 
   bool check_strategy = false;

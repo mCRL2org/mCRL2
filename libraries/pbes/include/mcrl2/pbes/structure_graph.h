@@ -108,7 +108,7 @@ class structure_graph
 
       bool is_defined() const
       {
-        return decoration != structure_graph::d_none && rank != data::undefined_index();
+        return (decoration != structure_graph::d_none) || (rank != data::undefined_index());
       }
     };
 

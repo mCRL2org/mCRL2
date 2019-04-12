@@ -232,7 +232,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     }
 
     void reset(const propositional_variable_instantiation& init,
-               std::deque<propositional_variable_instantiation>& todo,
+               pbesinst_lazy_todo& todo,
                std::size_t regeneration_period
               ) override
     {
@@ -309,7 +309,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
 
-      std::swap(todo, new_todo);
+      todo.set_todo(new_todo);
     };
 
   public:
@@ -424,7 +424,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         else // m_optimization == 7
         {
           m_graph_builder.finalize();
-          detail::partial_solve(m_graph_builder.m_graph, S0, S1, m_iteration_count); // modifies S0 and S1
+          detail::partial_solve(m_graph_builder.m_graph, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
         }
       }
       if (!todo.empty())
@@ -438,7 +438,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
           // compute todo_
           vertex_set todo_(n);
-          for (const propositional_variable_instantiation& X: todo)
+          for (const propositional_variable_instantiation& X: todo.all_elements())
           {
             structure_graph::index_type v = m_graph_builder.find_vertex(X);
             todo_.insert(v);

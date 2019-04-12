@@ -44,6 +44,89 @@ namespace mcrl2
 namespace pbes_system
 {
 
+// This todo set maintains elements that were removed by the reset procedure.
+class pbesinst_lazy_todo
+{
+  protected:
+    std::unordered_set<propositional_variable_instantiation> removed;
+    std::deque<propositional_variable_instantiation> todo;
+
+  public:
+    const propositional_variable_instantiation& front() const
+    {
+      return todo.front();
+    }
+
+    const propositional_variable_instantiation& back() const
+    {
+      return todo.back();
+    }
+
+    bool empty() const
+    {
+      return todo.empty();
+    }
+
+    std::size_t size() const
+    {
+      return todo.size();
+    }
+
+    const std::deque<propositional_variable_instantiation>& elements() const
+    {
+      return todo;
+    }
+
+    const std::unordered_set<propositional_variable_instantiation>& removed_elements() const
+    {
+      return removed;
+    }
+
+    std::vector<propositional_variable_instantiation> all_elements() const
+    {
+      std::vector<propositional_variable_instantiation> result;
+      result.insert(result.end(), todo.begin(), todo.end());
+      result.insert(result.end(), removed.begin(), removed.end());
+      return result;
+    }
+
+    void pop_front()
+    {
+      todo.pop_front();
+    }
+
+    void pop_back()
+    {
+      todo.pop_back();
+    }
+
+    void push_back(const propositional_variable_instantiation& x)
+    {
+      removed.erase(x);
+      todo.push_back(x);
+    }
+
+    void push_front(const propositional_variable_instantiation& x)
+    {
+      removed.erase(x);
+      todo.push_front(x);
+    }
+
+    void set_todo(std::deque<propositional_variable_instantiation>& new_todo)
+    {
+      using utilities::detail::contains;
+      for (const propositional_variable_instantiation& x: todo)
+      {
+        // TODO: use a set here for efficiency?
+        if (!contains(new_todo, x))
+        {
+          removed.insert(x);
+        }
+      }
+      std::swap(todo, new_todo);
+    }
+};
+
 /// \brief A PBES instantiation algorithm that uses a lazy strategy
 class pbesinst_lazy_algorithm
 {
@@ -61,7 +144,7 @@ class pbesinst_lazy_algorithm
     enumerate_quantifiers_rewriter R;
 
     /// \brief The propositional variable instantiations that need to be handled.
-    std::deque<propositional_variable_instantiation> todo;
+    pbesinst_lazy_todo todo;
 
     /// \brief The propositional variable instantiations that have been discovered (not necessarily handled).
     std::unordered_set<propositional_variable_instantiation> discovered;
@@ -234,7 +317,7 @@ class pbesinst_lazy_algorithm
 
     // recreates todo
     virtual void reset(const propositional_variable_instantiation& /* init */,
-                       std::deque<propositional_variable_instantiation>& /* todo */,
+                       pbesinst_lazy_todo& /* todo */,
                        std::size_t /* regeneration_period */
                       )
     {}
