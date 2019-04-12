@@ -744,7 +744,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
           }
           else
           {
-            throw error("command line argument `--" + option + "' not recognised");
+            error("command line argument `--" + option + "' not recognised");
           }
         }
         else
@@ -758,7 +758,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
           {
             if (descriptor.needs_argument())
             {
-              throw error("expected argument to option `--" + option + "'!");
+              error("expected argument to option `--" + option + "'!");
             }
             else if (descriptor.m_argument.get() == nullptr)
             {
@@ -776,11 +776,11 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
 
             if (!descriptor.accepts_argument())
             {
-              throw error("did not expect argument to option `--" + option + "'");
+              error("did not expect argument to option `--" + option + "'");
             }
             else if (!descriptor.m_argument->validate(option_argument))
             {
-              throw error("argument `" + option_argument + "' to option `--" + option + "' is invalid");
+              error("argument `" + option_argument + "' to option `--" + option + "' is invalid");
             }
 
             m_options.insert(std::make_pair(long_option, option_argument));
@@ -800,7 +800,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
             // Assume that the argument is a short option
             if (d.m_short_to_long.find(argument[j]) == d.m_short_to_long.end())
             {
-              throw error("command line argument `-" + option + "' not recognised");
+              error("command line argument `-" + option + "' not recognised");
             }
             else
             {
@@ -824,7 +824,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
                   }
                   else
                   {
-                    throw error("expected argument to option `-" + option + "'");
+                    error("expected argument to option `-" + option + "'");
                   }
                 }
                 else
@@ -840,11 +840,11 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
 
                   if (!descriptor.accepts_argument())
                   {
-                    throw error("did not expect argument to option `-" + option + "'");
+                    error("did not expect argument to option `-" + option + "'");
                   }
                   else if (!descriptor.m_argument->validate(option_argument))
                   {
-                    throw error("argument `" + option_argument + "' to option `-" + option + "' is invalid");
+                    error("argument `" + option_argument + "' to option `-" + option + "' is invalid");
                   }
 
                   // must be the last option, so take the remainder as option argument
@@ -1060,8 +1060,8 @@ void command_line_parser::process_default_options(interface_description& d)
     {
       if (1 < m_options.count(i->first))
       {
-        throw error("option -" + (d.long_to_short(i->first) != '\0' ?
-                            std::string(1, d.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
+        error("option -" + (d.long_to_short(i->first) != '\0' ?
+              std::string(1, d.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
       }
     }
   }
