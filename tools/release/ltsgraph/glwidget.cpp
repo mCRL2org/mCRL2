@@ -462,7 +462,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
           int dx = e->pos().x() - m_dragstart.x();
           int dy = e->pos().y() - m_dragstart.y();
           QVector3D vec3(dx, -dy, 0);
-          camera.center(camera.center() + camera.rotation() * vec3);
+          camera.center(camera.center() + camera.rotation().conjugated() * vec3);
           break;
         }
       case dm_dragnode:
