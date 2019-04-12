@@ -91,7 +91,7 @@ class rewriter_tool: public Tool
     /// \return The rewrite strategy
     data::rewrite_strategy rewrite_strategy() const
     {
-      return data::rewrite_strategy(m_rewrite_strategy);
+      return m_rewrite_strategy;
     }
 
     /// \brief Creates a data rewriter as specified on the command line.

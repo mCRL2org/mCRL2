@@ -115,7 +115,6 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
                             "such as the total number of states explored, just remain visible. ");
       desc.add_option("no-store", "save the resulting LTS to disk while generating. Currently this only works "
                               "for .aut files.");
-      options.rewrite_strategy = rewrite_strategy();
     }
 
     std::list<std::string> split_actions(const std::string& s)
@@ -249,6 +248,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       {
         parser.error("Search strategy 'highway' requires that the option todo-max is set");
       }
+      options.rewrite_strategy = rewrite_strategy();
     }
 
     std::unique_ptr<lts::lts_builder> create_builder(const lps::specification& lpsspec)
