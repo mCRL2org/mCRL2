@@ -371,7 +371,10 @@ class pbesinst_lazy_algorithm
         {
           break;
         }
-        reset(init, todo, (discovered.size() - todo.size()) / 2);
+        if (m_options.reset_todo)
+        {
+          reset(init, todo, (discovered.size() - todo.size()) / 2);
+        }
       }
     }
 

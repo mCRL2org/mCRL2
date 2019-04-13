@@ -119,8 +119,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
-      options.check_strategy = parser.options.count("check-strategy") > 0;
-      if (parser.options.count("file") > 0)
+      options.check_strategy = parser.has_option("check-strategy");
+      if (parser.has_option("file"))
       {
         std::string filename = parser.option_argument("file");
         if (file_extension(filename) == "lps")
@@ -132,7 +132,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
           ltsfile = filename;
         }
       }
-      if (parser.options.count("evidence-file") > 0)
+      if (parser.has_option("evidence-file"))
       {
         evidence_file = parser.option_argument("evidence-file");
       }
@@ -142,11 +142,15 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.optimization));
       }
-      if (parser.options.count("aggressive") > 0)
+      if (parser.has_option("aggressive"))
       {
         options.aggressive = true;
       }
-      options.replace_constants_by_variables = parser.options.find("replace-constants-by-variables") != parser.options.end();
+      if (parser.has_option("prune-todo-list"))
+      {
+        options.reset_todo = true;
+      }
+      options.replace_constants_by_variables = parser.has_option("replace-constants-by-variables");
     }
 
     std::set<utilities::file_format> available_input_formats() const override
