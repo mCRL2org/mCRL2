@@ -151,6 +151,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         options.reset_todo = true;
       }
       options.replace_constants_by_variables = parser.has_option("replace-constants-by-variables");
+      options.rewrite_strategy = rewrite_strategy();
     }
 
     std::set<utilities::file_format> available_input_formats() const override
