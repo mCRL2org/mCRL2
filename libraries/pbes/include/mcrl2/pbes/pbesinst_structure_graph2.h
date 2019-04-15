@@ -230,10 +230,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return true;
     }
 
-    void reset(const propositional_variable_instantiation& init,
-               pbesinst_lazy_todo& todo,
-               std::size_t regeneration_period
-              ) override
+    void prune_todo_list(
+      const propositional_variable_instantiation& init,
+      pbesinst_lazy_todo& todo,
+      std::size_t regeneration_period
+    ) override
     {
       using utilities::detail::contains;
 

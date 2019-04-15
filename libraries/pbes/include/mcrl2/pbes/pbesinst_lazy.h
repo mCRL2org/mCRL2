@@ -78,11 +78,6 @@ class pbesinst_lazy_todo
       return todo;
     }
 
-    const std::unordered_set<propositional_variable_instantiation>& removed_elements() const
-    {
-      return removed;
-    }
-
     std::vector<propositional_variable_instantiation> all_elements() const
     {
       std::vector<propositional_variable_instantiation> result;
@@ -312,10 +307,11 @@ class pbesinst_lazy_algorithm
     }
 
     // recreates todo
-    virtual void reset(const propositional_variable_instantiation& /* init */,
-                       pbesinst_lazy_todo& /* todo */,
-                       std::size_t /* regeneration_period */
-                      )
+    virtual void prune_todo_list(
+      const propositional_variable_instantiation& /* init */,
+      pbesinst_lazy_todo& /* todo */,
+      std::size_t /* regeneration_period */
+    )
     {}
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
@@ -371,9 +367,9 @@ class pbesinst_lazy_algorithm
         {
           break;
         }
-        if (m_options.reset_todo)
+        if (m_options.prune_todo_list)
         {
-          reset(init, todo, (discovered.size() - todo.size()) / 2);
+          prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
         }
       }
     }

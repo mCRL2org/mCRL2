@@ -109,9 +109,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       "structure graph is solved.")
                     ,"use strategy STRATEGY",
                  's');
-      desc.add_option("replace-constants-by-variables", "move constant expressions to a substitution. "
-                     "This is an experimental feature that can save some rewriting."
-      );
+      desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_hidden_option("aggressive", "apply optimizations 4 and 5 at every iteration");
     }
 
@@ -120,6 +118,11 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     {
       super::parse_options(parser);
       options.check_strategy = parser.has_option("check-strategy");
+      options.replace_constants_by_variables = !parser.has_option("no-replace-constants-by-variables");
+      options.aggressive = parser.has_option("aggressive");
+      options.prune_todo_list = parser.has_option("prune-todo-list");
+      options.exploration_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
+      options.rewrite_strategy = rewrite_strategy();
       if (parser.has_option("file"))
       {
         std::string filename = parser.option_argument("file");
@@ -136,22 +139,11 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         evidence_file = parser.option_argument("evidence-file");
       }
-      options.exploration_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       options.optimization = parser.option_argument_as<int>("strategy");
       if (options.optimization < 0 || options.optimization > 7)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.optimization));
       }
-      if (parser.has_option("aggressive"))
-      {
-        options.aggressive = true;
-      }
-      if (parser.has_option("prune-todo-list"))
-      {
-        options.reset_todo = true;
-      }
-      options.replace_constants_by_variables = parser.has_option("replace-constants-by-variables");
-      options.rewrite_strategy = rewrite_strategy();
     }
 
     std::set<utilities::file_format> available_input_formats() const override
