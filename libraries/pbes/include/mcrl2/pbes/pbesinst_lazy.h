@@ -52,6 +52,21 @@ class pbesinst_lazy_todo
     std::unordered_set<propositional_variable_instantiation> removed;
     std::deque<propositional_variable_instantiation> todo;
 
+    // checks some invariants on the internal state
+    bool check_invariants() const
+    {
+      using utilities::detail::contains;
+      for (const auto& X: removed)
+      {
+        if (contains(todo, X))
+        {
+          return false;
+        }
+      }
+      std::unordered_set<propositional_variable_instantiation> tmp(todo.begin(), todo.end());
+      return tmp.size() == todo.size();
+    }
+
   public:
     const propositional_variable_instantiation& front() const
     {
@@ -76,6 +91,11 @@ class pbesinst_lazy_todo
     const std::deque<propositional_variable_instantiation>& elements() const
     {
       return todo;
+    }
+
+    const std::unordered_set<propositional_variable_instantiation>& removed_elements() const
+    {
+      return removed;
     }
 
     std::vector<propositional_variable_instantiation> all_elements() const
@@ -111,15 +131,25 @@ class pbesinst_lazy_todo
     void set_todo(std::deque<propositional_variable_instantiation>& new_todo)
     {
       using utilities::detail::contains;
-      for (const propositional_variable_instantiation& x: todo)
+      std::size_t size_before = todo.size() + removed.size();
+
+      std::unordered_set<propositional_variable_instantiation> new_removed;
+      for (const propositional_variable_instantiation& x: all_elements())
       {
-        // TODO: use a set here for efficiency?
         if (!contains(new_todo, x))
         {
-          removed.insert(x);
+          new_removed.insert(x);
         }
       }
       std::swap(todo, new_todo);
+      std::swap(removed, new_removed);
+
+      std::size_t size_after = todo.size() + removed.size();
+      if (size_before != size_after)
+      {
+        throw mcrl2::runtime_error("sizes do not match in pbesinst_lazy_todo::set_todo");
+      }
+      assert(check_invariants());
     }
 };
 

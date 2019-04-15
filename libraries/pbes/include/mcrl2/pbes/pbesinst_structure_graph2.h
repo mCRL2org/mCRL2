@@ -230,21 +230,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return true;
     }
 
-    // Checks if all nodes in the todo list are undefined (i.e. have not been processed yet)
-    bool check_todo_list(const detail::structure_graph_builder& graph_builder) const
-    {
-      for (const propositional_variable_instantiation& X: todo.all_elements())
-      {
-        structure_graph::index_type u = graph_builder.find_vertex(X);
-        const structure_graph::vertex& u_ = graph_builder.vertex(u);
-        if (u_.is_defined())
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-
     void prune_todo_list(
       const propositional_variable_instantiation& init,
       pbesinst_lazy_todo& todo,
@@ -261,7 +246,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       simple_structure_graph G(m_graph_builder.vertices());
       std::unordered_set<pbes_expression> todo1{init};
       std::unordered_set<pbes_expression> done1;
-      std::deque<propositional_variable_instantiation> new_todo;
+      std::unordered_set<propositional_variable_instantiation> new_todo;
 
       while (!todo1.empty())
       {
@@ -320,12 +305,28 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         if (u_.decoration == structure_graph::d_none && u_.successors.empty())
         {
           assert(is_propositional_variable_instantiation(u_.formula));
-          new_todo.push_back(atermpp::down_cast<propositional_variable_instantiation>(u_.formula));
+          new_todo.insert(atermpp::down_cast<propositional_variable_instantiation>(u_.formula));
         }
       }
 
-      todo.set_todo(new_todo);
-      assert(check_todo_list(m_graph_builder));
+      // put the elements of new_todo in the right order
+      std::deque<propositional_variable_instantiation> new_todo_list;
+      for (const propositional_variable_instantiation& X: todo.removed_elements())
+      {
+        if (contains(new_todo, X))
+        {
+          new_todo_list.push_back(X);
+        }
+      }
+      for (const propositional_variable_instantiation& X: todo.elements())
+      {
+        if (contains(new_todo, X))
+        {
+          new_todo_list.push_back(X);
+        }
+      }
+      todo.set_todo(new_todo_list);
+      check_todo_list();
     };
 
   public:
