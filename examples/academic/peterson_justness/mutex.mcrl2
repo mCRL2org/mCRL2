@@ -1,0 +1,279 @@
+%% Peterson's mutual exclusion algorithm for two parties
+%% 
+%% The description is based on the one found in the (submitted) paper
+%%
+%% [BLW19] Mark Bouwman, Bas Luttik and Tim Willemse:
+%%       'Action-Based Justness for Automated Verification of Liveness'
+%%
+%% In this paper, Peterson's algorithm is used to illustrate how
+%% an action-based phrasing of just paths can lead to a formal
+%% verification of liveness using model checking. Justness is a
+%% weaker, more realistic assumption than fairness; it is studied
+%% by Van Glabbeek et al. The parameterised modal mu-calculus formula 
+%% justlive.mcf formalises the concept that on all *just* paths
+%% a critA action inevitably follows a noncritA action. It is an
+%% instance of the a-b-liveness property described in [BLW19].
+%% To make this work elegantly, the actions performed in Peterson's 
+%% algorithm are mapped to data values of the data type Action, which
+%% can be recorded/observed by the modal mu-calculus formula. Note
+%% that, alternatively, the justlive formula can be instantiated
+%% to a standard modal mu-calculus formula that is doubly-exponential
+%% in the size of the set of non-blocking actions.
+
+sort Action =
+  struct
+    a_assign_readyA |
+    a_read_readyA |
+    a_assign_readyB|
+    a_read_readyB |
+    a_assign_turnA |
+    a_assign_turnB |
+    a_read_turnA |
+    a_read_turnB |
+    a_critA |
+    a_critB |
+    a_noncritA |
+    a_noncritB
+  ;
+
+sort
+  TurnType= struct A | B;
+act
+  assign_readyA,r_assign_readyA,s_assign_readyA: Bool;
+  assign_readyB,r_assign_readyB,s_assign_readyB: Bool;
+  assign_turnA,r_assign_turnA,s_assign_turnA;
+  assign_turnB,r_assign_turnB,s_assign_turnB;
+  read_readyA,r_read_readyA,s_read_readyA: Bool;
+  read_readyB,r_read_readyB,s_read_readyB: Bool;
+  read_turnA,r_read_turnA,s_read_turnA;
+  read_turnB,r_read_turnB,s_read_turnB;
+  noncritA, critA, noncritB, critB;
+  action:Action;
+  
+proc
+  ReadyA(b: Bool) =
+    sum b':Bool.r_assign_readyA(b').ReadyA(b')
+  + s_read_readyA(b)|action(a_read_readyA).ReadyA();
+  
+  ReadyB(b: Bool) =
+    sum b':Bool.r_assign_readyB(b').ReadyB(b')
+  + s_read_readyB(b)|action(a_read_readyB).ReadyB();
+  
+  Turn(t: TurnType) =
+    r_assign_turnA.Turn(A)
+  + r_assign_turnB.Turn(B)
+  + (t==A) -> s_read_turnA|action(a_read_turnA).Turn()
+  + (t==B) -> s_read_turnB|action(a_read_turnB).Turn();
+  
+  procA =
+    noncritA|action(a_noncritA).
+      s_assign_readyA(true)|action(a_assign_readyA).
+        s_assign_turnB|action(a_assign_turnB).
+	  sum rA,rB: Bool, t:TurnType.
+	    (r_read_readyB(false)+r_read_turnA).
+              critA|action(a_critA).
+	        s_assign_readyA(false)|action(a_assign_readyA).procA;
+	    
+  procB =
+    noncritB|action(a_noncritB).
+      s_assign_readyB(true)|action(a_assign_readyB).
+        s_assign_turnA|action(a_assign_turnA).
+	  sum rA,rB: Bool, t:TurnType.
+	    (r_read_readyA(false)+r_read_turnB).
+	      critB|action(a_critB).
+	        s_assign_readyB(false)|action(a_assign_readyB).procB;
+
+init
+hide({assign_readyA,
+      read_readyA,
+      assign_readyB,
+      read_readyB,
+      assign_turnA,
+      assign_turnB,
+      read_turnA,
+      read_turnB,
+      critA,
+      critB,
+      noncritA,
+      noncritB},
+%hide({action},
+  allow({assign_readyA|action,
+	 read_readyA|action,
+	 assign_readyB|action,
+  	 read_readyB|action,
+  	 assign_turnA|action,
+  	 assign_turnB|action,
+  	 read_turnA|action,
+  	 read_turnB|action,
+  	 critA|action,
+  	 critB|action,
+  	 noncritA|action,
+  	 noncritB|action},
+      comm({r_assign_readyA|s_assign_readyA->assign_readyA,
+	    r_read_readyA|s_read_readyA -> read_readyA,
+            r_assign_readyB|s_assign_readyB->assign_readyB,
+	    r_read_readyB|s_read_readyB -> read_readyB,
+ 	    r_assign_turnA|s_assign_turnA ->assign_turnA,
+ 	    r_assign_turnB|s_assign_turnB ->assign_turnB,
+	    r_read_turnA|s_read_turnA -> read_turnA,
+	    r_read_turnB|s_read_turnB -> read_turnB},
+	      procA||procB||ReadyA(false)||ReadyB(false)||Turn(A)
+      )
+  )
+);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% THE DATA TYPES AND FUNCTIONS DEFINED BELOW ARE NEEDED TO
+%%% CLASSIFY THE ACTIONS AS BLOCKING/NON-BLOCKING AND SIGNALLING
+%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+sort Actions=Set(Action);
+
+sort Component =
+  struct
+    c_ReadyA |
+    c_ReadyB |
+    c_Turn |
+    c_procA |
+    c_procB
+  ;
+sort Components=Set(Component);
+map
+  needed:Action -> Components;
+eqn
+  needed(a_assign_readyA)={c_procA,c_ReadyA};
+  needed(a_read_readyA)={c_procB, c_ReadyA};
+  needed(a_assign_readyB)={c_procB, c_ReadyB};
+  needed(a_read_readyB)={c_procA, c_ReadyB};
+  needed(a_assign_turnA)={c_procB, c_Turn};
+  needed(a_assign_turnB)={c_procA, c_Turn};
+  needed(a_read_turnA)={c_procA, c_Turn};
+  needed(a_read_turnB)={c_procB, c_Turn};
+  needed(a_critA)={c_procA};
+  needed(a_critB)={c_procB};
+  needed(a_noncritA)={c_procA};
+  needed(a_noncritB)={c_procB};
+
+map
+  affected:Action -> Components;
+eqn
+  affected(a_assign_readyA)={c_procA, c_ReadyA};
+  affected(a_read_readyA)={c_procB};
+  affected(a_assign_readyB)={c_procB, c_ReadyB};
+  affected(a_read_readyB)={c_procA};
+  affected(a_assign_turnA)={c_procB, c_Turn};
+  affected(a_assign_turnB)={c_procA, c_Turn};
+  affected(a_read_turnA)={c_procA};
+  affected(a_read_turnB)={c_procB};
+  affected(a_critA)={c_procA};
+  affected(a_critB)={c_procB};
+  affected(a_noncritA)={c_procA};
+  affected(a_noncritB)={c_procB};
+
+map
+  elim: Action -> Actions;
+  conflict: Action#Action -> Bool;
+var
+  a,a': Action;
+eqn
+  elim(a) = {a'':Action | exists c:Component. c in needed(a'') && c in affected(a)};
+  conflict(a,a')=exists c:Component.(c in needed(a) && c in affected(a'));
+  
+map
+  blocking:Action -> Bool;
+eqn
+  blocking(a_noncritA)=true;
+  blocking(a_noncritB)=true;
+  blocking(a_assign_readyA)=false;
+  blocking(a_read_readyA)=false;
+  blocking(a_assign_readyB)=false;
+  blocking(a_read_readyB)=false;
+  blocking(a_assign_turnA)=false;
+  blocking(a_assign_turnB)=false;
+  blocking(a_read_turnA)=false;
+  blocking(a_read_turnB)=false;
+  blocking(a_critA)=false;
+  blocking(a_critB)=false;
+
+
+%%%%%%%%%%%%%%%%%%%
+%% BLOCKING ACTIONS
+%%%%%%%%%%%%%%%%%%%
+%
+% noncritA
+%   necessary participants: procA
+%   affected participants: procA
+% noncritB
+%   necessary participants: procB
+%   affected participants: procB
+%
+%%%%%%%%%%%%%%%%%%%%%%%
+%% NON-BLOCKING ACTIONS
+%%%%%%%%%%%%%%%%%%%%%%%
+%
+% assign_readyA
+%   necessary participants: procA, ReadyA
+%   affected components: procA, ReadyA
+% read_readyB
+%   necessary participants: procA, ReadyB
+%   affected components: procA
+% assign_readyB
+%   necessary participants: procB, ReadyB
+%   affected components: procB, ReadyB
+%% read_readyA:
+%   necessary participants: procB, ReadyA
+%   affected components: procB
+% assign_turn(A)
+%   necessary participants: procB, Turn
+%   affected components: procB, Turn
+% assign_turn(B):
+%   necessary participants: procA, Turn
+%   affected components: procA, Turn
+% read_turn(A)
+%   necessary participants: procA, Turn
+%   affected components: procA
+% read_turn(B):
+%   necessary participants: procB, Turn
+%   affected components: procB
+% critA
+%   necessary participants: procA
+%   affected components: procA
+% critB
+%   necessary participants: procB
+%   affected components: procB
+%
+%%%%%%%%%%%%%%%%%%%%
+%% AFFECTS COMPONENT
+%%%%%%%%%%%%%%%%%%%%
+%
+% ReadyA:
+%   assign_readyA
+% ReadyB:
+%   assign_readyB
+% Turn:
+%   assign_turn
+% ProcA:
+%   noncritA, assign_readyA, read_readyB, assign_turn(B),
+%   read_turn(A), critA
+% ProcB:
+%   noncritB, assign_readyB, read_readyA, assign_turn(A),
+%   read_turn(B), critB
+%
+%%%%%%%%%%%%%%%%%%
+%% NEEDS COMPONENT
+%%%%%%%%%%%%%%%%%%
+%
+% ReadyA:
+%   assign_readyA, read_readyA
+% ReadyB:
+%   assign_readyB, read_readyB
+% Turn:
+%   assign_turn, read_turn
+% ProcA:
+%   noncritA, assign_readyA, read_readyB, assign_turn(B),
+%   read_turn(A), critA
+% ProcB:
+%   noncritB, assign_readyB, read_readyA, assign_turn(A),
+%   read_turn(B), critB

@@ -1,0 +1,30 @@
+! mu W(O: Actions={}).
+%% X_O
+(
+  ( forall a:Action. ( val(!blocking(a) && !(a in O)) && <action(a)>true ) => W(O+{a}) )
+&&
+  ( ( exists a:Action. ( val(!blocking(a) && !(a in O)) && <action(a)>true ) )
+ ||     ( <action(a_noncritA)>(
+         nu Y(O': Actions=O-elim(a_noncritA)).
+            ( forall a:Action. (val(!blocking(a) && !(a in O')) && <action(a)>true) => Y(O'+{a}) )
+         && ( ( exists a':Action. val(!blocking(a') && !(a' in O')) && <action(a')>true)
+            ||
+              forall a:Action. val(a in O') => (
+	        mu Q(O'':Actions=O').
+                 (  ( forall a':Action. ( val(!blocking(a') && !(a' in O'')) && <action(a')>true ) => Q(O'' + {a'}) )
+                 &&
+                    ( ( exists a':Action. ( val(!blocking(a') && !(a' in O'')) && <action(a')>true ) )
+                    ||
+                      ( exists a':Action. val(conflict(a,a') &&  (a'!=a_critA)) && <action(a')>Y(O''-elim(a')) )
+                    || 
+	  	      ( exists a':Action. val(!conflict(a,a') && (a'!=a_critA)) && <action(a')>Q(O''-elim(a')) )
+                    )
+                 )
+              )
+           )
+      )
+    )
+ ||
+    ( exists a:Action. <action(a)>W(O-elim(a)) )
+  )
+)
