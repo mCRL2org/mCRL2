@@ -230,6 +230,21 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return true;
     }
 
+    // Checks if all nodes in the todo list are undefined (i.e. have not been processed yet)
+    bool check_todo_list(const detail::structure_graph_builder& graph_builder) const
+    {
+      for (const propositional_variable_instantiation& X: todo.all_elements())
+      {
+        structure_graph::index_type u = graph_builder.find_vertex(X);
+        const structure_graph::vertex& u_ = graph_builder.vertex(u);
+        if (u_.is_defined())
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     void prune_todo_list(
       const propositional_variable_instantiation& init,
       pbesinst_lazy_todo& todo,
@@ -310,6 +325,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
 
       todo.set_todo(new_todo);
+      assert(check_todo_list(m_graph_builder));
     };
 
   public:
