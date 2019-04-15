@@ -70,7 +70,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  "extension of the file should be .lps in case of an LPS file, in all other cases it is assumed to "
                  "be an LTS.",
                  'f');
-      desc.add_option("prune-todo-list", "Prune the todo list periodically (experimental). ");
+      desc.add_option("prune-todo-list", "Prune the todo list periodically (experimental). It is only enabled "
+                                         " for strategies 3 and higher.");
       desc.add_option("evidence-file",
                       utilities::make_file_argument("NAME"),
                       "The file to which the evidence is written. If not set, a default name will be chosen.");
@@ -109,8 +110,8 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       "structure graph is solved.")
                     ,"use strategy STRATEGY",
                  's');
-      desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
-      desc.add_hidden_option("aggressive", "apply optimizations 4 and 5 at every iteration");
+      desc.add_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
+      desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
     }
 
 
@@ -143,6 +144,10 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       if (options.optimization < 0 || options.optimization > 7)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.optimization));
+      }
+      if (options.prune_todo_list && options.optimization < 3)
+      {
+        mCRL2log(log::warning) << "Option --prune-todo-list has no effect for strategies less than 3." << std::endl;
       }
     }
 

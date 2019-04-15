@@ -397,7 +397,7 @@ class pbesinst_lazy_algorithm
         {
           break;
         }
-        if (m_options.prune_todo_list)
+        if (m_options.prune_todo_list && m_options.optimization >= 3)
         {
           prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
         }
