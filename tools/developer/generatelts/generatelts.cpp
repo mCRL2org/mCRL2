@@ -184,12 +184,12 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
           parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
-      if (output_format == lts::lts_none)
+      if (output_format == lts::lts_none && !output_filename().empty())
       {
         output_format = lts::detail::guess_format(output_filename());
         if (output_format == lts::lts_none)
         {
-          mCRL2log(log::warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
+          mCRL2log(log::warning) << "no output format set or detected; using default (lts)" << std::endl;
           output_format = lts::lts_lts;
         }
       }
@@ -262,7 +262,8 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
           }
         case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder(lpsspec.data(), lpsspec.action_labels()));
         case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder(lpsspec.data(), lpsspec.action_labels()));
-        default: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels()));
+        case lts::lts_lts: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels()));
+        default: return std::unique_ptr<lts::lts_builder>(new lts::lts_none_builder());
       }
     }
 

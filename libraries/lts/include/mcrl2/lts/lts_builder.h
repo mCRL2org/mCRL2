@@ -60,8 +60,20 @@ struct lts_builder
   virtual ~lts_builder() = default;
 };
 
+class lts_none_builder: public lts_builder
+{
+  public:
+    void add_transition(std::size_t /* from */, const process::timed_multi_action& /* a */, std::size_t /* to */) override
+    {}
 
-class lts_aut_builder: public lts_builder
+    void finalize(const std::unordered_map<lps::state, std::size_t>& /* state_map */) override
+    {}
+
+    void save(const std::string& /* filename */) override
+    {}
+};
+
+    class lts_aut_builder: public lts_builder
 {
   protected:
     lts_aut_t m_lts;
