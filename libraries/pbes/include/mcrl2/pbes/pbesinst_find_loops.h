@@ -104,6 +104,9 @@ void find_loops(const simple_structure_graph& G,
   }
 
   std::unordered_map<structure_graph::index_type, bool> visited;
+  bool b0 = false;
+  bool b1 = false;
+
   for (structure_graph::index_type u: done.vertices())
   {
     const auto& u_ = G.find_vertex(u);
@@ -124,15 +127,25 @@ void find_loops(const simple_structure_graph& G,
       if (u_.rank % 2 == 0)
       {
         S0.insert(u);
+        b0 = true;
         insertion_count++;
         mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S0" << std::endl;
       }
       else
       {
         S1.insert(u);
+        b1 = true;
         insertion_count++;
         mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S1" << std::endl;
       }
+    }
+    if (b0)
+    {
+      S0 = compute_attractor_set(G, S0, 0);
+    }
+    if (b1)
+    {
+      S1 = compute_attractor_set(G, S1, 1);
     }
   }
 

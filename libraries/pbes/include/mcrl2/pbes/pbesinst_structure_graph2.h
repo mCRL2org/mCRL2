@@ -419,7 +419,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void on_end_while_loop() override
     {
-      if (!todo.empty())
+      if (!todo.elements().empty() || !todo.removed_elements().empty())
       {
         auto u = m_graph_builder.find_vertex(init);
         if (S0.contains(u) || S1.contains(u))
