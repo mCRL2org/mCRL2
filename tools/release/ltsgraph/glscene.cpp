@@ -245,10 +245,6 @@ void GLScene::render(QPainter& painter)
     renderNode(sel ? m_graph.selectionNode(i) : i, viewProjMatrix);
   }
 
-  // All arrowheads and arcs are black.
-  QVector3D arrowhead_color(0.0f, 0.0f, 0.0f);
-  m_global_shader.setColor(arrowhead_color);
-
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     renderEdge(sel ? m_graph.selectionEdge(i) : i, viewProjMatrix);
@@ -416,7 +412,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     if (isVisible(to, fog))
     {
       // Apply the fog color.
-      m_global_shader.setColor(applyFog(QVector3D(0, 0, 0), fog));
+      m_global_shader.setColor(applyFog(arcColor, fog));
 
       QMatrix4x4 worldMatrix;
 
