@@ -297,8 +297,10 @@ GLScene::Selection GLScene::select(int x, int y)
   Selection s{SelectableObject::none, 0};
   selectObject(s, x, y, SelectableObject::node)
     || selectObject(s, x, y, SelectableObject::handle)
-    || selectObject(s, x, y, SelectableObject::label)
-    || selectObject(s, x, y, SelectableObject::slabel)
+    // Only select transition labels when they are rendered
+    || (m_drawtransitionlabels && selectObject(s, x, y, SelectableObject::label))
+    // Only select state labels when they are rendered
+    || (m_drawstatelabels && selectObject(s, x, y, SelectableObject::slabel))
     ;
   return s;
 }
