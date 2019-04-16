@@ -333,12 +333,12 @@ ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::mark_term(_aterm& root)
 {
   // Do not use the stack, because this might run out of stack memory for large lists.
-  todo.push(&root);
+  todo.push(root);
 
   // Mark the term depth-first to reduce the maximum todo size required.
   while (!todo.empty())
   {
-    _aterm& term = *todo.top();
+    _aterm& term = todo.top();
     todo.pop();
 
     // (Statically) determine the arity of the function application.
@@ -357,7 +357,7 @@ void ATERM_POOL_STORAGE::mark_term(_aterm& root)
         argument.mark();
 
         // Add the argument to be explored as well.
-        todo.push(&argument);
+        todo.push(argument);
       }
     }
 

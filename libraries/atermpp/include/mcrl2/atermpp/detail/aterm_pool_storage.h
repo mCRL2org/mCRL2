@@ -183,7 +183,7 @@ private:
   std::size_t m_erasedBlocks = 0; // The number of blocks that have been erased in the block allocator.
 
   /// A reusable todo stack.
-  std::stack<_aterm*> todo;
+  std::stack<std::reference_wrapper<_aterm>> todo;
 };
 
 } // namespace detail
