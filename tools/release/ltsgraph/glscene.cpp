@@ -248,10 +248,7 @@ void GLScene::render(QPainter& painter)
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     renderEdge(sel ? m_graph.selectionEdge(i) : i, viewProjMatrix);
-  }
 
-  for (std::size_t i = 0; i < edgeCount; ++i)
-  {
     renderHandle(sel ? m_graph.selectionEdge(i) : i, viewProjMatrix);
   }
 
