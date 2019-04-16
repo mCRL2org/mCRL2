@@ -368,18 +368,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         S0.insert(u);
         if (m_options.optimization > 2)
         {
-          // Compute the attractor set U of u, and add it to S0
-          auto N = G.size();
-          vertex_set U(N);
-          U.insert(u);
-          U = compute_attractor_set(G, U, 0);
-          for (auto v: U.vertices())
-          {
-            if (v != u)
-            {
-              S0.insert(v);
-            }
-          }
+          S0 = compute_attractor_set(G, S0, 0);
         }
       }
       else if (is_false(b))
@@ -387,18 +376,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         S1.insert(u);
         if (m_options.optimization > 2)
         {
-          // Compute the attractor set U of u, and add it to S1
-          auto N = G.size();
-          vertex_set U(N);
-          U.insert(u);
-          U = compute_attractor_set(G, U, 1);
-          for (auto v: U.vertices())
-          {
-            if (v != u)
-            {
-              S1.insert(v);
-            }
-          }
+          S1 = compute_attractor_set(G, S1, 1);
         }
       }
       if (S0_guard(S0.size()))
@@ -437,6 +415,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           detail::partial_solve(m_graph_builder.m_graph, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
         }
       }
+    }
+
+    void on_end_while_loop() override
+    {
       if (!todo.empty())
       {
         auto u = m_graph_builder.find_vertex(init);

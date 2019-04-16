@@ -301,6 +301,10 @@ class pbesinst_lazy_algorithm
     virtual void on_end_iteration()
     { }
 
+    /// \brief This function is called right after the while loop is finished.
+    virtual void on_end_while_loop()
+    { }
+
     propositional_variable_instantiation next_todo()
     {
       if (m_options.exploration_strategy == breadth_first)
@@ -397,11 +401,13 @@ class pbesinst_lazy_algorithm
         {
           break;
         }
+
         if (m_options.prune_todo_list && m_options.optimization >= 3)
         {
           prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
         }
       }
+      on_end_while_loop();
     }
 
     const pbes_equation_index& equation_index() const

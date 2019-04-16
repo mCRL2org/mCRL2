@@ -37,9 +37,23 @@
 
 \newcommand{\up}{\blacktriangle}
 \newcommand{\down}{\blacktriangledown}
+
+%--- pseudo code ---%
+\newcommand{\Space}{\text{\ }}
+\newcommand{\If}{\text{\textbf{if }}}
+\newcommand{\Do}{\text{\textbf{do }}}
+\newcommand{\Then}{\text{\textbf{then }}}
+\newcommand{\Else}{\text{\textbf{else }}}
+\newcommand{\For}{\text{\textbf{for }}}
+\newcommand{\While}{\text{\textbf{while }}}
+\newcommand{\Break}{\text{\textbf{break }}}
+\newcommand{\Continue}{\text{\textbf{continue }}}
+\newcommand{\Choose}{\text{\textbf{choose }}}
+\newcommand{\Return}{\text{\textbf{return }}}
+
 \begin{document}
 
-\title{PBES instantiation and solving}
+\title{PBES Instantiation and Solving}
 \author{Wieger Wesselink, Tim Willemse}
 \maketitle
 
@@ -285,7 +299,7 @@ decoration $\top $ or $\bot$. This algorithm is based on Zielonka's recursive al
 \text{\textbf{if} }V=\emptyset \text{ \textbf{then return }}(\emptyset
 ,\emptyset ) \\ 
 m:=\min (\{r(v)\mid v\in V\}) \\ 
-\alpha :=m \mod 2 \\ 
+\alpha := m \bmod 2 \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
 A:=\text{\textsc{Attr}}\left( U,\alpha \right)  \\ 
 W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
@@ -318,7 +332,7 @@ cannot be used for counter example generation(!)
 \text{\textbf{if} }V=\emptyset \text{ \textbf{then return }}(\emptyset
 ,\emptyset ) \\ 
 m:=\min (\{r(v)\mid v\in V\}) \\ 
-\alpha :=m \mod 2 \\ 
+\alpha := m \bmod 2 \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
 A:=\text{\textsc{Attr}}\left( U,\alpha \right)  \\ 
 W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
@@ -374,7 +388,7 @@ W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
 \qquad B:=\text{\textsc{Attr}}\left( W_{1-\alpha }^{\prime },1-\alpha \right)  \\ 
 \qquad W_{0},W_{1}:=\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
 \qquad W_{1-\alpha }:=W_{1-\alpha }\cup B \\ 
-\text{\textbf{return }}W_{0},W_{1}%
+\Return W_{0},W_{1}%
 \end{array}%
 \end{equation*}%
 
@@ -391,7 +405,7 @@ precondition: V \subseteq dom(r) \cup dom(d) \\
 \text{\textbf{if} }V=\emptyset \text{ \textbf{then return }}(\emptyset
 ,\emptyset ) \\ 
 m:=\min (\{r(v)\mid v\in V\}) \\ 
-\alpha :=m \mod 2 \\ 
+\alpha := m \bmod 2 \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
 \colorbox{lightgray}{$
 \text{\textbf{for} }u\in U\text{ \textbf{if} }d(u)=\alpha \wedge succ(u)\neq
@@ -406,7 +420,7 @@ B:=\text{\textsc{Attr}}\left( W_{1-\alpha }^{\prime },1-\alpha \right)  \\
 \text{\textbf{else}} \\ 
 \qquad W_{0},W_{1}:=\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
 \qquad W_{1-\alpha }:=W_{1-\alpha }\cup B \\ 
-\text{\textbf{return }}W_{0},W_{1}
+\Return W_{0},W_{1}
 \end{array}
 \end{equation*}
 with
@@ -424,7 +438,7 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 \lbrack u]:=v\text{ \textbf{with} }v\in A\cap succ(u) $}\\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
-\text{\textbf{return }}A%
+\Return A%
 \end{array}%
 \end{equation*}%
 Note that the mapping $\tau$ is a global variable of \textsc{Attr}, which is ugly.
@@ -457,7 +471,7 @@ discovered:=\{init\} \\
 (V,E) := (V,E) \cup SG^{0}(X_{k}(e),\psi ^{e}) $}\\
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\text{\textbf{return }}G%
+\Return (V, E)%
 \end{array}%
 \end{equation*}
 
@@ -534,7 +548,7 @@ discovered:=\{init\} \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\text{\textbf{return }}G,%
+\Return (V, E),%
 \end{array}%
 \end{equation*}%
 
@@ -604,7 +618,7 @@ S_1 := S_1 \cup \{ X^e \mid \psi^e \equiv false \} $}\\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\text{\textbf{return }}G,%
+\Return (V, E),%
 \end{array}%
 \end{equation*}%
 
@@ -673,7 +687,7 @@ S_1:= \emptyset $}\\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\text{\textbf{return }}(V, E)
+\Return (V, E)
 \end{array}%
 \end{equation*}%
 
@@ -695,13 +709,13 @@ $S_0$ or $S_1$, we can terminate the search. This leads to the following modifie
 \textsc{PbesinstStructureGraph$_{3}$(}\mathcal{E}, X_{init}(e_{init}), R) \\ 
 init:=R(X_{init}(e_{init})) \\
 todo:=\{init\} \\
+\colorbox{lightgray}{$removed := \emptyset$} \\
 discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
 S_0:= \emptyset \\
 S_1:= \emptyset \\
-\textbf{while }todo\neq \emptyset%
-\colorbox{lightgray}{$%
-\wedge X_{init}(e_{init}) \notin S_0 \cup S_1 $}%
+\textbf{while }todo\neq \emptyset
+\colorbox{lightgray}{$\wedge X_{init}(e_{init}) \notin S_0 \cup S_1 $}
 \textbf{ do} \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
@@ -716,21 +730,41 @@ S_1:= \emptyset \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
+\qquad \colorbox{lightgray}{$todo, removed := \textsc{PruneTodo}(init, todo, removed) $}\\
 \colorbox{lightgray}{$
 \textbf{if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_0 \textbf{ then }
 $}\\
-\colorbox{lightgray}{$
-\qquad V := V \setminus \textsc{Attr}(todo, 1)
-$}\\
+\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo \cup removed, 1)$}\\
 \colorbox{lightgray}{$
 \textbf{else if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then }
 $}\\
-\colorbox{lightgray}{$
-\qquad V := V \setminus \textsc{Attr}(todo, 0)
-$}\\
-\textbf{return }(V, E)
-\end{array}%
-\end{equation*}%
+\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo \cup removed, 0)$}\\
+\textbf{return }(V, E),
+\end{array}
+\end{equation*}
+
+where \textsc{PruneTodo} is defined as
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{PruneTodo}(init, todo, removed) \\ 
+todo' := \{init\} \\
+done' := \{init\} \\
+new\_todo := \emptyset \\
+\While done' \neq \emptyset \Space \Do \\
+\qquad \Choose u \in todo' \\
+\qquad todo' := todo' \setminus \{ u \} \\
+\qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Space \Then \\
+\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup done')) \\
+\qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Space \Then \\
+\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup done')) \\
+\qquad \If d(u) = \bot \wedge succ(u) = \emptyset \Space \Then \\
+\qquad \qquad new\_todo := new\_todo \cup \{ u \} \\
+new\_todo := new\_todo \cap (todo \cup removed) \\
+new\_removed := (todo \cup removed) \setminus new\_todo \\
+\Return new\_todo, new\_removed
+\end{array}
+\end{equation*}
 
 Further needless instantiation can be avoided by utilising the attractor
 strategies that are set when extending $S_0$ and $S_1$ by, once in a while, computing
@@ -847,7 +881,7 @@ S_0, S_1 := \text{\textsc{FindLoops}}(discovered, todo, S_0, S_1) $}\\  %w is re
 \qquad V := V \setminus \textsc{Attr}(todo, 1) \\
 \textbf{else if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then }\\
 \qquad V := V \setminus \textsc{Attr}(todo, 0) \\
-\text{\textbf{return }}(V, E)
+\Return (V, E)
 \end{array}%
 \end{equation*}%
 
@@ -934,7 +968,7 @@ S_0, S_1 := \text{\textsc{FatalAttractors}}(V, S_0, S_1) $}\\  %w is reachable f
 \qquad V := V \setminus \textsc{Attr}(todo, 1) \\
 \textbf{else if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then }\\
 \qquad V := V \setminus \textsc{Attr}(todo, 0) \\
-\text{\textbf{return }}(V, E)
+\Return (V, E)
 \end{array}%
 \end{equation*}%
 
@@ -965,7 +999,7 @@ pred^{\geq j}(u, U) \setminus X)  \\
 \text{\textsc{FatalAttractorsOriginal}}(V, S_0, S_1)\\
 J := \{ j \mid \exists u \in V : r(u) = j \} \\
 \textbf{for } j \in J \\
-\qquad \alpha := j \mod 2\\
+\qquad \alpha := j \bmod 2\\
 \qquad U_j := \{u \in V \mid r(u) = j \wedge (\alpha = 0 \Rightarrow d(u) \neq false) 
 \wedge (\alpha = 1 \Rightarrow d(u) \neq true) \} \setminus S_{1-\alpha} \\
 \qquad X := \emptyset \\
@@ -974,7 +1008,7 @@ J := \{ j \mid \exists u \in V : r(u) = j \} \\
 \qquad \qquad Y := \textsc{AttrMinRankOriginal}(X \cup S_\alpha, \alpha, V, j) \\
 \qquad \qquad \textbf{if } U_j \subseteq Y \\
 \qquad \qquad \qquad S_\alpha := S_\alpha \cup Y \\
-\qquad \qquad \qquad break \\
+\qquad \qquad \qquad \textbf{break} \\
 \qquad \qquad \textbf{else }\\
 \qquad \qquad \qquad U_j := U_j \cap Y\\
 \textbf{return } \textsc{Attr}(S_0, 0), \textsc{Attr}(S_1, 1)
@@ -1011,7 +1045,7 @@ S_0, S_1 := \textsc{PartialSolve}(V,todo,S_0,S_1) $}\\
 \qquad V := V \setminus \textsc{Attr}(todo, 1) \\
 \textbf{else if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then }\\
 \qquad V := V \setminus \textsc{Attr}(todo, 0) \\
-\text{\textbf{return }}(V, E)
+\Return (V, E)
 \end{array}
 \end{equation*}
 where \textsc{PartialSolve} is defined as
