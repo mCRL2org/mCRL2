@@ -103,11 +103,11 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       " needed to generate an equation substantially. N.B. This"
                       " optimization may cause stack overflow issues.")
                     .add_value_desc(5, "A generalization of strategy 4, where a so-called"
-                      "fatal attractor is applied.")
+                      " fatal attractor is applied.")
                     .add_value_desc(6, "A generalization of strategy 4, where the original"
-                      "fatal attractor computation is applied.")
+                      " fatal attractor computation is applied.")
                     .add_value_desc(7, "A generalization of strategy 4, where the partial"
-                      "structure graph is solved.")
+                      " structure graph is solved.")
                     ,"use strategy STRATEGY",
                  's');
       desc.add_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
