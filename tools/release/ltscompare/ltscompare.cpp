@@ -273,16 +273,6 @@ class ltscompare_tool : public ltscompare_base
     {
       ltscompare_base::parse_options(parser);
 
-      if (parser.options.count("equivalence") > 1)
-      {
-        parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
-      }
-
-      if (parser.options.count("preorder") > 1)
-      {
-        parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
-      }
-
       tool_options.equivalence = parser.option_argument_as<lts_equivalence>("equivalence");
       tool_options.preorder = parser.option_argument_as<lts_preorder>("preorder");
 
@@ -344,11 +334,6 @@ class ltscompare_tool : public ltscompare_base
 
       if (parser.has_option("in1"))
       {
-        if (1 < parser.options.count("in1"))
-        {
-          mCRL2log(warning) << "multiple input formats specified for first LTS; can only use one\n";
-        }
-
         tool_options.format_for_first = mcrl2::lts::detail::parse_format(parser.option_argument("in1"));
 
         if (tool_options.format_for_first == lts_none)
@@ -368,11 +353,6 @@ class ltscompare_tool : public ltscompare_base
       }
       if (parser.has_option("in2"))
       {
-        if (1 < parser.options.count("in2"))
-        {
-          mCRL2log(warning) << "multiple input formats specified for second LTS; can only use one\n";
-        }
-
         tool_options.format_for_second = mcrl2::lts::detail::parse_format(parser.option_argument("in2"));
 
         if (tool_options.format_for_second == lts_none)
