@@ -286,32 +286,32 @@ class ltscompare_tool : public ltscompare_base
       tool_options.equivalence = parser.option_argument_as<lts_equivalence>("equivalence");
       tool_options.preorder = parser.option_argument_as<lts_preorder>("preorder");
 
-      if (parser.options.count("counter-example")>0 && parser.options.count("preorder")==1)
+      if (parser.has_option("counter-example") && parser.has_option("preorder"))
       {
-        if (tool_options.preorder==lts_pre_sim)
+        if (tool_options.preorder == lts_pre_sim)
         {
           parser.error("counter examples cannot be used with simulation pre-order");
         }
-        if (tool_options.preorder==lts_pre_ready_sim)
+        if (tool_options.preorder == lts_pre_ready_sim)
         {
           parser.error("counter examples cannot be used with ready simulation pre-order");
         }
-        if (tool_options.preorder==lts_pre_trace)
+        if (tool_options.preorder == lts_pre_trace)
         {
           parser.error("counter examples cannot be used with the plain trace pre-order (use trace-ac instead)");
         }
-        if (tool_options.preorder==lts_pre_weak_trace)
+        if (tool_options.preorder == lts_pre_weak_trace)
         {
           parser.error("counter examples cannot be used with the plain weak trace pre-order (use weak-trace-ac instead");
         }
       }
 
-      if (parser.options.count("tau"))
+      if (parser.has_option("tau"))
       {
         set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
       }
 
-      tool_options.generate_counter_examples=parser.options.count("counter-example")>0;
+      tool_options.generate_counter_examples = parser.has_option("counter-example");
 
       if (parser.arguments.size() == 1)
       {
@@ -323,7 +323,7 @@ class ltscompare_tool : public ltscompare_base
         tool_options.name_for_second = parser.arguments[1];
       } // else something strange going on, caught in check_preconditions()
 
-      if (parser.options.count("strategy"))
+      if (parser.has_option("strategy"))
       {
         tool_options.strategy = mcrl2::lps::parse_exploration_strategy(parser.option_argument("strategy"));
 
@@ -342,7 +342,7 @@ class ltscompare_tool : public ltscompare_base
         }
       }
 
-      if (parser.options.count("in1"))
+      if (parser.has_option("in1"))
       {
         if (1 < parser.options.count("in1"))
         {
@@ -366,7 +366,7 @@ class ltscompare_tool : public ltscompare_base
         mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
         tool_options.format_for_first = lts_aut;
       }
-      if (parser.options.count("in2"))
+      if (parser.has_option("in2"))
       {
         if (1 < parser.options.count("in2"))
         {
