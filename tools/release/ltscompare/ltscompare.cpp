@@ -322,13 +322,15 @@ class ltscompare_tool : public ltscompare_base
           mCRL2log(mcrl2::log::warning) << "Generated counter example might not be the shortest with the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
         }
 
+        // Check whether the strategy option was passed for a preorder check where it applies or that no preorder check is performed.
         if (tool_options.preorder != lts_pre_trace_anti_chain
             && tool_options.preorder != lts_pre_weak_trace_anti_chain
             && tool_options.preorder != lts_pre_failures_refinement
             && tool_options.preorder != lts_pre_weak_failures_refinement
-            && tool_options.preorder != lts_pre_failures_divergence_refinement)
+            && tool_options.preorder != lts_pre_failures_divergence_refinement
+            && tool_options.preorder != lts_pre_none)
         {
-          parser.error("strategy can only be chosen for antichain based algorithms.");
+          mCRL2log(warning) << "The option -s, --strategy only works for antichain based algorithms.\n";
         }
       }
 
