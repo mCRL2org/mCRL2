@@ -17,9 +17,10 @@
 
 #include "mcrl2/utilities/unordered_set_iterator.h"
 
-#include "mcrl2/utilities/detail/bucket_list.h"
+#include "mcrl2/utilities/const.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/spinlock.h"
+#include "mcrl2/utilities/detail/bucket_list.h"
 
 namespace mcrl2
 {
@@ -106,6 +107,11 @@ public:
   /// \returns An iterator to the next key.
   iterator erase(iterator it);
 
+  /// \brief Searches whether an object Key(args...) occurs in the set.
+  /// \returns An iterator to the matching element or the end when this object does not exist.
+  template<typename...Args>
+  const_iterator find(const Args&... args) const;
+
   template<typename...Args>
   iterator find(const Args&... args);
 
@@ -126,10 +132,9 @@ public:
   NodeAllocator& allocator() noexcept { return m_allocator; }
 
 private:
-
   /// \returns The bucket that might contain the element constructed by the given arguments.
   template<typename ...Args>
-  Bucket& find_bucket(const Args&... args)
+  const Bucket& find_bucket(const Args&... args) const
   {
     std::size_t hash = Hash()(args...);
     /// n mod 2^i is equal to n & (2^i - 1).
@@ -137,6 +142,13 @@ private:
     std::size_t buffer = hash & m_buckets_mask;
     assert(buffer < m_buckets.size());
     return m_buckets[buffer];
+  }
+
+  template<typename ...Args>
+  Bucket& find_bucket(const Args&... args)
+  {
+    // Avoid code duplicate by calling the const version and making the resulting bucket reference non-const.
+    return const_cast<Bucket&>(as_const(*this).find_bucket(args...));
   }
 
   /// \brief Inserts a bucket node into the hash table.

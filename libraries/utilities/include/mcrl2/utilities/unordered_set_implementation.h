@@ -6,9 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#pragma once
 #ifndef MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H
 #define MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H
+#pragma once
 
 #define MCRL2_UNORDERED_SET_TEMPLATES template<typename Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
 #define MCRL2_UNORDERED_SET_CLASS unordered_set<Key, Hash, Equals, Allocator, ThreadSafe>
@@ -60,6 +60,24 @@ void MCRL2_UNORDERED_SET_CLASS::erase(Key& key)
       ++it;
     }
   }
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
+typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args) const
+{
+  const Bucket& bucket = find_bucket(args...);
+
+  for(typename Bucket::const_iterator it = bucket.begin(); it != bucket.end(); ++it)
+  {
+    auto& key = *it;
+    if (Equals()(key, args...))
+    {
+      return const_iterator(it);
+    }
+  }
+
+  return end();
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
