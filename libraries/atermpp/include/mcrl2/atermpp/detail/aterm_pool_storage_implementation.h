@@ -232,15 +232,14 @@ void ATERM_POOL_STORAGE::call_creation_hook(aterm term)
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::call_deletion_hook(_aterm* term)
+void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
 {
   for (auto& pair : m_deletion_hooks)
   {
-    if (pair.first == term->function())
+    if (pair.first == term.function())
     {
       // Create a temporary unprotected term to upcast to an actual term.
-      unprotected_aterm actual_term(term);
-      pair.second(static_cast<const aterm&>(actual_term));
+      pair.second(static_cast<const aterm&>(term));
     }
   }
 }

@@ -143,7 +143,7 @@ private:
   void call_creation_hook(aterm term);
 
   /// \brief Calls the deletion hook attached to the function symbol of this term.
-  void call_deletion_hook(_aterm* term);
+  void call_deletion_hook(unprotected_aterm term);
 
   /// \brief Removes an element from the unordered set and deallocates it.
   iterator destroy(iterator it);
