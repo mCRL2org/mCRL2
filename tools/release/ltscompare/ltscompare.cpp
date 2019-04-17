@@ -148,7 +148,7 @@ class ltscompare_tool : public ltscompare_base
     }
 
   public:
-    bool run()
+    bool run() override
     {
       check_preconditions();
 
@@ -193,12 +193,12 @@ class ltscompare_tool : public ltscompare_base
     }
 
   protected:
-    std::string synopsis() const
+    std::string synopsis() const override
     {
       return "[OPTION]... [INFILE1] INFILE2";
     }
 
-    void check_positional_options(const command_line_parser& parser)
+    void check_positional_options(const command_line_parser& parser) override
     {
       if (2 < parser.arguments.size())
       {
@@ -217,7 +217,7 @@ class ltscompare_tool : public ltscompare_base
       tau_actions.push_back(act_names.substr(lastpos));
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       ltscompare_base::add_options(desc);
 
@@ -269,7 +269,7 @@ class ltscompare_tool : public ltscompare_base
                  "generate counter example traces if the input lts's are not equivalent",'c');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       ltscompare_base::parse_options(parser);
 
