@@ -20,11 +20,8 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
-using namespace mcrl2;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::detail;
-using namespace mcrl2::core;
-using namespace mcrl2::data;
+using mcrl2::data::data_expression;
+using mcrl2::data::variable;
 
 namespace mcrl2
 {
@@ -193,7 +190,7 @@ public:
     typedef parity_game_generator::operation_type operation_type;
 private:
     pbes& p;
-    pbes_greybox_interface* pgg;
+    detail::pbes_greybox_interface* pgg;
     bool reset_option;
     bool always_split_option;
     lts_type type;
@@ -338,7 +335,7 @@ protected:
     /// \param pgg
     /// \param reset
     /// \param always_split
-    lts_info(pbes& p, pbes_greybox_interface* pgg, bool reset, bool always_split);
+    lts_info(pbes& p, detail::pbes_greybox_interface* pgg, bool reset, bool always_split);
 
 public:
 
@@ -482,7 +479,7 @@ protected:
     const data_expression& get_data_value(int type_no, int index);
 
     /// \brief the PBES greybox interface
-    pbes_greybox_interface* pgg;
+    detail::pbes_greybox_interface* pgg;
 
 public:
     /// \brief Constructor.

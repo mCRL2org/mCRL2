@@ -18,12 +18,6 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_explorer.h"
 
-using namespace atermpp;
-using namespace mcrl2;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::detail;
-using namespace mcrl2::core;
-using namespace mcrl2::data;
 
 namespace mcrl2
 {
@@ -168,14 +162,14 @@ void lts_type::add_edge_label(const std::string& name,
 
 /// lts_info
 
-lts_info::lts_info(pbes& p, pbes_greybox_interface* pgg, bool reset = false, bool always_split = false):
+lts_info::lts_info(pbes& p, detail::pbes_greybox_interface* pgg, bool reset = false, bool always_split = false):
     p(p),
     pgg(pgg),
     reset_option(reset),
     always_split_option(always_split),
     type(0)
 {
-    if (!is_ppg(p))
+    if (!detail::is_ppg(p))
     {
         throw std::runtime_error("PBES is not a PPG! Please rewrite with pbesrewr -pppg.");
     }
@@ -194,7 +188,7 @@ void lts_info::compute_lts_type()
     std::map<std::string,std::string> paramtypes;
     data::representative_generator default_expression_generator(p.data());
 
-    for (auto & eqn : p.equations()) 
+    for (const auto& eqn : p.equations())
     {
         //std::clog << core::pp((*eqn).symbol()) << " " << (*eqn).variable().name()
         //        << std::endl;
@@ -222,8 +216,7 @@ void lts_info::compute_lts_type()
     this->type.add_state("var", "string"); // Propositional variable name
 
     int i = 0;
-    for (auto & param : params) {
-        std::string signature = param;
+    for (const std::string& signature: params) {
         this->type.add_state(signature, paramtypes[signature]);
         this->param_index[signature] = i;
         i++;
@@ -270,6 +263,10 @@ inline bool lts_info::is_pass_through_state(const propositional_variable_instant
                 ++param_it;
             }
         }
+    }
+    if(params != values)
+    {
+      throw mcrl2::runtime_error("is_pass_through_state check failed on " + data::pp(params) + " " + data::pp(values));
     }
     return true;
 }
@@ -410,7 +407,7 @@ void lts_info::compute_transition_groups()
     int priority = 0;
     operation_type type = parity_game_generator::PGAME_AND;
     fixpoint_symbol symbol = fixpoint_symbol::nu();
-    ppg_visitor checker;
+    detail::ppg_visitor checker;
 
     std::string name = "true";
     propositional_variable t{core::identifier_string(name), data::variable_list()};
@@ -1245,11 +1242,11 @@ void ltsmin_state::add_parameter_value(const data_expression& value)
 
 pbes_expression ltsmin_state::to_pbes_expression() const
 {
-    data_expression_vector parameter_values;
+    data::data_expression_vector parameter_values;
     for (const auto & param_value : param_values) {
         parameter_values.push_back(param_value);
     }
-    data_expression_list parameter_values_list(parameter_values.begin(), parameter_values.end());
+    data::data_expression_list parameter_values_list(parameter_values.begin(), parameter_values.end());
     // Create propositional variable instantiation.
     propositional_variable_instantiation expr =
             propositional_variable_instantiation(core::identifier_string(var), parameter_values_list);
@@ -1288,13 +1285,13 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
         //std::clog << "varname = " << variable_name << std::endl;
     }
     pbes_system::algorithms::normalize(p);
-    if (!is_ppg(p))
+    if (!detail::is_ppg(p))
     {
         mCRL2log(log::info) << "Rewriting to PPG..." << std::endl;
         p = detail::to_ppg(p);
         mCRL2log(log::info) << "Rewriting done." << std::endl;
     }
-    this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
+    this->pgg = new detail::pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
     //std::clog << "explorer" << std::endl;
     for (std::size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); ++i) {
@@ -1310,7 +1307,7 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
 explorer::explorer(const pbes& p_, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
 {
     p = p_;
-    this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
+    this->pgg = new detail::pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
     //std::clog << "explorer" << std::endl;
     for (std::size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
@@ -1596,7 +1593,7 @@ ltsmin_state explorer::from_state_vector(int* const& src)
         //std::clog << "from_state_vector:   " << values[i].to_string() << std::endl;
     }
     //std::clog << "from_state_vector: values done." << std::endl;
-    data_expression_vector parameters;
+    data::data_expression_vector parameters;
     std::vector<int> parameter_indices =
             detail::map_at(info->get_variable_parameter_indices(), varname);
     for (int & parameter_indice : parameter_indices) {
@@ -1611,7 +1608,7 @@ ltsmin_state explorer::from_state_vector(int* const& src)
     {
         throw(std::runtime_error("Error in from_state_vector: NoValue in parameters."));
     }
-    data_expression_list paramlist(parameters.begin(), parameters.end());
+    data::data_expression_list paramlist(parameters.begin(), parameters.end());
     propositional_variable_instantiation state_expression(varname, paramlist);
     //std::clog << "from_state_vector: state_expression = " << state_expression.to_string() << std::endl;
     ltsmin_state state = this->get_state(state_expression);
