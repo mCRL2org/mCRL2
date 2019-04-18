@@ -94,19 +94,12 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     QCheckBox* cbOpt = NULL;
     QVBoxLayout *lytOpt = new QVBoxLayout();
 
-    if (option.argument.type == EnumArgument)
-    {
-      nameOpt = new QLabel("<b>"+option.nameLong+": </b>");
-    }
-    else
-    {
-      cbOpt = new QCheckBox(option.nameLong + ": ", this);
-      cbOpt->setChecked(option.standard);
-      QFont font(cbOpt->font());
-      font.setBold(true);
-      cbOpt->setFont(font);
-      nameOpt = cbOpt;
-    }
+    cbOpt = new QCheckBox(option.nameLong + ": ", this);
+    cbOpt->setChecked(option.standard);
+    QFont font(cbOpt->font());
+    font.setBold(true);
+    cbOpt->setFont(font);
+    nameOpt = cbOpt;
 
     formLayout->addRow(nameOpt, lytOpt);
 
