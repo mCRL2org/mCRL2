@@ -318,8 +318,8 @@ class divergence_detector
     const std::string& filename_prefix;
     trace_constructor m_local_trace_constructor;
     std::unordered_map<lps::state, std::size_t> m_divergent_states;
-    std::vector<lps::explorer::explorer_summand> m_regular_summands;
-    std::vector<lps::explorer::explorer_summand> m_confluent_summands;
+    std::vector<lps::explorer_summand> m_regular_summands;
+    std::vector<lps::explorer_summand> m_confluent_summands;
     std::size_t m_trace_count = 0;
     std::size_t m_max_trace_count;
     bool m_timed;
@@ -340,7 +340,7 @@ class divergence_detector
     {
       using utilities::detail::contains;
 
-      auto is_hidden = [&](const lps::explorer::explorer_summand& summand)
+      auto is_hidden = [&](const lps::explorer_summand& summand)
       {
         for (const process::action& a: summand.multi_action.actions())
         {
@@ -352,7 +352,7 @@ class divergence_detector
         return true;
       };
 
-      for (const lps::explorer::explorer_summand& summand: explorer.regular_summands())
+      for (const lps::explorer_summand& summand: explorer.regular_summands())
       {
         if (is_hidden(summand))
         {
@@ -360,7 +360,7 @@ class divergence_detector
         }
       }
 
-      for (const lps::explorer::explorer_summand& summand: explorer.confluent_summands())
+      for (const lps::explorer_summand& summand: explorer.confluent_summands())
       {
         if (is_hidden(summand))
         {

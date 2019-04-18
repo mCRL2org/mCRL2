@@ -316,87 +316,98 @@ void check_stochastic_state(const stochastic_state& s)
   // TODO
 }
 
+struct explorer_summand
+{
+  data::variable_list variables;
+  data::data_expression condition;
+  process::timed_multi_action multi_action;
+  stochastic_distribution distribution;
+  std::vector<data::data_expression> next_state;
+  std::size_t index;
+
+  // attributes for caching
+  caching cache_strategy;
+  std::vector<data::variable> gamma;
+  atermpp::function_symbol f_gamma;
+  mutable std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
+
+  template <typename ActionSummand>
+  explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
+    : variables(summand.summation_variables()),
+      condition(summand.condition()),
+      multi_action(summand.multi_action().actions(), summand.multi_action().time()),
+      distribution(summand_distribution(summand)),
+      next_state(make_data_expression_vector(summand.next_state(process_parameters))),
+      index(summand_index),
+      cache_strategy(cache_strategy_)
+  {
+    gamma = free_variables(summand.condition(), process_parameters);
+    if (cache_strategy_ == caching::global)
+    {
+      gamma.insert(gamma.begin(), data::variable());
+    }
+    f_gamma = atermpp::function_symbol("@gamma", gamma.size());
+  }
+
+  template <typename T>
+  std::vector<data::variable> free_variables(const T& x, const data::variable_list& v)
+  {
+    using utilities::detail::contains;
+    std::set<data::variable> FV = data::find_free_variables(x);
+    std::vector<data::variable> result;
+    for (const data::variable& vi: v)
+    {
+      if (contains(FV, vi))
+      {
+        result.push_back(vi);
+      }
+    }
+    return result;
+  }
+
+  atermpp::term_appl<data::data_expression> compute_key(data::mutable_indexed_substitution<>& sigma) const
+  {
+    if (cache_strategy == caching::global)
+    {
+      bool is_first_element = true;
+      return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
+                                                       [&](const data::variable& x)
+                                                       {
+                                                         if (is_first_element)
+                                                         {
+                                                           is_first_element = false;
+                                                           return condition;
+                                                         }
+                                                         return sigma(x);
+                                                       }
+      );
+    }
+    else
+    {
+      return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
+                                                       [&](const data::variable& x)
+                                                       {
+                                                         return sigma(x);
+                                                       }
+      );
+    }
+  }
+};
+
+inline
+std::ostream& operator<<(std::ostream& out, const explorer_summand& summand)
+{
+  return out << lps::stochastic_action_summand(
+    summand.variables,
+    summand.condition,
+    lps::multi_action(summand.multi_action.actions(), summand.multi_action.time()),
+    data::make_assignment_list(summand.variables, summand.next_state),
+    summand.distribution
+  );
+}
+
 class explorer
 {
-  public:
-    struct explorer_summand
-    {
-      data::variable_list variables;
-      data::data_expression condition;
-      process::timed_multi_action multi_action;
-      stochastic_distribution distribution;
-      std::vector<data::data_expression> next_state;
-      std::size_t index;
-
-      // attributes for caching
-      caching cache_strategy;
-      std::vector<data::variable> gamma;
-      atermpp::function_symbol f_gamma;
-      mutable std::unordered_map<atermpp::term_appl<data::data_expression>, std::list<data::data_expression_list>> local_cache;
-
-      template <typename ActionSummand>
-      explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
-        : variables(summand.summation_variables()),
-          condition(summand.condition()),
-          multi_action(summand.multi_action().actions(), summand.multi_action().time()),
-          distribution(summand_distribution(summand)),
-          next_state(make_data_expression_vector(summand.next_state(process_parameters))),
-          index(summand_index),
-          cache_strategy(cache_strategy_)
-      {
-        gamma = free_variables(summand.condition(), process_parameters);
-        if (cache_strategy_ == caching::global)
-        {
-          gamma.insert(gamma.begin(), data::variable());
-        }
-        f_gamma = atermpp::function_symbol("@gamma", gamma.size());
-      }
-
-      template <typename T>
-      std::vector<data::variable> free_variables(const T& x, const data::variable_list& v)
-      {
-        using utilities::detail::contains;
-        std::set<data::variable> FV = data::find_free_variables(x);
-        std::vector<data::variable> result;
-        for (const data::variable& vi: v)
-        {
-          if (contains(FV, vi))
-          {
-            result.push_back(vi);
-          }
-        }
-        return result;
-      }
-
-      atermpp::term_appl<data::data_expression> compute_key(data::mutable_indexed_substitution<>& sigma) const
-      {
-        if (cache_strategy == caching::global)
-        {
-          bool is_first_element = true;
-          return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
-                                                           [&](const data::variable& x)
-                                                           {
-                                                             if (is_first_element)
-                                                             {
-                                                               is_first_element = false;
-                                                               return condition;
-                                                             }
-                                                             return sigma(x);
-                                                           }
-          );
-        }
-        else
-        {
-          return atermpp::term_appl<data::data_expression>(f_gamma, gamma.begin(), gamma.end(),
-                                                           [&](const data::variable& x)
-                                                           {
-                                                             return sigma(x);
-                                                           }
-          );
-        }
-      }
-    };
-
   protected:
     typedef data::enumerator_list_element_with_substitution<> enumerator_element;
 
@@ -1235,12 +1246,6 @@ class explorer
       add_assignments(sigma, m_process_parameters, values);
     }
 };
-
-inline
-std::ostream& operator<<(std::ostream& out, const explorer::explorer_summand& s)
-{
-  return out << "(" << s.condition << ") -> " << s.multi_action << " . P(" << core::detail::print_arguments(s.next_state) << ")";
-}
 
 } // namespace lps
 
