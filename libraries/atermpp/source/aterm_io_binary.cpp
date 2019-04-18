@@ -15,24 +15,24 @@
 /* includes */
 
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_io_implementation.h"
 #include "mcrl2/atermpp/indexed_set.h"
 
+#include "mcrl2/utilities/block_allocator.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/platform.h"
+#include "mcrl2/utilities/unordered_map.h"
+#include "mcrl2/utilities/unused.h"
 
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
 #include <stdexcept>
-#include <unordered_set>
-#include <unordered_map>
 #include <bitset>
 
 #ifdef MCRL2_PLATFORM_WINDOWS
@@ -50,6 +50,17 @@ namespace atermpp
 
 using detail::readInt;
 using detail::writeInt;
+
+/// \brief Defines an unordered map that uses the block allocator to store its internal <key, value> pairs.
+template<typename Key, typename T>
+using unordered_map = mcrl2::utilities::unordered_map<
+  Key,
+  T,
+  std::hash<Key>,
+  std::equal_to<Key>,
+  mcrl2::utilities::detail::allocator_adapter<
+    Key,
+    mcrl2::utilities::block_allocator<Key>>>;
 
 using namespace std;
 
@@ -404,7 +415,7 @@ static const aterm& subterm(const aterm& t, std::size_t i)
  */
 static void add_term(sym_write_entry& entry, const aterm& term,
   const indexed_set<function_symbol>& symbol_index_map,
-  std::unordered_map<aterm, std::size_t>& term_index_map,
+  unordered_map<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   term_index_map[term] = entry.num_terms++;
@@ -468,7 +479,7 @@ static sym_write_entry& initialize_function_symbol(const function_symbol& func,
  */
 static void collect_terms(const aterm& t,
   indexed_set<function_symbol>& symbol_index_map,
-  std::unordered_map<aterm, std::size_t>& term_index_map,
+  unordered_map<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
@@ -544,7 +555,7 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
  */
 static void write_term(const aterm& t, ostream& os,
   const indexed_set<function_symbol>& symbol_index_map,
-  const std::unordered_map<aterm, std::size_t>& term_index_map,
+  const unordered_map<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
@@ -596,7 +607,7 @@ static void write_baf(const aterm& t, ostream& os)
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
   indexed_set<function_symbol> symbol_index_map;
-  std::unordered_map<aterm, std::size_t> term_index_map;
+  unordered_map<aterm, std::size_t> term_index_map;
   std::vector<sym_write_entry> sym_entries;
 
   collect_terms(t, symbol_index_map, term_index_map, sym_entries);
