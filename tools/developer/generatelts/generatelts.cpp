@@ -17,9 +17,11 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/explorer.h"
-#include "mcrl2/lps/detail/lps_io.h"
+#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/stochastic_lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/detail/transform_tool.h"
@@ -251,7 +253,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.rewrite_strategy = rewrite_strategy();
     }
 
-    std::unique_ptr<lts::lts_builder> create_builder(const lps::specification& lpsspec)
+    std::unique_ptr<lts::lts_builder> create_lts_builder(const lps::specification& lpsspec)
     {
       switch (output_format)
       {
@@ -267,16 +269,35 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       }
     }
 
+    std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& /* lpsspec */)
+    {
+      return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_builder());
+    }
+
     bool run() override
     {
       mCRL2log(log::verbose) << options << std::endl;
       options.trace_prefix = input_filename();
-      lps::specification lpsspec = lps::detail::load_lps(input_filename());
-      std::unique_ptr<lts::lts_builder> builder = create_builder(lpsspec);
-      lts::state_space_generator generator(lpsspec, options);
-      current_explorer = &generator.explorer;
-      generator.explore(*builder);
-      builder->save(output_filename());
+      lps::stochastic_specification stochastic_lpsspec;
+      lps::load_lps(stochastic_lpsspec, input_filename());
+
+      if (lps::is_stochastic(stochastic_lpsspec))
+      {
+        std::unique_ptr<lts::stochastic_lts_builder> builder = create_stochastic_lts_builder(stochastic_lpsspec);
+        lts::stochastic_state_space_generator generator(stochastic_lpsspec, options);
+        current_explorer = &generator.explorer;
+        generator.explore(*builder);
+        builder->save(output_filename());
+      }
+      else
+      {
+        lps::specification lpsspec = lps::remove_stochastic_operators(stochastic_lpsspec);
+        std::unique_ptr<lts::lts_builder> builder = create_lts_builder(lpsspec);
+        lts::state_space_generator generator(lpsspec, options);
+        current_explorer = &generator.explorer;
+        generator.explore(*builder);
+        builder->save(output_filename());
+      }
       return true;
     }
 

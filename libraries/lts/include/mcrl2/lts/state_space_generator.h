@@ -180,8 +180,9 @@ class action_detector
     }
 
   public:
+    template <typename Specification>
     action_detector(
-      const lps::specification& lpsspec,
+      const Specification& lpsspec,
       trace_constructor& trace_constructor_,
       const std::set<core::identifier_string>& trace_actions_,
       const std::set<lps::multi_action>& trace_multiactions_,
@@ -620,6 +621,125 @@ struct state_space_generator
           {
             m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size);
           }
+        }
+      );
+      m_progress_monitor.finish_exploration(explorer.state_map().size());
+      builder.finalize(explorer.state_map());
+    }
+    catch (const lps::enumerator_error& e)
+    {
+      mCRL2log(log::error) << "Error while exploring state space: " << e.what() << "\n";
+      if (options.save_error_trace)
+      {
+        const lps::state& s = *source;
+        trace::Trace tr = m_trace_constructor.construct_trace(s);
+        std::string filename = options.trace_prefix + "_error.trc";
+        detail::save_trace(tr, filename);
+      }
+      mCRL2log(log::info) << ".\n";
+    }
+  }
+};
+
+struct stochastic_state_space_generator
+{
+  const lps::explorer_options& options;
+  lps::explorer explorer;
+  detail::trace_constructor m_trace_constructor;
+
+  detail::action_detector m_action_detector;
+  detail::deadlock_detector m_deadlock_detector;
+  detail::nondeterminism_detector m_nondeterminism_detector;
+  std::unique_ptr<detail::divergence_detector> m_divergence_detector;
+  detail::progress_monitor m_progress_monitor;
+  bool m_timed = false;
+
+  stochastic_state_space_generator(const lps::stochastic_specification& lpsspec, const lps::explorer_options& options_)
+    : options(options_),
+      explorer(lpsspec, options_),
+      m_trace_constructor(explorer),
+      m_action_detector(lpsspec, m_trace_constructor, options.trace_actions, options.trace_multiactions, options.trace_prefix, options.max_traces),
+      m_deadlock_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
+      m_nondeterminism_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
+      m_progress_monitor(options.search_strategy)
+  {
+    if (options.detect_divergence)
+    {
+      m_divergence_detector = std::unique_ptr<detail::divergence_detector>(new detail::divergence_detector(explorer, m_timed, options.actions_internal_for_divergencies, options.trace_prefix, options.max_traces));
+    }
+  }
+
+  // Explore the specification passed via the constructor, and put the results in builder.
+  void explore(stochastic_lts_builder& builder)
+  {
+    bool has_outgoing_transitions;
+    const lps::state* source = nullptr;
+
+    try
+    {
+      explorer.generate_stochastic_state_space(
+        false,
+
+        // discover_state
+        [&](const lps::state& s, std::size_t s_index)
+        {
+          if (options.generate_traces && source)
+          {
+            m_trace_constructor.add_edge(*source, s);
+          }
+          if (options.detect_divergence)
+          {
+            m_divergence_detector->detect_divergence(s, s_index, m_trace_constructor);
+          }
+        },
+
+        // examine_transition
+        [&](const lps::state& s0, std::size_t s0_index, const process::timed_multi_action& a, const lps::stochastic_state& s1, const std::list<std::size_t>& s1_index, std::size_t summand_index)
+        {
+          builder.add_transition(s0_index, a, s1_index, s1.probabilities);
+          has_outgoing_transitions = true;
+          if (options.detect_action)
+          {
+            m_action_detector.detect_action(s0, s0_index, lps::multi_action(a.actions(), a.time()), s1.states.front(), summand_index);
+          }
+          if (options.detect_nondeterminism)
+          {
+            m_nondeterminism_detector.detect_nondeterminism(s0, s0_index, lps::multi_action(a.actions(), a.time()), s1.states.front());
+          }
+          if (!options.suppress_progress_messages)
+          {
+            m_progress_monitor.examine_transition();
+          }
+        },
+
+        // start_state
+        [&](const lps::state& s, std::size_t /* s_index */)
+        {
+          source = &s;
+          has_outgoing_transitions = false;
+          if (options.detect_nondeterminism)
+          {
+            m_nondeterminism_detector.start_state();
+          }
+        },
+
+        // finish_state
+        [&](const lps::state& s, std::size_t s_index, std::size_t todo_list_size)
+        {
+          if (options.detect_deadlock && !has_outgoing_transitions)
+          {
+            m_deadlock_detector.detect_deadlock(s, s_index);
+          }
+          if (!options.suppress_progress_messages)
+          {
+            m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size);
+          }
+        },
+
+        // discover_initial_state
+        [&](const lps::stochastic_state& s, const std::list<std::size_t>& s_index)
+        {
+          builder.set_initial_state(s_index, s.probabilities);
         }
       );
       m_progress_monitor.finish_exploration(explorer.state_map().size());

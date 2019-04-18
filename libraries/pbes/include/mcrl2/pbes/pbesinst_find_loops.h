@@ -110,10 +110,8 @@ void find_loops(const simple_structure_graph& G,
   for (structure_graph::index_type u: done.vertices())
   {
     const auto& u_ = G.find_vertex(u);
-    if (u_.rank == data::undefined_index())
-    {
-      continue;
-    }
+    assert(u_.rank != data::undefined_index());
+
     mCRL2log(log::debug) << "--- choose u = " << u << std::endl;
     auto i = visited.find(u);
     if (i != visited.end())

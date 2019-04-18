@@ -73,7 +73,7 @@ class lts_none_builder: public lts_builder
     {}
 };
 
-    class lts_aut_builder: public lts_builder
+class lts_aut_builder: public lts_builder
 {
   protected:
     lts_aut_t m_lts;
