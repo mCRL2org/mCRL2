@@ -25,6 +25,16 @@ namespace utilities
 {
 
 MCRL2_UNORDERED_SET_TEMPLATES
+void MCRL2_UNORDERED_SET_CLASS::clear()
+{
+  // A naive implementation of erasing all elements.
+  for (auto it = begin(); it != end(); )
+  {
+    it = erase(it);
+  }
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
 typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::iterator it)
 {
   // Find the bucket that is pointed to and remove the key after the before iterator.

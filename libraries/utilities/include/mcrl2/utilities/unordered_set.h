@@ -86,6 +86,8 @@ public:
     m_buckets_mask = m_buckets.size() - 1;
   }
 
+  ~unordered_set() { clear(); }
+
   /// \returns An iterator over all keys.
   iterator begin() { return iterator(m_buckets.begin(), m_buckets.end(), typename Bucket::iterator(*m_buckets.begin())); }
   iterator end() { return iterator(m_buckets.end()); }
@@ -93,6 +95,9 @@ public:
   /// \returns A const iterator over all keys.
   const_iterator begin() const { return const_iterator(m_buckets.begin(), m_buckets.end(), typename Bucket::const_iterator(*m_buckets.begin())); }
   const_iterator end() const { return const_iterator(m_buckets.end()); }
+
+  /// \brief Removes all elements from the set.
+  void clear();
 
   /// \brief Constructs an element Key(args...) and inserts it.
   /// \details Assumes that the given element is not already in the set.
