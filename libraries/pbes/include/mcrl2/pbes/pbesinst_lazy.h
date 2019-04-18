@@ -49,14 +49,14 @@ namespace pbes_system
 class pbesinst_lazy_todo
 {
   protected:
-    std::unordered_set<propositional_variable_instantiation> removed;
+    std::unordered_set<propositional_variable_instantiation> irrelevant;
     std::deque<propositional_variable_instantiation> todo;
 
     // checks some invariants on the internal state
     bool check_invariants() const
     {
       using utilities::detail::contains;
-      for (const auto& X: removed)
+      for (const auto& X: irrelevant)
       {
         if (contains(todo, X))
         {
@@ -93,16 +93,16 @@ class pbesinst_lazy_todo
       return todo;
     }
 
-    const std::unordered_set<propositional_variable_instantiation>& removed_elements() const
+    const std::unordered_set<propositional_variable_instantiation>& irrelevant_elements() const
     {
-      return removed;
+      return irrelevant;
     }
 
     std::vector<propositional_variable_instantiation> all_elements() const
     {
       std::vector<propositional_variable_instantiation> result;
       result.insert(result.end(), todo.begin(), todo.end());
-      result.insert(result.end(), removed.begin(), removed.end());
+      result.insert(result.end(), irrelevant.begin(), irrelevant.end());
       return result;
     }
 
@@ -116,35 +116,49 @@ class pbesinst_lazy_todo
       todo.pop_back();
     }
 
-    void push_back(const propositional_variable_instantiation& x)
+    void insert(const propositional_variable_instantiation& x)
     {
-      removed.erase(x);
+      irrelevant.erase(x);
       todo.push_back(x);
     }
 
-    void push_front(const propositional_variable_instantiation& x)
+    template <typename FwdIter>
+    void insert(FwdIter first, FwdIter last, const std::unordered_set<propositional_variable_instantiation>& discovered)
     {
-      removed.erase(x);
-      todo.push_front(x);
+      using utilities::detail::contains;
+
+      for (FwdIter i = first; i != last; ++i)
+      {
+        auto j = irrelevant.find(*i);
+        if (j != irrelevant.end())
+        {
+          irrelevant.erase(j);
+          todo.push_back(*j);
+        }
+        else if (!contains(discovered, *i))
+        {
+          todo.push_back(*i);
+        }
+      }
     }
 
     void set_todo(std::deque<propositional_variable_instantiation>& new_todo)
     {
       using utilities::detail::contains;
-      std::size_t size_before = todo.size() + removed.size();
+      std::size_t size_before = todo.size() + irrelevant.size();
 
-      std::unordered_set<propositional_variable_instantiation> new_removed;
+      std::unordered_set<propositional_variable_instantiation> new_irrelevant;
       for (const propositional_variable_instantiation& x: all_elements())
       {
         if (!contains(new_todo, x))
         {
-          new_removed.insert(x);
+          new_irrelevant.insert(x);
         }
       }
       std::swap(todo, new_todo);
-      std::swap(removed, new_removed);
+      std::swap(irrelevant, new_irrelevant);
 
-      std::size_t size_after = todo.size() + removed.size();
+      std::size_t size_after = todo.size() + irrelevant.size();
       if (size_before != size_after)
       {
         throw mcrl2::runtime_error("sizes do not match in pbesinst_lazy_todo::set_todo");
@@ -361,7 +375,7 @@ class pbesinst_lazy_algorithm
       }
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state(), sigma));
-      todo.push_back(init);
+      todo.insert(init);
       discovered.insert(init);
       while (!todo.empty())
       {
@@ -386,14 +400,9 @@ class pbesinst_lazy_algorithm
         mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e << " with rank " << k << std::endl;
         on_report_equation(X_e, psi_e, k);
 
-        for (const propositional_variable_instantiation& Y_f: find_propositional_variable_instantiations(psi_e))
-        {
-          if (!contains(discovered, Y_f))
-          {
-            todo.push_back(Y_f);
-            discovered.insert(Y_f);
-          }
-        }
+        std::set<propositional_variable_instantiation> occ = find_propositional_variable_instantiations(psi_e);
+        todo.insert(occ.begin(), occ.end(), discovered);
+        discovered.insert(occ.begin(), occ.end());
 
         on_end_iteration();
 

@@ -311,7 +311,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       // put the elements of new_todo in the right order
       std::deque<propositional_variable_instantiation> new_todo_list;
-      for (const propositional_variable_instantiation& X: todo.removed_elements())
+      for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
       {
         if (contains(new_todo, X))
         {
@@ -419,7 +419,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void on_end_while_loop() override
     {
-      if (!todo.elements().empty() || !todo.removed_elements().empty())
+      if (!todo.elements().empty() || !todo.irrelevant_elements().empty())
       {
         auto u = m_graph_builder.find_vertex(init);
         if (S0.contains(u) || S1.contains(u))

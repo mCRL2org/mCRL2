@@ -444,6 +444,7 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 Note that the mapping $\tau$ is a global variable of \textsc{Attr}, which is ugly.
 In the implementation the strategy is an attribute of the nodes.
 
+\newpage
 \section{Structure graph based PBES instantiation}
 
 In the tool \textbf{pbessolve} an extension called \textsc{%
@@ -693,7 +694,6 @@ S_1:= \emptyset $}\\
 
 \subsection{Optimisation~3}
 
-
 When the computation of $SG^0(\varphi,\psi,r)$ finishes and the subgraph represented by $SG^0$ 
 is effectively solved (which is the case if it represents $true$ or $false$), we can use these
 results to solve other variables by propagating the information in $S^0$ and $S^1$ to
@@ -709,7 +709,6 @@ $S_0$ or $S_1$, we can terminate the search. This leads to the following modifie
 \textsc{PbesinstStructureGraph$_{3}$(}\mathcal{E}, X_{init}(e_{init}), R) \\ 
 init:=R(X_{init}(e_{init})) \\
 todo:=\{init\} \\
-\colorbox{lightgray}{$removed := \emptyset$} \\
 discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
 S_0:= \emptyset \\
@@ -730,39 +729,15 @@ S_1:= \emptyset \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\qquad \colorbox{lightgray}{$todo, removed := \textsc{PruneTodo}(init, todo, removed) $}\\
 \colorbox{lightgray}{$
 \textbf{if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_0 \textbf{ then }
 $}\\
-\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo \cup removed, 1)$}\\
+\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo, 1)$}\\
 \colorbox{lightgray}{$
 \textbf{else if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then }
 $}\\
-\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo \cup removed, 0)$}\\
+\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo, 0)$}\\
 \textbf{return }(V, E),
-\end{array}
-\end{equation*}
-
-where \textsc{PruneTodo} is defined as
-
-\begin{equation*}
-\begin{array}{l}
-\textsc{PruneTodo}(init, todo, removed) \\ 
-todo' := \{init\} \\
-done' := \{init\} \\
-new\_todo := \emptyset \\
-\While done' \neq \emptyset \Space \Do \\
-\qquad \Choose u \in todo' \\
-\qquad todo' := todo' \setminus \{ u \} \\
-\qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Space \Then \\
-\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup done')) \\
-\qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Space \Then \\
-\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup done')) \\
-\qquad \If d(u) = \bot \wedge succ(u) = \emptyset \Space \Then \\
-\qquad \qquad new\_todo := new\_todo \cup \{ u \} \\
-new\_todo := new\_todo \cap (todo \cup removed) \\
-new\_removed := (todo \cup removed) \setminus new\_todo \\
-\Return new\_todo, new\_removed
 \end{array}
 \end{equation*}
 
@@ -776,6 +751,71 @@ detects whether the game can in fact already be solved (see e.g. optimisation 4)
 \paragraph{Note on computing winning strategies.} The winning strategy can be set by extending
 it using the attractor strategy that is computed while
 computing $Attr_0(S_0 \cup \{X^e\})$ and $Attr_1(S_1 \cup \{X^e\})$.
+
+\subsection{Pruning the todo set}
+
+During the execution of the algorithm, the set $todo$ may contain nodes that can be proven to
+be irrelevant, in the sense that the solution of the PBES can already be computed without exploring the irrelevant nodes. To this end we partition the set $todo$ into the sets $todo$ and $irrelevant$ using the function $\textsc{PruneTodo}$. This function is applicable for optimisations 3 and higher. Note that elements from $irrelevant$ may be moved back to $todo$ when new elements are added to the $todo$ set.
+The function $\textsc{PruneTodo}$ should be called periodically, not every iteration.
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{PbesinstStructureGraph$_{3}$(}\mathcal{E}, X_{init}(e_{init}), R) \\ 
+init:=R(X_{init}(e_{init})) \\
+todo:=\{init\} \\
+\colorbox{lightgray}{$irrelevant := \emptyset$} \\
+discovered:=\{init\} \\
+(V,E) :=(\emptyset ,\emptyset ) \\ 
+S_0:= \emptyset \\
+S_1:= \emptyset \\
+\textbf{while }todo\neq \emptyset
+\wedge X_{init}(e_{init}) \notin S_0 \cup S_1
+\textbf{ do} \\ 
+\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad \psi^e := \textbf{ if } \sigma_k = \mu \textbf{ then } R(\psi^e[X^e := false])
+\textbf{ else }  R(\psi^e[X^e := true]) \\
+\qquad (b,\psi^e) := R^+(\psi^e) \\
+\qquad \textbf{if $b = true$ then } S_0 := \textsc{Attr}(S_0 \cup \{ X^e \}, 0) \\
+\qquad \textbf{if $b = false$ then } S_1 := \textsc{Attr}(S_1 \cup \{ X^e \}, 1) \\
+\qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
+\qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus (\colorbox{lightgray}{$discovered \setminus irrelevant$})) \\
+\qquad \colorbox{lightgray}{$irrelevant:=irrelevant \setminus \mathrm{occ}(\psi ^{e})$} \\
+\qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
+\qquad \colorbox{lightgray}{$todo, irrelevant := \textsc{PruneTodo}(init, todo, irrelevant) $}\\
+\textbf{if } (\colorbox{lightgray}{$todo \cup irrelevant$}) \neq \emptyset \land X_{init}(e_{init}) \in S_0 \textbf{ then }
+\\
+\qquad V := V \setminus \textsc{Attr}(\colorbox{lightgray}{$todo \cup irrelevant$}, 1)\\
+\textbf{else if } (\colorbox{lightgray}{$todo \cup irrelevant$}) \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then } \\
+\qquad V := V \setminus \textsc{Attr}(\colorbox{lightgray}{$todo \cup irrelevant$}, 0)\\
+\textbf{return }(V, E),
+\end{array}
+\end{equation*}
+
+where \textsc{PruneTodo} is defined as
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{PruneTodo}(init, todo, irrelevant) \\ 
+todo' := \{init\} \\
+discovered' := \{init\} \\
+new\_todo := \emptyset \\
+\While todo' \neq \emptyset \Space \Do \\
+\qquad \Choose u \in todo' \\
+\qquad todo' := todo' \setminus \{ u \} \\
+\qquad discovered' := discovered' \cup \{ u \} \\
+\qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Space \Then \\
+\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup discovered')) \\
+\qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Space \Then \\
+\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup discovered')) \\
+\qquad \If d(u) = \bot \wedge succ(u) \setminus (S_0 \cup S_1 \cup discovered') = \emptyset \Space \Then \\
+\qquad \qquad new\_todo := new\_todo \cup \{ u \} \\
+new\_todo := new\_todo \cap (todo \cup irrelevant) \\
+new\_removed := (todo \cup irrelevant) \setminus new\_todo \\
+\Return new\_todo, new\_removed
+\end{array}
+\end{equation*}
 
 \subsection{Optimisation 4}
 Several simple algorithms exist that can solve partial structure graphs. An example
