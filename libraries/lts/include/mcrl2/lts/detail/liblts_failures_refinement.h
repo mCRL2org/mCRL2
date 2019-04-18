@@ -673,6 +673,9 @@ namespace detail
           mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
           for(const state_type s : spec)
           {
+            // Only the stable specification states contributed to this counter example.
+            if (!weak_property_cache.stable(s)) { continue; }
+
             const action_label_set& spec_action_labels = weak_property_cache.action_labels(s);
             mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
             for(const label_type a : spec_action_labels)
