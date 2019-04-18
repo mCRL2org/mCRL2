@@ -167,6 +167,12 @@ class pbesinst_lazy_todo
     }
 };
 
+inline
+std::ostream& operator<<(std::ostream& out, const pbesinst_lazy_todo& todo)
+{
+  return out << "todo = " << core::detail::print_list(todo.elements()) << " irrelevant = " << core::detail::print_list(todo.irrelevant_elements()) << std::endl;
+}
+
 /// \brief A PBES instantiation algorithm that uses a lazy strategy
 class pbesinst_lazy_algorithm
 {
