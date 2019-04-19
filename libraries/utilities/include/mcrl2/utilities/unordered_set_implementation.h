@@ -115,22 +115,6 @@ Key& MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
   // Lock the bucket and search for the key in the bucket list.
   Bucket& bucket = find_bucket(args...);
 
-  /*if (ThreadSafe)
-  {
-    // Try to find an existing entry in the bucket list.
-    bucket.lock();
-
-    auto result = find(args...);
-    if (result != end())
-    {
-      if (ThreadSafe)
-      {
-        bucket.unlock();
-      }
-      return *result;
-    }
-  }*/
-
   // Construct a new node and put it at the front of the bucket list.
   typename Bucket::node* new_node = m_allocator.allocate_and_construct(args...);
 
@@ -138,11 +122,6 @@ Key& MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
   ++m_number_of_elements;
   resize_if_needed();
 
-  // End of critical section.
-  /*if (ThreadSafe)
-  {
-    bucket.unlock();
-  }*/
   return new_node->key();
 }
 
