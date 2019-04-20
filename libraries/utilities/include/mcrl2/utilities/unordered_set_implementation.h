@@ -76,36 +76,14 @@ MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
 typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args) const
 {
-  const Bucket& bucket = find_bucket(args...);
-
-  for(typename Bucket::const_iterator it = bucket.begin(); it != bucket.end(); ++it)
-  {
-    auto& key = *it;
-    if (Equals()(key, args...))
-    {
-      return const_iterator(it);
-    }
-  }
-
-  return end();
+  return find_impl(find_bucket(args...), args...);
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
 typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args)
 {
-  Bucket& bucket = find_bucket(args...);
-
-  for(typename Bucket::iterator it = bucket.begin(); it != bucket.end(); ++it)
-  {
-    auto& key = *it;
-    if (Equals()(key, args...))
-    {
-      return iterator(it);
-    }
-  }
-
-  return end();
+  return find_impl(find_bucket(args...), args...);
 }
 
 namespace
@@ -130,7 +108,8 @@ MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
 std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
 {
-  auto it = find(args...);
+  Bucket& bucket = find_bucket(args...);
+  auto it = find_impl(bucket, args...);
 
   if (it != end())
   {
@@ -138,16 +117,7 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
   }
   else
   {
-    Bucket& bucket = it.bucket();
-
-    // Construct a new node and put it at the front of the bucket list.
-    typename Bucket::node* new_node = allocate<typename Bucket::node>(m_allocator, args...);
-    std::allocator_traits<NodeAllocator>::construct(m_allocator, new_node, args...);
-
-    bucket.push_front(new_node);
-    ++m_number_of_elements;
-    resize_if_needed();
-    return std::make_pair(iterator(typename Bucket::iterator(new_node)), true);
+    return emplace_impl(bucket, args...);
   }
 }
 
@@ -186,6 +156,64 @@ void MCRL2_UNORDERED_SET_CLASS::print_performance_statistics() const
 }
 
 /// Private functions
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
+std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace_impl(Bucket& bucket, const Args&... args)
+{
+  // Construct a new node and put it at the front of the bucket list.
+  typename Bucket::node* new_node = allocate<typename Bucket::node>(m_allocator, args...);
+  std::allocator_traits<NodeAllocator>::construct(m_allocator, new_node, args...);
+
+  bucket.push_front(new_node);
+  ++m_number_of_elements;
+  resize_if_needed();
+  return std::make_pair(iterator(typename Bucket::iterator(new_node)), true);
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
+const typename MCRL2_UNORDERED_SET_CLASS::Bucket& MCRL2_UNORDERED_SET_CLASS::find_bucket(const Args&... args) const
+{
+  std::size_t hash = Hash()(args...);
+  /// n mod 2^i is equal to n & (2^i - 1).
+  assert(m_buckets_mask == m_buckets.size() - 1);
+  std::size_t buffer = hash & m_buckets_mask;
+  assert(buffer < m_buckets.size());
+  return m_buckets[buffer];
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
+typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find_impl(const Bucket& bucket, const Args&... args) const
+{
+  for(auto it = bucket.begin(); it != bucket.end(); ++it)
+  {
+    auto& key = *it;
+    if (Equals()(key, args...))
+    {
+      return const_iterator(it);
+    }
+  }
+
+  return end();
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
+typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find_impl(Bucket& bucket, const Args&... args)
+{
+  for(auto it = bucket.begin(); it != bucket.end(); ++it)
+  {
+    auto& key = *it;
+    if (Equals()(key, args...))
+    {
+      return iterator(it);
+    }
+  }
+
+  return end();
+}
 
 MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::resize_if_needed()

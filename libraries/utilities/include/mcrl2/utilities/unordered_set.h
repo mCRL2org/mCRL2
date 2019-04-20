@@ -131,17 +131,14 @@ public:
   NodeAllocator& allocator() noexcept { return m_allocator; }
 
 private:
+
+  /// \brief Inserts T(args...) into the given bucket, assumes that it did not exists before.
+  template<typename ...Args>
+  std::pair<iterator, bool> emplace_impl(Bucket& bucket, const Args&... args);
+
   /// \returns The bucket that might contain the element constructed by the given arguments.
   template<typename ...Args>
-  const Bucket& find_bucket(const Args&... args) const
-  {
-    std::size_t hash = Hash()(args...);
-    /// n mod 2^i is equal to n & (2^i - 1).
-    assert(m_buckets_mask == m_buckets.size() - 1);
-    std::size_t buffer = hash & m_buckets_mask;
-    assert(buffer < m_buckets.size());
-    return m_buckets[buffer];
-  }
+  const Bucket& find_bucket(const Args&... args) const;
 
   template<typename ...Args>
   Bucket& find_bucket(const Args&... args)
@@ -149,6 +146,13 @@ private:
     // Avoid code duplicate by calling the const version and making the resulting bucket reference non-const.
     return const_cast<Bucket&>(as_const(*this).find_bucket(args...));
   }
+
+  /// \brief Searches for the element in the given bucket.
+  template<typename ...Args>
+  const_iterator find_impl(const Bucket& bucket, const Args&... args) const;
+
+  template<typename ...Args>
+  iterator find_impl(Bucket& bucket, const Args&... args);
 
   /// \brief Inserts a bucket node into the hash table.
   /// \details Does not increment the m_number_of_elements.

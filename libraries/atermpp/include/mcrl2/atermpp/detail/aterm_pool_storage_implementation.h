@@ -298,16 +298,13 @@ aterm ATERM_POOL_STORAGE::insert(Args&&... args)
   if (EnableTermCreationMetrics) { ++m_term_creates; }
 
   // Moving this existence check out of emplace matters for performance.
-  auto it = m_term_set.find(args...);
-  if (it != m_term_set.end())
+  auto result = m_term_set.emplace(args...);
+  if (!result.second && EnableTermCreationMetrics)
   {
-    if (EnableTermCreationMetrics) { ++m_term_hits; }
-    return aterm(&(*it));
+    ++m_term_hits;
   }
-  else
-  {
-    return emplace(args...);
-  }
+
+  return aterm(&(*result.first));
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
