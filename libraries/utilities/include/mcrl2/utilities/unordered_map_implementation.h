@@ -30,18 +30,9 @@ int MCRL2_UNORDERED_MAP_CLASS::count(const Key& key)
 MCRL2_UNORDERED_MAP_TEMPLATES
 T& MCRL2_UNORDERED_MAP_CLASS::operator[](const Key& key)
 {
-  auto it = m_set.find(key);
-  if (it != m_set.end())
-  {
-    // Return a reference to the existing element.
-    return (*it).value;
-  }
-  else
-  {
-    // Insert a new object and return a reference to it;
-    auto& pair = m_set.emplace(key);
-    return pair.value;
-  }
+  // Insert a new object and return a reference to it;
+  auto pair = m_set.emplace(std::make_pair(key, T()));
+  return (*pair.first).second;
 }
 
 MCRL2_UNORDERED_MAP_TEMPLATES
@@ -49,7 +40,7 @@ const T& MCRL2_UNORDERED_MAP_CLASS::at(const Key& key) const
 {
   auto it = m_set.find(key);
   assert(it != m_set.end());
-  return (*it).value;
+  return (*it).second;
 }
 
 #undef MCRL2_UNORDERED_MAP_TEMPLATES
