@@ -83,7 +83,13 @@ public:
   typename Set::iterator begin() { return m_set.begin(); }
   typename Set::iterator end() { return m_set.end(); }
 
+  typename Set::const_iterator begin() const { return m_set.begin(); }
+  typename Set::const_iterator end() const { return m_set.end(); }
+
   void clear() { m_set.clear(); }
+
+  template<typename ...Args>
+  std::pair<typename Set::iterator, bool> emplace(const Args&... args) { return m_set.emplace(args...); }
 
   void erase(const Key& key) { m_set.erase(key); }
   typename Set::iterator erase(typename Set::iterator it) { return m_set.erase(it); }

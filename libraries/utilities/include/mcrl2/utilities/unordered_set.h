@@ -62,6 +62,28 @@ public:
     m_buckets_mask = m_buckets.size() - 1;
   }
 
+  /// Move and copy constructors.
+  unordered_set(const unordered_set& set)
+  {
+    for (auto& element : set)
+    {
+      emplace(element);
+    }
+  }
+
+  unordered_set& operator=(const unordered_set& set)
+  {
+    clear();
+    for (auto& element : set)
+    {
+      emplace(element);
+    }
+    return *this;
+  }
+
+  unordered_set(unordered_set&& other) = default;
+  unordered_set& operator=(unordered_set&& other) = default;
+
   ~unordered_set() { clear(); }
 
   /// \returns An iterator over all keys.
@@ -103,9 +125,6 @@ public:
 
   /// \returns The number of elements that can be present in the set before resizing.
   std::size_t capacity() const noexcept { return m_buckets.size(); }
-
-  /// Move and copy constructors.
-  unordered_set& operator=(unordered_set&& other) = default;
 
   /// \returns A reference to the local node allocator.
   const NodeAllocator& allocator() const noexcept { return m_allocator; }
