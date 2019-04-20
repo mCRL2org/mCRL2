@@ -10,8 +10,7 @@
 #define MCRL2_UTILITIES_UNORDERED_MAP_H
 
 #include "mcrl2/utilities/unordered_set.h"
-
-#include "unordered_map"
+#include "mcrl2/utilities/block_allocator.h"
 
 #include <utility>
 #include <functional>
@@ -100,6 +99,14 @@ public:
   std::size_t size() const { return m_set.size(); }
 };
 
+/// \brief A specialization for large unordered maps that uses the block_allocator internally by default.
+template<typename Key,
+         typename T,
+         typename Hash = std::hash<Key>,
+         typename Equals = std::equal_to<Key>,
+         typename Allocator = mcrl2::utilities::block_allocator<Key>,
+         bool ThreadSafe = false>
+using unordered_map_large = unordered_map<Key, T, Hash, Equals, Allocator, ThreadSafe>;
 
 } // namespace utilities
 } // namespace mcrl2

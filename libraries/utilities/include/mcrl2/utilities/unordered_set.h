@@ -17,10 +17,11 @@
 
 #include "mcrl2/utilities/unordered_set_iterator.h"
 
+#include "mcrl2/utilities/block_allocator.h"
 #include "mcrl2/utilities/const.h"
+#include "mcrl2/utilities/detail/bucket_list.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/spinlock.h"
-#include "mcrl2/utilities/detail/bucket_list.h"
 
 namespace mcrl2
 {
@@ -177,6 +178,14 @@ private:
   std::vector<Bucket> m_buckets;
   NodeAllocator m_allocator;
 };
+
+/// \brief A specialization for large unordered sets that uses the block_allocator internally by default.
+template<typename Key,
+         typename Hash = std::hash<Key>,
+         typename Equals = std::equal_to<Key>,
+         typename Allocator = mcrl2::utilities::block_allocator<Key>,
+         bool ThreadSafe = false>
+using unordered_set_large = unordered_set<Key, Hash, Equals, Allocator, ThreadSafe>;
 
 } // namespace utilities
 } // namespace mcrl2;

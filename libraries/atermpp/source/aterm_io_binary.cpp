@@ -51,15 +51,6 @@ namespace atermpp
 using detail::readInt;
 using detail::writeInt;
 
-/// \brief Defines an unordered map that uses the block allocator to store its internal <key, value> pairs.
-template<typename Key, typename T>
-using unordered_map = mcrl2::utilities::unordered_map<
-  Key,
-  T,
-  std::hash<Key>,
-  std::equal_to<Key>,
-  mcrl2::utilities::block_allocator<Key>>;
-
 using namespace std;
 
 static void aterm_io_init(std::ios& stream)
@@ -413,7 +404,7 @@ static const aterm& subterm(const aterm& t, std::size_t i)
  */
 static void add_term(sym_write_entry& entry, const aterm& term,
   const indexed_set<function_symbol>& symbol_index_map,
-  unordered_map<aterm, std::size_t>& term_index_map,
+  mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   term_index_map[term] = entry.num_terms++;
@@ -477,7 +468,7 @@ static sym_write_entry& initialize_function_symbol(const function_symbol& func,
  */
 static void collect_terms(const aterm& t,
   indexed_set<function_symbol>& symbol_index_map,
-  unordered_map<aterm, std::size_t>& term_index_map,
+  mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
@@ -553,7 +544,7 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
  */
 static void write_term(const aterm& t, ostream& os,
   const indexed_set<function_symbol>& symbol_index_map,
-  const unordered_map<aterm, std::size_t>& term_index_map,
+  const mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
@@ -605,7 +596,7 @@ static void write_baf(const aterm& t, ostream& os)
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
   indexed_set<function_symbol> symbol_index_map;
-  unordered_map<aterm, std::size_t> term_index_map;
+  mcrl2::utilities::unordered_map_large<aterm, std::size_t> term_index_map;
   std::vector<sym_write_entry> sym_entries;
 
   collect_terms(t, symbol_index_map, term_index_map, sym_entries);
