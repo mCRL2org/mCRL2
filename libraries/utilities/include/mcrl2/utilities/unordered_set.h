@@ -27,7 +27,12 @@ namespace mcrl2
 namespace utilities
 {
 
-/// \brief A class for simple linked list hash table implementation.
+/// \brief A unordered_set with a subset of the interface of std::unordered_set that only stores a single pointer for each element.
+/// \details Only supports input iterators (not bidirectional) compared to std::unordered_set. Furthermore, iterating over all elements
+///          in the set is O(n + m), where n is the number of elements in the set and m the number of empty buckets. Also incrementing the
+///          iterator is O(m) as opposed to O(1) as the standard mandates.
+///          Finally, the unordered_set supports allocators that have a specialized allocate_args(args...) to vary the allocation size based
+///          on the arguments used. This is required to store _aterm_appl classes with the function symbol arity determined at runtime.
 template<typename Key,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,

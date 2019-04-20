@@ -137,7 +137,7 @@ public:
     typedef _aterm_appl_allocator<U> other;
   };
 
-  /// \brief Constructs a _aterm_appl where the arity is given by the function symbol.
+  /// \brief Allocates space for an _aterm_appl where the arity is given by the function symbol.
   template<typename ForwardIterator>
   T* allocate_args(const function_symbol& symbol, ForwardIterator)
   {
@@ -146,7 +146,7 @@ public:
     return reinterpret_cast<T*>(newTerm);
   }
 
-  /// \brief Constructs a _aterm_appl where the arity is given by the function symbol and the arguments taken from the arguments.
+  /// \brief Allocates space for an _aterm_appl where the arity is given by the function symbol.
   /// \details Assumes that arguments contains symbol.arity() number of terms.
   T* allocate_args(const function_symbol& symbol, unprotected_aterm*)
   {
@@ -155,17 +155,20 @@ public:
     return reinterpret_cast<T*>(newTerm);
   }
 
+  /// \brief Constructs an _aterm_appl with arguments taken from begin, the arity is given by the function symbol.
   template<typename ForwardIterator>
   void construct(T* element, const function_symbol& symbol, ForwardIterator begin)
   {
     new (element) T(symbol, begin, true);
   }
 
+  /// \brief Constructs an _aterm_appl with arguments taken from the list of arguments, the arity is given by the function symbol.
   void construct(T* element, const function_symbol& symbol, unprotected_aterm* args)
   {
     new (element) T(symbol, args, true);
   }
 
+  /// \brief Specialize destroy for _aterm_appl to only destroy the function symbol. The reference count for the aterm does not have to be decreased.
   void destroy(T* element)
   {
     assert(element != nullptr);
