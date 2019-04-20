@@ -27,40 +27,11 @@ namespace mcrl2
 namespace utilities
 {
 
-namespace detail
-{
-/// \brief Provides a default implementation of allocate_and_construct() that is required for polymorphic allocation.
-template<typename T,
-  typename Allocator>
-class allocator_adapter
-{
-public:
-  template <class U>
-  struct rebind
-  {
-    // Rebind the given allocator and provide an allocator_adapter for type U.
-    typedef allocator_adapter<U, typename Allocator::template rebind<U>::other> other;
-  };
-
-  template<typename ...Args>
-  T* allocate_and_construct(Args&&... args)
-  {
-    T* p = m_allocator.allocate(1);
-    m_allocator.construct(p, args...);
-    return p;
-  }
-
-private:
-  Allocator m_allocator;
-};
-
-} // namespace detail
-
 /// \brief A class for simple linked list hash table implementation.
 template<typename Key,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,
-         typename Allocator = detail::allocator_adapter<Key, typename std::allocator<Key>>,
+         typename Allocator = std::allocator<Key>,
          bool ThreadSafe = false>
 class unordered_set
 {

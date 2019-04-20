@@ -119,7 +119,17 @@ using _term_appl = _aterm_appl<>;
 template<typename T = _term_appl>
 class _aterm_appl_allocator
 {
+private:
+  /// \returns The size (in bytes) of a class T with arity number of arguments placed at the end.
+  constexpr static std::uint64_t term_appl_size(std::uint64_t arity)
+  {
+    return sizeof(T) + (arity - 1) * sizeof(aterm);
+  }
+
 public:
+  using size_type = std::size_t;
+  using pointer = T*;
+  using value_type = T;
 
   template <class U>
   struct rebind
@@ -127,30 +137,33 @@ public:
     typedef _aterm_appl_allocator<U> other;
   };
 
-  /// \returns The size (in bytes) of a class T with arity number of arguments placed at the end.
-  constexpr static std::uint64_t term_appl_size(std::uint64_t arity)
-  {
-    return sizeof(T) + (arity - 1) * sizeof(aterm);
-  }
-
   /// \brief Constructs a _aterm_appl where the arity is given by the function symbol.
   template<typename ForwardIterator>
-  T* allocate_and_construct(const function_symbol& symbol, ForwardIterator begin)
+  T* allocate_args(const function_symbol& symbol, ForwardIterator)
   {
     // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
     char* newTerm = m_packed_allocator.allocate(term_appl_size(symbol.arity()));
-    new (newTerm) T(symbol, begin, true);
     return reinterpret_cast<T*>(newTerm);
   }
 
   /// \brief Constructs a _aterm_appl where the arity is given by the function symbol and the arguments taken from the arguments.
   /// \details Assumes that arguments contains symbol.arity() number of terms.
-  T* allocate_and_construct(const function_symbol& symbol, unprotected_aterm* arguments)
+  T* allocate_args(const function_symbol& symbol, unprotected_aterm*)
   {
     // We assume that object T contains the _aterm_appl<aterm, 1> at the end and reserve extra space for parameters.
     char* newTerm = m_packed_allocator.allocate(term_appl_size(symbol.arity()));
-    new (newTerm) T(symbol, arguments, true);
     return reinterpret_cast<T*>(newTerm);
+  }
+
+  template<typename ForwardIterator>
+  void construct(T* element, const function_symbol& symbol, ForwardIterator begin)
+  {
+    new (element) T(symbol, begin, true);
+  }
+
+  void construct(T* element, const function_symbol& symbol, unprotected_aterm* args)
+  {
+    new (element) T(symbol, args, true);
   }
 
   void destroy(T* element)

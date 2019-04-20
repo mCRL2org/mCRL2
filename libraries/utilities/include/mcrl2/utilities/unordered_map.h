@@ -26,7 +26,7 @@ template<typename Key,
          typename T,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,
-         typename Allocator = detail::allocator_adapter<Key, std::allocator<Key>>,
+         typename Allocator = std::allocator<Key>,
          bool ThreadSafe = false>
 class unordered_map
 {

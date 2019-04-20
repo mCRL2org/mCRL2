@@ -58,9 +58,7 @@ using unordered_map = mcrl2::utilities::unordered_map<
   T,
   std::hash<Key>,
   std::equal_to<Key>,
-  mcrl2::utilities::detail::allocator_adapter<
-    Key,
-    mcrl2::utilities::block_allocator<Key>>>;
+  mcrl2::utilities::block_allocator<Key>>;
 
 using namespace std;
 
