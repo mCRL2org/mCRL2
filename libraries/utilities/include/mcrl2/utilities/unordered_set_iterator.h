@@ -78,9 +78,26 @@ public:
     return *m_key_it;
   }
 
-  bool operator!=(const unordered_set_iterator& other)
+  template<bool _Constant = Constant>
+  typename std::enable_if<!_Constant, Key*>::type operator->()
+  {
+    return &(*m_key_it);
+  }
+
+  template<bool _Constant = Constant>
+  typename std::enable_if<_Constant, const Key*>::type operator->() const
+  {
+    return &(*m_key_it);
+  }
+
+  bool operator!=(const unordered_set_iterator& other) const
   {
     return m_key_it != other.m_key_it || m_bucket_it != other.m_bucket_it;
+  }
+
+  bool operator==(const unordered_set_iterator& other) const
+  {
+    return !(operator!=(other));
   }
 
   /// \returns A reference to the before key iterator.
