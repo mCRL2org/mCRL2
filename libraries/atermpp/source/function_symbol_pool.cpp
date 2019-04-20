@@ -53,7 +53,7 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
   }
   else
   {
-    _function_symbol& symbol = m_symbol_set.emplace(name, arity);
+    _function_symbol& symbol = *m_symbol_set.emplace(name, arity).first;
     if (check_for_registered_functions)
     {
       // Check whether there is a registered prefix p such that name equal pn where n is a number.

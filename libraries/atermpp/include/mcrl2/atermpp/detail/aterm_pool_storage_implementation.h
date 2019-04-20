@@ -316,7 +316,8 @@ aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
 {
   m_pool.trigger_collection();
 
-  aterm term(&m_term_set.emplace(args...));
+  auto result = m_term_set.emplace(args...);
+  aterm term(&(*result.first));
   call_creation_hook(term);
 
   return term;
