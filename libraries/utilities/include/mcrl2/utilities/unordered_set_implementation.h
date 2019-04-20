@@ -111,6 +111,7 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(con
 namespace
 {
 
+/// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
 template<typename T, typename Allocator, typename ...Args>
 static auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
 {
@@ -127,20 +128,27 @@ static auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-Key& MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
+std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
 {
-  // Lock the bucket and search for the key in the bucket list.
-  Bucket& bucket = find_bucket(args...);
+  auto it = find(args...);
 
-  // Construct a new node and put it at the front of the bucket list.
-  typename Bucket::node* new_node = allocate<typename Bucket::node>(m_allocator, args...);
-  std::allocator_traits<NodeAllocator>::construct(m_allocator, new_node, args...);
+  if (it != end())
+  {
+    return std::make_pair(it, false);
+  }
+  else
+  {
+    Bucket& bucket = it.bucket();
 
-  bucket.push_front(new_node);
-  ++m_number_of_elements;
-  resize_if_needed();
+    // Construct a new node and put it at the front of the bucket list.
+    typename Bucket::node* new_node = allocate<typename Bucket::node>(m_allocator, args...);
+    std::allocator_traits<NodeAllocator>::construct(m_allocator, new_node, args...);
 
-  return new_node->key();
+    bucket.push_front(new_node);
+    ++m_number_of_elements;
+    resize_if_needed();
+    return std::make_pair(iterator(typename Bucket::iterator(new_node)), true);
+  }
 }
 
 inline float bytes_to_megabytes(std::size_t bytes)

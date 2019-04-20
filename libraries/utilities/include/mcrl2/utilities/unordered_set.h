@@ -76,9 +76,8 @@ public:
   void clear();
 
   /// \brief Constructs an element Key(args...) and inserts it.
-  /// \details Assumes that the given element is not already in the set.
   template<typename ...Args>
-  Key& emplace(const Args&... args);
+  std::pair<iterator, bool> emplace(const Args&... args);
 
   /// \brief Erases the given key from the unordered set.
   /// \details Needs to find the key first.
