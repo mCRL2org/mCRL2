@@ -29,16 +29,13 @@ template <class T,
           bool ThreadSafe = false>
 class block_allocator : public memory_pool<T, ElementsPerBlock, ThreadSafe>
 {
-public:
+private:
+  using super = memory_pool<T, ElementsPerBlock, ThreadSafe>;
 
-  typedef std::size_t size_type;
-  typedef std::ptrdiff_t difference_type;
-  typedef T *pointer;
-  typedef const T *const_pointer;
-  typedef T &reference;
-  typedef const T &const_reference;
-  typedef T value_type;
-  using base = std::allocator<T>;
+public:
+  using size_type = std::size_t;
+  using pointer = T*;
+  using value_type = T;
 
   template <class U>
   struct rebind
@@ -57,29 +54,14 @@ public:
       throw std::bad_alloc();
     }
 
-    return memory_pool<T, ElementsPerBlock, ThreadSafe>::allocate();
+    return super::allocate();
   }
 
   /// \details The unused parameter is to make the interface equivalent
   ///          to the allocator.
   void deallocate(pointer p, size_type)
   {
-    memory_pool<T, ElementsPerBlock, ThreadSafe>::deallocate(p);
-  }
-
-  template<typename... Args>
-  void construct(pointer p, Args&&... args)
-  {
-    new (p) T(std::forward<Args>(args)...);
-  }
-
-  // Nonstandard part of the interface.
-  template<typename... Args>
-  pointer allocate_and_construct(Args&&... args)
-  {
-    pointer p = allocate(1);
-    construct(p, std::forward<Args>(args)...);
-    return p;
+    super::deallocate(p);
   }
 
   // Move assignment and construction is possible.

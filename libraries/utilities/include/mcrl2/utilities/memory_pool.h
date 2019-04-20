@@ -50,7 +50,7 @@ public:
       {
         if (!slot.is_marked())
         {
-          destroy(reinterpret_cast<T*>(&slot));
+          reinterpret_cast<T*>(&slot)->~T();
         }
       }
     }
@@ -101,12 +101,6 @@ public:
   {
     assert(contains(pointer));
     m_freelist.push_front(reinterpret_cast<Slot&>(*pointer));
-  }
-
-  /// \brief Call the destructor of the pointed to object.
-  void destroy(T* p)
-  {
-    p->~T();
   }
 
   /// \brief Frees blocks that are no longer storing elements of T.

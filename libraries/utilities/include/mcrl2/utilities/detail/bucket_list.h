@@ -179,8 +179,8 @@ public:
     node* next_node = reinterpret_cast<node*>(erased_node->next());
 
     // Clean up the old node.
-    allocator.destroy(erased_node);
-    allocator.deallocate(erased_node, 1);
+    std::allocator_traits<NodeAllocator>::destroy(allocator, erased_node);
+    std::allocator_traits<NodeAllocator>::deallocate(allocator, erased_node, 1);
 
     // Update the next pointer of the current node.
     current_node->next(next_node);
