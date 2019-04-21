@@ -302,7 +302,7 @@ class lts: public LTS_BASE
     void set_action_label(const labels_size_type action, const ACTION_LABEL_T& label)
     {
       assert(action<m_action_labels.size());
-      assert(action==0 == (label==ACTION_LABEL_T::tau_action())); // a tau action is always stored at index 0.
+      assert((action==0) == (label==ACTION_LABEL_T::tau_action())); // a tau action is always stored at index 0.
       m_action_labels[action] = label;
     }
 
