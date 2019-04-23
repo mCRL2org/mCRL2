@@ -51,21 +51,21 @@ public:
   using iterator = unordered_set_iterator<Key, Bucket, Allocator, false>;
   using const_iterator = unordered_set_iterator<Key, Bucket, Allocator, true>;
 
-  unordered_set() :
-    m_buckets(4)
+  unordered_set()
   {
-    m_buckets_mask = m_buckets.size() - 1;
+    resize(4);
   }
 
-  unordered_set(std::size_t number_of_elements) :
-    m_buckets(round_up_to_power_of_two(number_of_elements))
+  unordered_set(std::size_t number_of_elements)
   {
-    m_buckets_mask = m_buckets.size() - 1;
+    resize(round_up_to_power_of_two(number_of_elements));
   }
 
   /// Move and copy constructors.
   unordered_set(const unordered_set& set)
   {
+    resize(round_up_to_power_of_two(set.size()));
+
     for (auto& element : set)
     {
       emplace(element);
@@ -75,10 +75,13 @@ public:
   unordered_set& operator=(const unordered_set& set)
   {
     clear();
+    resize(round_up_to_power_of_two(set.size()));
+
     for (auto& element : set)
     {
       emplace(element);
     }
+
     return *this;
   }
 
@@ -96,6 +99,7 @@ public:
   const_iterator end() const { return const_iterator(m_buckets.end()); }
 
   /// \brief Removes all elements from the set.
+  /// \details Does not free the vector of buckets itself.
   void clear();
 
   /// \brief Constructs an element Key(args...) and inserts it.
@@ -167,7 +171,7 @@ private:
   void resize_if_needed();
 
   /// \brief Resizes the set to the given number of elements.
-  void resize();
+  void resize(std::size_t new_size);
 
   /// \brief The number of elements stored in this set.
   std::size_t m_number_of_elements = 0;

@@ -32,6 +32,8 @@ void MCRL2_UNORDERED_SET_CLASS::clear()
   {
     it = erase(it);
   }
+
+  assert(m_number_of_elements == 0);
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
@@ -220,12 +222,13 @@ void MCRL2_UNORDERED_SET_CLASS::resize_if_needed()
 {
   if (m_number_of_elements >= capacity() && !ThreadSafe)
   {
-    resize();
+    // Calculate the new size before clearing the old buckets.
+    resize(capacity() * 2);
   }
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-void MCRL2_UNORDERED_SET_CLASS::resize()
+void MCRL2_UNORDERED_SET_CLASS::resize(std::size_t new_size)
 {
   // Create one bucket list for all elements in the hashtable.
   Bucket old_keys;
@@ -239,9 +242,6 @@ void MCRL2_UNORDERED_SET_CLASS::resize()
       old_keys.push_front(node);
     }
   }
-
-  // Calculate the new size before clearing the old buckets.
-  std::size_t new_size = m_buckets.size() * 2;
 
   // Recreate the hash table, but don't move or copy the old elements.
   {
