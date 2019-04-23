@@ -27,6 +27,8 @@ namespace utilities
 MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::clear()
 {
+  assert(m_buckets.size() != 0);
+
   // A naive implementation of erasing all elements.
   for (auto it = begin(); it != end(); )
   {
@@ -34,6 +36,7 @@ void MCRL2_UNORDERED_SET_CLASS::clear()
   }
 
   assert(m_number_of_elements == 0);
+  assert(m_buckets.size() != 0);
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
@@ -230,6 +233,8 @@ void MCRL2_UNORDERED_SET_CLASS::resize_if_needed()
 MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::resize(std::size_t new_size)
 {
+  assert(new_size >= 2);
+
   // Create one bucket list for all elements in the hashtable.
   Bucket old_keys;
   for (auto&& bucket : m_buckets)

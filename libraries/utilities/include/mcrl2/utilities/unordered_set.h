@@ -9,12 +9,6 @@
 #ifndef MCRL2_UTILITIES_UNORDERED_SET_H
 #define MCRL2_UTILITIES_UNORDERED_SET_H
 
-#include <array>
-#include <atomic>
-#include <cstddef>
-#include <vector>
-#include <unordered_set>
-
 #include "mcrl2/utilities/unordered_set_iterator.h"
 
 #include "mcrl2/utilities/block_allocator.h"
@@ -22,6 +16,12 @@
 #include "mcrl2/utilities/detail/bucket_list.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/spinlock.h"
+
+#include <algorithm>
+#include <array>
+#include <atomic>
+#include <cstddef>
+#include <vector>
 
 namespace mcrl2
 {
@@ -53,18 +53,18 @@ public:
 
   unordered_set()
   {
-    resize(4);
+    resize(4UL);
   }
 
   unordered_set(std::size_t number_of_elements)
   {
-    resize(round_up_to_power_of_two(number_of_elements));
+    resize(std::max(round_up_to_power_of_two(number_of_elements), 4UL));
   }
 
-  /// Move and copy constructors.
+  // Copy operators.
   unordered_set(const unordered_set& set)
   {
-    resize(round_up_to_power_of_two(set.size()));
+    resize(std::max(round_up_to_power_of_two(set.size()), 4UL));
 
     for (auto& element : set)
     {
@@ -75,7 +75,7 @@ public:
   unordered_set& operator=(const unordered_set& set)
   {
     clear();
-    resize(round_up_to_power_of_two(set.size()));
+    resize(std::max(round_up_to_power_of_two(set.size()), 4UL));
 
     for (auto& element : set)
     {
@@ -85,10 +85,18 @@ public:
     return *this;
   }
 
+  // Default move operators.
   unordered_set(unordered_set&& other) = default;
   unordered_set& operator=(unordered_set&& other) = default;
 
-  ~unordered_set() { clear(); }
+  ~unordered_set()
+  {
+    // This unordered_set is not moved-from.
+    if (m_buckets.size() > 0)
+    {
+      clear();
+    }
+  }
 
   /// \returns An iterator over all keys.
   iterator begin() { return iterator(m_buckets.begin(), m_buckets.end(), typename Bucket::iterator(*m_buckets.begin())); }
@@ -148,7 +156,7 @@ private:
   template<typename ...Args>
   Bucket& find_bucket(const Args&... args)
   {
-    // Avoid code duplicate by calling the const version and making the resulting bucket reference non-const.
+    // Avoid code duplication by calling the const version and making the resulting bucket reference non-const.
     return const_cast<Bucket&>(as_const(*this).find_bucket(args...));
   }
 
