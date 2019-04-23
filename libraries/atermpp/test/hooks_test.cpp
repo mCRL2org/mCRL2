@@ -40,12 +40,12 @@ class variable: public aterm_appl
     {}
 };
 
-void on_create_variable(const aterm& t)
+void on_create_variable(const aterm&)
 {
   variable_count++;
 }
 
-void on_delete_variable(const aterm& t)
+void on_delete_variable(const aterm&)
 {
   variable_count--;
 }
