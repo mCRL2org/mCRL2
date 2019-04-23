@@ -21,6 +21,41 @@ namespace utilities
 {
 
 MCRL2_UNORDERED_SET_TEMPLATES
+MCRL2_UNORDERED_SET_CLASS::unordered_set(const unordered_set& set)
+{
+  resize(std::max<std::size_t>(round_up_to_power_of_two(set.size()), 4));
+
+  for (auto& element : set)
+  {
+    emplace(element);
+  }
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+MCRL2_UNORDERED_SET_CLASS& MCRL2_UNORDERED_SET_CLASS::operator=(const unordered_set& set)
+{
+  clear();
+  resize(std::max<std::size_t>(round_up_to_power_of_two(set.size()), 4));
+
+  for (auto& element : set)
+  {
+    emplace(element);
+  }
+
+  return *this;
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+MCRL2_UNORDERED_SET_CLASS::~unordered_set()
+{
+  // This unordered_set is not moved-from.
+  if (m_buckets.size() > 0)
+  {
+    clear();
+  }
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::clear()
 {
   assert(m_buckets.size() != 0);

@@ -53,52 +53,18 @@ public:
   using iterator = unordered_set_iterator<Key, Bucket, Allocator, false>;
   using const_iterator = unordered_set_iterator<Key, Bucket, Allocator, true>;
 
-  unordered_set()
-  {
-    resize(4UL);
-  }
-
-  unordered_set(std::size_t number_of_elements)
-  {
-    resize(std::max(round_up_to_power_of_two(number_of_elements), 4UL));
-  }
+  unordered_set() { resize(4UL); }
+  unordered_set(std::size_t number_of_elements) { resize(std::max<std::size_t>(round_up_to_power_of_two(number_of_elements), 4)); }
 
   // Copy operators.
-  unordered_set(const unordered_set& set)
-  {
-    resize(std::max(round_up_to_power_of_two(set.size()), 4UL));
-
-    for (auto& element : set)
-    {
-      emplace(element);
-    }
-  }
-
-  unordered_set& operator=(const unordered_set& set)
-  {
-    clear();
-    resize(std::max(round_up_to_power_of_two(set.size()), 4UL));
-
-    for (auto& element : set)
-    {
-      emplace(element);
-    }
-
-    return *this;
-  }
+  unordered_set(const unordered_set& set);
+  unordered_set& operator=(const unordered_set& set);
 
   // Default move operators.
   unordered_set(unordered_set&& other) = default;
   unordered_set& operator=(unordered_set&& other) = default;
 
-  ~unordered_set()
-  {
-    // This unordered_set is not moved-from.
-    if (m_buckets.size() > 0)
-    {
-      clear();
-    }
-  }
+  ~unordered_set();
 
   /// \returns An iterator over all keys.
   iterator begin() { return iterator(m_buckets.begin(), m_buckets.end(), typename Bucket::iterator(*m_buckets.begin())); }
