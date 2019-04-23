@@ -207,7 +207,7 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
       }
     }
     return make_exists(data::variable_list(W.begin(), W.end()),
-                       and_(quantifiers_inside_forall(set_difference(V, W), join_and(X1.begin(), X1.end())),
+                       and_(quantifiers_inside_exists(set_difference(V, W), join_and(X1.begin(), X1.end())),
                             join_and(X2.begin(), X2.end()))
     );
   }
