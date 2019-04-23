@@ -13,6 +13,7 @@
 #include <atomic>
 #include <cstddef>
 #include <iterator>
+#include <memory>
 
 namespace mcrl2
 {

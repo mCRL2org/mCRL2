@@ -13,7 +13,7 @@
 #define MCRL2_UNORDERED_SET_TEMPLATES template<typename Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
 #define MCRL2_UNORDERED_SET_CLASS unordered_set<Key, Hash, Equals, Allocator, ThreadSafe>
 
-#include "unordered_set.h"
+#include "mcrl2/utilities/unordered_set.h"
 
 namespace mcrl2
 {
