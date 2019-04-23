@@ -15,10 +15,6 @@
 
 #include "unordered_set.h"
 
-#include "mcrl2/utilities/logger.h"
-
-#include <iostream>
-
 namespace mcrl2
 {
 namespace utilities

@@ -14,6 +14,7 @@
 #include "mcrl2/utilities/block_allocator.h"
 #include "mcrl2/utilities/const.h"
 #include "mcrl2/utilities/detail/bucket_list.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/spinlock.h"
 
@@ -21,6 +22,7 @@
 #include <array>
 #include <atomic>
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 namespace mcrl2
