@@ -150,10 +150,6 @@ private:
 
   /// \brief Inserts a term constructed by the given arguments, checks for existing term.
   template<typename ...Args>
-  aterm insert(Args&&... args);
-
-  /// \brief Insert without checking for an existing term.
-  template<typename ...Args>
   aterm emplace(Args&&... args);
 
   /// \returns True if and only if this term storage can store term applications with a dynamic

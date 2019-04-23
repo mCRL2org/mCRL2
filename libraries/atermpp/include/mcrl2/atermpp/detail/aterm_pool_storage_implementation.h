@@ -84,20 +84,20 @@ void ATERM_POOL_STORAGE::add_deletion_hook(function_symbol sym, term_callback ca
 ATERM_POOL_STORAGE_TEMPLATES
 aterm ATERM_POOL_STORAGE::create_int(std::size_t value)
 {
-  return insert(value);
+  return emplace(value);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
 aterm ATERM_POOL_STORAGE::create_term(const function_symbol& symbol)
 {
-  return insert(symbol);
+  return emplace(symbol);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<class ...Terms>
 aterm ATERM_POOL_STORAGE::create_appl(const function_symbol& sym, const Terms&... arguments)
 {
-  return insert(sym, arguments...);
+  return emplace(sym, arguments...);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -106,7 +106,7 @@ aterm ATERM_POOL_STORAGE::create_appl_iterator(const function_symbol& symbol,
                                         ForwardIterator begin,
                                         ForwardIterator)
 {
-  return insert(symbol, begin);
+  return emplace(symbol, begin);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -117,7 +117,7 @@ aterm ATERM_POOL_STORAGE::create_appl_iterator(const function_symbol& symbol,
                                         InputIterator)
 {
   std::array<unprotected_aterm, N> arguments = construct_arguments<N>(begin, converter);
-  return insert(symbol, arguments);
+  return emplace(symbol, arguments);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -126,7 +126,7 @@ aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
                                         ForwardIterator begin,
                                         ForwardIterator)
 {
-  return insert(symbol, begin);
+  return emplace(symbol, begin);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -146,7 +146,7 @@ aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
   }
 
   // Find or create a new term and return it.
-  return insert(symbol, arguments);
+  return emplace(symbol, arguments);
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
@@ -165,7 +165,7 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
 
   if (EnableTermCreationMetrics)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(" << identifier << "): insert() found "
+    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(" << identifier << "): emplace() found "
                                 << m_term_hits
                                 << " out of "
                                 << m_term_creates
@@ -293,29 +293,23 @@ typename ATERM_POOL_STORAGE::iterator ATERM_POOL_STORAGE::destroy(iterator it)
 
 ATERM_POOL_STORAGE_TEMPLATES
 template<typename ...Args>
-aterm ATERM_POOL_STORAGE::insert(Args&&... args)
+aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
 {
   if (EnableTermCreationMetrics) { ++m_term_creates; }
 
-  // Moving this existence check out of emplace matters for performance.
-  auto result = m_term_set.emplace(args...);
-  if (!result.second && EnableTermCreationMetrics)
-  {
-    ++m_term_hits;
-  }
-
-  return aterm(&(*result.first));
-}
-
-ATERM_POOL_STORAGE_TEMPLATES
-template<typename ...Args>
-aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
-{
-  m_pool.trigger_collection();
-
   auto result = m_term_set.emplace(args...);
   aterm term(&(*result.first));
-  call_creation_hook(term);
+  if (result.second)
+  {
+    // A new term was created
+    m_pool.trigger_collection();
+    call_creation_hook(term);
+  }
+  else if (EnableTermCreationMetrics)
+  {
+    // A term was found in the set.
+    ++m_term_hits;
+  }
 
   return term;
 }
