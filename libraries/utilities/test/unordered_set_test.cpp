@@ -12,6 +12,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include <random>
+#include <unordered_set>
 
 using namespace mcrl2::utilities;
 
