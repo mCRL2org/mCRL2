@@ -89,7 +89,7 @@ public:
   int count(const Key& key) { return m_set.count(key); }
 
   template<typename ...Args>
-  std::pair<iterator, bool> emplace(const Args&... args) { return m_set.emplace(args...); }
+  std::pair<iterator, bool> emplace(Args&&... args) { return m_set.emplace(std::forward<Args>(args)...); }
 
   void erase(const Key& key) { m_set.erase(key); }
   iterator erase(iterator it) { return m_set.erase(it); }

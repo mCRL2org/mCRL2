@@ -220,13 +220,13 @@ void ATERM_POOL_STORAGE::sweep()
 /// PRIVATE FUNCTIONS
 
 ATERM_POOL_STORAGE_TEMPLATES
-void ATERM_POOL_STORAGE::call_creation_hook(aterm term)
+void ATERM_POOL_STORAGE::call_creation_hook(unprotected_aterm term)
 {
   for (auto& pair : m_creation_hooks)
   {
     if (pair.first == term.function())
     {
-      pair.second(term);
+      pair.second(static_cast<const aterm&>(term));
     }
   }
 }
@@ -238,7 +238,6 @@ void ATERM_POOL_STORAGE::call_deletion_hook(unprotected_aterm term)
   {
     if (pair.first == term.function())
     {
-      // Create a temporary unprotected term to upcast to an actual term.
       pair.second(static_cast<const aterm&>(term));
     }
   }
@@ -297,7 +296,7 @@ aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
 {
   if (EnableTermCreationMetrics) { ++m_term_creates; }
 
-  auto result = m_term_set.emplace(args...);
+  auto result = m_term_set.emplace(std::forward<Args>(args)...);
   aterm term(&(*result.first));
   if (result.second)
   {
