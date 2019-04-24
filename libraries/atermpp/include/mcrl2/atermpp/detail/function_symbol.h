@@ -12,6 +12,7 @@
 #ifndef DETAIL_FUNCTION_SYMBOL_H
 #define DETAIL_FUNCTION_SYMBOL_H
 
+#include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/utilities/noncopyable.h"
 #include "mcrl2/utilities/shared_reference.h"
 
@@ -22,10 +23,6 @@ namespace atermpp
 {
 namespace detail
 {
-
-/// \brief Enables thread safety for the global term and function symbol pools.
-/// \details The reason to declare it here is because the function symbol is included by everything.
-constexpr static bool GlobalThreadSafe = false;
 
 /// \brief Stores the data for a function symbol (name, arity) pair.
 class _function_symbol : public mcrl2::utilities::shared_reference_counted<_function_symbol, GlobalThreadSafe>, private mcrl2::utilities::noncopyable

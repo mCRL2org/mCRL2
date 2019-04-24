@@ -11,6 +11,7 @@
 #define ATERMPP_DETAIL_ATERM_POOL_H
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/atermpp/detail/aterm_pool_storage.h"
 #include "mcrl2/atermpp/detail/function_symbol_pool.h"
 
@@ -20,19 +21,6 @@ namespace atermpp
 {
 namespace detail
 {
-
-
-/// \brief Enable to print garbage collection statistics.
-constexpr static bool EnableGarbageCollectionMetrics = false;
-
-/// \brief Enable to print hashtable collision, size and number of buckets.
-constexpr static bool EnableTermHashtableMetrics = false;
-
-/// \brief Enable to obtain the percentage of terms found compared to allocated.
-constexpr static bool EnableTermCreationMetrics = false;
-
-/// \brief Enable garbage collection.
-constexpr static bool EnableGarbageCollection = true && !GlobalThreadSafe;
 
 /// Define several specializations of the term pool storage objects.
 using integer_term_storage = aterm_pool_storage<_aterm_int, aterm_int_hasher, aterm_int_equals, 0, GlobalThreadSafe>;
