@@ -22,12 +22,6 @@ namespace utilities
 {
 
 MCRL2_UNORDERED_MAP_TEMPLATES
-int MCRL2_UNORDERED_MAP_CLASS::count(const Key& key)
-{
-  return m_set.find(key) != m_set.end();
-}
-
-MCRL2_UNORDERED_MAP_TEMPLATES
 T& MCRL2_UNORDERED_MAP_CLASS::operator[](const Key& key)
 {
   // Insert a new object and return a reference to it;

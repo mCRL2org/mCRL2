@@ -20,6 +20,29 @@ namespace mcrl2
 namespace utilities
 {
 
+namespace /// local functions
+{
+
+/// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
+template<typename T, typename Allocator, typename ...Args>
+static auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
+{
+  return allocator.allocate_args(args...);
+}
+
+template<typename T, typename Allocator, typename ...Args>
+static auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator.allocate(1))
+{
+  return allocator.allocate(1);
+}
+
+inline float bytes_to_megabytes(std::size_t bytes)
+{
+  return static_cast<float>(bytes) / (1024.0f * 1024.0f);
+}
+
+}
+
 MCRL2_UNORDERED_SET_TEMPLATES
 MCRL2_UNORDERED_SET_CLASS::unordered_set(const unordered_set& set)
 {
@@ -71,6 +94,31 @@ void MCRL2_UNORDERED_SET_CLASS::clear()
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
+std::size_t MCRL2_UNORDERED_SET_CLASS::count(const Args&... args) const
+{
+  return find(args...) != end();
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
+std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
+{
+  Bucket& bucket = find_bucket(args...);
+  auto it = find_impl(bucket, args...);
+
+  if (it != end())
+  {
+    return std::make_pair(it, false);
+  }
+  else
+  {
+    return emplace_impl(bucket, args...);
+  }
+}
+
+
+MCRL2_UNORDERED_SET_TEMPLATES
 typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::iterator it)
 {
   // Find the bucket that is pointed to and remove the key after the before iterator.
@@ -120,46 +168,6 @@ template<typename ...Args>
 typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args)
 {
   return find_impl(find_bucket(args...), args...);
-}
-
-namespace
-{
-
-/// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
-template<typename T, typename Allocator, typename ...Args>
-static auto allocate(Allocator& allocator, const Args&... args) -> decltype(allocator.allocate_args(args...))
-{
-  return allocator.allocate_args(args...);
-}
-
-template<typename T, typename Allocator, typename ...Args>
-static auto allocate(Allocator& allocator, const Args&...) -> decltype(allocator.allocate(1))
-{
-  return allocator.allocate(1);
-}
-
-}
-
-MCRL2_UNORDERED_SET_TEMPLATES
-template<typename ...Args>
-std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
-{
-  Bucket& bucket = find_bucket(args...);
-  auto it = find_impl(bucket, args...);
-
-  if (it != end())
-  {
-    return std::make_pair(it, false);
-  }
-  else
-  {
-    return emplace_impl(bucket, args...);
-  }
-}
-
-inline float bytes_to_megabytes(std::size_t bytes)
-{
-  return static_cast<float>(bytes) / (1024.0f * 1024.0f);
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES

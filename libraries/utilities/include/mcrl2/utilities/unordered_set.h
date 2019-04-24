@@ -78,6 +78,10 @@ public:
   /// \details Does not free the vector of buckets itself.
   void clear();
 
+  /// \brief Counts the number of occurrences of the given key (1 when it exists and 0 otherwise).
+  template<typename ...Args>
+  std::size_t count(const Args&... args) const;
+
   /// \brief Constructs an element Key(args...) and inserts it.
   template<typename ...Args>
   std::pair<iterator, bool> emplace(const Args&... args);

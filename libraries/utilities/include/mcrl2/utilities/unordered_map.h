@@ -69,8 +69,6 @@ private:
   Set m_set; ///< The underlying set storing <key, value> pairs.
 
 public:
-  /// \brief Counts the number of occurrences of the given key (1 when it exists and 0 otherwise).
-  int count(const Key& key);
 
   /// \brief Provides access to the value associated with the given key, constructs a default
   ///        value whenever the key was undefined.
@@ -86,6 +84,7 @@ public:
   typename Set::const_iterator end() const { return m_set.end(); }
 
   void clear() { m_set.clear(); }
+  int count(const Key& key) { return m_set.count(key); }
 
   template<typename ...Args>
   std::pair<typename Set::iterator, bool> emplace(const Args&... args) { return m_set.emplace(args...); }
