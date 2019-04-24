@@ -69,6 +69,8 @@ private:
   Set m_set; ///< The underlying set storing <key, value> pairs.
 
 public:
+  using iterator = typename Set::iterator;
+  using const_iterator = typename Set::const_iterator;
 
   /// \brief Provides access to the value associated with the given key, constructs a default
   ///        value whenever the key was undefined.
@@ -77,23 +79,23 @@ public:
   /// \brief Provides access to the value associated with the given key.
   const T& at(const Key& key) const;
 
-  typename Set::iterator begin() { return m_set.begin(); }
-  typename Set::iterator end() { return m_set.end(); }
+  iterator begin() { return m_set.begin(); }
+  iterator end() { return m_set.end(); }
 
-  typename Set::const_iterator begin() const { return m_set.begin(); }
-  typename Set::const_iterator end() const { return m_set.end(); }
+  const_iterator begin() const { return m_set.begin(); }
+  const_iterator end() const { return m_set.end(); }
 
   void clear() { m_set.clear(); }
   int count(const Key& key) { return m_set.count(key); }
 
   template<typename ...Args>
-  std::pair<typename Set::iterator, bool> emplace(const Args&... args) { return m_set.emplace(args...); }
+  std::pair<iterator, bool> emplace(const Args&... args) { return m_set.emplace(args...); }
 
   void erase(const Key& key) { m_set.erase(key); }
-  typename Set::iterator erase(typename Set::iterator it) { return m_set.erase(it); }
-  typename Set::iterator find(const Key& key) { return m_set.find(key); }
+  iterator erase(iterator it) { return m_set.erase(it); }
+  iterator find(const Key& key) { return m_set.find(key); }
 
-  std::pair<typename Set::iterator, bool> insert(const Pair& pair) { return m_set.emplace(pair); }
+  std::pair<iterator, bool> insert(const Pair& pair) { return m_set.emplace(pair); }
 
   std::size_t size() const { return m_set.size(); }
 };
