@@ -125,7 +125,7 @@ private:
   Bucket& find_bucket(const Args&... args)
   {
     // Avoid code duplication by calling the const version and making the resulting bucket reference non-const.
-    return const_cast<Bucket&>(as_const(*this).find_bucket(args...));
+    return const_cast<Bucket&>(mcrl2::utilities::as_const(*this).find_bucket(args...));
   }
 
   /// \brief Searches for the element in the given bucket.

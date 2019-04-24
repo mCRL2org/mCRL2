@@ -16,14 +16,14 @@ namespace utilities
 
 /// \brief A constexpr function that casts an l-value reference to a const l-value reference
 /// \details This function is available in <utility> from c++17 onwards. Also would be nicer to use std::add_const (instead of const T&) from c++14 onwards.
-template <class T>
+template <typename T>
 constexpr const T& as_const(T& t) noexcept
 {
   return t;
 }
 
 /// \brief This constructor is deleted to prevent the casting of r-value references.
-template <class T>
+template <typename T>
 void as_const(const T&&) = delete;
 
 }
