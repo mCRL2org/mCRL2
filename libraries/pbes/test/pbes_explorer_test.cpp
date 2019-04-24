@@ -24,6 +24,7 @@
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::detail;
 
 namespace ltsmin
 {
