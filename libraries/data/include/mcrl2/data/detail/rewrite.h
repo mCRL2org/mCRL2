@@ -15,6 +15,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/utilities/noncopyable.h"
 
 namespace mcrl2
 {
@@ -38,7 +39,7 @@ namespace detail
  *   delete r;
  * \endcode
  **/
-class Rewriter
+class Rewriter : public mcrl2::utilities::noncopyable
 {
   protected:
     enumerator_identifier_generator m_generator;  //name for variables.
