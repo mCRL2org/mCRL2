@@ -102,7 +102,7 @@ std::size_t MCRL2_UNORDERED_SET_CLASS::count(const Args&... args) const
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(const Args&... args)
+std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(Args&&... args)
 {
   Bucket& bucket = find_bucket(args...);
   auto it = find_impl(bucket, args...);
@@ -113,7 +113,7 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
   }
   else
   {
-    return emplace_impl(bucket, args...);
+    return emplace_impl(bucket, std::forward<Args>(args)...);
   }
 }
 
@@ -203,11 +203,11 @@ void MCRL2_UNORDERED_SET_CLASS::print_performance_statistics() const
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace_impl(Bucket& bucket, const Args&... args)
+std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace_impl(Bucket& bucket, Args&&... args)
 {
   // Construct a new node and put it at the front of the bucket list.
   typename Bucket::node* new_node = allocate<typename Bucket::node>(m_allocator, args...);
-  std::allocator_traits<NodeAllocator>::construct(m_allocator, new_node, args...);
+  std::allocator_traits<NodeAllocator>::construct(m_allocator, new_node, std::forward<Args>(args)...);
 
   bucket.push_front(new_node);
   ++m_number_of_elements;

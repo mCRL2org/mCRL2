@@ -84,7 +84,7 @@ public:
 
   /// \brief Constructs an element Key(args...) and inserts it.
   template<typename ...Args>
-  std::pair<iterator, bool> emplace(const Args&... args);
+  std::pair<iterator, bool> emplace(Args&&... args);
 
   /// \brief Erases the given key from the unordered set.
   /// \details Needs to find the key first.
@@ -119,7 +119,7 @@ private:
 
   /// \brief Inserts T(args...) into the given bucket, assumes that it did not exists before.
   template<typename ...Args>
-  std::pair<iterator, bool> emplace_impl(Bucket& bucket, const Args&... args);
+  std::pair<iterator, bool> emplace_impl(Bucket& bucket, Args&&... args);
 
   /// \returns The bucket that might contain the element constructed by the given arguments.
   template<typename ...Args>
