@@ -9,6 +9,7 @@ mcrl2_add_library(mcrl2_data
     source/data_specification.cpp
     source/typecheck.cpp
     source/detail/prover/smt_lib_solver.cpp
+    source/detail/rewrite/innermost.cpp
     source/detail/rewrite/jitty.cpp
     source/detail/rewrite/rewrite.cpp
     source/detail/rewrite/strategy.cpp

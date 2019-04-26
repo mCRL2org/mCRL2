@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+
+#include "mcrl2/data/detail/rewrite/innermost.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #ifdef MCRL2_ENABLE_JITTYC
@@ -532,6 +534,8 @@ std::shared_ptr<Rewriter> createRewriter(
 {
   switch (strategy)
   {
+    case innermost:
+      return std::make_shared<InnermostRewriter>(data_spec,equations_selector);
     case jitty:
       return std::shared_ptr<Rewriter>(new RewriterJitty(data_spec,equations_selector));
 #ifdef MCRL2_ENABLE_JITTYC
