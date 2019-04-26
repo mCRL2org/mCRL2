@@ -516,8 +516,7 @@ class application: public data_expression
       return atermpp::detail::aterm_appl_iterator_cast<data_expression>(atermpp::aterm_appl::end());
     }
 
-    /// \brief Returns an iterator pointing past the last argument of the
-    ///        application.
+    /// \return The number of arguments of this application.
     std::size_t size() const
     {
       return atermpp::aterm_appl::size() - 1;
