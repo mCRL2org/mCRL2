@@ -380,14 +380,13 @@ class pbesinst_lazy_algorithm
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state(), sigma));
       todo.insert(init);
       discovered.insert(init);
-      while (!todo.empty())
+      while (!todo.elements().empty())
       {
         ++m_iteration_count;
         mCRL2log(log::status) << print_equation_count(m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
 
         propositional_variable_instantiation X_e = next_todo();
-
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
         const auto& phi = eqn.formula();
