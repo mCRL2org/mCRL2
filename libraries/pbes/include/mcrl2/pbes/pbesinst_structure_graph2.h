@@ -234,11 +234,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       const propositional_variable_instantiation& init,
       pbesinst_lazy_todo& todo,
       std::size_t regeneration_period
-    ) override
+    )
     {
       using utilities::detail::contains;
 
-      if (!reset_guard(regeneration_period) && !m_options.aggressive && !todo.empty())
+      if (!reset_guard(regeneration_period) && !m_options.aggressive && !todo.elements().empty())
       {
         return;
       }
@@ -389,7 +389,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
     }
 
-    void on_end_iteration() override
+    void on_discovered_elements(const std::set<propositional_variable_instantiation>& elements) override
     {
       using utilities::detail::contains;
 
@@ -415,11 +415,20 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           detail::partial_solve(m_graph_builder.m_graph, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
         }
       }
+
+      for (const propositional_variable_instantiation& e: elements)
+      {
+        todo.irrelevant_elements().erase(e);
+      }
+      if (m_options.prune_todo_list && m_options.optimization > 2)
+      {
+        prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
+      }
     }
 
     void on_end_while_loop() override
     {
-      if (!todo.elements().empty() || !todo.irrelevant_elements().empty())
+      if (!todo.empty())
       {
         auto u = m_graph_builder.find_vertex(init);
         if (S0.contains(u) || S1.contains(u))
@@ -442,6 +451,16 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           std::set<structure_graph::index_type> to_be_erased;
           for (structure_graph::index_type v: todo_.vertices())
           {
+            to_be_erased.insert(v);
+          }
+          m_graph_builder.erase_vertices(to_be_erased);
+        }
+        else
+        {
+          std::set<structure_graph::index_type> to_be_erased;
+          for (const propositional_variable_instantiation& X: todo.all_elements())
+          {
+            structure_graph::index_type v = m_graph_builder.find_vertex(X);
             to_be_erased.insert(v);
           }
           m_graph_builder.erase_vertices(to_be_erased);

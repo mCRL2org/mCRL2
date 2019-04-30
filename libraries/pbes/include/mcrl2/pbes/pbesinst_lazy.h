@@ -80,7 +80,7 @@ class pbesinst_lazy_todo
 
     bool empty() const
     {
-      return todo.empty();
+      return todo.empty() && irrelevant.empty();
     }
 
     std::size_t size() const
@@ -94,6 +94,11 @@ class pbesinst_lazy_todo
     }
 
     const std::unordered_set<propositional_variable_instantiation>& irrelevant_elements() const
+    {
+      return irrelevant;
+    }
+
+    std::unordered_set<propositional_variable_instantiation>& irrelevant_elements()
     {
       return irrelevant;
     }
@@ -317,8 +322,8 @@ class pbesinst_lazy_algorithm
     virtual void on_report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)
     { }
 
-    /// \brief This function is called at the end of every iteration.
-    virtual void on_end_iteration()
+    /// \brief This function is called when new elements are added to discovered.
+    virtual void on_discovered_elements(const std::set<propositional_variable_instantiation>& /* elements */)
     { }
 
     /// \brief This function is called right after the while loop is finished.
@@ -359,14 +364,6 @@ class pbesinst_lazy_algorithm
     {
       return false;
     }
-
-    // recreates todo
-    virtual void prune_todo_list(
-      const propositional_variable_instantiation& /* init */,
-      pbesinst_lazy_todo& /* todo */,
-      std::size_t /* regeneration_period */
-    )
-    {}
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     virtual void run()
@@ -409,17 +406,11 @@ class pbesinst_lazy_algorithm
         std::set<propositional_variable_instantiation> occ = find_propositional_variable_instantiations(psi_e);
         todo.insert(occ.begin(), occ.end(), discovered);
         discovered.insert(occ.begin(), occ.end());
-
-        on_end_iteration();
+        on_discovered_elements(occ);
 
         if (solution_found(init))
         {
           break;
-        }
-
-        if (m_options.prune_todo_list && m_options.optimization >= 3)
-        {
-          prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
         }
       }
       on_end_while_loop();

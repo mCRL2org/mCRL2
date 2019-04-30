@@ -730,13 +730,13 @@ S_1:= \emptyset \\
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \colorbox{lightgray}{$
-\textbf{if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_0 \textbf{ then }
-$}\\
-\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo, 1)$}\\
+\If todo \neq \emptyset \Space \Then$} \\
 \colorbox{lightgray}{$
-\textbf{else if } todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then }
+\qquad \If X_{init}(e_{init}) \in S_0  \Space \Then V := V \setminus \textsc{Attr}(todo, 1)
 $}\\
-\qquad \colorbox{lightgray}{$V := V \setminus \textsc{Attr}(todo, 0)$}\\
+\colorbox{lightgray}{$
+\qquad \Else \If X_{init}(e_{init}) \in S_1 \Space \Then V := V \setminus \textsc{Attr}(todo, 0)
+$}\\
 \textbf{return }(V, E),
 \end{array}
 \end{equation*}
@@ -768,7 +768,7 @@ discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
 S_0:= \emptyset \\
 S_1:= \emptyset \\
-\textbf{while }todo\neq \emptyset
+\textbf{while }(\colorbox{lightgray}{$todo \setminus irrelevant$}) \neq \emptyset
 \wedge X_{init}(e_{init}) \notin S_0 \cup S_1
 \textbf{ do} \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
@@ -780,15 +780,15 @@ S_1:= \emptyset \\
 \qquad \textbf{if $b = true$ then } S_0 := \textsc{Attr}(S_0 \cup \{ X^e \}, 0) \\
 \qquad \textbf{if $b = false$ then } S_1 := \textsc{Attr}(S_1 \cup \{ X^e \}, 1) \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
-\qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus (\colorbox{lightgray}{$discovered \setminus irrelevant$})) \\
-\qquad \colorbox{lightgray}{$irrelevant:=irrelevant \setminus \mathrm{occ}(\psi ^{e})$} \\
-\qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\qquad \colorbox{lightgray}{$todo, irrelevant := \textsc{PruneTodo}(init, todo, irrelevant) $}\\
-\textbf{if } (\colorbox{lightgray}{$todo \cup irrelevant$}) \neq \emptyset \land X_{init}(e_{init}) \in S_0 \textbf{ then }
-\\
-\qquad V := V \setminus \textsc{Attr}(\colorbox{lightgray}{$todo \cup irrelevant$}, 1)\\
-\textbf{else if } (\colorbox{lightgray}{$todo \cup irrelevant$}) \neq \emptyset \land X_{init}(e_{init}) \in S_1 \textbf{ then } \\
-\qquad V := V \setminus \textsc{Attr}(\colorbox{lightgray}{$todo \cup irrelevant$}, 0)\\
+\qquad todo := todo\cup (\mathrm{occ}(\psi ^{e})\setminus (\colorbox{lightgray}{$discovered \setminus irrelevant$})) \\
+\qquad discovered := discovered\ \cup \mathrm{occ}(\psi^e) \\
+\qquad \colorbox{lightgray}{$irrelevant := irrelevant \setminus \mathrm{occ}(\psi^e)$} \\
+\qquad \colorbox{lightgray}{$irrelevant := \textsc{PruneTodo}(init, todo, irrelevant) $}\\
+\If todo \neq \emptyset \Space \Then \\
+\qquad \If X_{init}(e_{init}) \in S_0  \Space \Then V := V \setminus \textsc{Attr}(todo, 1) \\
+\qquad \Else \If X_{init}(e_{init}) \in S_1 \Space \Then V := V \setminus \textsc{Attr}(todo, 0) \\
+\qquad \colorbox{lightgray}{$\Else V := V \setminus todo$} \\
+
 \textbf{return }(V, E),
 \end{array}
 \end{equation*}
