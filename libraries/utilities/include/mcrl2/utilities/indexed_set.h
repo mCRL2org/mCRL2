@@ -34,11 +34,8 @@ public:
   using iterator = typename Map::iterator;
   using const_iterator = typename Map::const_iterator;
 
-  /// \brief Provides access to the value associated with the given key, constructs a default
-  ///        value whenever the key was undefined.
-  //T& operator[](const Key& key);
+  // The interface of an unordered_map without the ability to remove individual elements.
 
-  /// \brief Provides access to the value associated with the given key.
   const T& at(const Key& key) const { return m_map.at(key); };
 
   iterator begin() { return m_map.begin(); }
