@@ -56,11 +56,12 @@ void FindAndReplaceDialog::setReplaceEnabled()
                                 ui->textToFind->text());
 }
 
-void FindAndReplaceDialog::actionFind()
+void FindAndReplaceDialog::actionFind(bool forReplaceAll)
 {
-  bool back = ui->upRadioButton->isChecked();
+  bool back = !forReplaceAll && ui->upRadioButton->isChecked();
   QString toSearch = ui->textToFind->text();
   bool result = false;
+  QTextCursor originalPosition = codeEditor->textCursor();
 
   QTextDocument::FindFlags flags;
 
@@ -86,26 +87,28 @@ void FindAndReplaceDialog::actionFind()
     return;
   }
 
-  /* if the string was not found, try to wrap around begin/end of file */
-  QTextCursor originalPosition = codeEditor->textCursor();
-  codeEditor->moveCursor(back ? QTextCursor::End : QTextCursor::Start);
-  result = codeEditor->find(toSearch, flags);
-
-  /* if found, we are done and tell the user that we have wrapped around */
-  if (result)
+  if (!forReplaceAll)
   {
-    if (back)
+    /* if the string was not found, try to wrap around begin/end of file */
+    codeEditor->moveCursor(back ? QTextCursor::End : QTextCursor::Start);
+    result = codeEditor->find(toSearch, flags);
+
+    /* if found, we are done and tell the user that we have wrapped around */
+    if (result)
     {
-      showMessage("Found the last occurrence");
+      if (back)
+      {
+        showMessage("Found the last occurrence");
+      }
+      else
+      {
+        showMessage("Found the first occurence");
+      }
+      return;
     }
-    else
-    {
-      showMessage("Found the first occurence");
-    }
-    return;
   }
 
-  /* if the string was still not found, it is not in the text */
+  /* if the string was still not found, mention it and reset the cursor */
   showMessage("No match found", true);
   codeEditor->setTextCursor(originalPosition);
 }
@@ -121,13 +124,13 @@ void FindAndReplaceDialog::actionReplaceAll()
   QTextCursor originalPosition = codeEditor->textCursor();
 
   codeEditor->moveCursor(QTextCursor::Start);
-  actionFind();
+  actionFind(true);
 
   int i = 0;
   while (codeEditor->textCursor().hasSelection())
   {
     codeEditor->textCursor().insertText(ui->textToReplace->text());
-    actionFind();
+    actionFind(true);
     i++;
   }
 

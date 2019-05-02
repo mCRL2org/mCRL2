@@ -46,8 +46,9 @@ class FindReplaceDialog : public QDialog
     /**
      * @brief Finds the next occurrence
      * @param down True indicates forwards, false indicates backwards
+     * @param doWrapAround Whether it should warp around the file
      */
-    void find(bool down);
+    void find(bool down, bool doWrapAround);
 
     /**
      * @brief Finds the next occurrence
@@ -58,11 +59,11 @@ class FindReplaceDialog : public QDialog
     /**
      * @brief Finds the next occurrence
      */
-    void findNext() { find(true); }
+    void findNext() { find(true, true); }
     /**
      * @brief Finds the previous occurrence
      */
-    void findPrev() { find(false); }
+    void findPrev() { find(false, true); }
 
     /**
      * @brief Replaces the current occurrence

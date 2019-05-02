@@ -46,8 +46,10 @@ class FindAndReplaceDialog : public QDialog
 
   /**
    * @brief actionFind Allows the user to find a string in the editor
+   * @param forReplaceAll Whether we are finding for replace all
+            This means that searching must go down and no wrap around is done
    */
-  void actionFind();
+  void actionFind(bool forReplaceAll = false);
 
   /**
    * @brief actionReplace Allows the user to replace a string in the editor
