@@ -77,17 +77,6 @@ public:
     }
   }
 
-  /// \brief Constructs a term application with the given symbol and arguments.
-  _aterm_appl(const function_symbol& symbol, unprotected_aterm arguments[], bool)
-    : _aterm(symbol)
-  {
-    for (std::size_t i = 0; i < symbol.arity(); ++i)
-    {
-      // Prevent bound checking, the allocator must make sure that symbol.arity() arguments fit.
-      m_arguments.data()[i] = arguments[i];
-    }
-  }
-
   /// \returns A reference to the arguments at the ith position.
   aterm& arg(std::size_t index)
   {
@@ -160,12 +149,6 @@ public:
   void construct(T* element, const function_symbol& symbol, ForwardIterator begin)
   {
     new (element) T(symbol, begin, true);
-  }
-
-  /// \brief Constructs an _aterm_appl with arguments taken from the list of arguments, the arity is given by the function symbol.
-  void construct(T* element, const function_symbol& symbol, unprotected_aterm* args)
-  {
-    new (element) T(symbol, args, true);
   }
 
   /// \brief Specialize destroy for _aterm_appl to only destroy the function symbol. The reference count for the aterm does not have to be decreased.

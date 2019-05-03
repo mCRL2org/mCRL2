@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/detail/aterm_appl.h"
 #include "mcrl2/utilities/unused.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/stack_array.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -137,8 +138,7 @@ aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
                                         InputIterator it,
                                         InputIterator)
 {
-  // Construct a proxy object on the stack.
-  unprotected_aterm* arguments = MCRL2_SPECIFIC_STACK_ALLOCATOR(unprotected_aterm, symbol.arity());
+  MCRL2_DECLARE_STACK_ARRAY(arguments, unprotected_aterm, symbol.arity());
   for (std::size_t i = 0; i < symbol.arity(); ++i)
   {
     arguments[i] = converter(*it);
@@ -146,7 +146,7 @@ aterm ATERM_POOL_STORAGE::create_appl_dynamic(const function_symbol& symbol,
   }
 
   // Find or create a new term and return it.
-  return emplace(symbol, arguments);
+  return emplace(symbol, arguments.begin());
 }
 
 ATERM_POOL_STORAGE_TEMPLATES

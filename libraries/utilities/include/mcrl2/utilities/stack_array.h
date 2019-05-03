@@ -61,8 +61,8 @@ private:
   std::size_t m_size;
 };
 
-}
-}
+} // namespace utilities
+} // namespace mcrl2
 
 /// \brief Define a (hopefully) unique name for the underlying reserved stack memory.
 #define MCRL2_STACK_ARRAY_NAME(NAME) \
