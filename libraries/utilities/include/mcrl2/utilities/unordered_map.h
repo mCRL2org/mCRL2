@@ -44,6 +44,11 @@ private:
       return Hash()(pair.first);
     }
 
+    std::size_t operator()(const Key& key, const T&) const
+    {
+      return Hash()(key);
+    }
+
     std::size_t operator()(const Key& key) const
     {
       return Hash()(key);
@@ -56,6 +61,11 @@ private:
     bool operator()(const Pair& first, const Pair& second) const
     {
       return Equals()(first.first, second.first);
+    }
+
+    bool operator()(const Pair& first, const Key& key, const T&) const
+    {
+      return Equals()(first.first, key);
     }
 
     bool operator()(const Pair& first, const Key& key) const
@@ -71,6 +81,12 @@ private:
 public:
   using iterator = typename Set::iterator;
   using const_iterator = typename Set::const_iterator;
+
+  /// \brief Constructs an unordered_map that can store initial_size number of elements before resizing.
+  unordered_map(std::size_t initial_size)
+    : m_set(initial_size)
+  {}
+  unordered_map() {}
 
   /// \brief Provides access to the value associated with the given key, constructs a default
   ///        value whenever the key was undefined.

@@ -53,8 +53,9 @@ public:
   using iterator = unordered_set_iterator<Key, Bucket, Allocator, false>;
   using const_iterator = unordered_set_iterator<Key, Bucket, Allocator, true>;
 
+  /// \brief Constructs an unordered_set that can store initial_size number of elements before resizing.
+  unordered_set(std::size_t initial_size) { resize(std::max<std::size_t>(round_up_to_power_of_two(initial_size), 4)); }
   unordered_set() { resize(4UL); }
-  unordered_set(std::size_t number_of_elements) { resize(std::max<std::size_t>(round_up_to_power_of_two(number_of_elements), 4)); }
 
   // Copy operators.
   unordered_set(const unordered_set& set);
