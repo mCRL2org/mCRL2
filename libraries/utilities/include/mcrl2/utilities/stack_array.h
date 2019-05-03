@@ -21,9 +21,10 @@ namespace mcrl2
 namespace utilities
 {
 
-/// \brief Provides (a subset of) the interface of std::array for a portion of allocated memory. Can be used to
-///        interface with a portion of memory allocated on the stack, see MCRL2_DECLARE_STACK_VECTOR.
-/// \details It default constructs the elements in the constructor and destroys them in its destructor.
+/// \brief Provides (a subset of) the interface of std::array<T> for a portion of preallocated memory. Can be used to
+///        interface with a portion of memory allocated on the stack, \see MCRL2_DECLARE_STACK_ARRAY. The advantage over
+///        MCRL2_SPECIFIC_STACK_ALLOCATOR is that the lifetime of the underlying objects is bounded by the lifetime of the
+///        stack_array.
 template<typename T>
 class stack_array : public noncopyable
 {
@@ -76,6 +77,7 @@ public:
 
   T& operator[](std::size_t index)
   {
+    assert(index < size());
     return m_reserved_memory[index];
   }
 
@@ -91,7 +93,7 @@ private:
 #define MCRL2_STACK_ARRAY_NAME(NAME) \
   NAME ## _reserved_stack_memory
 
-/// \brief Allocates an of stack_array<TYPE> with the specified name that stores SIZE elements.
+/// \brief Declares a stack_array<TYPE> with the specified NAME that stores SIZE elements type TYPE.
 #define MCRL2_DECLARE_STACK_ARRAY(NAME, TYPE, SIZE) \
   TYPE* MCRL2_STACK_ARRAY_NAME(NAME) = MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE); \
   mcrl2::utilities::stack_array<TYPE> NAME (MCRL2_STACK_ARRAY_NAME(NAME), SIZE)
