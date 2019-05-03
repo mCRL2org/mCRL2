@@ -137,8 +137,8 @@ class pbesinst_lazy_todo
         auto j = irrelevant.find(*i);
         if (j != irrelevant.end())
         {
-          irrelevant.erase(j);
           todo.push_back(*j);
+          irrelevant.erase(j);
         }
         else if (!contains(discovered, *i))
         {
