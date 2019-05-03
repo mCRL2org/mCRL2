@@ -11,21 +11,28 @@
 #define MCRL2_UTILITIES_STACK_VECTOR_H
 
 #include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/noncopyable.h"
 
 #include <cstddef>
+#include <iterator>
 
 namespace mcrl2
 {
 namespace utilities
 {
 
-/// \brief Provides the interface of std::array for a portion of allocated memory. Can be used to
+/// \brief Provides (a subset of) the interface of std::array for a portion of allocated memory. Can be used to
 ///        interface with a portion of memory allocated on the stack, see MCRL2_DECLARE_STACK_VECTOR.
 /// \details It default constructs the elements in the constructor and destroys them in its destructor.
 template<typename T>
-class stack_array
+class stack_array : public noncopyable
 {
 public:
+  using iterator = T*;
+  using const_iterator = const T*;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
   /// \brief The given pointer should be able to hold N element of sizeof(T) bytes.
   stack_array<T>(T* reserved_memory, std::size_t N)
     : m_reserved_memory(reserved_memory),
@@ -45,11 +52,27 @@ public:
     }
   }
 
-  T* begin() { return m_reserved_memory; }
-  const T* begin() const { return m_reserved_memory; }
+  // The remaining interface of std::array
 
-  T* end() { return m_reserved_memory + m_size; }
-  const T* end() const { return m_reserved_memory + m_size; }
+  iterator begin() { return data(); }
+  const_iterator begin() const { return data(); }
+
+  iterator end() { return data() + size();  }
+  const_iterator end() const { return data() + size(); }
+
+  T* data() { return m_reserved_memory; }
+
+  bool empty() const { return size() != 0; }
+
+  reverse_iterator rbegin() { return end(); }
+  const_reverse_iterator rbegin() const { return end(); }
+
+  reverse_iterator rend() { return begin(); }
+  const_reverse_iterator rend() const { return begin(); }
+
+  std::size_t size() const { return m_size; }
+
+  std::size_t max_size() const { return m_size; }
 
   T& operator[](std::size_t index)
   {
