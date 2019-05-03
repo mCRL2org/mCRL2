@@ -30,7 +30,7 @@ private:
 public:
   using iterator = typename Map::iterator;
 
-  fixed_size_cache(std::size_t max_size)
+  fixed_size_cache(std::size_t max_size = 1024)
     : m_map(max_size)
   {
     if (max_size == 0)

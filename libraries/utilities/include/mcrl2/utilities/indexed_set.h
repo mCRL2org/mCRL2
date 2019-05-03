@@ -36,7 +36,7 @@ public:
 
   // The interface of an unordered_map without the ability to remove individual elements.
 
-  const T& at(const Key& key) const { return m_map.at(key); };
+  const T& at(const Key& key) const { return m_map.at(key); }
 
   iterator begin() { return m_map.begin(); }
   iterator end() { return m_map.end(); }
@@ -48,7 +48,7 @@ public:
   int count(const Key& key) { return m_map.count(key); }
 
   template<typename ...Args>
-  std::pair<iterator, bool> insert(const Key& key) { return m_map.insert(std::make_pair(key, size())); }
+  std::pair<iterator, bool> insert(const Key& key) { return m_map.emplace(key, size()); }
 
   iterator find(const Key& key) { return m_map.find(key); }
 
