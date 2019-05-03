@@ -101,6 +101,7 @@ public:
   const_iterator begin() const { return m_set.begin(); }
   const_iterator end() const { return m_set.end(); }
 
+  std::size_t capacity() { return m_set.capacity(); }
   void clear() { m_set.clear(); }
   int count(const Key& key) { return m_set.count(key); }
 

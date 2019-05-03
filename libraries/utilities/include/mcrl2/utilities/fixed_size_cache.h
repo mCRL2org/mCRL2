@@ -37,6 +37,12 @@ public:
     {
       m_maximum_size = std::numeric_limits<std::size_t>::max();
     }
+    else
+    {
+      // The reason for this is that the internal mapping might only support powers of two and as such
+      // we might as well use the additional capacity.
+      m_maximum_size = m_map.capacity();
+    }
   }
 
   iterator begin() { return m_map.begin(); }
@@ -49,7 +55,7 @@ public:
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args)
   {
-    if (m_map.size() +1 >= m_maximum_size)
+    if (m_map.size() + 1 >= m_maximum_size)
     {
       // Remove an existing element, for now an arbitrary choice.
       m_map.erase(m_map.begin());
