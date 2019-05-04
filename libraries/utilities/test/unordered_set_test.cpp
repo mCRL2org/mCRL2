@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE(test_small)
 
 BOOST_AUTO_TEST_CASE(test_large)
 {
+  // Test inserting a large number of elements (tests resize behaviour).
   std::random_device dev;
   std::mt19937 rng(dev());
   std::uniform_int_distribution<std::mt19937::result_type> dist(1,1000); // distribution in range [1, 6]
@@ -81,6 +82,7 @@ BOOST_AUTO_TEST_CASE(test_large)
 
 BOOST_AUTO_TEST_CASE(test_copy)
 {
+  // Test the copy constructor.
   unordered_set<int> set = construct({5,3,2,5});
 
   unordered_set<int> copy(set);
@@ -89,6 +91,16 @@ BOOST_AUTO_TEST_CASE(test_copy)
   BOOST_CHECK(copy.find(5) != copy.end());
   BOOST_CHECK(copy.find(2) != copy.end());
   BOOST_CHECK(copy.find(3) != copy.end());
+}
+
+BOOST_AUTO_TEST_CASE(test_find_erase)
+{
+  // Try to erase an element using the iterator returned by find.
+  unordered_set<int> set = construct({5,3,2,5});
+
+  auto it = set.find(3);
+  BOOST_CHECK(it != set.end());
+  set.erase(it);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])

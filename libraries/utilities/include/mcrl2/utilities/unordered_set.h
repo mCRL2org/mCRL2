@@ -43,18 +43,22 @@ template<typename Key,
          bool ThreadSafe = false>
 class unordered_set
 {
-public:
+private:
   /// \brief Combine the bucket list and a lock that locks modifications to the bucket list.
   struct lockable_bucket : public detail::bucket_list<Key, Allocator>
   {};
 
   using Bucket = lockable_bucket;
   using NodeAllocator = typename Bucket::NodeAllocator;
+  using bucket_it = typename std::vector<Bucket>::iterator;
+  using bucket_const_it = typename std::vector<Bucket>::const_iterator;
+
+public:
   using iterator = unordered_set_iterator<Key, Bucket, Allocator, false>;
   using const_iterator = unordered_set_iterator<Key, Bucket, Allocator, true>;
 
   /// \brief Constructs an unordered_set that can store initial_size number of elements before resizing.
-  unordered_set(std::size_t initial_size) { resize(std::max<std::size_t>(round_up_to_power_of_two(initial_size), 4)); }
+  explicit unordered_set(std::size_t initial_size) { resize(std::max<std::size_t>(round_up_to_power_of_two(initial_size), 4)); }
   unordered_set() { resize(4UL); }
 
   // Copy operators.
@@ -68,11 +72,11 @@ public:
   ~unordered_set();
 
   /// \returns An iterator over all keys.
-  iterator begin() { return iterator(m_buckets.begin(), m_buckets.end(), typename Bucket::iterator(*m_buckets.begin())); }
+  iterator begin() { return iterator(m_buckets.begin(), m_buckets.end()); }
   iterator end() { return iterator(m_buckets.end()); }
 
   /// \returns A const iterator over all keys.
-  const_iterator begin() const { return const_iterator(m_buckets.begin(), m_buckets.end(), typename Bucket::const_iterator(*m_buckets.begin())); }
+  const_iterator begin() const { return const_iterator(m_buckets.begin(), m_buckets.end()); }
   const_iterator end() const { return const_iterator(m_buckets.end()); }
 
   /// \brief Removes all elements from the set.
@@ -122,31 +126,28 @@ private:
 
   /// \brief Inserts T(args...) into the given bucket, assumes that it did not exists before.
   template<typename ...Args>
-  std::pair<iterator, bool> emplace_impl(Bucket& bucket, Args&&... args);
+  std::pair<iterator, bool> emplace_impl(bucket_it bucket_it, Args&&... args);
 
-  /// \returns The bucket that might contain the element constructed by the given arguments.
+  /// \returns An iterator to the bucket that might contain the element constructed by the given arguments.
+  /// \details The returned iterator always points to a valid bucket.
   template<typename ...Args>
-  const Bucket& find_bucket(const Args&... args) const;
+  bucket_const_it find_bucket(const Args&... args) const;
 
   template<typename ...Args>
-  Bucket& find_bucket(const Args&... args)
-  {
-    // Avoid code duplication by calling the const version and making the resulting bucket reference non-const.
-    return const_cast<Bucket&>(mcrl2::utilities::as_const(*this).find_bucket(args...));
-  }
+  bucket_it find_bucket(const Args&... args);
 
   /// \brief Searches for the element in the given bucket.
   template<typename ...Args>
-  const_iterator find_impl(const Bucket& bucket, const Args&... args) const;
+  const_iterator find_impl(bucket_const_it bucket_it, const Args&... args) const;
 
   template<typename ...Args>
-  iterator find_impl(Bucket& bucket, const Args&... args);
+  iterator find_impl(bucket_it bucket_it, const Args&... args);
 
   /// \brief Inserts a bucket node into the hash table.
   /// \details Does not increment the m_number_of_elements.
   void insert(typename Bucket::node* node)
   {
-    Bucket& bucket = find_bucket(node->key());
+    Bucket& bucket = *find_bucket(node->key());
     bucket.push_front(node);
   }
 

@@ -61,7 +61,7 @@ public:
 
     /// \brief Constructs a key by using the given arguments.
     template<typename ...Args>
-    node(Args&&... args)
+    explicit node(Args&&... args)
       : m_key(std::forward<Args>(args)...)
     {}
 
@@ -92,11 +92,11 @@ public:
 
   public:
 
-    key_iterator(node_base_pointer node)
+    explicit key_iterator(node_base_pointer node)
       : m_bucket_node(reinterpret_cast<node_pointer>(node))
     {}
 
-    key_iterator(Bucket& bucket)
+    explicit key_iterator(Bucket& bucket)
       : m_bucket_node(reinterpret_cast<node_pointer>(bucket.head()->next()))
     {}
 

@@ -9,7 +9,6 @@
 #ifndef MCRL2_UTILITIES_UNORDERED_SET_ITERATOR_H
 #define MCRL2_UTILITIES_UNORDERED_SET_ITERATOR_H
 
-#include "mcrl2/utilities/spinlock.h"
 #include "mcrl2/utilities/detail/bucket_list.h"
 
 #include <vector>
@@ -23,9 +22,7 @@ namespace utilities
 template<typename Key, typename Bucket, typename Allocator, bool Constant = false>
 class unordered_set_iterator : std::iterator_traits<Key>
 {
-public:
-  using tag = std::input_iterator_tag;
-
+private:
   using bucket_it = typename std::conditional<Constant,
     typename std::vector<Bucket>::const_iterator,
     typename std::vector<Bucket>::iterator>::type;
@@ -33,35 +30,30 @@ public:
     typename Bucket::const_iterator,
     typename Bucket::iterator>::type;
 
-  /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
-  unordered_set_iterator(bucket_it it, bucket_it end, key_it_type before_it, key_it_type key) :
-    m_key_before_it(before_it), m_key_it(key), m_bucket_it(it), m_bucket_end(end)
-  {
-    goto_next_bucket();
-  }
+public:
+  using tag = std::input_iterator_tag;
 
   /// \brief Construct an iterator over all keys passed in this bucket and all remaining buckets.
-  unordered_set_iterator(bucket_it it, bucket_it end, key_it_type key) :
-    m_key_it(key), m_bucket_it(it), m_bucket_end(end)
+  unordered_set_iterator(bucket_it it, bucket_it end, key_it_type before_it, key_it_type key) :
+    m_bucket_it(it), m_bucket_end(end), m_key_before_it(before_it), m_key_it(key)
+  {}
+
+  /// \brief Construct the begin iterator (over all elements).
+  unordered_set_iterator(bucket_it it, bucket_it end) :
+    m_bucket_it(it), m_bucket_end(end)
   {
-    m_key_before_it = (*m_bucket_it).before_begin();
     goto_next_bucket();
   }
 
   /// \brief Construct the end iterator
-  unordered_set_iterator(bucket_it it) :
+  explicit unordered_set_iterator(bucket_it it) :
     m_bucket_it(it)
-  {}
-
-  /// \brief Construct an iterator over the keys in a bucket.
-  unordered_set_iterator(key_it_type it) :
-    m_key_it(it)
   {}
 
   unordered_set_iterator& operator++()
   {
-    ++m_key_it;
     ++m_key_before_it;
+    ++m_key_it;
     goto_next_bucket();
     return *this;
   }
@@ -110,7 +102,6 @@ public:
 
   Bucket& bucket() { return *m_bucket_it; }
 
-private:
   /// \brief Iterate to the next non-empty bucket.
   void goto_next_bucket()
   {
@@ -136,10 +127,11 @@ private:
     assert(m_bucket_it == m_bucket_end || m_key_it != detail::EndIterator);
   }
 
-  key_it_type m_key_before_it;
-  key_it_type m_key_it; // Invariant: m_key_it != EndIterator.
+private:
   bucket_it m_bucket_it;
   bucket_it m_bucket_end;
+  key_it_type m_key_before_it;
+  key_it_type m_key_it; // Invariant: m_key_it != EndIterator.
 };
 
 } // namespace utilities
