@@ -40,7 +40,7 @@ public:
 
   /// \brief Construct the begin iterator (over all elements).
   unordered_set_iterator(bucket_it it, bucket_it end) :
-    m_bucket_it(it), m_bucket_end(end)
+    m_bucket_it(it), m_bucket_end(end), m_key_before_it((*it).before_begin()), m_key_it((*it).begin())
   {
     goto_next_bucket();
   }

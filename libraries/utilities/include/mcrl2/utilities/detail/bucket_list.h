@@ -96,10 +96,6 @@ public:
       : m_bucket_node(reinterpret_cast<node_pointer>(node))
     {}
 
-    explicit key_iterator(Bucket& bucket)
-      : m_bucket_node(reinterpret_cast<node_pointer>(bucket.head()->next()))
-    {}
-
     key_iterator()
       : m_bucket_node(nullptr)
     {}
@@ -156,7 +152,7 @@ public:
   iterator before_begin() { return iterator(&m_head); }
 
   /// \returns A const iterator over the keys of this bucket and successor buckets.
-  const_iterator begin() const { return const_iterator(*this); }
+  const_iterator begin() const { return const_iterator(m_head.next()); }
   const_iterator end() const { return const_iterator(); }
 
   /// \return A const iterator pointing to the before the head of the list.
