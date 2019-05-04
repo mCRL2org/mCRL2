@@ -83,7 +83,9 @@ public:
   template<typename ...Args>
   std::size_t count(const Args&... args) const;
 
-  /// \brief Constructs an element Key(args...) and inserts it.
+  /// \brief Inserts an element Key(args...) into the set if it did not already exist.
+  /// \returns A pair of the iterator pointing to the element and a boolean that is true iff
+  ///         a new element was inserted (as opposed to it already existing in the set).
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args);
 
