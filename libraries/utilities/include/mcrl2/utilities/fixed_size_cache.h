@@ -10,67 +10,24 @@
 #ifndef MCRL2_UTILITIES_FIXED_SIZE_CACHE_H
 #define MCRL2_UTILITIES_FIXED_SIZE_CACHE_H
 
-#include "mcrl2/utilities/unordered_map.h"
+#include "mcrl2/utilities/cache_policy.h"
 
 namespace mcrl2
 {
 namespace utilities
 {
 
-/// \brief An interface to implement a replacement policy for the fixed_size_cache.
-template<typename Key, typename Map>
-class replacement_policy
-{
-public:
-  replacement_policy(Map& map)
-    : m_map(map)
-  {}
-
-  /// \brief Called whenever a new element has been inserted into the cache.
-  virtual void inserted(const Key& key) = 0;
-
-  /// \returns An iterator to the key that should be replaced when the cache is full.
-  virtual typename Map::iterator replacement_candidate() = 0;
-
-  /// \brief Called whenever an element was found in the cache.
-  virtual void touch(const Key& key) = 0;
-
-public:
-  Map& m_map; ///< The map on which the policy operates.
-};
-
-/// \brief A policy that replaces an arbitrary (but not completely random) element.
-template<typename Key, typename Map>
-class no_policy final : public replacement_policy<Key, Map>
-{
-private:
-  using super = replacement_policy<Key, Map>;
-
-public:
-
-  no_policy(Map& map)
-    : super(map)
-  {}
-
-  typename Map::iterator replacement_candidate() override { return super::m_map.begin(); }
-
-  void inserted(const Key&) override
-  {}
-
-  void touch(const Key&) override
-  {}
-};
-
 /// \brief A cache keeps track of key-value pairs similar to a map. The difference is that a cache
 ///        has (an optional) maximum size and a policy that determines what element gets evicted when
 ///        the cache is full.
+/// \details Works with arbirary maps that implement the unordered_map interface.
 template<typename Key,
   typename T,
-  typename Map = unordered_map_large<Key, T>,
-  typename Policy = no_policy<Key, Map>>
+  typename Policy = no_policy<Key, T>>
 class fixed_size_cache
 {
 private:
+  using Map = typename Policy::Map;
   using Pair = std::pair<Key, T>;
 
 public:
@@ -105,20 +62,22 @@ public:
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args)
   {
-    // If an element was inserted and the current cache is full.
-    if (m_map.size() + 1 >= m_maximum_size)
+    auto result = m_map.emplace(std::forward<Args>(args)...);
+
+    if (result.second)
     {
-      // Remove an existing element defined by the policy.
-      m_map.erase(m_policy.replacement_candidate());
-    }
-    else
-    {
-      // An existing element was updated.
-      //m_policy.touch((*(result.first)).first);
+      m_policy.inserted((*result.first).first);
+
+      // If an element was inserted and the current cache is full.
+      if (m_map.size() >= m_maximum_size)
+      {
+        // Remove an existing element defined by the policy.
+        m_map.erase(m_policy.replacement_candidate());
+      }
     }
 
     assert(m_map.size() <= m_maximum_size);
-    return m_map.emplace(std::forward<Args>(args)...);
+    return result;
   }
 
 private:
