@@ -26,24 +26,15 @@ class replacement_policy
 public:
   using Map = Map_;
 
-  replacement_policy(Map& map)
-    : m_map(map)
-  {}
-
+protected:
   /// \brief Called whenever a new element has been inserted into the cache.
   virtual void inserted(const Key& key) = 0;
 
   /// \returns An iterator to the key that should be replaced when the cache is full.
-  virtual typename Map::iterator replacement_candidate() = 0;
+  virtual typename Map::iterator replacement_candidate(Map& map) = 0;
 
   /// \brief Called whenever an element was found in the cache.
   virtual void touch(const Key& key) = 0;
-
-protected:
-  Map& map() { return m_map; }
-
-private:
-  Map& m_map; ///< The map on which the policy operates.
 };
 
 /// \brief A policy that replaces an arbitrary (but not random) element.
@@ -60,7 +51,7 @@ public:
     : super(map)
   {}
 
-  typename Map::iterator replacement_candidate() override { return super::map().begin(); }
+  typename Map::iterator replacement_candidate(Map& map) override { return map.begin(); }
 
   void inserted(const Key&) override
   {}
@@ -84,13 +75,13 @@ public:
     m_last_element_it = m_queue.before_begin();
   }
 
-  typename Map::iterator replacement_candidate() override
+  typename Map::iterator replacement_candidate(Map& map) override
   {
     assert(!m_queue.empty());
     // Remove the first key (the first one to be inserted into the queue).
-    auto it = super::map().find(m_queue.front());
+    auto it = map.find(m_queue.front());
     m_queue.erase_after(m_queue.before_begin());
-    assert(it != super::map().end());
+    assert(it != map.end());
     return it;
   }
 

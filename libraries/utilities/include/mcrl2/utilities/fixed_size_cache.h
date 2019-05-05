@@ -33,9 +33,8 @@ private:
 public:
   using iterator = typename Map::iterator;
 
-  fixed_size_cache(std::size_t max_size = 1024)
-    : m_map(max_size),
-      m_policy(m_map)
+  explicit fixed_size_cache(std::size_t max_size = 1024)
+    : m_map(max_size)
   {
     if (max_size == 0)
     {
@@ -72,7 +71,7 @@ public:
       if (m_map.size() >= m_maximum_size)
       {
         // Remove an existing element defined by the policy.
-        m_map.erase(m_policy.replacement_candidate());
+        m_map.erase(m_policy.replacement_candidate(m_map));
       }
     }
 
