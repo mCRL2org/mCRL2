@@ -61,22 +61,27 @@ public:
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args)
   {
-    auto result = m_map.emplace(std::forward<Args>(args)...);
-
-    if (result.second)
+    // The reason to split the find and emplace is that when we insert an element the replacement_candidate should not be
+    // the key that we just inserted. The other way around, when an element that we are looking for was first removed and
+    // then searched for also leads to unnecessary inserts.
+    auto result = m_map.find(args...);
+    if (result == m_map.end())
     {
-      m_policy.inserted((*result.first).first);
-
-      // If an element was inserted and the current cache is full.
-      if (m_map.size() >= m_maximum_size)
+      // If the cache would be full after an inserted.
+      if (m_map.size() + 1 >= m_maximum_size)
       {
         // Remove an existing element defined by the policy.
         m_map.erase(m_policy.replacement_candidate(m_map));
       }
+
+      // Insert an element and inform the policy that an element was inserted.
+      auto emplace_result = m_map.emplace(std::forward<Args>(args)...);
+      m_policy.inserted((*emplace_result.first).first);
+      return emplace_result;
     }
 
     assert(m_map.size() <= m_maximum_size);
-    return result;
+    return std::make_pair(result, false);
   }
 
 private:

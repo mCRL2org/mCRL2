@@ -110,7 +110,12 @@ public:
 
   void erase(const Key& key) { m_set.erase(key); }
   iterator erase(iterator it) { return m_set.erase(it); }
-  iterator find(const Key& key) { return m_set.find(key); }
+
+  template<typename ...Args>
+  iterator find(const Args&... args) { return m_set.find(args...); }
+
+  template<typename ...Args>
+  const_iterator find(const Args&... args) const { return m_set.find(args...); }
 
   std::pair<iterator, bool> insert(const Pair& pair) { return m_set.emplace(pair); }
 

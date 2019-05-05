@@ -47,10 +47,6 @@ private:
 public:
   using Map = typename super::Map;
 
-  no_policy(Map& map)
-    : super(map)
-  {}
-
   typename Map::iterator replacement_candidate(Map& map) override { return map.begin(); }
 
   void inserted(const Key&) override
@@ -69,8 +65,7 @@ private:
 public:
   using Map = typename super::Map;
 
-  fifo_policy(Map& map)
-    : super(map)
+  fifo_policy()
   {
     m_last_element_it = m_queue.before_begin();
   }
