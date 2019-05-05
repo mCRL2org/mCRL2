@@ -294,7 +294,7 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find_imp
 MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::resize_if_needed()
 {
-  if (m_number_of_elements >= capacity() && !ThreadSafe)
+  if (m_number_of_elements > capacity() && !ThreadSafe)
   {
     resize(capacity() * 2);
   }

@@ -93,6 +93,23 @@ BOOST_AUTO_TEST_CASE(test_copy)
   BOOST_CHECK(copy.find(3) != copy.end());
 }
 
+BOOST_AUTO_TEST_CASE(test_move)
+{
+  // Test the move constructor.
+  unordered_set<int> set = construct({5,3,2,5});
+  unordered_set<int> moved = std::move(set);
+}
+
+BOOST_AUTO_TEST_CASE(test_empty)
+{
+  // Test the move constructor.
+  unordered_set<int> set(0);
+  for (int element : set)
+  {
+    BOOST_CHECK(false);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(test_find_erase)
 {
   // Try to erase an element using the iterator returned by find.
@@ -101,6 +118,13 @@ BOOST_AUTO_TEST_CASE(test_find_erase)
   auto it = set.find(3);
   BOOST_CHECK(it != set.end());
   set.erase(it);
+}
+
+BOOST_AUTO_TEST_CASE(test_erase_begin)
+{
+  // Try to erase an element using the iterator returned by find.
+  unordered_set<int> set = construct({5,3,2,5});
+  set.erase(set.begin());
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
