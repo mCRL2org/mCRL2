@@ -41,6 +41,7 @@ protected:
 template<typename Key, typename T>
 class no_policy final : public replacement_policy<Key, T>
 {
+public:
   using Map = typename replacement_policy<Key, T>::Map;
 
   typename Map::iterator replacement_candidate(Map& map) override { return map.begin(); }
