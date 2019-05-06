@@ -69,7 +69,7 @@ function_symbol function_symbol_pool::create(const std::string& name, const std:
         {
           try
           {
-            std::size_t number = std::stol(potential_number);
+            std::size_t number = static_cast<std::size_t>(std::stol(potential_number));
             *prefix_it->second = std::max(*prefix_it->second, number + 1); // Set the index belonging to the found prefix to at least a safe number+1.
           }
           catch (std::exception&)
@@ -128,7 +128,7 @@ std::size_t function_symbol_pool::get_sufficiently_large_postfix_index(const std
       std::size_t end_of_number;
       try
       {
-        std::size_t number = std::stol(potential_number, &end_of_number);
+        std::size_t number = static_cast<std::size_t>(std::stol(potential_number, &end_of_number));
         if (end_of_number == potential_number.size()) // A proper number was read.
         {
           if (number >= index)
