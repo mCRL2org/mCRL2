@@ -91,6 +91,10 @@ private:
   std::size_t m_maximum_size; ///< The maximum number of elements to cache.
 };
 
+template<typename Key,
+  typename T>
+using fifo_cache = fixed_size_cache<Key, T, fifo_policy<Key, T>>;
+
 } // namespace utilities
 } // namespace mcrl2
 

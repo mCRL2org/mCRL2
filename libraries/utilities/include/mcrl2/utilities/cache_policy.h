@@ -41,11 +41,7 @@ protected:
 template<typename Key, typename T>
 class no_policy final : public replacement_policy<Key, T>
 {
-private:
-  using super = replacement_policy<Key, T>;
-
-public:
-  using Map = typename super::Map;
+  using Map = typename replacement_policy<Key, T>::Map;
 
   typename Map::iterator replacement_candidate(Map& map) override { return map.begin(); }
 
@@ -59,16 +55,30 @@ public:
 template<typename Key, typename T>
 class fifo_policy final : public replacement_policy<Key, T>
 {
-private:
-  using super = replacement_policy<Key, T>;
-
 public:
-  using Map = typename super::Map;
+  using Map = typename replacement_policy<Key, T>::Map;
 
   fifo_policy()
   {
     m_last_element_it = m_queue.before_begin();
   }
+
+  fifo_policy(const fifo_policy& other)
+    : m_queue(other.m_queue)
+  {
+    update_last_element_it();
+  }
+
+  fifo_policy& operator=(const fifo_policy& other)
+  {
+    m_queue = other.m_queue;
+    update_last_element_it();
+    return *this;
+  }
+
+  // These moves work when moving m_queue guarantees that m_last_element_it remains valid.
+  fifo_policy(fifo_policy&& other) noexcept = default;
+  fifo_policy& operator=(fifo_policy&& other) noexcept = default;
 
   typename Map::iterator replacement_candidate(Map& map) override
   {
@@ -90,6 +100,15 @@ public:
   {}
 
 private:
+  void update_last_element_it()
+  {
+    // Update the iterator to the last element of the queue.
+    for (auto it = m_queue.before_begin(); it != m_queue.end(); ++it)
+    {
+      m_last_element_it = it;
+    }
+  }
+
   std::forward_list<Key> m_queue;
   typename std::forward_list<Key>::iterator m_last_element_it;
 };
