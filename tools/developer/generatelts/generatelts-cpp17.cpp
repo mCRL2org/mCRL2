@@ -269,11 +269,12 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       }
     }
 
-    std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& /* lpsspec */)
+    std::unique_ptr<lts::stochastic_lts_builder> create_stochastic_lts_builder(const lps::stochastic_specification& lpsspec)
     {
       switch (output_format)
       {
         case lts::lts_aut: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_aut_builder());
+        case lts::lts_lts: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_lts_builder(lpsspec.data(), lpsspec.action_labels()));
         default: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_none_builder());
       }
     }

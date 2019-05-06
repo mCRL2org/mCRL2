@@ -81,6 +81,7 @@ void check_stochastic_state(const stochastic_state& s, const data::rewriter& rew
   data::data_expression probability = real_zero();
   for (const data::data_expression& prob: s.probabilities)
   {
+    check_probability(prob);
     probability = data::sort_real::plus(probability, prob);
   }
   probability = rewr(probability);
