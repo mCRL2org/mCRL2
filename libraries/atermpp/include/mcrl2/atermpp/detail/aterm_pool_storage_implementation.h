@@ -34,13 +34,13 @@ template<std::size_t N,
          typename InputIterator,
          typename TermConverter,
          typename std::enable_if<is_iterator<InputIterator>::value, void>::type* = nullptr>
-static std::array<unprotected_aterm, N> construct_arguments(InputIterator it, TermConverter converter)
+static inline std::array<unprotected_aterm, N> construct_arguments(InputIterator it, TermConverter converter)
 {
   // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
   std::array<unprotected_aterm, N> arguments;
   for (size_t i = 0; i < N; ++i)
   {
-    arguments[i] = std::forward<TermConverter>(converter)(*it);
+    arguments[i] = converter(*it);
     ++it;
   }
 

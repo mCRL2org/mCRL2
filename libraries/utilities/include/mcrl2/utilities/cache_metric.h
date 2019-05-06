@@ -41,7 +41,7 @@ public:
   {
     std::stringstream str;
     std::size_t total_count = m_hit_count + m_miss_count;
-    str << m_hit_count << " cache hits out of " << total_count << " calls (" << static_cast<double>(m_hit_count) / static_cast<double>(m_miss_count) * 100 << " %)";
+    str << m_hit_count << " times found out of " << total_count << " calls (" << static_cast<double>(m_hit_count) / static_cast<double>(m_miss_count) * 100 << " %)";
     return str.str();
   }
 
