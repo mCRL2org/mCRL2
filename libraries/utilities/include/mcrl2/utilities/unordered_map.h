@@ -103,7 +103,7 @@ public:
 
   std::size_t capacity() { return m_set.capacity(); }
   void clear() { m_set.clear(); }
-  int count(const Key& key) { return m_set.count(key); }
+  std::size_t count(const Key& key) const { return m_set.count(key); }
 
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args) { return m_set.emplace(std::forward<Args>(args)...); }

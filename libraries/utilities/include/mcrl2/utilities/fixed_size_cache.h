@@ -51,6 +51,10 @@ public:
   iterator begin() { return m_map.begin(); }
   iterator end() { return m_map.end(); }
 
+  void clear() { m_map.clear(); m_policy.clear(); }
+
+  std::size_t count(const Key& key) const { return m_map.count(key); }
+
   iterator find(const Key& key)
   {
     return m_map.find(key);

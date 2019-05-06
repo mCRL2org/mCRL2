@@ -27,6 +27,9 @@ public:
   using Map = Map_;
 
 protected:
+  /// \brief Called whenever the underlying cache is cleared.
+  virtual void clear() = 0;
+
   /// \brief Called whenever a new element has been inserted into the cache.
   virtual void inserted(const Key& key) = 0;
 
@@ -46,11 +49,10 @@ public:
 
   typename Map::iterator replacement_candidate(Map& map) override { return map.begin(); }
 
-  void inserted(const Key&) override
-  {}
-
-  void touch(const Key&) override
-  {}
+  // Not implemented.
+  void clear() override {}
+  void inserted(const Key&) override {}
+  void touch(const Key&) override {}
 };
 
 template<typename Key, typename T>
@@ -80,6 +82,12 @@ public:
   // These moves work when moving m_queue guarantees that m_last_element_it remains valid.
   fifo_policy(fifo_policy&& other) noexcept = default;
   fifo_policy& operator=(fifo_policy&& other) noexcept = default;
+
+  void clear() override
+  {
+    m_queue.clear();
+    update_last_element_it();
+  }
 
   typename Map::iterator replacement_candidate(Map& map) override
   {
