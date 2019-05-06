@@ -46,11 +46,27 @@ public:
     /// For all actual elements stored in the pool trigger the destructor.
     for (auto& block : m_blocks)
     {
-      for (auto& slot : block)
+      --m_number_of_blocks;
+      if (m_number_of_blocks == 0)
       {
-        if (!slot.is_marked())
+        // This is the last block, for that one only m_current_index elements were inserted.
+        for (std::size_t index = 0; index < m_number_of_blocks; ++index)
         {
-          reinterpret_cast<T*>(&slot)->~T();
+          auto& slot = block[index];
+          if (!slot.is_marked())
+          {
+            reinterpret_cast<T*>(&slot)->~T();
+          }
+        }
+      }
+      else
+      {
+        for (auto& slot : block)
+        {
+          if (!slot.is_marked())
+          {
+            reinterpret_cast<T*>(&slot)->~T();
+          }
         }
       }
     }
