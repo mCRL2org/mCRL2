@@ -31,6 +31,7 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_state.h"
 #include "mcrl2/process/timed_multi_action.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/detail/io.h"
@@ -43,20 +44,6 @@ struct enumerator_error: public mcrl2::runtime_error
   explicit enumerator_error(const std::string& message): mcrl2::runtime_error(message)
   { }
 };
-
-inline
-const data::data_expression& real_zero()
-{
-  static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::c0()), data::sort_pos::c1());
-  return result;
-}
-
-inline
-const data::data_expression& real_one()
-{
-  static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::cnat(data::sort_pos::c1())), data::sort_pos::c1());
-  return result;
-}
 
 /// \brief The skip operation with a variable number of arguments
 struct skip
@@ -285,35 +272,6 @@ inline
 const stochastic_distribution& initial_distribution(const lps::stochastic_specification& lpsspec)
 {
   return lpsspec.initial_process().distribution();
-}
-
-// invariant: the elements of states must be unique
-// invariant: the elements of probabilities must be >= 0
-// invariant: the elements of probabilities must sum up to 1
-// invariant: |probabilities| = |states|
-struct stochastic_state
-{
-  // TODO: use a more efficient representation
-  std::vector<data::data_expression> probabilities;
-  std::vector<state> states;
-
-  stochastic_state() = default;
-
-  explicit stochastic_state(const state& s)
-    : probabilities{real_one()}, states{s}
-  {}
-
-  void push_back(const data::data_expression& probability, const state& s)
-  {
-    probabilities.push_back(probability);
-    states.push_back(s);
-  }
-};
-
-inline
-void check_stochastic_state(const stochastic_state& /* s */)
-{
-  // TODO
 }
 
 struct explorer_summand
@@ -575,7 +533,7 @@ class explorer: public abortable
                     [](const data::data_expression& x) { return x == real_zero(); }
         );
         remove_assignments(m_sigma, distribution.variables());
-        check_stochastic_state(result);
+        check_stochastic_state(result, m_rewr);
       }
       else
       {
@@ -749,10 +707,12 @@ class explorer: public abortable
       return result;
     }
 
-    std::set<data::function_symbol> add_less_equal_symbol(std::set<data::function_symbol> s) const
+    // Add operations on reals that are needed for the exploration.
+    std::set<data::function_symbol> add_real_operators(std::set<data::function_symbol> s) const
     {
       std::set<data::function_symbol> result = std::move(s);
       result.insert(data::less_equal(data::sort_real::real_()));
+      result.insert(data::sort_real::plus(data::sort_real::real_(), data::sort_real::real_()));
       return result;
     }
 
@@ -788,7 +748,7 @@ class explorer: public abortable
     explorer(const Specification& lpsspec, const explorer_options& options_)
       : m_options(options_),
         m_rewr(lpsspec.data(),
-          data::used_data_equation_selector(lpsspec.data(), add_less_equal_symbol(lps::find_function_symbols(lpsspec)), lpsspec.global_variables()),
+          data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables()),
           m_options.rewrite_strategy),
         m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
     {

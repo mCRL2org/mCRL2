@@ -30,6 +30,7 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_state.h"
 #include "mcrl2/process/timed_multi_action.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/detail/io.h"
@@ -43,20 +44,6 @@ struct enumerator_error: public mcrl2::runtime_error
   explicit enumerator_error(const std::string& message): mcrl2::runtime_error(message)
   { }
 };
-
-inline
-const data::data_expression& real_zero()
-{
-  static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::c0()), data::sort_pos::c1());
-  return result;
-}
-
-inline
-const data::data_expression& real_one()
-{
-  static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::cnat(data::sort_pos::c1())), data::sort_pos::c1());
-  return result;
-}
 
 /// \brief The skip operation with a variable number of arguments
 struct skip
@@ -285,29 +272,6 @@ inline
 const stochastic_distribution& initial_distribution(const lps::stochastic_specification& lpsspec)
 {
   return lpsspec.initial_process().distribution();
-}
-
-// invariant: the elements of states must be unique
-// invariant: the elements of probabilities must be >= 0
-// invariant: the elements of probabilities must sum up to 1
-// invariant: |probabilities| = |states|
-struct stochastic_state
-{
-  // TODO: use a more efficient representation
-  std::vector<data::data_expression> probabilities;
-  std::vector<lps::state> states;
-
-  void push_back(const data::data_expression& probability, const lps::state& s)
-  {
-    probabilities.push_back(probability);
-    states.push_back(s);
-  }
-};
-
-inline
-void check_stochastic_state(const stochastic_state& s)
-{
-  // TODO
 }
 
 struct explorer_summand
@@ -560,7 +524,7 @@ class explorer
                     [](const data::data_expression& x) { return x == real_zero(); }
         );
         remove_assignments(sigma, distribution.variables());
-        check_stochastic_state(result);
+        check_stochastic_state(result, r);
       }
       else
       {

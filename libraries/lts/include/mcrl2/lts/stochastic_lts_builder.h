@@ -12,6 +12,8 @@
 #ifndef MCRL2_LTS_STOCHASTIC_LTS_BUILDER_H
 #define MCRL2_LTS_STOCHASTIC_LTS_BUILDER_H
 
+#include "mcrl2/lts/lts_builder.h"
+
 namespace mcrl2 {
 
 namespace lts {
@@ -77,8 +79,8 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
       std::list<std::size_t> targets;
       std::vector<data::data_expression> probabilities;
 
-      stochastic_state(const std::list<std::size_t>& targets_, const std::vector<data::data_expression>& probabilities_)
-        : targets(targets_), probabilities(probabilities_)
+      stochastic_state(std::list<std::size_t>  targets_, std::vector<data::data_expression>  probabilities_)
+        : targets(std::move(targets_)), probabilities(std::move(probabilities_))
       {}
 
       void save_to_aut(std::ostream& out) const
@@ -87,7 +89,7 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
         out << *j;
         for (auto i = probabilities.begin(); j != targets.end(); ++i, ++j)
         {
-          out << " " << *i << " " << *j;
+          out << " " << lps::print_probability(*i) << " " << *j;
         }
       }
     };
