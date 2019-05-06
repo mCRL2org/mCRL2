@@ -168,6 +168,6 @@ void function_symbol_pool::print_performance_stats() const noexcept
 
   if (EnableReferenceCountMetrics)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
+    mCRL2log(mcrl2::log::info, "Performance") << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
   }
 }

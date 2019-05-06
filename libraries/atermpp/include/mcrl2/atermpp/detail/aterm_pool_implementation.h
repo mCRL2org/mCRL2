@@ -243,7 +243,7 @@ void aterm_pool::collect()
     auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
 
     // Print the relevant information.
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms, " << size() << " terms remaining in "
+    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(): Garbage collected " << old_size - size() << " terms, " << size() << " terms remaining in "
       << mark_duration + sweep_duration << " ms (marking " << mark_duration << " ms + sweep " << sweep_duration << " ms).\n";
   }
 
@@ -358,7 +358,7 @@ aterm aterm_pool::create_appl_dynamic(const function_symbol& sym,
   {
     if (EnableGarbageCollectionMetrics)
     {
-      mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): Deferred garbage collection.\n";
+      mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(): Deferred garbage collection.\n";
     }
     collect();
   }
@@ -382,7 +382,7 @@ void aterm_pool::print_performance_statistics() const
 
   if (mcrl2::utilities::EnableReferenceCountMetrics)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(): all reference counts changed " << _aterm::reference_count_changes() << " times.\n";
+    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(): all reference counts changed " << _aterm::reference_count_changes() << " times.\n";
   }
 }
 

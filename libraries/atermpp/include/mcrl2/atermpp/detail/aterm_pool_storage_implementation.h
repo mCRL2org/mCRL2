@@ -154,13 +154,13 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
 {
   if (EnableTermHashtableMetrics)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(" << identifier << ") hashtable:\n";
+    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << ") hashtable:\n";
     m_term_set.print_performance_statistics();
   }
 
   if (EnableGarbageCollectionMetrics && m_erasedBlocks > 0)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(" << identifier << "): Consolidate removed " << m_erasedBlocks << " blocks.\n";
+    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << "): Consolidate removed " << m_erasedBlocks << " blocks.\n";
   }
 
   if (EnableTermCreationMetrics)
