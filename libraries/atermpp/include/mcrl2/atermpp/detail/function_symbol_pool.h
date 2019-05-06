@@ -13,6 +13,7 @@
 #include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/atermpp/detail/function_symbol_hash.h"
 #include "mcrl2/utilities/block_allocator.h"
+#include "mcrl2/utilities/cache_metric.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/noncopyable.h"
 #include "mcrl2/utilities/unordered_set.h"
@@ -92,14 +93,13 @@ private:
   ///        prefix string is registered.
   std::map<std::string, std::shared_ptr<std::size_t>> m_prefix_to_register_function_map;
 
-  /// Various performance metrics.
-  std::uint64_t m_function_symbols_hits = 0; // The number of function symbols found in the pool.
-  std::uint64_t m_function_symbols_creates = 0; // The number of function symbols created.
-
   // Several default function symbols.
   function_symbol m_as_int;
   function_symbol m_as_list;
   function_symbol m_as_empty_list;
+
+  // Various performance metrics.
+  mcrl2::utilities::cache_metric m_function_symbol_metrics; ///< Track the number of function symbols found in or added to the set.
 };
 
 } // namespace detail

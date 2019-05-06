@@ -20,9 +20,6 @@ using namespace mcrl2::utilities;
 
 function_symbol_pool::function_symbol_pool()
 {
-  mcrl2::utilities::mcrl2_unused(m_function_symbols_creates);
-  mcrl2::utilities::mcrl2_unused(m_function_symbols_hits);
-
   // Initialize the default function symbols.
   m_as_int = create("<aterm_int>", 0);
   m_as_list = create("<list_constructor>", 2);
@@ -41,18 +38,19 @@ function_symbol_pool::~function_symbol_pool()
 
 function_symbol function_symbol_pool::create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-  if (EnableFunctionSymbolMetrics) { ++m_function_symbols_creates; }
 
   auto it = m_symbol_set.find(name, arity);
   if (it != m_symbol_set.end())
   {
-    if (EnableFunctionSymbolMetrics) { ++m_function_symbols_hits; }
+    if (EnableFunctionSymbolMetrics) { m_function_symbol_metrics.hit(); }
 
     // The element already exists so return it.
     return function_symbol(_function_symbol::ref(&(*it)));
   }
   else
   {
+    if (EnableFunctionSymbolMetrics) { m_function_symbol_metrics.miss(); }
+
     _function_symbol& symbol = *m_symbol_set.emplace(name, arity).first;
     if (check_for_registered_functions)
     {
@@ -157,13 +155,7 @@ void function_symbol_pool::print_performance_stats() const noexcept
 
   if (EnableFunctionSymbolMetrics)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_function_symbol_pool: Stores " << size() << " function symbols. create() found "
-                                << m_function_symbols_hits
-                                << " out of "
-                                << m_function_symbols_creates
-                                << " times ("
-                                << static_cast<double>(m_function_symbols_hits) / static_cast<double>(m_function_symbols_creates) * 100
-                                << " %)\n";
+    mCRL2log(mcrl2::log::info, "Performance") << "g_function_symbol_pool: Stores " << size() << " function symbols. create() " << m_function_symbol_metrics.message() << ".\n";
   }
 
   if (EnableReferenceCountMetrics)

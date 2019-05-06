@@ -10,11 +10,12 @@
 #ifndef ATERMPP_DETAIL_ATERM_POOL_STORAGE_H
 #define ATERMPP_DETAIL_ATERM_POOL_STORAGE_H
 
-#include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_appl.h"
-#include "mcrl2/atermpp/detail/aterm_int.h"
+#include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/detail/aterm_hash.h"
+#include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/utilities/block_allocator.h"
+#include "mcrl2/utilities/cache_metric.h"
 #include "mcrl2/utilities/unordered_set.h"
 
 #include <limits>
@@ -173,13 +174,13 @@ private:
   std::vector<callback_pair> m_creation_hooks;
   std::vector<callback_pair> m_deletion_hooks;
 
-  /// Various performance statistics.
-  std::size_t m_term_hits = 0; // The number of terms that a term was found in the pool.
-  std::size_t m_term_creates = 0; // The number of calls to create a term.
-  std::size_t m_erasedBlocks = 0; // The number of blocks that have been erased in the block allocator.
-
   /// A reusable todo stack.
   std::stack<std::reference_wrapper<_aterm>> todo;
+
+  // Various performance statistics.
+
+  mcrl2::utilities::cache_metric m_term_metric; ///< Count the number of times a term has been found in or is added to the set.
+  std::size_t m_erasedBlocks = 0; /// The number of blocks that have been erased in the block allocator.
 };
 
 } // namespace detail

@@ -165,13 +165,7 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
 
   if (EnableTermCreationMetrics)
   {
-    mCRL2log(mcrl2::log::debug, "Performance") << "g_term_pool(" << identifier << "): emplace() found "
-                                << m_term_hits
-                                << " out of "
-                                << m_term_creates
-                                << " times ("
-                                << static_cast<double>(m_term_hits) / static_cast<double>(m_term_creates) * 100
-                                << " %)\n";
+    mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << "): emplace() " << m_term_metric.message() << ".\n";
   }
 }
 
@@ -294,20 +288,20 @@ ATERM_POOL_STORAGE_TEMPLATES
 template<typename ...Args>
 aterm ATERM_POOL_STORAGE::emplace(Args&&... args)
 {
-  if (EnableTermCreationMetrics) { ++m_term_creates; }
 
   auto result = m_term_set.emplace(std::forward<Args>(args)...);
   aterm term(&(*result.first));
   if (result.second)
   {
     // A new term was created
+    if (EnableTermCreationMetrics) { m_term_metric.miss(); }
     m_pool.trigger_collection();
     call_creation_hook(term);
   }
   else if (EnableTermCreationMetrics)
   {
-    // A term was found in the set.
-    ++m_term_hits;
+    // A term was already found in the set.
+    m_term_metric.hit();
   }
 
   return term;
