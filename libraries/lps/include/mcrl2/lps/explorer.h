@@ -287,12 +287,6 @@ const stochastic_distribution& initial_distribution(const lps::stochastic_specif
   return lpsspec.initial_process().distribution();
 }
 
-struct stochastic_state_element
-{
-  data::data_expression probability;
-  lps::state target_state;
-};
-
 // invariant: the elements of states must be unique
 // invariant: the elements of probabilities must be >= 0
 // invariant: the elements of probabilities must sum up to 1
