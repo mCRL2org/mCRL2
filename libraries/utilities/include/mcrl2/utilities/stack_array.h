@@ -62,14 +62,15 @@ public:
   const_iterator end() const { return data() + size(); }
 
   T* data() { return m_reserved_memory; }
+  const T* data() const { return m_reserved_memory; }
 
   bool empty() const { return size() != 0; }
 
-  reverse_iterator rbegin() { return end(); }
-  const_reverse_iterator rbegin() const { return end(); }
+  reverse_iterator rbegin() { return reverse_iterator(data() + size()); }
+  const_reverse_iterator rbegin() const { return const_reverse_iterator(data() + size()); }
 
-  reverse_iterator rend() { return begin(); }
-  const_reverse_iterator rend() const { return begin(); }
+  reverse_iterator rend() { return reverse_iterator(data()); }
+  const_reverse_iterator rend() const { return const_reverse_iterator(data()); }
 
   std::size_t size() const { return m_size; }
 
