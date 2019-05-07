@@ -131,7 +131,8 @@ bool test_consistency_of_inequalities(const std::string& vars,
 bool test_application_of_Fourier_Motzkin(const std::string& vars,
                                          const std::string& variables_to_be_eliminated,
                                          const std::string& inequalities,
-                                         const std::string& inconsistent_with)
+                                         const std::string& inconsistent_with,
+                                         bool check_consistent = false)
 {
   // Take care that reals are part of the data type.
   data_specification data_spec;
@@ -149,15 +150,15 @@ bool test_application_of_Fourier_Motzkin(const std::string& vars,
 
   std::vector < linear_inequality> inconsistent_inequalities=resulting_inequalities;
   inconsistent_inequalities.push_back(linear_inequality(parse_data_expression(inconsistent_with,variables,data_spec),r));
-  if (!is_inconsistent(inconsistent_inequalities,r, false))
+  if (!(check_consistent ^ is_inconsistent(inconsistent_inequalities,r, false)))
   {
-    std::cout << "Expected set of inequations to be inconsisten with given inequality after applying Fourier-Motzkin elimination\n";
+    std::cout << "Expected set of inequations to be " << (check_consistent ? "" : "in") << "consistent with given inequality after applying Fourier-Motzkin elimination\n";
     std::cout << "Input: " << variables << ": " << inequalities << "\n";
     std::cout << "Parsed input : " << pp_vector(v_inequalities) << "\n";
     std::cout << "Variables to be eliminated: " << v_elim << "\n";
     std::cout << "Input after applying Fourier Motzkin: " << pp_vector(resulting_inequalities) << "\n";
-    std::cout << "Should be inconsistent with " << inconsistent_with << "\n";
-    std::cout << "Inconsistent inequality after parsing " << pp(linear_inequality(parse_data_expression(inconsistent_with,variables,data_spec),r)) << "\n";
+    std::cout << "Should be " << (check_consistent ? "" : "in") << "consistent with " << inconsistent_with << "\n";
+    std::cout << (check_consistent ? "Consistent" : "Inconsistent")  << " inequality after parsing " << pp(linear_inequality(parse_data_expression(inconsistent_with,variables,data_spec),r)) << "\n";
     return false;
   }
   return true;
@@ -287,8 +288,8 @@ int test_main(int /* argc */, char** /* argv[]*/)
   BOOST_CHECK(test_consistency_of_inequalities("u,t,l:Real;","u + -t <= 1 && -u <= -4 && -u + l < 0 && -u < 0 && -t <= 0 && -l + t <= 0",true));
 
   BOOST_CHECK(test_application_of_Fourier_Motzkin("x,y:Real;", "y:Real;", "-y + x < 0 &&  y < 2", "x>=2"));
+  BOOST_CHECK(test_application_of_Fourier_Motzkin("cup1,cup2,add:Real;", "add:Real;", "add <= 2 && 0 <= add && cup2 + 2 - add <= cup1 + add && 3 < cup1 + add - 2", "cup2 - cup1 >= 2", true));
   test_high_level_fourier_motzkin();
   test_high_level_fourier_motzkin_non_linear();
   return 0;
 }
-

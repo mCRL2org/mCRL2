@@ -80,6 +80,13 @@ inline application real_negate(const data_expression& arg)
   return application(negate_f,arg);
 }
 
+inline application real_abs(const data_expression& arg)
+{
+  static function_symbol abs_f(sort_real::abs_name(), make_function_sort(sort_real::real_(), sort_real::real_()));
+  assert(arg.sort()==sort_real::real_());
+  return application(abs_f,arg);
+}
+
 // End of functions that ought to be defined elsewhere.
 
 
@@ -660,10 +667,7 @@ class linear_inequality: public atermpp::aterm_appl
         *this=linear_inequality(lhs,rhs,comparison);
         return;
       }
-      if (is_negative(factor,r))
-      {
-        factor=rewrite_with_memory(real_divides(real_minus_one() ,factor), r);
-      }
+      factor=rewrite_with_memory(real_abs(factor), r);
 
       *this=linear_inequality(divide(lhs,factor,r),rewrite_with_memory(real_divides(rhs,factor), r),comparison);
     }
@@ -702,10 +706,7 @@ class linear_inequality: public atermpp::aterm_appl
         *this=linear_inequality(detail::map_to_lhs_type(new_lhs),new_rhs,comparison);
         return;
       }
-      if (is_negative(factor,r))
-      {
-        factor=rewrite_with_memory(real_times(real_minus_one() ,factor), r);
-      }
+      factor=rewrite_with_memory(real_abs(factor), r);
 
       *this=linear_inequality(detail::map_to_lhs_type(new_lhs,factor,r),rewrite_with_memory(real_divides(new_rhs,factor), r),comparison);
     }
