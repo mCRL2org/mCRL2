@@ -149,9 +149,10 @@ class lts_lts_builder: public lts_builder
     lts_lts_t m_lts;
 
   public:
-    lts_lts_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels)
+    lts_lts_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
     {
       m_lts.set_data(dataspec);
+      m_lts.set_process_parameters(process_parameters);
       m_lts.set_action_label_declarations(action_labels);
     }
 
@@ -192,8 +193,8 @@ class lts_dot_builder: public lts_lts_builder
 {
   public:
     typedef lts_lts_builder super;
-    lts_dot_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels)
-      : super(dataspec, action_labels)
+    lts_dot_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
+      : super(dataspec, action_labels, process_parameters)
     { }
 
     void save(const std::string& filename) override
@@ -208,8 +209,8 @@ class lts_fsm_builder: public lts_lts_builder
 {
   public:
     typedef lts_lts_builder super;
-    lts_fsm_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels)
-      : super(dataspec, action_labels)
+    lts_fsm_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
+      : super(dataspec, action_labels, process_parameters)
     { }
 
     void save(const std::string& filename) override

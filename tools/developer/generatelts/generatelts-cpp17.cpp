@@ -262,9 +262,9 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
             return options.no_store ? std::unique_ptr<lts::lts_builder>(new lts::lts_aut_disk_builder(output_filename()))
                                     : std::unique_ptr<lts::lts_builder>(new lts::lts_aut_builder());
           }
-        case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder(lpsspec.data(), lpsspec.action_labels()));
-        case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder(lpsspec.data(), lpsspec.action_labels()));
-        case lts::lts_lts: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels()));
+        case lts::lts_dot: return std::unique_ptr<lts::lts_builder>(new lts::lts_dot_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
+        case lts::lts_fsm: return std::unique_ptr<lts::lts_builder>(new lts::lts_fsm_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
+        case lts::lts_lts: return std::unique_ptr<lts::lts_builder>(new lts::lts_lts_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
         default: return std::unique_ptr<lts::lts_builder>(new lts::lts_none_builder());
       }
     }
@@ -274,7 +274,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       switch (output_format)
       {
         case lts::lts_aut: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_aut_builder());
-        case lts::lts_lts: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_lts_builder(lpsspec.data(), lpsspec.action_labels()));
+        case lts::lts_lts: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_lts_builder(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters()));
         default: return std::unique_ptr<lts::stochastic_lts_builder>(new lts::stochastic_lts_none_builder());
       }
     }

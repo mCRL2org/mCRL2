@@ -186,9 +186,10 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     probabilistic_lts_lts_t m_lts;
 
   public:
-    stochastic_lts_lts_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels)
+    stochastic_lts_lts_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
     {
       m_lts.set_data(dataspec);
+      m_lts.set_process_parameters(process_parameters);
       m_lts.set_action_label_declarations(action_labels);
     }
 
