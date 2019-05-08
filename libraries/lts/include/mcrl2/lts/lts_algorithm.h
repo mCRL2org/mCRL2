@@ -53,14 +53,6 @@ namespace mcrl2
 namespace lts
 {
 
-/* Auxiliary function */
-template<typename T>
-static bool lts_named_cmp(std::string N[], T a, T b)
-{
-  return N[a] < N[b];
-}
-
-
 /** \brief Applies a reduction algorithm to this LTS.
  * \param[in] l A labelled transition system that must be reduced.
  * \param[in] eq The equivalence with respect to which the LTS will be

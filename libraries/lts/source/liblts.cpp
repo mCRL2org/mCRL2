@@ -159,6 +159,13 @@ const std::set<lts_type>& supported_lts_formats()
   return s;
 }
 
+/* Auxiliary function, used below */
+template<typename T>
+bool lts_named_cmp(std::string N[], T a, T b)
+{
+  return N[a] < N[b];
+} 
+
 std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type>& supported)
 {
   vector<lts_type> types(supported.begin(), supported.end());
