@@ -11,17 +11,6 @@ as implemented in :ref:`tool-lps2lts`, relies on enumeration and stores each
 state explicitly. To avoid this, lpssymbolicbisim applies symbolic techniques to
 represent infinite sets.
 
-The tool can run in one of four modes: the default mode :option:`refine` only
-performs partition refinement with intermediate exploration steps to determine
-which parts of the state space are unreachable. In :option:`explore` mode, the
-tool tries to generate an invariant with forward exploration. When running in
-`explorerefine` mode, the tool first generates an invariant and then uses that
-invariant to initialise the refinement procedure. Finally, it's possible to
-simplify an LPS by using the :option:`simplify` mode.
-
-Instead of generating an invariant, one can also supply an invariant via the
-option :option:`-i/--invariant`.
-
 To run this tool, the Z3 SMT-solver should be installed and its bin-directory
 has to be added to the PATH variable.
 
