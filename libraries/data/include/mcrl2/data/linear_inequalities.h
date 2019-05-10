@@ -44,45 +44,45 @@ bool is_zero(const data_expression& e);
 
 
 // Efficient construction of times on reals.
-// The functions times, divide, plus and minus in the standard library are not efficient as it determines the sort at runtime.
+// The functions times, divide, plus, minus, negate and abs in the data library are not efficient since they determine the sort at runtime.
 inline application real_times(const data_expression& arg0, const data_expression& arg1)
 {
-  static function_symbol times_f(sort_real::times_name(), make_function_sort(sort_real::real_(), sort_real::real_(), sort_real::real_()));
+  static function_symbol times_f(sort_real::times(sort_real::real_(), sort_real::real_()));
   assert(arg0.sort()==sort_real::real_() && arg1.sort()==sort_real::real_());
   return application(times_f,arg0,arg1);
 }
 
 inline application real_plus(const data_expression& arg0, const data_expression& arg1)
 {
-  static function_symbol plus_f(sort_real::plus_name(), make_function_sort(sort_real::real_(), sort_real::real_(), sort_real::real_()));
+  static function_symbol plus_f(sort_real::plus(sort_real::real_(), sort_real::real_()));
   assert(arg0.sort()==sort_real::real_() && arg1.sort()==sort_real::real_());
   return application(plus_f,arg0,arg1);
 }
 
 inline application real_divides(const data_expression& arg0, const data_expression& arg1)
 {
-  static function_symbol divides_f(sort_real::divides_name(), make_function_sort(sort_real::real_(), sort_real::real_(), sort_real::real_()));
+  static function_symbol divides_f(sort_real::divides(sort_real::real_(), sort_real::real_()));
   assert(arg0.sort()==sort_real::real_() && arg1.sort()==sort_real::real_());
   return application(divides_f,arg0,arg1);
 }
 
 inline application real_minus(const data_expression& arg0, const data_expression& arg1)
 {
-  static function_symbol minus_f(sort_real::minus_name(), make_function_sort(sort_real::real_(), sort_real::real_(), sort_real::real_()));
+  static function_symbol minus_f(sort_real::minus(sort_real::real_(), sort_real::real_()));
   assert(arg0.sort()==sort_real::real_() && arg1.sort()==sort_real::real_());
   return application(minus_f,arg0,arg1);
 }
 
 inline application real_negate(const data_expression& arg)
 {
-  static function_symbol negate_f(sort_real::negate_name(), make_function_sort(sort_real::real_(), sort_real::real_()));
+  static function_symbol negate_f(sort_real::negate(sort_real::real_()));
   assert(arg.sort()==sort_real::real_());
   return application(negate_f,arg);
 }
 
 inline application real_abs(const data_expression& arg)
 {
-  static function_symbol abs_f(sort_real::abs_name(), make_function_sort(sort_real::real_(), sort_real::real_()));
+  static function_symbol abs_f(sort_real::abs(sort_real::real_()));
   assert(arg.sort()==sort_real::real_());
   return application(abs_f,arg);
 }
