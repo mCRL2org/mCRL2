@@ -186,24 +186,28 @@ class ltsconvert_tool : public input_output_tool
         }
         case lts_aut:
         {
-          LTS_TYPE l_out;
+          probabilistic_lts_aut_t l_out;
           lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
           l_out.save(tool_options.outfilename);
           return true;
         }
         case lts_lts:
         {
-          mCRL2log(warning) << "Conversion on an .lts file has not yet been implemented.";
+          probabilistic_lts_lts_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename);
           break;
         }
         case lts_fsm:
         {
-          mCRL2log(warning) << "Conversion on an .fsm file has not yet been implemented.";
+          probabilistic_lts_fsm_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename);
           break;
         }
         case lts_dot:
         {
-          mCRL2log(warning) << "Conversion on an .dot file has not yet been implemented.";
+          mCRL2log(warning) << "Probabilistic bisimulation on a .dot file has not been implemented.";
           break;
         }
 
