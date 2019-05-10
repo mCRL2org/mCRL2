@@ -95,10 +95,10 @@ static void check_state(std::size_t state, std::size_t number_of_states, std::si
   }
 } 
 
-static void check_states(detail::lts_aut_base::probabilistic_state& probability_state,
+static void check_states(mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& probability_state,
                          std::size_t number_of_states, std::size_t line_no)
 {
-  for(detail::lts_aut_base::state_probability_pair& p: probability_state)
+  for(mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t::state_probability_pair& p: probability_state)
   {
     check_state(p.state(), number_of_states, line_no);
   }
@@ -180,7 +180,7 @@ static void read_probabilistic_state(
 
 static void read_aut_header(
   istream& is,
-  detail::lts_aut_base::probabilistic_state& initial_state,
+  mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& initial_state,
   std::size_t& num_transitions,
   std::size_t& num_states)
 {
@@ -297,7 +297,7 @@ static bool read_aut_transition(
   istream& is,
   std::size_t& from,
   string& label,
-  detail::lts_aut_base::probabilistic_state& target_probabilistic_state,
+  mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& target_probabilistic_state,
   const std::size_t line_no)
 {
   if (!read_initial_part_of_an_aut_transition(is,from,label,line_no))
@@ -349,7 +349,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   std::size_t line_no = 1;
   std::size_t ntrans=0, nstate=0;
 
-  detail::lts_aut_base::probabilistic_state initial_probabilistic_state;
+  mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t initial_probabilistic_state;
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
 
   // The two unordered maps below are used to determine a unique index for each probabilistic state.
@@ -357,7 +357,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   // indices_of_single_probabilistic_states and indices_of_multiple_probabilistic_states.
   // The map indices_of_single_probabilistic_states requires far less memory.
   unordered_map < std::size_t, std::size_t> indices_of_single_probabilistic_states;
-  unordered_map < detail::lts_aut_base::probabilistic_state, std::size_t> indices_of_multiple_probabilistic_states;
+  unordered_map < mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t, std::size_t> indices_of_multiple_probabilistic_states;
   
   check_states(initial_probabilistic_state, nstate, line_no);
 
@@ -373,7 +373,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   l.set_initial_probabilistic_state(initial_probabilistic_state); 
 
-  detail::lts_aut_base::probabilistic_state probabilistic_target_state;
+  mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t probabilistic_target_state;
   std::size_t from;
   string s;
 
@@ -403,7 +403,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
     {
       assert(probabilistic_target_state.size()>1);
       index = indices_of_multiple_probabilistic_states.insert(
-                       std::pair< detail::lts_aut_base::probabilistic_state, std::size_t>
+                       std::pair< mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t, std::size_t>
                        (probabilistic_target_state,fresh_index)).first->second;
     }
     
@@ -429,7 +429,7 @@ static void read_from_aut(lts_aut_t& l, istream& is)
   std::size_t line_no = 1;
   std::size_t ntrans=0, nstate=0;
 
-  detail::lts_aut_base::probabilistic_state initial_probabilistic_state;
+  mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t initial_probabilistic_state;
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
   
   if (initial_probabilistic_state.size()>1)
@@ -475,11 +475,11 @@ static void read_from_aut(lts_aut_t& l, istream& is)
 }
 
 
-static void write_probabilistic_state(const detail::lts_aut_base::probabilistic_state& prob_state, ostream& os)
+static void write_probabilistic_state(const mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& prob_state, ostream& os)
 {
   mcrl2::lts::probabilistic_arbitrary_precision_fraction previous_probability;
   bool first_element=true;
-  for (const detail::lts_aut_base::state_probability_pair& p: prob_state)
+  for (const mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t::state_probability_pair& p: prob_state)
   {
     if (first_element)
     {

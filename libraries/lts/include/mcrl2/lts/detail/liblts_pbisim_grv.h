@@ -1313,7 +1313,7 @@ void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l, utilities::execution_tim
 * \param[in/out] l2 A second probabilistic transition system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_grv_compare(LTS_TYPE& l1, LTS_TYPE& l2, utilities::execution_timer& timer);
+bool destructive_probabilistic_bisimulation_compare_grv(LTS_TYPE& l1, LTS_TYPE& l2, utilities::execution_timer& timer);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 *  \details The current transitions system and the lts l2 are first duplicated and subsequently
@@ -1323,7 +1323,7 @@ bool destructive_probabilistic_bisimulation_grv_compare(LTS_TYPE& l1, LTS_TYPE& 
 * \param[in/out] l2 A second transistion system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_grv_compare(const LTS_TYPE& l1, const LTS_TYPE& l2, utilities::execution_timer& timer);
+bool probabilistic_bisimulation_compare_grv(const LTS_TYPE& l1, const LTS_TYPE& l2, utilities::execution_timer& timer);
 
 template < class LTS_TYPE>
 void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l, utilities::execution_timer& timer)
@@ -1341,21 +1341,21 @@ void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l, utilities::execution_tim
 }
 
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_grv_compare(
+bool probabilistic_bisimulation_compare_grv(
   const LTS_TYPE& l1,
   const LTS_TYPE& l2,
   utilities::execution_timer& timer)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_probabilistic_bisimulation_grv_compare(l1_copy, l2_copy, timer);
+  return destructive_probabilistic_bisimulation_compare_grv(l1_copy, l2_copy, timer);
 }
 
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_grv_compare(
+bool destructive_probabilistic_bisimulation_compare_grv(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
-   utilities::execution_timer& timer)
+  utilities::execution_timer& timer)
 {
   std::size_t initial_probabilistic_state_key_l1;
   std::size_t initial_probabilistic_state_key_l2;

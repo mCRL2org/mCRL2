@@ -26,6 +26,7 @@ set(MCRL2_TOOLS
   ltsgraph
   ltsinfo
   ltspbisim
+  ltspcompare
   ltsview
   mcrl2-gui
   mcrl22lps

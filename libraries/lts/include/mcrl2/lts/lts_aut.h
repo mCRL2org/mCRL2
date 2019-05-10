@@ -40,10 +40,6 @@ namespace detail
 class lts_aut_base
 {
   public:
-
-    typedef mcrl2::lts::probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
-    typedef mcrl2::lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
-
     /** \brief Provides the type of this lts, in casu lts_aut.  */
     lts_type type()
     {
@@ -97,7 +93,7 @@ class lts_aut_t : public lts< state_label_empty, action_label_string, detail::lt
 class probabilistic_lts_aut_t : 
             public probabilistic_lts< state_label_empty, 
                                       action_label_string, 
-                                      detail::lts_aut_base::probabilistic_state, 
+                                      mcrl2::lts::probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
                                       detail::lts_aut_base>
 {
   public:

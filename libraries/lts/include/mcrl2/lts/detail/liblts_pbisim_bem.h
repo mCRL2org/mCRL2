@@ -835,7 +835,8 @@ bool destructive_probabilistic_bisimulation_compare_bem(
     initial_probabilistic_state_key_l1);
 }
 
-}
-}
-}
+}  // namespace detail
+}  // namespace lts
+}  // namespace mcrl2
+
 #endif // _LIBLTS_PBISIM_BEM_H
