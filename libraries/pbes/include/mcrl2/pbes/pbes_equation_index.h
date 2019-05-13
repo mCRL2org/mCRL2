@@ -22,14 +22,14 @@ namespace pbes_system {
 struct pbes_equation_index
 {
   // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
-  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t> > equation_index;
+  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t>> equation_index;
 
   pbes_equation_index() = default;
 
   explicit pbes_equation_index(const pbes& p)
   {
     auto const& equations = p.equations();
-    std::size_t rank;
+    std::size_t rank = 0;
     for (std::size_t i = 0; i < equations.size(); i++)
     {
       const auto& eqn = equations[i];

@@ -112,9 +112,8 @@ struct replace_propositional_variables_builder: public Builder<replace_propositi
   using super::apply;
 
   const Substitution& sigma;
-  bool innermost;
 
-  replace_propositional_variables_builder(const Substitution& sigma_)
+  explicit replace_propositional_variables_builder(const Substitution& sigma_)
     : sigma(sigma_)
   {}
 
@@ -405,7 +404,7 @@ void replace_propositional_variables(T& x,
 template <typename T, typename Substitution>
 T replace_propositional_variables(const T& x,
                                   const Substitution& sigma,
-                                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
+                                  typename std::enable_if<std::is_base_of< atermpp::aterm, T>::value>::type* = nullptr
                                  )
 {
   return pbes_system::detail::make_replace_propositional_variables_builder<pbes_system::pbes_expression_builder>(sigma).apply(x);

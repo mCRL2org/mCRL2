@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/stategraph.h"
+#include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/detail/transform_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -229,6 +230,20 @@ struct stategraph_global_command: public pbes_system::detail::pbes_command
   }
 };
 
+struct unify_parameters_command: public pbes_system::detail::pbes_command
+{
+  unify_parameters_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_system::detail::pbes_command("unify-parameters", input_filename, output_filename, options)
+  {}
+
+  void execute() override
+  {
+    pbes_system::detail::pbes_command::execute();
+    pbes_system::unify_parameters(pbesspec);
+    pbes_system::detail::save_pbes(pbesspec, output_filename);
+  }
+};
+
 class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>>
 {
   typedef transform_tool<rewriter_tool<input_output_tool>> super;
@@ -257,6 +272,7 @@ class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>
       add_command(std::make_shared<rewrite_pbes_simplify_rewriter_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
       add_command(std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
+      add_command(std::make_shared<unify_parameters_command>(input_filename(), output_filename(), options));
     }
 };
 

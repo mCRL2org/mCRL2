@@ -39,7 +39,7 @@ class equation_index
   public:
 
     /// \brief Constructor
-    equation_index(const EquationSystem& p)
+    explicit equation_index(const EquationSystem& p)
       : m_equations(p)
     {
       std::size_t index = 0;
