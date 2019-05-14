@@ -13,6 +13,7 @@ mcrl2_add_library(mcrl2_data
     source/detail/rewrite/jitty.cpp
     source/detail/rewrite/rewrite.cpp
     source/detail/rewrite/strategy.cpp
+    source/detail/match/naive_matcher.cpp
     ${COMPILING_REWRITER_SRC}
   EXCLUDE_HEADERTEST
     mcrl2/data/detail/rewrite/jittycpreamble.h
