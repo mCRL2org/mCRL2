@@ -48,7 +48,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
 
     pbessolve_options options;
 
-
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;

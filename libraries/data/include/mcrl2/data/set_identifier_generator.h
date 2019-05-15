@@ -34,11 +34,10 @@ class set_identifier_generator: public identifier_generator<>
 
   public:
     /// \brief Constructor.
-    set_identifier_generator()
-    {}
+    set_identifier_generator() = default;
 
     /// \brief Clears the context.
-    void clear_context()
+    void clear_context() override
     {
       m_identifiers.clear();
       m_generator.clear();
@@ -46,14 +45,14 @@ class set_identifier_generator: public identifier_generator<>
 
     /// \brief Adds the identifier s to the context.
     /// \param s A
-    void add_identifier(const core::identifier_string& s)
+    void add_identifier(const core::identifier_string& s) override
     {
       m_identifiers.insert(s);
     }
 
     /// \brief Removes one occurrence of the identifier s from the context.
     /// \param s A
-    void remove_identifier(const core::identifier_string& s)
+    void remove_identifier(const core::identifier_string& s) override
     {
       m_identifiers.erase(s);
     }
@@ -61,7 +60,7 @@ class set_identifier_generator: public identifier_generator<>
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s A
     /// \return True if the identifier s appears in the context.
-    bool has_identifier(const core::identifier_string& s) const
+    bool has_identifier(const core::identifier_string& s) const override
     {
     	using utilities::detail::contains;
       return contains(m_identifiers, s);
@@ -91,11 +90,10 @@ class multiset_identifier_generator: public identifier_generator<>
 
   public:
     /// \brief Constructor.
-    multiset_identifier_generator()
-    {}
+    multiset_identifier_generator() = default;
 
     /// \brief Clears the context.
-    void clear_context()
+    void clear_context() override
     {
       m_identifiers.clear();
       m_generator.clear();
@@ -103,14 +101,14 @@ class multiset_identifier_generator: public identifier_generator<>
 
     /// \brief Adds the identifier s to the context.
     /// \param s A
-    void add_identifier(const core::identifier_string& s)
+    void add_identifier(const core::identifier_string& s) override
     {
       m_identifiers.insert(s);
     }
 
     /// \brief Removes one occurrence of the identifier s from the context.
     /// \param s A
-    void remove_identifier(const core::identifier_string& s)
+    void remove_identifier(const core::identifier_string& s) override
     {
       auto i = m_identifiers.find(s);
       if (i != m_identifiers.end())
@@ -122,7 +120,7 @@ class multiset_identifier_generator: public identifier_generator<>
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s A
     /// \return True if the identifier s appears in the context.
-    bool has_identifier(const core::identifier_string& s) const
+    bool has_identifier(const core::identifier_string& s) const override
     {
     	using utilities::detail::contains;
       return contains(m_identifiers, s);

@@ -65,7 +65,7 @@ class pfnf_implication
     std::vector<propositional_variable_instantiation> m_v;
 
   public:
-    pfnf_implication(const pbes_expression& x)
+    explicit pfnf_implication(const pbes_expression& x)
     {
       split_pfnf_implication(x, m_g, m_v);
     }
@@ -154,7 +154,7 @@ class pfnf_equation
     std::vector<pfnf_implication> m_implications;
 
   public:
-    pfnf_equation(const pbes_equation& eqn)
+    explicit pfnf_equation(const pbes_equation& eqn)
     {
       m_symbol = eqn.symbol();
       const propositional_variable& X = eqn.variable();
@@ -257,14 +257,6 @@ class pfnf_equation
       return pbes_equation(m_symbol, m_X, phi);
     }
 };
-
-} // namespace detail
-} // namespace pbes_system
-} // namespace mcrl2
-
-namespace mcrl2 {
-namespace pbes_system {
-namespace detail {
 
 // explicit representation of a pbes in PFNF format
 class pfnf_pbes

@@ -264,6 +264,14 @@ class Pbes_unify_parametersTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(Pbes_unify_parametersTest, self).__init__(name, ymlfile('pbes-unify-parameters'), settings)
 
+class Pbes_srfTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(Pbes_srfTest, self).__init__(name, ymlfile('pbes-srf'), settings)
+        #self.equation_count = 1
+        #self.atom_count = 2
+        #self.propvar_count = 1
+        #self.use_quantifiers = True
+
 # N.B does not work due to unknown expressions (F_or)
 class SymbolicExplorationTest(PbesTest):
     def __init__(self, name, settings = dict()):
@@ -353,6 +361,7 @@ available_tests = {
     'pbessolve-counter-example-optimization-7'    : lambda name, settings: Pbessolve_counter_exampleTest(name, 7, settings)                            ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
+    'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
 }
