@@ -53,7 +53,7 @@ If you have questions about using the mCRL2 toolset which the documentation does
 not answer, send a mail to <mcrl2-users@listserver.tue.nl> or open an issue.
 
 ## License
-Copyright (C) 2005-2018 Eindhoven University of Technology  
+Copyright (C) 2005-2019 Eindhoven University of Technology  
 mCRL2 is licensed under the [Boost
 license](https://www.boost.org/LICENSE_1_0.txt). See the file COPYING for
 detailed license information.
