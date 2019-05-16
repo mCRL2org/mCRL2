@@ -205,11 +205,10 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
     else
     {
       const propositional_variable& X = eqn.variable();
-      const data::variable_list& d = X.parameters();
-      propositional_variable X1(id_generator(X.name()), d);
+      propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(d))); // TODO: check this!
+      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
@@ -228,17 +227,16 @@ struct srf_or_traverser: public pbes_expression_traverser<srf_or_traverser>
     if (is_simple_expression(x.body()))
     {
       const pbes_expression& f = x.body();
-      const propositional_variable_instantiation& X = propositional_variable_instantiation(X_true, {}); // TODO: check this!
+      const propositional_variable_instantiation& X = propositional_variable_instantiation(X_true, {});
       summands.emplace_back(x.variables(), f, X);
     }
     else
     {
       const propositional_variable& X = eqn.variable();
-      const data::variable_list& d = X.parameters();
-      propositional_variable X1(id_generator(X.name()), d);
+      propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(d))); // TODO: check this!
+      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
@@ -364,11 +362,10 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
     else
     {
       const propositional_variable& X = eqn.variable();
-      const data::variable_list& d = X.parameters();
-      propositional_variable X1(id_generator(X.name()), d);
+      propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(d))); // TODO: check this!
+      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
@@ -387,17 +384,16 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
     if (is_simple_expression(x.body()))
     {
       const pbes_expression& f = x.body();
-      const propositional_variable_instantiation& X = propositional_variable_instantiation(X_true, {}); // TODO: check this!
+      const propositional_variable_instantiation& X = propositional_variable_instantiation(X_true, {});
       summands.emplace_back(x.variables(), f, X);
     }
     else
     {
       const propositional_variable& X = eqn.variable();
-      const data::variable_list& d = X.parameters();
-      propositional_variable X1(id_generator(X.name()), d);
+      propositional_variable X1(id_generator(X.name()), V);
       const pbes_expression& f = true_();
       equations.push_front(pbes_equation(eqn.symbol(), X1, x));
-      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(d))); // TODO: check this!
+      summands.emplace_back(data::variable_list(), f, propositional_variable_instantiation(X1.name(), data::make_data_expression_list(V)));
     }
   }
 
