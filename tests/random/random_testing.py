@@ -267,10 +267,6 @@ class Pbes_unify_parametersTest(PbesTest):
 class Pbes_srfTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(Pbes_srfTest, self).__init__(name, ymlfile('pbes-srf'), settings)
-        #self.equation_count = 1
-        #self.atom_count = 2
-        #self.propvar_count = 1
-        #self.use_quantifiers = True
 
 # N.B does not work due to unknown expressions (F_or)
 class SymbolicExplorationTest(PbesTest):

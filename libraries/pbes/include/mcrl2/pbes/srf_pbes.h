@@ -44,12 +44,27 @@ class srf_summand
       return m_parameters;
     }
 
+    data::variable_list& parameters()
+    {
+      return m_parameters;
+    }
+
     const pbes_expression& condition() const
     {
       return m_condition;
     }
 
+    pbes_expression& condition()
+    {
+      return m_condition;
+    }
+
     const propositional_variable_instantiation& variable() const
+    {
+      return m_X;
+    }
+
+    propositional_variable_instantiation& variable()
     {
       return m_X;
     }
@@ -96,7 +111,32 @@ class srf_equation
       : m_sigma(sigma), m_variable(variable), m_summands(std::move(summands)), m_conjunctive(conjunctive)
     {}
 
+    const fixpoint_symbol& symbol() const
+    {
+      return m_sigma;
+    }
+
+    fixpoint_symbol& symbol()
+    {
+      return m_sigma;
+    }
+
+    const propositional_variable& variable() const
+    {
+      return m_variable;
+    }
+
+    propositional_variable& variable()
+    {
+      return m_variable;
+    }
+
     const std::vector<srf_summand>& summands() const
+    {
+      return m_summands;
+    }
+
+    std::vector<srf_summand>& summands()
     {
       return m_summands;
     }
@@ -503,6 +543,11 @@ class srf_pbes
     }
 
     const propositional_variable_instantiation& initial_state() const
+    {
+      return m_initial_state;
+    }
+
+    propositional_variable_instantiation& initial_state()
     {
       return m_initial_state;
     }
