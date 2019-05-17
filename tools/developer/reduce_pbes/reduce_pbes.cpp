@@ -66,6 +66,10 @@ void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::strin
     for (const pbes_system::pbes_expression& replacement: replacements)
     {
       pbes_system::pbes q = replace_subterm(p, x, depth, replacement);
+      if (!q.is_well_typed())
+      {
+        continue;
+      }
       std::string filename = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "_" + utilities::number2string(index) + ".pbes";
       std::string text = pbes_system::pp(q);
       pbes_system::detail::save_pbes(q, filename);
