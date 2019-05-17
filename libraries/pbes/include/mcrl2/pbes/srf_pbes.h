@@ -488,29 +488,33 @@ std::vector<srf_summand> srf_and(
 inline
 bool is_conjunctive(const pbes_expression& phi)
 {
-  return is_and(phi) || is_forall(phi);
-}
-
-inline
-std::vector<srf_summand> make_srf(
-  const pbes_expression& phi,
-  std::deque<pbes_equation>& equations,
-  const pbes_equation& eqn,
-  const data::variable_list& V,
-  data::set_identifier_generator& id_generator,
-  const core::identifier_string& X_true,
-  const core::identifier_string& X_false,
-  std::vector<srf_equation>& result
-)
-{
-  if (is_conjunctive(phi))
+  if (is_simple_expression(phi))
   {
-    return srf_and(phi, equations, eqn, V, id_generator, X_true, X_false, result);
+    return false;
   }
-  else
+  else if (is_propositional_variable_instantiation(phi))
   {
-    return srf_or(phi, equations, eqn, V, id_generator, X_true, X_false, result);
+    return false;
   }
+  else if (is_or(phi))
+  {
+    const auto& phi_ = atermpp::down_cast<or_>(phi);
+    return is_simple_expression(phi_.left()) || is_simple_expression(phi_.right());
+  }
+  else if (is_and(phi))
+  {
+    const auto& phi_ = atermpp::down_cast<or_>(phi);
+    return !is_simple_expression(phi_.left()) && !is_simple_expression(phi_.right());
+  }
+  else if (is_exists(phi))
+  {
+    return false;
+  }
+  else if (is_forall(phi))
+  {
+    return true;
+  }
+  throw mcrl2::runtime_error("is_conjunctive: unexpected case " + pbes_system::pp(phi));
 }
 
 } // namespace detail
@@ -594,8 +598,11 @@ srf_pbes pbes2srf(const pbes& p)
   {
     pbes_equation eqn = equations.front();
     equations.pop_front();
-    std::vector<srf_summand> summands = detail::make_srf(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations);
-    srf_equations.emplace_back(eqn.symbol(), eqn.variable(), summands, detail::is_conjunctive(eqn.formula()));
+    bool is_conjunctive = detail::is_conjunctive(eqn.formula());
+    std::vector<srf_summand> summands = is_conjunctive ?
+      detail::srf_and(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations) :
+      detail::srf_or(eqn.formula(), equations, eqn, eqn.variable().parameters(), id_generator, X_true, X_false, srf_equations);
+    srf_equations.emplace_back(eqn.symbol(), eqn.variable(), summands, is_conjunctive);
   }
 
   return srf_pbes(p.data(), std::vector<srf_equation>(srf_equations.begin(), srf_equations.end()), p.initial_state());
