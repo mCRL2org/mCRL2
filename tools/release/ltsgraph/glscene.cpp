@@ -359,7 +359,11 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
   from = m_graph.node(edge.from()).pos();
   to = m_graph.node(edge.to()).pos();
 
+  // Move the control point a bit further from the middle point between the nodes.
+  // This is an affine combination of the points 'via' and '(from + to) / 2.0f'.
   control[1] = via * 1.33333f - (from + to) / 6.0f;
+  // Standard case: use the same position for both points (effectively a quadratic curve).
+  control[2] = control[1];
 
   if (edge.from() == edge.to())
   {
@@ -374,11 +378,6 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     diff = diff * ((via - from).length() / (diff.length() * 2.0));
     control[1] = control[1] + diff;
     control[2] = control[2] - diff;
-  }
-  else
-  {
-    // Else we use the same position for both points (effectively a quadratic curve).
-    control[2] = control[1];
   }
 
   // Use the arc shader to draw the arcs.
