@@ -66,7 +66,7 @@ proc sender(s:Int, srep:Int, nrtr:Int, i:Int)=
                
     channelK(k:Int)=
         % idle
-        (k==0)->read_aF.( dist b:Bool[98/100].
+        (k==0)->read_aF.( dist b:Bool[if(b,98/100,2/100)].
                           b-> channelK(1)
                           <>  channelK(2)
                          )+
@@ -78,7 +78,7 @@ proc sender(s:Int, srep:Int, nrtr:Int, i:Int)=
     
     channelL(l:Int)=
         % idle
-        (l==0)->read_aA.( dist b:Bool[1/100].
+        (l==0)->read_aA.( dist b:Bool[if(b,1/100,99/100)].
                           b-> channelL(2)
                           <>  channelL(1)
                          )+
