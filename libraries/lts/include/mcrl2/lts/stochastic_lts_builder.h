@@ -88,10 +88,13 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
       void save_to_aut(std::ostream& out) const
       {
         auto j = targets.begin();
-        out << *j;
-        for (auto i = probabilities.begin(); j != targets.end(); ++i, ++j)
+        out << *j++;
+        if (targets.size() > 1)
         {
-          out << " " << lps::print_probability(*i) << " " << *j;
+          for (auto i = probabilities.begin(); j != targets.end(); ++i, ++j)
+          {
+            out << " " << lps::print_probability(*i) << " " << *j;
+          }
         }
       }
     };
