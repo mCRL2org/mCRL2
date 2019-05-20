@@ -687,6 +687,15 @@ struct state_space_generator
           {
             m_progress_monitor.finish_state(explorer.state_map().size(), todo_list_size);
           }
+        },
+
+        // discover_initial_state
+        [&](const lps::stochastic_state& s, const std::list<std::size_t>& s_index)
+        {
+          if constexpr (Stochastic)
+          {
+            builder.set_initial_state(s_index, s.probabilities);
+          }
         }
       );
       m_progress_monitor.finish_exploration(explorer.state_map().size());
