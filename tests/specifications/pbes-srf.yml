@@ -28,12 +28,12 @@ tools:
     input: [l3]
     output: [l4]
     args: []
-    name: pbesrewr
+    name: pbesstategraph
   t5:
     input: [l4]
     output: []
-    args: []
-    name: pbessolve
+    args: [-ais-well-typed]
+    name: pbestransform
 result: |
-  result = t3.value['solution'] == t5.value['solution']
+  result = 'true' in (t5.stdout + t5.stderr)
 
