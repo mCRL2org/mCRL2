@@ -6,6 +6,7 @@
 
 import os
 import os.path
+import random
 import re
 import sys
 sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
@@ -135,6 +136,20 @@ class BisimulationTest(ProcessTauTest):
             self.set_command_line_options('t7', ['-bstrong-bisim'])
         else:
             self.set_command_line_options('t7', ['-b' + equivalence_type])
+
+class Lps2ltsAlgorithmsTest(ProcessTauTest):
+    def __init__(self, name, settings = dict()):
+        super(Lps2ltsAlgorithmsTest, self).__init__(name, ymlfile('lps2lts-algorithms'), settings)
+        # randomly choose an algorithm
+        actions = random.choice(['a', 'a,b', 'a,b,c'])
+        # options = [random.choice(['--deadlock', '--divergence', '--nondeterminism', '--action={}'.format(actions)])]
+        options = [random.choice(['--deadlock', '--nondeterminism', '--action={}'.format(actions)])]
+        if 'divergence' in options[0]:
+            tau_actions = random.choice(['', '', 'b', 'b,c'])
+            if tau_actions:
+                options.append('--tau={}'.format(tau_actions))
+        self.set_command_line_options('t2', options)
+        self.set_command_line_options('t3', options)
 
 class LpsConstelmTest(ProcessTest):
     def __init__(self, name, settings = dict()):
@@ -302,6 +317,7 @@ available_tests = {
     'lpsconfcheck-trivial'                        : lambda name, settings: LpsConfcheckTest(name, 'trivial', settings)                                 ,
     'lpsconstelm'                                 : lambda name, settings: LpsConstelmTest(name, settings)                                             ,
     'lpsbinary'                                   : lambda name, settings: LpsBinaryTest(name, settings)                                               ,
+    'lps2lts-algorithms'                          : lambda name, settings: Lps2ltsAlgorithmsTest(name, settings)                                       ,
     'lps2pbes'                                    : lambda name, settings: Lps2pbesTest(name, settings)                                                ,
     'lpsstategraph'                               : lambda name, settings: LpsstategraphTest(name, settings)                                           ,
     'lts2pbes'                                    : lambda name, settings: Lts2pbesTest(name, settings)                                                ,

@@ -98,17 +98,35 @@ class Tool(object):
             else:
                 node.value = 'executed'
 
+    # value[key] is an integer
     def parse_number(self, text, key, regex):
         m = re.search(regex, text)
         if m != None:
             self.value[key] = int(m.group(1))
 
+    # value[key] is an integer
     def parse_numbers(self, text, key1, key2, regex):
         m = re.search(regex, text)
         if m != None:
             self.value[key1] = int(m.group(1))
             self.value[key2] = int(m.group(2))
 
+    # value[key] is a set of strings
+    # All occurrences of regex are processed
+    def parse_action(self, text, key, regex):
+        for m in re.finditer(regex, text):
+            if not key in self.value:
+                self.value[key] = set([])
+            self.value[key].add(m.group(1))
+
+    def parse_deadlock(self, text, key, regexes):
+        result = False
+        for regex in regexes:
+            if re.search(regex, text, re.DOTALL) != None:
+                result = True
+        self.value[key] = result
+
+    # value[key] is a boolean
     def parse_boolean(self, text, key, regex, negated_regex = None):
         if negated_regex:
             m = re.search(negated_regex, text, re.DOTALL)
@@ -144,7 +162,6 @@ class Tool(object):
         self.parse_boolean(text, 'is-closed'                  , 'is closed', 'is not closed')
         self.parse_boolean(text, 'is-well-formed'             , 'well formed', 'not well formed')
         self.parse_boolean(text, 'is-well-typed'              , 'is well typed', 'is not well typed')
-        self.parse_boolean(text, 'has-deadlock'               , 'deadlock-detect: deadlock found')
         self.parse_boolean(text, 'result'                     , r'LTSs are strongly bisimilar', 'LTSs are not strongly bisimilar')
         self.parse_boolean(text, 'result'                     , r'LTSs are branching bisimilar', 'LTSs are not branching bisimilar')
         self.parse_boolean(text, 'result'                     , r'LTSs are equal \(branching bisimilarity using the almost-O\(m log n\) Groote/Wijs algorithm\)', 'LTSs are not equal \(branching bisimilarity using the almost-O\(m log n\) Groote/Wijs algorithm\)')
@@ -157,6 +174,11 @@ class Tool(object):
         self.parse_boolean(text, 'result'                     , r'LTSs are weak trace equivalent', 'LTSs are not weak trace equivalent')
         self.parse_boolean(text, 'result'                     , r'LTSs are equal', 'LTSs are not equal')
         self.parse_boolean(text, 'result'                     , r'is included in', 'is not included in')
+        self.parse_action(text, 'actions'                     , r"Detected action '(\w+)'")
+        self.parse_action(text, 'actions'                     , r"Action '(\w+)' found")
+        self.parse_deadlock(text, 'has-deadlock'              , [r'deadlock-detect: deadlock found', r'Deadlock found'])
+        self.parse_boolean(text, 'has-divergence'             , r'Divergent state found')
+        self.parse_boolean(text, 'has-nondeterminism'         , r'Nondeterministic state found')
 
     def command(self, runpath = None):
         args = self.arguments(runpath)
@@ -268,11 +290,23 @@ class Lps2LtsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         super(Lps2LtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
-    def parse_output(self):
-        super(Lps2LtsTool, self).parse_output()
-        # The tool lps2lts does not print a message if no deadlock is found...
-        if '-D' in self.args and not 'has-deadlock' in self.value:
-            self.value['has-deadlock'] = False
+    def assign_outputs(self):
+        self.value['has-deadlock'] = None
+        self.value['has-nondeterminism'] = None
+        self.value['has-divergence'] = None
+        self.value['actions'] = set([])
+        super(Lps2LtsTool, self).assign_outputs()
+
+class GenerateLtsTool(Tool):
+    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
+        super(GenerateLtsTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+
+    def assign_outputs(self):
+        self.value['has-deadlock'] = None
+        self.value['has-nondeterminism'] = None
+        self.value['has-divergence'] = None
+        self.value['actions'] = set([])
+        super(GenerateLtsTool, self).assign_outputs()
 
 class PbesSolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
@@ -317,6 +351,8 @@ class ToolFactory(object):
             return Lts2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lps2lts':
             return Lps2LtsTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name == 'generatelts':
+            return GenerateLtsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2lps':
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['pbespgsolve', 'pbes2bool', 'bessolve']:

@@ -1,0 +1,33 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LTS
+  l4:
+    type: LTS
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-n]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lps2lts
+  t3:
+    input: [l2]
+    output: [l4]
+    args: []
+    name: generatelts
+
+result: |
+    result = True
+    result = result and t2.value['has-deadlock'] == t3.value['has-deadlock']
+    result = result and t2.value['has-nondeterminism'] == t3.value['has-nondeterminism']
+    result = result and t2.value['has-divergence'] == t3.value['has-divergence']
+    result = result and t2.value['actions'] == t3.value['actions']
