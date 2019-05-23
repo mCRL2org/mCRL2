@@ -412,7 +412,7 @@ typename ATERM_POOL_STORAGE::iterator ATERM_POOL_STORAGE::destroy(iterator it)
   const Element& term = *it;
 
   // Trigger the deletion hook before the term is actually destroyed.
-  call_deletion_hook(&term);
+  call_deletion_hook(unprotected_aterm(&term));
 
   // Remove them from the hash table, will also destroy terms with fixed arity.
   return m_term_set.erase(it);
