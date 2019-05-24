@@ -88,7 +88,7 @@ inline static
 bool isCloseCircle(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
   float distance = std::sqrt(std::pow(pos.x() - x, 2) + std::pow(pos.y() - y, 2));
-  if (distance < threshold && pos.z() < bestZ)
+  if (distance < threshold && -1.0f <= pos.z() && pos.z() < bestZ)
   {
     bestZ = pos.z();
     return true;
@@ -102,7 +102,7 @@ bool isCloseCircle(int x, int y, const QVector3D& pos, float threshold, float& b
 inline static
 bool isCloseSquare(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
-  if(std::abs(x - pos.x()) < threshold && std::abs(y - pos.y()) < threshold && pos.z() < bestZ)
+  if(std::abs(x - pos.x()) < threshold && std::abs(y - pos.y()) < threshold && -1.0f <= pos.z() && pos.z() < bestZ)
   {
     bestZ = pos.z();
     return true;

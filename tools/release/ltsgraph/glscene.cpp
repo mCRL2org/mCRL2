@@ -582,7 +582,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
                            int y,
                            SelectableObject type)
 {
-  float bestZ = INFINITY;
+  float bestZ = 1.0f;
   bool sel = m_graph.hasSelection();
   std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
