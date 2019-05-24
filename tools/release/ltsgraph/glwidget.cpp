@@ -491,6 +491,10 @@ void GLWidget::rebuild()
 
 void GLWidget::set3D(bool enabled)
 {
+  if (!enabled)
+  {
+    m_scene.camera().resetRotation();
+  }
   m_is_threedimensional = enabled;
   update();
 }

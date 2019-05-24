@@ -55,6 +55,8 @@ public:
 
   /// \brief Sets the position and orientation of the camera to its default values.
   void reset();
+  /// \brief Sets the rotation of the camera to its default value.
+  void resetRotation();
 
   /// \returns The maximum view distance of this camera.
   float viewdistance() const { return m_viewdistance; }

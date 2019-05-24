@@ -131,7 +131,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::on3DChanged(bool enabled)
 {
-  m_glwidget->resetViewpoint(0);
   m_glwidget->set3D(enabled);
 
   // For 3D mode there is no limit and otherwise the z-dimension is limited to 0.

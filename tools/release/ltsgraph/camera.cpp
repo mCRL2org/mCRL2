@@ -58,3 +58,9 @@ void ArcballCameraView::reset()
   m_rotation = default_camera.m_rotation;
   m_zoom = default_camera.m_zoom;
 }
+
+void ArcballCameraView::resetRotation()
+{
+  ArcballCameraView default_camera;
+  m_rotation = default_camera.m_rotation;
+}
