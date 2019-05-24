@@ -105,18 +105,18 @@ inline void export_graph_as_tikz_input(Graph::Graph& graph, const QString& filen
 
   graph.lock(GRAPH_LOCK_TRACE);
 
-  bool sel = graph.hasSelection();
-  std::size_t nodeCount = sel ? graph.selectionNodeCount() : graph.nodeCount();
-  std::size_t edgeCount = sel ? graph.selectionEdgeCount() : graph.edgeCount();
+  bool sel = graph.hasExploration();
+  std::size_t nodeCount = sel ? graph.explorationNodeCount() : graph.nodeCount();
+  std::size_t edgeCount = sel ? graph.explorationEdgeCount() : graph.edgeCount();
 
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
-    tikz_code += tikzNode(graph, sel ? graph.selectionNode(i) : i, aspectRatio);
+    tikz_code += tikzNode(graph, sel ? graph.explorationNode(i) : i, aspectRatio);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
-    tikz_code += tikzEdge(graph, sel ? graph.selectionEdge(i) : i, aspectRatio);
+    tikz_code += tikzEdge(graph, sel ? graph.explorationEdge(i) : i, aspectRatio);
   }
 
   graph.unlock(GRAPH_LOCK_TRACE);

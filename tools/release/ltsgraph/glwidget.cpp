@@ -401,8 +401,8 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
         && (noderec != nullptr) && m_draglength.length() < DRAG_MIN_DIST)
     {
       // A node has been clicked (not dragged):
-      if (m_graph.isToggleable(m_hover.index)) {
-        m_graph.toggleActive(m_hover.index);
+      if (m_graph.isClosable(m_hover.index)) {
+        m_graph.toggleOpen(m_hover.index);
       }
     }
     m_dragnode->release(e->button() == Qt::RightButton);

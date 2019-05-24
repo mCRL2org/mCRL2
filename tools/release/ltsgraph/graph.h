@@ -317,7 +317,7 @@ class NodeNode : public NodeWithColor
     }
 };
 
-class Selection;
+class Exploration;
 class Information;
 
 /**
@@ -332,10 +332,10 @@ class Information;
 // Todo: see if graph is locked as required throughout the application.
 class Graph
 {
-    friend class Selection;
+    friend class Exploration;
 
   private:
-    Selection* m_sel;               ///< The selection of the current graph (or null).
+    Exploration* m_sel;               ///< The exploration of the current graph (or null).
     mcrl2::lts::lts_type m_type;    ///< The type of the current graph.
     QString m_empty;                ///< Empty string that is returned as label if none present.
     QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating
@@ -418,21 +418,22 @@ class Graph
      */
     void clip(const QVector3D& min, const QVector3D& max);
 
-    void makeSelection(); ///< Creates a new empty selection (overwriting existing).
-    void discardSelection(); ///< Discards the current selection (when present).
+    void makeExploration(); ///< Creates a new empty exploration (overwriting existing).
+    void discardExploration(); ///< Discards the current exploration (when present).
 
     /**
-     * @brief Toggles the state of a node between active and inactive.
-     *        Active nodes add their related nodes to the current selection.
+     * @brief Toggles the state of a node between open and closed.
+     *        For open nodes, all successors are added to the current exploration.
      * @param index The index of the node.
      */
-    void toggleActive(std::size_t index);
+    void toggleOpen(std::size_t index);
     /**
-     * @brief Returns whether a given node should be toggled active or inactive.
-     *        A node that leaves unconnected components or the selection empty should not be toggled inactive.
+     * @brief Returns whether a given node can be closed.
+     * @detail When closing the node would leave disconnected components in the
+     * exploration, it is not allowed to close that node.
      * @param index The index of the node.
      */
-    bool isToggleable(std::size_t index);
+    bool isClosable(std::size_t index);
 
     void setStable(bool stable); ///< @brief Sets whether this graph is stable. (guarded)
 
@@ -468,7 +469,7 @@ class Graph
     const NodeNode& node(std::size_t index) const;
     const LabelNode& stateLabel(std::size_t index) const;
     const LabelNode& transitionLabel(std::size_t edge) const;
-    bool isBridge(std::size_t index) const; ///< Returns whether a given node forms a bridge in the selection
+    bool isBridge(std::size_t index) const; ///< Returns whether a given node forms a bridge in the exploration
 
     std::size_t initialState() const;
     std::size_t edgeCount() const;
@@ -476,11 +477,11 @@ class Graph
     std::size_t transitionLabelCount() const;
     std::size_t stateLabelCount() const;
 
-    bool hasSelection() const;                ///< Returns whether a portion of the graph is selected
-    std::size_t selectionEdge(std::size_t index) const; ///< Returns the edge index for a certain edge in the selection
-    std::size_t selectionNode(std::size_t index) const; ///< Returns the node index for a certain node in the selection
-    std::size_t selectionEdgeCount() const;        ///< Returns the number of edges in the selection
-    std::size_t selectionNodeCount() const;        ///< Returns the number of nodes in the selection
+    bool hasExploration() const;                ///< Returns whether a portion of the graph is selected
+    std::size_t explorationEdge(std::size_t index) const; ///< Returns the edge index for a certain edge in the exploration
+    std::size_t explorationNode(std::size_t index) const; ///< Returns the node index for a certain node in the exploration
+    std::size_t explorationEdgeCount() const;        ///< Returns the number of edges in the exploration
+    std::size_t explorationNodeCount() const;        ///< Returns the number of nodes in the exploration
 
     const bool& stable() const ///< @brief Gets whether this graph is stable.
     {

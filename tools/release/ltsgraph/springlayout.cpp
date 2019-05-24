@@ -135,9 +135,9 @@ void SpringLayout::apply()
 
   if (!m_graph.stable())
   {
-    bool sel = m_graph.hasSelection();
-    std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-    std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+    bool sel = m_graph.hasExploration();
+    std::size_t nodeCount = sel ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+    std::size_t edgeCount = sel ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
     m_nforces.resize(m_graph.nodeCount()); // Todo: compact this
     m_hforces.resize(m_graph.edgeCount());
@@ -146,12 +146,12 @@ void SpringLayout::apply()
 
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
-      std::size_t n = sel ? m_graph.selectionNode(i) : i;
+      std::size_t n = sel ? m_graph.explorationNode(i) : i;
 
       m_nforces[n] = QVector3D(0, 0, 0);
       for (std::size_t j = 0; j < i; ++j)
       {
-        std::size_t m = sel ? m_graph.selectionNode(j) : j;
+        std::size_t m = sel ? m_graph.explorationNode(j) : j;
 
         QVector3D diff = repulsionForce(m_graph.node(n).pos(), m_graph.node(m).pos(), m_repulsion, m_natLength);
         m_nforces[n] += diff;
@@ -162,7 +162,7 @@ void SpringLayout::apply()
 
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
-      std::size_t n = sel ? m_graph.selectionEdge(i) : i;
+      std::size_t n = sel ? m_graph.explorationEdge(i) : i;
 
       Edge e = m_graph.edge(n);
       QVector3D f;
@@ -188,7 +188,7 @@ void SpringLayout::apply()
 
       for (std::size_t j = 0; j < i; ++j)
       {
-        std::size_t m = sel ? m_graph.selectionEdge(j) : j;
+        std::size_t m = sel ? m_graph.explorationEdge(j) : j;
 
         // Handles
         f = repulsionForce(m_graph.handle(n).pos(), m_graph.handle(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
@@ -204,7 +204,7 @@ void SpringLayout::apply()
 
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
-      std::size_t n = sel ? m_graph.selectionNode(i) : i;
+      std::size_t n = sel ? m_graph.explorationNode(i) : i;
 
       if (!m_graph.node(n).anchored())
       {
@@ -220,7 +220,7 @@ void SpringLayout::apply()
 
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
-      std::size_t n = sel ? m_graph.selectionEdge(i) : i;
+      std::size_t n = sel ? m_graph.explorationEdge(i) : i;
 
       if (!m_graph.handle(n).anchored())
       {

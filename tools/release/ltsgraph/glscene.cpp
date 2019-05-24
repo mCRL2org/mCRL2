@@ -230,9 +230,9 @@ void GLScene::render(QPainter& painter)
 
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
-  bool sel = m_graph.hasSelection();
-  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+  bool exploration_active = m_graph.hasExploration();
+  std::size_t nodeCount = exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
   // All other objects share the same shader and vertex layout.
   m_global_shader.bind();
@@ -242,14 +242,14 @@ void GLScene::render(QPainter& painter)
 
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
-    renderNode(sel ? m_graph.selectionNode(i) : i, viewProjMatrix);
+    renderNode(exploration_active ? m_graph.explorationNode(i) : i, viewProjMatrix);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
-    renderEdge(sel ? m_graph.selectionEdge(i) : i, viewProjMatrix);
+    renderEdge(exploration_active ? m_graph.explorationEdge(i) : i, viewProjMatrix);
 
-    renderHandle(sel ? m_graph.selectionEdge(i) : i, viewProjMatrix);
+    renderHandle(exploration_active ? m_graph.explorationEdge(i) : i, viewProjMatrix);
   }
 
   painter.endNativePainting();
@@ -269,12 +269,12 @@ void GLScene::render(QPainter& painter)
   {
     if (m_drawstatenumbers)
     {
-      renderStateNumber(painter, sel ? m_graph.selectionNode(i) : i);
+      renderStateNumber(painter, exploration_active ? m_graph.explorationNode(i) : i);
     }
 
     if (m_drawstatelabels)
     {
-      renderStateLabel(painter, sel ? m_graph.selectionNode(i) : i);
+      renderStateLabel(painter, exploration_active ? m_graph.explorationNode(i) : i);
     }
   }
 
@@ -282,7 +282,7 @@ void GLScene::render(QPainter& painter)
   {
     for (std::size_t i = 0; i < edgeCount; ++i)
     {
-      renderTransitionLabel(painter, sel ? m_graph.selectionEdge(i) : i);
+      renderTransitionLabel(painter, exploration_active ? m_graph.explorationEdge(i) : i);
     }
   }
 
@@ -527,7 +527,7 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
     m_global_shader.setWorldViewProjMatrix(viewProjMatrix * borderMatrix);
     glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
 
-    if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
+    if (m_graph.hasExploration() && !m_graph.isBridge(i) && m_graph.initialState() != i)
     {
       float s = (fill.x() < 0.5 && fill.y() < 0.5 && fill.z() < 0.5) ? 0.2f : -0.2f;
       QVector3D hint = QVector3D(fill.x() + s, fill.y() + s, fill.z() + s);
@@ -583,9 +583,9 @@ bool GLScene::selectObject(GLScene::Selection& s,
                            SelectableObject type)
 {
   float bestZ = 1.0f;
-  bool sel = m_graph.hasSelection();
-  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+  bool exploration_active = m_graph.hasExploration();
+  std::size_t nodeCount = exploration_active ? m_graph.explorationNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = exploration_active ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
 
   QFontMetrics metrics(m_font);
   switch (type)
@@ -594,7 +594,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
   {
     for (std::size_t i = 0; i < nodeCount; i++)
     {
-      std::size_t index = sel ? m_graph.selectionNode(i) : i;
+      std::size_t index = exploration_active ? m_graph.explorationNode(i) : i;
       QVector3D screenPos = m_camera.worldToWindow(m_graph.node(index).pos());
       float radius = sizeOnScreen(m_graph.node(index).pos(), nodeSizeScaled()) / 2.0f;
       if (isCloseCircle(x, y, screenPos, radius, bestZ))
@@ -609,7 +609,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
   {
     for (std::size_t i = 0; i < edgeCount; i++)
     {
-      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
+      std::size_t index = exploration_active ? m_graph.explorationEdge(i) : i;
       QVector3D screenPos = m_camera.worldToWindow(m_graph.handle(index).pos());
       float radius = sizeOnScreen(m_graph.handle(index).pos(), handleSizeScaled());
       if (isCloseSquare(x, y, screenPos, radius, bestZ))
@@ -624,7 +624,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
   {
     for (std::size_t i = 0; i < edgeCount; i++)
     {
-      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
+      std::size_t index = exploration_active ? m_graph.explorationEdge(i) : i;
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
       QVector3D window = m_camera.worldToWindow(label.pos());
       const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
@@ -641,7 +641,7 @@ bool GLScene::selectObject(GLScene::Selection& s,
   {
     for (std::size_t i = 0; i < nodeCount; i++)
     {
-      std::size_t index = sel ? m_graph.selectionNode(i) : i;
+      std::size_t index = exploration_active ? m_graph.explorationNode(i) : i;
       const Graph::LabelNode& label = m_graph.stateLabel(index);
       QVector3D window = m_camera.worldToWindow(label.pos());
       const QString& labelstring = m_graph.stateLabelstring(label.labelindex());

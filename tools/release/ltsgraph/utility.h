@@ -34,6 +34,12 @@
 constexpr float PI = 3.14159265358979323846f;
 constexpr float PI_2 = PI * 0.5f;
 
+inline static
+float frand(float min, float max)
+{
+  return ((float)qrand() / RAND_MAX) * (max - min) + min;
+}
+
 /// \brief Renders text, centered around the window coordinates at x and y (in pixels)
 inline static
 void drawCenteredText(QPainter& painter, float x, float y, const QString& text, const QColor& color = Qt::black)

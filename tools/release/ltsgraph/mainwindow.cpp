@@ -150,11 +150,11 @@ void MainWindow::onExplore(bool enabled)
 {
   if (enabled)
   {
-    m_graph.makeSelection();
-    m_graph.toggleActive(m_graph.initialState());
+    m_graph.makeExploration();
+    m_graph.toggleOpen(m_graph.initialState());
   }
   else {
-    m_graph.discardSelection();
+    m_graph.discardExploration();
   }
   m_glwidget->update();
 }
@@ -175,7 +175,7 @@ void MainWindow::openFile(const QString& fileName)
   {
     try
     {
-      bool hadSelection = m_graph.hasSelection();
+      bool hadExploration = m_graph.hasExploration();
       m_ui.actLayout->setChecked(false);
 
       m_glwidget->pause();
@@ -188,7 +188,7 @@ void MainWindow::openFile(const QString& fileName)
       // does that when supplied an empty string as the input file name
       m_graph.load(fileName == "-" ? "" : fileName, -limit, limit);
 
-      if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadSelection)
+      if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadExploration)
       {
         if (QMessageBox::question(this, "Exploration mode",
                                   tr("The selected LTS has a large number of states; "
@@ -201,7 +201,7 @@ void MainWindow::openFile(const QString& fileName)
       }
       else
       {
-        onExplore(hadSelection);
+        onExplore(hadExploration);
       }
 
       m_glwidget->rebuild();
@@ -261,11 +261,11 @@ void MainWindow::onImportXML()
 
   if (!fileName.isNull())
   {
-    bool hadSelection = m_graph.hasSelection();
+    bool hadExploration = m_graph.hasExploration();
     m_layout->ui()->setActive(false);
     m_glwidget->resetViewpoint(0);
     m_graph.loadXML(fileName);
-    onExplore(hadSelection);
+    onExplore(hadExploration);
     m_glwidget->rebuild();
     m_information->update();
     m_graph.setStable(false);
