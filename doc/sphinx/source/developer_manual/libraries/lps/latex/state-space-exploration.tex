@@ -11,6 +11,9 @@
 
 \setcounter{MaxMatrixCols}{10}
 
+\newtheorem{theorem}{Theorem}
+\newtheorem{remark}[theorem]{Remark}
+
 \font \aap cmmi10
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 \newcommand{\ap}{{:}}
@@ -22,6 +25,7 @@
 \newcommand{\aftertime}{\ensuremath{<\!\!<}}
 \newcommand{\emptymap}{\ensuremath{\{ : \}}}
 \newcommand{\emptylist}{\ensuremath{[\:]}}
+\newcommand{\stochasticstate}[2]{\ensuremath{\{#1 \mapsto #2\}}}
 
 %--- pseudo code ---%
 \newcommand{\Space}{\text{\ }}
@@ -42,21 +46,37 @@
 \begin{document}
 \maketitle
 
-\section{Untimed state space exploration}
-Consider the following untimed linear process specification $P$, with initial state $d_0$. 
+\section{Graph Exploration}
+
+State space exploration is an instance of graph exploration. Consider a directed graph
+and take a node $s_0$. We assume there is a function $successors$ that returns the successor
+nodes of a vertex. An abstract algorithm for exploring the graph starting from vertex
+$s_0$ is
 
 \[
-\begin{array}{l}
-P(d)=
-\sum\limits_{i\in I}\sum\limits_{e_i}c_i(d, e_i)\rightarrow a_i(f_i(d,e_i)) \cdot P(g_i(d,e_i))
-\end{array}
+\begin{tabular}{l}
+\textsc{ExploreGraph}($s_0$) \\
+$todo := \{ s_0 \}$ \\
+$discovered := \{ s_0 \}$ \\
+$\While todo \neq \emptyset \Space \Do$ \\
+\qquad \Choose $s \in todo$ \\
+\qquad $todo := todo \setminus \{s\}$ \\
+\qquad $discovered := discovered \cup \{s\}$ \\
+\qquad $\For s' \in successors(s)  \Space \Do$ \\
+\qquad \qquad $\If s' \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad $discovered := discovered \cup \{s' \}$ \\
+\qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\end{tabular}
 \]
 
-Below we define an algorithm for state space exploration of this process specification. The algorithm only
-reports events using callback functions. This is done to separate the exploration from its applications.
-The following events are distinguished:
+\subsection{Event points}
+There are many different applications of state space exploration. The Boost Graph Library
+(\cite{2002:BGL:504206}) uses a clever idea to separate such applications from the exploration
+itself. It is done by distinguishing \emph{event points} in the algorithm that the user can respond
+to by means of callback functions. For our purposes we select the following events:
 
 \begin{center}
+\label{table:eventpoints}
 \begin{tabular}{ |l|l| } 
 \hline
 \textsf{discover\_state} & is invoked when a state is encountered for the first time \\ 
@@ -66,18 +86,287 @@ The following events are distinguished:
 \hline
 \end{tabular}
 \end{center}
+The events are named in terms of states and transitions instead of vertices and edges, since this is
+closer to our application domain. The exploration algorithm with event points included looks like this:
 
-Using these events, most applications of state space exploration can be implemented efficiently.
-Not that this idea has been adopted from the Boost Graph Library. 
+\[
+\begin{tabular}{l}
+\textsc{ExploreGraph}($s_0, \textsf{discover\_state}, \textsf{examine\_transition},
+\textsf{start\_state}, \textsf{finish\_state}$) \\
+$todo := \{ s_0 \}$ \\
+$discovered := \{ s_0 \}$ \\
+\colorbox{lightgray}{$\textsf{discover\_state}(s_0)$} \\
+$\While todo \neq \emptyset \Space \Do$ \\
+\qquad \Choose $s \in todo$ \\
+\qquad $todo := todo \setminus \{s\}$ \\
+\qquad \colorbox{lightgray}{$\textsf{start\_state}(s)$} \\
+\qquad $discovered := discovered \cup \{s\}$ \\
+\qquad $\For s' \in successors(s)  \Space \Do$ \\
+\qquad \qquad $\If s' \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad $discovered := discovered \cup \{s' \}$ \\
+\qquad \qquad \qquad \colorbox{lightgray}{$\textsf{discover\_state}(s')$} \\
+\qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\qquad \qquad \colorbox{lightgray}{$\textsf{examine\_transition}(s, a, s')$} \\
+\qquad \colorbox{lightgray}{$\textsf{finish\_state}(s)$} \\
+\end{tabular}
+\]
 
-Let $rewr$ be a rewriter. An algorithm for state space exploration is 
+\newpage
+\section{Applications}
+
+Many applications can be easily expressed in terms of the given event points. 
+
+\subsection{Deadlock checking}
+With deadlock checking we are looking for states that have no outgoing transitions.
+By introducing one boolean variable has\_transitions we can implement deadlock checking as follows.
+The callback functions are given at the right.
+
+\[
+\begin{tabular}{p{7cm}p{6cm}}
+\textsc{FindDeadlock}($s_0, \textsf{discover\_state}, \textsf{examine\_transition},
+\textsf{start\_state}, \textsf{finish\_state}$) \\
+& \colorbox{lightgray}{bool has\_transitions} \\
+$todo := \{ s_0 \}$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
+$\While todo \neq \emptyset \Space \Do$ \\
+\qquad \Choose $s \in todo$ \\
+\qquad $todo := todo \setminus \{s\}$ \\
+\qquad $\textsf{start\_state}(s)$ & \colorbox{lightgray}{has\_transitions := false} \\
+\qquad $discovered := discovered \cup \{s\}$ \\
+\qquad $\For s' \in successors(s)  \Space \Do$ \\
+\qquad \qquad $\If s' \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad $discovered := discovered \cup \{s' \}$ \\
+\qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
+\qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\qquad \qquad $\textsf{examine\_transition}(s, a, s')$ & \colorbox{lightgray}{has\_transitions := true} \\
+\qquad $\textsf{finish\_state}(s)$ & \colorbox{lightgray}{if (!has\_transitions) report\_deadlock(s)} \\
+\end{tabular}
+\]
+
+\newpage
+\section{Search strategies}
+
+Exploration can be done with different search strategies. We describe three of them: breadth-first, depth-first and highway. They mainly differ in the order in which the elements of the todo set are processed. In breadth-first search nodes at the present depth are explored before nodes at a higher depth. In depth-first search the highest-depth nodes are explored first. Highway search is a variant that uses a breadth-first search, but it only explores a part of the state space.
+
+In all three cases the $todo$ list is stored in a double ended queue. We use the slicing operator to denote parts of a list. For example, $A[m:n]$ corresponds to the sublist $A[m,\ldots,n-1]$.
+
+\subsection{Breadth-first search}
+\[
+\begin{tabular}{l}
+\textsc{ExploreGraphBreadthFirst}($s_0, \textsf{discover\_state}, \textsf{examine\_transition},
+\textsf{start\_state}, \textsf{finish\_state}$) \\
+$todo := \colorbox{lightgray}{$[s_0]$}$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
+$\While \colorbox{lightgray}{$|todo| > 0$} \Do$ \\
+\qquad \colorbox{lightgray}{$s := todo[0]$} \\
+\qquad \colorbox{lightgray}{$todo := todo[1:|todo|]$} \\
+\qquad $\textsf{start\_state}(s)$ \\
+\qquad $discovered := discovered \cup \{s\}$ \\
+\qquad $\For s' \in successors(s)  \Space \Do$ \\
+\qquad \qquad $\If s' \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad $discovered := discovered \cup \{s' \}$ \\
+\qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
+\qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
+\qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
+\qquad $\textsf{finish\_state}(s)$ \\
+\end{tabular}
+\]
+
+\subsection{Depth-first search}
+\[
+\begin{tabular}{l}
+\textsc{ExploreGraphDepthFirst}($s_0, \textsf{discover\_state}, \textsf{examine\_transition},
+\textsf{start\_state}, \textsf{finish\_state}$) \\
+$todo := \colorbox{lightgray}{$[s_0]$}$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
+$\While \colorbox{lightgray}{$|todo| > 0$} \Do$ \\
+\qquad \colorbox{lightgray}{$s := todo[|todo| - 1]$} \\
+\qquad \colorbox{lightgray}{$todo := todo[0:|todo| - 1]$} \\
+\qquad $\textsf{start\_state}(s)$ \\
+\qquad $discovered := discovered \cup \{s\}$ \\
+\qquad $\For s' \in successors(s)  \Space \Do$ \\
+\qquad \qquad $\If s' \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad $discovered := discovered \cup \{s' \}$ \\
+\qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
+\qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
+\qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
+\qquad $\textsf{finish\_state}(s)$ \\
+\end{tabular}
+\]
+
+\newpage
+\subsection{Highway search}
+
+In highway search (see \cite{DBLP:journals/jlp/EngelsGWW09}) a breadth first search is done, with the restriction that at most $N$ states are put in the todo list for each level. The variable $L$ maintains the number of states in the todo list corresponding to the current level, and the variable $c$ counts how many elements have been added corresponding to the next level. Once $c$ reaches the maximum value $N$,  elements are being overwritten randomly. 
+
+\begin{remark}
+The specification below deviates from the published version of highway search in the
+sense that overwritten elements are added to the set $discovered$. To avoid this,
+the structure of the algorithm needs to be changed significantly.
+\end{remark}
+
+\[
+\begin{tabular}{l}
+\textsc{ExploreGraphHighway}($s_0, \colorbox{lightgray}{N}, \textsf{discover\_state}, \textsf{examine\_transition}, \textsf{start\_state}, \textsf{finish\_state})$ \\
+$todo := [s_0]$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
+\colorbox{lightgray}{$L := |todo|$} \\
+\colorbox{lightgray}{$c := 0$} \\
+$\While |todo| > 0$ \Do \\
+\qquad $s := todo[0]$ \\
+\qquad $todo := todo[1:|todo|]$ \\
+\qquad $\textsf{start\_state}(s)$ \\
+\qquad $\For s' \in successors(s)  \Space \Do$ \\
+\qquad \qquad $\If s' \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad $discovered := discovered \cup \{s' \}$ \\
+\qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
+\qquad \qquad \qquad \colorbox{lightgray}{$c := c + 1$} \\
+\qquad \qquad \qquad \colorbox{lightgray}{\If $c \leq N$ \Then} \\
+\qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
+\qquad \qquad \qquad \colorbox{lightgray}{\Else} \\
+\qquad \qquad \qquad \qquad \colorbox{lightgray}{$k := random(\{ 1, \ldots, c\})$} \\
+\qquad \qquad \qquad \qquad \colorbox{lightgray}{$\If k \leq N \Space \Then todo[|todo| - k] := s'$} \\
+\qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
+\qquad $\textsf{finish\_state}(s)$ \\
+\qquad \colorbox{lightgray}{$L := L - 1$} \\
+\qquad \colorbox{lightgray}{\If $L = 0$ \Then} \\
+\qquad \qquad \colorbox{lightgray}{$L := |todo|$} \\
+\qquad \qquad \colorbox{lightgray}{$c := 0$}
+\end{tabular}
+\]
+In Algorithm 1 of \cite{DBLP:journals/jlp/EngelsGWW09}, the set $Q_d$ stores todo elements corresponding to the current level, and the set $Q_{d+1}$ stores todo elements corresponding to the next level. The algorithm above uses only one list $todo$ that stores both of them. At each iteration of the while loop the first $L$ elements of $todo$ list belong to the current level, and the remaining elements belong to the next level. Furthermore, the algorithm above contains only one application of a random generator, compared to two applications in the original version. The element $k$ is chosen randomly in the range $[1, \ldots, c]$. There is an $N/c$ probability that this value is in the range $[1, \ldots, N]$. If $k$ is inside the range, the element in the $todo$ list with index $k$ (counting from the end) is overwritten. This behaviour matches with the published version.
+
+\newpage
+\section{Cycle detection}
+For cycle detection the event points in table \ref{table:eventpoints} are insufficient. In \cite{2002:BGL:504206} the following recursive depth first algorithm is given:
+
+\[
+\begin{tabular}{l}
+\textsc{boost\_dfs\_recursive}($u$) \\
+$color[u] := gray$ \\
+$\textsf{discover\_vertex}(u)$ \\
+$\For (a,v) \in out\_edges(u) \Space \Do$ \\
+\qquad $\textsf{examine\_edge}(a, v)$ \\
+\qquad $\If color[v] = white \Space \Then$ \\
+\qquad \qquad $\textsf{tree\_edge}(a, v)$ \\
+\qquad \qquad \textsc{dfs\_recursive}($v$) \\
+\qquad $\Else \If color[v] = gray \Space \Then$ \\
+\qquad \qquad $\textsf{back\_edge}(a, v)$ \\
+\qquad \Else \\
+\qquad \qquad $\textsf{forward\_or\_cross\_edge}(a, v)$ \\
+\qquad $color[u] := black$ \\
+\qquad $\textsf{finish\_vertex}(u)$ \\
+\end{tabular}
+\]
+
+The code in Boost uses an iterative version:
+
+\[
+\begin{tabular}{l}
+\textsc{boost\_dfs\_iterative}($u$) \\
+$color[u] := gray$ \\
+$\textsf{discover\_vertex}(u)$ \\
+$stack := [(u, out\_edges(u))]$ \\
+$\While |stack| > 0 \Space \Do$ \\
+\qquad $u, E := stack.pop\_back()$ \\
+\qquad $\While |E| > 0 \Space \Do$ \\
+\qquad \qquad $a, v := E[0]$ \\
+\qquad \qquad $\textsf{examine\_edge}(a, v)$ \\
+\qquad \qquad $\If color[v] = white \Space \Then$ \\
+\qquad \qquad \qquad $\textsf{tree\_edge}(a, v)$ \\
+\qquad \qquad \qquad $stack.push\_back(u, E[1:])$ \\
+\qquad \qquad \qquad $u := v$ \\
+\qquad \qquad \qquad $color[u] := gray$ \\
+\qquad \qquad \qquad $\textsf{discover\_vertex}(u)$ \\
+\qquad \qquad \qquad $E := out\_edges(u)$ \\
+\qquad \qquad $\Else \If color[v] = gray \Space \Then$ \\
+\qquad \qquad \qquad $\textsf{back\_edge}(a, v)$ \\
+\qquad \qquad \Else \\
+\qquad \qquad \qquad $\textsf{forward\_or\_cross\_edge}(a, v)$ \\
+\qquad \qquad \qquad $E := E[1:]$ \\
+\qquad \qquad $color[u] := black$ \\
+\qquad \qquad $\textsf{finish\_vertex}(u)$ \\
+\end{tabular}
+\]
+
+For our purposes we rewrite this as:
+
+\[
+\begin{tabular}{l}
+\textsc{dfs\_recursive}($s_0, gray$) \\
+$gray := gray \cup \{ s_0 \}$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
+$\For (a, s_1) \in out\_edges(s_0) \Space \Do$ \\
+\qquad $\textsf{examine\_edge}(s_0, a, s_1)$ \\
+\qquad $\If s_1 \notin discovered \Space \Then$ \\
+\qquad \qquad $\textsf{tree\_edge}(s_0, a, s_1)$ \\
+\qquad \qquad $discovered := discovered \cup \{ s_1 \}$ \\
+\qquad \qquad \textsc{dfs\_recursive}($s_1, gray$) \\
+\qquad $\Else \If s_1 \in todo \Space \Then$ \\
+\qquad \qquad $\textsf{back\_edge}(s_0, a, s_1)$ \\
+\qquad \Else \\
+\qquad \qquad $\textsf{forward\_or\_cross\_edge}(s_0, a, s_1)$ \\
+\qquad $gray := gray \setminus \{ s_0 \}$ \\
+\qquad $\textsf{finish\_state}(s_0)$ \\
+\end{tabular}
+\]
+
+\[
+\begin{tabular}{l}
+\textsc{dfs\_iterative}($s_0$) \\
+$todo := [(s_0, out\_edges(s_0))]$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
+$\While |todo| > 0 \Space \Do$ \\
+\qquad $s, E := todo[-1]$ \\
+\qquad $\While |E| > 0 \Space \Do$ \\
+\qquad \qquad $a, s_1 := E[0]$ \\
+\qquad \qquad $\textsf{examine\_edge}(s_0, a, s_1)$ \\
+\qquad \qquad $\If s_1 \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad $\textsf{tree\_edge}(s_0, a, s_1)$ \\
+\qquad \qquad \qquad $todo[-1] := (s, E[1:])$ \\
+\qquad \qquad \qquad $todo := todo \concat [(s_1, out\_edges(s_1))]$ \\
+\qquad \qquad \qquad $discovered := discovered \cup \{ s_1 \}$ \\
+\qquad \qquad \qquad $\textsf{discover\_state}(s_1)$ \\
+\qquad \qquad \qquad $s, E := todo[-1]$ \\
+\qquad \qquad $\Else \If s_1 \in todo \Space \Then$ \\
+\qquad \qquad \qquad $\textsf{back\_edge}(s_0, a, s_1)$ \\
+\qquad \qquad \Else \\
+\qquad \qquad \qquad $\textsf{forward\_or\_cross\_edge}(s_0, a, s_1)$ \\
+\qquad \qquad $E := E[1:]$ \\
+\qquad $\textsf{finish\_state}(s)$ \\
+\end{tabular}
+\]
+
+Whenever the \textsf{back\_edge} event is triggered, a cycle is found.
+
+\newpage
+\section{Untimed state space exploration}
+Consider the following untimed linear process specification $P$, with initial state $d_0$. 
+
+\[
+\begin{array}{l}
+P(d)=
+\sum\limits_{i\in I}\sum\limits_{e_i}c_i(d, e_i)\rightarrow a_i(f_i(d,e_i)) \cdot P(g_i(d,e_i))
+\end{array}
+\]
+This linear process is a symbolic representation of a state space, or labeled transition system
+(LTS). The previously described graph exploration algorithms can be applied to explore a
+state space. Let $rewr$ be a rewriter. An algorithm for untimed state space exploration is 
 
 \[
 \begin{tabular}{l}
 \textsc{ExploreLPS}($P(d), d_0, rewr, \textsf{discover\_state}, \textsf{examine\_transition},
 \textsf{start\_state}, \textsf{finish\_state})$ \\
-$todo := \{rewr(d_0, [\:])\}$ \\
-$discovered := \emptyset$ \\
+$s_0 := rewr(d_0, [\:])$ \\
+$todo := \{ s_0 \}$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
 $\While todo \neq \emptyset \Space \Do$ \\
 \qquad \Choose $s \in todo$ \\
 \qquad $todo := todo \setminus \{s\}$ \\
@@ -101,6 +390,7 @@ $\While todo \neq \emptyset \Space \Do$ \\
 
 The set $E$ is computed using the \textsc{Enumerate} algorithm. This computation may be expensive. Hence the condition $c(d,e_i)$ is first rewritten, since if it evaluates to $false$ the computation of $E$ can be skipped.
 
+\newpage
 \section{Timed state space exploration}
 Consider the following timed linear process specification $P$, with initial state $d_0$.
 
@@ -116,13 +406,16 @@ Note that the time tag $t_i(d,e_i)$ is optional. If it is omitted, the correspon
 increasing. In order to achieve that, a time stamp is recorded for each state
 in the state space. We use the notation $t \aftertime s$ to denote the state $s$
 with associated time stamp $t$.
+An algorithm for timed state space exploration is 
 
 \[
 \begin{tabular}{l}
 \textsc{ExploreLPSTimed}($P(d), d_0, rewr, \textsf{discover\_state}, \textsf{examine\_transition},
 \textsf{start\_state}, \textsf{finish\_state})$ \\
-$todo := \{\colorbox{lightgray}{$0 \aftertime rewr(d_0, [\:])$}\}$ \\
-$discovered := \emptyset$ \\
+$s_0 := rewr(d_0, [\:])$ \\
+$todo := \{\colorbox{lightgray}{$0 \aftertime s_0)$}\}$ \\
+$discovered := \{ \colorbox{lightgray}{$0 \aftertime s_0)$} \}$ \\
+$\textsf{discover\_state}(0 \aftertime s_0)$ \\
 $\While todo \neq \emptyset \Space \Do$ \\
 \qquad \Choose \colorbox{lightgray}{$t \aftertime s$} $\in todo$ \\
 \qquad $todo := todo \setminus \{ \colorbox{lightgray}{$t \aftertime s$} \}$ \\
@@ -147,22 +440,52 @@ $\While todo \neq \emptyset \Space \Do$ \\
 \]
 
 \newpage
-\section{Search strategies}
+\section{Stochastic state space exploration}
+Consider the following stochastic linear process specification $P$, with initial
+state $\frac{p(h)}{h} \cdot P(g(h))$.
 
-Three different search strategies have been implemented: breadth-first, depth-first and highway. They mainly differ in the order in which the elements of the todo set are processed. In breadth-first search nodes at the present depth are explored before nodes at a higher depth. In depth-first search the highest-depth nodes are explored first. Highway search is a variant that uses a breadth-first search, but it only explores a part of the state space.
+\begin{equation}
+\begin{array}{l}
+P(d)=
+\sum\limits_{i\in I}\sum\limits_{e_i}c_i(d, e_i)\rightarrow a_i(f_i(d,e_i))
+\colorbox{lightgray}{$\frac{p_i(d,e_i,h_i)}{h_i} $}
+\cdot P(g_i(d,e_i,h_i)),
+\end{array}
+\end{equation}
+where $p$ and $p_i$ are stochastic distributions.
+We define a \emph{stochastic state} as a set
+$\{(q_1, s_1), \ldots, (q_m, s_m)\}$ with $q_j, j = 1 \ldots m$ a sequence of non-zero probabilities that sum up to 1, and $s_j, j = 1 \ldots m$ a sequence of states.
+The function \textsc{ComputeStochasticState} is used to compute a stochastic state from its symbolic representation.
 
-In all three cases the $todo$ list is stored in a double ended queue. We use the slicing operator to denote parts of a list. For example, $A[m:n]$ corresponds to the sublist $A[m,\ldots,n-1]$.
-
-\subsection{Breadth-first search}
 \[
 \begin{tabular}{l}
-\textsc{ExploreLPSBreadthFirst}($P(d), d_0, rewr, \textsf{discover\_state}, \textsf{examine\_transition},
-\textsf{start\_state}, \textsf{finish\_state})$ \\
-$todo := \colorbox{lightgray}{$[rewr(d_0, [\:])]$}$ \\
-$discovered := \emptyset$ \\
-$\While \colorbox{lightgray}{$|todo| > 0$} \Do$ \\
-\qquad \colorbox{lightgray}{$s := todo[0]$} \\
-\qquad \colorbox{lightgray}{$todo := todo[1:|todo|]$} \\
+\textsc{ComputeStochasticState}($h, p, g, rewr, \sigma$) \\
+$result := \emptyset$ \\
+$H := \{ (h',q) \mid q = rewr(p, \sigma[h := h']) \wedge q > 0 \}$ \\
+$\For (h', q) \in H$ \Do \\
+\qquad $s := rewr(g, \sigma[h := h'])$ \\
+\qquad $result := result \cup \{ (q, s) \}$ \\
+\Return $result$
+\end{tabular}
+\]
+The set $H$ is computed using the \textsc{Enumerate} algorithm. 
+
+An algorithm for stochastic state space exploration is 
+
+\[
+\begin{tabular}{l}
+\textsc{ExploreLPSStochastic}($P(d), \frac{p(h)}{h} \cdot P(g(h)), rewr, \textsf{discover\_state}, \textsf{examine\_transition},
+\textsf{start\_state}, \textsf{finish\_state}, \textsf{discover\_initial\_state})$ \\
+\colorbox{lightgray}{$\hat{s_0} := \textsc{ComputeStochasticState}(h, p(h), g(h), rewr, \emptylist)$} \\
+\colorbox{lightgray}{$S := \{ s_i \mid (q_i, s_i) \in \hat{s_0} \}$} \\
+\colorbox{lightgray}{$\textsf{discover\_initial\_state}(\hat{s_0})$} \\
+\colorbox{lightgray}{$\For s \in S \Space \Do $}\\
+\qquad $todo := todo \cup \{ s \}$ \\
+\qquad $discovered := discovered \cup \{ s \} $ \\
+\qquad $\textsf{discover\_state}(s)$ \\
+$\While todo \neq \emptyset \Space \Do$ \\
+\qquad \Choose $s \in todo$ \\
+\qquad $todo := todo \setminus \{s\}$ \\
 \qquad $discovered := discovered \cup \{s\}$ \\
 \qquad $\textsf{start\_state}(s)$ \\
 \qquad $\For i \in I  \Space \Do$ \\
@@ -171,91 +494,17 @@ $\While \colorbox{lightgray}{$|todo| > 0$} \Do$ \\
 \qquad \qquad $E := \{ e \mid rewr(condition, [e_i := e]) = true \}$ \\
 \qquad \qquad $\For e \in E  \Space \Do$ \\
 \qquad \qquad \qquad $a := a_i(rewr(f_i(d,e_i), [d:=s,e_i:=e]))$ \\
-\qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
-\qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
-\qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
-\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
-\qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
-\qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
+\qquad \qquad \qquad \colorbox{lightgray}{$\hat{s'} := \textsc{ComputeStochasticState}(h_i, p_i(d,e_i,h_i), g_i(d,e_i,h_i), rewr, [d:=s, e_i:=e])$} \\
+\qquad \qquad \qquad \colorbox{lightgray}{$S' := \{ s_i \mid (q_i, s_i) \in \hat{s'} \}$} \\
+\qquad \qquad \qquad \colorbox{lightgray}{$\For s' \in S'$ \Do} \\
+\qquad \qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
+\qquad \qquad \qquad \qquad \qquad $todo := todo \cup \{ s' \}$ \\
+\qquad \qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
+\qquad \qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
+\qquad \qquad \qquad $\textsf{examine\_transition}(s, a, \colorbox{lightgray}{$\hat{s'}$})$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
 \end{tabular}
 \]
-
-\subsection{Depth-first search}
-\[
-\begin{tabular}{l}
-\textsc{ExploreLPSDepthFirst}($P(d), d_0, rewr, \textsf{discover\_state}, \textsf{examine\_transition},
-\textsf{start\_state}, \textsf{finish\_state})$ \\
-$todo := \colorbox{lightgray}{$[rewr(d_0, [\:])]$}$ \\
-$discovered := \emptyset$ \\
-$\While \colorbox{lightgray}{$|todo| > 0$} \Do$ \\
-\qquad \colorbox{lightgray}{$s := todo[|todo| - 1]$} \\
-\qquad \colorbox{lightgray}{$todo := todo[0:|todo| - 1]$} \\
-\qquad $discovered := discovered \cup \{s\}$ \\
-\qquad $\textsf{start\_state}(s)$ \\
-\qquad $\For i \in I  \Space \Do$ \\
-\qquad \qquad $condition := rewr(c_i(d, e_i), [d := s])$ \\
-\qquad \qquad $\If condition = false  \Space \Then \Continue$ \\
-\qquad \qquad $E := \{ e \mid rewr(condition, [e_i := e]) = true \}$ \\
-\qquad \qquad $\For e \in E  \Space \Do$ \\
-\qquad \qquad \qquad $a := a_i(rewr(f_i(d,e_i), [d:=s,e_i:=e]))$ \\
-\qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
-\qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
-\qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
-\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
-\qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
-\qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
-\qquad $\textsf{finish\_state}(s)$ \\
-\end{tabular}
-\]
-
-\newpage
-\subsection{Highway search}
-
-In highway search (see \cite{DBLP:journals/jlp/EngelsGWW09}) a breadth first search is done, with the restriction that at most $N$ states are put in the todo list for each level. The variable $L$ maintains the number of states in the todo list corresponding to the current level, and the variable $c$ counts how many elements have been added corresponding to the next level. Once $c$ reaches the maximum value $N$,  elements are being overwritten randomly.
-
-\[
-\begin{tabular}{l}
-\textsc{ExploreLPSHighway}($P(d), d_0, rewr, \colorbox{lightgray}{N}, \textsf{discover\_state}, \textsf{examine\_transition},
-\textsf{start\_state}, \textsf{finish\_state})$ \\
-$todo := [rewr(d_0, [\:])]$ \\
-$discovered := \emptyset$ \\
-\colorbox{lightgray}{$L := |todo|$} \\
-\colorbox{lightgray}{$c := 0$} \\
-$\While |todo| > 0$ \Do \\
-\qquad $s := todo[0]$ \\
-\qquad $todo := todo[1:|todo|]$ \\
-\qquad $discovered := discovered \cup \{s\}$ \\
-\qquad $\textsf{start\_state}(s)$ \\
-\qquad $\For i \in I  \Space \Do$ \\
-\qquad \qquad $condition := rewr(c_i(d, e_i), [d := s])$ \\
-\qquad \qquad $\If condition = false  \Space \Then \Continue$ \\
-\qquad \qquad $E := \{ e \mid rewr(condition, [e_i := e]) = true \}$ \\
-\qquad \qquad $\For e \in E  \Space \Do$ \\
-\qquad \qquad \qquad $a := a_i(rewr(f_i(d,e_i), [d:=s,e_i:=e]))$ \\
-\qquad \qquad \qquad $s' := rewr(g_i(d,e_i), [d:=s,e_i:=e])$ \\
-\qquad \qquad \qquad $\If s' \notin discovered \Space \Then$ \\
-\qquad \qquad \qquad \qquad $todo := todo \concat [s']$ \\
-\qquad \qquad \qquad \qquad $discovered := discovered \cup \{s'\}$ \\
-\qquad \qquad \qquad \qquad $\textsf{discover\_state}(s')$ \\
-\qquad \qquad \qquad \qquad \colorbox{lightgray}{$c := c + 1$} \\
-\qquad \qquad \qquad \qquad \colorbox{lightgray}{\If $c \leq N$ \Then} \\
-\qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo := todo \concat [s']$} \\
-\qquad \qquad \qquad \qquad \colorbox{lightgray}{\Else} \\
-\qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$k := random(\{ 1, \ldots, c\})$} \\
-\qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$\If k \leq N \Space \Then$} \\
-\qquad \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$discovered := discovered \setminus \{todo[|todo| - k]\}$} \\
-\qquad \qquad \qquad \qquad \qquad \qquad \colorbox{lightgray}{$todo[|todo| - k] := s'$} \\
-\qquad \qquad \qquad $\textsf{examine\_transition}(s, a, s')$ \\
-\qquad $\textsf{finish\_state}(s)$ \\
-\qquad \colorbox{lightgray}{$L := L - 1$} \\
-\qquad \colorbox{lightgray}{\If $L = 0$ \Then} \\
-\qquad \qquad \colorbox{lightgray}{$L := |todo|$} \\
-\qquad \qquad \colorbox{lightgray}{$c := 0$}
-\end{tabular}
-\]
-In Algorithm 1 of \cite{DBLP:journals/jlp/EngelsGWW09}, the set $Q_d$ stores todo elements corresponding to the current level, and the set $Q_{d+1}$ stores todo elements corresponding to the next level. The algorithm above uses only one list $todo$ that stores both of them. At each iteration of the while loop the first $L$ elements of $todo$ list belong to the current level, and the remaining elements belong to the next level. Furthermore, the algorithm above contains only one application of a random generator, compared to two applications in the original version. The element $k$ is chosen randomly in the range $[1, \ldots, c]$. There is an $N/c$ probability that this value is in the range $[1, \ldots, N]$. If $k$ is inside the range, the element in the $todo$ list with index $k$ (counting from the end) is overwritten. This behaviour matches with the original version.
-A subtle aspect of highway search is the states in the next level $Q_{d+1}$ that are overwritten are not added to the set of discovered states $V$. In the algorithm above this is achieved by removing the overwritten states from the set $discovered$.
 
 \newpage
 \section{Caching}
@@ -270,8 +519,10 @@ In the local caching algorithm for each summand $i$ a mapping $C_i$ is maintaine
 \begin{tabular}{l}
 \textsc{ExploreLPSLocallyCached}($P(d), d_0, rewr, \textsf{discover\_state}, \textsf{examine\_transition},
 \textsf{start\_state}, \textsf{finish\_state})$ \\
-$todo := \{d_0\}$ \\
-$discovered := \emptyset$ \\
+$s_0 := rewr(d_0, [\:])$ \\
+$todo := \{ s_0 \}$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
 \colorbox{lightgray}{\For $i \in I$ \Do} \\
 \colorbox{lightgray}{\qquad $C_i := \emptymap$} \\
 \colorbox{lightgray}{\qquad $\gamma_i := FV(c_i(d, e_i)) \cap \mathcal{D}$} \\
@@ -280,7 +531,7 @@ $\While todo \neq \emptyset \Space \Do$ \\
 \qquad $todo := todo \setminus \{s\}$ \\
 \qquad $discovered := discovered \cup \{s\}$ \\
 \qquad $\textsf{start\_state}(s)$ \\
-\qquad $\For i \in I \Do$ \\
+\qquad $\For i \in I$ \Do \\
 \qquad \qquad \colorbox{lightgray}{$key := \gamma_i[d:=s]$} \\
 \qquad \qquad \colorbox{lightgray}{\If $key \in keys(C_i)$ \Then} \\
 \qquad \qquad \colorbox{lightgray}{\qquad $E := C_i[key]$} \\
@@ -343,10 +594,12 @@ Confluence reduction (see \cite{DBLP:conf/mfcs/GrooteP00}, \cite{Blom01partialt-
 
 \[
 \begin{tabular}{l}
-\textsc{ExploreLTSConfluence}($P(d), d_0, rewr, \textsf{discover\_state}, \textsf{examine\_transition},
+\textsc{ExploreLPSConfluence}($P(d), d_0, rewr, \textsf{discover\_state}, \textsf{examine\_transition},
 \textsf{start\_state}, \textsf{finish\_state})$ \\
-$todo := \{\ \colorbox{lightgray}{$\textsc{FindRepresentative}(rewr(d_0, \emptylist))$}\}$ \\
-$discovered := \emptyset$ \\
+$s_0 := \colorbox{lightgray}{$\textsc{FindRepresentative}(rewr(d_0, [\:]))$}$ \\
+$todo := \{\ s_0 \}$ \\
+$discovered := \{ s_0 \}$ \\
+$\textsf{discover\_state}(s_0)$ \\
 \textbf{while} $todo \neq \emptyset $ \Do \\
 \qquad \Choose $s \in todo$ \\
 \qquad $todo := todo \setminus \{s\}$ \\
@@ -405,7 +658,7 @@ $stack := stack \concat [u]$ \\
 A side effect of a call \textsc{TarjanRecursive}$(u)$ is that $result$ contains the connected components that have been found.
 
 \subsection{FindRepresentative}
-Due to properties of confluent $tau$-summands, there is always only one terminal strongly connected component, i.e. a strongly connected component without outgoing edges. Furthermore, the first strongly connected component reported by Tarjan's algorithm is always terminating. For our implementation of \textsc{FindRepresentative} we prefer to use an iterative version of Tarjan's SCC algorithm. The reason for this is that an iterative version can be more easily interrupted once the first SCC has been found. The algorithm description in \cite{TarjanIterative} has been used as a model for our solution.
+Due to properties of confluent $\tau$-summands, there is always only one terminal strongly connected component, i.e. a strongly connected component without outgoing edges. Furthermore, the first strongly connected component reported by Tarjan's algorithm is always terminating. For our implementation of \textsc{FindRepresentative} we prefer to use an iterative version of Tarjan's SCC algorithm. The reason for this is that an iterative version can be more easily interrupted once the first SCC has been found. The algorithm description in \cite{TarjanIterative} has been used as a model for our solution.
 
 \[
 \begin{tabular}{l}

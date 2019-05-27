@@ -1,3 +1,5 @@
+#include <utility>
+
 // Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -6,7 +8,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/explorer.h
+/// \file mcrl2/lps/explorer-cpp17.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_LPS_EXPLORER_H
@@ -381,6 +383,16 @@ class explorer: public abortable
   protected:
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
+    struct transition
+    {
+      process::timed_multi_action action;
+      state_type state;
+
+      transition(process::timed_multi_action  action_, const state_type& state_)
+       : action(std::move(action_)), state(state_)
+      {}
+    };
+
     const explorer_options& m_options;
     data::rewriter m_rewr;
     mutable data::mutable_indexed_substitution<> m_sigma;
@@ -401,7 +413,7 @@ class explorer: public abortable
     std::unordered_map<state, std::size_t> m_discovered;
 
     // used by make_timed_state, to avoid needless creation of vectors
-    std::vector<data::data_expression> timed_state;
+    mutable std::vector<data::data_expression> timed_state;
 
     Specification preprocess(const Specification& lpsspec)
     {
@@ -421,6 +433,12 @@ class explorer: public abortable
         replace_constants_by_variables(result, m_rewr, m_sigma);
       }
       return result;
+    }
+
+    // Evaluates whether t0 <= t1
+    bool less_equal(const data::data_expression& t0, const data::data_expression& t1) const
+    {
+      return m_rewr(data::less_equal(t0, t1)) == data::sort_bool::true_();
     }
 
     // This function is based an iterative version of Tarjan's strongly connected components algorithm.
@@ -682,6 +700,39 @@ class explorer: public abortable
       }
     }
 
+    template <typename SummandSequence>
+    std::list<transition> out_edges(const state& s, const SummandSequence& regular_summands, const SummandSequence& confluent_summands)
+    {
+      std::list<transition> transitions;
+      add_assignments(m_sigma, m_process_parameters, s);
+      for (const explorer_summand& summand: regular_summands)
+      {
+        generate_transitions(
+          summand,
+          confluent_summands,
+          [&](const process::timed_multi_action& a, const state_type& s1)
+          {
+            if constexpr (Timed)
+            {
+              const data::data_expression& t = s[m_n];
+              if (a.has_time() && less_equal(a.time(), t))
+              {
+                return;
+              }
+              data::data_expression t1 = a.has_time() ? a.time() : t;
+              state s1_at_t1 = make_timed_state(s1, t1);
+              transitions.emplace_back(a, s1_at_t1);
+            }
+            else
+            {
+              transitions.emplace_back(a, s1);
+            }
+          }
+        );
+      }
+      return transitions;
+    }
+
     // pre: d0 is in normal form
     template <typename SummandSequence>
     std::vector<state> generate_successors(
@@ -714,11 +765,6 @@ class explorer: public abortable
       result.insert(data::less_equal(data::sort_real::real_()));
       result.insert(data::sort_real::plus(data::sort_real::real_(), data::sort_real::real_()));
       return result;
-    }
-
-    bool less_equal(const data::data_expression& t0, const data::data_expression& t1)
-    {
-      return m_rewr(data::less_equal(t0, t1)) == data::sort_bool::true_();
     }
 
     std::unique_ptr<todo_set> make_todo_set(const state& init)
@@ -779,7 +825,7 @@ class explorer: public abortable
     ~explorer() = default;
 
     // Returns the concatenation of s and [t]
-    state make_timed_state(const state& s, const data::data_expression& t)
+    state make_timed_state(const state& s, const data::data_expression& t) const
     {
       std::copy(s.begin(), s.end(), timed_state.begin());
       timed_state.back() = t;
@@ -1017,6 +1063,232 @@ class explorer: public abortable
       remove_assignments(m_sigma, m_regular_summands[i].variables);
       set_process_parameter_values(process_parameter_undo);
       return result;
+    }
+
+    // pre: s0 is in normal form
+    // N.B. Does not support stochastic specifications!
+    template <
+      typename SummandSequence,
+      typename DiscoverState = skip,
+      typename ExamineTransition = skip,
+      typename TreeEdge = skip,
+      typename BackEdge = skip,
+      typename ForwardOrCrossEdge = skip,
+      typename FinishState = skip
+    >
+    void generate_state_space_dfs_recursive(
+      const state& s0,
+      std::unordered_set<state> gray,
+      std::unordered_set<state>& discovered,
+      const SummandSequence& regular_summands,
+      const SummandSequence& confluent_summands,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      using utilities::detail::contains;
+
+      // invariants:
+      // - s not in discovered => color(s) = white
+      // - s in discovered && s in gray => color(s) = gray
+      // - s in discovered && s not in gray => color(s) = black
+
+      gray.insert(s0);
+      discovered.insert(s0);
+      discover_state(s0);
+
+      for (const transition& tr: out_edges(s0, regular_summands, confluent_summands))
+      {
+        if (m_must_abort)
+        {
+          break;
+        }
+
+        const auto&[a, s1] = tr;
+        examine_transition(s0, a, s1);
+
+        auto j = discovered.find(s1);
+        if (j == discovered.end())
+        {
+          tree_edge(s0, a, s1);
+          if constexpr (Timed)
+          {
+            const data::data_expression& t = s0[m_n];
+            data::data_expression t1 = a.has_time() ? a.time() : t;
+            state s1_at_t1 = make_timed_state(s1, t1);
+            discovered.insert(s1_at_t1);
+          }
+          else
+          {
+            discovered.insert(s1);
+          }
+          generate_state_space_dfs_recursive(s1, gray, discovered, regular_summands, confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
+        }
+        else if (contains(gray, s1))
+        {
+          back_edge(s0, a, s1);
+        }
+        else
+        {
+          forward_or_cross_edge(s0, a, s1);
+        }
+      }
+      gray.erase(s0);
+      finish_state(s0);
+    }
+
+    template <
+      typename DiscoverState = skip,
+      typename ExamineTransition = skip,
+      typename TreeEdge = skip,
+      typename BackEdge = skip,
+      typename ForwardOrCrossEdge = skip,
+      typename FinishState = skip
+    >
+    void generate_state_space_dfs_recursive(
+      bool recursive,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      m_recursive = recursive;
+      std::unordered_set<state> gray;
+      std::unordered_set<state> discovered;
+
+      state s0 = compute_state(m_initial_state);
+      if (!m_confluent_summands.empty())
+      {
+        s0 = find_representative(s0, m_confluent_summands);
+      }
+      if constexpr (Timed)
+      {
+        s0 = make_timed_state(s0, real_zero());
+      }
+      generate_state_space_dfs_recursive(s0, gray, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
+      m_recursive = false;
+    }
+
+    // pre: s0 is in normal form
+    // N.B. Does not support stochastic specifications!
+    template <
+      typename SummandSequence,
+      typename DiscoverState = skip,
+      typename ExamineTransition = skip,
+      typename TreeEdge = skip,
+      typename BackEdge = skip,
+      typename ForwardOrCrossEdge = skip,
+      typename FinishState = skip
+    >
+    void generate_state_space_dfs_iterative(
+      const state& s0,
+      std::unordered_set<state>& discovered,
+      const SummandSequence& regular_summands,
+      const SummandSequence& confluent_summands,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      using utilities::detail::contains;
+
+      // invariants:
+      // - s not in discovered => color(s) = white
+      // - s in discovered && s in todo => color(s) = gray
+      // - s in discovered && s not in todo => color(s) = black
+
+      std::vector<std::pair<state, std::list<transition>>> todo;
+
+      todo.emplace_back(s0, out_edges(regular_summands, confluent_summands));
+      discovered.insert(s0);
+      discover_state(s0);
+
+      while (!todo.empty())
+      {
+        const state* s = &todo.back().first;
+        std::list<transition>* E = &todo.back().second;
+        while (!E->empty())
+        {
+          const auto& [a, s1] = E->front();
+          examine_transition(*s, a, s1);
+
+          auto j = discovered.find(s1);
+          if (j == discovered.end())
+          {
+            tree_edge(*s, a, s1);
+            E->pop_front();
+            todo.emplace_back(s1, out_edges(s1, regular_summands, confluent_summands));
+            if constexpr (Timed)
+            {
+              const data::data_expression& t = (*s)[m_n];
+              data::data_expression t1 = a.has_time() ? a.time() : t;
+              state s1_at_t1 = make_timed_state(s1, t1);
+              discovered.insert(s1_at_t1);
+              discover_state(s1_at_t1);
+            }
+            else
+            {
+              discovered.insert(s1);
+              discover_state(s1);
+            }
+            s = &todo.back().first;
+            E = &todo.back().second;
+          }
+          else if (std::find_if(todo.begin(), todo.end(), [&](const std::pair<state, std::list<transition>>& p) { return *s == p.first; }) != todo.end())
+          {
+            back_edge(*s, a, s1);
+          }
+          else
+          {
+            forward_or_cross_edge(*s, a, s1);
+          }
+        }
+        finish_state(*s);
+      }
+    }
+
+    template <
+      typename DiscoverState = skip,
+      typename ExamineTransition = skip,
+      typename TreeEdge = skip,
+      typename BackEdge = skip,
+      typename ForwardOrCrossEdge = skip,
+      typename FinishState = skip
+    >
+    void generate_state_space_dfs_iterative(
+      bool recursive,
+      DiscoverState discover_state = DiscoverState(),
+      ExamineTransition examine_transition = ExamineTransition(),
+      TreeEdge tree_edge = TreeEdge(),
+      BackEdge back_edge = BackEdge(),
+      ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
+      FinishState finish_state = FinishState()
+    )
+    {
+      m_recursive = recursive;
+      std::unordered_set<state> discovered;
+
+      state s0 = compute_state(m_initial_state);
+      if (!m_confluent_summands.empty())
+      {
+        s0 = find_representative(s0, m_confluent_summands);
+      }
+      if constexpr (Timed)
+      {
+        s0 = make_timed_state(s0, real_zero());
+      }
+      generate_state_space_dfs_iterative(s0, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
+      m_recursive = false;
     }
 
     /// \brief Abort the state space generation

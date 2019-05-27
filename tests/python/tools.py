@@ -119,7 +119,9 @@ class Tool(object):
                 self.value[key] = set([])
             self.value[key].add(m.group(1))
 
-    def parse_deadlock(self, text, key, regexes):
+    # value[key] is a boolean
+    # multiple regular expressions are checked
+    def parse_boolean_regexes(self, text, key, regexes):
         result = False
         for regex in regexes:
             if re.search(regex, text, re.DOTALL) != None:
@@ -176,8 +178,8 @@ class Tool(object):
         self.parse_boolean(text, 'result'                     , r'is included in', 'is not included in')
         self.parse_action(text, 'actions'                     , r"Detected action '(\w+)'")
         self.parse_action(text, 'actions'                     , r"Action '(\w+)' found")
-        self.parse_deadlock(text, 'has-deadlock'              , [r'deadlock-detect: deadlock found', r'Deadlock found'])
-        self.parse_boolean(text, 'has-divergence'             , r'Divergent state found')
+        self.parse_boolean_regexes(text, 'has-deadlock'       , [r'deadlock-detect: deadlock found', r'Deadlock found'])
+        self.parse_boolean_regexes(text, 'has-divergence'     , [r'divergence-detect: divergence found', r'Divergent state found'])
         self.parse_boolean(text, 'has-nondeterminism'         , r'Nondeterministic state found')
 
     def command(self, runpath = None):
@@ -351,7 +353,7 @@ class ToolFactory(object):
             return Lts2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lps2lts':
             return Lps2LtsTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name == 'generatelts':
+        elif 'generatelts' in name:
             return GenerateLtsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2lps':
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
