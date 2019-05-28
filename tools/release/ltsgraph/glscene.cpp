@@ -221,6 +221,10 @@ void GLScene::render(QPainter& painter)
   // Enable depth testing, so that we don't have to care too much about rendering in the right order.
   glEnable(GL_DEPTH_TEST);
 
+  // Change the alpha blending function to make an alpha of 1 opaque and 0 fully transparent.
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
+
   // Enable multisample antialiasing.
   glEnable(GL_MULTISAMPLE);
 
@@ -240,27 +244,35 @@ void GLScene::render(QPainter& painter)
 
   QMatrix4x4 viewProjMatrix = m_camera.projectionMatrix() *  m_camera.viewMatrix();
 
+  // Render opaque objects
+  glDepthMask(GL_TRUE);
+
   for (std::size_t i = 0; i < nodeCount; ++i)
   {
-    renderNode(exploration_active ? m_graph.explorationNode(i) : i, viewProjMatrix);
+    renderNode(exploration_active ? m_graph.explorationNode(i) : i, viewProjMatrix, false);
   }
 
   for (std::size_t i = 0; i < edgeCount; ++i)
   {
     renderEdge(exploration_active ? m_graph.explorationEdge(i) : i, viewProjMatrix);
-
     renderHandle(exploration_active ? m_graph.explorationEdge(i) : i, viewProjMatrix);
+  }
+
+  // Render transparent objects
+  glDepthMask(GL_FALSE);
+
+  if (m_graph.hasExploration())
+  {
+    for (std::size_t i = 0; i < nodeCount; ++i)
+    {
+      renderNode(exploration_active ? m_graph.explorationNode(i) : i, viewProjMatrix, true);
+    }
   }
 
   painter.endNativePainting();
 
   // Use the painter to render the remaining text.
   glDisable(GL_DEPTH_TEST);
-
-  if (m_drawfog)
-  {
-    glEnable(GL_BLEND);
-  }
 
   painter.setFont(m_font);
   painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -472,7 +484,7 @@ void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
   }
 }
 
-void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
+void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix, bool transparent)
 {
   const Graph::NodeNode& node = m_graph.node(i);
   QVector3D fill;
@@ -502,23 +514,16 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
   }
 
   float fog = 0.0f;
-  if (isVisible(node.pos(), fog)) // Check if these elements are visible.
+  float alpha = (m_graph.hasExploration() && !node.active()) ? 1.0f : 1.0f; // Disabled for now until the transparent window issue can be resolved.
+  if (isVisible(node.pos(), fog) && (transparent || alpha > 0.99f)) // Check if these elements are visible and opaque if transparency is disallowed.
   {
     QMatrix4x4 worldMatrix;
     worldMatrix.translate(node.pos());
     worldMatrix.rotate(sphericalBillboard(node.pos()));
 
-    QMatrix4x4 nodeMatrix(worldMatrix);
-    nodeMatrix.scale(0.5f * nodeSizeScaled());
-    m_global_shader.setWorldViewProjMatrix(viewProjMatrix * nodeMatrix);
-
-    // Apply fogging the node color and draw the node.
-    m_global_shader.setColor(applyFog(fill, fog));
-    glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
-
     // Node stroke color: red when selected, black otherwise. Apply fogging afterwards.
     QVector3D line(0.6f * node.selected(), 0.0f, 0.0f);
-    m_global_shader.setColor(applyFog(line, fog));
+    m_global_shader.setColor(QVector4D(applyFog(line, fog), alpha));
 
     // Scale the border such that they are of constant width.
     QMatrix4x4 borderMatrix(worldMatrix);
@@ -527,6 +532,13 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
     m_global_shader.setWorldViewProjMatrix(viewProjMatrix * borderMatrix);
     glDrawArrays(GL_TRIANGLE_FAN, OFFSET_NODE_BORDER, VERTICES_NODE_BORDER);
 
+    QMatrix4x4 nodeMatrix(worldMatrix);
+    nodeMatrix.scale(0.5f * nodeSizeScaled());
+    m_global_shader.setWorldViewProjMatrix(viewProjMatrix * nodeMatrix);
+
+    // Apply fogging the node color and draw the node.
+    m_global_shader.setColor(QVector4D(applyFog(fill, fog), alpha));
+    glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
     if (m_graph.hasExploration() && !m_graph.isBridge(i) && m_graph.initialState() != i)
     {
       float s = (fill.x() < 0.5f && fill.y() < 0.5f && fill.z() < 0.5f) ? 0.2f : -0.2f;

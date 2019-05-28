@@ -133,7 +133,8 @@ private:
 
   /// \brief Renders a single node.
   /// \param i The index of the node to render.
-  void renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix);
+  /// \param transparent Allow nodes to be rendered with transparency, required for the two passes (opaque first, followed by transparent items).
+  void renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix, bool transparent);
 
   /// \brief Renders a single edge label.
   /// \param i The index of the edge of the label to render.
