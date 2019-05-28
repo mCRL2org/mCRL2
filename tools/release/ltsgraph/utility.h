@@ -67,6 +67,15 @@ T clamp(T value, T min, T max)
   return std::min(std::max(value, min), max);
 }
 
+inline static
+void clipVector(QVector3D& vec, const QVector3D& min, const QVector3D& max)
+{
+  for (int i = 0; i < 3; i++)
+  {
+    vec[i] = clamp(vec[i], min[i], max[i]);
+  }
+}
+
 /// \returns A linear interpolation between a and b using the given value. Often called lerp, but called mix in GLSL.
 inline static
 QVector3D mix(float value, QVector3D a, QVector3D b)

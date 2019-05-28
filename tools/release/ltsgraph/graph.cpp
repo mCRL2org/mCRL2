@@ -585,15 +585,15 @@ void Graph::clip(const QVector3D& min, const QVector3D& max)
   m_clip_max = max;
   for (NodeNode& node : m_nodes)
   {
-    mcrl2::gui::clipVector(node.pos_mutable(), min, max);
+    clipVector(node.pos_mutable(), min, max);
   }
   for (LabelNode& node : m_transitionLabelnodes)
   {
-    mcrl2::gui::clipVector(node.pos_mutable(), min, max);
+    clipVector(node.pos_mutable(), min, max);
   }
   for (Node& node : m_handles)
   {
-    mcrl2::gui::clipVector(node.pos_mutable(), min, max);
+    clipVector(node.pos_mutable(), min, max);
   }
 
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);

@@ -77,20 +77,5 @@ void applyRotation(const QQuaternion& rotation, bool reverse)
   glRotatef(2 * angle, rotation.x(), rotation.y(), rotation.z());
 }
 
-void clipVector(QVector3D& vec, const QVector3D& min, const QVector3D& max)
-{
-  for (int i = 0; i < 3; i++)
-  {
-    if (vec[i] < min[i])
-    {
-      vec[i] = min[i];
-    }
-    else if (vec[i] > max[i])
-    {
-      vec[i] = max[i];
-    }
-  }
-}
-
 } // namespace gui
 } // namespace mcrl2

@@ -8,13 +8,14 @@
 //
 
 #include "springlayout.h"
+#include "utility.h"
 #include "ui_springlayout.h"
+
 #include <QThread>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
-#include "mcrl2/gui/arcball.h"
 
 namespace Graph
 {
@@ -210,12 +211,12 @@ void SpringLayout::apply()
       if (!m_graph.node(n).anchored())
       {
         m_graph.node(n).pos_mutable() = applyForce(m_graph.node(n).pos(), m_nforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
+        clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.stateLabel(n).anchored())
       {
         m_graph.stateLabel(n).pos_mutable() = applyForce(m_graph.stateLabel(n).pos(), m_sforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
+        clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
 
@@ -226,12 +227,12 @@ void SpringLayout::apply()
       if (!m_graph.handle(n).anchored())
       {
         m_graph.handle(n).pos_mutable() = applyForce(m_graph.handle(n).pos(), m_hforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
+        clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
         m_graph.transitionLabel(n).pos_mutable() = applyForce(m_graph.transitionLabel(n).pos(), m_lforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
+        clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
   }

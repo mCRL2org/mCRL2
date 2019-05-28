@@ -23,8 +23,6 @@ QQuaternion arcballRotation(const QPoint& p1, const QPoint& p2);
 
 void applyRotation(const QQuaternion& rotation, bool reverse = false);
 
-void clipVector(QVector3D& vec, const QVector3D& min, const QVector3D& max);
-
 } // namespace gui
 } // namespace mcrl2
 
