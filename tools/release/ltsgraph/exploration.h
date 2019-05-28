@@ -94,6 +94,7 @@ class Exploration
           QVector3D(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(-1.0, 1.0));
       rvec *= 50.0 / rvec.length();
       m_graph.m_nodes[node.id].pos_mutable() = centroid / ((GLfloat)count) + rvec;
+      clipVector(m_graph.m_nodes[node.id].pos_mutable(), m_graph.getClipMin(), m_graph.getClipMax());
     }
   }
 
