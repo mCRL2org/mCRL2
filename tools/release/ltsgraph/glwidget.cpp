@@ -608,10 +608,10 @@ void GLWidgetUi::setSettings(QByteArray state)
 
   quint32 nodeSize, fogDistance, fontSize;
   bool paint, transitionLabels, stateLabels, stateNumbers, selfLoops, initial, fog;
-  QColor color;
+  QVector3D colorVec;
   in >> nodeSize >> fogDistance >> fontSize
      >> paint >> transitionLabels >> stateLabels >> stateNumbers >> selfLoops >> initial >> fog
-     >> color
+     >> colorVec
     ;
 
   if (in.status() == QDataStream::Ok)
@@ -626,6 +626,8 @@ void GLWidgetUi::setSettings(QByteArray state)
     m_ui.cbSelfLoops->setChecked(selfLoops);
     m_ui.cbInitial->setChecked(initial);
     m_ui.cbFog->setChecked(fog);
+    QColor color;
+    color.setRgbF(colorVec.x(), colorVec.y(), colorVec.z());
     m_colordialog->setCurrentColor(color);
     selectColor(color);
   }
