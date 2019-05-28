@@ -31,13 +31,13 @@ const char* g_vertexShader =
 const char* g_fragmentShader =
   "#version 330\n "
 
-  "uniform vec3 g_color = vec3(1.0f, 1.0f, 1.0f);\n"
+  "uniform vec4 g_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
 
   "out vec4 fragColor;\n"
 
   "void main(void)\n"
   "{\n"
-  "   fragColor = vec4(g_color, 1.0);\n"
+  "   fragColor = g_color;\n"
   "}";
 } // unnamed namespace
 

@@ -26,7 +26,8 @@ public:
   void setWorldViewProjMatrix(const QMatrix4x4& matrix) { setUniformValue(m_worldViewProjMatrix_location, matrix); }
 
   /// \brief Sets the fill color of this object.
-  void setColor(const QVector3D& color) { setUniformValue(m_color_location, color); }
+  void setColor(const QVector3D& color) { setUniformValue(m_color_location, QVector4D(color, 1.0f)); }
+  void setColor(const QVector4D& color) { setUniformValue(m_color_location, color); }
 
 private:
   int m_worldViewProjMatrix_location = -1;
