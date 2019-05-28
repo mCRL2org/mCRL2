@@ -54,6 +54,10 @@ class MainWindow : public QMainWindow
      */
     void delayedOpenFile(QString fileName);
 
+  public slots:
+
+    void updateStatusBar();
+
   private slots:
 
     /**

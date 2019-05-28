@@ -560,6 +560,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
 
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
   connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(setPaintMode(bool)));
+  connect(m_ui.btnPaint, SIGNAL(toggled(bool)), parentWidget(), SLOT(updateStatusBar()));
   connect(m_ui.btnSelectColor, SIGNAL(clicked()), m_colordialog, SLOT(exec()));
   connect(m_ui.cbTransitionLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleTransitionLabels(bool)));
   connect(m_ui.cbStateLabels, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleStateLabels(bool)));

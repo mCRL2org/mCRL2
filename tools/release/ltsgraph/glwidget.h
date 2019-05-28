@@ -155,6 +155,8 @@ public:
    */
   void endPaint();
 
+  bool isPainting() const { return m_painting; }
+
   /**
    * @brief Returns the user interface object. If no user interface is available,
    *        one is created using the provided @e parent.

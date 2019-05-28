@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
   connect(m_ui.actOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
+  connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(updateStatusBar()));
   connect(m_ui.actExplorationMode, SIGNAL(toggled(bool)), this, SLOT(onExplore(bool)));
   connect(m_ui.actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
   connect(m_ui.actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
@@ -85,6 +86,7 @@ MainWindow::MainWindow(QWidget* parent) :
 #else
   m_ui.actFullscreen->setShortcut(QString("F11"));
 #endif
+  updateStatusBar();
 }
 
 void MainWindow::onFullscreen()
@@ -281,4 +283,15 @@ void MainWindow::onExportXML()
   {
     m_graph.saveXML(fileName);
   }
+}
+
+void MainWindow::updateStatusBar()
+{
+  QString msg =
+    m_glwidget->isPainting() ?
+      "Click to paint a node" :
+      !m_ui.act3D->isChecked() ?
+        "Ctrl + drag: move camera; scroll: zoom in/out; Esc: reset viewpoint; Right click: fix a node/handle" :
+        "Ctrl + drag: move camera; Shift + drag: rotate camera; scroll: zoom in/out; Esc: reset viewpoint; Right click: fix a node/handle";
+  m_ui.statusBar->showMessage(msg);
 }
