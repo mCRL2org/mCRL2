@@ -620,7 +620,10 @@ void GLWidgetUi::setSettings(QByteArray state)
     m_ui.spinRadius->setValue(nodeSize);
     m_ui.spinFog->setValue(fogDistance);
     m_ui.spinFontSize->setValue(fontSize);
-    m_ui.btnPaint->setChecked(paint);
+    // Do not restore the setting of btnPaint, since that can be very confusing.
+    // We still read and store it for compatibility with old config files
+    // When the format of the config file is changed, the setting for btnPaint can
+    // be removed.
     m_ui.cbTransitionLabels->setChecked(transitionLabels);
     m_ui.cbStateLabels->setChecked(stateLabels);
     m_ui.cbStateNumbers->setChecked(stateNumbers);
