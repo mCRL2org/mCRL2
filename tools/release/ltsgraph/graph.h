@@ -335,7 +335,7 @@ class Graph
     friend class Exploration;
 
   private:
-    Exploration* m_sel;               ///< The exploration of the current graph (or null).
+    Exploration* m_exploration;     ///< The exploration of the current graph (or null).
     mcrl2::lts::lts_type m_type;    ///< The type of the current graph.
     QString m_empty;                ///< Empty string that is returned as label if none present.
     QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating

@@ -85,17 +85,17 @@ void debug_lock(const char *type, const char *func)
 #define unlockForWrite(lock, where) GRAPH_LOCK("W unlock", where, (lock).unlock())
 
 Graph::Graph()
-    : m_sel(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""),
+    : m_exploration(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""),
       m_stable(true)
 {
 }
 
 Graph::~Graph()
 {
-  if (m_sel != nullptr)
+  if (m_exploration != nullptr)
   {
-    delete m_sel;
-    m_sel = nullptr;
+    delete m_exploration;
+    m_exploration = nullptr;
   }
 }
 
@@ -167,10 +167,10 @@ void Graph::load(const QString& filename, const QVector3D& min,
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
     throw e;
   }
-  if (m_sel != nullptr)
+  if (m_exploration != nullptr)
   {
-    delete m_sel;
-    m_sel = nullptr;
+    delete m_exploration;
+    m_exploration = nullptr;
   }
   m_stable = true;
 
@@ -408,10 +408,10 @@ void Graph::loadXML(const QString& filename)
     node = node.nextSibling();
   }
 
-  if (m_sel != nullptr)
+  if (m_exploration != nullptr)
   {
-    delete m_sel;
-    m_sel = nullptr;
+    delete m_exploration;
+    m_exploration = nullptr;
   }
   m_stable = true;
 
@@ -622,8 +622,8 @@ void Graph::unlock(const char *where)
 void Graph::makeExploration()
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
-  delete m_sel;
-  m_sel = new Exploration(*this);
+  delete m_exploration;
+  m_exploration = new Exploration(*this);
 
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
 }
@@ -632,10 +632,10 @@ void Graph::discardExploration()
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
-  if (m_sel != nullptr)
+  if (m_exploration != nullptr)
   {
-    delete m_sel;
-    m_sel = nullptr;
+    delete m_exploration;
+    m_exploration = nullptr;
   }
 
   // Deactive all nodes
@@ -651,18 +651,18 @@ void Graph::toggleOpen(std::size_t index)
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
-  if (m_sel != nullptr && index < m_nodes.size())
+  if (m_exploration != nullptr && index < m_nodes.size())
   {
     NodeNode& node = m_nodes[index];
     bool active = node.m_active;
     node.m_active = !node.m_active;
     if (active)
     {
-      m_sel->contract(index);
+      m_exploration->contract(index);
     }
     else
     {
-      m_sel->expand(index);
+      m_exploration->expand(index);
     }
   }
 
@@ -671,7 +671,7 @@ void Graph::toggleOpen(std::size_t index)
 
 bool Graph::isClosable(std::size_t index)
 {
-  if (m_sel == nullptr || index >= m_nodes.size())
+  if (m_exploration == nullptr || index >= m_nodes.size())
   {
     return false;
   }
@@ -681,7 +681,7 @@ bool Graph::isClosable(std::size_t index)
   // active node count:
   // Todo: improve this
   std::size_t count = 0;
-  for (std::size_t nodeId : m_sel->nodes) {
+  for (std::size_t nodeId : m_exploration->nodes) {
     if (m_nodes[nodeId].m_active)
     {
       ++count;
@@ -690,7 +690,7 @@ bool Graph::isClosable(std::size_t index)
 
   NodeNode& node = m_nodes[index];
   bool toggleable =
-      !node.m_active || (m_sel->isContractable(index) && count > 1);
+      !node.m_active || (m_exploration->isContractable(index) && count > 1);
 
   toggleable = toggleable && index != m_initialState;
 
@@ -710,39 +710,39 @@ void Graph::setStable(bool stable)
 
 bool Graph::isBridge(std::size_t index) const
 {
-  return m_sel->isBridge(index);
+  return m_exploration->isBridge(index);
 }
 
 bool Graph::hasExploration() const
 {
-  return m_sel != nullptr;
+  return m_exploration != nullptr;
 }
 
 std::size_t Graph::explorationEdge(std::size_t index) const
 {
-  return m_sel->edges[index];
+  return m_exploration->edges[index];
 }
 
 std::size_t Graph::explorationNode(std::size_t index) const
 {
-  return m_sel->nodes[index];
+  return m_exploration->nodes[index];
 }
 
 std::size_t Graph::explorationEdgeCount() const
 {
-  if (m_sel == nullptr)
+  if (m_exploration == nullptr)
   {
     return 0;
   }
-  return m_sel->edges.size();
+  return m_exploration->edges.size();
 }
 
 std::size_t Graph::explorationNodeCount() const
 {
-  if (m_sel == nullptr)
+  if (m_exploration == nullptr)
   {
     return 0;
   }
-  return m_sel->nodes.size();
+  return m_exploration->nodes.size();
 }
 }  // namespace Graph
