@@ -340,6 +340,8 @@ class Graph
     QString m_empty;                ///< Empty string that is returned as label if none present.
     QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating
     bool m_stable;                  ///< When true, the graph is considered stable, spring forces should not be applied.
+    QVector3D m_clip_min;
+    QVector3D m_clip_max;
 
     std::vector<NodeNode> m_nodes;                  ///< Vector containing all graph nodes.
     std::vector<Node> m_handles;                    ///< Vector containing all handles.
@@ -417,6 +419,8 @@ class Graph
      * @param max The maximum coordinates for any node.
      */
     void clip(const QVector3D& min, const QVector3D& max);
+    const QVector3D& getClipMin() const;
+    const QVector3D& getClipMax() const;
 
     void makeExploration(); ///< Creates a new empty exploration (overwriting existing).
     void discardExploration(); ///< Discards the current exploration (when present).

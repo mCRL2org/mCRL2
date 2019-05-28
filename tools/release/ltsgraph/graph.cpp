@@ -581,6 +581,8 @@ void Graph::clip(const QVector3D& min, const QVector3D& max)
       m_lock,
       GRAPH_LOCK_TRACE); // read lock because indices are not invalidated
 
+  m_clip_min = min;
+  m_clip_max = max;
   for (NodeNode& node : m_nodes)
   {
     mcrl2::gui::clipVector(node.pos_mutable(), min, max);
@@ -595,6 +597,16 @@ void Graph::clip(const QVector3D& min, const QVector3D& max)
   }
 
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);
+}
+
+const QVector3D& Graph::getClipMin() const
+{
+  return m_clip_min;
+}
+
+const QVector3D& Graph::getClipMax() const
+{
+  return m_clip_max;
 }
 
 void Graph::lock()

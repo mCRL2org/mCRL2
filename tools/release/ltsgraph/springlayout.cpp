@@ -53,7 +53,6 @@ inline void clip(float& f, float min, float max)
 
 SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
   : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
-    m_clipMin(QVector3D(0.0f, 0.0f, 0.0f)), m_clipMax(QVector3D(1000.0f, 1000.0f, 1000.0f)),
     m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph), m_glwidget(glwidget)
 {
   srand(time(nullptr));
@@ -202,6 +201,8 @@ void SpringLayout::apply()
       }
     }
 
+    QVector3D clipmin = m_graph.getClipMin();
+    QVector3D clipmax = m_graph.getClipMax();
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
       std::size_t n = sel ? m_graph.explorationNode(i) : i;
@@ -209,12 +210,12 @@ void SpringLayout::apply()
       if (!m_graph.node(n).anchored())
       {
         m_graph.node(n).pos_mutable() = applyForce(m_graph.node(n).pos(), m_nforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.node(n).pos_mutable(), m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.node(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.stateLabel(n).anchored())
       {
         m_graph.stateLabel(n).pos_mutable() = applyForce(m_graph.stateLabel(n).pos(), m_sforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.stateLabel(n).pos_mutable(), m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.stateLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
 
@@ -225,12 +226,12 @@ void SpringLayout::apply()
       if (!m_graph.handle(n).anchored())
       {
         m_graph.handle(n).pos_mutable() = applyForce(m_graph.handle(n).pos(), m_hforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.handle(n).pos_mutable(), m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.handle(n).pos_mutable(), clipmin, clipmax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
         m_graph.transitionLabel(n).pos_mutable() = applyForce(m_graph.transitionLabel(n).pos(), m_lforces[n], m_speed);
-        mcrl2::gui::clipVector(m_graph.transitionLabel(n).pos_mutable(), m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.transitionLabel(n).pos_mutable(), clipmin, clipmax);
       }
     }
   }
@@ -238,25 +239,17 @@ void SpringLayout::apply()
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 }
 
-void SpringLayout::setClipRegion(const QVector3D& min, const QVector3D& max, float z)
+void SpringLayout::randomizeZ(float z)
 {
-  if (min.z() < m_clipMin.z() || max.z() > m_clipMax.z()) //Depth is increased, add random z values to improve spring movement in z direction
+  m_graph.lock(GRAPH_LOCK_TRACE);
+  for (std::size_t n = 0; n < m_graph.nodeCount(); ++n)
   {
-    m_graph.lock(GRAPH_LOCK_TRACE);
-    float change = (z - m_z) / 100.0f; //Add at most 1/100th of the change
-    for (std::size_t n = 0; n < m_graph.nodeCount(); ++n)
+    if (!m_graph.node(n).anchored())
     {
-      if (!m_graph.node(n).anchored())
-      {
-        m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + frand(-change, change));
-      }
+      m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + frand(-z, z));
     }
-    m_graph.unlock(GRAPH_LOCK_TRACE);
   }
-
-  m_z = z;
-  m_clipMin = min;
-  m_clipMax = max;
+  m_graph.unlock(GRAPH_LOCK_TRACE);
 }
 
 //

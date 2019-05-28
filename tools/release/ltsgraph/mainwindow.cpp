@@ -143,8 +143,11 @@ void MainWindow::on3DChanged(bool enabled)
   }
   m_graph.clip(-limit, limit);
 
-  // Here, 1000 is an arbitrary value chosen to move the nodes in the z-dimension when 3D is enabled.
-  m_layout->setClipRegion(-limit, limit, enabled ? 1000.0f : 0);
+  if(enabled)
+  {
+    // Here, 10 is an arbitrary value chosen to move the nodes in the z-dimension when 3D is enabled.
+    m_layout->randomizeZ(10.0f);
+  }
 }
 
 void MainWindow::onExplore(bool enabled)
