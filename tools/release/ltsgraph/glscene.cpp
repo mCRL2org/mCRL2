@@ -77,7 +77,7 @@ void GLScene::initialize()
     for (int i = 0; i < RES_NODE_SLICE; ++i)
     {
       float t = -i * 2.0f * PI / (RES_NODE_SLICE - 1);
-      nodeborder[i+1] = QVector3D(std::sin(t), std::cos(t), 0.0f);
+      nodeborder[static_cast<std::size_t>(i)+1] = QVector3D(std::sin(t), std::cos(t), 0.0f);
     }
   }
 
@@ -93,17 +93,17 @@ void GLScene::initialize()
       for (int i = 0; i < RES_NODE_SLICE - 1; ++i)
       {
         float slice = i * 2.0f * PI / (RES_NODE_SLICE - 2);
-        node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
-            std::sin((float)(stack + stackd)) * std::cos(slice),
-            std::cos((float)(stack + stackd)));
+        node[n++] = QVector3D(std::sin(stack + stackd) * std::sin(slice),
+            std::sin(stack + stackd) * std::cos(slice),
+            std::cos(stack + stackd));
         node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
             std::sin(stack) * std::cos(slice),
             std::cos(stack));
       }
 
-      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
-          std::sin((float)(stack + stackd)) * std::cos(0.0f),
-          std::cos((float)(stack + stackd)));
+      node[n++] = QVector3D(std::sin(stack + stackd) * std::sin(0.0f),
+          std::sin(stack + stackd) * std::cos(0.0f),
+          std::cos(stack + stackd));
       node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
           std::sin(stack) * std::cos(0.0f),
           std::cos(stack));
@@ -149,7 +149,7 @@ void GLScene::initialize()
     for (int i = 0; i < RES_ARROWHEAD; ++i)
     {
       float t = -i * 2.0f * PI / (RES_ARROWHEAD - 1);
-      arrowhead[i+1] = QVector3D(-1.0f,
+      arrowhead[static_cast<std::size_t>(i)+1] = QVector3D(-1.0f,
           0.3f * std::sin(t),
           0.3f * std::cos(t));
     }
@@ -162,7 +162,7 @@ void GLScene::initialize()
     for (int i = 0; i < RES_ARROWHEAD; ++i)
     {
       float t = i * 2.0f * PI / (RES_ARROWHEAD - 1);
-      arrowhead_base[i+1] = QVector3D(-1.0f,
+      arrowhead_base[static_cast<std::size_t>(i)+1] = QVector3D(-1.0f,
           0.3f * std::sin(t),
           0.3f * std::cos(t));
     }
@@ -173,7 +173,7 @@ void GLScene::initialize()
   {
     for (int i = 0; i < VERTICES_ARC; ++i)
     {
-      arc[i] = QVector3D(static_cast<float>(i) / (VERTICES_ARC - 1), 0.0f, 0.0f);
+      arc[static_cast<std::size_t>(i)] = QVector3D(static_cast<float>(i) / (VERTICES_ARC - 1), 0.0f, 0.0f);
     }
   }
 
@@ -327,7 +327,7 @@ void GLScene::drawCenteredText3D(QPainter& painter, const QString& text, const Q
   if (!text.isEmpty() && window.z() <= 1.0f && isVisible(position, fog)) // There is text, that is not behind the camera and it is visible.
   {
      QColor qcolor = vectorToColor(color);
-     qcolor.setAlpha(255 * (1.0f - fog));
+     qcolor.setAlpha(static_cast<int>(255 * (1.0f - fog)));
 
      drawCenteredText(painter,
        window.x(),
@@ -375,7 +375,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
     }
     QVector3D diff = control[1] - control[0];
     diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
-    diff = diff * ((via - from).length() / (diff.length() * 2.0));
+    diff = diff * ((via - from).length() / (diff.length() * 2.0f));
     control[1] = control[1] + diff;
     control[2] = control[2] - diff;
   }
@@ -419,7 +419,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 
       // Rotate the arrowhead to orient it to the end of the arc.
       QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
-      worldMatrix.rotate(radiansToDegrees(acos(vec.x())), axis);
+      worldMatrix.rotate(radiansToDegrees(std::acos(vec.x())), axis);
 
       // Move the arrowhead outside of the node.
       worldMatrix.translate(-0.5f * nodeSizeScaled(), 0.0f, 0.0f);
@@ -442,7 +442,7 @@ void GLScene::renderEdge(std::size_t i, const QMatrix4x4& viewProjMatrix)
 void GLScene::renderHandle(std::size_t i, const QMatrix4x4& viewProjMatrix)
 {
   Graph::Node& handle = m_graph.handle(i);
-  if (handle.selected() > 0.1 || handle.locked())
+  if (handle.selected() > 0.1f || handle.locked())
   {
     QVector3D line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
     QVector3D fill(1.0f, 1.0f, 1.0f);
@@ -529,7 +529,7 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix)
 
     if (m_graph.hasExploration() && !m_graph.isBridge(i) && m_graph.initialState() != i)
     {
-      float s = (fill.x() < 0.5 && fill.y() < 0.5 && fill.z() < 0.5) ? 0.2f : -0.2f;
+      float s = (fill.x() < 0.5f && fill.y() < 0.5f && fill.z() < 0.5f) ? 0.2f : -0.2f;
       QVector3D hint = QVector3D(fill.x() + s, fill.y() + s, fill.z() + s);
 
       m_global_shader.setColor(hint);
