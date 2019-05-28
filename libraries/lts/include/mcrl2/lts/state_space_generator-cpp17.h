@@ -405,7 +405,7 @@ class divergence_detector
     }
 
     // Returns true if a trace was saved.
-    bool detect_divergence(const lps::state& s, std::size_t s_index, trace_constructor<Explorer>& global_trace_constructor)
+    bool detect_divergence(const lps::state& s, std::size_t s_index, trace_constructor<Explorer>& global_trace_constructor, bool dfs_recursive = false)
     {
       using utilities::detail::contains;
 
@@ -422,44 +422,83 @@ class divergence_detector
         return false;
       }
 
-      std::unordered_set<lps::state> gray;
       std::unordered_set<lps::state> discovered;
-
       data::data_expression_list process_parameter_undo = explorer.process_parameter_values();
-      explorer.generate_state_space_dfs_recursive(
-        s,
-        gray,
-        discovered,
-        m_regular_summands,
-        m_confluent_summands,
-        lps::skip(), // discover_state
-        lps::skip(), // examine_transition
-        lps::skip(), // tree_edge
 
-        // back_edge
-        [&](const lps::state& s0, const process::timed_multi_action& a, const state_type& s1) {
-          mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
-          if (m_trace_count < m_max_trace_count)
-          {
-            trace::Trace tr = global_trace_constructor.construct_trace(s);
-            trace::Trace tr_loop = m_local_trace_constructor.construct_trace(s0);
-            for (const lps::state& u: tr_loop.states())
+      if (dfs_recursive)
+      {
+        std::unordered_set<lps::state> gray;
+        explorer.generate_state_space_dfs_recursive(
+          s,
+          gray,
+          discovered,
+          m_regular_summands,
+          m_confluent_summands,
+          lps::skip(), // discover_state
+          lps::skip(), // examine_transition
+          lps::skip(), // tree_edge
+
+          // back_edge
+          [&](const lps::state& s0, const process::timed_multi_action& a, const state_type& s1) {
+            mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
+            if (m_trace_count < m_max_trace_count)
             {
-              m_divergent_states[u] = s_index;
+              trace::Trace tr = global_trace_constructor.construct_trace(s);
+              trace::Trace tr_loop = m_local_trace_constructor.construct_trace(s0);
+              for (const lps::state& u: tr_loop.states())
+              {
+                m_divergent_states[u] = s_index;
+              }
+              tr_loop.setState(first_state(s1));
+              tr_loop.addAction(lps::multi_action(a.actions(), a.time()));
+              std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
+              std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
+              save_traces(tr, filename, tr_loop, loop_filename);
+              result = true;
             }
-            tr_loop.setState(first_state(s1));
-            tr_loop.addAction(lps::multi_action(a.actions(), a.time()));
-            std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
-            std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
-            save_traces(tr, filename, tr_loop, loop_filename);
-            result = true;
+            mCRL2log(log::info) << ".\n";
+            explorer.abort();
           }
-          mCRL2log(log::info) << ".\n";
-          explorer.abort();
-        }
-      );
-      explorer.set_process_parameter_values(process_parameter_undo);
-      return result;
+        );
+        explorer.set_process_parameter_values(process_parameter_undo);
+        return result;
+      }
+      else
+      {
+        explorer.generate_state_space_dfs_iterative(
+          s,
+          discovered,
+          m_regular_summands,
+          m_confluent_summands,
+          lps::skip(), // discover_state
+          lps::skip(), // examine_transition
+          lps::skip(), // tree_edge
+
+          // back_edge
+          [&](const lps::state& s0, const process::timed_multi_action& a, const state_type& s1) {
+            mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
+            if (m_trace_count < m_max_trace_count)
+            {
+              trace::Trace tr = global_trace_constructor.construct_trace(s);
+              trace::Trace tr_loop = m_local_trace_constructor.construct_trace(s0);
+              for (const lps::state& u: tr_loop.states())
+              {
+                m_divergent_states[u] = s_index;
+              }
+              tr_loop.setState(first_state(s1));
+              tr_loop.addAction(lps::multi_action(a.actions(), a.time()));
+              std::string filename = filename_prefix + "_divergence_" + std::to_string(m_trace_count) + ".trc";
+              std::string loop_filename = filename_prefix + "_divergence_loop" + std::to_string(m_trace_count++) + ".trc";
+              save_traces(tr, filename, tr_loop, loop_filename);
+              result = true;
+            }
+            mCRL2log(log::info) << ".\n";
+            explorer.abort();
+          }
+        );
+        explorer.set_process_parameter_values(process_parameter_undo);
+        return result;
+      }
     }
 };
 
@@ -600,7 +639,7 @@ struct state_space_generator
             // TODO: support divergence checks for stochastic specifications
             if constexpr (!Stochastic)
             {
-              m_divergence_detector->detect_divergence(s, s_index, m_trace_constructor);
+              m_divergence_detector->detect_divergence(s, s_index, m_trace_constructor, options.dfs_recursive);
             }
           }
         },

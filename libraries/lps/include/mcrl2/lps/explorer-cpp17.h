@@ -1,5 +1,3 @@
-#include <utility>
-
 // Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -1209,7 +1207,7 @@ class explorer: public abortable
 
       std::vector<std::pair<state, std::list<transition>>> todo;
 
-      todo.emplace_back(s0, out_edges(regular_summands, confluent_summands));
+      todo.emplace_back(s0, out_edges(s0, regular_summands, confluent_summands));
       discovered.insert(s0);
       discover_state(s0);
 
@@ -1219,15 +1217,16 @@ class explorer: public abortable
         std::list<transition>* E = &todo.back().second;
         while (!E->empty())
         {
-          const auto& [a, s1] = E->front();
+          transition e = E->front();
+          const auto& a = e.action;
+          const auto& s1 = e.state;
+          E->pop_front();
           examine_transition(*s, a, s1);
 
           auto j = discovered.find(s1);
           if (j == discovered.end())
           {
             tree_edge(*s, a, s1);
-            E->pop_front();
-            todo.emplace_back(s1, out_edges(s1, regular_summands, confluent_summands));
             if constexpr (Timed)
             {
               const data::data_expression& t = (*s)[m_n];
@@ -1241,18 +1240,23 @@ class explorer: public abortable
               discovered.insert(s1);
               discover_state(s1);
             }
+            todo.emplace_back(s1, out_edges(s1, regular_summands, confluent_summands));
             s = &todo.back().first;
             E = &todo.back().second;
           }
-          else if (std::find_if(todo.begin(), todo.end(), [&](const std::pair<state, std::list<transition>>& p) { return *s == p.first; }) != todo.end())
-          {
-            back_edge(*s, a, s1);
-          }
           else
           {
-            forward_or_cross_edge(*s, a, s1);
+            if (std::find_if(todo.begin(), todo.end(), [&](const std::pair<state, std::list<transition>>& p) { return s1 == p.first; }) != todo.end())
+            {
+              back_edge(*s, a, s1);
+            }
+            else
+            {
+              forward_or_cross_edge(*s, a, s1);
+            }
           }
         }
+        todo.pop_back();
         finish_state(*s);
       }
     }

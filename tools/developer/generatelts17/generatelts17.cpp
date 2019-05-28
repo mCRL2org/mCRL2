@@ -58,6 +58,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       desc.add_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
       desc.add_option("no-replace-constants-by-variables", "do not move constant expressions to a substitution");
       desc.add_option("no-resolve-summand-variable-name-clashes", "do not resolve summand variable name clashes");
+      desc.add_option("dfs-recursive", "use recursive depth first search for divergence detection");
 
       // copied from lps2lts
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
@@ -166,6 +167,7 @@ class generatelts_tool: public rewriter_tool<input_output_tool>
       options.detect_divergence                     = parser.has_option("divergence");
       options.save_error_trace                      = parser.has_option("error-trace");
       options.suppress_progress_messages            = parser.has_option("suppress");
+      options.dfs_recursive                         = parser.has_option("dfs-recursive");
       options.search_strategy = parser.option_argument_as<lps::exploration_strategy>("strategy");
 
       if (parser.has_option("max"))

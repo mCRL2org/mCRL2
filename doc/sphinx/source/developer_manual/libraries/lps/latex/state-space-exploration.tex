@@ -275,21 +275,22 @@ $\While |stack| > 0 \Space \Do$ \\
 \qquad $u, E := stack.pop\_back()$ \\
 \qquad $\While |E| > 0 \Space \Do$ \\
 \qquad \qquad $a, v := E[0]$ \\
-\qquad \qquad $\textsf{examine\_edge}(a, v)$ \\
+\qquad \qquad $\textsf{examine\_edge}(u, a, v)$ \\
 \qquad \qquad $\If color[v] = white \Space \Then$ \\
-\qquad \qquad \qquad $\textsf{tree\_edge}(a, v)$ \\
+\qquad \qquad \qquad $\textsf{tree\_edge}(u, a, v)$ \\
 \qquad \qquad \qquad $stack.push\_back(u, E[1:])$ \\
 \qquad \qquad \qquad $u := v$ \\
 \qquad \qquad \qquad $color[u] := gray$ \\
 \qquad \qquad \qquad $\textsf{discover\_vertex}(u)$ \\
 \qquad \qquad \qquad $E := out\_edges(u)$ \\
-\qquad \qquad $\Else \If color[v] = gray \Space \Then$ \\
-\qquad \qquad \qquad $\textsf{back\_edge}(a, v)$ \\
 \qquad \qquad \Else \\
-\qquad \qquad \qquad $\textsf{forward\_or\_cross\_edge}(a, v)$ \\
+\qquad \qquad \qquad $\If color[v] = gray \Space \Then$ \\
+\qquad \qquad \qquad \qquad $\textsf{back\_edge}(u, a, v)$ \\
+\qquad \qquad \qquad \Else \\
+\qquad \qquad \qquad \qquad $\textsf{forward\_or\_cross\_edge}(u, a, v)$ \\
 \qquad \qquad \qquad $E := E[1:]$ \\
-\qquad \qquad $color[u] := black$ \\
-\qquad \qquad $\textsf{finish\_vertex}(u)$ \\
+\qquad $color[u] := black$ \\
+\qquad $\textsf{finish\_vertex}(u)$ \\
 \end{tabular}
 \]
 
@@ -323,22 +324,21 @@ $todo := [(s_0, out\_edges(s_0))]$ \\
 $discovered := \{ s_0 \}$ \\
 $\textsf{discover\_state}(s_0)$ \\
 $\While |todo| > 0 \Space \Do$ \\
-\qquad $s, E := todo[-1]$ \\
+\qquad $s, E := todo.back()$ \\
 \qquad $\While |E| > 0 \Space \Do$ \\
-\qquad \qquad $a, s_1 := E[0]$ \\
+\qquad \qquad $a, s_1 := E.pop\_front()$ \\
 \qquad \qquad $\textsf{examine\_edge}(s_0, a, s_1)$ \\
 \qquad \qquad $\If s_1 \notin discovered \Space \Then$ \\
 \qquad \qquad \qquad $\textsf{tree\_edge}(s_0, a, s_1)$ \\
-\qquad \qquad \qquad $todo[-1] := (s, E[1:])$ \\
-\qquad \qquad \qquad $todo := todo \concat [(s_1, out\_edges(s_1))]$ \\
 \qquad \qquad \qquad $discovered := discovered \cup \{ s_1 \}$ \\
 \qquad \qquad \qquad $\textsf{discover\_state}(s_1)$ \\
-\qquad \qquad \qquad $s, E := todo[-1]$ \\
+\qquad \qquad \qquad $todo.back() := (s, E)$ \\
+\qquad \qquad \qquad $todo := todo \concat [(s_1, out\_edges(s_1))]$ \\
+\qquad \qquad \qquad $s, E := todo.back()$ \\
 \qquad \qquad $\Else \If s_1 \in todo \Space \Then$ \\
 \qquad \qquad \qquad $\textsf{back\_edge}(s_0, a, s_1)$ \\
 \qquad \qquad \Else \\
 \qquad \qquad \qquad $\textsf{forward\_or\_cross\_edge}(s_0, a, s_1)$ \\
-\qquad \qquad $E := E[1:]$ \\
 \qquad $\textsf{finish\_state}(s)$ \\
 \end{tabular}
 \]
