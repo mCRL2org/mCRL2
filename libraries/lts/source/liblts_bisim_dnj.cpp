@@ -415,7 +415,7 @@ class permutation_entry {
   public:
     state_info_iter_t st;
 
-    permutation_entry()  {  }
+    permutation_entry() = default;
 
     permutation_entry(const permutation_entry&& other)
     {
@@ -536,15 +536,6 @@ class block_t
                                                                                 assert(marked_bottom_begin <= nonbottom_begin);
                                                                                 assert(nonbottom_begin <= marked_nonbottom_begin);
         return nonbottom_begin - begin;
-    }
-
-
-    /// \brief provides the number of non-bottom states in the block
-    state_type nonbottom_size() const
-    {                                                                           assert(begin <= marked_bottom_begin);  assert(marked_nonbottom_begin <= end);
-                                                                                assert(marked_bottom_begin <= nonbottom_begin);
-                                                                                assert(nonbottom_begin <= marked_nonbottom_begin);
-        return end - nonbottom_begin;
     }
 
 
@@ -2101,7 +2092,7 @@ class part_trans_t
         state_info_iter_t const target(old_pred_pos->target);                   assert(target->pos->st == target);
 
         action_block_iter_t new_action_block_pos(action_block_inert_begin++);   assert(new_action_block_pos->succ()->block_bunch->pred->action_block ==
-                                                                                                                                             new_action_block_pos);
+                                                                                                                                         new_action_block_pos);
         succ_iter_t const new_succ_pos(source->succ_inert.begin++);             assert(new_succ_pos->block_bunch->pred->action_block->succ() == new_succ_pos);
         block_bunch_iter_t const new_block_bunch_pos(
                                                     block_bunch_inert_begin++); assert(new_block_bunch_pos->pred->action_block->succ()->block_bunch ==
@@ -2674,7 +2665,6 @@ class bisim_partitioner_dnj
                                                                                                                             part_tr.action_block_inert_begin; )
       refine_partition_until_it_becomes_stable();
     }
-    ~bisim_partitioner_dnj()  {  }
 
 
     /// \brief Calculate the number of equivalence classes
@@ -3665,6 +3655,7 @@ class bisim_partitioner_dnj
             // shared variables of both coroutines
             permutation_iter_t notblue_initialised_end(
                                                 refine_block->nonbottom_begin);
+            permutation_iter_t blue_nonbottom_end(notblue_initialised_end);
 
             // Line 2.2: need_slow_test := (mode not in {extend from marked
             //                            states, extend from marked states for
@@ -3674,7 +3665,6 @@ class bisim_partitioner_dnj
 
             // variable declarations of the blue coroutine
             permutation_iter_t blue_visited_end;
-            permutation_iter_t blue_blue_nonbottom_end;
             pred_iter_t blue_pred_iter;
             state_info_iter_t blue_t;
             succ_const_iter_t blue_end;
@@ -3738,7 +3728,8 @@ class bisim_partitioner_dnj
                         // to indicate the boundary between blue states (those
                         // in the interval [refine_block->begin,
                         // blue_visited_end) ) and Test states (those in
-                        // [blue_visited_end, refine_block->nonbottom_begin) ).
+                        // [blue_visited_end,refine_block->marked_bottom_begin)
+                        // ).
                     COROUTINE_WHILE (REFINE_BLUE_COLLECT_BOTTOM,
                         blue_visited_end < refine_block->marked_bottom_begin &&
                                                                 need_slow_test)
@@ -3780,7 +3771,7 @@ class bisim_partitioner_dnj
                     END_COROUTINE_WHILE;
                 // Line 2.12l: end if
                 }
-
+                // Blue := Blue union Test
                     // done implicitly: we now regard all unmarked bottom
                     // states as blue, i. e. the whole interval
                     // [refine_block->bottom_begin,
@@ -3803,13 +3794,12 @@ class bisim_partitioner_dnj
 
                  /*  -  -  -  -  -  -  visit blue states  -  -  -  -  -  -  */
 
-                blue_blue_nonbottom_end = refine_block->nonbottom_begin;
-                if (0 != refine_block->nonbottom_size())
+                if (blue_nonbottom_end < refine_block->marked_nonbottom_begin)
                 {
                     // Line 2.13l: for all blue states s do
                     blue_visited_end = refine_block->begin;
                     COROUTINE_DO_WHILE (REFINE_BLUE_STATE_HANDLED,
-                                    blue_visited_end < blue_blue_nonbottom_end)
+                                         blue_visited_end < blue_nonbottom_end)
                     {
                         // Line 2.14l: for all inert transitions t--tau-->s do
                         blue_pred_iter=blue_visited_end->st->pred_inert.begin;  assert(pred_entry::pred_begin[-1].target != blue_visited_end->st);
@@ -3879,13 +3869,19 @@ class bisim_partitioner_dnj
                                     END_COROUTINE_DO_WHILE;
                             // Line 2.22l: end if
                                 }
-                            }                                                   assert(blue_blue_nonbottom_end <= blue_t->pos);
+                            }                                                   assert(blue_nonbottom_end <= blue_t->pos);
                             /* Line 2.23l: Make t a blue state               */ assert(blue_t->pos < notblue_initialised_end);
-                            std::swap(*blue_t->pos,*blue_blue_nonbottom_end++);
-                            if (refine_block->size()/2<blue_blue_nonbottom_end-
+                            std::swap(*blue_t->pos, *blue_nonbottom_end++);
+                            if (refine_block->size() / 2 < blue_nonbottom_end -
                                     refine_block->nonbottom_begin +
                                           refine_block->unmarked_bottom_size())
                             {
+                                // As the blue coroutine is now aborted, the
+                                // notblue values are no longer relevant.  The
+                                // assignment tells the red coroutine that it
+                                // doesn't need to make complicated swaps any
+                                // more to keep notblue properly initialized.
+                                notblue_initialised_end = blue_nonbottom_end;
                                 ABORT_THIS_COROUTINE();
                             }
                         // Line 2.24: end for
@@ -3913,7 +3909,7 @@ class bisim_partitioner_dnj
                 }
                 // Line 2.27l: Create a new block of the blue states
                     // All non-blue states are red.
-                refine_block->marked_nonbottom_begin = blue_blue_nonbottom_end;
+                refine_block->marked_nonbottom_begin = blue_nonbottom_end;
                 red_block = refine_block;
                 block_t* const blue_block(
                              refine_block->split_off_block(new_block_is_blue));
@@ -3946,8 +3942,8 @@ class bisim_partitioner_dnj
                         state_info_iter_t s(
                                       red_visited_begin.fromred->pred->source); assert(s->block == refine_block);  assert(s->pos->st == s);
                         // Line 2.9r: Make s a red state
-                        if (refine_block->nonbottom_begin <= s->pos &&
-                                              s->pos < notblue_initialised_end)
+                        if (refine_block->nonbottom_begin <= s->pos && (        assert(blue_nonbottom_end <= s->pos),
+                                             s->pos < notblue_initialised_end))
                         {
                             // The non-bottom state has a transition to a blue
                             // state, so notblue is initialised; however, now
@@ -3974,7 +3970,7 @@ class bisim_partitioner_dnj
 
                 /*-  -  -  -  -  -  -  visit red states  -  -  -  -  -  -  -*/  assert(0 != refine_block->marked_size());
 
-                if (0 != refine_block->nonbottom_size())
+                if (blue_nonbottom_end < refine_block->marked_nonbottom_begin)
                 {
                     // Line 2.13r: for all red states s do
                     red_visited_begin.block = refine_block->nonbottom_begin;
@@ -3985,7 +3981,7 @@ class bisim_partitioner_dnj
                         // states.  (In that case, some of these states will
                         // become new bottom states.)
                         red_visited_begin.block = refine_block->end;
-                    }
+                    }                                                           assert(refine_block->marked_nonbottom_begin != red_visited_begin.block);
                     COROUTINE_DO_WHILE(REFINE_RED_STATE_HANDLED, refine_block->
                              marked_nonbottom_begin != red_visited_begin.block)
                     {
@@ -3997,7 +3993,7 @@ class bisim_partitioner_dnj
                             red_pred_iter->target==red_visited_begin.block->st,
                                                                ++red_pred_iter)
                         {
-                            state_info_iter_t const t(red_pred_iter->source);   assert(refine_block->nonbottom_begin <= t->pos);
+                            state_info_iter_t const t(red_pred_iter->source);   assert(blue_nonbottom_end <= t->pos);
                             /* Line 2.23r: Make t a red state                */ assert(t->pos->st == t);  assert(t->pos < refine_block->end);
                             if (t->pos < notblue_initialised_end)
                             {
