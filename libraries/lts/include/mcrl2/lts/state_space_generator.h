@@ -14,6 +14,7 @@
 
 #include "mcrl2/lps/explorer.h"
 #include "mcrl2/lts/lts_builder.h"
+#include "mcrl2/lts/stochastic_lts_builder.h"
 #include "mcrl2/trace/trace.h"
 
 namespace mcrl2 {
