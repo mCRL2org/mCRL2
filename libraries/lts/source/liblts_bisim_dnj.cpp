@@ -17,7 +17,7 @@
 /// (2017) and Valmari (2009) to calculate the branching bisimulation classes
 /// of a labelled transition system.  Different from the 2017 article, it does
 /// not translate the LTS to a Kripke structure, but works on the LTS directly.
-/// We hope that in this way the memory use can be reduced.
+/// In this way the memory use can be reduced.
 ///
 /// Partition refinement means that the algorithm maintains a partition of the
 /// state space of the LTS into ``blocks''.  A block contains all states in one
@@ -2990,9 +2990,9 @@ class bisim_partitioner_dnj
                     mCRL2log(log::warning) << "There are "
                         << action_label[label].count << ' '
                         << pp(aut.action_label(label)) << "-transitions.  "
-                        "This is more than n^2 (= " << n_square << ").  I "
-                        "cannot guarantee that branching bisimulation runs in "
-                        "time O(m log n).\n";                                   ONLY_IF_DEBUG(  if (max_transitions < action_label[label].count)
+                        "This is more than n^2 (= " << n_square << "). It is "
+                        "not guaranteed that branching bisimulation "
+                        "minimisation runs in time O(m log n).\n";              ONLY_IF_DEBUG(  if (max_transitions < action_label[label].count)
                                                                                                     {   max_transitions = action_label[label].count;   }  )
                 }
                 // initialise begin_or_before_end pointers for this
@@ -3010,8 +3010,17 @@ class bisim_partitioner_dnj
                 }                                                               // subsumed in the call at the end
             }
             else
-            {                                                                   // The assertion ensures that there are not many unused labels:
-                action_label[label].begin = next_action_label_begin;            assert(0 == label);
+            {
+                action_label[label].begin = next_action_label_begin;
+                if (0 != label && aut.num_transitions() < action_label.size())
+                {
+                    mCRL2log(log::warning) << "Action label "
+                        << pp(aut.action_label(label)) << " has no "
+                        "transitions, and the number of action labels exceeds "
+                        "the number of transitions. It is not guaranteed that "
+                        "branching bisimulation minimisation runs in time "
+                        "O(m log n).\n";
+                }
             }
         }
         while (0 < label && (/* insert a dummy entry                         */ assert(next_action_label_begin < part_tr.action_block_inert_begin),
