@@ -80,8 +80,6 @@
 #include "mcrl2/lts/detail/coroutine.h"
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
-// #include "mcrl2/lts/transition.h"
-// #include "mcrl2/lts/lts_utilities.h"
 
 #include <list>  // for the list of block_bunch-slices
 #include <algorithm> // for std::lower_bound()
@@ -473,20 +471,20 @@ class permutation_entry {
 class block_t
 {
   public:
-    /// \brief iterator past the last state of the block
-    permutation_iter_t end;
-
-    /// \brief iterator to the first marked non-bottom state of the block
-    permutation_iter_t marked_nonbottom_begin;
-
-    /// \brief iterator to the first non-bottom state of the block
-    permutation_iter_t nonbottom_begin;
+    /// \brief iterator to the first state of the block
+    permutation_iter_t begin;
 
     /// \brief iterator to the first marked bottom state of the block
     permutation_iter_t marked_bottom_begin;
 
-    /// \brief iterator to the first state of the block
-    permutation_iter_t begin;
+    /// \brief iterator to the first non-bottom state of the block
+    permutation_iter_t nonbottom_begin;
+
+    /// \brief iterator to the first marked non-bottom state of the block
+    permutation_iter_t marked_nonbottom_begin;
+
+    /// \brief iterator past the last state of the block
+    permutation_iter_t end;
 
     /// \brief list of stable block_bunch-slices with transitions from this
     /// block
@@ -495,7 +493,7 @@ class block_t
     /// \brief unique sequence number of this block
     /// \details After the stuttering equivalence algorithm has terminated,
     /// this number is used as a state number in the quotient LTS.
-    const state_type seqnr;
+    const state_type seqnr;  
 
     /// \brief total number of blocks with unique sequence number allocated
     /// \details Upon starting the stuttering equivalence algorithm, the number
@@ -1124,8 +1122,8 @@ class action_block_entry
 class bunch_t
 {
   public:
-    action_block_iter_t end;
     action_block_iter_t begin;
+    action_block_iter_t end;
 
     union sort_key_and_label_t
     {
@@ -1145,6 +1143,7 @@ class bunch_t
 
     static bunch_t* first_nontrivial;
     bunch_t* next_nontrivial;
+
   public:
     bunch_t(const action_block_iter_t& new_begin,
                    const action_block_iter_t& new_end, trans_type new_sort_key)
@@ -1513,8 +1512,9 @@ class part_trans_t
     ///                         dereferenced, see the implementation of
     ///                         surely_has_no_transition_in()).  This parameter
     ///                         is used to initialize dummy transitions.
-    part_trans_t(trans_type num_transitions, trans_type num_actions,
-                                               state_info_iter_t illegal_state)
+    part_trans_t(trans_type num_transitions, 
+                 trans_type num_actions,
+                 state_info_iter_t illegal_state)
       : succ(num_transitions + 2),
         block_bunch(num_transitions + 1),
         pred(num_transitions + 2),
@@ -1845,7 +1845,7 @@ class part_trans_t
                                                                                 ONLY_IF_DEBUG( template <class LTS_TYPE> )
     succ_iter_t move_out_slice_to_new_block(                                    ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
                         succ_iter_t out_slice_end, block_t* const old_block,
-                           const block_bunch_slice_const_iter_t& last_splitter)
+                        const block_bunch_slice_const_iter_t& last_splitter)
     {                                                                           assert(succ_entry::succ_begin < out_slice_end);
         succ_iter_t const out_slice_begin(
                                       out_slice_end[-1].begin_or_before_end()); assert(out_slice_begin < out_slice_end);
@@ -2276,11 +2276,12 @@ class part_trans_t
     ///                        to separate from each other
     /// \param new_block_mode  indicates whether the new block is blue or red
                                                                                 ONLY_IF_DEBUG( template<class LTS_TYPE> )
-    void adapt_transitions_for_new_block(block_t* const new_block,
-        block_t* const old_block,                                               ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
-                bool use_splitter_for_new_noninert_block_bunch,
-                        const block_bunch_slice_iter_t& last_splitter,
-                                    enum new_block_mode_t const new_block_mode)
+    void adapt_transitions_for_new_block(
+                  block_t* const new_block,
+                  block_t* const old_block,                                     ONLY_IF_DEBUG( const bisim_partitioner_dnj<LTS_TYPE>& partitioner, )
+                  bool use_splitter_for_new_noninert_block_bunch,
+                  const block_bunch_slice_iter_t& last_splitter,
+                  enum new_block_mode_t const new_block_mode)
     {                                                                           assert(last_splitter->is_stable());
         // We begin with a bottom state so the new block gets a sorted list of
         // stable block_bunch-slices.
