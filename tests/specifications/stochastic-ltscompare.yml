@@ -1,0 +1,34 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: AUT
+  l4:
+    type: AUT
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-n]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lps2lts
+  t3:
+    input: [l2]
+    output: [l4]
+    args: []
+    name: generatelts17
+  t4:
+    input: [l3, l4]
+    output: []
+    args: [-epbisim]
+    name: ltspcompare
+
+result: |
+  result = t4.value['result']

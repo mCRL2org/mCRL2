@@ -63,6 +63,24 @@ class ProcessTest(RandomTest):
         write_text(filename, str(p))
         self.inputfiles += [filename]
 
+# generates stochastic random processes
+class StochasticProcessTest(ProcessTest):
+    def __init__(self, name, ymlfile, settings = dict()):
+        super(StochasticProcessTest, self).__init__(name, ymlfile, settings)
+        self.process_expression_generators = {
+                               random_process_expression.make_action          : 8,
+                               random_process_expression.make_delta           : 1,
+                               random_process_expression.make_tau             : 1,
+                               random_process_expression.make_process_instance: 2,
+                               random_process_expression.make_sum             : 2,
+                               random_process_expression.make_if_then         : 2,
+                               random_process_expression.make_if_then_else    : 2,
+                               random_process_expression.make_choice          : 5,
+                               random_process_expression.make_seq             : 5,
+                               random_process_expression.make_multi_action    : 1,
+                               random_process_expression.make_dist            : 3,
+                            }
+
 # generates random process with higher probability of tau transitions
 class ProcessTauTest(ProcessTest):
     def __init__(self, name, testfile, settings = dict()):
@@ -79,7 +97,8 @@ class ProcessTauTest(ProcessTest):
                                random_process_expression.make_if_then_else: 0,
                                random_process_expression.make_choice: 5,
                                random_process_expression.make_seq: 5,
-                               random_process_expression.make_multi_action : 1,
+                               random_process_expression.make_multi_action: 1,
+                               random_process_expression.make_dist: 0,
                              }
 
 class AlphabetReduceTest(ProcessTest):
@@ -124,6 +143,10 @@ class LtscompareTest(ProcessTauTest):
         self.set_command_line_options('t3', ['-e' + equivalence_type])
         self.set_command_line_options('t4', ['-e' + equivalence_type])
 
+class StochasticLtscompareTest(StochasticProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(StochasticLtscompareTest, self).__init__(name, ymlfile('stochastic-ltscompare'), settings)
+
 class BisimulationTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings = dict()):
         assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-dnj', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-dnj', 'weak-bisim']
@@ -142,8 +165,7 @@ class Lps2ltsAlgorithmsTest(ProcessTauTest):
         super(Lps2ltsAlgorithmsTest, self).__init__(name, ymlfile('lps2lts-algorithms'), settings)
         # randomly choose an algorithm
         actions = random.choice(['a', 'a,b', 'a,b,c'])
-        # options = [random.choice(['--deadlock', '--divergence', '--nondeterminism', '--action={}'.format(actions)])]
-        options = [random.choice(['--deadlock', '--nondeterminism', '--action={}'.format(actions)])]
+        options = [random.choice(['--deadlock', '--divergence', '--nondeterminism', '--action={}'.format(actions)])]
         if 'divergence' in options[0]:
             tau_actions = random.choice(['', '', 'b', 'b,c'])
             if tau_actions:
@@ -376,6 +398,7 @@ available_tests = {
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
+    # 'stochastic-ltscompare'                       : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
 
 def print_names(tests):

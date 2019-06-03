@@ -252,3 +252,15 @@ class Rename(ProcessExpression):
         x = self.x
         R = self.R
         return 'rename({{{}}}, {})'.format(', '.join(R), x)
+
+class StochasticOperator(ProcessExpression):
+    def __init__(self, v, dist, x):
+        self.v = v
+        self.dist = dist
+        self.x = x
+
+    def __str__(self):
+        dist = self.dist
+        v = self.v
+        x = self.x
+        return 'dist {}: {}[{}].({})'.format(v, v.type, dist, x)

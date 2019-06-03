@@ -13,6 +13,7 @@
 # ProcessInstance             |     0      |  y   |
 # Sum                         |     1      |  y   |
 # IfThen                      |     1      |  y   |
+# StochasticOperator          |     1      |  y   |
 # IfThenElse                  |     2      |  y   |
 # Choice                      |     2      |  y   |
 # Seq                         |     2      |  y   |
@@ -37,6 +38,17 @@ import re
 import random_data_expression
 from process_expression import *
 from data_expression import *
+
+# Generate unique dist variables.
+# TODO: Check if variable clashes between nested dists are allowed.
+class DistVariableGenerator(object):
+    n = 0
+
+    @staticmethod
+    def generate():
+        result = Variable('x{}'.format(DistVariableGenerator.n), 'Bool')
+        DistVariableGenerator.n = DistVariableGenerator.n + 1
+        return result
 
 #---------------------------------------------------------------------------#
 #           process library classes
@@ -102,7 +114,11 @@ def expression_size(x):
     if isinstance(x, MultiAction):
         return 1
     result = 0
-    if isinstance(x, ProcessExpression):
+    # N.B. The dist operator itself is not counted. It is always generated
+    # in combination with a conditional expression, and increasing the size
+    # leads to a size error.
+    # TODO: Find a cleaner solution for this.
+    if isinstance(x, ProcessExpression) and not isinstance(x, StochasticOperator):
         result = result + 1
     for key, value in vars(x).items():
         if isinstance(value, ProcessExpression):
@@ -122,7 +138,7 @@ def select_generators(generators, actions, process_identifiers, variables, is_pc
             result = result + [make_process_instance]
 
     if size >= 2:
-        result = result + [make_sum, make_if_then]
+        result = result + [make_sum, make_if_then, make_dist]
 
     if size >= 3:
         result = result + [make_if_then_else, make_choice, make_seq]
@@ -205,6 +221,14 @@ def make_sum(process_expression_generators, actions, process_identifiers, variab
     d = make_variable(variables)
     x = make_process_expression(process_expression_generators, actions, process_identifiers, variables + [d], is_pcrl, is_guarded, size - 1)
     return Sum(d, x)
+
+def make_dist(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size):
+    d = DistVariableGenerator.generate()
+    # TODO: use 'variables + [d]' instead of 'variables'.
+    x = make_process_expression(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size - 1)
+    distributions = ['1/2', 'if({},1/4,3/4)'.format(d.name)]
+    dist = random.choice(distributions)
+    return StochasticOperator(d, dist, IfThen(d.name, x))
 
 def make_if_then(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size):
     c = 'true'
@@ -361,6 +385,7 @@ default_process_expression_generators = {
     make_choice          : 5,
     make_seq             : 5,
     make_multi_action    : 1,
+    make_dist            : 0,
 }
 
 default_parallel_operator_generators = [make_block, make_hide, make_rename, make_comm, make_allow]
