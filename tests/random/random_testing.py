@@ -166,6 +166,7 @@ class Lps2ltsAlgorithmsTest(ProcessTauTest):
         # randomly choose an algorithm
         actions = random.choice(['a', 'a,b', 'a,b,c'])
         options = [random.choice(['--deadlock', '--divergence', '--nondeterminism', '--action={}'.format(actions)])]
+        options = [random.choice(['--deadlock', '--nondeterminism', '--action={}'.format(actions)])]
         if 'divergence' in options[0]:
             tau_actions = random.choice(['', '', 'b', 'b,c'])
             if tau_actions:
