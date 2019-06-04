@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_FIND_LOOPS_H
 #define MCRL2_PBES_PBESINST_FIND_LOOPS_H
 
+#include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
