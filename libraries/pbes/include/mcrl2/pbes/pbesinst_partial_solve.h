@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
+#include "mcrl2/pbes/structure_graph_builder.h"
 
 namespace mcrl2 {
 

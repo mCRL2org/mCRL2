@@ -448,12 +448,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           mCRL2log(log::debug) << "final todo = " << core::detail::print_set(todo_.vertices()) << std::endl;
 
           todo_ = compute_attractor_set(G, todo_, alpha);
-          std::set<structure_graph::index_type> to_be_erased;
-          for (structure_graph::index_type v: todo_.vertices())
-          {
-            to_be_erased.insert(v);
-          }
-          m_graph_builder.erase_vertices(to_be_erased);
+          m_graph_builder.erase_vertices(todo_);
         }
         else
         {
@@ -466,9 +461,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           mCRL2log(log::debug) << "irrelevant = " << irrelevant << std::endl;
           irrelevant = compute_attractor_set_simple(G, irrelevant);
           mCRL2log(log::debug) << "attr(irrelevant) = " << irrelevant << std::endl;
-          const auto& vertices = irrelevant.vertices();
-          std::set<structure_graph::index_type> to_be_erased(vertices.begin(), vertices.end());
-          m_graph_builder.erase_vertices(to_be_erased);
+          m_graph_builder.erase_vertices(irrelevant);
         }
       }
     }
