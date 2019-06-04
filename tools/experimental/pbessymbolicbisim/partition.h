@@ -29,6 +29,7 @@
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/structure_graph.h"
+#include "mcrl2/pbes/structure_graph_builder.h"
 #include "mcrl2/smt/cvc4.h"
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/smt/translation_error.h"
