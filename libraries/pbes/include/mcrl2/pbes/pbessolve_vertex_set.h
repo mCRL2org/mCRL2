@@ -404,6 +404,43 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, std::siz
   return A;
 }
 
+// Computes an attractor set, by extending A.
+// StructureGraph is either structure_graph or simple_structure_graph
+template <typename StructureGraph>
+vertex_set compute_attractor_set_simple(const StructureGraph& G, vertex_set A)
+{
+  // put all predecessors of elements in A in todo
+  deque_vertex_set todo(G.all_vertices().size());
+  for (auto u: A.vertices())
+  {
+    for (auto v: G.predecessors(u))
+    {
+      if (!A.contains(v))
+      {
+        todo.insert(v);
+      }
+    }
+  }
+
+  while (!todo.is_empty())
+  {
+    auto u = todo.pop_front();
+
+    if (includes_successors(G, u, A))
+    {
+      A.insert(u);
+      for (auto v: G.predecessors(u))
+      {
+        if (!A.contains(v))
+        {
+          todo.insert(v);
+        }
+      }
+    }
+  }
+  return A;
+}
+
 namespace detail {
 
 template <typename T>

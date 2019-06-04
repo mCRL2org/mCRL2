@@ -787,7 +787,7 @@ S_1:= \emptyset \\
 \If todo \neq \emptyset \Space \Then \\
 \qquad \If X_{init}(e_{init}) \in S_0  \Space \Then V := V \setminus \textsc{Attr}(todo, 1) \\
 \qquad \Else \If X_{init}(e_{init}) \in S_1 \Space \Then V := V \setminus \textsc{Attr}(todo, 0) \\
-\qquad \colorbox{lightgray}{$\Else V := V \setminus todo$} \\
+\qquad \colorbox{lightgray}{$\Else V := V \setminus \textsc{AttrSimple}(irrelevant)$} \\
 
 \textbf{return }(V, E),
 \end{array}
@@ -814,6 +814,22 @@ new\_todo := \emptyset \\
 new\_todo := new\_todo \cap (todo \cup irrelevant) \\
 new\_removed := (todo \cup irrelevant) \setminus new\_todo \\
 \Return new\_todo, new\_removed
+\end{array}
+\end{equation*}
+
+and \textsc{AttrSimple} is defined as
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{AttrSimple}(A) \\ 
+todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
+\While todo \neq \emptyset \Space \Do \\ 
+\qquad \Choose u \in todo \\ 
+\qquad todo:=todo\ \backslash \ \{u\} \\ 
+\qquad \If succ(u)\subseteq A \Space \Then \\ 
+\qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
+\Return A
 \end{array}
 \end{equation*}
 

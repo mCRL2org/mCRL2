@@ -360,6 +360,7 @@ class solve_structure_graph_algorithm
     bool solve(structure_graph& G)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
+      mCRL2log(log::debug) << "G = " << G << std::endl;
       assert(G.extent() > 0);
       assert(G.is_defined());
       auto W = solve_recursive_extended(G);

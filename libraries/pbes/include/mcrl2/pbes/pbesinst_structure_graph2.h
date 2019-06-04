@@ -428,14 +428,15 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void on_end_while_loop() override
     {
+      simple_structure_graph G(m_graph_builder.vertices());
+      std::size_t n = m_graph_builder.extent();
+
       if (!todo.empty())
       {
         auto u = m_graph_builder.find_vertex(init);
         if (S0.contains(u) || S1.contains(u))
         {
           std::size_t alpha = S0.contains(u) ? 1 : 0;
-
-          std::size_t n = m_graph_builder.extent();
 
           // compute todo_
           vertex_set todo_(n);
@@ -446,7 +447,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
           mCRL2log(log::debug) << "final todo = " << core::detail::print_set(todo_.vertices()) << std::endl;
 
-          simple_structure_graph G(m_graph_builder.vertices());
           todo_ = compute_attractor_set(G, todo_, alpha);
           std::set<structure_graph::index_type> to_be_erased;
           for (structure_graph::index_type v: todo_.vertices())
@@ -457,12 +457,17 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         else
         {
-          std::set<structure_graph::index_type> to_be_erased;
-          for (const propositional_variable_instantiation& X: todo.all_elements())
+          vertex_set irrelevant(n);
+          for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
           {
             structure_graph::index_type v = m_graph_builder.find_vertex(X);
-            to_be_erased.insert(v);
+            irrelevant.insert(v);
           }
+          mCRL2log(log::debug) << "irrelevant = " << irrelevant << std::endl;
+          irrelevant = compute_attractor_set_simple(G, irrelevant);
+          mCRL2log(log::debug) << "attr(irrelevant) = " << irrelevant << std::endl;
+          const auto& vertices = irrelevant.vertices();
+          std::set<structure_graph::index_type> to_be_erased(vertices.begin(), vertices.end());
           m_graph_builder.erase_vertices(to_be_erased);
         }
       }
