@@ -10,6 +10,7 @@
 #ifndef MCRL2_LTSGRAPH_UTILITY_H
 #define MCRL2_LTSGRAPH_UTILITY_H
 
+#include <QOpenGLFunctions_3_3_Core>
 #include <QPainter>
 #include <QVector3D>
 
@@ -18,17 +19,45 @@
 /// \file This file contains various utility commands, instead of defining them inline in source files, such that they can be reused and/or
 /// moved to more logical locations.
 
+/// \return A string for each error code that glGetError() might return.
+inline const char* glErrorString(GLenum code)
+{
+  switch(code)
+  {
+    case GL_NO_ERROR:
+      return "GL_NO_ERROR";
+    case GL_INVALID_ENUM:
+      return "GL_INVALID_ENUM";
+    case GL_INVALID_VALUE:
+      return "GL_INVALID_VALUE";
+    case GL_INVALID_OPERATION:
+      return "GL_INVALID_OPERATION";
+    case GL_STACK_OVERFLOW:
+      return "GL_STACK_OVERFLOW";
+    case GL_STACK_UNDERFLOW:
+      return "GL_STACK_UNDERFLOW";
+    case GL_OUT_OF_MEMORY:
+      return "GL_OUT_OF_MEMORY";
+    case GL_INVALID_FRAMEBUFFER_OPERATION:
+      return "GL_INVALID_FRAMEBUFFER_OPERATION";
+    case GL_CONTEXT_LOST:
+      return "GL_CONTEXT_LOST";
+    default:
+      return "Deprecated or unsupported result";
+  }
+}
+
 /// \brief Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
 #define MCRL2_QGL_VERIFY(x) \
   do { if (!x) { mCRL2log(mcrl2::log::error) << #x " failed.\n"; std::abort(); } } while(false)
 
 /// \brief Checks for OpenGL errors, prints it and aborts.
 #define MCRL2_OGL_CHECK() \
-  do { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(result) << "\n"; std::abort(); } } while(false)
+  do { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " << glErrorString(result) << "\n"; std::abort(); } } while(false)
 
 /// \brief Executes x and checks for errors afterwards.
 #define MCRL2_OGL_VERIFY(x) \
-  x; { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " #x " failed with " << gluErrorString(result) << "\n"; std::abort(); } } do {} while(false)
+  x; { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " #x " failed with " << glErrorString(result) << "\n"; std::abort(); } } do {} while(false)
 
 /// \brief Constants for pi and pi/2.
 constexpr float PI = 3.14159265358979323846f;
