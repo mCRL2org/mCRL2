@@ -40,8 +40,6 @@ inline const char* glErrorString(GLenum code)
       return "GL_OUT_OF_MEMORY";
     case GL_INVALID_FRAMEBUFFER_OPERATION:
       return "GL_INVALID_FRAMEBUFFER_OPERATION";
-    case GL_CONTEXT_LOST:
-      return "GL_CONTEXT_LOST";
     default:
       return "Deprecated or unsupported result";
   }
