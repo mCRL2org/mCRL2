@@ -66,7 +66,7 @@ constexpr float PI_2 = PI * 0.5f;
 inline static
 float frand(float min, float max)
 {
-  return ((float)qrand() / RAND_MAX) * (max - min) + min;
+  return (static_cast<float>(qrand()) / RAND_MAX) * (max - min) + min;
 }
 
 /// \brief Renders text, centered around the window coordinates at x and y (in pixels)
@@ -131,7 +131,7 @@ float degreesToRadians(float degrees)
 inline static
 bool isCloseCircle(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
-  float distance = std::sqrt(std::pow(pos.x() - x, 2) + std::pow(pos.y() - y, 2));
+  float distance = std::sqrt(std::pow(pos.x() - x, 2.0f) + std::pow(pos.y() - y, 2.0f));
   if (distance < threshold && -1.0f <= pos.z() && pos.z() < bestZ)
   {
     bestZ = pos.z();
