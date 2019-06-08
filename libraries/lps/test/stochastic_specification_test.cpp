@@ -9,6 +9,7 @@
 /// \file specification_test.cpp
 /// \brief Add your file description here.
 
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/is_stochastic.h"
@@ -17,7 +18,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/lps/is_well_typed.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -128,12 +129,12 @@ BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
   std::string result =
     "act  a: Bool # Bool;\n"
     "\n"
-    "proc P(b3_X,b4_X: Bool) =\n"
+    "proc P(b4_X,b3_X: Bool) =\n"
     "       a(b3_X, b4_X) .\n"
     "         dist b3_X1,b4_X1: Bool[if(b3_X1, 1 / 8, 3 / 8)] .\n"
-    "         P(b3_X = b3_X1, b4_X = b4_X1);\n"
+    "         P(b4_X = b4_X1, b3_X = b3_X1);\n"
     "\n"
-    "init dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] . P(b3, b4);\n"
+    "init dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] . P(b4, b3);\n"
     ;
 
   stochastic_specification spec=linearise(text);
@@ -159,6 +160,7 @@ BOOST_AUTO_TEST_CASE(test_push_dist_outward)
     ;
 
   stochastic_specification spec=linearise(text);
+  BOOST_CHECK(lps::detail::is_well_typed(spec));
 }  
 
 
@@ -167,6 +169,17 @@ BOOST_AUTO_TEST_CASE(test_parelm)
   stochastic_specification spec = linearise(lps::detail::ABP_SPECIFICATION());
   std::set<data::variable> v = lps::find_all_variables(spec);
   parelm(spec);
+  BOOST_CHECK(lps::detail::is_well_typed(spec));
+}
+
+/* This test case caused the lineariser to incorrectly handle bound variables in the distribution operator */
+BOOST_AUTO_TEST_CASE(bound_variable)
+{
+  std::string text =
+    "act a;\n"
+    "init dist x0: Bool[if(x0,1/3,2/3)].(x0 -> (a . dist x1: Bool[1/2].(x1 -> a)));\n";
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK(lps::detail::is_well_typed(spec));
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

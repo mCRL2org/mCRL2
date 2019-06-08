@@ -2183,18 +2183,15 @@ class specification_basic_type
       const variable_list& parameters,
       const process_expression& body)
     {
-      if (parameters.empty())
+      variable_list result; 
+      for(const variable& p: parameters) 
       {
-        return parameters;
+        if (occursinpCRLterm(p,body,false))
+        {
+          result.push_front(p);
+        }
       }
-
-      variable_list parameters1=parameters_that_occur_in_body(parameters.tail(),body);
-      if (occursinpCRLterm(parameters.front(),body,false))
-      {
-
-        parameters1.push_front(parameters.front());
-      }
-      return parameters1;
+      return result;
     }
 
     // The variable below is used to count the number of new processes that
@@ -2203,8 +2200,8 @@ class specification_basic_type
     // In such a case a warning is printed suggesting to use regular2.
 
     process_identifier newprocess(
-      const variable_list& parameters,  // Intentionally not a reference.
-      const process_expression& body,   // Intentionally not a reference.
+      const variable_list& parameters,
+      const process_expression& body,
       const processstatustype ps,
       const bool canterminate,
       const bool containstime)
@@ -2239,9 +2236,11 @@ class specification_basic_type
         warningNumber=warningNumber*5;
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
+std::cerr << "PARAMETERS " << parameters1 << " +++++++ " << parameters << "      BBBBBBBBB          " << body << "\n";
       const core::identifier_string s=fresh_identifier_generator("P");
       const process_identifier p(s, parameters1);
       assert(std::string(p.name()).size()>0);
+std::cerr << "Make new process " << s << "(" << parameters1 << ") := " << body << "\n";
       insertProcDeclaration(
         p,
         parameters1,
@@ -3286,6 +3285,7 @@ class specification_basic_type
       const variable_list& freevars,
       const std::set<variable>& variables_bound_in_sum)
     {
+std::cerr << "Create regular invocation " << sequence << "     " << freevars << "\n";
       process_identifier new_process;
 
       /* Sequence consists of a sequence of process references,
@@ -3297,7 +3297,9 @@ class specification_basic_type
         const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(sequence);
         std::set<variable> variables_bound_in_sum_new=variables_bound_in_sum;
         variables_bound_in_sum_new.insert(sto.variables().begin(),sto.variables().end());
-        return stochastic_operator(sto.variables(),sto.distribution(), create_regular_invocation(sto.operand(),todo,freevars,variables_bound_in_sum_new));
+        return stochastic_operator(sto.variables(),
+                                   sto.distribution(), 
+                                   create_regular_invocation(sto.operand(),todo,freevars+sto.variables(),variables_bound_in_sum_new));
       }
 
       sequence=cut_off_unreachable_tail(sequence);
@@ -3373,6 +3375,7 @@ class specification_basic_type
        this variable by a single one, putting the new variable
        on the todo list, to be transformed to regular form also. */
     {
+std::cerr << "To regular form " << t << "    freevars: " << freevars << "\n";
       if (is_choice(t))
       {
         const process_expression t1=to_regular_form(choice(t).left(),todo,freevars,variables_bound_in_sum);
@@ -3540,6 +3543,7 @@ class specification_basic_type
        GNF where one action is always followed by a
        variable. */
     {
+std::cerr << "ProcstorealGNFbody " << body << "\n";
       if (is_at(body))
       {
         data_expression timecondition=sort_bool::true_();
@@ -3573,12 +3577,16 @@ class specification_basic_type
                                        todo,regular,mode,freevars,variables_bound_in_sum);
         const process_expression body2=procstorealGNFbody(seq(body).right(),later,
                                        todo,regular,mode,freevars,variables_bound_in_sum);
+std::cerr << "body1 " << body1 << "\n";
+std::cerr << "body2 " << body2 << "\n";
         process_expression t3=putbehind(body1,body2);
+std::cerr << "T3 first " << t3 << "\n";
         if ((regular) && (v==first))
         {
           /* We must transform t3 to regular form */
           t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
         }
+std::cerr << "T3 second " << t3 << "\n";
         return t3;
       }
 
@@ -3742,12 +3750,14 @@ class specification_basic_type
 
     {
       std::size_t n=objectIndex(procIdDecl);
+std::cerr << "ProcstorealGNFrec " << procIdDecl << "   " << objectdata[n].parameters << "\n";
       if (objectdata[n].processstatus==pCRL)
       {
         objectdata[n].processstatus=GNFbusy;
         std::set<variable> variables_bound_in_sum;
         const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,
                                    todo,regular,pCRL,objectdata[n].parameters,variables_bound_in_sum);
+std::cerr << "RESTULT rec " << procIdDecl << "(" << objectdata[n].parameters << ") := " << t << "\n";
         if (objectdata[n].processstatus!=GNFbusy)
         {
           throw mcrl2::runtime_error("There is something wrong with recursion.");
@@ -3795,6 +3805,7 @@ class specification_basic_type
     void procstorealGNF(const process_identifier& procsIdDecl,
                         const bool regular)
     {
+std::cerr << "ProcstorealGNF " << procsIdDecl << "\n";
       std::vector <process_identifier> todo;
       todo.push_back(procsIdDecl);
       for (; !todo.empty() ;)
@@ -4216,6 +4227,7 @@ class specification_basic_type
       for (const process_identifier& p: pCRLprocs)
       {
         const std::size_t n=objectIndex(p);
+std::cerr << "Joinparameters " << p << "    " << objectdata[n].parameters << "\n" << parameters << "\n";
         parameters=joinparameters(parameters,objectdata[n].parameters);
       }
       return parameters;
@@ -7104,6 +7116,7 @@ class specification_basic_type
     /* A pair of initial state and linear process must be extracted
        from the underlying GNF */
     {
+std::cerr << "generateLPEpCRL " << procId << "    " << parameters << "\n";
       // We use action_summands and deadlock_summands as an output.
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
@@ -7139,6 +7152,7 @@ class specification_basic_type
         singlecontrolstate=true;
       }
       parameters=collectparameterlist(stochastic_normalized_process_identifiers);
+std::cerr << "Parameters " << parameters << "\n";
 
       if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
@@ -11031,8 +11045,8 @@ class specification_basic_type
         if (multiaction == action_list({ terminationAction }))
         {
           acts.push_front(terminationAction.label());
-          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << " followed by a deadlock is added to signal termination of the linear process. \n" <<
-                                           "Note that this has as effect that a terminating process always contains a deadlock. \n";
+          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << 
+                           " followed by a deadlock is added to signal termination of the linear process. \n";
           return;
         }
       }
