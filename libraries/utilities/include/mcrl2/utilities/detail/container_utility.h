@@ -165,8 +165,8 @@ bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIt
   return true;
 }
 
-template <typename T>
-bool has_empty_intersection(const std::set<T>& s1, const std::set<T>& s2)
+template <typename SetContainer1, typename SetContainer2>
+bool has_empty_intersection(const SetContainer1& s1, const SetContainer2& s2)
 {
   return has_empty_intersection(s1.begin(), s1.end(), s2.begin(), s2.end());
 }
@@ -205,6 +205,16 @@ std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
   std::set<T> result;
   std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
   return result;
+}
+
+/// \brief Returns if y is included in x.
+/// \param x A set
+/// \param y A set
+/// \return The intersection of two sets.
+template <typename T>
+bool set_includes(const std::set<T>& x, const std::set<T>& y)
+{
+  return std::includes(x.begin(), x.end(), y.begin(), y.end());
 }
 
 } // namespace detail
