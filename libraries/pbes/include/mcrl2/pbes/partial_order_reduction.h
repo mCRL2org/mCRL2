@@ -17,6 +17,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
@@ -44,14 +45,37 @@ struct summand_class
   data::variable_list e;
   pbes_expression f;
   data::data_expression_list g;
-  std::vector<std::vector<std::size_t>> nxt;
+  std::vector<std::set<std::size_t>> nxt;
   std::vector<std::set<std::size_t>> NES; // TODO: use boost::dynamic_bitset<> (?)
   std::set<std::size_t> invis;
+
+  summand_class() = default;
+
+  summand_class(const data::variable_list& e_, const pbes_expression& f_, const data::data_expression_list& g_)
+   : e(e_), f(f_), g(g_)
+  {}
 };
 
-auto srf_summand_compare = [](const srf_summand& x1, const srf_summand& x2)
+// The part of a summand used for determining equivalence classes
+struct summand_equivalence_key
 {
-  return std::tie(x1.parameters(), x1.condition(), x1.variable().parameters()) < std::tie(x2.parameters(), x2.condition(), x2.variable().parameters());
+  data::variable_list e;
+  pbes_expression f;
+  data::data_expression_list g;
+
+  explicit summand_equivalence_key(const srf_summand& summand)
+   : e(summand.parameters()), f(summand.condition()), g(summand.variable().parameters())
+  {}
+
+  bool operator<(const summand_equivalence_key& other) const
+  {
+    return std::tie(e, f, g) < std::tie(other.e, other.f, other.g);
+  }
+
+  bool operator==(const summand_equivalence_key& other) const
+  {
+    return std::tie(e, f, g) == std::tie(other.e, other.f, other.g);
+  }
 };
 
 } // namespace pbes_system
@@ -62,9 +86,9 @@ namespace std {
 
 /// \brief specialization of the standard std::hash function.
 template<>
-struct hash<mcrl2::pbes_system::summand_class>
+struct hash<mcrl2::pbes_system::summand_equivalence_key>
 {
-  std::size_t operator()(const mcrl2::pbes_system::summand_class& x) const
+  std::size_t operator()(const mcrl2::pbes_system::summand_equivalence_key& x) const
   {
     std::size_t seed = std::hash<atermpp::aterm>()(x.f);
     if (!x.e.empty())
@@ -119,9 +143,14 @@ class partial_order_reduction_algorithm
     {
       std::set<std::size_t> Twork;
       std::set<std::size_t> Ts;
-      invis_pair(std::set<std::size_t>  Twork_, std::set<std::size_t>  Ts_)
+      invis_pair(std::set<std::size_t> Twork_, std::set<std::size_t> Ts_)
        : Twork(std::move(Twork_)), Ts(std::move(Ts_))
       {}
+
+      bool operator<(const invis_pair& other) const
+      {
+        return std::tie(Twork, Ts) < std::tie(other.Twork, other.Ts);
+      }
     };
 
     struct accordance_pair
@@ -134,11 +163,21 @@ class partial_order_reduction_algorithm
     };
 
     data::rewriter m_rewr;
+    enumerate_quantifiers_rewriter m_pbes_rewr;
     data::enumerator_identifier_generator m_id_generator;
-    data::enumerator_algorithm<> m_enumerator;
+    data::enumerator_algorithm<enumerate_quantifiers_rewriter, data::rewriter> m_enumerator;
     pbes_equation_index m_equation_index;
     srf_pbes m_pbes;
     data::mutable_indexed_substitution<> m_sigma;
+
+    // the parameters of the PBES equations
+    std::vector<data::variable> m_parameters;
+
+    // maps parameters to their corresponding index
+    std::map<data::variable, std::size_t> m_parameter_positions;
+
+    // maps summands to the index of the corresponding summand class
+    std::unordered_map<summand_equivalence_key, std::size_t> m_summand_index;
 
     // X_j \in nxt_k(X_i) <=> j \in m_summand_classes[k].nxt[i]
     // (X_i |- k -> X_j) <=> m_summand_classes[k].NES[i][j]
@@ -300,6 +339,105 @@ class partial_order_reduction_algorithm
         );
         remove_assignments(m_sigma, e_k);
       }
+      return result;
+    }
+
+    std::size_t index(const srf_summand& summand) const
+    {
+      auto i = m_summand_index.find(summand_equivalence_key(summand));
+      assert(i != m_summand_index.end());
+      return i->second;
+    }
+
+    std::size_t parameter_position(const data::variable& v) const
+    {
+      auto i = m_parameter_positions.find(v);
+      return i->second;
+    }
+
+    void compute_nxt()
+    {
+      std::size_t n = m_pbes.equations().size();
+      for (std::size_t i = 0; i < n; i++)
+      {
+        const srf_equation& eqn = m_pbes.equations()[i];
+        for (const srf_summand& summand: eqn.summands())
+        {
+          std::size_t j = m_equation_index.index(summand.variable().name());
+          std::size_t k = index(summand);
+          m_summand_classes[k].nxt[i].insert(j);
+        }
+      }
+    }
+
+    // returns the indices of the parameters that occur freely in x
+    std::set<std::size_t> FV(const pbes_expression& x) const
+    {
+      std::set<std::size_t> result;
+      for (const data::variable& v: find_free_variables(x))
+      {
+        result.insert(parameter_position(v));
+      }
+      return result;
+    }
+
+    void compute_NES()
+    {
+      using utilities::detail::set_union;
+
+      struct parameter_info
+      {
+        std::set<std::size_t> Ts; // test set
+        std::set<std::size_t> Ws; // write set
+        std::set<std::size_t> Rs; // read set
+        std::set<std::size_t> Vs; // variable set
+      };
+
+      std::size_t N = m_summand_classes.size();
+      std::vector<parameter_info> info(N);
+      const std::vector<data::variable>& d = m_parameters;
+
+      auto compute_parameter_info = [&](summand_class& summand, parameter_info& info)
+      {
+        // compute Ts
+        std::set<data::variable> FV = find_free_variables(summand.f);
+        for (const data::variable& v: summand.e)
+        {
+          FV.erase(v);
+        }
+        for (const data::variable& v: FV)
+        {
+          info.Ts.insert(parameter_position(v));
+        }
+
+        // compute Ws and Rs
+        auto gi = summand.g.begin();
+        auto di = d.begin();
+        for ( ; di != d.end(); ++di, ++gi)
+        {
+          if (*di != *gi)
+          {
+            std::size_t i = di - d.begin();
+            info.Ws.insert(i);
+
+            for (const data::variable& v: find_free_variables(*gi))
+            {
+              info.Rs.insert(parameter_position(v));
+            }
+          }
+        }
+
+        // compute Vs
+        info.Vs = set_union(info.Ts, set_union(info.Ws, info.Rs));
+      };
+
+      for (std::size_t k = 0; k < N; k++)
+      {
+        compute_parameter_info(m_summand_classes[k], info[k]);
+      }
+
+      // compute NES
+
     }
 
     void compute_summand_classes()
@@ -308,8 +446,18 @@ class partial_order_reduction_algorithm
       {
         for (const srf_summand& summand: eqn.summands())
         {
+          summand_equivalence_key key(summand);
+          auto i = m_summand_index.find(summand_equivalence_key(summand));
+          if (i == m_summand_index.end())
+          {
+            std::size_t k = m_summand_index.size();
+            m_summand_index[key] = k;
+            m_summand_classes.emplace_back(summand.parameters(), summand.condition(), summand.variable().parameters());
+          }
         }
       }
+      compute_nxt();
+      compute_NES();
     }
 
   public:
@@ -317,10 +465,19 @@ class partial_order_reduction_algorithm
      : m_rewr(p.data(),
               data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
               strategy),
-       m_enumerator(m_rewr, p.data(), m_rewr, m_id_generator, false),
+       m_pbes_rewr(m_rewr, p.data()),
+       m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, false),
        m_equation_index(p),
        m_pbes(pbes2srf(p))
     {
+      // initialize m_parameters and m_parameter_positions
+      const data::variable_list& parameters = m_pbes.equations().front().variable().parameters();
+      m_parameters = std::vector<data::variable>{parameters.begin(), parameters.end()};
+      for (std::size_t m = 0; m < m_parameters.size(); m++)
+      {
+        m_parameter_positions[m_parameters[m]] = m;
+      }
+
       compute_summand_classes();
     }
 
