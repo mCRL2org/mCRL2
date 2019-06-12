@@ -56,6 +56,7 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
+#include "mcrl2/data/enumerator.h" 
 
 //mCRL2 processes
 #include "mcrl2/process/find.h"
@@ -1566,16 +1567,13 @@ class specification_basic_type
          terms to rename the replaced variables to new ones. */
       variable_list newsumvars;
 
-      for (variable_list::const_iterator l=sumvars.begin() ; l!=sumvars.end() ; ++l)
+      for (const variable& var: sumvars)
       {
-        const variable var= *l;
         if (occursintermlist(var,variable_list_to_data_expression_list(occurvars)) ||
             occursintermlist(var,occurterms))
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars.push_front(newvar);
-          /* rename_vars.push_front(var);
-             rename_terms.push_front(data_expression(newvar)); */
           sigma[var]=newvar;
         }
         else
@@ -2013,7 +2011,7 @@ class specification_basic_type
       }
       if (is_if_then(p))
       {
-        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma);
+        data_expression condition=replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma);
         if (condition==sort_bool::false_())
         {
           return delta_at_zero();
@@ -2026,7 +2024,7 @@ class specification_basic_type
       }
       if (is_if_then_else(p))
       {
-        data_expression condition=/* data::*/replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma);
+        data_expression condition=replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma);
         if (condition==sort_bool::false_())
         {
           return substitute_pCRLproc(if_then_else(p).else_case(),sigma);
@@ -2236,11 +2234,9 @@ class specification_basic_type
         warningNumber=warningNumber*5;
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
-std::cerr << "PARAMETERS " << parameters1 << " +++++++ " << parameters << "      BBBBBBBBB          " << body << "\n";
       const core::identifier_string s=fresh_identifier_generator("P");
       const process_identifier p(s, parameters1);
       assert(std::string(p.name()).size()>0);
-std::cerr << "Make new process " << s << "(" << parameters1 << ") := " << body << "\n";
       insertProcDeclaration(
         p,
         parameters1,
@@ -2927,6 +2923,7 @@ std::cerr << "Make new process " << s << "(" << parameters1 << ") := " << body <
       return process_expression();
     }
 
+
     process_expression distribute_condition(
       const process_expression& body1,
       const data_expression& condition)
@@ -2994,6 +2991,141 @@ std::cerr << "Make new process " << s << "(" << parameters1 << ") := " << body <
 
       throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute condition " + process::pp(body1) +".");
     }
+    
+    /* This process calculates the equivalent of sum sumvars dist stochvars[distribution] body
+       where the distribution occurs in front. This can only be done under limited circumstances.
+       Assume we can enumerate the values of sumvars by e1,...,en. Introduce n copies of stochvars,
+       i.e., stochvars1,...,stochvarsn. The new process becomes 
+
+           dist stochvars1,stochvars2,...,stochvarsn
+                [distribution(e1,stochvars1)*distribution(e2,stochvars2)*...*distribution(en,stochvarsn)].
+
+           body(e1,stochvars1)+
+           body(e2,stochvars2)+
+           ...
+           body(en,stochvarsn)
+    */
+
+    process_expression enumerate_distribution_and_sums(
+                         const variable_list& sumvars, 
+                         const variable_list& stochvars, 
+                         const data_expression& distribution,
+                         const process_expression& body)
+    {
+      if (options.norewrite)
+      {
+        throw mcrl2::runtime_error("The use of the rewriter must be allowed to distribute a sum operator over a distribution.");
+      }
+
+
+      std::vector < data_expression_vector > data_vector(1,data_expression_vector());
+      for(const variable& v:sumvars) 
+      {
+        std::vector < data_expression_vector > new_data_vector;
+
+        if (!data.is_certainly_finite(v.sort()))
+        {
+          throw mcrl2::runtime_error("Cannot distribute a sum variable of non finite sort " + pp(v.sort()) + " over a distribution, which is required for linearisation.");
+        }
+
+        for(const data_expression& d: enumerate_expressions(v.sort(),data,rewr))
+        {
+          for(const data_expression_vector& dv: data_vector)
+          {
+            data_expression_vector new_dv=dv;
+            new_dv.push_back(d);
+            new_data_vector.push_back(new_dv);
+          }
+           
+        }
+        data_vector.swap(new_data_vector);
+        
+      } 
+      assert(!data_vector.empty());
+      
+      process_expression resulting_body;
+      data_expression resulting_distribution;
+      variable_list resulting_stochastic_variables;
+      bool result_defined=false;
+      for(const data_expression_vector& d: data_vector)
+      {
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
+        variable_list vl = stochvars;
+        alphaconvert(vl,sigma,stochvars,data_expression_list());
+        data_expression_vector::const_iterator i=d.begin();
+        for(const variable& v: sumvars)
+        {
+std::cerr << "AASSS " << v << " := " << *i << "\n";
+          sigma[v] = *i;
+          ++i;
+        }
+        const process_expression d1=substitute_pCRLproc(body,sigma);
+        const data_expression new_distribution=replace_variables_capture_avoiding_alt(distribution, sigma);
+
+        if (result_defined)
+        {
+          resulting_body=choice(resulting_body, d1);
+          resulting_distribution=data::sort_real::times(resulting_distribution,new_distribution);
+          resulting_stochastic_variables=resulting_stochastic_variables + vl;
+        }
+        else
+        {
+          resulting_body=d1;
+          resulting_distribution=new_distribution;
+          resulting_stochastic_variables=vl;
+          result_defined=true;
+        }
+std::cerr << "Resulting distribution " << resulting_distribution << "\n";
+std::cerr << "Resulting stoch vars " << resulting_stochastic_variables << "\n";
+std::cerr << "Resulting body " << resulting_body << "\n";
+      } 
+      /* Put the distribution in front. */
+
+      return stochastic_operator(resulting_stochastic_variables, resulting_distribution, resulting_body);
+    }
+
+    process_expression distribute_sum_over_a_stochastic_operator(
+                         const variable_list& sumvars, 
+                         const variable_list& stochastic_variables, 
+                         const data_expression& distribution,
+                         const process_expression& body)
+    {
+      if (is_sum(body)||
+          is_choice(body)||
+          is_seq(body)||
+          is_if_then(body)||
+          is_sync(body)||
+          is_action(body)||
+          is_tau(body)||
+          is_at(body)||
+          is_process_instance_assignment(body)||
+          isDeltaAtZero(body))
+      {
+        return enumerate_distribution_and_sums(sumvars,stochastic_variables,distribution,body);
+      }
+
+      if (is_delta(body)||
+          is_tau(body))
+      {
+        return body;
+      }
+
+      if (is_stochastic_operator(body))
+      {
+        const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body);
+        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
+        variable_list inner_stoch_vars=sto.variables();
+        alphaconvert(inner_stoch_vars,sigma,sumvars,data_expression_list());
+        const process_expression new_body=substitute_pCRLproc(sto.operand(), sigma);
+        const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
+        return distribute_sum_over_a_stochastic_operator(sumvars, 
+                                                         stochastic_variables + inner_stoch_vars, 
+                                                         data::sort_real::times(distribution,new_distribution), new_body);
+      }
+
+      throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute_sum " + process::pp(body) +".");
+      return process_expression();
+    }
 
     process_expression distribute_sum(
       const variable_list& sumvars,
@@ -3031,11 +3163,11 @@ std::cerr << "Make new process " << s << "(" << parameters1 << ") := " << body <
       {
         const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body1);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        variable_list inner_sumvars=sto.variables();
-        alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list());
+        variable_list inner_stoch_vars=sto.variables();
+        alphaconvert(inner_stoch_vars,sigma,sumvars,data_expression_list());
         const process_expression new_body1=substitute_pCRLproc(sto.operand(), sigma);
-        const data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
-        return stochastic_operator(sumvars+inner_sumvars,new_distribution,new_body1);
+        const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
+        return distribute_sum_over_a_stochastic_operator(sumvars, inner_stoch_vars, new_distribution, new_body1);
       }
 
       if (is_delta(body1)||
@@ -3285,7 +3417,6 @@ std::cerr << "Make new process " << s << "(" << parameters1 << ") := " << body <
       const variable_list& freevars,
       const std::set<variable>& variables_bound_in_sum)
     {
-std::cerr << "Create regular invocation " << sequence << "     " << freevars << "\n";
       process_identifier new_process;
 
       /* Sequence consists of a sequence of process references,
@@ -3543,7 +3674,7 @@ std::cerr << "To regular form " << t << "    freevars: " << freevars << "\n";
        GNF where one action is always followed by a
        variable. */
     {
-std::cerr << "ProcstorealGNFbody " << body << "\n";
+std::cerr << "PROCSTOREAL GNF BOD " << body << "\n";
       if (is_at(body))
       {
         data_expression timecondition=sort_bool::true_();
@@ -3577,16 +3708,12 @@ std::cerr << "ProcstorealGNFbody " << body << "\n";
                                        todo,regular,mode,freevars,variables_bound_in_sum);
         const process_expression body2=procstorealGNFbody(seq(body).right(),later,
                                        todo,regular,mode,freevars,variables_bound_in_sum);
-std::cerr << "body1 " << body1 << "\n";
-std::cerr << "body2 " << body2 << "\n";
         process_expression t3=putbehind(body1,body2);
-std::cerr << "T3 first " << t3 << "\n";
         if ((regular) && (v==first))
         {
           /* We must transform t3 to regular form */
           t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
         }
-std::cerr << "T3 second " << t3 << "\n";
         return t3;
       }
 
@@ -3750,19 +3877,20 @@ std::cerr << "T3 second " << t3 << "\n";
 
     {
       std::size_t n=objectIndex(procIdDecl);
-std::cerr << "ProcstorealGNFrec " << procIdDecl << "   " << objectdata[n].parameters << "\n";
       if (objectdata[n].processstatus==pCRL)
       {
         objectdata[n].processstatus=GNFbusy;
         std::set<variable> variables_bound_in_sum;
+std::cerr << "AAAA REALGNF BODY " << procIdDecl << "    " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
         const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,
                                    todo,regular,pCRL,objectdata[n].parameters,variables_bound_in_sum);
-std::cerr << "RESTULT rec " << procIdDecl << "(" << objectdata[n].parameters << ") := " << t << "\n";
         if (objectdata[n].processstatus!=GNFbusy)
         {
           throw mcrl2::runtime_error("There is something wrong with recursion.");
         }
 
+std::cerr << "AAAA RESULTING PROCESS " << t << "     " << "\n";
+std::cerr << "AAAA REALGNF BODY RESULT " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
         objectdata[n].processbody=t;
         objectdata[n].processstatus=GNF;
         return;
@@ -3772,8 +3900,11 @@ std::cerr << "RESTULT rec " << procIdDecl << "(" << objectdata[n].parameters << 
       {
         objectdata[n].processstatus=mCRLbusy;
         std::set<variable> variables_bound_in_sum;
-        procstorealGNFbody(objectdata[n].processbody,first,todo,
+std::cerr << "REALGNF BODY " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
+        const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,todo,
                                    regular,mCRL,objectdata[n].parameters,variables_bound_in_sum);
+std::cerr << "RESULTING PROCESS " << t << "     " << "\n";
+std::cerr << "REALGNF BODY RESULT " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
         /* if the last result is not equal to NULL,
            the body of this process is itself a processidentifier */
 
@@ -3805,13 +3936,13 @@ std::cerr << "RESTULT rec " << procIdDecl << "(" << objectdata[n].parameters << 
     void procstorealGNF(const process_identifier& procsIdDecl,
                         const bool regular)
     {
-std::cerr << "ProcstorealGNF " << procsIdDecl << "\n";
       std::vector <process_identifier> todo;
       todo.push_back(procsIdDecl);
       for (; !todo.empty() ;)
       {
         const process_identifier pi=todo.back();
         todo.pop_back();
+std::cerr << "to real GNF: " << pi << "\n";
         procstorealGNFrec(pi,first,todo,regular);
       }
     }
@@ -4227,7 +4358,6 @@ std::cerr << "ProcstorealGNF " << procsIdDecl << "\n";
       for (const process_identifier& p: pCRLprocs)
       {
         const std::size_t n=objectIndex(p);
-std::cerr << "Joinparameters " << p << "    " << objectdata[n].parameters << "\n" << parameters << "\n";
         parameters=joinparameters(parameters,objectdata[n].parameters);
       }
       return parameters;
@@ -5149,6 +5279,7 @@ std::cerr << "Joinparameters " << p << "    " << objectdata[n].parameters << "\n
           pushdummy_regular(objectdata[objectIndex(initialProcId)].parameters,
                             stack,
                             initial_stochastic_distribution.variables());
+std::cerr << "RESTULT PUSH DUMMY REGULAR " << result << "     " << initial_stochastic_distribution.variables() << "\n";
         if (!singlecontrolstate)
         {
           return processencoding(i,result,stack);
@@ -7116,7 +7247,6 @@ std::cerr << "Joinparameters " << p << "    " << objectdata[n].parameters << "\n
     /* A pair of initial state and linear process must be extracted
        from the underlying GNF */
     {
-std::cerr << "generateLPEpCRL " << procId << "    " << parameters << "\n";
       // We use action_summands and deadlock_summands as an output.
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
@@ -7152,7 +7282,6 @@ std::cerr << "generateLPEpCRL " << procId << "    " << parameters << "\n";
         singlecontrolstate=true;
       }
       parameters=collectparameterlist(stochastic_normalized_process_identifiers);
-std::cerr << "Parameters " << parameters << "\n";
 
       if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
@@ -7183,6 +7312,7 @@ std::cerr << "Parameters " << parameters << "\n";
         parameters = variable_list({ stack.stackvar });
       }
       init=make_initialstate(initial_proc_id,stack,stochastic_normalized_process_identifiers,regular,singlecontrolstate,initial_stochastic_distribution);
+std::cerr << "MAKE INITIAL STATE " << init << "\n------     " << initial_stochastic_distribution << "\n";
       collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
@@ -9212,7 +9342,7 @@ std::cerr << "Parameters " << parameters << "\n";
     void generateLPEmCRLterm(
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
-      const process_expression& t,    // This process expression cannot be a reference.
+      const process_expression& t,    
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
@@ -9220,20 +9350,24 @@ std::cerr << "Parameters " << parameters << "\n";
       stochastic_distribution& initial_stochastic_distribution,
       lps::detail::ultimate_delay& ultimate_delay_condition)
     {
+std::cerr << "generateLPEmCRLterm " << t << "\n";
       if (is_process_instance_assignment(t))
       {
         generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
+std::cerr << "RECURSE " << t << "    " << init << "    " << initial_stochastic_distribution << "\n";
         std::size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
-        for (assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
+        for (assignment_list::const_iterator i=ass.begin();  i!=ass.end(); ++i)
         {
           sigma[i->lhs()]=i->rhs();
           const std::set<variable> varset=find_free_variables(i->rhs());
         }
 
+std::cerr << "PRE  " << init <<  "    " << pars  << "\n";
         init=substitute_assignmentlist(init,pars,false,true,sigma);
+std::cerr << "POST " << init <<  "    " << pars  << "\n";
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9251,6 +9385,7 @@ std::cerr << "Parameters " << parameters << "\n";
           }
         }
 
+std::cerr << "CCCCCCCCCCCCCCCCCC  " << init << "\n";
         if (regular && !options.do_not_apply_constelm)
         {
           // We apply constant elimination on the obtained linear process.
@@ -9259,10 +9394,14 @@ std::cerr << "Parameters " << parameters << "\n";
           // Note that this is only useful, in regular mode. This does not make sense if
           // stacks are being used.
 
+std::cerr << "EEEEEEEEEE  " << init << "\n";
+std::cerr << "EEEEEEEEEE2 " << pars << "\n";
           stochastic_linear_process lps(pars,deadlock_summands,action_summands);
-          stochastic_process_initializer initializer(init,stochastic_distribution(variable_list(),real_one())); // Default distribution.
+          // stochastic_process_initializer initializer(init,stochastic_distribution(variable_list(),real_one())); // Default distribution.
+          stochastic_process_initializer initializer(init,initial_stochastic_distribution); 
 
           stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
+std::cerr << "TEMPORARY SPEC " << temporary_spec << "\n";
           constelm_algorithm < rewriter, stochastic_specification > alg(temporary_spec,rewr);
 
           // Remove constants from the specification, where global variables are
@@ -9277,7 +9416,10 @@ std::cerr << "Parameters " << parameters << "\n";
 
           // Reconstruct the variables from the temporary specification
           init=temporary_spec.initial_process().assignments();
+std::cerr << "DDDDDDDDDD  " << init << "\n";
+
           pars=temporary_spec.process().process_parameters();
+std::cerr << "DDDDDDDDDD  " << pars << "\n";
 
           // Add all free variables in objectdata[n].parameters that are not already in the parameter list
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
@@ -9302,6 +9444,7 @@ std::cerr << "Parameters " << parameters << "\n";
           deadlock_summands=temporary_spec.process().deadlock_summands();
         }
         // Now constelm has been applied.
+std::cerr << "LPE mCRLterm  " << init << "\n";
         return;
       }
 
@@ -9444,6 +9587,7 @@ std::cerr << "Parameters " << parameters << "\n";
       /* If regular=1, then a regular version of the pCRL processes
          must be generated */
 
+std::cerr << "Generate LPE mCRL " << procIdDecl << "\n";
       std::size_t n=objectIndex(procIdDecl);
 
       if ((objectdata[n].processstatus==GNF)||
@@ -9453,6 +9597,7 @@ std::cerr << "Parameters " << parameters << "\n";
       {
         generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
                                objectdata[n].containstime,regular,pars,init,initial_stochastic_distribution);
+std::cerr << "LPE pCRL AAAAAA " << init << "\nSTOCH " << initial_stochastic_distribution << "\n";
         if (options.ignore_time)
         {
           ultimate_delay_condition=lps::detail::ultimate_delay();
@@ -9488,9 +9633,12 @@ std::cerr << "Parameters " << parameters << "\n";
           (objectdata[n].processstatus==mCRLlin)||
           (objectdata[n].processstatus==mCRL))
       {
+std::cerr << "START\n";
         objectdata[n].processstatus=mCRLlin;
-        return generateLPEmCRLterm(action_summands, deadlock_summands, objectdata[n].processbody,
+        generateLPEmCRLterm(action_summands, deadlock_summands, objectdata[n].processbody,
                                    regular, false, pars, init, initial_stochastic_distribution, ultimate_delay_condition);
+std::cerr << "LPE mCRL BBBBBBB " << init << "\nSTOCH " << initial_stochastic_distribution << "\n";
+        return;
       }
 
       throw mcrl2::runtime_error("laststatus: " + std::to_string(objectdata[n].processstatus));
@@ -11166,6 +11314,8 @@ std::cerr << "Parameters " << parameters << "\n";
 
       lps::detail::ultimate_delay dummy_ultimate_delay_condition;
       generateLPEmCRL(action_summands,deadlock_summands,init_, options.lin_method!=lmStack,parameters,initial_state,initial_stochastic_distribution,dummy_ultimate_delay_condition);
+std::cerr << "RESULT " << parameters << "    distribution " << initial_stochastic_distribution << "\n";
+std::cerr << "INITIAL STATE " << initial_state << "\n";
       allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
