@@ -1,5 +1,3 @@
-#include <utility>
-
 // Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -54,6 +52,20 @@ struct summand_class
   summand_class(const data::variable_list& e_, const pbes_expression& f_, const data::data_expression_list& g_)
    : e(e_), f(f_), g(g_)
   {}
+
+  // returns X_i -k->
+  bool maps_to(std::size_t i) const
+  {
+    return !nxt[i].empty();
+  }
+
+  // returns X_i -k-> j
+  bool maps_to(std::size_t i, std::size_t j) const
+  {
+    using utilities::detail::contains;
+
+    return contains(nxt[i], j);
+  }
 };
 
 // The part of a summand used for determining equivalence classes
@@ -183,7 +195,8 @@ class partial_order_reduction_algorithm
     // (X_i |- k -> X_j) <=> m_summand_classes[k].NES[i][j]
     std::vector<summand_class> m_summand_classes;
 
-    std::vector<accordance_pair> m_accordance;
+    std::vector<std::set<std::size_t>> m_DNA;
+    std::vector<std::set<std::size_t>> m_DNL;
 
     // j \in m_enabled[i] <=> ???
     std::vector<std::set<std::size_t>> m_enabled;
@@ -201,9 +214,9 @@ class partial_order_reduction_algorithm
       add_assignments(m_sigma, d, e);
       for (std::size_t k: m_enabled[i])
       {
-        const summand_class& summand = m_summand_classes[k];
-        const data::variable_list& e_k = summand.e;
-        const pbes_expression& f_k = summand.f;
+        const summand_class& summand_k = m_summand_classes[k];
+        const data::variable_list& e_k = summand_k.e;
+        const pbes_expression& f_k = summand_k.f;
         m_enumerator.enumerate(enumerator_element(e_k, f_k),
                                m_sigma,
                                [&](const enumerator_element&) {
@@ -224,8 +237,8 @@ class partial_order_reduction_algorithm
       std::set<std::size_t> result;
       for (std::size_t k: K)
       {
-        const summand_class& summand = m_summand_classes[k];
-        result.insert(summand.invis.begin(), summand.invis.end());
+        const summand_class& summand_k = m_summand_classes[k];
+        result.insert(summand_k.invis.begin(), summand_k.invis.end());
       }
       return result;
     }
@@ -281,13 +294,13 @@ class partial_order_reduction_algorithm
           std::set<std::size_t> T = set_intersection(Ts, en_X_e);
           for (std::size_t k: T)
           {
-            if (set_includes(Ts, m_accordance[k].DNA))
+            if (set_includes(Ts, m_DNA[k]))
             {
               return Ts;
             }
           }
           std::size_t k = *T.begin(); // TODO: choose k according to D2t
-          Twork = set_union(Twork, set_difference(m_accordance[k].DNA, Ts));
+          Twork = set_union(Twork, set_difference(m_DNA[k], Ts));
         }
         else
         {
@@ -296,7 +309,7 @@ class partial_order_reduction_algorithm
           Ts.insert(k);
           if (contains(en_X_e, k))
           {
-            Twork = set_union(Twork, set_difference(m_accordance[k].DNL, Ts));
+            Twork = set_union(Twork, set_difference(m_DNL[k], Ts));
             if (contains(m_vis, k))
             {
               Twork = set_union(Twork, m_vis);
@@ -318,11 +331,11 @@ class partial_order_reduction_algorithm
       std::size_t i = m_equation_index.index(X_e.name());
       for (std::size_t k: K)
       {
-        const summand_class& summand = m_summand_classes[k];
-        const data::variable_list& e_k = summand.e;
-        const pbes_expression& f_k = summand.f;
-        const data::data_expression_list& g_k = summand.g;
-        const auto& J = summand.nxt[i];
+        const summand_class& summand_k = m_summand_classes[k];
+        const data::variable_list& e_k = summand_k.e;
+        const pbes_expression& f_k = summand_k.f;
+        const data::data_expression_list& g_k = summand_k.g;
+        const auto& J = summand_k.nxt[i];
         m_enumerator.enumerate(enumerator_element(e_k, f_k),
                                m_sigma,
                                [&](const enumerator_element& p) {
@@ -384,6 +397,7 @@ class partial_order_reduction_algorithm
     void compute_NES()
     {
       using utilities::detail::set_union;
+      using utilities::detail::has_empty_intersection;
 
       struct parameter_info
       {
@@ -393,9 +407,11 @@ class partial_order_reduction_algorithm
         std::set<std::size_t> Vs; // variable set
       };
 
+      std::size_t n = m_pbes.equations().size();
       std::size_t N = m_summand_classes.size();
       std::vector<parameter_info> info(N);
       const std::vector<data::variable>& d = m_parameters;
+      std::unordered_map<std::pair<std::size_t, std::size_t>, bool> TsWs_empty_intersection_cache;
 
       auto compute_parameter_info = [&](summand_class& summand, parameter_info& info)
       {
@@ -431,13 +447,58 @@ class partial_order_reduction_algorithm
         info.Vs = set_union(info.Ts, set_union(info.Ws, info.Rs));
       };
 
+      // returns true if Ts(k1) and Ws(k2) have an empty intersection
+      auto TsWs_has_empty_intersection = [&](std::size_t k1, std::size_t k2)
+      {
+        auto key = std::make_pair(k1, k2);
+        auto i = TsWs_empty_intersection_cache.find(key);
+        if (i == TsWs_empty_intersection_cache.end())
+        {
+          bool value = has_empty_intersection(info[k1].Ts, info[k2].Ws);
+          i = TsWs_empty_intersection_cache.insert(std::make_pair(key, value)).first;
+        }
+        return i->second;
+      };
+
       for (std::size_t k = 0; k < N; k++)
       {
         compute_parameter_info(m_summand_classes[k], info[k]);
       }
 
       // compute NES
+      for (std::size_t k = 0; k < N; k++)
+      {
+        summand_class& summand_k = m_summand_classes[k];
+        for (std::size_t i = 0; i < n; i++)
+        {
+          std::set<std::size_t>& NES_i = summand_k.NES[i];
+          if (summand_k.maps_to(i))
+          {
+            for (std::size_t k1 = 0; k < N; k++)
+            {
+              if (TsWs_has_empty_intersection(k, k1))
+              {
+                NES_i.insert(k1);
+              }
+            }
+          }
+          else
+          {
+            for (std::size_t k1 = 0; k < N; k++)
+            {
+              const std::set<std::size_t> J = m_summand_classes[k].nxt[i];
+              if (J.size() > 1 || (J.size() == 1 && *J.begin() != i))
+              {
+                NES_i.insert(k1);
+              }
+            }
+          }
+        }
+      }
+    }
 
+    void compute_DNA_DNL()
+    {
     }
 
     void compute_summand_classes()
@@ -458,6 +519,7 @@ class partial_order_reduction_algorithm
       }
       compute_nxt();
       compute_NES();
+      compute_DNA_DNL();
     }
 
   public:
