@@ -742,7 +742,6 @@ class specification_basic_type
       const bool canterminate,
       const bool containstime)
     {
-std::cerr << "NEW PROCESS " << procId << "(" << pp(parameters) << ") := " << body << "\n";
       assert(procId.variables().size()==parameters.size());
       const std::string str=procId.name();
       addString(str);
@@ -2091,7 +2090,6 @@ std::cerr << "NEW PROCESS " << procId << "(" << pp(parameters) << ") := " << bod
         const process_instance_assignment q(p);
         std::size_t n=objectIndex(q.identifier());
         const variable_list parameters=objectdata[n].parameters;
-std::cerr << "SUBSTITUTE " << q.assignments() << "    " << parameters << "\n" << p << "\n";;
         const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma);
         assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
         return process_instance_assignment(q.identifier(),new_assignments);
@@ -2183,15 +2181,15 @@ std::cerr << "SUBSTITUTE " << q.assignments() << "    " << parameters << "\n" <<
       const variable_list& parameters,
       const process_expression& body)
     {
-      variable_list result; 
+      variable_vector result; 
       for(const variable& p: parameters) 
       {
         if (occursinpCRLterm(p,body,false))
         {
-          result.push_front(p);
+          result.push_back(p);
         }
       }
-      return result;
+      return variable_list(result.begin(),result.end());
     }
 
     // The variable below is used to count the number of new processes that
@@ -3057,7 +3055,6 @@ std::cerr << "SUBSTITUTE " << q.assignments() << "    " << parameters << "\n" <<
         data_expression_vector::const_iterator i=d.begin();
         for(const variable& v: sumvars)
         {
-std::cerr << "AASSS " << v << " := " << *i << "\n";
           sigma[v] = *i;
           ++i;
         }
@@ -3077,9 +3074,6 @@ std::cerr << "AASSS " << v << " := " << *i << "\n";
           resulting_stochastic_variables=vl;
           result_defined=true;
         }
-std::cerr << "Resulting distribution " << resulting_distribution << "\n";
-std::cerr << "Resulting stoch vars " << resulting_stochastic_variables << "\n";
-std::cerr << "Resulting body " << resulting_body << "\n";
       } 
       /* Put the distribution in front. */
 
@@ -3508,7 +3502,6 @@ std::cerr << "Resulting body " << resulting_body << "\n";
        this variable by a single one, putting the new variable
        on the todo list, to be transformed to regular form also. */
     {
-std::cerr << "To regular form " << t << "    freevars: " << freevars << "\n";
       if (is_choice(t))
       {
         const process_expression t1=to_regular_form(choice(t).left(),todo,freevars,variables_bound_in_sum);
@@ -3676,7 +3669,6 @@ std::cerr << "To regular form " << t << "    freevars: " << freevars << "\n";
        GNF where one action is always followed by a
        variable. */
     {
-std::cerr << "PROCSTOREAL GNF BOD " << body << "\n";
       if (is_at(body))
       {
         data_expression timecondition=sort_bool::true_();
@@ -3883,7 +3875,6 @@ std::cerr << "PROCSTOREAL GNF BOD " << body << "\n";
       {
         objectdata[n].processstatus=GNFbusy;
         std::set<variable> variables_bound_in_sum;
-std::cerr << "AAAA REALGNF BODY " << procIdDecl << "    " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
         const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,
                                    todo,regular,pCRL,objectdata[n].parameters,variables_bound_in_sum);
         if (objectdata[n].processstatus!=GNFbusy)
@@ -3891,8 +3882,6 @@ std::cerr << "AAAA REALGNF BODY " << procIdDecl << "    " << objectdata[n].proce
           throw mcrl2::runtime_error("There is something wrong with recursion.");
         }
 
-std::cerr << "AAAA RESULTING PROCESS " << t << "     " << "\n";
-std::cerr << "AAAA REALGNF BODY RESULT " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
         objectdata[n].processbody=t;
         objectdata[n].processstatus=GNF;
         return;
@@ -3902,11 +3891,8 @@ std::cerr << "AAAA REALGNF BODY RESULT " << objectdata[n].processbody << "   PAR
       {
         objectdata[n].processstatus=mCRLbusy;
         std::set<variable> variables_bound_in_sum;
-std::cerr << "REALGNF BODY " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
         const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,todo,
                                    regular,mCRL,objectdata[n].parameters,variables_bound_in_sum);
-std::cerr << "RESULTING PROCESS " << t << "     " << "\n";
-std::cerr << "REALGNF BODY RESULT " << objectdata[n].processbody << "   PARS " << objectdata[n].parameters << "\n";
         /* if the last result is not equal to NULL,
            the body of this process is itself a processidentifier */
 
@@ -3944,7 +3930,6 @@ std::cerr << "REALGNF BODY RESULT " << objectdata[n].processbody << "   PARS " <
       {
         const process_identifier pi=todo.back();
         todo.pop_back();
-std::cerr << "to real GNF: " << pi << "\n";
         procstorealGNFrec(pi,first,todo,regular);
       }
     }
@@ -4243,17 +4228,14 @@ std::cerr << "to real GNF: " << pi << "\n";
       {
         const std::size_t n = objectIndex(p);
         process_expression proc_=obtain_initial_distribution_term(objectdata[n].processbody);
-std::cerr << "PROCESS DIST " << p << "     " << proc_ << "\n";
         if (!is_stochastic_operator(proc_))
         {
           processes_with_stochastic_distribution_first.insert(std::pair< process_identifier, process_pid_pair >(p, process_pid_pair(proc_,p)));
           result.insert(p);
-std::cerr << "INSERT1 " << p << "\n";
         }
         else
         {
           const stochastic_operator& proc=down_cast<const stochastic_operator>(proc_);
-std::cerr << "EXTRACTED DISTRIBUTION " << proc << "\n";
           assert(!is_process_instance_assignment(proc.operand()));
           const std::size_t n=objectIndex(p);
           maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
@@ -4278,10 +4260,6 @@ std::cerr << "EXTRACTED DISTRIBUTION " << proc << "\n";
                                                         replace_variables_capture_avoiding_alt(proc.distribution(), local_sigma),
                                                         proc.operand()),
                                                    newproc)));
-std::cerr << "INSERTnew " << p << "     " << newproc << "\n" << "****** " << stochastic_operator(
-                                                        vars,
-                                                        replace_variables_capture_avoiding_alt(proc.distribution(), local_sigma),
-                                                        proc.operand()) << "\n";;
           result.insert(newproc);
         }
       }
@@ -5170,49 +5148,18 @@ std::cerr << "INSERTnew " << p << "     " << newproc << "\n" << "****** " << sto
     }
 
 
-    assignment_list pushdummyrec_regular(
-      const variable_list& totalpars,
+    assignment_list pushdummy_regular(
       const variable_list& pars,
       const stacklisttype& stack,
       const variable_list& stochastic_variables)
     {
-std::cerr << "PARAMETERS1 " << pp(totalpars) << "\n";
-std::cerr << "PARAMETERS2 " << pp(pars) << "\n";
-std::cerr << "PARAMETERS3 " << pp(stochastic_variables) << "\n";
-std::cerr << "----------------------------------------------------\n";
-      /* totalpars is the total list of parameters of the
+      /* stack.parameters is the total list of parameters of the
          aggregated pCRL process. The variable pars contains
          the list of all variables occuring in the initial
          process. */
 
-      /* if (totalpars.empty())
-      {
-        return assignment_list();
-      }
-
-      const variable& par=totalpars.front();
-      // Check whether it is a stochastic variable.
-      if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
-      {
-        assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
-        result.push_front(assignment(par,par));
-        return result;
-      }
-      // Otherwise, check that is is an ordinary parameter.
-      if (std::find(pars.begin(),pars.end(),par)!=pars.end())
-      {
-        assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
-        return result;
-      }
-      / * otherwise the value of this argument is irrelevant, so
-         make it a don't care variable. * /
-
-      assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
-      result.push_front(assignment(par,representative_generator_internal(par.sort())));
-      return result; */
-
       assignment_vector result;
-      for(const variable& par: totalpars)
+      for(const variable& par: stack.parameters)
       {
         // Check whether it is a stochastic variable.
         if (std::find(stochastic_variables.begin(),stochastic_variables.end(),par)!=pars.end())
@@ -5230,16 +5177,7 @@ std::cerr << "----------------------------------------------------\n";
           result.push_back(assignment(par,representative_generator_internal(par.sort())));
         }
       }
-std::cerr << "PARAMETERRESULT " << assignment_list(result.begin(), result.end()) << "\n";
       return assignment_list(result.begin(), result.end());
-    }
-
-    assignment_list pushdummy_regular(
-      const variable_list& parameters,
-      const stacklisttype& stack,
-      const variable_list& stochastic_variables)
-    {
-      return pushdummyrec_regular(stack.parameters,parameters,stack,stochastic_variables);
     }
 
     data_expression_list pushdummyrec_stack(
@@ -5309,12 +5247,10 @@ std::cerr << "PARAMETERRESULT " << assignment_list(result.begin(), result.end())
 
       if (regular)
       {
-std::cerr << "PAAAAAAARS " << objectdata[objectIndex(initialProcId)].parameters << "\n";
         assignment_list result=
           pushdummy_regular(objectdata[objectIndex(initialProcId)].parameters,
                             stack,
                             initial_stochastic_distribution.variables());
-std::cerr << "RESTULT PUSH DUMMY REGULAR " << result << "     " << initial_stochastic_distribution.variables() << "\n";
         if (!singlecontrolstate)
         {
           return processencoding(i,result,stack);
@@ -5619,7 +5555,6 @@ std::cerr << "RESTULT PUSH DUMMY REGULAR " << result << "     " << initial_stoch
       const bool singlestate,
       const std::set < process_identifier >& pCRLprocs)
     {
-std::cerr << "COLLECTSUM LIST " << body << "\n";
       if (is_choice(body))
       {
         const process_expression t1=choice(body).left();
@@ -7283,7 +7218,6 @@ std::cerr << "COLLECTSUM LIST " << body << "\n";
     /* A pair of initial state and linear process must be extracted
        from the underlying GNF */
     {
-std::cerr << "GENERATE LPE pCRL " << initial_stochastic_distribution << "\n";
       // We use action_summands and deadlock_summands as an output.
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
@@ -7319,14 +7253,12 @@ std::cerr << "GENERATE LPE pCRL " << initial_stochastic_distribution << "\n";
         singlecontrolstate=true;
       }
       parameters=collectparameterlist(stochastic_normalized_process_identifiers);
-std::cerr << "STACKVARSAA " << parameters << "\n";
 
       if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
         declare_control_state(stochastic_normalized_process_identifiers);
       }
       stacklisttype stack(parameters,*this,regular,stochastic_normalized_process_identifiers,singlecontrolstate);
-std::cerr << "STACKVARS0 " << stack.parameters << "\n";
 
       if (regular)
       {
@@ -7350,9 +7282,7 @@ std::cerr << "STACKVARS0 " << stack.parameters << "\n";
       {
         parameters = variable_list({ stack.stackvar });
       }
-std::cerr << "STACKVARS1 " << stack.parameters << "\n";
       init=make_initialstate(initial_proc_id,stack,stochastic_normalized_process_identifiers,regular,singlecontrolstate,initial_stochastic_distribution);
-std::cerr << "MAKE INITIAL STATE " << init << "\n------     " << initial_stochastic_distribution << "\n";
       collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
@@ -9390,12 +9320,10 @@ std::cerr << "MAKE INITIAL STATE " << init << "\n------     " << initial_stochas
       stochastic_distribution& initial_stochastic_distribution,
       lps::detail::ultimate_delay& ultimate_delay_condition)
     {
-std::cerr << "generateLPEmCRLterm " << t << "\n";
       if (is_process_instance_assignment(t))
       {
         generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),
                         regular,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-std::cerr << "RECURSE " << t << "    " << init << "    " << initial_stochastic_distribution << "\n";
         std::size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
@@ -9406,9 +9334,7 @@ std::cerr << "RECURSE " << t << "    " << init << "    " << initial_stochastic_d
           const std::set<variable> varset=find_free_variables(i->rhs());
         }
 
-std::cerr << "PRE  " << init <<  "    " << pars  << "\n";
         init=substitute_assignmentlist(init,pars,false,true,sigma);
-std::cerr << "POST " << init <<  "    " << pars  << "\n";
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9426,7 +9352,6 @@ std::cerr << "POST " << init <<  "    " << pars  << "\n";
           }
         }
 
-std::cerr << "CCCCCCCCCCCCCCCCCC  " << init << "\n";
         if (regular && !options.do_not_apply_constelm)
         {
           // We apply constant elimination on the obtained linear process.
@@ -9435,14 +9360,11 @@ std::cerr << "CCCCCCCCCCCCCCCCCC  " << init << "\n";
           // Note that this is only useful, in regular mode. This does not make sense if
           // stacks are being used.
 
-std::cerr << "EEEEEEEEEE  " << init << "\n";
-std::cerr << "EEEEEEEEEE2 " << pars << "\n";
           stochastic_linear_process lps(pars,deadlock_summands,action_summands);
           // stochastic_process_initializer initializer(init,stochastic_distribution(variable_list(),real_one())); // Default distribution.
           stochastic_process_initializer initializer(init,initial_stochastic_distribution); 
 
           stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
-std::cerr << "TEMPORARY SPEC " << temporary_spec << "\n";
           constelm_algorithm < rewriter, stochastic_specification > alg(temporary_spec,rewr);
 
           // Remove constants from the specification, where global variables are
@@ -9457,10 +9379,8 @@ std::cerr << "TEMPORARY SPEC " << temporary_spec << "\n";
 
           // Reconstruct the variables from the temporary specification
           init=temporary_spec.initial_process().assignments();
-std::cerr << "DDDDDDDDDD  " << init << "\n";
 
           pars=temporary_spec.process().process_parameters();
-std::cerr << "DDDDDDDDDD  " << pars << "\n";
 
           // Add all free variables in objectdata[n].parameters that are not already in the parameter list
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
@@ -9485,7 +9405,6 @@ std::cerr << "DDDDDDDDDD  " << pars << "\n";
           deadlock_summands=temporary_spec.process().deadlock_summands();
         }
         // Now constelm has been applied.
-std::cerr << "LPE mCRLterm  " << init << "\n";
         return;
       } // End process assignment. 
 
@@ -9653,8 +9572,6 @@ std::cerr << "LPE mCRLterm  " << init << "\n";
          must be generated */
 
       std::size_t n=objectIndex(procIdDecl);
-std::cerr << "+++++++++++++++++++++++++\n";
-std::cerr << "Generate LPE mCRL " << procIdDecl << " := " << objectdata[n].processbody << "\n";
 
       if ((objectdata[n].processstatus==GNF)||
           (objectdata[n].processstatus==pCRL)||
@@ -9663,7 +9580,6 @@ std::cerr << "Generate LPE mCRL " << procIdDecl << " := " << objectdata[n].proce
       {
         generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
                                objectdata[n].containstime,regular,pars,init,initial_stochastic_distribution);
-std::cerr << "LPE pCRL AAAAAA " << init << "\nSTOCH " << initial_stochastic_distribution << "\n";
         if (options.ignore_time)
         {
           ultimate_delay_condition=lps::detail::ultimate_delay();
@@ -9699,11 +9615,9 @@ std::cerr << "LPE pCRL AAAAAA " << init << "\nSTOCH " << initial_stochastic_dist
           (objectdata[n].processstatus==mCRLlin)||
           (objectdata[n].processstatus==mCRL))
       {
-std::cerr << "START\n";
         objectdata[n].processstatus=mCRLlin;
         generateLPEmCRLterm(action_summands, deadlock_summands, objectdata[n].processbody,
                                    regular, false, pars, init, initial_stochastic_distribution, ultimate_delay_condition);
-std::cerr << "LPE mCRL BBBBBBB " << init << "\nSTOCH " << initial_stochastic_distribution << "\n";
         return;
       }
 
@@ -10711,17 +10625,10 @@ std::cerr << "LPE mCRL BBBBBBB " << init << "\nSTOCH " << initial_stochastic_dis
 
       if (objectdata[n].processstatus==mCRL)
       {
-        /* insertProcDeclaration(
-          newProcId,
-          objectdata[n].parameters,
-          split_body(objectdata[n].processbody,
-                     visited_id,visited_proc,
-                     objectdata[n].parameters),
-          mCRL,0,false); */
+        visited_id[procId]=procId;
         objectdata[n].processbody = split_body(objectdata[n].processbody,
                                                visited_id,visited_proc,
                                                objectdata[n].parameters);
-        visited_id[procId]=procId;
         return procId;
       }
 
@@ -11390,8 +11297,6 @@ std::cerr << "LPE mCRL BBBBBBB " << init << "\nSTOCH " << initial_stochastic_dis
 
       lps::detail::ultimate_delay dummy_ultimate_delay_condition;
       generateLPEmCRL(action_summands,deadlock_summands,init_, options.lin_method!=lmStack,parameters,initial_state,initial_stochastic_distribution,dummy_ultimate_delay_condition);
-std::cerr << "RESULT " << parameters << "    distribution " << initial_stochastic_distribution << "\n";
-std::cerr << "INITIAL STATE " << initial_state << "\n";
       allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
       if (options.final_cluster)
       {

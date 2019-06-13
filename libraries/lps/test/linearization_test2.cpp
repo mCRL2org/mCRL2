@@ -43,6 +43,7 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
 {
   // Set various rewrite strategies
   rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);
+  std::clog << "Tested specification:\n" << spec << "\n------------------------------------\n";
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {

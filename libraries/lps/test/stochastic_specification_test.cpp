@@ -129,12 +129,12 @@ BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
   std::string result =
     "act  a: Bool # Bool;\n"
     "\n"
-    "proc P(b4_X,b3_X: Bool) =\n"
+    "proc P(b3_X,b4_X: Bool) =\n"
     "       a(b3_X, b4_X) .\n"
     "         dist b3_X1,b4_X1: Bool[if(b3_X1, 1 / 8, 3 / 8)] .\n"
-    "         P(b4_X = b4_X1, b3_X = b3_X1);\n"
+    "         P(b3_X = b3_X1, b4_X = b4_X1);\n"
     "\n"
-    "init dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] . P(b4, b3);\n"
+    "init dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] . P(b3, b4);\n"
     ;
 
   stochastic_specification spec=linearise(text);
