@@ -182,6 +182,45 @@ BOOST_AUTO_TEST_CASE(bound_variable)
   BOOST_CHECK(lps::detail::is_well_typed(spec));
 }
 
+/* The following test case requires that the sum operator is distributed over the dist operator.
+ * This is only possible, as it stands for finite domains. */
+BOOST_AUTO_TEST_CASE(distributed_sum_over_dist1)
+{
+  std::string text =
+    "act\n"
+    "  c:Bool#Bool;\n"
+    "\n"
+    "proc\n"
+    "  Q = sum b1: Bool. dist x0: Bool[if(x0,1/4,3/4)].c(b1,x0).delta;\n"
+    "  \n"
+    "init Q;\n";
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK(lps::detail::is_well_typed(spec));
+}
+
+/* A more elaborate example of the previous test case, where there are also distributions
+ * inside the linear process. */
+BOOST_AUTO_TEST_CASE(distributed_sum_over_dist2)
+{
+  std::string text =
+    "act  c: Bool # Bool;\n"
+    "  \n"
+    "glob dc,dc1,dc2,dc3: Bool;\n"
+    "\n"
+    "proc P(s1_Q: Pos, x: Bool) = \n"
+    "       (s1_Q == 2) ->\n"
+    "         c(true, x) .\n"
+    "         P(s1_Q = 1, x = dc)\n"
+    "     + delta;\n"
+    "         \n"
+    "init dist x: Bool[if(x, 1 / 4, 3 / 4)] . P(2, x);\n";
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK(lps::detail::is_well_typed(spec));
+}
+
+
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   return nullptr;
