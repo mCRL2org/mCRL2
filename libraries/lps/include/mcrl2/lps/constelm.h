@@ -100,6 +100,21 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       }
     }
 
+    // returns true if x contains free variables that are not in global_variables
+    bool is_constant(const data::data_expression& x, const std::set<data::variable>& global_variables) const
+    {
+      using utilities::detail::contains;
+
+      for (const data::variable& v: find_free_variables(x))
+      {
+        if (!contains(global_variables, v))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
   public:
 
     /// \brief Constructor
@@ -122,18 +137,17 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      data::data_expression_list vl = super::m_spec.initial_process().state(super::m_spec.process().process_parameters());
-      data::data_expression_vector r(vl.begin(), vl.end());
+      data::data_expression_list initial_state = super::m_spec.initial_process().state(super::m_spec.process().process_parameters());
+      data::data_expression_vector r(initial_state.begin(), initial_state.end());
 
       // essential: rewrite the initial state vector r to normal form. Essential
       // because this value is used in W below, and assigned to the right hand side of a substitution, which
       // must be a normal form.
       lps::rewrite(r, R);
 
-      auto& p = super::m_spec.process();
+      auto& process = super::m_spec.process();
       const std::set<data::variable>& global_variables = super::m_spec.global_variables();
-      data::variable_list V(global_variables.begin(), global_variables.end());
-      const data::variable_list& d = p.process_parameters();
+      const data::variable_list& d = process.process_parameters();
 
       // initialize m_index_of
       unsigned index = 0;
@@ -146,8 +160,16 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       std::set<data::variable> dG;
       for (const data::assignment& a: super::m_spec.initial_process().assignments())
       {
-        // The rewriter requires that the rhs's of a substitution are in normal form.
-        sigma[a.lhs()] = R(a.rhs());
+        // The rewriter requires that the right hand sides of a substitution are in normal form.
+        data::data_expression rhs = R(a.rhs());
+        if (is_constant(rhs, global_variables))
+        {
+          sigma[a.lhs()] = rhs;
+        }
+        else
+        {
+          G.erase(a.lhs());
+        }
       }
 
       // undo contains undo information of instantiations of free variables
@@ -156,10 +178,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       do
       {
         dG.clear();
-        for (auto i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
+        for (const auto& summand: process.action_summands())
         {
-          const action_summand& s = *i;
-          const data::data_expression& c_i = s.condition();
+          const data::data_expression& c_i = summand.condition();
           if (m_ignore_conditions || (R(c_i, sigma) != data::sort_bool::false_()))
           {
             for (const data::variable& j: G)
@@ -170,13 +191,13 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
               }
               std::size_t index_j = m_index_of[j];
               const data::variable& d_j = j;
-              data::data_expression g_ij = super::next_state(s, d_j);
+              data::data_expression g_ij = super::next_state(summand, d_j);
 
               if (R(g_ij, sigma) != R(d_j, sigma))
               {
                 LOG_PARAMETER_CHANGE(d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "POSSIBLE CHANGE FOR PARAMETER ");
                 data::data_expression z = R(g_ij, sigma);
-                if (is_variable(z) && contains(V, atermpp::down_cast<data::variable>(z)))
+                if (is_variable(z) && contains(global_variables, atermpp::down_cast<data::variable>(z)))
                 {
                   sigma[atermpp::down_cast<data::variable>(z)] = r[index_j];
                   undo[d_j].insert(atermpp::down_cast<data::variable>(z));
@@ -200,7 +221,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
           }
           else
           {
-            LOG_CONDITION(i->condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
+            LOG_CONDITION(summand.condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
           }
         }
         for (const data::variable& v: dG)
