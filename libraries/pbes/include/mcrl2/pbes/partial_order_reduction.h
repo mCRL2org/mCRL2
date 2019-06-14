@@ -165,13 +165,12 @@ class partial_order_reduction_algorithm
       }
     };
 
-    struct accordance_pair
+    struct parameter_info
     {
-      std::set<std::size_t> DNA;
-      std::set<std::size_t> DNL;
-      accordance_pair(std::set<std::size_t> DNA_, std::set<std::size_t> DNL_)
-       : DNA(std::move(DNA_)), DNL(std::move(DNL_))
-      {}
+      std::set<std::size_t> Ts; // test set
+      std::set<std::size_t> Ws; // write set
+      std::set<std::size_t> Rs; // read set
+      std::set<std::size_t> Vs; // variable set
     };
 
     data::rewriter m_rewr;
@@ -394,24 +393,201 @@ class partial_order_reduction_algorithm
       return result;
     }
 
-    void compute_NES()
+    void compute_NES(const std::vector<parameter_info>& info)
     {
       using utilities::detail::set_union;
       using utilities::detail::has_empty_intersection;
 
-      struct parameter_info
+      std::unordered_map<std::pair<std::size_t, std::size_t>, bool> TsWs_empty_intersection_cache;
+
+      // returns true if Ts(k1) and Ws(k2) have an empty intersection
+      auto TsWs_has_empty_intersection = [&](std::size_t k1, std::size_t k2)
       {
-        std::set<std::size_t> Ts; // test set
-        std::set<std::size_t> Ws; // write set
-        std::set<std::size_t> Rs; // read set
-        std::set<std::size_t> Vs; // variable set
+        auto key = std::make_pair(k1, k2);
+        auto i = TsWs_empty_intersection_cache.find(key);
+        if (i == TsWs_empty_intersection_cache.end())
+        {
+          bool value = has_empty_intersection(info[k1].Ts, info[k2].Ws);
+          i = TsWs_empty_intersection_cache.insert(std::make_pair(key, value)).first;
+        }
+        return i->second;
       };
 
       std::size_t n = m_pbes.equations().size();
       std::size_t N = m_summand_classes.size();
+
+      // compute NES
+      for (std::size_t k = 0; k < N; k++)
+      {
+        summand_class& summand_k = m_summand_classes[k];
+        for (std::size_t i = 0; i < n; i++)
+        {
+          std::set<std::size_t>& NES_i = summand_k.NES[i];
+          if (summand_k.maps_to(i))
+          {
+            for (std::size_t k1 = 0; k1 < N; k1++)
+            {
+              if (TsWs_has_empty_intersection(k, k1))
+              {
+                NES_i.insert(k1);
+              }
+            }
+          }
+          else
+          {
+            for (std::size_t k1 = 0; k < N; k++)
+            {
+              const std::set<std::size_t>& J = m_summand_classes[k].nxt[i];
+              if (J.size() > 1 || (J.size() == 1 && *J.begin() != i))
+              {
+                NES_i.insert(k1);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // returns X_i |--k--> X_j
+    bool maps_to(std::size_t i, std::size_t k, std::size_t j) const
+    {
+      return m_summand_classes[k].maps_to(i, j);
+    };
+
+    bool accords_DNL(std::size_t k, std::size_t k1) const
+    {
+      std::size_t n = m_pbes.equations().size();
+
+      for (std::size_t i = 0; i < n; i++)
+      {
+        for (std::size_t i1 = 0; i1 < n; i1++)
+        {
+          bool X_k1_X1 = maps_to(i, k1, i1);
+          for (std::size_t i_prime = 0; i_prime < n; i_prime++)
+          {
+            bool X1_k_Xprime = maps_to(i1, k, i_prime);
+            if (X_k1_X1 && X1_k_Xprime)
+            {
+              for (std::size_t i2 = 0; i2 < n; i2++)
+              {
+                bool X_k_X2 = maps_to(i, k, i2);
+                bool X2_k1_Xprime = maps_to(i2, k1, i_prime);
+                if (!(X_k_X2 && X2_k1_Xprime))
+                {
+                  return false;
+                }
+              }
+            }
+          }
+        }
+      }
+      return true;
+    }
+
+    bool accords_DNS(std::size_t k, std::size_t k1) const
+    {
+      std::size_t n = m_pbes.equations().size();
+
+      for (std::size_t i = 0; i < n; i++)
+      {
+        for (std::size_t i1 = 0; i1 < n; i1++)
+        {
+          bool X_k1_X1 = maps_to(i, k1, i1);
+          for (std::size_t i2 = 0; i2 < n; i2++)
+          {
+            bool X_k_X2 = maps_to(i, k, i2);
+            if (X_k1_X1 && X_k_X2)
+            {
+              bool found = false;
+              for (std::size_t i_prime = 0; i_prime < n; i_prime++)
+              {
+                bool X1_k_Xprime = maps_to(i1, k, i_prime);
+                bool X2_k1_Xprime = maps_to(i2, k1, i_prime);
+                if (X1_k_Xprime && X2_k1_Xprime)
+                {
+                  found = true;
+                  break;
+                }
+              }
+              if (!found)
+              {
+                return false;
+              }
+            }
+          }
+        }
+      }
+      return true;
+    }
+
+    bool accords_DNT(std::size_t k, std::size_t k1) const
+    {
+      std::size_t n = m_pbes.equations().size();
+
+      for (std::size_t i = 0; i < n; i++)
+      {
+        for (std::size_t i1 = 0; i1 < n; i1++)
+        {
+          bool X_k1_X1 = maps_to(i, k1, i1);
+          for (std::size_t i2 = 0; i2 < n; i2++)
+          {
+            bool X_k_X2 = maps_to(i, k, i2);
+            bool X2_k1_X1 = maps_to(i2, k1, i1);
+            if (X_k1_X1 && X_k_X2 && !X2_k1_X1)
+            {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    }
+
+    void compute_DNA_DNL(const std::vector<parameter_info>& info)
+    {
+      using utilities::detail::has_empty_intersection;
+      using utilities::detail::set_includes;
+      using utilities::detail::set_intersection;
+      using utilities::detail::set_union;
+
+      std::size_t N = m_summand_classes.size();
+
+      auto Rs = [&](const std::size_t k) { return info[k].Rs; };
+      auto Ts = [&](const std::size_t k) { return info[k].Ts; };
+      auto Vs = [&](const std::size_t k) { return info[k].Vs; };
+      auto Ws = [&](const std::size_t k) { return info[k].Ws; };
+
+      for (std::size_t k = 0; k < N; k++)
+      {
+        for (std::size_t k1 = 0; k1 < N; k1++)
+        {
+          bool DNL_DNS_criterion = set_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1))).empty();
+          bool DNT_criterion = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
+
+          bool not_in_DNL = DNL_DNS_criterion && accords_DNL(k, k1);
+          bool not_in_DNS = DNL_DNS_criterion && accords_DNS(k, k1);
+          bool not_in_DNT = DNT_criterion && accords_DNT(k, k1);
+
+          if (!not_in_DNL)
+          {
+            m_DNL[k].insert(k1);
+          }
+
+          if (!not_in_DNS && !not_in_DNT)
+          {
+            m_DNA[k].insert(k1);
+          }
+        }
+      }
+    }
+
+    void compute_NES_DNA_DNL()
+    {
+      using utilities::detail::set_union;
+
+      std::size_t N = m_summand_classes.size();
       std::vector<parameter_info> info(N);
       const std::vector<data::variable>& d = m_parameters;
-      std::unordered_map<std::pair<std::size_t, std::size_t>, bool> TsWs_empty_intersection_cache;
 
       auto compute_parameter_info = [&](summand_class& summand, parameter_info& info)
       {
@@ -447,58 +623,13 @@ class partial_order_reduction_algorithm
         info.Vs = set_union(info.Ts, set_union(info.Ws, info.Rs));
       };
 
-      // returns true if Ts(k1) and Ws(k2) have an empty intersection
-      auto TsWs_has_empty_intersection = [&](std::size_t k1, std::size_t k2)
-      {
-        auto key = std::make_pair(k1, k2);
-        auto i = TsWs_empty_intersection_cache.find(key);
-        if (i == TsWs_empty_intersection_cache.end())
-        {
-          bool value = has_empty_intersection(info[k1].Ts, info[k2].Ws);
-          i = TsWs_empty_intersection_cache.insert(std::make_pair(key, value)).first;
-        }
-        return i->second;
-      };
-
       for (std::size_t k = 0; k < N; k++)
       {
         compute_parameter_info(m_summand_classes[k], info[k]);
       }
 
-      // compute NES
-      for (std::size_t k = 0; k < N; k++)
-      {
-        summand_class& summand_k = m_summand_classes[k];
-        for (std::size_t i = 0; i < n; i++)
-        {
-          std::set<std::size_t>& NES_i = summand_k.NES[i];
-          if (summand_k.maps_to(i))
-          {
-            for (std::size_t k1 = 0; k < N; k++)
-            {
-              if (TsWs_has_empty_intersection(k, k1))
-              {
-                NES_i.insert(k1);
-              }
-            }
-          }
-          else
-          {
-            for (std::size_t k1 = 0; k < N; k++)
-            {
-              const std::set<std::size_t> J = m_summand_classes[k].nxt[i];
-              if (J.size() > 1 || (J.size() == 1 && *J.begin() != i))
-              {
-                NES_i.insert(k1);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    void compute_DNA_DNL()
-    {
+      compute_NES(info);
+      compute_DNA_DNL(info);
     }
 
     void compute_summand_classes()
@@ -518,8 +649,7 @@ class partial_order_reduction_algorithm
         }
       }
       compute_nxt();
-      compute_NES();
-      compute_DNA_DNL();
+      compute_NES_DNA_DNL();
     }
 
   public:
