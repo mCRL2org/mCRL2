@@ -260,7 +260,7 @@ class specification_basic_type
       terminationAction=action(action_label(fresh_identifier_generator("Terminate"),sort_expression_list()),data_expression_list());
       terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"), variable_list());
 // /* Changed delta() to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
-      insertProcDeclaration(
+      insert_process_declaration(
         terminatedProcId,
         variable_list(),
         seq(terminationAction,delta()),
@@ -734,9 +734,9 @@ class specification_basic_type
 
     /************ storeprocs *************************************************/
 
-    std::size_t insertProcDeclaration(
-      const process_identifier& procId, // This should not be a reference.
-      const variable_list& parameters,  // This should not be a reference.
+    std::size_t insert_process_declaration(
+      const process_identifier& procId, 
+      const variable_list& parameters,  
       const process_expression& body,
       processstatustype s,
       const bool canterminate,
@@ -771,7 +771,7 @@ class specification_basic_type
       for (std::vector< process_equation >::const_iterator i=procs.begin();
            i!=procs.end(); ++i)
       {
-        insertProcDeclaration(
+        insert_process_declaration(
           i->identifier(),
           i->formal_parameters(),
           i->expression(),
@@ -813,7 +813,7 @@ class specification_basic_type
          because it cannot occur as a string in the input */
 
       process_identifier initprocess(std::string("init"), variable_list());
-      insertProcDeclaration(initprocess,variable_list(),init,unknown,0,false);
+      insert_process_declaration(initprocess,variable_list(),init,unknown,0,false);
       return initprocess;
     }
 
@@ -2237,7 +2237,7 @@ class specification_basic_type
       const core::identifier_string s=fresh_identifier_generator("P");
       const process_identifier p(s, parameters1);
       assert(std::string(p.name()).size()>0);
-      insertProcDeclaration(
+      insert_process_declaration(
         p,
         parameters1,
         body,
@@ -9999,15 +9999,19 @@ class specification_basic_type
         if (is_stochastic_operator(new_process))
         {
           // Add the initial stochastic_distribution.
-          const process_identifier new_identifier=processes_with_initial_distribution.at(u.identifier()).process_id();
+          const process_identifier& new_identifier=processes_with_initial_distribution.at(u.identifier()).process_id();
           const std::size_t n=objectIndex(new_identifier);
-          variable_list new_parameters=objectdata[n].parameters;
-          const stochastic_operator& sto=down_cast<const stochastic_operator>(new_process);
+          const variable_list new_parameters=objectdata[n].parameters;
+          const stochastic_operator& sto=down_cast<stochastic_operator>(new_process);
           assignment_list new_assignments;
-          for(const variable& v: sto.variables())
+          
+          const variable_list relevant_stochastic_variables=parameters_that_occur_in_body(sto.variables(),objectdata[n].processbody);
+          assert(relevant_stochastic_variables.size()<=new_parameters.size());
+          variable_list::const_iterator i=new_parameters.begin();
+          for(const variable& v: relevant_stochastic_variables)
           {
-            new_assignments=push_back(new_assignments,assignment(new_parameters.front(),v));
-            new_parameters.pop_front();
+            new_assignments=push_back(new_assignments,assignment(*i,v));
+            i++;
           }
           // Some of the variables may occur only in the distribution, which is now moved out.
           // Therefore, the assignments must be filtered.
@@ -10640,7 +10644,7 @@ class specification_basic_type
       if (objectdata[n].canterminate)
       {
         assert(check_valid_process_instance_assignment(terminatedProcId,assignment_list()));
-        insertProcDeclaration(
+        insert_process_declaration(
           newProcId,
           objectdata[n].parameters,
           seq(objectdata[n].processbody, process_instance_assignment(terminatedProcId,assignment_list())),

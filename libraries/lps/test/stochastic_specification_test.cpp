@@ -217,7 +217,19 @@ BOOST_AUTO_TEST_CASE(distributed_sum_over_dist2)
   stochastic_specification spec=linearise(text);
   BOOST_CHECK(lps::detail::is_well_typed(spec));
 }
-
+/* The following example shows an initial distribution with variables
+ * that are not used in the body. */
+BOOST_AUTO_TEST_CASE(non_bound_initial_stochastic_variables)
+{
+  std::string text =
+    "act a;\n"
+    "\n"
+    "proc P = (true -> delta <> (dist x0: Bool[1 / 2] . x0 -> a)) . P;\n"
+    "\n"
+    "init P;\n";
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK(lps::detail::is_well_typed(spec));
+}
 
 
 
