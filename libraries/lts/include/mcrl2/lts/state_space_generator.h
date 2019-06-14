@@ -541,7 +541,7 @@ struct state_space_generator
   bool m_timed;
 
   state_space_generator(const lps::specification& lpsspec, const lps::explorer_options& options_)
-    : options(options_), 
+    : options(options_),
       explorer(lpsspec, options_),
       m_trace_constructor(explorer),
       m_action_detector(lpsspec, m_trace_constructor, options.trace_actions, options.trace_multiactions, options.trace_prefix, options.max_traces),
@@ -627,7 +627,7 @@ struct state_space_generator
       m_progress_monitor.finish_exploration(explorer.state_map().size());
       builder.finalize(explorer.state_map());
     }
-    catch (const lps::enumerator_error& e)
+    catch (const data::enumerator_error& e)
     {
       mCRL2log(log::error) << "Error while exploring state space: " << e.what() << "\n";
       if (options.save_error_trace)
@@ -746,7 +746,7 @@ struct stochastic_state_space_generator
       m_progress_monitor.finish_exploration(explorer.state_map().size());
       builder.finalize(explorer.state_map());
     }
-    catch (const lps::enumerator_error& e)
+    catch (const data::enumerator_error& e)
     {
       mCRL2log(log::error) << "Error while exploring state space: " << e.what() << "\n";
       if (options.save_error_trace)

@@ -434,9 +434,9 @@ class divergence_detector
           discovered,
           m_regular_summands,
           m_confluent_summands,
-          lps::skip(), // discover_state
-          lps::skip(), // examine_transition
-          lps::skip(), // tree_edge
+          utilities::skip(), // discover_state
+          utilities::skip(), // examine_transition
+          utilities::skip(), // tree_edge
 
           // back_edge
           [&](const lps::state& s0, const process::timed_multi_action& a, const state_type& s1) {
@@ -470,9 +470,9 @@ class divergence_detector
           discovered,
           m_regular_summands,
           m_confluent_summands,
-          lps::skip(), // discover_state
-          lps::skip(), // examine_transition
-          lps::skip(), // tree_edge
+          utilities::skip(), // discover_state
+          utilities::skip(), // examine_transition
+          utilities::skip(), // tree_edge
 
           // back_edge
           [&](const lps::state& s0, const process::timed_multi_action& a, const state_type& s1) {
@@ -601,7 +601,7 @@ struct state_space_generator
   detail::progress_monitor m_progress_monitor;
 
   state_space_generator(const Specification& lpsspec, const lps::explorer_options& options_)
-    : options(options_), 
+    : options(options_),
       explorer(lpsspec, options_),
       m_trace_constructor(explorer),
       m_action_detector(lpsspec, m_trace_constructor, options.trace_actions, options.trace_multiactions, options.trace_prefix, options.max_traces),
@@ -706,7 +706,7 @@ struct state_space_generator
       m_progress_monitor.finish_exploration(explorer.state_map().size());
       builder.finalize(explorer.state_map());
     }
-    catch (const lps::enumerator_error& e)
+    catch (const data::enumerator_error& e)
     {
       mCRL2log(log::error) << "Error while exploring state space: " << e.what() << "\n";
       if (options.save_error_trace)

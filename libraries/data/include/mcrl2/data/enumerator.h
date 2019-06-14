@@ -215,6 +215,13 @@ bool is_enumerable(const data_specification& dataspec, const Rewriter& rewr, con
 
 } // namespace detail
 
+/// \brief Enumerator exception
+struct enumerator_error: public mcrl2::runtime_error
+{
+  explicit enumerator_error(const std::string& message): mcrl2::runtime_error(message)
+  {}
+};
+
 template <typename Rewriter>
 static bool is_enumerable(const data_specification& dataspec, const Rewriter& rewr, const sort_expression& sort)
 {

@@ -23,6 +23,7 @@
 #include <utility>
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_options.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
@@ -35,22 +36,10 @@
 #include "mcrl2/process/timed_multi_action.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/detail/io.h"
+#include "mcrl2/utilities/skip.h"
 #include "mcrl2/utilities/unused.h"
 
 namespace mcrl2::lps {
-
-struct enumerator_error: public mcrl2::runtime_error
-{
-  explicit enumerator_error(const std::string& message): mcrl2::runtime_error(message)
-  { }
-};
-
-/// \brief The skip operation with a variable number of arguments
-struct skip
-{
-  template<typename... Args>
-  void operator()(const Args&...) const {}
-};
 
 enum class caching { none, local, global };
 
@@ -65,29 +54,6 @@ std::ostream& operator<<(std::ostream& os, caching c)
     default: os.setstate(std::ios_base::failbit);
   }
   return os;
-}
-
-template <typename VariableSequence, typename DataExpressionSequence>
-inline
-void add_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v, const DataExpressionSequence& e)
-{
-  assert(v.size() <= e.size());
-  auto vi = v.begin();
-  auto ei = e.begin();
-  for (; vi != v.end(); ++vi, ++ei)
-  {
-    sigma[*vi] = *ei;
-  }
-}
-
-template <typename VariableSequence>
-inline
-void remove_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v)
-{
-  for (const data::variable& vi: v)
-  {
-    sigma[vi] = vi;
-  }
 }
 
 inline
@@ -548,7 +514,7 @@ class explorer: public abortable
                     },
                     [](const data::data_expression& x) { return x == real_zero(); }
         );
-        remove_assignments(m_sigma, distribution.variables());
+        data::remove_assignments(m_sigma, distribution.variables());
         check_stochastic_state(result, m_rewr);
       }
       else
@@ -584,22 +550,22 @@ class explorer: public abortable
       {
         data::data_expression condition = data::replace_variables(summand.condition, m_sigma);
 
-        remove_assignments(m_sigma, m_process_parameters);
-        remove_assignments(m_sigma, summand.variables);
+        data::remove_assignments(m_sigma, m_process_parameters);
+        data::remove_assignments(m_sigma, summand.variables);
         data::data_expression reduced_condition = m_rewr(summand.condition, m_sigma);
 
         std::string printed_condition = data::pp(condition).substr(0, 300);
 
-        throw enumerator_error("Expression " + data::pp(reduced_condition) +
-                               " does not rewrite to true or false in the condition "
-                               + printed_condition
-                               + (printed_condition.size() >= 300 ? "..." : ""));
+        throw data::enumerator_error("Expression " + data::pp(reduced_condition) +
+                                     " does not rewrite to true or false in the condition "
+                                     + printed_condition
+                                     + (printed_condition.size() >= 300 ? "..." : ""));
       }
     }
 
     // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
-    template <typename SummandSequence, typename ReportTransition = skip>
+    template <typename SummandSequence, typename ReportTransition = utilities::skip>
     void generate_transitions(
       const explorer_summand& summand,
       const SummandSequence& confluent_summands,
@@ -636,7 +602,7 @@ class explorer: public abortable
                         }
                         if (m_recursive)
                         {
-                          remove_assignments(m_sigma, summand.variables);
+                          data::remove_assignments(m_sigma, summand.variables);
                         }
                         report_transition(a, s1);
                         return false;
@@ -670,7 +636,7 @@ class explorer: public abortable
         }
         for (const data::data_expression_list& e: q->second)
         {
-          add_assignments(m_sigma, summand.variables, e);
+          data::add_assignments(m_sigma, summand.variables, e);
           process::timed_multi_action a = rewrite_action(summand.multi_action);
           state_type s1;
           if constexpr (Stochastic)
@@ -687,14 +653,14 @@ class explorer: public abortable
           }
           if (m_recursive)
           {
-            remove_assignments(m_sigma, summand.variables);
+            data::remove_assignments(m_sigma, summand.variables);
           }
           report_transition(a, s1);
         }
       }
       if (!m_recursive)
       {
-        remove_assignments(m_sigma, summand.variables);
+        data::remove_assignments(m_sigma, summand.variables);
       }
     }
 
@@ -702,7 +668,7 @@ class explorer: public abortable
     std::list<transition> out_edges(const state& s, const SummandSequence& regular_summands, const SummandSequence& confluent_summands)
     {
       std::list<transition> transitions;
-      add_assignments(m_sigma, m_process_parameters, s);
+      data::add_assignments(m_sigma, m_process_parameters, s);
       for (const explorer_summand& summand: regular_summands)
       {
         generate_transitions(
@@ -740,7 +706,7 @@ class explorer: public abortable
     )
     {
       std::vector<state> result;
-      add_assignments(m_sigma, m_process_parameters, s0);
+      data::add_assignments(m_sigma, m_process_parameters, s0);
       for (const explorer_summand& summand: summands)
       {
         generate_transitions(
@@ -751,7 +717,7 @@ class explorer: public abortable
             result.push_back(s1);
           }
         );
-        remove_assignments(m_sigma, summand.variables);
+        data::remove_assignments(m_sigma, summand.variables);
       }
       return result;
     }
@@ -851,11 +817,11 @@ class explorer: public abortable
     template <
       typename StateType,
       typename SummandSequence,
-      typename DiscoverState = skip,
-      typename ExamineTransition = skip,
-      typename StartState = skip,
-      typename FinishState = skip,
-      typename DiscoverInitialState = skip
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename StartState = utilities::skip,
+      typename FinishState = utilities::skip,
+      typename DiscoverInitialState = utilities::skip
     >
     void generate_state_space(
       bool recursive,
@@ -905,7 +871,7 @@ class explorer: public abortable
         state s = todo->choose_element();
         std::size_t s_index = discovered.find(s)->second;
         start_state(s, s_index);
-        add_assignments(m_sigma, m_process_parameters, s);
+        data::add_assignments(m_sigma, m_process_parameters, s);
         for (const explorer_summand& summand: regular_summands)
         {
           generate_transitions(
@@ -980,11 +946,11 @@ class explorer: public abortable
     /// \param start_state Is invoked on a state right before its outgoing transitions are being explored.
     /// \param finish_state Is invoked on a state after all of its outgoing transitions have been explored.
     template <
-      typename DiscoverState = skip,
-      typename ExamineTransition = skip,
-      typename StartState = skip,
-      typename FinishState = skip,
-      typename DiscoverInitialState = skip
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename StartState = utilities::skip,
+      typename FinishState = utilities::skip,
+      typename DiscoverInitialState = utilities::skip
     >
     void generate_state_space(
       bool recursive,
@@ -1020,7 +986,7 @@ class explorer: public abortable
     {
       data::data_expression_list process_parameter_undo = process_parameter_values();
       std::vector<std::pair<lps::multi_action, state_type>> result;
-      add_assignments(m_sigma, m_process_parameters, d0);
+      data::add_assignments(m_sigma, m_process_parameters, d0);
       for (const explorer_summand& summand: m_regular_summands)
       {
         generate_transitions(
@@ -1049,7 +1015,7 @@ class explorer: public abortable
       data::data_expression_list process_parameter_undo = process_parameter_values();
       state d0 = compute_state(init);
       std::vector<std::pair<lps::multi_action, state_type>> result;
-      add_assignments(m_sigma, m_process_parameters, d0);
+      data::add_assignments(m_sigma, m_process_parameters, d0);
       generate_transitions(
         m_regular_summands[i],
         m_confluent_summands,
@@ -1058,7 +1024,7 @@ class explorer: public abortable
           result.emplace_back(lps::multi_action(a), d1);
         }
       );
-      remove_assignments(m_sigma, m_regular_summands[i].variables);
+      data::remove_assignments(m_sigma, m_regular_summands[i].variables);
       set_process_parameter_values(process_parameter_undo);
       return result;
     }
@@ -1067,12 +1033,12 @@ class explorer: public abortable
     // N.B. Does not support stochastic specifications!
     template <
       typename SummandSequence,
-      typename DiscoverState = skip,
-      typename ExamineTransition = skip,
-      typename TreeEdge = skip,
-      typename BackEdge = skip,
-      typename ForwardOrCrossEdge = skip,
-      typename FinishState = skip
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
     >
     void generate_state_space_dfs_recursive(
       const state& s0,
@@ -1140,12 +1106,12 @@ class explorer: public abortable
     }
 
     template <
-      typename DiscoverState = skip,
-      typename ExamineTransition = skip,
-      typename TreeEdge = skip,
-      typename BackEdge = skip,
-      typename ForwardOrCrossEdge = skip,
-      typename FinishState = skip
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
     >
     void generate_state_space_dfs_recursive(
       bool recursive,
@@ -1178,12 +1144,12 @@ class explorer: public abortable
     // N.B. Does not support stochastic specifications!
     template <
       typename SummandSequence,
-      typename DiscoverState = skip,
-      typename ExamineTransition = skip,
-      typename TreeEdge = skip,
-      typename BackEdge = skip,
-      typename ForwardOrCrossEdge = skip,
-      typename FinishState = skip
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
     >
     void generate_state_space_dfs_iterative(
       const state& s0,
@@ -1262,12 +1228,12 @@ class explorer: public abortable
     }
 
     template <
-      typename DiscoverState = skip,
-      typename ExamineTransition = skip,
-      typename TreeEdge = skip,
-      typename BackEdge = skip,
-      typename ForwardOrCrossEdge = skip,
-      typename FinishState = skip
+      typename DiscoverState = utilities::skip,
+      typename ExamineTransition = utilities::skip,
+      typename TreeEdge = utilities::skip,
+      typename BackEdge = utilities::skip,
+      typename ForwardOrCrossEdge = utilities::skip,
+      typename FinishState = utilities::skip
     >
     void generate_state_space_dfs_iterative(
       bool recursive,
@@ -1329,7 +1295,7 @@ class explorer: public abortable
 
     void set_process_parameter_values(const data::data_expression_list& values)
     {
-      add_assignments(m_sigma, m_process_parameters, values);
+      data::add_assignments(m_sigma, m_process_parameters, values);
     }
 };
 

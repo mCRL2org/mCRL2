@@ -14,29 +14,16 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/skip.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
-
-// TODO: reuse this code
-struct enumerator_error: public mcrl2::runtime_error
-{
-  explicit enumerator_error(const std::string& message): mcrl2::runtime_error(message)
-  { }
-};
-
-// TODO: reuse this code
-/// \brief The skip operation with a variable number of arguments
-struct skip
-{
-  template<typename... Args>
-  void operator()(const Args&...) const {}
-};
 
 struct summand_class
 {
@@ -121,31 +108,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-// TODO: reuse this code
-template <typename VariableSequence, typename DataExpressionSequence>
-inline
-void add_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v, const DataExpressionSequence& e)
-{
-  assert(v.size() <= e.size());
-  auto vi = v.begin();
-  auto ei = e.begin();
-  for (; vi != v.end(); ++vi, ++ei)
-  {
-    sigma[*vi] = *ei;
-  }
-}
-
-// TODO: reuse this code
-template <typename VariableSequence>
-inline
-void remove_assignments(data::mutable_indexed_substitution<>& sigma, const VariableSequence& v)
-{
-  for (const data::variable& vi: v)
-  {
-    sigma[vi] = vi;
-  }
-}
-
 class partial_order_reduction_algorithm
 {
   protected:
@@ -200,7 +162,6 @@ class partial_order_reduction_algorithm
     // j \in m_enabled[i] <=> ???
     std::vector<std::set<std::size_t>> m_enabled;
 
-    // TODO: remove one of the attributes below
     std::set<std::size_t> m_invis; // invisible summand classes
     std::set<std::size_t> m_vis;   // visible summand classes
 
@@ -652,6 +613,44 @@ class partial_order_reduction_algorithm
       compute_NES_DNA_DNL();
     }
 
+    void compute_vis_invis()
+    {
+      using utilities::detail::contains;
+
+      std::size_t n = m_pbes.equations().size();
+      std::size_t N = m_summand_classes.size();
+
+      for (std::size_t i = 0; i < n; i++)
+      {
+        const srf_equation& eqn = m_pbes.equations()[i];
+        const core::identifier_string& X_i = eqn.variable().name();
+        bool op_i = eqn.is_conjunctive();
+        std::size_t rank_i = m_equation_index.rank(X_i);
+
+        for (const srf_summand& summand: eqn.summands())
+        {
+          const core::identifier_string& X_j = summand.variable().name();
+          std::size_t j = m_equation_index.index(X_j);
+          std::size_t rank_j = m_equation_index.rank(X_j);
+          bool op_j = m_pbes.equations()[j].is_conjunctive();
+          bool is_invisible = op_i == op_j && rank_i == rank_j;
+          if (!is_invisible)
+          {
+            std::size_t k = m_summand_index[summand_equivalence_key(summand)];
+            m_vis.insert(k);
+          }
+        }
+      }
+
+      for (std::size_t k = 0; k < N; k++)
+      {
+        if (!contains(m_vis, k))
+        {
+          m_invis.insert(k);
+        }
+      }
+    }
+
   public:
     explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy)
      : m_rewr(p.data(),
@@ -671,11 +670,12 @@ class partial_order_reduction_algorithm
       }
 
       compute_summand_classes();
+      compute_vis_invis();
     }
 
     template <
-      typename EmitNode = skip,
-      typename EmitEdge = skip
+      typename EmitNode = utilities::skip,
+      typename EmitEdge = utilities::skip
     >
     void explore(
       const propositional_variable_instantiation& X_init,
