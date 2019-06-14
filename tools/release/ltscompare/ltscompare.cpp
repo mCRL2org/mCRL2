@@ -38,27 +38,16 @@ using namespace mcrl2::log;
 
 struct t_tool_options
 {
-  // defaults
-  t_tool_options():
-    name_for_first(""),
-    name_for_second(""),
-    format_for_first(lts_none),
-    format_for_second(lts_none),
-    equivalence(lts_eq_none),
-    preorder(lts_pre_none),
-    strategy(mcrl2::lps::es_breadth),
-    generate_counter_examples(false)
-  {}
-
-  std::string     name_for_first;
-  std::string     name_for_second;
-  lts_type        format_for_first;
-  lts_type        format_for_second;
-  lts_equivalence equivalence;
-  lts_preorder    preorder;
-  mcrl2::lps::exploration_strategy strategy;
+  std::string     name_for_first  = "";
+  std::string     name_for_second = "";
+  lts_type        format_for_first = lts_none;
+  lts_type        format_for_second = lts_none;
+  lts_equivalence equivalence = lts_eq_none;
+  lts_preorder    preorder = lts_pre_none;
+  mcrl2::lps::exploration_strategy strategy = mcrl2::lps::es_breadth;
   std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
-  bool generate_counter_examples;
+  bool generate_counter_examples = false;
+  bool enable_preprocessing      = true;
 };
 
 typedef  input_tool ltscompare_base;
@@ -121,7 +110,7 @@ class ltscompare_tool : public ltscompare_base
         mCRL2log(verbose) << "comparing LTSs using " <<
                      tool_options.equivalence << "..." << std::endl;
 
-        result = destructive_compare(l1, l2, tool_options.equivalence,tool_options.generate_counter_examples);
+        result = destructive_compare(l1, l2, tool_options.equivalence, tool_options.generate_counter_examples);
 
         mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
                        << "equal ("
@@ -134,7 +123,7 @@ class ltscompare_tool : public ltscompare_base
                      description(tool_options.preorder) << "..."
                      " using the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
 
-        result = destructive_compare(l1, l2, tool_options.preorder, tool_options.generate_counter_examples, tool_options.strategy);
+        result = destructive_compare(l1, l2, tool_options.preorder, tool_options.generate_counter_examples, tool_options.strategy, tool_options.enable_preprocessing);
 
         mCRL2log(info) << "The LTS in " << tool_options.name_for_first
                        << " is " << ((result) ? "" : "not ")
@@ -266,7 +255,9 @@ class ltscompare_tool : public ltscompare_base
                  "be internal (tau) actions in addition to those defined as such by "
                  "the input").
       add_option("counter-example",
-                 "generate counter example traces if the input lts's are not equivalent",'c');
+                 "generate counter example traces if the input lts's are not equivalent",'c').
+      add_hidden_option("no-preprocessing",
+                 "disable preprocessing applied to the input LTSs for refinement checking",'\0');
     }
 
     void parse_options(const command_line_parser& parser) override
@@ -294,6 +285,11 @@ class ltscompare_tool : public ltscompare_base
         {
           parser.error("counter examples cannot be used with the plain weak trace pre-order (use weak-trace-ac instead");
         }
+      }
+
+      if (parser.has_option("no-preprocessing"))
+      {
+        tool_options.enable_preprocessing = false;
       }
 
       if (parser.has_option("tau"))

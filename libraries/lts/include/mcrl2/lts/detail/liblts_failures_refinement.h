@@ -250,10 +250,11 @@ std::pair<std::size_t, bool> reduce(LTS_TYPE& lts,
 /// sense of trace inclusions, failures inclusion and divergence failures
 /// inclusion.
 /// \param weak_reduction Remove inert tau loops.
+/// \param strategy Choose between breadth and depth first.
+/// \param preprocess Uses (divergence preserving) branching bisimulation and tau scc reduction to reduce the input LTSs.
 /// \param generate_counter_example If set, a labelled transition system is generated
 ///        that can act as a counterexample. It consists of a trace, followed by
 ///        outgoing transitions representing a refusal set.
-/// \param strategy Choose between breadth and depth first.
 template < class LTS_TYPE, class COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor >
 bool destructive_refinement_checker(
                         LTS_TYPE& l1,
@@ -261,6 +262,7 @@ bool destructive_refinement_checker(
                         const refinement_type refinement,
                         const bool weak_reduction,
                         const lps::exploration_strategy strategy,
+                        const bool preprocess = true,
                         COUNTER_EXAMPLE_CONSTRUCTOR generate_counter_example = detail::dummy_counter_example_constructor())
 {
   assert(strategy == lps::exploration_strategy::es_breadth || strategy == lps::exploration_strategy::es_depth); // Need a valid strategy.
@@ -271,7 +273,7 @@ bool destructive_refinement_checker(
   // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
   const bool preserve_divergence = weak_reduction && (refinement != trace);
 
-  if (!generate_counter_example.is_dummy())
+  if (!generate_counter_example.is_dummy() && preprocess)
   {
     // Counter example is requested, apply bisimulation to l2.
     reduce(l2, weak_reduction, preserve_divergence, l2.initial_state());
@@ -281,7 +283,7 @@ bool destructive_refinement_checker(
   mcrl2::lts::detail::merge(l1, l2);
   l2.clear(); // No use for l2 anymore.
 
-  if (generate_counter_example.is_dummy())
+  if (generate_counter_example.is_dummy() && preprocess)
   {
     // No counter example is requested. We can use bisimulation preprocessing.
     bool initial_equal = false;

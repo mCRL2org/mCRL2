@@ -248,6 +248,9 @@ bool compare(const LTS_TYPE& l1,
  * compared.
  * \param[in] generate_counter_example Indicates whether a file containing a counter example is
  *            generated when the comparison fails.
+ * \param[in] strategy Choose breadth-first or depth-first for exploration strategy
+ *            of the antichain algorithms.
+ * \param[in] preprocess Whether to allow preprocessing of the given LTSs.
  * \retval true if LTS \a l1 is smaller than LTS \a l2 according to
  * preorder \a pre.
  * \retval false otherwise.
@@ -262,7 +265,9 @@ template <class LTS_TYPE >
 bool destructive_compare(LTS_TYPE& l1,
                          LTS_TYPE& l2,
                          const lts_preorder pre,
-                         const bool generate_counter_example);
+                         const bool generate_counter_example,
+                         const lps::exploration_strategy strategy = lps::es_breadth,
+                         const bool preprocess = true);
 
 /** \brief Checks whether this LTS is smaller than another LTS according
  * to a preorder.
@@ -273,6 +278,7 @@ bool destructive_compare(LTS_TYPE& l1,
  *            generated when the comparison fails.
  * \param[in] strategy Choose breadth-first or depth-first for exploration strategy
  *            of the antichain algorithms.
+ * \param[in] preprocess Whether to allow preprocessing of the given LTSs.
  * \retval true if this LTS is smaller than LTS \a l according to
  * preorder \a pre.
  * \retval false otherwise.
@@ -282,7 +288,8 @@ bool compare(const LTS_TYPE&  l1,
              const  LTS_TYPE& l2,
              const lts_preorder pre,
              const bool generate_counter_example,
-             const lps::exploration_strategy strategy = lps::es_breadth);
+             const lps::exploration_strategy strategy = lps::es_breadth,
+             const bool preprocess = true);
 
 /** \brief Determinises this LTS. */
 template <class LTS_TYPE>
@@ -755,15 +762,15 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, c
 }
 
 template <class LTS_TYPE>
-bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy)
+bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy, const bool preprocess)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_compare(l1_copy, l2_copy, pre, generate_counter_example, strategy);
+  return destructive_compare(l1_copy, l2_copy, pre, generate_counter_example, strategy, preprocess);
 }
 
 template <class LTS_TYPE>
-bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy = lps::es_breadth)
+bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example, const lps::exploration_strategy strategy, const bool preprocess)
 {
   switch (pre)
   {
@@ -842,45 +849,45 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_trace_preorder.trc");
-        return destructive_refinement_checker(l1, l2, trace, false, strategy, cec);
+        return destructive_refinement_checker(l1, l2, trace, false, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, trace, false, strategy);
+      return destructive_refinement_checker(l1, l2, trace, false, strategy, preprocess);
     }
     case lts_pre_weak_trace_anti_chain:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_weak_trace_preorder.trc");
-        return destructive_refinement_checker(l1, l2, trace, true, strategy, cec);
+        return destructive_refinement_checker(l1, l2, trace, true, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, trace, true, strategy);
+      return destructive_refinement_checker(l1, l2, trace, true, strategy, preprocess);
     }
     case lts_pre_failures_refinement:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_failures_refinement.trc");
-        return destructive_refinement_checker(l1, l2, failures, false, strategy, cec);
+        return destructive_refinement_checker(l1, l2, failures, false, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, failures, false, strategy);
+      return destructive_refinement_checker(l1, l2, failures, false, strategy, preprocess);
     }
     case lts_pre_weak_failures_refinement:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_weak_failures_refinement.trc");
-        return destructive_refinement_checker(l1, l2, failures, true, strategy, cec);
+        return destructive_refinement_checker(l1, l2, failures, true, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, failures, true, strategy);
+      return destructive_refinement_checker(l1, l2, failures, true, strategy, preprocess);
     }
     case lts_pre_failures_divergence_refinement:
     {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_failures_divergence_refinement.trc");
-        return destructive_refinement_checker(l1, l2, failures_divergence, true, strategy, cec);
+        return destructive_refinement_checker(l1, l2, failures_divergence, true, strategy, preprocess, cec);
       }
-      return destructive_refinement_checker(l1, l2, failures_divergence, true, strategy);
+      return destructive_refinement_checker(l1, l2, failures_divergence, true, strategy, preprocess);
     }
     default:
       mCRL2log(log::error) << "Comparison for this preorder is not available\n";
