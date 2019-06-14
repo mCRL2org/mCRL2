@@ -219,30 +219,30 @@ void report_statistics(refinement_statistics<T>& stats)
 
 /// \brief Preprocess the LTS for destructive refinement checking.
 /// \param lts The lts to preprocess.
-/// \param init Any state in this lts.
+/// \param init The initial state of the right LTS that was merged.
 /// \return A pair where the first element is the state number of init in the reduced
 ///         lts and the second value indicate whether this state in equal to lts.initial_state.
 template<typename LTS_TYPE>
 std::pair<std::size_t, bool> reduce(LTS_TYPE& lts,
             const bool weak_reduction,
             const bool preserve_divergence,
-            std::size_t init)
+            std::size_t l2_init)
 {
   lts.clear_state_labels();
   if (weak_reduction)
   {
     // Remove inert tau loops when requested, but preserve divergences for failures and failures-divergence.
     detail::scc_partitioner<LTS_TYPE> scc_part(lts);
-    init = scc_part.get_eq_class(init);
+    l2_init = scc_part.get_eq_class(l2_init);
     scc_part.replace_transition_system(preserve_divergence);
   }
 
   detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(lts, weak_reduction, preserve_divergence);
   // Assign the reduced LTS, and set init_l2.
-  init = bisim_part.get_eq_class(init);
+  l2_init = bisim_part.get_eq_class(l2_init);
   bisim_part.replace_transition_system(weak_reduction, preserve_divergence);
 
-  return std::make_pair(init, bisim_part.in_same_class(init, lts.initial_state()));
+  return std::make_pair(l2_init, l2_init == lts.initial_state());
 }
 
 /// \brief This function checks using algorithms in the paper mentioned above
@@ -278,7 +278,7 @@ bool destructive_refinement_checker(
   }
 
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
-  mcrl2::lts::detail::merge(l1,l2);
+  mcrl2::lts::detail::merge(l1, l2);
   l2.clear(); // No use for l2 anymore.
 
   if (generate_counter_example.is_dummy())
@@ -338,7 +338,7 @@ bool destructive_refinement_checker(
       }
     }
 
-    // if not diverges(spec)$ or not CheckDiv (refinement == failures_divergence)
+    // if not diverges(spec) or not CheckDiv (refinement == failures_divergence)
     if (!spec_diverges || refinement != failures_divergence)
     {
       if (weak_property_cache.diverges(impl_spec.state()) && refinement == failures_divergence) // if impl diverges and CheckDiv
