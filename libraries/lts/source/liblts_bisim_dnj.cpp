@@ -493,7 +493,7 @@ class block_t
     /// \brief unique sequence number of this block
     /// \details After the stuttering equivalence algorithm has terminated,
     /// this number is used as a state number in the quotient LTS.
-    const state_type seqnr;  
+    const state_type seqnr;
 
     /// \brief total number of blocks with unique sequence number allocated
     /// \details Upon starting the stuttering equivalence algorithm, the number
@@ -508,12 +508,11 @@ class block_t
     /// \param new_end     initial iterator past the last state of the block
     block_t(const permutation_iter_t& new_begin,
                                              const permutation_iter_t& new_end)
-      : end(new_end),
-        marked_nonbottom_begin(new_end),
-        nonbottom_begin(new_end),
+      : begin(new_begin),
         marked_bottom_begin(new_end),
-        begin(new_begin),
-        stable_block_bunch(),
+        nonbottom_begin(new_end),
+        marked_nonbottom_begin(new_end),
+        end(new_end),
         seqnr(nr_of_blocks++)
     {                                                                           assert(new_begin < new_end);
     }
@@ -1147,8 +1146,8 @@ class bunch_t
   public:
     bunch_t(const action_block_iter_t& new_begin,
                    const action_block_iter_t& new_end, trans_type new_sort_key)
-      : end(new_end),
-        begin(new_begin),
+      : begin(new_begin),
+        end(new_end),
         sort_key_and_label(new_sort_key),
         next_nontrivial(nullptr)
     {  }
@@ -1512,7 +1511,7 @@ class part_trans_t
     ///                         dereferenced, see the implementation of
     ///                         surely_has_no_transition_in()).  This parameter
     ///                         is used to initialize dummy transitions.
-    part_trans_t(trans_type num_transitions, 
+    part_trans_t(trans_type num_transitions,
                  trans_type num_actions,
                  state_info_iter_t illegal_state)
       : succ(num_transitions + 2),
