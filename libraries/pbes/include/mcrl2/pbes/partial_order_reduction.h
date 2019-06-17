@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/skip.h"
 
@@ -198,9 +199,6 @@ class partial_order_reduction_algorithm
     // (X_i |- k -> X_j) <=> m_summand_classes[k].NES[i][j]
     std::vector<summand_class> m_summand_classes;
 
-    // j \in m_enabled[i] <=> ???
-    std::vector<std::set<std::size_t>> m_enabled;
-
     std::set<std::size_t> m_invis; // invisible summand classes
     std::set<std::size_t> m_vis;   // visible summand classes
 
@@ -239,13 +237,19 @@ class partial_order_reduction_algorithm
 
     std::set<std::size_t> en(const propositional_variable_instantiation& X_e)
     {
+      std::size_t N = m_summand_classes.size();
+
       std::set<std::size_t> result;
       std::size_t i = m_equation_index.index(X_e.name());
       const data::variable_list& d = m_pbes.equations()[i].variable().parameters();
       const data::data_expression_list& e = X_e.parameters();
       add_assignments(m_sigma, d, e);
-      for (std::size_t k: m_enabled[i])
+      for (std::size_t k = 0; k < N; k++)
       {
+        if (!maps_to(i, k))
+        {
+          continue;
+        }
         const summand_class& summand_k = m_summand_classes[k];
         const data::variable_list& e_k = summand_k.e;
         const pbes_expression& f_k = summand_k.f;
@@ -359,6 +363,10 @@ class partial_order_reduction_algorithm
 
     std::set<propositional_variable_instantiation> succ(const propositional_variable_instantiation& X_e, const std::set<std::size_t>& K)
     {
+      const auto& d = m_parameters;
+      const auto& e = X_e.parameters();
+      data::add_assignments(m_sigma, d, e);
+
       std::set<propositional_variable_instantiation> result;
       std::size_t i = m_equation_index.index(X_e.name());
       for (std::size_t k: K)
@@ -382,7 +390,7 @@ class partial_order_reduction_algorithm
                                },
                                pbes_system::is_false
         );
-        remove_assignments(m_sigma, e_k);
+        data::remove_assignments(m_sigma, e_k);
       }
       return result;
     }
@@ -472,6 +480,21 @@ class partial_order_reduction_algorithm
     bool maps_to(std::size_t i, std::size_t k, std::size_t j) const
     {
       return m_summand_classes[k].maps_to(i, j);
+    };
+
+    // TODO: precompute this function
+    // returns X_i |--k-->
+    bool maps_to(std::size_t i, std::size_t k) const
+    {
+      std::size_t n = m_pbes.equations().size();
+      for (std::size_t j = 0; j < n; j++)
+      {
+        if (maps_to(i, k, j))
+        {
+          return true;
+        }
+      }
+      return false;
     };
 
     bool accords_DNL(std::size_t k, std::size_t k1) const
@@ -784,6 +807,8 @@ class partial_order_reduction_algorithm
        m_pbes(pbes2srf(p)),
        m_equation_index(m_pbes)
     {
+      unify_parameters(m_pbes);
+
       // initialize m_parameters and m_parameter_positions
       const data::variable_list& parameters = m_pbes.equations().front().variable().parameters();
       m_parameters = std::vector<data::variable>{parameters.begin(), parameters.end()};
@@ -797,6 +822,11 @@ class partial_order_reduction_algorithm
 
       std::cout << p << std::endl;
       print_pbes();
+    }
+
+    const propositional_variable_instantiation& initial_state() const
+    {
+      return m_pbes.initial_state();
     }
 
     void print() const
@@ -827,10 +857,13 @@ class partial_order_reduction_algorithm
         auto iter = todo.begin();
         propositional_variable_instantiation X_e = *iter;
         todo.erase(iter);
+        mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
         seen.insert(X_e);
         std::set<std::size_t> stubborn_set_X_e = stubborn_set(X_e);
+        mCRL2log(log::debug) << "stubborn_set(X_e) = " << core::detail::print_set(stubborn_set_X_e) << std::endl;
         std::set<std::size_t> en_X_e = en(X_e);
         std::set<propositional_variable_instantiation> next = succ(X_e, set_intersection(stubborn_set_X_e, en_X_e));
+        mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
         if (!has_empty_intersection(next, todo))
         {
           next = set_union(next, succ(X_e, set_difference(en_X_e, stubborn_set_X_e)));

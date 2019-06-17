@@ -35,7 +35,21 @@ void pbespor(const std::string& input_filename,
   partial_order_reduction_algorithm algorithm(p, rewrite_strategy);
   algorithm.print();
 
-//  algorithm.explore(p.initial_state());
+  algorithm.explore(
+    algorithm.initial_state(),
+
+    // emit_node
+    [&](const propositional_variable_instantiation& X)
+    {
+      std::cout << "emit node " << X << std::endl;
+    },
+
+    // emit_edge
+    [&](const propositional_variable_instantiation& X, const propositional_variable_instantiation& Y)
+    {
+      std::cout << "emit edge " << X << " -> " << Y << std::endl;
+    }
+  );
 
 //  save_pbes(p, output_filename, output_format, false);
 //  if (!p.is_well_typed())
