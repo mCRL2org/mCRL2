@@ -26,7 +26,9 @@ struct pbes_equation_index
 
   pbes_equation_index() = default;
 
-  explicit pbes_equation_index(const pbes& p)
+  // PBES can be pbes or srf_pbes
+  template <typename PBES>
+  explicit pbes_equation_index(const PBES& p)
   {
     auto const& equations = p.equations();
     std::size_t rank = 0;
@@ -64,6 +66,16 @@ struct pbes_equation_index
     return i->second.second;
   }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const pbes_equation_index& index)
+{
+  for (const auto& p: index.equation_index)
+  {
+    out << p.first << " -> (" << p.second.first << ", " << p.second.second << ")" << std::endl;
+  }
+  return out;
+}
 
 } // namespace pbes_system
 

@@ -33,12 +33,18 @@ struct summand_class
   std::vector<std::set<std::size_t>> nxt;
   std::vector<std::set<std::size_t>> NES; // TODO: use boost::dynamic_bitset<> (?)
   std::set<std::size_t> invis;
+  std::set<std::size_t> DNA;
+  std::set<std::size_t> DNL;
 
   summand_class() = default;
 
-  summand_class(const data::variable_list& e_, const pbes_expression& f_, const data::data_expression_list& g_)
-   : e(e_), f(f_), g(g_)
-  {}
+  // n is the number of PBES equations
+  summand_class(data::variable_list  e_, pbes_expression f_, data::data_expression_list g_, std::size_t n)
+   : e(std::move(e_)), f(std::move(f_)), g(std::move(g_))
+  {
+    nxt.resize(n);
+    NES.resize(n);
+  }
 
   // returns X_i -k->
   bool maps_to(std::size_t i) const
@@ -52,6 +58,42 @@ struct summand_class
     using utilities::detail::contains;
 
     return contains(nxt[i], j);
+  }
+
+  void print(std::ostream& out, const std::set<std::size_t>& s) const
+  {
+    using utilities::detail::contains;
+
+    std::size_t n = nxt.size();
+    for (std::size_t i = 0; i < n; i++)
+    {
+      out << (contains(s, i) ? '1' : '0');
+    }
+  }
+
+  void print(std::ostream& out) const
+  {
+    std::size_t n = nxt.size();
+
+    for (std::size_t i = 0; i < n; i++)
+    {
+      out << "nxt " << std::setw(3) << i << " ";
+      print(out, nxt[i]);
+      out << std::endl;
+    }
+
+    out << std::endl;
+
+    for (std::size_t i = 0; i < n; i++)
+    {
+      out << "NES " << std::setw(3) << i << " ";
+      print(out, NES[i]);
+      out << std::endl;
+    }
+
+    out << std::endl;
+    out << "DNA = " << core::detail::print_set(DNA) << std::endl;
+    out << "DNL = " << core::detail::print_set(DNL) << std::endl;
   }
 };
 
@@ -139,8 +181,8 @@ class partial_order_reduction_algorithm
     enumerate_quantifiers_rewriter m_pbes_rewr;
     data::enumerator_identifier_generator m_id_generator;
     data::enumerator_algorithm<enumerate_quantifiers_rewriter, data::rewriter> m_enumerator;
-    pbes_equation_index m_equation_index;
     srf_pbes m_pbes;
+    pbes_equation_index m_equation_index;
     data::mutable_indexed_substitution<> m_sigma;
 
     // the parameters of the PBES equations
@@ -156,14 +198,44 @@ class partial_order_reduction_algorithm
     // (X_i |- k -> X_j) <=> m_summand_classes[k].NES[i][j]
     std::vector<summand_class> m_summand_classes;
 
-    std::vector<std::set<std::size_t>> m_DNA;
-    std::vector<std::set<std::size_t>> m_DNL;
-
     // j \in m_enabled[i] <=> ???
     std::vector<std::set<std::size_t>> m_enabled;
 
     std::set<std::size_t> m_invis; // invisible summand classes
     std::set<std::size_t> m_vis;   // visible summand classes
+
+    std::size_t summand_index(const srf_summand& summand) const
+    {
+      auto i = m_summand_index.find(summand_equivalence_key(summand));
+      assert(i != m_summand_index.end());
+      return i->second;
+    }
+
+    std::size_t parameter_position(const data::variable& v) const
+    {
+      auto i = m_parameter_positions.find(v);
+      return i->second;
+    }
+
+    const std::set<std::size_t>& DNA(std::size_t k) const
+    {
+      return m_summand_classes[k].DNA;
+    }
+
+    std::set<std::size_t>& DNA(std::size_t k)
+    {
+      return m_summand_classes[k].DNA;
+    }
+
+    const std::set<std::size_t>& DNL(std::size_t k) const
+    {
+      return m_summand_classes[k].DNL;
+    }
+
+    std::set<std::size_t>& DNL(std::size_t k)
+    {
+      return m_summand_classes[k].DNL;
+    }
 
     std::set<std::size_t> en(const propositional_variable_instantiation& X_e)
     {
@@ -254,13 +326,13 @@ class partial_order_reduction_algorithm
           std::set<std::size_t> T = set_intersection(Ts, en_X_e);
           for (std::size_t k: T)
           {
-            if (set_includes(Ts, m_DNA[k]))
+            if (set_includes(Ts, DNA(k)))
             {
               return Ts;
             }
           }
           std::size_t k = *T.begin(); // TODO: choose k according to D2t
-          Twork = set_union(Twork, set_difference(m_DNA[k], Ts));
+          Twork = set_union(Twork, set_difference(DNA(k), Ts));
         }
         else
         {
@@ -269,7 +341,7 @@ class partial_order_reduction_algorithm
           Ts.insert(k);
           if (contains(en_X_e, k))
           {
-            Twork = set_union(Twork, set_difference(m_DNL[k], Ts));
+            Twork = set_union(Twork, set_difference(DNL(k), Ts));
             if (contains(m_vis, k))
             {
               Twork = set_union(Twork, m_vis);
@@ -315,19 +387,6 @@ class partial_order_reduction_algorithm
       return result;
     }
 
-    std::size_t index(const srf_summand& summand) const
-    {
-      auto i = m_summand_index.find(summand_equivalence_key(summand));
-      assert(i != m_summand_index.end());
-      return i->second;
-    }
-
-    std::size_t parameter_position(const data::variable& v) const
-    {
-      auto i = m_parameter_positions.find(v);
-      return i->second;
-    }
-
     void compute_nxt()
     {
       std::size_t n = m_pbes.equations().size();
@@ -337,7 +396,7 @@ class partial_order_reduction_algorithm
         for (const srf_summand& summand: eqn.summands())
         {
           std::size_t j = m_equation_index.index(summand.variable().name());
-          std::size_t k = index(summand);
+          std::size_t k = summand_index(summand);
           m_summand_classes[k].nxt[i].insert(j);
         }
       }
@@ -429,14 +488,19 @@ class partial_order_reduction_algorithm
             bool X1_k_Xprime = maps_to(i1, k, i_prime);
             if (X_k1_X1 && X1_k_Xprime)
             {
+              bool found = false;
               for (std::size_t i2 = 0; i2 < n; i2++)
               {
                 bool X_k_X2 = maps_to(i, k, i2);
                 bool X2_k1_Xprime = maps_to(i2, k1, i_prime);
-                if (!(X_k_X2 && X2_k1_Xprime))
+                if (X_k_X2 && X2_k1_Xprime)
                 {
-                  return false;
+                  found = true;
                 }
+              }
+              if (!found)
+              {
+                return false;
               }
             }
           }
@@ -531,12 +595,12 @@ class partial_order_reduction_algorithm
 
           if (!not_in_DNL)
           {
-            m_DNL[k].insert(k1);
+            DNL(k).insert(k1);
           }
 
           if (!not_in_DNS && !not_in_DNT)
           {
-            m_DNA[k].insert(k1);
+            DNA(k).insert(k1);
           }
         }
       }
@@ -595,6 +659,8 @@ class partial_order_reduction_algorithm
 
     void compute_summand_classes()
     {
+      std::size_t n = m_pbes.equations().size();
+
       for (const srf_equation& eqn: m_pbes.equations())
       {
         for (const srf_summand& summand: eqn.summands())
@@ -605,7 +671,7 @@ class partial_order_reduction_algorithm
           {
             std::size_t k = m_summand_index.size();
             m_summand_index[key] = k;
-            m_summand_classes.emplace_back(summand.parameters(), summand.condition(), summand.variable().parameters());
+            m_summand_classes.emplace_back(summand.parameters(), summand.condition(), summand.variable().parameters(), n);
           }
         }
       }
@@ -636,7 +702,7 @@ class partial_order_reduction_algorithm
           bool is_invisible = op_i == op_j && rank_i == rank_j;
           if (!is_invisible)
           {
-            std::size_t k = m_summand_index[summand_equivalence_key(summand)];
+            std::size_t k = summand_index(summand);
             m_vis.insert(k);
           }
         }
@@ -651,6 +717,63 @@ class partial_order_reduction_algorithm
       }
     }
 
+    std::string print_variables(const data::variable_list& v) const
+    {
+      std::ostringstream out;
+      for (auto i = v.begin(); i != v.end(); ++i)
+      {
+        if (i != v.begin())
+        {
+          out << ", ";
+        }
+        out << *i << ": " << i->sort();
+      }
+      return out.str();
+    }
+
+    void print_summand(const srf_summand& summand, bool is_conjunctive) const
+    {
+      std::size_t k = summand_index(summand);
+      std::cout << "   (" << k << ") ";
+      if (!summand.parameters().empty())
+      {
+        std::cout << (is_conjunctive ? "forall " : "exists ") << print_variables(summand.parameters()) << ". ";
+      }
+      std::cout << summand.condition()
+                << (is_conjunctive ? " => " : " && ")
+                << summand.variable()
+                << std::endl;
+    }
+
+    void print_pbes() const
+    {
+      std::cout << m_pbes.to_pbes() << std::endl;
+      std::cout << "srf_pbes" << std::endl;
+      for (const srf_equation& eqn: m_pbes.equations())
+      {
+        std::cout << eqn.symbol() << " " << eqn.variable() << " = " << (eqn.is_conjunctive() ? "conjunction" : "disjunction") << " of summands\n";
+        for (const srf_summand& summand: eqn.summands())
+        {
+          print_summand(summand, eqn.is_conjunctive());
+        }
+        std::cout << std::endl;
+      }
+    }
+
+    void print_summand_classes() const
+    {
+      using utilities::detail::contains;
+
+      std::size_t N = m_summand_classes.size();
+      for (std::size_t k = 0; k < N; k++)
+      {
+        const summand_class& summand = m_summand_classes[k];
+        std::cout << "\n--- summand class " << k << " ---" << std::endl;
+        std::cout << "visible = " << std::boolalpha << contains(m_vis, k) << "\n\n";
+        summand.print(std::cout);
+      }
+    }
+
   public:
     explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy)
      : m_rewr(p.data(),
@@ -658,8 +781,8 @@ class partial_order_reduction_algorithm
               strategy),
        m_pbes_rewr(m_rewr, p.data()),
        m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, false),
-       m_equation_index(p),
-       m_pbes(pbes2srf(p))
+       m_pbes(pbes2srf(p)),
+       m_equation_index(m_pbes)
     {
       // initialize m_parameters and m_parameter_positions
       const data::variable_list& parameters = m_pbes.equations().front().variable().parameters();
@@ -671,6 +794,14 @@ class partial_order_reduction_algorithm
 
       compute_summand_classes();
       compute_vis_invis();
+
+      std::cout << p << std::endl;
+      print_pbes();
+    }
+
+    void print() const
+    {
+      print_summand_classes();
     }
 
     template <

@@ -6,6 +6,7 @@ set(MCRL2_TOOLS
   lpssymbolicbisim
   pbesabsinthe
   pbespareqelm
+  pbespor
   pbessymbolicbisim
   symbolic_exploration
 )
