@@ -319,6 +319,12 @@ class partial_order_reduction_algorithm
       {
         C.insert(invis_pair(std::set<std::size_t>{k}, std::set<std::size_t>()));
       }
+      assert(!C.empty());
+      // TODO: remove this
+      if (C.empty())
+      {
+        throw mcrl2::runtime_error("partial_order_reduction: the set C cannot be empty!");
+      }
 
       while (true)
       {
@@ -829,6 +835,11 @@ class partial_order_reduction_algorithm
       return m_pbes.initial_state();
     }
 
+    const std::vector<data::variable>& parameters() const
+    {
+      return m_parameters;
+    }
+
     void print() const
     {
       print_summand_classes();
@@ -874,7 +885,10 @@ class partial_order_reduction_algorithm
           {
             continue;
           }
-          emit_node(Y_f);
+          std::size_t rank = m_equation_index.rank(X_e.name());
+          std::size_t i = m_equation_index.index(X_e.name());
+          bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
+          emit_node(Y_f, is_conjunctive, rank);
           todo.insert(Y_f);
         }
         for (const propositional_variable_instantiation& Y_f: next)
