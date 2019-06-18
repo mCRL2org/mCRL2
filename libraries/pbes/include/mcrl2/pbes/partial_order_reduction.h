@@ -832,6 +832,12 @@ class partial_order_reduction_algorithm
       return m_parameters;
     }
 
+    const fixpoint_symbol& symbol(const core::identifier_string& X) const
+    {
+      std::size_t i = m_equation_index.index(X);
+      return m_pbes.equations()[i].symbol();
+    }
+
     void print() const
     {
       print_summand_classes();

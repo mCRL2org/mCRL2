@@ -31,13 +31,14 @@ struct pbespor_pbes_composer
     propositional_variable_instantiation X;
     bool is_conjunctive = false;
     std::size_t rank = 0;
+    fixpoint_symbol symbol;
     std::vector<pbes_expression> expressions;
 
     equation_info() = default;
     equation_info(const equation_info&) = default;
 
-    explicit equation_info(propositional_variable_instantiation X_, bool is_conjunctive_ = false, std::size_t rank_ = 0)
-      : X(std::move(X_)), is_conjunctive(is_conjunctive_), rank(rank_)
+    explicit equation_info(propositional_variable_instantiation X_, bool is_conjunctive_ = false, std::size_t rank_ = 0, fixpoint_symbol symbol_ = fixpoint_symbol::mu())
+      : X(std::move(X_)), is_conjunctive(is_conjunctive_), rank(rank_), symbol(symbol_)
     {}
 
     void add(const pbes_expression& x)
@@ -47,8 +48,6 @@ struct pbespor_pbes_composer
 
     pbes_equation make_equation() const
     {
-      // TODO: check this
-      fixpoint_symbol symbol = (rank % 2 == 0) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
       pbes_expression rhs = is_conjunctive ? join_and(expressions.begin(), expressions.end()) : join_or(expressions.begin(), expressions.end());
       return pbes_equation(symbol, propositional_variable(X.name(), data::variable_list()), rhs);
     }
@@ -67,18 +66,19 @@ struct pbespor_pbes_composer
     return propositional_variable_instantiation(core::identifier_string(out.str()), data::data_expression_list());
   };
 
-  void add_equation(const propositional_variable_instantiation& X, bool is_conjunctive, std::size_t rank)
+  void add_equation(const propositional_variable_instantiation& X, bool is_conjunctive, std::size_t rank, const fixpoint_symbol& symbol)
   {
     auto i = equations.find(X);
     if (i == equations.end())
     {
-      equations.insert(std::make_pair(X, equation_info(make_variable(X), is_conjunctive, rank)));
+      equations.insert(std::make_pair(X, equation_info(make_variable(X), is_conjunctive, rank, symbol)));
     }
     else
     {
       equation_info& eqn = i->second;
       eqn.rank = rank;
       eqn.is_conjunctive = is_conjunctive;
+      eqn.symbol = symbol;
     }
   };
 
@@ -129,7 +129,7 @@ struct pbespor_pbes_composer
       [&](const propositional_variable_instantiation& X, bool is_conjunctive, std::size_t rank)
       {
         std::cout << "emit node " << X << std::endl;
-        add_equation(X, is_conjunctive, rank);
+        add_equation(X, is_conjunctive, rank, algorithm.symbol(X.name()));
       },
 
       // emit_edge
