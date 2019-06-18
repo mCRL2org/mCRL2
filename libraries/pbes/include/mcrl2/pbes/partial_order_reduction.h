@@ -33,7 +33,6 @@ struct summand_class
   data::data_expression_list g;
   std::vector<std::set<std::size_t>> nxt;
   std::vector<std::set<std::size_t>> NES; // TODO: use boost::dynamic_bitset<> (?)
-  std::set<std::size_t> invis;
   std::set<std::size_t> DNA;
   std::set<std::size_t> DNL;
 
@@ -61,25 +60,25 @@ struct summand_class
     return contains(nxt[i], j);
   }
 
-  void print(std::ostream& out, const std::set<std::size_t>& s) const
+  void print(std::ostream& out, const std::set<std::size_t>& s, const std::size_t N) const
   {
     using utilities::detail::contains;
 
-    std::size_t n = nxt.size();
-    for (std::size_t i = 0; i < n; i++)
+    for (std::size_t i = 0; i < N; i++)
     {
       out << (contains(s, i) ? '1' : '0');
     }
   }
 
-  void print(std::ostream& out) const
+  // N is the number of summand classes
+  void print(std::ostream& out, const std::size_t N) const
   {
     std::size_t n = nxt.size();
 
     for (std::size_t i = 0; i < n; i++)
     {
       out << "nxt " << std::setw(3) << i << " ";
-      print(out, nxt[i]);
+      print(out, nxt[i], n);
       out << std::endl;
     }
 
@@ -88,7 +87,7 @@ struct summand_class
     for (std::size_t i = 0; i < n; i++)
     {
       out << "NES " << std::setw(3) << i << " ";
-      print(out, NES[i]);
+      print(out, NES[i], N);
       out << std::endl;
     }
 
@@ -269,14 +268,7 @@ class partial_order_reduction_algorithm
 
     std::set<std::size_t> invis(const std::set<std::size_t>& K)
     {
-      // TODO: check this
-      std::set<std::size_t> result;
-      for (std::size_t k: K)
-      {
-        const summand_class& summand_k = m_summand_classes[k];
-        result.insert(summand_k.invis.begin(), summand_k.invis.end());
-      }
-      return result;
+      return utilities::detail::set_intersection(m_invis, K);
     }
 
     std::set<std::size_t> stubborn_set(const propositional_variable_instantiation& X_e)
@@ -354,13 +346,13 @@ class partial_order_reduction_algorithm
             Twork = set_union(Twork, set_difference(DNL(k), Ts));
             if (contains(m_vis, k))
             {
-              Twork = set_union(Twork, m_vis);
+              Twork = set_union(Twork, set_difference(m_vis, Ts));
             }
           }
           else
           {
             std::size_t i = 0; // TODO: choose i such that h is minimal
-            Twork = set_union(Twork, m_summand_classes[k].NES[i]);
+            Twork = set_union(Twork, set_difference(m_summand_classes[k].NES[i], Ts));
           }
         }
         C.insert(invis_pair(Twork, Ts));
@@ -461,7 +453,7 @@ class partial_order_reduction_algorithm
           {
             for (std::size_t k1 = 0; k1 < N; k1++)
             {
-              if (TsWs_has_empty_intersection(k, k1))
+              if (!TsWs_has_empty_intersection(k, k1))
               {
                 NES_i.insert(k1);
               }
@@ -469,9 +461,9 @@ class partial_order_reduction_algorithm
           }
           else
           {
-            for (std::size_t k1 = 0; k < N; k++)
+            for (std::size_t k1 = 0; k1 < N; k1++)
             {
-              const std::set<std::size_t>& J = m_summand_classes[k].nxt[i];
+              const std::set<std::size_t>& J = summand_k.nxt[i];
               if (J.size() > 1 || (J.size() == 1 && *J.begin() != i))
               {
                 NES_i.insert(k1);
@@ -799,7 +791,7 @@ class partial_order_reduction_algorithm
         const summand_class& summand = m_summand_classes[k];
         std::cout << "\n--- summand class " << k << " ---" << std::endl;
         std::cout << "visible = " << std::boolalpha << contains(m_vis, k) << "\n\n";
-        summand.print(std::cout);
+        summand.print(std::cout, N);
       }
     }
 
@@ -869,6 +861,10 @@ class partial_order_reduction_algorithm
         propositional_variable_instantiation X_e = *iter;
         todo.erase(iter);
         mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
+        std::size_t rank = m_equation_index.rank(X_e.name());
+        std::size_t i = m_equation_index.index(X_e.name());
+        bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
+        emit_node(X_e, is_conjunctive, rank);
         seen.insert(X_e);
         std::set<std::size_t> stubborn_set_X_e = stubborn_set(X_e);
         mCRL2log(log::debug) << "stubborn_set(X_e) = " << core::detail::print_set(stubborn_set_X_e) << std::endl;
@@ -885,10 +881,6 @@ class partial_order_reduction_algorithm
           {
             continue;
           }
-          std::size_t rank = m_equation_index.rank(X_e.name());
-          std::size_t i = m_equation_index.index(X_e.name());
-          bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
-          emit_node(Y_f, is_conjunctive, rank);
           todo.insert(Y_f);
         }
         for (const propositional_variable_instantiation& Y_f: next)
