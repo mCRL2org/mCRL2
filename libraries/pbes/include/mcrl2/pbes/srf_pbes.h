@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_functions.h"
+#include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 
 namespace mcrl2 {
 
@@ -27,16 +28,16 @@ class srf_summand
 {
   protected:
     data::variable_list m_parameters;
-    pbes_expression m_condition;
+    data::data_expression m_condition;
     propositional_variable_instantiation m_X;
 
   public:
     srf_summand(
       data::variable_list parameters,
-      pbes_expression condition,
+      const pbes_expression& condition,
       propositional_variable_instantiation X
     )
-     : m_parameters(std::move(parameters)), m_condition(std::move(condition)), m_X(std::move(X))
+     : m_parameters(std::move(parameters)), m_condition(detail::pbes2data(condition)), m_X(std::move(X))
     {}
 
     const data::variable_list& parameters() const
@@ -49,12 +50,12 @@ class srf_summand
       return m_parameters;
     }
 
-    const pbes_expression& condition() const
+    const data::data_expression& condition() const
     {
       return m_condition;
     }
 
-    pbes_expression& condition()
+    data::data_expression& condition()
     {
       return m_condition;
     }
@@ -76,7 +77,7 @@ class srf_summand
 
     void add_condition(const pbes_expression& f)
     {
-      m_condition = and_(f, m_condition);
+      m_condition = data::lazy::and_(atermpp::down_cast<data::data_expression>(detail::pbes2data(f)), m_condition);
     }
 
     pbes_expression to_pbes(bool conjunctive) const

@@ -29,7 +29,7 @@ namespace pbes_system {
 struct summand_class
 {
   data::variable_list e;
-  pbes_expression f;
+  data::data_expression f;
   data::data_expression_list g;
   std::vector<std::set<std::size_t>> nxt;
   std::vector<std::set<std::size_t>> NES; // TODO: use boost::dynamic_bitset<> (?)
@@ -39,7 +39,7 @@ struct summand_class
   summand_class() = default;
 
   // n is the number of PBES equations
-  summand_class(data::variable_list  e_, pbes_expression f_, data::data_expression_list g_, std::size_t n)
+  summand_class(data::variable_list  e_, data::data_expression f_, data::data_expression_list g_, std::size_t n)
    : e(std::move(e_)), f(std::move(f_)), g(std::move(g_))
   {
     nxt.resize(n);
@@ -101,7 +101,7 @@ struct summand_class
 struct summand_equivalence_key
 {
   data::variable_list e;
-  pbes_expression f;
+  data::data_expression f;
   data::data_expression_list g;
 
   explicit summand_equivalence_key(const srf_summand& summand)
