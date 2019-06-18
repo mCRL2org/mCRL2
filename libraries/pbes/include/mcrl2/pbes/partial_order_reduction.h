@@ -865,7 +865,6 @@ class partial_order_reduction_algorithm
       {
         auto iter = todo.begin();
         propositional_variable_instantiation X_e = *iter;
-        todo.erase(iter);
         mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
         std::size_t rank = m_equation_index.rank(X_e.name());
         std::size_t i = m_equation_index.index(X_e.name());
@@ -881,6 +880,7 @@ class partial_order_reduction_algorithm
         {
           next = set_union(next, succ(X_e, set_difference(en_X_e, stubborn_set_X_e)));
         }
+        todo.erase(iter);
         for (const propositional_variable_instantiation& Y_f: next)
         {
           if (contains(todo, Y_f) || contains(seen, Y_f))
