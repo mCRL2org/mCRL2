@@ -463,7 +463,7 @@ class partial_order_reduction_algorithm
           {
             for (std::size_t k1 = 0; k1 < N; k1++)
             {
-              const std::set<std::size_t>& J = summand_k.nxt[i];
+              const std::set<std::size_t>& J = m_summand_classes[k1].nxt[i];
               if (J.size() > 1 || (J.size() == 1 && *J.begin() != i))
               {
                 NES_i.insert(k1);
