@@ -385,7 +385,7 @@ available_tests = {
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
     #'pbespor1'                                    : lambda name, settings: Pbespor1Test(name, settings)                                                ,
-    #'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
+    'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
     'pbesrewr-quantifier-all'                     : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)                              ,
