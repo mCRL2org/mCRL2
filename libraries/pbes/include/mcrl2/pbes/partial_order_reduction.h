@@ -495,7 +495,110 @@ class partial_order_reduction_algorithm
       return false;
     };
 
-    bool accords_DNL(std::size_t k, std::size_t k1) const
+    bool left_accords_data(std::size_t k, std::size_t k1) const
+    {
+      const summand_class& summand_k = m_summand_classes[k];
+      const summand_class& summand_k1 = m_summand_classes[k1];
+
+      const data::data_expression condition_k = summand_k.f;
+      const data::data_expression condition_k1 = summand_k1.f;
+
+      const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+
+      data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
+      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, summand_k1.g);
+
+      data::data_expression antecedent = data::sort_bool::and_(condition_k1, data::where_clause(condition_k, assignments_k1));
+      data::data_expression parameters_equal = data::sort_bool::true_();
+      auto it_k = summand_k.g.begin();
+      auto it_k1 = summand_k1.g.begin();
+      while (it_k != summand_k.g.end())
+      {
+        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments_k1), data::where_clause(*it_k1, assignments_k)));
+        ++it_k; ++it_k1;
+      }
+      data::data_expression consequent =
+        data::sort_bool::and_(
+          data::sort_bool::and_(
+            condition_k,
+            data::where_clause(condition_k1, assignments_k)
+          ),
+          parameters_equal
+        );
+      data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
+
+      // std::cout << "Left condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
+
+      return m_rewr(condition) == data::sort_bool::true_();
+    }
+
+    bool square_accords_data(std::size_t k, std::size_t k1) const
+    {
+      const summand_class& summand_k = m_summand_classes[k];
+      const summand_class& summand_k1 = m_summand_classes[k1];
+
+      const data::data_expression condition_k = summand_k.f;
+      const data::data_expression condition_k1 = summand_k1.f;
+
+      const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+
+      data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
+      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, summand_k1.g);
+
+      data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
+      data::data_expression parameters_equal = data::sort_bool::true_();
+      auto it_k = summand_k.g.begin();
+      auto it_k1 = summand_k1.g.begin();
+      while (it_k != summand_k.g.end())
+      {
+        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments_k1), data::where_clause(*it_k1, assignments_k)));
+        ++it_k; ++it_k1;
+      }
+      data::data_expression consequent =
+        data::sort_bool::and_(
+          data::sort_bool::and_(
+            data::where_clause(condition_k, assignments_k1),
+            data::where_clause(condition_k1, assignments_k)
+          ),
+          parameters_equal
+        );
+      data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
+
+      // std::cout << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
+
+      return m_rewr(condition) == data::sort_bool::true_();
+    }
+
+    bool triangle_accords_data(std::size_t k, std::size_t k1) const
+    {
+      const summand_class& summand_k = m_summand_classes[k];
+      const summand_class& summand_k1 = m_summand_classes[k1];
+
+      const data::data_expression condition_k = summand_k.f;
+      const data::data_expression condition_k1 = summand_k1.f;
+
+      const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+
+      data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
+
+      data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
+      data::data_expression parameters_equal = data::sort_bool::true_();
+      for (const data::data_expression& gi: summand_k1.g)
+      {
+        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(gi, data::where_clause(gi, assignments_k)));
+      }
+      data::data_expression consequent = data::sort_bool::and_(data::where_clause(condition_k1, assignments_k), parameters_equal);
+      data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
+
+      // std::cout << "Triangle condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
+
+      return m_rewr(condition) == data::sort_bool::true_();
+    }
+
+    bool left_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
 
@@ -530,7 +633,7 @@ class partial_order_reduction_algorithm
       return true;
     }
 
-    bool accords_DNS(std::size_t k, std::size_t k1) const
+    bool square_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
 
@@ -566,7 +669,7 @@ class partial_order_reduction_algorithm
       return true;
     }
 
-    bool accords_DNT(std::size_t k, std::size_t k1) const
+    bool triangle_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
 
@@ -607,19 +710,19 @@ class partial_order_reduction_algorithm
       {
         for (std::size_t k1 = 0; k1 < N; k1++)
         {
-          bool DNL_DNS_criterion = set_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1))).empty();
-          bool DNT_criterion = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
+          bool DNL_DNS_affect_sets = set_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1))).empty();
+          bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
 
-          bool not_in_DNL = DNL_DNS_criterion && accords_DNL(k, k1);
-          bool not_in_DNS = DNL_DNS_criterion && accords_DNS(k, k1);
-          bool not_in_DNT = DNT_criterion && accords_DNT(k, k1);
+          bool left_accords     = (DNL_DNS_affect_sets || left_accords_data(k, k1))   && left_accords_equations(k, k1);
+          bool square_accords   = (DNL_DNS_affect_sets || square_accords_data(k, k1)) && square_accords_equations(k, k1);
+          bool triangle_accords = (DNT_affect_sets || triangle_accords_data(k, k1))   && triangle_accords_equations(k, k1);
 
-          if (!not_in_DNL)
+          if (!left_accords)
           {
             DNL(k).insert(k1);
           }
 
-          if (!not_in_DNS && !not_in_DNT)
+          if (!square_accords && !triangle_accords)
           {
             DNA(k).insert(k1);
           }
@@ -798,7 +901,8 @@ class partial_order_reduction_algorithm
   public:
     explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy)
      : m_rewr(p.data(),
-              data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
+              //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
+              // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
               strategy),
        m_pbes_rewr(m_rewr, p.data()),
        m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, false),
