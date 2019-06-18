@@ -1,0 +1,41 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: StateFrm
+  l3:
+    type: LPS
+  l4:
+    type: PBES
+  l5:
+    type: PBES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l3]
+    args: [-n]
+    name: mcrl22lps
+  t2:
+    input: [l3, l2]
+    output: [l4]
+    args: []
+    name: lps2pbes
+  t3:
+    input: [l4]
+    output: []
+    args: []
+    name: pbessolve
+  t4:
+    input: [l4]
+    output: [l5]
+    args: []
+    name: pbespor
+  t5:
+    input: [l5]
+    output: []
+    args: []
+    name: pbessolve
+
+result: |
+  result = t3.value['solution'] == t5.value['solution']

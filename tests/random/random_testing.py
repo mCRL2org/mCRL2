@@ -241,6 +241,21 @@ class PbespareqelmTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(PbespareqelmTest, self).__init__(name, ymlfile('pbespareqelm'), settings)
 
+class Pbespor1Test(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(Pbespor1Test, self).__init__(name, ymlfile('pbespor1'), settings)
+
+class Pbespor2Test(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(Pbespor2Test, self).__init__(name, ymlfile('pbespor2'), settings)
+
+    def create_inputfiles(self, runpath = '.'):
+        super(Pbespor2Test, self).create_inputfiles(runpath)
+        filename = '{0}.mcf'.format(self.name, self.settings)
+        formula = random_state_formula_generator.make_modal_formula()
+        write_text(filename, str(formula))
+        self.inputfiles += [filename]
+
 class PbesrewrTest(PbesTest):
     def __init__(self, name, rewriter, settings = dict()):
         super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), settings)
@@ -369,6 +384,8 @@ available_tests = {
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
+    #'pbespor1'                                    : lambda name, settings: Pbespor1Test(name, settings)                                                ,
+    #'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
     'pbesrewr-quantifier-all'                     : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)                              ,
@@ -399,7 +416,7 @@ available_tests = {
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
     # 'pbessymbolicbisim'                           : lambda name, settings: PbessymbolicbisimTest(name, settings)                                       , # excluded from the tests because of Z3 dependency
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
-    # 'stochastic-ltscompare'                       : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
+    'stochastic-ltscompare'                       : lambda name, settings: StochasticLtscompareTest(name, settings)                                     ,
 }
 
 def print_names(tests):
