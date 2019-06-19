@@ -47,13 +47,13 @@ struct summand_class
   }
 
   // returns X_i -k->
-  bool maps_to(std::size_t i) const
+  bool depends(std::size_t i) const
   {
     return !nxt[i].empty();
   }
 
   // returns X_i -k-> j
-  bool maps_to(std::size_t i, std::size_t j) const
+  bool depends(std::size_t i, std::size_t j) const
   {
     using utilities::detail::contains;
 
@@ -245,7 +245,7 @@ class partial_order_reduction_algorithm
       add_assignments(m_sigma, d, e);
       for (std::size_t k = 0; k < N; k++)
       {
-        if (!maps_to(i, k))
+        if (!depends(i, k))
         {
           continue;
         }
@@ -269,6 +269,44 @@ class partial_order_reduction_algorithm
     std::set<std::size_t> invis(const std::set<std::size_t>& K)
     {
       return utilities::detail::set_intersection(m_invis, K);
+    }
+
+    // Choose a NES according to the heuristic function h.
+    std::size_t choose_minimal_NES(std::size_t k,
+                                   const std::set<std::size_t>& Twork,
+                                   const std::set<std::size_t>& Ts,
+                                   const std::set<std::size_t>& en_X_e
+                                  ) const
+    {
+      using utilities::detail::set_difference;
+      using utilities::detail::set_intersection;
+      using utilities::detail::set_union;
+
+      std::size_t n = m_pbes.equations().size();
+      std::set<std::size_t> Twork_Ts = set_union(Twork, Ts);
+      const summand_class& summand_k = m_summand_classes[k];
+
+      std::set<std::size_t> T1 = set_union(Twork_Ts, en_X_e);
+      std::set<std::size_t> T2 = set_intersection(Twork_Ts, en_X_e);
+
+      auto h = [&](std::size_t i)
+      {
+        const std::set<std::size_t> NES_k = summand_k.NES[i];
+        return set_difference(NES_k, T1).size() + n * set_difference(NES_k, T2).size();
+      };
+
+      std::size_t i_min = 0;
+      std::size_t h_min = h(0);
+      for (std::size_t i = 1; i < n; i++)
+      {
+        std::size_t h_i = h(i);
+        if (h_i < h_min)
+        {
+          i_min = i;
+          h_min = h_i;
+        }
+      }
+      return i_min;
     }
 
     std::set<std::size_t> stubborn_set(const propositional_variable_instantiation& X_e)
@@ -312,11 +350,6 @@ class partial_order_reduction_algorithm
         C.insert(invis_pair(std::set<std::size_t>{k}, std::set<std::size_t>()));
       }
       assert(!C.empty());
-      // TODO: remove this
-      if (C.empty())
-      {
-        throw mcrl2::runtime_error("partial_order_reduction: the set C cannot be empty!");
-      }
 
       while (true)
       {
@@ -351,7 +384,7 @@ class partial_order_reduction_algorithm
           }
           else
           {
-            std::size_t i = 0; // TODO: choose i such that h is minimal
+            std::size_t i = choose_minimal_NES(k, Twork, Ts, en_X_e);
             Twork = set_union(Twork, set_difference(m_summand_classes[k].NES[i], Ts));
           }
         }
@@ -449,7 +482,7 @@ class partial_order_reduction_algorithm
         for (std::size_t i = 0; i < n; i++)
         {
           std::set<std::size_t>& NES_i = summand_k.NES[i];
-          if (summand_k.maps_to(i))
+          if (summand_k.depends(i))
           {
             for (std::size_t k1 = 0; k1 < N; k1++)
             {
@@ -475,19 +508,19 @@ class partial_order_reduction_algorithm
     }
 
     // returns X_i |--k--> X_j
-    bool maps_to(std::size_t i, std::size_t k, std::size_t j) const
+    bool depends(std::size_t i, std::size_t k, std::size_t j) const
     {
-      return m_summand_classes[k].maps_to(i, j);
+      return m_summand_classes[k].depends(i, j);
     };
 
     // TODO: precompute this function
     // returns X_i |--k-->
-    bool maps_to(std::size_t i, std::size_t k) const
+    bool depends(std::size_t i, std::size_t k) const
     {
       std::size_t n = m_pbes.equations().size();
       for (std::size_t j = 0; j < n; j++)
       {
-        if (maps_to(i, k, j))
+        if (depends(i, k, j))
         {
           return true;
         }
@@ -606,17 +639,17 @@ class partial_order_reduction_algorithm
       {
         for (std::size_t i1 = 0; i1 < n; i1++)
         {
-          bool X_k1_X1 = maps_to(i, k1, i1);
+          bool X_k1_X1 = depends(i, k1, i1);
           for (std::size_t i_prime = 0; i_prime < n; i_prime++)
           {
-            bool X1_k_Xprime = maps_to(i1, k, i_prime);
+            bool X1_k_Xprime = depends(i1, k, i_prime);
             if (X_k1_X1 && X1_k_Xprime)
             {
               bool found = false;
               for (std::size_t i2 = 0; i2 < n; i2++)
               {
-                bool X_k_X2 = maps_to(i, k, i2);
-                bool X2_k1_Xprime = maps_to(i2, k1, i_prime);
+                bool X_k_X2 = depends(i, k, i2);
+                bool X2_k1_Xprime = depends(i2, k1, i_prime);
                 if (X_k_X2 && X2_k1_Xprime)
                 {
                   found = true;
@@ -641,17 +674,17 @@ class partial_order_reduction_algorithm
       {
         for (std::size_t i1 = 0; i1 < n; i1++)
         {
-          bool X_k1_X1 = maps_to(i, k1, i1);
+          bool X_k1_X1 = depends(i, k1, i1);
           for (std::size_t i2 = 0; i2 < n; i2++)
           {
-            bool X_k_X2 = maps_to(i, k, i2);
+            bool X_k_X2 = depends(i, k, i2);
             if (X_k1_X1 && X_k_X2)
             {
               bool found = false;
               for (std::size_t i_prime = 0; i_prime < n; i_prime++)
               {
-                bool X1_k_Xprime = maps_to(i1, k, i_prime);
-                bool X2_k1_Xprime = maps_to(i2, k1, i_prime);
+                bool X1_k_Xprime = depends(i1, k, i_prime);
+                bool X2_k1_Xprime = depends(i2, k1, i_prime);
                 if (X1_k_Xprime && X2_k1_Xprime)
                 {
                   found = true;
@@ -677,11 +710,11 @@ class partial_order_reduction_algorithm
       {
         for (std::size_t i1 = 0; i1 < n; i1++)
         {
-          bool X_k1_X1 = maps_to(i, k1, i1);
+          bool X_k1_X1 = depends(i, k1, i1);
           for (std::size_t i2 = 0; i2 < n; i2++)
           {
-            bool X_k_X2 = maps_to(i, k, i2);
-            bool X2_k1_X1 = maps_to(i2, k1, i1);
+            bool X_k_X2 = depends(i, k, i2);
+            bool X2_k1_X1 = depends(i2, k1, i1);
             if (X_k1_X1 && X_k_X2 && !X2_k1_X1)
             {
               return false;
