@@ -12,3 +12,21 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 set(PREFIX "example_lps")
+
+file(GLOB TERM_OBJS "*.cpp")
+
+foreach( OBJ ${TERM_OBJS} )
+
+  get_filename_component(result "${OBJ}" NAME_WE)
+  set(PROJECT_NAME "${PREFIX}_${result}")
+  project( ${PROJECT_NAME} )
+
+  add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
+        ${OBJ}
+  )
+
+  target_link_libraries(${PROJECT_NAME}
+     mcrl2_lps
+  )
+
+endforeach( OBJ )

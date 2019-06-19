@@ -13,3 +13,5 @@ add_mcrl2_library(atermpp
 if (${MCRL2_ENABLE_BENCHMARKS})
   add_subdirectory(benchmark/)
 endif()
+
+add_subdirectory(example)

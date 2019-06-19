@@ -7,3 +7,5 @@ add_mcrl2_library(bes
   DEPENDS
     mcrl2_pbes
 )
+
+add_subdirectory(example)

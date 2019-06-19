@@ -14,8 +14,8 @@ cmake_minimum_required(VERSION 2.6)
 set(PREFIX "example_bes")
 
 ##---------------------------------------------------
-## Example *.cpp 
-##--------------------------------------------------- 
+## Example *.cpp
+##---------------------------------------------------
 
 file(GLOB TERM_OBJS "*.cpp")
 
@@ -25,15 +25,12 @@ foreach( OBJ ${TERM_OBJS} )
   set(PROJECT_NAME "${PREFIX}_${result}")
   project( ${PROJECT_NAME} )
 
-  add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
-        ${OBJ} 
+  add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
+        ${OBJ}
   )
-  
+
   target_link_libraries(${PROJECT_NAME}
      mcrl2_bes
   )
 
-  build_and_run_test_example_target( ${PROJECT_NAME} "-h" )
-
 endforeach( OBJ )
-

@@ -23,3 +23,5 @@ add_mcrl2_library(data
     mcrl2_utilities
     ${COMPILING_REWRITER_DEPS}
 )
+
+add_subdirectory(example)

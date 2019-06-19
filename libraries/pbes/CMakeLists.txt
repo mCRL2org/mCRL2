@@ -8,8 +8,8 @@ add_mcrl2_library(pbes
   INSTALL_HEADERS TRUE
   NOHEADERTEST
     # This test fails due to circular dependencies between the bes and
-    # pbes libraries on a mac. Therefore it is disabled. 
-    mcrl2/pbes/pbes_solver_test.h 
+    # pbes libraries on a mac. Therefore it is disabled.
+    mcrl2/pbes/pbes_solver_test.h
   SOURCES
     algorithms.cpp
     pbes.cpp
@@ -36,9 +36,9 @@ if(${MCRL2_ENABLE_TESTS})
     get_filename_component(base ${test} NAME_WE)
     target_link_libraries(librarytest_mcrl2_pbes_${base} mcrl2_pbes mcrl2_bes)
   endforeach()
-  
+
   # The code below does not seem to do anything. Therefore it is outcommented,
-  # and could be removed in due course. 
+  # and could be removed in due course.
   # if(${MCRL2_ENABLE_HEADER_TESTS})
   #   file(GLOB_RECURSE headers "include/*.h")
   #   foreach(header ${headers})
@@ -52,3 +52,5 @@ if(${MCRL2_ENABLE_TESTS})
   #  endforeach()
   # endif()
 endif()
+
+add_subdirectory(example)

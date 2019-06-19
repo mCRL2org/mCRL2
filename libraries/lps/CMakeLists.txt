@@ -3,7 +3,7 @@ add_mcrl2_library(lps
   NOHEADERTEST
     # These headers require C++17. Reenable when compiling with C++17.
     mcrl2/lps/explorer-cpp17.h
-    
+
   SOURCES
     lps.cpp
     tools.cpp
@@ -20,3 +20,5 @@ add_mcrl2_library(lps
     ${CMAKE_SOURCE_DIR}/libraries/trace/include
     ${Boost_INCLUDE_DIRS}
 )
+
+add_subdirectory(example)

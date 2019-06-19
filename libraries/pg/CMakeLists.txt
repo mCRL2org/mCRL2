@@ -23,3 +23,5 @@ add_mcrl2_library(pg
     mcrl2_pbes
     mcrl2_bes
 )
+
+add_subdirectory(example)
