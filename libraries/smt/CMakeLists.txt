@@ -9,3 +9,5 @@ add_mcrl2_library(smt
     mcrl2_data
     mcrl2_utilities
 )
+
+add_subdirectory(example)
