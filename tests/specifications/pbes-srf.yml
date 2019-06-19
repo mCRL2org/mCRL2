@@ -34,6 +34,11 @@ tools:
     output: []
     args: [-ais-well-typed]
     name: pbestransform
+  t6:
+    input: [l4]
+    output: []
+    args: []
+    name: pbessolve
 result: |
-  result = 'true' in (t5.stdout + t5.stderr)
+  result = 'true' in (t5.stdout + t5.stderr) and t3.value['solution'] == t6.value['solution'] 
 
