@@ -851,10 +851,15 @@ class explorer: public abortable
         std::list<std::size_t> s0_index;
         for (const state& s: S)
         {
-          std::size_t s_index = discovered.size();
-          discovered.insert(std::make_pair(s, s_index));
-          discover_state(s, s_index);
-          s0_index.push_back(s_index);
+          // TODO: join duplicate targets
+          auto j = discovered.find(s);
+          if (j == discovered.end())
+          {
+            std::size_t s_index = discovered.size();
+            j = discovered.insert(std::make_pair(s, s_index)).first;
+            discover_state(s, s_index);
+          }
+          s0_index.push_back(j->second);
         }
         discover_initial_state(s0_, s0_index);
       }
@@ -891,6 +896,7 @@ class explorer: public abortable
               {
                 std::list<std::size_t> s1_index;
                 const auto& S1 = s1.states;
+                // TODO: join duplicate targets
                 for (const state& s1_: S1)
                 {
                   auto j = discovered.find(s1_);
