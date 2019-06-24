@@ -463,6 +463,34 @@ class partial_order_reduction_algorithm
       return result;
     }
 
+    bool summand_can_enable_data(const std::size_t k, const std::size_t k1)
+    {
+      const summand_class& summand_k = m_summand_classes[k];
+      const summand_class& summand_k1 = m_summand_classes[k1];
+
+      const data::data_expression condition_k = summand_k.f;
+      const data::data_expression condition_k1 = summand_k1.f;
+
+      const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      //TODO: rename clashing variables
+      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+
+      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, summand_k1.g);
+
+      data::data_expression can_enable = data::exists(
+        parameters + combined_quantified_vars,
+        data::sort_bool::and_(
+          data::sort_bool::and_(
+            data::sort_bool::not_(condition_k),
+            condition_k1
+          ),
+          data::where_clause(condition_k, assignments_k1)
+        )
+      );
+
+      return m_rewr(can_enable) == data::sort_bool::true_();
+    }
+
     void compute_NES(const std::vector<parameter_info>& info)
     {
       using utilities::detail::set_union;
@@ -493,7 +521,7 @@ class partial_order_reduction_algorithm
         std::set<std::size_t>& NES = summand_k.NES;
         for (std::size_t k1 = 0; k1 < N; k1++)
         {
-          if (!TsWs_has_empty_intersection(k, k1))
+          if (!TsWs_has_empty_intersection(k, k1) && summand_can_enable_data(k, k1))
           {
             NES.insert(k1);
           }
