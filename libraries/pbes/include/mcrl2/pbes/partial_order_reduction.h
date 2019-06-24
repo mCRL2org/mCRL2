@@ -32,7 +32,7 @@ struct summand_class
   data::data_expression f;
   data::data_expression_list g;
   std::vector<std::set<std::size_t>> nxt;
-  std::vector<std::set<std::size_t>> NES; // TODO: use boost::dynamic_bitset<> (?)
+  std::set<std::size_t> NES; // TODO: use boost::dynamic_bitset<> (?)
   std::set<std::size_t> DNA;
   std::set<std::size_t> DNL;
 
@@ -43,7 +43,6 @@ struct summand_class
    : e(std::move(e_)), f(std::move(f_)), g(std::move(g_))
   {
     nxt.resize(n);
-    NES.resize(n);
   }
 
   // returns X_i -k->
@@ -84,12 +83,9 @@ struct summand_class
 
     out << std::endl;
 
-    for (std::size_t i = 0; i < n; i++)
-    {
-      out << "NES " << std::setw(3) << i << " ";
-      print(out, NES[i], N);
-      out << std::endl;
-    }
+    out << "NES   ";
+    print(out, NES, N);
+    out << std::endl;
 
     out << std::endl;
     out << "DNA = " << core::detail::print_set(DNA) << std::endl;
@@ -201,6 +197,10 @@ class partial_order_reduction_algorithm
     std::set<std::size_t> m_invis; // invisible summand classes
     std::set<std::size_t> m_vis;   // visible summand classes
 
+    // One NES for every predicate variable X_i that can be used for summand
+    // class k when !depends(i,k).
+    std::vector<std::set<std::size_t>> m_dependency_nes;
+
     std::size_t summand_index(const srf_summand& summand) const
     {
       auto i = m_summand_index.find(summand_equivalence_key(summand));
@@ -272,41 +272,52 @@ class partial_order_reduction_algorithm
     }
 
     // Choose a NES according to the heuristic function h.
-    std::size_t choose_minimal_NES(std::size_t k,
-                                   const std::set<std::size_t>& Twork,
-                                   const std::set<std::size_t>& Ts,
-                                   const std::set<std::size_t>& en_X_e
+    const std::set<std::size_t>& choose_minimal_NES(std::size_t k,
+                                   const propositional_variable_instantiation& X_e,
+                                   const std::set<std::size_t>& /* Twork */,
+                                   const std::set<std::size_t>& /* Ts */,
+                                   const std::set<std::size_t>& /* en_X_e */
                                   ) const
     {
       using utilities::detail::set_difference;
       using utilities::detail::set_intersection;
       using utilities::detail::set_union;
 
-      std::size_t n = m_pbes.equations().size();
-      std::set<std::size_t> Twork_Ts = set_union(Twork, Ts);
-      const summand_class& summand_k = m_summand_classes[k];
-
-      std::set<std::size_t> T1 = set_union(Twork_Ts, en_X_e);
-      std::set<std::size_t> T2 = set_intersection(Twork_Ts, en_X_e);
-
-      auto h = [&](std::size_t i)
+      if(!depends(m_equation_index.index(X_e.name()), k))
       {
-        const std::set<std::size_t> NES_k = summand_k.NES[i];
-        return set_difference(NES_k, T1).size() + n * set_difference(NES_k, T2).size();
-      };
-
-      std::size_t i_min = 0;
-      std::size_t h_min = h(0);
-      for (std::size_t i = 1; i < n; i++)
-      {
-        std::size_t h_i = h(i);
-        if (h_i < h_min)
-        {
-          i_min = i;
-          h_min = h_i;
-        }
+        return m_dependency_nes[m_equation_index.index(X_e.name())];
       }
-      return i_min;
+      else
+      {
+        return m_summand_classes[k].NES;
+      }
+
+      //TODO implement one NES per guard, choose the smallest one
+      // std::size_t n = m_pbes.equations().size();
+      // std::set<std::size_t> Twork_Ts = set_union(Twork, Ts);
+      // const summand_class& summand_k = m_summand_classes[k];
+      //
+      // std::set<std::size_t> T1 = set_union(Twork_Ts, en_X_e);
+      // std::set<std::size_t> T2 = set_intersection(Twork_Ts, en_X_e);
+      //
+      // auto h = [&](std::size_t i)
+      // {
+      //   const std::set<std::size_t> NES_k = summand_k.NES[i];
+      //   return set_difference(NES_k, T1).size() + n * set_difference(NES_k, T2).size();
+      // };
+      //
+      // std::size_t i_min = 0;
+      // std::size_t h_min = h(0);
+      // for (std::size_t i = 1; i < n; i++)
+      // {
+      //   std::size_t h_i = h(i);
+      //   if (h_i < h_min)
+      //   {
+      //     i_min = i;
+      //     h_min = h_i;
+      //   }
+      // }
+      // return i_min;
     }
 
     std::set<std::size_t> stubborn_set(const propositional_variable_instantiation& X_e)
@@ -384,8 +395,8 @@ class partial_order_reduction_algorithm
           }
           else
           {
-            std::size_t i = choose_minimal_NES(k, Twork, Ts, en_X_e);
-            Twork = set_union(Twork, set_difference(m_summand_classes[k].NES[i], Ts));
+            auto& NES = choose_minimal_NES(k, X_e, Twork, Ts, en_X_e);
+            Twork = set_union(Twork, set_difference(NES, Ts));
           }
         }
         C.insert(invis_pair(Twork, Ts));
@@ -479,29 +490,23 @@ class partial_order_reduction_algorithm
       for (std::size_t k = 0; k < N; k++)
       {
         summand_class& summand_k = m_summand_classes[k];
-        for (std::size_t i = 0; i < n; i++)
+        std::set<std::size_t>& NES = summand_k.NES;
+        for (std::size_t k1 = 0; k1 < N; k1++)
         {
-          std::set<std::size_t>& NES_i = summand_k.NES[i];
-          if (summand_k.depends(i))
+          if (!TsWs_has_empty_intersection(k, k1))
           {
-            for (std::size_t k1 = 0; k1 < N; k1++)
-            {
-              if (!TsWs_has_empty_intersection(k, k1))
-              {
-                NES_i.insert(k1);
-              }
-            }
+            NES.insert(k1);
           }
-          else
+        }
+      }
+      for (std::size_t i = 0; i < n; i++)
+      {
+        for (std::size_t k = 0; k < N; k++)
+        {
+          const std::set<std::size_t>& J = m_summand_classes[k].nxt[i];
+          if (J.size() > 1 || (J.size() == 1 && *J.begin() != i))
           {
-            for (std::size_t k1 = 0; k1 < N; k1++)
-            {
-              const std::set<std::size_t>& J = m_summand_classes[k1].nxt[i];
-              if (J.size() > 1 || (J.size() == 1 && *J.begin() != i))
-              {
-                NES_i.insert(k1);
-              }
-            }
+            m_dependency_nes[i].insert(k);
           }
         }
       }
@@ -537,6 +542,7 @@ class partial_order_reduction_algorithm
       const data::data_expression condition_k1 = summand_k1.f;
 
       const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      //TODO: rename clashing variables
       data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
 
       data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
@@ -575,6 +581,7 @@ class partial_order_reduction_algorithm
       const data::data_expression condition_k1 = summand_k1.f;
 
       const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      //TODO: rename clashing variables
       data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
 
       data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
@@ -613,6 +620,7 @@ class partial_order_reduction_algorithm
       const data::data_expression condition_k1 = summand_k1.f;
 
       const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      //TODO: rename clashing variables
       data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
 
       data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
@@ -940,7 +948,8 @@ class partial_order_reduction_algorithm
        m_pbes_rewr(m_rewr, p.data()),
        m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, false),
        m_pbes(pbes2srf(p)),
-       m_equation_index(m_pbes)
+       m_equation_index(m_pbes),
+       m_dependency_nes(m_pbes.equations().size())
     {
       unify_parameters(m_pbes);
 
