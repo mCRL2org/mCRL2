@@ -899,12 +899,12 @@ class partial_order_reduction_algorithm
     void print_summand(const srf_summand& summand, bool is_conjunctive) const
     {
       std::size_t k = summand_index(summand);
-      std::cout << "   (" << k << ") ";
+      mCRL2log(log::verbose) << "   (" << k << ") ";
       if (!summand.parameters().empty())
       {
-        std::cout << (is_conjunctive ? "forall " : "exists ") << print_variables(summand.parameters()) << ". ";
+        mCRL2log(log::verbose) << (is_conjunctive ? "forall " : "exists ") << print_variables(summand.parameters()) << ". ";
       }
-      std::cout << summand.condition()
+      mCRL2log(log::verbose) << summand.condition()
                 << (is_conjunctive ? " => " : " && ")
                 << summand.variable()
                 << std::endl;
@@ -912,16 +912,16 @@ class partial_order_reduction_algorithm
 
     void print_pbes() const
     {
-      std::cout << m_pbes.to_pbes() << std::endl;
-      std::cout << "srf_pbes" << std::endl;
+      mCRL2log(log::verbose) << m_pbes.to_pbes() << std::endl;
+      mCRL2log(log::verbose) << "srf_pbes" << std::endl;
       for (const srf_equation& eqn: m_pbes.equations())
       {
-        std::cout << eqn.symbol() << " " << eqn.variable() << " = " << (eqn.is_conjunctive() ? "conjunction" : "disjunction") << " of summands\n";
+        mCRL2log(log::verbose) << eqn.symbol() << " " << eqn.variable() << " = " << (eqn.is_conjunctive() ? "conjunction" : "disjunction") << " of summands\n";
         for (const srf_summand& summand: eqn.summands())
         {
           print_summand(summand, eqn.is_conjunctive());
         }
-        std::cout << std::endl;
+        mCRL2log(log::verbose) << std::endl;
       }
     }
 
@@ -929,13 +929,20 @@ class partial_order_reduction_algorithm
     {
       using utilities::detail::contains;
 
-      std::size_t N = m_summand_classes.size();
-      for (std::size_t k = 0; k < N; k++)
+      if(mCRL2logEnabled(log::verbose))
       {
-        const summand_class& summand = m_summand_classes[k];
-        std::cout << "\n--- summand class " << k << " ---" << std::endl;
-        std::cout << "visible = " << std::boolalpha << contains(m_vis, k) << "\n\n";
-        summand.print(std::cout, N);
+        std::size_t N = m_summand_classes.size();
+        for (std::size_t k = 0; k < N; k++)
+        {
+          const summand_class& summand = m_summand_classes[k];
+          mCRL2log(log::verbose) << "\n--- summand class " << k << " ---" << std::endl;
+          mCRL2log(log::verbose) << "visible = " << std::boolalpha << contains(m_vis, k) << "\n\n";
+          summand.print(log::mcrl2_logger().get(log::verbose), N);
+        }
+        for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
+        {
+          mCRL2log(log::verbose) << "dependency NES[" << std::setw(3) << i << "]  " << core::detail::print_set(m_dependency_nes[i]) << std::endl;
+        }
       }
     }
 
@@ -964,7 +971,7 @@ class partial_order_reduction_algorithm
       compute_summand_classes();
       compute_vis_invis();
 
-      std::cout << p << std::endl;
+      mCRL2log(log::verbose) << p << std::endl;
       print_pbes();
     }
 
