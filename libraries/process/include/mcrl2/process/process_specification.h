@@ -38,6 +38,7 @@ void normalize_sorts(process_specification& x, const data::sort_specification& s
 void translate_user_notation(process::process_specification& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x);
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x);
+std::set<data::variable> find_free_variables(const process::process_specification& x);
 
 /// \brief Test for a process specification expression
 /// \param x A term

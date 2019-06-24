@@ -78,6 +78,7 @@ std::set<data::sort_expression> find_sort_expressions(const process::process_exp
 std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x) { return process::find_sort_expressions< process::process_specification >(x); }
 std::set<data::variable> find_all_variables(const process::action& x) { return process::find_all_variables< process::action >(x); }
 std::set<data::variable> find_free_variables(const process::action& x) { return process::find_free_variables< process::action >(x); }
+std::set<data::variable> find_free_variables(const process::process_specification& x) { return process::find_free_variables< process::process_specification >(x); }
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
 

@@ -134,6 +134,7 @@ pbes_system::pbes
 pbes_system::pbes_expression
 pbes_system::pbes_equation
 process::action
+process::process_specification
 state_formulas::state_formula
 '''
 

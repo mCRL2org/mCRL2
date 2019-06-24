@@ -15,6 +15,7 @@
 #include <fstream>
 
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/process/is_well_typed.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/replace_subterm.h"
 #include "mcrl2/utilities/logger.h"
@@ -82,6 +83,10 @@ void generate_reduced_processes(const process::process_specification& p, std::si
     for (const process::process_expression& replacement: replacements)
     {
       process::process_specification q = replace_subterm(p, x, depth, replacement);
+      if (!process::is_well_typed(q))
+      {
+        continue;
+      }
       std::string filename = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "_" + utilities::number2string(index) + ".mcrl2";
       std::string text = process::pp(q);
       utilities::detail::write_text(filename, text);
@@ -96,11 +101,11 @@ class reduce_process_tool: public utilities::tools::input_output_tool
   protected:
     const std::size_t undefined = std::size_t(-1);
     typedef utilities::tools::input_output_tool super;
-    bool m_print_max_depth;
-    bool m_verbose;
+    bool m_print_max_depth = false;
+    bool m_verbose = false;
     std::size_t m_depth = undefined;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_verbose = parser.options.count("verbose") > 0;
@@ -110,7 +115,7 @@ class reduce_process_tool: public utilities::tools::input_output_tool
       }
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("depth", utilities::make_optional_argument<std::size_t>("DEPTH", "0"), "the depth at which the reductions are applied", 'D');
@@ -124,7 +129,7 @@ class reduce_process_tool: public utilities::tools::input_output_tool
              )
     {}
 
-    bool run()
+    bool run() override
     {
       process::process_specification procspec = parse_process_specification(input_filename());
       if (m_verbose)
