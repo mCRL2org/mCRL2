@@ -15,6 +15,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitution_utility.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
@@ -84,6 +86,14 @@ struct summand_equivalence_key
   data::variable_list e;
   data::data_expression f;
   data::data_expression_list g;
+
+  explicit summand_equivalence_key(data::variable_list e_, data::data_expression f_, data::data_expression_list g_)
+  : e(std::move(e_)), f(std::move(f_)), g(std::move(g_))
+  {}
+
+  explicit summand_equivalence_key(const summand_class& summand)
+   : e(summand.e), f(summand.f), g(summand.g)
+  {}
 
   explicit summand_equivalence_key(const srf_summand& summand)
    : e(summand.parameters()), f(summand.condition()), g(summand.variable().parameters())
@@ -546,26 +556,61 @@ class partial_order_reduction_algorithm
       return false;
     };
 
+    summand_equivalence_key rename_duplicate_variables(data::set_identifier_generator& id_gen, const summand_equivalence_key& summ) const
+    {
+      std::vector<data::variable> new_variables;
+      data::maintain_variables_in_rhs< data::mutable_map_substitution<> > sigma;
+      for (const data::variable& var: summ.e)
+      {
+        core::identifier_string new_name = id_gen(var.name());
+        if (new_name != var.name())
+        {
+          sigma[var] = data::variable(new_name, var.sort());
+        }
+        new_variables.emplace_back(new_name, var.sort());
+      }
+
+      auto replace_vars = [&](const data::data_expression& e)
+      {
+        return data::replace_variables_capture_avoiding_with_an_identifier_generator(e, sigma, id_gen);
+      };
+      // std::function<data::data_expression(data::data_expression)> replace_vars = std::bind(data::replace_variables_capture_avoiding_with_an_identifier_generator,
+      //   std::placeholders::_1, sigma, id_gen));
+
+      return summand_equivalence_key(
+        data::variable_list(new_variables.begin(), new_variables.end()),
+        replace_vars(summ.f),
+        data::data_expression_list(summ.g.begin(), summ.g.end(), replace_vars)
+      );
+    }
+
     bool left_accords_data(std::size_t k, std::size_t k1) const
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
 
-      const data::data_expression condition_k = summand_k.f;
-      const data::data_expression condition_k1 = summand_k1.f;
-
       const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
-      //TODO: rename clashing variables
+      data::set_identifier_generator id_gen;
+      for(const data::variable& v: parameters)
+      {
+        id_gen.add_identifier(v.name());
+      }
+
+      summand_equivalence_key new_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars_k  = new_k.e;  data::data_expression condition_k  = new_k.f;  data::data_expression_list updates_k  = new_k.g;
+      data::variable_list qvars_k1 = new_k1.e; data::data_expression condition_k1 = new_k1.f; data::data_expression_list updates_k1 = new_k1.g;
+
       data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
 
-      data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
-      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, summand_k1.g);
+      data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
+      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, updates_k1);
 
       data::data_expression antecedent = data::sort_bool::and_(condition_k1, data::where_clause(condition_k, assignments_k1));
       data::data_expression parameters_equal = data::sort_bool::true_();
-      auto it_k = summand_k.g.begin();
-      auto it_k1 = summand_k1.g.begin();
-      while (it_k != summand_k.g.end())
+      auto it_k = updates_k.begin();
+      auto it_k1 = updates_k1.begin();
+      while (it_k != updates_k.end())
       {
         parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments_k1), data::where_clause(*it_k1, assignments_k)));
         ++it_k; ++it_k1;
@@ -590,21 +635,28 @@ class partial_order_reduction_algorithm
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
 
-      const data::data_expression condition_k = summand_k.f;
-      const data::data_expression condition_k1 = summand_k1.f;
-
       const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
-      //TODO: rename clashing variables
-      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+      data::set_identifier_generator id_gen;
+      for(const data::variable& v: parameters)
+      {
+        id_gen.add_identifier(v.name());
+      }
 
-      data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
-      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, summand_k1.g);
+      summand_equivalence_key new_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars_k  = new_k.e;  data::data_expression condition_k  = new_k.f;  data::data_expression_list updates_k  = new_k.g;
+      data::variable_list qvars_k1 = new_k1.e; data::data_expression condition_k1 = new_k1.f; data::data_expression_list updates_k1 = new_k1.g;
+
+      data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
+
+      data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
+      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, updates_k1);
 
       data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
       data::data_expression parameters_equal = data::sort_bool::true_();
-      auto it_k = summand_k.g.begin();
-      auto it_k1 = summand_k1.g.begin();
-      while (it_k != summand_k.g.end())
+      auto it_k = updates_k.begin();
+      auto it_k1 = updates_k1.begin();
+      while (it_k != updates_k.end())
       {
         parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments_k1), data::where_clause(*it_k1, assignments_k)));
         ++it_k; ++it_k1;
@@ -619,7 +671,7 @@ class partial_order_reduction_algorithm
         );
       data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
-      // std::cout << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
+      // mCRL2log(log::verbose) << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
       return m_rewr(condition) == data::sort_bool::true_();
     }
@@ -629,18 +681,25 @@ class partial_order_reduction_algorithm
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
 
-      const data::data_expression condition_k = summand_k.f;
-      const data::data_expression condition_k1 = summand_k1.f;
-
       const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
-      //TODO: rename clashing variables
-      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+      data::set_identifier_generator id_gen;
+      for(const data::variable& v: parameters)
+      {
+        id_gen.add_identifier(v.name());
+      }
 
-      data::assignment_list assignments_k = data::make_assignment_list(parameters, summand_k.g);
+      summand_equivalence_key new_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars_k  = new_k.e;  data::data_expression condition_k  = new_k.f;  data::data_expression_list updates_k  = new_k.g;
+      data::variable_list qvars_k1 = new_k1.e; data::data_expression condition_k1 = new_k1.f; data::data_expression_list updates_k1 = new_k1.g;
+
+      data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
+
+      data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
 
       data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
       data::data_expression parameters_equal = data::sort_bool::true_();
-      for (const data::data_expression& gi: summand_k1.g)
+      for (const data::data_expression& gi: updates_k1)
       {
         parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(gi, data::where_clause(gi, assignments_k)));
       }
