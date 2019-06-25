@@ -480,7 +480,7 @@ vertex_set attr_cheap(const StructureGraph& G, const vertex_set& S, typename Str
       A.insert(u);
       for (auto w: G.predecessors(u))
       {
-        if (!A.contains(w))
+        if (!A.contains(w) && !S.contains(w))
         {
           todo.insert(w);
         }
