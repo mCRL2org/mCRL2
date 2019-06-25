@@ -72,22 +72,7 @@ struct summand_class
   // N is the number of summand classes
   void print(std::ostream& out, const std::size_t N) const
   {
-    std::size_t n = nxt.size();
-
-    for (std::size_t i = 0; i < n; i++)
-    {
-      out << "nxt " << std::setw(3) << i << " ";
-      print(out, nxt[i], n);
-      out << std::endl;
-    }
-
-    out << std::endl;
-
-    out << "NES   ";
-    print(out, NES, N);
-    out << std::endl;
-
-    out << std::endl;
+    out << "NES = " << core::detail::print_set(NES) << std::endl;
     out << "DNA = " << core::detail::print_set(DNA) << std::endl;
     out << "DNL = " << core::detail::print_set(DNL) << std::endl;
   }
