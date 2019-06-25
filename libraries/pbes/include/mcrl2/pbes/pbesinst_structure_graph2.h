@@ -175,12 +175,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void compute_attractor_set_S0(const simple_structure_graph& G)
     {
-      S0 = compute_attractor_set(G, S0, 0);
+      S0 = attr_default(G, S0, 0);
     }
 
     void compute_attractor_set_S1(const simple_structure_graph& G)
     {
-      S1 = compute_attractor_set(G, S1, 1);
+      S1 = attr_default(G, S1, 1);
     }
 
     bool solution_found(const propositional_variable_instantiation& init) const override
@@ -368,7 +368,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         S0.insert(u);
         if (m_options.optimization > 2)
         {
-          S0 = compute_attractor_set(G, S0, 0);
+          S0 = m_options.cheap_attractor ? attr_cheap(G, S0, u, 0) : attr_default(G, S0, 0);
         }
       }
       else if (is_false(b))
@@ -376,7 +376,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         S1.insert(u);
         if (m_options.optimization > 2)
         {
-          S1 = compute_attractor_set(G, S1, 1);
+          S1 = m_options.cheap_attractor ? attr_cheap(G, S1, u, 1) : attr_default(G, S1, 1);
         }
       }
       if (S0_guard(S0.size()))
@@ -447,7 +447,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           }
           mCRL2log(log::debug) << "final todo = " << core::detail::print_set(todo_.vertices()) << std::endl;
 
-          todo_ = compute_attractor_set(G, todo_, alpha);
+          todo_ = attr_default(G, todo_, alpha);
           m_graph_builder.erase_vertices(todo_);
         }
         else
@@ -459,7 +459,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             irrelevant.insert(v);
           }
           mCRL2log(log::debug) << "irrelevant = " << irrelevant << std::endl;
-          irrelevant = compute_attractor_set_simple(G, irrelevant);
+          irrelevant = attr_simple(G, irrelevant);
           mCRL2log(log::debug) << "attr(irrelevant) = " << irrelevant << std::endl;
           m_graph_builder.erase_vertices(irrelevant);
         }

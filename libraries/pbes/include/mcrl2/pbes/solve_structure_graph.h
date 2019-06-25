@@ -165,14 +165,14 @@ class solve_structure_graph_algorithm
       vertex_set W[2]   = { vertex_set(N), vertex_set(N) };
       vertex_set W_1[2];
 
-      vertex_set A = compute_attractor_set(G, U, alpha);
+      vertex_set A = attr_default(G, U, alpha);
       std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
 
       if (use_toms_optimization)
       {
         // More efficient than Zielonka, because some recursive calls are skipped.
         // As a consequence, the computed strategy may be wrong.
-        vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
+        vertex_set B = attr_default(G, W_1[1 - alpha], 1 - alpha);
         if (W_1[1 - alpha].size() == B.size())
         {
           W[alpha] = set_union(A, W_1[alpha]);
@@ -194,7 +194,7 @@ class solve_structure_graph_algorithm
          }
          else
          {
-           vertex_set B = compute_attractor_set(G, W_1[1 - alpha], 1 - alpha);
+           vertex_set B = attr_default(G, W_1[1 - alpha], 1 - alpha);
            std::tie(W[0], W[1]) = solve_recursive(G, B);
            W[1 - alpha] = set_union(W[1 - alpha], B);
          }
@@ -238,11 +238,11 @@ class solve_structure_graph_algorithm
       // extend Vconj and Vdisj
       if (!Vconj.is_empty())
       {
-        Vconj = compute_attractor_set(G, Vconj, 1);
+        Vconj = attr_default(G, Vconj, 1);
       }
       if (!Vdisj.is_empty())
       {
-        Vdisj = compute_attractor_set(G, Vdisj, 0);
+        Vdisj = attr_default(G, Vdisj, 0);
       }
 
       // default case

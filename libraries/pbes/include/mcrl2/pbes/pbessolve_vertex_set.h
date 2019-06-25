@@ -325,7 +325,7 @@ void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::str
   // mCRL2log(log::debug) << "exclude = " << G.exclude() << "\n";
 }
 
-// Returns true if the successors of u are included in A
+// Returns true if succ(u) \subseteq A
 template <typename StructureGraph>
 bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A)
 {
@@ -339,13 +339,40 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
   return true;
 }
 
+// Returns true if succ(u) \subseteq (A \cup S)
+template <typename StructureGraph>
+bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, const vertex_set& S)
+{
+  for (auto v: G.successors(u))
+  {
+    if (!A.contains(v) && !S.contains(v))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Returns true if succ(u) \cap A == \emptyset
+template <typename StructureGraph>
+bool has_empty_intersection(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A)
+{
+  for (auto v: G.successors(u))
+  {
+    if (A.contains(v))
+    {
+      return false;
+    }
+  }
+  return true;
+}
 
 // Computes an attractor set, by extending A.
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
 template <typename StructureGraph>
-vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, std::size_t alpha)
+vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha)
 {
   // utilities::chrono_timer timer;
   // std::size_t A_size = A.size();
@@ -404,10 +431,71 @@ vertex_set compute_attractor_set(const StructureGraph& G, vertex_set A, std::siz
   return A;
 }
 
+// Computes an attractor set, by extending S.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
+// StructureGraph is either structure_graph or simple_structure_graph
+template <typename StructureGraph>
+vertex_set attr_cheap(const StructureGraph& G, const vertex_set& S, typename StructureGraph::index_type v, std::size_t alpha)
+{
+  std::size_t N = G.all_vertices().size();
+
+  deque_vertex_set todo(N);
+  for (auto u: G.predecessors(v))
+  {
+    if (!S.contains(u))
+    {
+      todo.insert(u);
+    }
+  }
+
+  vertex_set A(N);
+  A.insert(v);
+
+  while (!todo.is_empty())
+  {
+    // N.B. Use a breadth first search, to minimize counter examples
+    auto u = todo.pop_front();
+
+    if ((G.decoration(u) == alpha && has_empty_intersection(G, u, A)) || (G.decoration(u) != alpha && includes_successors(G, u, A, S)))
+    {
+      // set strategy
+      if (G.decoration(u) == alpha)
+      {
+        for (auto w: G.successors(u))
+        {
+          if ((A.contains(w)))
+          {
+            mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
+            G.find_vertex(u).strategy = w;
+            break;
+          }
+        }
+        if (G.strategy(u) == structure_graph::undefined_vertex)
+        {
+          mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
+        }
+      }
+
+      A.insert(u);
+      for (auto w: G.predecessors(u))
+      {
+        if (!A.contains(w))
+        {
+          todo.insert(w);
+        }
+      }
+    }
+  }
+
+  // mCRL2log(log::verbose) << "computed attractor set, alpha = " << alpha << ", size before = " << A_size << ", size after = " << A.size() << ", time = " << timer.elapsed() << std::endl;
+  return A;
+}
+
 // Computes an attractor set, by extending A.
 // StructureGraph is either structure_graph or simple_structure_graph
 template <typename StructureGraph>
-vertex_set compute_attractor_set_simple(const StructureGraph& G, vertex_set A)
+vertex_set attr_simple(const StructureGraph& G, vertex_set A)
 {
   // put all predecessors of elements in A in todo
   deque_vertex_set todo(G.all_vertices().size());

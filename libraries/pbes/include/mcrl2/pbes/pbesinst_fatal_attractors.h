@@ -185,14 +185,14 @@ void fatal_attractors(const simple_structure_graph& G,
     detail::log_vertex_set(U_j, "U_" + std::to_string(j));
     vertex_set U = set_union(U_j, S_alpha);
     vertex_set X = detail::compute_attractor_set_min_rank(G, U, alpha, V, j);
-    vertex_set Y = set_minus(V, compute_attractor_set(G, set_minus(V, X), 1 - alpha));
+    vertex_set Y = set_minus(V, attr_default(G, set_minus(V, X), 1 - alpha));
 
     while (X != Y)
     {
       detail::log_vertex_set(X, "X");
       detail::log_vertex_set(Y, "Y");
       X = detail::compute_attractor_set_min_rank(G, set_intersection(U, Y), alpha, V, j);
-      Y = set_minus(Y, compute_attractor_set(G, set_minus(Y, X), 1 - alpha));
+      Y = set_minus(Y, attr_default(G, set_minus(Y, X), 1 - alpha));
     }
     detail::log_vertex_set(X, "X (final value)");
 
@@ -203,23 +203,9 @@ void fatal_attractors(const simple_structure_graph& G,
       mCRL2log(log::debug) << "Fatal attractors: insert vertex " << x << " in S" << alpha << std::endl;
     }
   }
-  S0 = compute_attractor_set(G, S0, 0);
-  S1 = compute_attractor_set(G, S1, 1);
+  S0 = attr_default(G, S0, 0);
+  S1 = attr_default(G, S1, 1);
   mCRL2log(log::debug) << "Fatal attractors: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
-}
-
-// Returns true if the successors of u are included in A and X
-template <typename StructureGraph>
-bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, const vertex_set& X)
-{
-  for (auto v: G.successors(u))
-  {
-    if (!A.contains(v) && !X.contains(v))
-    {
-      return false;
-    }
-  }
-  return true;
 }
 
 // Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
@@ -332,8 +318,8 @@ void fatal_attractors_original(const simple_structure_graph& G,
       }
     }
   }
-  S0 = compute_attractor_set(G, S0, 0);
-  S1 = compute_attractor_set(G, S1, 1);
+  S0 = attr_default(G, S0, 0);
+  S1 = attr_default(G, S1, 1);
   mCRL2log(log::debug) << "Fatal attractors original: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 

@@ -44,8 +44,8 @@ void partial_solve(structure_graph& G,
   S0.truncate(N);
   S1.truncate(N);
 
-  S0 = compute_attractor_set(G, S0, 0);
-  S1 = compute_attractor_set(G, S1, 1);
+  S0 = attr_default(G, S0, 0);
+  S1 = attr_default(G, S1, 1);
 
   // compute Si_todo = Si \cup { v \in V | v.is_defined() }
   vertex_set S0_todo = S0;
@@ -62,10 +62,10 @@ void partial_solve(structure_graph& G,
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
 
   vertex_set W[2] = { vertex_set(N), vertex_set(N) };
-  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S1, compute_attractor_set(G, S0_todo, 0)));
-  S1 = compute_attractor_set(G, set_union(S1, W[1]), 1);
-  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S0, compute_attractor_set(G, S1_todo, 1)));
-  S0 = compute_attractor_set(G, set_union(S0, W[0]), 0);
+  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S1, attr_default(G, S0_todo, 0)));
+  S1 = attr_default(G, set_union(S1, W[1]), 1);
+  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S0, attr_default(G, S1_todo, 1)));
+  S0 = attr_default(G, set_union(S0, W[0]), 0);
 
   detail::log_vertex_set(S0, "S0 (end of partial solve)");
   detail::log_vertex_set(S1, "S1 (end of partial solve)");

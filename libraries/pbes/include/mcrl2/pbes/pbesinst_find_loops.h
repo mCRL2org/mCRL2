@@ -141,11 +141,11 @@ void find_loops(const simple_structure_graph& G,
     }
     if (b0)
     {
-      S0 = compute_attractor_set(G, S0, 0);
+      S0 = attr_default(G, S0, 0);
     }
     if (b1)
     {
-      S1 = compute_attractor_set(G, S1, 1);
+      S1 = attr_default(G, S1, 1);
     }
   }
 
