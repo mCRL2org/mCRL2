@@ -489,7 +489,7 @@ vertex_set attr_cheap(const StructureGraph& G, const vertex_set& S, typename Str
   }
 
   // mCRL2log(log::verbose) << "computed attractor set, alpha = " << alpha << ", size before = " << A_size << ", size after = " << A.size() << ", time = " << timer.elapsed() << std::endl;
-  return A;
+  return set_union(A, S);
 }
 
 // Computes an attractor set, by extending A.
