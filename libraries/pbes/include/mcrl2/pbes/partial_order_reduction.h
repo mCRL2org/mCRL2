@@ -141,6 +141,25 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+enum tribool
+{
+  no, maybe, yes
+};
+static inline bool operator&&(tribool a, tribool b)
+{
+  return a == yes || b == yes || (a == maybe && b == maybe);
+}
+// Short-circuit version of the operator && for tribools
+static inline bool operator&&(std::function<tribool()> a, std::function<tribool()> b)
+{
+  tribool a_ = a();
+  if(a_ == yes)
+  {
+    return true;
+  }
+  return a_ && b();
+}
+
 class partial_order_reduction_algorithm
 {
   protected:
@@ -574,8 +593,6 @@ class partial_order_reduction_algorithm
       {
         return data::replace_variables_capture_avoiding_with_an_identifier_generator(e, sigma, id_gen);
       };
-      // std::function<data::data_expression(data::data_expression)> replace_vars = std::bind(data::replace_variables_capture_avoiding_with_an_identifier_generator,
-      //   std::placeholders::_1, sigma, id_gen));
 
       return summand_equivalence_key(
         data::variable_list(new_variables.begin(), new_variables.end()),
@@ -584,7 +601,7 @@ class partial_order_reduction_algorithm
       );
     }
 
-    bool left_accords_data(std::size_t k, std::size_t k1) const
+    tribool left_accords_data(std::size_t k, std::size_t k1) const
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
@@ -601,7 +618,7 @@ class partial_order_reduction_algorithm
       data::variable_list qvars_k  = new_k.e;  data::data_expression condition_k  = new_k.f;  data::data_expression_list updates_k  = new_k.g;
       data::variable_list qvars_k1 = new_k1.e; data::data_expression condition_k1 = new_k1.f; data::data_expression_list updates_k1 = new_k1.g;
 
-      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+      data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
 
       data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
       data::assignment_list assignments_k1 = data::make_assignment_list(parameters, updates_k1);
@@ -625,12 +642,12 @@ class partial_order_reduction_algorithm
         );
       data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
-      // std::cout << "Left condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
+      // mCRL2log(log::verbose) << "Left condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
-      return m_rewr(condition) == data::sort_bool::true_();
+      return m_rewr(condition) == data::sort_bool::true_() ? maybe : no;
     }
 
-    bool square_accords_data(std::size_t k, std::size_t k1) const
+    tribool square_accords_data(std::size_t k, std::size_t k1) const
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
@@ -673,10 +690,10 @@ class partial_order_reduction_algorithm
 
       // mCRL2log(log::verbose) << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
-      return m_rewr(condition) == data::sort_bool::true_();
+      return m_rewr(condition) == data::sort_bool::true_() ? maybe : no;
     }
 
-    bool triangle_accords_data(std::size_t k, std::size_t k1) const
+    tribool triangle_accords_data(std::size_t k, std::size_t k1) const
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
@@ -706,14 +723,15 @@ class partial_order_reduction_algorithm
       data::data_expression consequent = data::sort_bool::and_(data::where_clause(condition_k1, assignments_k), parameters_equal);
       data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
-      // std::cout << "Triangle condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
+      // mCRL2log(log::verbose) << "Triangle condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
-      return m_rewr(condition) == data::sort_bool::true_();
+      return m_rewr(condition) == data::sort_bool::true_() ? maybe : no;
     }
 
-    bool left_accords_equations(std::size_t k, std::size_t k1) const
+    tribool left_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
+      tribool result = yes;
 
       for (std::size_t i = 0; i < n; i++)
       {
@@ -725,6 +743,7 @@ class partial_order_reduction_algorithm
             bool X1_k_Xprime = depends(i1, k, i_prime);
             if (X_k1_X1 && X1_k_Xprime)
             {
+              result = maybe;
               bool found = false;
               for (std::size_t i2 = 0; i2 < n; i2++)
               {
@@ -737,18 +756,19 @@ class partial_order_reduction_algorithm
               }
               if (!found)
               {
-                return false;
+                return no;
               }
             }
           }
         }
       }
-      return true;
+      return result;
     }
 
-    bool square_accords_equations(std::size_t k, std::size_t k1) const
+    tribool square_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
+      tribool result = yes;
 
       for (std::size_t i = 0; i < n; i++)
       {
@@ -760,6 +780,7 @@ class partial_order_reduction_algorithm
             bool X_k_X2 = depends(i, k, i2);
             if (X_k1_X1 && X_k_X2)
             {
+              result = maybe;
               bool found = false;
               for (std::size_t i_prime = 0; i_prime < n; i_prime++)
               {
@@ -773,18 +794,19 @@ class partial_order_reduction_algorithm
               }
               if (!found)
               {
-                return false;
+                return no;
               }
             }
           }
         }
       }
-      return true;
+      return result;
     }
 
-    bool triangle_accords_equations(std::size_t k, std::size_t k1) const
+    tribool triangle_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
+      tribool result = yes;
 
       for (std::size_t i = 0; i < n; i++)
       {
@@ -795,14 +817,18 @@ class partial_order_reduction_algorithm
           {
             bool X_k_X2 = depends(i, k, i2);
             bool X2_k1_X1 = depends(i2, k1, i1);
-            if (X_k1_X1 && X_k_X2 && !X2_k1_X1)
+            if (X_k1_X1 && X_k_X2)
             {
-              return false;
+              result = maybe;
+              if(!X2_k1_X1)
+              {
+                return no;
+              }
             }
           }
         }
       }
-      return true;
+      return result;
     }
 
     void compute_DNA_DNL(const std::vector<parameter_info>& info)
@@ -823,19 +849,20 @@ class partial_order_reduction_algorithm
       {
         for (std::size_t k1 = 0; k1 < N; k1++)
         {
-          bool DNL_DNS_affect_sets = set_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1))).empty();
+          bool DNL_DNS_affect_sets = has_empty_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1)));
           bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
 
-          bool left_accords     = (DNL_DNS_affect_sets || left_accords_data(k, k1))   && left_accords_equations(k, k1);
-          bool square_accords   = (DNL_DNS_affect_sets || square_accords_data(k, k1)) && square_accords_equations(k, k1);
-          bool triangle_accords = (DNT_affect_sets || triangle_accords_data(k, k1))   && triangle_accords_equations(k, k1);
+          // Use lambdas for short-circuiting the && operator on tribools
+          bool left_accords     =  [&]{ return left_accords_equations(k, k1); }     && [&]{ return left_accords_data(k, k1); };
+          bool accords          = ([&]{ return square_accords_equations(k, k1); }   && [&]{ return square_accords_data(k, k1); }) ||
+                                  ([&]{ return triangle_accords_equations(k, k1); } && [&]{ return triangle_accords_data(k, k1); });
 
           if (!left_accords)
           {
             DNL(k).insert(k1);
           }
 
-          if (!square_accords && !triangle_accords)
+          if (!accords)
           {
             DNA(k).insert(k1);
           }
