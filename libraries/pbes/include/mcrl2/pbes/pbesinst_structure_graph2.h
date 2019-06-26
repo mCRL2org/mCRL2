@@ -367,7 +367,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       if (is_true(b))
       {
         S0.insert(u);
-        if (m_options.optimization > 2)
+        if (m_options.optimization == 3)
         {
           S0 = m_options.cheap_attractor ? attr_cheap(G, S0, u, 0) : attr_default(G, S0, 0);
         }
@@ -375,7 +375,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       else if (is_false(b))
       {
         S1.insert(u);
-        if (m_options.optimization > 2)
+        if (m_options.optimization == 3)
         {
           S1 = m_options.cheap_attractor ? attr_cheap(G, S1, u, 1) : attr_default(G, S1, 1);
         }
