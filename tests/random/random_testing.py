@@ -302,9 +302,9 @@ class Pbessolve_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization = 0, settings = dict()):
         super(Pbessolve_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
         if optimization in [4, 5]:
-            self.set_command_line_options('t3', ['-s{}'.format(optimization), '--aggressive', '--prune-todo-list'])
+            self.set_command_line_options('t3', ['-s{}'.format(optimization), '--aggressive', '--prune-todo-list', '--cheap-attractor'])
         else:
-            self.set_command_line_options('t3', ['-s{}'.format(optimization), '--prune-todo-list'])
+            self.set_command_line_options('t3', ['-s{}'.format(optimization), '--prune-todo-list', '--cheap-attractor'])
 
     def create_inputfiles(self, runpath = '.'):
         super(Pbessolve_counter_exampleTest, self).create_inputfiles(runpath)

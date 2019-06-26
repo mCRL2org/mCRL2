@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/pbesinst_fatal_attractors.h"
 #include "mcrl2/pbes/pbesinst_find_loops.h"
 #include "mcrl2/pbes/pbesinst_partial_solve.h"
+#include "mcrl2/pbes/pbessolve_attractors.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
@@ -420,7 +421,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       {
         todo.irrelevant_elements().erase(e);
       }
-      if (m_options.prune_todo_list && m_options.optimization > 2)
+      if (m_options.prune_todo_list)
       {
         prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
       }

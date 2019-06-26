@@ -25,6 +25,7 @@
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
+#include "mcrl2/pbes/pbessolve_attractors.h"
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 #include "mcrl2/pbes/structure_graph.h"
 
