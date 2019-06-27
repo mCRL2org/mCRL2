@@ -58,9 +58,9 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'c');
       desc.add_option("search",
                  utilities::make_enum_argument<search_strategy>("SEARCH")
-                   .add_value(breadth_first, true)
-                   .add_value(depth_first),
-                 "use search strategy SEARCH:",
+                   .add_value_desc(breadth_first, "Leads to smaller counter examples", true)
+                   .add_value_desc(depth_first, ""),
+                 "Use search strategy SEARCH:",
                  'z');
       desc.add_option("file",
                  utilities::make_file_argument("NAME"),
@@ -69,12 +69,21 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  "extension of the file should be .lps in case of an LPS file, in all other cases it is assumed to "
                  "be an LTS.",
                  'f');
-      desc.add_option("prune-todo-list", "Prune the todo list periodically (experimental). It is only enabled "
-                                         " for strategies 3 and higher.");
+      desc.add_option("prune-todo-list", "Prune the todo list periodically.");
       desc.add_option("evidence-file",
                       utilities::make_file_argument("NAME"),
                       "The file to which the evidence is written. If not set, a default name will be chosen.");
       desc.add_option("strategy",
+                      utilities::make_enum_argument<int>("STRATEGY")
+                        .add_value_desc(0, "No on-the-fly solving is applied", true)
+                        .add_value_desc(1, "Propagate solved equations using an attractor.")
+                        .add_value_desc(2, "Detect winning loops."
+                                           " N.B. This optimization may cause stack overflow issues.")
+                        .add_value_desc(3, "Solve subgames using a fatal attractor.")
+                        .add_value_desc(4, "Solve subgames using the solver.")
+        ,"Use solving strategy STRATEGY. Strategies 1-4 periodically apply on-the-fly solving, which may lead to early termination.",
+                      's');
+      desc.add_hidden_option("long-strategy",
                   utilities::make_enum_argument<int>("STRATEGY")
                     .add_value_desc(0, "Compute all boolean equations which can be"
                       " reached from the initial state, without"
@@ -95,21 +104,21 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       " Depending on the PBES, this can reduce the size of"
                       " the generated BES substantially but requires a"
                       " larger memory footprint.")
-                    .add_value_desc(4, "In addition to 3, investigate for generated"
+                    .add_value_desc(4, "In addition to 2, investigate for generated"
                       " variables whether they occur on a loop, such that"
                       " they can be set to true or false, depending on the"
                       " fixed point symbol. This can increase the time"
                       " needed to generate an equation substantially. N.B. This"
                       " optimization may cause stack overflow issues.")
-                    .add_value_desc(5, "A generalization of strategy 4, where a so-called"
-                      " fatal attractor is applied.")
-                    .add_value_desc(6, "A generalization of strategy 4, where the original"
-                      " fatal attractor computation is applied.")
-                    .add_value_desc(7, "A generalization of strategy 4, where the partial"
-                      " structure graph is solved.")
-                    ,"use strategy STRATEGY",
-                 's');
-      desc.add_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
+                    .add_value_desc(5, "In addition to 2, apply a"
+                      " fatal attractor computation. This is a generalization of 4.")
+                    .add_value_desc(6, "In addition to 2 apply the"
+                      " original fatal attractor computation.")
+                    .add_value_desc(7, "In addition to 2, apply partial"
+                      " solving of the structure graph.")
+                    ,"use strategy STRATEGY (N.B. This is a developer option that overrides --strategy)",
+                 'l');
+      desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
       desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
     }
 
@@ -117,12 +126,14 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
     void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
+
       options.check_strategy = parser.has_option("check-strategy");
       options.replace_constants_by_variables = !parser.has_option("no-replace-constants-by-variables");
       options.aggressive = parser.has_option("aggressive");
       options.prune_todo_list = parser.has_option("prune-todo-list");
       options.exploration_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       options.rewrite_strategy = rewrite_strategy();
+
       if (parser.has_option("file"))
       {
         std::string filename = parser.option_argument("file");
@@ -139,14 +150,43 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       {
         evidence_file = parser.option_argument("evidence-file");
       }
-      options.optimization = parser.option_argument_as<int>("strategy");
+
+      if (parser.has_option("long-strategy"))
+      {
+        options.optimization = parser.option_argument_as<int>("long-strategy");
+      }
+      else
+      {
+        options.optimization = parser.option_argument_as<int>("strategy");
+        if (options.optimization == 0)
+        {
+          options.optimization = 2;
+        }
+        else if (options.optimization == 1)
+        {
+          options.optimization = 3;
+        }
+        else if (options.optimization == 2)
+        {
+          options.optimization = 4;
+        }
+        else if (options.optimization == 3)
+        {
+          options.optimization = 6;
+        }
+        else if (options.optimization == 4)
+        {
+          options.optimization = 7;
+        }
+      }
+
       if (options.optimization < 0 || options.optimization > 7)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.optimization));
       }
-      if (options.prune_todo_list && options.optimization < 3)
+      if (options.prune_todo_list && options.optimization < 2)
       {
-        mCRL2log(log::warning) << "Option --prune-todo-list has no effect for strategies less than 3." << std::endl;
+        mCRL2log(log::warning) << "Option --prune-todo-list has no effect for strategies less than 2." << std::endl;
       }
     }
 
