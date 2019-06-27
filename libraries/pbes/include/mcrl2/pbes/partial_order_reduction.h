@@ -613,33 +613,39 @@ class partial_order_reduction_algorithm
         id_gen.add_identifier(v.name());
       }
 
-      summand_equivalence_key new_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
-      summand_equivalence_key new_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
-      data::variable_list qvars_k  = new_k.e;  data::data_expression condition_k  = new_k.f;  data::data_expression_list updates_k  = new_k.g;
-      data::variable_list qvars_k1 = new_k1.e; data::data_expression condition_k1 = new_k1.f; data::data_expression_list updates_k1 = new_k1.g;
+      summand_equivalence_key new1_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new1_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars1_k  = new1_k.e;  data::data_expression condition1_k  = new1_k.f;  data::data_expression_list updates1_k  = new1_k.g;
+      data::variable_list qvars1_k1 = new1_k1.e; data::data_expression condition1_k1 = new1_k1.f; data::data_expression_list updates1_k1 = new1_k1.g;
+      data::assignment_list assignments1_k = data::make_assignment_list(parameters, updates1_k);
+      data::assignment_list assignments1_k1 = data::make_assignment_list(parameters, updates1_k1);
 
-      data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
+      summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new2_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars2_k  = new2_k.e;  data::data_expression condition2_k  = new2_k.f;  data::data_expression_list updates2_k  = new2_k.g;
+      data::variable_list qvars2_k1 = new2_k1.e; data::data_expression condition2_k1 = new2_k1.f; data::data_expression_list updates2_k1 = new2_k1.g;
 
-      data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
-      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, updates_k1);
+      data::variable_list combined_quantified_vars = qvars1_k + qvars1_k1;
 
-      data::data_expression antecedent = data::sort_bool::and_(condition_k1, data::where_clause(condition_k, assignments_k1));
+      data::data_expression antecedent = data::sort_bool::and_(condition1_k1, data::where_clause(condition1_k, assignments1_k1));
       data::data_expression parameters_equal = data::sort_bool::true_();
-      auto it_k = updates_k.begin();
-      auto it_k1 = updates_k1.begin();
-      while (it_k != updates_k.end())
+      auto it_k = updates2_k.begin();
+      auto it_k1 = updates2_k1.begin();
+      while (it_k != updates2_k.end())
       {
-        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments_k1), data::where_clause(*it_k1, assignments_k)));
+        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments1_k1), data::where_clause(*it_k1, assignments1_k)));
         ++it_k; ++it_k1;
       }
-      data::data_expression consequent =
+      data::data_expression consequent = data::exists(
+        qvars2_k + qvars2_k1,
         data::sort_bool::and_(
           data::sort_bool::and_(
-            condition_k,
-            data::where_clause(condition_k1, assignments_k)
+            condition2_k,
+            data::where_clause(condition2_k1, assignments1_k)
           ),
           parameters_equal
-        );
+        )
+      );
       data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
       // mCRL2log(log::verbose) << "Left condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
@@ -659,33 +665,40 @@ class partial_order_reduction_algorithm
         id_gen.add_identifier(v.name());
       }
 
-      summand_equivalence_key new_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
-      summand_equivalence_key new_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
-      data::variable_list qvars_k  = new_k.e;  data::data_expression condition_k  = new_k.f;  data::data_expression_list updates_k  = new_k.g;
-      data::variable_list qvars_k1 = new_k1.e; data::data_expression condition_k1 = new_k1.f; data::data_expression_list updates_k1 = new_k1.g;
+      summand_equivalence_key new1_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new1_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars1_k  = new1_k.e;  data::data_expression condition1_k  = new1_k.f;  data::data_expression_list updates1_k  = new1_k.g;
+      data::variable_list qvars1_k1 = new1_k1.e; data::data_expression condition1_k1 = new1_k1.f; data::data_expression_list updates1_k1 = new1_k1.g;
+      data::assignment_list assignments1_k = data::make_assignment_list(parameters, updates1_k);
+      data::assignment_list assignments1_k1 = data::make_assignment_list(parameters, updates1_k1);
 
-      data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
+      summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new2_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars2_k  = new2_k.e;  data::data_expression condition2_k  = new2_k.f;  data::data_expression_list updates2_k  = new2_k.g;
+      data::variable_list qvars2_k1 = new2_k1.e; data::data_expression condition2_k1 = new2_k1.f; data::data_expression_list updates2_k1 = new2_k1.g;
 
-      data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
-      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, updates_k1);
+      data::variable_list combined_quantified_vars = qvars1_k + qvars1_k1;
 
-      data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
+
+      data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition1_k1);
       data::data_expression parameters_equal = data::sort_bool::true_();
-      auto it_k = updates_k.begin();
-      auto it_k1 = updates_k1.begin();
-      while (it_k != updates_k.end())
+      auto it_k = updates2_k.begin();
+      auto it_k1 = updates2_k1.begin();
+      while (it_k != updates2_k.end())
       {
-        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments_k1), data::where_clause(*it_k1, assignments_k)));
+        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments1_k1), data::where_clause(*it_k1, assignments1_k)));
         ++it_k; ++it_k1;
       }
-      data::data_expression consequent =
+      data::data_expression consequent = data::exists(
+        qvars2_k + qvars2_k1,
         data::sort_bool::and_(
           data::sort_bool::and_(
-            data::where_clause(condition_k, assignments_k1),
-            data::where_clause(condition_k1, assignments_k)
+            data::where_clause(condition2_k, assignments1_k1),
+            data::where_clause(condition2_k1, assignments1_k)
           ),
           parameters_equal
-        );
+        )
+      );
       data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
       // mCRL2log(log::verbose) << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
@@ -852,7 +865,7 @@ class partial_order_reduction_algorithm
           bool DNL_DNS_affect_sets = has_empty_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1)));
           bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
 
-          // Use lambdas for short-circuiting the && operator on tribools
+          // Use lambda lifting for short-circuiting the && operator on tribools
           bool left_accords     =  [&]{ return left_accords_equations(k, k1); }     && [&]{ return left_accords_data(k, k1); };
           bool accords          = ([&]{ return square_accords_equations(k, k1); }   && [&]{ return square_accords_data(k, k1); }) ||
                                   ([&]{ return triangle_accords_equations(k, k1); } && [&]{ return triangle_accords_data(k, k1); });
