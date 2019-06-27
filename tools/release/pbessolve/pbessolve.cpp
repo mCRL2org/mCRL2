@@ -71,7 +71,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  'f');
       desc.add_option("prune-todo-list", "Prune the todo list periodically (experimental). It is only enabled "
                                          " for strategies 3 and higher.");
-      desc.add_option("cheap-attractor", "Use a cheaper, less powerful attractor set computation.");
       desc.add_option("evidence-file",
                       utilities::make_file_argument("NAME"),
                       "The file to which the evidence is written. If not set, a default name will be chosen.");
@@ -122,7 +121,6 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       options.replace_constants_by_variables = !parser.has_option("no-replace-constants-by-variables");
       options.aggressive = parser.has_option("aggressive");
       options.prune_todo_list = parser.has_option("prune-todo-list");
-      options.cheap_attractor = parser.has_option("cheap-attractor");
       options.exploration_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       options.rewrite_strategy = rewrite_strategy();
       if (parser.has_option("file"))

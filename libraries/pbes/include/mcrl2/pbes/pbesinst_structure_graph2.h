@@ -362,31 +362,13 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       S1.resize(m_graph_builder.extent());
 
       auto u = m_graph_builder.find_vertex(X);
-      simple_structure_graph G(m_graph_builder.vertices());
-
       if (is_true(b))
       {
         S0.insert(u);
-        if (m_options.optimization == 3)
-        {
-          S0 = m_options.cheap_attractor ? attr_cheap(G, S0, u, 0) : attr_default(G, S0, 0);
-        }
       }
       else if (is_false(b))
       {
         S1.insert(u);
-        if (m_options.optimization == 3)
-        {
-          S1 = m_options.cheap_attractor ? attr_cheap(G, S1, u, 1) : attr_default(G, S1, 1);
-        }
-      }
-      if (S0_guard(S0.size()))
-      {
-        compute_attractor_set_S0(G);
-      }
-      if (S1_guard(S1.size()))
-      {
-        compute_attractor_set_S1(G);
       }
     }
 
@@ -394,7 +376,20 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       using utilities::detail::contains;
 
-      if (m_options.optimization == 4 && (m_options.aggressive || find_loops_guard(m_iteration_count)))
+      if (m_options.optimization == 3)
+      {
+        if (S0_guard(S0.size()))
+        {
+          simple_structure_graph G(m_graph_builder.vertices());
+          S0 = attr_default(G, S0, 0);
+        }
+        if (S1_guard(S1.size()))
+        {
+          simple_structure_graph G(m_graph_builder.vertices());
+          S1 = attr_default(G, S1, 1);
+        }
+      }
+      else if (m_options.optimization == 4 && (m_options.aggressive || find_loops_guard(m_iteration_count)))
       {
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops(G, discovered, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
@@ -417,12 +412,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
 
-      for (const propositional_variable_instantiation& e: elements)
-      {
-        todo.irrelevant_elements().erase(e);
-      }
       if (m_options.prune_todo_list)
       {
+        for (const propositional_variable_instantiation& e: elements)
+        {
+          todo.irrelevant_elements().erase(e);
+        }
         prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
       }
     }
@@ -430,18 +425,18 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     void on_end_while_loop() override
     {
       simple_structure_graph G(m_graph_builder.vertices());
-      std::size_t n = m_graph_builder.extent();
 
       if (!todo.empty())
       {
         auto u = m_graph_builder.find_vertex(init);
         if (S0.contains(u) || S1.contains(u))
         {
+          std::size_t n = m_graph_builder.extent();
           std::size_t alpha = S0.contains(u) ? 1 : 0;
 
           // compute todo_
           vertex_set todo_(n);
-          for (const propositional_variable_instantiation& X: todo.all_elements())
+          for (const propositional_variable_instantiation& X: todo.elements())
           {
             structure_graph::index_type v = m_graph_builder.find_vertex(X);
             todo_.insert(v);
@@ -451,19 +446,21 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           todo_ = attr_default(G, todo_, alpha);
           m_graph_builder.erase_vertices(todo_);
         }
-        else
+      }
+
+      if (m_options.prune_todo_list)
+      {
+        std::size_t n = m_graph_builder.extent();
+        vertex_set irrelevant(n);
+        for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
         {
-          vertex_set irrelevant(n);
-          for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
-          {
-            structure_graph::index_type v = m_graph_builder.find_vertex(X);
-            irrelevant.insert(v);
-          }
-          mCRL2log(log::debug) << "irrelevant = " << irrelevant << std::endl;
-          irrelevant = attr_simple(G, irrelevant);
-          mCRL2log(log::debug) << "attr(irrelevant) = " << irrelevant << std::endl;
-          m_graph_builder.erase_vertices(irrelevant);
+          structure_graph::index_type v = m_graph_builder.find_vertex(X);
+          irrelevant.insert(v);
         }
+        mCRL2log(log::debug) << "irrelevant = " << irrelevant << std::endl;
+        irrelevant = attr_simple(G, irrelevant);
+        mCRL2log(log::debug) << "attr(irrelevant) = " << irrelevant << std::endl;
+        m_graph_builder.erase_vertices(irrelevant);
       }
     }
 };

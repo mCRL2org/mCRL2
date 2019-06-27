@@ -26,7 +26,6 @@ struct pbessolve_options
   data::rewrite_strategy rewrite_strategy = data::jitty;
   bool replace_constants_by_variables = false;
   bool prune_todo_list = false;
-  bool cheap_attractor = false;
   search_strategy exploration_strategy = breadth_first;
   int optimization = 0;
 
@@ -47,7 +46,6 @@ std::ostream& operator<<(std::ostream& out, const pbessolve_options& options)
   out << "optimization = " << options.optimization << std::endl;
   out << "aggressive = " << std::boolalpha << options.aggressive << std::endl;
   out << "check-strategy = " << std::boolalpha << options.check_strategy << std::endl;
-  out << "cheap-attractor = " << std::boolalpha << options.cheap_attractor << std::endl;
   return out;
 }
 

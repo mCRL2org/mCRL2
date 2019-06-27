@@ -88,9 +88,6 @@ bool has_empty_intersection(const StructureGraph& G, typename StructureGraph::in
 template <typename StructureGraph>
 vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha)
 {
-  // utilities::chrono_timer timer;
-  // std::size_t A_size = A.size();
-
   // put all predecessors of elements in A in todo
   deque_vertex_set todo(G.all_vertices().size());
   for (auto u: A.vertices())
@@ -125,7 +122,6 @@ vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha
     }
   }
 
-  // mCRL2log(log::verbose) << "computed attractor set, alpha = " << alpha << ", size before = " << A_size << ", size after = " << A.size() << ", time = " << timer.elapsed() << std::endl;
   return A;
 }
 
