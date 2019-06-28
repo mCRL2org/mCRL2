@@ -194,6 +194,7 @@ class partial_order_reduction_algorithm
     srf_pbes m_pbes;
     pbes_equation_index m_equation_index;
     data::mutable_indexed_substitution<> m_sigma;
+    std::size_t m_largest_equation_size = 0;
 
     // the parameters of the PBES equations
     std::vector<data::variable> m_parameters;
@@ -307,7 +308,6 @@ class partial_order_reduction_algorithm
       }
 
       //TODO implement one NES per guard, choose the smallest one
-      // std::size_t n = m_pbes.equations().size();
       // std::set<std::size_t> Twork_Ts = set_union(Twork, Ts);
       // const summand_class& summand_k = m_summand_classes[k];
       //
@@ -317,7 +317,7 @@ class partial_order_reduction_algorithm
       // auto h = [&](std::size_t i)
       // {
       //   const std::set<std::size_t> NES_k = summand_k.NES[i];
-      //   return set_difference(NES_k, T1).size() + n * set_difference(NES_k, T2).size();
+      //   return set_difference(NES_k, T1).size() + m_largest_equation_size * set_difference(NES_k, T2).size();
       // };
       //
       // std::size_t i_min = 0;
@@ -344,7 +344,6 @@ class partial_order_reduction_algorithm
       using utilities::detail::set_union;
 
       std::set<std::size_t> en_X_e = en(X_e);
-      // return en_X_e;
 
       auto size = [&](const invis_pair& p)
       {
@@ -1087,6 +1086,12 @@ class partial_order_reduction_algorithm
 
       compute_summand_classes();
       compute_vis_invis();
+
+      // initialize m_largest_equation_size;
+      for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
+      {
+        m_largest_equation_size = std::max(m_largest_equation_size, m_pbes.equations()[i].summands().size());
+      }
 
       mCRL2log(log::verbose) << p << std::endl;
       print_pbes();
