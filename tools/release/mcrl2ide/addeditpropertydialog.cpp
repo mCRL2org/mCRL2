@@ -11,6 +11,47 @@
 #include "ui_addeditpropertydialog.h"
 
 #include <QMessageBox>
+#include <QStandardItemModel>
+
+EquivalenceComboBox::EquivalenceComboBox()
+{
+  /* add equivalences to the combobox, including some seperators to indicate the
+   *   use of abstraction */
+  QStringList items;
+  int secondSeparatorIndex = 2;
+  items << "----- CHOOSE REDUCTION -----"
+        << "--- WITHOUT ABSTRACTION ---";
+  for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
+       LTSREDUCTIONINFO)
+  {
+    if (!item.second.second &&
+        item.first != mcrl2::lts::lts_equivalence::lts_eq_none)
+    {
+      items << item.second.first;
+      secondSeparatorIndex++;
+    }
+  }
+
+  items << "--- WITH ABSTRACTION ---";
+  for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
+       LTSREDUCTIONINFO)
+  {
+    if (item.second.second)
+    {
+      items << item.second.first;
+    }
+  }
+
+  this->addItems(items);
+
+  /* Set separators to be unselectable */
+  QStandardItemModel* model = qobject_cast<QStandardItemModel*>(this->model());
+  model->item(0)->setFlags(model->item(0)->flags() & ~Qt::ItemIsEnabled);
+  model->item(1)->setFlags(model->item(1)->flags() & ~Qt::ItemIsEnabled);
+  model->item(secondSeparatorIndex)
+      ->setFlags(model->item(secondSeparatorIndex)->flags() &
+                 ~Qt::ItemIsEnabled);
+}
 
 AddEditPropertyDialog::AddEditPropertyDialog(bool add,
                                              ProcessSystem* processSystem,

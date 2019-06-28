@@ -458,7 +458,7 @@ void MainWindow::actionShowReducedLts()
       QDialog reductionDialog(this, Qt::WindowCloseButtonHint);
       QVBoxLayout vbox;
       QLabel textLabel("Reduction:");
-      QComboBox reductionBox;
+      EquivalenceComboBox reductionBox;
       QDialogButtonBox buttonBox(QDialogButtonBox::Cancel);
 
       vbox.addWidget(&textLabel);
@@ -470,43 +470,6 @@ void MainWindow::actionShowReducedLts()
       connect(&reductionBox, SIGNAL(activated(int)), &reductionDialog,
               SLOT(accept()));
       connect(&buttonBox, SIGNAL(rejected()), &reductionDialog, SLOT(reject()));
-
-      /* add the items to the combobox, including some unselectable seperators
-       *   to indicate the use of abstraction */
-      QStringList items;
-      int secondSeparatorIndex = 2;
-      items << "----- CHOOSE REDUCTION -----"
-            << "--- WITHOUT ABSTRACTION ---";
-      for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
-               item : LTSREDUCTIONINFO)
-      {
-        if (!item.second.second &&
-            item.first != mcrl2::lts::lts_equivalence::lts_eq_none)
-        {
-          items << item.second.first;
-          secondSeparatorIndex++;
-        }
-      }
-
-      items << "--- WITH ABSTRACTION ---";
-      for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
-               item : LTSREDUCTIONINFO)
-      {
-        if (item.second.second)
-        {
-          items << item.second.first;
-        }
-      }
-
-      reductionBox.addItems(items);
-
-      QStandardItemModel* model =
-          qobject_cast<QStandardItemModel*>(reductionBox.model());
-      model->item(0)->setFlags(model->item(0)->flags() & ~Qt::ItemIsEnabled);
-      model->item(1)->setFlags(model->item(1)->flags() & ~Qt::ItemIsEnabled);
-      model->item(secondSeparatorIndex)
-          ->setFlags(model->item(secondSeparatorIndex)->flags() &
-                     ~Qt::ItemIsEnabled);
 
       /* execute the dialog */
       if (reductionDialog.exec())

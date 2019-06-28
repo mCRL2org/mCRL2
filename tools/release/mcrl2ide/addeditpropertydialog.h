@@ -14,12 +14,26 @@
 #include "filesystem.h"
 
 #include <QDialog>
+#include <QComboBox>
 #include <QRegExpValidator>
 
 namespace Ui
 {
 class AddEditPropertyDialog;
 }
+
+/**
+ * @brief The EquivalenceComboBox class defines a combobox for selecting an
+ *   equivalence
+ */
+class EquivalenceComboBox : public QComboBox
+{
+  public:
+  /**
+   * @brief EquivalenceComboBox Constructor
+   */
+  EquivalenceComboBox();
+};
 
 /**
  * @brief The AddEditPropertyDialog class defines the dialog used to add or edit
