@@ -36,7 +36,9 @@ struct summand_class
   std::vector<std::set<std::size_t>> nxt;
   std::set<std::size_t> NES; // TODO: use boost::dynamic_bitset<> (?)
   std::set<std::size_t> DNA;
+  std::set<std::size_t> DNS;
   std::set<std::size_t> DNL;
+  bool is_deterministic = false;
 
   summand_class() = default;
 
@@ -74,8 +76,10 @@ struct summand_class
   // N is the number of summand classes
   void print(std::ostream& out, const std::size_t N) const
   {
+    out << "deterministic = " << std::boolalpha << is_deterministic << std::endl;
     out << "NES = " << core::detail::print_set(NES) << std::endl;
     out << "DNA = " << core::detail::print_set(DNA) << std::endl;
+    out << "DNS = " << core::detail::print_set(DNS) << std::endl;
     out << "DNL = " << core::detail::print_set(DNL) << std::endl;
   }
 };
@@ -239,6 +243,16 @@ class partial_order_reduction_algorithm
       return m_summand_classes[k].DNA;
     }
 
+    const std::set<std::size_t>& DNS(std::size_t k) const
+    {
+      return m_summand_classes[k].DNS;
+    }
+
+    std::set<std::size_t>& DNS(std::size_t k)
+    {
+      return m_summand_classes[k].DNS;
+    }
+
     const std::set<std::size_t>& DNL(std::size_t k) const
     {
       return m_summand_classes[k].DNL;
@@ -334,6 +348,35 @@ class partial_order_reduction_algorithm
       // return i_min;
     }
 
+    const std::set<std::size_t>& DNX(std::size_t k,
+                                   const std::set<std::size_t>& Twork,
+                                   const std::set<std::size_t>& Ts,
+                                   const std::set<std::size_t>& en_X_e
+                                  ) const
+    {
+      using utilities::detail::set_difference;
+      using utilities::detail::set_intersection;
+      using utilities::detail::set_union;
+
+      const summand_class& summand_k = m_summand_classes[k];
+      if (!summand_k.is_deterministic)
+      {
+        return DNL(k);
+      }
+
+      std::set<std::size_t> Twork_Ts = set_union(Twork, Ts);
+
+      std::set<std::size_t> T1 = set_union(Twork_Ts, en_X_e);
+      std::set<std::size_t> T2 = set_intersection(Twork_Ts, en_X_e);
+
+      auto h = [&](const std::set<std::size_t>& A)
+      {
+        return set_difference(A, T1).size() + m_largest_equation_size * set_difference(A, T2).size();
+      };
+
+      return h(DNS(k)) <= h(DNL(k)) ? DNS(k) : DNL(k);
+    }
+
     std::set<std::size_t> stubborn_set(const propositional_variable_instantiation& X_e)
     {
       using utilities::detail::contains;
@@ -400,7 +443,8 @@ class partial_order_reduction_algorithm
           Ts.insert(k);
           if (contains(en_X_e, k))
           {
-            Twork = set_union(Twork, set_difference(DNL(k), Ts));
+            auto& DNS_or_DNL = DNX(k, Twork, Ts, en_X_e);
+            Twork = set_union(Twork, set_difference(DNS_or_DNL, Ts));
             if (contains(m_vis, k))
             {
               Twork = set_union(Twork, set_difference(m_vis, Ts));
@@ -870,15 +914,19 @@ class partial_order_reduction_algorithm
           bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
 
           // Use lambda lifting for short-circuiting the && operator on tribools
-          bool left_accords     =  [&]{ return left_accords_equations(k, k1); }     && [&]{ return left_accords_data(k, k1); };
-          bool accords          = ([&]{ return square_accords_equations(k, k1); }   && [&]{ return square_accords_data(k, k1); }) ||
+          bool left_accords     = [&]{ return left_accords_equations(k, k1); }     && [&]{ return left_accords_data(k, k1); };
+          bool square_accords   = [&]{ return square_accords_equations(k, k1); }   && [&]{ return square_accords_data(k, k1); };
+          bool accords          = square_accords ||
                                   ([&]{ return triangle_accords_equations(k, k1); } && [&]{ return triangle_accords_data(k, k1); });
 
           if (!left_accords)
           {
             DNL(k).insert(k1);
           }
-
+          if (!square_accords)
+          {
+            DNS(k).insert(k1);
+          }
           if (!accords)
           {
             DNA(k).insert(k1);
@@ -938,6 +986,62 @@ class partial_order_reduction_algorithm
       compute_DNA_DNL(info);
     }
 
+    bool compute_deterministic_equations(std::size_t k)
+    {
+      const summand_class& summand_k = m_summand_classes[k];
+
+      std::size_t n = m_pbes.equations().size();
+      for (std::size_t i = 0; i < n; i++)
+      {
+        if (summand_k.nxt[i].size() >= 2)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    bool compute_deterministic_data(std::size_t k)
+    {
+      const summand_class& summand_k = m_summand_classes[k];
+
+      const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
+      data::set_identifier_generator id_gen;
+      for(const data::variable& v: parameters)
+      {
+        id_gen.add_identifier(v.name());
+      }
+
+      summand_equivalence_key new1_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      data::variable_list qvars1_k = new1_k.e; data::data_expression condition1_k = new1_k.f; data::data_expression_list updates1_k = new1_k.g;
+      data::variable_list qvars2_k = new2_k.e; data::data_expression condition2_k = new2_k.f; data::data_expression_list updates2_k = new2_k.g;
+
+      data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition2_k);
+      data::data_expression consequent = data::sort_bool::true_();
+      auto it1_k = updates1_k.begin();
+      auto it2_k = updates2_k.begin();
+      while (it1_k != updates1_k.end())
+      {
+        consequent = data::lazy::and_(consequent, data::equal_to(*it1_k, *it2_k));
+        ++it1_k; ++it2_k;
+      }
+      data::data_expression condition = make_abstraction(data::forall_binder(), parameters + qvars1_k + qvars2_k, data::sort_bool::implies(antecedent, consequent));
+
+      mCRL2log(log::verbose) << "Determinism condition for " << k << ": " << m_rewr(condition) << " original " << condition << std::endl;
+
+      return m_rewr(condition) == data::sort_bool::true_();
+    }
+
+    void compute_deterministic()
+    {
+      std::size_t N = m_summand_classes.size();
+      for (std::size_t k = 0; k < N; k++)
+      {
+        m_summand_classes[k].is_deterministic = compute_deterministic_equations(k) && compute_deterministic_data(k);
+      }
+    }
+
     void compute_summand_classes()
     {
       std::size_t n = m_pbes.equations().size();
@@ -958,6 +1062,7 @@ class partial_order_reduction_algorithm
       }
       compute_nxt();
       compute_NES_DNA_DNL();
+      compute_deterministic();
     }
 
     void compute_vis_invis()
@@ -1052,7 +1157,7 @@ class partial_order_reduction_algorithm
         {
           const summand_class& summand = m_summand_classes[k];
           mCRL2log(log::verbose) << "\n--- summand class " << k << " ---" << std::endl;
-          mCRL2log(log::verbose) << "visible = " << std::boolalpha << contains(m_vis, k) << "\n\n";
+          mCRL2log(log::verbose) << "visible = " << std::boolalpha << contains(m_vis, k) << "\n";
           summand.print(log::mcrl2_logger().get(log::verbose), N);
         }
         for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
