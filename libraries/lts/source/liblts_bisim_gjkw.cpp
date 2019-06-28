@@ -28,6 +28,8 @@
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/lts/lts_utilities.h"
 
+#define PARANOID_CHECK
+
 namespace mcrl2
 {
 namespace lts
@@ -973,7 +975,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                 // *s_iter to a new constellation is handled.
                 if (!postprocessing ? !old_fromred_invalid &&
                                   RfnB->to_constln.begin() == old_B_to_C_slice
-                            : !old_B_to_C_slice->needs_postprocessing())
+                                   : !old_B_to_C_slice->needs_postprocessing())
                 {
                     // During primary refinement (Line 2.23):
                     // The old B_to_C_slice is in the FromRed-position, i. e.
@@ -1071,6 +1073,11 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                 swap_B_to_C(succ_iter, new_pos->pred->succ);
                 if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
                 {
+                    if (!old_fromred_invalid &&
+                                  RfnB->to_constln.begin() == old_B_to_C_slice)
+                    {
+                        old_fromred_invalid = true;
+                    }
                     RfnB->to_constln.erase(old_B_to_C_slice);
                 }
             }
@@ -1667,8 +1674,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
     blocks[0]->set_marked_nonbottom_begin(blocks[0]->bottom_begin());
 
     // initialise states and succ slices
-    part_st.state_info.begin()->set_pred_begin(part_tr.pred.begin());
-    part_st.state_info.begin()->set_succ_begin(part_tr.succ.begin());
+    part_st.state_info.front().set_pred_begin(part_tr.pred.begin());
+    part_st.state_info.front().set_succ_begin(part_tr.succ.begin());
     for (state_type s = 0; get_nr_of_states() != s; ++s)
     {
         part_st.state_info[s].set_pred_end(part_st.state_info[s].pred_begin() +
@@ -3235,7 +3242,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom(
 Line_4_4:
     // 4.4: for all constellations C not in R reachable from RfnB do
     assert(0 == RfnB->marked_bottom_size());
-    while (!RfnB->to_constln.begin()->needs_postprocessing())
+    while (!RfnB->to_constln.front().needs_postprocessing())
     {
         bisim_gjkw::B_to_C_desc_iter_t const new_slice =
                                                       RfnB->to_constln.begin();
@@ -3315,7 +3322,7 @@ Line_4_4:
             //       postprocessing
             SpC->postprocess_begin = FromRed->end;
             assert(SpC->postprocess_begin <= SpC->postprocess_end);
-            assert(B->to_constln.begin() != B->to_constln.end());
+            assert(!B->to_constln.empty());
             if (B->to_constln.begin() != FromRed)
             {
                 assert(FromRed->from_block() == B);
