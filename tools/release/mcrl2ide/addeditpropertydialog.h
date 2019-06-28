@@ -31,8 +31,9 @@ class EquivalenceComboBox : public QComboBox
   public:
   /**
    * @brief EquivalenceComboBox Constructor
+   * @param parent The parent of this widget
    */
-  EquivalenceComboBox();
+  EquivalenceComboBox(QWidget* parent = 0);
 };
 
 /**

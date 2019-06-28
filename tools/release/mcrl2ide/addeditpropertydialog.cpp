@@ -13,7 +13,7 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
 
-EquivalenceComboBox::EquivalenceComboBox()
+EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
 {
   /* add equivalences to the combobox, including some seperators to indicate the
    *   use of abstraction */

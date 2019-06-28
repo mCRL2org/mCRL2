@@ -458,7 +458,7 @@ void MainWindow::actionShowReducedLts()
       QDialog reductionDialog(this, Qt::WindowCloseButtonHint);
       QVBoxLayout vbox;
       QLabel textLabel("Reduction:");
-      EquivalenceComboBox reductionBox;
+      EquivalenceComboBox reductionBox(&reductionDialog);
       QDialogButtonBox buttonBox(QDialogButtonBox::Cancel);
 
       vbox.addWidget(&textLabel);
