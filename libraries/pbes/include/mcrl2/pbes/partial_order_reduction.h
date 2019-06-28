@@ -601,6 +601,11 @@ class partial_order_reduction_algorithm
       );
     }
 
+    data::data_expression make_abstraction(const data::binder_type& b, const data::variable_list& vars, const data::data_expression& expr) const
+    {
+      return vars.empty() ? expr : data::abstraction(b, vars, expr);
+    }
+
     tribool left_accords_data(std::size_t k, std::size_t k1) const
     {
       const summand_class& summand_k = m_summand_classes[k];
@@ -636,7 +641,7 @@ class partial_order_reduction_algorithm
         parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments1_k1), data::where_clause(*it_k1, assignments1_k)));
         ++it_k; ++it_k1;
       }
-      data::data_expression consequent = data::exists(
+      data::data_expression consequent = make_abstraction(data::exists_binder(),
         qvars2_k + qvars2_k1,
         data::sort_bool::and_(
           data::sort_bool::and_(
@@ -646,7 +651,7 @@ class partial_order_reduction_algorithm
           parameters_equal
         )
       );
-      data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
+      data::data_expression condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
       // mCRL2log(log::verbose) << "Left condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
@@ -689,7 +694,7 @@ class partial_order_reduction_algorithm
         parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(data::where_clause(*it_k, assignments1_k1), data::where_clause(*it_k1, assignments1_k)));
         ++it_k; ++it_k1;
       }
-      data::data_expression consequent = data::exists(
+      data::data_expression consequent = make_abstraction(data::exists_binder(),
         qvars2_k + qvars2_k1,
         data::sort_bool::and_(
           data::sort_bool::and_(
@@ -699,7 +704,7 @@ class partial_order_reduction_algorithm
           parameters_equal
         )
       );
-      data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
+      data::data_expression condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
       // mCRL2log(log::verbose) << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
@@ -734,7 +739,7 @@ class partial_order_reduction_algorithm
         parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(gi, data::where_clause(gi, assignments_k)));
       }
       data::data_expression consequent = data::sort_bool::and_(data::where_clause(condition_k1, assignments_k), parameters_equal);
-      data::data_expression condition = data::forall(parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
+      data::data_expression condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
       // mCRL2log(log::verbose) << "Triangle condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
