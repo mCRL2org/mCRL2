@@ -12,11 +12,9 @@
 
 FindAndReplaceDialog::FindAndReplaceDialog(CodeEditor* codeEditor,
                                            QWidget* parent)
-    : QDialog(parent), ui(new Ui::FindAndReplaceDialog)
+    : QDialog(parent), ui(new Ui::FindAndReplaceDialog), codeEditor(codeEditor)
 {
   ui->setupUi(this);
-
-  this->codeEditor = codeEditor;
 
   setWindowFlags(Qt::Window);
 

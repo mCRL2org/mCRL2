@@ -14,11 +14,9 @@
 
 PropertiesDock::PropertiesDock(ProcessSystem* processSystem,
                                FileSystem* fileSystem, QWidget* parent)
-    : QDockWidget("Properties", parent)
+    : QDockWidget("Properties", parent), processSystem(processSystem),
+      fileSystem(fileSystem)
 {
-  this->processSystem = processSystem;
-  this->fileSystem = fileSystem;
-
   /* create the properties layout */
   propertiesLayout = new QVBoxLayout();
   propertiesLayout->setAlignment(Qt::AlignTop);

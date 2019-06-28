@@ -16,14 +16,9 @@
 
 PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
                                FileSystem* fileSystem, QWidget* parent)
-    : QWidget(parent)
+    : QWidget(parent), property(property), processSystem(processSystem),
+      fileSystem(fileSystem), parent(parent), lastRunningProcessId(-1)
 {
-  this->property = property;
-  this->processSystem = processSystem;
-  this->fileSystem = fileSystem;
-  this->parent = parent;
-  lastRunningProcessId = -1;
-
   editPropertyDialog =
       new AddEditPropertyDialog(false, processSystem, fileSystem, this);
   connect(editPropertyDialog, SIGNAL(accepted()), this,

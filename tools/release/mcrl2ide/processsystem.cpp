@@ -13,11 +13,9 @@
 #include <QEventLoop>
 
 ProcessThread::ProcessThread(QQueue<int>* processQueue, ProcessType processType)
+    : processQueue(processQueue), processType(processType), running(false),
+      currentProcessid(-1)
 {
-  this->processQueue = processQueue;
-  this->processType = processType;
-  running = false;
-  currentProcessid = -1;
 }
 
 void ProcessThread::newProcessQueued(ProcessType processType)
@@ -78,10 +76,8 @@ int ProcessThread::getCurrentProcessId()
 }
 
 ProcessSystem::ProcessSystem(FileSystem* fileSystem)
+    : fileSystem(fileSystem), pid(0)
 {
-  this->fileSystem = fileSystem;
-  pid = 0;
-
   qRegisterMetaType<ProcessType>("ProcessType");
 
   /* create, connect and start all process threads */
@@ -205,6 +201,7 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
     case ProcessType::Parsing:
       connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
               SLOT(logToParsingConsole()));
+      break;
     case ProcessType::Simulation:
       connect(subprocess, SIGNAL(readyReadStandardError()), consoleDock,
               SLOT(logToSimulationConsole()));
@@ -331,6 +328,9 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
       connect(subprocess, SIGNAL(finished(int)), this,
               SLOT(verificationResult(int)));
     }
+    break;
+
+  default:
     break;
   }
 
@@ -666,6 +666,9 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
               ProcessType::Verification,
               "Up to date evidence LPS already exists\n");
         }
+
+      default:
+        break;
       }
 
       /* if we can skip this subprocess act like it has finished, else execute
@@ -815,13 +818,10 @@ void ProcessSystem::abortAllProcesses(ProcessType processType)
 
   /* then stop the process run by the thread */
   int processid = processThreads[processType]->getCurrentProcessId();
-  if (processid >= 0)
+  if (processid >= 0 && processes.count(processid) > 0)
   {
-    if (processes.count(processid) > 0)
-    {
-      killProcess(processid);
-      emit processFinished(processid);
-    }
+    killProcess(processid);
+    emit processFinished(processid);
   }
 
   consoleDock->writeToConsole(processType,

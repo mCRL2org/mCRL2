@@ -22,16 +22,12 @@
 #include <QDomElement>
 #include <QDomNodeList>
 
-Property::Property()
+Property::Property() : name(""), text("")
 {
-  this->name = "";
-  this->text = "";
 }
 
-Property::Property(QString name, QString text)
+Property::Property(QString name, QString text) : name(name), text(text)
 {
-  this->name = name;
-  this->text = text;
 }
 
 bool Property::operator==(const Property& property) const
@@ -46,13 +42,10 @@ bool Property::operator!=(const Property& property) const
 
 FileSystem::FileSystem(CodeEditor* specificationEditor, QSettings* settings,
                        QWidget* parent)
+    : specificationEditor(specificationEditor), settings(settings),
+      parent(parent), specificationModified(false), projectOpen(false),
+      specificationOnlyMode(false)
 {
-  this->specificationEditor = specificationEditor;
-  this->settings = settings;
-  this->parent = parent;
-  specificationModified = false;
-  projectOpen = false;
-  specificationOnlyMode = false;
   for (std::pair<IntermediateFileType, QString> item :
        INTERMEDIATEFILETYPENAMES)
   {

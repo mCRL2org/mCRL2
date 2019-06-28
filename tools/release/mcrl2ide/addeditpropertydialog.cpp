@@ -16,13 +16,11 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
                                              ProcessSystem* processSystem,
                                              FileSystem* fileSystem,
                                              QWidget* parent)
-    : QDialog(parent), ui(new Ui::AddEditPropertyDialog)
+    : QDialog(parent), ui(new Ui::AddEditPropertyDialog),
+      processSystem(processSystem), fileSystem(fileSystem),
+      propertyParsingProcessid(-1)
 {
   ui->setupUi(this);
-
-  this->processSystem = processSystem;
-  this->fileSystem = fileSystem;
-  propertyParsingProcessid = -1;
 
   propertyNameValidator = new QRegExpValidator(QRegExp("[A-Za-z0-9_\\s]*"));
   ui->propertyNameField->setValidator(propertyNameValidator);

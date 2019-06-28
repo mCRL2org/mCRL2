@@ -22,7 +22,7 @@
 #include <QDateTime>
 #include <QDomDocument>
 
-/* contains som extra info for lts reductions:
+/* contains some extra info for lts reductions:
  *   - the name of the reduction
  *   - whether this reduction makes use of abstraction */
 const std::map<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>

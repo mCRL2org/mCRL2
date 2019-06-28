@@ -15,9 +15,8 @@
 #include <QMenu>
 
 HighlightingRule::HighlightingRule(QRegExp pattern, QTextCharFormat format)
+    : pattern(pattern), format(format)
 {
-  this->pattern = pattern;
-  this->format = format;
 }
 
 CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
@@ -118,7 +117,7 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
         HighlightingRule(QRegExp(pattern), dataOperatorKeywordFormat));
   }
 
-  /* todo keywords */
+  /* to do keywords */
   todoKeywordFormat.setForeground(Qt::red);
   QStringList todoKeywordPatterns = {"\\bcontained\\b", "\\bTODO\\b",
                                      "\\bFIXME\\b", "\\bXXX\\b"};
@@ -176,9 +175,9 @@ void CodeHighlighter::highlightBlock(const QString& text)
   }
 }
 
-LineNumbersArea::LineNumbersArea(CodeEditor* editor) : QWidget(editor)
+LineNumbersArea::LineNumbersArea(CodeEditor* editor)
+    : QWidget(editor), codeEditor(editor)
 {
-  codeEditor = editor;
 }
 
 QSize LineNumbersArea::sizeHint() const
