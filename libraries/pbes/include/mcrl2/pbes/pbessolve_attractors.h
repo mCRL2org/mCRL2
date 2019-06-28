@@ -23,12 +23,12 @@ void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u
 {
   if (G.decoration(u) == alpha)
   {
-    for (auto w: G.successors(u))
+    for (auto v: G.successors(u))
     {
-      if ((A.contains(w)))
+      if ((A.contains(v)))
       {
-        mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
-        G.find_vertex(u).strategy = w;
+        mCRL2log(log::debug) << "set strategy for node " << u << " to " << v << std::endl;
+        G.find_vertex(u).strategy = v;
         break;
       }
     }

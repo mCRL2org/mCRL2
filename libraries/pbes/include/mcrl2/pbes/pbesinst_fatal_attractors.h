@@ -23,27 +23,6 @@ namespace pbes_system {
 namespace detail {
 
 template <typename StructureGraph>
-void set_strategy(const StructureGraph& G, const vertex_set& A, structure_graph::index_type u, std::size_t alpha)
-{
-  if (G.decoration(u) == alpha)
-  {
-    for (auto w: G.successors(u))
-    {
-      if ((A.contains(w)))
-      {
-        mCRL2log(log::debug) << "set strategy for node " << u << " to " << w << std::endl;
-        G.find_vertex(u).strategy = w;
-        break;
-      }
-    }
-    if (G.strategy(u) == structure_graph::undefined_vertex)
-    {
-      mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
-    }
-  }
-}
-
-template <typename StructureGraph>
 deque_vertex_set attr_min_rank_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
 {
   std::size_t n = G.extent();
@@ -131,7 +110,7 @@ vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A,
 
     if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
-      set_strategy(G, A, u, alpha);
+      set_strategy(G, u, A, alpha);
 
       A.insert(u);
 
@@ -236,7 +215,7 @@ vertex_set compute_attractor_set_min_rank_original(const StructureGraph& G, vert
 
     if (G.decoration(u) == alpha || includes_successors(G, u, A, X))
     {
-      set_strategy(G, A, u, alpha);
+      set_strategy(G, u, A, alpha);
 
       X.insert(u);
 

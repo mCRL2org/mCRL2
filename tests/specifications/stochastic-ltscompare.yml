@@ -17,7 +17,7 @@ tools:
   t2:
     input: [l2]
     output: [l3]
-    args: []
+    args: [-Q0]
     name: lps2lts
   t3:
     input: [l2]

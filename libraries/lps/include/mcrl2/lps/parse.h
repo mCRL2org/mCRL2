@@ -34,7 +34,7 @@ namespace detail
 
 struct multi_action_actions: public process::detail::action_actions
 {
-  multi_action_actions(const core::parser& parser_)
+  explicit multi_action_actions(const core::parser& parser_)
     : process::detail::action_actions(parser_)
   {}
 
@@ -80,7 +80,7 @@ multi_action complete_multi_action(process::untyped_multi_action& x, const proce
 
 struct action_rename_actions: public process::detail::action_actions
 {
-  action_rename_actions(const core::parser& parser_)
+  explicit action_rename_actions(const core::parser& parser_)
     : process::detail::action_actions(parser_)
   {}
 

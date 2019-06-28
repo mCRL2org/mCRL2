@@ -175,12 +175,10 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   process_equation eqn;
 
   /// \brief Exception that is thrown by linear_process_expression_traverser.
-  struct non_linear_process_error
+  struct non_linear_process_error: public mcrl2::runtime_error
   {
-    std::string msg;
-
-    non_linear_process_error(const std::string& s)
-      : msg(s)
+    explicit non_linear_process_error(const std::string& msg)
+      : mcrl2::runtime_error(msg)
     {}
   };
 
@@ -274,18 +272,18 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     }
     if (is_process_instance(right))
     {
-      const process_instance& q = atermpp::down_cast<process_instance>(right);
-      if (q.identifier() != eqn.identifier())
+      const auto& right_ = atermpp::down_cast<process_instance>(right);
+      if (right_.identifier() != eqn.identifier())
       {
-        throw non_linear_process_error(process::pp(q) + " has an unexpected identifier");
+        throw non_linear_process_error(process::pp(right_) + " has an unexpected identifier");
       }
     }
     else if (is_process_instance_assignment(right))
     {
-      const process_instance_assignment& q = atermpp::down_cast<process_instance_assignment>(right);
-      if (q.identifier() != eqn.identifier())
+      const auto& right_ = atermpp::down_cast<process_instance_assignment>(right);
+      if (right_.identifier() != eqn.identifier())
       {
-        throw non_linear_process_error(process::pp(q) + " has an unexpected identifier");
+        throw non_linear_process_error(process::pp(right_) + " has an unexpected identifier");
       }
     }
     else
@@ -335,7 +333,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     {
       if (verbose)
       {
-        std::clog << p.msg << std::endl;
+        std::clog << p.what() << std::endl;
       }
       return false;
     }

@@ -38,11 +38,9 @@ class txt2lps_tool : public input_output_tool
         "present, standard input is used.")
     {}
 
-    bool run()
+    bool run() override
     {
-      lps::txt2lps(input_filename(),
-                   output_filename()
-                  );
+      lps::txt2lps(input_filename(), output_filename());
       return true;
     }
 
