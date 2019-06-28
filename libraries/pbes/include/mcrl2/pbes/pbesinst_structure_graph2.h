@@ -424,10 +424,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void on_end_while_loop() override
     {
-      simple_structure_graph G(m_graph_builder.vertices());
-
       if (!todo.empty())
       {
+        simple_structure_graph G(m_graph_builder.vertices());
+
         auto u = m_graph_builder.find_vertex(init);
         if (S0.contains(u) || S1.contains(u))
         {
@@ -450,6 +450,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       if (m_options.prune_todo_list)
       {
+        simple_structure_graph G(m_graph_builder.vertices());
+
         std::size_t n = m_graph_builder.extent();
         vertex_set irrelevant(n);
         for (const propositional_variable_instantiation& X: todo.irrelevant_elements())

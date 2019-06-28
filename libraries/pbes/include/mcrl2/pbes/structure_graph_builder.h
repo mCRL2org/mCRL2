@@ -218,6 +218,13 @@ struct structure_graph_builder
     }
 
     vertices().erase(vertices().begin() + vertices().size() - U.size(), vertices().end());
+
+    // Recreate the index
+    m_vertex_map.clear();
+    for (std::size_t i = 0; i < vertices().size(); i++)
+    {
+      m_vertex_map.insert({vertices()[i].formula, i});
+    }
   }
 };
 
