@@ -676,6 +676,11 @@ class partial_order_reduction_algorithm
       data::variable_list combined_quantified_vars = qvars1_k + qvars1_k1;
 
       data::data_expression antecedent = data::sort_bool::and_(condition1_k1, data::where_clause(condition1_k, assignments1_k1));
+      data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
+      if (m_rewr(yes_condition) == data::sort_bool::true_())
+      {
+        return yes;
+      }
       data::data_expression parameters_equal = data::sort_bool::true_();
       auto it_k = updates2_k.begin();
       auto it_k1 = updates2_k1.begin();
@@ -729,6 +734,11 @@ class partial_order_reduction_algorithm
 
 
       data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition1_k1);
+      data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
+      if (m_rewr(yes_condition) == data::sort_bool::true_())
+      {
+        return yes;
+      }
       data::data_expression parameters_equal = data::sort_bool::true_();
       auto it_k = updates2_k.begin();
       auto it_k1 = updates2_k1.begin();
@@ -776,6 +786,11 @@ class partial_order_reduction_algorithm
       data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
 
       data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
+      data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
+      if (m_rewr(yes_condition) == data::sort_bool::true_())
+      {
+        return yes;
+      }
       data::data_expression parameters_equal = data::sort_bool::true_();
       for (const data::data_expression& gi: updates_k1)
       {
@@ -1028,7 +1043,7 @@ class partial_order_reduction_algorithm
       }
       data::data_expression condition = make_abstraction(data::forall_binder(), parameters + qvars1_k + qvars2_k, data::sort_bool::implies(antecedent, consequent));
 
-      mCRL2log(log::verbose) << "Determinism condition for " << k << ": " << m_rewr(condition) << " original " << condition << std::endl;
+      // mCRL2log(log::verbose) << "Determinism condition for " << k << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
       return m_rewr(condition) == data::sort_bool::true_();
     }
