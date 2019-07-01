@@ -42,8 +42,8 @@ bool Property::operator!=(const Property& property) const
 
 FileSystem::FileSystem(CodeEditor* specificationEditor, QSettings* settings,
                        QWidget* parent)
-    : specificationEditor(specificationEditor), settings(settings),
-      parent(parent), specificationModified(false), projectOpen(false),
+    : parent(parent), specificationEditor(specificationEditor),
+      settings(settings), projectOpen(false), specificationModified(false),
       specificationOnlyMode(false)
 {
   for (std::pair<IntermediateFileType, QString> item :

@@ -114,9 +114,9 @@ class PropertyWidget : public QWidget
   void paintEvent(QPaintEvent* event) override;
 
   private:
+  QWidget* parent;
   ProcessSystem* processSystem;
   FileSystem* fileSystem;
-  QWidget* parent;
   Property property;
 
   QHBoxLayout* propertyLayout;

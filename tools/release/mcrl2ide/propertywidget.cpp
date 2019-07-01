@@ -16,8 +16,8 @@
 
 PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
                                FileSystem* fileSystem, QWidget* parent)
-    : QWidget(parent), property(property), processSystem(processSystem),
-      fileSystem(fileSystem), parent(parent), lastRunningProcessId(-1)
+    : QWidget(parent), parent(parent), processSystem(processSystem),
+      fileSystem(fileSystem), property(property), lastRunningProcessId(-1)
 {
   editPropertyDialog =
       new AddEditPropertyDialog(false, processSystem, fileSystem, this);
@@ -204,7 +204,7 @@ void PropertyWidget::actionVerifyResult(int processid)
       propertyNameScrollArea->setStyleSheet(".QScrollArea" + styleSheet);
       propertyNameLabel->setStyleSheet(".QLabel" + styleSheet);
     }
-    
+
     editButton->setEnabled(true);
     deleteButton->setEnabled(true);
   }
