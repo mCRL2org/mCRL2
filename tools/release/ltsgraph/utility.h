@@ -10,6 +10,8 @@
 #ifndef MCRL2_LTSGRAPH_UTILITY_H
 #define MCRL2_LTSGRAPH_UTILITY_H
 
+#include "mcrl2/utilities/logger.h"
+
 #include <QOpenGLFunctions_3_3_Core>
 #include <QPainter>
 #include <QVector3D>
@@ -45,17 +47,17 @@ inline const char* glErrorString(GLenum code)
   }
 }
 
-/// \brief Execute the given QT OpenGL function that returns a boolean; logs error and aborts when it failed.
-#define MCRL2_QGL_VERIFY(x) \
-  do { if (!x) { mCRL2log(mcrl2::log::error) << #x " failed.\n"; std::abort(); } } while(false)
-
 /// \brief Checks for OpenGL errors, prints it and aborts.
-#define MCRL2_OGL_CHECK() \
-  do { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " << glErrorString(result) << "\n"; std::abort(); } } while(false)
+inline void glCheckError()
+{
+  GLenum result = glGetError();
 
-/// \brief Executes x and checks for errors afterwards.
-#define MCRL2_OGL_VERIFY(x) \
-  x; { GLenum result = glGetError(); if (result != GL_NO_ERROR) { mCRL2log(mcrl2::log::error) << "OpenGL error: " #x " failed with " << glErrorString(result) << "\n"; std::abort(); } } do {} while(false)
+  if (result != GL_NO_ERROR)
+  {
+    mCRL2log(mcrl2::log::error) << "OpenGL error: " << glErrorString(result) << "\n";
+    std::abort();
+  }
+}
 
 /// \brief Constants for pi and pi/2.
 constexpr float PI = 3.14159265358979323846f;

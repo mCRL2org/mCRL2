@@ -188,19 +188,18 @@ void GLScene::initialize()
   vertices.insert(vertices.end(), arrowhead_base.begin(), arrowhead_base.end());
   vertices.insert(vertices.end(), arc.begin(), arc.end());
 
-  MCRL2_QGL_VERIFY(m_vertexbuffer.create());
+  m_vertexbuffer.create();
   m_vertexbuffer.bind();
   m_vertexbuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
   m_vertexbuffer.allocate(vertices.data(), static_cast<int>(vertices.size() * sizeof(QVector3D)));
 
   // The vertex array object stores the layout of the vertex data that we use (vec3 float).
+  m_vertexarray.create();
   {
-    MCRL2_QGL_VERIFY(m_vertexarray.create());
-    MCRL2_OGL_VERIFY(QOpenGLVertexArrayObject::Binder bind_vao(&m_vertexarray));
-    MCRL2_OGL_VERIFY(glEnableVertexAttribArray(0));
+    QOpenGLVertexArrayObject::Binder bind_vao(&m_vertexarray);
 
-    m_vertexbuffer.bind();
-    MCRL2_OGL_VERIFY(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
   }
 }
 
@@ -300,8 +299,8 @@ void GLScene::render(QPainter& painter)
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
-  // Check that no OpenGL error has occured.
-  MCRL2_OGL_CHECK();
+  // Make sure that glGetError() is not an error.
+  glCheckError();
 }
 
 GLScene::Selection GLScene::select(int x, int y)
