@@ -120,6 +120,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                  'l');
       desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
       desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
+      desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
     }
 
 
@@ -131,6 +132,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
       options.replace_constants_by_variables = !parser.has_option("no-replace-constants-by-variables");
       options.aggressive = parser.has_option("aggressive");
       options.prune_todo_list = parser.has_option("prune-todo-list");
+      options.prune_todo_alternative = parser.has_option("prune-todo-alternative");
       options.exploration_strategy = parser.option_argument_as<mcrl2::pbes_system::search_strategy>("search");
       options.rewrite_strategy = rewrite_strategy();
 

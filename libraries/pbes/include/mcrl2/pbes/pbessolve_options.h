@@ -34,6 +34,8 @@ struct pbessolve_options
 
   // for doing a consistency check on the computed strategy
   bool check_strategy = false;
+
+  bool prune_todo_alternative = false;
 };
 
 inline
@@ -46,6 +48,7 @@ std::ostream& operator<<(std::ostream& out, const pbessolve_options& options)
   out << "optimization = " << options.optimization << std::endl;
   out << "aggressive = " << std::boolalpha << options.aggressive << std::endl;
   out << "check-strategy = " << std::boolalpha << options.check_strategy << std::endl;
+  out << "prune-todo-alternative = " << std::boolalpha << options.prune_todo_alternative << std::endl;
   return out;
 }
 

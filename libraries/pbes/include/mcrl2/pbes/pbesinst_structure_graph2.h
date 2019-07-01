@@ -257,8 +257,15 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         auto u = m_graph_builder.find_vertex(X);
         const auto& u_ = m_graph_builder.vertex(u);
 
+        if (m_options.prune_todo_alternative && u_.strategy != structure_graph::undefined_vertex)
+        {
+          todo1.insert(u_.formula);
+          continue;
+        }
+
         if (u_.decoration == structure_graph::d_conjunction && successors_disjoint(G, u, S1))
         {
+          // todo' := todo' \cup (succ(u) \setminus (S_0 \cup done'))
           for (auto v: G.successors(u))
           {
             if (S0.contains(v))
@@ -277,6 +284,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
         if (u_.decoration == structure_graph::d_disjunction && successors_disjoint(G, u, S0))
         {
+          // todo' := todo' \cup (succ(u) \setminus (S_1 \cup done'))
           for (auto v: G.successors(u))
           {
             if (S1.contains(v))
@@ -295,6 +303,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
         if (u_.decoration == structure_graph::d_none && has_successor_not_in(G, u, S0, S1, done1))
         {
+          // todo' := todo' \cup succ(u)
           for (auto v: G.successors(u))
           {
             const auto& v_ = m_graph_builder.vertex(v);
@@ -310,7 +319,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
 
-      // put the elements of new_todo in the right order
+      // new_todo_list := new_todo \cap (todo \cup irrelevant)
+      // N.B. An attempt is made to preserve the order of the current todo list, to not
+      // disturb breadth first and depth first search.
       std::deque<propositional_variable_instantiation> new_todo_list;
       for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
       {
