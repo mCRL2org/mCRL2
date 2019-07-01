@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-#~ Copyright 2013, 2014 Mark Geelen.
-#~ Copyright 2014, 2015 Wieger Wesselink.
-#~ Distributed under the Boost Software License, Version 1.0.
-#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# Copyright 2013, 2014 Mark Geelen.
+# Copyright 2014, 2015 Wieger Wesselink.
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import os
 import os.path
@@ -159,9 +159,36 @@ class Test:
             return False
         return self.globals['result']
 
-    def remaining_tasks(self):
-        # Returns a list of tools that can be executed and have not been executed before
-        return [tool for tool in self.tools if tool.can_execute()]
+    # Returns a valid schedule for executing the tools in this test
+    def make_task_schedule(self):
+        from collections import defaultdict
+        from topological_sort import topological_sort
+
+        # Create a label based mapping E that contains outgoing edges for all nodes.
+        E = defaultdict(lambda: set([]))
+        for tool in self.tools:
+            for node in tool.input_nodes:
+                E[node.label].add(tool.label)
+            for node in tool.output_nodes:
+                E[tool.label].add(node.label)
+
+        # Create a label based graph G
+        G = defaultdict(lambda: (set([]), set([]))) # (predecessors, successors)
+        for tool in self.tools:
+            u = tool.label
+            for v in E[u]:
+                for w in E[v]:
+                    G[u][1].add(w)
+                    G[w][0].add(u)
+
+        # Create a mapping tool_map from labels to tools
+        tool_map = {}
+        for tool in self.tools:
+            tool_map[tool.label] = tool
+
+        schedule = topological_sort(G)
+        return [tool_map[label] for label in schedule]
+
 
     def cleanup(self):
         if self.cleanup_files:
@@ -183,11 +210,11 @@ class Test:
     def run(self):
         import popen
 
-        # Singlecore run
-        tasks = self.remaining_tasks()
-        commands = []
+        tasks = self.make_task_schedule()
+        commands = [tool.command() for tool in tasks]
+
         while len(tasks) > 0:
-            tool = tasks[0]
+            tool = tasks.pop(0)
             try:
                 commands.append(tool.command())
                 returncode = tool.execute(timeout = self.timeout, memlimit = self.memlimit, verbose = self.verbose)
@@ -213,7 +240,6 @@ class Test:
                 self.dump_file_contents()
                 self.cleanup()
                 raise e
-            tasks = self.remaining_tasks()
 
         if not all(tool.executed for tool in self.tools):
             not_executed = [tool for tool in self.tools if not tool.executed]

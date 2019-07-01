@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-#~ Copyright 2013, 2014 Mark Geelen.
-#~ Copyright 2014, 2015 Wieger Wesselink.
-#~ Distributed under the Boost Software License, Version 1.0.
-#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# Copyright 2013, 2014 Mark Geelen.
+# Copyright 2014, 2015 Wieger Wesselink.
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 from subprocess import  PIPE
 import os.path
@@ -51,7 +51,7 @@ class Tool(object):
             # How to suppress crash notification dialog?, Raymond Chen Jan 14,2004 -
             import ctypes
             SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
-            ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
+            ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
             self.subprocess_flags = 0x8000000 #win32con.CREATE_NO_WINDOW?
         else:
             self.subprocess_flags = 0
