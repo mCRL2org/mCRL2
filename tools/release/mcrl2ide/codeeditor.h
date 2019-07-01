@@ -109,11 +109,16 @@ class CodeEditor : public QPlainTextEdit
   /**
    * @brief CodeEditor Constructor
    * @param parent The parent of this widget
-   * @param spec Whether this code editor is for a mcrl2 specifcation or a mcf
-   *   formula
    */
-  explicit CodeEditor(QWidget* parent = 0, bool spec = false);
+  explicit CodeEditor(QWidget* parent = 0);
   ~CodeEditor();
+
+  /**
+   * @brief setHighlightingRules Set what highlighting rules to use
+   * @param spec Whether to use the highlighting rules for mCRL2 specifications
+   *   (true) or for mu-calculus formulae (false)
+   */
+  void setHighlightingRules(bool spec);
 
   /**
    * @brief lineNumberAreaPaintEvent Paints the line number area on the screen
@@ -176,7 +181,6 @@ class CodeEditor : public QPlainTextEdit
   QFont lineNumberFont;
   LineNumbersArea* lineNumberArea;
   CodeHighlighter* highlighter;
-  QString placeholderText;
 
   QAction* zoomInAction;
   QAction* zoomOutAction;

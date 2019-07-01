@@ -80,6 +80,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   setWindowTitle(windowTitle);
   setWindowFlags(Qt::Window);
 
+  ui->formulaTextField->setHighlightingRules(false);
+
   connect(ui->parseButton, SIGNAL(clicked()), this, SLOT(parseProperty()));
   connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));
   connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
@@ -103,19 +105,19 @@ void AddEditPropertyDialog::resetFocus()
 void AddEditPropertyDialog::clearFields()
 {
   ui->propertyNameField->clear();
-  ui->propertyTextField->clear();
+  ui->formulaTextField->clear();
 }
 
 void AddEditPropertyDialog::setProperty(const Property& property)
 {
   ui->propertyNameField->setText(property.name);
-  ui->propertyTextField->setPlainText(property.text);
+  ui->formulaTextField->setPlainText(property.text);
 }
 
 Property AddEditPropertyDialog::getProperty()
 {
   return Property(ui->propertyNameField->text(),
-                  ui->propertyTextField->toPlainText());
+                  ui->formulaTextField->toPlainText());
 }
 
 void AddEditPropertyDialog::setOldProperty(const Property& oldProperty)

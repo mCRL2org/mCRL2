@@ -190,7 +190,7 @@ void LineNumbersArea::paintEvent(QPaintEvent* event)
   codeEditor->lineNumberAreaPaintEvent(event);
 }
 
-CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
+CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 {
   /* set the font used (monospaced) */
   codeFont.setFamily("Monospace");
@@ -200,12 +200,7 @@ CodeEditor::CodeEditor(QWidget* parent, bool spec) : QPlainTextEdit(parent)
 
   setFontSize(13);
 
-  placeholderText =
-      "Type your " +
-      QString(spec ? "mCRL2 specification" : "mu-calculus formula") + " here";
-
   lineNumberArea = new LineNumbersArea(this);
-  highlighter = new CodeHighlighter(spec, this->document());
 
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
@@ -229,12 +224,17 @@ CodeEditor::~CodeEditor()
 void CodeEditor::setFontSize(int pixelSize)
 {
   codeFont.setPixelSize(pixelSize);
-  this->document()->setDefaultFont(codeFont);
+  this->setFont(codeFont);
   lineNumberFont.setPixelSize(pixelSize);
 
   /* set the tab width to 4 characters */
   QFontMetrics codeFontMetrics = QFontMetrics(codeFont);
   this->setTabStopWidth(codeFontMetrics.width("1234"));
+}
+
+void CodeEditor::setHighlightingRules(bool spec)
+{
+  highlighter = new CodeHighlighter(spec, this->document());
 }
 
 void CodeEditor::showContextMenu(const QPoint& position)
@@ -265,20 +265,8 @@ void CodeEditor::highlightCurrentLine()
 
 void CodeEditor::paintEvent(QPaintEvent* event)
 {
-  /* add placeholder text if the code editor is out of focus and empty, else
-   *   highlight the line the cursor is on */
-  if (!this->hasFocus() && this->toPlainText().isEmpty())
-  {
-    /* first remove the line highlighting */
-    this->setExtraSelections({});
-
-    QPainter painter(this->viewport());
-    painter.setFont(codeFont);
-    painter.setPen(Qt::gray);
-    QRect rect(4, 4, event->rect().width(), event->rect().height());
-    painter.drawText(rect, placeholderText);
-  }
-  else
+  /* highlight the line the cursor is on when in focus */
+  if (this->hasFocus())
   {
     highlightCurrentLine();
   }

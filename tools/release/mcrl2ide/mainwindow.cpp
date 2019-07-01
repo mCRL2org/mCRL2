@@ -23,7 +23,9 @@
 MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
     : QMainWindow(parent)
 {
-  specificationEditor = new CodeEditor(this, true);
+  specificationEditor = new CodeEditor(this);
+  specificationEditor->setPlaceholderText("Type your mCRL2 specification here");
+  specificationEditor->setHighlightingRules(true);
   setCentralWidget(specificationEditor);
 
   settings = new QSettings("mCRL2", "mcrl2ide");

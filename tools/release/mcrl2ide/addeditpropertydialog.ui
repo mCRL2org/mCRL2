@@ -31,19 +31,17 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="widget_3" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Mu-calculus formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CodeEditor" name="propertyTextField"/>
-      </item>
-     </layout>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Mu-calculus formula:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="CodeEditor" name="formulaTextField">
+     <property name="placeholderText">
+      <string>Type your mu-calculus formula here</string>
+     </property>
     </widget>
    </item>
    <item>
