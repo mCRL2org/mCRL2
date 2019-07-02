@@ -14,6 +14,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
@@ -520,6 +522,16 @@ class partial_order_reduction_algorithm
       return result;
     }
 
+    bool is_true(const data::data_expression& expr) const
+    {
+      data::data_expression result = m_rewr(data::one_point_rule_rewrite(data::quantifiers_inside_rewrite(m_rewr(expr))));
+      if (result != data::sort_bool::true_() && result != data::sort_bool::false_())
+      {
+        mCRL2log(log::verbose) << "Cannot rewrite " << result << " any further" << std::endl;
+      }
+      return result == data::sort_bool::true_();
+    }
+
     bool summand_can_enable_data(const std::size_t k, const std::size_t k1)
     {
       const summand_class& summand_k = m_summand_classes[k];
@@ -545,7 +557,7 @@ class partial_order_reduction_algorithm
         )
       );
 
-      return m_rewr(can_enable) == data::sort_bool::true_();
+      return is_true(can_enable);
     }
 
     void compute_NES(const std::vector<parameter_info>& info)
@@ -677,7 +689,7 @@ class partial_order_reduction_algorithm
 
       data::data_expression antecedent = data::sort_bool::and_(condition1_k1, data::where_clause(condition1_k, assignments1_k1));
       data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
-      if (m_rewr(yes_condition) == data::sort_bool::true_())
+      if (is_true(yes_condition))
       {
         return yes;
       }
@@ -703,7 +715,7 @@ class partial_order_reduction_algorithm
 
       // mCRL2log(log::verbose) << "Left condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
-      return m_rewr(condition) == data::sort_bool::true_() ? maybe : no;
+      return is_true(condition) ? maybe : no;
     }
 
     tribool square_accords_data(std::size_t k, std::size_t k1) const
@@ -735,7 +747,7 @@ class partial_order_reduction_algorithm
 
       data::data_expression antecedent = data::sort_bool::and_(condition1_k, condition1_k1);
       data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
-      if (m_rewr(yes_condition) == data::sort_bool::true_())
+      if (is_true(yes_condition))
       {
         return yes;
       }
@@ -761,7 +773,7 @@ class partial_order_reduction_algorithm
 
       // mCRL2log(log::verbose) << "Square condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
-      return m_rewr(condition) == data::sort_bool::true_() ? maybe : no;
+      return is_true(condition) ? maybe : no;
     }
 
     tribool triangle_accords_data(std::size_t k, std::size_t k1) const
@@ -787,7 +799,7 @@ class partial_order_reduction_algorithm
 
       data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
       data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
-      if (m_rewr(yes_condition) == data::sort_bool::true_())
+      if (is_true(yes_condition))
       {
         return yes;
       }
@@ -801,7 +813,7 @@ class partial_order_reduction_algorithm
 
       // mCRL2log(log::verbose) << "Triangle condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
-      return m_rewr(condition) == data::sort_bool::true_() ? maybe : no;
+      return is_true(condition) ? maybe : no;
     }
 
     tribool left_accords_equations(std::size_t k, std::size_t k1) const
@@ -1045,7 +1057,7 @@ class partial_order_reduction_algorithm
 
       // mCRL2log(log::verbose) << "Determinism condition for " << k << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
-      return m_rewr(condition) == data::sort_bool::true_();
+      return is_true(condition);
     }
 
     void compute_deterministic()
