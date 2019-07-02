@@ -173,11 +173,16 @@ class Test:
         G = defaultdict(lambda: (set([]), set([]))) # (predecessors, successors)
         for tool in self.tools:
             u = tool.label
-            G[u] # force the creation of an entry for u
             for v in E[u]:
                 for w in E[v]:
                     G[u][1].add(w)
                     G[w][0].add(u)
+
+        # Add isolated nodes
+        for tool in self.tools:
+            u = tool.label
+            if not u in G:
+                G[u] = (set([]), set([]))
 
         # Create a mapping tool_map from labels to tools
         tool_map = {}
