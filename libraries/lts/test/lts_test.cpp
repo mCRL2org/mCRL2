@@ -635,6 +635,196 @@ static void counterexample_postprocessing()
   test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
 }
 
+static void regression_delete_old_bb_slice()
+{
+  std::string POSTPROCESS_AUT =
+    "des(0,163,100)\n"
+    "(33,\"a\",79)\n"
+    "(87,\"a\",2)\n"
+    "(4,\"b\",35)\n"
+    "(13,\"b\",10)\n"
+    "(15,\"b\",32)\n"
+    "(31,\"b\",3)\n"
+    "(35,\"b\",86)\n"
+    "(47,\"b\",73)\n"
+    "(61,\"b\",10)\n"
+    "(67,\"b\",59)\n"
+    "(81,\"b\",38)\n"
+    "(89,\"b\",77)\n"
+    "(94,\"b\",34)\n"
+    "(20,\"tau\",10)\n"
+    "(65,\"tau\",61)\n"
+    "(38,\"tau\",64)\n"
+    "(86,\"tau\",41)\n"
+    "(18,\"tau\",55)\n"
+    "(50,\"tau\",65)\n"
+    "(28,\"tau\",50)\n"
+    "(29,\"tau\",55)\n"
+    "(43,\"tau\",85)\n"
+    "(93,\"tau\",8)\n"
+    "(54,\"tau\",72)\n"
+    "(52,\"tau\",47)\n"
+    "(7,\"tau\",36)\n"
+    "(6,\"tau\",60)\n"
+    "(48,\"tau\",43)\n"
+    "(77,\"tau\",68)\n"
+    "(90,\"tau\",34)\n"
+    "(18,\"tau\",21)\n"
+    "(18,\"tau\",56)\n"
+    "(36,\"tau\",70)\n"
+    "(54,\"tau\",28)\n"
+    "(62,\"tau\",40)\n"
+    "(5,\"tau\",18)\n"
+    "(91,\"tau\",47)\n"
+    "(42,\"tau\",27)\n"
+    "(34,\"tau\",70)\n"
+    "(23,\"tau\",63)\n"
+    "(19,\"tau\",70)\n"
+    "(39,\"tau\",43)\n"
+    "(86,\"tau\",34)\n"
+    "(25,\"tau\",73)\n"
+    "(16,\"tau\",4)\n"
+    "(34,\"tau\",30)\n"
+    "(70,\"tau\",20)\n"
+    "(30,\"tau\",22)\n"
+    "(51,\"tau\",97)\n"
+    "(5,\"tau\",67)\n"
+    "(80,\"tau\",13)\n"
+    "(66,\"tau\",59)\n"
+    "(24,\"tau\",23)\n"
+    "(95,\"tau\",82)\n"
+    "(5,\"tau\",2)\n"
+    "(82,\"tau\",9)\n"
+    "(40,\"tau\",46)\n"
+    "(94,\"tau\",31)\n"
+    "(19,\"tau\",96)\n"
+    "(34,\"tau\",32)\n"
+    "(62,\"tau\",24)\n"
+    "(74,\"tau\",8)\n"
+    "(9,\"tau\",76)\n"
+    "(98,\"tau\",50)\n"
+    "(25,\"tau\",62)\n"
+    "(89,\"tau\",95)\n"
+    "(1,\"tau\",56)\n"
+    "(44,\"tau\",66)\n"
+    "(1,\"tau\",45)\n"
+    "(73,\"tau\",60)\n"
+    "(70,\"tau\",98)\n"
+    "(36,\"tau\",14)\n"
+    "(18,\"tau\",27)\n"
+    "(87,\"tau\",27)\n"
+    "(65,\"tau\",17)\n"
+    "(57,\"tau\",97)\n"
+    "(98,\"tau\",8)\n"
+    "(29,\"tau\",25)\n"
+    "(59,\"tau\",97)\n"
+    "(1,\"tau\",94)\n"
+    "(30,\"tau\",74)\n"
+    "(53,\"tau\",90)\n"
+    "(50,\"tau\",19)\n"
+    "(41,\"tau\",81)\n"
+    "(73,\"tau\",97)\n"
+    "(97,\"tau\",62)\n"
+    "(40,\"tau\",59)\n"
+    "(33,\"tau\",86)\n"
+    "(16,\"tau\",47)\n"
+    "(50,\"tau\",72)\n"
+    "(90,\"tau\",68)\n"
+    "(90,\"tau\",63)\n"
+    "(17,\"tau\",75)\n"
+    "(70,\"tau\",49)\n"
+    "(85,\"tau\",33)\n"
+    "(25,\"tau\",52)\n"
+    "(63,\"tau\",99)\n"
+    "(22,\"tau\",29)\n"
+    "(47,\"tau\",31)\n"
+    "(39,\"tau\",88)\n"
+    "(41,\"tau\",88)\n"
+    "(49,\"tau\",83)\n"
+    "(60,\"tau\",34)\n"
+    "(85,\"tau\",59)\n"
+    "(12,\"tau\",6)\n"
+    "(47,\"tau\",99)\n"
+    "(47,\"tau\",23)\n"
+    "(77,\"tau\",73)\n"
+    "(78,\"tau\",55)\n"
+    "(7,\"tau\",6)\n"
+    "(0,\"tau\",67)\n"
+    "(66,\"tau\",12)\n"
+    "(75,\"tau\",31)\n"
+    "(25,\"tau\",80)\n"
+    "(53,\"tau\",35)\n"
+    "(83,\"tau\",79)\n"
+    "(74,\"tau\",88)\n"
+    "(57,\"tau\",80)\n"
+    "(7,\"tau\",77)\n"
+    "(77,\"tau\",8)\n"
+    "(87,\"tau\",1)\n"
+    "(59,\"tau\",54)\n"
+    "(66,\"tau\",33)\n"
+    "(86,\"tau\",80)\n"
+    "(90,\"tau\",30)\n"
+    "(1,\"tau\",4)\n"
+    "(47,\"tau\",78)\n"
+    "(75,\"tau\",47)\n"
+    "(26,\"tau\",7)\n"
+    "(6,\"tau\",93)\n"
+    "(51,\"tau\",14)\n"
+    "(7,\"tau\",77)\n"
+    "(13,\"tau\",67)\n"
+    "(65,\"tau\",77)\n"
+    "(41,\"tau\",39)\n"
+    "(91,\"tau\",96)\n"
+    "(69,\"tau\",38)\n"
+    "(71,\"tau\",77)\n"
+    "(81,\"tau\",56)\n"
+    "(53,\"tau\",44)\n"
+    "(50,\"tau\",88)\n"
+    "(65,\"tau\",4)\n"
+    "(39,\"tau\",49)\n"
+    "(82,\"tau\",93)\n"
+    "(20,\"tau\",13)\n"
+    "(4,\"tau\",49)\n"
+    "(16,\"tau\",6)\n"
+    "(42,\"tau\",9)\n"
+    "(74,\"tau\",3)\n"
+    "(17,\"tau\",21)\n"
+    "(7,\"tau\",80)\n"
+    "(58,\"tau\",84)\n"
+    "(74,\"tau\",62)\n"
+    "(81,\"tau\",58)\n"
+    "(19,\"tau\",87)\n"
+    "(42,\"tau\",45)\n"
+    "(26,\"tau\",30)\n"
+    "(57,\"tau\",87)\n"
+    "(57,\"tau\",96)\n"
+    "(34,\"tau\",32)\n"
+    "(43,\"tau\",11)\n"
+    "(53,\"tau\",35)\n"
+    "(30,\"tau\",56)\n"
+    ;
+
+  std::size_t expected_label_count = 3;
+  std::size_t expected_state_count = 17;
+  std::size_t expected_transition_count = 43;
+
+  std::istringstream is(POSTPROCESS_AUT);
+  lts::lts_aut_t l_gw;
+  l_gw.load(is);
+  lts::lts_aut_t l=l_gw;
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
+  test_lts("regression test for GJKW bug (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gv);
+  test_lts("regression test for GJKW bug (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_dnj);
+  test_lts("regression test for GJKW bug (branching bisimulation directly on LTS)",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
+  test_lts("regression test for GJKW bug (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
+}
+
 void is_deterministic_test1()
 {
   std::string automaton =
@@ -679,6 +869,7 @@ int test_main(int /* argc*/, char** /* argv */)
   failing_test_groote_wijs_algorithm();
   counterexample_jk_1(3);
   counterexample_postprocessing();
+  regression_delete_old_bb_slice();
   // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate.
   return 0;
 }

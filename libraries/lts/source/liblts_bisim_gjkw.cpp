@@ -282,7 +282,7 @@ void part_state_t::print_block(const char*const message, const block_t*const B,
 void part_state_t::print_part(const part_trans_t& part_tr) const
 {
     assert(permutation.begin() < permutation.end());
-    const constln_t* C = (*permutation.begin())->constln();
+    const constln_t* C = permutation.front()->constln();
     for (;;)
     {
         mCRL2log(log::debug, "bisim_gjkw") << C->debug_id() << ":\n";
@@ -1154,7 +1154,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
     }
 
     // for all constellations C do
-    C = (*part_st.permutation.begin())->constln();
+    C = part_st.permutation.front()->constln();
     assert(C->begin() == part_st.permutation.begin());
     for (;;)
     {
@@ -1920,7 +1920,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
             else
             {
                 state_type const tgt_id = succ_iter->target -
-                                                  &*part_st.state_info.begin();
+                                                   &part_st.state_info.front();
                 // We have a non-inert transition to an intermediary state.
                 // Look up the label and where the transition from the
                 // intermediary state goes.
