@@ -1,18 +1,18 @@
 nodes:
   l1:
-    type: mCRL2Spec
+    type: mcrl2
   l2:
-    type: LPS
+    type: lps
   l3:
-    type: LPS
+    type: lps
   l4:
-    type: AUT
+    type: aut
   l5:
-    type: AUT
+    type: aut
   l6:
-    type: AUT
+    type: aut
   l7:
-    type: AUT
+    type: aut
 
 tools:
   t1:

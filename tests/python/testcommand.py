@@ -31,7 +31,7 @@ class TestCommand(object):
             os.rmdir(runpath)
 
 class YmlTest(TestCommand):
-    def __init__(self, name, ymlfile, inputfiles, settings = dict()):
+    def __init__(self, name, ymlfile, inputfiles, settings):
         super(YmlTest, self).__init__(name)
         self.ymlfile = ymlfile
         self.inputfiles = inputfiles
@@ -40,9 +40,10 @@ class YmlTest(TestCommand):
     def execute(self, runpath = '.'):
         run_yml_test(self.name, self.ymlfile, self.inputfiles, self.settings)
 
-    def print_commands(self, runpath = '.'):
+    # If no_paths is True, then all paths in the command are excluded
+    def print_commands(self, working_directory ='.', no_paths = False):
         test = Test(self.ymlfile, self.settings)
-        test.print_commands(runpath)
+        test.print_commands(working_directory, no_paths)
 
     def set_command_line_options(self, tool_label, options):
         if not 'tools' in self.settings:

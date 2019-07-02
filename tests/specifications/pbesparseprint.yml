@@ -1,10 +1,10 @@
 nodes:
   l1:
-    type: TEXT
+    type: text
   l2:
-    type: PBES
+    type: pbes
   l3:
-    type: TEXT
+    type: text
 
 tools:
   t1:

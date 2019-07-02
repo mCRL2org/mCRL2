@@ -1,14 +1,14 @@
 nodes:
   l1:
-    type: mCRL2Spec
+    type: mcrl2
   l2:
-    type: mCRL2Spec
+    type: mcrl2
   l3:
-    type: LPS
+    type: lps
   l4:
-    type: LPS
+    type: lps
   l5:
-    type: PBES
+    type: pbes
 
 tools:
   t1:

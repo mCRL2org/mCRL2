@@ -24,33 +24,33 @@ def ymlfile(file):
     return '{}/tests/specifications/{}.yml'.format(MCRL2_ROOT, file)
 
 class LpsconfcheckTest(YmlTest):
-    def __init__(self, name, inputfiles, confluence_type, expected_result, settings = dict()):
+    def __init__(self, name, inputfiles, confluence_type, expected_result, settings):
         assert confluence_type in 'cdCTZ'
         super(LpsconfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), inputfiles, settings)
         self.set_command_line_options('t2', ['-x' + confluence_type])
         self.settings.update({'result': "result = t5.value['result'] and t2.value['confluent-tau-summand-count'] == {}  and t2.value['tau-summand-count'] == {}".format(expected_result[0], expected_result[1])})
 
 class LpsconfcheckCtauTest(YmlTest):
-    def __init__(self, name, inputfiles, confluence_type, expected_result, settings = dict()):
+    def __init__(self, name, inputfiles, confluence_type, expected_result, settings):
         assert confluence_type in 'cdCTZ'
         super(LpsconfcheckCtauTest, self).__init__(name, ymlfile('lpsconfcheck_ctau'), inputfiles, settings)
         self.set_command_line_options('t3', ['-x' + confluence_type])
         self.settings.update({'result': "result = t6.value['result'] and t3.value['confluent-tau-summand-count'] == {}  and t3.value['tau-summand-count'] == {}".format(expected_result[0], expected_result[1])})
 
 class PbesrewrTest(YmlTest):
-    def __init__(self, name, inputfiles, rewriter, settings = dict()):
+    def __init__(self, name, inputfiles, rewriter, settings):
         super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), inputfiles, settings)
         self.set_command_line_options('t2', ['-p' + rewriter])
 
 class CountStatesTest(YmlTest):
     # expected_result is the expected number of states
-    def __init__(self, name, inputfiles, expected_result, lps2lts_options = [], settings = dict()):
+    def __init__(self, name, inputfiles, expected_result, lps2lts_options, settings):
         super(CountStatesTest, self).__init__(name, ymlfile('countstates'), inputfiles, settings)
         if lps2lts_options:
             self.set_command_line_options('t2', lps2lts_options)
 
 class PbesstategraphTest(YmlTest):
-    def __init__(self, name, inputfiles, command_line_options, settings = dict()):
+    def __init__(self, name, inputfiles, command_line_options, settings):
         super(PbesstategraphTest, self).__init__(name, ymlfile('pbesstategraph'), inputfiles, settings)
         self.set_command_line_options('t2', command_line_options)
 
@@ -64,7 +64,7 @@ regression_tests = {
     'ticket-1114b'  : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1114/2.mcrl2')], settings),
     'ticket-1143'   : lambda name, settings: PbesrewrTest(name, [abspath('tickets/1143/1.txt')], 'quantifier-one-point', settings),
     'ticket-1144'   : lambda name, settings: YmlTest(name, ymlfile('lpsbisim2pbes'),     [abspath('tickets/1144/test1.txt'), abspath('tickets/1144/test2.txt')], settings),
-    'ticket-1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, settings = settings),
+    'ticket-1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, [], settings = settings),
     'ticket-1206'   : lambda name, settings: YmlTest(name, ymlfile('lps2lts'),           [abspath('tickets/1206/1.mcrl2')], settings),
     'ticket-1218'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1218/1.mcrl2')], settings),
     'ticket-1234'   : lambda name, settings: YmlTest(name, ymlfile('lpsbinary'),         [mcrl2file('examples/academic/cabp/cabp.mcrl2')], settings),
@@ -129,7 +129,7 @@ def test1():
     os.chdir(testdir)
     LpsconfcheckTest('lpsconfcheck_1',     [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 10), settings = settings).execute_in_sandbox()
     LpsconfcheckCtauTest('lpsconfcheck_2', [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings = settings).execute_in_sandbox()
-    CountStatesTest('countstates_abp',     [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, settings = settings).execute_in_sandbox()
+    CountStatesTest('countstates_abp',     [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, [], settings = settings).execute_in_sandbox()
 
 def test2():
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': True, 'cleanup_files': True}

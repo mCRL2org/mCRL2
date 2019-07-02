@@ -2,7 +2,7 @@ nodes:
   l1:
     type: BesSpec
   l2:
-    type: BES
+    type: bes
 
 tools:
   t1:

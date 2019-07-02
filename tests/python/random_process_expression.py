@@ -431,4 +431,4 @@ def make_process_specification(parallel_operator_generators = default_parallel_o
 
 if __name__ == '__main__':
     procspec = make_process_specification(generate_process_parameters = True)
-    print procspec
+    print(procspec)

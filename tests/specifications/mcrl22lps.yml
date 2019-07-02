@@ -1,8 +1,8 @@
 nodes:
   l1:
-    type: mCRL2Spec
+    type: mcrl2
   l2:
-    type: LPS
+    type: lps
 
 tools:
   t1:

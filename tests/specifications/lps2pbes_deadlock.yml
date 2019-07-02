@@ -1,10 +1,10 @@
 nodes:
   l1:
-    type: mCRL2Spec
+    type: mcrl2
   l2:
-    type: LPS
+    type: lps
   l3:
-    type: PBES
+    type: pbes
 
 tools:
   t1:

@@ -1,20 +1,20 @@
 nodes:
   l1:
-    type: mCRL2Spec
+    type: mcrl2
   l2:
-    type: StateFrm
+    type: mcf
   l3:
-    type: LPS
+    type: lps
   l4:
-    type: PBES
+    type: pbes
   l5:
-    type: LPS
+    type: lps
   l6:
-    type: PBES
+    type: pbes
   l7:
-    type: LTS
+    type: lts
   l8:
-    type: LTS
+    type: lts
 
 tools:
   t1:

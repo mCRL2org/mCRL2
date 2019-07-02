@@ -1,10 +1,10 @@
 nodes:
   l1:
-    type: PbesSpec
+    type: pbesspec
   l2:
-    type: PBES
+    type: pbes
   l3:
-    type: PBES
+    type: pbes
 
 tools:
   t1:
