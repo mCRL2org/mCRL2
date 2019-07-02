@@ -4206,9 +4206,9 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                             // Line 1.18: Remove T_U--> \ T_U--a-->B' from the
                             //            list of instable block-bunch-slices
                             block_t* const block_U(
-                                               refine_block_begin->st->bl.ock); assert(blue_block->end == refine_block->begin);
+                                               refine_block_begin->st->bl.ock); assert(block_U->end == refine_block->begin);
                             block_bunch_slice_iter_t blue_splitter(
-                                         part_tr.unstable_block_bunch.begin()); assert(0 == blue_block->marked_size());
+                                         part_tr.unstable_block_bunch.begin()); assert(0 == block_U->marked_size());
                             if(part_tr.unstable_block_bunch.end() !=
                                                                blue_splitter &&
                                (blue_splitter->source_block() == block_U ||
@@ -4218,9 +4218,9 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                             {                                                   assert(!blue_splitter->is_stable());
                                                                                 assert(blue_splitter->bunch == bunch_T);
                                 block_U->stable_block_bunch.splice(
-                                          blue_block->stable_block_bunch.end(),
-                                          part_tr.unstable_block_bunch,
-                                          blue_splitter);
+                                             block_U->stable_block_bunch.end(),
+                                             part_tr.unstable_block_bunch,
+                                             blue_splitter);
                                 blue_splitter->make_stable();
                             }
                                                                                 #ifndef NDEBUG
