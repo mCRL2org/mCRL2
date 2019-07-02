@@ -304,6 +304,7 @@ class check_complexity
         refine_partition_until_it_becomes_stable__stabilize,
                     BLOCK_BUNCH_dnj_MIN =
                            refine_partition_until_it_becomes_stable__stabilize,
+        refine_partition_until_it_becomes_stable__stabilize_for_large_splitter,
         second_move_transition_to_new_bunch,
         prepare_for_postprocessing__make_unstable_temp,
                     BLOCK_BUNCH_dnj_MIN_TEMP =
@@ -400,11 +401,10 @@ class check_complexity
                   enum counter_type FirstPostprocessCounter = FirstTempCounter>
     class counter_t
     {
-      protected:
+      public:
         /// \brief actual space to store the counters
         unsigned char counters[LastCounter - FirstCounter + 1];
 
-      public:
         /// \brief cancel temporary work
         /// \details The function registers that all counters from `first` to
         /// `last` (inclusive) are counting superfluous work.  It adds them to
@@ -1048,6 +1048,13 @@ class check_complexity
                             ctr < BLOCK_BUNCH_dnj_MIN_TEMP;
                                            ctr = (enum counter_type) (ctr + 1))
             {
+                if (counters[ctr - BLOCK_BUNCH_dnj_MIN] > max_bunch)
+                {
+                    mCRL2log(log::error) << "Error 12: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                        "maximum value (" << (unsigned) max_bunch << ") for ";
+                    return false;
+                }
                 assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= max_bunch);
                 counters[ctr - BLOCK_BUNCH_dnj_MIN] = max_bunch;
             }

@@ -182,6 +182,7 @@ const char *check_complexity::work_names[TRANS_dnj_MAX - BLOCK_MIN + 1] =
     // block_bunch-slice counters (only for block_bunch-slices that are
     // part of a small bunch)
     "refine_partition_until_it_becomes_stable(), stabilize",
+    "refine_partition_until_it_becomes_stable(), stabilize for large splitter",
     "second_move_transition_to_new_bunch()",
     "prepare_for_postprocessing(), make block_bunch-slice without bottom "
                                          "states unstable (temporary counter)",
@@ -338,6 +339,8 @@ void check_complexity::test_work_names()
     // part of a small bunch)
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN == i);
     test_work_name(i, refine_partition_until_it_becomes_stable__stabilize);
+    test_work_name(i,
+       refine_partition_until_it_becomes_stable__stabilize_for_large_splitter);
     test_work_name(i, second_move_transition_to_new_bunch);
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN_TEMP == i);
     test_work_name(i, prepare_for_postprocessing__make_unstable_temp);
