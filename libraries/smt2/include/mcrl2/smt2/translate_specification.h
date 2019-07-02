@@ -14,6 +14,8 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/smt2/native_translation.h"
+#include "mcrl2/smt2/translate_expression.h"
+#include "mcrl2/smt2/translate_sort.h"
 
 namespace mcrl2
 {
@@ -22,37 +24,48 @@ namespace smt
 namespace detail
 {
 
-/**
- * \brief Declare variables to be used in binder such as exists or forall and print the declaration to out
- * \return An expression that constrains the domains of Pos and Nat variables
- */
-template <class OutputStream>
-static inline
-data::data_expression declare_variables_binder(OutputStream& out, const data::variable_list& vars)
+template <typename OutputStream>
+inline
+void translate_sort_definition(const std::string& sort_name, const data::sort_expression& s, const data::data_specification& dataspec, OutputStream& out, const native_translations& nt, data::set_identifier_generator& id_gen)
 {
-  data::data_expression result = data::sort_bool::true_();
-  out << "(";
-  for(const data::variable& var: vars)
+  auto find_result = nt.sorts.find(s);
+  if(find_result != nt.sorts.end())
   {
-    out << "(" << var.name() << " ";
-    if(var.sort() == data::sort_pos::pos())
+    // Do not output anything for natively defined sorts
+    return;
+  }
+
+  out << "(declare-datatypes () ((" << sort_name << " ";
+  for(const data::function_symbol& cons: dataspec.constructors(s))
+  {
+    out << "(" << cons.name() << " ";
+    if(data::is_function_sort(cons.sort()))
     {
-      out << "Int";
-      result = data::lazy::and_(result, greater_equal(var, data::sort_pos::c1()));
-    }
-    else if(var.sort() == data::sort_nat::nat())
-    {
-      out << "Int";
-      result = data::lazy::and_(result, greater_equal(var, data::sort_nat::c0()));
-    }
-    else
-    {
-      out << var.sort();
+      const data::function_sort& cs = atermpp::down_cast<data::function_sort>(cons.sort());
+      for(const data::sort_expression& arg: cs.domain())
+      {
+        out << "(" << id_gen("@recog") << " ";
+        translate_sort_expression(arg, out, nt);
+        out << ") ";
+      }
     }
     out << ") ";
   }
-  out << ")";
-  return result;
+  out << ")))\n";
+}
+
+template <typename OutputStream>
+inline
+void translate_sort_definition(const data::basic_sort& s, const data::data_specification& dataspec, OutputStream& out, const native_translations& nt, data::set_identifier_generator& id_gen)
+{
+  translate_sort_definition(pp(s.name()), s, dataspec, out, nt, id_gen);
+}
+
+template <typename OutputStream>
+inline
+void translate_alias(const data::sort_expression& s, const data::data_specification& dataspec, OutputStream& out, const native_translations& nt)
+{
+
 }
 
 template <typename OutputStream>
@@ -105,11 +118,24 @@ void translate_equation(const data::data_equation& eq, OutputStream& out, const 
 template <typename OutputStream>
 void translate_data_specification(const data::data_specification& dataspec, OutputStream& o, const native_translations& nt)
 {
-  for(const data::function_symbol& f: dataspec.mappings())
+  data::set_identifier_generator id_gen;
+  for(const data::basic_sort& s: dataspec.user_defined_sorts())
+  {
+    detail::translate_sort_definition(s, dataspec, o, nt, id_gen);
+  }
+  for(const data::alias& s: dataspec.user_defined_aliases())
+  {
+    if(data::is_structured_sort(s.reference()))
+    {
+      detail::translate_sort_definition(pp(s.name().name()), s.reference(), dataspec, o, nt, id_gen);
+    }
+    // detail::translate_sort_definition(s, dataspec, o, nt, id_gen);
+  }
+  for(const data::function_symbol& f: dataspec.user_defined_mappings())
   {
     detail::translate_mapping(f, o, nt);
   }
-  for(const data::data_equation& eq: dataspec.equations())
+  for(const data::data_equation& eq: dataspec.user_defined_equations())
   {
     detail::translate_equation(eq, o, nt);
   }

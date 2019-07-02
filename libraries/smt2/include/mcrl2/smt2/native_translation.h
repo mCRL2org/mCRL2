@@ -77,15 +77,45 @@ native_translations initialise_native_translation(const data::data_specification
   std::map<data::function_symbol, data::data_equation> mappings;
   std::map<data::sort_expression, std::string> sorts;
 
+  sorts[data::sort_bool::bool_()] = "Bool";
+  sorts[data::sort_pos::pos()] = "Int";
+  sorts[data::sort_nat::nat()] = "Int";
+  sorts[data::sort_int::int_()] = "Int";
+  sorts[data::sort_real::real_()] = "Real";
+
   for(const data::sort_expression& sort: dataspec.sorts())
   {
-    symbols[data::equal_to(sort)] = fixed_string_translation("=");
-    symbols[data::not_equal_to(sort)] = fixed_string_translation("distinct");
-    symbols[data::less(sort)] = pp_translation;
-    symbols[data::less_equal(sort)] = pp_translation;
-    symbols[data::greater(sort)] = pp_translation;
-    symbols[data::greater_equal(sort)] = pp_translation;
-    symbols[data::if_(sort)] = fixed_string_translation("ite");
+    if(data::is_basic_sort(sort))
+    {
+      symbols[data::equal_to(sort)] = fixed_string_translation("=");
+      symbols[data::not_equal_to(sort)] = fixed_string_translation("distinct");
+      auto find_result = sorts.find(sort);
+      if(find_result != sorts.end() && find_result->second == "Int")
+      {
+        symbols[data::less(sort)] = pp_translation;
+        symbols[data::less_equal(sort)] = pp_translation;
+        symbols[data::greater(sort)] = pp_translation;
+        symbols[data::greater_equal(sort)] = pp_translation;
+      }
+      else
+      {
+        symbols[data::less(sort)] = fixed_string_translation("@less");
+        symbols[data::less_equal(sort)] = fixed_string_translation("@less_equal");
+        symbols[data::greater(sort)] = fixed_string_translation("@greater");
+        symbols[data::greater_equal(sort)] = fixed_string_translation("@greater_equal");
+        mappings[data::less(sort)] =
+        mappings[data::less_equal(sort)] =
+        mappings[data::greater(sort)] =
+        mappings[data::greater_equal(sort)] =
+      }
+      symbols[data::if_(sort)] = fixed_string_translation("ite");
+
+      symbols[data::sort_list::empty(sort)] = fixed_string_translation("nil");
+      symbols[data::sort_list::cons_(sort)] = fixed_string_translation("insert");
+      symbols[data::sort_list::head(sort)] = pp_translation;
+      symbols[data::sort_list::tail(sort)] = pp_translation;
+      sorts[data::sort_list::list(sort)] = "(List " + pp(s) + ")";
+    }
   }
   symbols[data::sort_bool::not_()] = fixed_string_translation("not");
   symbols[data::sort_bool::and_()] = fixed_string_translation("and");
@@ -120,10 +150,8 @@ native_translations initialise_native_translation(const data::data_specification
   mappings[id_int] = data::data_equation(data::variable_list({vi}), vi, vi);
   mappings[id_real] = data::data_equation(data::variable_list({vr}), vr, vr);
 
-  sorts[data::sort_pos::pos()] = "Int";
-  sorts[data::sort_pos::nat()] = "Int";
 
-  return native_translations(symbols, expressions, mappings);
+  return native_translations(symbols, expressions, mappings, sorts);
 }
 
 inline

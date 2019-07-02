@@ -12,7 +12,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/smt2/translate.h"
+#include "mcrl2/smt2/translate_expression.h"
+#include "mcrl2/smt2/translate_specification.h"
 #include "mcrl2/smt2/native_translation.h"
 
 #include <vector>

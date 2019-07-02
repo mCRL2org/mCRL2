@@ -14,6 +14,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/smt2/native_translation.h"
+#include "mcrl2/smt2/translate_sort.h"
 
 namespace mcrl2
 {
@@ -25,39 +26,6 @@ void translate_data_expression(const T& x, OutputStream& o, const native_transla
 
 namespace detail
 {
-
-/**
- * \brief Declare variables to be used in binder such as exists or forall and print the declaration to out
- * \return An expression that constrains the domains of Pos and Nat variables
- */
-template <class OutputStream>
-static inline
-data::data_expression declare_variables_binder(OutputStream& out, const data::variable_list& vars)
-{
-  data::data_expression result = data::sort_bool::true_();
-  out << "(";
-  for(const data::variable& var: vars)
-  {
-    out << "(" << var.name() << " ";
-    if(var.sort() == data::sort_pos::pos())
-    {
-      out << "Int";
-      result = data::lazy::and_(result, greater_equal(var, data::sort_pos::c1()));
-    }
-    else if(var.sort() == data::sort_nat::nat())
-    {
-      out << "Int";
-      result = data::lazy::and_(result, greater_equal(var, data::sort_nat::c0()));
-    }
-    else
-    {
-      out << var.sort();
-    }
-    out << ") ";
-  }
-  out << ")";
-  return result;
-}
 
 template <template <class> class Traverser, class OutputStream>
 struct translate_data_expression_traverser: public Traverser<translate_data_expression_traverser<Traverser, OutputStream> >
@@ -74,6 +42,33 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     : out(out_)
     , m_native(nt)
   {}
+
+
+  /**
+   * \brief Declare variables to be used in binder such as exists or forall and print the declaration to out
+   * \return An expression that constrains the domains of Pos and Nat variables
+   */
+  data::data_expression declare_variables_binder(const data::variable_list& vars)
+  {
+    data::data_expression result = data::sort_bool::true_();
+    out << "(";
+    for(const data::variable& var: vars)
+    {
+      out << "(" << var.name() << " ";
+      translate_sort_expression(var.sort(), out, m_native);
+      out << ")";
+      if(var.sort() == data::sort_pos::pos())
+      {
+        result = data::lazy::and_(result, greater_equal(var, data::sort_pos::c1()));
+      }
+      else if(var.sort() == data::sort_nat::nat())
+      {
+        result = data::lazy::and_(result, greater_equal(var, data::sort_nat::c0()));
+      }
+    }
+    out << ")";
+    return result;
+  }
 
   void apply(const data::application& v)
   {
@@ -111,7 +106,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
   void apply(const data::forall& v)
   {
     out << "(forall ";
-    data::data_expression vars_conditions = declare_variables_binder(out, v.variables());
+    data::data_expression vars_conditions = declare_variables_binder(v.variables());
     out << " ";
     super::apply(data::lazy::implies(vars_conditions, v.body()));
     out << ")";
@@ -120,7 +115,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
   void apply(const data::exists& v)
   {
     out << "(exists ";
-    data::data_expression vars_conditions = declare_variables_binder(out, v.variables());
+    data::data_expression vars_conditions = declare_variables_binder(v.variables());
     out << " ";
     super::apply(data::lazy::and_(vars_conditions, v.body()));
     out << ")";

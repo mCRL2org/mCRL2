@@ -9,11 +9,9 @@
 #ifndef MCRL2_SMT_TRANSLATE_SORT_H
 #define MCRL2_SMT_TRANSLATE_SORT_H
 
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/smt2/native_translation.h"
+#include "mcrl2/smt2/translation_error.h"
 
 namespace mcrl2
 {
@@ -38,55 +36,33 @@ struct translate_sort_expression_traverser: public Traverser<translate_sort_expr
     , m_native(nt)
   {}
 
-  void apply(const data::application& v)
+  void apply(const data::basic_sort& s)
   {
-    native_translation_map_t::const_iterator find_result;
-    if(data::is_function_symbol(v.head()) && (find_result = m_native.expressions.find(atermpp::down_cast<data::function_symbol>(v.head()))) != m_native.expressions.end())
+    auto find_result = m_native.sorts.find(s);
+    if(find_result != m_native.sorts.end())
     {
-      out << find_result->second(v);
+      out << find_result->second;
+      return;
     }
-    else
-    {
-      out << "(";
-      super::apply(v);
-      out << ") ";
-    }
+
+    out << s.name();
   }
 
-  void apply(const data::function_symbol& v)
+  void apply(const data::container_sort& s)
   {
-    native_translation_map_t::const_iterator find_result = m_native.symbols.find(v);
-    if(find_result != m_native.symbols.end())
-    {
-      out << find_result->second(v) << " ";
-    }
-    else
-    {
-      out << v.name() << " ";
-    }
+    out << "(" << pp(s.container_name()) << " (";
+    super::apply(s.element_sort());
+    out << "))";
   }
 
-  void apply(const data::variable& v)
+  void apply(const data::structured_sort& s)
   {
-    out << v.name() << " ";
+    throw translation_error("Cannot translate structured sort " + pp(s));
   }
 
-  void apply(const data::forall& v)
+  void apply(const data::function_sort& s)
   {
-    out << "(forall ";
-    data::data_expression vars_conditions = declare_variables_binder(out, v.variables());
-    out << " ";
-    super::apply(data::lazy::implies(vars_conditions, v.body()));
-    out << ")";
-  }
-
-  void apply(const data::exists& v)
-  {
-    out << "(exists ";
-    data::data_expression vars_conditions = declare_variables_binder(out, v.variables());
-    out << " ";
-    super::apply(data::lazy::and_(vars_conditions, v.body()));
-    out << ")";
+    throw translation_error("Cannot translate function sort " + pp(s));
   }
 };
 
