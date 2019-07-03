@@ -72,8 +72,8 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
 
   void apply(const data::application& v)
   {
-    native_translation_map_t::const_iterator find_result;
-    if(data::is_function_symbol(v.head()) && (find_result = m_native.expressions.find(atermpp::down_cast<data::function_symbol>(v.head()))) != m_native.expressions.end())
+    auto find_result = m_native.find_native_translation(v);
+    if(find_result != m_native.expressions.end())
     {
       out << find_result->second(v);
     }
@@ -87,10 +87,10 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
 
   void apply(const data::function_symbol& v)
   {
-    native_translation_map_t::const_iterator find_result = m_native.symbols.find(v);
+    auto find_result = m_native.symbols.find(v);
     if(find_result != m_native.symbols.end())
     {
-      out << find_result->second(v) << " ";
+      out << find_result->second << " ";
     }
     else
     {

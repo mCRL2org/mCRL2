@@ -20,6 +20,13 @@ namespace smt
 namespace detail
 {
 
+static inline
+const std::map<data::structured_sort, std::string>& empty_name_map()
+{
+  static std::map<data::structured_sort, std::string> result;
+  return result;
+}
+
 template <template <class> class Traverser, class OutputStream>
 struct translate_sort_expression_traverser: public Traverser<translate_sort_expression_traverser<Traverser, OutputStream> >
 {
@@ -30,10 +37,12 @@ struct translate_sort_expression_traverser: public Traverser<translate_sort_expr
 
   OutputStream& out;
   const native_translations& m_native;
+  const std::map<data::structured_sort, std::string>& m_struct_names;
 
-  translate_sort_expression_traverser(OutputStream& out_, const native_translations& nt)
+  translate_sort_expression_traverser(OutputStream& out_, const native_translations& nt, const std::map<data::structured_sort, std::string>& snm)
     : out(out_)
     , m_native(nt)
+    , m_struct_names(snm)
   {}
 
   void apply(const data::basic_sort& s)
@@ -57,7 +66,15 @@ struct translate_sort_expression_traverser: public Traverser<translate_sort_expr
 
   void apply(const data::structured_sort& s)
   {
-    throw translation_error("Cannot translate structured sort " + pp(s));
+    auto find_result = m_struct_names.find(s);
+    if(find_result != m_struct_names.end())
+    {
+      out << find_result->second;
+    }
+    else
+    {
+      throw translation_error("Cannot translate structured sort " + pp(s));
+    }
   }
 
   void apply(const data::function_sort& s)
@@ -68,17 +85,19 @@ struct translate_sort_expression_traverser: public Traverser<translate_sort_expr
 
 template <template <class> class Traverser, class OutputStream>
 translate_sort_expression_traverser<Traverser, OutputStream>
-make_translate_sort_expression_traverser(OutputStream& out, const native_translations& nt)
+make_translate_sort_expression_traverser(OutputStream& out, const native_translations& nt,
+  const std::map<data::structured_sort, std::string>& snm)
 {
-  return translate_sort_expression_traverser<Traverser, OutputStream>(out, nt);
+  return translate_sort_expression_traverser<Traverser, OutputStream>(out, nt, snm);
 }
 
 } // namespace detail
 
 template <typename T, typename OutputStream>
-void translate_sort_expression(const T& x, OutputStream& o, const native_translations& nt)
+void translate_sort_expression(const T& x, OutputStream& o, const native_translations& nt,
+  const std::map<data::structured_sort, std::string>& snm = detail::empty_name_map())
 {
-  detail::make_translate_sort_expression_traverser<data::sort_expression_traverser>(o, nt).apply(x);
+  detail::make_translate_sort_expression_traverser<data::sort_expression_traverser>(o, nt, snm).apply(x);
 }
 
 } // namespace smt
