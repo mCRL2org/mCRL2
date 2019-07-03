@@ -36,6 +36,9 @@ public:
 
   // The interface of an unordered_map without the ability to remove individual elements.
 
+  indexed_set() {}
+  indexed_set(std::size_t initial_size) : m_map(initial_size) {}
+
   const T& at(const Key& key) const { return m_map.at(key); }
 
   iterator begin() { return m_map.begin(); }
@@ -51,6 +54,7 @@ public:
   std::pair<iterator, bool> insert(const Key& key) { return m_map.emplace(key, size()); }
 
   iterator find(const Key& key) { return m_map.find(key); }
+  const_iterator find(const Key& key) const { return m_map.find(key); }
 
   std::size_t size() const { return m_map.size(); }
 };
