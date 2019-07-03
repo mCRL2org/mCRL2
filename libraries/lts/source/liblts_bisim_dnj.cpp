@@ -372,7 +372,7 @@ class action_block_entry;
         {
           protected:
             empty_entry* ptr;
-        
+
             const_iterator(const empty_entry* new_ptr)
               : ptr(const_cast<empty_entry*>(new_ptr))
             {  }
@@ -426,7 +426,7 @@ class action_block_entry;
         {
           public:
             iterator_or_null() : iterator()  {  }
-            iterator_or_null(nullptr_t) : iterator()
+            iterator_or_null(std::nullptr_t) : iterator()
             {
                  const_iterator::ptr = nullptr;
             }
@@ -459,7 +459,7 @@ class action_block_entry;
                 return !operator==(other);
             }
 
-            void operator=(nullptr_t)
+            void operator=(std::nullptr_t)
             {
                 const_iterator::ptr = nullptr;
             }
