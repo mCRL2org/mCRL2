@@ -537,7 +537,25 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix, bool t
 
     // Apply fogging the node color and draw the node.
     m_global_shader.setColor(QVector4D(applyFog(fill, fog), alpha));
-    glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
+
+    if (node.is_probabilistic())
+    {
+      // Draw only the outer part of the half sphere that makes up a node in the standard fill
+      glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE + VERTICES_NODE_SPHERE / 2, VERTICES_NODE_SPHERE / 2);
+
+      QVector3D blue(0.35f, 0.7f, 1.0f);
+      m_global_shader.setColor(applyFog(blue, fog));
+      
+      // Draw only only the inner part of the half sphere that makes up a node in blue
+      glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE / 2);
+    }
+    else
+    {
+      // Draw the half sphere
+      glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE);
+    }
+
+
     if (m_graph.hasExploration() && !m_graph.isBridge(i) && m_graph.initialState() != i)
     {
       float s = (fill.x() < 0.5f && fill.y() < 0.5f && fill.z() < 0.5f) ? 0.2f : -0.2f;
@@ -548,15 +566,6 @@ void GLScene::renderNode(std::size_t i, const QMatrix4x4& viewProjMatrix, bool t
       // When the node is active, which means that its successors are shown in exploration mode, only the "minus" is drawn
       // by omitting the vertical rectangle of the whole "plus" shape.
       glDrawArrays(GL_TRIANGLES, OFFSET_HINT, node.active() ? VERTICES_HINT / 2 : VERTICES_HINT);
-    }
-
-    if (node.is_probabilistic())
-    {
-      QVector3D blue(0.1f, 0.1f, 0.7f);
-
-      m_global_shader.setColor(applyFog(blue, fog));
-      // Draw only only the inner part of the half sphere that makes up a node in blue
-      glDrawArrays(GL_TRIANGLE_STRIP, OFFSET_NODE_SPHERE, VERTICES_NODE_SPHERE / RES_NODE_STACK);
     }
   }
 }
