@@ -66,7 +66,7 @@ class Tool(object):
         if returncode != 0:
             print('warning: tool {} ended with return code {}'.format(self.name, returncode))
         if platform.system() == 'Windows' and returncode == -1073740777:
-            raise popen.ToolRuntimeError('Tool {} failed with the return code STATUS_INVALID_CRUNTIME_PARAMETER (0xC0000417)')
+            raise popen.ToolRuntimeError('Tool {} failed with the return code STATUS_INVALID_CRUNTIME_PARAMETER (0xC0000417)'.format(self.name))
         if platform.system() == 'Windows' and returncode == -1073741571:
             raise popen.StackOverflowError(self.name)
         if platform.system() == 'Linux' and returncode == -11:
