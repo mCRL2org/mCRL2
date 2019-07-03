@@ -22,24 +22,94 @@ namespace smt
 {
 
 typedef std::function<std::string(data::data_expression)> native_translation_t;
-typedef std::map<data::function_symbol, native_translation_t> native_translation_map_t;
 struct native_translations
 {
-  native_translation_map_t symbols;
-  native_translation_map_t expressions;
+  // If f occurs in symbols, its translation should be symbols[f]
+  std::map<data::function_symbol, std::string> symbols;
+  // If f occurs in expressions, all applications f(a) should be translated by the function expressions[f]
+  std::map<data::function_symbol, native_translation_t> expressions;
+  // Function symbols for which the equations should not be defined
+  std::set<data::function_symbol> do_not_define;
+  // Pairs of mappings and equations that need to be translated as well
   std::map<data::function_symbol, data::data_equation> mappings;
+  // Sorts that have a native definition in Z3
   std::map<data::sort_expression, std::string> sorts;
 
-  native_translations(native_translation_map_t s,
-                      native_translation_map_t e,
-                      std::map<data::function_symbol, data::data_equation> m,
-                      std::map<data::sort_expression, std::string> so
-                     )
-  : symbols(std::move(s))
-  , expressions(std::move(e))
-  , mappings(std::move(m))
-  , sorts(so)
-  {}
+  native_translations() = default;
+
+  // native_translations(native_translation_map_t s,
+  //                     native_translation_map_t e,
+  //                     std::map<data::function_symbol, data::data_equation> m,
+  //                     std::map<data::sort_expression, std::string> so
+  //                    )
+  // : symbols(std::move(s))
+  // , expressions(std::move(e))
+  // , mappings(std::move(m))
+  // , sorts(std::move(so))
+  // {}
+
+  std::map<data::function_symbol, native_translation_t>::const_iterator find_native_translation(const data::application& a) const
+  {
+    if(data::is_function_symbol(a.head()))
+    {
+      auto& f = atermpp::down_cast<data::function_symbol>(a.head());
+      return expressions.find(f);
+    }
+    return expressions.end();
+  }
+
+  bool has_native_definition(const data::function_symbol& f) const
+  {
+    return do_not_define.find(f) != do_not_define.end();
+  }
+
+  bool has_native_definition(const data::application& a) const
+  {
+    if(data::is_function_symbol(a.head()))
+    {
+      auto& f = atermpp::down_cast<data::function_symbol>(a.head());
+      return has_native_definition(f);
+    }
+    return false;
+  }
+
+  bool has_native_definition(const data::data_equation& eq) const
+  {
+    const data::data_expression& lhs = eq.lhs();
+    if(data::is_function_symbol(lhs))
+    {
+      return has_native_definition(atermpp::down_cast<data::function_symbol>(lhs));
+    }
+    else if(data::is_application(lhs) && data::is_function_symbol(atermpp::down_cast<data::application>(lhs).head()))
+    {
+      return has_native_definition(atermpp::down_cast<data::function_symbol>(atermpp::down_cast<data::application>(lhs).head()));
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  /**
+   * \brief Record that the mapping and equations for f should not be translated
+   * \details This translation is either not desired because there is a native Z3
+   * counterpart, or because the function symbol is only used internally.
+   */
+  void set_native_definition(const data::function_symbol& f)
+  {
+    do_not_define.insert(f);
+  }
+
+  void set_native_definition(const data::function_symbol& f, const std::string& s)
+  {
+    symbols[f] = s;
+    do_not_define.insert(f);
+  }
+
+  void set_alternative_name(const data::function_symbol& f, const std::string& s)
+  {
+    symbols[f] = s;
+  }
 };
 
 namespace detail {
@@ -72,111 +142,84 @@ inline
 native_translations initialise_native_translation(const data::data_specification& dataspec)
 {
   using namespace detail;
-  native_translation_map_t symbols;
-  native_translation_map_t expressions;
-  std::map<data::function_symbol, data::data_equation> mappings;
-  std::map<data::sort_expression, std::string> sorts;
+  native_translations nt;
 
-  sorts[data::sort_bool::bool_()] = "Bool";
-  sorts[data::sort_pos::pos()] = "Int";
-  sorts[data::sort_nat::nat()] = "Int";
-  sorts[data::sort_int::int_()] = "Int";
-  sorts[data::sort_real::real_()] = "Real";
+  nt.sorts[data::sort_bool::bool_()] = "Bool";
+  nt.sorts[data::sort_pos::pos()] = "Int";
+  nt.sorts[data::sort_nat::nat()] = "Int";
+  nt.sorts[data::sort_int::int_()] = "Int";
+  nt.sorts[data::sort_real::real_()] = "Real";
 
   for(const data::sort_expression& sort: dataspec.sorts())
   {
     if(data::is_basic_sort(sort))
     {
-      symbols[data::equal_to(sort)] = fixed_string_translation("=");
-      symbols[data::not_equal_to(sort)] = fixed_string_translation("distinct");
-      auto find_result = sorts.find(sort);
-      if(find_result != sorts.end() && find_result->second == "Int")
+      nt.set_native_definition(data::equal_to(sort), "=");
+      nt.set_native_definition(data::not_equal_to(sort), "distinct");
+      auto find_result = nt.sorts.find(sort);
+      if(find_result != nt.sorts.end() && find_result->second == "Int")
       {
-        symbols[data::less(sort)] = pp_translation;
-        symbols[data::less_equal(sort)] = pp_translation;
-        symbols[data::greater(sort)] = pp_translation;
-        symbols[data::greater_equal(sort)] = pp_translation;
+        // Functions <, <=, >, >= are already defined on Int and cannot be overloaded
+        nt.set_native_definition(data::less(sort));
+        nt.set_native_definition(data::less_equal(sort));
+        nt.set_native_definition(data::greater(sort));
+        nt.set_native_definition(data::greater_equal(sort));
       }
       else
       {
-        symbols[data::less(sort)] = fixed_string_translation("@less");
-        symbols[data::less_equal(sort)] = fixed_string_translation("@less_equal");
-        symbols[data::greater(sort)] = fixed_string_translation("@greater");
-        symbols[data::greater_equal(sort)] = fixed_string_translation("@greater_equal");
-        mappings[data::less(sort)] =
-        mappings[data::less_equal(sort)] =
-        mappings[data::greater(sort)] =
-        mappings[data::greater_equal(sort)] =
+        nt.set_alternative_name(data::less(sort), "@less");
+        nt.set_alternative_name(data::less_equal(sort), "@less_equal");
+        nt.set_alternative_name(data::greater(sort), "@greater");
+        nt.set_alternative_name(data::greater_equal(sort), "@greater_equal");
       }
-      symbols[data::if_(sort)] = fixed_string_translation("ite");
+      nt.set_native_definition(data::if_(sort), "ite");
 
-      symbols[data::sort_list::empty(sort)] = fixed_string_translation("nil");
-      symbols[data::sort_list::cons_(sort)] = fixed_string_translation("insert");
-      symbols[data::sort_list::head(sort)] = pp_translation;
-      symbols[data::sort_list::tail(sort)] = pp_translation;
-      sorts[data::sort_list::list(sort)] = "(List " + pp(s) + ")";
+      nt.set_native_definition(data::sort_list::empty(sort), "nil");
+      nt.set_native_definition(data::sort_list::cons_(sort), "insert");
+      nt.set_native_definition(data::sort_list::head(sort));
+      nt.set_native_definition(data::sort_list::tail(sort));
+      nt.sorts[data::sort_list::list(sort)] = "(List " + pp(sort) + ")";
     }
   }
-  symbols[data::sort_bool::not_()] = fixed_string_translation("not");
-  symbols[data::sort_bool::and_()] = fixed_string_translation("and");
-  symbols[data::sort_bool::or_()] = fixed_string_translation("or");
-  symbols[data::sort_bool::implies()] = pp_translation;
+  nt.set_native_definition(data::sort_bool::not_(), "not");
+  nt.set_native_definition(data::sort_bool::and_(), "and");
+  nt.set_native_definition(data::sort_bool::or_(), "or");
+  nt.set_native_definition(data::sort_bool::implies());
 
-  symbols[data::sort_pos::c1()] = pp_translation;
-  expressions[data::sort_pos::cdub()] = pp_translation;
-  symbols[data::sort_nat::c0()] = pp_translation;
-  expressions[data::sort_nat::cnat()] = pp_translation;
-  expressions[data::sort_int::cneg()] = pp_translation;
-  expressions[data::sort_int::cint()] = pp_translation;
-  expressions[data::sort_real::creal()] = pp_real_translation;
+  nt.set_native_definition(data::sort_pos::c1(), pp(data::sort_pos::c1()));
+  nt.set_native_definition(data::sort_nat::c0(), pp(data::sort_nat::c0()));
+  nt.expressions[data::sort_pos::cdub()] = pp_translation;
+  nt.expressions[data::sort_nat::cnat()] = pp_translation;
+  nt.expressions[data::sort_int::cneg()] = pp_translation;
+  nt.expressions[data::sort_int::cint()] = pp_translation;
+  nt.expressions[data::sort_real::creal()] = pp_real_translation;
 
-  symbols[data::sort_nat::pos2nat()] = fixed_string_translation("@id");
-  symbols[data::sort_nat::nat2pos()] = fixed_string_translation("@id");
-  symbols[data::sort_int::pos2int()] = fixed_string_translation("@id");
-  symbols[data::sort_int::int2pos()] = fixed_string_translation("@id");
-  symbols[data::sort_int::nat2int()] = fixed_string_translation("@id");
-  symbols[data::sort_int::int2nat()] = fixed_string_translation("@id");
-  symbols[data::sort_real::pos2real()] = fixed_string_translation("to_real");
-  symbols[data::sort_real::real2pos()] = fixed_string_translation("to_int");
-  symbols[data::sort_real::nat2real()] = fixed_string_translation("to_real");
-  symbols[data::sort_real::real2nat()] = fixed_string_translation("to_int");
-  symbols[data::sort_real::int2real()] = fixed_string_translation("to_real");
-  symbols[data::sort_real::real2int()] = fixed_string_translation("to_int");
+  nt.set_native_definition(data::sort_pos::plus());
+  nt.set_native_definition(data::sort_pos::times());
+
+  nt.set_native_definition(data::sort_nat::pos2nat(), "@id");
+  nt.set_native_definition(data::sort_nat::nat2pos(), "@id");
+  nt.set_native_definition(data::sort_int::pos2int(), "@id");
+  nt.set_native_definition(data::sort_int::int2pos(), "@id");
+  nt.set_native_definition(data::sort_int::nat2int(), "@id");
+  nt.set_native_definition(data::sort_int::int2nat(), "@id");
+  nt.set_native_definition(data::sort_real::pos2real(), "to_real");
+  nt.set_native_definition(data::sort_real::real2pos(), "to_int");
+  nt.set_native_definition(data::sort_real::nat2real(), "to_real");
+  nt.set_native_definition(data::sort_real::real2nat(), "to_int");
+  nt.set_native_definition(data::sort_real::int2real(), "to_real");
+  nt.set_native_definition(data::sort_real::real2int(), "to_int");
 
   data::function_symbol id_int("@id", data::function_sort({data::sort_int::int_()}, data::sort_int::int_()));
   data::function_symbol id_real("@id", data::function_sort({data::sort_real::real_()}, data::sort_real::real_()));
   data::variable vi("i", data::sort_int::int_());
   data::variable vr("r", data::sort_real::real_());
-  mappings[id_int] = data::data_equation(data::variable_list({vi}), vi, vi);
-  mappings[id_real] = data::data_equation(data::variable_list({vr}), vr, vr);
+  nt.mappings[id_int] = data::data_equation(data::variable_list({vi}), vi, vi);
+  nt.mappings[id_real] = data::data_equation(data::variable_list({vr}), vr, vr);
 
-
-  return native_translations(symbols, expressions, mappings, sorts);
+  return nt;
 }
 
-inline
-bool has_native_translation(const data::function_symbol& f, const native_translations& nt)
-{
-  return nt.symbols.find(f) != nt.symbols.end() || nt.expressions.find(f) != nt.expressions.end();
-}
-
-inline
-bool has_native_translation(const data::data_equation& eq, const native_translations& nt)
-{
-  const data::data_expression& lhs = eq.lhs();
-  if(data::is_function_symbol(lhs))
-  {
-    return has_native_translation(atermpp::down_cast<data::function_symbol>(lhs), nt);
-  }
-  else if(data::is_application(lhs) && data::is_function_symbol(atermpp::down_cast<data::application>(lhs).head()))
-  {
-    return has_native_translation(atermpp::down_cast<data::function_symbol>(atermpp::down_cast<data::application>(lhs).head()), nt);
-  }
-  else
-  {
-    return false;
-  }
-}
 
 } // namespace smt
 } // namespace mcrl2
