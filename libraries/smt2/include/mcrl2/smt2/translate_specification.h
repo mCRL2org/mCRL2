@@ -132,9 +132,10 @@ bool is_higher_order(const data::data_equation& eq)
 
 template <typename OutputStream>
 inline
-void translate_mapping(const data::function_symbol& f, OutputStream& out, const native_translations& nt, const std::map<data::structured_sort, std::string>& snm)
+void translate_mapping(const data::function_symbol& f, OutputStream& out, const native_translations& nt,
+                       const std::map<data::structured_sort, std::string>& snm, bool check_native = true)
 {
-  if(is_higher_order(f) || nt.has_native_definition(f))
+  if(is_higher_order(f) || (check_native && nt.has_native_definition(f)))
   {
     return;
   }
@@ -164,15 +165,15 @@ void translate_mapping(const data::function_symbol& f, OutputStream& out, const 
 
 template <typename OutputStream>
 inline
-void translate_equation(const data::data_equation& eq, OutputStream& out, const native_translations& nt)
+void translate_equation(const data::data_equation& eq, OutputStream& out, const native_translations& nt, bool check_native = true)
 {
-  if(is_higher_order(eq) || nt.has_native_definition(eq))
+  if(is_higher_order(eq) || (check_native && nt.has_native_definition(eq)))
   {
     return;
   }
 
   const data::variable_list& vars = eq.variables();
-  data::data_expression body(data::sort_bool::implies(eq.condition(), data::equal_to(eq.lhs(), eq.rhs())));
+  data::data_expression body(data::lazy::implies(eq.condition(), data::equal_to(eq.lhs(), eq.rhs())));
   data::data_expression definition(vars.empty() ? body : data::forall(vars, body));
 
   out << "(assert ";
@@ -227,10 +228,17 @@ void translate_data_specification(const data::data_specification& dataspec, Outp
   {
     detail::translate_mapping(f, o, nt, struct_name_map);
   }
+  for(const auto& f: nt.mappings)
+  {
+    detail::translate_mapping(f.first, o, nt, struct_name_map, false);
+  }
   for(const data::data_equation& eq: dataspec.equations())
   {
-    std::cout << "Translating equation " << eq << std::endl;
     detail::translate_equation(eq, o, nt);
+  }
+  for(const auto& f: nt.mappings)
+  {
+    detail::translate_equation(f.second, o, nt, false);
   }
 }
 
