@@ -100,6 +100,12 @@ struct native_translations
     do_not_define.insert(f);
   }
 
+  void set_native_definition(const data::function_symbol& f, const data::data_equation& eq)
+  {
+    do_not_define.insert(f);
+    mappings[f] = eq;
+  }
+
   void set_native_definition(const data::function_symbol& f, const std::string& s)
   {
     symbols[f] = s;
@@ -150,7 +156,10 @@ native_translations initialise_native_translation(const data::data_specification
   nt.sorts[data::sort_int::int_()] = "Int";
   nt.sorts[data::sort_real::real_()] = "Real";
 
-  for(const data::sort_expression& sort: dataspec.sorts())
+  std::set<data::sort_expression> sorts = dataspec.sorts();
+  sorts.insert(data::sort_int::int_());
+  sorts.insert(data::sort_real::real_());
+  for(const data::sort_expression& sort: sorts)
   {
     if(data::is_basic_sort(sort))
     {
@@ -196,6 +205,13 @@ native_translations initialise_native_translation(const data::data_specification
 
   nt.set_native_definition(data::sort_pos::plus());
   nt.set_native_definition(data::sort_pos::times());
+  // Do not translate the following auxiliary functions
+  nt.set_native_definition(data::sort_pos::pos_predecessor());
+  nt.set_native_definition(data::sort_pos::add_with_carry());
+  nt.set_native_definition(data::sort_pos::powerlog2_pos());
+  data::variable vp("p", data::sort_pos::pos());
+  nt.set_native_definition(data::sort_pos::succ(),
+      data::data_equation(data::variable_list({vp}), data::sort_pos::succ(vp), data::sort_pos::plus(vp, data::sort_pos::c1())));
 
   nt.set_native_definition(data::sort_nat::pos2nat(), "@id");
   nt.set_native_definition(data::sort_nat::nat2pos(), "@id");
@@ -214,8 +230,8 @@ native_translations initialise_native_translation(const data::data_specification
   data::function_symbol id_real("@id", data::function_sort({data::sort_real::real_()}, data::sort_real::real_()));
   data::variable vi("i", data::sort_int::int_());
   data::variable vr("r", data::sort_real::real_());
-  nt.mappings[id_int] = data::data_equation(data::variable_list({vi}), vi, vi);
-  nt.mappings[id_real] = data::data_equation(data::variable_list({vr}), vr, vr);
+  nt.mappings[id_int] = data::data_equation(data::variable_list({vi}), id_int(vi), vi);
+  nt.mappings[id_real] = data::data_equation(data::variable_list({vr}), id_real(vr), vr);
 
   return nt;
 }

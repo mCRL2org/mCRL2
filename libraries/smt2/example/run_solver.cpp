@@ -15,6 +15,7 @@
 #include "mcrl2/smt2/translate_expression.h"
 #include "mcrl2/smt2/translate_specification.h"
 #include "mcrl2/smt2/native_translation.h"
+#include "mcrl2/smt2/solver.h"
 
 #include <vector>
 #include <sstream>
@@ -38,13 +39,15 @@ int main(int /*argc*/, char** /*argv*/)
   smt::native_translations ntm = smt::initialise_native_translation(data_spec);
 
   std::ostringstream out;
-  data::variable vp1("p1", data::sort_pos::pos());
-  data::variable vp2("p2", data::sort_pos::pos());
-  smt::translate_data_expression(data::forall(data::variable_list({vp1}), data::greater_equal(vp1, vp2)), out, ntm);
-  out << "\n\n";
-
   smt::translate_data_specification(data_spec, out, ntm);
   std::cout << out.str() << std::endl;
+
+  smt::smt_solver solv(data_spec);
+  data::variable vp1("p1", data::sort_pos::pos());
+  data::variable vp2("p2", data::sort_pos::pos());
+  bool result = solv.solve(data::variable_list({vp1, vp2}), data::sort_bool::and_(data::equal_to(vp1, data::sort_pos::plus(vp2, data::sort_pos::pos(2))),
+                                                                                  data::equal_to(vp1, data::sort_pos::times(vp2, data::sort_pos::pos(2)))));
+  std::cout << "result " << std::boolalpha << result << std::endl;
 
   return 0;
 }
