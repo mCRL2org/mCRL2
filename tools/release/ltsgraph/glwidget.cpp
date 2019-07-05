@@ -459,10 +459,11 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
         }
       case dm_translate:
         {
-          int dx = e->pos().x() - m_dragstart.x();
-          int dy = e->pos().y() - m_dragstart.y();
-          QVector3D vec3(dx, -dy, 0);
-          camera.center(camera.center() + camera.rotation().conjugated() * vec3);
+          int new_x = e->pos().x();
+          int new_y = e->pos().y();
+          float z = camera.worldToWindow(camera.center()).z();
+          QVector3D translation(camera.windowToWorld(QVector3D(new_x, new_y, z)) - camera.windowToWorld(QVector3D(m_dragstart.x(), m_dragstart.y(), z)));
+          camera.center(camera.center() + translation);
           break;
         }
       case dm_dragnode:
