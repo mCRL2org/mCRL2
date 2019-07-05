@@ -25,7 +25,7 @@ class PersistentFileDialog : QObject
 {
     Q_OBJECT
 public:
-    explicit PersistentFileDialog(QString directory = QString(), QWidget *parent = 0);
+    explicit PersistentFileDialog(QString directory = QString(), QWidget *parent = nullptr);
 
     QString	getExistingDirectory  ( const QString & caption = QString(), QFileDialog::Options options = QFileDialog::ShowDirsOnly );
     QString	getOpenFileName       ( const QString & caption = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0 );

@@ -45,11 +45,13 @@ static QVector3D arcballVector(const QPoint& p)
     float len = std::sqrt(squared);
     if (std::isnormal(len))
     {
-      x /= len, y /= len;
+      x /= len;
+      y /= len;
     }
     else
     {
-      x = 0.0f, y = 0.0f;
+      x = 0.0f;
+      y = 0.0f;
     }
     z = 0.0f;
   }

@@ -26,7 +26,7 @@ class NumberedTextEdit : public QTextEdit
 {
     Q_OBJECT
 public:
-    explicit NumberedTextEdit(QWidget *parent = 0);
+    explicit NumberedTextEdit(QWidget *parent = nullptr);
 
     int lineNumberAreaWidth();
     void lineNumberAreaPaintEvent(QPaintEvent* event);

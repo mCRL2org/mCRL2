@@ -30,7 +30,7 @@ public:
      * @brief Constructor
      * @param parent The parent QWidget for the tabwidget
      */
-    explicit ExtendedTabWidget(QWidget *parent = 0);
+    explicit ExtendedTabWidget(QWidget *parent = nullptr);
 
     /**
      * @brief Used to create context menu for tabbar
