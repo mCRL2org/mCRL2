@@ -36,9 +36,8 @@
 #include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/smt/solver.h"
-#include "mcrl2/smt/translation_error.h"
-#include "mcrl2/smt/cvc4.h"
+#include "mcrl2/smt2/solver.h"
+#include "mcrl2/smt2/translation_error.h"
 #include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -119,7 +118,7 @@ protected:
   std::list<data_expression>      partition;
   bool                           m_contains_reals;
   simplifier*                    simpl;
-  smt::solver                    m_smt_solver;
+  smt::smt_solver                m_smt_solver;
 
   typedef std::unordered_set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache_t;
   refinement_cache_t refinement_cache;
@@ -541,19 +540,14 @@ protected:
 
   bool is_satisfiable(const variable_list& vars, const data_expression& expr)
   {
-    smt::smt_problem problem;
-    for(const variable& v: vars)
-    {
-      problem.add_variable(v);
-    }
-    problem.add_assertion(expr);
     try
     {
-      return m_smt_solver.solve(problem);
+      return m_smt_solver.solve(vars, expr);
     }
     catch(const smt::translation_error& e)
     {
       mCRL2log(log::warning) << e.what() << std::endl;
+      throw mcrl2::runtime_error("Solver failed!");
     }
 
     // The SMT solver failed, so we fallback to the rewriter
@@ -786,7 +780,7 @@ public:
 #endif
     , m_contains_reals(std::find_if(m_spec.process().process_parameters().begin(), m_spec.process().process_parameters().end(),[](const variable& v){ return v.sort() == sort_real::real_(); }) != m_spec.process().process_parameters().end())
     , simpl(get_simplifier_instance(simplify_strat, rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data()))
-    , m_smt_solver(new smt::smt4_data_specification(spec.data()))
+    , m_smt_solver(spec.data())
   {}
 
   void run()
