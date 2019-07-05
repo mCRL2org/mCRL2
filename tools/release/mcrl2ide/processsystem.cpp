@@ -182,7 +182,7 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
                                           int processid, int subprocessIndex,
                                           const QString& propertyName,
                                           bool evidence,
-                                          mcrl2::lts::lts_equivalence reduction)
+                                          mcrl2::lts::lts_equivalence equivalence)
 {
   QProcess* subprocess = new QProcess();
   ProcessType processType = processTypes[processid];
@@ -266,9 +266,9 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
 
   case SubprocessType::Lps2lts:
     program = "lps2lts";
-    inputFile = fileSystem->lpsFilePath(evidence, propertyName);
+    inputFile = fileSystem->lpsFilePath(propertyName, evidence);
     outputFile = fileSystem->ltsFilePath(
-        mcrl2::lts::lts_equivalence::lts_eq_none, evidence, propertyName);
+        mcrl2::lts::lts_equivalence::lts_eq_none, propertyName, evidence);
     arguments << inputFile << outputFile << "--rewriter=jitty"
               << "--strategy=breadth"
               << "--verbose";
@@ -277,16 +277,16 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
   case SubprocessType::Ltsconvert:
     program = "ltsconvert";
     inputFile = fileSystem->ltsFilePath();
-    outputFile = fileSystem->ltsFilePath(reduction);
+    outputFile = fileSystem->ltsFilePath(equivalence);
     arguments << inputFile << outputFile << "--verbose"
               << "--equivalence=" +
                      QString::fromStdString(
-                         mcrl2::lts::print_equivalence(reduction));
+                         mcrl2::lts::print_equivalence(equivalence));
     break;
 
   case SubprocessType::Ltsgraph:
     program = "ltsgraph";
-    inputFile = fileSystem->ltsFilePath(reduction, evidence, propertyName);
+    inputFile = fileSystem->ltsFilePath(equivalence, propertyName, evidence);
     arguments << inputFile;
     break;
 
@@ -320,7 +320,7 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
     if (evidence)
     {
       inputFile2 = fileSystem->lpsFilePath();
-      outputFile = fileSystem->lpsFilePath(evidence, propertyName);
+      outputFile = fileSystem->lpsFilePath(propertyName, evidence);
       arguments << "--file=" + inputFile2 << "--evidence-file=" + outputFile;
     }
     else

@@ -19,10 +19,10 @@ EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
    *   use of abstraction */
   QStringList items;
   int secondSeparatorIndex = 2;
-  items << "----- CHOOSE REDUCTION -----"
+  items << "----- CHOOSE EQUIVALENCE -----"
         << "--- WITHOUT ABSTRACTION ---";
   for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
-       LTSREDUCTIONINFO)
+       LTSEQUIVALENCEINFO)
   {
     if (!item.second.second &&
         item.first != mcrl2::lts::lts_equivalence::lts_eq_none)
@@ -34,7 +34,7 @@ EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
 
   items << "--- WITH ABSTRACTION ---";
   for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
-       LTSREDUCTIONINFO)
+       LTSEQUIVALENCEINFO)
   {
     if (item.second.second)
     {

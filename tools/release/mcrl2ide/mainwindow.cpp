@@ -446,16 +446,6 @@ void MainWindow::actionShowReducedLts()
     }
     else
     {
-      QStringList reductionNames;
-      for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
-               item : LTSREDUCTIONINFO)
-      {
-        if (item.first != mcrl2::lts::lts_equivalence::lts_eq_none)
-        {
-          reductionNames << item.second.first;
-        }
-      }
-
       /* create a dialog for asking the user what reduction to use */
       QDialog reductionDialog(this, Qt::WindowCloseButtonHint);
       QVBoxLayout vbox;
@@ -480,7 +470,7 @@ void MainWindow::actionShowReducedLts()
         mcrl2::lts::lts_equivalence reduction =
             mcrl2::lts::lts_equivalence::lts_eq_none;
         for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
-                 item : LTSREDUCTIONINFO)
+                 item : LTSEQUIVALENCEINFO)
         {
           if (item.second.first == selectedReduction)
           {

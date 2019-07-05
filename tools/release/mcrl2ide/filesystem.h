@@ -22,11 +22,11 @@
 #include <QDateTime>
 #include <QDomDocument>
 
-/* contains some extra info for lts reductions:
- *   - the name of the reduction
- *   - whether this reduction makes use of abstraction */
+/* contains some extra info for lts equivalences:
+ *   - the name of the equivalences
+ *   - whether this equivalence makes use of abstraction */
 const std::map<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
-    LTSREDUCTIONINFO = {
+    LTSEQUIVALENCEINFO = {
         {mcrl2::lts::lts_equivalence::lts_eq_none,
          std::pair<QString, bool>("None", false)},
         {mcrl2::lts::lts_equivalence::lts_eq_bisim,
@@ -148,28 +148,30 @@ class FileSystem : public QObject
 
   /**
    * @brief specificationFilePath Defines the file path of a specification
+   * @param propertyName The property name in case this is a generated
+   *   specification to compare against
    * @return The file path of the specification
    */
-  QString specificationFilePath();
+  QString specificationFilePath(const QString& propertyName = "");
 
   /**
    * @brief lpsFilePath Defines the file path of a lps
-   * @param evidence Whether this is an evidence lps
    * @param propertyName The property name in case this is an evindence lps
+   * @param evidence Whether this is an evidence lps
    * @return The file path of the lps
    */
-  QString lpsFilePath(bool evidence = false, const QString& propertyName = "");
+  QString lpsFilePath(const QString& propertyName = "", bool evidence = false);
 
   /**
    * @brief ltsFilePath Defines the file path of a lts
-   * @param reduction The reduction applied to the lts
-   * @param evidence Whether this is an evidence lts
+   * @param equivalence The equivalence reduction applied to the lts
    * @param propertyName The property name in case this is an evindence lts
+   * @param evidence Whether this is an evidence lts
    * @return The file path of the lts
    */
-  QString ltsFilePath(mcrl2::lts::lts_equivalence reduction =
+  QString ltsFilePath(mcrl2::lts::lts_equivalence equivalence =
                           mcrl2::lts::lts_equivalence::lts_eq_none,
-                      bool evidence = false, const QString& propertyName = "");
+                      const QString& propertyName = "", bool evidence = false);
 
   /**
    * @brief propertyFilePath Defines the file path of a property
@@ -284,17 +286,17 @@ class FileSystem : public QObject
    *   new project if the specification has been modified
    * @param forNewProject Whether this is done for "New Project" or "Save
    *   Project As"
-   * @return Whether creating a new project was successfull
+   * @return Whether creating a new project was successful
    */
   bool newProject(bool askToSave = true, bool forNewProject = true);
 
   /**
    * @brief loadSpecification Loads the specification from its file and puts it
    *   in the editor
-   * @param loadSpecFilePath The path to the specification (optional)
+   * @param specPath The path to the specification (optional)
    * @return Whether the specification file could be found
    */
-  bool loadSpecification(QString loadSpecFilePath = "");
+  bool loadSpecification(QString specPath = "");
 
   /**
    * @brief openProjectFromArgument Opens a project from the input argument
@@ -345,13 +347,13 @@ class FileSystem : public QObject
    * @brief save Saves the project to file
    * @param forceSave Whether the files should be saved even if they have not
    *   been modified
-   * @return Whether saving was successfull
+   * @return Whether saving was successful
    */
   bool save(bool forceSave = false);
 
   /**
    * @brief saveAs Saves the project to file under a new name
-   * @return Whether saving was successfull
+   * @return Whether saving was successful
    */
   bool saveAs();
 
@@ -368,7 +370,7 @@ class FileSystem : public QObject
   void openProjectFolderInExplorer();
 
   /**
-   * @brief clearTemporaryFolder Removes the tomporary folder and its contents
+   * @brief clearTemporaryFolder Removes the temporary folder and its contents
    */
   void removeTemporaryFolder();
 
@@ -476,9 +478,19 @@ class FileSystem : public QObject
    * @param oldFormat The contents of the project file in the old format
    * @return The new format
    */
-  QDomDocument convertProjectFileToNewFormat(QString newProjectFolderPath,
-                                             QString newProjectFilePath,
-                                             QString oldFormat);
+  QDomDocument
+  convertProjectFileToNewFormat(const QString& newProjectFolderPath,
+                                const QString& newProjectFilePath,
+                                const QString& oldFormat);
+
+  /**
+   * @brief readSpecification Reads the contents of a specification
+   * @param specPath The file path of the specification; picks the currently
+   *   opened specification if empty
+   * @return The contents of the specification if successful, the empty string
+   *   otherwise
+   */
+  QString readSpecification(QString specPath = "");
 
   /**
    * @brief readPropertyFromFile Reads a property from a file

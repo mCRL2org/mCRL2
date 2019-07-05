@@ -111,32 +111,42 @@ QString FileSystem::defaultSpecificationFilePath()
   return projectFolderPath + QDir::separator() + projectName + "_spec.mcrl2";
 }
 
-QString FileSystem::specificationFilePath()
+QString FileSystem::specificationFilePath(const QString& propertyName)
 {
+  QString path = "";
   if (specFilePath.isEmpty())
   {
-    return defaultSpecificationFilePath();
+    path = defaultSpecificationFilePath();
   }
   else
   {
-    return specFilePath;
+    path = specFilePath;
   }
+
+  if (!propertyName.isEmpty())
+  {
+    path = path.insert(path.size() - 6, "_" + propertyName);
+  }
+
+  return path;
 }
 
-QString FileSystem::lpsFilePath(bool evidence, const QString& propertyName)
+QString FileSystem::lpsFilePath(const QString& propertyName, bool evidence)
 {
   return intermediateFilesFolderPath(IntermediateFileType::Lps) +
          QDir::separator() + projectName +
-         (evidence ? "_" + propertyName + "_evidence" : "") + "_lps.lps";
+         (propertyName.isEmpty() ? "" : "_" + propertyName) +
+         (evidence ? "_evidence" : "") + "_lps.lps";
 }
 
-QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence reduction,
-                                bool evidence, const QString& propertyName)
+QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
+                                const QString& propertyName, bool evidence)
 {
   return intermediateFilesFolderPath(IntermediateFileType::Lts) +
          QDir::separator() + projectName +
-         (evidence ? "_" + propertyName + "_evidence" : "") + "_lts_" +
-         QString(LTSREDUCTIONINFO.at(reduction).first).replace(' ', '_') +
+         (propertyName.isEmpty() ? "" : "_" + propertyName) +
+         (evidence ? "_evidence" : "") + "_lts_" +
+         QString(LTSEQUIVALENCEINFO.at(equivalence).first).replace(' ', '_') +
          ".lts";
 }
 
@@ -344,8 +354,10 @@ void FileSystem::updateProjectFile()
   projectFile.close();
 }
 
-QDomDocument FileSystem::convertProjectFileToNewFormat(
-    QString newProjectFolderPath, QString newProjectFilePath, QString oldFormat)
+QDomDocument
+FileSystem::convertProjectFileToNewFormat(const QString& newProjectFolderPath,
+                                          const QString& newProjectFilePath,
+                                          const QString& oldFormat)
 {
   /* notify the user of the conversion */
   QMessageBox msgBox(QMessageBox::Information, "Open Project",
@@ -487,21 +499,34 @@ bool FileSystem::newProject(bool askToSave, bool forNewProject)
   return success;
 }
 
-bool FileSystem::loadSpecification(QString loadSpecFilePath)
+QString FileSystem::readSpecification(QString specPath)
 {
-  if (loadSpecFilePath.isEmpty())
+  if (specPath.isEmpty())
   {
-    loadSpecFilePath = specificationFilePath();
+    specPath = specificationFilePath();
   }
-  QFile specificationFile(loadSpecFilePath);
+  QFile specificationFile(specPath);
   if (specificationFile.exists())
   {
-    specFilePath = loadSpecFilePath;
+    specFilePath = specPath;
     specificationFile.open(QIODevice::ReadOnly);
     QTextStream specificationOpenStream(&specificationFile);
     QString spec = specificationOpenStream.readAll();
-    specificationEditor->setPlainText(spec);
     specificationFile.close();
+    return spec;
+  }
+  else
+  {
+    return "";
+  }
+}
+
+bool FileSystem::loadSpecification(QString specPath)
+{
+  QString spec = readSpecification(specPath);
+  if (!spec.isEmpty())
+  {
+    specificationEditor->setPlainText(spec);
     specificationModified = false;
     updateSpecificationModificationTime();
     return true;
