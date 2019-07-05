@@ -25,9 +25,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 enable_testing()
 
-# TODO: Remove DEB-dependency on compiler (g++/clang). Instead let mcrl2compilerewriter report a user-friendly error message if no compiler can be found.
-# TODO: Remove trace library (to LPS? or LTS?)
-
 if(APPLE)
   # Lower versions of Qt do not support native menu's correctly on Apple.
   # To use a lower version replace set window->menuBar()->setNativeMenuBar(true)
