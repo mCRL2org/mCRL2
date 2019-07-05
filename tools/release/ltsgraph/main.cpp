@@ -49,6 +49,21 @@ class ltsgraph_tool : public ltsgraph_base
 
     bool run() override
     {
+      QVersionNumber runtime_version = QVersionNumber::fromString(qVersion());
+      QVersionNumber required_version(5,9,0);
+
+      if (QVersionNumber::compare(required_version, runtime_version) > 0)
+      {
+        // Check if the required version is above the currently used version.
+        std::stringstream message;
+
+        message << "Your version of Qt (" << runtime_version.toString().toStdString() << ") is below the minimally supported version of Qt ("
+          << required_version.toString().toStdString() << ") and might lead to instabilities.";
+
+        QMessageBox box(QMessageBox::Warning, "Unsupported Qt Version", message.str().c_str(), QMessageBox::Ok);
+        box.exec();
+      }
+
       MainWindow window;
 
       if (!m_input_filename.empty())
