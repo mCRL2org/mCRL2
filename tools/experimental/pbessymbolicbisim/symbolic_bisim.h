@@ -29,6 +29,46 @@ namespace mcrl2
 namespace data
 {
 
+inline
+std::set<pbes_system::structure_graph::index_type> find_counter_example_nodes(pbes_system::structure_graph& G, pbes_system::structure_graph::index_type init, bool is_disjunctive)
+{
+  using utilities::detail::contains;
+
+  typedef pbes_system::structure_graph::vertex vertex;
+  std::vector<const vertex*> result;
+
+  std::set<pbes_system::structure_graph::index_type> todo = { init };
+  std::set<pbes_system::structure_graph::index_type> done;
+  while (!todo.empty())
+  {
+    pbes_system::structure_graph::index_type u = *todo.begin();
+    todo.erase(todo.begin());
+    done.insert(u);
+    if ((is_disjunctive && G.decoration(u) == pbes_system::structure_graph::d_disjunction) || (!is_disjunctive && G.decoration(u) == pbes_system::structure_graph::d_conjunction))
+    {
+      // explore only the strategy edge
+      pbes_system::structure_graph::index_type v = G.strategy(u);
+      assert (v != pbes_system::structure_graph::undefined_vertex);
+      if (!contains(done, v))
+      {
+        todo.insert(v);
+      }
+    }
+    else
+    {
+      // explore all outgoing edges
+      for (pbes_system::structure_graph::index_type v: G.successors(u))
+      {
+        if (!contains(done, v))
+        {
+          todo.insert(v);
+        }
+      }
+    }
+  }
+  return done;
+}
+
 class symbolic_bisim_algorithm
 {
   typedef rewriter::substitution_type substitution_t;
