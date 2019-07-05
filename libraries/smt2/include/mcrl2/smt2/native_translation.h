@@ -148,90 +148,154 @@ inline
 native_translations initialise_native_translation(const data::data_specification& dataspec)
 {
   using namespace detail;
+  using namespace data;
   native_translations nt;
 
-  nt.sorts[data::sort_bool::bool_()] = "Bool";
-  nt.sorts[data::sort_pos::pos()] = "Int";
-  nt.sorts[data::sort_nat::nat()] = "Int";
-  nt.sorts[data::sort_int::int_()] = "Int";
-  nt.sorts[data::sort_real::real_()] = "Real";
+  nt.sorts[sort_bool::bool_()] = "Bool";
+  nt.sorts[sort_pos::pos()] = "Int";
+  nt.sorts[sort_nat::nat()] = "Int";
+  nt.sorts[sort_int::int_()] = "Int";
+  nt.sorts[sort_real::real_()] = "Real";
 
-  std::set<data::sort_expression> sorts = dataspec.sorts();
-  sorts.insert(data::sort_int::int_());
-  sorts.insert(data::sort_real::real_());
-  for(const data::sort_expression& sort: sorts)
+  std::set<sort_expression> sorts = dataspec.sorts();
+  std::vector<sort_expression> number_sorts({ sort_pos::pos(), sort_nat::nat(), sort_int::int_(), sort_real::real_() });
+  for(const sort_expression& sort: sorts)
   {
-    if(data::is_basic_sort(sort))
+    if(is_basic_sort(sort))
     {
-      nt.set_native_definition(data::equal_to(sort), "=");
-      nt.set_native_definition(data::not_equal_to(sort), "distinct");
-      auto find_result = nt.sorts.find(sort);
-      if(find_result != nt.sorts.end() && find_result->second == "Int")
+      nt.set_native_definition(equal_to(sort), "=");
+      nt.set_native_definition(not_equal_to(sort), "distinct");
+      if(std::find(number_sorts.begin(), number_sorts.end(), sort) != number_sorts.end())
       {
-        // Functions <, <=, >, >= are already defined on Int and cannot be overloaded
-        nt.set_native_definition(data::less(sort));
-        nt.set_native_definition(data::less_equal(sort));
-        nt.set_native_definition(data::greater(sort));
-        nt.set_native_definition(data::greater_equal(sort));
+        nt.set_native_definition(less(sort));
+        nt.set_native_definition(less_equal(sort));
+        nt.set_native_definition(greater(sort));
+        nt.set_native_definition(greater_equal(sort));
+        nt.set_alternative_name(sort_real::exp(sort, sort == sort_real::real_() ? sort_int::int_() : sort_nat::nat()), "^");
+        nt.set_alternative_name(sort_real::minus(sort, sort), "-");
+        nt.set_alternative_name(sort_real::negate(sort), "-");
+      }
+      else if(sort == basic_sort("@NatPair"))
+      {
+        // NatPair is not used and its equations upset Z3
+        nt.set_native_definition(less(sort));
+        nt.set_native_definition(less_equal(sort));
+        nt.set_native_definition(greater(sort));
+        nt.set_native_definition(greater_equal(sort));
       }
       else
       {
-        nt.set_alternative_name(data::less(sort), "@less");
-        nt.set_alternative_name(data::less_equal(sort), "@less_equal");
-        nt.set_alternative_name(data::greater(sort), "@greater");
-        nt.set_alternative_name(data::greater_equal(sort), "@greater_equal");
+        // Functions <, <=, >, >= are already defined on Int/Real and cannot be overloaded
+        nt.set_alternative_name(less(sort), "@less");
+        nt.set_alternative_name(less_equal(sort), "@less_equal");
+        nt.set_alternative_name(greater(sort), "@greater");
+        nt.set_alternative_name(greater_equal(sort), "@greater_equal");
       }
-      nt.set_native_definition(data::if_(sort), "ite");
+      nt.set_native_definition(if_(sort), "ite");
 
-      nt.set_native_definition(data::sort_list::empty(sort), "nil");
-      nt.set_native_definition(data::sort_list::cons_(sort), "insert");
-      nt.set_native_definition(data::sort_list::head(sort));
-      nt.set_native_definition(data::sort_list::tail(sort));
-      nt.sorts[data::sort_list::list(sort)] = "(List " + pp(sort) + ")";
+      nt.set_native_definition(sort_list::empty(sort), "nil");
+      nt.set_native_definition(sort_list::cons_(sort), "insert");
+      nt.set_native_definition(sort_list::head(sort));
+      nt.set_native_definition(sort_list::tail(sort));
+      nt.sorts[sort_list::list(sort)] = "(List " + (nt.sorts.find(sort) != nt.sorts.end() ? nt.sorts.find(sort)->second : pp(sort)) + ")";
     }
   }
-  nt.set_native_definition(data::sort_bool::not_(), "not");
-  nt.set_native_definition(data::sort_bool::and_(), "and");
-  nt.set_native_definition(data::sort_bool::or_(), "or");
-  nt.set_native_definition(data::sort_bool::implies());
 
-  nt.set_native_definition(data::sort_pos::c1(), pp(data::sort_pos::c1()));
-  nt.set_native_definition(data::sort_nat::c0(), pp(data::sort_nat::c0()));
-  nt.expressions[data::sort_pos::cdub()] = pp_translation;
-  nt.expressions[data::sort_nat::cnat()] = pp_translation;
-  nt.expressions[data::sort_int::cneg()] = pp_translation;
-  nt.expressions[data::sort_int::cint()] = pp_translation;
-  nt.expressions[data::sort_real::creal()] = pp_real_translation;
+  std::vector<function_symbol_vector> fs_numbers(
+    {
+      sort_pos::pos_generate_functions_code(),
+      sort_nat::nat_generate_functions_code(),
+      sort_int::int_generate_functions_code(),
+      sort_real::real_generate_functions_code()
+    }
+  );
+  for(const auto& fsv: fs_numbers)
+  {
+    for(const auto& fs: fsv)
+    {
+      nt.set_native_definition(fs);
+    }
+  }
 
-  nt.set_native_definition(data::sort_pos::plus());
-  nt.set_native_definition(data::sort_pos::times());
-  // Do not translate the following auxiliary functions
-  nt.set_native_definition(data::sort_pos::pos_predecessor());
-  nt.set_native_definition(data::sort_pos::add_with_carry());
-  nt.set_native_definition(data::sort_pos::powerlog2_pos());
-  data::variable vp("p", data::sort_pos::pos());
-  nt.set_native_definition(data::sort_pos::succ(),
-      data::data_equation(data::variable_list({vp}), data::sort_pos::succ(vp), data::sort_pos::plus(vp, data::sort_pos::c1())));
+  auto one = [](const sort_expression& s)
+  {
+    return s == sort_int::int_() ? sort_int::int_(1) : sort_real::real_(1);
+  };
+  for(const sort_expression& s: { sort_int::int_(), sort_real::real_() })
+  {
+    variable v1("v1", s);
+    variable v2("v2", s);
+    variable_list l1({v1});
+    variable_list l2({v1,v2});
+    nt.mappings[sort_real::minimum(s,s)] = data_equation(l2, sort_real::minimum(v1, v2), if_(less(v1,v2), v1, v2));
+    nt.mappings[sort_real::maximum(s,s)] = data_equation(l2, sort_real::maximum(v1, v2), if_(less(v1,v2), v2, v1));
+    nt.mappings[sort_real::succ(s)] = data_equation(l1, sort_real::succ(v1), sort_real::plus(v1, one(s)));
+    nt.mappings[sort_real::pred(s)] = data_equation(l1, sort_real::pred(v1), sort_real::minus(v1, one(s)));
+  }
+  // TODO come up with equations for these
+  // nt.mappings[sort_real::floor(s)]
+  // nt.mappings[sort_real::ceil(s)]
+  // nt.mappings[sort_real::round(s)]
 
-  nt.set_native_definition(data::sort_nat::pos2nat(), "@id");
-  nt.set_native_definition(data::sort_nat::nat2pos(), "@id");
-  nt.set_native_definition(data::sort_int::pos2int(), "@id");
-  nt.set_native_definition(data::sort_int::int2pos(), "@id");
-  nt.set_native_definition(data::sort_int::nat2int(), "@id");
-  nt.set_native_definition(data::sort_int::int2nat(), "@id");
-  nt.set_native_definition(data::sort_real::pos2real(), "to_real");
-  nt.set_native_definition(data::sort_real::real2pos(), "to_int");
-  nt.set_native_definition(data::sort_real::nat2real(), "to_real");
-  nt.set_native_definition(data::sort_real::real2nat(), "to_int");
-  nt.set_native_definition(data::sort_real::int2real(), "to_real");
-  nt.set_native_definition(data::sort_real::real2int(), "to_int");
 
-  data::function_symbol id_int("@id", data::function_sort({data::sort_int::int_()}, data::sort_int::int_()));
-  data::function_symbol id_real("@id", data::function_sort({data::sort_real::real_()}, data::sort_real::real_()));
-  data::variable vi("i", data::sort_int::int_());
-  data::variable vr("r", data::sort_real::real_());
-  nt.mappings[id_int] = data::data_equation(data::variable_list({vi}), id_int(vi), vi);
-  nt.mappings[id_real] = data::data_equation(data::variable_list({vr}), id_real(vr), vr);
+  // for(const sort_expression& s1: number_sorts)
+  // {
+  //   nt.set_native_definition(sort_real::minus(s1,s1));
+  //   nt.set_native_definition(sort_real::times(s1,s1));
+  //   nt.set_native_definition(sort_real::divides(s1,s1));
+  //   for(const sort_expression& s2: number_sorts)
+  //   {
+  //     // not all combinations are allowed; ignore exception when necessary
+  //     try { nt.set_native_definition(sort_real::plus(s1,s2)); } catch (const mcrl2::runtime_error&) {}
+  //     try { nt.set_native_definition(sort_real::minus(s1,s2)); } catch (const mcrl2::runtime_error&) {}
+  //   }
+  // }
+  nt.set_native_definition(sort_bool::not_(), "not");
+  nt.set_native_definition(sort_bool::and_(), "and");
+  nt.set_native_definition(sort_bool::or_(), "or");
+  nt.set_native_definition(sort_bool::implies());
+
+  nt.set_native_definition(sort_pos::c1(), pp(sort_pos::c1()));
+  nt.set_native_definition(sort_nat::c0(), pp(sort_nat::c0()));
+  nt.expressions[sort_pos::cdub()] = pp_translation;
+  nt.expressions[sort_nat::cnat()] = pp_translation;
+  nt.expressions[sort_int::cneg()] = pp_translation;
+  nt.expressions[sort_int::cint()] = pp_translation;
+  nt.expressions[sort_real::creal()] = pp_real_translation;
+  nt.set_native_definition(sort_real::creal());
+
+  // nt.set_native_definition(sort_pos::plus());
+  // nt.set_native_definition(sort_pos::times());
+  // // Do not translate the following auxiliary functions
+  // nt.set_native_definition(sort_pos::pos_predecessor());
+  // nt.set_native_definition(sort_pos::add_with_carry());
+  // nt.set_native_definition(sort_pos::powerlog2_pos());
+  // variable vp("p", sort_pos::pos());
+  // nt.set_native_definition(sort_pos::succ(),
+  //     data_equation(variable_list({vp}), sort_pos::succ(vp), sort_pos::plus(vp, sort_pos::c1())));
+
+  nt.set_native_definition(sort_nat::pos2nat(), "@id");
+  nt.set_native_definition(sort_nat::nat2pos(), "@id");
+  nt.set_native_definition(sort_int::pos2int(), "@id");
+  nt.set_native_definition(sort_int::int2pos(), "@id");
+  nt.set_native_definition(sort_int::nat2int(), "@id");
+  nt.set_native_definition(sort_int::int2nat(), "@id");
+  nt.set_native_definition(sort_real::pos2real(), "to_real");
+  nt.set_native_definition(sort_real::real2pos(), "to_int");
+  nt.set_native_definition(sort_real::nat2real(), "to_real");
+  nt.set_native_definition(sort_real::real2nat(), "to_int");
+  nt.set_native_definition(sort_real::int2real(), "to_real");
+  nt.set_native_definition(sort_real::real2int(), "to_int");
+
+  function_symbol id_int("@id", function_sort({sort_int::int_()}, sort_int::int_()));
+  function_symbol id_real("@id", function_sort({sort_real::real_()}, sort_real::real_()));
+  variable vi("i", sort_int::int_());
+  variable vr("r", sort_real::real_());
+  nt.mappings[id_int] = data_equation(variable_list({vi}), id_int(vi), vi);
+  nt.mappings[id_real] = data_equation(variable_list({vr}), id_real(vr), vr);
+  // necessary for translating the two equations above
+  nt.set_native_definition(equal_to(sort_int::int_()), "=");
+  nt.set_native_definition(equal_to(sort_real::real_()), "=");
 
   return nt;
 }

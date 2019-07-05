@@ -290,6 +290,7 @@ public:
     initialize_solver();
     std::ostringstream out;
     translate_data_specification(dataspec, out, m_native);
+    mCRL2log(log::debug) << out.str() << std::endl;
     execute(out.str());
   }
 
@@ -306,6 +307,7 @@ public:
 
     int return_status;
     ::wait(&return_status);
+    std::cout << "Cleaned up solver" << std::endl;
 #endif
   }
 
@@ -316,6 +318,7 @@ public:
     translate_variable_declaration(vars, out, m_native);
     translate_assertion(expr, out, m_native);
     out << "(check-sat)\n";
+    mCRL2log(log::debug) << out.str() << std::endl;
     bool result = execute_and_check(out.str());
     execute("(pop)\n");
     return result;

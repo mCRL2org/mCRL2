@@ -49,7 +49,7 @@ void translate_sort_definition(const std::string& sort_name,
       const data::function_sort& cs = atermpp::down_cast<data::function_sort>(cons.sort());
       for(const data::sort_expression& arg: cs.domain())
       {
-        out << "(" << id_gen("@recog") << " ";
+        out << "(" << id_gen("@projectionf") << " ";
         translate_sort_expression(arg, out, nt, struct_name_map);
         out << ") ";
       }
