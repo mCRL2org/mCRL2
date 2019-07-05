@@ -176,6 +176,31 @@ void fatal_attractors(const simple_structure_graph& G,
     }
     detail::log_vertex_set(X, "X (final value)");
 
+    // set strategy for v \in (U_j \cap X) \ S_alpha
+    for (structure_graph::index_type v: U_j.vertices())
+    {
+      if (!X.contains(v) || S_alpha.contains(v))
+      {
+        continue;
+      }
+      if ((alpha == 0 && G.decoration(v) == structure_graph::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::d_conjunction))
+      {
+        for (auto w: G.successors(v))
+        {
+          if ((Y.contains(w)))
+          {
+            mCRL2log(log::debug) << "set strategy for node " << v << " to " << w << std::endl;
+            G.find_vertex(v).strategy = w;
+            break;
+          }
+        }
+        if (G.strategy(v) == structure_graph::undefined_vertex)
+        {
+          mCRL2log(log::debug) << "Error: no strategy for node " << v << std::endl;
+        }
+      }
+    }
+
     for (structure_graph::index_type x: X.vertices())
     {
       insertion_count++;
@@ -284,6 +309,31 @@ void fatal_attractors_original(const simple_structure_graph& G,
       mCRL2log(log::debug) << "U_" + std::to_string(j) << " is " << (is_subset_of(U_j, Y) ? "a" : "no") << " subset of Y" << std::endl;
       if (is_subset_of(U_j, Y))
       {
+        // set strategy for v \in U_j \ S_alpha
+        for (structure_graph::index_type v: U_j.vertices())
+        {
+          if (S_alpha.contains(v))
+          {
+            continue;
+          }
+          if ((alpha == 0 && G.decoration(v) == structure_graph::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::d_conjunction))
+          {
+            for (auto w: G.successors(v))
+            {
+              if ((Y.contains(w)))
+              {
+                mCRL2log(log::debug) << "set strategy for node " << v << " to " << w << std::endl;
+                G.find_vertex(v).strategy = w;
+                break;
+              }
+            }
+            if (G.strategy(v) == structure_graph::undefined_vertex)
+            {
+              mCRL2log(log::debug) << "Error: no strategy for node " << v << std::endl;
+            }
+          }
+        }
+
         for (structure_graph::index_type y: Y.vertices())
         {
           insertion_count++;

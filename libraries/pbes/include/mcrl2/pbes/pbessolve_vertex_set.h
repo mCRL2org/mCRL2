@@ -343,6 +343,46 @@ void log_vertex_set(const vertex_set& V, const std::string& name)
 
 } // namespace detail
 
+template <typename StructureGraph>
+std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureGraph& G, typename StructureGraph::index_type init, const vertex_set& S0, const vertex_set& S1)
+{
+  using utilities::detail::contains;
+
+  typedef structure_graph::vertex vertex;
+  std::vector<const vertex*> result;
+
+  std::set<structure_graph::index_type> todo = { init };
+  std::set<structure_graph::index_type> done;
+  while (!todo.empty())
+  {
+    structure_graph::index_type u = *todo.begin();
+    todo.erase(todo.begin());
+    done.insert(u);
+    if ((S0.contains(u) && G.decoration(u) == structure_graph::d_disjunction) || (S1.contains(u) && G.decoration(u) == structure_graph::d_conjunction))
+    {
+      // explore only the strategy edge
+      structure_graph::index_type v = G.strategy(u);
+      assert (v != structure_graph::undefined_vertex);
+      if (!contains(done, v))
+      {
+        todo.insert(v);
+      }
+    }
+    else
+    {
+      // explore all outgoing edges
+      for (structure_graph::index_type v: G.successors(u))
+      {
+        if (!contains(done, v))
+        {
+          todo.insert(v);
+        }
+      }
+    }
+  }
+  return done;
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

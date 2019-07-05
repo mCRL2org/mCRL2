@@ -174,16 +174,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
     }
 
-    void compute_attractor_set_S0(const simple_structure_graph& G)
-    {
-      S0 = attr_default(G, S0, 0);
-    }
-
-    void compute_attractor_set_S1(const simple_structure_graph& G)
-    {
-      S1 = attr_default(G, S1, 1);
-    }
-
     bool solution_found(const propositional_variable_instantiation& init) const override
     {
       auto u = m_graph_builder.find_vertex(init);
@@ -231,6 +221,21 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return true;
     }
 
+    // Returns true if all nodes in the todo list are undefined (i.e. have not been processed yet)
+    bool todo_has_undefined_nodes() const
+    {
+      for (const propositional_variable_instantiation& X: todo.all_elements())
+      {
+        structure_graph::index_type u = m_graph_builder.find_vertex(X);
+        const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
+        if (u_.is_defined())
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     void prune_todo_list(
       const propositional_variable_instantiation& init,
       pbesinst_lazy_todo& todo,
@@ -251,6 +256,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       while (!todo1.empty())
       {
+        using utilities::detail::contains;
+
         auto X = *todo1.begin();
         todo1.erase(todo1.begin());
         done1.insert(X);
@@ -259,8 +266,13 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
         if (m_options.prune_todo_alternative && u_.strategy != structure_graph::undefined_vertex)
         {
-          todo1.insert(u_.formula);
-          continue;
+          auto v = u_.strategy;
+          const auto& v_ = m_graph_builder.vertex(v);
+          if (!contains(done1, v_.formula))
+          {
+            todo1.insert(v_.formula);
+            continue;
+          }
         }
 
         if (u_.decoration == structure_graph::d_conjunction && successors_disjoint(G, u, S1))
@@ -338,7 +350,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
       todo.set_todo(new_todo_list);
-      check_todo_list();
+      todo_has_undefined_nodes();
     };
 
   public:
@@ -435,46 +447,22 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void on_end_while_loop() override
     {
-      if (!todo.empty())
+      using  utilities::detail::contains;
+
+      simple_structure_graph G(m_graph_builder.vertices());
+      structure_graph::index_type u = m_graph_builder.find_vertex(init);
+      std::set<structure_graph::index_type> V = extract_minimal_structure_graph(G, u, S0, S1);
+
+      std::size_t n = m_graph_builder.extent();
+      vertex_set to_be_removed(n);
+      for (std::size_t v = 0; v < n; v++)
       {
-        simple_structure_graph G(m_graph_builder.vertices());
-
-        auto u = m_graph_builder.find_vertex(init);
-        if (S0.contains(u) || S1.contains(u))
+        if (!contains(V, v))
         {
-          std::size_t n = m_graph_builder.extent();
-          std::size_t alpha = S0.contains(u) ? 1 : 0;
-
-          // compute todo_
-          vertex_set todo_(n);
-          for (const propositional_variable_instantiation& X: todo.elements())
-          {
-            structure_graph::index_type v = m_graph_builder.find_vertex(X);
-            todo_.insert(v);
-          }
-          mCRL2log(log::debug) << "final todo = " << core::detail::print_set(todo_.vertices()) << std::endl;
-
-          todo_ = attr_default(G, todo_, alpha);
-          m_graph_builder.erase_vertices(todo_);
+          to_be_removed.insert(v);
         }
       }
-
-      if (m_options.prune_todo_list)
-      {
-        simple_structure_graph G(m_graph_builder.vertices());
-
-        std::size_t n = m_graph_builder.extent();
-        vertex_set irrelevant(n);
-        for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
-        {
-          structure_graph::index_type v = m_graph_builder.find_vertex(X);
-          irrelevant.insert(v);
-        }
-        mCRL2log(log::debug) << "irrelevant = " << irrelevant << std::endl;
-        irrelevant = attr_simple(G, irrelevant);
-        mCRL2log(log::debug) << "attr(irrelevant) = " << irrelevant << std::endl;
-        m_graph_builder.erase_vertices(irrelevant);
-      }
+      m_graph_builder.erase_vertices(to_be_removed);
     }
 };
 

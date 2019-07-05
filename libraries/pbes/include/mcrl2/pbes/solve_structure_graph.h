@@ -74,7 +74,7 @@ class solve_structure_graph_algorithm
     bool use_toms_optimization = false;
 
     // find a successor of u
-    structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u)
+    static structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u)
     {
       for (structure_graph::index_type v: G.successors(u))
       {
@@ -84,7 +84,7 @@ class solve_structure_graph_algorithm
     }
 
     // find a successor of u in U, or a random one if no successor in U exists
-    inline
+    static inline
     structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u, const vertex_set& U)
     {
       auto result = structure_graph::undefined_vertex;
@@ -386,50 +386,10 @@ class solve_structure_graph_algorithm
     }
 };
 
-inline
-std::set<structure_graph::index_type> find_counter_example_nodes(structure_graph& G, structure_graph::index_type init, bool is_disjunctive)
-{
-  using utilities::detail::contains;
-
-  typedef structure_graph::vertex vertex;
-  std::vector<const vertex*> result;
-
-  std::set<structure_graph::index_type> todo = { init };
-  std::set<structure_graph::index_type> done;
-  while (!todo.empty())
-  {
-    structure_graph::index_type u = *todo.begin();
-    todo.erase(todo.begin());
-    done.insert(u);
-    if ((is_disjunctive && G.decoration(u) == structure_graph::d_disjunction) || (!is_disjunctive && G.decoration(u) == structure_graph::d_conjunction))
-    {
-      // explore only the strategy edge
-      structure_graph::index_type v = G.strategy(u);
-      assert (v != structure_graph::undefined_vertex);
-      if (!contains(done, v))
-      {
-        todo.insert(v);
-      }
-    }
-    else
-    {
-      // explore all outgoing edges
-      for (structure_graph::index_type v: G.successors(u))
-      {
-        if (!contains(done, v))
-        {
-          todo.insert(v);
-        }
-      }
-    }
-  }
-  return done;
-}
-
 class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorithm
 {
   protected:
-    lps::specification create_counter_example_lps(structure_graph& G, const std::set<structure_graph::index_type>& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
+    static lps::specification create_counter_example_lps(structure_graph& G, const std::set<structure_graph::index_type>& V, const lps::specification& lpsspec, const pbes& p, const pbes_equation_index& p_index)
     {
       lps::specification result = lpsspec;
       result.process().action_summands().clear();
@@ -504,19 +464,9 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       std::tie(Wdisj, Wconj) = solve_recursive_extended(G);
       structure_graph::index_type init = G.initial_vertex();
 
-      if (Wdisj.contains(init))
-      {
-        mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
-        std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, true);
-        return { true, create_counter_example_lps(G, W, lpsspec, p, p_index) };
-      }
-      else if (Wconj.contains(init))
-      {
-        mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
-        std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, false);
-        return { false, create_counter_example_lps(G, W, lpsspec, p, p_index) };
-      }
-      throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
+      mCRL2log(log::verbose) << "Extracting evidence..." << std::endl;
+      std::set<structure_graph::index_type> W = extract_minimal_structure_graph(G, init, Wdisj, Wconj);
+      return { Wdisj.contains(init), create_counter_example_lps(G, W, lpsspec, p, p_index) };
     }
 };
 
@@ -525,7 +475,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
   protected:
     // Removes all transitions from ltsspec, except the ones in transition_indices.
     // After that, the unreachable parts of the LTS are removed.
-    inline
+    static inline
     void filter_transitions(lts::lts_lts_t& ltsspec, const std::set<std::size_t>& transition_indices)
     {
       // remove transitions
@@ -542,7 +492,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
     }
 
     // modifies ltsspec
-    inline
+    static inline
     void create_counter_example_lts(structure_graph& G, const std::set<structure_graph::index_type>& V, lts::lts_lts_t& ltsspec)
     {
       std::regex re("Z(neg|pos)_(\\d+)_.*");
@@ -578,21 +528,10 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       std::tie(Wdisj, Wconj) = solve_recursive_extended(G);
       structure_graph::index_type init = G.initial_vertex();
 
-      if (Wdisj.contains(init))
-      {
-        mCRL2log(log::verbose) << "Extracting witness..." << std::endl;
-        std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, true);
-        create_counter_example_lts(G, W, ltsspec);
-        return true;
-      }
-      else if (Wconj.contains(init))
-      {
-        mCRL2log(log::verbose) << "Extracting counter example..." << std::endl;
-        std::set<structure_graph::index_type> W = find_counter_example_nodes(G, init, false);
-        create_counter_example_lts(G, W, ltsspec);
-        return false;
-      }
-      throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
+      mCRL2log(log::verbose) << "Extracting evidence..." << std::endl;
+      std::set<structure_graph::index_type> W = extract_minimal_structure_graph(G, init, Wdisj, Wconj);
+      create_counter_example_lts(G, W, ltsspec);
+      return Wdisj.contains(init);
     }
 };
 

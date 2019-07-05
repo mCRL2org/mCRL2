@@ -98,21 +98,6 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       return vertex_psi;
     }
 
-    // Checks if all nodes in the todo list are undefined (i.e. have not been processed yet)
-    bool check_todo_list() const
-    {
-      for (const propositional_variable_instantiation& X: todo.all_elements())
-      {
-        structure_graph::index_type u = m_graph_builder.find_vertex(X);
-        const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
-        if (u_.is_defined())
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-
   public:
     pbesinst_structure_graph_algorithm(
       const pbessolve_options& options,
