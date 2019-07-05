@@ -151,7 +151,7 @@ tools. Qt version 5.12.1 appears to work fine.
 .. admonition:: Linux
    :class: platform-specific linux
 
-   For Linux the minimum Qt version supported is 5.5.
+   For Linux the minimum Qt version supported is 5.9.
    Binary development versions are available in the package manager in most
    distributions (for instance the ``qtbase5-dev`` package in Ubuntu).
 
