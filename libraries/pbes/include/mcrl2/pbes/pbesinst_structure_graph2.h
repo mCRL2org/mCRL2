@@ -353,6 +353,28 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       todo_has_undefined_nodes();
     };
 
+    bool strategies_are_set_in_solved_nodes() const
+    {
+      simple_structure_graph G(m_graph_builder.vertices());
+      for (structure_graph::index_type u: S0.vertices())
+      {
+        if (G.decoration(u) == structure_graph::d_disjunction && G.strategy(u) == structure_graph::undefined_vertex)
+        {
+          mCRL2log(log::debug) << "Error: no strategy for node " << u << " in S0." << std::endl;
+          return false;
+        }
+      }
+      for (structure_graph::index_type u: S1.vertices())
+      {
+        if (G.decoration(u) == structure_graph::d_conjunction && G.strategy(u) == structure_graph::undefined_vertex)
+        {
+          mCRL2log(log::debug) << "Error: no strategy for node " << u << " in S1." << std::endl;
+          return false;
+        }
+      }
+      return true;
+    }
+
   public:
     typedef pbesinst_structure_graph_algorithm super;
 
@@ -416,6 +438,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       {
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops(G, discovered, todo, S0, S1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+        assert(strategies_are_set_in_solved_nodes());
       }
       else if ((5 <= m_options.optimization && m_options.optimization <= 7) && (m_options.aggressive || fatal_attractors_guard(m_iteration_count)))
       {
@@ -423,10 +446,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         if (m_options.optimization == 5)
         {
           detail::fatal_attractors(G, S0, S1, m_iteration_count); // modifies S0 and S1
+          assert(strategies_are_set_in_solved_nodes());
         }
         else if (m_options.optimization == 6)
         {
           detail::fatal_attractors_original(G, S0, S1, m_iteration_count); // modifies S0 and S1
+          assert(strategies_are_set_in_solved_nodes());
         }
         else // m_optimization == 7
         {
@@ -450,6 +475,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       using  utilities::detail::contains;
 
       simple_structure_graph G(m_graph_builder.vertices());
+
+      // Needed to make sure that G is well defined
+      S0 = attr_default(G, S0, 0);
+      S1 = attr_default(G, S1, 1);
+
       structure_graph::index_type u = m_graph_builder.find_vertex(init);
       std::set<structure_graph::index_type> V = extract_minimal_structure_graph(G, u, S0, S1);
 
