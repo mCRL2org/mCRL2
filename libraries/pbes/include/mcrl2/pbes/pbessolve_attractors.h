@@ -39,6 +39,27 @@ void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u
   }
 }
 
+template <typename StructureGraph>
+void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, const vertex_set& B, std::size_t alpha)
+{
+  if (G.decoration(u) == alpha)
+  {
+    for (auto v: G.successors(u))
+    {
+      if (A.contains(v) || B.contains(v))
+      {
+        mCRL2log(log::debug) << "set strategy for node " << u << " to " << v << std::endl;
+        G.find_vertex(u).strategy = v;
+        break;
+      }
+    }
+    if (G.strategy(u) == structure_graph::undefined_vertex)
+    {
+      mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
+    }
+  }
+}
+
 // Returns true if succ(u) \subseteq A
 template <typename StructureGraph>
 bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A)

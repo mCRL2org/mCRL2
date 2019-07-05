@@ -240,7 +240,7 @@ vertex_set compute_attractor_set_min_rank_original(const StructureGraph& G, vert
 
     if (G.decoration(u) == alpha || includes_successors(G, u, A, X))
     {
-      set_strategy(G, u, A, alpha);
+      set_strategy(G, u, A, X, alpha);
 
       X.insert(u);
 
