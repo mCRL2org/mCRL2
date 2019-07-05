@@ -7,5 +7,5 @@ add_mcrl2_tool(lpssymbolicbisim
     mcrl2_lps
     mcrl2_lts
     mcrl2_process
-    mcrl2_smt
+    mcrl2_smt2
 )
