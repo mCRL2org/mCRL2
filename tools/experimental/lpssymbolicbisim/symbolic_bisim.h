@@ -19,7 +19,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
@@ -40,6 +39,7 @@
 #include "mcrl2/smt/solver.h"
 #include "mcrl2/smt/translation_error.h"
 #include "mcrl2/smt/cvc4.h"
+#include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "../pbessymbolicbisim/simplifier_mode.h"
@@ -687,18 +687,18 @@ protected:
   lts::lts_lts_t make_lts(const Container& blocks, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
     lts::lts_lts_t result;
-    atermpp::indexed_set<data_expression> indexed_partition;
+    utilities::indexed_set<data_expression> indexed_partition;
     for(const data_expression& block: blocks)
     {
-      indexed_partition.put(block);
+      indexed_partition.insert(block);
       result.add_state(lts::state_label_lts(lps::state{rewr(block)}));
     }
-    atermpp::indexed_set<process::action_list> indexed_actions;
+    utilities::indexed_set<process::action_list> indexed_actions;
     // tau is always action 0
-    indexed_actions.put(lts::action_label_lts::tau_action().actions());
+    indexed_actions.insert(lts::action_label_lts::tau_action().actions());
     for(const lps::action_summand& as: m_spec.process().action_summands())
     {
-      std::pair<std::size_t, bool> action_index = indexed_actions.put(as.multi_action().actions());
+      auto action_index = indexed_actions.insert(as.multi_action().actions());
       if(action_index.second)
       {
         result.add_action(lts::action_label_lts(as.multi_action()));
@@ -722,7 +722,7 @@ protected:
         {
           if(transition_exists(src, dest, as))
           {
-            lts::transition trans(indexed_partition[src], indexed_actions[as.multi_action().actions()], indexed_partition[dest]);
+            lts::transition trans(indexed_partition.at(src), indexed_actions.at(as.multi_action().actions()), indexed_partition.at(dest));
             result.add_transition(trans);
           }
         }
@@ -734,7 +734,7 @@ protected:
     if(initial_block != data_expression())
     {
       // The intial block was found, set it as intial state
-      result.set_initial_state(indexed_partition[initial_block]);
+      result.set_initial_state(indexed_partition.at(initial_block));
     }
     return result;
   }
