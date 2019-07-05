@@ -431,7 +431,7 @@ void MainWindow::actionShowLts()
     else
     {
       lastLtsHasReduction = false;
-      processSystem->showLts(mcrl2::lts::lts_equivalence::lts_eq_none);
+      processSystem->showLts(mcrl2::lts::lts_eq_none);
     }
   }
 }
@@ -467,8 +467,7 @@ void MainWindow::actionShowReducedLts()
       if (reductionDialog.exec())
       {
         QString selectedReduction = reductionBox.currentText();
-        mcrl2::lts::lts_equivalence reduction =
-            mcrl2::lts::lts_equivalence::lts_eq_none;
+        mcrl2::lts::lts_equivalence reduction = mcrl2::lts::lts_eq_none;
         for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
                  item : LTSEQUIVALENCEINFO)
         {

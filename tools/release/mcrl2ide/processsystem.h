@@ -274,12 +274,10 @@ class ProcessSystem : public QObject
    * @param evidence Whether the subprocess is for creating evidence
    * @param equivalence An equivalence (if needed)
    */
-  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
-                             int subprocessIndex,
-                             const QString& propertyName = "",
-                             bool evidence = false,
-                             mcrl2::lts::lts_equivalence equivalence =
-                                 mcrl2::lts::lts_equivalence::lts_eq_none);
+  QProcess* createSubprocess(
+      SubprocessType subprocessType, int processid, int subprocessIndex,
+      const QString& propertyName = "", bool evidence = false,
+      mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none);
 
   private slots:
   /**

@@ -25,7 +25,7 @@ EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
        LTSEQUIVALENCEINFO)
   {
     if (!item.second.second &&
-        item.first != mcrl2::lts::lts_equivalence::lts_eq_none)
+        item.first != mcrl2::lts::lts_eq_none)
     {
       items << item.second.first;
       secondSeparatorIndex++;

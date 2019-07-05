@@ -27,21 +27,19 @@
  *   - whether this equivalence makes use of abstraction */
 const std::map<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
     LTSEQUIVALENCEINFO = {
-        {mcrl2::lts::lts_equivalence::lts_eq_none,
-         std::pair<QString, bool>("None", false)},
-        {mcrl2::lts::lts_equivalence::lts_eq_bisim,
+        {mcrl2::lts::lts_eq_none, std::pair<QString, bool>("None", false)},
+        {mcrl2::lts::lts_eq_bisim,
          std::pair<QString, bool>("Strong Bisimulation", false)},
-        {mcrl2::lts::lts_equivalence::lts_eq_trace,
+        {mcrl2::lts::lts_eq_trace,
          std::pair<QString, bool>("Trace equivalence", false)},
-        {mcrl2::lts::lts_equivalence::
-             lts_eq_divergence_preserving_branching_bisim,
+        {mcrl2::lts::lts_eq_divergence_preserving_branching_bisim,
          std::pair<QString, bool>(
              "Divergence Preserving Branching Bisimulation", true)},
-        {mcrl2::lts::lts_equivalence::lts_eq_branching_bisim,
+        {mcrl2::lts::lts_eq_branching_bisim,
          std::pair<QString, bool>("Branching Bisimulation", true)},
-        {mcrl2::lts::lts_equivalence::lts_eq_weak_bisim,
+        {mcrl2::lts::lts_eq_weak_bisim,
          std::pair<QString, bool>("Weak Bisimulation", true)},
-        {mcrl2::lts::lts_equivalence::lts_eq_weak_trace,
+        {mcrl2::lts::lts_eq_weak_trace,
          std::pair<QString, bool>("Weak Trace Equivalence", true)}};
 
 enum IntermediateFileType
@@ -169,9 +167,9 @@ class FileSystem : public QObject
    * @param evidence Whether this is an evidence lts
    * @return The file path of the lts
    */
-  QString ltsFilePath(mcrl2::lts::lts_equivalence equivalence =
-                          mcrl2::lts::lts_equivalence::lts_eq_none,
-                      const QString& propertyName = "", bool evidence = false);
+  QString
+  ltsFilePath(mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+              const QString& propertyName = "", bool evidence = false);
 
   /**
    * @brief propertyFilePath Defines the file path of a property

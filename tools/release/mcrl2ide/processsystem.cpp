@@ -178,11 +178,11 @@ bool ProcessSystem::isThreadRunning(ProcessType processType)
   return processThreads[processType]->isRunning();
 }
 
-QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
-                                          int processid, int subprocessIndex,
-                                          const QString& propertyName,
-                                          bool evidence,
-                                          mcrl2::lts::lts_equivalence equivalence)
+QProcess*
+ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
+                                int subprocessIndex,
+                                const QString& propertyName, bool evidence,
+                                mcrl2::lts::lts_equivalence equivalence)
 {
   QProcess* subprocess = new QProcess();
   ProcessType processType = processTypes[processid];
@@ -267,8 +267,8 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
   case SubprocessType::Lps2lts:
     program = "lps2lts";
     inputFile = fileSystem->lpsFilePath(propertyName, evidence);
-    outputFile = fileSystem->ltsFilePath(
-        mcrl2::lts::lts_equivalence::lts_eq_none, propertyName, evidence);
+    outputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none, propertyName,
+                                         evidence);
     arguments << inputFile << outputFile << "--rewriter=jitty"
               << "--strategy=breadth"
               << "--verbose";
@@ -395,7 +395,7 @@ int ProcessSystem::showLts(mcrl2::lts::lts_equivalence reduction)
     ProcessType processType = ProcessType::LtsCreation;
     processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
-    bool noReduction = reduction == mcrl2::lts::lts_equivalence::lts_eq_none;
+    bool noReduction = reduction == mcrl2::lts::lts_eq_none;
 
     showLtsProcesses.push_back(
         createSubprocess(SubprocessType::ParseMcrl2, processid, 0));
