@@ -43,10 +43,18 @@ int main(int /*argc*/, char** /*argv*/)
   std::cout << out.str() << std::endl;
 
   smt::smt_solver solv(data_spec);
+
+  bool result;
   data::variable vp1("p1", data::sort_pos::pos());
   data::variable vp2("p2", data::sort_pos::pos());
-  bool result = solv.solve(data::variable_list({vp1, vp2}), data::sort_bool::and_(data::equal_to(vp1, data::sort_pos::plus(vp2, data::sort_pos::pos(2))),
-                                                                                  data::equal_to(vp1, data::sort_pos::times(vp2, data::sort_pos::pos(2)))));
+  data::variable_list pos_vars({vp1, vp2});
+  result = solv.solve(pos_vars, data::parse_data_expression("(p1 == p2 + 2) && (p1 == p2 * 2)", pos_vars, data_spec));
+  std::cout << "result " << std::boolalpha << result << std::endl;
+
+  data::variable vb1 = data::parse_variable("bit1: Bit", data_spec);
+  data::variable vb2 = data::parse_variable("bit2: Bit", data_spec);
+  data::variable_list bit_vars({vb1, vb2});
+  result = solv.solve(data::variable_list(), data::parse_data_expression("forall bit1: Bit. invert(invert(bit1)) == bit1", data::variable_list(), data_spec));
   std::cout << "result " << std::boolalpha << result << std::endl;
 
   return 0;
