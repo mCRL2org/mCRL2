@@ -49,6 +49,9 @@ class ltsgraph_tool : public ltsgraph_base
 
     bool run() override
     {
+      // Check the version string without QVersionNumber requires extensive work. Unfortunately, QVersionNumber was introduced in Qt 5.6, which is above our
+      // minimum required for compilation (Qt 5.5), and as such we conditionally disable this check for older setups.
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
       QVersionNumber runtime_version = QVersionNumber::fromString(qVersion());
       QVersionNumber required_version(5,9,0);
 
@@ -63,6 +66,7 @@ class ltsgraph_tool : public ltsgraph_base
         QMessageBox box(QMessageBox::Warning, "Unsupported Qt Version", message.str().c_str(), QMessageBox::Ok);
         box.exec();
       }
+#endif // QT_VERSION
 
       MainWindow window;
 
