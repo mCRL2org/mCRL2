@@ -34,9 +34,6 @@
 #include <memory>
 #include <algorithm>
 
-// ATermpp libraries
-#include "mcrl2/atermpp/indexed_set.h"
-
 // linear process libraries.
 #include "mcrl2/lps/detail/ultimate_delay.h"
 #include "mcrl2/lps/linearise.h"
@@ -113,7 +110,7 @@ class objectdatatype
     bool constructor;
     process_expression representedprocess;
     process_identifier process_representing_action; /* for actions target sort is used to
-                                   indicate the process representing this action. */
+                                                       indicate the process representing this action. */
     process_expression processbody;
     std::set <variable> free_variables;
     bool free_variables_defined;
@@ -212,11 +209,10 @@ class specification_basic_type
     bool timeIsBeingUsed;
     bool stochastic_operator_is_being_used;
     bool fresh_equation_added;
-    std::deque < objectdatatype > objectdata; // This is a double ended queue to guarantee that the objects will not
-                                              // be moved to another place when the object data structure grows. This
-                                              // is because objects in this datatype  are passed around by reference.
+    std::map < aterm, objectdatatype > objectdata; // It is important to guarantee that the objects will not
+                                                   // be moved to another place when the object data structure grows. This
+                                                   // is because objects in this datatype  are passed around by reference.
 
-    indexed_set<aterm_appl> objectIndexTable;
     set_identifier_generator fresh_identifier_generator;
     std::vector < enumeratedtype > enumeratedtypes;
     stackoperations* stack_operations_list;
@@ -238,8 +234,6 @@ class specification_basic_type
       stochastic_operator_is_being_used(false),
       fresh_equation_added(false)
     {
-      objectIndexTable=indexed_set<aterm_appl>(1024,75);
-
       // find_identifiers does not find the identifiers in the enclosed data specification.
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
       // So, the identifiers in the data type must be added explicitly.
@@ -337,23 +331,11 @@ class specification_basic_type
     }
 
 
-    /*****************  store and retrieve basic objects  ******************/
+    /*****************  retrieve basic objects  ******************/
 
-    std::size_t addObject(const aterm_appl& o, bool& b)
+    void detail_check_objectdata(const aterm_appl& o) const
     {
-      std::pair<std::size_t, bool> result=objectIndexTable.put(o);
-      if (objectdata.size()<=result.first)
-      {
-        objectdata.resize(result.first+1);
-      }
-      b=result.second;
-      return result.first;
-    }
-
-    std::size_t objectIndex(const aterm_appl& o) const
-    {
-      std::size_t result=objectIndexTable.index(o);
-      if (result==atermpp::npos)
+      if (objectdata.count(o)==0)
       {
         if (is_process_identifier(o))
         {
@@ -364,8 +346,19 @@ class specification_basic_type
           throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) + ". This is an internal error in the lineariser. ");
         }
       }
-      return result;
     }
+
+    objectdatatype& objectIndex(const aterm_appl& o) 
+    {
+      detail_check_objectdata(o);
+      return objectdata.find(o)->second;
+    } 
+
+    const objectdatatype& objectIndex(const aterm_appl& o) const
+    {
+      detail_check_objectdata(o);
+      return objectdata.find(o)->second;
+    } 
 
     void addString(const identifier_string& str)
     {
@@ -492,53 +485,57 @@ class specification_basic_type
       return reverse(result);
     }
 
-    std::size_t addMultiAction(const process_expression& multiAction, bool& isnew)
+    objectdatatype& addMultiAction(const process_expression& multiAction, bool& isnew)
     {
       const process::action_label_list actionnames=getnames(multiAction);
-      std::size_t n=addObject(atermpp::down_cast<aterm_appl>(static_cast<const aterm&>(actionnames)),isnew);
+
+      isnew=(objectdata.count(actionnames)==0);
 
       if (isnew)
       {
+        objectdatatype object;
+              
         // tempvar is needed as objectdata can change during a call
         // of getparameters.
         const variable_list templist=getparameters(multiAction);
-        objectdata[n].parameters=templist;
-        objectdata[n].object=multiact;
+        object.parameters=templist;
+        object.object=multiact;
         // must separate assignment below as
         // objectdata may change as a side effect of make
         // multiaction.
-        const action_list tempvar=makemultiaction(actionnames, variable_list_to_data_expression_list(objectdata[n].parameters));
-        objectdata[n].processbody=action_list_to_process(tempvar);
-        objectdata[n].free_variables=std::set<variable>(objectdata[n].parameters.begin(), objectdata[n].parameters.end());
-        objectdata[n].free_variables_defined=true;
+        const action_list tempvar=makemultiaction(actionnames, variable_list_to_data_expression_list(object.parameters));
+        object.processbody=action_list_to_process(tempvar);
+        object.free_variables=std::set<variable>(object.parameters.begin(), object.parameters.end());
+        object.free_variables_defined=true;
+        
+        objectdata[actionnames]=object;
       }
-      return n;
+      return objectdata.find(actionnames)->second;
     }
 
-    const std::set<variable>& get_free_variables(const std::size_t n)
+    const std::set<variable>& get_free_variables(objectdatatype& object)
     {
-      if (!objectdata[n].free_variables_defined)
+      if (!object.free_variables_defined)
       {
-        objectdata[n].free_variables=find_free_variables_process(objectdata[n].processbody);
-        objectdata[n].free_variables_defined=true;
+        object.free_variables=find_free_variables_process(object.processbody);
+        object.free_variables_defined=true;
       }
-      return objectdata[n].free_variables;
+      return object.free_variables;
     }
 
     void insertvariable(const variable& var, const bool mustbenew)
     {
       addString(var.name());
 
-      bool isnew=false;
-      std::size_t n=addObject(var.name(),isnew);
-
-      if ((!isnew) && mustbenew)
+      if (objectdata.count(var.name())>0  && mustbenew)
       {
         throw mcrl2::runtime_error("Variable " + data::pp(var) + " already exists. ");
       }
 
-      objectdata[n].objectname=var.name();
-      objectdata[n].object=variable_;
+      objectdatatype object;
+      object.objectname=var.name();
+      object.object=variable_;
+      objectdata[var.name()]=object;
     }
 
     void insertvariables(const variable_list& vars, const bool mustbenew)
@@ -706,22 +703,23 @@ class specification_basic_type
 
     /************ storeact ****************************************************/
 
-    std::size_t insertAction(const action_label& actionId)
+    objectdatatype& insertAction(const action_label& actionId)
     {
-      bool isnew=false;
-      std::size_t n=addObject(actionId,isnew);
-
-      if (isnew==0)
+      if (objectdata.count(actionId)>0)
       {
         throw mcrl2::runtime_error("Action " + process::pp(actionId) + " is added twice. This is an internal error in the lineariser. Please report. ");
       }
 
       const identifier_string& str=actionId.name();
       addString(str);
-      objectdata[n].objectname=str;
-      objectdata[n].object=act;
-      objectdata[n].process_representing_action=process_identifier();
-      return n;
+
+      objectdatatype object;
+      object.objectname=str;
+      object.object=act;
+      object.process_representing_action=process_identifier();
+      
+      objectdata[actionId]=object;
+      return objectdata.find(actionId)->second;
     }
 
     void storeact(const process::action_label_list& acts)
@@ -734,7 +732,7 @@ class specification_basic_type
 
     /************ storeprocs *************************************************/
 
-    std::size_t insert_process_declaration(
+    objectdatatype& insert_process_declaration(
       const process_identifier& procId, 
       const variable_list& parameters,  
       const process_expression& body,
@@ -746,24 +744,23 @@ class specification_basic_type
       const std::string str=procId.name();
       addString(str);
 
-      bool isnew=false;
-      std::size_t n=addObject(procId,isnew);
-
-      if (isnew==0)
+      if (objectdata.count(procId)>0)
       {
         throw mcrl2::runtime_error("Process " + process::pp(procId) + " is added twice. This is an internal error in the lineariser. Please report. ");
       }
 
-      objectdata[n].objectname=procId.name();
-      objectdata[n].object=proc;
-      objectdata[n].processbody=body;
-      objectdata[n].free_variables_defined=false;
-      objectdata[n].canterminate=canterminate;
-      objectdata[n].containstime=containstime;
-      objectdata[n].processstatus=s;
-      objectdata[n].parameters=parameters;
+      objectdatatype object;
+      object.objectname=procId.name();
+      object.object=proc;
+      object.processbody=body;
+      object.free_variables_defined=false;
+      object.canterminate=canterminate;
+      object.containstime=containstime;
+      object.processstatus=s;
+      object.parameters=parameters;
       insertvariables(parameters,false);
-      return n;
+      objectdata[procId]=object;
+      return objectdata.find(procId)->second;
     }
 
     void storeprocs(const std::vector< process_equation >& procs)
@@ -787,16 +784,16 @@ class specification_basic_type
       const bool containstime,
       process_identifier& p)
     {
-      for(const objectdatatype& d:objectdata)
+      for(const std::pair<aterm,objectdatatype>& d: objectdata)
       {
-        if (d.object==proc &&
-            d.parameters==parameters &&
-            d.processbody==body &&
-            d.canterminate==canterminate &&
-            d.containstime==containstime &&
-            d.processstatus==s)
+        if (d.second.object==proc &&
+            d.second.parameters==parameters &&
+            d.second.processbody==body &&
+            d.second.canterminate==canterminate &&
+            d.second.containstime==containstime &&
+            d.second.processstatus==s)
         {
-          p=process_identifier(d.objectname,d.parameters);
+          p=process_identifier(d.second.objectname,d.second.parameters);
           return true;
         }
       }
@@ -1137,32 +1134,32 @@ class specification_basic_type
       const processstatustype status)
     {
       processstatustype s;
-      std::size_t n=objectIndex(procDecl);
-      s=objectdata[n].processstatus;
+      objectdatatype& object=objectIndex(procDecl);
+      s=object.processstatus;
 
       if (s==unknown)
       {
-        objectdata[n].processstatus=status;
+        object.processstatus=status;
         if (status==pCRL)
         {
-          determine_process_statusterm(objectdata[n].processbody,pCRL);
+          determine_process_statusterm(object.processbody,pCRL);
           return;
         }
         /* status==mCRL */
-        s=determine_process_statusterm(objectdata[n].processbody,mCRL);
+        s=determine_process_statusterm(object.processbody,mCRL);
         if (s!=status)
         {
           /* s==pCRL and status==mCRL */
-          objectdata[n].processstatus=s;
-          determine_process_statusterm(objectdata[n].processbody,pCRL);
+          object.processstatus=s;
+          determine_process_statusterm(object.processbody,pCRL);
         }
       }
       if (s==mCRL)
       {
         if (status==pCRL)
         {
-          objectdata[n].processstatus=pCRL;
-          determine_process_statusterm(objectdata[n].processbody,pCRL);
+          object.processstatus=pCRL;
+          determine_process_statusterm(object.processbody,pCRL);
         }
       }
     }
@@ -1293,12 +1290,12 @@ class specification_basic_type
       if (visited.count(procDecl)==0)
       {
         visited.insert(procDecl);
-        std::size_t n=objectIndex(procDecl);
-        if (objectdata[n].processstatus==pCRL)
+        objectdatatype& object=objectIndex(procDecl);
+        if (object.processstatus==pCRL)
         {
           pcrlprocesses.push_back(procDecl);
         }
-        collectPcrlProcesses_term(objectdata[n].processbody,pcrlprocesses,visited);
+        collectPcrlProcesses_term(object.processbody,pcrlprocesses,visited);
       }
     }
 
@@ -1386,7 +1383,7 @@ class specification_basic_type
       }
       // Check whether x does not occur in the assignment list. Then variable x is assigned to
       // itself, and it occurs in the process.
-      variable_list parameters=objectdata[objectIndex(proc_name)].parameters;
+      variable_list parameters=objectIndex(proc_name).parameters;
       for (variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
       {
         if (var==*i)
@@ -1679,8 +1676,8 @@ class specification_basic_type
       if (is_process_instance_assignment(p))
       {
         const process_instance_assignment q(p);
-        std::size_t n=objectIndex(q.identifier());
-        const variable_list parameters=objectdata[n].parameters;
+        objectdatatype& object=objectIndex(q.identifier());
+        const variable_list parameters=object.parameters;
         std::set<variable> parameter_set(parameters.begin(),parameters.end());
         const assignment_list& assignments=q.assignments();
         for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
@@ -1956,8 +1953,8 @@ class specification_basic_type
                const process_identifier& id,
                const assignment_list& assignments)
     {
-      std::size_t n=objectIndex(id);
-      variable_list parameters=objectdata[n].parameters;
+      objectdatatype& object=objectIndex(id);
+      variable_list parameters=object.parameters;
       for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
       {
         // Every assignment must occur in the parameter list, in the right sequence.
@@ -2088,8 +2085,8 @@ class specification_basic_type
       if (is_process_instance_assignment(p))
       {
         const process_instance_assignment q(p);
-        std::size_t n=objectIndex(q.identifier());
-        const variable_list parameters=objectdata[n].parameters;
+        objectdatatype& object=objectIndex(q.identifier());
+        const variable_list parameters=object.parameters;
         const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma);
         assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
         return process_instance_assignment(q.identifier(),new_assignments);
@@ -2136,8 +2133,8 @@ class specification_basic_type
               const process_instance& procId,
               const std::set<variable>& bound_variables=std::set<variable>())
     {
-      std::size_t n=objectIndex(procId.identifier());
-      const variable_list process_parameters=objectdata[n].parameters;
+      objectdatatype& object=objectIndex(procId.identifier());
+      const variable_list process_parameters=object.parameters;
       const data_expression_list& rhss=procId.actual_parameters();
 
       assignment_vector new_assignments;
@@ -2492,8 +2489,8 @@ class specification_basic_type
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
-        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
       }
 
       if (is_sum(body))
@@ -2523,8 +2520,8 @@ class specification_basic_type
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
-        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
       }
 
       if (is_stochastic_operator(body))
@@ -2552,8 +2549,8 @@ class specification_basic_type
         const process_identifier newproc=newprocess(freevars,body_,pCRL,
                                          canterminatebody(body_),
                                          containstimebody(body_));
-        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
-        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
       }
 
       if (is_if_then(body))
@@ -2571,8 +2568,8 @@ class specification_basic_type
         const process_identifier newproc=newprocess(freevars,body2,pCRL,
                                          canterminatebody(body2),
                                          containstimebody(body2));
-        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
-        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
 
       }
 
@@ -2617,8 +2614,8 @@ class specification_basic_type
         const process_identifier newproc=newprocess(freevars,body3,pCRL,
                                          canterminatebody(body3),
                                          containstimebody(body3));
-        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
-        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
 
       }
 
@@ -2684,8 +2681,8 @@ class specification_basic_type
         const process_identifier newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1),
                                          containstimebody(body1));
 
-        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
-        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
       }
 
       if (is_action(body))
@@ -2696,9 +2693,9 @@ class specification_basic_type
         }
 
         bool isnew=false;
-        std::size_t n=addMultiAction(action(body),isnew);
+        objectdatatype& object=addMultiAction(action(body),isnew);
 
-        if (objectdata[n].process_representing_action==process_identifier())
+        if (object.process_representing_action==process_identifier())
         {
           /* this action does not yet have a corresponding process, which
              must be constructed. The resulting process is stored in
@@ -2706,13 +2703,13 @@ class specification_basic_type
              needed as objectdata may be realloced as a side effect
              of newprocess */
           const process_identifier tempvar=newprocess(
-                                             objectdata[n].parameters,
-                                             objectdata[n].processbody,
+                                             object.parameters,
+                                             object.processbody,
                                              GNF,true,false);
-          objectdata[n].process_representing_action=tempvar;
+          object.process_representing_action=tempvar;
         }
         return transform_process_instance_to_process_instance_assignment(
-                          process_instance(objectdata[n].process_representing_action,
+                          process_instance(object.process_representing_action,
                           action(body).arguments()));
       }
 
@@ -2731,23 +2728,23 @@ class specification_basic_type
           return mp;
         }
 
-        std::size_t n=addMultiAction(mp,isnew);
+        objectdatatype& object=addMultiAction(mp,isnew);
 
-        if (objectdata[n].process_representing_action==process_identifier())
+        if (object.process_representing_action==process_identifier())
         {
           /* this action does not yet have a corresponding process, which
              must be constructed. The resulting process is stored in
              the variable process_representing_action in objectdata. Tempvar below is needed
              as objectdata may be realloced as a side effect of newprocess */
           process_identifier tempvar=newprocess(
-                                       objectdata[n].parameters,
-                                       objectdata[n].processbody,
+                                       object.parameters,
+                                       object.processbody,
                                        GNF,true,false);
-          objectdata[n].process_representing_action=tempvar;
+          object.process_representing_action=tempvar;
         }
         return transform_process_instance_to_process_instance_assignment(
                       process_instance(
-                           process_identifier(objectdata[n].process_representing_action),
+                           process_identifier(object.process_representing_action),
                            getarguments(ma)));
       }
 
@@ -2770,8 +2767,8 @@ class specification_basic_type
         const process_identifier newproc=newprocess(freevars,body1,pCRL,
                                          canterminatebody(body1),
                                          containstimebody(body1));
-        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
-        return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
+        assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum)));
+        return process_instance_assignment(newproc,parameters_to_assignment_list(objectIndex(newproc).parameters,variables_bound_in_sum));
       }
 
       if (is_process_instance(body))
@@ -2817,7 +2814,7 @@ class specification_basic_type
       /* transform the processes in procs into newprocs */
       for (const process_identifier& i:procs)
       {
-        std::size_t n=objectIndex(i);
+        objectdatatype& object=objectIndex(i);
 
         // The intermediate variable result is needed here
         // because objectdata can be realloced as a side
@@ -2826,12 +2823,12 @@ class specification_basic_type
         std::set<variable> variables_bound_in_sum;
         const process_expression result=
           bodytovarheadGNF(
-            objectdata[n].processbody,
+            object.processbody,
             alt_state,
-            objectdata[n].parameters,
+            object.parameters,
             first,
             variables_bound_in_sum);
-        objectdata[n].processbody=result;
+        object.processbody=result;
       }
     }
 
@@ -3260,8 +3257,8 @@ class specification_basic_type
         if (is_process_instance_assignment(first))
         {
           result.push_back(atermpp::down_cast<process_instance_assignment>(first));
-          std::size_t n=objectIndex(atermpp::down_cast<process_instance_assignment>(first).identifier());
-          if (objectdata[n].canterminate)
+          objectdatatype& object=objectIndex(atermpp::down_cast<process_instance_assignment>(first).identifier());
+          if (object.canterminate)
           {
             extract_names(seq(sequence).right(),result);
           }
@@ -3279,7 +3276,7 @@ class specification_basic_type
       if (is_process_instance_assignment(oldbody))
       {
         const process_identifier procId=process_instance_assignment(oldbody).identifier();
-        const variable_list parameters=objectdata[objectIndex(procId)].parameters;
+        const variable_list parameters=objectIndex(procId).parameters;
         assert(check_valid_process_instance_assignment(procId,data::assignment_list()));
         newbody=process_instance_assignment(procId,data::assignment_list());
         return parameters;
@@ -3290,14 +3287,14 @@ class specification_basic_type
         const process_expression first=seq(oldbody).left();
         if (is_process_instance_assignment(first))
         {
-          std::size_t n=objectIndex(process_instance_assignment(first).identifier());
-          if (objectdata[n].canterminate)
+          objectdatatype& object=objectIndex(process_instance_assignment(first).identifier());
+          if (object.canterminate)
           {
             const process_identifier procId=process_instance_assignment(first).identifier();
             const variable_list pars=parscollect(seq(oldbody).right(),newbody);
             variable_list pars1, pars2;
 
-            const variable_list new_pars=construct_renaming(pars,objectdata[objectIndex(procId)].parameters,pars1,pars2,false);
+            const variable_list new_pars=construct_renaming(pars,objectIndex(procId).parameters,pars1,pars2,false);
             assignment_vector new_assignment;
             for(variable_list::const_iterator i=pars2.begin(), j=new_pars.begin(); i!=pars2.end(); ++i,++j)
             {
@@ -3341,9 +3338,9 @@ class specification_basic_type
       if (is_process_instance_assignment(t))
       {
         const process_instance_assignment p(t);
-        std::size_t n=objectIndex(p.identifier());
+        objectdatatype& object=objectIndex(p.identifier());
 
-        const variable_list pars=objectdata[n].parameters; // These are the old parameters of the process.
+        const variable_list pars=object.parameters; // These are the old parameters of the process.
         assert(pars.size()<=vl.size());
 
         std::map<variable,data_expression>sigma;
@@ -3367,9 +3364,9 @@ class specification_basic_type
       if (is_seq(t))
       {
         const process_instance_assignment firstproc=atermpp::down_cast<process_instance_assignment>(seq(t).left());
-        std::size_t n=objectIndex(firstproc.identifier());
+        objectdatatype& object=objectIndex(firstproc.identifier());
         const assignment_list first_assignment=argscollect_regular2(firstproc,vl);
-        if (objectdata[n].canterminate)
+        if (object.canterminate)
         {
           return first_assignment + argscollect_regular2(seq(t).right(),vl);
         }
@@ -3395,8 +3392,8 @@ class specification_basic_type
       if (is_seq(t))
       {
         const process_expression firstproc=seq(t).left();
-        std::size_t n=objectIndex(process_instance_assignment(firstproc).identifier());
-        if (objectdata[n].canterminate)
+        objectdatatype& object=objectIndex(process_instance_assignment(firstproc).identifier());
+        if (object.canterminate)
         {
           return seq(firstproc,cut_off_unreachable_tail(seq(t).right()));
         }
@@ -3477,7 +3474,7 @@ class specification_basic_type
         todo.push_back(new_process);
       }
       /* now we must construct arguments */
-      variable_list parameters=objectdata[objectIndex(new_process)].parameters;
+      variable_list parameters=objectIndex(new_process).parameters;
       if (options.lin_method==lmRegular2)
       {
         const assignment_list args=argscollect_regular2(sequence,parameters);
@@ -3772,8 +3769,8 @@ class specification_basic_type
           return body;
         }
 
-        const std::size_t n=objectIndex(t);
-        if (objectdata[n].processstatus==mCRL)
+        objectdatatype& object=objectIndex(t);
+        if (object.processstatus==mCRL)
         {
           todo.push_back(t);
           return process_expression();
@@ -3792,7 +3789,7 @@ class specification_basic_type
           sigma[i->lhs()]=i->rhs();
           const std::set<variable> varset=find_free_variables(i->rhs());
         }
-        process_expression t3=substitute_pCRLproc(objectdata[n].processbody,sigma);
+        process_expression t3=substitute_pCRLproc(object.processbody,sigma);
         if (regular)
         {
           t3=to_regular_form(t3,todo,freevars,variables_bound_in_sum);
@@ -3870,55 +3867,55 @@ class specification_basic_type
        Greibach Normal Form. */
 
     {
-      std::size_t n=objectIndex(procIdDecl);
-      if (objectdata[n].processstatus==pCRL)
+      objectdatatype& object=objectIndex(procIdDecl);
+      if (object.processstatus==pCRL)
       {
-        objectdata[n].processstatus=GNFbusy;
+        object.processstatus=GNFbusy;
         std::set<variable> variables_bound_in_sum;
-        const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,
-                                   todo,regular,pCRL,objectdata[n].parameters,variables_bound_in_sum);
-        if (objectdata[n].processstatus!=GNFbusy)
+        const process_expression t=procstorealGNFbody(object.processbody,first,
+                                   todo,regular,pCRL,object.parameters,variables_bound_in_sum);
+        if (object.processstatus!=GNFbusy)
         {
           throw mcrl2::runtime_error("There is something wrong with recursion.");
         }
 
-        objectdata[n].processbody=t;
-        objectdata[n].processstatus=GNF;
+        object.processbody=t;
+        object.processstatus=GNF;
         return;
       }
 
-      if (objectdata[n].processstatus==mCRL)
+      if (object.processstatus==mCRL)
       {
-        objectdata[n].processstatus=mCRLbusy;
+        object.processstatus=mCRLbusy;
         std::set<variable> variables_bound_in_sum;
-        const process_expression t=procstorealGNFbody(objectdata[n].processbody,first,todo,
-                                   regular,mCRL,objectdata[n].parameters,variables_bound_in_sum);
+        const process_expression t=procstorealGNFbody(object.processbody,first,todo,
+                                   regular,mCRL,object.parameters,variables_bound_in_sum);
         /* if the last result is not equal to NULL,
            the body of this process is itself a processidentifier */
 
-        objectdata[n].processstatus=mCRLdone;
+        object.processstatus=mCRLdone;
         return;
       }
 
-      if ((objectdata[n].processstatus==GNFbusy) && (v==first))
+      if ((object.processstatus==GNFbusy) && (v==first))
       {
         throw mcrl2::runtime_error("Unguarded recursion in process " + process::pp(procIdDecl) +".");
       }
 
-      if ((objectdata[n].processstatus==GNFbusy)||
-          (objectdata[n].processstatus==GNF)||
-          (objectdata[n].processstatus==mCRLdone)||
-          (objectdata[n].processstatus==multiAction))
+      if ((object.processstatus==GNFbusy)||
+          (object.processstatus==GNF)||
+          (object.processstatus==mCRLdone)||
+          (object.processstatus==multiAction))
       {
         return;
       }
 
-      if (objectdata[n].processstatus==mCRLbusy)
+      if (object.processstatus==mCRLbusy)
       {
         throw mcrl2::runtime_error("Unguarded recursion in process " + process::pp(procIdDecl) +".");
       }
 
-      throw mcrl2::runtime_error("strange process type: " + std::to_string(objectdata[n].processstatus));
+      throw mcrl2::runtime_error("strange process type: " + std::to_string(object.processstatus));
     }
 
     void procstorealGNF(const process_identifier& procsIdDecl,
@@ -3955,7 +3952,7 @@ class specification_basic_type
       if (reachable_process_identifiers.count(id)==0)  // not found
       {
         reachable_process_identifiers.insert(id);
-        make_pCRL_procs(objectdata[objectIndex(id)].processbody,reachable_process_identifiers);
+        make_pCRL_procs(objectIndex(id).processbody,reachable_process_identifiers);
       }
       return;
     }
@@ -4122,8 +4119,8 @@ class specification_basic_type
       std::map< process_identifier, process_identifier > identifier_identifier_map;
       for(const process_identifier& id: reachable_process_identifiers)
       {
-        std::size_t n=objectIndex(id);
-        const parameters_process_pair p(objectdata[n].parameters,objectdata[n].processbody);
+        objectdatatype& object=objectIndex(id);
+        const parameters_process_pair p(object.parameters,object.processbody);
         mapping_type::const_iterator i=process_mapping.find(p);
         if (i==process_mapping.end())   // Not found.
         {
@@ -4175,8 +4172,8 @@ class specification_basic_type
       for(const mapping_type_pair& p: process_mapping)
       {
         result.insert(p.second);
-        const std::size_t n=objectIndex(p.second);
-        objectdata[n].processbody=p.first.second;
+        objectdatatype& object=objectIndex(p.second);
+        object.processbody=p.first.second;
       }
       assert(result.count(initial_process)>0);
       return result;
@@ -4226,8 +4223,8 @@ class specification_basic_type
       std::set< process_identifier > result;
       for(const process_identifier& p: reachable_process_identifiers)
       {
-        const std::size_t n = objectIndex(p);
-        process_expression proc_=obtain_initial_distribution_term(objectdata[n].processbody);
+        objectdatatype& object = objectIndex(p);
+        process_expression proc_=obtain_initial_distribution_term(object.processbody);
         if (!is_stochastic_operator(proc_))
         {
           processes_with_stochastic_distribution_first.insert(std::pair< process_identifier, process_pid_pair >(p, process_pid_pair(proc_,p)));
@@ -4237,13 +4234,13 @@ class specification_basic_type
         {
           const stochastic_operator& proc=down_cast<const stochastic_operator>(proc_);
           assert(!is_process_instance_assignment(proc.operand()));
-          const std::size_t n=objectIndex(p);
+          objectdatatype& object=objectIndex(p);
           maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
           variable_list vars=proc.variables();
-          alphaconvert(vars,local_sigma, vars + objectdata[n].parameters, data_expression_list());
+          alphaconvert(vars,local_sigma, vars + object.parameters, data_expression_list());
 
           const process_identifier newproc=newprocess(
-                                           vars + objectdata[n].parameters,
+                                           vars + object.parameters,
                                            process::replace_variables_capture_avoiding_with_an_identifier_generator(proc.operand(),
                                                                                        local_sigma,
                                                                                        fresh_identifier_generator),
@@ -4266,10 +4263,10 @@ class specification_basic_type
 
       for(const process_identifier& p: reachable_process_identifiers)
       {
-        const std::size_t n=objectIndex(processes_with_stochastic_distribution_first.at(p).process_id());
-        assert(!is_stochastic_operator(objectdata[n].processbody));
-        objectdata[n].processbody=transform_initial_distribution_term(objectdata[n].processbody,processes_with_stochastic_distribution_first);
-        assert(!is_stochastic_operator(objectdata[n].processbody));
+        objectdatatype& object=objectIndex(processes_with_stochastic_distribution_first.at(p).process_id());
+        assert(!is_stochastic_operator(object.processbody));
+        object.processbody=transform_initial_distribution_term(object.processbody,processes_with_stochastic_distribution_first);
+        assert(!is_stochastic_operator(object.processbody));
       }
 
       // Adapt the initial process
@@ -4343,8 +4340,8 @@ class specification_basic_type
       variable_list parameters;
       for (const process_identifier& p: pCRLprocs)
       {
-        const std::size_t n=objectIndex(p);
-        parameters=joinparameters(parameters,objectdata[n].parameters);
+        const objectdatatype& object=objectIndex(p);
+        parameters=joinparameters(parameters,object.parameters);
       }
       return parameters;
     }
@@ -4982,8 +4979,8 @@ class specification_basic_type
       bool singlestate,
       const variable_list& stochastic_variables)
     {
-      const std::size_t n=objectIndex(procId);
-      const assignment_list t=find_dummy_arguments(stack.parameters,args,get_free_variables(n),stochastic_variables);
+      objectdatatype& object=objectIndex(procId);
+      const assignment_list t=find_dummy_arguments(stack.parameters,args,get_free_variables(object),stochastic_variables);
 
       if (singlestate)
       {
@@ -5041,11 +5038,11 @@ class specification_basic_type
       const variable_list& vars,
       const variable_list& stochastic_variables)
     {
-      const std::size_t n=objectIndex(procId);
-      const data_expression_list t=findarguments(objectdata[n].parameters,
+      objectdatatype& object=objectIndex(procId);
+      const data_expression_list t=findarguments(object.parameters,
                                                  stack.parameters,
                                                  args,t2,stack,vars,
-                                                 get_free_variables(n),
+                                                 get_free_variables(object),
                                                  stochastic_variables);
 
       std::size_t i=1;
@@ -5078,7 +5075,7 @@ class specification_basic_type
         const process_identifier& procId=process.identifier();
         const assignment_list& t1=process.assignments();
 
-        if (objectdata[objectIndex(procId)].canterminate)
+        if (objectIndex(procId).canterminate)
         {
           const data_expression stackframe=make_procargs_stack(process2,stack,pcrlprcs, vars,stochastic_variables);
           return push_stack(procId,t1, data_expression_list({ stackframe }),stack,pcrlprcs,vars,stochastic_variables);
@@ -5093,7 +5090,7 @@ class specification_basic_type
         const process_identifier procId=process_instance_assignment(t).identifier();
         const assignment_list t1=process_instance_assignment(t).assignments();
 
-        if (objectdata[objectIndex(procId)].canterminate)
+        if (objectIndex(procId).canterminate)
         {
           return push_stack(procId,
                             t1,
@@ -5248,7 +5245,7 @@ class specification_basic_type
       if (regular)
       {
         assignment_list result=
-          pushdummy_regular(objectdata[objectIndex(initialProcId)].parameters,
+          pushdummy_regular(objectIndex(initialProcId).parameters,
                             stack,
                             initial_stochastic_distribution.variables());
         if (!singlecontrolstate)
@@ -5260,7 +5257,7 @@ class specification_basic_type
       else
       {
         data_expression_list result=
-                pushdummy_stack(objectdata[objectIndex(initialProcId)].parameters,
+                pushdummy_stack(objectIndex(initialProcId).parameters,
                                 stack,
                                 initial_stochastic_distribution.variables());
         const data_expression_list l=processencoding(i,result,stack);
@@ -5592,13 +5589,13 @@ class specification_basic_type
     {
       for (const process_identifier& p: pCRLprocs)
       {
-        const std::size_t n=objectIndex(p);
+        objectdatatype& object=objectIndex(p);
 
         collectsumlistterm(
           p,
           action_summands,
           deadlock_summands,
-          objectdata[n].processbody,
+          object.processbody,
           pars,
           stack,
           regular,
@@ -9324,7 +9321,7 @@ class specification_basic_type
       {
         generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),
                         regular,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
-        std::size_t n=objectIndex(process_instance_assignment(t).identifier());
+        objectdatatype& object=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
@@ -9338,11 +9335,11 @@ class specification_basic_type
 
         // Make the bound variables and parameters in this process unique.
 
-        if ((objectdata[n].processstatus==GNF)||
-            (objectdata[n].processstatus==pCRL)||
-            (objectdata[n].processstatus==GNFalpha))
+        if ((object.processstatus==GNF)||
+            (object.processstatus==pCRL)||
+            (object.processstatus==GNFalpha))
         {
-          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition,std::string(objectdata[n].objectname));
+          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition,std::string(object.objectname));
         }
         else
         {
@@ -9382,7 +9379,7 @@ class specification_basic_type
 
           pars=temporary_spec.process().process_parameters();
 
-          // Add all free variables in objectdata[n].parameters that are not already in the parameter list
+          // Add all free variables in object.parameters that are not already in the parameter list
           // and are not global variables to pars. This can occur when a parameter of the process is replaced
           // by a constant, which by itself is a parameter.
 
@@ -9571,15 +9568,15 @@ class specification_basic_type
       /* If regular=1, then a regular version of the pCRL processes
          must be generated */
 
-      std::size_t n=objectIndex(procIdDecl);
+      objectdatatype& object=objectIndex(procIdDecl);
 
-      if ((objectdata[n].processstatus==GNF)||
-          (objectdata[n].processstatus==pCRL)||
-          (objectdata[n].processstatus==GNFalpha)||
-          (objectdata[n].processstatus==multiAction))
+      if ((object.processstatus==GNF)||
+          (object.processstatus==pCRL)||
+          (object.processstatus==GNFalpha)||
+          (object.processstatus==multiAction))
       {
         generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
-                               objectdata[n].containstime,regular,pars,init,initial_stochastic_distribution);
+                               object.containstime,regular,pars,init,initial_stochastic_distribution);
         if (options.ignore_time)
         {
           ultimate_delay_condition=lps::detail::ultimate_delay();
@@ -9611,17 +9608,17 @@ class specification_basic_type
         return;
       }
       /* process is a mCRLdone */
-      if ((objectdata[n].processstatus==mCRLdone)||
-          (objectdata[n].processstatus==mCRLlin)||
-          (objectdata[n].processstatus==mCRL))
+      if ((object.processstatus==mCRLdone)||
+          (object.processstatus==mCRLlin)||
+          (object.processstatus==mCRL))
       {
-        objectdata[n].processstatus=mCRLlin;
-        generateLPEmCRLterm(action_summands, deadlock_summands, objectdata[n].processbody,
+        object.processstatus=mCRLlin;
+        generateLPEmCRLterm(action_summands, deadlock_summands, object.processbody,
                                    regular, false, pars, init, initial_stochastic_distribution, ultimate_delay_condition);
         return;
       }
 
-      throw mcrl2::runtime_error("laststatus: " + std::to_string(objectdata[n].processstatus));
+      throw mcrl2::runtime_error("laststatus: " + std::to_string(object.processstatus));
     }
 
     /**************** alphaconversion ********************************/
@@ -9711,9 +9708,9 @@ class specification_basic_type
       if (is_process_instance_assignment(t))
       {
         const process_identifier procId=process_instance_assignment(t).identifier();
-        std::size_t n=objectIndex(procId);
+        objectdatatype& object=objectIndex(procId);
 
-        const variable_list instance_parameters=objectdata[n].parameters;
+        const variable_list instance_parameters=object.parameters;
         alphaconversion(procId,instance_parameters);
 
         const process_instance_assignment result(procId,
@@ -9765,31 +9762,31 @@ class specification_basic_type
 
     void alphaconversion(const process_identifier& procId, const variable_list& parameters)
     {
-      std::size_t n=objectIndex(procId);
+      objectdatatype& object=objectIndex(procId);
 
-      if ((objectdata[n].processstatus==GNF)||
-          (objectdata[n].processstatus==multiAction))
+      if ((object.processstatus==GNF)||
+          (object.processstatus==multiAction))
       {
-        objectdata[n].processstatus=GNFalpha;
+        object.processstatus=GNFalpha;
         // tempvar below is needed as objectdata may be reallocated
         // during a call to alphaconversionterm.
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,sigma);
-        objectdata[n].processbody=tempvar;
+        const process_expression tempvar=alphaconversionterm(object.processbody,parameters,sigma);
+        object.processbody=tempvar;
       }
-      else if (objectdata[n].processstatus==mCRLdone)
+      else if (object.processstatus==mCRLdone)
       {
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        alphaconversionterm(objectdata[n].processbody,parameters,sigma);
+        alphaconversionterm(object.processbody,parameters,sigma);
 
       }
-      else if (objectdata[n].processstatus==GNFalpha)
+      else if (object.processstatus==GNFalpha)
       {
         return;
       }
       else
       {
-        throw mcrl2::runtime_error("unknown type " + std::to_string(objectdata[n].processstatus) +
+        throw mcrl2::runtime_error("unknown type " + std::to_string(object.processstatus) +
                                                 " in alphaconversion of " + process::pp(procId) +".");
       }
       return;
@@ -9820,7 +9817,7 @@ class specification_basic_type
         {
           return (containstime_rec(process_instance(t).identifier(),stable,visited,contains_if_then));
         }
-        return objectdata[objectIndex(process_instance(t).identifier())].containstime;
+        return objectIndex(process_instance(t).identifier()).containstime;
       }
 
       if (is_process_instance_assignment(t))
@@ -9829,7 +9826,7 @@ class specification_basic_type
         {
           return (containstime_rec(process_instance_assignment(t).identifier(),stable,visited,contains_if_then));
         }
-        return objectdata[objectIndex(process_instance_assignment(t).identifier())].containstime;
+        return objectIndex(process_instance_assignment(t).identifier()).containstime;
       }
 
       if (is_hide(t))
@@ -9933,12 +9930,12 @@ class specification_basic_type
       std::set < process_identifier >& visited,
       bool& contains_if_then)
     {
-      std::size_t n=objectIndex(procId);
+      objectdatatype& object=objectIndex(procId);
 
       if (visited.count(procId)==0)
       {
         visited.insert(procId);
-        const bool ct=containstimebody(objectdata[n].processbody,stable,visited,true,contains_if_then);
+        const bool ct=containstimebody(object.processbody,stable,visited,true,contains_if_then);
         static bool show_only_once=true;
         if (ct && options.ignore_time && show_only_once)
         {
@@ -9947,16 +9944,16 @@ class specification_basic_type
               "Use --timed or -T, or untick `add deadlocks' for a correct timed linearisation...\n";
           show_only_once=false;
         }
-        if (objectdata[n].containstime!=ct)
+        if (object.containstime!=ct)
         {
-          objectdata[n].containstime=ct;
+          object.containstime=ct;
           if (stable!=nullptr)
           {
             *stable=false;
           }
         }
       }
-      return (objectdata[n].containstime);
+      return (object.containstime);
     }
 
     bool containstimebody(const process_expression& t)
@@ -10000,12 +9997,12 @@ class specification_basic_type
         {
           // Add the initial stochastic_distribution.
           const process_identifier& new_identifier=processes_with_initial_distribution.at(u.identifier()).process_id();
-          const std::size_t n=objectIndex(new_identifier);
-          const variable_list new_parameters=objectdata[n].parameters;
+          objectdatatype& object=objectIndex(new_identifier);
+          const variable_list new_parameters=object.parameters;
           const stochastic_operator& sto=down_cast<stochastic_operator>(new_process);
           assignment_list new_assignments;
           
-          const variable_list relevant_stochastic_variables=parameters_that_occur_in_body(sto.variables(),objectdata[n].processbody);
+          const variable_list relevant_stochastic_variables=parameters_that_occur_in_body(sto.variables(),object.processbody);
           assert(relevant_stochastic_variables.size()<=new_parameters.size());
           variable_list::const_iterator i=new_parameters.begin();
           for(const variable& v: relevant_stochastic_variables)
@@ -10015,7 +10012,7 @@ class specification_basic_type
           }
           // Some of the variables may occur only in the distribution, which is now moved out.
           // Therefore, the assignments must be filtered.
-          new_assignments=filter_assignments(new_assignments + u.assignments(),objectdata[n].parameters);
+          new_assignments=filter_assignments(new_assignments + u.assignments(),object.parameters);
 
           // Furthermore, the old assignment must be applied to the distribution, when it is moved
           // outside of the process body.
@@ -10416,8 +10413,8 @@ class specification_basic_type
 
     process_expression obtain_initial_distribution(const process_identifier& procId)
     {
-      std::size_t n=objectIndex(procId);
-      const process_expression initial_distribution_=obtain_initial_distribution_term(objectdata[n].processbody);
+      objectdatatype& object=objectIndex(procId);
+      const process_expression initial_distribution_=obtain_initial_distribution_term(object.processbody);
       if (!is_stochastic_operator(initial_distribution_))
       {
         return process_instance_assignment(procId,assignment_list());
@@ -10426,7 +10423,7 @@ class specification_basic_type
       if (!is_process_instance_assignment(initial_distribution.operand()))
       {
         const process_identifier new_procId=
-                 newprocess(objectdata[n].parameters + initial_distribution.variables(),
+                 newprocess(object.parameters + initial_distribution.variables(),
                             initial_distribution.operand(),
                             pCRL, canterminatebody(initial_distribution.operand()), containstimebody(initial_distribution.operand()));
 
@@ -10461,7 +10458,7 @@ class specification_basic_type
         {
           return (canterminate_rec(process_instance(t).identifier(),stable,visited));
         }
-        return objectdata[objectIndex(process_instance(t).identifier())].canterminate;
+        return objectIndex(process_instance(t).identifier()).canterminate;
       }
 
       if (is_process_instance_assignment(t))
@@ -10471,7 +10468,7 @@ class specification_basic_type
         {
           return (canterminate_rec(u.identifier(),stable,visited));
         }
-        return objectdata[objectIndex(u.identifier())].canterminate;
+        return objectIndex(u.identifier()).canterminate;
       }
 
       if (is_hide(t))
@@ -10571,22 +10568,22 @@ class specification_basic_type
       bool& stable,
       std::set < process_identifier >& visited)
     {
-      std::size_t n=objectIndex(procId);
+      objectdatatype& object=objectIndex(procId);
 
       if (visited.count(procId)==0)
       {
         visited.insert(procId);
-        const bool ct=canterminatebody(objectdata[n].processbody,stable,visited,1);
-        if (objectdata[n].canterminate!=ct)
+        const bool ct=canterminatebody(object.processbody,stable,visited,1);
+        if (object.canterminate!=ct)
         {
-          objectdata[n].canterminate=ct;
+          object.canterminate=ct;
           if (stable)
           {
             stable=false;
           }
         }
       }
-      return (objectdata[n].canterminate);
+      return (object.canterminate);
     }
 
     bool canterminatebody(const process_expression& t)
@@ -10618,38 +10615,38 @@ class specification_basic_type
         return visited_id[procId];
       }
 
-      std::size_t n=objectIndex(procId);
+      objectdatatype& object=objectIndex(procId);
 
-      if ((objectdata[n].processstatus!=mCRL) &&
-          (objectdata[n].canterminate==0))
+      if ((object.processstatus!=mCRL) &&
+          (object.canterminate==0))
       {
         /* no new process needs to be constructed */
         return procId;
       }
 
-      if (objectdata[n].processstatus==mCRL)
+      if (object.processstatus==mCRL)
       {
         visited_id[procId]=procId;
-        objectdata[n].processbody = split_body(objectdata[n].processbody,
+        object.processbody = split_body(object.processbody,
                                                visited_id,visited_proc,
-                                               objectdata[n].parameters);
+                                               object.parameters);
         return procId;
       }
 
       const process_identifier newProcId(
                    fresh_identifier_generator(procId.name()),
-                   objectdata[n].parameters);
+                   object.parameters);
       visited_id[procId]=newProcId;
 
-      if (objectdata[n].canterminate)
+      if (object.canterminate)
       {
         assert(check_valid_process_instance_assignment(terminatedProcId,assignment_list()));
         insert_process_declaration(
           newProcId,
-          objectdata[n].parameters,
-          seq(objectdata[n].processbody, process_instance_assignment(terminatedProcId,assignment_list())),
-          pCRL,canterminatebody(objectdata[n].processbody),
-          containstimebody(objectdata[n].processbody));
+          object.parameters,
+          seq(object.processbody, process_instance_assignment(terminatedProcId,assignment_list())),
+          pCRL,canterminatebody(object.processbody),
+          containstimebody(object.processbody));
         return newProcId;
       }
       return procId;
@@ -10671,10 +10668,10 @@ class specification_basic_type
       if (visited_processes.count(procId)==0)
       {
         visited_processes.insert(procId);
-        std::size_t n=objectIndex(procId);
+        objectdatatype& object=objectIndex(procId);
         const std::set<variable> bound_variables;
-        objectdata[n].processbody=transform_process_arguments_body(
-                                         objectdata[n].processbody,
+        object.processbody=transform_process_arguments_body(
+                                         object.processbody,
                                          bound_variables,
                                          visited_processes);
       }
@@ -10700,12 +10697,12 @@ class specification_basic_type
       {
         transform_process_arguments(process_instance_assignment(t).identifier(),visited_processes);
         const process_instance_assignment u(t);
-        std::size_t n=objectIndex(u.identifier());
+        objectdatatype& object=objectIndex(u.identifier());
         assert(check_valid_process_instance_assignment(u.identifier(),
-                 sort_assignments(u.assignments(),objectdata[n].parameters)));
+                 sort_assignments(u.assignments(),object.parameters)));
         return process_instance_assignment(
                      u.identifier(),
-                     sort_assignments(u.assignments(),objectdata[n].parameters));
+                     sort_assignments(u.assignments(),object.parameters));
       }
       if (is_hide(t))
       {
@@ -10826,8 +10823,8 @@ class specification_basic_type
       if (visited_processes.count(procId)==0)
       {
         visited_processes.insert(procId);
-        std::size_t n=objectIndex(procId);
-        const variable_list parameters=objectdata[n].parameters;
+        objectdatatype& object=objectIndex(procId);
+        const variable_list parameters=object.parameters;
         for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
         {
           if (used_variable_names.count(i->name())==0)
@@ -10849,10 +10846,10 @@ class specification_basic_type
             }
           }
         }
-        objectdata[n].old_parameters=objectdata[n].parameters;
-        objectdata[n].parameters=data::replace_variables(parameters,parameter_mapping);
-        objectdata[n].processbody=guarantee_that_parameters_have_unique_type_body(
-                                         objectdata[n].processbody,
+        object.old_parameters=object.parameters;
+        object.parameters=data::replace_variables(parameters,parameter_mapping);
+        object.processbody=guarantee_that_parameters_have_unique_type_body(
+                                         object.processbody,
                                          visited_processes,
                                          used_variable_names,
                                          parameter_mapping,
@@ -10884,12 +10881,12 @@ class specification_basic_type
       {
         guarantee_that_parameters_have_unique_type(process_instance_assignment(t).identifier(),visited_processes,used_variable_names,parameter_mapping,variables_in_lhs_of_parameter_mapping);
         const process_instance_assignment u(t);
-        std::size_t n=objectIndex(u.identifier());
+        objectdatatype& object=objectIndex(u.identifier());
         assert(check_valid_process_instance_assignment(u.identifier(),
-                 substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping)));
+                 substitute_assignmentlist(u.assignments(),object.old_parameters,true,true,parameter_mapping)));
         return process_instance_assignment(
                      u.identifier(),
-                     substitute_assignmentlist(u.assignments(),objectdata[n].old_parameters,true,true,parameter_mapping));
+                     substitute_assignmentlist(u.assignments(),object.old_parameters,true,true,parameter_mapping));
       }
       if (is_hide(t))
       {
@@ -11082,12 +11079,12 @@ class specification_basic_type
       else if (is_process_instance_assignment(t))
       {
         const process_instance_assignment u(t);
-        std::size_t n=objectIndex(u.identifier());
+        objectdatatype& object=objectIndex(u.identifier());
         assert(check_valid_process_instance_assignment(split_process(u.identifier(),visited_id,visited_proc),
-                 sort_assignments(u.assignments(),objectdata[n].parameters)));
+                 sort_assignments(u.assignments(),object.parameters)));
         result=process_instance_assignment(
                  split_process(u.identifier(),visited_id,visited_proc),
-                 sort_assignments(u.assignments(),objectdata[n].parameters));
+                 sort_assignments(u.assignments(),object.parameters));
       }
       else if (is_hide(t))
       {
