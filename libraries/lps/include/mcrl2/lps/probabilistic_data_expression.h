@@ -27,7 +27,9 @@ namespace lps
 {
 
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denumerator.
- *  \details There are methods to add and subtract such labels. The numbers are used as 64 bit integers.
+ *  \details This class provides a number of operators to calculate with real constants (actually fractions). 
+ *           Comparisons of more complex expressions may not always rewrite properly. 
+ *           There are methods to add and subtract such labels. The numbers are used as 64 bit integers.
  *           If the integers do not fit into 64 bit, the numerator and denumerator are adapted to make
  *           them fit. This means that this library is not exact, but employs rounding at times.
  *
