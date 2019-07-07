@@ -49,7 +49,17 @@
 %   5     No    No    No    No    No    No
 %   6     No    No    No    No    No
 %
+% Observe that this description allows the game to continue after it has been won or lost.
+% Adding extra conditions stopping the game after winning it, leads to a smaller state space, but also
+% a substantial slowdown of generating the state space. 
+%
+% Using the Mastodont (3+12)#Terabyte main memory computer (21 June, 2019) we obtain for this specification:
+% The state space for a 4x7 instantiation has a state space of 30 levels, 6741832166 states and 17968443566 transitions 
+% using approximately 500Gigabyte of memory and 1 day of calculation time.  
+%
+% 
 % Jan Friso Groote, April 6, 2010/Juli 28, 2014
+
 
 sort Piece = struct Red | Yellow | None;
 map N,M,R:Pos;
@@ -188,11 +198,11 @@ proc FourInaRow(b:Board,WhoMoves:Piece)=
 
        (WhoMoves==Yellow && Four_in_a_row(Red,b)) ->
              RedWins.
-                FourInaRow(b,None)+
+                FourInaRow(initial_board,None)+
 
        (WhoMoves==Red && Four_in_a_row(Yellow,b)) ->
              YellowWins.
-                FourInaRow(b,None);
+                FourInaRow(initial_board,None);
                   
 % Note that the board is reversed. The bottom row is drawn at the top.
 map initial_board:Board;
