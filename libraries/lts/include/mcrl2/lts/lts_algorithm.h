@@ -21,7 +21,6 @@
 
 #include <string>
 #include <vector>
-#include <set>
 #include <stack>
 #include <algorithm>
 #include <iostream>
@@ -345,8 +344,8 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
 
-    std::map < std::size_t , std::size_t > state_map;
-    std::map < std::size_t , std::size_t > label_map;
+    std::unordered_map < std::size_t , std::size_t > state_map;
+    std::unordered_map < std::size_t , std::size_t > label_map;
 
     lts < SL, AL, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
     new_lts.clear();
@@ -460,8 +459,8 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
 
-    std::map < std::size_t , std::size_t > state_map;
-    std::map < std::size_t , std::size_t > label_map;
+    std::unordered_map < std::size_t , std::size_t > state_map;
+    std::unordered_map < std::size_t , std::size_t > label_map;
 
     probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
     new_lts.clear();

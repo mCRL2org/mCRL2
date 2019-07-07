@@ -11,7 +11,7 @@
 #ifndef _LIBLTS_SCC_H
 #define _LIBLTS_SCC_H
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <unordered_set>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
@@ -100,10 +100,10 @@ class scc_partitioner
 
     void group_components(const state_type t,
                           const state_type equivalence_class_index,
-                          const std::map < state_type, std::vector < state_type > >& tgt_src,
+                          const std::unordered_map < state_type, std::vector < state_type > >& tgt_src,
                           std::vector < bool >& visited);
     void dfs_numbering(const state_type t,
-                       const std::map < state_type, std::vector < state_type > >& src_tgt,
+                       const std::unordered_map < state_type, std::vector < state_type > >& src_tgt,
                        std::vector < bool >& visited);
 
 };
@@ -117,7 +117,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
               l.num_transitions() << " transitions" << std::endl;
 
   // read and store tau transitions.
-  std::map < state_type, std::vector < state_type > > src_tgt;
+  std::unordered_map < state_type, std::vector < state_type > > src_tgt;
   for (const transition& t: aut.get_transitions())
   {
     if (aut.is_tau(l.apply_hidden_label_map(t.label())))
@@ -135,7 +135,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   }
   src_tgt.clear();
 
-  std::map < state_type, std::vector < state_type > > tgt_src;
+  std::unordered_map < state_type, std::vector < state_type > > tgt_src;
   for (const transition& t: aut.get_transitions())
   {
     if (aut.is_tau(l.apply_hidden_label_map(t.label())))
@@ -237,7 +237,7 @@ template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::group_components(
   const state_type t,
   const state_type equivalence_class_index,
-  const std::map < state_type, std::vector < state_type > >& tgt_src,
+  const std::unordered_map < state_type, std::vector < state_type > >& tgt_src,
   std::vector < bool >& visited)
 {
   if (!visited[t])
@@ -262,7 +262,7 @@ void scc_partitioner<LTS_TYPE>::group_components(
 template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::dfs_numbering(
   const state_type t,
-  const std::map < state_type, std::vector < state_type > >& src_tgt,
+  const std::unordered_map < state_type, std::vector < state_type > >& src_tgt,
   std::vector < bool >& visited)
 {
   if (visited[t])
