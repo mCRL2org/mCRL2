@@ -158,7 +158,6 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
     for(const outgoing_pair_t& p: vec)
     {
       const state_type from_=from;         // the start state of a transition under consideration. 
-      from++;
       const label_type label_=label(p);    // the label
       const state_type to_=to(p);          // the target state
 
@@ -166,8 +165,7 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
       states_reachable_in_one_hidden_action.clear();
 
       // For every transition from-label->to we calculate the sets { s | from -a->s } and { s | from -tau-> s }.
-      // for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(from_);
-      //                j!=outgoing_transitions.upper_bound(from_); ++j)
+      assert(from_<outgoing_transitions.size());
       for(const outgoing_pair_t& j: outgoing_transitions[from_])
       {
         if (l.is_tau(l.apply_hidden_label_map(label(j))))
@@ -189,8 +187,6 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
       {
         // Find a visible step from state middle to state to, unless label is hidden, in which case we search
         // a hidden step. 
-        // for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
-        //            !found && j!=outgoing_transitions.upper_bound(middle); ++j)
         for(const outgoing_pair_t& j: outgoing_transitions[middle])
         {
           if (l.is_tau(l.apply_hidden_label_map(label_)))
@@ -218,8 +214,6 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
         for(const state_type& middle: states_reachable_in_one_visible_action)
         {
           // Find a hidden step from state middle to state to.
-          // for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
-          //             !found && j!=outgoing_transitions.upper_bound(middle); ++j)
           for(const outgoing_pair_t& j: outgoing_transitions[middle])
           {
             if (l.is_tau(l.apply_hidden_label_map(label(j))) && to(j)==to_)
@@ -238,6 +232,7 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
         l.add_transition(transition(from_, label_, to_));
       }
     }  
+    from++;
   }
 }
 
