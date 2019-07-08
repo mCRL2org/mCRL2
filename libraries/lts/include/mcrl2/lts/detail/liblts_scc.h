@@ -11,7 +11,6 @@
 #ifndef _LIBLTS_SCC_H
 #define _LIBLTS_SCC_H
 #include <vector>
-#include <unordered_map>
 #include <unordered_set>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
@@ -100,10 +99,10 @@ class scc_partitioner
 
     void group_components(const state_type t,
                           const state_type equivalence_class_index,
-                          const std::unordered_map < state_type, std::vector < state_type > >& tgt_src,
+                          const std::vector < std::vector < state_type > >& tgt_src,
                           std::vector < bool >& visited);
     void dfs_numbering(const state_type t,
-                       const std::unordered_map < state_type, std::vector < state_type > >& src_tgt,
+                       const std::vector < std::vector < state_type > >& src_tgt,
                        std::vector < bool >& visited);
 
 };
@@ -117,7 +116,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
               l.num_transitions() << " transitions" << std::endl;
 
   // read and store tau transitions.
-  std::unordered_map < state_type, std::vector < state_type > > src_tgt;
+  std::vector < std::vector < state_type > > src_tgt(l.num_states());
   for (const transition& t: aut.get_transitions())
   {
     if (aut.is_tau(l.apply_hidden_label_map(t.label())))
@@ -135,7 +134,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   }
   src_tgt.clear();
 
-  std::unordered_map < state_type, std::vector < state_type > > tgt_src;
+  std::vector < std::vector < state_type > > tgt_src(l.num_states());
   for (const transition& t: aut.get_transitions())
   {
     if (aut.is_tau(l.apply_hidden_label_map(t.label())))
@@ -237,32 +236,25 @@ template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::group_components(
   const state_type t,
   const state_type equivalence_class_index,
-  const std::unordered_map < state_type, std::vector < state_type > >& tgt_src,
+  const std::vector < std::vector < state_type > >& tgt_src,
   std::vector < bool >& visited)
 {
   if (!visited[t])
   {
     return;
   }
+  visited[t] = false;
+  for(const state_type s: tgt_src[t])
   {
-    visited[t] = false;
-    if (tgt_src.count(t)>0)
-    {
-      const std::vector < state_type >& sources = tgt_src.find(t)->second;
-      for (std::vector < state_type >::const_iterator i=sources.begin();
-           i!=sources.end(); ++i)
-      {
-        group_components(*i,equivalence_class_index,tgt_src,visited);
-      }
-    }
-    block_index_of_a_state[t]=equivalence_class_index;
+    group_components(s,equivalence_class_index,tgt_src,visited);
   }
+  block_index_of_a_state[t]=equivalence_class_index;
 }
 
 template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::dfs_numbering(
   const state_type t,
-  const std::unordered_map < state_type, std::vector < state_type > >& src_tgt,
+  const std::vector < std::vector < state_type > >& src_tgt,
   std::vector < bool >& visited)
 {
   if (visited[t])
@@ -270,14 +262,9 @@ void scc_partitioner<LTS_TYPE>::dfs_numbering(
     return;
   }
   visited[t] = true;
-  if (src_tgt.count(t)>0)
+  for(const state_type s: src_tgt[t])
   {
-    const std::vector < state_type >& targets = src_tgt.find(t)->second;
-    for (std::vector < state_type >::const_iterator i=targets.begin();
-         i!=targets.end() ; ++i)
-    {
-      dfs_numbering(*i,src_tgt,visited);
-    }
+    dfs_numbering(s,src_tgt,visited);
   }
   dfsn2state.push_back(t);
 }
