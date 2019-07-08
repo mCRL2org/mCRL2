@@ -309,7 +309,7 @@ template <class SL, class AL, class BASE>
 bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
-  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
+  const outgoing_transitions_per_state_t out_trans(transitions_per_outgoing_state(l.get_transitions()));
 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
@@ -343,8 +343,8 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
 
-    std::unordered_map < std::size_t , std::size_t > state_map;
-    std::unordered_map < std::size_t , std::size_t > label_map;
+    std::vector < detail::state_type > state_map(l.num_states());
+    std::vector < detail::state_type > label_map(l.num_action_labels());
 
     lts < SL, AL, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
     new_lts.clear();
@@ -379,7 +379,7 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
     std::size_t new_nlabels = 0;
     for (std::size_t i=0; i<l.num_action_labels(); i++)
     {
-      if (label_map.count(i)>0)   // Label i is used.
+      if (label_map[i]>0)   // Label i is used.
       {
         label_map[i] = new_nlabels;
         new_lts.add_action(l.action_label(i));
@@ -457,8 +457,8 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
 
-    std::unordered_map < std::size_t , std::size_t > state_map;
-    std::unordered_map < std::size_t , std::size_t > label_map;
+    std::vector < detail::state_type > state_map(l.num_states());
+    std::vector < detail::state_type > label_map(l.num_action_labels());
 
     probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
     new_lts.clear();
@@ -493,7 +493,7 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
     std::size_t new_nlabels = 0;
     for (std::size_t i=0; i<l.num_action_labels(); i++)
     {
-      if (label_map.count(i)>0)   // Label i is used.
+      if (label_map[i]>0)   // Label i is used.
       {
         label_map[i] = new_nlabels;
         new_lts.add_action(l.action_label(i));

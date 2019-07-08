@@ -726,9 +726,9 @@ class bisim_partitioner
     }
     void order_recursively_on_tau_reachability(
       const state_type s,
-      std::map < state_type, std::vector < state_type > > &inert_transition_map,
-      std::vector < non_bottom_state > &new_non_bottom_states,
-      std::set < state_type > &visited)
+      std::map < state_type, std::vector < state_type > >& inert_transition_map,
+      std::vector < non_bottom_state >& new_non_bottom_states,
+      std::set < state_type >& visited)
     {
       if (inert_transition_map.count(s)>0) // The state s is a bottom state. We need not to investigate these.
       {
