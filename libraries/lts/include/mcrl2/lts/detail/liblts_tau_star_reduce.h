@@ -150,85 +150,95 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
   std::set < state_type > states_reachable_in_one_visible_action;
   std::set < state_type > states_reachable_in_one_hidden_action;
 
-  for(outgoing_transitions_per_state_t::const_iterator i=outgoing_transitions.begin(); i!=outgoing_transitions.end(); ++i)
+  // for(outgoing_transitions_per_state_t::const_iterator i=outgoing_transitions.begin(); i!=outgoing_transitions.end(); ++i)
+
+  state_type from=0;
+  for(const outgoing_transitions_t& vec: outgoing_transitions)
   {
-    const state_type from_=from(i);
-    const label_type label_=label(i);
-    const state_type to_=to(i);
-
-    states_reachable_in_one_visible_action.clear();
-    states_reachable_in_one_hidden_action.clear();
-
-    // For every transition from-label->to we calculate the sets { s | from -a->s } and { s | from -tau-> s }.
-    for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(from_);
-                    j!=outgoing_transitions.upper_bound(from_); ++j)
+    for(const outgoing_pair_t& p: vec)
     {
-      if (l.is_tau(l.apply_hidden_label_map(label(j))))
-      {
-        states_reachable_in_one_hidden_action.insert(to(j));
-      }
-      else if (label_==label(j))
-      {
-        assert(!l.is_tau(l.apply_hidden_label_map(label_)));
-        states_reachable_in_one_visible_action.insert(to(j)); 
-      }
-    }
+      const state_type from_=from;         // the start state of a transition under consideration. 
+      from++;
+      const label_type label_=label(p);    // the label
+      const state_type to_=to(p);          // the target state
 
-    // Now check whether to is reachable in one step from one of the two sets constructed above. If no,
-    // insert the transition in l.transitions. 
-    bool found=false;
-    
-    for(const state_type& middle: states_reachable_in_one_hidden_action)
-    {
-      // Find a visible step from state middle to state to, unless label is hidden, in which case we search
-      // a hidden step. 
-      for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
-                  !found && j!=outgoing_transitions.upper_bound(middle); ++j)
+      states_reachable_in_one_visible_action.clear();
+      states_reachable_in_one_hidden_action.clear();
+
+      // For every transition from-label->to we calculate the sets { s | from -a->s } and { s | from -tau-> s }.
+      // for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(from_);
+      //                j!=outgoing_transitions.upper_bound(from_); ++j)
+      for(const outgoing_pair_t& j: outgoing_transitions[from_])
       {
-        if (l.is_tau(l.apply_hidden_label_map(label_)))
-        { 
-          if (l.is_tau(l.apply_hidden_label_map(label(j))) && to(j)==to_)
-          {
-            assert(!found);
-            found=true; break;
-          }
-        }
-        else // label is visible.
+        if (l.is_tau(l.apply_hidden_label_map(label(j))))
         {
-          if (label(j)==label_ && to(j)==to_)
-          {
-            assert(!found);
-            found=true; break;
-          }
+          states_reachable_in_one_hidden_action.insert(to(j));
+        }
+        else if (label_==label(j))
+        {
+          assert(!l.is_tau(l.apply_hidden_label_map(label_)));
+          states_reachable_in_one_visible_action.insert(to(j)); 
         }
       }
-      if (found) break;
-    }
-    
-    if (!found && !l.is_tau(l.apply_hidden_label_map(label_)))
-    {
-      for(const state_type& middle: states_reachable_in_one_visible_action)
+
+      // Now check whether to is reachable in one step from one of the two sets constructed above. If no,
+      // insert the transition in l.transitions. 
+      bool found=false;
+      
+      for(const state_type& middle: states_reachable_in_one_hidden_action)
       {
-        // Find a hidden step from state middle to state to.
-        for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
-                    !found && j!=outgoing_transitions.upper_bound(middle); ++j)
+        // Find a visible step from state middle to state to, unless label is hidden, in which case we search
+        // a hidden step. 
+        // for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
+        //            !found && j!=outgoing_transitions.upper_bound(middle); ++j)
+        for(const outgoing_pair_t& j: outgoing_transitions[middle])
         {
-          if (l.is_tau(l.apply_hidden_label_map(label(j))) && to(j)==to_)
+          if (l.is_tau(l.apply_hidden_label_map(label_)))
           { 
-            assert(!found);
-            found=true; break;
-          } 
+            if (l.is_tau(l.apply_hidden_label_map(label(j))) && to(j)==to_)
+            {
+              assert(!found);
+              found=true; break;
+            }
+          }
+          else // label is visible.
+          {
+            if (label(j)==label_ && to(j)==to_)
+            {
+              assert(!found);
+              found=true; break;
+            }
+          }
         }
         if (found) break;
       }
-    }
+      
+      if (!found && !l.is_tau(l.apply_hidden_label_map(label_)))
+      {
+        for(const state_type& middle: states_reachable_in_one_visible_action)
+        {
+          // Find a hidden step from state middle to state to.
+          // for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
+          //             !found && j!=outgoing_transitions.upper_bound(middle); ++j)
+          for(const outgoing_pair_t& j: outgoing_transitions[middle])
+          {
+            if (l.is_tau(l.apply_hidden_label_map(label(j))) && to(j)==to_)
+            { 
+              assert(!found);
+              found=true; break;
+            } 
+          }
+          if (found) break;
+        }
+      }
 
-    // If no alternative transition is found, add this transition to l.transitions().
-    if (!found) 
-    {
-      l.add_transition(transition(from_, label_, to_));
-    }
-  }  
+      // If no alternative transition is found, add this transition to l.transitions().
+      if (!found) 
+      {
+        l.add_transition(transition(from_, label_, to_));
+      }
+    }  
+  }
 }
 
 

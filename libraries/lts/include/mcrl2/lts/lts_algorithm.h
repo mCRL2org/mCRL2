@@ -321,14 +321,13 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
   {
     std::size_t state_to_consider=todo.top();
     todo.pop();
-    for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider);
-         i!=out_trans.upper_bound(state_to_consider); ++i)
+    for (const outgoing_pair_t& p: out_trans[state_to_consider])
     {
-      assert(visited[from(i)] && from(i)<l.num_states() && to(i)<l.num_states());
-      if (!visited[to(i)])
+      assert(visited[state_to_consider] && state_to_consider<l.num_states() && to(p)<l.num_states());
+      if (!visited[to(p)])
       {
-        visited[to(i)]=true;
-        todo.push(to(i));
+        visited[to(p)]=true;
+        todo.push(to(p));
       }
     }
   }
@@ -432,17 +431,16 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
   {
     std::size_t state_to_consider=todo.top();
     todo.pop();
-    for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider);
-         i!=out_trans.upper_bound(state_to_consider); ++i)
+    for (const outgoing_pair_t& p: out_trans[state_to_consider])
     {
-      assert(visited[from(i)] && from(i)<l.num_states() && to(i)<l.num_probabilistic_states());
+      assert(visited[state_to_consider] && state_to_consider<l.num_states() && to(p)<l.num_probabilistic_states());
       // Walk through the the states in this probabilistic state.
-      for(const typename PROBABILISTIC_STATE::state_probability_pair& p: l.probabilistic_state(to(i)))
+      for(const typename PROBABILISTIC_STATE::state_probability_pair& pr: l.probabilistic_state(to(p)))
       {
-        if (!visited[p.state()])
+        if (!visited[pr.state()])
         {
-          visited[p.state()]=true;
-          todo.push(p.state());
+          visited[pr.state()]=true;
+          todo.push(pr.state());
         }
       }
     }
@@ -921,19 +919,21 @@ bool is_deterministic(const LTS_TYPE& l)
 namespace detail
 {
 inline
-void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
-                      tree_set_store& tss,
-                      std::size_t d,
-                      std::vector<transition> &d_trans)
+void get_trans(const outgoing_transitions_per_state_t& begin,
+               tree_set_store& tss,
+               std::size_t d,
+               std::vector<transition> &d_trans)
 {
   if (!tss.is_set_empty(d))
   {
     if (tss.is_set_empty(tss.get_set_child_right(d)))
     {
-      for (std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > :: const_iterator
-           j=begin.lower_bound(tss.get_set_child_left(d)); j!=begin.upper_bound(tss.get_set_child_left(d)); ++j)
+      // for (outgoing_transitions_per_state_t:: const_iterator
+      //     j=begin.lower_bound(tss.get_set_child_left(d)); j!=begin.upper_bound(tss.get_set_child_left(d)); ++j)
+      const state_type from=tss.get_set_child_left(d);
+      for(const outgoing_pair_t& p: begin[from])
       {
-        d_trans.push_back(transition(j->first,j->second.first,j->second.second));
+        d_trans.push_back(transition(from, label(p), to(p)));
       }
     }
     else
@@ -959,8 +959,8 @@ void determinise(LTS_TYPE& l)
   std::ptrdiff_t d_id = tss.set_set_tag(tss.create_set(d_states));
   d_states.clear();
 
-  std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
-  begin=transitions_per_outgoing_state(l.get_transitions(),l.hidden_label_map());
+  // std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
+  const outgoing_transitions_per_state_t begin=transitions_per_outgoing_state(l.get_transitions(),l.hidden_label_map());
 
   l.clear_transitions();
   l.clear_state_labels();

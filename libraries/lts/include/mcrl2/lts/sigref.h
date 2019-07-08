@@ -132,15 +132,15 @@ protected:
   {
     if(m_sig[t].insert(std::make_pair(label_, block)).second)
     {
-      std::pair<outgoing_transitions_per_state_t::const_iterator, outgoing_transitions_per_state_t::const_iterator> pred_range
-          = m_prev_transitions.equal_range(t);
+      // std::pair<outgoing_transitions_per_state_t::const_iterator, outgoing_transitions_per_state_t::const_iterator> pred_range
+      //    = m_prev_transitions.equal_range(t);
 
-      for(outgoing_transitions_per_state_t::const_iterator i = pred_range.first; i != pred_range.second; ++i)
+      // for(outgoing_transitions_per_state_t::const_iterator i = pred_range.first; i != pred_range.second; ++i)
+      for(const outgoing_pair_t& p: m_prev_transitions[t])
       {
-        assert(from(i) == t);
-        if(m_lts.is_tau(label(i)) && partition[from(i)] == partition[to(i)])
+        if(m_lts.is_tau(label(p)) && partition[t] == partition[to(p)])
         {
-          insert(partition, to(i), label_, block);
+          insert(partition, to(p), label_, block);
         }
       }
     }
@@ -205,67 +205,70 @@ protected:
   {
     std::size_t unused = 1, lastscc = 1;
     std::vector<std::size_t> scc(m_lts.num_states(), 0);
-	  std::vector<std::size_t> low(m_lts.num_states(), 0);
-	  std::stack<std::size_t> stack;
-	  std::stack<std::size_t> sccstack;
+    std::vector<std::size_t> low(m_lts.num_states(), 0);
+    std::stack<std::size_t> stack;
+    std::stack<std::size_t> sccstack;
 
     // Record forward transition relation sorted by state.
-	  outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions(),m_lts.hidden_label_map()));
+    outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions(),m_lts.hidden_label_map()));
 
-	  for (std::size_t i = 0; i < m_lts.num_states(); ++i)
-	  {
-		  if (scc[i] == 0)
-			  stack.push(i);
-		  while (!stack.empty())
-		  {
-			  std::size_t vi = stack.top();
+    for (std::size_t i = 0; i < m_lts.num_states(); ++i)
+    {
+      if (scc[i] == 0)
+        stack.push(i);
+      while (!stack.empty())
+      {
+        const std::size_t vi = stack.top();
 
         // Outgoing transitions of vi.
-        std::pair<outgoing_transitions_per_state_t::const_iterator, outgoing_transitions_per_state_t::const_iterator> succ_range
-          = m_lts_succ_transitions.equal_range(vi);
+        // std::pair<outgoing_transitions_per_state_t::const_iterator, outgoing_transitions_per_state_t::const_iterator> succ_range
+        //  = m_lts_succ_transitions.equal_range(vi);
 
-			  if (low[vi] == 0 && scc[vi] == 0)
-			  {
-				  scc[vi] = unused;
-				  low[vi] = unused++;
-				  sccstack.push(vi);
+        if (low[vi] == 0 && scc[vi] == 0)
+        {
+          scc[vi] = unused;
+          low[vi] = unused++;
+          sccstack.push(vi);
 
-				  for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
-				  {
+          // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
+          for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
+          {
             if ((low[to(t)] == 0) && (scc[to(t)] == 0) && (m_lts.is_tau(label(t))))
-					  {
-						  stack.push(to(t));
-						}
-				  }
-			  }
-			  else
-			  {
-				  for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
-				  {
-					  if ((low[to(t)] != 0) && (m_lts.is_tau(label(t))))
-						  low[vi] = low[vi] < low[to(t)] ? low[vi] : low[to(t)];
-				  }
-				  if (low[vi] == scc[vi])
-				  {
-					  std::size_t tos, scc_id = lastscc++;
+            {
+              stack.push(to(t));
+            }
+          }
+        }
+        else
+        {
+          // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
+          for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
+          {
+            if ((low[to(t)] != 0) && (m_lts.is_tau(label(t))))
+              low[vi] = low[vi] < low[to(t)] ? low[vi] : low[to(t)];
+          }
+          if (low[vi] == scc[vi])
+          {
+            std::size_t tos, scc_id = lastscc++;
             std::vector<std::size_t> this_scc;
-					  do
-					  {
-						  tos = sccstack.top();
-						  low[tos] = 0;
-						  scc[tos] = scc_id;
-						  sccstack.pop();
+            do
+            {
+              tos = sccstack.top();
+              low[tos] = 0;
+              scc[tos] = scc_id;
+              sccstack.pop();
               this_scc.push_back(tos);
-					  }
-					  while (tos != vi);
+            }
+            while (tos != vi);
 
             // We only consider non-trivial sccs, hence
             // if the scc consists of a single schate, check whether it has a tau-loop
             if(this_scc.size() == 1)
             {
-              for(outgoing_transitions_per_state_t::const_iterator i = succ_range.first; i != succ_range.second; ++i)
+              // for(outgoing_transitions_per_state_t::const_iterator i = succ_range.first; i != succ_range.second; ++i)
+              for (const outgoing_pair_t& i: m_lts_succ_transitions[vi]) 
               {
-                if(from(i) == to(i) && m_lts.is_tau(label(i)))
+                if(vi == to(i) && m_lts.is_tau(label(i)))
                 {
                   m_divergent[tos] = true;
                   break;
@@ -276,11 +279,11 @@ protected:
             {
               m_divergent[tos] = true;
             }
-				  }
-				  stack.pop();
-			  }
-		  }
-	  }
+          }
+          stack.pop();
+        }
+      }
+    }
   }
 
 public:

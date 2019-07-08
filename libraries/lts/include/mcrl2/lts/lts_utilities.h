@@ -47,25 +47,20 @@ inline std::size_t apply_map(const std::size_t n, std::map<transition::size_type
 } // end namespace detail 
 
 /// \brief Type for exploring transitions per state.
-typedef std::multimap<transition::size_type, std::pair<transition::size_type, transition::size_type> >
-outgoing_transitions_per_state_t;
+typedef std::pair<transition::size_type, transition::size_type> outgoing_pair_t;
+typedef std::vector<outgoing_pair_t > outgoing_transitions_t;
+typedef std::vector< outgoing_transitions_t > outgoing_transitions_per_state_t;
 
-/// \brief From state of an iterator exploring transitions per outgoing state.
-inline std::size_t from(const outgoing_transitions_per_state_t::const_iterator& i)
+/// \brief Label of a pair of a label and target state. 
+inline std::size_t label(const outgoing_pair_t& p)
 {
-  return i->first;
+  return p.first;
 }
 
-/// \brief Label of an iterator exploring transitions per outgoing state.
-inline std::size_t label(const outgoing_transitions_per_state_t::const_iterator& i)
+/// \brief Target state of a label state pair. 
+inline std::size_t to(const outgoing_pair_t& p)
 {
-  return i->second.first;
-}
-
-/// \brief To state of an iterator exploring transitions per outgoing state.
-inline std::size_t to(const outgoing_transitions_per_state_t::const_iterator& i)
-{
-  return i->second.second;
+  return p.second;
 }
 
 /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
@@ -75,8 +70,11 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std
   outgoing_transitions_per_state_t result;
   for (const transition& t: trans)
   {
-    result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
-                    t.from(), std::pair<transition::size_type, transition::size_type>(t.label(), t.to())));
+    if (t.from()>=result.size())
+    {
+      result.resize(t.from()+1);
+    }
+    result[t.from()].emplace_back(std::pair<transition::size_type, transition::size_type>(t.label(), t.to()));
   }
   return result;
 }
@@ -90,8 +88,11 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state(
   outgoing_transitions_per_state_t result;
   for (const transition& t: trans)
   {
-    result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
-                    t.from(), std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.to())));
+    if (t.from()>=result.size())
+    {
+      result.resize(t.from()+1);
+    }
+    result[t.from()].emplace_back(std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.to()));
   }
   return result;
 } 
@@ -103,8 +104,11 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(
   outgoing_transitions_per_state_t result;
   for (const transition& t: trans)
   {
-    result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
-                    t.to(), std::pair<transition::size_type, transition::size_type>(t.label(), t.from())));
+    if (t.to()>=result.size())
+    {
+      result.resize(t.to()+1);
+    }
+    result[t.to()].emplace_back(std::pair<transition::size_type, transition::size_type>(t.label(), t.from()));
   }
   return result;
 }
@@ -119,8 +123,11 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(
   outgoing_transitions_per_state_t result;
   for (const transition& t: trans)
   {
-    result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
-                    t.to(), std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.from())));
+    if (t.to()>=result.size())
+    {
+      result.resize(t.to()+1);
+    }
+    result[t.to()].emplace_back(std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.from()));
   }
   return result;
 } 
