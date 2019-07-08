@@ -62,13 +62,14 @@ void partial_solve(structure_graph& G,
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
 
   vertex_set W[2] = { vertex_set(N), vertex_set(N) };
-  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S1, attr_default(G, S0_todo, 0)));
+  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S1, attr_default_no_strategy(G, S0_todo, 0)));
   S1 = attr_default(G, set_union(S1, W[1]), 1);
-  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S0, attr_default(G, S1_todo, 1)));
+  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S0, attr_default_no_strategy(G, S1_todo, 1)));
   S0 = attr_default(G, set_union(S0, W[0]), 0);
 
-  detail::log_vertex_set(S0, "S0 (end of partial solve)");
-  detail::log_vertex_set(S1, "S1 (end of partial solve)");
+  mCRL2log(log::debug) << "Result of partial solve\n" << G << std::endl;
+  mCRL2log(log::debug) << "S0 = " << S0 << std::endl;
+  mCRL2log(log::debug) << "S1 = " << S1 << std::endl;
 }
 
 } // namespace detail

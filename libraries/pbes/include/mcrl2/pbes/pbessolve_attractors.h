@@ -19,6 +19,13 @@ namespace mcrl2 {
 namespace pbes_system {
 
 template <typename StructureGraph>
+void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, typename StructureGraph::index_type v)
+{
+  mCRL2log(log::debug) << "set strategy for node " << u << " to " << v << std::endl;
+  G.find_vertex(u).strategy = v;
+}
+
+template <typename StructureGraph>
 void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, std::size_t alpha)
 {
   if (G.decoration(u) == alpha)
@@ -27,8 +34,7 @@ void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u
     {
       if ((A.contains(v)))
       {
-        mCRL2log(log::debug) << "set strategy for node " << u << " to " << v << std::endl;
-        G.find_vertex(u).strategy = v;
+        set_strategy(G, u, v);
         break;
       }
     }
@@ -48,8 +54,7 @@ void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u
     {
       if (A.contains(v) || B.contains(v))
       {
-        mCRL2log(log::debug) << "set strategy for node " << u << " to " << v << std::endl;
-        G.find_vertex(u).strategy = v;
+        set_strategy(G, u, v);
         break;
       }
     }
@@ -106,7 +111,7 @@ bool has_empty_intersection(const StructureGraph& G, typename StructureGraph::in
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph>
+template <typename StructureGraph, bool SetStrategy = true>
 vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha)
 {
   // put all predecessors of elements in A in todo
@@ -129,7 +134,10 @@ vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha
 
     if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
-      set_strategy(G, u, A, alpha);
+      if (SetStrategy)
+      {
+        set_strategy(G, u, A, alpha);
+      }
 
       A.insert(u);
 
@@ -144,6 +152,13 @@ vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha
   }
 
   return A;
+}
+
+// Variant of attr_default that does not set any strategies.
+template <typename StructureGraph>
+vertex_set attr_default_no_strategy(const StructureGraph& G, vertex_set A, std::size_t alpha)
+{
+  return attr_default<StructureGraph, false>(G, A, alpha);
 }
 
 // Computes an attractor set, by extending S.

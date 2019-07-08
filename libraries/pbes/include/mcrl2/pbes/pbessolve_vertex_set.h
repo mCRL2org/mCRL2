@@ -307,6 +307,21 @@ vertex_set set_minus(const vertex_set& V, const vertex_set& W)
   return result;
 }
 
+struct lazy_vertex_set_union
+{
+  const vertex_set& A;
+  const vertex_set& B;
+
+  lazy_vertex_set_union(const vertex_set& A_, const vertex_set& B_)
+    : A(A_), B(B_)
+  {}
+
+  bool contains(structure_graph::index_type u) const
+  {
+    return A.contains(u) && B.contains(u);
+  }
+};
+
 inline
 bool is_subset_of(const vertex_set& V, const vertex_set& W)
 {

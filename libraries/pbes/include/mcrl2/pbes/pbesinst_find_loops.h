@@ -57,6 +57,7 @@ bool find_loop(const simple_structure_graph& G,
       {
         if (u == v || find_loop(G, U, v, u, p, visited))
         {
+          set_strategy(G, w, u == v ? v : u);
           visited[w] = true;
           mCRL2log(log::debug) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
           return true;
