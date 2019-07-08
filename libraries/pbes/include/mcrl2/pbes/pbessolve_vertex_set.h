@@ -380,7 +380,30 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
       }
     }
   }
+  mCRL2log(log::debug) << "Extracted minimal structure graph " << core::detail::print_set(done) << std::endl;
   return done;
+}
+
+template <typename StructureGraph>
+std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureGraph& G, typename StructureGraph::index_type init, bool is_disjunctive)
+{
+  std::size_t n = G.extent();
+
+  vertex_set all(n);
+  for (std::size_t i = 0; i < n; i++)
+  {
+    all.insert(i);
+  }
+  vertex_set empty(n);
+
+  if (is_disjunctive)
+  {
+    return extract_minimal_structure_graph(G, init, all, empty);
+  }
+  else
+  {
+    return extract_minimal_structure_graph(G, init, empty, all);
+  }
 }
 
 } // namespace pbes_system
