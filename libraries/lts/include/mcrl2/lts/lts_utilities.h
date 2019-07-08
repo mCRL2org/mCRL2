@@ -65,15 +65,12 @@ inline std::size_t to(const outgoing_pair_t& p)
 
 /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
 ///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std::vector<transition>& trans)
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std::vector<transition>& trans, const transition::size_type number_of_states)
 {
-  outgoing_transitions_per_state_t result;
+  outgoing_transitions_per_state_t result(number_of_states);
   for (const transition& t: trans)
   {
-    if (t.from()>=result.size())
-    {
-      result.resize(t.from()+1);
-    }
+    assert(t.from()<number_of_states);
     result[t.from()].emplace_back(std::pair<transition::size_type, transition::size_type>(t.label(), t.to()));
   }
   return result;
@@ -83,15 +80,13 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std
 ///        for for instance state space exploration.
 inline outgoing_transitions_per_state_t transitions_per_outgoing_state(
                     const std::vector<transition>& trans, 
-                    const std::map<transition::size_type,transition::size_type>& hide_label_map)
+                    const std::map<transition::size_type,transition::size_type>& hide_label_map,
+                    const transition::size_type number_of_states)
 {
-  outgoing_transitions_per_state_t result;
+  outgoing_transitions_per_state_t result(number_of_states);
   for (const transition& t: trans)
   {
-    if (t.from()>=result.size())
-    {
-      result.resize(t.from()+1);
-    }
+    assert(t.from()<number_of_states);  
     result[t.from()].emplace_back(std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.to()));
   }
   return result;
@@ -99,15 +94,12 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state(
 
 /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
 ///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(const std::vector<transition>& trans)
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(const std::vector<transition>& trans, const transition::size_type number_of_states)
 {
-  outgoing_transitions_per_state_t result;
+  outgoing_transitions_per_state_t result(number_of_states);
   for (const transition& t: trans)
   {
-    if (t.to()>=result.size())
-    {
-      result.resize(t.to()+1);
-    }
+    assert(t.to()<number_of_states);
     result[t.to()].emplace_back(std::pair<transition::size_type, transition::size_type>(t.label(), t.from()));
   }
   return result;
@@ -118,15 +110,13 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(
 ///        for for instance state space exploration.
 inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(
                   const std::vector<transition>& trans, 
-                  const std::map<transition::size_type,transition::size_type>& hide_label_map)
+                  const std::map<transition::size_type,transition::size_type>& hide_label_map,
+                  const transition::size_type number_of_states)
 {
-  outgoing_transitions_per_state_t result;
+  outgoing_transitions_per_state_t result(number_of_states);
   for (const transition& t: trans)
   {
-    if (t.to()>=result.size())
-    {
-      result.resize(t.to()+1);
-    }
+    assert(t.to()<number_of_states);
     result[t.to()].emplace_back(std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.from()));
   }
   return result;

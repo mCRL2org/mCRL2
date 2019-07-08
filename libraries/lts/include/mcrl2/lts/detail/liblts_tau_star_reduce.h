@@ -145,7 +145,7 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
   typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_type;
   typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::labels_size_type label_type;
 
-  outgoing_transitions_per_state_t outgoing_transitions=transitions_per_outgoing_state(l.get_transitions());
+  outgoing_transitions_per_state_t outgoing_transitions=transitions_per_outgoing_state(l.get_transitions(),l.num_states());
   l.clear_transitions();
   std::set < state_type > states_reachable_in_one_visible_action;
   std::set < state_type > states_reachable_in_one_hidden_action;

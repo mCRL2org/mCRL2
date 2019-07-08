@@ -309,7 +309,7 @@ template <class SL, class AL, class BASE>
 bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
-  const outgoing_transitions_per_state_t out_trans(transitions_per_outgoing_state(l.get_transitions()));
+  const outgoing_transitions_per_state_t out_trans(transitions_per_outgoing_state(l.get_transitions(),l.num_states()));
 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
@@ -416,7 +416,7 @@ template <class SL, class AL, class PROBABILISTIC_STATE, class BASE>
 bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>&  l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
-  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
+  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions(),l.num_states());
 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
@@ -960,7 +960,7 @@ void determinise(LTS_TYPE& l)
   d_states.clear();
 
   // std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
-  const outgoing_transitions_per_state_t begin=transitions_per_outgoing_state(l.get_transitions(),l.hidden_label_map());
+  const outgoing_transitions_per_state_t begin=transitions_per_outgoing_state(l.get_transitions(),l.hidden_label_map(),l.num_states());
 
   l.clear_transitions();
   l.clear_state_labels();

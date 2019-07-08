@@ -150,7 +150,7 @@ public:
   /** \brief Constructor  */
   signature_branching_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_),
-      m_prev_transitions(transitions_per_outgoing_state_reversed(lts_.get_transitions(),lts_.hidden_label_map()))
+      m_prev_transitions(transitions_per_outgoing_state_reversed(lts_.get_transitions(),lts_.hidden_label_map(),lts_.num_states()))
   {
     mCRL2log(log::verbose, "sigref") << "initialising signature computation for branching bisimulation" << std::endl;
   }
@@ -210,7 +210,7 @@ protected:
     std::stack<std::size_t> sccstack;
 
     // Record forward transition relation sorted by state.
-    outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions(),m_lts.hidden_label_map()));
+    outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions(),m_lts.hidden_label_map(),m_lts.num_states()));
 
     for (std::size_t i = 0; i < m_lts.num_states(); ++i)
     {
