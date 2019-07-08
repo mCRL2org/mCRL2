@@ -81,7 +81,9 @@ class sort_specification
     /// \brief Set containing all the sorts, including the system defined ones.
     mutable std::set<sort_expression> m_normalised_sorts;
 
-    /// \brief The sorts that occur in the context of this data specification.
+    /// \brief The sorts that occur are needed in this sort specification but are 
+    /// not explicitly defined as user defined sorts. An example is the sort Nat 
+    /// when declaring the use of a sort List(Nat). 
     /// The normalised sorts, constructors, mappings and equations are complete
     /// with respect to these sorts.
     std::set< sort_expression > m_sorts_in_context;
