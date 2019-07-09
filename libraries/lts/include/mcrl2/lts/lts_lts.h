@@ -89,7 +89,15 @@ class state_label_lts : public atermpp::term_list< lps::state >
     /** \brief An operator to concatenate two state labels. */
     state_label_lts operator+(const state_label_lts& l) const
     {
-      return state_label_lts(static_cast<super>(*this)+static_cast<super>(l));
+      // The order of the state labels should not matter. For efficiency the elements of l are inserted in front of the aterm_list.
+      state_label_lts result(*this);
+
+      for (const lps::state& el : l)
+      {
+        result.push_front(el);
+      }
+
+      return result;
     }
 };
 
