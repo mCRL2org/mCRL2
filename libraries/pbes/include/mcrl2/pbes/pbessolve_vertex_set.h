@@ -318,7 +318,7 @@ struct lazy_union
 
   bool contains(structure_graph::index_type u) const
   {
-    return A.contains(u) && B.contains(u);
+    return A.contains(u) || B.contains(u);
   }
 };
 

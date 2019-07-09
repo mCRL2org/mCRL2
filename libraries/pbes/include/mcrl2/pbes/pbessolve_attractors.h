@@ -25,34 +25,14 @@ void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u
   G.find_vertex(u).strategy = v;
 }
 
-template <typename StructureGraph>
-void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, std::size_t alpha)
+template <typename StructureGraph, typename VertexSet>
+void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, const VertexSet& A, std::size_t alpha)
 {
   if (G.decoration(u) == alpha)
   {
     for (auto v: G.successors(u))
     {
       if ((A.contains(v)))
-      {
-        set_strategy(G, u, v);
-        break;
-      }
-    }
-    if (G.strategy(u) == structure_graph::undefined_vertex)
-    {
-      mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
-    }
-  }
-}
-
-template <typename StructureGraph>
-void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, const vertex_set& B, std::size_t alpha)
-{
-  if (G.decoration(u) == alpha)
-  {
-    for (auto v: G.successors(u))
-    {
-      if (A.contains(v) || B.contains(v))
       {
         set_strategy(G, u, v);
         break;
@@ -72,20 +52,6 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
   for (auto v: G.successors(u))
   {
     if (!A.contains(v))
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-// Returns true if succ(u) \subseteq (A \cup S)
-template <typename StructureGraph>
-bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A, const vertex_set& S)
-{
-  for (auto v: G.successors(u))
-  {
-    if (!A.contains(v) && !S.contains(v))
     {
       return false;
     }

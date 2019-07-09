@@ -41,7 +41,7 @@ std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure
   std::vector<structure_graph::index_type> M; // vertices with minimal rank
   std::size_t N = G.all_vertices().size();
 
-  for (structure_graph::index_type vi = 0; vi < N; vi++)
+  for (std::size_t vi = 0; vi < N; vi++)
   {
     if (!G.contains(vi))
     {
@@ -219,7 +219,7 @@ class solve_structure_graph_algorithm
       vertex_set Vdisj(N);
 
       // find vertices Vconj with decoration false and Vdisj with decoration true
-      for (structure_graph::index_type vi = 0; vi < N; vi++)
+      for (std::size_t vi = 0; vi < N; vi++)
       {
         if (!G.contains(vi))
         {

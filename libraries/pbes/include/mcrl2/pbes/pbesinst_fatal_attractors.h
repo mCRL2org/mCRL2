@@ -142,7 +142,7 @@ void fatal_attractors(const simple_structure_graph& G,
 
   // compute V
   vertex_set V(n);
-  for (structure_graph::index_type u = 0; u < n; u++)
+  for (std::size_t u = 0; u < n; u++)
   {
     V.insert(u);
   }
@@ -238,9 +238,9 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
     // N.B. Use a breadth first search, to minimize counter examples
     auto u = todo.pop_front();
 
-    if (G.decoration(u) == alpha || includes_successors(G, u, A, X))
+    if (G.decoration(u) == alpha || includes_successors(G, u, lazy_union(A, X)))
     {
-      set_strategy(G, u, A, X, alpha);
+      set_strategy(G, u, lazy_union(A, X), alpha);
 
       X.insert(u);
 
@@ -271,7 +271,7 @@ void fatal_attractors_original(const simple_structure_graph& G,
 
   // compute V
   vertex_set V(n);
-  for (structure_graph::index_type u = 0; u < n; u++)
+  for (std::size_t u = 0; u < n; u++)
   {
     V.insert(u);
   }
