@@ -1061,6 +1061,13 @@ class check_complexity
             for (enum counter_type ctr = BLOCK_BUNCH_dnj_MIN_TEMP;
                ctr <= BLOCK_BUNCH_dnj_MAX; ctr = (enum counter_type) (ctr + 1))
             {
+                if (counters[ctr - BLOCK_BUNCH_dnj_MIN] > 0)
+                {
+                    mCRL2log(log::error) << "Error 13: counter \""
+                        << work_names[ctr - BLOCK_MIN] << "\" exceeded "
+                        "maximum value (" << (unsigned) 0 << ") for ";
+                    return false;
+                }
                 assert(counters[ctr - BLOCK_BUNCH_dnj_MIN] <= 0);
             }
             assert(BLOCK_BUNCH_dnj_MAX_TEMP == BLOCK_BUNCH_dnj_MAX);

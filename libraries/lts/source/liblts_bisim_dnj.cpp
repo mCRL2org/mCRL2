@@ -4229,8 +4229,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                     for (block_bunch_slice_const_iter_t
                                                                                                                   iter(part_tr.unstable_block_bunch.cbegin());
                                                                                                            part_tr.unstable_block_bunch.cend() != iter; ++iter)
-                                                                                    {
-                                                                                        assert(!iter->is_stable());
+                                                                                    {   assert(!iter->is_stable());
                                                                                         assert(iter->source_block() != block_U || iter->bunch != bunch_T);
                         /* Line 1.19: end if                                 */     }
                                                                                 #endif
@@ -4241,14 +4240,12 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                         // account for work that couldn't be accounted for earlier (because we
                                                                                         // didn't know yet which state would become a new bottom state)
                                                                                         if (!add_stabilize_to_bottom_transns_succeeded)
-                                                                                        {
-                                                                                            assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                        {   assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
                                                                                                  check_complexity::
                                                                                                  postprocess_new_noninert__stabilize_a_posteriori, 1U, *this));
                                                                                         }
                                                                                         if (splitter->work_counter.has_temporary_work())
-                                                                                        {
-                                                                                            assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                        {   assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
                                                                                                         check_complexity::
                                                                                                         prepare_for_postprocessing__make_unstable_a_posteriori,
                                                                                                                                                    1U, *this));
@@ -4272,7 +4269,22 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                         /* Line 1.27: end if                                 */     assert(nullptr==refine_block || splitter->source_block() == refine_block);
                                                                                 #endif
                         }
-                    }                                                           else  assert(0 == refine_block->marked_size());
+                    }
+                                                                                #ifndef NDEBUG
+                                                                                    else
+                                                                                    {   assert(0 == refine_block->marked_size());
+                                                                                        assert(add_stabilize_to_bottom_transns_succeeded);
+                                                                                        // now splitter must have some transitions that start in bottom states:
+                                                                                        if (splitter->work_counter.has_temporary_work())
+                                                                                        {   assert(!is_primary_splitter);
+                                                                                            assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
+                                                                                                        check_complexity::
+                                                                                                        prepare_for_postprocessing__make_unstable_a_posteriori,
+                                                                                                                                                   1U, *this));
+                                                                                            splitter->work_counter.reset_temporary_work();
+                                                                                        }
+                                                                                    }
+                                                                                #endif
                 }
                 else
                 {                                                               assert(refine_block->nonbottom_begin == refine_block->end);
@@ -4287,7 +4299,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                 #ifndef NDEBUG
                                                                                     // now splitter must have some transitions that start in bottom states:
                                                                                     if (splitter->work_counter.has_temporary_work())
-                                                                                    {
+                                                                                    {   assert(!is_primary_splitter);
                                                                                         assert(splitter->add_work_to_bottom_transns(bisim_gjkw::
                                                                                                         check_complexity::
                                                                                                         prepare_for_postprocessing__make_unstable_a_posteriori,
@@ -4301,8 +4313,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                            !part_tr.unstable_block_bunch.empty() &&
                                                                                            part_tr.unstable_block_bunch.front().bunch == bunch_T &&
                                                                                            part_tr.unstable_block_bunch.front().source_block() == refine_block)
-                                                                                    {
-                                                                                        // The next block_bunch-slice to be handled is the one in the large
+                                                                                    {   // The next block_bunch-slice to be handled is the one in the large
                                                                                         // splitter corresponding to the current splitter.  In that iteration,
                                                                                         // we will need the current splitter block_bunch-slice.
                                                                                         assert(nullptr != refine_block);
@@ -4862,6 +4873,8 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
             // However, the bunch of new noninert transitions and the bunch
             // that was the last splitter do not need to be handled (as long
             // as there are no further new bottom states).
+            // We cannot do this in time O(1) because we need to call
+            // `make_unstable()` for each block_bunch-slice individually.
         for (block_bunch_slice_iter_t block_bunch_iter(
                                    refine_block->stable_block_bunch.begin());
                   refine_block->stable_block_bunch.end() != block_bunch_iter; )
@@ -4895,6 +4908,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                               check_complexity::prepare_for_postprocessing__make_unstable_temp,
                                                                                                                                                    1U), *this);
                                                                                         assert(block_bunch_iter->work_counter.has_temporary_work());
+                                                                                        assert(!block_bunch_iter->is_stable());
                                                                                     }
                                                                                 #endif
             block_bunch_iter = next_block_bunch_iter;
