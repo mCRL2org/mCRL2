@@ -41,8 +41,8 @@
 %--- pseudo code ---%
 \newcommand{\Space}{\text{\ }}
 \newcommand{\If}{\text{\textbf{if }}}
-\newcommand{\Do}{\text{\textbf{do }}}
-\newcommand{\Then}{\text{\textbf{then }}}
+\newcommand{\Do}{\text{\textbf{ do }}}
+\newcommand{\Then}{\text{\textbf{ then }}}
 \newcommand{\Else}{\text{\textbf{else }}}
 \newcommand{\For}{\text{\textbf{for }}}
 \newcommand{\While}{\text{\textbf{while }}}
@@ -50,6 +50,7 @@
 \newcommand{\Continue}{\text{\textbf{continue }}}
 \newcommand{\Choose}{\text{\textbf{choose }}}
 \newcommand{\Return}{\text{\textbf{return }}}
+\newcommand{\With}{\text{\textbf{ with }}}
 
 \begin{document}
 
@@ -58,13 +59,13 @@
 \maketitle
 
 This document describes instantiation and solving algorithms for PBESs that
-are used in the tools \textbf{pbesinst} and \textbf{pbessolve}.
+are used in the tools \texttt{pbesinst} and \texttt{pbessolve}.
 
 \section{Finite algorithm}
 
 In this section we describe an implementation of the finite instantiation
 algorithm \textsc{PbesInstFinite} that eliminates data parameters with
-finite sorts. It is implemented in the tool \textbf{pbesinst}. Let $\mathcal{%
+finite sorts. It is implemented in the tool \texttt{pbesinst}. Let $\mathcal{%
 E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi _{1})\cdots \mathcal{%
 (\sigma }_{n}X_{n}(d_{n}:D_{n},e_{n}:E_{n})=\varphi _{n})$ be a PBES. We
 assume that all data sorts $D_{i}$ are finite and all data sorts $E_{i}$ are
@@ -106,7 +107,7 @@ variables appearing in $d$.\newpage
 
 In this section we describe an implementation of the lazy instantiation
 algorithm \textsc{PbesInstLazy} that uses instantiation to compute a BES. It
-is implemented in the tool \textbf{pbesinst}. It takes two extra parameters,
+is implemented in the tool \texttt{pbesinst}. It takes two extra parameters,
 an injective function $\rho $ that renames proposition variables to
 predicate variables, and a rewriter $R$ that eliminates quantifiers from
 predicate formulae. Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi
@@ -120,7 +121,7 @@ PBES, and $X_{init}(e_{init})$ an initial state.%
 _{i}:=\epsilon  \\
 todo:=\{R(X_{init}(e_{init}))\} \\
 done:=\emptyset  \\
-\While todo\neq \emptyset \Space \Do \\
+\While todo\neq \emptyset \Do \\
 \qquad \Choose X_{k}(e)\in todo \\
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
 \qquad done:=done\cup \{X_{k}(e)\} \\
@@ -159,7 +160,7 @@ R\text{\textsc{)}} \\
 init:=R(X_{init}(e_{init})) \\
 todo:=\{init\} \\
 done:=\emptyset \\
-\While todo\neq \emptyset \Space \Do \\
+\While todo\neq \emptyset \Do \\
 \qquad \Choose X_{k}(e)\in todo \\
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
 \qquad done:=done\cup \{X_{k}(e)\} \\
@@ -181,7 +182,7 @@ $done = discovered \setminus todo$.
 init:=R(X_{init}(e_{init})) \\
 todo:=\{init\} \\
 discovered:=\{init\} \\
-\While todo\neq \emptyset \Space \Do \\
+\While todo\neq \emptyset \Do \\
 \qquad \Choose X_{k}(e)\in todo \\
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
@@ -192,7 +193,7 @@ discovered:=\{init\} \\
 \end{equation*}
 
 It turned out that the second version has slightly better performance for
-some larger use cases, so the second version is implemented in the tool \textbf{pbessolve}.
+some larger use cases, so the second version is implemented in the tool \texttt{pbessolve}.
 
 To support breadth first and depth first search, the implementation stores the
 set $todo$ as a double ended queue. New elements are always appended to $todo$.
@@ -271,10 +272,12 @@ $\alpha = 0$ corresponds with disjunction and $\alpha = 1$ with conjunction.
 \begin{array}{l}
 \textsc{AttrDefault}(A,\alpha) \\ 
 todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
-\While todo\neq \emptyset \Space \Do \\ 
+\While todo\neq \emptyset \Do \\ 
 \qquad \Choose u\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
-\qquad \If d(u) = \alpha \vee succ(u)\subseteq A \Space \Then \\ 
+\qquad \If d(u) = \alpha \vee succ(u)\subseteq A \Then \\ 
+\qquad \qquad \colorbox{Apricot}{$ \If d(u) = \alpha \Then \tau
+\lbrack u]:=v\With v\in A\cap succ(u) $}\\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
 \Return A%
@@ -286,35 +289,40 @@ pred(v) &=&\{u\in V\mid (u,v)\in E\} \\
 succ(u) &=&\{v\in V\mid (u,v)\in E\}
 \end{eqnarray*}%
 
-A cheaper, less powerful attractor set computation is
+As a side effect a mapping $\tau$ is produced that corresponds to a winning
+strategy. Assignments to $\tau$ are \colorbox{Apricot}{colored}.
 
-\begin{equation*}
-\begin{array}{l}
-\textsc{AttrCheap}(S,v,\alpha) \\ 
-todo := pred(v) \setminus S \\ 
-A := \{ v \} \\
-\While todo \neq \emptyset \Space \Do \\ 
-\qquad \Choose u \in todo \\ 
-\qquad todo := todo\ \setminus \{ u \} \\ 
-\qquad \If (d(u) = \alpha \wedge succ(u) \cap A \neq \emptyset)
-           \vee (d(u) \neq \alpha \wedge succ(u) \subseteq A \cup S) \Space \Then \\ 
-\qquad \qquad A := A \cup \{ u \} \\ 
-\qquad \qquad todo := todo \cup \left( pred(u) \setminus (A \cup S) \right)  \\ 
-\Return A \cup S
-\end{array}
-\end{equation*}
+% A cheaper, less powerful attractor set computation is
+%
+% \begin{equation*}
+% \begin{array}{l}
+% \textsc{AttrCheap}(S,v,\alpha) \\ 
+% todo := pred(v) \setminus S \\ 
+% A := \{ v \} \\
+% \While todo \neq \emptyset \Do \\ 
+% \qquad \Choose u \in todo \\ 
+% \qquad todo := todo\ \setminus \{ u \} \\ 
+% \qquad \If (d(u) = \alpha \wedge succ(u) \cap A \neq \emptyset)
+%           \vee (d(u) \neq \alpha \wedge succ(u) \subseteq A \cup S) \Then \\ 
+% \qquad \qquad A := A \cup \{ u \} \\ 
+% \qquad \qquad todo := todo \cup \left( pred(u) \setminus (A \cup S) \right)  \\ 
+% \Return A \cup S
+% \end{array}
+% \end{equation*}
 
-A third version of an attractor set computation is \textsc{AttrSimple}. It is used in optimization 3.
+A second version of an attractor set computation is \textsc{AttrSimple}. It is used for pruning the todo list.
 
 \begin{equation*}
 \begin{array}{l}
 \textsc{AttrSimple}(A) \\ 
 todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
-\While todo \neq \emptyset \Space \Do \\ 
+\While todo \neq \emptyset \Do \\ 
 \qquad \Choose u \in todo \\ 
 \qquad todo:=todo\ \backslash \ \{u\} \\ 
-\qquad \If succ(u)\subseteq A \Space \Then \\ 
+\qquad \If succ(u)\subseteq A \Then \\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad \colorbox{Apricot}{$ \If d(u) = \alpha \Then \tau
+\lbrack u]:=v\With v\in A\cap succ(u) $}\\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
 \Return A
 \end{array}
@@ -338,7 +346,7 @@ U:=\{v\in V\mid r(v)=m\} \\
 A:=\text{\textsc{AttrDefault}}\left( U,\alpha \right)  \\ 
 W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
 \text{)} \\ 
-\If W_{1-\alpha }^{\prime }= \emptyset \Space \Then \\ 
+\If W_{1-\alpha }^{\prime }= \emptyset \Then \\ 
 \qquad W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime }, \emptyset \\ 
 \Else \\ 
 \qquad B:=\text{\textsc{AttrDefault}}\left( W_{1-\alpha }^{\prime },1-\alpha \right)  \\ 
@@ -363,18 +371,23 @@ cannot be used for counter example generation(!)
 \begin{equation*}
 \begin{array}{l}
 \textsc{SolveRecursive}(V) \\ 
+precondition: V \subseteq dom(r) \cup dom(d) \\
 \If V=\emptyset \text{ \textbf{then return }}(\emptyset
 ,\emptyset ) \\ 
 m:=\min (\{r(v)\mid v\in V\}) \\ 
 \alpha := m \bmod 2 \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
+\colorbox{Apricot}{$
+\text{\textbf{for} }u\in U\text{ \textbf{if} }d(u)=\alpha \wedge succ(u)\neq
+\emptyset \Then \tau \lbrack u]:=v\With v\in
+succ(u) $}\\ 
 A:=\text{\textsc{AttrDefault}}\left( U,\alpha \right)  \\ 
 W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
 \text{)} \\
 \colorbox{lightgray}{$
 B:=\text{\textsc{AttrDefault}}\left( W_{1-\alpha }^{\prime },1-\alpha \right) $}\\ 
 \colorbox{lightgray}{$
-\If W_{1-\alpha }^{\prime }=B \Space \Then $}\\ 
+\If W_{1-\alpha }^{\prime }=B \Then $}\\ 
 \colorbox{lightgray}{$
 \qquad W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime },B $}\\ 
 \colorbox{lightgray}{$
@@ -409,14 +422,18 @@ isn't enabled in the code.
 m:=\min (\{r(v)\mid v\in V\}) \\ 
 \alpha :=m \bmod 2 \\ 
 U:=\{v\in V\mid r(v)=m\} \\ 
+\colorbox{Apricot}{$
+\text{\textbf{for} }u\in U\text{ \textbf{if} }d(u)=\alpha \wedge succ(u)\neq
+\emptyset \Then \tau \lbrack u]:=v\With v\in
+succ(u) $}\\ 
 \colorbox{lightgray}{$
-\If h=m\wedge even(m) \Space \Then \Return (\emptyset,V) $}\\ 
+\If h=m\wedge even(m) \Then \Return (\emptyset,V) $}\\ 
 \colorbox{lightgray}{$
-\If h=m\wedge odd(m) \Space \Then \Return (V,\emptyset) $}\\
+\If h=m\wedge odd(m) \Then \Return (V,\emptyset) $}\\
 A:=\text{\textsc{AttrDefault}}\left( U,\alpha \right)  \\ 
 W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
 \text{)} \\ 
-\If W_{1-\alpha }^{\prime }= \emptyset \Space \Then \\ 
+\If W_{1-\alpha }^{\prime }= \emptyset \Then \\ 
 \qquad W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime }, \emptyset \\ 
 \Else \\ 
 \qquad B:=\text{\textsc{AttrDefault}}\left( W_{1-\alpha }^{\prime },1-\alpha \right)  \\ 
@@ -426,62 +443,10 @@ W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
 \end{array}%
 \end{equation*}%
 
-
-\subsection{Computing a winning strategy}
-
-The \textsc{SolveRecursive} algorithm can as a side effect produce a mapping $\tau$ that
-corresponds to a winning strategy, by slightly adapting the algorithm and the attractor set computation:
-
-\begin{equation*}
-\begin{array}{l}
-precondition: V \subseteq dom(r) \cup dom(d) \\
-\text{\textsc{SolveRecursive(}}V\text{\textsc{)}} \\ 
-\If V=\emptyset \text{ \textbf{then return }}(\emptyset
-,\emptyset ) \\ 
-m:=\min (\{r(v)\mid v\in V\}) \\ 
-\alpha := m \bmod 2 \\ 
-U:=\{v\in V\mid r(v)=m\} \\ 
-\colorbox{lightgray}{$
-\text{\textbf{for} }u\in U\text{ \textbf{if} }d(u)=\alpha \wedge succ(u)\neq
-\emptyset \text{ \textbf{then }}\tau \lbrack u]:=v\text{ \textbf{with} }v\in
-succ(u) $}\\ 
-A:=\text{\textsc{AttrDefault}}\left( U,\alpha \right)  \\ 
-W_{0}^{\prime },W_{1}^{\prime }:=\text{\textsc{SolveRecursive(}}V\setminus A%
-\text{)} \\ 
-B:=\text{\textsc{AttrDefault}}\left( W_{1-\alpha }^{\prime },1-\alpha \right)  \\ 
-\If W_{1-\alpha }^{\prime }=B \Space \Then \\ 
-\qquad W_{\alpha },W_{1-\alpha }:=A\cup W_{\alpha }^{\prime },B \\ 
-\Else \\ 
-\qquad W_{0},W_{1}:=\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
-\qquad W_{1-\alpha }:=W_{1-\alpha }\cup B \\ 
-\Return W_{0},W_{1}
-\end{array}
-\end{equation*}
-with
-
-\begin{equation*}
-\begin{array}{l}
-\text{\textsc{AttrDefault(}}A,\alpha \text{\textsc{)}} \\ 
-todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
-\While todo\neq \emptyset \Space \Do \\ 
-\qquad \Choose u\in todo \\ 
-\qquad todo:=todo\ \backslash \ \{u\} \\ 
-\qquad \If d(u) = \alpha \vee succ(u)\subseteq A \Space \Then \\ 
-\qquad \qquad \colorbox{lightgray}{$%
-\If d(u)\neq 1 - \alpha \text{ \textbf{then }}\tau
-\lbrack u]:=v\text{ \textbf{with} }v\in A\cap succ(u) $}\\ 
-\qquad \qquad A:=A\cup \{u\} \\ 
-\qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
-\Return A%
-\end{array}%
-\end{equation*}%
-Note that the mapping $\tau$ is a global variable of \textsc{AttrDefault}, which is ugly.
-In the implementation the strategy is an attribute of the nodes.
-
 \newpage
 \section{Structure graph based PBES instantiation}
 
-In the tool \textbf{pbessolve} an extension called \textsc{%
+In the tool \texttt{pbessolve} an extension called \textsc{%
 PbesInstStructureGraph} of the \textsc{PbesInstLazy2} algorithm is
 implemented that builds a structure graph from the reported equations. On
 top of it several optimizations to this algorithm are defined. For
@@ -498,7 +463,7 @@ todo:=\{init\} \\
 discovered:=\{init\} \\
 \colorbox{lightgray}{$%
 (V,E) :=(\emptyset ,\emptyset ) $}\\
-\While todo\neq \emptyset \Space \Do \\
+\While todo\neq \emptyset \Do \\
 \qquad \Choose X_{k}(e)\in todo \\
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
@@ -574,12 +539,12 @@ init:=R(X_{init}(e_{init})) \\
 todo:=\{init\} \\
 discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
-\While todo\neq \emptyset \Space \Do \\ 
+\While todo\neq \emptyset \Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
 \qquad \colorbox{lightgray}{$%
-\psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false]) \Space \Else  R(\psi^e[X^e := true]) $}\\
+\psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false]) \Space \Else  R(\psi^e[X^e := true]) $}\\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
@@ -638,11 +603,11 @@ discovered:=\{init\} \\
 S_0:= \emptyset $}\\
 \colorbox{lightgray}{$%
 S_1:= \emptyset $}\\
-\While todo\neq \emptyset \Space \Do \\ 
+\While todo\neq \emptyset \Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad \colorbox{lightgray}{$%
 \psi^{e} := R(\psi^e (\rho_0(S_0) \cup \rho_1(S_1) ) ) $}\\
@@ -657,7 +622,7 @@ S_1 := S_1 \cup \{ X^e \mid \psi^e \equiv false \} $}\\
 \end{array}%
 \end{equation*}%
 
-Note that this version of the algorithm is not available in the tool \textbf{pbessolve}.
+Note that this version of the algorithm is not available in the tool \texttt{pbessolve}.
 
 \paragraph{Note on computing winning strategies.} Rewriting the propositional formula
 $\psi^e$ using $S_0$ and $S_1$ may result in a loss of information, preventing us from
@@ -691,13 +656,12 @@ $(b,\psi^e) := R^+(\psi^e)$, and the extension to $S_0$ and $S_1$ can then be re
 following code:
 \[
 \begin{array}{l}
-\If b = true \Space \Then S_0 := S_0 \cup \{ X^e \} \\
-\If b = false \Space \Then S_1 := S_1 \cup \{ X^e \} \\
+\If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
+\If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
 \end{array}
 \]
-Note that $R^+$ can probably also be implemented at the level of PBES expressions.
+Note that $R^+$ can probably also be implemented at the level of PBES expressions. This results in the following adapted version, which is the default in \texttt{pbessolve}.
 
-This results in the following adapted version:
 \begin{equation*}
 \begin{array}{l}
 \textsc{PbesinstStructureGraph$_2$}(\mathcal{E}, X_{init}(e_{init}), R) \\ 
@@ -709,26 +673,49 @@ discovered:=\{init\} \\
 S_0:= \emptyset $}\\
 \colorbox{lightgray}{$%
 S_1:= \emptyset $}\\
-\While todo\neq \emptyset \Space \Do \\ 
+\While todo\neq \emptyset \Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad \colorbox{lightgray}{$%
 (b,\psi^e) := R^+(\psi^e) $}\\
 \qquad \colorbox{lightgray}{$%
-\If b = true \Space \Then S_0 := S_0 \cup \{ X^e \} $}\\
+\If b = true \Then S_0 := S_0 \cup \{ X^e \} $}\\
 \qquad \colorbox{lightgray}{$%
-\If b = false \Space \Then S_1 := S_1 \cup \{ X^e \} $}\\
+\If b = false \Then S_1 := S_1 \cup \{ X^e \} $}\\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
+\colorbox{lightgray}{$V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1)$} \\
 \Return (V, E)
 \end{array}%
 \end{equation*}%
 
-This algorithm is the default in \textbf{pbessolve}.
+As a post-processing of the graph constructed by instantiation, the following procedure is used.
+It returns a structure graph $(V,E)$ in which information regarding local winning strategies has been exploited to minimise the structure graph, preserving relevant counterexample information. Note: the strategy $\tau$ should be consistent with the sets $S_0$ and $S_1$ (i.e., be a closed, winning strategy for the vertices in those sets).
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{ExtractMinimalStructureGraph}(V,init,S_0,S_1)\\
+todo := \{ init \} \\
+done := \emptyset \\
+\While todo \neq \emptyset \Do \\
+\qquad \Choose u \in todo \\
+\qquad todo := todo \setminus \{ u \} \\
+\qquad done := done \cup \{ u \} \\
+\qquad \If (u \in S_1 \land d(u) = \blacktriangle) \lor (u \in S_0 \land d(u) = \blacktriangledown) \\
+\qquad \qquad v := \tau(u) \\
+\qquad \qquad \If v \notin done \Then \\
+\qquad \qquad \qquad todo := todo \cup \{ v \} \\
+\qquad \Else \\
+\qquad \qquad \For v \in succ(u) \Do \\
+\qquad \qquad \qquad \If v \notin done \Then \\
+\qquad \qquad \qquad \qquad todo := todo \cup \{ v \} \\
+\Return done
+\end{array}
+\end{equation*}
 
 \subsection{Pruning the todo set}
 
@@ -748,21 +735,21 @@ S_0:= \emptyset \\
 S_1:= \emptyset \\
 \While (\colorbox{lightgray}{$todo \setminus irrelevant$}) \neq \emptyset
 \wedge X_{init}(e_{init}) \notin S_0 \cup S_1
-\Space \Do \\ 
+\Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad (b,\psi^e) := R^+(\psi^e) \\
-\qquad \If b = true \Space \Then S_0 := S_0 \cup \{ X^e \} \\
-\qquad \If b = false \Space \Then S_1 := S_1 \cup \{ X^e \} \\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo := todo\cup (\mathrm{occ}(\psi ^{e})\setminus (\colorbox{lightgray}{$discovered \setminus irrelevant$})) \\
 \qquad discovered := discovered\ \cup \mathrm{occ}(\psi^e) \\
 \qquad \colorbox{lightgray}{$irrelevant := irrelevant \setminus \mathrm{occ}(\psi^e)$} \\
 \qquad \colorbox{lightgray}{$irrelevant := \textsc{PruneTodo}(init, todo, irrelevant) $}\\
-\colorbox{lightgray}{$V := V \setminus \textsc{AttrSimple}(irrelevant)$} \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return(V, E),
 \end{array}
 \end{equation*}
@@ -772,22 +759,84 @@ where \textsc{PruneTodo} is defined as
 \begin{equation*}
 \begin{array}{l}
 \textsc{PruneTodo}(init, todo, irrelevant) \\ 
-todo' := \{init\} \\
-discovered' := \{init\} \\
+todo' := \{ init \} \\
+done' := \{ init \} \\
 new\_todo := \emptyset \\
-\While todo' \neq \emptyset \Space \Do \\
+\While todo' \neq \emptyset \Do \\
 \qquad \Choose u \in todo' \\
 \qquad todo' := todo' \setminus \{ u \} \\
-\qquad discovered' := discovered' \cup \{ u \} \\
-\qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Space \Then \\
-\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup discovered')) \\
-\qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Space \Then \\
-\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup discovered')) \\
-\qquad \If d(u) = \bot \wedge succ(u) \setminus (S_0 \cup S_1 \cup discovered') = \emptyset \Space \Then \\
+\qquad done' := done' \cup \{ u \} \\
+\qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Then \\
+\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup done')) \\
+\qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Then \\
+\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup done')) \\
+\qquad \If d(u) = \bot \wedge succ(u) \setminus (S_0 \cup S_1 \cup done') = \emptyset \Then \\
+\qquad \qquad todo' := todo' \cup succ(u) \\
+\qquad \If d(u) = \bot \wedge succ(u) = \emptyset \Then \\
 \qquad \qquad new\_todo := new\_todo \cup \{ u \} \\
 new\_todo := new\_todo \cap (todo \cup irrelevant) \\
-new\_removed := (todo \cup irrelevant) \setminus new\_todo \\
-\Return new\_todo, new\_removed
+new\_irrelevant := (todo \cup irrelevant) \setminus new\_todo \\
+\Return new\_todo, new\_irrelevant
+\end{array}
+\end{equation*}
+
+There is a second, more advanced version available:
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{PbesinstStructureGraphPruneTodoAlternative}(\mathcal{E}, X_{init}(e_{init}), R) \\ 
+init:=R(X_{init}(e_{init})) \\
+todo:=\{init\} \\
+discovered:=\{init\} \\
+(V,E) :=(\emptyset ,\emptyset ) \\ 
+S_0:= \emptyset \\
+S_1:= \emptyset \\
+\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Do \\ 
+\qquad \Choose X_{k}(e)\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
+\Space \Else R(\psi^e[X^e := true]) \\
+\qquad (b,\psi^e) := R^+(\psi^e) \\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
+\qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
+\qquad todo := todo\cup (\mathrm{occ}(\psi ^{e})\setminus (\colorbox{lightgray}{$discovered \setminus irrelevant$})) \\
+\qquad discovered := discovered\ \cup \mathrm{occ}(\psi^e) \\
+
+\qquad \colorbox{lightgray}{$V' := \textsc{PruneTodoAlternative}(init, S_0, S_1) $}\\
+\colorbox{lightgray}{$V := V \setminus \textsc{AttrSimple}(irrelevant)$} \\
+
+\Return(V, E),
+\end{array}
+\end{equation*}
+
+where \textsc{PruneTodoAlternative} is defined as
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{PruneTodoAlternative}(init, todo, irrelevant) \\ 
+todo' := \{ init \} \\
+done' := \{ init \} \\
+new\_todo := \emptyset \\
+\While todo' \neq \emptyset \Do \\
+\qquad \Choose u \in todo' \\
+\qquad todo' := todo' \setminus \{ u \} \\
+\qquad done' := done' \cup \{ u \} \\
+\qquad \colorbox{lightgray}{$ \If u \in dom(\tau) \land \tau(u) \notin done' \Then $}\\
+\qquad \qquad \colorbox{lightgray}{$todo' := todo' \cup \{ \tau(u) \} $}\\
+\qquad \Else \\
+\qquad \qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Then \\
+\qquad \qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup done')) \\
+\qquad \qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Then \\
+\qquad \qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup done')) \\
+\qquad \qquad \If d(u) = \bot \wedge succ(u) \setminus (S_0 \cup S_1 \cup done') = \emptyset \Then \\
+\qquad \qquad \qquad todo' := todo' \cup succ(u) \\
+\qquad \qquad \If d(u) = \bot \wedge succ(u) = \emptyset \Then \\
+\qquad \qquad \qquad new\_todo := new\_todo \cup \{ u \} \\
+new\_todo := new\_todo \cap (todo \cup irrelevant) \\
+new\_irrelevant := (todo \cup irrelevant) \setminus new\_todo \\
+\Return new\_todo, new\_irrelevant
 \end{array}
 \end{equation*}
 
@@ -815,33 +864,27 @@ S_0:= \emptyset \\
 S_1:= \emptyset \\
 \While todo\neq \emptyset
 \colorbox{lightgray}{$\wedge X_{init}(e_{init}) \notin S_0 \cup S_1 $}
-\Space \Do \\ 
+\Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad (b,\psi^e) := R^+(\psi^e) \\
-\qquad \If b = true \Space \Then S_0 := S_0 \cup \{ X^e \}\\
-\qquad \If b = false \Space \Then S_1 := S_1 \cup \{ X^e \}\\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \}\\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \}\\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\qquad \colorbox{lightgray}{$S_0, S_1 := apply\_attractor(S_0, S_1)$} \\
-\colorbox{lightgray}{$
-\If todo \neq \emptyset \Space \Then$} \\
-\colorbox{lightgray}{$
-\qquad \If X_{init}(e_{init}) \in S_0  \Space \Then V := V \setminus \textsc{AttrDefault}(todo, 1)
-$}\\
-\colorbox{lightgray}{$
-\qquad \Else \If X_{init}(e_{init}) \in S_1 \Space \Then V := V \setminus \textsc{AttrDefault}(todo, 0)$}
-\\
+\qquad \colorbox{lightgray}{$S_0, S_1 := apply\_attractor(S_0, S_1)$} 
+\text{(executed periodically)} \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return(V, E),
 \end{array}
 \end{equation*}
 
 The optimizations 3 until 7 each use a different function for $apply\_attractor$. Attractor
-computations are expensive operations, so in \textbf{pbessolve} the function $apply\_attractor$
+computations are expensive operations, so in \texttt{pbessolve} the function $apply\_attractor$
 is called only periodically.
 
 \subsection{Optimisation~3}
@@ -855,15 +898,15 @@ discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
 S_0:= \emptyset \\
 S_1:= \emptyset \\
-\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Space \Do \\ 
+\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad (b,\psi^e) := R^+(\psi^e) \\
-\qquad \If b = true \Space \Then S_0 := S_0 \cup \{ X^e \}\\
-\qquad \If b = false \Space \Then S_1 := S_1 \cup \{ X^e \}\\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \}\\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \}\\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
@@ -871,9 +914,7 @@ S_1:= \emptyset \\
 \text{(executed periodically)} \\
 \qquad \colorbox{lightgray}{$S_1 := \textsc{AttrDefault}(S_1, 1) $}
 \text{(executed periodically)} \\
-\If todo \neq \emptyset \Space \Then \\
-\qquad \If X_{init}(e_{init}) \in S_0  \Space \Then V := V \setminus \textsc{AttrDefault}(todo, 1) \\
-\qquad \Else \If X_{init}(e_{init}) \in S_1 \Space \Then V := V \setminus \textsc{AttrDefault}(todo, 0) \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return(V, E),
 \end{array}
 \end{equation*}
@@ -890,9 +931,9 @@ detects whether the game can in fact already be solved (see e.g. optimisation 4)
 
 % \begin{equation*}
 % \begin{array}{l}
-% \qquad \If b = true \Space \Then S_0 := \colorbox{lightgray}{$
+% \qquad \If b = true \Then S_0 := \colorbox{lightgray}{$
 % \textsc{AttrCheap}(S_0, X^e, 0)$} \\
-% \qquad \If b = false \Space \Then S_1 := \colorbox{lightgray}{$
+% \qquad \If b = false \Then S_1 := \colorbox{lightgray}{$
 % \textsc{AttrCheap}(S_1, X^e, 1) $}\\
 % \end{array}
 % \end{equation*}
@@ -921,9 +962,9 @@ them; the function $\mathsf{parity}(p) = \up$ when $p$ is odd, and $\down$ other
 %\If d(w) \in\{\top,\bot\} \textbf{ then return } false \\
 %\If w \in \mathsf{dom}(r) \text{ and } r(w) \neq p \textbf{ then return } false \\
 %\If w \in \mathsf{keys}(\text{visited}) \textbf{ then return } \text{visited}(w) \\
-%\If w \in U \Space \Then \\
+%\If w \in U \Then \\
 %\qquad \text{visited}(w) := false\\
-%\qquad \If (w \in \mathsf{dom}(d) \Rightarrow d(w) = \textsf{parity}(p)) \Space \Then \\
+%\qquad \If (w \in \mathsf{dom}(d) \Rightarrow d(w) = \textsf{parity}(p)) \Then \\
 %\qquad \qquad b := \bigvee\limits_{u \in \{ u' \mid w \to u' \}} \textsc{FindLoop}(U,v, u, p, \text{visited}) \\
 %\qquad \textbf{else } \\
 %\qquad \qquad b := \bigwedge\limits_{u \in \{ u' \mid w \to u' \}} \textsc{FindLoop}(U,v, u, p, \text{visited}) \\
@@ -939,19 +980,20 @@ them; the function $\mathsf{parity}(p) = \up$ when $p$ is odd, and $\down$ other
 \If d(w) \in\{\top,\bot\} \textbf{ then return } false \\
 \If w \in \mathsf{dom}(r) \text{ and } r(w) \neq p \textbf{ then return } false \\
 \If w \in \mathsf{keys}(\text{visited}) \textbf{ then return } \text{visited}(w) \\
-\If w \in U \Space \Then \\
+\If w \in U \Then \\
 \qquad \text{visited}(w) := false\\
-\qquad \If (w \in \mathsf{dom}(d) \Rightarrow d(w) = \textsf{parity}(p)) \Space \Then \\
-\qquad \qquad b := (w \to v) \vee \bigvee\limits_{u \in \{ u' \mid w \to u' \wedge u' \neq v \}} \textsc{FindLoop}(U,v, u, p, \text{visited}) \\
+\qquad \If d(w) = \bot \lor d(w) = p \bmod 2 \Then \\
+\qquad \qquad \For u \in succ(w) \Do \\
+\qquad \qquad \qquad \If u = v \lor \textsc{FindLoop}(U,v, u, p, \text{visited}) \Then \\
+\qquad \qquad \qquad \qquad \colorbox{Apricot}{$ \If u = v \Then \tau(w) := v \Space \Else \tau(w) := u $} \\
+\qquad \qquad \qquad \qquad visited(w) := true \\
+\qquad \qquad \qquad \qquad \Return true \\
 \qquad \textbf{else } \\
 \qquad \qquad \Return false \\
 %\qquad \qquad b := \bigwedge\limits_{u \in \{ u' \mid w \to u' \wedge u' \neq v \}} \textsc{FindLoop}(U,v, u, p, \text{visited}) \\
-\qquad \text{visited}(w) := b\\
-\qquad \Return b\\
 \textbf{return $false$}
 \end{array}
 \end{equation*}
-
 
 The routine $\textsc{FindLoop}(U,v,w,r(v),\text{visited})$ finds a
 $r(v)$-ranked (possibly tree-like) loop starting in $v$, within a set of vertices
@@ -968,20 +1010,19 @@ The procedure $\textsc{FindLoops}$ can be called from within the main algorithm;
 done := discovered \setminus todo \\
 \text{visited} := [] \\
 b_0,b_1 := false,false \\
-\textbf{for } u \in done \cap \textsf{dom}(r) \Space \Do \\
-\qquad \If u \notin \textsf{keys}(\text{visited}) \Space \Then \text{visited}(u) := false\\
+\textbf{for } u \in done \cap \textsf{dom}(r) \Do \\
+\qquad \If u \notin \textsf{keys}(\text{visited}) \Then \text{visited}(u) := false\\
 \qquad b := \textsc{FindLoop}(done, u, u, r(u), \text{visited}) \\
 \qquad \text{visited}(u) := b\\
-\qquad \If b \Space \Then \\
-\qquad \qquad \If r(u) \bmod 2 = 0 \Space \Then S_0,b_0 := S_0 \cup \{u\}, true\\
+\qquad \If b \Then \\
+\qquad \qquad \If r(u) \bmod 2 = 0 \Then S_0,b_0 := S_0 \cup \{u\}, true\\
 \qquad\qquad \textbf{else } S_1,b_1 := S_1 \cup \{u\}, true\\
-\If b_0 \Space \Then S_0 := \textsc{AttrDefault}(S_0, 0)\\ 
-\If b_1 \Space \Then S_1 := \textsc{AttrDefault}(S_1, 1)\\ 
+\If b_0 \Then S_0 := \textsc{AttrDefault}(S_0, 0)\\ 
+\If b_1 \Then S_1 := \textsc{AttrDefault}(S_1, 1)\\ 
 \Return S_0, S_1
 \end{array}
 \end{equation*}
-The above optimisation can be integrated in the algorithm as follows. In \textbf{pbessolve}
-this optimisation is implemented as an extension of \textsc{PbesinstStructureGraph$_2$}.
+The above optimisation can be integrated in the algorithm as follows.
 
 \begin{equation*}
 \begin{array}{l}
@@ -992,24 +1033,21 @@ discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
 S_0:= \emptyset \\
 S_1:= \emptyset \\
-\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Space \Do \\ 
+\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad (b,\psi^e) := R^+(\psi^e) \\
-\qquad \If b = true \Space \Then S_0 := S_0 \cup \{ X^e \} \\
-\qquad \If b = false \Space \Then S_1 := S_1 \cup \{ X^e \} \\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$%
 S_0, S_1 := \text{\textsc{FindLoops}}(discovered, todo, S_0, S_1) $} \text{(executed periodically)} \\
-\If todo \neq \emptyset \land X_{init}(e_{init}) \in S_0 \Space \Then \\
-\qquad V := V \setminus \textsc{AttrDefault}(todo, 1) \\
-\Else \If todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \Space \Then \\
-\qquad V := V \setminus \textsc{AttrDefault}(todo, 0) \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return (V, E)
 \end{array}%
 \end{equation*}%
@@ -1038,6 +1076,9 @@ J := \{ j \mid \exists u \in V \cap dom(r) : r(u) = j \} \\
 \qquad \While X \neq Y \textbf{ do }\\
 \qquad \qquad X := \textsc{AttrMinRank}(U \cap Y, \alpha, V, j) \\
 \qquad \qquad Y := Y \setminus \textsc{AttrDefault}(Y \setminus X, 1-\alpha) \\
+\qquad \colorbox{Apricot}{$ \For v \in (U_j \cap X) \setminus S_{\alpha} \Do $} \\
+\qquad \colorbox{Apricot}{$ \qquad \If (\alpha = 0 \land d(u) = \blacktriangledown) \lor (\alpha = 1 \land d(u) = \blacktriangle) \Then $} \\
+\qquad \colorbox{Apricot}{$ \qquad \qquad \tau(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
 \qquad S_\alpha := S_\alpha \cup X \\
 \Return \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1, 1)
 \end{array}
@@ -1051,10 +1092,12 @@ $j$ are considered:
 todo := \bigcup_{u \in A} (%
 \colorbox{lightgray}{$ pred^{\geq j}(u, U) $}%
 \setminus A) \\
-\While todo \neq \emptyset \Space \Do \\
+\While todo \neq \emptyset \Do \\
 \qquad \textbf{choose } u \in todo \\
 \qquad todo := todo \setminus \{u\} \\
 \qquad \If d(u) = \alpha \vee succ(u) \subseteq A \\
+\qquad \qquad \colorbox{Apricot}{$ \If d(u) = \alpha \Then \tau
+\lbrack u]:=v\With v\in A\cap succ(u) $}\\ 
 \qquad \qquad A := A \cup \{u \} \\
 \qquad \qquad todo := todo \cup (%
 \colorbox{lightgray}{$ pred^{\geq j}(u, U) $}%
@@ -1068,8 +1111,7 @@ where
 pred^{\geq j}(u, U) = \{v \in U \mid (v,u) \in E \wedge (r(v) \ge j \vee (v \notin dom(r) \wedge d(v) \in \{\blacktriangle,\blacktriangledown\}) \}
 \end{eqnarray*}%
 
-The above optimisation can be integrated in the algorithm as follows. In \textbf{pbessolve}
-this optimisation is implemented as an extension of \textsc{PbesinstStructureGraph$_2$}.
+The above optimisation can be integrated in the algorithm as follows.
 
 \begin{equation*}
 \begin{array}{l}
@@ -1080,30 +1122,27 @@ discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
 S_0:= \emptyset \\
 S_1:= \emptyset \\
-\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Space \Do \\ 
+\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad (b,\psi^e) := R^+(\psi^e) \\
-\qquad \If b = true \Space \Then S_0 := S_0 \cup \{ X^e \} \\
-\qquad \If b = false \Space \Then S_1 := S_1 \cup \{ X^e \} \\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$%
 S_0, S_1 := \text{\textsc{FatalAttractors}}(V, S_0, S_1) $} \text{(executed periodically)} \\
-\If todo \neq \emptyset \land X_{init}(e_{init}) \in S_0 \Space \Then \\
-\qquad V := V \setminus \textsc{AttrDefault}(todo, 1) \\
-\Else \If todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \Space \Then \\
-\qquad V := V \setminus \textsc{AttrDefault}(todo, 0) \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return (V, E)
 \end{array}%
 \end{equation*}%
 
 \subsection{Optimisation 6}
-Optimisation 6 is a slightly differen fatal attractor computation that is very close to the
+Optimisation 6 is a slightly different fatal attractor computation that is very close to the
 original one by Michael Huth, Jim Huan-Pu Kuo, and Nir Piterman.
 
 \begin{equation*}
@@ -1113,10 +1152,12 @@ original one by Michael Huth, Jim Huan-Pu Kuo, and Nir Piterman.
 todo := \bigcup_{u \in A} (%
 pred^{\geq j}(u, U) ) \\
 X := \{ u \in todo \cap A \mid d(u) = \alpha \vee succ(u) \subseteq A \} \\
-\While todo \neq \emptyset \Space \Do \\
+\While todo \neq \emptyset \Do \\
 \qquad \textbf{choose } u \in todo \\
 \qquad todo := todo \setminus \{u\} \\
 \qquad \If d(u) = \alpha \vee succ(u) \subseteq A \cup X \\
+\qquad \qquad \colorbox{Apricot}{$ \If d(u) = \alpha \Then \tau
+\lbrack u]:=v\With v\in (A \cup X) \cap succ(u) $}\\ 
 \qquad \qquad X := X \cup \{u \} \\
 \qquad \qquad todo := todo \cup (%
 pred^{\geq j}(u, U) \setminus X)  \\
@@ -1137,6 +1178,9 @@ J := \{ j \mid \exists u \in V : r(u) = j \} \\
 \qquad \qquad X := U_j\\
 \qquad \qquad Y := \textsc{AttrMinRankOriginal}(X \cup S_\alpha, \alpha, V, j) \\
 \qquad \qquad \If U_j \subseteq Y \\
+\qquad \qquad \qquad \colorbox{Apricot}{$ \For v \in U_j \setminus S_{\alpha} \Do $} \\
+\qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \If (\alpha = 0 \land d(u) = \blacktriangledown) \lor (\alpha = 1 \land d(u) = \blacktriangle) \Then $} \\
+\qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \qquad \tau(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
 \qquad \qquad \qquad S_\alpha := S_\alpha \cup Y \\
 \qquad \qquad \qquad \textbf{break} \\
 \qquad \qquad \textbf{else }\\
@@ -1145,8 +1189,10 @@ J := \{ j \mid \exists u \in V : r(u) = j \} \\
 \end{array}
 \end{equation*}
 
+Note for setting strategy: when $U_j \subseteq Y$, we should set a strategy for all vertices $v \in U_j \setminus S_\alpha$ as follows: for each $v \in V_\alpha \cap (U_j \setminus S_\alpha)$, define $\tau(v) :\in \{ u \in Y \mid v \to u \}$.
+
 \subsection{Optimisation 7}
-In optimisation 7 the sets $S_0$ and $S_1$ are extended by solving a partial game. In \textbf{pbessolve} this optimisation is implemented as an extension of \textsc{PbesinstStructureGraph$_2$}.
+In optimisation 7 the sets $S_0$ and $S_1$ are extended by solving a partial game.
 
 \begin{equation*}
 \begin{array}{l}
@@ -1157,24 +1203,21 @@ discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
 S_0:= \emptyset \\
 S_1:= \emptyset \\
-\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Space \Do \\ 
+\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Do \\ 
 \qquad \Choose X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Space \Then R(\psi^e[X^e := false])
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad (b,\psi^e) := R^+(\psi^e) \\
-\qquad \If b = true \Space \Then S_0 := S_0 \cup \{ X^e \} \\
-\qquad \If b = false \Space \Then S_1 := S_1 \cup \{ X^e \} \\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$
 S_0, S_1 := \textsc{PartialSolve}(V,todo,S_0,S_1) $} \text{(executed periodically)} \\
-\If todo \neq \emptyset \land X_{init}(e_{init}) \in S_0 \Space \Then \\
-\qquad V := V \setminus \textsc{AttrDefault}(todo, 1) \\
-\Else \If todo \neq \emptyset \land X_{init}(e_{init}) \in S_1 \Space \Then \\
-\qquad V := V \setminus \textsc{AttrDefault}(todo, 0) \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return (V, E)
 \end{array}
 \end{equation*}
@@ -1189,6 +1232,7 @@ S_0,S_1 := \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1,1) \\
 S_1 := \textsc{AttrDefault}(S_1 \cup W_1,1) \\
 (W_0,W_1) := \textsc{SolveRecursive}(V \setminus (S_0 \cup \textsc{AttrDefault}(S_1 \cup todo,1)))\\
 S_0 := \textsc{AttrDefault}(S_0 \cup W_0,0) \\
+\Return S_0, S_1
 \end{array}
 \end{equation*}
 
