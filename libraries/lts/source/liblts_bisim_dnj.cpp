@@ -488,11 +488,11 @@ class action_block_entry;
         const_iterator end()   const  {  return cend();    }
 
         T& front()
-        {
+        {                                                                       assert(!empty());
             return static_cast<entry*>(sentinel.next)->data;
         }
         T& back()
-        {
+        {                                                                       assert(!empty());
             return static_cast<entry*>(sentinel.prev)->data;
         }
 
@@ -853,9 +853,9 @@ class state_info_entry
                                                                                     template<class LTS_TYPE>
                                                                                     std::string debug_id_short(const bisim_partitioner_dnj<LTS_TYPE>&
                                                                                                                                              partitioner) const
-                                                                                    {   assert(&*partitioner.part_st.state_info.cbegin() <= this);
-                                                                                        assert(this <= &partitioner.part_st.state_info.cend()[-1]);
-                                                                                        return std::to_string(this-&*partitioner.part_st.state_info.cbegin());
+                                                                                    {   assert(&partitioner.part_st.state_info.front() <= this);
+                                                                                        assert(this <= &partitioner.part_st.state_info.back());
+                                                                                        return std::to_string(this - &partitioner.part_st.state_info.front());
                                                                                     }
 
                                                                                     /// \brief print a state identification for debugging
@@ -1170,15 +1170,15 @@ class block_t
                                                                                     template<class LTS_TYPE>
                                                                                     inline std::string debug_id(const bisim_partitioner_dnj<LTS_TYPE>&
                                                                                                                                              partitioner) const
-                                                                                    {   assert(&*partitioner.part_st.permutation.cbegin() <= begin);
+                                                                                    {   assert(&partitioner.part_st.permutation.front() <= begin);
                                                                                         assert(begin < end);  assert(begin <= marked_bottom_begin);
                                                                                         assert(marked_bottom_begin <= nonbottom_begin);
                                                                                         assert(nonbottom_begin <= marked_nonbottom_begin);
                                                                                         assert(marked_nonbottom_begin <= end);
-                                                                                        assert(end <= 1 + &partitioner.part_st.permutation.cend()[-1]);
+                                                                                        assert(end <= 1 + &partitioner.part_st.permutation.back());
                                                                                         return "block [" +
-                                                                                          std::to_string(begin - &*partitioner.part_st.permutation.cbegin()) +
-                                                                                          "," + std::to_string(end-&*partitioner.part_st.permutation.cbegin())+
+                                                                                           std::to_string(begin - &partitioner.part_st.permutation.front()) +
+                                                                                           "," + std::to_string(end-&partitioner.part_st.permutation.front()) +
                                                                                                                           ") (#" + std::to_string(seqnr) + ")";
                                                                                     }
 
@@ -1221,15 +1221,15 @@ class part_state_t
         state_info(num_states),
         nr_of_blocks(0)
     {                                                                           assert(1 < num_states);
-        permutation_entry* perm_iter(&*permutation.begin());                    ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<block_t>::value);)
-        state_info_entry* state_iter(&*state_info.begin());
+        permutation_entry* perm_iter(&permutation.front());                     ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<block_t>::value);)
+        state_info_entry* state_iter(&state_info.front());
                                                                                 assert(perm_iter <= &permutation.back());
         do
         {
             state_iter->pos = perm_iter;
             perm_iter->st = state_iter;
         }
-        while (++state_iter, ++perm_iter <= &permutation.back());               assert(state_iter == 1 + &state_info.cend()[-1]);
+        while (++state_iter, ++perm_iter <= &permutation.back());               assert(state_iter == 1 + &state_info.back());
     }
 
 
@@ -1239,14 +1239,14 @@ class part_state_t
         /// not directly referenced from anywhere.
         ~part_state_t()
         {                                                                       ONLY_IF_DEBUG( state_type deleted_blocks(0); )
-            permutation_entry* perm_iter(1 + &permutation.back());              assert(&*permutation.begin() < perm_iter);
+            permutation_entry* perm_iter(1 + &permutation.back());              assert(&permutation.front() < perm_iter);
             do
             {
                 block_t* const B(perm_iter[-1].st->bl.ock);                     assert(B->end == perm_iter);
                 perm_iter = B->begin;                                           ONLY_IF_DEBUG( ++deleted_blocks; )
                 delete B;
             }
-            while (&*permutation.begin() < perm_iter);                          assert(deleted_blocks == nr_of_blocks);
+            while (&permutation.front() < perm_iter);                           assert(deleted_blocks == nr_of_blocks);
         }
     #endif
 
@@ -1306,7 +1306,7 @@ class part_state_t
                                                                                     /// lists its states, separated into nonbottom and bottom states.
                                                                                     template<class LTS_TYPE>
                                                                                     void print_part(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
-                                                                                    {   assert(permutation.cbegin() < permutation.cend());
+                                                                                    {
                                                                                         if (!mCRL2logEnabled(log::debug, "bisim_dnj"))  return;
                                                                                         const block_t* B(permutation.front().st->bl.ock);
                                                                                         do
@@ -1322,8 +1322,7 @@ class part_state_t
                                                                                                                B->marked_nonbottom_begin, B->end, partitioner);
                                                                                         // go to next block
                                                                                         }
-                                                                                        while (B->end < 1 + &permutation.cend()[-1] &&
-                                                                                                                               (B = B->end->st->bl.ock, true));
+                                                                                        while(B->end <= &permutation.back() && (B = B->end->st->bl.ock, true));
                                                                                     }
 
                                                                                     /// \brief asserts that the partition of states is consistent
@@ -1332,8 +1331,8 @@ class part_state_t
                                                                                     void assert_consistency(bool branching,
                                                                                                       const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
-                                                                                        const permutation_entry* perm_iter(&*permutation.cbegin());
-                                                                                        assert(perm_iter < 1 + &permutation.cend()[-1]);
+                                                                                        const permutation_entry* perm_iter(&permutation.front());
+                                                                                        assert(perm_iter <= &permutation.back());
                                                                                         do
                                                                                         {
                                                                                             const block_t* const block(perm_iter->st->bl.ock);
@@ -1354,17 +1353,16 @@ class part_state_t
                                                                                             do
                                                                                             {
                                                                                                 const state_info_entry* const state(perm_iter->st);
-                                                                                                // assert(&*part_tr.pred.cbegin() < state->pred_inert.begin);
-                                                                                                assert(&state_info.cend()[-1] == state ||
+                                                                                                // assert(&part_tr.pred.front() < state->pred_inert.begin);
+                                                                                                assert(&state_info.back() == state ||
                                                                                                          state->pred_inert.begin <= state[1].pred_inert.begin);
-                                                                                                // assert(state->pred_inert.begin<1+&part_tr.pred.cend()[-1]);
-                                                                                                // assert(state->succ_inert.begin<1+&part_tr.succ.cend()[-1]);
+                                                                                                // assert(state->pred_inert.begin <= &part_tr.pred.back());
+                                                                                                // assert(state->succ_inert.begin <= &part_tr.succ.back());
                                                                                                 if (perm_iter < block->nonbottom_begin)
                                                                                                 {
-                                                                                                    assert(&state_info.cend()[-1] == state || state->
+                                                                                                    assert(&state_info.back() == state || state->
                                                                                                                 succ_inert.begin <= state[1].succ_inert.begin);
-                                                                                                    // assert(state->succ_inert.begin ==
-                                                                                                    //                              &part_tr.succ.cend()[-1] ||
+                                                                                                    // assert(state->succ_inert.begin==&part_tr.succ.back() ||
                                                                                                     //    state <
                                                                                                     //     state->succ_inert.begin->block_bunch->pred->source);
                                                                                                     mCRL2complexity(state, no_temporary_work(max_block, true),
@@ -1372,9 +1370,8 @@ class part_state_t
                                                                                                 }
                                                                                                 else
                                                                                                 {
-                                                                                                    // assert(state->succ_inert.begin <
-                                                                                                    //                               &part_tr.succ.cend()[-1]);
-                                                                                                    assert(&state_info.cend()[-1] == state || state->
+                                                                                                    // assert(state->succ_inert.begin < &part_tr.succ.back());
+                                                                                                    assert(&state_info.back() == state || state->
                                                                                                                  succ_inert.begin < state[1].succ_inert.begin);
                                                                                                     //assert(state ==
                                                                                                     //     state->succ_inert.begin->block_bunch->pred->source);
@@ -1387,7 +1384,7 @@ class part_state_t
                                                                                             while (++perm_iter < block->end);
                                                                                             assert(perm_iter == block->end);
                                                                                         }
-                                                                                        while (perm_iter < 1 + &permutation.cend()[-1]);
+                                                                                        while (perm_iter <= &permutation.back());
                                                                                     }
                                                                                 #endif
 };
@@ -1563,8 +1560,8 @@ class action_block_entry
 
 
     /// \brief find the beginning of the action_block-slice
-    action_block_entry* action_block_slice_begin(                               ONLY_IF_DEBUG( const bisim_gjkw::fixed_vector<action_block_entry>&
-                                                                                        action_block, const action_block_entry* action_block_orig_inert_begin )
+    action_block_entry* action_block_slice_begin(                               ONLY_IF_DEBUG( const action_block_entry* action_block_begin,
+                                                                                                      const action_block_entry* action_block_orig_inert_begin )
                                                  )
     {
         action_block_entry* result(begin_or_before_end);                        assert(nullptr != result);
@@ -1577,7 +1574,7 @@ class action_block_entry
                                                                                 //                            result->succ->block_bunch->pred->target->bl.ock);
                                                                                 assert(nullptr != succ);  assert(nullptr != result->succ);
                                                                                 assert(succ->bunch() == result->succ->bunch());
-                                                                                assert(result == &*action_block.cbegin() || nullptr == result[-1].succ ||
+                                                                                assert(result == action_block_begin || nullptr == result[-1].succ ||
                                                                                             action_block_orig_inert_begin <= result ||
                                                                                             result[-1].succ->block_bunch->pred->target->bl.ock !=
                                                                                                               result->succ->block_bunch->pred->target->bl.ock);
@@ -1650,11 +1647,11 @@ class bunch_t
                                                                                     std::string debug_id_short(const bisim_partitioner_dnj<LTS_TYPE>&
                                                                                                                                              partitioner) const
                                                                                     {
-                                                                                        assert(&*partitioner.part_tr.action_block.cbegin() <= begin);
+                                                                                        assert(partitioner.part_tr.action_block_begin <= begin);
                                                                                         assert(end <= partitioner.part_tr.action_block_inert_begin);
                                                                                         return "bunch [" + std::to_string(begin -
-                                                                                                           &*partitioner.part_tr.action_block.cbegin()) + "," +
-                                                                                         std::to_string(end-&*partitioner.part_tr.action_block.cbegin()) + ")";
+                                                                                                                partitioner.part_tr.action_block_begin) + "," +
+                                                                                            std::to_string(end - partitioner.part_tr.action_block_begin) + ")";
                                                                                     }
 
                                                                                     /// \brief print a bunch identification for debugging
@@ -1784,7 +1781,7 @@ class block_bunch_slice_t
     /// \details A block_bunch-slice should only become empty if it is
     /// unstable.
     bool empty() const
-    {                                                                           // assert(&*part_tr.block_bunch.cbegin() < end);
+    {                                                                           // assert(&part_tr.block_bunch.front() < end);
                                                                                 // assert(end <= part_tr.block_bunch_inert_begin);
                                                                                 // assert(part_tr.block_bunch.front().slice != this);
         return end[-1].slice != this;
@@ -1809,7 +1806,7 @@ class block_bunch_slice_t
                                                                                             }
                                                                                         } block_bunch_not_equal;
 
-                                                                                        assert(&*partitioner.part_tr.block_bunch.cbegin() < end);
+                                                                                        assert(&partitioner.part_tr.block_bunch.front() < end);
                                                                                         assert(end <= partitioner.part_tr.block_bunch_inert_begin);
                                                                                         std::string index_string(std::to_string(end -
                                                                                                                 &partitioner.part_tr.block_bunch.cbegin()[1]));
@@ -1948,7 +1945,14 @@ class part_trans_t
     /// their label. Between transitions with different labels there is a dummy
     /// entry, to make it easier to check whether there is another transition
     /// in the current action_block slice.
-    bisim_gjkw::fixed_vector<action_block_entry> action_block;
+    ///
+    /// The array may be empty, in particular if there are no transitions.  In
+    /// that case, the two pointers (and `action_block_inert_begin` below)
+    /// should all be null pointers.  Also, front() and back() are undefined;
+    /// to avoid trouble with these methods, I decided to just store pointers
+    /// to the beginning and the end of the array.
+    action_block_entry* action_block_begin;
+    action_block_entry* action_block_end;
 
     /// \brief pointer to the first inert transition in block_bunch
     block_bunch_entry* block_bunch_inert_begin;
@@ -1989,16 +1993,18 @@ class part_trans_t
       : succ(num_transitions + 2),
         block_bunch(num_transitions + 1),
         pred(num_transitions + 2),
-        action_block(num_transitions + num_actions - 1),
+        action_block_begin(0 == num_transitions + num_actions - 1 ? nullptr
+                  : new action_block_entry[num_transitions + num_actions - 1]),
+        action_block_end(action_block_begin + (num_transitions+num_actions-1)),
         block_bunch_inert_begin(1 + &block_bunch.back()),
-        action_block_inert_begin(1 + &action_block.back()),
+        action_block_inert_begin(action_block_end),
         unstable_block_bunch(),
         first_nontrivial(nullptr)
     {
-        succ.front().block_bunch = &*block_bunch.begin();                       ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<bunch_t>::value);)
-        succ.back() .block_bunch = &*block_bunch.begin();                       ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<simple_list<
+        succ.front().block_bunch = &block_bunch.front();                        ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<bunch_t>::value);)
+        succ.back() .block_bunch = &block_bunch.front();                        ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<simple_list<
                                                                                                                          block_bunch_slice_t>::entry>::value);)
-        block_bunch.front().pred = &*pred.begin();
+        block_bunch.front().pred = &pred.front();
         block_bunch.front().slice = nullptr;
         pred.front().source = nullptr;
         pred.front().target = nullptr;
@@ -2007,20 +2013,24 @@ class part_trans_t
     }
 
 
-    #ifndef USE_POOL_ALLOCATOR
-        /// \brief destructor
-        /// \details The destructor also deallocates the bunches, as they are
-        /// not directly referenced from anywhere.
-        ~part_trans_t()
-        {
+    /// \brief destructor
+    ~part_trans_t()
+    {
+        #ifndef USE_POOL_ALLOCATOR
+            // The destructor also deallocates the bunches, as they are not
+            // directly referenced from anywhere.
             // mCRL2log(log::verbose, "bisim_dnj") << "The algorithm found "
             //       << number_of_new_bottom_states << " new bottom states.\n";
-            action_block_entry* action_block_iter(&*action_block.begin());
+            action_block_entry* action_block_iter(action_block_begin);
             for (;;)
             {
                 do
                 {
-                    if (action_block_inert_begin <= action_block_iter)  return;
+                    if (action_block_inert_begin <= action_block_iter)
+                    {
+                        delete [] action_block_begin;
+                        return;
+                    }
                 }
                 while (nullptr == action_block_iter->succ && (                  assert(nullptr == action_block_iter->begin_or_before_end),
                                                    ++action_block_iter, true)); assert(nullptr != action_block_iter->begin_or_before_end);
@@ -2029,8 +2039,10 @@ class part_trans_t
                 delete bunch;
             }
             /* unreachable                                                   */ assert(0);
-        }
-    #endif
+        #else
+            delete [] action_block_begin;
+        #endif
+    }
 
 
     /// \brief provide some bunch from the list of non-trivial bunches
@@ -2264,7 +2276,7 @@ class part_trans_t
         state_info_entry* const source(
                                       new_succ_pos->block_bunch->pred->source); assert(source->pos->st == source);
                                                                                 assert(new_succ_pos < source->succ_inert.begin);
-                                                                                assert(source == &*partitioner.part_st.state_info.cbegin() ||
+                                                                                assert(source == &partitioner.part_st.state_info.front() ||
                                                                                                                   source[-1].succ_inert.begin <= new_succ_pos);
                                                                                 assert(nullptr != new_succ_pos->begin_or_before_end);
         succ_entry* const new_begin_or_before_end(
@@ -2272,7 +2284,7 @@ class part_trans_t
                                                                                 assert(new_begin_or_before_end->block_bunch->pred->action_block->succ ==
                                                                                                                                       new_begin_or_before_end);
         if (new_begin_or_before_end < new_succ_pos)
-        {                                                                       assert(source == &*partitioner.part_st.state_info.cbegin() ||
+        {                                                                       assert(source == &partitioner.part_st.state_info.front() ||
                                                                                                        source[-1].succ_inert.begin <= new_begin_or_before_end);
             new_succ_pos->begin_or_before_end = new_begin_or_before_end;
         }
@@ -2314,7 +2326,7 @@ class part_trans_t
                                                            new_block_bunch_pos; assert(nullptr != new_block_bunch_pos);
                     }                                                           else assert(1 >= source->bl.ock->size());
                 }
-            }                                                                   else assert(source == &*partitioner.part_st.state_info.cbegin() ||
+            }                                                                   else assert(source == &partitioner.part_st.state_info.front() ||
                                                                                                                 source[-1].succ_inert.begin <= new_before_end);
         }
                                                                                 #ifndef NDEBUG
@@ -2332,7 +2344,7 @@ class part_trans_t
                                                                                     // block_bunch-slice, this would be the moment.
                                                                                     do  assert(source->bl.ock == new_block_bunch_pos->pred->source->bl.ock);
                                                                                     while ((--new_block_bunch_pos)->slice == new_block_bunch_slice);
-                                                                                    assert(new_block_bunch_pos <= &*partitioner.part_tr.block_bunch.begin() ||
+                                                                                    assert(new_block_bunch_pos <= &partitioner.part_tr.block_bunch.front() ||
                                                                                                 source->bl.ock != new_block_bunch_pos->pred->source->bl.ock ||
                                                                                                              bunch_T_a_B != new_block_bunch_pos->slice->bunch);
                                                                                 #endif
@@ -2384,7 +2396,7 @@ class part_trans_t
         block_bunch_entry* old_block_bunch_slice_end(
                                                    old_block_bunch_slice->end);
         state_info_entry* const source(old_block_bunch_pos->pred->source);      assert(out_slice_end <= source->succ_inert.begin);
-                                                                                assert(source == &*partitioner.part_st.state_info.cbegin() ||
+                                                                                assert(&partitioner.part_st.state_info.front() == source ||
                                                                                                                   source[-1].succ_inert.begin < out_slice_end);
         block_t* const new_block(source->bl.ock);                               assert(source == out_slice_begin->block_bunch->pred->source);
         block_bunch_slice_iter_t new_block_bunch_slice;                         assert(source->pos->st == source);
@@ -2492,7 +2504,7 @@ class part_trans_t
                     out_slice_end->block_bunch = new_prepaid_begin;
                 }
             }                                                                   assert(nullptr != old_block_bunch_slice_end->pred->action_block->succ);
-            old_block_bunch_slice_end->pred->action_block->succ->block_bunch=
+            old_block_bunch_slice_end->pred->action_block->succ->block_bunch =
                                                      old_block_bunch_slice_end; assert(nullptr != old_block_bunch_pos->pred->action_block->succ);
             old_block_bunch_pos->pred->action_block->succ->block_bunch =
                                                            old_block_bunch_pos;
@@ -2551,7 +2563,7 @@ class part_trans_t
                                                       pred_iter->action_block); assert(nullptr != old_action_block_pos->succ);
                                                                                 assert(old_action_block_pos->succ->block_bunch->pred == pred_iter);
         action_block_entry* const action_block_slice_begin(
-                             old_action_block_pos->action_block_slice_begin(    ONLY_IF_DEBUG( action_block, action_block_orig_inert_begin )
+                             old_action_block_pos->action_block_slice_begin(    ONLY_IF_DEBUG( action_block_begin, action_block_orig_inert_begin )
                                                                             )); assert(nullptr != action_block_slice_begin->succ);
                                                                                 assert(action_block_slice_begin->succ->block_bunch->pred->action_block ==
                                                                                                                                      action_block_slice_begin);
@@ -2607,7 +2619,7 @@ class part_trans_t
                                   new_action_block_pos[1].begin_or_before_end); assert(nullptr != action_block_slice_before_end);
                                                                                 assert(new_action_block_pos < action_block_slice_before_end);
                                                                                 assert(nullptr != action_block_slice_before_end->succ);
-                                                                                assert(action_block_slice_before_end->succ->block_bunch->pred->action_block==
+                                                                                assert(action_block_slice_before_end->succ->block_bunch->pred->action_block ==
                                                                                                                                 action_block_slice_before_end);
                                                                                 assert(new_action_block_pos + 1 ==
                                                                                                            action_block_slice_before_end->begin_or_before_end);
@@ -2820,7 +2832,7 @@ class part_trans_t
                 if (new_noninert_bunch->is_trivial())
                 {                                                               // Only during initialisation, it may happen that we add new non-inert
                     make_nontrivial(new_noninert_bunch);                        // transitions to a nontrivial bunch:
-                }                                                               else assert(&*action_block.cbegin() == new_noninert_bunch->begin);
+                }                                                               else assert(action_block_begin == new_noninert_bunch->begin);
             }
 
             /* adapt the out-slice                                           */ assert(source != succ.front().block_bunch->pred->source);
@@ -2928,7 +2940,7 @@ class part_trans_t
                                                                                 assert(s != pred.front().target);
             for (pred_entry* pred_iter(s->pred_inert.begin);
                                                   s == (--pred_iter)->target; )
-            {                                                                   assert(&*pred.cbegin() < pred_iter);
+            {                                                                   assert(&pred.front() < pred_iter);
                                                                                 assert(nullptr != pred_iter->action_block->succ);
                                                                                 assert(pred_iter->action_block->succ->block_bunch->pred == pred_iter);
                 first_move_transition_to_new_action_block(pred_iter);           // mCRL2complexity(pred_iter, ...) -- subsumed in the call below
@@ -2954,7 +2966,7 @@ class part_trans_t
             state_info_entry* const s(s_iter->st);                              assert(s->pos == s_iter);  assert(s != pred.front().target);
             for (pred_entry* pred_iter(s->pred_inert.begin);
                                                   s == (--pred_iter)->target; )
-            {                                                                   assert(&*pred.cbegin() < pred_iter);
+            {                                                                   assert(&pred.front() < pred_iter);
                                                                                 assert(nullptr != pred_iter->action_block->succ);
                                                                                 assert(pred_iter->action_block->succ->block_bunch->pred == pred_iter);
                 second_move_transition_to_new_action_block(pred_iter);          // mCRL2complexity(pred_iter, ...) -- subsumed in the call below
@@ -2963,7 +2975,7 @@ class part_trans_t
         while (++s_iter < new_block->end);
                                                                                 assert(0 == new_block->marked_size());  assert(0 == old_block->marked_size());
         /* -  -  -  -  -  - find new non-inert transitions -  -  -  -  -  - */  assert(1 + &block_bunch.back() - block_bunch_inert_begin ==
-                                                                                                       1 + &action_block.back() - action_block_inert_begin);
+                                                                                                                  action_block_end - action_block_inert_begin);
         if (block_bunch_inert_begin <= &block_bunch.back())
         {
             block_bunch_slice_iter_or_null_t new_noninert_block_bunch;
@@ -2977,7 +2989,7 @@ class part_trans_t
             }
             if (new_block_is_blue == new_block_mode)
             {                                                                   assert(old_block == new_block->end->st->bl.ock);
-                                                                                assert(new_block->end < 1 + &partitioner.part_st.permutation.cend()[-1]);
+                                                                                assert(new_block->end <= &partitioner.part_st.permutation.back());
                 permutation_entry* target_iter(new_block->begin);               assert(target_iter < new_block->end);
                 do
                 {
@@ -2986,7 +2998,7 @@ class part_trans_t
                     /* still start in new_block                              */ assert(s != pred.back().target);
                     for (pred_entry* pred_iter(s->pred_inert.begin);
                                            s == pred_iter->target; ++pred_iter)
-                    {                                                           assert(pred_iter < &pred.cend()[-1]);
+                    {                                                           assert(pred_iter < &pred.back());
                                                                                 assert(nullptr != pred_iter->action_block->succ);
                         state_info_entry* const t(pred_iter->source);           assert(pred_iter->action_block->succ->block_bunch->pred == pred_iter);
                                                                                 assert(t->pos->st == t);
@@ -3006,7 +3018,7 @@ class part_trans_t
             }
             else
             {                                                                   assert(new_block_is_red == new_block_mode);
-                    /* We have to be careful because make_noninert may make a*/ assert(&*partitioner.part_st.permutation.cbegin() < new_block->begin);
+                    /* We have to be careful because make_noninert may make a*/ assert(&partitioner.part_st.permutation.front() < new_block->begin);
                     /* state move either forward (to the marked states) or   */ assert(old_block == new_block->begin[-1].st->bl.ock);
                     /* back (to the bottom states).                          */ assert(0 < old_block->bottom_size());
                 for(permutation_entry* source_iter(new_block->nonbottom_begin);
@@ -3015,7 +3027,7 @@ class part_trans_t
                     state_info_entry* const s(source_iter->st);                 assert(s->pos == source_iter);
                     // check all outgoing inert transitions of s, whether they
                     /* still end in new_block.                               */ assert(succ.back().block_bunch->pred->source != s);
-                    succ_entry* succ_iter(s->succ_inert.begin);                 assert(succ_iter < &succ.cend()[-1]);
+                    succ_entry* succ_iter(s->succ_inert.begin);                 assert(succ_iter < &succ.back());
                     bool dont_mark(true);                                       assert(s == succ_iter->block_bunch->pred->source);
                     do
                     {                                                           assert(succ_iter->block_bunch->pred->action_block->succ == succ_iter);
@@ -3051,7 +3063,7 @@ class part_trans_t
                                                                                         if (!mCRL2logEnabled(log::debug, "bisim_dnj"))  return;
                                                                                         // print all outgoing transitions ordered per successor and out-slice
                                                                                         const succ_entry* succ_iter(&succ.cbegin()[1]);
-                                                                                        if (succ_iter >= &succ.cend()[-1])
+                                                                                        if (succ_iter >= &succ.back())
                                                                                         {
                                                                                             mCRL2log(log::debug, "bisim_dnj") << "No transitions.\n";
                                                                                             return;
@@ -3091,11 +3103,11 @@ class part_trans_t
                                                                                             mCRL2log(log::debug, "bisim_dnj") << "\t\t"
                                                                                                 << succ_iter->block_bunch->pred->debug_id(partitioner) << '\n';
                                                                                         }
-                                                                                        while (++succ_iter < &succ.cend()[-1]);
+                                                                                        while (++succ_iter < &succ.back());
 
                                                                                         // print all transitions ordered per bunch and action_block-slice
-                                                                                        const action_block_entry* action_block_iter(&*action_block.cbegin());
-                                                                                        do  assert(action_block_iter < 1 + &action_block.cend()[-1]);
+                                                                                        const action_block_entry* action_block_iter(action_block_begin);
+                                                                                        do  assert(action_block_iter < action_block_end);
                                                                                         while (nullptr == action_block_iter->succ &&
                                                                                                    (assert(nullptr == action_block_iter->begin_or_before_end),
                                                                                                     ++action_block_iter, true));
@@ -3107,7 +3119,7 @@ class part_trans_t
                                                                                             if (action_block_iter->succ->block_bunch->slice.is_null())
                                                                                             {   assert(action_block_iter == action_block_inert_begin);
                                                                                                 mCRL2log(log::debug, "bisim_dnj") <<"Inert transition slice [";
-                                                                                                action_block_slice_end = bunch_end=1+&action_block.cend()[-1];
+                                                                                                action_block_slice_end = bunch_end = action_block_end;
                                                                                             }
                                                                                             else
                                                                                             {
@@ -3127,8 +3139,8 @@ class part_trans_t
                                                                                             for (;;)
                                                                                             {
                                                                                                 mCRL2log(log::debug,"bisim_dnj") << (action_block_iter -
-                                                                                                                                &*action_block.cbegin()) << ","
-                                                                                                 << (action_block_slice_end-&*action_block.cbegin()) << "):\n";
+                                                                                                                                     action_block_begin) << ","
+                                                                                                    << (action_block_slice_end - action_block_begin) << "):\n";
                                                                                                 // for all transitions in the action_block-slice
                                                                                                 assert(action_block_iter < action_block_slice_end);
                                                                                                 do
@@ -3155,14 +3167,14 @@ class part_trans_t
                                                                                             }
                                                                                             // go to next bunch
                                                                                             assert(action_block_iter == bunch_end);
-                                                                                            while(action_block_iter < 1 + &action_block.cend()[-1] &&
+                                                                                            while (action_block_iter < action_block_end &&
                                                                                                                             nullptr == action_block_iter->succ)
                                                                                             {
                                                                                                 assert(nullptr == action_block_iter->begin_or_before_end);
                                                                                                 ++action_block_iter;
                                                                                             }
                                                                                         }
-                                                                                        while (action_block_iter < 1 + &action_block.cend()[-1]);
+                                                                                        while (action_block_iter < action_block_end);
                                                                                     }
                                                                                 #endif
 };
@@ -3381,16 +3393,16 @@ class bisim_partitioner_dnj
                                                                                     arbitrary_state_per_block->assign(num_eq_classes(), (state_type) -1);
                                                                                 #endif
             // for all blocks
-            const permutation_entry* s_iter(&*part_st.permutation.cbegin());    assert(s_iter < 1 + &part_st.permutation.cend()[-1]);
+            const permutation_entry* s_iter(&part_st.permutation.front());      assert(s_iter <= &part_st.permutation.back());
             do
             {
                 const block_t* const B(s_iter->st->bl.ock);                     assert(0 <= B->seqnr);  assert(B->seqnr < arbitrary_state_per_block->size());
                                                                                 assert((state_type) -1 == (*arbitrary_state_per_block)[B->seqnr]);
                 (*arbitrary_state_per_block)[B->seqnr] =
-                                    s_iter->st - &*part_st.state_info.cbegin();
+                                      s_iter->st - &part_st.state_info.front();
                 s_iter = B->end;
             }
-            while (s_iter < 1 + &part_st.permutation.cend()[-1]);
+            while (s_iter <= &part_st.permutation.back());
         }
 
         // The labels have already been stored in
@@ -3399,7 +3411,7 @@ class bisim_partitioner_dnj
 
         // for all blocks
         {
-            const permutation_entry* s_iter(&*part_st.permutation.cbegin());    assert(s_iter < 1 + &part_st.permutation.cend()[-1]);
+            const permutation_entry* s_iter(&part_st.permutation.front());      assert(s_iter <= &part_st.permutation.back());
             do
             {
                 const block_t* const B(s_iter->st->bl.ock);
@@ -3418,7 +3430,7 @@ class bisim_partitioner_dnj
                 }
                 s_iter = B->end;
             }
-            while (s_iter < 1 + &part_st.permutation.cend()[-1]);
+            while (s_iter <= &part_st.permutation.back());
         }
 
         // Merge the states, by setting the state labels of each state to the
@@ -3454,11 +3466,6 @@ class bisim_partitioner_dnj
         }
 
         aut.set_initial_state(get_eq_class(aut.initial_state()));
-#ifndef NDEBUG
-for (const state_info_entry* s_iter = &*part_st.state_info.begin(); s_iter <= &part_st.state_info.back(); ++s_iter) {
-mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_iter->bl.ock->debug_id(*this) << '\n';
-}
-#endif
     }
 
 
@@ -3513,7 +3520,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                 #else
                     new block_t
                 #endif
-                 (&*part_st.permutation.begin(),
+                    (&part_st.permutation.front(),
                      1 + &part_st.permutation.back(), part_st.nr_of_blocks++));
 
         // Iterate over the transitions to count how to order them in
@@ -3563,7 +3570,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
 
         pred_entry* next_pred_begin(&part_tr.pred.begin()[1]);
         succ_entry* next_succ_begin(&part_tr.succ.begin()[1]);
-        state_info_entry* state_iter(&*part_st.state_info.begin());             assert(state_iter <= &part_st.state_info.back());
+        state_info_entry* state_iter(&part_st.state_info.front());              assert(state_iter <= &part_st.state_info.back());
         do
         {
             state_iter->bl.ed_noninert_end = next_pred_begin;
@@ -3603,14 +3610,14 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
         // create a single bunch containing all non-inert transitions
 
         part_tr.action_block_inert_begin =
-                          1 + &part_tr.action_block.back() - inert_transitions;
+                                  part_tr.action_block_end - inert_transitions;
         part_tr.block_bunch_inert_begin =
                            1 + &part_tr.block_bunch.back() - inert_transitions;
 
         bunch_t* bunch(nullptr);
 
         // create a single block_bunch entry for all non-inert transitions
-        if (&*part_tr.action_block.begin() < part_tr.action_block_inert_begin)
+        if (part_tr.action_block_begin < part_tr.action_block_inert_begin)
         {
             bunch =
                 #ifdef USE_POOL_ALLOCATOR
@@ -3618,7 +3625,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                 #else
                     new bunch_t
                 #endif
-                                            (&*part_tr.action_block.begin(),
+                                            (part_tr.action_block_begin,
                                              part_tr.action_block_inert_begin); assert(nullptr != bunch);  assert(part_tr.unstable_block_bunch.empty());
             part_tr.unstable_block_bunch.emplace_front(
                 #ifdef USE_SIMPLE_LIST
@@ -3635,10 +3642,10 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
         // non-inert and finally the inert transitions.
         // Transitions with other labels are placed from beginning to end.
         // Every such transition block except the last one ends with a dummy
-        /* entry.  If there are transition labels without transitions,       */ assert(part_tr.action_block.size() ==
+        /* entry.  If there are transition labels without transitions,       */ assert((size_t) (part_tr.action_block_end - part_tr.action_block_begin) ==
         /* multiple dummy entries will be placed side-by-side.               */                               aut.num_transitions() + action_label.size() - 1);
         action_block_entry* next_action_label_begin(
-                                               &*part_tr.action_block.begin());
+                                                   part_tr.action_block_begin);
         label_type num_labels_with_transitions(0);
         trans_type const n_square(part_st.state_size() * part_st.state_size()); ONLY_IF_DEBUG( trans_type max_transitions = n_square; )
         label_type label(action_label.size());                                  assert(0 < label);
@@ -3661,7 +3668,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                         "This is more than n^2 (= " << n_square << "). It is "
                         "not guaranteed that branching bisimulation "
                         "minimisation runs in time O(m log n).\n";              ONLY_IF_DEBUG(  if (max_transitions < action_label[label].count)
-                                                                                                    {   max_transitions = action_label[label].count;   }  )
+                                                                                                {   max_transitions = action_label[label].count;   }  )
                 }
                 // initialise begin_or_before_end pointers for this
                 // action_block-slice
@@ -3703,9 +3710,9 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
         for (const transition& t: aut.get_transitions())
         {
             state_info_entry* const source =
-                                       &*part_st.state_info.begin() + t.from();
+                                        &part_st.state_info.front() + t.from();
             state_info_entry* const target =
-                                       &*part_st.state_info.begin() + t.to();
+                                        &part_st.state_info.front() + t.to();
             succ_entry* succ_pos;
             block_bunch_entry* block_bunch_pos;
             pred_entry* pred_pos;
@@ -3721,9 +3728,9 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                 block_bunch_pos = 1 + &part_tr.block_bunch.back() -
                                                              inert_transitions; assert(block_bunch_pos >= part_tr.block_bunch_inert_begin);
                 pred_pos = --target->pred_inert.begin;                          assert(block_bunch_pos->slice.is_null());
-                action_block_pos = 1 + &part_tr.action_block.back() -
-                                                             inert_transitions; assert(action_block_pos >= part_tr.action_block_inert_begin);
-                --inert_transitions;                                            assert(nullptr == action_block_pos->begin_or_before_end);
+                action_block_pos = part_tr.action_block_end-inert_transitions;  assert(action_block_pos >= part_tr.action_block_inert_begin);
+                action_block_pos->begin_or_before_end = nullptr;
+                --inert_transitions;
             }
             else
             {
@@ -3756,7 +3763,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
         // add new transitions at the end of minimisation.
         aut.clear_transitions();
 
-        state_iter = &*part_st.state_info.begin();                              assert(state_iter <= &part_st.state_info.back());
+        state_iter = &part_st.state_info.front();                               assert(state_iter <= &part_st.state_info.back());
         do
         {
             state_iter->bl.ock = B;
@@ -3804,7 +3811,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
 
                                                                                         assert(part_tr.succ.size() == part_tr.block_bunch.size() + 1);
                                                                                         assert(part_tr.pred.size() == part_tr.block_bunch.size() + 1);
-                                                                                        assert(part_tr.action_block.size() ==
+                                                                                        assert((size_t)(part_tr.action_block_end-part_tr.action_block_begin) ==
                                                                                                          part_tr.block_bunch.size() + action_label.size() - 2);
                                                                                         if (part_tr.block_bunch.empty())  return;
 
@@ -3816,8 +3823,8 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                         } */
 
                                                                                         // for all blocks
-                                                                                        const permutation_entry* perm_iter(&*part_st.permutation.cbegin());
-                                                                                        assert(perm_iter < 1 + &part_st.permutation.cend()[-1]);
+                                                                                        const permutation_entry* perm_iter(&part_st.permutation.front());
+                                                                                        assert(perm_iter <= &part_st.permutation.back());
                                                                                         do
                                                                                         {
                                                                                             const block_t* const block(perm_iter->st->bl.ock);
@@ -3920,29 +3927,23 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                             }
                                                                                             while (++perm_iter < block->end);
                                                                                         }
-                                                                                        while (perm_iter < 1 + &part_st.permutation.cend()[-1]);
-
-                                                                                        assert(&*part_tr.action_block.cbegin() <=
-                                                                                                                             part_tr.action_block_inert_begin);
-                                                                                        assert(&*part_tr.block_bunch.cbegin()<part_tr.block_bunch_inert_begin);
+                                                                                        while (perm_iter <= &part_st.permutation.back());
+                                                                                        assert(part_tr.action_block_begin <= part_tr.action_block_inert_begin);
+                                                                                        assert(&part_tr.block_bunch.front() < part_tr.block_bunch_inert_begin);
                                                                                         if (branching)
-                                                                                        {
-                                                                                            assert(part_tr.action_block_inert_begin <=
-                                                                                                                             1 + &part_tr.action_block.back());
+                                                                                        {   assert(part_tr.action_block_inert_begin<=part_tr.action_block_end);
                                                                                             assert(part_tr.block_bunch_inert_begin <=
                                                                                                                               1 + &part_tr.block_bunch.back());
                                                                                             assert(1 + &part_tr.block_bunch.back() -
                                                                                                                              part_tr.block_bunch_inert_begin ==
-                                                                                                   1 + &part_tr.action_block.back() -
-                                                                                                                             part_tr.action_block_inert_begin);
+                                                                                                  part_tr.action_block_end - part_tr.action_block_inert_begin);
 
                                                                                             // for all inert transitions
                                                                                             for (const action_block_entry* action_block(
                                                                                                                              part_tr.action_block_inert_begin);
-                                                                                                           action_block < 1 + &part_tr.action_block.cend()[-1];
+                                                                                                                       action_block < part_tr.action_block_end;
                                                                                                                                                 ++action_block)
-                                                                                            {
-                                                                                                assert(nullptr == action_block->begin_or_before_end);
+                                                                                            {   assert(nullptr == action_block->begin_or_before_end);
                                                                                                 const succ_entry* const succ_iter(action_block->succ);
                                                                                                 assert(nullptr != succ_iter);
                                                                                                 assert(succ_iter->block_bunch->slice.is_null());
@@ -3969,8 +3970,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                         else
                                                                                         {
                                                                                             assert(!preserve_divergence);
-                                                                                            assert(part_tr.action_block_inert_begin ==
-                                                                                                                             1 + &part_tr.action_block.back());
+                                                                                            assert(part_tr.action_block_inert_begin==part_tr.action_block_end);
                                                                                             assert(part_tr.block_bunch_inert_begin ==
                                                                                                                               1 + &part_tr.block_bunch.back());
                                                                                         }
@@ -3982,7 +3982,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                         const bunch_t* previous_bunch(nullptr);
                                                                                         do
                                                                                         {
-                                                                                            assert(&*part_tr.action_block.cbegin()<=action_label[label].begin);
+                                                                                            assert(part_tr.action_block_begin <= action_label[label].begin);
                                                                                             assert(action_label[label].begin <= action_slice_end);
                                                                                             assert(action_slice_end <= part_tr.action_block_inert_begin);
                                                                                             // for all action_block slices
@@ -4120,7 +4120,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
             do
             {                                                                   assert(nullptr != splitter_iter->succ);
                 state_info_entry* const source(
-                             splitter_iter->succ->block_bunch->pred->source);   assert(splitter_iter->succ->block_bunch->pred->action_block==splitter_iter);
+                               splitter_iter->succ->block_bunch->pred->source); assert(splitter_iter->succ->block_bunch->pred->action_block == splitter_iter);
                 // Line 1.10: Mark all transitions in bunch_T_a_B
                     // actually we make the initial state red
                 bool const first_transition_of_state(
@@ -4529,7 +4529,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                             {                                                   assert(blue_t != part_tr.succ.front().block_bunch->pred->source);
                                 // Line 2.19l: for all non-inert
                                 //             t --alpha--> u do
-                                blue_end = blue_t->succ_inert.begin;            assert(&*part_tr.succ.cbegin() < blue_end);
+                                blue_end = blue_t->succ_inert.begin;            assert(&part_tr.succ.front() < blue_end);
                                 COROUTINE_WHILE(REFINE_BLUE_TESTING, blue_t ==
                                         blue_end[-1].block_bunch->pred->source)
                                 {
@@ -4803,7 +4803,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                     part_tr.unstable_block_bunch.front().source_block() ==
                                                                   refine_block;
             refine_block = refine(refine_block, new_noninert_block_bunch,
-                           extend_from_marked_states_for_init_and_postprocess); assert(&*part_st.permutation.cbegin() < refine_block->begin);
+                           extend_from_marked_states_for_init_and_postprocess); assert(&part_st.permutation.front() < refine_block->begin);
             blue_block = refine_block->begin[-1].st->bl.ock;
 
             // If the first element of part_tr.unstable_block_bunch was a
@@ -4876,7 +4876,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
             // We cannot do this in time O(1) because we need to call
             // `make_unstable()` for each block_bunch-slice individually.
         for (block_bunch_slice_iter_t block_bunch_iter(
-                                   refine_block->stable_block_bunch.begin());
+                                     refine_block->stable_block_bunch.begin());
                   refine_block->stable_block_bunch.end() != block_bunch_iter; )
         {                                                                       assert(block_bunch_iter->is_stable());
             block_bunch_slice_iter_t const next_block_bunch_iter(
@@ -5143,7 +5143,7 @@ mCRL2log(log::debug, "bisim_dnj") << s_iter->debug_id(*this) << " is in " << s_i
                                                                                                                                   max_red_block), partitioner);
                                                                                             }
                                                                                             assert(s !=
-                                                                                                 partitioner.part_tr.succ.front().block_bunch->pred->source);
+                                                                                                   partitioner.part_tr.succ.front().block_bunch->pred->source);
                                                                                             for (const succ_entry* succ_iter(s->succ_inert.begin);
                                                                                                                s == (--succ_iter)->block_bunch->pred->source; )
                                                                                             {

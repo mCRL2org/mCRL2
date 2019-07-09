@@ -926,6 +926,13 @@ class check_complexity
         bool no_temporary_work(unsigned const max_block)
         {
             assert((log_n + 1U) / 2U <= max_block);
+            if (max_block > log_n)
+            {
+                    mCRL2log(log::error) << "Error 14: max_block == "
+                                         << max_block << " exceeded log_n == "
+                                         << (unsigned) log_n << " for ";
+                    return false;
+            }
             assert(max_block <= log_n);
             for (enum counter_type ctr = BLOCK_dnj_MIN;
                                 ctr < create_initial_partition;
