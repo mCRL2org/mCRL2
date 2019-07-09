@@ -222,7 +222,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     }
 
     // Returns true if all nodes in the todo list are undefined (i.e. have not been processed yet)
-    bool todo_has_undefined_nodes() const
+    bool todo_has_only_undefined_nodes() const
     {
       for (const propositional_variable_instantiation& X: todo.all_elements())
       {
@@ -350,7 +350,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
       todo.set_todo(new_todo_list);
-      todo_has_undefined_nodes();
+      assert(todo_has_only_undefined_nodes());
     };
 
     bool strategies_are_set_in_solved_nodes() const

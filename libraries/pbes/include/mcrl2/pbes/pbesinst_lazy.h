@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
@@ -221,32 +222,6 @@ class pbesinst_lazy_algorithm
       return "";
     }
 
-    /// \brief Adds the assignments [v := e] to sigma
-    /// \param v A sequence of data variables
-    /// \param e A sequence of data expressions
-    /// \param sigma The substitution that maps the i-th element of \p v to the i-th element of \p e
-    inline
-    void add_assignments(const data::variable_list& v, const data::data_expression_list& e, data::mutable_indexed_substitution<>& sigma)
-    {
-      assert(v.size() == e.size());
-      auto vi = v.begin();
-      auto ei = e.begin();
-      for (; vi != v.end(); ++vi, ++ei)
-      {
-        sigma[*vi] = *ei;
-      }
-    }
-
-    /// \brief Removes assignments to variables in v from sigma
-    inline
-    void remove_assignments(const data::variable_list& v, data::mutable_indexed_substitution<>& sigma)
-    {
-      for (const data::variable& v_i: v)
-      {
-        sigma[v_i] = v_i;
-      }
-    }
-
     // instantiates global variables
     // simplifies the pbes
     pbes preprocess(const pbes& x) const
@@ -288,8 +263,8 @@ class pbesinst_lazy_algorithm
       );
       if (changed)
       {
-        simplify_rewriter R;
-        return R(result);
+        simplify_rewriter simplify;
+        return simplify(result);
       }
       else
       {
@@ -390,9 +365,9 @@ class pbesinst_lazy_algorithm
         std::size_t index = m_equation_index.index(X_e.name());
         const pbes_equation& eqn = m_pbes.equations()[index];
         const auto& phi = eqn.formula();
-        add_assignments(eqn.variable().parameters(), X_e.parameters(), sigma);
+        data::add_assignments(sigma, eqn.variable().parameters(), X_e.parameters());
         pbes_expression psi_e = R(phi, sigma);
-        remove_assignments(eqn.variable().parameters(), sigma);
+        data::remove_assignments(sigma, eqn.variable().parameters());
 
         // optional step
         psi_e = rewrite_psi(eqn.symbol(), X_e, psi_e);

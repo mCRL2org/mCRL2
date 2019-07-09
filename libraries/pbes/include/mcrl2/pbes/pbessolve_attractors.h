@@ -66,8 +66,8 @@ void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u
 }
 
 // Returns true if succ(u) \subseteq A
-template <typename StructureGraph>
-bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A)
+template <typename StructureGraph, typename VertexSet>
+bool includes_successors(const StructureGraph& G, typename StructureGraph::index_type u, const VertexSet& A)
 {
   for (auto v: G.successors(u))
   {
@@ -86,20 +86,6 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
   for (auto v: G.successors(u))
   {
     if (!A.contains(v) && !S.contains(v))
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-// Returns true if succ(u) \cap A == \emptyset
-template <typename StructureGraph>
-bool has_empty_intersection(const StructureGraph& G, typename StructureGraph::index_type u, const vertex_set& A)
-{
-  for (auto v: G.successors(u))
-  {
-    if (A.contains(v))
     {
       return false;
     }
@@ -159,91 +145,6 @@ template <typename StructureGraph>
 vertex_set attr_default_no_strategy(const StructureGraph& G, vertex_set A, std::size_t alpha)
 {
   return attr_default<StructureGraph, false>(G, A, alpha);
-}
-
-// Computes an attractor set, by extending S.
-// alpha = 0: disjunctive
-// alpha = 1: conjunctive
-// StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph>
-vertex_set attr_cheap(const StructureGraph& G, vertex_set S, typename StructureGraph::index_type v, std::size_t alpha)
-{
-  std::size_t N = G.all_vertices().size();
-
-  deque_vertex_set todo(N);
-  for (auto u: G.predecessors(v))
-  {
-    if (!S.contains(u))
-    {
-      todo.insert(u);
-    }
-  }
-
-  vertex_set A(N);
-  A.insert(v);
-
-  while (!todo.is_empty())
-  {
-    // N.B. Use a breadth first search, to minimize counter examples
-    auto u = todo.pop_front();
-
-    if ((G.decoration(u) == alpha && has_empty_intersection(G, u, A)) || (G.decoration(u) != alpha && includes_successors(G, u, A, S)))
-    {
-      set_strategy(G, u, A, alpha);
-
-      A.insert(u);
-      for (auto w: G.predecessors(u))
-      {
-        if (!A.contains(w) && !S.contains(w))
-        {
-          todo.insert(w);
-        }
-      }
-    }
-  }
-
-  for (auto u: A.vertices())
-  {
-    S.insert(u);
-  }
-  return S;
-}
-
-// Computes an attractor set, by extending A.
-// StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph>
-vertex_set attr_simple(const StructureGraph& G, vertex_set A)
-{
-  // put all predecessors of elements in A in todo
-  deque_vertex_set todo(G.all_vertices().size());
-  for (auto u: A.vertices())
-  {
-    for (auto v: G.predecessors(u))
-    {
-      if (!A.contains(v))
-      {
-        todo.insert(v);
-      }
-    }
-  }
-
-  while (!todo.is_empty())
-  {
-    auto u = todo.pop_front();
-
-    if (includes_successors(G, u, A))
-    {
-      A.insert(u);
-      for (auto v: G.predecessors(u))
-      {
-        if (!A.contains(v))
-        {
-          todo.insert(v);
-        }
-      }
-    }
-  }
-  return A;
 }
 
 } // namespace pbes_system

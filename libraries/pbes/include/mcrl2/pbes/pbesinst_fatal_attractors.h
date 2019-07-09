@@ -98,10 +98,10 @@ std::map<std::size_t, vertex_set> compute_U_j_map(const StructureGraph& G, const
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
 template <typename StructureGraph>
-vertex_set compute_attractor_set_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
 {
   // put all predecessors of elements in A in todo
-  deque_vertex_set todo = attr_min_rank_original_todo(G, A, U, j);
+  deque_vertex_set todo = attr_min_rank_todo(G, A, U, j);
 
   while (!todo.is_empty())
   {
@@ -164,14 +164,14 @@ void fatal_attractors(const simple_structure_graph& G,
     U_j = set_minus(U_j, S_one_minus_alpha);
     detail::log_vertex_set(U_j, "U_" + std::to_string(j));
     vertex_set U = set_union(U_j, S_alpha);
-    vertex_set X = detail::compute_attractor_set_min_rank(G, U, alpha, V, j);
+    vertex_set X = detail::attr_min_rank(G, U, alpha, V, j);
     vertex_set Y = set_minus(V, attr_default(G, set_minus(V, X), 1 - alpha));
 
     while (X != Y)
     {
       detail::log_vertex_set(X, "X");
       detail::log_vertex_set(Y, "Y");
-      X = detail::compute_attractor_set_min_rank(G, set_intersection(U, Y), alpha, V, j);
+      X = detail::attr_min_rank(G, set_intersection(U, Y), alpha, V, j);
       Y = set_minus(Y, attr_default(G, set_minus(Y, X), 1 - alpha));
     }
     detail::log_vertex_set(X, "X (final value)");
@@ -219,7 +219,7 @@ void fatal_attractors(const simple_structure_graph& G,
 // StructureGraph is either structure_graph or simple_structure_graph
 // This version is based on the work of Michael Huth, Jim Huan-Pu Kuo, and Nir Piterman.
 template <typename StructureGraph>
-vertex_set compute_attractor_set_min_rank_original(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
 {
   // put all predecessors of elements in A in todo
   deque_vertex_set todo = attr_min_rank_original_todo(G, A, U, j);
@@ -304,7 +304,7 @@ void fatal_attractors_original(const simple_structure_graph& G,
       X = U_j;
       detail::log_vertex_set(X, "X");
       detail::log_vertex_set(set_union(X, S_alpha), "X \\cup S_" + std::to_string(alpha));
-      vertex_set Y = detail::compute_attractor_set_min_rank_original(G, set_union(X, S_alpha), alpha, V, j);
+      vertex_set Y = detail::attr_min_rank_original(G, set_union(X, S_alpha), alpha, V, j);
       detail::log_vertex_set(Y, "Y");
       mCRL2log(log::debug) << "U_" + std::to_string(j) << " is " << (is_subset_of(U_j, Y) ? "a" : "no") << " subset of Y" << std::endl;
       if (is_subset_of(U_j, Y))
