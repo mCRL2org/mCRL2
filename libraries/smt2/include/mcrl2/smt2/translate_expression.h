@@ -75,7 +75,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     auto find_result = m_native.find_native_translation(v);
     if(find_result != m_native.expressions.end())
     {
-      out << find_result->second(v);
+      out << find_result->second(v) << " ";
     }
     else
     {

@@ -47,11 +47,13 @@ void translate_sort_definition(const std::string& sort_name,
     if(data::is_function_sort(cons.sort()))
     {
       const data::function_sort& cs = atermpp::down_cast<data::function_sort>(cons.sort());
+      std::size_t index = 0;
       for(const data::sort_expression& arg: cs.domain())
       {
-        out << "(" << id_gen("@projectionf") << " ";
+        out << "(" << make_projection_name(cons, index) << " ";
         translate_sort_expression(arg, out, nt, struct_name_map);
         out << ") ";
+        index++;
       }
     }
     out << ") ";

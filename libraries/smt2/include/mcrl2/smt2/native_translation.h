@@ -237,19 +237,6 @@ native_translations initialise_native_translation(const data::data_specification
   // nt.mappings[sort_real::ceil(s)]
   // nt.mappings[sort_real::round(s)]
 
-
-  // for(const sort_expression& s1: number_sorts)
-  // {
-  //   nt.set_native_definition(sort_real::minus(s1,s1));
-  //   nt.set_native_definition(sort_real::times(s1,s1));
-  //   nt.set_native_definition(sort_real::divides(s1,s1));
-  //   for(const sort_expression& s2: number_sorts)
-  //   {
-  //     // not all combinations are allowed; ignore exception when necessary
-  //     try { nt.set_native_definition(sort_real::plus(s1,s2)); } catch (const mcrl2::runtime_error&) {}
-  //     try { nt.set_native_definition(sort_real::minus(s1,s2)); } catch (const mcrl2::runtime_error&) {}
-  //   }
-  // }
   nt.set_native_definition(sort_bool::not_(), "not");
   nt.set_native_definition(sort_bool::and_(), "and");
   nt.set_native_definition(sort_bool::or_(), "or");
@@ -263,16 +250,6 @@ native_translations initialise_native_translation(const data::data_specification
   nt.expressions[sort_int::cint()] = pp_translation;
   nt.expressions[sort_real::creal()] = pp_real_translation;
   nt.set_native_definition(sort_real::creal());
-
-  // nt.set_native_definition(sort_pos::plus());
-  // nt.set_native_definition(sort_pos::times());
-  // // Do not translate the following auxiliary functions
-  // nt.set_native_definition(sort_pos::pos_predecessor());
-  // nt.set_native_definition(sort_pos::add_with_carry());
-  // nt.set_native_definition(sort_pos::powerlog2_pos());
-  // variable vp("p", sort_pos::pos());
-  // nt.set_native_definition(sort_pos::succ(),
-  //     data_equation(variable_list({vp}), sort_pos::succ(vp), sort_pos::plus(vp, sort_pos::c1())));
 
   nt.set_native_definition(sort_nat::pos2nat(), "@id");
   nt.set_native_definition(sort_nat::nat2pos(), "@id");
@@ -300,6 +277,32 @@ native_translations initialise_native_translation(const data::data_specification
   return nt;
 }
 
+inline
+std::string make_projection_name(const data::function_symbol& cons, std::size_t i)
+{
+  return "@proj-" + data::pp(cons) + "-" + std::to_string(i);
+}
+
+inline
+data::function_symbol make_projection_func(const data::function_symbol& cons, const data::sort_expression& arg_sort, std::size_t i)
+{
+  data::function_sort sort(data::sort_expression_list({ cons.sort().target_sort() }), arg_sort);
+  return data::function_symbol(make_projection_name(cons, i), sort);
+}
+
+inline
+std::string make_recogniser_name(const data::function_symbol& cons)
+{
+  // Z3 automatically generates recognisers "is-constructorname"
+  return "is-" + data::pp(cons);
+}
+
+inline
+data::function_symbol make_recogniser_func(const data::function_symbol& cons)
+{
+  data::function_sort sort(data::sort_expression_list({ cons.sort().target_sort() }), data::sort_bool::bool_());
+  return data::function_symbol(make_recogniser_name(cons), sort);
+}
 
 } // namespace smt
 } // namespace mcrl2
