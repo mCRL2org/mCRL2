@@ -15,6 +15,7 @@
 #include "mcrl2/smt2/translate_expression.h"
 #include "mcrl2/smt2/translate_specification.h"
 #include "mcrl2/smt2/native_translation.h"
+#include "mcrl2/smt2/unfold_pattern_matching.h"
 #include "mcrl2/smt2/solver.h"
 
 #include <vector>
@@ -41,10 +42,11 @@ int main(int /*argc*/, char** /*argv*/)
                                    "  invert(b0(r1))= b1;             \n"
                                    "  invert2(b0(r1))= b0(-r1);             \n"
                                  );
-  smt::native_translations ntm = smt::initialise_native_translation(data_spec);
+  smt::native_translations nt = smt::initialise_native_translation(data_spec);
+  unfold_pattern_matching(data_spec, nt);
 
   std::ostringstream out;
-  smt::translate_data_specification(data_spec, out, ntm);
+  smt::translate_data_specification(data_spec, out, nt);
   std::cout << out.str() << std::endl;
 
   smt::smt_solver solv(data_spec);
