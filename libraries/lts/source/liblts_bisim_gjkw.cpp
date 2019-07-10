@@ -1955,7 +1955,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
       {
         --i;
         const std::size_t new_index=part_st.block(i)->seqnr();  /* get_eq_class(i) */
-        new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
+        new_labels[new_index] = new_labels[new_index] + aut.state_label(i);
       }
 
       aut.set_num_states(block_t::nr_of_blocks);

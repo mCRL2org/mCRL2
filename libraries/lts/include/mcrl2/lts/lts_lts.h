@@ -86,7 +86,9 @@ class state_label_lts : public atermpp::term_list< lps::state >
     {
     }
 
-    /** \brief An operator to concatenate two state labels. */
+    /** \brief An operator to concatenate two state labels.
+        \details Is optimal whenever |l| is smaller than the left operand, i.e. |l| < |this|.
+     */
     state_label_lts operator+(const state_label_lts& l) const
     {
       // The order of the state labels should not matter. For efficiency the elements of l are inserted in front of the aterm_list.
