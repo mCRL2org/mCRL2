@@ -3448,7 +3448,7 @@ class bisim_partitioner_dnj
             {
                 --i;
                 const state_type new_index(get_eq_class(i));
-                new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
+                new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
             }
             while (0 < i);
 
