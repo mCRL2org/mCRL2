@@ -1272,11 +1272,10 @@ class partial_order_reduction_algorithm
       using utilities::detail::set_union;
 
       std::unordered_set<propositional_variable_instantiation> seen;
-      std::unordered_set<propositional_variable_instantiation> todo{X_init};
+      std::list<propositional_variable_instantiation> todo{X_init};
       while (!todo.empty())
       {
-        auto iter = todo.begin();
-        propositional_variable_instantiation X_e = *iter;
+        const propositional_variable_instantiation X_e = todo.front();
         mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
         std::size_t rank = m_equation_index.rank(X_e.name());
         std::size_t i = m_equation_index.index(X_e.name());
@@ -1288,18 +1287,18 @@ class partial_order_reduction_algorithm
         std::set<std::size_t> en_X_e = en(X_e);
         std::set<propositional_variable_instantiation> next = succ(X_e, set_intersection(stubborn_set_X_e, en_X_e));
         mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
-        if (!has_empty_intersection(next, todo))
+        if (std::any_of(todo.begin(), todo.end(), [&](const propositional_variable_instantiation& pv){ return contains(seen, pv); }))
         {
           next = set_union(next, succ(X_e, set_difference(en_X_e, stubborn_set_X_e)));
         }
-        todo.erase(iter);
+        todo.pop_front();
         for (const propositional_variable_instantiation& Y_f: next)
         {
           if (contains(todo, Y_f) || contains(seen, Y_f))
           {
             continue;
           }
-          todo.insert(Y_f);
+          todo.push_front(Y_f);
         }
         for (const propositional_variable_instantiation& Y_f: next)
         {
