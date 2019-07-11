@@ -15,6 +15,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/smt2/native_translation.h"
 #include "mcrl2/smt2/translate_sort.h"
+#include "mcrl2/smt2/utilities.h"
 
 namespace mcrl2
 {

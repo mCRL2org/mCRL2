@@ -277,53 +277,6 @@ native_translations initialise_native_translation(const data::data_specification
   return nt;
 }
 
-inline
-std::string translate_identifier(const std::string& id)
-{
-  std::string result = id;
-  for(std::size_t i = 0; i < result.size(); i++)
-  {
-    if(result[i] == '\'')
-    {
-      result[i] = '!';
-    }
-  }
-  return result;
-}
-
-inline
-std::string translate_identifier(const core::identifier_string& id)
-{
-  return translate_identifier(core::pp(id));
-}
-
-inline
-std::string make_projection_name(const data::function_symbol& cons, std::size_t i)
-{
-  return "@proj-" + translate_identifier(cons.name()) + "-" + std::to_string(i);
-}
-
-inline
-data::function_symbol make_projection_func(const data::function_symbol& cons, const data::sort_expression& arg_sort, std::size_t i)
-{
-  data::function_sort sort(data::sort_expression_list({ cons.sort().target_sort() }), arg_sort);
-  return data::function_symbol(make_projection_name(cons, i), sort);
-}
-
-inline
-std::string make_recogniser_name(const data::function_symbol& cons)
-{
-  // Z3 automatically generates recognisers "is-constructorname"
-  return "is-" + translate_identifier(cons.name());
-}
-
-inline
-data::function_symbol make_recogniser_func(const data::function_symbol& cons)
-{
-  data::function_sort sort(data::sort_expression_list({ cons.sort().target_sort() }), data::sort_bool::bool_());
-  return data::function_symbol(make_recogniser_name(cons), sort);
-}
-
 } // namespace smt
 } // namespace mcrl2
 
