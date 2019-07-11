@@ -17,6 +17,7 @@
 #include "mcrl2/smt2/native_translation.h"
 #include "mcrl2/smt2/translate_expression.h"
 #include "mcrl2/smt2/translate_specification.h"
+#include "mcrl2/smt2/unfold_pattern_matching.h"
 
 #ifdef MCRL2_PLATFORM_WINDOWS
   #include <windows.h>
@@ -284,6 +285,7 @@ public:
   smt_solver(const data::data_specification& dataspec)
   : m_native(initialise_native_translation(dataspec))
   {
+    unfold_pattern_matching(dataspec, m_native);
 #ifndef MCRL2_PLATFORM_WINDOWS
     signal(SIGPIPE, SIG_IGN);
 #endif

@@ -278,9 +278,29 @@ native_translations initialise_native_translation(const data::data_specification
 }
 
 inline
+std::string translate_identifier(const std::string& id)
+{
+  std::string result = id;
+  for(std::size_t i = 0; i < result.size(); i++)
+  {
+    if(result[i] == '\'')
+    {
+      result[i] = '!';
+    }
+  }
+  return result;
+}
+
+inline
+std::string translate_identifier(const core::identifier_string& id)
+{
+  return translate_identifier(core::pp(id));
+}
+
+inline
 std::string make_projection_name(const data::function_symbol& cons, std::size_t i)
 {
-  return "@proj-" + data::pp(cons) + "-" + std::to_string(i);
+  return "@proj-" + translate_identifier(cons.name()) + "-" + std::to_string(i);
 }
 
 inline
@@ -294,7 +314,7 @@ inline
 std::string make_recogniser_name(const data::function_symbol& cons)
 {
   // Z3 automatically generates recognisers "is-constructorname"
-  return "is-" + data::pp(cons);
+  return "is-" + translate_identifier(cons.name());
 }
 
 inline
