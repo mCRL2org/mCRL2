@@ -673,7 +673,6 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
           if (find_result != constructor_application.end() && all_args_are_vars && all_vars_are_unique)
           {
             data::application::const_iterator::difference_type index = find_result - constructor_application.begin();
-            std::cout << "Found projection " << constructor_application << ", index " << index << std::endl;
             assert(index >= 0 && index < constructor_application.size());
             ssf.projection_func[constructor].resize(constructor_application.size());
             ssf.projection_func[constructor][index] = mapping;

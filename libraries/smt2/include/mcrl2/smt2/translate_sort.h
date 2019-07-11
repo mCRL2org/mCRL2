@@ -54,7 +54,7 @@ struct translate_sort_expression_traverser: public Traverser<translate_sort_expr
       return;
     }
 
-    out << s.name();
+    out << translate_identifier(s.name());
   }
 
   void apply(const data::container_sort& s)

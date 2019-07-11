@@ -54,7 +54,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     out << "(";
     for(const data::variable& var: vars)
     {
-      out << "(" << var.name() << " ";
+      out << "(" << translate_identifier(var.name()) << " ";
       translate_sort_expression(var.sort(), out, m_native);
       out << ")";
       if(var.sort() == data::sort_pos::pos())
@@ -94,13 +94,13 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     }
     else
     {
-      out << v.name() << " ";
+      out << translate_identifier(v.name()) << " ";
     }
   }
 
   void apply(const data::variable& v)
   {
-    out << v.name() << " ";
+    out << translate_identifier(v.name()) << " ";
   }
 
   void apply(const data::forall& v)
@@ -151,7 +151,7 @@ void translate_variable_declaration(const Container& vars, OutputStream& o, cons
   data::data_expression vars_conditions = data::sort_bool::true_();
   for(const data::variable& v: vars)
   {
-    o << "(declare-fun " << v.name() << " (";
+    o << "(declare-fun " << translate_identifier(v.name()) << " (";
     data::sort_expression_list domain = data::is_function_sort(v.sort()) ?
       atermpp::down_cast<data::function_sort>(v.sort()).domain() : data::sort_expression_list();
     for(const data::sort_expression& s: domain)

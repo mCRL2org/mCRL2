@@ -40,10 +40,10 @@ void translate_sort_definition(const std::string& sort_name,
     return;
   }
 
-  out << "(declare-datatypes () ((" << sort_name << " ";
+  out << "(" << translate_identifier(sort_name) << " ";
   for(const data::function_symbol& cons: dataspec.constructors(s))
   {
-    out << "(" << cons.name() << " ";
+    out << "(" << translate_identifier(cons.name()) << " ";
     if(data::is_function_sort(cons.sort()))
     {
       const data::function_sort& cs = atermpp::down_cast<data::function_sort>(cons.sort());
@@ -58,7 +58,7 @@ void translate_sort_definition(const std::string& sort_name,
     }
     out << ") ";
   }
-  out << ")))\n";
+  out << ")\n";
 }
 
 template <typename OutputStream>
@@ -75,12 +75,51 @@ void translate_sort_definition(const data::basic_sort& s,
 
 template <typename OutputStream>
 inline
+void translate_sort_definitions(const data::data_specification& dataspec,
+                               OutputStream& out,
+                               const native_translations& nt,
+                               data::set_identifier_generator& id_gen,
+                               std::map<data::structured_sort, std::string>& struct_name_map)
+{
+  out << "(declare-datatypes () (";
+  for(const data::sort_expression& s: dataspec.context_sorts())
+  {
+    if(data::is_function_sort(s))
+    {
+      // smt-lib2 does not support function sorts
+      continue;
+    }
+    auto find_result = dataspec.sort_alias_map().find(s);
+    if(find_result != dataspec.sort_alias_map().end() && find_result->second != s)
+    {
+      // translate only the unique representation of a sort
+      continue;
+    }
+    std::string name(pp(s));
+    if(data::is_structured_sort(s))
+    {
+      name = pp(id_gen("@struct"));
+      struct_name_map[atermpp::down_cast<data::structured_sort>(s)] = name;
+    }
+    translate_sort_definition(name, s, dataspec, out, nt, id_gen, struct_name_map);
+  }
+  for(const data::basic_sort& s: dataspec.user_defined_sorts())
+  {
+    translate_sort_definition(s, dataspec, out, nt, id_gen, struct_name_map);
+  }
+  out << "))\n";
+}
+
+
+
+template <typename OutputStream>
+inline
 void translate_alias(const data::alias& s,
                      const data::data_specification& dataspec,
                      OutputStream& out, const native_translations& nt,
                      const std::map<data::structured_sort, std::string>& struct_name_map)
 {
-  out << "(define-sort " << pp(s.name()) << " () ";
+  out << "(define-sort " << translate_identifier(s.name().name()) << " () ";
   translate_sort_expression(s.reference(), out, nt, struct_name_map);
   out << ")\n";
 }
@@ -192,31 +231,7 @@ void translate_data_specification(const data::data_specification& dataspec, Outp
   data::set_identifier_generator id_gen;
   // Inline struct definitions are anonymous, we keep track of a newly-generate name for each
   std::map<data::structured_sort, std::string> struct_name_map;
-  for(const data::sort_expression& s: dataspec.context_sorts())
-  {
-    if(data::is_function_sort(s))
-    {
-      // smt-lib2 does not support function sorts
-      continue;
-    }
-    auto find_result = dataspec.sort_alias_map().find(s);
-    if(find_result != dataspec.sort_alias_map().end() && find_result->second != s)
-    {
-      // translate only the unique representation of a sort
-      continue;
-    }
-    std::string name(pp(s));
-    if(data::is_structured_sort(s))
-    {
-      name = pp(id_gen("@struct"));
-      struct_name_map[atermpp::down_cast<data::structured_sort>(s)] = name;
-    }
-    detail::translate_sort_definition(name, s, dataspec, o, nt, id_gen, struct_name_map);
-  }
-  for(const data::basic_sort& s: dataspec.user_defined_sorts())
-  {
-    detail::translate_sort_definition(s, dataspec, o, nt, id_gen, struct_name_map);
-  }
+  detail::translate_sort_definitions(dataspec, o, nt, id_gen, struct_name_map);
   for(const data::alias& s: dataspec.user_defined_aliases())
   {
     if(dataspec.sort_alias_map().find(s.reference())->second == s.name())
