@@ -77,44 +77,44 @@ bool is_disjunctive(const boolean_expression& x)
   return is_or(x);
 }
 
-inline
-unsigned int mu_block_count(const boolean_equation_system& b)
-{
-  unsigned int result = 0;
-  fixpoint_symbol last_symbol = fixpoint_symbol::nu();
-  for (const boolean_equation& eqn: b.equations())
-  {
-    if (eqn.symbol().is_mu() && last_symbol.is_nu())
-    {
-      result++;
-    }
-    last_symbol = eqn.symbol();
-  }
-  return result;
-}
+//inline
+//unsigned int mu_block_count(const boolean_equation_system& b)
+//{
+//  unsigned int result = 0;
+//  fixpoint_symbol last_symbol = fixpoint_symbol::nu();
+//  for (const boolean_equation& eqn: b.equations())
+//  {
+//    if (eqn.symbol().is_mu() && last_symbol.is_nu())
+//    {
+//      result++;
+//    }
+//    last_symbol = eqn.symbol();
+//  }
+//  return result;
+//}
+//
+//inline
+//unsigned int block_count(const boolean_equation_system& b)
+//{
+//  unsigned int result = 0;
+//  fixpoint_symbol last_symbol;
+//  for (auto i = b.equations().begin(); i != b.equations().end(); ++i)
+//  {
+//    if (i == b.equations().begin() || (i->symbol() != last_symbol))
+//    {
+//      result++;
+//    }
+//    last_symbol = i->symbol();
+//  }
+//  return result;
+//}
 
 inline
-unsigned int block_count(const boolean_equation_system& b)
+int maximum_rank(const boolean_equation_system& b)
 {
-  unsigned int result = 0;
+  int result = 0;
   fixpoint_symbol last_symbol;
-  for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
-  {
-    if (i == b.equations().begin() || (i->symbol() != last_symbol))
-    {
-      result++;
-    }
-    last_symbol = i->symbol();
-  }
-  return result;
-}
-
-inline
-unsigned int maximum_rank(const boolean_equation_system& b)
-{
-  unsigned int result = 0;
-  fixpoint_symbol last_symbol;
-  for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+  for (auto i = b.equations().begin(); i != b.equations().end(); ++i)
   {
     if (i == b.equations().begin())
     {
@@ -131,7 +131,7 @@ unsigned int maximum_rank(const boolean_equation_system& b)
 
 struct progress_measure
 {
-  progress_measure(std::size_t d)
+  explicit progress_measure(std::size_t d)
     : v(d, 0)
   {}
 
@@ -185,7 +185,7 @@ void inc(std::vector<int>& alpha, int m, const std::vector<int>& beta)
 /// \brief Vertex of the progress measures graph
 struct progress_measures_vertex
 {
-  progress_measures_vertex(bool even_ = false, int rank_ = 0, unsigned int d = 1)
+  explicit progress_measures_vertex(bool even_ = false, int rank_ = 0, unsigned int d = 1)
     : even(even_),
       rank(rank_),
       alpha(d)
@@ -193,7 +193,7 @@ struct progress_measures_vertex
 
   std::vector<progress_measures_vertex*> successors;
   bool even;
-  unsigned int rank;
+  int rank;
   progress_measure alpha;
 
 #ifdef MCRL2_SMALL_PROGRESS_MEASURES_DEBUG
@@ -206,7 +206,7 @@ struct compare_progress_measures_vertex
 {
   unsigned int m;
 
-  compare_progress_measures_vertex(unsigned int m_)
+  explicit compare_progress_measures_vertex(unsigned int m_)
     : m(m_)
   {}
 
@@ -234,7 +234,7 @@ std::ostream& operator<<(std::ostream& out, const progress_measures_vertex& v)
 {
   out << " alpha = " << v.alpha;
   out << " successors = {";
-  for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
+  for (auto i = v.successors.begin(); i != v.successors.end(); ++i)
   {
     if (i != v.successors.begin())
     {
@@ -260,7 +260,7 @@ class small_progress_measures_algorithm
       // first build the vertex map without successor information
       m_d = maximum_rank(m_bes) + 1;
       unsigned int block_size = 0;
-      unsigned int last_rank = 0;
+      int last_rank = 0;
       fixpoint_symbol last_symbol = fixpoint_symbol::nu();
       for (const boolean_equation& eqn: m_bes.equations())
       {
@@ -294,7 +294,7 @@ class small_progress_measures_algorithm
       for (const boolean_equation& eqn: m_bes.equations())
       {
         std::set<boolean_variable> succ = bes::find_boolean_variables(eqn.formula());
-        vertex_map::iterator k = m_vertices.find(eqn.variable());
+        auto k = m_vertices.find(eqn.variable());
         std::vector<vertex*>& k_successors = k->second.successors;
         for (const boolean_variable& v: succ)
         {
@@ -337,12 +337,12 @@ class small_progress_measures_algorithm
     }
 
     vertex_map m_vertices;
-    unsigned int m_d;
+    int m_d = 0;
     const boolean_equation_system& m_bes;
     std::vector<int> m_beta;
 
   public:
-    small_progress_measures_algorithm(const boolean_equation_system& b)
+    explicit small_progress_measures_algorithm(const boolean_equation_system& b)
       : m_bes(b)
     {}
 
@@ -360,7 +360,7 @@ class small_progress_measures_algorithm
         {
           vertex& v = i.second;
           mCRL2log(log::debug) << "\nchoose vertex " << print_vertex(v);
-          unsigned int m = v.rank;
+          int m = v.rank;
           std::vector<progress_measures_vertex*>::const_iterator j;
           mCRL2log(log::debug) << "\n    neighbors:" << print_neighbors(v);
           if (v.even)

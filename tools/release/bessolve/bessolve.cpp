@@ -13,13 +13,11 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 #include <vector>
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/gauss_elimination.h"
@@ -53,7 +51,7 @@ class bessolve_tool: public bes_input_tool<input_tool>
       strategy(small_progr_measures)
     {}
 
-    bool run()
+    bool run() override
     {
       bes::boolean_equation_system bes;
       load_bes(bes,input_filename(),bes_input_format());
@@ -62,7 +60,7 @@ class bessolve_tool: public bes_input_tool<input_tool>
                    (input_filename().empty()?"standard input":input_filename()) << " using " <<
                    solution_strategy_to_string(strategy) << "" << std::endl;
 
-      bool result = false;
+      bool result;
       std::vector<bool> full_solution;
 
       timer().start("solving");
@@ -79,7 +77,6 @@ class bessolve_tool: public bes_input_tool<input_tool>
           break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");
-          break;
       }
       timer().finish("solving");
 
@@ -95,11 +92,11 @@ class bessolve_tool: public bes_input_tool<input_tool>
 
   protected:
     solution_strategy_t strategy;
-    bool print_justification;
+    bool print_justification = false;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
-      input_tool::add_options(desc);
+      super::add_options(desc);
       desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
                       .add_value(small_progr_measures, true)
                       .add_value(gauss)
@@ -108,7 +105,7 @@ class bessolve_tool: public bes_input_tool<input_tool>
       desc.add_option("print-justification", "print justification for solution. Works only with the local fixpoint strategy.", 'j');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       strategy = parser.option_argument_as<solution_strategy_t>("strategy");
