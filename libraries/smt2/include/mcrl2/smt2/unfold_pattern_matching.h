@@ -531,6 +531,10 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
     {
       continue;
     }
+    if(eqn.variables().size() == 1 && (core::pp(function.name()) == "<" || core::pp(function.name()) == "<="))
+    {
+      continue;
+    }
 
     rewrite_rules[function].push_back(eqn);
   }
