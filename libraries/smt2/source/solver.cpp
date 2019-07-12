@@ -328,14 +328,15 @@ native_translations initialise_native_translation(const data::data_specification
   nt.sorts[sort_int::int_()] = "Int";
   nt.sorts[sort_real::real_()] = "Real";
 
-  std::set<sort_expression> sorts = dataspec.sorts();
   std::vector<sort_expression> number_sorts({ sort_pos::pos(), sort_nat::nat(), sort_int::int_(), sort_real::real_() });
-  for(const sort_expression& sort: sorts)
+  for(const sort_expression& sort: dataspec.sorts())
   {
-    if(is_basic_sort(sort))
+    if(is_basic_sort(sort) || is_container_sort(sort))
     {
       nt.set_native_definition(equal_to(sort), "=");
       nt.set_native_definition(not_equal_to(sort), "distinct");
+      nt.set_native_definition(if_(sort), "ite");
+
       if(std::find(number_sorts.begin(), number_sorts.end(), sort) != number_sorts.end())
       {
         nt.set_native_definition(less(sort));
@@ -362,13 +363,16 @@ native_translations initialise_native_translation(const data::data_specification
         nt.set_alternative_name(greater(sort), "@greater");
         nt.set_alternative_name(greater_equal(sort), "@greater_equal");
       }
-      nt.set_native_definition(if_(sort), "ite");
 
-      nt.set_native_definition(sort_list::empty(sort), "nil");
+      std::string printed_sort_name = nt.sorts.find(sort) != nt.sorts.end() ? nt.sorts.find(sort)->second : translate_identifier(pp(sort));
+      std::string list_sort_name = "(List " + printed_sort_name + ")";
+      nt.set_alternative_name(sort_list::count(sort), "@list_count");
+      nt.set_alternative_name(sort_list::snoc(sort), "@snoc");
+      nt.set_native_definition(sort_list::empty(sort), "(as nil " + list_sort_name + ")");
       nt.set_native_definition(sort_list::cons_(sort), "insert");
       nt.set_native_definition(sort_list::head(sort));
       nt.set_native_definition(sort_list::tail(sort));
-      nt.sorts[sort_list::list(sort)] = "(List " + (nt.sorts.find(sort) != nt.sorts.end() ? nt.sorts.find(sort)->second : pp(sort)) + ")";
+      nt.sorts[sort_list::list(sort)] = list_sort_name;
     }
   }
 
