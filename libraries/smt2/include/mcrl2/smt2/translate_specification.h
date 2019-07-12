@@ -52,7 +52,7 @@ void translate_sort_definition(const std::string& sort_name,
       std::size_t index = 0;
       for(const data::sort_expression& arg: cs.domain())
       {
-        out << "(" << make_projection_name(cons, index) << " ";
+        out << "(" << make_projection_name(cons, index, nt) << " ";
         translate_sort_expression(arg, out, nt, struct_name_map);
         out << ") ";
         index++;
