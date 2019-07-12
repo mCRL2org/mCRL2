@@ -466,17 +466,8 @@ void MainWindow::actionShowReducedLts()
       /* execute the dialog */
       if (reductionDialog.exec())
       {
-        QString selectedReduction = reductionBox.currentText();
-        mcrl2::lts::lts_equivalence reduction = mcrl2::lts::lts_eq_none;
-        for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
-                 item : LTSEQUIVALENCEINFO)
-        {
-          if (item.second.first == selectedReduction)
-          {
-            reduction = item.first;
-            break;
-          }
-        }
+        mcrl2::lts::lts_equivalence reduction =
+            reductionBox.getSelectedEquivalence();
 
         lastLtsHasReduction = true;
         processSystem->showLts(reduction);

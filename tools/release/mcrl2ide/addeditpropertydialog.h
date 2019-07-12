@@ -34,6 +34,19 @@ class EquivalenceComboBox : public QComboBox
    * @param parent The parent of this widget
    */
   EquivalenceComboBox(QWidget* parent = 0);
+
+  /**
+   * @brief getSelectedEquivalence Returns the equivalence that has been
+   *   selected
+   * @return The equivalence that has been selected
+   */
+  mcrl2::lts::lts_equivalence getSelectedEquivalence();
+
+  /**
+   * @brief setSelectedEquivalence Sets the equivalence that is selected
+   * @param equivalence The equivalence to be selected
+   */
+  void setSelectedEquivalence(mcrl2::lts::lts_equivalence equivalence);
 };
 
 /**

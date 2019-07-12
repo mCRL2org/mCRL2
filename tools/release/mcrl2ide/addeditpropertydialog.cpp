@@ -24,8 +24,7 @@ EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
   for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
        LTSEQUIVALENCEINFO)
   {
-    if (!item.second.second &&
-        item.first != mcrl2::lts::lts_eq_none)
+    if (!item.second.second && item.first != mcrl2::lts::lts_eq_none)
     {
       items << item.second.first;
       secondSeparatorIndex++;
@@ -51,6 +50,28 @@ EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
   model->item(secondSeparatorIndex)
       ->setFlags(model->item(secondSeparatorIndex)->flags() &
                  ~Qt::ItemIsEnabled);
+}
+
+mcrl2::lts::lts_equivalence EquivalenceComboBox::getSelectedEquivalence()
+{
+  QString selectedReduction = this->currentText();
+  mcrl2::lts::lts_equivalence reduction = mcrl2::lts::lts_eq_none;
+  for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
+       LTSEQUIVALENCEINFO)
+  {
+    if (item.second.first == selectedReduction)
+    {
+      reduction = item.first;
+      break;
+    }
+  }
+  return reduction;
+}
+
+void EquivalenceComboBox::setSelectedEquivalence(
+    mcrl2::lts::lts_equivalence equivalence)
+{
+  this->setCurrentText(LTSEQUIVALENCEINFO.at(equivalence).first);
 }
 
 AddEditPropertyDialog::AddEditPropertyDialog(bool add,
