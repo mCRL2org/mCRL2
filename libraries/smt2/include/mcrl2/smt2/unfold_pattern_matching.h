@@ -69,9 +69,17 @@ struct rule
   , rhs(std::move(r))
   , condition(std::move(c))
   , variables(std::move(v))
-  {}
+  {
+    assert(condition.sort() == data::sort_bool::bool_());
+  }
 
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const rule& r)
+{
+  return out << core::detail::print_list(r.variables) << ". " << r.condition << " -> " << core::detail::print_map(r.match_criteria) << " = " << r.rhs;
+}
 
 struct structured_sort_functions
 {
@@ -304,14 +312,14 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
        * variable that disappears.
        */
       assert(data::is_variable(pattern));
-      data::variable_substitution sigma(data::variable(pattern), matching_target);
+      data::variable_substitution sigma(atermpp::down_cast<data::variable>(pattern), matching_target);
       data::data_expression condition = data::replace_free_variables(r.condition, sigma);
       data::data_expression rhs = data::replace_free_variables(r.rhs, sigma);
 
       const std::set<data::function_symbol>& constructors = match_constructors;
       for (const data::function_symbol& f: constructors)
       {
-        rule rule(r.match_criteria, condition, rhs, r.variables);
+        rule rule(r.match_criteria, rhs, condition, r.variables);
         rule.match_criteria.erase(matching_target);
 
         data::set_identifier_generator generator;
@@ -728,9 +736,11 @@ void unfold_pattern_matching(const data::data_specification& dataspec, native_tr
   std::function<bool(data::data_equation)> is_valid = std::bind(is_pattern_matching_rule, ssf, _1);
   for(const auto& map_eqn: rewrite_rules)
   {
+    // Only unfold equations with parameters
     // Do not unfold recognisers and projection functions
     // Only unfold equations that satisfy the function 'is_pattern_matching_rule'
-    if(recog_and_proj.find(map_eqn.first) == recog_and_proj.end() &&
+    if(data::is_function_sort(map_eqn.first.sort()) &&
+       recog_and_proj.find(map_eqn.first) == recog_and_proj.end() &&
        std::all_of(map_eqn.second.begin(), map_eqn.second.end(), is_valid))
     {
       data::set_identifier_generator id_gen;
