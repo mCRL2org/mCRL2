@@ -180,8 +180,8 @@ bool ProcessSystem::isThreadRunning(ProcessType processType)
 
 QProcess*
 ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
-                                int subprocessIndex,
-                                const QString& propertyName, bool evidence,
+                                int subprocessIndex, const Property& property,
+                                bool evidence,
                                 mcrl2::lts::lts_equivalence equivalence)
 {
   QProcess* subprocess = new QProcess();
@@ -231,7 +231,7 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
   subprocess->setProperty("processid", processid);
   subprocess->setProperty("subprocessType", int(subprocessType));
   subprocess->setProperty("subprocessIndex", subprocessIndex);
-  subprocess->setProperty("propertyName", propertyName);
+  subprocess->setProperty("propertyName", property.name);
   subprocess->setProperty("evidence", evidence);
 
   QString program = "";
@@ -266,8 +266,8 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
 
   case SubprocessType::Lps2lts:
     program = "lps2lts";
-    inputFile = fileSystem->lpsFilePath(propertyName, evidence);
-    outputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none, propertyName,
+    inputFile = fileSystem->lpsFilePath(property.name, evidence);
+    outputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none, property.name,
                                          evidence);
     arguments << inputFile << outputFile << "--rewriter=jitty"
               << "--strategy=breadth"
@@ -286,7 +286,7 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
 
   case SubprocessType::Ltsgraph:
     program = "ltsgraph";
-    inputFile = fileSystem->ltsFilePath(equivalence, propertyName, evidence);
+    inputFile = fileSystem->ltsFilePath(equivalence, property.name, evidence);
     arguments << inputFile;
     break;
 
@@ -298,8 +298,8 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
   case SubprocessType::Lps2pbes:
     program = "lps2pbes";
     inputFile = fileSystem->lpsFilePath();
-    inputFile2 = fileSystem->propertyFilePath(propertyName);
-    outputFile = fileSystem->pbesFilePath(propertyName, evidence);
+    inputFile2 = fileSystem->propertyFilePath(property);
+    outputFile = fileSystem->pbesFilePath(property.name, evidence);
     arguments << inputFile << outputFile << "--formula=" + inputFile2
               << "--out=pbes"
               << "--verbose";
@@ -311,7 +311,7 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
 
   case SubprocessType::Pbessolve:
     program = "pbessolve";
-    inputFile = fileSystem->pbesFilePath(propertyName, evidence);
+    inputFile = fileSystem->pbesFilePath(property.name, evidence);
     arguments << inputFile << "--in=pbes"
               << "--rewriter=jitty"
               << "--search=breadth-first"
@@ -320,7 +320,7 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
     if (evidence)
     {
       inputFile2 = fileSystem->lpsFilePath();
-      outputFile = fileSystem->lpsFilePath(propertyName, evidence);
+      outputFile = fileSystem->lpsFilePath(property.name, evidence);
       arguments << "--file=" + inputFile2 << "--evidence-file=" + outputFile;
     }
     else
@@ -406,12 +406,13 @@ int ProcessSystem::showLts(mcrl2::lts::lts_equivalence reduction)
     /* create the ltsconvert process if we need to reduce */
     if (!noReduction)
     {
-      showLtsProcesses.push_back(createSubprocess(
-          SubprocessType::Ltsconvert, processid, 3, "", false, reduction));
+      showLtsProcesses.push_back(createSubprocess(SubprocessType::Ltsconvert,
+                                                  processid, 3, Property(),
+                                                  false, reduction));
     }
     showLtsProcesses.push_back(createSubprocess(SubprocessType::Ltsgraph,
                                                 processid, noReduction ? 3 : 4,
-                                                "", false, reduction));
+                                                Property(), false, reduction));
 
     processes[processid] = showLtsProcesses;
     processQueues[processType]->enqueue(processid);
@@ -435,8 +436,7 @@ int ProcessSystem::parseProperty(const Property& property)
     processes[processid] = {
         createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
         createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
-        createSubprocess(SubprocessType::ParseMcf, processid, 2,
-                         property.name)};
+        createSubprocess(SubprocessType::ParseMcf, processid, 2, property)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -458,10 +458,9 @@ int ProcessSystem::verifyProperty(const Property& property)
     processes[processid] = {
         createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
         createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
-        createSubprocess(SubprocessType::ParseMcf, processid, 2, property.name),
-        createSubprocess(SubprocessType::Lps2pbes, processid, 3, property.name),
-        createSubprocess(SubprocessType::Pbessolve, processid, 4,
-                         property.name)};
+        createSubprocess(SubprocessType::ParseMcf, processid, 2, property),
+        createSubprocess(SubprocessType::Lps2pbes, processid, 3, property),
+        createSubprocess(SubprocessType::Pbessolve, processid, 4, property)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -483,14 +482,13 @@ int ProcessSystem::showEvidence(const Property& property)
     processes[processid] = {
         createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
         createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
-        createSubprocess(SubprocessType::ParseMcf, processid, 2, property.name),
-        createSubprocess(SubprocessType::Lps2pbes, processid, 3, property.name,
+        createSubprocess(SubprocessType::ParseMcf, processid, 2, property),
+        createSubprocess(SubprocessType::Lps2pbes, processid, 3, property,
                          true),
-        createSubprocess(SubprocessType::Pbessolve, processid, 4, property.name,
+        createSubprocess(SubprocessType::Pbessolve, processid, 4, property,
                          true),
-        createSubprocess(SubprocessType::Lps2lts, processid, 5, property.name,
-                         true),
-        createSubprocess(SubprocessType::Ltsgraph, processid, 6, property.name,
+        createSubprocess(SubprocessType::Lps2lts, processid, 5, property, true),
+        createSubprocess(SubprocessType::Ltsgraph, processid, 6, property,
                          true)};
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
