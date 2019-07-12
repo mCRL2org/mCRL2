@@ -40,31 +40,37 @@ std::string translate_identifier(const core::identifier_string& id)
   return translate_identifier(core::pp(id));
 }
 
-inline
-std::string make_projection_name(const data::function_symbol& cons, std::size_t i)
+std::string translate_symbol(const data::function_symbol& f, const native_translations& nt)
 {
-  return "@proj-" + translate_identifier(cons.name()) + "-" + std::to_string(i);
+  auto find_result = nt.symbols.find(f);
+  return find_result != nt.symbols.end() ? find_result->second : translate_identifier(f.name());
 }
 
 inline
-data::function_symbol make_projection_func(const data::function_symbol& cons, const data::sort_expression& arg_sort, std::size_t i)
+std::string make_projection_name(const data::function_symbol& cons, std::size_t i, const native_translations& nt)
+{
+  return "@proj-" + translate_symbol(cons, nt) + "-" + std::to_string(i);
+}
+
+inline
+data::function_symbol make_projection_func(const data::function_symbol& cons, const data::sort_expression& arg_sort, std::size_t i, const native_translations& nt)
 {
   data::function_sort sort(data::sort_expression_list({ cons.sort().target_sort() }), arg_sort);
-  return data::function_symbol(make_projection_name(cons, i), sort);
+  return data::function_symbol(make_projection_name(cons, i, nt), sort);
 }
 
 inline
-std::string make_recogniser_name(const data::function_symbol& cons)
+std::string make_recogniser_name(const data::function_symbol& cons, const native_translations& nt)
 {
   // Z3 automatically generates recognisers "is-constructorname"
-  return "is-" + translate_identifier(cons.name());
+  return "is-" + translate_symbol(cons, nt);
 }
 
 inline
-data::function_symbol make_recogniser_func(const data::function_symbol& cons)
+data::function_symbol make_recogniser_func(const data::function_symbol& cons, const native_translations& nt)
 {
   data::function_sort sort(data::sort_expression_list({ cons.sort().target_sort() }), data::sort_bool::bool_());
-  return data::function_symbol(make_recogniser_name(cons), sort);
+  return data::function_symbol(make_recogniser_name(cons, nt), sort);
 }
 
 inline

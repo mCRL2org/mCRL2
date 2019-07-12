@@ -88,15 +88,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
 
   void apply(const data::function_symbol& v)
   {
-    auto find_result = m_native.symbols.find(v);
-    if(find_result != m_native.symbols.end())
-    {
-      out << find_result->second << " ";
-    }
-    else
-    {
-      out << translate_identifier(v.name()) << " ";
-    }
+    out << translate_symbol(v, m_native) << " ";
   }
 
   void apply(const data::variable& v)

@@ -297,7 +297,7 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
       rule.match_criteria.erase(matching_target);
       for (std::size_t j = 0; j < parameters.size(); j++)
       {
-        data::function_symbol projection_function = make_projection_func(constructor, parameters[j].sort(), j);
+        data::function_symbol projection_function = ssf.projection_func.at(constructor)[j];
         data::data_expression lhs_expression = data::application(projection_function, matching_target);
         rule.match_criteria[lhs_expression] = parameters[j];
       }
@@ -335,7 +335,7 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
           for (const data::sort_expression& s: sort.domain())
           {
             data::variable variable(generator("v"), s);
-            data::function_symbol projection_function = make_projection_func(f, s, index);
+            data::function_symbol projection_function = ssf.projection_func.at(f)[index];
             data::data_expression lhs_expression = data::application(projection_function, matching_target);
             rule.match_criteria[lhs_expression] = variable;
             index++;
@@ -355,7 +355,7 @@ static data::data_expression construct_rhs(const structured_sort_functions& ssf,
   for (i++; i != match_constructors.end(); i++)
   {
     data::data_expression term = construct_rhs(ssf, gen, constructor_rules[*i], sort);
-    data::function_symbol recogniser_function = make_recogniser_func(*i);
+    data::function_symbol recogniser_function = ssf.recogniser_func.at(*i);
     data::data_expression condition = data::application(recogniser_function, matching_target);
     result = lazyif(condition, term, result);
   }
@@ -697,6 +697,53 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
   return std::make_pair(ssf, rewrite_rules);
 }
 
+/**
+ * \brief Complete the containers with recognisers and projections in ssf
+ * \details Also sets native translations and build a set of all recognisers and
+ * projections in dataspec.
+ */
+std::set<data::function_symbol> complete_recognisers_projections(const data::data_specification& dataspec, native_translations& nt, structured_sort_functions& ssf)
+{
+  std::set<data::function_symbol> recog_and_proj;
+
+  for(const data::function_symbol& cons: dataspec.constructors())
+  {
+    auto find_result = ssf.recogniser_func.find(cons);
+    if(find_result != ssf.recogniser_func.end())
+    {
+      nt.set_native_definition(find_result->second, make_recogniser_name(cons, nt));
+      recog_and_proj.insert(find_result->second);
+    }
+    else
+    {
+      ssf.recogniser_func[cons] = make_recogniser_func(cons, nt);
+    }
+
+    if(data::is_function_sort(cons.sort()))
+    {
+      std::size_t index = 0;
+      const data::sort_expression_list& arg_list = atermpp::down_cast<data::function_sort>(cons.sort()).domain();
+      ssf.projection_func[cons].resize(arg_list.size());
+      for(const data::sort_expression& arg: arg_list)
+      {
+        data::function_symbol& projection = ssf.projection_func[cons][index];
+        if(projection != data::function_symbol())
+        {
+          nt.set_native_definition(projection, make_projection_name(cons, index, nt));
+          recog_and_proj.insert(projection);
+        }
+        else
+        {
+          projection = make_projection_func(cons, arg, index, nt);
+        }
+        index++;
+      }
+    }
+  }
+
+  return recog_and_proj;
+}
+
 inline
 void unfold_pattern_matching(const data::data_specification& dataspec, native_translations& nt)
 {
@@ -704,32 +751,7 @@ void unfold_pattern_matching(const data::data_specification& dataspec, native_tr
   structured_sort_functions& ssf = p.first;
   std::map<data::function_symbol, data::data_equation_vector>& rewrite_rules = p.second;
 
-  std::set<data::function_symbol> recog_and_proj;
-  // Set the recogniser and projection functions that were found as natively
-  // defined, so they won't be translated.
-  for(const auto& cons_recog: ssf.recogniser_func)
-  {
-    const data::function_symbol& constructor = cons_recog.first;
-    const data::function_symbol& recogniser = cons_recog.second;
-    nt.set_native_definition(recogniser, make_recogniser_name(constructor));
-    recog_and_proj.insert(recogniser);
-  }
-  for(const auto& cons_projs: ssf.projection_func)
-  {
-    const data::function_symbol& constructor = cons_projs.first;
-    const data::function_symbol_vector& projections = cons_projs.second;
-    std::size_t index = 0;
-    for(const data::function_symbol& proj: projections)
-    {
-      if(proj != data::function_symbol())
-      {
-        nt.set_native_definition(proj, make_projection_name(constructor, index));
-        recog_and_proj.insert(proj);
-      }
-      index++;
-    }
-  }
-
+  std::set<data::function_symbol> recog_and_proj = complete_recognisers_projections(dataspec, nt, ssf);
 
   data::representative_generator rep_gen(dataspec);
   using std::placeholders::_1;
