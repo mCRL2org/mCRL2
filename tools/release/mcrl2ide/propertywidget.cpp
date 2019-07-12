@@ -13,6 +13,7 @@
 #include <QSpacerItem>
 #include <QStyleOption>
 #include <QPainter>
+#include <QMessageBox>
 
 PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
                                FileSystem* fileSystem, QWidget* parent)
@@ -212,6 +213,17 @@ void PropertyWidget::actionVerifyResult(int processid)
 
 void PropertyWidget::actionShowEvidence()
 {
+  /* creating evidence is not (yet) enabled for equivalence properties */
+  if (!property.mucalculus)
+  {
+    QMessageBox msgBox(QMessageBox::Information, "Not yet implemented",
+                       "Creating evidence for equivalence properties has not "
+                       "yet been implemented",
+                       QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
+    msgBox.exec();
+    return;
+  }
+
   /* check if the property has veen verified */
   if (verificationWidgets->currentIndex() > 1)
   {

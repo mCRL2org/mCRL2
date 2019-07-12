@@ -22,17 +22,22 @@
 #include <QDomElement>
 #include <QDomNodeList>
 
-Property::Property() : name(""), text("")
+Property::Property()
+    : name(""), text(""), mucalculus(true), equivalence(mcrl2::lts::lts_eq_none)
 {
 }
 
-Property::Property(QString name, QString text) : name(name), text(text)
+Property::Property(QString name, QString text, bool mucalculus,
+                   mcrl2::lts::lts_equivalence equivalence)
+    : name(name), text(text), mucalculus(mucalculus), equivalence(equivalence)
 {
 }
 
 bool Property::operator==(const Property& property) const
 {
-  return this->name == property.name && this->text == property.text;
+  return this->name == property.name && this->text == property.text &&
+         this->mucalculus == property.mucalculus &&
+         this->equivalence == property.equivalence;
 }
 
 bool Property::operator!=(const Property& property) const
@@ -113,22 +118,22 @@ QString FileSystem::defaultSpecificationFilePath()
 
 QString FileSystem::specificationFilePath(const QString& propertyName)
 {
-  QString path = "";
-  if (specFilePath.isEmpty())
+  if (propertyName.isEmpty())
   {
-    path = defaultSpecificationFilePath();
+    if (specFilePath.isEmpty())
+    {
+      return defaultSpecificationFilePath();
+    }
+    else
+    {
+      return specFilePath;
+    }
   }
   else
   {
-    path = specFilePath;
+    return temporaryFolder.path() + QDir::separator() + projectName + "_" +
+           propertyName + "_spec.mcrl2";
   }
-
-  if (!propertyName.isEmpty())
-  {
-    path = path.insert(path.size() - 6, "_" + propertyName);
-  }
-
-  return path;
 }
 
 QString FileSystem::lpsFilePath(const QString& propertyName, bool evidence)
@@ -150,9 +155,10 @@ QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
          ".lts";
 }
 
-QString FileSystem::propertyFilePath(const QString& propertyName)
+QString FileSystem::propertyFilePath(const Property& property)
 {
-  return propertiesFolderPath() + QDir::separator() + propertyName + ".mcf";
+  return propertiesFolderPath() + QDir::separator() + property.name +
+         (property.mucalculus ? ".mcf" : ".equ");
 }
 
 QString FileSystem::pbesFilePath(const QString& propertyName, bool evidence)
@@ -681,8 +687,9 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
           for (int i = 0; i < propertyNodes.length(); i++)
           {
             QDomElement element = propertyNodes.at(i).toElement();
+            // TODO catch error when property file does not exist
             Property readProperty =
-                readPropertyFromFile(propertyFilePath(element.text()));
+                readPropertyFromFile(findPropertyFilePath(element.text()));
             if (!readProperty.name.isEmpty())
             {
               properties.push_back(readProperty);
@@ -717,11 +724,27 @@ void FileSystem::openProject()
   openProjectDialog->deleteLater();
 }
 
+QString FileSystem::findPropertyFilePath(const QString& propertyName)
+{
+  QDir propertiesFolder = QDir(propertiesFolderPath());
+  QStringList fileNames =
+      propertiesFolder.entryList(QStringList({"*.mcf", "*.equ"}));
+  for (QString fileName : fileNames)
+  {
+    if (propertyName == fileName.left(fileName.length() - 4))
+    {
+      return propertiesFolderPath() + QDir::separator() + fileName;
+    }
+  }
+  return "";
+}
+
 Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
 {
   QFile propertyFile(propertyFilePath);
   QString fileName = QFileInfo(propertyFile).fileName();
-  fileName.chop(4);
+  QString fileExtension = fileName.right(3);
+  QString propertyName = fileName.left(fileName.size() - 4);
 
   if (propertyFile.open(QIODevice::ReadOnly))
   {
@@ -729,7 +752,22 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
     QString propertyText = propertyOpenStream.readAll();
     propertyFile.close();
 
-    return Property(fileName, propertyText);
+    if (fileExtension == "mcf")
+    {
+      return Property(propertyName, propertyText);
+    }
+    else // fileExtension == "equ"
+    {
+      /* extract equivalence and alternate process */
+      int firstNewlineIndex = propertyText.indexOf("\n");
+      mcrl2::lts::lts_equivalence equivalence =
+          static_cast<mcrl2::lts::lts_equivalence>(
+              propertyText.left(firstNewlineIndex).toInt());
+      QString altProcess =
+          propertyText.right(propertyText.size() - firstNewlineIndex).trimmed();
+
+      return Property(propertyName, altProcess, false, equivalence);
+    }
   }
   else
   {
@@ -737,10 +775,10 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
   }
 }
 
-bool FileSystem::deletePropertyFile(const QString& propertyName,
+bool FileSystem::deletePropertyFile(const QString& propFilePath,
                                     bool showIfFailed)
 {
-  QFile propertyFile(propertyFilePath(propertyName));
+  QFile propertyFile(propFilePath);
   bool deleteSucceeded = true;
   if (!propertyFile.remove())
   {
@@ -762,16 +800,33 @@ bool FileSystem::deletePropertyFile(const QString& propertyName,
 void FileSystem::deleteUnlistedPropertyFiles()
 {
   QDir propertiesFolder = QDir(propertiesFolderPath());
-  QStringList fileNames = propertiesFolder.entryList();
-  for (QString fileName : fileNames)
+  QStringList propertyFileNames =
+      propertiesFolder.entryList(QStringList({"*.mcf", "*.equ"}));
+  for (QString fileName : propertyFileNames)
   {
-    if (fileName.endsWith(".mcf"))
+    QString fileExtension = fileName.right(3);
+    QString propertyName = fileName.left(fileName.length() - 4);
+
+    /* A property file needs to be removed if
+     *   - the property name does not exist, or
+     *   - the property name does exist but the property type does not match */
+    bool needToRemove = !propertyNameExists(propertyName);
+    if (!needToRemove)
     {
-      QString propertyName = fileName.left(fileName.length() - 4);
-      if (!propertyNameExists(propertyName))
+      for (const Property& property : properties)
       {
-        deletePropertyFile(propertyName, false);
+        if (property.name == propertyName &&
+            property.mucalculus == (fileExtension == "equ"))
+        {
+          needToRemove = true;
+        }
       }
+    }
+
+    if (needToRemove)
+    {
+      deletePropertyFile(propertiesFolderPath() + QDir::separator() + fileName,
+                         false);
     }
   }
 }
@@ -871,7 +926,7 @@ bool FileSystem::deleteProperty(const Property& oldProperty)
   if (deleteIt)
   {
     /* also delete the file if it exists */
-    if (deletePropertyFile(oldProperty.name))
+    if (deletePropertyFile(propertyFilePath(oldProperty)))
     {
       properties.remove(oldProperty);
     }
@@ -983,11 +1038,42 @@ void FileSystem::saveProperty(const Property& property)
 {
   makeSurePropertiesFolderExists();
 
-  QFile propertyFile(propertyFilePath(property.name));
+  QFile propertyFile(propertyFilePath(property));
   propertyFile.open(QIODevice::WriteOnly);
   QTextStream saveStream(&propertyFile);
-  saveStream << property.text;
+
+  if (property.mucalculus)
+  {
+    saveStream << property.text;
+  }
+  else
+  {
+    saveStream << QString::number(property.equivalence) << "\n"
+               << property.text;
+  }
+
   propertyFile.close();
+}
+
+void FileSystem::createReinitialisedSpecification(const Property& property)
+{
+  if (!upToDateOutputFileExists(specificationFilePath(),
+                                specificationFilePath(property.name)) ||
+      !upToDateOutputFileExists(propertyFilePath(property),
+                                specificationFilePath(property.name)))
+  {
+    QString spec = readSpecification();
+    int initIndex = spec.indexOf(QRegExp("init[^a-zA-Z0-9_]"));
+    QString alternateSpec = spec;
+    alternateSpec.replace(
+        initIndex, spec.indexOf(";", initIndex) - initIndex + 1, property.text);
+
+    QFile alternateSpecFile(specificationFilePath(property.name));
+    alternateSpecFile.open(QIODevice::WriteOnly);
+    QTextStream saveStream(&alternateSpecFile);
+    saveStream << alternateSpec;
+    alternateSpecFile.close();
+  }
 }
 
 void FileSystem::openProjectFolderInExplorer()

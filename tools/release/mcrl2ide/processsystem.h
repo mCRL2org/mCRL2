@@ -25,10 +25,11 @@ enum class SubprocessType
   Lpsxsim = 2,
   Lps2lts = 3,
   Ltsconvert = 4,
-  Ltsgraph = 5,
-  ParseMcf = 6,
-  Lps2pbes = 7,
-  Pbessolve = 8
+  Ltscompare = 5,
+  Ltsgraph = 6,
+  ParseMcf = 7,
+  Lps2pbes = 8,
+  Pbessolve = 9
 };
 
 /**

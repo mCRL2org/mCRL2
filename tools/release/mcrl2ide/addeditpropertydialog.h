@@ -130,6 +130,7 @@ class AddEditPropertyDialog : public QDialog
   QString windowTitle;
   Property oldProperty;
   int propertyParsingProcessid;
+  bool lastParsingPropertyIsMucalculus;
   QRegExpValidator* propertyNameValidator;
 
   /**

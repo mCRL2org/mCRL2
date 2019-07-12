@@ -117,8 +117,8 @@ void ProcessSystem::testExecutableExistence()
   QString mcrl2ideVersion =
       QString::fromStdString(mcrl2::utilities::get_toolset_version());
 
-  QStringList tools = {"mcrl22lps", "lpsxsim",  "lps2lts",  "ltsconvert",
-                       "ltsgraph",  "lps2pbes", "pbessolve"};
+  QStringList tools = {"mcrl22lps",  "lpsxsim",  "lps2lts",  "ltsconvert",
+                       "ltscompare", "ltsgraph", "lps2pbes", "pbessolve"};
 
   /* for each necessary executable, check if it exists by trying to run it and
    *   compare its version with mcrl2ide's version */
@@ -251,8 +251,8 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
 
   case SubprocessType::Mcrl22lps:
     program = "mcrl22lps";
-    inputFile = fileSystem->specificationFilePath();
-    outputFile = fileSystem->lpsFilePath();
+    inputFile = fileSystem->specificationFilePath(property.name);
+    outputFile = fileSystem->lpsFilePath(property.name);
     arguments << inputFile << outputFile << "--lin-method=regular"
               << "--rewriter=jitty"
               << "--verbose";
@@ -282,6 +282,20 @@ ProcessSystem::createSubprocess(SubprocessType subprocessType, int processid,
               << "--equivalence=" +
                      QString::fromStdString(
                          mcrl2::lts::print_equivalence(equivalence));
+    break;
+
+  case SubprocessType::Ltscompare:
+    program = "ltscompare";
+    inputFile = fileSystem->ltsFilePath();
+    inputFile2 =
+        fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none, property.name);
+    arguments << "--equivalence=" +
+                     QString::fromStdString(
+                         mcrl2::lts::print_equivalence(equivalence))
+              << inputFile << inputFile2;
+
+    connect(subprocess, SIGNAL(finished(int)), this,
+            SLOT(verificationResult(int)));
     break;
 
   case SubprocessType::Ltsgraph:
@@ -433,10 +447,21 @@ int ProcessSystem::parseProperty(const Property& property)
     processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
 
-    processes[processid] = {
-        createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
-        createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
-        createSubprocess(SubprocessType::ParseMcf, processid, 2, property)};
+    if (property.mucalculus)
+    {
+      processes[processid] = {
+          createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+          createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
+          createSubprocess(SubprocessType::ParseMcf, processid, 2, property)};
+    }
+    else
+    {
+      fileSystem->createReinitialisedSpecification(property);
+      processes[processid] = {
+          createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+          createSubprocess(SubprocessType::ParseMcrl2, processid, 1, property)};
+    }
+
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -455,12 +480,28 @@ int ProcessSystem::verifyProperty(const Property& property)
     processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
 
-    processes[processid] = {
-        createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
-        createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
-        createSubprocess(SubprocessType::ParseMcf, processid, 2, property),
-        createSubprocess(SubprocessType::Lps2pbes, processid, 3, property),
-        createSubprocess(SubprocessType::Pbessolve, processid, 4, property)};
+    if (property.mucalculus)
+    {
+      processes[processid] = {
+          createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+          createSubprocess(SubprocessType::Mcrl22lps, processid, 1),
+          createSubprocess(SubprocessType::ParseMcf, processid, 2, property),
+          createSubprocess(SubprocessType::Lps2pbes, processid, 3, property),
+          createSubprocess(SubprocessType::Pbessolve, processid, 4, property)};
+    }
+    else
+    {
+      fileSystem->createReinitialisedSpecification(property);
+      processes[processid] = {
+          createSubprocess(SubprocessType::ParseMcrl2, processid, 0),
+          createSubprocess(SubprocessType::ParseMcrl2, processid, 1, property),
+          createSubprocess(SubprocessType::Mcrl22lps, processid, 2),
+          createSubprocess(SubprocessType::Mcrl22lps, processid, 3, property),
+          createSubprocess(SubprocessType::Lps2lts, processid, 4),
+          createSubprocess(SubprocessType::Lps2lts, processid, 5, property),
+          createSubprocess(SubprocessType::Ltscompare, processid, 6, property,
+                           false, property.equivalence)};
+    }
     processQueues[processType]->enqueue(processid);
     emit newProcessQueued(processType);
 
@@ -561,9 +602,10 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
                                       "##### PARSING SPECIFICATION #####\n");
         }
 
-        /* no need to run if there is an up to date lps file with respect to the
-         *   input mcrl2 file */
-        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
+        /* no need to parse the main mcrl2 file when there is an up to date lps
+         *   file */
+        if (nextSubprocessIndex == 0 &&
+            fileSystem->upToDateOutputFileExists(inputFile, outputFile))
         {
           noNeedToRun = true;
           consoleDock->writeToConsole(
@@ -617,6 +659,11 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
           consoleDock->writeToConsole(processType,
                                       "Up to date LTS already exists\n");
         }
+        break;
+
+      case SubprocessType::Ltscompare:
+        consoleDock->writeToConsole(processType,
+                                    "##### COMPARING LTSS #####\n");
         break;
 
       case SubprocessType::Ltsgraph:
@@ -687,23 +734,44 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
 {
   QProcess* mcrl2ParsingProcess = qobject_cast<QProcess*>(sender());
   int processid = mcrl2ParsingProcess->property("processid").toInt();
+  int subprocessIndex =
+      mcrl2ParsingProcess->property("subprocessIndex").toInt();
+  ProcessType processType = processTypes[processid];
 
-  /* if the full process was only for parsing the specification, signal that the
-   *   process has finished */
-  if (processTypes[processid] == ProcessType::Parsing &&
-      processes[processid].size() == 1)
+  /* if parsing resulted in an error, go to the parsing tab */
+  if (previousExitCode > 0)
+  {
+    consoleDock->setConsoleTab(ProcessType::Parsing);
+  }
+
+  /* if parsing a reinitialised specification, set the corresponding result */
+  if (processType == ProcessType::Parsing && subprocessIndex == 1)
+  {
+    if (previousExitCode == 0)
+    {
+      results[processid] = "valid";
+    }
+    else
+    {
+      results[processid] = "invalid";
+    }
+  }
+
+  /* if the full process was only for parsing specifications and this is the
+   *   last one, signal that the process has finished */
+  if (processType == ProcessType::Parsing &&
+      processes[processid].size() == subprocessIndex + 1)
   {
     emit processFinished(processid);
   }
 
-  /* if parsing gave an error, move to the parsing tab and move the cursor in
-   *   the code editor to the parsing error if possible */
-  if (previousExitCode > 0)
+  /* if parsing the main specification gave an error, move the cursor in the
+   *   code editor to the parsing error if possible */
+  if (subprocessIndex == 0 && previousExitCode > 0)
   {
     consoleDock->writeToConsole(
         ProcessType::Parsing,
         "The given specification is not a valid mCRL2 specification\n");
-    consoleDock->setConsoleTab(ProcessType::Parsing);
     QString parsingOutput = consoleDock->getConsoleOutput(ProcessType::Parsing);
     QRegExp parsingError = QRegExp("Line (\\d+), column (\\d+): syntax error");
     int parsingErrorIndex =

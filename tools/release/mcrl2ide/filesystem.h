@@ -59,6 +59,8 @@ class Property
   public:
   QString name;
   QString text;
+  bool mucalculus;
+  mcrl2::lts::lts_equivalence equivalence;
 
   /**
    * @brief Property Default constructor
@@ -69,8 +71,12 @@ class Property
    * @brief Property Constructor
    * @param name The name of the property
    * @param text The text of the property
+   * @param mulcalculus Whether this is a mu-calculus property (true) or an
+   *   equivalence property (false)
+   * @param equivalence The equivalence in case this is an equivalance property
    */
-  Property(QString name, QString text);
+  Property(QString name, QString text, bool mucalculus = true,
+           mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none);
 
   /**
    * @brief operator== Defines equality on two properties
@@ -173,10 +179,10 @@ class FileSystem : public QObject
 
   /**
    * @brief propertyFilePath Defines the file path of a property
-   * @param propertyName The name of the property
+   * @param property The property
    * @return The file path of the property
    */
-  QString propertyFilePath(const QString& propertyName);
+  QString propertyFilePath(const Property& property);
 
   /**
    * @brief pbesFilePath Defines the file path of a pbes
@@ -362,6 +368,15 @@ class FileSystem : public QObject
   void saveProperty(const Property& property);
 
   /**
+   * @brief createReinitialisedSpecification Creates a new mCRL2 specification
+   *   which is a copy of the current one but with its initial process replaced
+   *   by a given one; assumes a specification is open
+   * @param property The equivalence property for which the new specification
+   *   needs to be created
+   */
+  void createReinitialisedSpecification(const Property& property);
+
+  /**
    * @brief actionOpenProjectFolderInExplorer Allows the user to open the
    *   project folder in the native file explorer
    */
@@ -491,6 +506,14 @@ class FileSystem : public QObject
   QString readSpecification(QString specPath = "");
 
   /**
+   * @brief propertyFilePath Find the file path of a property file with the
+   *   given property name
+   * @param property The property name
+   * @return The file path of the property if found, the empty string otherwise
+   */
+  QString findPropertyFilePath(const QString& propertyName);
+
+  /**
    * @brief readPropertyFromFile Reads a property from a file
    * @param propertyFilePath The path to the property file
    * @return The property read from the file
@@ -499,12 +522,12 @@ class FileSystem : public QObject
 
   /**
    * @brief deletePropertyFile Deletes the file of a property
-   * @param propertyName The name of the property
+   * @param propFilePath The path of the property file
    * @param showIfFailed Whether the user should be told if deleting a property
    *   file was unsuccessful
    * @return Whether deleting the property file was successful
    */
-  bool deletePropertyFile(const QString& propertyName,
+  bool deletePropertyFile(const QString& propFilePath,
                           bool showIfFailed = true);
 };
 

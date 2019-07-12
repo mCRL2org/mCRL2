@@ -31,17 +31,55 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Mu-calculus formula:</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="CodeEditor" name="formulaTextField">
-     <property name="placeholderText">
-      <string>Type your mu-calculus formula here</string>
-     </property>
+     <widget class="QWidget" name="mucalculusTab">
+      <attribute name="title">
+       <string>Mu-calculus</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Mu-calculus formula:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="CodeEditor" name="formulaTextField">
+         <property name="placeholderText">
+          <string>Type your mu-calculus formula here</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="equivalenceTab">
+      <attribute name="title">
+       <string>Equivalence</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="EquivalenceComboBox" name="equivalenceComboBox"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Alternate initial process (starting with init):</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="CodeEditor" name="initTextField">
+         <property name="placeholderText">
+          <string>Type your alternate initial process here</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -91,6 +129,11 @@
    <class>CodeEditor</class>
    <extends>QPlainTextEdit</extends>
    <header>codeeditor.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EquivalenceComboBox</class>
+   <extends>QComboBox</extends>
+   <header>addeditpropertydialog.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

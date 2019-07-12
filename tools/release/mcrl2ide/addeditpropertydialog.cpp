@@ -80,7 +80,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
                                              QWidget* parent)
     : QDialog(parent), ui(new Ui::AddEditPropertyDialog),
       processSystem(processSystem), fileSystem(fileSystem),
-      propertyParsingProcessid(-1)
+      propertyParsingProcessid(-1), lastParsingPropertyIsMucalculus(true)
 {
   ui->setupUi(this);
 
@@ -102,6 +102,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   setWindowFlags(Qt::Window);
 
   ui->formulaTextField->setHighlightingRules(false);
+  ui->initTextField->setHighlightingRules(true);
 
   connect(ui->parseButton, SIGNAL(clicked()), this, SLOT(parseProperty()));
   connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));
@@ -132,13 +133,32 @@ void AddEditPropertyDialog::clearFields()
 void AddEditPropertyDialog::setProperty(const Property& property)
 {
   ui->propertyNameField->setText(property.name);
-  ui->formulaTextField->setPlainText(property.text);
+  if (property.mucalculus)
+  {
+    ui->formulaTextField->setPlainText(property.text);
+    ui->tabWidget->setCurrentIndex(0);
+  }
+  else
+  {
+    ui->equivalenceComboBox->setSelectedEquivalence(property.equivalence);
+    ui->initTextField->setPlainText(property.text);
+    ui->tabWidget->setCurrentIndex(1);
+  }
 }
 
 Property AddEditPropertyDialog::getProperty()
 {
-  return Property(ui->propertyNameField->text(),
-                  ui->formulaTextField->toPlainText());
+  if (ui->tabWidget->currentIndex() == 0) // mucalculus tab
+  {
+    return Property(ui->propertyNameField->text(),
+                    ui->formulaTextField->toPlainText());
+  }
+  else // equivalence tab
+  {
+    return Property(ui->propertyNameField->text(),
+                    ui->initTextField->toPlainText(), false,
+                    ui->equivalenceComboBox->getSelectedEquivalence());
+  }
 }
 
 void AddEditPropertyDialog::setOldProperty(const Property& oldProperty)
@@ -204,6 +224,7 @@ void AddEditPropertyDialog::parseProperty()
       /* save the property, start a parsing process and wait for a reply */
       Property property = getProperty();
       fileSystem->saveProperty(property);
+      lastParsingPropertyIsMucalculus = property.mucalculus;
       propertyParsingProcessid = processSystem->parseProperty(property);
       ui->parseButton->setText("Abort Parsing");
     }
@@ -219,19 +240,24 @@ void AddEditPropertyDialog::parseResults(int processid)
     /* if valid accept, else show message */
     QString text = "";
     QString result = processSystem->getResult(processid);
+    QString inputType = lastParsingPropertyIsMucalculus
+                            ? "mu-calculus formula"
+                            : "alternate initial process";
 
     if (result == "valid")
     {
-      text = "The entered formula is a valid mu-calculus formula.";
+      text = "The entered " + inputType + " is valid.";
     }
     else if (result == "invalid")
     {
-      text = "The entered formula is not a valid mu-calculus formula. See the "
+      text = "The entered " + inputType +
+             "is not valid. See the "
              "parsing console for more information";
     }
     else
     {
-      text = "Could not parse the entered formula. See the parsing console "
+      text = "Could not parse the entered " + inputType +
+             ". See the parsing console "
              "for more information";
     }
 
