@@ -9,6 +9,7 @@
 #ifndef MCRL2_SMT_TRANSLATE_SPECIFICATION_H
 #define MCRL2_SMT_TRANSLATE_SPECIFICATION_H
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_expression.h"
@@ -41,7 +42,7 @@ void translate_sort_definition(const std::string& sort_name,
     return;
   }
 
-  out << "(" << translate_identifier(sort_name) << " ";
+  out << "(declare-datatypes () ((" << translate_identifier(sort_name) << " ";
   for(const data::function_symbol& cons: dataspec.constructors(s))
   {
     out << "(" << translate_identifier(cons.name()) << " ";
@@ -59,7 +60,7 @@ void translate_sort_definition(const std::string& sort_name,
     }
     out << ") ";
   }
-  out << ")\n";
+  out << ")))\n";
 }
 
 template <typename OutputStream>
@@ -74,6 +75,52 @@ void translate_sort_definition(const data::basic_sort& s,
   translate_sort_definition(pp(s.name()), s, dataspec, out, nt, id_gen, struct_name_map);
 }
 
+// Find the dependencies in the definition of a sort
+std::set<data::sort_expression> find_dependencies(const data::data_specification& dataspec, const data::sort_expression& sort)
+{
+  std::set<data::sort_expression> result;
+  for(const data::function_symbol& cons: dataspec.constructors(sort))
+  {
+    find_sort_expressions(cons, std::inserter(result, result.end()));
+  }
+
+  for(auto i = result.begin(); i != result.end(); ++i)
+  {
+    if(!(data::is_basic_sort(*i) || data::is_structured_sort(*i)) || *i == sort)
+    {
+      result.erase(*i);
+    }
+  }
+  return result;
+}
+
+// Find all sorts that need to be translated and the dependencies in their definitions
+std::map<data::sort_expression, std::set<data::sort_expression>> find_sorts_and_dependencies(const data::data_specification& dataspec, const native_translations& nt)
+{
+  std::map<data::sort_expression, std::set<data::sort_expression>> result;
+  for(const data::sort_expression& s: dataspec.context_sorts())
+  {
+    if(data::is_function_sort(s))
+    {
+      // SMT-LIB2 does not support function sorts
+      continue;
+    }
+    auto find_alias = dataspec.sort_alias_map().find(s);
+    if(find_alias != dataspec.sort_alias_map().end() && find_alias->second != s)
+    {
+      // translate only the unique representation of a sort
+      continue;
+    }
+
+    result[s] = find_dependencies(dataspec, s);
+  }
+  for(const data::basic_sort& s: dataspec.user_defined_sorts())
+  {
+    result[s] = find_dependencies(dataspec, s);
+  }
+  return result;
+}
+
 template <typename OutputStream>
 inline
 void translate_sort_definitions(const data::data_specification& dataspec,
@@ -82,20 +129,14 @@ void translate_sort_definitions(const data::data_specification& dataspec,
                                data::set_identifier_generator& id_gen,
                                std::map<data::structured_sort, std::string>& struct_name_map)
 {
-  out << "(declare-datatypes () (";
-  for(const data::sort_expression& s: dataspec.context_sorts())
+  auto sort_dependencies = find_sorts_and_dependencies(dataspec, nt);
+  // for(const auto& p: sort_dependencies)
+  // {
+  //   std::cout << p.first << " := " << core::detail::print_set(p.second) << std::endl;
+  // }
+  auto sorts = topological_sort(sort_dependencies);
+  for(const data::sort_expression& s: sorts)
   {
-    if(data::is_function_sort(s))
-    {
-      // smt-lib2 does not support function sorts
-      continue;
-    }
-    auto find_result = dataspec.sort_alias_map().find(s);
-    if(find_result != dataspec.sort_alias_map().end() && find_result->second != s)
-    {
-      // translate only the unique representation of a sort
-      continue;
-    }
     std::string name(pp(s));
     if(data::is_structured_sort(s))
     {
@@ -104,11 +145,6 @@ void translate_sort_definitions(const data::data_specification& dataspec,
     }
     translate_sort_definition(name, s, dataspec, out, nt, id_gen, struct_name_map);
   }
-  for(const data::basic_sort& s: dataspec.user_defined_sorts())
-  {
-    translate_sort_definition(s, dataspec, out, nt, id_gen, struct_name_map);
-  }
-  out << "))\n";
 }
 
 
