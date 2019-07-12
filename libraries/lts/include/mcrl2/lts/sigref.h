@@ -137,7 +137,7 @@ protected:
 
       // for(outgoing_transitions_per_state_t::const_iterator i = pred_range.first; i != pred_range.second; ++i)
       // for(const outgoing_pair_t& p: m_prev_transitions[t])
-      for (detail::state_type i=m_prev_transitions.lowerbound(t); i<m_prev_transitions.upperbound(t); ++i)
+      for (std::size_t i=m_prev_transitions.lowerbound(t); i<m_prev_transitions.upperbound(t); ++i)
       {
         const outgoing_pair_t& p = m_prev_transitions.get_transitions()[i];
         if(m_lts.is_tau(m_lts.apply_hidden_label_map(label(p))) && partition[t] == partition[to(p)])
@@ -235,7 +235,7 @@ protected:
           // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
           // for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
           // for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
-          for (detail::state_type i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
+          for (std::size_t i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
           {
             const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
             if ((low[to(t)] == 0) && (scc[to(t)] == 0) && (m_lts.is_tau(m_lts.apply_hidden_label_map(label(t)))))
@@ -247,7 +247,7 @@ protected:
         else
         {
           // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
-          for (detail::state_type i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
+          for (std::size_t i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
           {
             const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
             if ((low[to(t)] != 0) && (m_lts.is_tau(m_lts.apply_hidden_label_map(label(t)))))
@@ -273,7 +273,7 @@ protected:
             {
               // for(outgoing_transitions_per_state_t::const_iterator i = succ_range.first; i != succ_range.second; ++i)
               // for (const outgoing_pair_t& i: m_lts_succ_transitions[vi]) 
-              for (detail::state_type i_=m_lts_succ_transitions.lowerbound(vi); i_<m_lts_succ_transitions.upperbound(vi); ++i_)
+              for (std::size_t i_=m_lts_succ_transitions.lowerbound(vi); i_<m_lts_succ_transitions.upperbound(vi); ++i_)
               {
                 const outgoing_pair_t& i=m_lts_succ_transitions.get_transitions()[i_];
                 if(vi == to(i) && m_lts.is_tau(m_lts.apply_hidden_label_map(label(i))))
