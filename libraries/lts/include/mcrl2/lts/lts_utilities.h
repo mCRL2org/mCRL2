@@ -33,6 +33,7 @@ namespace lts
 
 namespace detail
 {
+
 inline std::size_t apply_map(const std::size_t n, std::map<transition::size_type,transition::size_type>& mapping)
 {
   const std::map<transition::size_type,transition::size_type>::const_iterator i=mapping.find(n);
@@ -44,12 +45,108 @@ inline std::size_t apply_map(const std::size_t n, std::map<transition::size_type
 }
 
 
+// An indexed sorted vector below contains the outgoing or incoming transitions per state,
+// grouped per state. The input consists of a vector of transitions. The incoming/outcoming
+// tau transitions are grouped by state in the m_states_with_outgoing_or_incoming_transition. 
+// It is as long as the lts aut has transitions. The vector m_indices is as long as the number
+// of states plus 1. For each state it contains the place in the other vector where its tau transitions
+// start. So, the tau transitions reside at position indices[s] to indices[s+1]. These indices
+// can be acquired using the functions lowerbound and upperbound. 
+// This data structure is chosen due to its minimal memory and time footprint. 
+template <class CONTENT>
+class indexed_sorted_vector_for_transitions
+{
+  protected:
+    typedef std::size_t state_type;
+    typedef std::size_t label_type;
+    typedef std::pair<label_type,state_type> label_state_pair;
+
+    std::vector < CONTENT > m_states_with_outgoing_or_incoming_transition;
+    std::vector <size_t> m_indices;
+
+  public:
+
+    indexed_sorted_vector_for_transitions(const std::vector < transition >& transitions , state_type num_states, bool outgoing)
+     : m_indices(num_states+1,0)
+    {
+      // First count the number of outgoing transitions per state and put it in indices.
+      for(const transition& t: transitions)
+      {
+        m_indices[outgoing?t.from():t.to()]++;
+      }
+
+      // Calculate the m_indices where the states with outgoing/incoming tau transition must be placed.
+      // Put the starting index for state i at position i-1. When placing the transitions these indices
+      // are decremented properly. 
+      
+      size_t sum=0;
+      for(state_type& i: m_indices)  // The vector is changed. This must be a reference. 
+      {
+        sum=sum+i;
+        i=sum;
+      }
+
+      // Now declare enough space for all transitions and store them in reverse order, while
+      // at the same time decrementing the indices in m_indices. 
+      m_states_with_outgoing_or_incoming_transition.resize(sum);
+      for(const transition& t: transitions)
+      {
+        if (outgoing)
+        {
+          assert(t.from()<m_indices.size());
+          assert(m_indices[t.from()]>0);
+          m_indices[t.from()]--;
+          assert(m_indices[t.from()] < m_states_with_outgoing_or_incoming_transition.size());
+          m_states_with_outgoing_or_incoming_transition[m_indices[t.from()]]=label_state_pair(t.label(), t.to());
+        }
+        else
+        {
+          assert(t.to()<m_indices.size());
+          assert(m_indices[t.to()]>0);
+          m_indices[t.to()]--;
+          assert(m_indices[t.to()] < m_states_with_outgoing_or_incoming_transition.size());
+          m_states_with_outgoing_or_incoming_transition[m_indices[t.to()]]=label_state_pair(t.label(), t.from());
+        }
+      }
+      assert(m_indices.at(num_states)==m_states_with_outgoing_or_incoming_transition.size());
+    }
+
+    // Get the indexed transitions. 
+    const std::vector<CONTENT>& get_transitions() const
+    {
+      return m_states_with_outgoing_or_incoming_transition;
+    }
+  
+    // Get the lowest index of incoming/outging transitions stored in m_states_with_outgoing_or_incoming_transition.
+    size_t lowerbound(const state_type s) const
+    {
+      assert(s+1<m_indices.size());
+      return m_indices[s];
+    }
+
+    // Get 1 beyond the higest index of incoming/outging transitions stored in m_states_with_outgoing_or_incoming_transition.
+    size_t upperbound(const state_type s) const
+    {
+      assert(s+1<m_indices.size());
+      return m_indices[s+1];
+    }
+
+    // Drastically clear the vectors by resetting its memory usage to minimal. 
+    void clear()   
+    {
+      std::vector <state_type>().swap(m_states_with_outgoing_or_incoming_transition);
+      std::vector <size_t>().swap(m_indices);
+      
+    }
+};
+
 } // end namespace detail 
 
+//
 /// \brief Type for exploring transitions per state.
 typedef std::pair<transition::size_type, transition::size_type> outgoing_pair_t;
-typedef std::vector<outgoing_pair_t > outgoing_transitions_t;
-typedef std::vector< outgoing_transitions_t > outgoing_transitions_per_state_t;
+
+typedef detail::indexed_sorted_vector_for_transitions < outgoing_pair_t > outgoing_transitions_per_state_t;
 
 /// \brief Label of a pair of a label and target state. 
 inline std::size_t label(const outgoing_pair_t& p)
@@ -62,65 +159,6 @@ inline std::size_t to(const outgoing_pair_t& p)
 {
   return p.second;
 }
-
-/// \brief Provide the transitions as a multimap accessible per outgoing state, useful
-///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std::vector<transition>& trans, const transition::size_type number_of_states)
-{
-  outgoing_transitions_per_state_t result(number_of_states);
-  for (const transition& t: trans)
-  {
-    assert(t.from()<number_of_states);
-    result[t.from()].emplace_back(std::pair<transition::size_type, transition::size_type>(t.label(), t.to()));
-  }
-  return result;
-}
-
-/// \brief Provide the transitions as a multimap accessible per outgoing state, useful
-///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state(
-                    const std::vector<transition>& trans, 
-                    const std::map<transition::size_type,transition::size_type>& hide_label_map,
-                    const transition::size_type number_of_states)
-{
-  outgoing_transitions_per_state_t result(number_of_states);
-  for (const transition& t: trans)
-  {
-    assert(t.from()<number_of_states);  
-    result[t.from()].emplace_back(std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.to()));
-  }
-  return result;
-} 
-
-/// \brief Provide the transitions as a multimap accessible per outgoing state, useful
-///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(const std::vector<transition>& trans, const transition::size_type number_of_states)
-{
-  outgoing_transitions_per_state_t result(number_of_states);
-  for (const transition& t: trans)
-  {
-    assert(t.to()<number_of_states);
-    result[t.to()].emplace_back(std::pair<transition::size_type, transition::size_type>(t.label(), t.from()));
-  }
-  return result;
-}
-
-/// \brief Type for exploring transitions per state and action.
-/// \brief Provide the transitions as a multimap accessible per outgoing state, useful
-///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(
-                  const std::vector<transition>& trans, 
-                  const std::map<transition::size_type,transition::size_type>& hide_label_map,
-                  const transition::size_type number_of_states)
-{
-  outgoing_transitions_per_state_t result(number_of_states);
-  for (const transition& t: trans)
-  {
-    assert(t.to()<number_of_states);
-    result[t.to()].emplace_back(std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.from()));
-  }
-  return result;
-} 
 
 /// \brief Type for exploring transitions per state and action.
 typedef std::multimap<std::pair<transition::size_type, transition::size_type>, transition::size_type>

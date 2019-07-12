@@ -309,7 +309,7 @@ template <class SL, class AL, class BASE>
 bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
-  const outgoing_transitions_per_state_t out_trans(transitions_per_outgoing_state(l.get_transitions(),l.num_states()));
+  const outgoing_transitions_per_state_t out_trans(l.get_transitions(),l.num_states(),true);
 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
@@ -321,8 +321,10 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
   {
     std::size_t state_to_consider=todo.top();
     todo.pop();
-    for (const outgoing_pair_t& p: out_trans[state_to_consider])
+    // for (const outgoing_pair_t& p: out_trans[state_to_consider])
+    for (detail::state_type i=out_trans.lowerbound(state_to_consider); i<out_trans.upperbound(state_to_consider); ++i)
     {
+      const outgoing_pair_t& p=out_trans.get_transitions()[i];
       assert(visited[state_to_consider] && state_to_consider<l.num_states() && to(p)<l.num_states());
       if (!visited[to(p)])
       {
@@ -416,7 +418,7 @@ template <class SL, class AL, class PROBABILISTIC_STATE, class BASE>
 bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>&  l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
-  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions(),l.num_states());
+  const outgoing_transitions_per_state_t out_trans(l.get_transitions(),l.num_states(),true);
 
   std::vector < bool > visited(l.num_states(),false);
   std::stack<std::size_t> todo;
@@ -431,8 +433,10 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
   {
     std::size_t state_to_consider=todo.top();
     todo.pop();
-    for (const outgoing_pair_t& p: out_trans[state_to_consider])
+    // for (const outgoing_pair_t& p: out_trans[state_to_consider])
+    for (detail::state_type i=out_trans.lowerbound(state_to_consider); i<out_trans.upperbound(state_to_consider); ++i)
     {
+      const outgoing_pair_t& p=out_trans.get_transitions()[i];
       assert(visited[state_to_consider] && state_to_consider<l.num_states() && to(p)<l.num_probabilistic_states());
       // Walk through the the states in this probabilistic state.
       for(const typename PROBABILISTIC_STATE::state_probability_pair& pr: l.probabilistic_state(to(p)))
@@ -918,11 +922,13 @@ bool is_deterministic(const LTS_TYPE& l)
 
 namespace detail
 {
-inline
+
+template <class LTS_TYPE>
 void get_trans(const outgoing_transitions_per_state_t& begin,
                tree_set_store& tss,
                std::size_t d,
-               std::vector<transition> &d_trans)
+               std::vector<transition>& d_trans,
+               LTS_TYPE& aut)
 {
   if (!tss.is_set_empty(d))
   {
@@ -931,15 +937,17 @@ void get_trans(const outgoing_transitions_per_state_t& begin,
       // for (outgoing_transitions_per_state_t:: const_iterator
       //     j=begin.lower_bound(tss.get_set_child_left(d)); j!=begin.upper_bound(tss.get_set_child_left(d)); ++j)
       const state_type from=tss.get_set_child_left(d);
-      for(const outgoing_pair_t& p: begin[from])
+      // for(const outgoing_pair_t& p: begin[from])
+      for (detail::state_type i=begin.lowerbound(from); i<begin.upperbound(from); ++i)
       {
-        d_trans.push_back(transition(from, label(p), to(p)));
+        const outgoing_pair_t& p=begin.get_transitions()[i];
+        d_trans.push_back(transition(from, aut.apply_hidden_label_map(label(p)), to(p)));
       }
     }
     else
     {
-      get_trans(begin,tss,tss.get_set_child_left(d),d_trans);
-      get_trans(begin,tss,tss.get_set_child_right(d),d_trans);
+      get_trans(begin,tss,tss.get_set_child_left(d),d_trans,aut);
+      get_trans(begin,tss,tss.get_set_child_right(d),d_trans,aut);
     }
   }
 }
@@ -960,7 +968,8 @@ void determinise(LTS_TYPE& l)
   d_states.clear();
 
   // std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
-  const outgoing_transitions_per_state_t begin=transitions_per_outgoing_state(l.get_transitions(),l.hidden_label_map(),l.num_states());
+  // const outgoing_transitions_per_state_t begin(l.get_transitions(),l.hidden_label_map(),l.num_states(),true);
+  const outgoing_transitions_per_state_t begin(l.get_transitions(),l.num_states(),true);
 
   l.clear_transitions();
   l.clear_state_labels();
@@ -974,7 +983,7 @@ void determinise(LTS_TYPE& l)
   {
     // collect the outgoing transitions of every state of DLTS state d_id in
     // the vector d_transs
-    detail::get_trans(begin,tss,tss.get_set(d_id),d_transs);
+    detail::get_trans(begin,tss,tss.get_set(d_id),d_transs,l);
 
     // sort d_transs by label and (if labels are equal) by destination
     const detail::compare_transitions_lts compare(l.hidden_label_map());

@@ -136,9 +136,11 @@ protected:
       //    = m_prev_transitions.equal_range(t);
 
       // for(outgoing_transitions_per_state_t::const_iterator i = pred_range.first; i != pred_range.second; ++i)
-      for(const outgoing_pair_t& p: m_prev_transitions[t])
+      // for(const outgoing_pair_t& p: m_prev_transitions[t])
+      for (detail::state_type i=m_prev_transitions.lowerbound(t); i<m_prev_transitions.upperbound(t); ++i)
       {
-        if(m_lts.is_tau(label(p)) && partition[t] == partition[to(p)])
+        const outgoing_pair_t& p = m_prev_transitions.get_transitions()[i];
+        if(m_lts.is_tau(m_lts.apply_hidden_label_map(label(p))) && partition[t] == partition[to(p)])
         {
           insert(partition, to(p), label_, block);
         }
@@ -150,7 +152,7 @@ public:
   /** \brief Constructor  */
   signature_branching_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_),
-      m_prev_transitions(transitions_per_outgoing_state_reversed(lts_.get_transitions(),lts_.hidden_label_map(),lts_.num_states()))
+      m_prev_transitions(lts_.get_transitions(),lts_.num_states(),false)  // transitions stored backward. 
   {
     mCRL2log(log::verbose, "sigref") << "initialising signature computation for branching bisimulation" << std::endl;
   }
@@ -210,7 +212,7 @@ protected:
     std::stack<std::size_t> sccstack;
 
     // Record forward transition relation sorted by state.
-    outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions(),m_lts.hidden_label_map(),m_lts.num_states()));
+    outgoing_transitions_per_state_t m_lts_succ_transitions(m_lts.get_transitions(),m_lts.num_states(),true);
 
     for (std::size_t i = 0; i < m_lts.num_states(); ++i)
     {
@@ -231,9 +233,12 @@ protected:
           sccstack.push(vi);
 
           // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
-          for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
+          // for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
+          // for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
+          for (detail::state_type i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
           {
-            if ((low[to(t)] == 0) && (scc[to(t)] == 0) && (m_lts.is_tau(label(t))))
+            const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
+            if ((low[to(t)] == 0) && (scc[to(t)] == 0) && (m_lts.is_tau(m_lts.apply_hidden_label_map(label(t)))))
             {
               stack.push(to(t));
             }
@@ -242,9 +247,10 @@ protected:
         else
         {
           // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
-          for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
+          for (detail::state_type i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
           {
-            if ((low[to(t)] != 0) && (m_lts.is_tau(label(t))))
+            const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
+            if ((low[to(t)] != 0) && (m_lts.is_tau(m_lts.apply_hidden_label_map(label(t)))))
               low[vi] = low[vi] < low[to(t)] ? low[vi] : low[to(t)];
           }
           if (low[vi] == scc[vi])
@@ -266,9 +272,11 @@ protected:
             if(this_scc.size() == 1)
             {
               // for(outgoing_transitions_per_state_t::const_iterator i = succ_range.first; i != succ_range.second; ++i)
-              for (const outgoing_pair_t& i: m_lts_succ_transitions[vi]) 
+              // for (const outgoing_pair_t& i: m_lts_succ_transitions[vi]) 
+              for (detail::state_type i_=m_lts_succ_transitions.lowerbound(vi); i_<m_lts_succ_transitions.upperbound(vi); ++i_)
               {
-                if(vi == to(i) && m_lts.is_tau(label(i)))
+                const outgoing_pair_t& i=m_lts_succ_transitions.get_transitions()[i_];
+                if(vi == to(i) && m_lts.is_tau(m_lts.apply_hidden_label_map(label(i))))
                 {
                   m_divergent[tos] = true;
                   break;
