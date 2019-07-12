@@ -22,6 +22,106 @@ namespace lts
 
 namespace detail
 {
+  // An indexed sorted vector below contains the outgoing or incoming tau transitions per state,
+  // grouped per state. The input consists of an automaton with transitions. The incoming/outcoming
+  // tau transitions are grouped by state in the m_states_with_outgoing_or_incoming_tau_transition. 
+  // It is as long as the lts aut has tau transitions. The vector m_indices is as long as the number
+  // of states. For each state it contains the place in the other vector where its tau transitions
+  // start. So, the tau transitions reside at position indices[s] to indices[s+1]. These indices
+  // can be acquired using the functions lowerbound and upperbound. 
+  // This data structure is chosen due to its minimal memory and time footprint. 
+  template <class LTS_TYPE>
+  class indexed_sorted_vector_for_tau_transitions
+  {
+    protected:
+      typedef std::size_t state_type;
+      typedef std::size_t label_type;
+
+      std::vector <state_type> m_states_with_outgoing_or_incoming_tau_transition;
+      std::vector <size_t> m_indices;
+
+    public:
+
+      indexed_sorted_vector_for_tau_transitions(const LTS_TYPE aut, bool outgoing)
+       : m_indices(aut.num_states()+1,0)
+      {
+        // First count the number of outgoing transitions per state and put it in indices.
+        for(const transition& t: aut.get_transitions())
+        {
+          if (aut.is_tau(aut.apply_hidden_label_map(t.label())))
+          {
+            m_indices[outgoing?t.from():t.to()]++;
+          }
+        }
+
+        // Calculate the m_indices where the states with outgoing/incoming tau transition must be placed.
+        // Put the starting index for state i at position i-1. When placing the transitions these indices
+        // are decremented properly. 
+        
+        size_t sum=0;
+        for(state_type& i: m_indices)  // The vector is changed. This must be a reference. 
+        {
+          sum=sum+i;
+          i=sum;
+        }
+
+        // Now declare enough space for all transitions and store them in reverse order, while
+        // at the same time decrementing the indices in m_indices. 
+        m_states_with_outgoing_or_incoming_tau_transition.resize(sum);
+        for(const transition& t: aut.get_transitions())
+        {
+          if (aut.is_tau(aut.apply_hidden_label_map(t.label())))
+          {
+            if (outgoing)
+            {
+              assert(t.from()<m_indices.size());
+              assert(m_indices[t.from()]>0);
+              m_indices[t.from()]--;
+              assert(m_indices[t.from()] < m_states_with_outgoing_or_incoming_tau_transition.size());
+              m_states_with_outgoing_or_incoming_tau_transition[m_indices[t.from()]]=t.to();
+            }
+            else
+            {
+              assert(t.to()<m_indices.size());
+              assert(m_indices[t.to()]>0);
+              m_indices[t.to()]--;
+              assert(m_indices[t.to()] < m_states_with_outgoing_or_incoming_tau_transition.size());
+              m_states_with_outgoing_or_incoming_tau_transition[m_indices[t.to()]]=t.from();
+            }
+          }
+        }
+        assert(m_indices.at(aut.num_states())==m_states_with_outgoing_or_incoming_tau_transition.size());
+      }
+
+      // Get the indexed transitions. 
+      const std::vector<state_type>& get_transitions() const
+      {
+        return m_states_with_outgoing_or_incoming_tau_transition;
+      }
+    
+      // Get the lowest index of incoming/outging transitions stored in m_states_with_outgoing_or_incoming_tau_transition.
+      size_t lowerbound(const state_type s) const
+      {
+        assert(s+1<m_indices.size());
+        return m_indices[s];
+      }
+
+      // Get 1 beyond the higest index of incoming/outging transitions stored in m_states_with_outgoing_or_incoming_tau_transition.
+      size_t upperbound(const state_type s) const
+      {
+        assert(s+1<m_indices.size());
+        return m_indices[s+1];
+      }
+
+      // Drastically clear the vectors by resetting its memory usage to minimal. 
+      void clear()   
+      {
+        std::vector <state_type>().swap(m_states_with_outgoing_or_incoming_tau_transition);
+        std::vector <size_t>().swap(m_indices);
+        
+      }
+  };
+
 /// \brief This class contains an scc partitioner removing inert tau loops.
 
 template < class LTS_TYPE>
@@ -99,10 +199,10 @@ class scc_partitioner
 
     void group_components(const state_type t,
                           const state_type equivalence_class_index,
-                          const std::vector < std::vector < state_type > >& tgt_src,
+                          const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt_src,
                           std::vector < bool >& visited);
     void dfs_numbering(const state_type t,
-                       const std::vector < std::vector < state_type > >& src_tgt,
+                       const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt,
                        std::vector < bool >& visited);
 
 };
@@ -116,16 +216,19 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
               l.num_transitions() << " transitions" << std::endl;
 
   // read and store tau transitions.
-  std::vector < std::vector < state_type > > src_tgt(l.num_states());
+  /* std::vector < std::vector < state_type > > src_tgt(l.num_states());
   for (const transition& t: aut.get_transitions())
   {
     if (aut.is_tau(l.apply_hidden_label_map(t.label())))
     {
       src_tgt[t.from()].push_back(t.to());
     }
-  }
+  } */
   // Initialise the data structures
-  std::vector<bool> visited(aut.num_states(),false);
+  std::vector<bool> visited(aut.num_states(),false); 
+
+  indexed_sorted_vector_for_tau_transitions<LTS_TYPE> src_tgt(aut,true); // Group the tau transitions ordered per outgoing states. 
+  
 
   // Number the states via a depth first search
   for (state_type i=0; i<aut.num_states(); ++i)
@@ -134,14 +237,14 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   }
   src_tgt.clear();
 
-  std::vector < std::vector < state_type > > tgt_src(l.num_states());
-  for (const transition& t: aut.get_transitions())
+  indexed_sorted_vector_for_tau_transitions<LTS_TYPE> tgt_src(aut,false);
+  /* for (const transition& t: aut.get_transitions())
   {
     if (aut.is_tau(l.apply_hidden_label_map(t.label())))
     {
       tgt_src[t.to()].push_back(t.from());
     }
-  }
+  } */
   equivalence_class_index=0;
   block_index_of_a_state=std::vector < state_type >(aut.num_states(),0);
   for (std::vector < state_type >::reverse_iterator i=dfsn2state.rbegin();
@@ -234,39 +337,41 @@ bool scc_partitioner<LTS_TYPE>::in_same_class(const std::size_t s, const std::si
 
 template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::group_components(
-  const state_type t,
+  const state_type s,
   const state_type equivalence_class_index,
-  const std::vector < std::vector < state_type > >& tgt_src,
+  const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& tgt_src,
   std::vector < bool >& visited)
 {
-  if (!visited[t])
+  if (!visited[s])
   {
     return;
   }
-  visited[t] = false;
-  for(const state_type s: tgt_src[t])
+  visited[s] = false;
+  const size_t u=tgt_src.upperbound(s);  // only calculate the upperbound once. 
+  for(state_type i=tgt_src.lowerbound(s); i<u; ++i)
   {
-    group_components(s,equivalence_class_index,tgt_src,visited);
+    group_components(tgt_src.get_transitions()[i],equivalence_class_index,tgt_src,visited);
   }
-  block_index_of_a_state[t]=equivalence_class_index;
+  block_index_of_a_state[s]=equivalence_class_index;
 }
 
 template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::dfs_numbering(
-  const state_type t,
-  const std::vector < std::vector < state_type > >& src_tgt,
+  const state_type s,
+  const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt,
   std::vector < bool >& visited)
 {
-  if (visited[t])
+  if (visited[s])
   {
     return;
   }
-  visited[t] = true;
-  for(const state_type s: src_tgt[t])
+  visited[s] = true;
+  const size_t u=src_tgt.upperbound(s);  // only calculate the upperbound once. 
+  for(state_type i=src_tgt.lowerbound(s); i<u; ++i)
   {
-    dfs_numbering(s,src_tgt,visited);
+    dfs_numbering(src_tgt.get_transitions()[i],src_tgt,visited);
   }
-  dfsn2state.push_back(t);
+  dfsn2state.push_back(s);
 }
 
 } // namespace detail
