@@ -37,7 +37,7 @@ class symbolic_exploration_algorithm
     bool m_clustered;
     std::vector<pbes_equation> m_cluster_equations;
 
-    std::string pp(const std::vector<data::variable>& v)
+    static std::string pp(const std::vector<data::variable>& v)
     {
       return data::pp(data::variable_list(v.begin(), v.end()));
     }
@@ -65,7 +65,7 @@ class symbolic_exploration_algorithm
     /// \param x A variable list
     /// \param y A variable list
     /// \return The concatenation of x and y
-    data::variable_list concat(const data::variable_list& x, const data::variable_list& y)
+    static data::variable_list concat(const data::variable_list& x, const data::variable_list& y)
     {
       std::vector<data::variable> v(x.begin(), x.end());
       v.insert(v.end(), y.begin(), y.end());
@@ -369,28 +369,28 @@ class symbolic_exploration_algorithm
       : m_pbes(p), m_optimized(optimized), m_clustered(clustered)
     {
       std::vector<pbes_equation>& equations = m_pbes.equations();
-      for (std::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
+      for (auto& equation: equations)
       {
-        m_generator.add_identifier(i->variable().name());
+        m_generator.add_identifier(equation.variable().name());
       }
     }
 
     void run()
     {
       std::vector<pbes_equation>& equations = m_pbes.equations();
-      for (std::vector<pbes_equation>::iterator i = equations.begin(); i != equations.end(); ++i)
+      for (auto& equation : equations)
       {
-        push_variables(i->variable().parameters());
-        pbes_expression phi = i->formula();
+        push_variables(equation.variable().parameters());
+        pbes_expression phi = equation.formula();
         if (is_conjunctive(phi))
         {
-          i->formula() = and_(expr_and(phi), make_cluster(F_and(phi)));
+          equation.formula() = and_(expr_and(phi), make_cluster(F_and(phi)));
         }
         else
         {
-          i->formula() = imp(not_(expr_or(phi)), make_cluster(F_or(phi)));
+          equation.formula() = imp(not_(expr_or(phi)), make_cluster(F_or(phi)));
         }
-        pop_variables(i->variable().parameters());
+        pop_variables(equation.variable().parameters());
       }
 
       // add the cluster equations to the PBES
