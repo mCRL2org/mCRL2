@@ -42,7 +42,7 @@ namespace detail
 
     public:
 
-      indexed_sorted_vector_for_tau_transitions(const LTS_TYPE aut, bool outgoing)
+      indexed_sorted_vector_for_tau_transitions(const LTS_TYPE& aut, bool outgoing)
        : m_indices(aut.num_states()+1,0)
       {
         // First count the number of outgoing transitions per state and put it in indices.
@@ -215,20 +215,9 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   mCRL2log(log::debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
               l.num_transitions() << " transitions" << std::endl;
 
-  // read and store tau transitions.
-  /* std::vector < std::vector < state_type > > src_tgt(l.num_states());
-  for (const transition& t: aut.get_transitions())
-  {
-    if (aut.is_tau(l.apply_hidden_label_map(t.label())))
-    {
-      src_tgt[t.from()].push_back(t.to());
-    }
-  } */
   // Initialise the data structures
   std::vector<bool> visited(aut.num_states(),false); 
-
   indexed_sorted_vector_for_tau_transitions<LTS_TYPE> src_tgt(aut,true); // Group the tau transitions ordered per outgoing states. 
-  
 
   // Number the states via a depth first search
   for (state_type i=0; i<aut.num_states(); ++i)
@@ -238,13 +227,6 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   src_tgt.clear();
 
   indexed_sorted_vector_for_tau_transitions<LTS_TYPE> tgt_src(aut,false);
-  /* for (const transition& t: aut.get_transitions())
-  {
-    if (aut.is_tau(l.apply_hidden_label_map(t.label())))
-    {
-      tgt_src[t.to()].push_back(t.from());
-    }
-  } */
   equivalence_class_index=0;
   block_index_of_a_state=std::vector < state_type >(aut.num_states(),0);
   for (std::vector < state_type >::reverse_iterator i=dfsn2state.rbegin();
