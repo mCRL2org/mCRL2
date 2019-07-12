@@ -766,79 +766,16 @@ new\_todo := \emptyset \\
 \qquad \Choose u \in todo' \\
 \qquad todo' := todo' \setminus \{ u \} \\
 \qquad done' := done' \cup \{ u \} \\
-\qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Then \\
-\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup done')) \\
-\qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Then \\
-\qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup done')) \\
-\qquad \If d(u) = \bot \wedge succ(u) \setminus (S_0 \cup S_1 \cup done') = \emptyset \Then \\
-\qquad \qquad todo' := todo' \cup succ(u) \\
-\qquad \If d(u) = \bot \wedge succ(u) = \emptyset \Then \\
+\qquad \If d(u) = \bot \land succ(u) = \emptyset \Then\\
 \qquad \qquad new\_todo := new\_todo \cup \{ u \} \\
+\qquad \Else \If u \notin S_0 \cup S_1 \Then \\ 
+\qquad\qquad todo' := todo' \cup (succ(u) \setminus done') \\
 new\_todo := new\_todo \cap (todo \cup irrelevant) \\
 new\_irrelevant := (todo \cup irrelevant) \setminus new\_todo \\
 \Return new\_todo, new\_irrelevant
 \end{array}
 \end{equation*}
 
-There is a second, more advanced version available:
-
-\begin{equation*}
-\begin{array}{l}
-\textsc{PbesinstStructureGraphPruneTodoAlternative}(\mathcal{E}, X_{init}(e_{init}), R) \\ 
-init:=R(X_{init}(e_{init})) \\
-todo:=\{init\} \\
-discovered:=\{init\} \\
-(V,E) :=(\emptyset ,\emptyset ) \\ 
-S_0:= \emptyset \\
-S_1:= \emptyset \\
-\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Do \\ 
-\qquad \Choose X_{k}(e)\in todo \\ 
-\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
-\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
-\Space \Else R(\psi^e[X^e := true]) \\
-\qquad (b,\psi^e) := R^+(\psi^e) \\
-\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
-\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
-\qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
-\qquad todo := todo\cup (\mathrm{occ}(\psi ^{e})\setminus (\colorbox{lightgray}{$discovered \setminus irrelevant$})) \\
-\qquad discovered := discovered\ \cup \mathrm{occ}(\psi^e) \\
-
-\qquad \colorbox{lightgray}{$V' := \textsc{PruneTodoAlternative}(init, S_0, S_1) $}\\
-\colorbox{lightgray}{$V := V \setminus \textsc{AttrSimple}(irrelevant)$} \\
-
-\Return(V, E),
-\end{array}
-\end{equation*}
-
-where \textsc{PruneTodoAlternative} is defined as
-
-\begin{equation*}
-\begin{array}{l}
-\textsc{PruneTodoAlternative}(init, todo, irrelevant) \\ 
-todo' := \{ init \} \\
-done' := \{ init \} \\
-new\_todo := \emptyset \\
-\While todo' \neq \emptyset \Do \\
-\qquad \Choose u \in todo' \\
-\qquad todo' := todo' \setminus \{ u \} \\
-\qquad done' := done' \cup \{ u \} \\
-\qquad \colorbox{lightgray}{$ \If u \in dom(\tau) \land \tau(u) \notin done' \Then $}\\
-\qquad \qquad \colorbox{lightgray}{$todo' := todo' \cup \{ \tau(u) \} $}\\
-\qquad \Else \\
-\qquad \qquad \If d(u) = \blacktriangle \wedge succ(u) \cap S_1 = \emptyset \Then \\
-\qquad \qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_0 \cup done')) \\
-\qquad \qquad \If d(u) = \blacktriangledown \wedge succ(u) \cap S_0 = \emptyset \Then \\
-\qquad \qquad \qquad todo' := todo' \cup (succ(u) \setminus (S_1 \cup done')) \\
-\qquad \qquad \If d(u) = \bot \wedge succ(u) \setminus (S_0 \cup S_1 \cup done') = \emptyset \Then \\
-\qquad \qquad \qquad todo' := todo' \cup succ(u) \\
-\qquad \qquad \If d(u) = \bot \wedge succ(u) = \emptyset \Then \\
-\qquad \qquad \qquad new\_todo := new\_todo \cup \{ u \} \\
-new\_todo := new\_todo \cap (todo \cup irrelevant) \\
-new\_irrelevant := (todo \cup irrelevant) \setminus new\_todo \\
-\Return new\_todo, new\_irrelevant
-\end{array}
-\end{equation*}
 
 \subsection{Optimisations 3 and higher}
 
@@ -1076,11 +1013,12 @@ J := \{ j \mid \exists u \in V \cap dom(r) : r(u) = j \} \\
 \qquad \While X \neq Y \textbf{ do }\\
 \qquad \qquad X := \textsc{AttrMinRank}(U \cap Y, \alpha, V, j) \\
 \qquad \qquad Y := Y \setminus \textsc{AttrDefault}(Y \setminus X, 1-\alpha) \\
-\qquad \colorbox{Apricot}{$ \For v \in (U_j \cap X) \setminus S_{\alpha} \Do $} \\
+\qquad \colorbox{Apricot}{$ \For v \in X \setminus S_{\alpha} \Do $} \\
 \qquad \colorbox{Apricot}{$ \qquad \If (\alpha = 0 \land d(u) = \blacktriangledown) \lor (\alpha = 1 \land d(u) = \blacktriangle) \Then $} \\
-\qquad \colorbox{Apricot}{$ \qquad \qquad \tau(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
+\qquad \colorbox{Apricot}{$ \qquad \qquad \If v \in U_j \Then \tau_{\alpha}(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
+\qquad \colorbox{Apricot}{$ \qquad \qquad \Else \tau_{\alpha}(v) := \tau(v)$} \\
 \qquad S_\alpha := S_\alpha \cup X \\
-\Return \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1, 1)
+\Return \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1, 1), \tau_0,\tau_1
 \end{array}
 \end{equation*}
 where $\textsc{AttrMinRank}$ is a slightly modified version of the original attractor
@@ -1135,7 +1073,7 @@ S_1:= \emptyset \\
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$%
-S_0, S_1 := \text{\textsc{FatalAttractors}}(V, S_0, S_1) $} \text{(executed periodically)} \\
+S_0, S_1,\tau_0,\tau_1 := \text{\textsc{FatalAttractors}}(V, S_0, S_1) $} \text{(executed periodically)} \\
 V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return (V, E)
 \end{array}%
@@ -1178,14 +1116,15 @@ J := \{ j \mid \exists u \in V : r(u) = j \} \\
 \qquad \qquad X := U_j\\
 \qquad \qquad Y := \textsc{AttrMinRankOriginal}(X \cup S_\alpha, \alpha, V, j) \\
 \qquad \qquad \If U_j \subseteq Y \\
-\qquad \qquad \qquad \colorbox{Apricot}{$ \For v \in U_j \setminus S_{\alpha} \Do $} \\
+\qquad \qquad \qquad \colorbox{Apricot}{$ \For v \in Y \setminus S_{\alpha} \Do $} \\
 \qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \If (\alpha = 0 \land d(u) = \blacktriangledown) \lor (\alpha = 1 \land d(u) = \blacktriangle) \Then $} \\
-\qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \qquad \tau(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
+\qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \qquad \If v \in U_j \Then \tau_{\alpha}(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
+\qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \qquad \Else \tau_{\alpha}(v) := \tau(v) $} \\
 \qquad \qquad \qquad S_\alpha := S_\alpha \cup Y \\
 \qquad \qquad \qquad \textbf{break} \\
 \qquad \qquad \textbf{else }\\
 \qquad \qquad \qquad U_j := U_j \cap Y\\
-\Return \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1, 1)
+\Return \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1, 1), \tau_0,\tau_1
 \end{array}
 \end{equation*}
 
@@ -1216,7 +1155,7 @@ S_1:= \emptyset \\
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$
-S_0, S_1 := \textsc{PartialSolve}(V,todo,S_0,S_1) $} \text{(executed periodically)} \\
+S_0, S_1,\tau_0,\tau_1 := \textsc{PartialSolve}(V,todo,S_0,S_1) $} \text{(executed periodically)} \\
 V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
 \Return (V, E)
 \end{array}
@@ -1229,10 +1168,16 @@ where \textsc{PartialSolve} is defined as
 \{\textit{use the solver to compute an over and underapproaximation}\}\\
 S_0,S_1 := \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1,1) \\
 (W_0,W_1) := \textsc{SolveRecursive}(V \setminus (S_1 \cup \textsc{AttrDefault}(S_0 \cup todo,0)))\\
+
+\colorbox{Apricot}{$ \For v \in W_1 \setminus S_{1} \Do $} \\
+\colorbox{Apricot}{$ \qquad \If d(u) = \blacktriangle \Then \tau_{1}(v) := \tau(v) $} \\
 S_1 := \textsc{AttrDefault}(S_1 \cup W_1,1) \\
+
 (W_0,W_1) := \textsc{SolveRecursive}(V \setminus (S_0 \cup \textsc{AttrDefault}(S_1 \cup todo,1)))\\
+\colorbox{Apricot}{$ \For v \in W_0 \setminus S_{0} \Do $} \\
+\colorbox{Apricot}{$ \qquad \If d(u) = \blacktriangledown \Then \tau_{0}(v) := \tau(v) $} \\
 S_0 := \textsc{AttrDefault}(S_0 \cup W_0,0) \\
-\Return S_0, S_1
+\Return S_0, S_1, \tau_0,\tau_1
 \end{array}
 \end{equation*}
 

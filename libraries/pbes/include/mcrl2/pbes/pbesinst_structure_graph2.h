@@ -180,47 +180,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       return S0.contains(u) || S1.contains(u);
     }
 
-    bool successors_disjoint(const simple_structure_graph& G, const structure_graph::index_type u, const vertex_set& S) const
-    {
-      for (auto v: G.successors(u))
-      {
-        if (S.contains(v))
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    // returns true if u has a successor that is not contained in the union of S0, S1 and done
-    bool has_successor_not_in(const simple_structure_graph& G,
-                              const structure_graph::index_type u,
-                              const vertex_set& S0,
-                              const vertex_set& S1,
-                              const std::unordered_set<pbes_expression>& done
-                             ) const
-    {
-      using utilities::detail::contains;
-
-      for (auto v: G.successors(u))
-      {
-        if (S0.contains(v))
-        {
-          return false;
-        }
-        if (S1.contains(v))
-        {
-          return false;
-        }
-        const auto& v_ = m_graph_builder.vertex(v);
-        if (contains(done, v_.formula))
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-
     // Returns true if all nodes in the todo list are undefined (i.e. have not been processed yet)
     bool todo_has_only_undefined_nodes() const
     {
@@ -264,70 +223,27 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         auto u = m_graph_builder.find_vertex(X);
         const auto& u_ = m_graph_builder.vertex(u);
 
-        if (m_options.prune_todo_alternative && u_.strategy != structure_graph::undefined_vertex)
-        {
-          auto v = u_.strategy;
-          const auto& v_ = m_graph_builder.vertex(v);
-          if (!contains(done1, v_.formula))
-          {
-            todo1.insert(v_.formula);
-            continue;
-          }
-        }
-
-        if (u_.decoration == structure_graph::d_conjunction && successors_disjoint(G, u, S1))
-        {
-          // todo' := todo' \cup (succ(u) \setminus (S_0 \cup done'))
-          for (auto v: G.successors(u))
-          {
-            if (S0.contains(v))
-            {
-              continue;
-            }
-            const auto& v_ = m_graph_builder.vertex(v);
-            const auto& Y = v_.formula;
-            if (contains(done1, Y))
-            {
-              continue;
-            }
-            todo1.insert(Y);
-          }
-        }
-
-        if (u_.decoration == structure_graph::d_disjunction && successors_disjoint(G, u, S0))
-        {
-          // todo' := todo' \cup (succ(u) \setminus (S_1 \cup done'))
-          for (auto v: G.successors(u))
-          {
-            if (S1.contains(v))
-            {
-              continue;
-            }
-            const auto& v_ = m_graph_builder.vertex(v);
-            const auto& Y = v_.formula;
-            if (contains(done1, Y))
-            {
-              continue;
-            }
-            todo1.insert(Y);
-          }
-        }
-
-        if (u_.decoration == structure_graph::d_none && has_successor_not_in(G, u, S0, S1, done1))
-        {
-          // todo' := todo' \cup succ(u)
-          for (auto v: G.successors(u))
-          {
-            const auto& v_ = m_graph_builder.vertex(v);
-            const auto& Y = v_.formula;
-            todo1.insert(Y);
-          }
-        }
-
         if (u_.decoration == structure_graph::d_none && u_.successors.empty())
         {
           assert(is_propositional_variable_instantiation(u_.formula));
           new_todo.insert(atermpp::down_cast<propositional_variable_instantiation>(u_.formula));
+        }
+        else
+        {
+          if (!S0.contains(u) && !S1.contains(u))
+          {
+            // todo' := todo' \cup (succ(u) \ done')
+            for (auto v: G.successors(u))
+            {
+              const auto& v_ = m_graph_builder.vertex(v);
+              const auto& Y = v_.formula;
+              if (contains(done1, Y))
+              {
+                continue;
+              }
+              todo1.insert(Y);
+            }
+          }
         }
       }
 
@@ -481,10 +397,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       using  utilities::detail::contains;
 
       simple_structure_graph G(m_graph_builder.vertices());
-
-      // Needed to make sure that G is well defined
-      S0 = attr_default(G, S0, 0);
-      S1 = attr_default(G, S1, 1);
 
       structure_graph::index_type u = m_graph_builder.find_vertex(init);
       std::set<structure_graph::index_type> V = extract_minimal_structure_graph(G, u, S0, S1);
