@@ -111,6 +111,11 @@ public:
   #endif // MCRL2_PLATFORM_WINDOWS
   }
 
+  ~obitstream()
+  {
+    flush();
+  }
+
   /// \brief Write the nr_bits least significant bits from val to os
   void writeBits(std::size_t val, const std::size_t nr_bits)
   {
@@ -132,25 +137,6 @@ public:
       {
         stream.put((write_value >> (8*(i-1))) & 0xFF);
       }
-    }
-  }
-
-  /// \brief Flush the remaining bits in the buffer to os.
-  void flushBitsToWriter()
-  {
-    if (bits_in_buffer > 0)
-    {
-      unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
-      for(uint32_t i = 8; i > 7 - bits_in_buffer / 8; --i)
-      {
-        stream.put((write_value >> (8*(i-1))) & 0xFF);
-      }
-      if (stream.fail())
-      {
-        throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
-      }
-      read_write_buffer = std::bitset<128>(0);
-      bits_in_buffer = 0;
     }
   }
 
@@ -216,6 +202,27 @@ public:
   }
 
 private:
+
+  /// \brief Flush the remaining bits in the buffer to the output stream.
+  void flush()
+  {
+    if (bits_in_buffer > 0)
+    {
+      unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
+      for(uint32_t i = 8; i > 7 - bits_in_buffer / 8; --i)
+      {
+        stream.put((write_value >> (8*(i-1))) & 0xFF);
+      }
+      if (stream.fail())
+      {
+        throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
+      }
+
+      read_write_buffer = std::bitset<128>(0);
+      bits_in_buffer = 0;
+    }
+  }
+
   std::ostream& stream;
 
   /// \brief Buffer that is filled starting from bit 127 when reading or writing
