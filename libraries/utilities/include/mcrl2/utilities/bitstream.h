@@ -241,27 +241,22 @@ public:
   /// \returns A pointer to a character string, remains valid until the next readString call.
   const char* readString()
   {
-    std::size_t len;
+    std::size_t length;
 
     // Get length of string.
-    len = readInt();
+    length = readInt();
 
     // Assure buffer can hold the string.
-    if (text_buffer_size < (len+1))
+    if (m_text_buffer.size() <  (length + 1))
     {
-      text_buffer_size = 2*len;
-      text_buffer = (char*)realloc(text_buffer, text_buffer_size);
-      if (!text_buffer)
-      {
-        throw mcrl2::runtime_error("Out of memory while reading the input file. Fail to claim a block of memory of size "+ std::to_string(text_buffer_size) + ".");
-      }
+      m_text_buffer.resize(2 * m_text_buffer.size());
     }
 
     // Read the actual string.
-    stream.read(text_buffer, len);
-    text_buffer[len] = '\0';
+    stream.read(m_text_buffer.data(), length);
+    m_text_buffer[length] = '\0';
 
-    return text_buffer;
+    return m_text_buffer.data();
   }
 
   /// @brief readBits Reads an n-bit integer from the input stream.
@@ -369,8 +364,7 @@ private:
 
   std::size_t  bits_in_buffer = 0; ///< how many bits in bit_buffer are used.
 
-  char* text_buffer = nullptr;
-  std::size_t text_buffer_size = 0;
+  std::vector<char> m_text_buffer;
 
 };
 
