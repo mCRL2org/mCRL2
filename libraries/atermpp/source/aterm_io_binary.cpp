@@ -363,8 +363,6 @@ static void write_term(mcrl2::utilities::obitstream& stream, const aterm& t,
     stack.pop();
   }
   while (!stack.empty());
-
-  stream.flushBitsToWriter();
 }
 
 
