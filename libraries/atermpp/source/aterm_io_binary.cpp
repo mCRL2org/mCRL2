@@ -20,78 +20,24 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_io_implementation.h"
 
-#include "mcrl2/utilities/block_allocator.h"
+#include "mcrl2/utilities/bitstream.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/platform.h"
 #include "mcrl2/utilities/unordered_map.h"
-#include "mcrl2/utilities/unused.h"
 
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
 #include <cassert>
-#include <stdexcept>
-#include <bitset>
-
-#ifdef MCRL2_PLATFORM_WINDOWS
-#include <io.h>
-#include <fcntl.h>
-#endif
-
-/* Integers in BAF are always exactly 32 or 64 bits.  The size must be fixed so that
- *  *  * BAF terms can be exchanged between platforms. */
-static const std::size_t INT_SIZE_IN_BAF = 64;
 
 
 namespace atermpp
 {
+using namespace mcrl2::utilities;
 
-using detail::readInt;
-using detail::writeInt;
-
-using namespace std;
-
-static void aterm_io_init(std::ios& stream)
-{
-  mcrl2::utilities::mcrl2_unused(stream);
-
-#ifdef MCRL2_PLATFORM_WINDOWS
-  std::string name;
-  FILE* handle;
-  if (stream.rdbuf() == std::cin.rdbuf())
-  {
-    name = "cin";
-    handle = stdin;
-  }
-  else
-  if (stream.rdbuf() == std::cout.rdbuf())
-  {
-    name = "cout";
-    handle = stdout;
-    fflush(stdout);
-  }
-  else
-  if (stream.rdbuf() == std::cerr.rdbuf())
-  {
-    name = "cerr";
-    handle = stderr;
-    fflush(stderr);
-  }
-  if (!name.empty())
-  {
-    if (_setmode(_fileno(handle), _O_BINARY) == -1)
-    {
-      mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
-    }
-    else
-    {
-      mCRL2log(mcrl2::log::debug) << "Converted " << name << " to binary mode.\n";
-    }
-  }
-#endif // MCRL2_PLATFORM_WINDOWS
-}
+/* Integers in BAF are always exactly 32 or 64 bits.  The size must be fixed so that
+ *  *  * BAF terms can be exchanged between platforms. */
+// If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
+static const std::size_t INT_SIZE_IN_BAF = 64;
 
 static const std::size_t BAF_MAGIC = 0xbaf;
 
@@ -173,7 +119,7 @@ class sym_read_entry
     function_symbol sym;
     std::size_t term_width;
     std::vector<aterm> terms;
-    std::vector<vector<std::size_t> > topsyms;
+    std::vector<std::vector<std::size_t>> topsyms;
     std::vector<std::size_t> sym_width;
 
     sym_read_entry():
@@ -182,157 +128,13 @@ class sym_read_entry
     }
 };
 
-static char* text_buffer = nullptr;
-static std::size_t text_buffer_size = 0;
-
-static std::size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
-/**
- * \brief Buffer that is filled starting from bit 127 when reading or writing
- */
-static std::bitset<128> read_write_buffer(0);
-
-/**
- * \brief Reverse the order of bits in val.
- * \details In BAF version 0x0304 the bits are written in reverse order. When bumping
- * the version number, one should also consider to remove this reversal.
- */
-static void reverse_bit_order(std::size_t& val)
-{
-  if(std::numeric_limits<std::size_t>::digits == 64)
-  {
-    val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
-  }
-  val = ((val << 16) & 0xFFFF0000FFFF0000) | ((val >> 16) & 0x0000FFFF0000FFFF);
-  val = ((val << 8)  & 0xFF00FF00FF00FF00) | ((val >> 8)  & 0x00FF00FF00FF00FF);
-  val = ((val << 4)  & 0xF0F0F0F0F0F0F0F0) | ((val >> 4)  & 0x0F0F0F0F0F0F0F0F);
-  val = ((val << 2)  & 0xCCCCCCCCCCCCCCCC) | ((val >> 2)  & 0x3333333333333333);
-  val = ((val << 1)  & 0xAAAAAAAAAAAAAAAA) | ((val >> 1)  & 0x5555555555555555);
-}
-
-/**
- * \brief Write the nr_bits least significant bits from val to os
- */
-static void writeBits(std::size_t val, const std::size_t nr_bits, ostream& os)
-{
-  if(nr_bits == 0)
-  {
-    return;
-  }
-  reverse_bit_order(val);
-  // Add val to the buffer
-  read_write_buffer |= std::bitset<128>(val) << (128 - std::numeric_limits<std::size_t>::digits - bits_in_buffer);
-  bits_in_buffer += nr_bits;
-  // Write 8 bytes if available
-  if(bits_in_buffer >= 64)
-  {
-    unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
-    read_write_buffer <<= 64;
-    bits_in_buffer -= 64;
-    for(uint32_t i = 8; i > 0; --i)
-    {
-      os.put((write_value >> (8*(i-1))) & 0xFF);
-    }
-  }
-}
-
-/**
- * \brief Flush the remaining bits in the buffer to os.
- */
-static void flushBitsToWriter(ostream& os)
-{
-  if (bits_in_buffer > 0)
-  {
-    unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
-    for(uint32_t i = 8; i > 7 - bits_in_buffer / 8; --i)
-    {
-      os.put((write_value >> (8*(i-1))) & 0xFF);
-    }
-    if (os.fail())
-    {
-      throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
-    }
-    read_write_buffer = std::bitset<128>(0);
-    bits_in_buffer = 0;
-  }
-}
-
-/**
- * @brief readBits Reads an n-bit integer from the input stream.
- * @param val      Variable to store integer in.
- * @param nr_bits  Number of bits to read from the input stream.
- * @param is       The input stream.
- * @return true on success, false on failure (EOF).
- */
-static
-bool readBits(std::size_t& val, const unsigned int nr_bits, istream& is)
-{
-  val = 0;
-  if(nr_bits == 0)
-  {
-    return true;
-  }
-  while(bits_in_buffer < nr_bits)
-  {
-    // Read bytes until the buffer is sufficiently full
-    int byte = is.get();
-    if(is.fail())
-    {
-      return false;
-    }
-    read_write_buffer |= std::bitset<128>(byte) << (56 + 64 - bits_in_buffer);
-    bits_in_buffer += 8;
-  }
-  val = (read_write_buffer >> (128 - std::numeric_limits<std::size_t>::digits)).to_ullong() &
-      (std::numeric_limits<std::size_t>::max() <<
-         (std::numeric_limits<std::size_t>::digits - std::min(nr_bits, static_cast<unsigned int>(std::numeric_limits<std::size_t>::digits))));
-  bits_in_buffer -= nr_bits;
-  read_write_buffer <<= nr_bits;
-  reverse_bit_order(val);
-  return true;
-}
-
-static void writeString(const std::string& str, ostream& os)
-{
-  /* Write length. */
-  writeInt(str.size(), os);
-
-  /* Write actual string. */
-  os.write(str.c_str(), str.size());
-}
-
-
-static std::size_t readString(istream& is)
-{
-  std::size_t len;
-
-  /* Get length of string */
-  len = readInt(is);
-
-  /* Assure buffer can hold the string */
-  if (text_buffer_size < (len+1))
-  {
-    text_buffer_size = 2*len;
-    text_buffer = (char*) realloc(text_buffer, text_buffer_size);
-    if (!text_buffer)
-    {
-      throw mcrl2::runtime_error("Out of memory while reading the input file. Fail to claim a block of memory of size "+ std::to_string(text_buffer_size) + ".");
-    }
-  }
-
-  /* Read the actual string */
-  is.read(text_buffer, len);
-
-  /* Ok, return length of string */
-  return len;
-}
-
 /**
  * Write a symbol to file.
  */
-static void write_symbol(const function_symbol& sym, ostream& os)
+static void write_symbol(obitstream& stream, const function_symbol& sym)
 {
-  writeString(sym.name(), os);
-  writeInt(sym.arity(), os);
+  stream.writeString(sym.name());
+  stream.writeInt(sym.arity());
 }
 
 /**
@@ -350,33 +152,11 @@ static const function_symbol& get_function_symbol(const aterm& t)
  * of a term. Could be a special symbol (AS_INT, etc) when the term is not an application.
  * \details sym_entries[result].id == t.function()
  */
-static std::size_t get_fn_symbol_index(const aterm& t, const mcrl2::utilities::indexed_set<function_symbol>& index)
+static std::size_t get_fn_symbol_index(const aterm& t, const mcrl2::utilities::indexed_set_large<function_symbol>& index)
 {
   const function_symbol& sym = get_function_symbol(t);
-  std::size_t result = index.index(sym);
+  std::size_t result = index.at(sym);
   return result;
-}
-
-/**
- * How many bits are needed to represent val?
- * Basically, this function is equal to log2(val), except that it maps 0 to 0
- */
-static std::size_t bit_width(std::size_t val)
-{
-  std::size_t nr_bits = 0;
-
-  if (val <= 1)
-  {
-    return 0;
-  }
-
-  while (val)
-  {
-    val>>=1;
-    nr_bits++;
-  }
-
-  return nr_bits;
 }
 
 /**
@@ -402,7 +182,7 @@ static const aterm& subterm(const aterm& t, std::size_t i)
  * \brief Add a term to the global term table. Update the symbol tables.
  */
 static void add_term(sym_write_entry& entry, const aterm& term,
-  const mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
+  const mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
   mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -424,10 +204,10 @@ static void add_term(sym_write_entry& entry, const aterm& term,
       std::size_t top_symbol_index = get_fn_symbol_index(arg, symbol_index_map);
       const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
 
-      const std::pair<std::size_t,bool> put_result = tss.index_into_symbols.insert(top_symbol);
+      auto put_result = tss.index_into_symbols.insert(top_symbol);
       if (put_result.second)
       {
-        tss.symbols.emplace_back(top_symbol_index, put_result.first);
+        tss.symbols.emplace_back(top_symbol_index, (*put_result.first).second);
       }
     }
   }
@@ -450,23 +230,23 @@ struct write_todo
  * \return The sym_write_entry belonging to func.
  */
 static sym_write_entry& initialize_function_symbol(const function_symbol& func,
-  mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
+  mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
-  const std::pair<std::size_t,bool> insert_result = symbol_index_map.insert(func);
+  auto insert_result = symbol_index_map.insert(func);
   if(insert_result.second)
   {
     // We just found a new function symbol, it has 1 occurrence so far
     sym_entries.emplace_back(func);
   }
-  return sym_entries[insert_result.first];
+  return sym_entries[(*insert_result.first).second];
 }
 
 /**
  * \brief Collect all terms in the term tables of each symbol
  */
 static void collect_terms(const aterm& t,
-  mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
+  mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
   mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -518,21 +298,21 @@ static void compute_num_bits(std::vector<sym_write_entry>& sym_entries)
 /**
  * Write all symbols in a term to file.
  */
-static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& sym_entries)
+static void write_all_symbols(mcrl2::utilities::obitstream& stream, const std::vector<sym_write_entry>& sym_entries)
 {
   for(const sym_write_entry& cur_sym: sym_entries)
   {
-    write_symbol(cur_sym.id, os);
-    writeInt(cur_sym.num_terms, os);
+    write_symbol(stream, cur_sym.id);
+    stream.writeInt(cur_sym.num_terms);
 
     for (std::size_t arg_idx=0; arg_idx<cur_sym.id.arity(); arg_idx++)
     {
       std::size_t nr_symbols = cur_sym.top_symbols[arg_idx].symbols.size();
-      writeInt(nr_symbols, os);
+      stream.writeInt(nr_symbols);
       for (std::size_t top_idx=0; top_idx<nr_symbols; top_idx++)
       {
         const top_symbol& ts = cur_sym.top_symbols[arg_idx].symbols[top_idx];
-        writeInt(ts.index, os);
+        stream.writeInt(ts.index);
       }
     }
   }
@@ -541,8 +321,8 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
 /**
  * \brief Write the term t to os in BAF
  */
-static void write_term(const aterm& t, ostream& os,
-  const mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
+static void write_term(mcrl2::utilities::obitstream& stream, const aterm& t,
+  const mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
   const mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -552,24 +332,23 @@ static void write_term(const aterm& t, ostream& os,
   do
   {
     write_todo& current = stack.top();
-    sym_write_entry& cur_entry = sym_entries[symbol_index_map.index(get_function_symbol(current.term))];
+    sym_write_entry& cur_entry = sym_entries[symbol_index_map.at(get_function_symbol(current.term))];
 
     if (current.term.type_is_int())
     {
-      // If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
-      writeBits(atermpp::down_cast<aterm_int>(current.term).value(), INT_SIZE_IN_BAF, os);
+      stream.writeBits(atermpp::down_cast<aterm_int>(current.term).value(), INT_SIZE_IN_BAF);
     }
     else if (current.arg < get_function_symbol(current.term).arity())
     {
       write_todo item(subterm(current.term, current.arg));
-      sym_write_entry& item_entry = sym_entries[symbol_index_map.index(get_function_symbol(item.term))];
+      sym_write_entry& item_entry = sym_entries[symbol_index_map.at(get_function_symbol(item.term))];
 
       const top_symbols_t& symbol_table = cur_entry.top_symbols.at(current.arg);
-      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.index(item_entry.id));
-      writeBits(ts.code, symbol_table.code_width, os);
+      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item_entry.id));
+      stream.writeBits(ts.code, symbol_table.code_width);
       const sym_write_entry& arg_sym = sym_entries.at(ts.index);
       std::size_t arg_trm_idx = term_index_map.at(item.term);
-      writeBits(arg_trm_idx, arg_sym.term_width, os);
+      stream.writeBits(arg_trm_idx, arg_sym.term_width);
 
       ++current.arg;
 
@@ -584,17 +363,14 @@ static void write_term(const aterm& t, ostream& os,
     stack.pop();
   }
   while (!stack.empty());
-  flushBitsToWriter(os);
+
+  stream.flushBitsToWriter();
 }
 
 
-static void write_baf(const aterm& t, ostream& os)
+static void write_baf(mcrl2::utilities::obitstream& stream, const aterm& t)
 {
-  /* Initialize bit buffer */
-  read_write_buffer = std::bitset<128>(0);
-  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
-
-  mcrl2::utilities::indexed_set<function_symbol> symbol_index_map;
+  mcrl2::utilities::indexed_set_large<function_symbol> symbol_index_map;
   mcrl2::utilities::unordered_map_large<aterm, std::size_t> term_index_map;
   std::vector<sym_write_entry> sym_entries;
 
@@ -602,56 +378,49 @@ static void write_baf(const aterm& t, ostream& os)
   compute_num_bits(sym_entries);
 
   /* write header */
-  writeInt(0, os);
-  writeInt(BAF_MAGIC, os);
-  writeInt(BAF_VERSION, os);
-  writeInt(sym_entries.size(), os);
-  write_all_symbols(os, sym_entries);
+  stream.writeInt(0);
+  stream.writeInt(BAF_MAGIC);
+  stream.writeInt(BAF_VERSION);
+  stream.writeInt(sym_entries.size());
+  write_all_symbols(stream, sym_entries);
 
   /* Write the top symbol */
-  writeInt(get_fn_symbol_index(t,symbol_index_map), os);
+  stream.writeInt(get_fn_symbol_index(t,symbol_index_map));
 
-  write_term(t, os, symbol_index_map, term_index_map, sym_entries);
+  write_term(stream, t, symbol_index_map, term_index_map, sym_entries);
 }
 
 void write_term_to_binary_stream(const aterm& t, std::ostream& os)
 {
-  aterm_io_init(os);
-  write_baf(t, os);
+  mcrl2::utilities::obitstream stream(os);
+  write_baf(stream, t);
 }
 
-/**
-  * Read a single symbol from file.
-  */
-
-static function_symbol read_symbol(istream& is)
+/// \brief Read a single function symbol from a stream <string, arity>.
+static function_symbol read_symbol(ibitstream& stream)
 {
-  std::size_t len=readString(is);
+  std::string name = stream.readString();
+  std::size_t arity = stream.readInt();
 
-  text_buffer[len] = '\0';
-
-  std::size_t arity = readInt(is);
-
-  return function_symbol(text_buffer, arity);
+  return function_symbol(name, arity);
 }
 
 /**
  * Read all symbols from file.
  */
 
-static void read_all_symbols(istream& is, std::size_t nr_unique_symbols, std::vector<sym_read_entry>& read_symbols)
+static void read_all_symbols(mcrl2::utilities::ibitstream& stream, std::size_t nr_unique_symbols, std::vector<sym_read_entry>& read_symbols)
 {
   std::size_t val;
 
   for (std::size_t i=0; i<nr_unique_symbols; i++)
   {
-    /* Read the actual symbol */
-
-    function_symbol sym = read_symbol(is);
+    // Read the actual symbol.
+    function_symbol sym = read_symbol(stream);
     read_symbols[i].sym = sym;
 
-    /* Read term count and allocate space */
-    val = readInt(is);
+    // Read term count and allocate space.
+    val = stream.readInt();
     if (val == 0)
     {
       throw mcrl2::runtime_error("Read file: internal file error: failed to read all function symbols.");
@@ -661,17 +430,17 @@ static void read_all_symbols(istream& is, std::size_t nr_unique_symbols, std::ve
 
     /*  Allocate space for topsymbol information */
     read_symbols[i].sym_width = std::vector<std::size_t>(sym.arity());
-    read_symbols[i].topsyms = std::vector< vector <std::size_t> > (sym.arity());
+    read_symbols[i].topsyms = std::vector<std::vector<std::size_t>> (sym.arity());
 
     for (std::size_t j=0; j<sym.arity(); j++)
     {
-      val = readInt(is);
+      val = stream.readInt();
       read_symbols[i].sym_width[j] = bit_width(val);
       read_symbols[i].topsyms[j] = std::vector<std::size_t>(val);
 
       for (std::size_t k=0; k<read_symbols[i].topsyms[j].size(); k++)
       {
-        read_symbols[i].topsyms[j][k] = readInt(is);
+        read_symbols[i].topsyms[j][k] = stream.readInt();
       }
     }
   }
@@ -693,7 +462,7 @@ struct read_todo
   }
 };
 
-static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_entry>& read_symbols)
+static aterm read_term(mcrl2::utilities::ibitstream& stream, sym_read_entry* sym,  std::vector<sym_read_entry>& read_symbols)
 {
   aterm result;
   std::size_t value;
@@ -709,14 +478,15 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
       current.args.push_back(*current.callresult);
       current.callresult = nullptr;
     }
+
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
     if (current.sym->sym != detail::g_term_pool().as_int() && current.args.size() < current.sym->sym.arity())
     {
-      if (readBits(value, current.sym->sym_width[current.args.size()], is) &&
+      if (stream.readBits(value, current.sym->sym_width[current.args.size()]) &&
           value < current.sym->topsyms[current.args.size()].size())
       {
         sym_read_entry* arg_sym = &read_symbols[current.sym->topsyms[current.args.size()][value]];
-        if (readBits(value, arg_sym->term_width, is) &&
+        if (stream.readBits(value, arg_sym->term_width) &&
             value < arg_sym->terms.size())
         {
           current.callresult = &arg_sym->terms[value];
@@ -732,7 +502,7 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
 
     if (current.sym->sym == detail::g_term_pool().as_int())
     {
-      if (readBits(value, INT_SIZE_IN_BAF, is))
+      if (stream.readBits(value, INT_SIZE_IN_BAF))
       {
         *current.result = aterm_int(value);
       }
@@ -763,47 +533,44 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
  */
 
 static
-aterm read_baf(istream& is)
+aterm read_baf(mcrl2::utilities::ibitstream& stream)
 {
-  // Initialize bit buffer
-  read_write_buffer = std::bitset<128>(0);
-  bits_in_buffer = 0; // how many bits in bit_buffer are used
-
   // Read header
-  std::size_t val = readInt(is);
+  std::size_t val = stream.readInt();
   if (val == 0)
   {
-    val = readInt(is);
+    val = stream.readInt();
   }
   if (val != BAF_MAGIC)
   {
     throw mcrl2::runtime_error("Error while reading file: The file is not correct as it does not have the BAF_MAGIC control sequence at the right place.");
   }
 
-  std::size_t version = readInt(is);
+  std::size_t version = stream.readInt();
   if (version != BAF_VERSION)
   {
     throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) +
                                ") of this tool. The input file must be regenerated. ");
   }
 
-  std::size_t nr_unique_symbols = readInt(is);
+  std::size_t nr_unique_symbols = stream.readInt();
 
   // Allocate symbol space
   std::vector<sym_read_entry> read_symbols(nr_unique_symbols);
 
-  read_all_symbols(is, nr_unique_symbols, read_symbols);
+  read_all_symbols(stream, nr_unique_symbols, read_symbols);
 
-  val = readInt(is);
-  aterm result=read_term(&read_symbols[val], is, read_symbols);
+  val = stream.readInt();
+  aterm result = read_term(stream, &read_symbols[val], read_symbols);
   return result;
 }
 
 
-aterm read_term_from_binary_stream(istream& is)
+aterm read_term_from_binary_stream(std::istream& is)
 {
-  aterm_io_init(is);
-  aterm result=read_baf(is);
+  mcrl2::utilities::ibitstream stream(is);
+
+  aterm result = read_baf(stream);
   if (!result.defined())
   {
     throw mcrl2::runtime_error("Failed to read a term from the input. The file is not a proper binary file.");
