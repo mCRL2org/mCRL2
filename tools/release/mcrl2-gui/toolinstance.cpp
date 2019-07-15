@@ -85,6 +85,11 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     m_ui.pckFileIn->setVisible(false);
   }
 
+  if (m_info.guiTool)
+  {
+    m_ui.btnRun->setText("Open");
+  }
+
   QFormLayout *formLayout = new QFormLayout();
   formLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
   for (int i = 0; i < m_info.options.count(); i++)
@@ -269,39 +274,26 @@ QString ToolInstance::executable()
   return m_info.path;
 }
 
-QString ToolInstance::arguments()
+QStringList ToolInstance::arguments()
 {
   QFileInfo info(m_filename);
-  QString result = info.fileName();
-
-  if (result.contains(" "))
-  {
-    result = QString("\"%1\"").arg(result);
-  }
+  QStringList result(info.fileName());
 
   if (m_pckFileOut)
   {
     QString fileOut = m_pckFileOut->text();
-    if (fileOut.contains(" "))
-    {
-      fileOut = QString("\"%1\"").arg(fileOut);
-    }
     if (!fileOut.isEmpty())
     {
-      result.append(" ").append(fileOut);
+      result.append(fileOut);
     }
   }
 
   if (m_pckFileIn)
   {
     QString fileIn = m_pckFileIn->text();
-    if (fileIn.contains(" "))
-    {
-      fileIn = QString("\"%1\"").arg(fileIn);
-    }
     if (!fileIn.isEmpty())
     {
-      result.append(" ").append(fileIn);
+      result.append(fileIn);
     }
   }
 
@@ -310,7 +302,7 @@ QString ToolInstance::arguments()
     OptionValue& val =  *m_optionValues[i];
     if (!val.value().isEmpty())
     {
-      result.append(" ").append(val.value());
+      result.append(val.value());
     }
   }
 
@@ -405,22 +397,32 @@ void ToolInstance::onRun()
     scrollbar->setValue(oldValue);
   }
 
-  QString exec = executable();
-  if (exec.contains(" "))
+  // Start gui-based tools detached from the main executable
+  bool success = false;
+  if (m_info.guiTool)
   {
-    exec = QString("\"%1\"").arg(exec);
-  }
-  exec.append(" ").append(arguments());
-
-  m_process.start(exec, QIODevice::ReadOnly);
-  if (m_process.waitForStarted(1000))
-  {
-    mCRL2log(mcrl2::log::info) << "Started " << exec.toStdString() << std::endl;
-    m_ui.tabWidget->setCurrentIndex(1);
+    success = m_process.startDetached(executable(), arguments(),
+      m_process.workingDirectory());
   }
   else
   {
-    mCRL2log(mcrl2::log::error) << m_process.errorString().toStdString() << " (" << exec.toStdString() << ")" << std::endl;
+    m_process.start(executable(), arguments(), QIODevice::ReadOnly);
+    success = m_process.waitForStarted(1000);
+  }
+
+  if (success)
+  {
+    mCRL2log(mcrl2::log::info) << "Started " << executable().toStdString() << std::endl;
+    if (!m_info.guiTool)
+    {
+      // Switch to logging tab for non-gui tools only, since gui-based tools do not log.
+      m_ui.tabWidget->setCurrentIndex(1);
+    }
+  }
+  else
+  {
+    mCRL2log(mcrl2::log::error) << m_process.errorString().toStdString()
+      << " (" << executable().toStdString() << ")" << std::endl;
     onStateChange(QProcess::NotRunning);
   }
 }

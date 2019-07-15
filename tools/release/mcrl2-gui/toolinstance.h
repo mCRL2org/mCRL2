@@ -29,7 +29,7 @@ class ToolInstance : public QWidget
 
     ToolInformation information() { return m_info; }
     QString executable();
-    QString arguments();
+    QStringList arguments();
 
   public slots:
     void onStateChange(QProcess::ProcessState state);
