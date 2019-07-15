@@ -1993,8 +1993,8 @@ class part_trans_t
       : succ(num_transitions + 2),
         block_bunch(num_transitions + 1),
         pred(num_transitions + 2),
-        action_block_begin(0 == num_transitions + num_actions - 1 ? nullptr
-                  : new action_block_entry[num_transitions + num_actions - 1]),
+        action_block_begin(
+                    new action_block_entry[num_transitions + num_actions - 1]),
         action_block_end(action_block_begin + (num_transitions+num_actions-1)),
         block_bunch_inert_begin(1 + &block_bunch.back()),
         action_block_inert_begin(action_block_end),
@@ -3771,11 +3771,15 @@ class bisim_partitioner_dnj
         while (++state_iter <= &part_st.state_info.back());
 
         if (nullptr != bunch)
-        {                                                                       assert(nullptr != bunch->begin->succ);
+        {
+            while (nullptr == bunch->begin->succ)
+            {                                                                   assert(nullptr == bunch->begin->begin_or_before_end);
+                ++bunch->begin;                                                 assert(bunch->begin < bunch->end);
+            }                                                                   assert(nullptr != bunch->begin->begin_or_before_end);
             while (nullptr == bunch->end[-1].succ)
-            {
+            {                                                                   assert(nullptr == bunch->end[-1].begin_or_before_end);
                 --bunch->end;                                                   assert(bunch->begin < bunch->end);
-            }                                                                   assert(nullptr != bunch->end[-1].succ);
+            }                                                                   assert(nullptr != bunch->end[-1].begin_or_before_end);
         }
         /* Line 1.2: B_vis := { s in S | there exists a visible transition   */ mCRL2complexity(B, add_work(bisim_gjkw::check_complexity::
         /*                               that is reachable from s }          */                                          create_initial_partition, 1U), *this);
