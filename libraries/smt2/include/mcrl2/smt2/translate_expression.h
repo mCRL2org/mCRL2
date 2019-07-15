@@ -28,6 +28,22 @@ void translate_data_expression(const T& x, OutputStream& o, const native_transla
 namespace detail
 {
 
+inline
+std::string translate_symbol_disambiguate(const data::function_symbol& f, const native_translations& nt)
+{
+  std::string f_pp(translate_symbol(f, nt));
+  if(nt.is_ambiguous(f))
+  {
+    std::ostringstream o;
+    translate_sort_expression(f.sort().target_sort(), o, nt);
+    return "(as " + f_pp + " " + o.str() + ")";
+  }
+  else
+  {
+    return f_pp;
+  }
+}
+
 template <template <class> class Traverser, class OutputStream>
 struct translate_data_expression_traverser: public Traverser<translate_data_expression_traverser<Traverser, OutputStream> >
 {
@@ -88,7 +104,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
 
   void apply(const data::function_symbol& v)
   {
-    out << translate_symbol(v, m_native) << " ";
+    out << translate_symbol_disambiguate(v, m_native) << " ";
   }
 
   void apply(const data::variable& v)
