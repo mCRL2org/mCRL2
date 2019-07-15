@@ -131,7 +131,7 @@ obitstream::obitstream(std::ostream& stream)
   }
 }
 
-void obitstream::writeBits(std::size_t val, const std::size_t nr_bits)
+void obitstream::write_bits(std::size_t val, const std::size_t nr_bits)
 {
   if(nr_bits == 0)
   {
@@ -154,16 +154,16 @@ void obitstream::writeBits(std::size_t val, const std::size_t nr_bits)
   }
 }
 
-void obitstream::writeString(const std::string& string)
+void obitstream::write_string(const std::string& string)
 {
   // Write length.
-  writeInt(string.size());
+  write_integer(string.size());
 
   // Write actual string.
   stream.write(string.c_str(), string.size());
 }
 
-void obitstream::writeInt(const std::size_t val)
+void obitstream::write_integer(const std::size_t val)
 {
   std::size_t nr_items = encode_variablesize_int(val, integer_buffer);
   stream.write(reinterpret_cast<char*>(integer_buffer), static_cast<std::streamsize>(nr_items));
@@ -178,12 +178,12 @@ ibitstream::ibitstream(std::istream& stream)
   }
 }
 
-const char* ibitstream::readString()
+const char* ibitstream::read_string()
 {
   std::size_t length;
 
   // Get length of string.
-  length = readInt();
+  length = read_integer();
 
   // Assure buffer can hold the string.
   if (m_text_buffer.size() < (length + 1))
@@ -198,7 +198,7 @@ const char* ibitstream::readString()
   return m_text_buffer.data();
 }
 
-bool ibitstream::readBits(std::size_t& val, const unsigned int nr_bits)
+bool ibitstream::read_bits(std::size_t& val, const unsigned int nr_bits)
 {
   val = 0;
   if(nr_bits == 0)
@@ -225,7 +225,7 @@ bool ibitstream::readBits(std::size_t& val, const unsigned int nr_bits)
   return true;
 }
 
-std::size_t ibitstream::readInt()
+std::size_t ibitstream::read_integer()
 {
   return decode_variablesize_int(stream);
 }

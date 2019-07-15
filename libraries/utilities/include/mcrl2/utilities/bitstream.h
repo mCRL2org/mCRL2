@@ -53,15 +53,17 @@ public:
   obitstream(std::ostream& stream);
   ~obitstream() { flush(); }
 
-  /// \brief Write the nr_bits least significant bits from val to os
-  void writeBits(std::size_t val, const std::size_t nr_bits);
+  /// \brief Write the nr_bits least significant bits from val to this stream.
+  /// @param val      Variable that contains the bits.
+  /// @param nr_bits  Number of bits to write to the output stream.
+  void write_bits(std::size_t val, const std::size_t nr_bits);
 
   /// \brief Write the given string to the output stream.
   /// \details Encoded in bits using <length, string>
-  void writeString(const std::string& string);
+  void write_string(const std::string& string);
 
   /// \brief Write the given value to the output stream using most significant bit encoding.
-  void writeInt(std::size_t val);
+  void write_integer(std::size_t val);
 
 private:
   /// \brief Flush the remaining bits in the buffer to the output stream.
@@ -82,18 +84,17 @@ class ibitstream
 public:
   ibitstream(std::istream& stream);
 
-  /// \returns A pointer to a character string, remains valid until the next readString call.
-  const char* readString();
-
-  /// @brief readBits Reads an n-bit integer from the input stream.
+  /// @brief Reads an n-bit integer from the input stream.
   /// @param val      Variable to store integer in.
   /// @param nr_bits  Number of bits to read from the input stream.
-  /// @param is       The input stream.
   /// @return true on success, false on failure (EOF).
-  bool readBits(std::size_t& val, const unsigned int nr_bits);
+  bool read_bits(std::size_t& val, const unsigned int nr_bits);
+
+  /// \returns A pointer to a character string, remains valid until the next readString call.
+  const char* read_string();
 
   /// \returns A natural number that was read from the binary stream encoded using most significant bit encoding.
-  std::size_t readInt();
+  std::size_t read_integer();
 
 private:
   std::istream& stream;
