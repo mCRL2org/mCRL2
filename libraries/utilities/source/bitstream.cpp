@@ -23,22 +23,6 @@
 
 using namespace mcrl2::utilities;
 
-/// \brief Reverse the order of bits in val.
-/// \details In BAF version 0x0304 the bits are written in reverse order. When bumping
-/// the version number, one should also consider to remove this reversal.
-static void reverse_bit_order(std::size_t& val)
-{
-  if(std::numeric_limits<std::size_t>::digits == 64)
-  {
-    val = ((val << 32) & 0xFFFFFFFF00000000) | ((val >> 32) & 0x00000000FFFFFFFF);
-  }
-  val = ((val << 16) & 0xFFFF0000FFFF0000) | ((val >> 16) & 0x0000FFFF0000FFFF);
-  val = ((val << 8)  & 0xFF00FF00FF00FF00) | ((val >> 8)  & 0x00FF00FF00FF00FF);
-  val = ((val << 4)  & 0xF0F0F0F0F0F0F0F0) | ((val >> 4)  & 0x0F0F0F0F0F0F0F0F);
-  val = ((val << 2)  & 0xCCCCCCCCCCCCCCCC) | ((val >> 2)  & 0x3333333333333333);
-  val = ((val << 1)  & 0xAAAAAAAAAAAAAAAA) | ((val >> 1)  & 0x5555555555555555);
-}
-
 /// \brief Encodes an unsigned variable-length integer using the most significant bit (MSB) algorithm.
 ///        This function assumes that the value is stored as little endian.
 /// \param value The input value. Any standard integer type is allowed.
@@ -133,23 +117,21 @@ obitstream::obitstream(std::ostream& stream)
 
 void obitstream::write_bits(std::size_t val, const std::size_t nr_bits)
 {
-  if(nr_bits == 0)
-  {
-    return;
-  }
-  reverse_bit_order(val);
-  // Add val to the buffer
-  read_write_buffer |= std::bitset<128>(val) << (128 - std::numeric_limits<std::size_t>::digits - bits_in_buffer);
+  // Add val to the buffer by masking out additional bits and put them at left-most position free in the buffer.
+  read_write_buffer |= std::bitset<128>(val & ((static_cast<std::size_t>(1) << nr_bits) - 1)) << ((128 - bits_in_buffer) - nr_bits);
   bits_in_buffer += nr_bits;
+
   // Write 8 bytes if available
   if(bits_in_buffer >= 64)
   {
     unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
     read_write_buffer <<= 64;
     bits_in_buffer -= 64;
-    for(uint32_t i = 8; i > 0; --i)
+
+    for(int32_t i = 7; i >= 0; --i)
     {
-      stream.put((write_value >> (8*(i-1))) & 0xFF);
+      // Write the 8 * i most significant bits and mask out the other values.
+      stream.put(static_cast<char>((write_value >> (8 * i)) & 255));
     }
   }
 }
@@ -160,7 +142,7 @@ void obitstream::write_string(const std::string& string)
   write_integer(string.size());
 
   // Write actual string.
-  stream.write(string.c_str(), string.size());
+  stream.write(string.c_str(), static_cast<std::streamsize>(string.size()));
 }
 
 void obitstream::write_integer(const std::size_t val)
@@ -200,28 +182,33 @@ const char* ibitstream::read_string()
 
 bool ibitstream::read_bits(std::size_t& val, const unsigned int nr_bits)
 {
+  // Read at most the number of bits of a std::size_t.
+  assert(nr_bits <= static_cast<unsigned int>(std::numeric_limits<std::size_t>::digits));
+
   val = 0;
-  if(nr_bits == 0)
-  {
-    return true;
-  }
+
   while(bits_in_buffer < nr_bits)
   {
-    // Read bytes until the buffer is sufficiently full
+    // Read bytes until the buffer is sufficiently full.
     int byte = stream.get();
+
     if(stream.fail())
     {
       return false;
     }
+
+    // Shift the 8 bits to the first free (120 - bits_in_buffer) position in the buffer.
     read_write_buffer |= std::bitset<128>(byte) << (56 + 64 - bits_in_buffer);
     bits_in_buffer += 8;
   }
-  val = (read_write_buffer >> (128 - std::numeric_limits<std::size_t>::digits)).to_ullong() &
-      (std::numeric_limits<std::size_t>::max() <<
-         (std::numeric_limits<std::size_t>::digits - std::min(nr_bits, static_cast<unsigned int>(std::numeric_limits<std::size_t>::digits))));
-  bits_in_buffer -= nr_bits;
+
+  // Read nr_bits from the buffer by shifting them to the least significant bits and masking out the remaining bits.
+  val = (read_write_buffer >> (128 - nr_bits)).to_ullong();
+
+  // Shift the first bit to the first position in the buffer.
   read_write_buffer <<= nr_bits;
-  reverse_bit_order(val);
+  bits_in_buffer -= nr_bits;
+
   return true;
 }
 
