@@ -42,7 +42,7 @@ static std::size_t bit_width(std::size_t val)
 template<typename T>
 constexpr std::size_t bits_needed()
 {
-  return (sizeof(T) * 7) / 8;
+  return ((sizeof(T) + 1) * 8) / 7;
 }
 
 /// \brief A bitstream provided per bit writing of data to any stream (including stdout). Internally uses
