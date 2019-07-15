@@ -46,8 +46,8 @@ static size_t encode_variablesize_int(int_t value, uint8_t* output)
     outputSize++;
   }
 
-  output[outputSize++] = (static_cast<uint8_t>(value));
-  return outputSize;
+  output[outputSize] = (static_cast<uint8_t>(value));
+  return outputSize + 1;
 }
 
 /// \brief Decodes an unsigned variable-length integer using the MSB algorithm.
@@ -69,7 +69,7 @@ int_t decode_variablesize_int(std::istream& stream)
     // Take 7 bits (mask 0x01111111) from byte and shift it before the bits already written to value.
     value |= (static_cast<int_t>(byte) & 127) << (7 * i);
 
-    if(!(byte & 128))
+    if (!(byte & 128))
     {
       // If the next-byte flag is not set then we are finished.
       break;
@@ -122,13 +122,13 @@ void obitstream::write_bits(std::size_t val, const std::size_t nr_bits)
   bits_in_buffer += nr_bits;
 
   // Write 8 bytes if available
-  if(bits_in_buffer >= 64)
+  if (bits_in_buffer >= 64)
   {
     unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
     read_write_buffer <<= 64;
     bits_in_buffer -= 64;
 
-    for(int32_t i = 7; i >= 0; --i)
+    for (int32_t i = 7; i >= 0; --i)
     {
       // Write the 8 * i most significant bits and mask out the other values.
       stream.put(static_cast<char>((write_value >> (8 * i)) & 255));
@@ -221,19 +221,15 @@ std::size_t ibitstream::read_integer()
 
 void obitstream::flush()
 {
-  if (bits_in_buffer > 0)
-  {
-    unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
-    for(uint32_t i = 8; i > 7 - bits_in_buffer / 8; --i)
-    {
-      stream.put((write_value >> (8*(i-1))) & 0xFF);
-    }
-    if (stream.fail())
-    {
-      throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
-    }
+  // Writing the buffer full to 64 bits should flush it internally, this also guarantees that the unnecessary bits are zeroed out.
+  write_bits(0, 64 - bits_in_buffer);
+  assert(bits_in_buffer == 0);
 
-    read_write_buffer = std::bitset<128>(0);
-    bits_in_buffer = 0;
+  if (stream.fail())
+  {
+    throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
   }
+
+  stream.flush();
+  read_write_buffer = std::bitset<128>(0);
 }
