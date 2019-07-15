@@ -38,6 +38,13 @@ static std::size_t bit_width(std::size_t val)
   return nr_bits;
 }
 
+/// \returns The number of bits needed to represent a value of type T in most significant bit encoding.
+template<typename T>
+constexpr std::size_t bits_needed()
+{
+  return (sizeof(T) * 7) / 8;
+}
+
 /// \brief A bitstream provided per bit writing of data to any stream (including stdout). Internally uses
 ///        bitpacking and buffering for compact and efficient IO.
 class obitstream
@@ -67,7 +74,7 @@ private:
 
   std::size_t  bits_in_buffer = 0; ///< how many bits in bit_buffer are used.
 
-  std::uint8_t integer_buffer[10]; ///< Reserved space to space an 8 byte integer (std::size_t).
+  std::uint8_t integer_buffer[bits_needed<std::size_t>()]; ///< Reserved space to space an n byte integer.
 };
 
 class ibitstream

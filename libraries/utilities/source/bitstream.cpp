@@ -12,6 +12,7 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/unused.h"
+#include "mcrl2/utilities/power_of_two.h"
 
 #include <limits>
 
@@ -42,7 +43,7 @@ static void reverse_bit_order(std::size_t& val)
 ///        This function assumes that the value is stored as little endian.
 /// \param value The input value. Any standard integer type is allowed.
 /// \param output A pointer to a piece of reserved memory. Must have a minimum size dependent on the input size (32 bit = 5 bytes, 64 bit = 10 bytes).
-/// \return The number of bytes used in the output memory.
+/// \returns The number of bytes used in the output.
 /// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
 template<typename int_t = std::size_t>
 static size_t encode_variablesize_int(int_t value, uint8_t* output)
@@ -50,44 +51,49 @@ static size_t encode_variablesize_int(int_t value, uint8_t* output)
   size_t outputSize = 0;
 
   // While more than 7 bits of data are left, occupy the last output byte
-  // and set the next byte flag
+  // and set the next byte flag.
   while (value > 127)
   {
-    //|128: Set the next byte flag
+    // | 128: Sets the next byte flag.
     output[outputSize] = (static_cast<uint8_t>(value & 127)) | 128;
-    //Remove the seven bits we just wrote
+
+    // Remove the seven bits we just wrote from value.
     value >>= 7;
     outputSize++;
   }
 
-  output[outputSize++] = (static_cast<uint8_t>(value)) & 127;
-
-  if (sizeof(std::size_t) > 4 && value > ((std::size_t)1 << 4 * sizeof(std::size_t)))
-  {
-    mCRL2log(mcrl2::log::warning) << "losing precision of integers when writing to .baf file" << std::endl;
-  }
-
+  output[outputSize++] = (static_cast<uint8_t>(value));
   return outputSize;
 }
 
 /// \brief Decodes an unsigned variable-length integer using the MSB algorithm.
-/// \param value A variable-length encoded integer of arbitrary size.
-/// \param inputSize How many bytes it should read at most
+/// \param stream The stream from which the bytes for this value are read.
+/// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
 template<typename int_t = std::size_t>
 int_t decode_variablesize_int(std::istream& stream)
 {
   int_t value = 0;
-  for (size_t i = 0; i < sizeof(int_t); i++)
+  for (size_t i = 0; i < bits_needed<int_t>(); i++)
   {
     // Read the next byte from the stream.
     int byte = stream.get();
+    if (stream.eof())
+    {
+      throw std::runtime_error("Fail to read an int from the input");
+    }
 
-    value |= (byte & 127) << (7 * i);
+    // Take 7 bits (mask 0x01111111) from byte and shift it before the bits already written to value.
+    value |= (static_cast<int_t>(byte) & 127) << (7 * i);
 
-    // If the next-byte flag is not set then we are finished.
     if(!(byte & 128))
     {
+      // If the next-byte flag is not set then we are finished.
       break;
+    }
+    else if (i == sizeof(int_t))
+    {
+      // The next-byte flag was set, but we cannot represent it using int_t.
+      throw std::runtime_error("Fail to read an int from the input");
     }
   }
 
@@ -160,7 +166,7 @@ void obitstream::writeString(const std::string& string)
 void obitstream::writeInt(const std::size_t val)
 {
   std::size_t nr_items = encode_variablesize_int(val, integer_buffer);
-  stream.write(reinterpret_cast<char*>(integer_buffer), nr_items);
+  stream.write(reinterpret_cast<char*>(integer_buffer), static_cast<std::streamsize>(nr_items));
 }
 
 ibitstream::ibitstream(std::istream& stream)
@@ -180,13 +186,13 @@ const char* ibitstream::readString()
   length = readInt();
 
   // Assure buffer can hold the string.
-  if (m_text_buffer.size() <  (length + 1))
+  if (m_text_buffer.size() < (length + 1))
   {
-    m_text_buffer.resize(2 * m_text_buffer.size());
+    m_text_buffer.resize(round_up_to_power_of_two(length + 1));
   }
 
   // Read the actual string.
-  stream.read(m_text_buffer.data(), length);
+  stream.read(m_text_buffer.data(), static_cast<std::streamsize>(length));
   m_text_buffer[length] = '\0';
 
   return m_text_buffer.data();
