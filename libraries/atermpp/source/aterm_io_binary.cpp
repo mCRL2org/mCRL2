@@ -133,8 +133,8 @@ class sym_read_entry
  */
 static void write_symbol(obitstream& stream, const function_symbol& sym)
 {
-  stream.writeString(sym.name());
-  stream.writeInt(sym.arity());
+  stream.write_string(sym.name());
+  stream.write_integer(sym.arity());
 }
 
 /**
@@ -303,16 +303,16 @@ static void write_all_symbols(mcrl2::utilities::obitstream& stream, const std::v
   for(const sym_write_entry& cur_sym: sym_entries)
   {
     write_symbol(stream, cur_sym.id);
-    stream.writeInt(cur_sym.num_terms);
+    stream.write_integer(cur_sym.num_terms);
 
     for (std::size_t arg_idx=0; arg_idx<cur_sym.id.arity(); arg_idx++)
     {
       std::size_t nr_symbols = cur_sym.top_symbols[arg_idx].symbols.size();
-      stream.writeInt(nr_symbols);
+      stream.write_integer(nr_symbols);
       for (std::size_t top_idx=0; top_idx<nr_symbols; top_idx++)
       {
         const top_symbol& ts = cur_sym.top_symbols[arg_idx].symbols[top_idx];
-        stream.writeInt(ts.index);
+        stream.write_integer(ts.index);
       }
     }
   }
@@ -336,7 +336,7 @@ static void write_term(mcrl2::utilities::obitstream& stream, const aterm& t,
 
     if (current.term.type_is_int())
     {
-      stream.writeBits(atermpp::down_cast<aterm_int>(current.term).value(), INT_SIZE_IN_BAF);
+      stream.write_bits(atermpp::down_cast<aterm_int>(current.term).value(), INT_SIZE_IN_BAF);
     }
     else if (current.arg < get_function_symbol(current.term).arity())
     {
@@ -345,10 +345,10 @@ static void write_term(mcrl2::utilities::obitstream& stream, const aterm& t,
 
       const top_symbols_t& symbol_table = cur_entry.top_symbols.at(current.arg);
       const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item_entry.id));
-      stream.writeBits(ts.code, symbol_table.code_width);
+      stream.write_bits(ts.code, symbol_table.code_width);
       const sym_write_entry& arg_sym = sym_entries.at(ts.index);
       std::size_t arg_trm_idx = term_index_map.at(item.term);
-      stream.writeBits(arg_trm_idx, arg_sym.term_width);
+      stream.write_bits(arg_trm_idx, arg_sym.term_width);
 
       ++current.arg;
 
@@ -376,14 +376,14 @@ static void write_baf(mcrl2::utilities::obitstream& stream, const aterm& t)
   compute_num_bits(sym_entries);
 
   /* write header */
-  stream.writeInt(0);
-  stream.writeInt(BAF_MAGIC);
-  stream.writeInt(BAF_VERSION);
-  stream.writeInt(sym_entries.size());
+  stream.write_integer(0);
+  stream.write_integer(BAF_MAGIC);
+  stream.write_integer(BAF_VERSION);
+  stream.write_integer(sym_entries.size());
   write_all_symbols(stream, sym_entries);
 
   /* Write the top symbol */
-  stream.writeInt(get_fn_symbol_index(t,symbol_index_map));
+  stream.write_integer(get_fn_symbol_index(t,symbol_index_map));
 
   write_term(stream, t, symbol_index_map, term_index_map, sym_entries);
 }
@@ -397,8 +397,8 @@ void write_term_to_binary_stream(const aterm& t, std::ostream& os)
 /// \brief Read a single function symbol from a stream <string, arity>.
 static function_symbol read_symbol(ibitstream& stream)
 {
-  std::string name = stream.readString();
-  std::size_t arity = stream.readInt();
+  std::string name = stream.read_string();
+  std::size_t arity = stream.read_integer();
 
   return function_symbol(name, arity);
 }
@@ -418,7 +418,7 @@ static void read_all_symbols(mcrl2::utilities::ibitstream& stream, std::size_t n
     read_symbols[i].sym = sym;
 
     // Read term count and allocate space.
-    val = stream.readInt();
+    val = stream.read_integer();
     if (val == 0)
     {
       throw mcrl2::runtime_error("Read file: internal file error: failed to read all function symbols.");
@@ -432,13 +432,13 @@ static void read_all_symbols(mcrl2::utilities::ibitstream& stream, std::size_t n
 
     for (std::size_t j=0; j<sym.arity(); j++)
     {
-      val = stream.readInt();
+      val = stream.read_integer();
       read_symbols[i].sym_width[j] = bit_width(val);
       read_symbols[i].topsyms[j] = std::vector<std::size_t>(val);
 
       for (std::size_t k=0; k<read_symbols[i].topsyms[j].size(); k++)
       {
-        read_symbols[i].topsyms[j][k] = stream.readInt();
+        read_symbols[i].topsyms[j][k] = stream.read_integer();
       }
     }
   }
@@ -480,11 +480,11 @@ static aterm read_term(mcrl2::utilities::ibitstream& stream, sym_read_entry* sym
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
     if (current.sym->sym != detail::g_term_pool().as_int() && current.args.size() < current.sym->sym.arity())
     {
-      if (stream.readBits(value, current.sym->sym_width[current.args.size()]) &&
+      if (stream.read_bits(value, current.sym->sym_width[current.args.size()]) &&
           value < current.sym->topsyms[current.args.size()].size())
       {
         sym_read_entry* arg_sym = &read_symbols[current.sym->topsyms[current.args.size()][value]];
-        if (stream.readBits(value, arg_sym->term_width) &&
+        if (stream.read_bits(value, arg_sym->term_width) &&
             value < arg_sym->terms.size())
         {
           current.callresult = &arg_sym->terms[value];
@@ -500,7 +500,7 @@ static aterm read_term(mcrl2::utilities::ibitstream& stream, sym_read_entry* sym
 
     if (current.sym->sym == detail::g_term_pool().as_int())
     {
-      if (stream.readBits(value, INT_SIZE_IN_BAF))
+      if (stream.read_bits(value, INT_SIZE_IN_BAF))
       {
         *current.result = aterm_int(value);
       }
@@ -534,31 +534,31 @@ static
 aterm read_baf(mcrl2::utilities::ibitstream& stream)
 {
   // Read header
-  std::size_t val = stream.readInt();
+  std::size_t val = stream.read_integer();
   if (val == 0)
   {
-    val = stream.readInt();
+    val = stream.read_integer();
   }
   if (val != BAF_MAGIC)
   {
     throw mcrl2::runtime_error("Error while reading file: The file is not correct as it does not have the BAF_MAGIC control sequence at the right place.");
   }
 
-  std::size_t version = stream.readInt();
+  std::size_t version = stream.read_integer();
   if (version != BAF_VERSION)
   {
     throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) +
                                ") of this tool. The input file must be regenerated. ");
   }
 
-  std::size_t nr_unique_symbols = stream.readInt();
+  std::size_t nr_unique_symbols = stream.read_integer();
 
   // Allocate symbol space
   std::vector<sym_read_entry> read_symbols(nr_unique_symbols);
 
   read_all_symbols(stream, nr_unique_symbols, read_symbols);
 
-  val = stream.readInt();
+  val = stream.read_integer();
   aterm result = read_term(stream, &read_symbols[val], read_symbols);
   return result;
 }
