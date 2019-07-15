@@ -36,6 +36,8 @@ struct native_translations
   std::map<data::function_symbol, data::data_equation> mappings;
   // Sorts that have a native definition in Z3
   std::map<data::sort_expression, std::string> sorts;
+  // Function symbols that are overloaded
+  std::set<data::function_symbol> ambiguous_symbols;
 
   native_translations() = default;
 
@@ -92,6 +94,11 @@ struct native_translations
     }
   }
 
+  bool is_ambiguous(const data::function_symbol& f) const
+  {
+    return ambiguous_symbols.find(f) != ambiguous_symbols.end();
+  }
+
   /**
    * \brief Record that the mapping and equations for f should not be translated
    * \details This translation is either not desired because there is a native Z3
@@ -117,6 +124,11 @@ struct native_translations
   void set_alternative_name(const data::function_symbol& f, const std::string& s)
   {
     symbols[f] = s;
+  }
+
+  void set_ambiguous(const data::function_symbol& f)
+  {
+    ambiguous_symbols.insert(f);
   }
 };
 

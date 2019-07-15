@@ -368,7 +368,8 @@ native_translations initialise_native_translation(const data::data_specification
       std::string list_sort_name = "(List " + printed_sort_name + ")";
       nt.set_alternative_name(sort_list::count(sort), "@list_count");
       nt.set_alternative_name(sort_list::snoc(sort), "@snoc");
-      nt.set_native_definition(sort_list::empty(sort), "(as nil " + list_sort_name + ")");
+      nt.set_native_definition(sort_list::empty(sort), "nil");
+      nt.set_ambiguous(sort_list::empty(sort));
       nt.set_native_definition(sort_list::cons_(sort), "insert");
       nt.set_native_definition(sort_list::head(sort));
       nt.set_native_definition(sort_list::tail(sort));
@@ -406,6 +407,10 @@ native_translations initialise_native_translation(const data::data_specification
     nt.mappings[sort_real::maximum(s,s)] = data_equation(l2, sort_real::maximum(v1, v2), if_(less(v1,v2), v2, v1));
     nt.mappings[sort_real::succ(s)] = data_equation(l1, sort_real::succ(v1), sort_real::plus(v1, one(s)));
     nt.mappings[sort_real::pred(s)] = data_equation(l1, sort_real::pred(v1), sort_real::minus(v1, one(s)));
+    nt.set_ambiguous(sort_real::minimum(s,s));
+    nt.set_ambiguous(sort_real::maximum(s,s));
+    nt.set_ambiguous(sort_real::succ(s));
+    nt.set_ambiguous(sort_real::pred(s));
   }
   // TODO come up with equations for these
   // nt.mappings[sort_real::floor(s)]

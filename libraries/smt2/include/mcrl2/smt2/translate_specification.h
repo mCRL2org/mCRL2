@@ -218,9 +218,7 @@ void translate_mapping(const data::function_symbol& f, OutputStream& out, const 
     return;
   }
 
-  out << "(declare-fun ";
-  translate_data_expression(f, out, nt);
-  out << " ";
+  out << "(declare-fun " << translate_symbol(f, nt) << " ";
   if(data::is_function_sort(f.sort()))
   {
     out << "(";
