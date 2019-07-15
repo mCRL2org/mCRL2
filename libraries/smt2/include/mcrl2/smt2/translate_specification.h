@@ -78,17 +78,18 @@ void translate_sort_definition(const data::basic_sort& s,
 // Find the dependencies in the definition of a sort
 std::set<data::sort_expression> find_dependencies(const data::data_specification& dataspec, const data::sort_expression& sort)
 {
-  std::set<data::sort_expression> result;
+  std::set<data::sort_expression> dependencies;
   for(const data::function_symbol& cons: dataspec.constructors(sort))
   {
-    find_sort_expressions(cons, std::inserter(result, result.end()));
+    find_sort_expressions(cons, std::inserter(dependencies, dependencies.end()));
   }
 
-  for(auto i = result.begin(); i != result.end(); ++i)
+  std::set<data::sort_expression> result;
+  for(const data::sort_expression& s: dependencies)
   {
-    if(!(data::is_basic_sort(*i) || data::is_structured_sort(*i)) || *i == sort)
+    if((data::is_basic_sort(s) || data::is_structured_sort(s)) && s != sort)
     {
-      result.erase(*i);
+      result.insert(s);
     }
   }
   return result;
