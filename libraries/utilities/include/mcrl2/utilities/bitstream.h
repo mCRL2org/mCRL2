@@ -73,42 +73,14 @@ public:
   obitstream(std::ostream& stream)
     : stream(stream)
   {
-    mcrl2::utilities::mcrl2_unused(stream);
-
-  #ifdef MCRL2_PLATFORM_WINDOWS
-    std::string name;
-    FILE* handle;
-    if (stream.rdbuf() == std::cin.rdbuf())
-    {
-      name = "cin";
-      handle = stdin;
-    }
-    else
     if (stream.rdbuf() == std::cout.rdbuf())
     {
-      name = "cout";
-      handle = stdout;
-      fflush(stdout);
+      set_stream_binary("cout", stdout);
     }
-    else
-    if (stream.rdbuf() == std::cerr.rdbuf())
+    else if (stream.rdbuf() == std::cerr.rdbuf())
     {
-      name = "cerr";
-      handle = stderr;
-      fflush(stderr);
+      set_stream_binary("cerr", stderr);
     }
-    if (!name.empty())
-    {
-      if (_setmode(_fileno(handle), _O_BINARY) == -1)
-      {
-        mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
-      }
-      else
-      {
-        mCRL2log(mcrl2::log::debug) << "Converted " << name << " to binary mode.\n";
-      }
-    }
-  #endif // MCRL2_PLATFORM_WINDOWS
   }
 
   ~obitstream()
@@ -223,6 +195,23 @@ private:
     }
   }
 
+  void set_stream_binary(const std::string& name, FILE* handle)
+  {
+    mcrl2::utilities::mcrl2_unused(name, handle);
+  #ifdef MCRL2_PLATFORM_WINDOWS
+    if (_setmode(_fileno(handle), _O_BINARY) == -1)
+    {
+      mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
+    }
+    else
+    {
+      mCRL2log(mcrl2::log::debug) << "Converted " << name << " to binary mode.\n";
+    }
+
+    fflush(stderr);
+  #endif // MCRL2_PLATFORM_WINDOWS
+  }
+
   std::ostream& stream;
 
   /// \brief Buffer that is filled starting from bit 127 when reading or writing
@@ -236,7 +225,12 @@ class ibitstream
 public:
   ibitstream(std::istream& stream)
     : stream(stream)
-  {}
+  {
+    if (stream.rdbuf() == std::cin.rdbuf())
+    {
+      set_stream_binary("cin", stdin);
+    }
+  }
 
   /// \returns A pointer to a character string, remains valid until the next readString call.
   const char* readString()
@@ -358,6 +352,25 @@ public:
 
 private:
   std::istream& stream;
+
+  void set_stream_binary(const std::string& name, FILE* handle)
+  {
+    mcrl2::utilities::mcrl2_unused(name, handle);
+  #ifdef MCRL2_PLATFORM_WINDOWS
+    if (!name.empty())
+    {
+      if (_setmode(_fileno(handle), _O_BINARY) == -1)
+      {
+        mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
+      }
+      else
+      {
+        mCRL2log(mcrl2::log::debug) << "Converted " << name << " to binary mode.\n";
+      }
+    }
+  #endif // MCRL2_PLATFORM_WINDOWS
+  }
+
 
   /// \brief Buffer that is filled starting from bit 127 when reading or writing
   std::bitset<128> read_write_buffer = 0;
