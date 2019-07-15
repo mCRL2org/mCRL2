@@ -5,7 +5,7 @@
 ltscompare
 ==========
 
-The tool ``ltscompare`` compares two transition systems that both must have the
+The tool ``ltscompare`` compares two transition systems that both must have 
 either the extension .aut, .lts or .fsm. The transition systems should not
 be probabilistic. 
 
