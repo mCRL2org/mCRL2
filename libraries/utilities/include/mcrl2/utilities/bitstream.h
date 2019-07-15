@@ -67,7 +67,11 @@ public:
 
 private:
   /// \brief Flush the remaining bits in the buffer to the output stream.
+  /// \details Note that this aligns it to the next byte, so if bits_in_buffer is 7 then a single zero bit is added additionally.
   void flush();
+
+  /// \brief Writes size bytes from the given buffer.
+  void write(const std::uint8_t* buffer, std::size_t size);
 
   std::ostream& stream;
 
@@ -97,6 +101,9 @@ public:
   std::size_t read_integer();
 
 private:
+  /// \brief Read size bytes into the given buffer.
+  void read(std::size_t size, std::uint8_t* buffer);
+
   std::istream& stream;
 
   /// \brief Buffer that is filled starting from bit 127 when reading or writing

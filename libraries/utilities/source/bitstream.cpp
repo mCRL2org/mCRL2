@@ -54,14 +54,14 @@ static size_t encode_variablesize_int(int_t value, uint8_t* output)
 /// \param stream The stream from which the bytes for this value are read.
 /// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
 template<typename int_t = std::size_t>
-int_t decode_variablesize_int(std::istream& stream)
+int_t decode_variablesize_int(ibitstream& stream)
 {
   int_t value = 0;
   for (size_t i = 0; i < bits_needed<int_t>(); i++)
   {
     // Read the next byte from the stream.
-    int byte = stream.get();
-    if (stream.eof())
+    std::size_t byte;
+    if (!stream.read_bits(byte, 8))
     {
       throw std::runtime_error("Fail to read an int from the input");
     }
@@ -142,13 +142,14 @@ void obitstream::write_string(const std::string& string)
   write_integer(string.size());
 
   // Write actual string.
-  stream.write(string.c_str(), static_cast<std::streamsize>(string.size()));
+  write(reinterpret_cast<const std::uint8_t*>(string.c_str()), string.size());
 }
 
 void obitstream::write_integer(const std::size_t val)
 {
-  std::size_t nr_items = encode_variablesize_int(val, integer_buffer);
-  stream.write(reinterpret_cast<char*>(integer_buffer), static_cast<std::streamsize>(nr_items));
+  std::size_t nr_bytes = encode_variablesize_int(val, integer_buffer);
+
+  write(integer_buffer, nr_bytes);
 }
 
 ibitstream::ibitstream(std::istream& stream)
@@ -174,7 +175,7 @@ const char* ibitstream::read_string()
   }
 
   // Read the actual string.
-  stream.read(m_text_buffer.data(), static_cast<std::streamsize>(length));
+  read(length, reinterpret_cast<std::uint8_t*>(m_text_buffer.data()));
   m_text_buffer[length] = '\0';
 
   return m_text_buffer.data();
@@ -187,7 +188,7 @@ bool ibitstream::read_bits(std::size_t& val, const unsigned int nr_bits)
 
   val = 0;
 
-  while(bits_in_buffer < nr_bits)
+  while (bits_in_buffer < nr_bits)
   {
     // Read bytes until the buffer is sufficiently full.
     int byte = stream.get();
@@ -214,7 +215,7 @@ bool ibitstream::read_bits(std::size_t& val, const unsigned int nr_bits)
 
 std::size_t ibitstream::read_integer()
 {
-  return decode_variablesize_int(stream);
+  return decode_variablesize_int(*this);
 }
 
 // Private functions
@@ -231,5 +232,22 @@ void obitstream::flush()
   }
 
   stream.flush();
-  read_write_buffer = std::bitset<128>(0);
+}
+
+void obitstream::write(const uint8_t* buffer, std::size_t size)
+{
+  for (std::size_t index = 0; index < size; ++index)
+  {
+    // Write a single byte for every entry in the buffer that was filled (size).
+    write_bits(buffer[index], 8);
+  }
+}
+
+void ibitstream::read(std::size_t size, std::uint8_t* buffer)
+{
+  for (std::size_t index = 0; index < size; ++index)
+  {
+    // Write a single byte for every entry in the buffer that was filled (size).
+    read_bits(reinterpret_cast<std::size_t&>(buffer[index]), 8);
+  }
 }
