@@ -121,56 +121,10 @@ public:
     stream.write(string.c_str(), string.size());
   }
 
-  std::size_t writeIntToBuf(const std::size_t val, unsigned char* buf)
-  {
-    if (val < (1 << 7))
-    {
-      buf[0] = (unsigned char) val;
-      return 1;
-    }
-
-    if (val < (1 << 14))
-    {
-      buf[0] = (unsigned char)((val >>  8) | 0x80);
-      buf[1] = (unsigned char)((val >>  0) & 0xff);
-      return 2;
-    }
-
-    if (val < (1 << 21))
-    {
-      buf[0] = (unsigned char)((val >> 16) | 0xc0);
-      buf[1] = (unsigned char)((val >>  8) & 0xff);
-      buf[2] = (unsigned char)((val >>  0) & 0xff);
-      return 3;
-    }
-
-    if (val < (1 << 28))
-    {
-      buf[0] = (unsigned char)((val >> 24) | 0xe0);
-      buf[1] = (unsigned char)((val >> 16) & 0xff);
-      buf[2] = (unsigned char)((val >>  8) & 0xff);
-      buf[3] = (unsigned char)((val >>  0) & 0xff);
-      return 4;
-    }
-
-    if (sizeof(std::size_t)>4 && val>((std::size_t)1<<4*sizeof(std::size_t)))
-    {
-      mCRL2log(mcrl2::log::warning) << "losing precision of integers when writing to .baf file" << std::endl;
-    }
-
-    buf[0] = 0xf0;
-    buf[1] = (unsigned char)((val >> 24) & 0xff);
-    buf[2] = (unsigned char)((val >> 16) & 0xff);
-    buf[3] = (unsigned char)((val >>  8) & 0xff);
-    buf[4] = (unsigned char)((val >>  0) & 0xff);
-    return 5;
-  }
-
   void writeInt(const std::size_t val)
   {
-    unsigned char buf[8];
-    std::size_t nr_items = writeIntToBuf(val, buf);
-    stream.write((char*)buf, nr_items);
+    std::size_t nr_items = encode_variablesize_int(val, integer_buffer);
+    stream.write(reinterpret_cast<char*>(integer_buffer), nr_items);
   }
 
 private:
@@ -193,6 +147,38 @@ private:
       read_write_buffer = std::bitset<128>(0);
       bits_in_buffer = 0;
     }
+  }
+
+  /// \brief Encodes an unsigned variable-length integer using the most significant bit (MSB) algorithm.
+  ///        This function assumes that the value is stored as little endian.
+  /// \param value The input value. Any standard integer type is allowed.
+  /// \param output A pointer to a piece of reserved memory. Must have a minimum size dependent on the input size (32 bit = 5 bytes, 64 bit = 10 bytes).
+  /// \return The number of bytes used in the output memory.
+  /// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
+  template<typename int_t = std::size_t>
+  size_t encode_variablesize_int(int_t value, uint8_t* output)
+  {
+    size_t outputSize = 0;
+
+    // While more than 7 bits of data are left, occupy the last output byte
+    // and set the next byte flag
+    while (value > 127)
+    {
+      //|128: Set the next byte flag
+      output[outputSize] = (static_cast<uint8_t>(value & 127)) | 128;
+      //Remove the seven bits we just wrote
+      value >>= 7;
+      outputSize++;
+    }
+
+    output[outputSize++] = (static_cast<uint8_t>(value)) & 127;
+
+    if (sizeof(std::size_t) > 4 && value > ((std::size_t)1 << 4 * sizeof(std::size_t)))
+    {
+      mCRL2log(mcrl2::log::warning) << "losing precision of integers when writing to .baf file" << std::endl;
+    }
+
+    return outputSize;
   }
 
   void set_stream_binary(const std::string& name, FILE* handle)
@@ -218,6 +204,8 @@ private:
   std::bitset<128> read_write_buffer = 0;
 
   std::size_t  bits_in_buffer = 0; ///< how many bits in bit_buffer are used.
+
+  std::uint8_t integer_buffer[10]; ///< Reserved space to space an 8 byte integer (std::size_t).
 };
 
 class ibitstream
@@ -289,70 +277,10 @@ public:
   // returns the number of bytes read
   std::size_t readInt()
   {
-    int buf[8];
-
-    // Try to read 1st character
-    if ((buf[0] = stream.get()) == EOF)
-    {
-      throw std::runtime_error("Fail to read an int from the input");
-    }
-
-    // Check if 1st character stream enough
-    if ((buf[0] & 0x80) == 0)
-    {
-      return buf[0];
-    }
-
-    // Try to read 2nd character
-    if ((buf[1] = stream.get()) == EOF)
-    {
-      throw std::runtime_error("Fail to read an int from the input");
-    }
-
-    // Check if 2nd character is enough
-    if ((buf[0] & 0x40) == 0)
-    {
-      return buf[1] + ((buf[0] & ~0xc0) << 8);
-    }
-
-    // Try to read 3rd character
-    if ((buf[2] = stream.get()) == EOF)
-    {
-      throw std::runtime_error("Fail to read an int from the input");
-    }
-
-    // Check if 3rd character is enough
-    if ((buf[0] & 0x20) == 0)
-    {
-      return buf[2] + (buf[1] << 8) + ((buf[0] & ~0xe0) << 16);
-    }
-
-    // Try to read 4th character
-    if ((buf[3] = stream.get()) == EOF)
-    {
-      throw std::runtime_error("Fail to read an int from the input");
-    }
-
-    // Check if 4th character is enough
-    if ((buf[0] & 0x10) == 0)
-    {
-      return buf[3] + (buf[2] << 8) + (buf[1] << 16) + ((buf[0] & ~0xf0) << 24);
-    }
-
-    // Try to read 5th character
-    if ((buf[4] = stream.get()) == EOF)
-    {
-      throw std::runtime_error("Fail to read an int from the input");
-    }
-
-    // Now 5th character should be enough
-    return buf[4] + (buf[3] << 8) + (buf[2] << 16) + (buf[1] << 24);
+    return decode_variablesize_int();
   }
 
-
 private:
-  std::istream& stream;
-
   void set_stream_binary(const std::string& name, FILE* handle)
   {
     mcrl2::utilities::mcrl2_unused(name, handle);
@@ -371,11 +299,38 @@ private:
   #endif // MCRL2_PLATFORM_WINDOWS
   }
 
+  /// \brief Decodes an unsigned variable-length integer using the MSB algorithm.
+  /// \param value A variable-length encoded integer of arbitrary size.
+  /// \param inputSize How many bytes it should read at most
+  template<typename int_t = std::size_t>
+  int_t decode_variablesize_int()
+  {
+    int_t value = 0;
+    for (size_t i = 0; i < sizeof(int_t); i++)
+    {
+      // Read the next byte from the stream.
+      int byte = stream.get();
+
+      value |= (byte & 127) << (7 * i);
+
+      // If the next-byte flag is not set then we are finished.
+      if(!(byte & 128))
+      {
+        break;
+      }
+    }
+
+    return value;
+  }
+
+
+  std::istream& stream;
+
 
   /// \brief Buffer that is filled starting from bit 127 when reading or writing
   std::bitset<128> read_write_buffer = 0;
 
-  std::size_t  bits_in_buffer = 0; ///< how many bits in bit_buffer are used.
+  std::size_t bits_in_buffer = 0; ///< how many bits in bit_buffer are used.
 
   std::vector<char> m_text_buffer;
 
