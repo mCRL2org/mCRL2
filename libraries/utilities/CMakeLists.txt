@@ -6,6 +6,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mcrl2/utilities/toolset_version_const.
 add_mcrl2_library(utilities
   INSTALL_HEADERS TRUE
   SOURCES
+    bitstream.cpp
     command_line_interface.cpp
     logger.cpp
     text_utility.cpp
