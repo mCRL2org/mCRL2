@@ -34,11 +34,6 @@ namespace atermpp
 {
 using namespace mcrl2::utilities;
 
-/* Integers in BAF are always exactly 32 or 64 bits.  The size must be fixed so that
- *  *  * BAF terms can be exchanged between platforms. */
-// If aterm integers are > 32 bits, then they cannot be read on a 32 bit machine.
-static const std::size_t INT_SIZE_IN_BAF = 64;
-
 static const std::size_t BAF_MAGIC = 0xbaf;
 
 // The BAF_VERSION constant is the version number of the ATerms written in BAF
@@ -336,7 +331,7 @@ static void write_term(mcrl2::utilities::obitstream& stream, const aterm& t,
 
     if (current.term.type_is_int())
     {
-      stream.write_bits(atermpp::down_cast<aterm_int>(current.term).value(), INT_SIZE_IN_BAF);
+      stream.write_integer(atermpp::down_cast<aterm_int>(current.term).value());
     }
     else if (current.arg < get_function_symbol(current.term).arity())
     {
@@ -500,10 +495,7 @@ static aterm read_term(mcrl2::utilities::ibitstream& stream, sym_read_entry* sym
 
     if (current.sym->sym == detail::g_term_pool().as_int())
     {
-      if (stream.read_bits(value, INT_SIZE_IN_BAF))
-      {
-        *current.result = aterm_int(value);
-      }
+      *current.result = aterm_int(stream.read_integer());
     }
     else if (current.sym->sym== detail::g_term_pool().as_empty_list())
     {
