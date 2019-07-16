@@ -44,19 +44,10 @@ static const std::size_t MAX_ERROR_SIZE = 64;
 /* Prototypes */
 static aterm fparse_term(int* c, istream& is);
 
-static void aterm_io_init()
-{
-  static bool initialized = false;
-  if (!initialized)
-  {
-    /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
-    /* This check might break on perfectly valid architectures */
-    /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-    assert(sizeof(std::size_t) == sizeof(aterm*));
-    assert(sizeof(std::size_t) >= 4);
-    initialized = true;
-  }
-}
+/* This check might break on perfectly valid architectures */
+/* that have char == 2 bytes, and sizeof(header_type) == 2 */
+static_assert(sizeof(std::size_t) == sizeof(aterm*), "Check for reasonably sized aterm (32 bits, 4 bytes)");
+static_assert(sizeof(std::size_t) >= 4, "Check for reasonably sized aterm (32 bits, 4 bytes)");
 
 static void write_string_with_escape_symbols(const std::string& s, std::ostream& os)
 {
@@ -157,14 +148,12 @@ static void writeToStream(const aterm& t, std::ostream& os)
 
 std::ostream& operator<<(std::ostream& out, const aterm& t)
 {
-  aterm_io_init();
   writeToStream(t, out);
   return out;
 }
 
 void write_term_to_text_stream(const aterm& t, std::ostream& os)
 {
-  aterm_io_init();
   writeToStream(t,os);
 }
 
@@ -431,9 +420,6 @@ aterm read_term_from_string(const std::string& s)
 
 aterm read_term_from_text_stream(istream& is)
 {
-  // Initialise global io (esp. for windows)
-  aterm_io_init();
-
   // Initialise error handling.
   line = 0;
   col = 0;
@@ -454,8 +440,6 @@ aterm read_term_from_text_stream(istream& is)
 
 bool is_binary_aterm_stream(std::istream& is)
 {
-  aterm_io_init();
-
   int c;
   fnext_char(&c, is);
   return (c == 0);
