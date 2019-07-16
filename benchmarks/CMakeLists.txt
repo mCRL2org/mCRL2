@@ -1,13 +1,16 @@
 # Print a short message on how to perform the benchmarks.
 message(STATUS "To generate the necessary files for benchmarking, build the benchmarks target")
 
+set(BENCHMARK_SCRIPT "" CACHE STRING "Pass the benchmark target (mcrl22lps x y) as the first parameter of this script or binary")
+mark_as_advanced(BENCHMARK_SCRIPT)
+
 # Add a benchmark named NAME that uses TOOL on the given INPUT.
 function(add_tool_benchmark NAME TOOL INPUT OUTPUT)
   set(TARGET "benchmark_target_${TOOL}_${NAME}")
   set(TEST "benchmark_${TOOL}_${NAME}")
 
   add_custom_target(${TARGET}
-    COMMAND ${TOOL} ${ARGN} "${INPUT}" "${OUTPUT}"
+    COMMAND ${BENCHMARK_SCRIPT} ${TOOL} ${ARGN} ${INPUT} ${OUTPUT}
   )
 
   add_test(NAME ${TEST} 
