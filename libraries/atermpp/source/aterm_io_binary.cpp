@@ -18,17 +18,13 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/detail/aterm_io_implementation.h"
 
-#include "mcrl2/utilities/bitstream.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/platform.h"
 #include "mcrl2/utilities/unordered_map.h"
 
 #include <cassert>
-
 
 namespace atermpp
 {
@@ -36,501 +32,215 @@ using namespace mcrl2::utilities;
 
 static const std::size_t BAF_MAGIC = 0xbaf;
 
-// The BAF_VERSION constant is the version number of the ATerms written in BAF
-// format. As of 29 August 2013 this version number is used by the mCRL2
-// toolset. Whenever the file format of mCRL2 files is changed, the BAF_VERSION
-// has to be increased.
-//
-// History:
-//
-// before 2013       : version 0x0300
-// 29 August 2013    : version changed to 0x0301
-// 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
-// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
-//  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
-
+/// \brief The BAF_VERSION constant is the version number of the ATerms written in BAF
+///        format. As of 29 August 2013 this version number is used by the mCRL2
+///        toolset. Whenever the file format of mCRL2 files is changed, the BAF_VERSION
+///        has to be increased.
+///
+/// \details History:
+///
+/// before 2013       : version 0x0300
+/// 29 August 2013    : version changed to 0x0301
+/// 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
+/// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
+///  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
 static const std::size_t BAF_VERSION = 0x0304;
 
-struct top_symbol
+/// \brief Each packet has a header consisting of a type and an invisible bit (indicating no output).
+enum class packet_type
 {
-  /// \brief index into the vector with all sym_write_entries
-  std::size_t index;
-  /// \brief Identification number of this function symbol in the output
-  std::size_t code;
-
-  top_symbol(std::size_t index_, std::size_t code_)
-   : index(index_), code(code_)
-  {}
+  function_symbol = 0,
+  aterm,
+  aterm_output,
+  aterm_int,
 };
 
-class top_symbols_t
+/// \brief
+constexpr std::size_t packet_bits = 2;
+
+binary_aterm_output::binary_aterm_output(std::ostream& stream)
+  : m_stream(stream)
 {
-  public:
-    std::vector<top_symbol> symbols; /**< The set of symbols that occur directly below the top symbol.
-                                        The order of the symbols in this vector is important. */
-    mcrl2::utilities::indexed_set<function_symbol> index_into_symbols;
-                                     /**< This mapping helps to find the entry in symbols with the given
-                                          function symbol */
-};
+  // The term with function symbol index 0 indicates the end of the stream, its actual value does not matter.
+  m_function_symbol.insert(detail::g_as_int);
 
-class sym_write_entry
-{
-  public:
-    /// \brief The function symbol that this write entry is about
-    const function_symbol id;
-
-    /**
-     * \brief The number of unique occurrences of id, i.e. the number of term that
-     * have id as their function symbol.
-     */
-    std::size_t num_terms = 0;
-    /**
-     * \brief Maps each argument index to a table with function symbols that may
-     * occur at that index
-     * top_symbols.size() == id.arity()
-     */
-    std::vector<top_symbols_t> top_symbols;
-    /**
-     * \brief Counter to indicate which argument is being worked on
-     */
-    std::size_t cur_index = 0;
-
-    sym_write_entry(const function_symbol& id_)
-     : id(id_)
-    {}
-};
-
-class sym_read_entry
-{
-  public:
-    function_symbol sym;
-    std::vector<aterm> terms;
-    std::vector<std::vector<std::size_t>> topsyms;
-};
-
-/**
- * Write a symbol to file.
- */
-static void write_symbol(obitstream& stream, const function_symbol& sym)
-{
-  stream.write_string(sym.name());
-  stream.write_integer(sym.arity());
+  // Write the header of the binary aterm format.
+  m_stream.write_integer(0);
+  m_stream.write_integer(BAF_MAGIC);
+  m_stream.write_integer(BAF_VERSION);
 }
 
-/**
- * \brief Get the function symbol from an aterm
- * \details This function is necessary only becuase aterm::function() is protected
- */
-static const function_symbol& get_function_symbol(const aterm& t)
+binary_aterm_output::~binary_aterm_output()
 {
-  assert(t.type_is_int() || t.type_is_list() || t.type_is_appl());
-  return detail::address(t)->function();
+  m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
+  m_stream.write_integer(0);
 }
 
-/**
- * \brief Retrieve the index into the sym_write_entry table belonging to the top symbol
- * of a term. Could be a special symbol (AS_INT, etc) when the term is not an application.
- * \details sym_entries[result].id == t.function()
- */
-static std::size_t get_fn_symbol_index(const aterm& t, const mcrl2::utilities::indexed_set_large<function_symbol>& index)
-{
-  const function_symbol& sym = get_function_symbol(t);
-  std::size_t result = index.at(sym);
-  return result;
-}
-
-/**
- * \brief Get argument number i (zero indexed) from term t.
- */
-static const aterm& subterm(const aterm& t, std::size_t i)
-{
-  if (t.type_is_appl())
-  {
-    assert(i < down_cast<const aterm_appl>(t).function().arity());
-    return atermpp::down_cast<const aterm_appl>(t)[i];
-  }
-  else
-  {
-    assert(t.type_is_list() && t != aterm_list());
-    assert(i < 2);
-    return i == 0 ? atermpp::down_cast<const aterm_list>(t).front()
-                  : atermpp::down_cast<const aterm_list>(t).tail();
-  }
-}
-
-/**
- * \brief Add a term to the global term table. Update the symbol tables.
- */
-static void add_term(sym_write_entry& entry, const aterm& term,
-  const mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
-  mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
-  std::vector<sym_write_entry>& sym_entries)
-{
-  term_index_map[term] = entry.num_terms++;
-  std::size_t arity = entry.id.arity();
-  // Initialize the vector if necessary
-  if(entry.top_symbols.size() != arity)
-  {
-    entry.top_symbols = std::vector<top_symbols_t>(arity);
-  }
-
-  if (entry.id != detail::g_term_pool().as_int())
-  {
-    // For every argument, check whether the term should be added to the table
-    for (std::size_t cur_arg=0; cur_arg<arity; cur_arg++)
-    {
-      const aterm& arg = subterm(term, cur_arg);
-      top_symbols_t& tss = entry.top_symbols[cur_arg];
-      std::size_t top_symbol_index = get_fn_symbol_index(arg, symbol_index_map);
-      const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
-
-      auto put_result = tss.index_into_symbols.insert(top_symbol);
-      if (put_result.second)
-      {
-        tss.symbols.emplace_back(top_symbol_index, (*put_result.first).second);
-      }
-    }
-  }
-}
-
+/// \brief Keep track of the
 struct write_todo
 {
-  const aterm& term;
-  std::size_t arg;
+  const aterm_appl& term;
+  std::size_t arg = 0;
 
-  write_todo(const aterm& t)
-   :  term(t),
-      arg(0)
+  write_todo(const aterm_appl& term)
+   :  term(term)
   {}
 };
 
-/**
- * \brief If we see this function symbol for the first time, we initialize data
- * for it in symbol_index_map and sym_entries.
- * \return The sym_write_entry belonging to func.
- */
-static sym_write_entry& initialize_function_symbol(const function_symbol& func,
-  mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
-  std::vector<sym_write_entry>& sym_entries)
+void binary_aterm_output::write_term(const aterm& term)
 {
-  auto insert_result = symbol_index_map.insert(func);
-  if(insert_result.second)
-  {
-    // We just found a new function symbol, it has 1 occurrence so far
-    sym_entries.emplace_back(func);
-  }
-  return sym_entries[(*insert_result.first).second];
-}
+  assert(!term.type_is_int());
 
-/**
- * \brief Collect all terms in the term tables of each symbol
- */
-static void collect_terms(const aterm& t,
-  mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
-  mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
-  std::vector<sym_write_entry>& sym_entries)
-{
+  // Traverse the term bottom up and store the subterms before the actual term.
   std::stack<write_todo> stack;
-  stack.emplace(t);
+  stack.emplace(static_cast<const aterm_appl&>(term));
 
-  // Traverse the term in a postfix order: for every term, we first process each
-  // of its arguments, before processing the term itself
   do
   {
-    write_todo& current = stack.top();
-    if (current.term.type_is_int() || current.arg >= get_function_symbol(current.term).arity())
+    auto& current = stack.top();
+    if (current.arg >= current.term.function().arity())
     {
-      // This term is an int or we are finished processing its arguments (arg >= arity)
-      sym_write_entry& we = initialize_function_symbol(get_function_symbol(current.term), symbol_index_map, sym_entries);
-      add_term(we, current.term, symbol_index_map, term_index_map, sym_entries);
+      // Write the packet identifier, followed by the function symbol and its arguments.
+      if (current.term.type_is_int())
+      {
+        m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm_int), packet_bits);
+        m_stream.write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+      }
+      else
+      {
+        // We are finished processing the arguments of this term (arg >= arity)
+        std::size_t symbol_index = write_function_symbol(current.term.function());
+
+        m_stream.write_bits(static_cast<std::size_t>(stack.size() == 1 ? packet_type::aterm_output : packet_type::aterm), packet_bits);
+        m_stream.write_integer(symbol_index);
+        for (const auto& argument : current.term)
+        {
+          auto result = m_terms.find(argument);
+          assert(result != m_terms.end());
+          m_stream.write_integer(result->second);
+        }
+      }
+
+      m_terms.insert(current.term);
+
       stack.pop();
     }
     else
     {
-      // Take the argument according to current.arg and increase the counter
-      const aterm& t = subterm(current.term, current.arg++);
-      if (term_index_map.count(t) == 0)
+      // Take the argument according to current.arg and increase the argument index.
+      const aterm_appl& t = static_cast<const aterm_appl&>(current.term[current.arg]);
+      if (m_terms.count(t) == 0)
       {
         stack.emplace(t);
       }
-    }
-  }
-  while (!stack.empty());
-}
-
-/**
- * Write all symbols in a term to file.
- */
-static void write_all_symbols(mcrl2::utilities::obitstream& stream, const std::vector<sym_write_entry>& sym_entries)
-{
-  for(const sym_write_entry& cur_sym: sym_entries)
-  {
-    write_symbol(stream, cur_sym.id);
-    stream.write_integer(cur_sym.num_terms);
-
-    for (std::size_t arg_idx=0; arg_idx<cur_sym.id.arity(); arg_idx++)
-    {
-      std::size_t nr_symbols = cur_sym.top_symbols[arg_idx].symbols.size();
-      stream.write_integer(nr_symbols);
-      for (std::size_t top_idx=0; top_idx<nr_symbols; top_idx++)
-      {
-        const top_symbol& ts = cur_sym.top_symbols[arg_idx].symbols[top_idx];
-        stream.write_integer(ts.index);
-      }
-    }
-  }
-}
-
-/**
- * \brief Write the term t to os in BAF
- */
-static void write_term(mcrl2::utilities::obitstream& stream, const aterm& t,
-  const mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
-  const mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
-  std::vector<sym_write_entry>& sym_entries)
-{
-  std::stack<write_todo> stack;
-  stack.emplace(t);
-
-  do
-  {
-    write_todo& current = stack.top();
-    sym_write_entry& cur_entry = sym_entries[symbol_index_map.at(get_function_symbol(current.term))];
-
-    if (current.term.type_is_int())
-    {
-      stream.write_integer(atermpp::down_cast<aterm_int>(current.term).value());
-    }
-    else if (current.arg < get_function_symbol(current.term).arity())
-    {
-      write_todo item(subterm(current.term, current.arg));
-      sym_write_entry& item_entry = sym_entries[symbol_index_map.at(get_function_symbol(item.term))];
-
-      const top_symbols_t& symbol_table = cur_entry.top_symbols.at(current.arg);
-      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item_entry.id));
-      stream.write_integer(ts.code);
-      const sym_write_entry& arg_sym = sym_entries.at(ts.index);
-      std::size_t arg_trm_idx = term_index_map.at(item.term);
-      stream.write_integer(arg_trm_idx);
-
       ++current.arg;
-
-      if (arg_trm_idx >= arg_sym.cur_index)
-      {
-        stack.push(item);
-      }
-      continue;
     }
 
-    ++cur_entry.cur_index;
-    stack.pop();
   }
   while (!stack.empty());
 }
 
-
-static void write_baf(mcrl2::utilities::obitstream& stream, const aterm& t)
+binary_aterm_input::binary_aterm_input(std::istream& is)
+  : m_stream(is)
 {
-  mcrl2::utilities::indexed_set_large<function_symbol> symbol_index_map;
-  mcrl2::utilities::unordered_map_large<aterm, std::size_t> term_index_map;
-  std::vector<sym_write_entry> sym_entries;
+  // The term with function symbol index 0 indicates the end of the stream.
+  m_function_symbol.emplace_back();
 
-  collect_terms(t, symbol_index_map, term_index_map, sym_entries);
-
-  /* write header */
-  stream.write_integer(0);
-  stream.write_integer(BAF_MAGIC);
-  stream.write_integer(BAF_VERSION);
-  stream.write_integer(sym_entries.size());
-  write_all_symbols(stream, sym_entries);
-
-  /* Write the top symbol */
-  stream.write_integer(get_fn_symbol_index(t,symbol_index_map));
-
-  write_term(stream, t, symbol_index_map, term_index_map, sym_entries);
-}
-
-void write_term_to_binary_stream(const aterm& t, std::ostream& os)
-{
-  mcrl2::utilities::obitstream stream(os);
-  write_baf(stream, t);
-}
-
-/// \brief Read a single function symbol from a stream <string, arity>.
-static function_symbol read_symbol(ibitstream& stream)
-{
-  std::string name = stream.read_string();
-  std::size_t arity = stream.read_integer();
-
-  return function_symbol(name, arity);
-}
-
-/**
- * Read all symbols from file.
- */
-
-static void read_all_symbols(mcrl2::utilities::ibitstream& stream, std::size_t nr_unique_symbols, std::vector<sym_read_entry>& read_symbols)
-{
-  std::size_t val;
-
-  for (std::size_t i=0; i<nr_unique_symbols; i++)
-  {
-    // Read the actual symbol.
-    function_symbol sym = read_symbol(stream);
-    read_symbols[i].sym = sym;
-
-    // Read term count and allocate space.
-    val = stream.read_integer();
-    if (val == 0)
-    {
-      throw mcrl2::runtime_error("Read file: internal file error: failed to read all function symbols.");
-    }
-
-    read_symbols[i].terms = std::vector<aterm>(val);
-
-    /*  Allocate space for topsymbol information */
-    read_symbols[i].topsyms = std::vector<std::vector<std::size_t>> (sym.arity());
-
-    for (std::size_t j=0; j<sym.arity(); j++)
-    {
-      val = stream.read_integer();
-      read_symbols[i].topsyms[j] = std::vector<std::size_t>(val);
-
-      for (std::size_t k=0; k<read_symbols[i].topsyms[j].size(); k++)
-      {
-        read_symbols[i].topsyms[j][k] = stream.read_integer();
-      }
-    }
-  }
-
-  return;
-}
-
-struct read_todo
-{
-  sym_read_entry* sym;
-  std::vector<aterm> args;
-  aterm* result;
-  aterm* callresult;
-
-  read_todo(sym_read_entry* s, aterm* r)
-   : sym(s), result(r), callresult(nullptr)
-  {
-    args.reserve(sym->sym.arity());
-  }
-};
-
-static aterm read_term(mcrl2::utilities::ibitstream& stream, sym_read_entry* sym,  std::vector<sym_read_entry>& read_symbols)
-{
-  aterm result;
-  std::stack<read_todo> stack;
-  stack.emplace(sym, &result);
-
-  do
-  {
-    read_todo& current = stack.top();
-
-    if (current.callresult != nullptr)
-    {
-      current.args.push_back(*current.callresult);
-      current.callresult = nullptr;
-    }
-
-    // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
-    if (current.sym->sym != detail::g_term_pool().as_int() && current.args.size() < current.sym->sym.arity())
-    {
-      std::size_t value = stream.read_integer();
-      if (value < current.sym->topsyms[current.args.size()].size())
-      {
-        sym_read_entry* arg_sym = &read_symbols[current.sym->topsyms[current.args.size()][value]];
-        value = stream.read_integer();
-        if (value < arg_sym->terms.size())
-        {
-
-          current.callresult = &arg_sym->terms[value];
-          if (!current.callresult->defined())
-          {
-            stack.emplace(arg_sym, current.callresult);
-          }
-          continue;
-        }
-      }
-      throw mcrl2::runtime_error("Could not read valid aterm from stream.");
-    }
-
-    if (current.sym->sym == detail::g_term_pool().as_int())
-    {
-      *current.result = aterm_int(stream.read_integer());
-    }
-    else if (current.sym->sym== detail::g_term_pool().as_empty_list())
-    {
-      *current.result = aterm_list();
-    }
-    else if (current.sym->sym == detail::g_term_pool().as_list())
-    {
-      aterm_list result = atermpp::down_cast<aterm_list>(current.args[1]);
-      result.push_front(current.args[0]);
-      *current.result = result;
-    }
-    else // sym is a function application
-    {
-      *current.result = aterm_appl(current.sym->sym, current.args.begin(), current.args.end());
-    }
-    stack.pop();
-  }
-  while (!stack.empty());
-
-  return result;
-}
-
-/**
- * Read a term from a BAF reader.
- */
-
-static
-aterm read_baf(mcrl2::utilities::ibitstream& stream)
-{
-  // Read header
-  std::size_t val = stream.read_integer();
-  if (val == 0)
-  {
-    val = stream.read_integer();
-  }
-  if (val != BAF_MAGIC)
+  // Read the binary aterm format header.
+  if (m_stream.read_integer() != 0 || m_stream.read_integer() != BAF_MAGIC)
   {
     throw mcrl2::runtime_error("Error while reading file: The file is not correct as it does not have the BAF_MAGIC control sequence at the right place.");
   }
 
-  std::size_t version = stream.read_integer();
+  std::size_t version = m_stream.read_integer();
   if (version != BAF_VERSION)
   {
     throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) +
                                ") of this tool. The input file must be regenerated. ");
   }
-
-  std::size_t nr_unique_symbols = stream.read_integer();
-
-  // Allocate symbol space
-  std::vector<sym_read_entry> read_symbols(nr_unique_symbols);
-
-  read_all_symbols(stream, nr_unique_symbols, read_symbols);
-
-  val = stream.read_integer();
-  aterm result = read_term(stream, &read_symbols[val], read_symbols);
-  return result;
 }
 
+std::size_t binary_aterm_output::write_function_symbol(const function_symbol& symbol)
+{
+  auto result = m_function_symbol.find(symbol);
+
+  if (result != m_function_symbol.end())
+  {
+    return result->second;
+  }
+  else
+  {
+    // The function symbol has not been written yet, write it now and insert its index.
+    m_stream.write_bits(static_cast<std::size_t>(packet_type::function_symbol), packet_bits);
+    m_stream.write_string(symbol.name());
+    m_stream.write_integer(symbol.arity());
+    auto result = m_function_symbol.insert(symbol);
+    return result.first->second;
+  }
+}
+
+aterm binary_aterm_input::read_term()
+{
+  while(true)
+  {
+    // Determine the type of the next packet.
+    std::size_t header = m_stream.read_bits(packet_bits);
+    packet_type packet = static_cast<packet_type>(header);
+
+    if (packet == packet_type::function_symbol)
+    {
+      // Read a single function symbol and insert it into the already read function symbols.
+      std::string name = m_stream.read_string();
+      std::size_t arity = m_stream.read_integer();
+      m_function_symbol.emplace_back(name, arity);
+    }
+    else if (packet == packet_type::aterm || packet == packet_type::aterm_output)
+    {
+      // First read the function symbol of the following term.
+      function_symbol symbol = m_function_symbol[m_stream.read_integer()];
+
+      if (!symbol.defined())
+      {
+        // The term with function symbol zero marks the end of the stream.
+        return aterm();
+      }
+
+      // Read arity number of arguments from the stream and search them in the already defined set of terms.
+      std::vector<aterm> arguments(symbol.arity());
+      for (std::size_t argument = 0; argument < symbol.arity(); ++argument)
+      {
+        arguments[argument] = m_terms[m_stream.read_integer()];
+      }
+
+      // Construct the term appl from the function symbol and the read arguments.
+      m_terms.emplace_back(aterm_appl(symbol, arguments.begin(), arguments.end()));
+      auto term = m_terms.back();
+
+      if (packet == packet_type::aterm_output)
+      {
+        // This aterm was marked as output in the file, so we return it.
+        return static_cast<aterm>(term);
+      }
+    }
+    else if (packet == packet_type::aterm_int)
+    {
+      // Read the integer from the stream and construct an aterm_int.
+      std::size_t value = m_stream.read_integer();
+      m_terms.emplace_back(aterm_int(value));
+    }
+  }
+}
+
+void write_term_to_binary_stream(const aterm& t, std::ostream& os)
+{
+  binary_aterm_output output(os);
+  output.write_term(t);
+}
 
 aterm read_term_from_binary_stream(std::istream& is)
 {
-  mcrl2::utilities::ibitstream stream(is);
-
-  aterm result = read_baf(stream);
-  if (!result.defined())
-  {
-    throw mcrl2::runtime_error("Failed to read a term from the input. The file is not a proper binary file.");
-  }
-  return result;
+  binary_aterm_input input(is);
+  return input.read_term();
 }
 
 } // namespace atermpp

@@ -18,29 +18,9 @@ namespace mcrl2
 namespace utilities
 {
 
-/// \returns The number of bits needed to represent val.
-/// \details This function is equal to log2(val), except that it maps 0 to 0
-static std::size_t bit_width(std::size_t val)
-{
-  std::size_t nr_bits = 0;
-
-  if (val <= 1)
-  {
-    return 0;
-  }
-
-  while (val)
-  {
-    val>>=1;
-    nr_bits++;
-  }
-
-  return nr_bits;
-}
-
 /// \returns The number of bits needed to represent a value of type T in most significant bit encoding.
 template<typename T>
-constexpr std::size_t bits_needed()
+constexpr std::size_t integer_encoding_size()
 {
   return ((sizeof(T) + 1) * 8) / 7;
 }
@@ -80,7 +60,7 @@ private:
 
   std::size_t  bits_in_buffer = 0; ///< how many bits in bit_buffer are used.
 
-  std::uint8_t integer_buffer[bits_needed<std::size_t>()]; ///< Reserved space to space an n byte integer.
+  std::uint8_t integer_buffer[integer_encoding_size<std::size_t>()]; ///< Reserved space to space an n byte integer.
 };
 
 class ibitstream
@@ -88,11 +68,9 @@ class ibitstream
 public:
   ibitstream(std::istream& stream);
 
-  /// @brief Reads an n-bit integer from the input stream.
-  /// @param val      Variable to store integer in.
-  /// @param nr_bits  Number of bits to read from the input stream.
-  /// @return true on success, false on failure (EOF).
-  bool read_bits(std::size_t& val, const unsigned int nr_bits);
+  /// \brief Reads an n-bit integer from the input stream.
+  /// \param nr_bits  Number of bits to read from the input stream.
+  std::size_t read_bits(const unsigned int nr_bits);
 
   /// \returns A pointer to a character string, remains valid until the next readString call.
   const char* read_string();

@@ -17,6 +17,7 @@
 #include <limits>
 
 #ifdef MCRL2_PLATFORM_WINDOWS
+#include <iomanip>
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -57,14 +58,10 @@ template<typename int_t = std::size_t>
 int_t decode_variablesize_int(ibitstream& stream)
 {
   int_t value = 0;
-  for (size_t i = 0; i < bits_needed<int_t>(); i++)
+  for (size_t i = 0; i < integer_encoding_size<int_t>(); i++)
   {
     // Read the next byte from the stream.
-    std::size_t byte;
-    if (!stream.read_bits(byte, 8))
-    {
-      throw std::runtime_error("Fail to read an int from the input");
-    }
+    std::size_t byte = stream.read_bits(8);
 
     // Take 7 bits (mask 0x01111111) from byte and shift it before the bits already written to value.
     value |= (static_cast<int_t>(byte) & 127) << (7 * i);
@@ -115,11 +112,11 @@ obitstream::obitstream(std::ostream& stream)
   }
 }
 
-void obitstream::write_bits(std::size_t val, const std::size_t nr_bits)
+void obitstream::write_bits(std::size_t value, const std::size_t num_of_bits)
 {
   // Add val to the buffer by masking out additional bits and put them at left-most position free in the buffer.
-  read_write_buffer |= std::bitset<128>(val & ((static_cast<std::size_t>(1) << nr_bits) - 1)) << ((128 - bits_in_buffer) - nr_bits);
-  bits_in_buffer += nr_bits;
+  read_write_buffer |= std::bitset<128>(value & ((static_cast<std::size_t>(1) << num_of_bits) - 1)) << ((128 - bits_in_buffer) - num_of_bits);
+  bits_in_buffer += num_of_bits;
 
   // Write 8 bytes if available
   if (bits_in_buffer >= 64)
@@ -181,12 +178,10 @@ const char* ibitstream::read_string()
   return m_text_buffer.data();
 }
 
-bool ibitstream::read_bits(std::size_t& val, const unsigned int nr_bits)
+std::size_t ibitstream::read_bits(const unsigned int nr_bits)
 {
   // Read at most the number of bits of a std::size_t.
   assert(nr_bits <= static_cast<unsigned int>(std::numeric_limits<std::size_t>::digits));
-
-  val = 0;
 
   while (bits_in_buffer < nr_bits)
   {
@@ -195,22 +190,22 @@ bool ibitstream::read_bits(std::size_t& val, const unsigned int nr_bits)
 
     if(stream.fail())
     {
-      return false;
+      throw mcrl2::runtime_error("Failed to read bytes from the input file/stream.");
     }
 
     // Shift the 8 bits to the first free (120 - bits_in_buffer) position in the buffer.
-    read_write_buffer |= std::bitset<128>(byte) << (56 + 64 - bits_in_buffer);
+    read_write_buffer |= std::bitset<128>(static_cast<std::size_t>(byte)) << (56 + 64 - bits_in_buffer);
     bits_in_buffer += 8;
   }
 
   // Read nr_bits from the buffer by shifting them to the least significant bits and masking out the remaining bits.
-  val = (read_write_buffer >> (128 - nr_bits)).to_ullong();
+  std::size_t value = (read_write_buffer >> (128 - nr_bits)).to_ullong();
 
   // Shift the first bit to the first position in the buffer.
   read_write_buffer <<= nr_bits;
   bits_in_buffer -= nr_bits;
 
-  return true;
+  return value;
 }
 
 std::size_t ibitstream::read_integer()
@@ -248,6 +243,7 @@ void ibitstream::read(std::size_t size, std::uint8_t* buffer)
   for (std::size_t index = 0; index < size; ++index)
   {
     // Write a single byte for every entry in the buffer that was filled (size).
-    read_bits(reinterpret_cast<std::size_t&>(buffer[index]), 8);
+    std::size_t value = read_bits(8);
+    buffer[index] = static_cast<std::uint8_t>(value);
   }
 }
