@@ -10,7 +10,7 @@ function(add_tool_benchmark NAME TOOL INPUT OUTPUT)
   set(TEST "benchmark_${TOOL}_${NAME}")
 
   add_custom_target(${TARGET}
-    COMMAND ${BENCHMARK_SCRIPT} ${TOOL} ${ARGN} ${INPUT} ${OUTPUT}
+    COMMAND ${BENCHMARK_SCRIPT} $<TARGET_FILE:${TOOL}> ${ARGN} ${INPUT} ${OUTPUT}
   )
 
   add_test(NAME ${TEST} 
