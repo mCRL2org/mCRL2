@@ -66,7 +66,6 @@ struct top_symbol
 class top_symbols_t
 {
   public:
-    std::size_t code_width;          /**< This is the log of the number of symbols both for "symbols" and "index_into_symbols". */
     std::vector<top_symbol> symbols; /**< The set of symbols that occur directly below the top symbol.
                                         The order of the symbols in this vector is important. */
     mcrl2::utilities::indexed_set<function_symbol> index_into_symbols;
@@ -79,16 +78,12 @@ class sym_write_entry
   public:
     /// \brief The function symbol that this write entry is about
     const function_symbol id;
-    /**
-     * \brief After executing compute_num_bits, this stores the number of bits required
-     * to uniquely identify each occurrence of id.
-     */
-    std::size_t term_width;
+
     /**
      * \brief The number of unique occurrences of id, i.e. the number of term that
      * have id as their function symbol.
      */
-    std::size_t num_terms;
+    std::size_t num_terms = 0;
     /**
      * \brief Maps each argument index to a table with function symbols that may
      * occur at that index
@@ -98,13 +93,10 @@ class sym_write_entry
     /**
      * \brief Counter to indicate which argument is being worked on
      */
-    std::size_t cur_index;
+    std::size_t cur_index = 0;
 
     sym_write_entry(const function_symbol& id_)
-     : id(id_),
-       term_width(0),
-       num_terms(0),
-       cur_index(0)
+     : id(id_)
     {}
 };
 
@@ -112,15 +104,8 @@ class sym_read_entry
 {
   public:
     function_symbol sym;
-    std::size_t term_width;
     std::vector<aterm> terms;
     std::vector<std::vector<std::size_t>> topsyms;
-    std::vector<std::size_t> sym_width;
-
-    sym_read_entry():
-       term_width(0)
-    {
-    }
 };
 
 /**
@@ -274,23 +259,6 @@ static void collect_terms(const aterm& t,
 }
 
 /**
- * \brief Calculate the amount of bits required to store the top symbol for every
- * argument of every function symbol and the term for every function symbol.
- */
-static void compute_num_bits(std::vector<sym_write_entry>& sym_entries)
-{
-  for(sym_write_entry& cur_entry: sym_entries)
-  {
-    for(std::size_t cur_arg = 0; cur_arg < cur_entry.id.arity(); cur_arg++)
-    {
-      top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
-      tss.code_width = bit_width(tss.symbols.size());
-    }
-    cur_entry.term_width = bit_width(cur_entry.num_terms);
-  }
-}
-
-/**
  * Write all symbols in a term to file.
  */
 static void write_all_symbols(mcrl2::utilities::obitstream& stream, const std::vector<sym_write_entry>& sym_entries)
@@ -340,10 +308,10 @@ static void write_term(mcrl2::utilities::obitstream& stream, const aterm& t,
 
       const top_symbols_t& symbol_table = cur_entry.top_symbols.at(current.arg);
       const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item_entry.id));
-      stream.write_bits(ts.code, symbol_table.code_width);
+      stream.write_integer(ts.code);
       const sym_write_entry& arg_sym = sym_entries.at(ts.index);
       std::size_t arg_trm_idx = term_index_map.at(item.term);
-      stream.write_bits(arg_trm_idx, arg_sym.term_width);
+      stream.write_integer(arg_trm_idx);
 
       ++current.arg;
 
@@ -368,7 +336,6 @@ static void write_baf(mcrl2::utilities::obitstream& stream, const aterm& t)
   std::vector<sym_write_entry> sym_entries;
 
   collect_terms(t, symbol_index_map, term_index_map, sym_entries);
-  compute_num_bits(sym_entries);
 
   /* write header */
   stream.write_integer(0);
@@ -418,17 +385,15 @@ static void read_all_symbols(mcrl2::utilities::ibitstream& stream, std::size_t n
     {
       throw mcrl2::runtime_error("Read file: internal file error: failed to read all function symbols.");
     }
-    read_symbols[i].term_width = bit_width(val);
+
     read_symbols[i].terms = std::vector<aterm>(val);
 
     /*  Allocate space for topsymbol information */
-    read_symbols[i].sym_width = std::vector<std::size_t>(sym.arity());
     read_symbols[i].topsyms = std::vector<std::vector<std::size_t>> (sym.arity());
 
     for (std::size_t j=0; j<sym.arity(); j++)
     {
       val = stream.read_integer();
-      read_symbols[i].sym_width[j] = bit_width(val);
       read_symbols[i].topsyms[j] = std::vector<std::size_t>(val);
 
       for (std::size_t k=0; k<read_symbols[i].topsyms[j].size(); k++)
@@ -458,7 +423,6 @@ struct read_todo
 static aterm read_term(mcrl2::utilities::ibitstream& stream, sym_read_entry* sym,  std::vector<sym_read_entry>& read_symbols)
 {
   aterm result;
-  std::size_t value;
   std::stack<read_todo> stack;
   stack.emplace(sym, &result);
 
@@ -475,13 +439,14 @@ static aterm read_term(mcrl2::utilities::ibitstream& stream, sym_read_entry* sym
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
     if (current.sym->sym != detail::g_term_pool().as_int() && current.args.size() < current.sym->sym.arity())
     {
-      if (stream.read_bits(value, current.sym->sym_width[current.args.size()]) &&
-          value < current.sym->topsyms[current.args.size()].size())
+      std::size_t value = stream.read_integer();
+      if (value < current.sym->topsyms[current.args.size()].size())
       {
         sym_read_entry* arg_sym = &read_symbols[current.sym->topsyms[current.args.size()][value]];
-        if (stream.read_bits(value, arg_sym->term_width) &&
-            value < arg_sym->terms.size())
+        value = stream.read_integer();
+        if (value < arg_sym->terms.size())
         {
+
           current.callresult = &arg_sym->terms[value];
           if (!current.callresult->defined())
           {
