@@ -18,7 +18,6 @@ using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(simple_term_test)
 {
-  std::stringstream stream;
 
   // The sequence of terms to send.
   std::vector<aterm_appl> sequence;
@@ -30,8 +29,47 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
   sequence.push_back(static_cast<const aterm_appl&>(f));
   sequence.emplace_back(function_symbol("nested", 2), sequence.front(), g);
   sequence.push_back(static_cast<const aterm_appl&>(g));
-  sequence.emplace_back(function_symbol("nested", 2), sequence.front(), sequence.front());
+  sequence.emplace_back(function_symbol("deeply_nested", 3), sequence[3], sequence.front(), sequence[3]);
 
+  std::stringstream stream;
+  {
+    binary_aterm_output input(stream);
+
+    for (const auto& term : sequence)
+    {
+      input.write_term(term);
+    }
+
+    // The buffer is flushed here.
+  }
+
+  binary_aterm_input output(stream);
+
+  for (std::size_t index = 0; index < sequence.size(); ++index)
+  {
+    BOOST_CHECK(output.read_term() == sequence[index]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(transitions_test)
+{
+  std::vector<aterm_appl> sequence;
+
+  function_symbol transition("transition", 2);
+  aterm label = aterm_appl(function_symbol("state", 1), aterm_int(0));
+  aterm time = aterm_appl(function_symbol("time", 1), aterm_int(50));
+
+  aterm_list states;
+
+  for (std::size_t index = 0; index < 2; ++index)
+  {
+    sequence.emplace_back(transition, states, time);
+
+    // Increase the state labels size.
+    states.push_front(label);
+  }
+
+  std::stringstream stream;
   {
     binary_aterm_output input(stream);
 

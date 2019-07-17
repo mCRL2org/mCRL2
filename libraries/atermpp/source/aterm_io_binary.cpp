@@ -137,10 +137,10 @@ void binary_aterm_output::write_term(const aterm& term)
     else
     {
       // Take the argument according to current.arg and increase the argument index.
-      const aterm_appl& t = static_cast<const aterm_appl&>(current.term[current.arg]);
-      if (m_terms.count(t) == 0)
+      const aterm_appl& term = static_cast<const aterm_appl&>(current.term[current.arg]);
+      if (m_terms.count(term) == 0)
       {
-        stack.emplace(t);
+        stack.emplace(term);
       }
       ++current.arg;
     }
@@ -221,13 +221,15 @@ aterm binary_aterm_input::read_term()
         arguments[argument] = m_terms[m_stream.read_integer()];
       }
 
-      // Construct the term appl from the function symbol and the read arguments.
-      m_terms.emplace_back(aterm_appl(symbol, arguments.begin(), arguments.end()));
-
       if (packet == packet_type::aterm_output)
       {
         // This aterm was marked as output in the file so return it.
-        return static_cast<aterm>(m_terms.back());
+        return static_cast<aterm>(aterm_appl(symbol, arguments.begin(), arguments.end()));
+      }
+      else
+      {
+        // Construct the term appl from the function symbol and the already read arguments and insert it.
+        m_terms.emplace_back(aterm_appl(symbol, arguments.begin(), arguments.end()));
       }
     }
     else if (packet == packet_type::aterm_int)
