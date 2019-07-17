@@ -93,7 +93,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
     probabilistic_lts(const probabilistic_lts& l)
       : super(l),
         m_probabilistic_states(l.m_probabilistic_states)
-    {};
+    {}
 
     /** \brief Swap this lts with the supplied supplied LTS.
      * \param[in] l The LTS to swap. */
@@ -101,7 +101,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
     {
       super::swap(l);
       m_probabilistic_states.swap(l.m_probabilistic_states);
-    };
+    }
 
     /** \brief Gets the initial state number of this LTS.
       * \return The number of the initial state of this LTS. */
