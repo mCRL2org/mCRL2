@@ -53,7 +53,8 @@ static size_t encode_variablesize_int(int_t value, uint8_t* output)
 
 /// \brief Decodes an unsigned variable-length integer using the MSB algorithm.
 /// \param stream The stream from which the bytes for this value are read.
-/// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/
+/// \details Implementation taken from https://techoverflow.net/2013/01/25/efficiently-encoding-variable-length-integers-in-cc/, but converted to a streaming
+///          method.
 template<typename int_t = std::size_t>
 int_t decode_variablesize_int(ibitstream& stream)
 {
@@ -102,6 +103,7 @@ static void set_stream_binary(const std::string& name, FILE* handle)
 obitstream::obitstream(std::ostream& stream)
   : stream(stream)
 {
+  // Ensures that the given stream is changed to binary mode.
   if (stream.rdbuf() == std::cout.rdbuf())
   {
     set_stream_binary("cout", stdout);
@@ -115,14 +117,14 @@ obitstream::obitstream(std::ostream& stream)
 void obitstream::write_bits(std::size_t value, const std::size_t num_of_bits)
 {
   // Add val to the buffer by masking out additional bits and put them at left-most position free in the buffer.
-  read_write_buffer |= std::bitset<128>(value & ((static_cast<std::size_t>(1) << num_of_bits) - 1)) << ((128 - bits_in_buffer) - num_of_bits);
+  write_buffer |= std::bitset<128>(value & ((static_cast<std::size_t>(1) << num_of_bits) - 1)) << ((128 - bits_in_buffer) - num_of_bits);
   bits_in_buffer += num_of_bits;
 
   // Write 8 bytes if available
   if (bits_in_buffer >= 64)
   {
-    unsigned long long write_value = (read_write_buffer >> 64).to_ullong();
-    read_write_buffer <<= 64;
+    unsigned long long write_value = (write_buffer >> 64).to_ullong();
+    write_buffer <<= 64;
     bits_in_buffer -= 64;
 
     for (int32_t i = 7; i >= 0; --i)
@@ -152,6 +154,7 @@ void obitstream::write_integer(const std::size_t val)
 ibitstream::ibitstream(std::istream& stream)
   : stream(stream)
 {
+  // Ensures that the given stream is changed to binary mode.
   if (stream.rdbuf() == std::cin.rdbuf())
   {
     set_stream_binary("cin", stdin);
@@ -194,15 +197,15 @@ std::size_t ibitstream::read_bits(const unsigned int nr_bits)
     }
 
     // Shift the 8 bits to the first free (120 - bits_in_buffer) position in the buffer.
-    read_write_buffer |= std::bitset<128>(static_cast<std::size_t>(byte)) << (56 + 64 - bits_in_buffer);
+    read_buffer |= std::bitset<128>(static_cast<std::size_t>(byte)) << (56 + 64 - bits_in_buffer);
     bits_in_buffer += 8;
   }
 
   // Read nr_bits from the buffer by shifting them to the least significant bits and masking out the remaining bits.
-  std::size_t value = (read_write_buffer >> (128 - nr_bits)).to_ullong();
+  std::size_t value = (read_buffer >> (128 - nr_bits)).to_ullong();
 
   // Shift the first bit to the first position in the buffer.
-  read_write_buffer <<= nr_bits;
+  read_buffer <<= nr_bits;
   bits_in_buffer -= nr_bits;
 
   return value;
@@ -242,7 +245,7 @@ void ibitstream::read(std::size_t size, std::uint8_t* buffer)
 {
   for (std::size_t index = 0; index < size; ++index)
   {
-    // Write a single byte for every entry in the buffer that was filled (size).
+    // Read a single byte for every entry into the buffer that was filled (size).
     std::size_t value = read_bits(8);
     buffer[index] = static_cast<std::uint8_t>(value);
   }
