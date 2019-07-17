@@ -190,6 +190,17 @@ BOOST_AUTO_TEST_CASE(equality_substitution_test)
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
+BOOST_AUTO_TEST_CASE(test_ticket_1486)
+{
+  std::string dataspec_text = "sort L = Int;";
+  std::string variable_text = "y : Nat;";
+  std::string expression_text = "y + 20 == 25";
+  std::string free_variable_text = "y : Nat;";
+  std::size_t number_of_solutions = 1;
+  bool more_solutions_possible = false;
+  enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
+}
+
 BOOST_AUTO_TEST_CASE(tree_test)
 {
   std::string dataspec_text =
