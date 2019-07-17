@@ -55,7 +55,7 @@ enum class packet_type
   aterm_int,
 };
 
-/// \brief
+/// \brief The number of bits needed to store an element of packet_type.
 constexpr std::size_t packet_bits = 2;
 
 binary_aterm_output::binary_aterm_output(std::ostream& stream)
@@ -72,11 +72,12 @@ binary_aterm_output::binary_aterm_output(std::ostream& stream)
 
 binary_aterm_output::~binary_aterm_output()
 {
+  // Write the end of the stream.
   m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm), packet_bits);
   m_stream.write_integer(0);
 }
 
-/// \brief Keep track of the
+/// \brief Keep track of the remaining arguments that still has to be processed for this term.
 struct write_todo
 {
   const aterm_appl& term;
@@ -91,7 +92,7 @@ void binary_aterm_output::write_term(const aterm& term)
 {
   assert(!term.type_is_int());
 
-  // Traverse the term bottom up and store the subterms before the actual term.
+  // Traverse the term bottom up and store the subterms (and function symbol) before the actual term.
   std::stack<write_todo> stack;
   stack.emplace(static_cast<const aterm_appl&>(term));
 
@@ -100,9 +101,12 @@ void binary_aterm_output::write_term(const aterm& term)
     auto& current = stack.top();
     if (current.arg >= current.term.function().arity())
     {
-      // Write the packet identifier, followed by the function symbol and its arguments.
+      // Indicates that this term is output and not a subterm.
+      bool is_output = stack.size() == 1;
+
       if (current.term.type_is_int())
       {
+        // Write the packet identifier of an aterm_int followed by its value.
         m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm_int), packet_bits);
         m_stream.write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
       }
@@ -111,7 +115,8 @@ void binary_aterm_output::write_term(const aterm& term)
         // We are finished processing the arguments of this term (arg >= arity)
         std::size_t symbol_index = write_function_symbol(current.term.function());
 
-        m_stream.write_bits(static_cast<std::size_t>(stack.size() == 1 ? packet_type::aterm_output : packet_type::aterm), packet_bits);
+        // Write the packet identifier, followed by the indices of its function symbol and arguments.
+        m_stream.write_bits(static_cast<std::size_t>(is_output ? packet_type::aterm_output : packet_type::aterm), packet_bits);
         m_stream.write_integer(symbol_index);
         for (const auto& argument : current.term)
         {
@@ -170,7 +175,7 @@ std::size_t binary_aterm_output::write_function_symbol(const function_symbol& sy
   }
   else
   {
-    // The function symbol has not been written yet, write it now and insert its index.
+    // The function symbol has not been written yet, write it now and return its index.
     m_stream.write_bits(static_cast<std::size_t>(packet_type::function_symbol), packet_bits);
     m_stream.write_string(symbol.name());
     m_stream.write_integer(symbol.arity());
@@ -214,12 +219,11 @@ aterm binary_aterm_input::read_term()
 
       // Construct the term appl from the function symbol and the read arguments.
       m_terms.emplace_back(aterm_appl(symbol, arguments.begin(), arguments.end()));
-      auto term = m_terms.back();
 
       if (packet == packet_type::aterm_output)
       {
-        // This aterm was marked as output in the file, so we return it.
-        return static_cast<aterm>(term);
+        // This aterm was marked as output in the file so return it.
+        return static_cast<aterm>(m_terms.back());
       }
     }
     else if (packet == packet_type::aterm_int)

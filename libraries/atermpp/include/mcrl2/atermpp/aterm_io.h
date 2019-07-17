@@ -23,14 +23,27 @@ namespace atermpp
 bool is_binary_aterm_stream(std::istream& is);
 bool is_binary_aterm_file(const std::string& filename);
 
-/// \brief Streams terms to a stream in binary aterm format.
+/// \brief Writes terms in a streamable binary aterm format to a stream.
+/// \details The streamable aterm format:
+///
+///          Aterms (and function symbols) are written as packets (with an identifier in the header) and their
+///          indices are derived from the number of aterms, resp. symbols, that occur before them in this stream. For each term
+///          we first ensure that its arguments and symbol are written to the stream (avoiding duplicates). Then its
+///          symbol index followed by a number of indices (depending on the arity) for its argments are written as integers.
+///          Packet headers also contain a special value to indicate that the read term should be visible as output as opposed to
+///          being only a subterm.
+///          The start of the stream is a zero followed by a header and a version and a term with function symbol index zero
+///          indicates the end of the stream.
+///
 class binary_aterm_output
 {
 public:
+  /// \brief Provide the output stream to which the terms are written.
   binary_aterm_output(std::ostream& os);
   ~binary_aterm_output();
 
-  /// \brief Write the given term to this stream.
+  /// \brief Write the given term to the stream, this aterm (but not its subterms) are also returned from
+  ///        the corresponding binary_aterm_input::read_term() call.
   void write_term(const aterm& term);
 
 private:
@@ -43,20 +56,22 @@ private:
   mcrl2::utilities::indexed_set_large<function_symbol> m_function_symbol; ///< An index of already written function symbols.
 };
 
-/// \brief Streams terms to a stream in binary aterm format.
+/// \brief Reads terms from a stream in the steamable binary aterm format.
 class binary_aterm_input
 {
 public:
+  /// \brief Provide the input stream from which terms are read.
   binary_aterm_input(std::istream& is);
 
-  /// \brief Write a single term.
+  /// \brief Reads a single term from this stream.
+  /// \details The default constructed term aterm() indicates the end of the stream.
   aterm read_term();
 
 private:
   mcrl2::utilities::ibitstream m_stream;
 
-  std::deque<aterm> m_terms; ///< An index of already written terms.
-  std::deque<function_symbol> m_function_symbol; ///< An index of already written function symbols.
+  std::deque<aterm> m_terms; ///< An index of read terms.
+  std::deque<function_symbol> m_function_symbol; ///< An index of read function symbols.
 };
 
 /// \brief Writes term t to a stream in binary aterm format.
