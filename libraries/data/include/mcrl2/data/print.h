@@ -1667,7 +1667,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_unary_data_operation(x, "-");
     }
-    // TODO: handle @dub
     else if (sort_int::is_plus_application(x))
     {
       print_binary_data_operation(x, " + ");
@@ -2314,4 +2313,3 @@ std::string pp(const T& x)
 } // namespace mcrl2
 
 #endif
-
