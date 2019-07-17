@@ -1621,6 +1621,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().apply(*x.begin());
     }
     // TODO: handle @dub
+    // TODO: handle @dubsucc
     else if (sort_nat::is_plus_application(x))
     {
       print_binary_data_operation(x, " + ");

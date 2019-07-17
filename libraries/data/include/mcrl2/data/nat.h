@@ -650,6 +650,58 @@ namespace mcrl2 {
         return is_application(e) && is_dub_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
+      /// \brief Generate identifier \@dubsucc
+      /// \return Identifier \@dubsucc
+      inline
+      core::identifier_string const& dubsucc_name()
+      {
+        static core::identifier_string dubsucc_name = core::identifier_string("@dubsucc");
+        return dubsucc_name;
+      }
+
+      /// \brief Constructor for function symbol \@dubsucc
+      
+      /// \return Function symbol dubsucc
+      inline
+      function_symbol const& dubsucc()
+      {
+        static function_symbol dubsucc(dubsucc_name(), make_function_sort(nat(), sort_pos::pos()));
+        return dubsucc;
+      }
+
+      /// \brief Recogniser for function \@dubsucc
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@dubsucc
+      inline
+      bool is_dubsucc_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == dubsucc();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@dubsucc
+      
+      /// \param arg0 A data expression
+      /// \return Application of \@dubsucc to a number of arguments
+      inline
+      application dubsucc(const data_expression& arg0)
+      {
+        return sort_nat::dubsucc()(arg0);
+      }
+
+      /// \brief Recogniser for application of \@dubsucc
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol dubsucc to a
+      ///     number of arguments
+      inline
+      bool is_dubsucc_application(const atermpp::aterm_appl& e)
+      {
+        return is_application(e) && is_dubsucc_function_symbol(atermpp::down_cast<application>(e).head());
+      }
+
       /// \brief Generate identifier +
       /// \return Identifier +
       inline
@@ -1720,6 +1772,7 @@ namespace mcrl2 {
         result.push_back(sort_nat::succ(nat()));
         result.push_back(sort_nat::pred());
         result.push_back(sort_nat::dub());
+        result.push_back(sort_nat::dubsucc());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
@@ -1812,7 +1865,7 @@ namespace mcrl2 {
       inline
       const data_expression& arg(const data_expression& e)
       {
-        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
+        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_dubsucc_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -1863,8 +1916,9 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list(), succ(c0()), sort_pos::c1()));
         result.push_back(data_equation(variable_list({vp}), succ(cnat(vp)), succ(vp)));
         result.push_back(data_equation(variable_list(), pred(sort_pos::c1()), c0()));
-        result.push_back(data_equation(variable_list({vp}), pred(sort_pos::cdub(sort_bool::true_(), vp)), cnat(sort_pos::cdub(sort_bool::false_(), vp))));
-        result.push_back(data_equation(variable_list({vp}), pred(sort_pos::cdub(sort_bool::false_(), vp)), dub(sort_bool::true_(), pred(vp))));
+        result.push_back(data_equation(variable_list({vb, vp}), pred(sort_pos::cdub(vb, vp)), cnat(if_(vb, sort_pos::cdub(sort_bool::false_(), vp), dubsucc(pred(vp))))));
+        result.push_back(data_equation(variable_list(), dubsucc(c0()), sort_pos::c1()));
+        result.push_back(data_equation(variable_list({vp}), dubsucc(cnat(vp)), sort_pos::cdub(sort_bool::true_(), vp)));
         result.push_back(data_equation(variable_list(), dub(sort_bool::false_(), c0()), c0()));
         result.push_back(data_equation(variable_list(), dub(sort_bool::true_(), c0()), cnat(sort_pos::c1())));
         result.push_back(data_equation(variable_list({vb, vp}), dub(vb, cnat(vp)), cnat(sort_pos::cdub(vb, vp))));
