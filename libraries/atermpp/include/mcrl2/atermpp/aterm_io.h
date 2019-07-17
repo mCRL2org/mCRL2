@@ -44,6 +44,8 @@ public:
 
   /// \brief Write the given term to the stream, this aterm (but not its subterms) are also returned from
   ///        the corresponding binary_aterm_input::read_term() call.
+  /// \details The term written to the stream is not shared if it occurs as the argument of another term, but therefore
+  ///          it is also not stored internally.
   void write_term(const aterm& term);
 
 private:

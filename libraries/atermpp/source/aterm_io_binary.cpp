@@ -126,7 +126,11 @@ void binary_aterm_output::write_term(const aterm& term)
         }
       }
 
-      m_terms.insert(current.term);
+      if (!is_output)
+      {
+        // Output terms are not shared and thus can be forgotten.
+        m_terms.insert(current.term);
+      }
 
       stack.pop();
     }
