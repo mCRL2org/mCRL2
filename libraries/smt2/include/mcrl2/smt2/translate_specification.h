@@ -242,9 +242,48 @@ void translate_mapping(const data::function_symbol& f, OutputStream& out, const 
 
 template <typename OutputStream>
 inline
-void translate_equation(const data::data_equation& eq, OutputStream& out, const native_translations& nt, bool check_native = true)
+void translate_native_mappings(OutputStream& out, const native_translations& nt,
+                       const std::map<data::structured_sort, std::string>& snm)
 {
-  if(is_higher_order(eq) || (check_native && nt.has_native_definition(eq)))
+  out << "(define-funs-rec (\n";
+  for(const auto& f: nt.mappings)
+  {
+    const data::function_symbol& mapping = f.first;
+    const data::data_equation& eqn = f.second;
+    if(is_higher_order(mapping))
+    {
+      continue;
+    }
+
+    out << "(" << translate_symbol(mapping, nt) << " ";
+    data::data_expression condition = declare_variables_binder(eqn.variables(), out, nt);
+    out << " ";
+    translate_sort_expression(mapping.sort().target_sort(), out, nt, snm);
+    out << ")\n";
+  }
+  out << ")\n";
+
+  out << "(\n";
+  for(const auto& f: nt.mappings)
+  {
+    const data::function_symbol& mapping = f.first;
+    const data::data_equation& eqn = f.second;
+    if(is_higher_order(mapping))
+    {
+      continue;
+    }
+
+    translate_data_expression(eqn.rhs(), out, nt);
+    out << "\n";
+  }
+  out << "))\n";
+}
+
+template <typename OutputStream>
+inline
+void translate_equation(const data::data_equation& eq, OutputStream& out, const native_translations& nt)
+{
+  if(is_higher_order(eq) || nt.has_native_definition(eq))
   {
     return;
   }
@@ -267,6 +306,8 @@ void translate_data_specification(const data::data_specification& dataspec, Outp
   data::set_identifier_generator id_gen;
   // Inline struct definitions are anonymous, we keep track of a newly-generate name for each
   std::map<data::structured_sort, std::string> struct_name_map;
+
+  // Translate sorts
   detail::translate_sort_definitions(dataspec, o, nt, id_gen, struct_name_map);
   for(const data::alias& s: dataspec.user_defined_aliases())
   {
@@ -277,21 +318,18 @@ void translate_data_specification(const data::data_specification& dataspec, Outp
     }
     detail::translate_alias(s, dataspec, o, nt, struct_name_map);
   }
+
+  // Translate mappings
   for(const data::function_symbol& f: dataspec.mappings())
   {
     detail::translate_mapping(f, o, nt, struct_name_map);
   }
-  for(const auto& f: nt.mappings)
-  {
-    detail::translate_mapping(f.first, o, nt, struct_name_map, false);
-  }
+  detail::translate_native_mappings(o, nt, struct_name_map);
+
+  // Translate remaining equations
   for(const data::data_equation& eq: dataspec.equations())
   {
     detail::translate_equation(eq, o, nt);
-  }
-  for(const auto& f: nt.mappings)
-  {
-    detail::translate_equation(f.second, o, nt, false);
   }
 }
 
