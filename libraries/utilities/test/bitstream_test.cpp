@@ -13,28 +13,32 @@
 
 using namespace mcrl2::utilities;
 
-BOOST_AUTO_TEST_CASE(test_connection)
+BOOST_AUTO_TEST_CASE(fixed_sequence_test)
 {
-  {
-    std::ofstream file("./bitstream.test", std::ios_base::binary);
-    if (file.fail())
-    {
-      throw std::runtime_error("Stop");
-    }
+  std::stringstream stream;
 
-    obitstream input(file);
+  {
+    obitstream input(stream);
     input.write_integer(50);
+    input.write_bits(7, 3);
+
+    input.write_string("test");
     input.write_integer(1337);
 
     input.write_string("function_symbol");
     input.write_integer(5);
+
+    // The buffer is flushed here.
   }
 
-  // Check the results.
-  std::ifstream file("./bitstream.test", std::ios_base::binary);
-  ibitstream output(file);
+  // Check the resulting stream.
+  ibitstream output(stream);
   BOOST_CHECK(output.read_integer() == 50);
+  BOOST_CHECK(output.read_bits(3) == 7);
+
+  BOOST_CHECK(strcmp(output.read_string(), "test") == 0);
   BOOST_CHECK(output.read_integer() == 1337);
+
   BOOST_CHECK(strcmp(output.read_string(), "function_symbol") == 0);
   BOOST_CHECK(output.read_integer() == 5);
 }
