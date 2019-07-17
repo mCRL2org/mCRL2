@@ -29,7 +29,10 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     min <"minimum">:Nat <"left"> #Nat <"right">->Nat;
     succ <"succ">:Nat <"arg">->Pos;
     pred <"pred">:Pos <"arg">->Nat;
+% Double and conditionally add 1
     @dub <"dub">:Bool <"left"> # Nat <"right"> -> Nat;
+% Double and add 1
+    @dubsucc <"dubsucc">:Nat <"arg"> -> Pos;
     + <"plus">:Pos <"left"> #Nat <"right">->Pos;
     + <"plus">:Nat <"left"> #Pos <"right">->Pos;
     + <"plus">:Nat <"left"> #Nat <"right">->Nat;
@@ -86,8 +89,11 @@ eqn ==(@c0, @cNat(p)) = false;
 % The rule below is essential for the enumeration of lists.
 %    succ(succ(n)) = @cDub(!(@even(n)), succ(div(n,@cDub(false,@c1))));
     pred(@c1) = @c0;
-    pred(@cDub(true,p)) = @cNat(@cDub(false,p));
-    pred(@cDub(false,p)) = @dub(true,pred(p));
+% Pulling the @cNat outside of the if, instead of using pattern matching,
+% helps the enumerator
+    pred(@cDub(b,p)) = @cNat(if(b,@cDub(false,p),@dubsucc(pred(p))));
+    @dubsucc(@c0) = @c1;
+    @dubsucc(@cNat(p)) = @cDub(true,p);
     @dub(false,@c0) = @c0;
     @dub(true,@c0) = @cNat(@c1);
     @dub(b,@cNat(p)) = @cNat(@cDub(b,p));
