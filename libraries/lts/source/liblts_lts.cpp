@@ -36,6 +36,7 @@ typedef term_list<data::function_symbol> boolean_list_t;         // A list with 
 
 // Special function symbols to indicate the type of written terms.
 
+// A header consisting of the data_specification, the process parameters, the list of action labels and the initial state.
 static atermpp::function_symbol lts_header()
 {
   static atermpp::function_symbol lts_h("labelled_transition_system", 4);
@@ -45,6 +46,12 @@ static atermpp::function_symbol lts_header()
 static atermpp::function_symbol transition_header()
 {
   static atermpp::function_symbol t_h("transition", 3);
+  return t_h;
+}
+
+static atermpp::function_symbol probabilistic_transition_header()
+{
+  static atermpp::function_symbol t_h("probabilistic_transition", 3);
   return t_h;
 }
 
@@ -109,6 +116,36 @@ static void set_initial_state(lts_lts_t& lts, const probabilistic_lts_lts_t::pro
 static void set_initial_state(probabilistic_lts_lts_t& lts, const probabilistic_lts_lts_t::probabilistic_state_t& initial_state)
 {
   lts.set_initial_probabilistic_state(initial_state);
+}
+
+static aterm make_transition(const lts_lts_t& lts, const transition& trans)
+{
+  return atermpp::aterm_appl(transition_header(),
+    aterm_int(trans.from()),
+    aterm_int(lts.apply_hidden_label_map(trans.label())),
+    aterm_int(trans.to()));
+}
+
+static aterm make_transition(const probabilistic_lts_lts_t& lts, const transition& trans)
+{
+  const probabilistic_lts_lts_t::probabilistic_state_t& probabilistic_state = lts.probabilistic_state(trans.to());
+
+  if (probabilistic_state.size() == 1)
+  {
+    // Actually a non_probabilistic transition.
+    return atermpp::aterm_appl(transition_header(),
+      aterm_int(trans.from()),
+      aterm_int(lts.apply_hidden_label_map(trans.label())),
+      aterm_int(probabilistic_state.begin()->state()));
+  }
+  else
+  {
+    return atermpp::aterm_appl(probabilistic_transition_header(),
+      aterm_int(trans.from()),
+      aterm_int(lts.apply_hidden_label_map(trans.label())),
+      state_probability_list(probabilistic_state));
+  }
+
 }
 
 static void add_transition(lts_lts_t& lts, const aterm_appl& appl)
@@ -264,9 +301,9 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
       }
     }
 
-    for (auto& transition : lts.get_transitions())
+    for (auto& trans : lts.get_transitions())
     {
-      stream.write_term(atermpp::aterm_appl(transition_header(), aterm_int(transition.from()), aterm_int(transition.label()), aterm_int(transition.to())));
+      stream.write_term(make_transition(lts, trans));
     }
 
     // Write the header of the labelled transition system at the end, because the initial state must be set of adding the transitions.
