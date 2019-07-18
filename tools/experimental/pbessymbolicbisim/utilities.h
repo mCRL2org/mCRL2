@@ -11,6 +11,9 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_UTILITIES_H
 #define MCRL2_PBESSYMBOLICBISIM_UTILITIES_H
 
+#include "mcrl2/smt/solver.h"
+#include "mcrl2/smt/translation_error.h"
+
 namespace mcrl2
 {
 namespace data
@@ -32,7 +35,7 @@ struct data_manipulators
 {
   rewriter rewr;
   rewriter proving_rewr;
-  std::shared_ptr<smt::solver> smt_solver;
+  std::shared_ptr<smt::smt_solver> smt_solver;
   std::shared_ptr<std::map<pbes_system::propositional_variable, simplifier*>> simpl;
   bool contains_reals;
 
@@ -41,21 +44,15 @@ struct data_manipulators
   data_manipulators(const rewriter& r, const rewriter& pr, const data_specification& s)
   : rewr(r)
   , proving_rewr(pr)
-  , smt_solver(std::make_shared<smt::solver>(new smt::smt4_data_specification(s)))
+  , smt_solver(std::make_shared<smt::smt_solver>(s))
   , simpl(std::make_shared<std::map<pbes_system::propositional_variable, simplifier*>>())
   {}
 
   bool is_satisfiable(const variable_list& vars, const data_expression& expr) const
   {
-    smt::smt_problem problem;
-    for(const variable& v: vars)
-    {
-      problem.add_variable(v);
-    }
-    problem.add_assertion(expr);
     try
     {
-      return smt_solver->solve(problem);
+      return smt_solver->solve(vars, expr);
     }
     catch(const smt::translation_error&)
     {}

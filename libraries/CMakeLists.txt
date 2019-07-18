@@ -15,7 +15,6 @@ set(MCRL2_LIBRARIES
   pg
   process
   smt
-  smt2
   trace
   utilities
 )

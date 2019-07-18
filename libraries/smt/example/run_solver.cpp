@@ -12,32 +12,50 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/smt/cvc4.h"
+#include "mcrl2/smt/translate_expression.h"
+#include "mcrl2/smt/translate_specification.h"
+#include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/solver.h"
 
 #include <vector>
+#include <sstream>
 
 using namespace mcrl2;
 
 int main(int /*argc*/, char** /*argv*/)
 {
   // note that the newline characters are significant
-  data::data_specification data_spec;
-  smt::smt4_data_specification* smt_data_spec = new smt::smt4_data_specification(data_spec);
-  smt::solver solver(smt_data_spec);
-  data::variable x("x", data::sort_pos::pos());
+  data::data_specification data_spec = data::parse_data_specification(
+                                   "sort                      \n"
+                                   "  Bit   = struct b0 | b1; \n"
+                                   "                          \n"
+                                   "map                       \n"
+                                   "  invert: Bit -> Bit;     \n"
+                                   "                          \n"
+                                   "eqn                       \n"
+                                   "  invert(b1)= b0;         \n"
+                                   "  invert(b0)= b1;         \n"
+                                 );
+  smt::native_translations ntm = smt::initialise_native_translation(data_spec);
 
-  smt::smt_problem problem1;
-  problem1.add_variable(x);
-  problem1.add_assertion(data::parse_data_expression("2 + x == 5", data::variable_vector({x})));
-  std::cout << "Result of checking 'exists x:Pos. 2 + x == 5': " << std::boolalpha << solver.solve(problem1) << std::endl;
+  std::ostringstream out;
+  smt::translate_data_specification(data_spec, out, ntm);
+  std::cout << out.str() << std::endl;
 
-  smt::smt_problem problem2;
-  problem2.add_variable(x);
-  problem2.add_assertion(data::parse_data_expression("5 + x == 2", data::variable_vector({x})));
-  std::cout << "Result of checking 'exists x:Pos. 5 + x == 2': " << std::boolalpha << solver.solve(problem2) << std::endl;
+  smt::smt_solver solv(data_spec);
 
-  delete smt_data_spec;
+  bool result;
+  data::variable vp1("p1", data::sort_pos::pos());
+  data::variable vp2("p2", data::sort_pos::pos());
+  data::variable_list pos_vars({vp1, vp2});
+  result = solv.solve(pos_vars, data::parse_data_expression("(p1 == p2 + 2) && (p1 == p2 * 2)", pos_vars, data_spec));
+  std::cout << "result " << std::boolalpha << result << std::endl;
+
+  data::variable vb1 = data::parse_variable("bit1: Bit", data_spec);
+  data::variable vb2 = data::parse_variable("bit2: Bit", data_spec);
+  data::variable_list bit_vars({vb1, vb2});
+  result = solv.solve(data::variable_list(), data::parse_data_expression("forall bit1: Bit. invert(invert(bit1)) == bit1", data::variable_list(), data_spec));
+  std::cout << "result " << std::boolalpha << result << std::endl;
 
   return 0;
 }

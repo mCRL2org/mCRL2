@@ -36,8 +36,8 @@
 #include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/smt2/solver.h"
-#include "mcrl2/smt2/translation_error.h"
+#include "mcrl2/smt/solver.h"
+#include "mcrl2/smt/translation_error.h"
 #include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/utilities/logger.h"
 

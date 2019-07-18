@@ -12,7 +12,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/smt2/solver.h"
+#include "mcrl2/smt/solver.h"
 
 #include <vector>
 #include <sstream>

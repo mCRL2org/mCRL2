@@ -13,14 +13,20 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "example_smt")
 
-set(PROJECT_NAME "${PREFIX}_run_solver")
-project( ${PROJECT_NAME} )
+file(GLOB TERM_OBJS "*.cpp")
 
-add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
-      run_solver.cpp
-)
+foreach( OBJ ${TERM_OBJS} )
+  get_filename_component(result "${OBJ}" NAME_WE)
+  set(PROJECT_NAME "${PREFIX}_${result}")
+  project( ${PROJECT_NAME} )
 
-target_link_libraries(${PROJECT_NAME}
-   mcrl2_data
-   mcrl2_smt
-)
+  add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
+        ${OBJ}
+  )
+
+  target_link_libraries(${PROJECT_NAME}
+     mcrl2_data
+     mcrl2_smt
+  )
+
+endforeach( OBJ )
