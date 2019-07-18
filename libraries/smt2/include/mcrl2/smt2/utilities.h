@@ -40,6 +40,7 @@ std::string translate_identifier(const core::identifier_string& id)
   return translate_identifier(core::pp(id));
 }
 
+inline
 std::string translate_symbol(const data::function_symbol& f, const native_translations& nt)
 {
   auto find_result = nt.symbols.find(f);
@@ -49,6 +50,16 @@ std::string translate_symbol(const data::function_symbol& f, const native_transl
 inline
 std::string make_projection_name(const data::function_symbol& cons, std::size_t i, const native_translations& nt)
 {
+  // Projections for natively defined sort List
+  if(data::pp(cons) == "|>")
+  {
+    return i == 0 ? "head" : "tail";
+  }
+  // Projection for all constructors that are mapped to @id, such as @cNat and @cInt
+  if(translate_symbol(cons, nt) == "@id")
+  {
+    return "@id";
+  }
   return "@proj-" + translate_symbol(cons, nt) + "-" + std::to_string(i);
 }
 
