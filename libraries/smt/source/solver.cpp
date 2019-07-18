@@ -21,10 +21,10 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/smt2/translate_expression.h"
-#include "mcrl2/smt2/translate_specification.h"
-#include "mcrl2/smt2/solver.h"
-#include "mcrl2/smt2/unfold_pattern_matching.h"
+#include "mcrl2/smt/translate_expression.h"
+#include "mcrl2/smt/translate_specification.h"
+#include "mcrl2/smt/solver.h"
+#include "mcrl2/smt/unfold_pattern_matching.h"
 #include "mcrl2/utilities/logger.h"
 
 #ifdef MCRL2_PLATFORM_WINDOWS

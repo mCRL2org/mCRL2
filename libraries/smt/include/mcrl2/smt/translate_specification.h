@@ -14,10 +14,10 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/smt2/native_translation.h"
-#include "mcrl2/smt2/translate_expression.h"
-#include "mcrl2/smt2/translate_sort.h"
-#include "mcrl2/smt2/utilities.h"
+#include "mcrl2/smt/native_translation.h"
+#include "mcrl2/smt/translate_expression.h"
+#include "mcrl2/smt/translate_sort.h"
+#include "mcrl2/smt/utilities.h"
 
 namespace mcrl2
 {

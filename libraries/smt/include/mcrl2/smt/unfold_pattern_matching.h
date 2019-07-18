@@ -17,7 +17,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
 #include "mcrl2/data/substitutions/variable_substitution.h"
-#include "mcrl2/smt2/native_translation.h"
+#include "mcrl2/smt/native_translation.h"
 
 namespace mcrl2
 {

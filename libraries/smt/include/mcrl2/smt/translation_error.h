@@ -23,7 +23,7 @@ class translation_error : public std::runtime_error
 {
   public:
     translation_error(const std::string& message) : std::runtime_error(message)
-    { assert(false); }
+    {}
 };
 
 }

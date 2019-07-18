@@ -10,9 +10,9 @@
 #define MCRL2_SMT_TRANSLATE_SORT_H
 
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/smt2/native_translation.h"
-#include "mcrl2/smt2/translation_error.h"
-#include "mcrl2/smt2/utilities.h"
+#include "mcrl2/smt/native_translation.h"
+#include "mcrl2/smt/translation_error.h"
+#include "mcrl2/smt/utilities.h"
 
 namespace mcrl2
 {
