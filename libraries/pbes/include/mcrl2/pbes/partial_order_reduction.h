@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H
 #define MCRL2_PBES_PARTIAL_ORDER_REDUCTION_H
 
+#include <iomanip>
 #include <boost/dynamic_bitset.hpp>
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"

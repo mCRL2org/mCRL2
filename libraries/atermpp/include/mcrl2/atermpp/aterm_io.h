@@ -12,7 +12,6 @@
 #ifndef MCRL2_ATERMPP_ATERM_IO_H
 #define MCRL2_ATERMPP_ATERM_IO_H
 
-#include <iomanip>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_int.h"
 
