@@ -9,9 +9,10 @@
 /// \file bes_test.cpp
 /// \brief Some tests for BES.
 
+#define BOOST_TEST_MODULE bes_test
 #include "mcrl2/bes/bdd_expression.h"
 #include "mcrl2/bes/print.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::bdd;
@@ -38,9 +39,7 @@ void test_bdd()
   BOOST_CHECK(b3.name() == core::identifier_string("b3"));
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_bdd();
-
-  return 0;
 }

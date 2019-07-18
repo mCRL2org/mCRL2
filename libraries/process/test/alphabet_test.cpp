@@ -9,6 +9,7 @@
 /// \file alphabet_test.cpp
 /// \brief Test for alphabet reduction.
 
+#define BOOST_TEST_MODULE alphabet_test
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
@@ -373,7 +374,3 @@ BOOST_AUTO_TEST_CASE(test_alphabet_new)
   alphabet_reduce(procspec);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return EXIT_SUCCESS;
-}

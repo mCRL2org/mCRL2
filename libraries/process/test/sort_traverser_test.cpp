@@ -6,13 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file process_test.cpp
+/// \file sort_traverser_test.cpp
 /// \brief Add your file description here.
+
+#define BOOST_TEST_MODULE sort_traverser_test
 
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <set>
 #include <string>
@@ -161,7 +163,7 @@ void test_process(const std::string& text)
   std::cerr << "sorts: " << data::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_process(CASE1);
   test_process(CASE2);
@@ -176,7 +178,5 @@ int test_main(int argc, char* argv[])
   test_process(SPEC1);
   test_process(SPEC2);
   test_process(ABS_SPEC_LINEARIZED);
-
-  return 0;
 }
 

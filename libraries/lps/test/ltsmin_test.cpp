@@ -9,10 +9,11 @@
 /// \file ltsmin_test.cpp
 /// \brief Test for the pins class that connects mCRL2 with LTSMin (http://fmt.cs.utwente.nl/tools/ltsmin/).
 
+#define BOOST_TEST_MODULE ltsmin_test
 #include <cstdio>
 #include <iostream>
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
@@ -343,10 +344,9 @@ void test_serialisation()
   std::remove(filename.c_str());
 }
 
-int test_main(int, char**)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_dependency_matrix();
   test_serialisation();
   test_ltsmin();
-  return 0;
 }

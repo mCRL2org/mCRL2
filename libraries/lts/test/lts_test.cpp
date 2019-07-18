@@ -9,9 +9,10 @@
 /// \file lts_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE lts_test
 #include <iostream>
 #include <sstream>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_aut.h"
 
@@ -857,7 +858,7 @@ void test_is_deterministic()
   is_deterministic_test2();
 }
 
-int test_main(int /* argc*/, char** /* argv */)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   reduce_simple_loop();
   reduce_simple_loop_with_tau();
@@ -871,5 +872,4 @@ int test_main(int /* argc*/, char** /* argv */)
   counterexample_postprocessing();
   regression_delete_old_bb_slice();
   // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate.
-  return 0;
 }

@@ -9,12 +9,13 @@
 /// \file remove_parameters_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE remove_parameters_test
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <set>
 #include <string>
@@ -99,11 +100,9 @@ void test_remove_rundant_assignments()
   BOOST_CHECK(result == expected_result);
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_remove_parameters();
   test_instantiate_free_variables();
   test_remove_rundant_assignments();
-
-  return 0;
 }

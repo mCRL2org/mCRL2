@@ -9,9 +9,11 @@
 /// \file identifier_string_test.cpp
 /// \brief Add your file description here.
 
-#include "mcrl2/core/identifier_string.h"
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE identifier_string_test
+
 #include <iostream>
+#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/core/identifier_string.h"
 
 using namespace mcrl2;
 
@@ -28,9 +30,7 @@ void test_identifier_string()
   }
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_identifier_string();
-
-  return 0;
 }

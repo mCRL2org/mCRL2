@@ -9,12 +9,13 @@
 /// \file modal_formula_find_test.cpp
 /// \brief Test for find functions.
 
+#define BOOST_TEST_MODULE modal_formula_find_test
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/parse.h"
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
@@ -83,10 +84,8 @@ void test_free_variables()
   BOOST_CHECK(free_variables.find(c) != free_variables.end());
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_find();
   test_free_variables();
-
-  return EXIT_SUCCESS;
 }

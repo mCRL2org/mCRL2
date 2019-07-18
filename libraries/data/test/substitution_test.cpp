@@ -6,11 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#define BOOST_TEST_MODULE substitution_test
 #include <functional>
 #include <string>
 #include <utility>
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/concepts.h"
@@ -399,7 +400,7 @@ void test_mutable_indexed_substitution()
   BOOST_CHECK(s == "[b := true]");
 }
 
-int test_main(int /* a */, char**  /* aa */)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_my_assignment_sequence_substitution();
   test_my_list_substitution();
@@ -410,6 +411,4 @@ int test_main(int /* a */, char**  /* aa */)
   test_indexed_substitution();
   test_enumerator_substitution();
   test_mutable_indexed_substitution();
-
-  return EXIT_SUCCESS;
 }

@@ -9,9 +9,10 @@
 /// \file bes_io_test.cpp
 /// \brief Some io tests for boolean equation systems.
 
+#define BOOST_TEST_MODULE bes_io_test
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/parse.h"
@@ -77,12 +78,10 @@ void test_pgsolver()
   std::clog << out.str() << std::endl;
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_parse_bes();
   test_bes();
   test_pbes();
   test_pgsolver();
-
-  return 0;
 }

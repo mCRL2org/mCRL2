@@ -270,8 +270,8 @@ int precedence(const application& x)
   // N.B. this code should match printing of a creal
   if (sort_real::is_creal_application(x))
   {
-    data_expression numerator = sort_real::left(x);
-    data_expression denominator = sort_real::right(x);
+    const data_expression& numerator = sort_real::left(x);
+    const data_expression& denominator = sort_real::right(x);
     if (sort_pos::is_c1_function_symbol(denominator))
     {
       return precedence(numerator);

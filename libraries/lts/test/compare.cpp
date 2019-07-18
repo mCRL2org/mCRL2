@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#define BOOST_TEST_MODULE compare
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lts/lts_algorithm.h"
@@ -407,7 +408,3 @@ BOOST_AUTO_TEST_CASE(failures_divergence_incomparable_test)
   BOOST_CHECK(preorder_compare(bP, aPtauP, lts_pre_failures_divergence_refinement)); // failures(bP) subset failures(aPtau) != empty because divergences.
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

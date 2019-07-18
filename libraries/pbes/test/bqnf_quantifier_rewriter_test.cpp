@@ -9,11 +9,12 @@
 /// \file bqnf_quantifier_rewriter_test.cpp
 /// \brief Test for the bqnf_quantifier rewriter.
 
+#define BOOST_TEST_MODULE bqnf_quantifier_rewriter_test
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 using namespace mcrl2;
@@ -54,9 +55,7 @@ void test_bqnf_quantifier_rewriter()
 }
 
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_bqnf_quantifier_rewriter();
-
-  return 0;
 }

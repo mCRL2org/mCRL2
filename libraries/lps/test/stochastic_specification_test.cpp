@@ -6,9 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file specification_test.cpp
+/// \file stochastic_specification_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE stochastic_specification_test
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/find.h"
@@ -231,9 +232,3 @@ BOOST_AUTO_TEST_CASE(non_bound_initial_stochastic_variables)
   BOOST_CHECK(lps::detail::is_well_typed(spec));
 }
 
-
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

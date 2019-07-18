@@ -6,10 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file data_expression_test.cpp
+/// \file int_test.cpp
 /// \brief Basic regression test for data expressions.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE int_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 #include "mcrl2/data/standard_numbers_utility.h"
@@ -29,9 +30,7 @@ void recogniser_test()
   BOOST_CHECK(!sort_int::is_minus_application(negate));
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   recogniser_test();
-
-  return EXIT_SUCCESS;
 }

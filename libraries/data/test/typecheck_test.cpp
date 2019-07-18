@@ -9,6 +9,8 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE typecheck_test
+
 // Some tests rely on type check failures, so we have to set this flag.
 #define MCRL2_DISABLE_TYPECHECK_ASSERTIONS
 
@@ -1658,7 +1660,3 @@ BOOST_AUTO_TEST_CASE(test_sort_aliases)
   }
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

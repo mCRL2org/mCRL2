@@ -9,7 +9,8 @@
 /// \file suminst_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE suminst_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/suminst.h"
@@ -206,7 +207,7 @@ void test_case_7()
   BOOST_CHECK(sum_count == 1);
 }
 
-int test_main(int ac, char** av)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   std::clog << "test case 1" << std::endl;
   test_case_1();
@@ -220,7 +221,5 @@ int test_main(int ac, char** av)
   test_case_5();
   std::clog << "test case 6" << std::endl;
   test_case_6();
-
-  return 0;
 }
 

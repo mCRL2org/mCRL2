@@ -9,7 +9,8 @@
 /// \file template_test.cpp
 /// \brief Template tests.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE template_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 template <typename Derived>
@@ -52,7 +53,7 @@ template <typename Derived>
 class lps_traverser2: public data_traverser<Derived>
 {};
 
-int test_main(int /*argc*/, char** /*argv[]*/)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   make_find_helper<data_traverser>().print();
   f1<data_traverser>();
@@ -67,6 +68,4 @@ int test_main(int /*argc*/, char** /*argv[]*/)
   //--- But this does compile ---//
   make_find_helper<lps_traverser2>().print();
   f1<lps_traverser2>();
-
-  return 0;
 }

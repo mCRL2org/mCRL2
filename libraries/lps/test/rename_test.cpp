@@ -9,9 +9,10 @@
 /// \file rename_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE rename_test
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linearise.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <iterator>
 #include <set>
@@ -101,10 +102,8 @@ void test_rename()
   // BOOST_CHECK(spec.process().process_parameters().front().name() == spec2.process().process_parameters().front().name());
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_rename();
   test_lps_rename();
-
-  return 0;
 }

@@ -9,10 +9,11 @@
 /// \file aterm_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE aterm_test
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -83,11 +84,9 @@ void test_aterm_io()
   test_aterm_io("f([a,f(x),[]],2,[g,g(34566)])"); 
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_aterm();
   test_aterm_string(); 
   test_aterm_io();
-
-  return 0;
 }

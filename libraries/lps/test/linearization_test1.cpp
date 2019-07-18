@@ -9,6 +9,7 @@
 /// \file linearization_test1.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE linearization_test1
 #include <boost/test/included/unit_test_framework.hpp>
 
 #ifndef MCRL2_SKIP_LONG_TESTS
@@ -501,9 +502,4 @@ BOOST_AUTO_TEST_CASE(skip_linearization_test)
 }
 
 #endif // ndef MCRL2_SKIP_LONG_TESTS
-
-boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
-{
-  return nullptr;
-}
 

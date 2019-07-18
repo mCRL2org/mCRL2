@@ -1,4 +1,16 @@
-#include <boost/test/minimal.hpp>
+// Author(s): Unknown
+// Copyright: see the accompanying file COPYING or copy at
+// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file read_mcrl2.cpp
+
+#define BOOST_TEST_MODULE read_mcrl2
+
+#include <boost/test/included/unit_test_framework.hpp>
 #include <exception>
 #include <sstream>
 #include "mcrl2/process/action_parse.h"
@@ -28,7 +40,7 @@ void test_next_action(Trace& t, const char* s)
   }
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   using namespace mcrl2::data;
   using namespace mcrl2::lps;
@@ -57,7 +69,6 @@ int test_main(int argc, char** argv)
   catch (const mcrl2::runtime_error& e)
   {
     BOOST_ERROR(e.what());
-    return false;
   }
 
   BOOST_CHECK(t.number_of_actions() == 3);
@@ -65,6 +76,4 @@ int test_main(int argc, char** argv)
   test_next_action(t,"a");
   test_next_action(t,"b(1, true)");
   test_next_action(t,"c");
-
-  return 0;
 }

@@ -9,6 +9,7 @@
 /// \file linearization_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE linearization_instantiation_compare_test
 #include <iostream>
 #include <string>
 
@@ -148,9 +149,3 @@ BOOST_AUTO_TEST_CASE(where_clauses_in_conditions_of_rewrite_rules)
   run_linearisation_test_case(spec,statespace);
 }
 
-
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

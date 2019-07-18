@@ -9,6 +9,7 @@
 /// \file action_rename_test.cpp
 /// \brief Action rename test.
 
+#define BOOST_TEST_MODULE action_rename_test
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/action_summand.h"
 #include "mcrl2/lps/deadlock_summand.h"
@@ -16,7 +17,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using lps::stochastic_specification;
@@ -25,7 +26,6 @@ using lps::action_summand;
 using lps::action_summand_vector;
 using lps::deadlock_summand;
 
-static
 void test1()
 {
   // Check a renaming when more than one renaming rule
@@ -49,7 +49,6 @@ void test1()
   BOOST_CHECK(new_spec.process().summand_count()==3);
 }
 
-static
 void test2()
 {
   // Check whether new declarations in the rename file
@@ -76,7 +75,6 @@ void test2()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
-static
 void test3()
 {
   // Check whether constants in an action_rename file are properly translated.
@@ -99,7 +97,6 @@ void test3()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
-static
 void test4()
 {
   const std::string SPEC =
@@ -127,7 +124,6 @@ void test4()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
-static
 void test5() // Test whether partial renaming to delta is going well. See bug report #1009.
 {
   const std::string SPEC =
@@ -200,7 +196,7 @@ static void test_regex1()
 }
 
 // Check whether renaming some actions to delta works
-static void test_regex2()
+void test_regex2()
 {
   const std::string SPEC =
   "act a_out, b_out, cout, ab_out, ac_out;\n"
@@ -231,7 +227,7 @@ static void test_regex2()
 }
 
 // Check whether renaming some actions to tau works
-static void test_regex3()
+void test_regex3()
 {
   const std::string SPEC =
   "act a_out, b_out, cout, ab_out, ac_out;\n"
@@ -255,7 +251,7 @@ static void test_regex3()
 
 // Check whether the list of actions contains no duplicates after renaming multiple actions
 // to one action.
-static void test_regex4()
+void test_regex4()
 {
   const std::string SPEC =
   "act a_out, b_out;\n"
@@ -269,7 +265,7 @@ static void test_regex4()
   BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "out");
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test1();
   test2();
@@ -281,6 +277,4 @@ int test_main(int argc, char** argv)
   test_regex2();
   test_regex3();
   test_regex4();
-
-  return 0;
 }

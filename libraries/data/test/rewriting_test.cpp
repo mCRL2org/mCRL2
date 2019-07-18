@@ -6,9 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file rewriter_test.cpp
+/// \file rewriting_test.cpp
 /// \brief Tests whether terms are correctly rewritten using various rewriters.
 
+#define BOOST_TEST_MODULE rewriting_test
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -1511,13 +1512,3 @@ BOOST_AUTO_TEST_CASE(Check_normal_forms_in_function_update)   // In the jitty re
   }
 }
 
-
-
-
-
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  //mcrl2::log::logger::set_reporting_level(log::debug);
-  return nullptr;
-}

@@ -6,10 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file sort_expression_test.cpp
+/// \file utility_test.cpp
 /// \brief Basic regression test for sort expressions.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE utility_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 #include "mcrl2/data/bool.h"
@@ -139,14 +140,12 @@ void convert_test()
   BOOST_CHECK(l.size() == al.size());
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   number_test();
 
   list_construction_test();
 
   convert_test();
-
-  return EXIT_SUCCESS;
 }
 

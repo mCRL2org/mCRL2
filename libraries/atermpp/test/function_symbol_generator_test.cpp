@@ -9,9 +9,10 @@
 /// \file function_symbol_generator_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE function_symbol_generator_test
 #include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/function_symbol_generator.h"
 
@@ -52,9 +53,7 @@ void test_generator()
   std::cout << "q2 == " << q2 << " name = " << q2.name() << " arity = " << q2.arity() << std::endl;
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_generator();
-
-  return 0;
 }

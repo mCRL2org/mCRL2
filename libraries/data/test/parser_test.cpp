@@ -9,7 +9,8 @@
 /// \file parser_test.cpp
 /// \brief Regression test for parsing a data specification.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE parser_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 #include "mcrl2/data/basic_sort.h"
@@ -106,12 +107,10 @@ void test_ticket_1267()
   test_sort_expression(data_spec, "A -> A -> A -> A", true);
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   parser_test();
   test_user_defined_sort();
   test_whr();
   test_ticket_1267();
-
-  return EXIT_SUCCESS;
 }

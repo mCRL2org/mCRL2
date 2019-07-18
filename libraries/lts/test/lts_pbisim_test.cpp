@@ -10,6 +10,7 @@
 /// \brief This file contains tests to see whether ltsconvert
 //         reduces problems well.
 
+#define BOOST_TEST_MODULE lts_pbisim_test
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lts/lts_aut.h"
@@ -385,9 +386,3 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   execute_test("Test7",test7,3,5,3);
 }
 
-
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return 0;
-}

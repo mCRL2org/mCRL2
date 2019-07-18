@@ -9,13 +9,14 @@
 /// \file lpsparunfold_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE lpsparunfold_test
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/lpsparunfoldlib.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/text_utility.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <string>
 
@@ -24,9 +25,8 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 
-int test_main(int, char**)
+BOOST_AUTO_TEST_CASE(test_main)
 {
-  {
     /**
       * Unfold Pos process parameter at index 0
       *
@@ -103,8 +103,5 @@ int test_main(int, char**)
       }
       BOOST_CHECK(!(std::distance(p1.begin(), i) == 2 && data::pp(i->sort()).compare("Pos") != 0));
     }
-  }
-
-  return 0;
 }
 

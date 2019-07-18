@@ -9,9 +9,10 @@
 /// \file hooks_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE hooks_test
 #include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -82,9 +83,7 @@ void test_hooks()
   BOOST_CHECK(variable_count == 2);
 }
 
-int test_main(int, char*[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_hooks();
-
-  return 0;
 }

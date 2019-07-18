@@ -9,11 +9,12 @@
 /// \file normalize_sorts_test.cpp
 /// \brief Test for normalizing sorts.
 
+#define BOOST_TEST_MODULE normalize_sorts_test
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/parse.h"
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
@@ -86,11 +87,9 @@ void test_loop_free_knuth_bendix_completion()
   BOOST_CHECK(false); // No exception is not ok. 
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_normalize_sorts();
   test_apply_knuth_bendix_completion_on_sorts();
   test_loop_free_knuth_bendix_completion();
-
-  return 0;
 }

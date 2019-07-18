@@ -9,9 +9,10 @@
 /// \file operators.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE operators
 #include <iostream>
 #include <set>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -26,7 +27,7 @@ class D: public aterm_appl
 // This program is for checking if some standard operators on aterms
 // are defined and don't lead to ambiguities.
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   aterm t (read_term_from_string("[1,2]"));
   aterm_appl a (read_appl_from_string("f(x)"));
@@ -107,6 +108,4 @@ int test_main(int argc, char* argv[])
   set<aterm_appl> sA;
   set<aterm_list> sL;
   set<D> sD;
-
-  return 0;
 }

@@ -13,6 +13,7 @@
 #define MCRL2_WITH_GARBAGE_COLLECTION
 #endif
 
+#define BOOST_TEST_MODULE lps2lts_test
 #include <boost/test/included/unit_test_framework.hpp>
 
 #ifndef MCRL2_SKIP_LONG_TESTS
@@ -569,7 +570,3 @@ BOOST_AUTO_TEST_CASE(skip_test)
 
 #endif // ndef MCRL2_SKIP_LONG_TESTS
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

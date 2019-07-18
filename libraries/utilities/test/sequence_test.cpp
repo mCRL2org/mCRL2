@@ -9,8 +9,10 @@
 /// \file sequence_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE sequence_test
+
 #include "mcrl2/utilities/sequence.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <numeric>
 #include <vector>
 
@@ -64,9 +66,7 @@ void test_sequence()
   BOOST_CHECK(sum == 32);
 }
 
-int test_main(int, char*[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_sequence();
-
-  return 0;
 }

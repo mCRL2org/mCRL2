@@ -9,6 +9,7 @@
 /// \file solve_test.cpp
 /// \brief Test for BES solvers.
 
+#define BOOST_TEST_MODULE solve_test
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
@@ -63,9 +64,4 @@ BOOST_AUTO_TEST_CASE(test_simple)
     "init X1;          \n"
   );
   run_all_algorithms(b, false);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

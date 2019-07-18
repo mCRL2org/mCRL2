@@ -9,6 +9,7 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE replace_test
 #include <vector>
 #include <iostream>
 #include <iterator>
@@ -272,7 +273,3 @@ BOOST_AUTO_TEST_CASE(cached_bottom_up_replace_test)
   BOOST_CHECK(cache.size() == 4);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

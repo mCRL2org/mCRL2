@@ -9,17 +9,19 @@
 /// \file action_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE action_test
+
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/process/process_expression.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <set>
 #include <string>
 
 using namespace mcrl2;
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   data::sort_expression X(data::basic_sort("X"));
   data::sort_expression Y(data::basic_sort("Y"));
@@ -52,6 +54,4 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(l.front()==aY);
   process::action_label a=l.front();
   BOOST_CHECK(a==aY);
-
-  return 0;
 }

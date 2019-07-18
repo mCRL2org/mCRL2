@@ -6,12 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file table_test.cpp
+/// \file indexed_set_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE indexed_set_test
 #include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include <map>
 #include "mcrl2/atermpp/aterm_io.h"
@@ -61,8 +62,7 @@ void test_indexed_set()
   x[2] = t;
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_indexed_set();
-  return 0;
 }

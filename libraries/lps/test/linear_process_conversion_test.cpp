@@ -9,12 +9,13 @@
 /// \file linear_process_conversion_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE linear_process_conversion_test
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <set>
 
 using namespace mcrl2;
@@ -193,7 +194,7 @@ void test_process(const std::string& text, bool expect_exception = false)
   }
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   std::clog << "SPEC1" << std::endl;
   test_process(SPEC1, true);
@@ -205,7 +206,5 @@ int test_main(int argc, char* argv[])
   test_process(SPEC4, true);
   std::clog << "ABS_SPEC_LINEARIZED" << std::endl;
   test_process(ABS_SPEC_LINEARIZED);
-
-  return 0;
 }
 

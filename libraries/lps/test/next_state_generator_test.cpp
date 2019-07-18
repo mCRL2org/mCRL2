@@ -9,6 +9,7 @@
 /// \file next_state_generator_test.cpp
 /// \brief Test for next_state_generator class.
 
+#define BOOST_TEST_MODULE next_state_generator_test 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/parse.h"
@@ -155,7 +156,3 @@ BOOST_AUTO_TEST_CASE(test_non_true_condition)
 
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

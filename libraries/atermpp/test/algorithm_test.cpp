@@ -9,12 +9,13 @@
 /// \file algorithm_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE algorithm_test
 #include <vector>
 #include <iostream>
 #include <iterator>
 #include <set>
 #include <string>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -124,11 +125,9 @@ void test_operators()
   }
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_algorithm();
   test_operators();
   test_for_each();
-
-  return 0;
 }

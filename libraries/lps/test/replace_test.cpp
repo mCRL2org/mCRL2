@@ -9,12 +9,13 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE replace_test
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/replace.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <set>
 #include <string>
@@ -170,7 +171,7 @@ void test_action_list()
   l1 = process::replace_variables_capture_avoiding(l1, sigma, v);
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_replace();
   test_lps_substituter();
@@ -178,6 +179,4 @@ int test_main(int argc, char* argv[])
   test_replace_process_parameters();
   test_replace_summand_variables();
   test_action_list();
-
-  return 0;
 }

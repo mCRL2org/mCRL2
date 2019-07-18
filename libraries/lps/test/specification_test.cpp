@@ -9,6 +9,7 @@
 /// \file specification_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE specification_test
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/find.h"
@@ -16,7 +17,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <iterator>
 #include <set>
@@ -66,11 +67,9 @@ void test_context_sorts()
   BOOST_CHECK(check_well_typedness(sspec));
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_find_sort_expressions();
   test_system_defined_sorts();
   test_context_sorts();
-
-  return 0;
 }

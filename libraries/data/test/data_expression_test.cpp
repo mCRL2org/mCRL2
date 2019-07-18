@@ -9,7 +9,8 @@
 /// \file data_expression_test.cpp
 /// \brief Basic regression test for data expressions.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE data_expression_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 #include "mcrl2/core/identifier_string.h"
@@ -285,7 +286,7 @@ void system_defined_check()
   BOOST_CHECK(sort_list::empty(sort_pos::pos()) != sort_list::empty(sort_nat::nat()));
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   variable_test();
 
@@ -308,8 +309,6 @@ int test_main(int argc, char** argv)
   where_declaration_test();
 
   assignment_test();
-
-  return EXIT_SUCCESS;
 }
 
 

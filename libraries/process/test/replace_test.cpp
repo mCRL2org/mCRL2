@@ -9,7 +9,9 @@
 /// \file replace_test.cpp
 /// \brief Regression test for replace functions
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE replace_test
+
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 #include "mcrl2/data/detail/data_functional.h"
@@ -175,11 +177,9 @@ void test_replace_process_identifiers()
   BOOST_CHECK(rhs == eqR.expression());
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_replace_variables_capture_avoiding();
   test_process_instance_assignment();
   test_replace_process_identifiers();
-
-  return EXIT_SUCCESS;
 }

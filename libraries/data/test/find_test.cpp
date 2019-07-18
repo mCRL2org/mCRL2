@@ -9,12 +9,13 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#define BOOST_TEST_MODULE find_test
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard_utility.h"
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
@@ -64,7 +65,7 @@ void test_search_variable()
   BOOST_CHECK(data::search_variable(v, c));
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   variable n1 = nat("n1");
   variable n2 = nat("n2");
@@ -147,6 +148,4 @@ int test_main(int argc, char* argv[])
   //--- data_specification ---//
   // TODO: discuss whether this test should fail or not
   //BOOST_CHECK(search_data_expression(data_specification().constructors(), sort_bool::true_()));
-
-  return 0;
 }

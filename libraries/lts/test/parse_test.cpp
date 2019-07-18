@@ -9,6 +9,7 @@
 /// \file parse_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE parse_test
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -92,7 +93,3 @@ BOOST_AUTO_TEST_CASE(fsm_parser_test)
   );
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

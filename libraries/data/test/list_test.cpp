@@ -9,7 +9,8 @@
 /// \file list_test.cpp
 /// \brief Basic regression test for list expressions.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE list_test
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/parse.h"
@@ -63,10 +64,8 @@ void list_expression_test()
   BOOST_CHECK(is_cons_application(normaliser(e)));
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   list_expression_test();
-
-  return EXIT_SUCCESS;
 }
 

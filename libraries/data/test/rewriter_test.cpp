@@ -9,6 +9,7 @@
 /// \file rewriter_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE rewriter_test
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/data/detail/parse_substitution.h"
@@ -22,7 +23,7 @@
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/utilities/text_utility.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <memory>
 #include <set>
@@ -251,7 +252,7 @@ void test_enumeration_of_functions()
   test_expressions(R, expr1, expr2, "", data_spec, sigma);
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test1();
   test2();
@@ -262,6 +263,4 @@ int test_main(int argc, char** argv)
   test_lambda_expression();
   test_equality_on_functions();
   test_enumeration_of_functions();
-
-  return 0;
 }

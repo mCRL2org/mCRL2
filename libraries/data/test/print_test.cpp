@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#define BOOST_TEST_MODULE print_test
 #include <sstream>
 
 #include <boost/test/included/unit_test_framework.hpp>
@@ -568,8 +569,3 @@ BOOST_AUTO_TEST_CASE(printing_terms_takes_a_lot_of_memory)
   std::cerr << "Print term " << data::pp(t) << "\n";;
 }
 
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

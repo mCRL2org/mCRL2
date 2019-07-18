@@ -9,7 +9,8 @@
 /// \file data_specification_test.cpp
 /// \brief Basic regression test for data specifications.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE data_specification_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <functional>
 #include <iostream>
 #include "mcrl2/data/bag.h"
@@ -964,7 +965,7 @@ void test_standard_sorts_mappings_functions()
    BOOST_CHECK(mappings.size()==225);
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_bke();
 
@@ -995,8 +996,6 @@ int test_main(int argc, char** argv)
   test_merge_data_specifications();
 
   test_standard_sorts_mappings_functions();
-
-  return EXIT_SUCCESS;
 }
 
 

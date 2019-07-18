@@ -6,9 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file stochastic_linearization_test.cpp
+/// \file timed_linearization_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE timed_linearization_test
 #include <boost/test/included/unit_test_framework.hpp>
 
 #ifndef MCRL2_SKIP_LONG_TESTS
@@ -295,7 +296,3 @@ BOOST_AUTO_TEST_CASE(skip_test)
 
 #endif // ndef MCRL2_SKIP_LONG_TESTS
 
-boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
-{
-  return nullptr;
-}

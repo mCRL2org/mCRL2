@@ -1,6 +1,16 @@
-#include <boost/test/minimal.hpp>
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file reachable_nodes_test.cpp
+
+#define BOOST_TEST_MODULE reachable_nodes_test.cpp
+
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/reachable_nodes.h"
 #include <boost/graph/adjacency_list.hpp>
 
@@ -31,9 +41,7 @@ void test_reachable_nodes()
   BOOST_CHECK(std::find(nodes.begin(), nodes.end(), 5) != nodes.end());
 }
 
-int test_main(int, char*[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_reachable_nodes();
-
-  return 0;
 }

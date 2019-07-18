@@ -9,6 +9,7 @@
 /// \file type_check_tree_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE type_check_tree_test
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/experimental/type_check_tree.h"
 #include "mcrl2/data/parse.h"
@@ -138,7 +139,3 @@ BOOST_AUTO_TEST_CASE(replace_untyped_sort_test)
   BOOST_CHECK(replace_untyped_sort(s1, B) == s2);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

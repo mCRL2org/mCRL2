@@ -11,9 +11,10 @@
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
+#define BOOST_TEST_MODULE parelm_test
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include "mcrl2/lps/parelm.h"
 #include "mcrl2/lps/parse.h"
@@ -133,9 +134,7 @@ void test_parelm()
   test_parelm("case_8", case_8, expected_8);
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_parelm();
-
-  return 0;
 }

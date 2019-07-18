@@ -9,6 +9,8 @@
 /// \file parse_test.cpp
 /// \brief Regression test for parsing process expressions
 
+#define BOOST_TEST_MODULE parse_test
+
 #include "mcrl2/process/parse.h"
 #include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
@@ -113,7 +115,3 @@ BOOST_AUTO_TEST_CASE(parse_process_expression_test)
   test_parse_process_expression("a . Q(n)", procspec.global_variables(), procspec.data(), procspec.action_labels(), process_identifiers);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return EXIT_SUCCESS;
-}

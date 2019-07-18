@@ -9,7 +9,8 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE replace_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <iterator>
 #include <list>
@@ -312,7 +313,7 @@ void test_ticket_1209()
   BOOST_CHECK(result == expected_result);
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_assignment_list();
   test_variable_replace();
@@ -321,6 +322,4 @@ int test_main(int argc, char** argv)
   test_replace_variables_capture_avoiding();
   test_replace_free_variables();
   test_ticket_1209();
-
-  return 0;
 }

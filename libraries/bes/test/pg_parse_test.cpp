@@ -6,11 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file bes_io_test.cpp
+/// \file pg_parse_test.cpp
 /// \brief Some io tests for boolean equation systems.
 
+#define BOOST_TEST_MODULE pg_parse_test
 #include "mcrl2/bes/pg_parse.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <sstream>
 #include <string>
 
@@ -184,11 +185,10 @@ void test_case_parity_and_start()
   test_parse_pg(game);
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_case();
   test_case_parity();
   test_case_start();
   test_case_parity_and_start();
-  return 0;
 }

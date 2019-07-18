@@ -9,7 +9,8 @@
 /// \file identifier_generator_test.cpp
 /// \brief Test for identifier generators.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE identifier_generator_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -91,11 +92,9 @@ void xyz_identifier_generator_test()
   BOOST_CHECK(s == str("Z0"));
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   set_identifier_generator_test();
   multiset_identifier_generator_test();
   xyz_identifier_generator_test();
-
-  return EXIT_SUCCESS;
 }

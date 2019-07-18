@@ -9,6 +9,8 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE typecheck_test
+
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
 #include <boost/test/included/unit_test_framework.hpp>
@@ -434,7 +436,3 @@ BOOST_AUTO_TEST_CASE(test_function_as_equation_condition)
   );
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

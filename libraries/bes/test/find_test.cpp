@@ -9,10 +9,11 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#define BOOST_TEST_MODULE find_test
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/parse.h"
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
@@ -183,12 +184,10 @@ void test_bnd_occ()
 
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_my_find();
   test_find();
   test_my_search();
   test_bnd_occ();
-
-  return EXIT_SUCCESS;
 }

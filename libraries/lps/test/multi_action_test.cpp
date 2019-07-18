@@ -6,16 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file parelm_test.cpp
+/// \file multi_action_test.cpp
 /// \brief Add your file description here.
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
+#define BOOST_TEST_MODULE multi_action_test
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/print.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <string>
 
@@ -112,10 +113,8 @@ void test_pp()
   BOOST_CHECK(s == "a(d1)|a(d1)");
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_equal_multi_actions();
   test_pp();
-
-  return 0;
 }

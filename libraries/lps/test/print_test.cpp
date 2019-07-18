@@ -6,9 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pp_test.cpp
+/// \file print_test.cpp
 /// \brief Test for parser + pretty printer
 
+#define BOOST_TEST_MODULE print_test
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
@@ -133,7 +134,3 @@ BOOST_AUTO_TEST_CASE(ticket_1267)
   BOOST_CHECK(s == "a(n)");
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

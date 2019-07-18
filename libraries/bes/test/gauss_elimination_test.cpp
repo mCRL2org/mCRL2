@@ -9,6 +9,7 @@
 /// \file gauss_elimination_test.cpp
 /// \brief Gauss elimination tests.
 
+#define BOOST_TEST_MODULE gauss_elimination_test
 #define MCRL2_GAUSS_ELIMINATION_DEBUG
 
 #include "mcrl2/bes/gauss_elimination.h"
@@ -23,7 +24,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <iterator>
 #include <utility>
@@ -287,7 +288,7 @@ void tutorial2()
   assert(solution == 0); // 0 indicates false
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_bes();
   test_abp();
@@ -295,6 +296,4 @@ int test_main(int argc, char** argv)
   test_approximate();
   tutorial1();
   tutorial2();
-
-  return 0;
 }

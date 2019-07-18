@@ -9,12 +9,13 @@
 /// \file specification_property_map_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE specification_property_map_test
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <string>
 
@@ -39,13 +40,11 @@ const std::string LPSINFO =
   "used_multi_actions           = {a1, c2}; {c3}; {c5}; {c6}; {i,j}; {r1}; {s4}                                                               \n"
   ;
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   lps::detail::specification_property_map<> info1(spec);
   std::cerr << info1.to_string() << std::endl;
   lps::detail::specification_property_map<> info2(LPSINFO);
   std::cerr << info1.compare(info2) << std::endl;
-
-  return 0;
 }

@@ -6,14 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file boolean_operator.cpp
+/// \file boolean_expression_test.cpp
 /// \brief Test for boolean expressions.
 
+#define BOOST_TEST_MODULE boolean_expression_test
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/print.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -88,11 +89,9 @@ void test_precedence()
   BOOST_CHECK(s == "X1 && X2");
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_boolean_expressions();
   test_bes2pbes();
   test_precedence();
-
-  return 0;
 }

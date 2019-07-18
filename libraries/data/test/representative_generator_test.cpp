@@ -6,16 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file data_utility_test.cpp
+/// \file representative_generator_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE representative_generator_test
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <set>
 #include <string>
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/list.h"
@@ -79,9 +80,7 @@ void test_representative_generator()
 
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_representative_generator();
-
-  return 0;
 }

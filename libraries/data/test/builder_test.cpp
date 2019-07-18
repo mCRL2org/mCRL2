@@ -9,7 +9,8 @@
 /// \file builder_test.cpp
 /// \brief Builder tests.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE builder_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <set>
 
@@ -131,9 +132,7 @@ void test_binding()
   BOOST_CHECK(z == x);
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_binding();
-
-  return EXIT_SUCCESS;
 }

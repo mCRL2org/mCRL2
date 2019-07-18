@@ -6,9 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file parelm_test.cpp
+/// \file confcheck_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE confcheck_test
 #include "mcrl2/data/bool.h"
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/parse.h"
@@ -201,8 +202,3 @@ BOOST_AUTO_TEST_CASE(case_5)
   run_confluence_test_case(s,5);
 }
 
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

@@ -9,6 +9,7 @@
 /// \file sumelm_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE sumelm_test
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
@@ -370,10 +371,5 @@ BOOST_AUTO_TEST_CASE(test_boolean_variables)
   }
 
   print_specifications(s0, s1);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }
 

@@ -9,6 +9,7 @@
 /// \file rewriter_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE rewriter_test
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/rewriter.h"
@@ -20,7 +21,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/text_utility.h"
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <cstdlib>
 #include <string>
 
@@ -223,13 +224,11 @@ void test_one_point_rule_rewriter()
   BOOST_CHECK(result == expected_result);
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test1();
   test2();
   test3();
   test_lps_rewriter();
   test_one_point_rule_rewriter();
-
-  return 0;
 }

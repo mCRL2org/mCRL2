@@ -9,6 +9,7 @@
 /// \file stochastic_linearization_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE stochastic_linearization_test
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include <iostream>
@@ -125,11 +126,5 @@ BOOST_AUTO_TEST_CASE(renaming_of_initial_stochastic_variables)
     "init COIN(0, 0);\n";
 
   run_linearisation_test_case(spec,true);
-}
-
-
-boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
-{
-  return nullptr;
 }
 

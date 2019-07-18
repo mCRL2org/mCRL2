@@ -12,7 +12,7 @@
 #define MCRL2_STATE_FORMULA_BUILDER_DEBUG
 
 #define BOOST_TEST_MODULE state_formula
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"

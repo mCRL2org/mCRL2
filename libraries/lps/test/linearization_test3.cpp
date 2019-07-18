@@ -6,9 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file linearization_test.cpp
+/// \file linearization_test3.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE linearization_test3
 #include <boost/test/included/unit_test_framework.hpp>
 
 
@@ -192,9 +193,4 @@ BOOST_AUTO_TEST_CASE(skip_linearization_test)
 }
 
 #endif // ndef MCRL2_SKIP_LONG_TESTS
-
-boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
-{
-  return nullptr;
-}
 

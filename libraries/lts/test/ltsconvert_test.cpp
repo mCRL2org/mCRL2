@@ -10,6 +10,7 @@
 /// \brief This file contains tests to see whether ltsconvert
 //         reduces problems well.
 
+#define BOOST_TEST_MODULE ltsconvert_test
 // #include <iostream>
 #include <string>
 #include <sstream>
@@ -704,10 +705,5 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t13,lts_red_tau_star); //Tau star reduction
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==1);
  }
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }
 

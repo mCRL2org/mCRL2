@@ -9,11 +9,12 @@
 /// \file normal_form_test.cpp
 /// \brief Tests for transformations into normal form.
 
+#define BOOST_TEST_MODULE normal_form_test
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <sstream>
 #include <string>
 
@@ -58,9 +59,7 @@ void test_standard_recursive_form()
 
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_standard_recursive_form();
-
-  return 0;
 }

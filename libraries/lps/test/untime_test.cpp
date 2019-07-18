@@ -9,7 +9,8 @@
 /// \file untime_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE untime_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/linearise.h"
@@ -143,12 +144,10 @@ void test_case_4()
   BOOST_CHECK(sumvar_count == 1);
 }
 
-int test_main(int ac, char** av)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_case_1();
   test_case_2();
   test_case_3();
   test_case_4();
-
-  return 0;
 }

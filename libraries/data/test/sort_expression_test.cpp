@@ -9,6 +9,7 @@
 /// \file sort_expression_test.cpp
 /// \brief Basic regression test for sort expressions.
 
+#define BOOST_TEST_MODULE sort_expression_test
 #include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
@@ -172,7 +173,3 @@ BOOST_AUTO_TEST_CASE(container_sort_test)
   BOOST_CHECK(ls0.element_sort() != ls1.element_sort());
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

@@ -9,9 +9,9 @@
 /// \file print_test.cpp
 /// \brief Regression test for parsing process expressions
 
-#define MCRL2_DEBUG_EXPRESSION_BUILDER
+#define BOOST_TEST_MODULE print_test
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 #include "mcrl2/process/parse.h"
@@ -105,12 +105,10 @@ void test_process_expressions()
   test_process_expression("false -> true -> a <> b <> c", "false -> (true -> a <> b) <> c");
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_comm();
   test_procinst();
   test_action_name_multiset();
   test_process_expressions();
-
-  return EXIT_SUCCESS;
 }

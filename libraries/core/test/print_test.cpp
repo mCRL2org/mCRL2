@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file identifier_string_test.cpp
+/// \file print_test.cpp
 /// \brief Add your file description here.
 
-#define MCRL2_PRINT_DEBUG
+#define BOOST_TEST_MODULE print_test
 
-#include "mcrl2/core/print.h"
-#include <boost/test/minimal.hpp>
 #include <sstream>
+#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/core/print.h"
 
 using namespace mcrl2;
 
@@ -36,8 +36,7 @@ void test_print()
 
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_print();
-  return 0;
 }

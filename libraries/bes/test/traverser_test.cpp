@@ -9,10 +9,11 @@
 /// \file traverser_test.cpp
 /// \brief Test for traversers.
 
+#define BOOST_TEST_MODULE traverser_test
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/traverser.h"
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
@@ -120,10 +121,8 @@ void test_traverser1()
 
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_custom_traverser();
   test_traverser1();
-
-  return EXIT_SUCCESS;
 }

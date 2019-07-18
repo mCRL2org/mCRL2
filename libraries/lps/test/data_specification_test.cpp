@@ -11,9 +11,10 @@
 /// library, but unfortunately the data library contains no parser for
 /// data specifications.
 
+#define BOOST_TEST_MODULE data_specification_test
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -27,12 +28,10 @@ const std::string SPECIFICATION =
   "init P(false);                          \n"
   ;
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   stochastic_specification spec = linearise(SPECIFICATION);
   data_specification data = spec.data();
   BOOST_CHECK(data.is_certainly_finite(sort_bool::bool_()));
   BOOST_CHECK(!data.is_certainly_finite(sort_nat::nat()));
-
-  return 0;
 }

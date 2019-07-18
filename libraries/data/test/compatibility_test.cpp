@@ -10,7 +10,8 @@
 /// \brief Regression test for the transformations between new and old data
 ///       format.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE compatibility_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <sstream>
 
@@ -52,9 +53,7 @@ void compatibility_test()
   BOOST_CHECK(data_spec_aterm == data_spec_aterm_new);
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   compatibility_test();
-
-  return EXIT_SUCCESS;
 }

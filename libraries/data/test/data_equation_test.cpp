@@ -9,7 +9,8 @@
 /// \file data_equation_test.cpp
 /// \brief Basic regression test for data equations.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE data_equation_test
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 
 #include "mcrl2/data/basic_sort.h"
@@ -36,11 +37,9 @@ void data_equation_test()
   BOOST_CHECK(e.rhs() == f);
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   data_equation_test();
-
-  return EXIT_SUCCESS;
 }
 
 

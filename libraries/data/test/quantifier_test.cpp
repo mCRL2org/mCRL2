@@ -6,10 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file list_test.cpp
+/// \file quantifier_test.cpp
 /// \brief Basic regression test for quantifier expressions.
 
-#include <boost/test/minimal.hpp>
+#define BOOST_TEST_MODULE quantifier_test
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/data/fset.h"
@@ -183,7 +184,7 @@ void test_mixed_enumeration()
   quantifier_expression_test("exists x:Real, p:Pos . x > 4", "exists x:Real . x > 4", data_specification(), data::rewriter(data_specification()));
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(test_main)
 {
   auto strategies = data::detail::get_test_rewrite_strategies(false);
   for (const auto& strategy: strategies)
@@ -194,6 +195,4 @@ int test_main(int argc, char** argv)
   }
 
   test_mixed_enumeration();
-
-  return EXIT_SUCCESS;
 }

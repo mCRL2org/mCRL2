@@ -9,11 +9,13 @@
 /// \file process_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE process_test
+
 #include "mcrl2/process/is_guarded.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <set>
 #include <string>
@@ -270,7 +272,7 @@ void test_guarded()
   BOOST_CHECK(!is_guarded(x, procspec.equations()));
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_linear(CASE1);
   test_linear(CASE2);
@@ -292,6 +294,4 @@ int test_main(int argc, char* argv[])
   test_data_spec();
 
   test_guarded();
-
-  return 0;
 }

@@ -6,15 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file find_test.cpp
+/// \file ticket_1300.cpp
 /// \brief Test for find functions.
 
+#define BOOST_TEST_MODULE ticket_1300
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 
@@ -200,9 +201,7 @@ void test1()
   std::cout << s << std::endl;
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test1();
-
-  return 0;
 }

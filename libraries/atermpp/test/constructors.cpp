@@ -9,8 +9,9 @@
 /// \file constructors.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE constructors
 #include <iostream>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
@@ -18,7 +19,7 @@
 using namespace std;
 using namespace atermpp;
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   aterm_int i(10);
   atermpp::aterm x=aterm_appl(function_symbol("x",0));
@@ -30,6 +31,4 @@ int test_main(int argc, char* argv[])
 
   atermpp::aterm_string s("s"); // g++ 3.4.4 complains if atermpp:: is removed :-(
   // aterm_string s1("s1(x)"); will generate an error!
-
-  return 0;
 }

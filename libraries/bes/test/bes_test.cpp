@@ -9,11 +9,12 @@
 /// \file bes_test.cpp
 /// \brief Some tests for BES.
 
+#define BOOST_TEST_MODULE bes_test
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/join.h"
 #include "mcrl2/bes/print.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -165,12 +166,10 @@ void test_bes()
   BOOST_CHECK(occurring_variables.size() == 3);
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_expressions();
   test_boolean_equation();
   test_join();
   test_bes();
-
-  return 0;
 }

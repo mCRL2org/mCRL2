@@ -9,9 +9,10 @@
 /// \file aterm_list_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE aterm_list_test
 #include <sstream>
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -55,8 +56,8 @@ struct func
   atermpp::aterm operator()(const atermpp::aterm& x) const
   {
     return read_term_from_string("f(" + pp(x) + ")");
-  } 
-}; 
+  }
+};
 
 static void test_aterm_balanced_tree()
 {
@@ -100,11 +101,9 @@ static void test_aterm_balanced_tree()
 
   BOOST_CHECK(!std::equal(rtree.begin(), rtree.end(), q.begin()));
   BOOST_CHECK(!std::equal(q.begin(), q.end(), rtree.begin()));
-} 
+}
 
-int test_main(int , char**)
+BOOST_AUTO_TEST_CASE(test_main)
 {
-  test_aterm_balanced_tree(); 
-
-  return 0;
+  test_aterm_balanced_tree();
 }

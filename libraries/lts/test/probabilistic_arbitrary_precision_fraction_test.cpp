@@ -9,6 +9,7 @@
 /// \file big_numbers_test.cpp
 /// \brief Test whether the class bbilistic_arbitrary_precision_fraction works properly.
 
+#define BOOST_TEST_MODULE probabilistic_arbitrary_precision_fraction_test
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 
@@ -63,8 +64,3 @@ BOOST_AUTO_TEST_CASE(cumulative_tests)
        "34985431223981954640133634673587613874569183765329875682716348576138476108576387546187658127653201876510287356021876530287165023817650187635081237650812376501876350871236501287365012873650182735610237560000000000000000000000000320129384710938471039561390847109398734601956601293846019285609853607349587453098713409835719348571930857");
 }
 
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

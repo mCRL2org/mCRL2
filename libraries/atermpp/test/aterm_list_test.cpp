@@ -9,9 +9,10 @@
 /// \file aterm_list_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE aterm_list_test
 #include <sstream>
 #include <algorithm>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -155,13 +156,11 @@ void test_concatenation()
   BOOST_CHECK(l2+l1 == l1+l2);
 }
 
-int test_main(int, char*[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_aterm_list();
   test_set_operations();
   test_initializer_list();
   test_list_with_apply_filter();
   test_concatenation();
-
-  return 0;
 }

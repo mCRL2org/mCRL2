@@ -9,6 +9,7 @@
 /// \file binary_test.cpp
 /// \brief Some simple tests for the binary algorithm.
 
+#define BOOST_TEST_MODULE binary_test
 #include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <string>
@@ -271,10 +272,5 @@ BOOST_AUTO_TEST_CASE(abp)
   binary_algorithm<rewriter, specification>(spec, r).run();
   std::clog << "--- after ---\n" << lps::pp(spec) << std::endl;
   BOOST_CHECK(check_well_typedness(spec));
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }
 

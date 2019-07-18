@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Unknown
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -6,11 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file parelm_test.cpp
+/// \file invelm_test.cpp
 /// \brief Add your file description here.
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
+#define BOOST_TEST_MODULE invelm_test
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/invelm_algorithm.h"
@@ -132,7 +133,3 @@ BOOST_AUTO_TEST_CASE(test_invariant)
   BOOST_CHECK(proc.deadlock_summands().back().condition() == invariant);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
-}

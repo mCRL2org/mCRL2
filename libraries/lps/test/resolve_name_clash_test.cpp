@@ -9,9 +9,10 @@
 /// \file resolve_name_clash_test.cpp
 /// \brief Add your file description here.
 
+#define BOOST_TEST_MODULE resolve_name_clash_test
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <set>
 #include <string>
@@ -66,9 +67,7 @@ void test_resolve_name_clashes()
   }
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(test_main)
 {
   test_resolve_name_clashes();
-
-  return 0;
 }
