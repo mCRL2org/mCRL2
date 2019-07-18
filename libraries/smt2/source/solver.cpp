@@ -58,7 +58,6 @@ void smt_solver::execute(const std::string& command) const
     throw mcrl2::runtime_error("Failed to write SMT problem to the solver.\n" + command);
   }
 #else // MCRL2_PLATFORM_WINDOWS
-  std::cout << "Executing\n" << command << std::endl;
   if(::write(pipe_stdin[1], command.c_str(), command.size()) < 0)
   {
     throw mcrl2::runtime_error("Failed to write SMT problem to the solver.\n" + command);
@@ -117,7 +116,7 @@ bool smt_solver::execute_and_check(const std::string& command) const
     }
     else if(std::strncmp(output, "unknown", 7) == 0)
     {
-      throw mcrl2::runtime_error("Cannot determine whether this formula is satisfiable or not.");
+      throw mcrl2::runtime_error("Cannot determine whether this formula is satisfiable or not.\n" + command);
     }
     else
     {
@@ -273,7 +272,6 @@ void smt_solver::initialize_solver()
 smt_solver::smt_solver(const data::data_specification& dataspec)
 : m_native(initialise_native_translation(dataspec))
 {
-  unfold_pattern_matching(dataspec, m_native);
 #ifndef MCRL2_PLATFORM_WINDOWS
   signal(SIGPIPE, SIG_IGN);
 #endif
@@ -297,7 +295,6 @@ smt_solver::~smt_solver()
 
   int return_status;
   ::wait(&return_status);
-  std::cout << "Cleaned up solver" << std::endl;
 #endif
 }
 
@@ -425,9 +422,9 @@ native_translations initialise_native_translation(const data::data_specification
   nt.set_native_definition(sort_pos::c1(), pp(sort_pos::c1()));
   nt.set_native_definition(sort_nat::c0(), pp(sort_nat::c0()));
   nt.expressions[sort_pos::cdub()] = pp_translation;
-  nt.expressions[sort_nat::cnat()] = pp_translation;
-  nt.expressions[sort_int::cneg()] = pp_translation;
-  nt.expressions[sort_int::cint()] = pp_translation;
+  nt.set_native_definition(sort_nat::cnat(), "@id");
+  nt.set_native_definition(sort_int::cneg(), "-");
+  nt.set_native_definition(sort_int::cint(), "@id");
   nt.expressions[sort_real::creal()] = pp_real_translation;
   nt.set_native_definition(sort_real::creal());
 
@@ -453,6 +450,8 @@ native_translations initialise_native_translation(const data::data_specification
   // necessary for translating the two equations above
   nt.set_native_definition(equal_to(sort_int::int_()), "=");
   nt.set_native_definition(equal_to(sort_real::real_()), "=");
+
+  unfold_pattern_matching(dataspec, nt);
 
   return nt;
 }
