@@ -160,7 +160,6 @@ static native_translation_t pp_real_translation = [](const data::data_expression
 
 } // namespace detail
 
-inline
 native_translations initialise_native_translation(const data::data_specification& dataspec);
 
 } // namespace smt

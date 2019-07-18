@@ -12,10 +12,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/smt2/translate_expression.h"
-#include "mcrl2/smt2/translate_specification.h"
-#include "mcrl2/smt2/native_translation.h"
-#include "mcrl2/smt2/unfold_pattern_matching.h"
 #include "mcrl2/smt2/solver.h"
 
 #include <vector>
@@ -32,7 +28,6 @@ int main(int /*argc*/, char** /*argv*/)
                                    "                                  \n"
                                    "map                               \n"
                                    "  invert: Bit -> Bit;             \n"
-                                   "  invert2: Bit -> Bit;             \n"
                                    "                                  \n"
                                    "var                               \n"
                                    "  r1: Real;                       \n"
@@ -40,24 +35,10 @@ int main(int /*argc*/, char** /*argv*/)
                                    "eqn                               \n"
                                    "  invert(b1)= b0(1);              \n"
                                    "  invert(b0(r1))= b1;             \n"
-                                   "  invert2(b0(r1))= b0(-r1);             \n"
                                  );
-  smt::native_translations nt = smt::initialise_native_translation(data_spec);
-  unfold_pattern_matching(data_spec, nt);
-
-  std::ostringstream out;
-  smt::translate_data_specification(data_spec, out, nt);
-  std::cout << out.str() << std::endl;
 
   smt::smt_solver solv(data_spec);
-  //
   bool result;
-  // data::variable vp1("p1", data::sort_pos::pos());
-  // data::variable vp2("p2", data::sort_pos::pos());
-  // data::variable_list pos_vars({vp1, vp2});
-  // result = solv.solve(pos_vars, data::parse_data_expression("(p1 == p2 + 2) && (p1 == p2 * 2)", pos_vars, data_spec));
-  // std::cout << "result " << std::boolalpha << result << std::endl;
-  //
   data::variable vb1 = data::parse_variable("bit_1: Bit", data_spec);
   data::variable vb2 = data::parse_variable("bit_2: Bit", data_spec);
   data::variable_list bit_vars({vb1});

@@ -32,7 +32,6 @@ void translate_sort_definition(const std::string& sort_name,
                                const data::sort_expression& s,
                                const data::data_specification& dataspec, OutputStream& out,
                                const native_translations& nt,
-                               data::set_identifier_generator& id_gen,
                                std::map<data::structured_sort, std::string>& struct_name_map)
 {
   auto find_result = nt.sorts.find(s);
@@ -69,10 +68,9 @@ void translate_sort_definition(const data::basic_sort& s,
                                const data::data_specification& dataspec,
                                OutputStream& out,
                                const native_translations& nt,
-                               data::set_identifier_generator& id_gen,
                                std::map<data::structured_sort, std::string>& struct_name_map)
 {
-  translate_sort_definition(pp(s.name()), s, dataspec, out, nt, id_gen, struct_name_map);
+  translate_sort_definition(pp(s.name()), s, dataspec, out, nt, struct_name_map);
 }
 
 // Find the dependencies in the definition of a sort
@@ -96,7 +94,7 @@ std::set<data::sort_expression> find_dependencies(const data::data_specification
 }
 
 // Find all sorts that need to be translated and the dependencies in their definitions
-std::map<data::sort_expression, std::set<data::sort_expression>> find_sorts_and_dependencies(const data::data_specification& dataspec, const native_translations& nt)
+std::map<data::sort_expression, std::set<data::sort_expression>> find_sorts_and_dependencies(const data::data_specification& dataspec)
 {
   std::map<data::sort_expression, std::set<data::sort_expression>> result;
   for(const data::sort_expression& s: dataspec.context_sorts())
@@ -130,7 +128,7 @@ void translate_sort_definitions(const data::data_specification& dataspec,
                                data::set_identifier_generator& id_gen,
                                std::map<data::structured_sort, std::string>& struct_name_map)
 {
-  auto sort_dependencies = find_sorts_and_dependencies(dataspec, nt);
+  auto sort_dependencies = find_sorts_and_dependencies(dataspec);
   // for(const auto& p: sort_dependencies)
   // {
   //   std::cout << p.first << " := " << core::detail::print_set(p.second) << std::endl;
@@ -144,7 +142,7 @@ void translate_sort_definitions(const data::data_specification& dataspec,
       name = pp(id_gen("@struct"));
       struct_name_map[atermpp::down_cast<data::structured_sort>(s)] = name;
     }
-    translate_sort_definition(name, s, dataspec, out, nt, id_gen, struct_name_map);
+    translate_sort_definition(name, s, dataspec, out, nt, struct_name_map);
   }
 }
 
@@ -153,7 +151,6 @@ void translate_sort_definitions(const data::data_specification& dataspec,
 template <typename OutputStream>
 inline
 void translate_alias(const data::alias& s,
-                     const data::data_specification& dataspec,
                      OutputStream& out, const native_translations& nt,
                      const std::map<data::structured_sort, std::string>& struct_name_map)
 {
@@ -316,7 +313,7 @@ void translate_data_specification(const data::data_specification& dataspec, Outp
       // Left-hand side is already the normalized form
       continue;
     }
-    detail::translate_alias(s, dataspec, o, nt, struct_name_map);
+    detail::translate_alias(s, o, nt, struct_name_map);
   }
 
   // Translate mappings

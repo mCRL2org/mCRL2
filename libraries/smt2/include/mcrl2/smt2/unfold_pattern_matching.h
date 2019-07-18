@@ -539,6 +539,8 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
     {
       continue;
     }
+    //TODO equations of the shape x < x or x <= x are simply removed, so the remaining equations
+    // for a valid pattern matching. How can this problem be adressed in a proper way?
     if(eqn.variables().size() == 1 && (core::pp(function.name()) == "<" || core::pp(function.name()) == "<="))
     {
       continue;
@@ -685,7 +687,7 @@ std::pair<structured_sort_functions, std::map< data::function_symbol, data::data
           if (find_result != constructor_application.end() && all_args_are_vars && all_vars_are_unique)
           {
             data::application::const_iterator::difference_type index = find_result - constructor_application.begin();
-            assert(index >= 0 && index < constructor_application.size());
+            assert(index >= 0 && index < static_cast<data::application::const_iterator::difference_type>(constructor_application.size()));
             ssf.projection_func[constructor].resize(constructor_application.size());
             ssf.projection_func[constructor][index] = mapping;
           }

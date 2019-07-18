@@ -89,7 +89,6 @@ data::function_symbol make_recogniser_func(const data::function_symbol& cons, co
   return data::function_symbol(make_recogniser_name(cons, nt), sort);
 }
 
-inline
 template<class T>
 std::vector<T> topological_sort(std::map<T, std::set<T>> dependencies)
 {
