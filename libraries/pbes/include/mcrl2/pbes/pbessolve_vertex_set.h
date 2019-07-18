@@ -421,6 +421,61 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
   }
 }
 
+// strategy vector that resizes automatically
+class strategy_vector
+{
+  protected:
+    mutable std::vector<structure_graph::index_type> strategy;
+
+    void resize(std::size_t n) const
+    {
+      std::size_t m = strategy.size();
+      if (m < 1024)
+      {
+        m = 1024;
+      }
+      while (m < n)
+      {
+        m *= 2;
+      }
+      strategy.resize(m);
+    }
+
+  public:
+    structure_graph::index_type operator[](std::size_t i) const
+    {
+      if (i >= strategy.size())
+      {
+        resize(i);
+      }
+      return strategy[i];
+    }
+
+    structure_graph::index_type& operator[](std::size_t i)
+    {
+      if (i >= strategy.size())
+      {
+        resize(i);
+      }
+      return strategy[i];
+    }
+
+    std::size_t size() const
+    {
+      return strategy.size();
+    }
+
+    // truncate the size to n
+    void truncate(std::size_t n)
+    {
+      if (strategy.size() > n)
+      {
+        strategy.erase(strategy.begin() + n, strategy.end());
+        strategy.shrink_to_fit();
+      }
+    }
+};
+
 } // namespace pbes_system
 
 } // namespace mcrl2

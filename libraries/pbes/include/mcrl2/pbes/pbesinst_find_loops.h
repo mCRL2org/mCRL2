@@ -77,6 +77,8 @@ void find_loops(const simple_structure_graph& G,
                 const pbesinst_lazy_todo& todo,
                 vertex_set& S0,
                 vertex_set& S1,
+                strategy_vector& tau0,
+                strategy_vector& tau1,
                 std::size_t iteration_count,
                 const detail::structure_graph_builder& graph_builder
 )
@@ -143,11 +145,11 @@ void find_loops(const simple_structure_graph& G,
     }
     if (b0)
     {
-      S0 = attr_default(G, S0, 0);
+      std::tie(S0, tau0) = attr_default_with_tau(G, S0, 0, tau0);
     }
     if (b1)
     {
-      S1 = attr_default(G, S1, 1);
+      std::tie(S1, tau1) = attr_default_with_tau(G, S1, 1, tau1);
     }
   }
 

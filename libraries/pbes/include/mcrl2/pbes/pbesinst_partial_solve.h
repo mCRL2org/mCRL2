@@ -29,6 +29,8 @@ void partial_solve(structure_graph& G,
                    const pbesinst_lazy_todo& todo,
                    vertex_set& S0,
                    vertex_set& S1,
+                   strategy_vector& tau0,
+                   strategy_vector& tau1,
                    std::size_t iteration_count,
                    const detail::structure_graph_builder& graph_builder
                   )
@@ -63,9 +65,9 @@ void partial_solve(structure_graph& G,
 
   vertex_set W[2] = { vertex_set(N), vertex_set(N) };
   std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S1, attr_default_no_strategy(G, S0_todo, 0)));
-  S1 = attr_default(G, set_union(S1, W[1]), 1);
+  std::tie(S1, tau1) = attr_default_with_tau(G, set_union(S1, W[1]), 1, tau1);
   std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S0, attr_default_no_strategy(G, S1_todo, 1)));
-  S0 = attr_default(G, set_union(S0, W[0]), 0);
+  std::tie(S0, tau0) = attr_default_with_tau(G, set_union(S0, W[0]), 0, tau0);
 
   mCRL2log(log::debug) << "Result of partial solve\n" << G << std::endl;
   mCRL2log(log::debug) << "S0 = " << S0 << std::endl;

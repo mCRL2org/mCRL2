@@ -131,6 +131,8 @@ inline
 void fatal_attractors(const simple_structure_graph& G,
                       vertex_set& S0,
                       vertex_set& S1,
+                      strategy_vector& tau0,
+                      strategy_vector& tau1,
                       std::size_t iteration_count
 )
 {
@@ -208,8 +210,8 @@ void fatal_attractors(const simple_structure_graph& G,
       mCRL2log(log::debug) << "Fatal attractors: insert vertex " << x << " in S" << alpha << std::endl;
     }
   }
-  S0 = attr_default(G, S0, 0);
-  S1 = attr_default(G, S1, 1);
+  std::tie(S0, tau0) = attr_default_with_tau(G, S0, 0, tau0);
+  std::tie(S1, tau1) = attr_default_with_tau(G, S1, 1, tau1);
   mCRL2log(log::debug) << "Fatal attractors: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 
@@ -260,6 +262,8 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
 void fatal_attractors_original(const simple_structure_graph& G,
                                vertex_set& S0,
                                vertex_set& S1,
+                               strategy_vector& tau0,
+                               strategy_vector& tau1,
                                std::size_t iteration_count
 )
 {
@@ -348,8 +352,8 @@ void fatal_attractors_original(const simple_structure_graph& G,
       }
     }
   }
-  S0 = attr_default(G, S0, 0);
-  S1 = attr_default(G, S1, 1);
+  std::tie(S0, tau0) = attr_default_with_tau(G, S0, 0, tau0);
+  std::tie(S1, tau1) = attr_default_with_tau(G, S1, 1, tau1);
   mCRL2log(log::debug) << "Fatal attractors original: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 
