@@ -38,6 +38,8 @@ struct native_translations
   std::map<data::sort_expression, std::string> sorts;
   // Function symbols that are overloaded
   std::set<data::function_symbol> ambiguous_symbols;
+  // Constructors that have a native recogniser
+  std::map<data::function_symbol, std::string> special_recogniser;
 
   native_translations() = default;
 

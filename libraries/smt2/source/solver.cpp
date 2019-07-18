@@ -428,6 +428,15 @@ native_translations initialise_native_translation(const data::data_specification
   nt.expressions[sort_real::creal()] = pp_real_translation;
   nt.set_native_definition(sort_real::creal());
 
+  nt.special_recogniser[data::sort_bool::true_()] = "@id";
+  nt.special_recogniser[data::sort_bool::false_()] = "not";
+  nt.special_recogniser[data::sort_pos::c1()] = "= 1";
+  nt.special_recogniser[data::sort_pos::cdub()] = ">= 2";
+  nt.special_recogniser[data::sort_nat::c0()] = "= 0";
+  nt.special_recogniser[data::sort_nat::cnat()] = ">= 1";
+  nt.special_recogniser[data::sort_int::cneg()] = "< 0";
+  nt.special_recogniser[data::sort_int::cint()] = ">= 0";
+
   nt.set_native_definition(sort_nat::pos2nat(), "@id");
   nt.set_native_definition(sort_nat::nat2pos(), "@id");
   nt.set_native_definition(sort_int::pos2int(), "@id");

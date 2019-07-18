@@ -62,6 +62,11 @@ data::function_symbol make_projection_func(const data::function_symbol& cons, co
 inline
 std::string make_recogniser_name(const data::function_symbol& cons, const native_translations& nt)
 {
+  auto find_result = nt.special_recogniser.find(cons);
+  if(find_result != nt.special_recogniser.end())
+  {
+    return find_result->second;
+  }
   // Z3 automatically generates recognisers "is-constructorname"
   return "is-" + translate_symbol(cons, nt);
 }
