@@ -375,12 +375,7 @@ inline int precedence(const data_expression& x)
 inline
 bool is_left_associative(const data_expression& x)
 {
-  return !(
-          sort_bool::is_and_application(x) ||
-          sort_bool::is_or_application(x) ||
-          sort_bool::is_implies_application(x) ||
-          sort_list::is_cons_application(x)
-  );
+  return !sort_bool::is_implies_application(x) && !sort_list::is_cons_application(x);
 }
 
 inline

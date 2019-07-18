@@ -48,7 +48,7 @@ inline int precedence(const process_expression& x)
 
 // only defined for binary operators
 inline bool is_left_associative(const choice&)              { return true; }
-inline bool is_left_associative(const merge&)               { return false; }
+inline bool is_left_associative(const merge&)               { return true; }
 inline bool is_left_associative(const left_merge&)          { return false; }
 inline bool is_left_associative(const bounded_init&)        { return true; }
 inline bool is_left_associative(const seq&)                 { return true; }
