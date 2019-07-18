@@ -37,7 +37,7 @@ public:
   /// \brief Write the num_of_bits least significant bits in descending order from value.
   /// @param val      Variable that contains the bits.
   /// @param nr_bits  Number of bits to write to the output stream.
-  void write_bits(std::size_t value, const std::size_t num_of_bits);
+  void write_bits(std::size_t value, unsigned int num_of_bits);
 
   /// \brief Write the given string to the output stream.
   /// \details Encoded in bits using <length, string>
@@ -60,7 +60,7 @@ private:
   /// \brief Buffer that is filled starting from bit 127 when writing
   std::bitset<128> write_buffer = 0;
 
-  std::size_t  bits_in_buffer = 0; ///< how many bits in are used in the buffer.
+  unsigned int bits_in_buffer = 0; ///< how many bits in are used in the buffer.
 
   std::uint8_t integer_buffer[integer_encoding_size<std::size_t>()]; ///< Reserved space to store an n byte integer.
 };
@@ -75,7 +75,7 @@ public:
 
   /// \brief Reads an num_of_bits bits from the input stream and stores them in the least significant part (in descending order) of the return value.
   /// \param num_of_bits Number of bits to read from the input stream.
-  std::size_t read_bits(const unsigned int num_of_bits);
+  std::size_t read_bits(unsigned int num_of_bits);
 
   /// \returns A pointer to the read string.
   /// \details Remains valid until the next call to read_string.
@@ -93,7 +93,7 @@ private:
   /// \brief Buffer that is filled starting from bit 127 when reading.
   std::bitset<128> read_buffer = 0;
 
-  std::size_t bits_in_buffer = 0; ///< how many bits in the buffer are used.
+  unsigned int bits_in_buffer = 0; ///< how many bits in the buffer are used.
 
   std::vector<char> m_text_buffer; ///< A temporary buffer to store char array strings.
 };
