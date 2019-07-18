@@ -54,8 +54,17 @@ private:
 
   mcrl2::utilities::obitstream m_stream;
 
+  /// \returns The number of bits needed to index terms.
+  unsigned int term_index_width();
+
+  /// \returns The number of bits needed to index function symbols.
+  unsigned int function_symbol_index_width();
+
+  unsigned int m_term_index_width; ///< caches the result of term_index_width().
+  unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
+
   mcrl2::utilities::indexed_set_large<aterm> m_terms; ///< An index of already written terms.
-  mcrl2::utilities::indexed_set_large<function_symbol> m_function_symbol; ///< An index of already written function symbols.
+  mcrl2::utilities::indexed_set_large<function_symbol> m_function_symbols; ///< An index of already written function symbols.
 };
 
 /// \brief Reads terms from a stream in the steamable binary aterm format.
@@ -72,8 +81,17 @@ public:
 private:
   mcrl2::utilities::ibitstream m_stream;
 
+  /// \returns The number of bits needed to index terms.
+  unsigned int term_index_width();
+
+  /// \returns The number of bits needed to index function symbols.
+  unsigned int function_symbol_index_width();
+
+  unsigned int m_term_index_width; ///< caches the result of term_index_width().
+  unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
+
   std::deque<aterm> m_terms; ///< An index of read terms.
-  std::deque<function_symbol> m_function_symbol; ///< An index of read function symbols.
+  std::deque<function_symbol> m_function_symbols; ///< An index of read function symbols.
 };
 
 /// \brief Writes term t to a stream in binary aterm format.
