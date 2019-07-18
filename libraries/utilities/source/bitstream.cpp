@@ -17,7 +17,6 @@
 #include <limits>
 
 #ifdef MCRL2_PLATFORM_WINDOWS
-#include <iomanip>
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -114,11 +113,11 @@ obitstream::obitstream(std::ostream& stream)
   }
 }
 
-void obitstream::write_bits(std::size_t value, const std::size_t num_of_bits)
+void obitstream::write_bits(std::size_t value, unsigned int number_of_bits)
 {
   // Add val to the buffer by masking out additional bits and put them at left-most position free in the buffer.
-  write_buffer |= std::bitset<128>(value & ((static_cast<std::size_t>(1) << num_of_bits) - 1)) << ((128 - bits_in_buffer) - num_of_bits);
-  bits_in_buffer += num_of_bits;
+  write_buffer |= std::bitset<128>(value & ((static_cast<std::size_t>(1) << number_of_bits) - 1)) << ((128 - bits_in_buffer) - number_of_bits);
+  bits_in_buffer += number_of_bits;
 
   // Write 8 bytes if available
   if (bits_in_buffer >= 64)
@@ -144,7 +143,7 @@ void obitstream::write_string(const std::string& string)
   write(reinterpret_cast<const std::uint8_t*>(string.c_str()), string.size());
 }
 
-void obitstream::write_integer(const std::size_t val)
+void obitstream::write_integer(std::size_t val)
 {
   std::size_t nr_bytes = encode_variablesize_int(val, integer_buffer);
 
@@ -181,12 +180,12 @@ const char* ibitstream::read_string()
   return m_text_buffer.data();
 }
 
-std::size_t ibitstream::read_bits(const unsigned int nr_bits)
+std::size_t ibitstream::read_bits(unsigned int number_of_bits)
 {
   // Read at most the number of bits of a std::size_t.
-  assert(nr_bits <= static_cast<unsigned int>(std::numeric_limits<std::size_t>::digits));
+  assert(number_of_bits <= std::numeric_limits<std::size_t>::digits);
 
-  while (bits_in_buffer < nr_bits)
+  while (bits_in_buffer < number_of_bits)
   {
     // Read bytes until the buffer is sufficiently full.
     int byte = stream.get();
@@ -202,11 +201,11 @@ std::size_t ibitstream::read_bits(const unsigned int nr_bits)
   }
 
   // Read nr_bits from the buffer by shifting them to the least significant bits and masking out the remaining bits.
-  std::size_t value = (read_buffer >> (128 - nr_bits)).to_ullong();
+  std::size_t value = (read_buffer >> (128 - number_of_bits)).to_ullong();
 
   // Shift the first bit to the first position in the buffer.
-  read_buffer <<= nr_bits;
-  bits_in_buffer -= nr_bits;
+  read_buffer <<= number_of_bits;
+  bits_in_buffer -= number_of_bits;
 
   return value;
 }
