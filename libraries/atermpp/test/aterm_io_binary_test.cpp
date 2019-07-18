@@ -9,11 +9,11 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
-
 #include <vector>
 
-using namespace std;
+#define BOOST_AUTO_TEST_MAIN
+#include <boost/test/included/unit_test_framework.hpp>
+
 using namespace atermpp;
 
 BOOST_AUTO_TEST_CASE(simple_term_test)
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_CHECK(output.read_term() == sequence[index]);
+    BOOST_TEST(output.read_term() == sequence[index]);
   }
 }
 
@@ -85,11 +85,6 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_CHECK(output.read_term() == sequence[index]);
+    BOOST_TEST(output.read_term() == sequence[index]);
   }
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }
