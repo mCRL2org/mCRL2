@@ -75,7 +75,6 @@ void test_aterm_io(const std::string& input_string)
 
 void test_aterm_io()
 {
-  test_aterm_io("17");
   test_aterm_io("a_somewhat_longer_constant_name_with_some_blah_blah_at_the_end_to_make_it_longer");
   test_aterm_io("f(g,h)");
   test_aterm_io("[]");
