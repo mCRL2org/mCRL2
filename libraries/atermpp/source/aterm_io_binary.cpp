@@ -6,13 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file atermpp/source/aterm_io_binary.cpp
-/// \brief This file allows to read and write terms in compact binary aterm`
-///        format. This code stems largely from the ATerm library designed by
-///        Paul Klint cs. 
-
-
-/* includes */
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -31,7 +24,10 @@ namespace atermpp
 {
 using namespace mcrl2::utilities;
 
-static constexpr std::size_t BAF_MAGIC = 0xbaf;
+/// \brief The magic value for a binary aterm format stream.
+/// \details As of version 0x8305 the magic and version are written as 2 bytes not encoded as variable-width integers. To ensure
+///          compatibility with older formats the previously variable-width encoding is mimicked by prefixing them with 1000 (0x8).
+static constexpr std::uint16_t BAF_MAGIC = 0x8baf;
 
 /// \brief The BAF_VERSION constant is the version number of the ATerms written in BAF
 ///        format. As of 29 August 2013 this version number is used by the mCRL2
@@ -45,7 +41,8 @@ static constexpr std::size_t BAF_MAGIC = 0xbaf;
 /// 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
 /// 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
 ///  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
-static constexpr std::size_t BAF_VERSION = 0x0304;
+/// 19 Juli 2019      : version changed to 0x8305 (introduction of the streamable aterm format)
+static constexpr std::uint16_t BAF_VERSION = 0x8305;
 
 /// \brief Each packet has a header consisting of a type and an invisible bit (indicating no output).
 enum class packet_type
@@ -67,9 +64,9 @@ binary_aterm_output::binary_aterm_output(std::ostream& stream)
   m_function_symbol_index_width = 1;
 
   // Write the header of the binary aterm format.
-  m_stream.write_integer(0);
-  m_stream.write_integer(BAF_MAGIC);
-  m_stream.write_integer(BAF_VERSION);
+  m_stream.write_bits(0, 8);
+  m_stream.write_bits(BAF_MAGIC, 16);
+  m_stream.write_bits(BAF_VERSION, 16);
 }
 
 binary_aterm_output::~binary_aterm_output()
@@ -172,12 +169,12 @@ binary_aterm_input::binary_aterm_input(std::istream& is)
   m_function_symbol_index_width = 1;
 
   // Read the binary aterm format header.
-  if (m_stream.read_integer() != 0 || m_stream.read_integer() != BAF_MAGIC)
+  if (m_stream.read_bits(8) != 0 || m_stream.read_bits(16) != BAF_MAGIC)
   {
     throw mcrl2::runtime_error("Error while reading file: The file is not correct as it does not have the BAF_MAGIC control sequence at the right place.");
   }
 
-  std::size_t version = m_stream.read_integer();
+  std::size_t version = m_stream.read_bits(16);
   if (version != BAF_VERSION)
   {
     throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) +
