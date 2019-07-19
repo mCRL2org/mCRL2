@@ -263,7 +263,6 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
         lts.set_data(data::data_specification(static_cast<const aterm_appl&>(header[0])));
         lts.set_process_parameters(static_cast<const data::variable_list&>(header[1]));
         lts.set_action_label_declarations(static_cast<const process::action_label_list&>(header[2]));
-        decode_initial_state(lts, decode_probabilistic_state(static_cast<const aterm_list&>(header[3]), cache));
 
         if (lts.num_state_labels() == 0)
         {
@@ -273,6 +272,9 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
         {
           assert(lts.num_states() == lts.num_state_labels());
         }
+
+        // The initial state can only be set after the states are known.
+        decode_initial_state(lts, decode_probabilistic_state(static_cast<const aterm_list&>(header[3]), cache));
       }
     }
   }
