@@ -12,7 +12,7 @@
 #include <vector>
 
 #define BOOST_AUTO_TEST_MAIN
-#include <boost/test/included/unit_test_framework.hpp>
+#include <boost/test/included/unit_test.hpp>
 
 using namespace atermpp;
 
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(simple_term_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_TEST(output.read_term() == sequence[index]);
+    BOOST_CHECK_EQUAL(output.read_term(), sequence[index]);
   }
 }
 
@@ -85,6 +85,6 @@ BOOST_AUTO_TEST_CASE(transitions_test)
 
   for (std::size_t index = 0; index < sequence.size(); ++index)
   {
-    BOOST_TEST(output.read_term() == sequence[index]);
+    BOOST_CHECK_EQUAL(output.read_term(), sequence[index]);
   }
 }
