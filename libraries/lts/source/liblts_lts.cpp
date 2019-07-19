@@ -86,10 +86,12 @@ static probabilistic_lts_lts_t::probabilistic_state_t decode_probabilistic_state
 
   for(auto it = list.begin(); it != list.end(); ++it)
   {
+    // Read the (index, probability) pair from the list.
     const std::size_t state_number = down_cast<aterm_int>(*it).value();
     ++it;
 
-    const lps::probabilistic_data_expression& probability = down_cast<lps::probabilistic_data_expression>(data::detail::add_index(*it, cache));
+    // The indices are already added to the header before.
+    const lps::probabilistic_data_expression& probability = down_cast<lps::probabilistic_data_expression>(*it);
     result.push_back(lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>(state_number, probability));
   }
 
@@ -269,7 +271,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
         }
         else
         {
-          assert(lts.num_states() == lts.state_labels().size());
+          assert(lts.num_states() == lts.num_state_labels());
         }
       }
     }
