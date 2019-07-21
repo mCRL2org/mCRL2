@@ -7,8 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/detail/aterm.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
+
+#include "mcrl2/atermpp/aterm_io.h"
 
 using namespace atermpp;
 using namespace atermpp::detail;
@@ -28,5 +31,9 @@ void atermpp::add_deletion_hook(const function_symbol& function, term_callback c
 {  
   g_term_pool().add_deletion_hook(function, callback);
 }
+
+aterm_input::~aterm_input() {}
+
+aterm_output::~aterm_output() {}
 
 typename std::aligned_storage<sizeof(aterm_pool), alignof(aterm_pool)>::type atermpp::detail::g_aterm_pool_storage = {};
