@@ -323,9 +323,30 @@ struct lazy_union
 };
 
 inline
+std::ostream& operator<<(std::ostream& out, const lazy_union& V)
+{
+  return out << "(" << V.A << " U " << V.B << ")";
+}
+
+inline
 bool is_subset_of(const vertex_set& V, const vertex_set& W)
 {
   return V.include().is_subset_of(W.include());
+}
+
+// returns a successor of u that is in A, or undefined_index if not found
+template <typename StructureGraph, typename VertexSet>
+structure_graph::index_type find_successor_in(const StructureGraph& G, structure_graph::index_type u, const VertexSet& A)
+{
+  for (auto v: G.successors(u))
+  {
+    if (A.contains(v))
+    {
+      return v;
+    }
+  }
+  mCRL2log(log::debug) << "No successor found for node " << u << " in " << A << std::endl;
+  return structure_graph::undefined_vertex;
 }
 
 template <typename StructureGraph>
@@ -336,8 +357,6 @@ void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::str
   {
     mCRL2log(log::debug) << "  " << v << " " << G.find_vertex(v) << std::endl;
   }
-  // mCRL2log(log::debug) << "\n";
-  // mCRL2log(log::debug) << "exclude = " << G.exclude() << "\n";
 }
 
 namespace detail {
@@ -357,6 +376,86 @@ void log_vertex_set(const vertex_set& V, const std::string& name)
 }
 
 } // namespace detail
+
+// strategy vector that resizes automatically
+class strategy_vector
+{
+  protected:
+    mutable std::vector<structure_graph::index_type> m_strategy;
+
+    void resize(std::size_t n) const
+    {
+      std::size_t m = m_strategy.size();
+      if (m < 16)
+      {
+        m = 16;
+      }
+      while (m < n)
+      {
+        m *= 2;
+      }
+      m_strategy.resize(m, structure_graph::undefined_vertex);
+    }
+
+  public:
+    structure_graph::index_type operator[](std::size_t i) const
+    {
+      if (i >= m_strategy.size())
+      {
+        resize(i);
+      }
+      return m_strategy[i];
+    }
+
+    structure_graph::index_type& operator[](std::size_t i)
+    {
+      if (i >= m_strategy.size())
+      {
+        resize(i);
+      }
+      return m_strategy[i];
+    }
+
+    std::size_t size() const
+    {
+      return m_strategy.size();
+    }
+
+    // truncate the size to n
+    void truncate(std::size_t n)
+    {
+      if (m_strategy.size() > n)
+      {
+        m_strategy.erase(m_strategy.begin() + n, m_strategy.end());
+        m_strategy.shrink_to_fit();
+      }
+    }
+
+    const std::vector<structure_graph::index_type>& strategy() const
+    {
+      return m_strategy;
+    }
+};
+
+inline
+std::string print_strategy_vector(const vertex_set& S_alpha, const strategy_vector& tau_alpha)
+{
+  std::ostringstream out;
+  bool first = true;
+  for (structure_graph::index_type u: S_alpha.vertices())
+  {
+    if (tau_alpha[u] != structure_graph::undefined_vertex)
+    {
+      if (!first)
+      {
+        out << ", ";
+      }
+      out << u << " -> " << tau_alpha[u];
+      first = false;
+    }
+  }
+  return out.str();
+}
 
 template <typename StructureGraph>
 std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureGraph& G, typename StructureGraph::index_type init, const vertex_set& S0, const vertex_set& S1)
@@ -400,6 +499,64 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
 }
 
 template <typename StructureGraph>
+std::set<structure_graph::index_type> extract_minimal_structure_graph(
+  StructureGraph& G,
+  typename StructureGraph::index_type init,
+  const vertex_set& S0,
+  const vertex_set& S1,
+  const strategy_vector& tau0,
+  const strategy_vector& tau1
+)
+{
+  using utilities::detail::contains;
+
+  typedef structure_graph::vertex vertex;
+  std::vector<const vertex*> result;
+
+  std::set<structure_graph::index_type> todo = { init };
+  std::set<structure_graph::index_type> done;
+  while (!todo.empty())
+  {
+    structure_graph::index_type u = *todo.begin();
+    todo.erase(todo.begin());
+    done.insert(u);
+    if (S0.contains(u) && G.decoration(u) == structure_graph::d_disjunction)
+    {
+      // explore only the strategy edge
+      structure_graph::index_type v = tau0[u];
+      assert (v != structure_graph::undefined_vertex);
+      if (!contains(done, v))
+      {
+        todo.insert(v);
+      }
+    }
+    else if (S1.contains(u) && G.decoration(u) == structure_graph::d_conjunction)
+    {
+      // explore only the strategy edge
+      structure_graph::index_type v = tau1[u];
+      assert (v != structure_graph::undefined_vertex);
+      if (!contains(done, v))
+      {
+        todo.insert(v);
+      }
+    }
+    else
+    {
+      // explore all outgoing edges
+      for (structure_graph::index_type v: G.successors(u))
+      {
+        if (!contains(done, v))
+        {
+          todo.insert(v);
+        }
+      }
+    }
+  }
+  mCRL2log(log::debug) << "\nExtracted minimal structure graph " << core::detail::print_set(done) << std::endl;
+  return done;
+}
+
+template <typename StructureGraph>
 std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureGraph& G, typename StructureGraph::index_type init, bool is_disjunctive)
 {
   std::size_t n = G.extent();
@@ -420,61 +577,6 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
     return extract_minimal_structure_graph(G, init, empty, all);
   }
 }
-
-// strategy vector that resizes automatically
-class strategy_vector
-{
-  protected:
-    mutable std::vector<structure_graph::index_type> strategy;
-
-    void resize(std::size_t n) const
-    {
-      std::size_t m = strategy.size();
-      if (m < 1024)
-      {
-        m = 1024;
-      }
-      while (m < n)
-      {
-        m *= 2;
-      }
-      strategy.resize(m);
-    }
-
-  public:
-    structure_graph::index_type operator[](std::size_t i) const
-    {
-      if (i >= strategy.size())
-      {
-        resize(i);
-      }
-      return strategy[i];
-    }
-
-    structure_graph::index_type& operator[](std::size_t i)
-    {
-      if (i >= strategy.size())
-      {
-        resize(i);
-      }
-      return strategy[i];
-    }
-
-    std::size_t size() const
-    {
-      return strategy.size();
-    }
-
-    // truncate the size to n
-    void truncate(std::size_t n)
-    {
-      if (strategy.size() > n)
-      {
-        strategy.erase(strategy.begin() + n, strategy.end());
-        strategy.shrink_to_fit();
-      }
-    }
-};
 
 } // namespace pbes_system
 

@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_PARTIAL_SOLVE_H
 #define MCRL2_PBES_PBESINST_PARTIAL_SOLVE_H
 
+#include <array>
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
@@ -27,36 +28,34 @@ namespace detail {
 inline
 void partial_solve(structure_graph& G,
                    const pbesinst_lazy_todo& todo,
-                   vertex_set& S0,
-                   vertex_set& S1,
-                   strategy_vector& tau0,
-                   strategy_vector& tau1,
-                   std::size_t iteration_count,
+                   std::array<vertex_set, 2>& S,
+                   std::array<strategy_vector, 2>& tau,
+                   std::size_t equation_count,
                    const detail::structure_graph_builder& graph_builder
                   )
 {
-  mCRL2log(log::debug) << "Apply partial solve (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
-
-  detail::log_vertex_set(S0, "S0 (start of partial solve)");
-  detail::log_vertex_set(S1, "S1 (start of partial solve)");
+  mCRL2log(log::debug) << "\n  === partial solve (equation " << equation_count << ") ===\n" << G << std::endl;
+  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
 
   std::size_t N = G.extent();
 
-  // The size of S0 and S1 may be bigger than N, because of the resize strategy in vertex_set.
-  S0.truncate(N);
-  S1.truncate(N);
+  // The size of S[0] and S[1] may be bigger than N, because of the resize strategy in vertex_set.
+  S[0].truncate(N);
+  S[1].truncate(N);
 
-  S0 = attr_default(G, S0, 0);
-  S1 = attr_default(G, S1, 1);
+  mCRL2log(log::debug) << "  computing S0 = attr_default_with_tau(G, S0, 0, tau0)" << std::endl;
+  S[0] = attr_default_with_tau(G, S[0], 0, tau);
+  mCRL2log(log::debug) << "  computing S1 = attr_default_with_tau(G, S1, 1, tau1)" << std::endl;
+  S[1] = attr_default_with_tau(G, S[1], 1, tau);
 
-  // compute Si_todo = Si \cup { v \in V | v.is_defined() }
-  vertex_set S0_todo = S0;
-  vertex_set S1_todo = S1;
+  // Si_todo := Si U todo
+  std::array<vertex_set, 2> S_todo = S;
   for (const propositional_variable_instantiation& X: todo.all_elements())
   {
     structure_graph::index_type u = graph_builder.find_vertex(X);
-    S0_todo.insert(u);
-    S1_todo.insert(u);
+    S_todo[0].insert(u);
+    S_todo[1].insert(u);
   }
 
   bool check_strategy = false;
@@ -64,14 +63,38 @@ void partial_solve(structure_graph& G,
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
 
   vertex_set W[2] = { vertex_set(N), vertex_set(N) };
-  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S1, attr_default_no_strategy(G, S0_todo, 0)));
-  std::tie(S1, tau1) = attr_default_with_tau(G, set_union(S1, W[1]), 1, tau1);
-  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S0, attr_default_no_strategy(G, S1_todo, 1)));
-  std::tie(S0, tau0) = attr_default_with_tau(G, set_union(S0, W[0]), 0, tau0);
+  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S[1], attr_default_no_strategy(G, S_todo[0], 0)));
+  for (structure_graph::index_type v: W[1].vertices())
+  {
+    if (S[1].contains(v))
+    {
+      continue;
+    }
+    if (G.decoration(v) == structure_graph::d_conjunction)
+    {
+      auto tau_v = G.decoration(v);
+      local_strategy(tau, 1).set_strategy(v, tau_v);
+    }
+  }
+  std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S[0], attr_default_no_strategy(G, S_todo[1], 1)));
+  for (structure_graph::index_type v: W[0].vertices())
+  {
+    if (S[0].contains(v))
+    {
+      continue;
+    }
+    if (G.decoration(v) == structure_graph::d_disjunction)
+    {
+      auto tau_v = G.decoration(v);
+      local_strategy(tau, 0).set_strategy(v, tau_v);
+    }
+  }
 
-  mCRL2log(log::debug) << "Result of partial solve\n" << G << std::endl;
-  mCRL2log(log::debug) << "S0 = " << S0 << std::endl;
-  mCRL2log(log::debug) << "S1 = " << S1 << std::endl;
+  mCRL2log(log::debug) << "\n  === result of partial solve (iteration " << equation_count << ") ===" << std::endl;
+  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
+  mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
 }
 
 } // namespace detail

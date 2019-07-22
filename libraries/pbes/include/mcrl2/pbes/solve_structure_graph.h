@@ -119,7 +119,7 @@ class solve_structure_graph_algorithm
     inline
     std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G)
     {
-      mCRL2log(log::debug) << "\n--- solve_recursive input ---\n" << G << std::endl;
+      mCRL2log(log::debug) << "\n  --- solve_recursive input ---\n" << G << std::endl;
       std::size_t N = G.extent();
 
       if (G.is_empty())
@@ -143,8 +143,9 @@ class solve_structure_graph_algorithm
           auto v = succ(G, ui, U);
           if (v != structure_graph::undefined_vertex)
           {
-            mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
-            u.strategy = v;
+            global_strategy<structure_graph>(G).set_strategy(ui, v);
+//            mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
+//            u.strategy = v;
           }
         }
       }
@@ -201,7 +202,7 @@ class solve_structure_graph_algorithm
          }
       }
 
-      mCRL2log(log::debug) << "\n--- solution for solve_recursive input ---\n" << G;
+      mCRL2log(log::debug) << "\n  --- solution for solve_recursive input ---\n" << G;
       mCRL2log(log::debug) << "   W0 = " << W[0] << std::endl;
       mCRL2log(log::debug) << "   W1 = " << W[1] << std::endl;
       assert(W[0].size() + W[1].size() + G.exclude().count() == N);
@@ -212,7 +213,7 @@ class solve_structure_graph_algorithm
     inline
     std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G)
     {
-      mCRL2log(log::debug) << "\n--- solve_recursive_extended input ---\n" << G << std::endl;
+      mCRL2log(log::debug) << "\n  --- solve_recursive_extended input ---\n" << G << std::endl;
 
       std::size_t N = G.extent();
       vertex_set Vconj(N);
@@ -361,7 +362,7 @@ class solve_structure_graph_algorithm
     bool solve(structure_graph& G)
     {
       mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
-      mCRL2log(log::debug) << "G = " << G << std::endl;
+      mCRL2log(log::debug) << G << std::endl;
       assert(G.extent() > 0);
       assert(G.is_defined());
       auto W = solve_recursive_extended(G);

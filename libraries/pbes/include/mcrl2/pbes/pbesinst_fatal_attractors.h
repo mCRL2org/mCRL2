@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_FATAL_ATTRACTORS_H
 #define MCRL2_PBES_PBESINST_FATAL_ATTRACTORS_H
 
+#include <array>
 #include "mcrl2/pbes/pbessolve_attractors.h"
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 #include "mcrl2/pbes/simple_structure_graph.h"
@@ -110,7 +111,7 @@ vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alph
 
     if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
-      set_strategy(G, u, A, alpha);
+      global_strategy<StructureGraph>(G).set_strategy(u, find_successor_in(G, u, A));
 
       A.insert(u);
 
@@ -129,16 +130,16 @@ vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alph
 
 inline
 void fatal_attractors(const simple_structure_graph& G,
-                      vertex_set& S0,
-                      vertex_set& S1,
-                      strategy_vector& tau0,
-                      strategy_vector& tau1,
-                      std::size_t iteration_count
+                      std::array<vertex_set, 2>& S,
+                      std::array<strategy_vector, 2>& tau,
+                      std::size_t equation_count
 )
 {
-  mCRL2log(log::debug) << "Apply fatal attractors (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
+  mCRL2log(log::debug) << "\n  === fatal attractors (equation " << equation_count << ") ===\n" << G << std::endl;
+  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
 
-  // count the number of insertions in the sets S0 and S1
+  // count the number of insertions in the sets S[0] and S[1]
   std::size_t insertion_count = 0;
   std::size_t n = G.extent();
 
@@ -152,67 +153,69 @@ void fatal_attractors(const simple_structure_graph& G,
   // compute U_j_map, such that U_j_map[j] = U_j
   std::map<std::size_t, vertex_set> U_j_map = compute_U_j_map(G, V);
 
-  detail::log_vertex_set(V, "V");
-  detail::log_vertex_set(S0, "S0");
-  detail::log_vertex_set(S1, "S1");
+  S[0] = attr_default_with_tau(G, S[0], 0, tau);
+  S[1] = attr_default_with_tau(G, S[1], 1, tau);
 
   for (auto& p: U_j_map)
   {
     std::size_t j = p.first;
     auto alpha = j % 2;
-    vertex_set& S_alpha = alpha == 0 ? S0 : S1;
-    vertex_set& S_one_minus_alpha = alpha == 0 ? S1 : S0;
+    mCRL2log(log::debug) << "  --- equation j = " << j << " ---" << std::endl;
+
     vertex_set& U_j = p.second;
-    U_j = set_minus(U_j, S_one_minus_alpha);
-    detail::log_vertex_set(U_j, "U_" + std::to_string(j));
-    vertex_set U = set_union(U_j, S_alpha);
+    U_j = set_minus(U_j, S[1 - alpha]);
+    mCRL2log(log::debug) << "  U_" << std::to_string(j) << " = " << U_j << std::endl;
+    vertex_set U = set_union(U_j, S[alpha]);
     vertex_set X = detail::attr_min_rank(G, U, alpha, V, j);
     vertex_set Y = set_minus(V, attr_default(G, set_minus(V, X), 1 - alpha));
 
     while (X != Y)
     {
-      detail::log_vertex_set(X, "X");
-      detail::log_vertex_set(Y, "Y");
+      mCRL2log(log::debug) << "  X = " << X << std::endl;
+      mCRL2log(log::debug) << "  Y = " << Y << std::endl;
       X = detail::attr_min_rank(G, set_intersection(U, Y), alpha, V, j);
       Y = set_minus(Y, attr_default(G, set_minus(Y, X), 1 - alpha));
     }
-    detail::log_vertex_set(X, "X (final value)");
+    mCRL2log(log::debug) << "  X (final) = " << X << std::endl;
 
-    // set strategy for v \in (U_j \cap X) \ S_alpha
-    for (structure_graph::index_type v: U_j.vertices())
+    // set strategy for v \in X \ S[alpha]
+    for (structure_graph::index_type v: X.vertices())
     {
-      if (!X.contains(v) || S_alpha.contains(v))
+      if (S[alpha].contains(v))
       {
         continue;
       }
       if ((alpha == 0 && G.decoration(v) == structure_graph::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::d_conjunction))
       {
-        for (auto w: G.successors(v))
+        if (U_j.contains(v))
         {
-          if ((Y.contains(w)))
-          {
-            mCRL2log(log::debug) << "set strategy for node " << v << " to " << w << std::endl;
-            G.find_vertex(v).strategy = w;
-            break;
-          }
+          auto w = find_successor_in(G, v, Y);
+          local_strategy(tau, alpha).set_strategy(v, w);
         }
-        if (G.strategy(v) == structure_graph::undefined_vertex)
+        else
         {
-          mCRL2log(log::debug) << "Error: no strategy for node " << v << std::endl;
+          auto tau_v = G.find_vertex(v).strategy;
+          local_strategy(tau, alpha).set_strategy(v, tau_v);
         }
       }
     }
 
+    // S_alpha := S_alpha U X
     for (structure_graph::index_type x: X.vertices())
     {
       insertion_count++;
-      S_alpha.insert(x);
-      mCRL2log(log::debug) << "Fatal attractors: insert vertex " << x << " in S" << alpha << std::endl;
+      S[alpha].insert(x);
+      mCRL2log(log::debug) << "  insert vertex " << x << " in S" << alpha << std::endl;
     }
+
+    S[alpha] = attr_default_with_tau(G, S[alpha], alpha, tau);
   }
-  std::tie(S0, tau0) = attr_default_with_tau(G, S0, 0, tau0);
-  std::tie(S1, tau1) = attr_default_with_tau(G, S1, 1, tau1);
-  mCRL2log(log::debug) << "Fatal attractors: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
+  mCRL2log(log::debug) << "\n  === result of fatal attractors (equation " << equation_count << ") ===" << std::endl;
+  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
+  mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
+  mCRL2log(log::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
 }
 
 // Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
@@ -242,7 +245,7 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
 
     if (G.decoration(u) == alpha || includes_successors(G, u, lazy_union(A, X)))
     {
-      set_strategy(G, u, lazy_union(A, X), alpha);
+      global_strategy<StructureGraph>(G).set_strategy(u, find_successor_in(G, u, lazy_union(A, X)));
 
       X.insert(u);
 
@@ -260,16 +263,16 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
 }
 
 void fatal_attractors_original(const simple_structure_graph& G,
-                               vertex_set& S0,
-                               vertex_set& S1,
-                               strategy_vector& tau0,
-                               strategy_vector& tau1,
-                               std::size_t iteration_count
+                               std::array<vertex_set, 2>& S,
+                               std::array<strategy_vector, 2>& tau,
+                               std::size_t equation_count
 )
 {
-  mCRL2log(log::debug) << "Apply fatal attractors original (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
+  mCRL2log(log::debug) << "\n  === fatal attractors original (equation " << equation_count << ") ===\n" << G << std::endl;
+  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
 
-  // count the number of insertions in the sets S0 and S1
+  // count the number of insertions in the sets S[0] and S[1]
   std::size_t insertion_count = 0;
   std::size_t n = G.extent();
 
@@ -283,67 +286,62 @@ void fatal_attractors_original(const simple_structure_graph& G,
   // compute U_j_map, such that U_j_map[j] = U_j
   std::map<std::size_t, vertex_set> U_j_map = compute_U_j_map(G, V);
 
-  detail::log_vertex_set(V, "V");
-  detail::log_vertex_set(S0, "S0");
-  detail::log_vertex_set(S1, "S1");
+  S[0] = attr_default_with_tau(G, S[0], 0, tau);
+  S[1] = attr_default_with_tau(G, S[1], 1, tau);
 
   for (auto& p: U_j_map)
   {
     std::size_t j = p.first;
     auto alpha = j % 2;
+    mCRL2log(log::debug) << "  --- equation j = " << j << " ---" << std::endl;
 
-    mCRL2log(log::debug) << "--- Iteration j = " << j << " ---" << std::endl;
-
-    vertex_set& S_alpha = alpha == 0 ? S0 : S1;
-    vertex_set& S_one_minus_alpha = alpha == 0 ? S1 : S0;
     vertex_set& U_j = p.second;
-    U_j = set_minus(U_j, S_one_minus_alpha);
+    U_j = set_minus(U_j, S[1 - alpha]);
 
     vertex_set X(n);
 
     while (!U_j.is_empty() && U_j != X)
     {
-      mCRL2log(log::debug) << "---------------------------" << std::endl;
-      detail::log_vertex_set(U_j, "U_" + std::to_string(j));
+      mCRL2log(log::debug) << "  U_" + std::to_string(j) << " = " << U_j << std::endl;
       X = U_j;
-      detail::log_vertex_set(X, "X");
-      detail::log_vertex_set(set_union(X, S_alpha), "X \\cup S_" + std::to_string(alpha));
-      vertex_set Y = detail::attr_min_rank_original(G, set_union(X, S_alpha), alpha, V, j);
-      detail::log_vertex_set(Y, "Y");
-      mCRL2log(log::debug) << "U_" + std::to_string(j) << " is " << (is_subset_of(U_j, Y) ? "a" : "no") << " subset of Y" << std::endl;
+      mCRL2log(log::debug) << "  X = " << X << std::endl;
+      mCRL2log(log::debug) << "  X U S_" + std::to_string(alpha) << " = " << set_union(X, S[alpha]) << std::endl;
+      vertex_set Y = detail::attr_min_rank_original(G, set_union(X, S[alpha]), alpha, V, j);
+      mCRL2log(log::debug) << "  Y = " << Y << std::endl;
+      mCRL2log(log::debug) << "  U_" + std::to_string(j) << " is " << (is_subset_of(U_j, Y) ? "a" : "no") << " subset of Y" << std::endl;
       if (is_subset_of(U_j, Y))
       {
-        // set strategy for v \in U_j \ S_alpha
-        for (structure_graph::index_type v: U_j.vertices())
+        // set strategy for v \in Y \ S[alpha]
+        for (structure_graph::index_type v: Y.vertices())
         {
-          if (S_alpha.contains(v))
+          if (S[alpha].contains(v))
           {
             continue;
           }
           if ((alpha == 0 && G.decoration(v) == structure_graph::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::d_conjunction))
           {
-            for (auto w: G.successors(v))
+            if (U_j.contains(v))
             {
-              if ((Y.contains(w)))
-              {
-                mCRL2log(log::debug) << "set strategy for node " << v << " to " << w << std::endl;
-                G.find_vertex(v).strategy = w;
-                break;
-              }
+              auto w = find_successor_in(G, v, Y);
+              local_strategy(tau, alpha).set_strategy(v, w);
             }
-            if (G.strategy(v) == structure_graph::undefined_vertex)
+            else
             {
-              mCRL2log(log::debug) << "Error: no strategy for node " << v << std::endl;
+              auto tau_v = G.find_vertex(v).strategy;
+              local_strategy(tau, alpha).set_strategy(v, tau_v);
             }
           }
         }
 
+        // S_alpha := S_alpha U Y
         for (structure_graph::index_type y: Y.vertices())
         {
           insertion_count++;
-          S_alpha.insert(y);
-          mCRL2log(log::debug) << "Fatal attractors original: insert vertex " << y << " in S" << alpha << std::endl;
+          S[alpha].insert(y);
+          mCRL2log(log::debug) << "  insert vertex " << y << " in S" << alpha << std::endl;
         }
+
+        S[alpha] = attr_default_with_tau(G, S[alpha], alpha, tau);
         break;
       }
       else
@@ -352,9 +350,12 @@ void fatal_attractors_original(const simple_structure_graph& G,
       }
     }
   }
-  std::tie(S0, tau0) = attr_default_with_tau(G, S0, 0, tau0);
-  std::tie(S1, tau1) = attr_default_with_tau(G, S1, 1, tau1);
-  mCRL2log(log::debug) << "Fatal attractors original: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
+  mCRL2log(log::debug) << "\n  === result of fatal attractors original (equation " << equation_count << ") ===" << std::endl;
+  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
+  mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
+  mCRL2log(log::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
 }
 
 } // namespace detail

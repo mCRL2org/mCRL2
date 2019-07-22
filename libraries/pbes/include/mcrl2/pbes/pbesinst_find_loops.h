@@ -57,7 +57,7 @@ bool find_loop(const simple_structure_graph& G,
       {
         if (u == v || find_loop(G, U, v, u, p, visited))
         {
-          set_strategy(G, w, u == v ? v : u);
+          global_strategy<simple_structure_graph>(G).set_strategy(w, u == v ? v : u);
           visited[w] = true;
           mCRL2log(log::debug) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
           return true;
@@ -75,20 +75,18 @@ bool find_loop(const simple_structure_graph& G,
 void find_loops(const simple_structure_graph& G,
                 const std::unordered_set<propositional_variable_instantiation>& discovered,
                 const pbesinst_lazy_todo& todo,
-                vertex_set& S0,
-                vertex_set& S1,
-                strategy_vector& tau0,
-                strategy_vector& tau1,
+                std::array<vertex_set, 2>& S,
+                std::array<strategy_vector, 2>& tau,
                 std::size_t iteration_count,
                 const detail::structure_graph_builder& graph_builder
 )
 {
   mCRL2log(log::debug) << "Apply find loops (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
 
-  // count the number of insertions in the sets S0 and S1
+  // count the number of insertions in the sets S[0] and S[1]
   std::size_t insertion_count = 0;
 
-  std::size_t n = S0.extent();
+  std::size_t n = S[0].extent();
 
   // compute todo_
   boost::dynamic_bitset<> todo_(n);
@@ -130,26 +128,26 @@ void find_loops(const simple_structure_graph& G,
     {
       if (u_.rank % 2 == 0)
       {
-        S0.insert(u);
+        S[0].insert(u);
         b0 = true;
         insertion_count++;
-        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S0" << std::endl;
+        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S[0]" << std::endl;
       }
       else
       {
-        S1.insert(u);
+        S[1].insert(u);
         b1 = true;
         insertion_count++;
-        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S1" << std::endl;
+        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S[1]" << std::endl;
       }
     }
     if (b0)
     {
-      std::tie(S0, tau0) = attr_default_with_tau(G, S0, 0, tau0);
+      S[0] = attr_default_with_tau(G, S[0], 0, tau);
     }
     if (b1)
     {
-      std::tie(S1, tau1) = attr_default_with_tau(G, S1, 1, tau1);
+      S[1] = attr_default_with_tau(G, S[1], 1, tau);
     }
   }
 

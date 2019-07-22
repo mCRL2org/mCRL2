@@ -18,53 +18,72 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+// Does not set a strategy
+struct no_strategy
+{
+  void set_strategy(structure_graph::index_type /* u */, structure_graph::index_type /* v */)
+  {}
+};
+
+// Puts strategy annotations in the strategy attributes of the nodes of graph G
 template <typename StructureGraph>
-void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, typename StructureGraph::index_type v)
+struct global_strategy
 {
-  mCRL2log(log::debug) << "set strategy for node " << u << " to " << v << std::endl;
-  G.find_vertex(u).strategy = v;
-}
+  const StructureGraph& G;
 
-template <typename StructureGraph, typename VertexSet>
-void set_strategy(const StructureGraph& G, typename StructureGraph::index_type u, const VertexSet& A, std::size_t alpha)
-{
-  if (G.decoration(u) == alpha)
-  {
-    for (auto v: G.successors(u))
-    {
-      if ((A.contains(v)))
-      {
-        set_strategy(G, u, v);
-        break;
-      }
-    }
-    if (G.strategy(u) == structure_graph::undefined_vertex)
-    {
-      mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
-    }
-  }
-}
+  explicit global_strategy(const StructureGraph& G_)
+   : G(G_)
+  {}
 
-template <typename StructureGraph, typename VertexSet>
-void set_strategy_with_tau(const StructureGraph& G, typename StructureGraph::index_type u, const VertexSet& A, std::size_t alpha, strategy_vector& tau)
-{
-  if (G.decoration(u) == alpha)
+  void set_strategy(structure_graph::index_type u, structure_graph::index_type v)
   {
-    for (auto v: G.successors(u))
+    if (v == structure_graph::undefined_vertex)
     {
-      if ((A.contains(v)))
-      {
-        set_strategy(G, u, v);
-        tau[u] = v;
-        break;
-      }
+      mCRL2log(log::debug) << "Error: undefined strategy for node " << u << std::endl;
     }
-    if (G.strategy(u) == structure_graph::undefined_vertex)
-    {
-      mCRL2log(log::debug) << "Error: no strategy for node " << u << std::endl;
-    }
+    mCRL2log(log::debug) << "  set tau[" << u << "] = " << v << std::endl;
+    G.find_vertex(u).strategy = v;
   }
-}
+};
+
+// Puts strategy annotations in tau[alpha]
+struct local_strategy
+{
+  std::array<strategy_vector, 2>& tau;
+  std::size_t alpha;
+
+  local_strategy(std::array<strategy_vector, 2>& tau_, std::size_t alpha_)
+    : tau(tau_), alpha(alpha_)
+  {}
+
+  void set_strategy(structure_graph::index_type u, structure_graph::index_type v)
+  {
+    if (v == structure_graph::undefined_vertex)
+    {
+      mCRL2log(log::debug) << "Error: undefined strategy for node " << u << std::endl;
+    }
+    mCRL2log(log::debug) << "  set tau" << alpha << "[" << u << "] = " << v << std::endl;
+    tau[alpha][u] = v;
+  }
+};
+
+// Combination of global and local strategy
+template <typename StructureGraph>
+struct global_local_strategy
+{
+  global_strategy<StructureGraph> global;
+  local_strategy local;
+
+  global_local_strategy(const StructureGraph& G, std::array<strategy_vector, 2>& tau, std::size_t alpha)
+   : global(G), local(tau, alpha)
+  {}
+
+  void set_strategy(structure_graph::index_type u, structure_graph::index_type v)
+  {
+    global.set_strategy(u, v);
+    local.set_strategy(u, v);
+  }
+};
 
 // Returns true if succ(u) \subseteq A
 template <typename StructureGraph, typename VertexSet>
@@ -80,9 +99,9 @@ bool includes_successors(const StructureGraph& G, typename StructureGraph::index
   return true;
 }
 
-// Returns all predecessors of elements in A.
+// Returns pred(A) \ A
 template <typename StructureGraph>
-deque_vertex_set predecessors(const StructureGraph& G, const vertex_set& A)
+deque_vertex_set exclusive_predecessors(const StructureGraph& G, const vertex_set& A)
 {
   // put all predecessors of elements in A in todo
   deque_vertex_set todo(G.all_vertices().size());
@@ -116,10 +135,11 @@ void insert_predecessors(const StructureGraph& G, structure_graph::index_type u,
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph, bool SetStrategy = true>
-vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha)
+// Strategy is either no_strategy, global_strategy, local_strategy or global_local_strategy
+template <typename StructureGraph, typename Strategy>
+vertex_set attr_default_generic(const StructureGraph& G, vertex_set A, std::size_t alpha, Strategy tau)
 {
-  deque_vertex_set todo = predecessors(G, A);
+  deque_vertex_set todo = exclusive_predecessors(G, A);
 
   while (!todo.is_empty())
   {
@@ -128,10 +148,7 @@ vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha
 
     if (G.decoration(u) == alpha || includes_successors(G, u, A))
     {
-      if (SetStrategy)
-      {
-        set_strategy(G, u, A, alpha);
-      }
+      tau.set_strategy(u, find_successor_in(G, u, A));
       A.insert(u);
       insert_predecessors(G, u, A, todo);
     }
@@ -140,39 +157,31 @@ vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha
   return A;
 }
 
+// Computes an attractor set, by extending A.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
+// StructureGraph is either structure_graph or simple_structure_graph
+template <typename StructureGraph>
+vertex_set attr_default(const StructureGraph& G, vertex_set A, std::size_t alpha)
+{
+  return attr_default_generic(G, A, alpha, global_strategy<StructureGraph>(G));
+}
+
 // Variant of attr_default that does not set any strategies.
 template <typename StructureGraph>
 vertex_set attr_default_no_strategy(const StructureGraph& G, vertex_set A, std::size_t alpha)
 {
-  return attr_default<StructureGraph, false>(G, A, alpha);
+  return attr_default_generic(G, A, alpha, no_strategy());
 }
 
 // Computes an attractor set, by extending A.
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph, bool SetStrategy = true>
-std::pair<vertex_set, strategy_vector> attr_default_with_tau(const StructureGraph& G, vertex_set A, std::size_t alpha, strategy_vector tau)
+template <typename StructureGraph>
+vertex_set attr_default_with_tau(const StructureGraph& G, vertex_set A, std::size_t alpha, std::array<strategy_vector, 2>& tau)
 {
-  deque_vertex_set todo = predecessors(G, A);
-
-  while (!todo.is_empty())
-  {
-    // N.B. Use a breadth first search, to minimize counter examples
-    auto u = todo.pop_front();
-
-    if (G.decoration(u) == alpha || includes_successors(G, u, A))
-    {
-      if (SetStrategy)
-      {
-        set_strategy_with_tau(G, u, A, alpha, tau);
-      }
-      A.insert(u);
-      insert_predecessors(G, u, A, todo);
-    }
-  }
-
-  return { A, tau };
+  return attr_default_generic(G, A, alpha, global_local_strategy<StructureGraph>(G, tau, alpha));
 }
 
 } // namespace pbes_system

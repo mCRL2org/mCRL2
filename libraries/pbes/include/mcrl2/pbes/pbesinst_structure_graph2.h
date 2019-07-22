@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 
+#include <array>
 #include <utility>
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbesinst_fatal_attractors.h"
@@ -75,13 +76,11 @@ class periodic_guard
 class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algorithm
 {
   protected:
-    vertex_set S0;
-    vertex_set S1;
-    strategy_vector tau0;
-    strategy_vector tau1;
+    std::array<vertex_set, 2> S;
+    std::array<strategy_vector, 2> tau;
+    std::array<detail::computation_guard, 2> S_guard;
+
     pbes_expression b; // to store the result of the Rplus computation
-    detail::computation_guard S0_guard;
-    detail::computation_guard S1_guard;
     detail::computation_guard find_loops_guard;
     detail::computation_guard fatal_attractors_guard;
     detail::periodic_guard reset_guard;
@@ -116,13 +115,13 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         {}
       };
 
-      vertex_set& S0;
-      vertex_set& S1;
+      std::array<vertex_set, 2>& S;
+
       detail::structure_graph_builder& graph_builder;
       std::vector<stack_element> stack;
 
-      Rplus_traverser(vertex_set& S0_, vertex_set& S1_, detail::structure_graph_builder& graph_builder_)
-       : S0(S0_), S1(S1_), graph_builder(graph_builder_)
+      Rplus_traverser(std::array<vertex_set, 2>& S_, detail::structure_graph_builder& graph_builder_)
+       : S(S_), graph_builder(graph_builder_)
       {}
 
       void unexpected(const pbes_expression& x) const
@@ -177,14 +176,14 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         auto u = graph_builder.find_vertex(x);
         if (u == structure_graph::undefined_vertex)
         {
-          // if x is not yet in the graph, then it certainly isn't in S0 or S1
+          // if x is not yet in the graph, then it certainly isn't in S[0] or S[1]
           stack.emplace_back(data::undefined_data_expression(), x, true_(), false_());
         }
-        else if (S0.contains(u))
+        else if (S[0].contains(u))
         {
           stack.emplace_back(true_(), x, x, false_());
         }
-        else if (S1.contains(u))
+        else if (S[1].contains(u))
         {
           stack.emplace_back(false_(), x, true_(), x);
         }
@@ -332,114 +331,17 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
     };
 
-    std::pair<pbes_expression, pbes_expression> Rplus_old(const pbes_expression& x)
-    {
-      if (is_true(x) || is_false(x))
-      {
-        return { x, x };
-      }
-      else if (is_propositional_variable_instantiation(x))
-      {
-        auto u = m_graph_builder.find_vertex(x);
-        if (u != structure_graph::undefined_vertex)
-        {
-          if (S0.contains(u))
-          {
-            return { expr(true_()), x };
-          }
-          else if (S1.contains(u))
-          {
-            return { expr(false_()), x };
-          }
-        }
-        return { expr(data::undefined_data_expression()), x };
-      }
-      else if (is_and(x))
-      {
-        const auto& x_ = atermpp::down_cast<and_>(x);
-        // TODO: use structured bindings
-        pbes_expression b1, b2, x1, x2;
-        std::tie(b1, x1) = Rplus_old(x_.left());
-        std::tie(b2, x2) = Rplus_old(x_.right());
-        if (is_true(b1) && is_true(b2))
-        {
-          return { expr(true_()), x };
-        }
-        else if (is_false(b1) && !is_false(b2))
-        {
-          return { expr(false_()), x1 };
-        }
-        else if (!is_false(b1) && is_false(b2))
-        {
-          return { expr(false_()), x2 };
-        }
-        else if (is_false(b1) && is_false(b2))
-        {
-          // TODO: use a heuristic for the smallest term (x1 or x2)
-          return { expr(false_()), x1 };
-        }
-        else // if (b1 == data::undefined_data_expression() && b2 == data::undefined_data_expression())
-        {
-          return { expr(data::undefined_data_expression()), x };
-        }
-      }
-      else if (is_or(x))
-      {
-        const auto& x_ = atermpp::down_cast<or_>(x);
-        // TODO: use structured bindings
-        pbes_expression b1, b2, x1, x2;
-        std::tie(b1, x1) = Rplus_old(x_.left());
-        std::tie(b2, x2) = Rplus_old(x_.right());
-        if (is_false(b1) && is_false(b2))
-        {
-          return { expr(false_()), x };
-        }
-        else if (is_true(b1) && !is_true(b2))
-        {
-          return { expr(true_()), x1 };
-        }
-        else if (!is_true(b1) && is_true(b2))
-        {
-          return { expr(true_()), x2 };
-        }
-        else if (is_true(b1) && is_true(b2))
-        {
-          // TODO: use a heuristic for the smallest term (x1 or x2)
-          return { expr(true_()), x1 };
-        }
-        else // if (b1 == data::undefined_data_expression() && b2 == data::undefined_data_expression())
-        {
-          return { expr(data::undefined_data_expression()), x };
-        }
-      }
-      else
-      {
-        throw mcrl2::runtime_error("Unexpected term " + pbes_system::pp(x) + " encountered in Rplus_old");
-      }
-    }
-
     Rplus_traverser::stack_element Rplus(const pbes_expression& x)
     {
-      Rplus_traverser f(S0, S1, m_graph_builder);
+      Rplus_traverser f(S, m_graph_builder);
       f.apply(x);
-      const auto& top = f.top();
-
-      // compare the result
-      std::pair<pbes_expression, pbes_expression> old = Rplus_old(x);
-      if (top.b != old.first || top.f != old.second)
-      {
-        std::cout << "x " << x << std::endl;
-        std::cout << "b " << top.b << " " << old.first << std::endl;
-        std::cout << "f " << top.f << " " << old.second << std::endl;
-      }
-
       return f.top();
     }
 
     bool solution_found(const propositional_variable_instantiation& init) const override
     {
       auto u = m_graph_builder.find_vertex(init);
-      return S0.contains(u) || S1.contains(u);
+      return S[0].contains(u) || S[1].contains(u);
     }
 
     // Returns true if all nodes in the todo list are undefined (i.e. have not been processed yet)
@@ -492,9 +394,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         else
         {
-          if (!S0.contains(u) && !S1.contains(u))
+          if (!S[0].contains(u) && !S[1].contains(u))
           {
-            // todo' := todo' \cup (succ(u) \ done')
+            // todo' := todo' U (succ(u) \ done')
             for (auto v: G.successors(u))
             {
               const auto& v_ = m_graph_builder.vertex(v);
@@ -509,7 +411,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
 
-      // new_todo_list := new_todo \cap (todo \cup irrelevant)
+      // new_todo_list := new_todo \cap (todo U irrelevant)
       // N.B. An attempt is made to preserve the order of the current todo list, to not
       // disturb breadth first and depth first search.
       std::deque<propositional_variable_instantiation> new_todo_list;
@@ -534,25 +436,27 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     bool strategies_are_set_in_solved_nodes() const
     {
       simple_structure_graph G(m_graph_builder.vertices());
-      for (structure_graph::index_type u: S0.vertices())
+      for (structure_graph::index_type u: S[0].vertices())
       {
-        if (G.decoration(u) == structure_graph::d_disjunction && G.strategy(u) == structure_graph::undefined_vertex)
+        // if (G.decoration(u) == structure_graph::d_disjunction && G.strategy(u) == structure_graph::undefined_vertex)
+        if (G.decoration(u) == structure_graph::d_disjunction && tau[0][u] == structure_graph::undefined_vertex)
         {
-          mCRL2log(log::debug) << "Error: no strategy for node " << u << " in S0." << std::endl;
+          mCRL2log(log::debug) << "Error: no strategy has been set for disjunctive node " << u << " in S0." << std::endl;
           mCRL2log(log::debug) << G << std::endl;
-          mCRL2log(log::debug) << "S0 = " << S0 << std::endl;
-          mCRL2log(log::debug) << "S1 = " << S1 << std::endl;
+          mCRL2log(log::debug) << "S0 = " << S[0] << std::endl;
+          mCRL2log(log::debug) << "S1 = " << S[1] << std::endl;
           return false;
         }
       }
-      for (structure_graph::index_type u: S1.vertices())
+      for (structure_graph::index_type u: S[1].vertices())
       {
-        if (G.decoration(u) == structure_graph::d_conjunction && G.strategy(u) == structure_graph::undefined_vertex)
+        // if (G.decoration(u) == structure_graph::d_conjunction && G.strategy(u) == structure_graph::undefined_vertex)
+        if (G.decoration(u) == structure_graph::d_conjunction && tau[1][u] == structure_graph::undefined_vertex)
         {
-          mCRL2log(log::debug) << "Error: no strategy for node " << u << " in S1." << std::endl;
+          mCRL2log(log::debug) << "Error: no strategy has been set for conjunctive node " << u << " in S1." << std::endl;
           mCRL2log(log::debug) << G << std::endl;
-          mCRL2log(log::debug) << "S0 = " << S0 << std::endl;
-          mCRL2log(log::debug) << "S1 = " << S1 << std::endl;
+          mCRL2log(log::debug) << "S0 = " << S[0] << std::endl;
+          mCRL2log(log::debug) << "S1 = " << S[1] << std::endl;
           return false;
         }
       }
@@ -594,18 +498,18 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       super::on_report_equation(X, psi, k);
 
-      // The structure graph has just been extended, so S0 and S1 need to be resized.
-      S0.resize(m_graph_builder.extent());
-      S1.resize(m_graph_builder.extent());
+      // The structure graph has just been extended, so S[0] and S[1] need to be resized.
+      S[0].resize(m_graph_builder.extent());
+      S[1].resize(m_graph_builder.extent());
 
       auto u = m_graph_builder.find_vertex(X);
       if (is_true(b))
       {
-        S0.insert(u);
+        S[0].insert(u);
       }
       else if (is_false(b))
       {
-        S1.insert(u);
+        S[1].insert(u);
       }
     }
 
@@ -615,21 +519,22 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       if (m_options.optimization == 3)
       {
-        if (S0_guard(S0.size()))
+        if (S_guard[0](S[0].size()))
         {
           simple_structure_graph G(m_graph_builder.vertices());
-          std::tie(S0, tau0) = attr_default_with_tau(G, S0, 0, tau0);
+          S[0] = attr_default_with_tau(G, S[0], 0, tau);
         }
-        if (S1_guard(S1.size()))
+        if (S_guard[1](S[1].size()))
         {
           simple_structure_graph G(m_graph_builder.vertices());
-          std::tie(S1, tau1) = attr_default_with_tau(G, S1, 1, tau1);
+          S[1] = attr_default_with_tau(G, S[1], 1, tau);
         }
+        assert(strategies_are_set_in_solved_nodes());
       }
       else if (m_options.optimization == 4 && (m_options.aggressive || find_loops_guard(m_iteration_count)))
       {
         simple_structure_graph G(m_graph_builder.vertices());
-        detail::find_loops(G, discovered, todo, S0, S1, tau0, tau1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+        detail::find_loops(G, discovered, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
         assert(strategies_are_set_in_solved_nodes());
       }
       else if ((5 <= m_options.optimization && m_options.optimization <= 7) && (m_options.aggressive || fatal_attractors_guard(m_iteration_count)))
@@ -637,18 +542,19 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         simple_structure_graph G(m_graph_builder.vertices());
         if (m_options.optimization == 5)
         {
-          detail::fatal_attractors(G, S0, S1, tau0, tau1, m_iteration_count); // modifies S0 and S1
+          detail::fatal_attractors(G, S, tau, m_iteration_count); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
         else if (m_options.optimization == 6)
         {
-          detail::fatal_attractors_original(G, S0, S1, tau0, tau1, m_iteration_count); // modifies S0 and S1
+          detail::fatal_attractors_original(G, S, tau, m_iteration_count); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
         else // m_optimization == 7
         {
           m_graph_builder.finalize();
-          detail::partial_solve(m_graph_builder.m_graph, todo, S0, S1, tau0, tau1, m_iteration_count, m_graph_builder); // modifies S0 and S1
+          detail::partial_solve(m_graph_builder.m_graph, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
+          assert(strategies_are_set_in_solved_nodes());
         }
       }
 
@@ -669,7 +575,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       simple_structure_graph G(m_graph_builder.vertices());
 
       structure_graph::index_type u = m_graph_builder.find_vertex(init);
-      std::set<structure_graph::index_type> V = extract_minimal_structure_graph(G, u, S0, S1);
+      assert(strategies_are_set_in_solved_nodes());
+
+      std::set<structure_graph::index_type> V = extract_minimal_structure_graph(G, u, S[0], S[1], tau[0], tau[1]);
 
       std::size_t n = m_graph_builder.extent();
       vertex_set to_be_removed(n);
@@ -681,6 +589,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       }
       m_graph_builder.erase_vertices(to_be_removed);
+      mCRL2log(log::debug) << G << std::endl;
     }
 };
 
