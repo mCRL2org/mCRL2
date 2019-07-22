@@ -160,7 +160,7 @@ void fatal_attractors(const simple_structure_graph& G,
   {
     std::size_t j = p.first;
     auto alpha = j % 2;
-    mCRL2log(log::debug) << "  --- equation j = " << j << " ---" << std::endl;
+    mCRL2log(log::debug) << "  --- iteration j = " << j << " ---" << std::endl;
 
     vertex_set& U_j = p.second;
     U_j = set_minus(U_j, S[1 - alpha]);
@@ -293,7 +293,7 @@ void fatal_attractors_original(const simple_structure_graph& G,
   {
     std::size_t j = p.first;
     auto alpha = j % 2;
-    mCRL2log(log::debug) << "  --- equation j = " << j << " ---" << std::endl;
+    mCRL2log(log::debug) << "  --- iteration j = " << j << " ---" << std::endl;
 
     vertex_set& U_j = p.second;
     U_j = set_minus(U_j, S[1 - alpha]);
