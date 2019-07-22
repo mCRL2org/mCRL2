@@ -365,6 +365,7 @@ class strategy_vector
   protected:
     mutable std::vector<structure_graph::index_type> m_strategy;
 
+    // resize to at least n elements
     void resize(std::size_t n) const
     {
       std::size_t m = m_strategy.size();
@@ -384,7 +385,7 @@ class strategy_vector
     {
       if (i >= m_strategy.size())
       {
-        resize(i);
+        resize(i + 1);
       }
       return m_strategy[i];
     }
@@ -393,7 +394,7 @@ class strategy_vector
     {
       if (i >= m_strategy.size())
       {
-        resize(i);
+        resize(i + 1);
       }
       return m_strategy[i];
     }
@@ -418,6 +419,12 @@ class strategy_vector
       return m_strategy;
     }
 };
+
+inline
+std::ostream& operator<<(std::ostream& out, const strategy_vector& tau_alpha)
+{
+  return out << core::detail::print_list(tau_alpha.strategy());
+}
 
 inline
 std::string print_strategy_vector(const vertex_set& S_alpha, const strategy_vector& tau_alpha)
