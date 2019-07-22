@@ -86,7 +86,7 @@ protected:
     // If there is no winning strategy in src, then all outgoing transitions
     // from src have to be considered.
     sg_index_t strat = m_structure_graph.strategy(src.index);
-    return strat == pbes_system::structure_graph::undefined_vertex || strat == dest.index;
+    return strat == pbes_system::undefined_vertex() || strat == dest.index;
   }
 
   /**

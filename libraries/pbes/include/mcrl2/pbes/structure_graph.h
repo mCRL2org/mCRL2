@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <limits>
+#include <utility>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include "mcrl2/core/detail/print_utility.h"
@@ -52,6 +53,12 @@ struct manual_structure_graph_builder;
 
 } // namespace detail
 
+constexpr inline
+unsigned int undefined_vertex()
+{
+  return std::numeric_limits<unsigned int>::max();
+}
+
 // A structure graph with a facility to exclude a subset of the vertices.
 // It has the same interface as simple_structure_graph.
 class structure_graph
@@ -70,7 +77,9 @@ class structure_graph
     };
 
     using index_type = unsigned int;
-    static constexpr index_type undefined_vertex = (std::numeric_limits<index_type>::max)();
+
+    // TODO: when using the CMake build, this declaration causes strange linker errors
+    // static constexpr index_type undefined_vertex = (std::numeric_limits<index_type>::max)();
 
     struct vertex
     {
@@ -81,18 +90,18 @@ class structure_graph
       std::vector<index_type> successors;
       mutable index_type strategy;
 
-      explicit vertex(const pbes_expression& formula_,
+      explicit vertex(pbes_expression  formula_,
              decoration_type decoration_ = structure_graph::d_none,
              std::size_t rank_ = data::undefined_index(),
              std::vector<index_type> pred_ = std::vector<index_type>(),
              std::vector<index_type> succ_ = std::vector<index_type>(),
-             index_type strategy_ = undefined_vertex
+             index_type strategy_ = undefined_vertex()
             )
-        : formula(formula_),
+        : formula(std::move(formula_)),
           decoration(decoration_),
           rank(rank_),
-          predecessors(pred_),
-          successors(succ_),
+          predecessors(std::move(pred_)),
+          successors(std::move(succ_)),
           strategy(strategy_)
       {}
 
@@ -115,7 +124,7 @@ class structure_graph
 
   protected:
     std::vector<vertex> m_vertices;
-    index_type m_initial_vertex;
+    index_type m_initial_vertex = 0;
     boost::dynamic_bitset<> m_exclude;
 
     struct integers_not_contained_in
@@ -152,10 +161,10 @@ class structure_graph
   public:
     structure_graph() = default;
 
-    structure_graph(const std::vector<vertex>& vertices, index_type initial_vertex, const boost::dynamic_bitset<>& exclude)
-      : m_vertices(vertices),
+    structure_graph(std::vector<vertex>  vertices, index_type initial_vertex, boost::dynamic_bitset<>  exclude)
+      : m_vertices(std::move(vertices)),
         m_initial_vertex(initial_vertex),
-        m_exclude(exclude)
+        m_exclude(std::move(exclude))
     {}
 
     index_type initial_vertex() const
@@ -297,7 +306,7 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
       << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
       << ", predecessors = " << core::detail::print_list(u.predecessors)
       << ", successors = " << core::detail::print_list(u.successors)
-      << ", strategy = " << (u.strategy == structure_graph::undefined_vertex ? std::string("undefined") : std::to_string(u.strategy))
+      << ", strategy = " << (u.strategy == undefined_vertex() ? std::string("undefined") : std::to_string(u.strategy))
       << ")";
   return out;
 }
@@ -306,7 +315,7 @@ template <typename StructureGraph>
 std::ostream& print_structure_graph(std::ostream& out, const StructureGraph& G)
 {
   auto N = G.all_vertices().size();
-  for (structure_graph::index_type i = 0; i < N; i++)
+  for (std::size_t i = 0; i < N; i++)
   {
     if (G.contains(i))
     {
@@ -317,7 +326,7 @@ std::ostream& print_structure_graph(std::ostream& out, const StructureGraph& G)
           << ", rank = " << (u.rank == data::undefined_index() ? std::string("undefined") : std::to_string(u.rank))
           << ", predecessors = " << core::detail::print_list(structure_graph_predecessors(G, i))
           << ", successors = " << core::detail::print_list(structure_graph_successors(G, i))
-          << ", strategy = " << (u.strategy == structure_graph::undefined_vertex ? std::string("undefined") : std::to_string(u.strategy))
+          << ", strategy = " << (u.strategy == undefined_vertex() ? std::string("undefined") : std::to_string(u.strategy))
           << ")"
           << std::endl;
     }

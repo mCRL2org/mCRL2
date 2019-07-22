@@ -166,7 +166,7 @@ struct structure_graph_builder
     auto i = m_vertex_map.find(x);
     if (i == m_vertex_map.end())
     {
-      return structure_graph::undefined_vertex;
+      return undefined_vertex();
     }
     return i->second;
   }
@@ -183,7 +183,7 @@ struct structure_graph_builder
     structure_graph::index_type count = 0;
     for (index_type u = 0; u != vertices().size(); u++)
     {
-      index.push_back(U.contains(u) ? structure_graph::undefined_vertex : count++);
+      index.push_back(U.contains(u) ? undefined_vertex() : count++);
     }
 
     // computes new predecessors / successors
@@ -191,7 +191,7 @@ struct structure_graph_builder
       std::vector<index_type> result;
       for (auto v: V)
       {
-        if (index[v] != structure_graph::undefined_vertex)
+        if (index[v] != undefined_vertex())
         {
           result.push_back(index[v]);
         }
@@ -201,12 +201,12 @@ struct structure_graph_builder
 
     for (index_type u = 0; u != vertices().size(); u++)
     {
-      if (index[u] != structure_graph::undefined_vertex)
+      if (index[u] != undefined_vertex())
       {
         structure_graph::vertex& u_ = vertex(u);
         u_.predecessors = update(u_.predecessors);
         u_.successors = update(u_.successors);
-        if (u_.strategy != structure_graph::undefined_vertex)
+        if (u_.strategy != undefined_vertex())
         {
           u_.strategy = index[u_.strategy];
         }

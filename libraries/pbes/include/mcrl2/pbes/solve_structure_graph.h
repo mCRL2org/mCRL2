@@ -80,14 +80,14 @@ class solve_structure_graph_algorithm
       {
         return v;
       }
-      return structure_graph::undefined_vertex;
+      return undefined_vertex();
     }
 
     // find a successor of u in U, or a random one if no successor in U exists
     static inline
     structure_graph::index_type succ(const structure_graph& G, structure_graph::index_type u, const vertex_set& U)
     {
-      auto result = structure_graph::undefined_vertex;
+      auto result = undefined_vertex();
       for (structure_graph::index_type v: G.successors(u))
       {
         if (U.contains(v))
@@ -141,7 +141,7 @@ class solve_structure_graph_algorithm
         {
           // auto v = succ(G, ui); // N.B. this may lead to a wrong strategy!
           auto v = succ(G, ui, U);
-          if (v != structure_graph::undefined_vertex)
+          if (v != undefined_vertex())
           {
             global_strategy<structure_graph>(G).set_strategy(ui, v);
 //            mCRL2log(log::debug) << "set initial strategy for node " << ui << " to " << v << std::endl;
@@ -307,7 +307,7 @@ class solve_structure_graph_algorithm
           // explore only the strategy edge
           structure_graph::index_type v = G.strategy(u);
           insert_edge(V, u, v);
-          if (v != structure_graph::undefined_vertex && !contains(done, v))
+          if (v != undefined_vertex() && !contains(done, v))
           {
             todo.insert(v);
           }

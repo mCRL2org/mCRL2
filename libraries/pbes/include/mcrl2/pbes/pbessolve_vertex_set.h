@@ -346,7 +346,7 @@ structure_graph::index_type find_successor_in(const StructureGraph& G, structure
     }
   }
   mCRL2log(log::debug) << "No successor found for node " << u << " in " << A << std::endl;
-  return structure_graph::undefined_vertex;
+  return undefined_vertex();
 }
 
 template <typename StructureGraph>
@@ -358,24 +358,6 @@ void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::str
     mCRL2log(log::debug) << "  " << v << " " << G.find_vertex(v) << std::endl;
   }
 }
-
-namespace detail {
-
-template <typename T>
-std::vector<T> sorted(const std::vector<T>& x)
-{
-  std::vector<T> result = x;
-  std::sort(result.begin(), result.end());
-  return result;
-}
-
-inline
-void log_vertex_set(const vertex_set& V, const std::string& name)
-{
-  mCRL2log(log::debug) << name << " = " << core::detail::print_set(sorted(V.vertices())) << std::endl;
-}
-
-} // namespace detail
 
 // strategy vector that resizes automatically
 class strategy_vector
@@ -394,7 +376,7 @@ class strategy_vector
       {
         m *= 2;
       }
-      m_strategy.resize(m, structure_graph::undefined_vertex);
+      m_strategy.resize(m, undefined_vertex());
     }
 
   public:
@@ -444,7 +426,7 @@ std::string print_strategy_vector(const vertex_set& S_alpha, const strategy_vect
   bool first = true;
   for (structure_graph::index_type u: S_alpha.vertices())
   {
-    if (tau_alpha[u] != structure_graph::undefined_vertex)
+    if (tau_alpha[u] != undefined_vertex())
     {
       if (!first)
       {
@@ -476,7 +458,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
     {
       // explore only the strategy edge
       structure_graph::index_type v = G.strategy(u);
-      assert (v != structure_graph::undefined_vertex);
+      assert (v != undefined_vertex());
       if (!contains(done, v))
       {
         todo.insert(v);
@@ -524,7 +506,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
     {
       // explore only the strategy edge
       structure_graph::index_type v = tau0[u];
-      assert (v != structure_graph::undefined_vertex);
+      assert (v != undefined_vertex());
       if (!contains(done, v))
       {
         todo.insert(v);
@@ -534,7 +516,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
     {
       // explore only the strategy edge
       structure_graph::index_type v = tau1[u];
-      assert (v != structure_graph::undefined_vertex);
+      assert (v != undefined_vertex());
       if (!contains(done, v))
       {
         todo.insert(v);

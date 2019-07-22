@@ -174,7 +174,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       void leave(const propositional_variable_instantiation& x)
       {
         auto u = graph_builder.find_vertex(x);
-        if (u == structure_graph::undefined_vertex)
+        if (u == undefined_vertex())
         {
           // if x is not yet in the graph, then it certainly isn't in S[0] or S[1]
           stack.emplace_back(data::undefined_data_expression(), x, true_(), false_());
@@ -438,8 +438,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       simple_structure_graph G(m_graph_builder.vertices());
       for (structure_graph::index_type u: S[0].vertices())
       {
-        // if (G.decoration(u) == structure_graph::d_disjunction && G.strategy(u) == structure_graph::undefined_vertex)
-        if (G.decoration(u) == structure_graph::d_disjunction && tau[0][u] == structure_graph::undefined_vertex)
+        // if (G.decoration(u) == structure_graph::d_disjunction && G.strategy(u) == undefined_vertex())
+        if (G.decoration(u) == structure_graph::d_disjunction && tau[0][u] == undefined_vertex())
         {
           mCRL2log(log::debug) << "Error: no strategy has been set for disjunctive node " << u << " in S0." << std::endl;
           mCRL2log(log::debug) << G << std::endl;
@@ -450,8 +450,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       for (structure_graph::index_type u: S[1].vertices())
       {
-        // if (G.decoration(u) == structure_graph::d_conjunction && G.strategy(u) == structure_graph::undefined_vertex)
-        if (G.decoration(u) == structure_graph::d_conjunction && tau[1][u] == structure_graph::undefined_vertex)
+        // if (G.decoration(u) == structure_graph::d_conjunction && G.strategy(u) == undefined_vertex())
+        if (G.decoration(u) == structure_graph::d_conjunction && tau[1][u] == undefined_vertex())
         {
           mCRL2log(log::debug) << "Error: no strategy has been set for conjunctive node " << u << " in S1." << std::endl;
           mCRL2log(log::debug) << G << std::endl;

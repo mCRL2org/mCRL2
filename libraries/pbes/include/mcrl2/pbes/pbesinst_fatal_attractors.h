@@ -262,6 +262,7 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
   return X;
 }
 
+inline
 void fatal_attractors_original(const simple_structure_graph& G,
                                std::array<vertex_set, 2>& S,
                                std::array<strategy_vector, 2>& tau,

@@ -21,7 +21,7 @@ namespace pbes_system {
 // Does not set a strategy
 struct no_strategy
 {
-  void set_strategy(structure_graph::index_type /* u */, structure_graph::index_type /* v */)
+  static void set_strategy(structure_graph::index_type /* u */, structure_graph::index_type /* v */)
   {}
 };
 
@@ -37,7 +37,7 @@ struct global_strategy
 
   void set_strategy(structure_graph::index_type u, structure_graph::index_type v)
   {
-    if (v == structure_graph::undefined_vertex)
+    if (v == undefined_vertex())
     {
       mCRL2log(log::debug) << "Error: undefined strategy for node " << u << std::endl;
     }
@@ -58,7 +58,7 @@ struct local_strategy
 
   void set_strategy(structure_graph::index_type u, structure_graph::index_type v)
   {
-    if (v == structure_graph::undefined_vertex)
+    if (v == undefined_vertex())
     {
       mCRL2log(log::debug) << "Error: undefined strategy for node " << u << std::endl;
     }

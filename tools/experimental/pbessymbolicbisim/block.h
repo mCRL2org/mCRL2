@@ -38,7 +38,7 @@ protected:
 
 public:
 
-  sg_index_t index = pbes_system::structure_graph::undefined_vertex;
+  sg_index_t index = pbes_system::undefined_vertex();
   int bfs_level = 0;
 
   block()
@@ -46,7 +46,7 @@ public:
   , m_cache(nullptr)
   {}
 
-  block(const std::list< subblock_t >& subblocks, split_cache<block>* cache, sg_index_t i = pbes_system::structure_graph::undefined_vertex)
+  block(const std::list< subblock_t >& subblocks, split_cache<block>* cache, sg_index_t i = pbes_system::undefined_vertex())
   : m_subblocks(std::make_shared<std::list<subblock_t>>(subblocks.begin(), subblocks.end()))
   , m_cache(cache)
   , index(i)
