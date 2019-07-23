@@ -68,15 +68,16 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
     return push_block(x.block_set(), x.operand(), equations, id_generator, pcrl_equation_cache);
   }
 
-  process_expression apply(const process::process_instance& x)
-  {
-    return apply(block(core::identifier_string_list(), x));
-  }
-
-  process_expression apply(const process::process_instance_assignment& x)
-  {
-    return apply(block(core::identifier_string_list(), x));
-  }
+// TODO: fix unit tests before applying this change
+//  process_expression apply(const process::process_instance& x)
+//  {
+//    return apply(block(core::identifier_string_list(), x));
+//  }
+//
+//  process_expression apply(const process::process_instance_assignment& x)
+//  {
+//    return apply(block(core::identifier_string_list(), x));
+//  }
 };
 
 inline
