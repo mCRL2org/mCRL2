@@ -16,6 +16,7 @@
 #include <utility>
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbesinst_fatal_attractors.h"
+#include "mcrl2/pbes/pbesinst_find_loops.h"
 #include "mcrl2/pbes/pbesinst_partial_solve.h"
 #include "mcrl2/pbes/pbessolve_attractors.h"
 #include "mcrl2/pbes/replace.h"
@@ -549,12 +550,18 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           detail::fatal_attractors_original(G, S, tau, m_iteration_count); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
-        else // m_optimization == 7
+        else if (m_options.optimization == 7)
         {
           m_graph_builder.finalize();
           detail::partial_solve(m_graph_builder.m_graph, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
+      }
+      else if (m_options.optimization == 8 && (m_options.aggressive || find_loops_guard(m_iteration_count)))
+      {
+        simple_structure_graph G(m_graph_builder.vertices());
+        detail::find_loops(G, discovered, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
+        assert(strategies_are_set_in_solved_nodes());
       }
 
       if (m_options.prune_todo_list)

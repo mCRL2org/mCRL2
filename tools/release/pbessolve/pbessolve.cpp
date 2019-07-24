@@ -104,18 +104,18 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       " Depending on the PBES, this can reduce the size of"
                       " the generated BES substantially but requires a"
                       " larger memory footprint.")
-                    .add_value_desc(4, "In addition to 2, investigate for generated"
-                      " variables whether they occur on a loop, such that"
-                      " they can be set to true or false, depending on the"
-                      " fixed point symbol. This can increase the time"
-                      " needed to generate an equation substantially. N.B. This"
-                      " optimization may cause stack overflow issues.")
+                    .add_value_desc(4, "In addition to 2, apply the find_loops2 attractor"
+                      " set computation.")
                     .add_value_desc(5, "In addition to 2, apply a"
                       " fatal attractor computation. This is a generalization of 4.")
                     .add_value_desc(6, "In addition to 2 apply the"
                       " original fatal attractor computation.")
                     .add_value_desc(7, "In addition to 2, apply partial"
                       " solving of the structure graph.")
+                    .add_value_desc(8, "In addition to 2, apply the old find_loops optimization."
+                      " N.B. This optimization does not work correctly in combination with counter examples."
+                      " It may also cause stack overflow."
+                     )
                     ,"use strategy STRATEGY (N.B. This is a developer option that overrides --strategy)",
                  'l');
       desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
@@ -182,7 +182,7 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
         }
       }
 
-      if (options.optimization < 0 || options.optimization > 7)
+      if (options.optimization < 0 || options.optimization > 8)
       {
         throw mcrl2::runtime_error("Invalid strategy " + std::to_string(options.optimization));
       }
