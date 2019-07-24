@@ -81,6 +81,17 @@ inline mcrl2::lps::stochastic_specification linearise(
   return linearise(spec, lin_options);
 }
 
+/// \brief Linearises a process specification from a textual specification
+/// \param[in] text A string containing a process specification
+/// \return An LPS equivalent to the specification representing text, which is linearised without applying
+/// alphabet reduction.
+/// \exception mcrl2::runtime_error Linearisation failed
+inline stochastic_specification linearise_no_alpha(const std::string& text)
+{
+  mcrl2::process::process_specification procspec = mcrl2::process::parse_process_specification(text, false);
+  return linearise(procspec);
+}
+
 } // namespace lps
 
 } // namespace mcrl2
