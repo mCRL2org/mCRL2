@@ -280,10 +280,10 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 \lbrack u]:=v\With v\in A\cap succ(u) $}\\ 
 \qquad \qquad A:=A\cup \{u\} \\ 
 \qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
-\Return A%
-\end{array}%
-\end{equation*}%
-where%
+\Return A
+\end{array}
+\end{equation*}
+where
 \begin{eqnarray*}
 pred(v) &=&\{u\in V\mid (u,v)\in E\} \\
 succ(u) &=&\{v\in V\mid (u,v)\in E\}
@@ -291,6 +291,42 @@ succ(u) &=&\{v\in V\mid (u,v)\in E\}
 
 As a side effect a mapping $\tau$ is produced that corresponds to a winning
 strategy. Assignments to $\tau$ are \colorbox{Apricot}{colored}.
+
+A second version \textsc{AttrDefaultWithTau} is available, that in addition
+sets the strategy in the mapping $\tau_\alpha$.
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{AttrDefaultWithTau}(A,\alpha,\tau_\alpha) \\ 
+todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
+\While todo\neq \emptyset \Do \\ 
+\qquad \Choose u\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{u\} \\ 
+\qquad \If d(u) = \alpha \vee succ(u)\subseteq A \Then \\ 
+\qquad \qquad \colorbox{Apricot}{$ \If d(u) = \alpha \Then
+\tau[u], \tau_\alpha[u] := v, v \With v\in A\cap succ(u) $}\\ 
+\qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
+\Return A, \tau_\alpha
+\end{array}
+\end{equation*}
+
+Finally \textsc{AttrDefaultNoStrategy} does not set any strategy:
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{AttrDefaulNoStrategy}(A,\alpha) \\ 
+todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
+\While todo\neq \emptyset \Do \\ 
+\qquad \Choose u\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{u\} \\ 
+\qquad \If d(u) = \alpha \vee succ(u)\subseteq A \Then \\ 
+\qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
+\Return A
+\end{array}
+\end{equation*}
+
 
 % A cheaper, less powerful attractor set computation is
 %
@@ -562,7 +598,8 @@ some additional notation. Let $(V,E)$ be a (partial) structure graph
 underlying the PBES $\mathcal{E}$.  By $S_0$ we denote the set of
 vertices that represent equations with solution $true$, whereas
 $S_1$ denotes the set of vertices representing equations with
-solution $false$.  Let $\pi$ be a partial
+solution $false$. Along with these sets, we introduce strategies $\tau_0$ and
+$\tau_1$ that explain why a vertex belongs to $S_0$ or $S_1$, respectively. Let $\pi$ be a partial
 function that maps vertices to the propositional variables they
 represent (and only those vertices that represent propositional variables). 
 For a set of vertices $S \subseteq V$, we define
@@ -630,29 +667,37 @@ constructing a winning strategy for both players. We can solve that by mimicking
 attractor set computation in our rewriting; that is, we implement $R(\psi^e(\rho_0(S_0) \cup \rho_1(S_1)))$
 using a rewriter $R^+$ which takes a formula (and implicitly takes sets $S_0$ and $S_1$ into account. 
 This leads to the following bottom-up
-procedure in which $R^+(f)$ yields a tuple $(b, f')$, where $b$ is either a Boolean value,
+procedure in which $R^+(f)$ yields a tuple $(b, f',g_0,g_1)$, where $b$ is either a Boolean value,
 or the value $\bot$, and $f'$ is a propositional formula that is equivalent to $f$ under
-the assumption that $S_0$ and $S_1$ are solved.
+the assumption that $S_0$ and $S_1$ are solved, but the formula $f$ is not fully solved using that information. Propositional formula $g_0$ (resp.\ $g_1$) is a conjunctive (resp.\ disjunctive) formulae, representing $f$ in case $b$ is true (resp.\ false); in case $b$ is true, the conjunctive formula $g_0$ can be used to construct a witness, as it contains exactly all dependencies on $S_0$ that are needed to make formula $f$ hold. Dually for formula $g_1$.
+
 
 \begin{itemize}
-\item Case $f \equiv true$  then $R^+(f) = (f,f)$;
-\item Case $f \equiv false$ then $R^+(f) = (f,f)$;
-\item Case $f \equiv X$; then $R^+(f) =(true,X)$ when $X \in S_0$, $(false, X)$ when $X \in S_1$ and $(\bot, X)$ otherwise;
-\item Case $f \equiv f_1 \wedge f_2$, assuming that $R^+(f_i) = (b_i,f'_i)$. If $b_1 = b_2 = true$, then
-$R^+(f) = (true, f_1' \wedge f_2')$. If $b_1 = false$ and $b_2 \neq false$, then $R^+(f) = (false, f_1')$. 
-If $b_2 = false$ and $b_1 \neq false$ then $R^+(f) = (false,f_2')$. If $b_1 = b_2 = false$ then
-$R^+(f) = (false, f_1')$ when $|f_1'| < |f_2'|$ and $(false,f_2')$ otherwise. If $b_1 = b_2 = \bot$ then
-$R^+(f) = (\bot, f_1' \wedge f_2')$;
+\item Case $f \equiv true$  then $R^+(f) = (f,f, true,false)$;
 
-\item Case $f \equiv f_1 \vee f_2$,  assuming that $R^+(f_i) = (b_i,f'_i)$. If $b_1 = b_2 = false$, then
-$R^+(f) = (false, f_1' \vee f_2')$. If $b_1 = true$ and $b_2 \neq true$, then $R^+(f) = (true, f_1')$. 
-If $b_2 = true$ and $b_1 \neq true$ then $R^+(f) = (true,f_2')$. If $b_1 = b_2 = true$ then
-$R^+(f) = (true, f_1')$ when $|f_1'| < |f_2'|$ and $(true,f_2')$ otherwise. If $b_1 = b_2 = \bot$ then
-$R^+(f) = (\bot, f_1' \vee f_2')$.
+\item Case $f \equiv false$ then $R^+(f) = (f,f,true,false)$;
+
+\item Case $f \equiv X$; then $R^+(f) =(true,X,X,false)$ when $X \in S_0$, $(false, X,true,X)$ when $X \in S_1$ and $(\bot, X,true,false)$ otherwise;
+
+\item Case $f \equiv f_1 \wedge f_2$, assuming that $R^+(f_i) = (b_i,f'_i,g_0^i,g_1^i)$. \\
+If $b_1 = true$ and $b_2 = true$, then $R^+(f) = (true, f_1' \wedge f_2',g_0^1 \wedge g_0^2,false)$. \\
+If $b_1 = false$ and $b_2 \neq false$, then $R^+(f) = (false, f_1',true,g_1^1)$. \\
+If $b_1 \neq false$ and $b_2 = false$ then $R^+(f) = (false,f_2',true,g_1^2)$. \\
+If $b_1 = false$ and $b_2 = false$ then
+$R^+(f) = (false, f_1',true,g_1^1)$ when $|g_1^1| < |g_1^2|$ and $(false,f_2',true,g_1^2)$ otherwise.
+
+If $b_1 = \bot$ and $b_2 = \bot$ then $R^+(f) = (\bot, f_1' \wedge f_2',true,false)$;
+
+\item Case $f \equiv f_1 \vee f_2$,  assuming that $R^+(f_i) = (b_i,f'_i,g_0^i,g_1^i)$.\\ 
+If $b_1 = false$ and $b_2 = false$, then $R^+(f) = (false, f_1' \vee f_2',true,g_1^1\vee g_1^2)$.\\
+If $b_1 = true$ and $b_2 \neq true$, then $R^+(f) = (true, f_1', g_0^1,false)$. \\
+If $b_1 \neq true$ and $b_2 = true$ then $R^+(f) = (true,f_2',g_0^2,false)$. \\
+If $b_1 = true$ and $b_2 = true$ then $R^+(f) = (true, f_1',g_0^1,false)$ when $|g_0^1| < |g_0^2|$ and $(true,f_2',g_0^2,false)$ otherwise. \\
+If $b_1 = \bot$ and $b_2 = \bot$ then $R^+(f) = (\bot, f_1' \vee f_2',true,false)$.
 \end{itemize}
 
 The assignment $\psi^e := R(\psi^e(\rho_0(S_0) \cup \rho_1(S_1)))$ can be replaced by an assignment
-$(b,\psi^e) := R^+(\psi^e)$, and the extension to $S_0$ and $S_1$ can then be replaced by the
+$(b,\psi^e,g_0,g_1) := R^+(\psi^e)$, and the extension to $S_0$ and $S_1$ can then be replaced by the
 following code:
 \[
 \begin{array}{l}
@@ -680,33 +725,41 @@ S_1:= \emptyset $}\\
 \qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
 \Space \Else R(\psi^e[X^e := true]) \\
 \qquad \colorbox{lightgray}{$%
-(b,\psi^e) := R^+(\psi^e) $}\\
+(b,\psi^e,g_0,g_1) := R^+(\psi^e) $}\\
 \qquad \colorbox{lightgray}{$%
-\If b = true \Then S_0 := S_0 \cup \{ X^e \} $}\\
+\If b = true \Then$}\\
+\qquad \colorbox{lightgray}{$ \qquad S_0 := S_0 \cup \{ X^e \} $}\\
+\qquad \colorbox{lightgray}{$ \qquad \psi^e := g_0 $}\\
 \qquad \colorbox{lightgray}{$%
-\If b = false \Then S_1 := S_1 \cup \{ X^e \} $}\\
+\If b = false \Then$}\\
+\qquad \colorbox{lightgray}{$ \qquad S_1 := S_1 \cup \{ X^e \} $}\\
+\qquad \colorbox{lightgray}{$ \qquad \psi^e := g_1 $}\\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\colorbox{lightgray}{$V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1)$} \\
+\colorbox{lightgray}{$V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1)$} \\
 \Return (V, E)
 \end{array}%
 \end{equation*}%
 
 As a post-processing of the graph constructed by instantiation, the following procedure is used.
-It returns a structure graph $(V,E)$ in which information regarding local winning strategies has been exploited to minimise the structure graph, preserving relevant counterexample information. Note: the strategy $\tau$ should be consistent with the sets $S_0$ and $S_1$ (i.e., be a closed, winning strategy for the vertices in those sets).
+It returns a structure graph $(V,E)$ in which information regarding local winning strategies has been exploited to minimise the structure graph, preserving relevant counterexample information. Note: the strategies $\tau_0$ and $\tau_1$ are assumed to be consistent with the sets $S_0$ and $S_1$ (i.e., be a closed, winning strategy for the vertices in those sets).
 
 \begin{equation*}
 \begin{array}{l}
-\textsc{ExtractMinimalStructureGraph}(V,init,S_0,S_1)\\
+\textsc{ExtractMinimalStructureGraph}(V,init,S_0,S_1,\tau_0,\tau_1)\\
 todo := \{ init \} \\
 done := \emptyset \\
 \While todo \neq \emptyset \Do \\
 \qquad \Choose u \in todo \\
 \qquad todo := todo \setminus \{ u \} \\
 \qquad done := done \cup \{ u \} \\
-\qquad \If (u \in S_1 \land d(u) = \blacktriangle) \lor (u \in S_0 \land d(u) = \blacktriangledown) \\
-\qquad \qquad v := \tau(u) \\
+\qquad \If (u \in S_0 \land d(u) = \blacktriangledown) \\
+\qquad \qquad v := \tau_0(u) \\
+\qquad \qquad \If v \notin done \Then \\
+\qquad \qquad \qquad todo := todo \cup \{ v \} \\
+\qquad \Else \If (u \in S_1 \land d(u) = \blacktriangle) \\
+\qquad \qquad v := \tau_1(u) \\
 \qquad \qquad \If v \notin done \Then \\
 \qquad \qquad \qquad todo := todo \cup \{ v \} \\
 \qquad \Else \\
@@ -749,7 +802,7 @@ S_1:= \emptyset \\
 \qquad discovered := discovered\ \cup \mathrm{occ}(\psi^e) \\
 \qquad \colorbox{lightgray}{$irrelevant := irrelevant \setminus \mathrm{occ}(\psi^e)$} \\
 \qquad \colorbox{lightgray}{$irrelevant := \textsc{PruneTodo}(init, todo, irrelevant) $}\\
-V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1) \\
 \Return(V, E),
 \end{array}
 \end{equation*}
@@ -797,8 +850,8 @@ init:=R(X_{init}(e_{init})) \\
 todo:=\{init\} \\
 discovered:=\{init\} \\
 (V,E) :=(\emptyset ,\emptyset ) \\ 
-S_0:= \emptyset \\
-S_1:= \emptyset \\
+S_0, \tau_0 := \emptyset, \emptyset \\
+S_1, \tau_1 := \emptyset, \emptyset \\
 \While todo\neq \emptyset
 \colorbox{lightgray}{$\wedge X_{init}(e_{init}) \notin S_0 \cup S_1 $}
 \Do \\ 
@@ -813,16 +866,19 @@ S_1:= \emptyset \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\qquad \colorbox{lightgray}{$S_0, S_1 := apply\_attractor(S_0, S_1)$} 
-\text{(executed periodically)} \\
-V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
+\qquad \colorbox{lightgray}{$S_0, S_1, \tau_0, \tau_1 := apply\_attractor(S_0, S_1, \tau_0, \tau_1)$}  \text{(executed periodically)} \\
+%\qquad \colorbox{lightgray}{$W_0, W_1 := apply\_attractor(S_0, S_1)$} \\
+%\qquad \colorbox{Apricot}{$\For v \in (W_0 \cup W_1) \setminus (S_0 \cup S_1)$}\\
+%\qquad \colorbox{Apricot}{$\qquad \If (v \in W_0 \wedge d(v) = \blacktriangledown) \Then \tau_0(v) := \tau(v)$}\\
+%\qquad \colorbox{Apricot}{$\qquad \If (v \in W_1 \wedge d(v) = \blacktriangle) \Then \tau_1(v) := \tau(v)$}\\
+%\qquad \colorbox{lightgray}{$S_0, S_1 := W_0, W_1$} \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1) \\
 \Return(V, E),
 \end{array}
 \end{equation*}
 
 The optimizations 3 until 7 each use a different function for $apply\_attractor$. Attractor
-computations are expensive operations, so in \texttt{pbessolve} the function $apply\_attractor$
-is called only periodically.
+computations are expensive operations, so in \texttt{pbessolve} the function $apply\_attractor$ is called only periodically.
 
 \subsection{Optimisation~3}
 
@@ -847,11 +903,11 @@ S_1:= \emptyset \\
 \qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
-\qquad \colorbox{lightgray}{$S_0 := \textsc{AttrDefault}(S_0, 0) $}
+\qquad \colorbox{lightgray}{$S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0) $}
 \text{(executed periodically)} \\
-\qquad \colorbox{lightgray}{$S_1 := \textsc{AttrDefault}(S_1, 1) $}
+\qquad \colorbox{lightgray}{$S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1) $}
 \text{(executed periodically)} \\
-V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1) \\
 \Return(V, E),
 \end{array}
 \end{equation*}
@@ -943,7 +999,7 @@ the role of $X_k(e)$ and $w$ fulfils the role of $\phi$.
 The procedure $\textsc{FindLoops}$ can be called from within the main algorithm; it searches for loops in the structure graph currently constructed.
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{FindLoops}}(discovered, todo, S_0, S_1)\\  %w is reachable from v
+\text{\textsc{FindLoops}}(discovered, todo, S_0, S_1, \tau_0, \tau_1)\\  %w is reachable from v
 done := discovered \setminus todo \\
 \text{visited} := [] \\
 b_0,b_1 := false,false \\
@@ -954,9 +1010,9 @@ b_0,b_1 := false,false \\
 \qquad \If b \Then \\
 \qquad \qquad \If r(u) \bmod 2 = 0 \Then S_0,b_0 := S_0 \cup \{u\}, true\\
 \qquad\qquad \textbf{else } S_1,b_1 := S_1 \cup \{u\}, true\\
-\If b_0 \Then S_0 := \textsc{AttrDefault}(S_0, 0)\\ 
-\If b_1 \Then S_1 := \textsc{AttrDefault}(S_1, 1)\\ 
-\Return S_0, S_1
+\If b_0 \Then S_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)\\ 
+\If b_1 \Then S_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)\\ 
+\Return S_0, S_1, \tau_0, \tau_1
 \end{array}
 \end{equation*}
 The above optimisation can be integrated in the algorithm as follows.
@@ -983,14 +1039,116 @@ S_1:= \emptyset \\
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$%
-S_0, S_1 := \text{\textsc{FindLoops}}(discovered, todo, S_0, S_1) $} \text{(executed periodically)} \\
-V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
+S_0, S_1, \tau_0, \tau_1 := \text{\textsc{FindLoops}}(discovered, todo, S_0, S_1, \tau_0, \tau_1) $} \text{(executed periodically)} \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1) \\
 \Return (V, E)
 \end{array}%
 \end{equation*}%
 
 Note that in the call to \textsc{FindLoops} we would like to pass the argument $done = discovered \setminus todo$.
 However this set is not available, and it is too expensive to compute. So we pass the larger set $discovered$, and we use $discovered \cap dom(r) = discovered \setminus todo$.
+
+\paragraph{Alternative implementation Optimisation 4}
+
+Optimisation~4 searches for a dominion within the set of vertices with the same priority. That is, for rank $j$ and associated player $\alpha = j \mod 2$, one searches for the largest set of vertices $X_j \subseteq \{ v \in V \mid r(u) = j \vee u \notin dom(r)\}$ satisfying that player $\alpha$ has a winning strategy within $X_j$. That is, it is the largest fixed point of the following transformer (assuming $S_\alpha$ and $S_{1-\alpha}$ are attractor-maximal):
+\[
+\mathcal{C}_j(X) = 
+\begin{array}[t]{ll}
+\{ v \in V \setminus S_{1-\alpha} \mid & (r(u) = j \vee u \notin dom(r) ) \wedge {} \\
+ & (d(v) = \blacktriangledown \wedge \alpha = 0 \Rightarrow ((X \cup S_\alpha) \cap \{u \in V \mid v \to u \} \neq \emptyset))\\
+& \vee
+(d(v) = \blacktriangledown \wedge \alpha = 1 \Rightarrow (\{u \in V \mid v \to u \} \subseteq X \cup S_\alpha))\\
+& (d(v) = \blacktriangle \wedge \alpha = 1 \Rightarrow ((X \cup S_\alpha) \cap \{u \in V \mid v \to u \} \neq \emptyset))\\
+& \vee
+(d(v) = \blacktriangle \wedge \alpha = 0 \Rightarrow (\{u \in V \mid v \to u \} \subseteq X \cup S_\alpha))
+\}
+\end{array}
+\]
+A simple algorithm computing this is the following. It uses a modified
+attractor computation.
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{FindLoops}}_2(V, S_0, S_1, \tau_0, \tau_1)\\
+J := \{ j \mid \exists u \in V \cap dom(r) : r(u) = j \} \\
+\colorbox{Apricot}{$S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$} \\
+\colorbox{Apricot}{$S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$} \\
+\textbf{for } j \in J \\
+\qquad \alpha := j \bmod 2\\
+\qquad U_j := \{u \in V \mid r(u) = j \wedge (\alpha = 0 \Rightarrow d(u) \neq false) 
+\wedge (\alpha = 1 \Rightarrow d(u) \neq true) \} \setminus S_{1 - \alpha} \\
+\qquad U := U_j \cup S_\alpha\\
+\qquad X := \textsc{AttrEqRank}(U, \alpha, V, j) \\
+\qquad Y := V \setminus \textsc{AttrDefault}(V \setminus X, 1-\alpha) \\
+\qquad \While X \neq Y \textbf{ do }\\
+\qquad \qquad X := \textsc{AttrEqRank}(U \cap Y, \alpha, V, j) \\
+\qquad \qquad Y := Y \setminus \textsc{AttrDefault}(Y \setminus X, 1-\alpha) \\
+\qquad \colorbox{Apricot}{$ \For v \in X \setminus S_{\alpha} \Do $} \\
+\qquad \colorbox{Apricot}{$ \qquad \If (\alpha = 0 \land d(u) = \blacktriangledown) \lor (\alpha = 1 \land d(u) = \blacktriangle) \Then $} \\
+\qquad \colorbox{Apricot}{$ \qquad \qquad \If v \in U_j \Then \tau_{\alpha}(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
+\qquad \colorbox{Apricot}{$ \qquad \qquad \Else \tau_{\alpha}(v) := \tau(v)$} \\
+\qquad S_\alpha := S_\alpha \cup X \\
+\qquad \colorbox{Apricot}{$ S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$} \\
+\Return S_0, S_1, \tau_0,\tau_1
+\end{array}
+\end{equation*}
+where $\textsc{AttrEqRank}$ is a slightly modified version of the original attractor
+set computation $\textsc{AttrDefault}$, where only predecessors in $U$ with a rank of 
+$j$ are considered:
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{AttrEqRank}}(A, \alpha, U, j) \\
+todo := \bigcup_{u \in A} (%
+\colorbox{lightgray}{$ pred^{= j}(u, U) $}%
+\setminus A) \\
+\While todo \neq \emptyset \Do \\
+\qquad \textbf{choose } u \in todo \\
+\qquad todo := todo \setminus \{u\} \\
+\qquad \If d(u) = \alpha \vee succ(u) \subseteq A \\
+\qquad \qquad \colorbox{Apricot}{$ \If d(u) = \alpha \Then \tau
+\lbrack u]:=v\With v\in A\cap succ(u) $}\\ 
+\qquad \qquad A := A \cup \{u \} \\
+\qquad \qquad todo := todo \cup (%
+\colorbox{lightgray}{$ pred^{= j}(u, U) $}%
+\setminus A)  \\
+\Return A
+\end{array}
+\end{equation*}
+
+where
+\begin{eqnarray*}
+pred^{= j}(u, U) = \{v \in U \mid (v,u) \in E \wedge (r(v) = j \vee (v \notin dom(r) \wedge d(v) \in \{\blacktriangle,\blacktriangledown\}) \}
+\end{eqnarray*}%
+
+The above optimisation can be integrated in the algorithm as follows.
+
+\begin{equation*}
+\begin{array}{l}
+\textsc{PbesinstStructureGraph$_{4}$(}\mathcal{E}, X_{init}(e_{init}), R) \\ 
+init:=R(X_{init}(e_{init})) \\
+todo:=\{init\} \\
+discovered:=\{init\} \\
+(V,E) :=(\emptyset ,\emptyset ) \\ 
+S_0:= \emptyset \\
+S_1:= \emptyset \\
+\While todo \neq \emptyset \wedge X_{init}(e_{init}) \notin S_0 \cup S_1 \Do \\ 
+\qquad \Choose X_{k}(e)\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad \psi^e := \Space \If \sigma_k = \mu \Then R(\psi^e[X^e := false])
+\Space \Else R(\psi^e[X^e := true]) \\
+\qquad (b,\psi^e) := R^+(\psi^e) \\
+\qquad \If b = true \Then S_0 := S_0 \cup \{ X^e \} \\
+\qquad \If b = false \Then S_1 := S_1 \cup \{ X^e \} \\
+\qquad (V,E) := (V,E) \cup SG^{0}(X^{e},\psi ^{e}) \\ 
+\qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
+\qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
+\qquad \colorbox{lightgray}{$%
+S_0, S_1,\tau_0,\tau_1 := \text{\textsc{FindLoops}}_2(V, S_0, S_1, \tau_0, \tau_1) $} \text{(executed periodically)} \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1) \\
+\Return (V, E)
+\end{array}%
+\end{equation*}%
 
 \subsection{Optimisation 5} 
 
@@ -1001,8 +1159,10 @@ attractor computation.
 
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{FatalAttractors}}(V, S_0, S_1)\\
+\text{\textsc{FatalAttractors}}(V, S_0, S_1, \tau_0, \tau_1)\\
 J := \{ j \mid \exists u \in V \cap dom(r) : r(u) = j \} \\
+\colorbox{Apricot}{$S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$} \\
+\colorbox{Apricot}{$S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$} \\
 \textbf{for } j \in J \\
 \qquad \alpha := j \bmod 2\\
 \qquad U_j := \{u \in V \mid r(u) = j \wedge (\alpha = 0 \Rightarrow d(u) \neq false) 
@@ -1018,7 +1178,8 @@ J := \{ j \mid \exists u \in V \cap dom(r) : r(u) = j \} \\
 \qquad \colorbox{Apricot}{$ \qquad \qquad \If v \in U_j \Then \tau_{\alpha}(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
 \qquad \colorbox{Apricot}{$ \qquad \qquad \Else \tau_{\alpha}(v) := \tau(v)$} \\
 \qquad S_\alpha := S_\alpha \cup X \\
-\Return \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1, 1), \tau_0,\tau_1
+\qquad \colorbox{Apricot}{$ S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$} \\
+\Return S_0, S_1, \tau_0,\tau_1
 \end{array}
 \end{equation*}
 where $\textsc{AttrMinRank}$ is a slightly modified version of the original attractor
@@ -1073,8 +1234,8 @@ S_1:= \emptyset \\
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$%
-S_0, S_1,\tau_0,\tau_1 := \text{\textsc{FatalAttractors}}(V, S_0, S_1) $} \text{(executed periodically)} \\
-V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
+S_0, S_1,\tau_0,\tau_1 := \text{\textsc{FatalAttractors}}(V, S_0, S_1, \tau_0, \tau_1) $} \text{(executed periodically)} \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1) \\
 \Return (V, E)
 \end{array}%
 \end{equation*}%
@@ -1105,8 +1266,10 @@ pred^{\geq j}(u, U) \setminus X)  \\
 
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{FatalAttractorsOriginal}}(V, S_0, S_1)\\
+\textsc{FatalAttractorsOriginal}(V, S_0, S_1, \tau_0, \tau_1)\\
 J := \{ j \mid \exists u \in V : r(u) = j \} \\
+\colorbox{Apricot}{$S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$} \\
+\colorbox{Apricot}{$S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$} \\
 \textbf{for } j \in J \\
 \qquad \alpha := j \bmod 2\\
 \qquad U_j := \{u \in V \mid r(u) = j \wedge (\alpha = 0 \Rightarrow d(u) \neq false) 
@@ -1121,10 +1284,12 @@ J := \{ j \mid \exists u \in V : r(u) = j \} \\
 \qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \qquad \If v \in U_j \Then \tau_{\alpha}(v) := w \textbf{ with } w \in succ(v) \cap Y $} \\
 \qquad \qquad \qquad \colorbox{Apricot}{$ \qquad \qquad \Else \tau_{\alpha}(v) := \tau(v) $} \\
 \qquad \qquad \qquad S_\alpha := S_\alpha \cup Y \\
+
+\qquad\qquad\qquad \colorbox{Apricot}{$S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$} \\
 \qquad \qquad \qquad \textbf{break} \\
 \qquad \qquad \textbf{else }\\
 \qquad \qquad \qquad U_j := U_j \cap Y\\
-\Return \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1, 1), \tau_0,\tau_1
+\Return S_0, S_1, \tau_0,\tau_1
 \end{array}
 \end{equation*}
 
@@ -1155,8 +1320,8 @@ S_1:= \emptyset \\
 \qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
 \qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e}) \\
 \qquad \colorbox{lightgray}{$
-S_0, S_1,\tau_0,\tau_1 := \textsc{PartialSolve}(V,todo,S_0,S_1) $} \text{(executed periodically)} \\
-V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1) \\
+S_0, S_1,\tau_0,\tau_1 := \textsc{PartialSolve}(V,todo,S_0,S_1, \tau_0, \tau_1) $} \text{(executed periodically)} \\
+V := \textsc{ExtractMinimalStructureGraph}(V, init, S_0, S_1, \tau_0, \tau_1) \\
 \Return (V, E)
 \end{array}
 \end{equation*}
@@ -1164,19 +1329,20 @@ where \textsc{PartialSolve} is defined as
 
 \begin{equation*}
 \begin{array}{l}
-\textsc{PartialSolve}(V,todo,S_0,S_1)\\
+\textsc{PartialSolve}(V,todo,S_0,S_1, \tau_0, \tau_1)\\
 \{\textit{use the solver to compute an over and underapproaximation}\}\\
-S_0,S_1 := \textsc{AttrDefault}(S_0, 0), \textsc{AttrDefault}(S_1,1) \\
-(W_0,W_1) := \textsc{SolveRecursive}(V \setminus (S_1 \cup \textsc{AttrDefault}(S_0 \cup todo,0)))\\
+\colorbox{Apricot}{$S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$} \\
+\colorbox{Apricot}{$S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$} \\
+(W_0,W_1) := \textsc{SolveRecursive}(V \setminus (S_1 \cup \textsc{AttrDefaultNoStrategy}(S_0 \cup todo,0)))\\
 
 \colorbox{Apricot}{$ \For v \in W_1 \setminus S_{1} \Do $} \\
 \colorbox{Apricot}{$ \qquad \If d(u) = \blacktriangle \Then \tau_{1}(v) := \tau(v) $} \\
-S_1 := \textsc{AttrDefault}(S_1 \cup W_1,1) \\
+S_1 := S_1 \cup W_1\\
 
-(W_0,W_1) := \textsc{SolveRecursive}(V \setminus (S_0 \cup \textsc{AttrDefault}(S_1 \cup todo,1)))\\
+(W_0,W_1) := \textsc{SolveRecursive}(V \setminus (S_0 \cup \textsc{AttrDefaultNoStrategy}(S_1 \cup todo,1)))\\
 \colorbox{Apricot}{$ \For v \in W_0 \setminus S_{0} \Do $} \\
 \colorbox{Apricot}{$ \qquad \If d(u) = \blacktriangledown \Then \tau_{0}(v) := \tau(v) $} \\
-S_0 := \textsc{AttrDefault}(S_0 \cup W_0,0) \\
+S_0 := S_0 \cup W_0 \\
 \Return S_0, S_1, \tau_0,\tau_1
 \end{array}
 \end{equation*}

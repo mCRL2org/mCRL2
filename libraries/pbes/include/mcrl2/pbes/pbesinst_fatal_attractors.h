@@ -23,8 +23,8 @@ namespace pbes_system {
 
 namespace detail {
 
-template <typename StructureGraph>
-deque_vertex_set attr_min_rank_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
+template <typename StructureGraph, typename Compare>
+deque_vertex_set attr_min_rank_todo_generic(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j, Compare compare)
 {
   std::size_t n = G.extent();
   deque_vertex_set todo(n);
@@ -32,13 +32,25 @@ deque_vertex_set attr_min_rank_todo(const StructureGraph& G, const vertex_set& A
   {
     for (auto u: G.predecessors(v))
     {
-      if (U.contains(u) && G.rank(u) >= j && !A.contains(u))
+      if (U.contains(u) && compare(G.rank(u), j) && !A.contains(u))
       {
         todo.insert(u);
       }
     }
   }
   return todo;
+}
+
+template <typename StructureGraph>
+deque_vertex_set attr_min_rank_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
+{
+  return attr_min_rank_todo_generic(G, A, U, j, std::greater_equal<structure_graph::index_type>());
+}
+
+template <typename StructureGraph>
+deque_vertex_set attr_eq_rank_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
+{
+  return attr_min_rank_todo_generic(G, A, U, j, std::equal_to<structure_graph::index_type>());
 }
 
 template <typename StructureGraph>
@@ -98,11 +110,11 @@ std::map<std::size_t, vertex_set> compute_U_j_map(const StructureGraph& G, const
 // alpha = 0: disjunctive
 // alpha = 1: conjunctive
 // StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph>
-vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+template <typename StructureGraph, typename Compare>
+vertex_set attr_min_rank_generic(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j, Compare compare)
 {
   // put all predecessors of elements in A in todo
-  deque_vertex_set todo = attr_min_rank_todo(G, A, U, j);
+  deque_vertex_set todo = attr_min_rank_todo_generic(G, A, U, j, compare);
 
   while (!todo.is_empty())
   {
@@ -117,7 +129,7 @@ vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alph
 
       for (auto v: G.predecessors(u))
       {
-        if (U.contains(v) && (G.rank(v) >= j || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !A.contains(v))
+        if (U.contains(v) && (compare(G.rank(v), j) || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !A.contains(v))
         {
           todo.insert(v);
         }
@@ -128,12 +140,33 @@ vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alph
   return A;
 }
 
-inline
-void fatal_attractors(const simple_structure_graph& G,
-                      std::array<vertex_set, 2>& S,
-                      std::array<strategy_vector, 2>& tau,
-                      std::size_t equation_count
-)
+// Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
+// StructureGraph is either structure_graph or simple_structure_graph
+template <typename StructureGraph>
+vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+{
+  return attr_min_rank_generic(G, A, alpha, U, j, std::greater_equal<structure_graph::index_type>());
+}
+
+// Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
+// alpha = 0: disjunctive
+// alpha = 1: conjunctive
+// StructureGraph is either structure_graph or simple_structure_graph
+template <typename StructureGraph>
+vertex_set attr_eq_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
+{
+  return attr_min_rank_generic(G, A, alpha, U, j, std::equal_to<structure_graph::index_type>());
+}
+
+template <typename Compare>
+void fatal_attractors_generic(const simple_structure_graph& G,
+                              std::array<vertex_set, 2>& S,
+                              std::array<strategy_vector, 2>& tau,
+                              std::size_t equation_count,
+                              Compare compare
+                             )
 {
   mCRL2log(log::debug) << "\n  === fatal attractors (equation " << equation_count << ") ===\n" << G << std::endl;
   mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
@@ -173,7 +206,7 @@ void fatal_attractors(const simple_structure_graph& G,
     {
       mCRL2log(log::debug) << "  X = " << X << std::endl;
       mCRL2log(log::debug) << "  Y = " << Y << std::endl;
-      X = detail::attr_min_rank(G, set_intersection(U, Y), alpha, V, j);
+      X = detail::attr_min_rank_generic(G, set_intersection(U, Y), alpha, V, j, compare);
       Y = set_minus(Y, attr_default(G, set_minus(Y, X), 1 - alpha));
     }
     mCRL2log(log::debug) << "  X (final) = " << X << std::endl;
@@ -216,6 +249,26 @@ void fatal_attractors(const simple_structure_graph& G,
   mCRL2log(log::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
   mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
   mCRL2log(log::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
+}
+
+inline
+void fatal_attractors(const simple_structure_graph& G,
+                      std::array<vertex_set, 2>& S,
+                      std::array<strategy_vector, 2>& tau,
+                      std::size_t equation_count
+                     )
+{
+  return fatal_attractors_generic(G, S, tau, equation_count, std::greater_equal<structure_graph::index_type>());
+}
+
+inline
+void find_loops2(const simple_structure_graph& G,
+                 std::array<vertex_set, 2>& S,
+                 std::array<strategy_vector, 2>& tau,
+                 std::size_t equation_count
+)
+{
+  return fatal_attractors_generic(G, S, tau, equation_count, std::equal_to<structure_graph::index_type>());
 }
 
 // Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
