@@ -33,62 +33,6 @@ namespace mcrl2 {
 
 namespace process {
 
-namespace detail {
-
-struct alphabet_push_builder: public process_expression_builder<alphabet_push_builder>
-{
-  typedef process_expression_builder<alphabet_push_builder> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-  using super::update;
-
-  std::vector<process_equation>& equations;
-  process_expression init;
-  data::set_identifier_generator id_generator;
-  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
-
-  alphabet_push_builder(std::vector<process_equation>& equations_, const process_expression& init_)
-    : equations(equations_), init(init_)
-  {
-    for (process_equation& equation: equations_)
-    {
-      id_generator.add_identifier(equation.identifier().name());
-    }
-    pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations, init);
-  }
-
-  process_expression apply(const process::allow& x)
-  {
-    return push_allow(x.operand(), x.allow_set(), equations, id_generator, pcrl_equation_cache);
-  }
-
-  process_expression apply(const process::block& x)
-  {
-    return push_block(x.block_set(), x.operand(), equations, id_generator, pcrl_equation_cache);
-  }
-
-// TODO: fix unit tests before applying this change
-//  process_expression apply(const process::process_instance& x)
-//  {
-//    return apply(block(core::identifier_string_list(), x));
-//  }
-//
-//  process_expression apply(const process::process_instance_assignment& x)
-//  {
-//    return apply(block(core::identifier_string_list(), x));
-//  }
-};
-
-inline
-process_expression alphabet_reduce(const process_expression& x, std::vector<process_equation>& equations)
-{
-  alphabet_push_builder f(equations, x);
-  return f.apply(x);
-}
-
-} // namespace detail
-
 /// \brief Applies alphabet reduction to a process specification.
 /// \param procspec A process specification
 /// \param duplicate_equation_limit If the number of equations is less than
@@ -104,17 +48,27 @@ void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equa
   {
     init = expand_process_instance_assignments(init, procspec.equations());
   }
-  process_expression init_reduced = detail::alphabet_reduce(init, procspec.equations());
-  if (init != init_reduced)
+
+  // cache the alphabet of pcrl equations and apply alphabet reduction to block({}, init)
+  std::vector<process_equation>& equations = procspec.equations();
+  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
+  data::set_identifier_generator id_generator;
+  for (process_equation& equation: equations)
   {
-    procspec.init() = init_reduced;
+    id_generator.add_identifier(equation.identifier().name());
   }
+  pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations, init);
+  core::identifier_string_list empty_blockset;
+  procspec.init() = push_block(empty_blockset, init, equations, id_generator, pcrl_equation_cache);
+
+  // remove duplicate equations
   if (procspec.equations().size() < duplicate_equation_limit)
   {
     mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
     remove_duplicate_equations(procspec);
     mCRL2log(log::debug) << "removing duplicate equations finished" << std::endl;
   }
+
   mCRL2log(log::debug) << "alphabet reduction finished" << std::endl;
 }
 
