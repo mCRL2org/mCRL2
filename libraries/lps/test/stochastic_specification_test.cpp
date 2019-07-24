@@ -105,10 +105,10 @@ BOOST_AUTO_TEST_CASE(test_linearisation)
   std::string result =
     "act  a: Bool;\n"
     "\n"
-    "proc P(b1_X: Bool) =\n"
-    "       a(b1_X) .\n"
-    "         dist b1_X1: Bool[1 / 2] .\n"
-    "         P(b1_X = b1_X1);\n"
+    "proc P(b1: Bool) =\n"
+    "       a(b1) .\n"
+    "         dist b1: Bool[1 / 2] .\n"
+    "         P(b1 = b1);\n"
     "\n"
     "init dist b1: Bool[1 / 2] . P(b1);\n"
     ;
@@ -130,10 +130,10 @@ BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
   std::string result =
     "act  a: Bool # Bool;\n"
     "\n"
-    "proc P(b3_X,b4_X: Bool) =\n"
-    "       a(b3_X, b4_X) .\n"
-    "         dist b3_X1,b4_X1: Bool[if(b3_X1, 1 / 8, 3 / 8)] .\n"
-    "         P(b3_X = b3_X1, b4_X = b4_X1);\n"
+    "proc P(b3,b4: Bool) =\n"
+    "       a(b3, b4) .\n"
+    "         dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] .\n"
+    "         P(b3 = b3, b4 = b4);\n"
     "\n"
     "init dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] . P(b3, b4);\n"
     ;
