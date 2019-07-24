@@ -140,26 +140,6 @@ vertex_set attr_min_rank_generic(const StructureGraph& G, vertex_set A, std::siz
   return A;
 }
 
-// Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
-// alpha = 0: disjunctive
-// alpha = 1: conjunctive
-// StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph>
-vertex_set attr_min_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
-{
-  return attr_min_rank_generic(G, A, alpha, U, j, std::greater_equal<structure_graph::index_type>());
-}
-
-// Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
-// alpha = 0: disjunctive
-// alpha = 1: conjunctive
-// StructureGraph is either structure_graph or simple_structure_graph
-template <typename StructureGraph>
-vertex_set attr_eq_rank(const StructureGraph& G, vertex_set A, std::size_t alpha, const vertex_set& U, std::size_t j)
-{
-  return attr_min_rank_generic(G, A, alpha, U, j, std::equal_to<structure_graph::index_type>());
-}
-
 template <typename Compare>
 void fatal_attractors_generic(const simple_structure_graph& G,
                               std::array<vertex_set, 2>& S,
@@ -199,7 +179,7 @@ void fatal_attractors_generic(const simple_structure_graph& G,
     U_j = set_minus(U_j, S[1 - alpha]);
     mCRL2log(log::debug) << "  U_" << std::to_string(j) << " = " << U_j << std::endl;
     vertex_set U = set_union(U_j, S[alpha]);
-    vertex_set X = detail::attr_min_rank(G, U, alpha, V, j);
+    vertex_set X = detail::attr_min_rank_generic(G, U, alpha, V, j, compare);
     vertex_set Y = set_minus(V, attr_default(G, set_minus(V, X), 1 - alpha));
 
     while (X != Y)
