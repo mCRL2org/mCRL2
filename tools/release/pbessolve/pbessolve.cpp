@@ -77,42 +77,22 @@ class pbessolve_tool: public rewriter_tool<pbes_input_tool<input_tool>>
                       utilities::make_enum_argument<int>("STRATEGY")
                         .add_value_desc(0, "No on-the-fly solving is applied", true)
                         .add_value_desc(1, "Propagate solved equations using an attractor.")
-                        .add_value_desc(2, "Detect winning loops."
-                                           " N.B. This optimization may cause stack overflow issues.")
+                        .add_value_desc(2, "Detect winning loops.")
                         .add_value_desc(3, "Solve subgames using a fatal attractor.")
                         .add_value_desc(4, "Solve subgames using the solver.")
         ,"Use solving strategy STRATEGY. Strategies 1-4 periodically apply on-the-fly solving, which may lead to early termination.",
                       's');
       desc.add_hidden_option("long-strategy",
                   utilities::make_enum_argument<int>("STRATEGY")
-                    .add_value_desc(0, "Compute all boolean equations which can be"
-                      " reached from the initial state, without"
-                      " optimization. This is is the most data efficient"
-                      " option per generated equation.", true)
-                    .add_value_desc(1, "In addition to 0, remove self loops.")
-                    .add_value_desc(2, "Optimize by immediately substituting the right"
-                      " hand sides for already investigated variables that"
-                      " are true or false when generating an expression."
-                      " This is as memory efficient as 0.")
-                    .add_value_desc(3, "In addition to 2, also substitute variables that"
-                      " are true or false into an already generated right"
-                      " hand side. This can mean that certain variables"
-                      " become unreachable (e.g. X0 in X0 and X1, when X1"
-                      " becomes false, assuming X0 does not occur elsewhere."
-                      " It will be maintained which variables have become"
-                      " unreachable as these do not have to be investigated."
-                      " Depending on the PBES, this can reduce the size of"
-                      " the generated BES substantially but requires a"
-                      " larger memory footprint.")
-                    .add_value_desc(4, "In addition to 2, apply the find_loops2 attractor"
-                      " set computation.")
-                    .add_value_desc(5, "In addition to 2, apply a"
-                      " fatal attractor computation. This is a generalization of 4.")
-                    .add_value_desc(6, "In addition to 2 apply the"
-                      " original fatal attractor computation.")
-                    .add_value_desc(7, "In addition to 2, apply partial"
-                      " solving of the structure graph.")
-                    .add_value_desc(8, "In addition to 2, apply the old find_loops optimization."
+                    .add_value_desc(0, "Do not apply any optimizations.")
+                    .add_value_desc(1, "Remove self loops.")
+                    .add_value_desc(2, "Propagate solved equations using substitution.")
+                    .add_value_desc(3, "Propagate solved equations using an attractor.")
+                    .add_value_desc(4, "Detect winning loops using a fatal attractor.")
+                    .add_value_desc(5, "Solve subgames using a fatal attractor (local version).")
+                    .add_value_desc(6, "Solve subgames using a fatal attractor (original version).")
+                    .add_value_desc(7, "Solve subgames using the solver.")
+                    .add_value_desc(8, "Detect winning loops (original version)."
                       " N.B. This optimization does not work correctly in combination with counter examples."
                       " It may also cause stack overflow."
                      )
