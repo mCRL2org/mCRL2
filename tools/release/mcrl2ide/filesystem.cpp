@@ -560,6 +560,7 @@ void FileSystem::openFromArgument(const QString& inputFilePath)
 
 void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
 {
+  QString context = "Open Project";
   QDir projectFolder(newProjectFolderPath);
 
   settings->setValue("fileDialogLocation",
@@ -579,7 +580,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   if (projectFiles.length() == 0)
   {
     executeInformationBox(
-        parent, "Open project",
+        parent, context,
         "Provided folder does not contain a project file (ending with " +
             projectFileExtension + ")");
     return;
@@ -587,8 +588,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   if (projectFiles.length() > 1)
   {
     executeInformationBox(
-        parent, "Open project",
-        "Provided folder contains more than one project file");
+        parent, context, "Provided folder contains more than one project file");
     return;
   }
 
@@ -623,7 +623,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   if (!successfullyParsed)
   {
     executeInformationBox(
-        parent, "Open project",
+        parent, context,
         "Project file could not be parsed correctly: " + parseError +
             " on line " + QString::number(parseErrorRow) + " and column " +
             QString::number(parseErrorColumn));
@@ -636,7 +636,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   if (specElement.isNull())
   {
     executeInformationBox(
-        parent, "Open project",
+        parent, context,
         "Project file in provided project folder does not contain a "
         "specification (should contain a \"spec\" element with the path to the "
         "specification as value).");
@@ -655,7 +655,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   /* read the specification and put it in the specification editor */
   if (!loadSpecification(newSpecFilePath))
   {
-    executeInformationBox(parent, "Open project",
+    executeInformationBox(parent, context,
                           "Specification file given in the project file in the "
                           "provided project folder does not exist");
     return;
@@ -672,10 +672,25 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   QDomNodeList propertyNodes = projectOptions.elementsByTagName("property");
   for (int i = 0; i < propertyNodes.length(); i++)
   {
-    QDomElement element = propertyNodes.at(i).toElement();
-    // TODO catch error when property file does not exist
-    Property readProperty =
-        readPropertyFromFile(findPropertyFilePath(element.text()));
+    QString propertyName = propertyNodes.at(i).toElement().text();
+
+    /* find the file that corresponds to this property */
+    QString propFilePath = findPropertyFilePath(propertyName);
+    if (propFilePath.isEmpty())
+    {
+      if (executeBinaryQuestionBox(
+              parent, context,
+              "Could not find a property file with basename " + propertyName +
+                  ", do you want to remove it from the project file?"))
+      {
+        removePropertyFromProjectFile(propertyName);
+        i--;
+      }
+      continue;
+    }
+
+    /* read the file and create the corresponding property */
+    Property readProperty = readPropertyFromFile(propFilePath, context);
     if (!readProperty.name.isEmpty())
     {
       properties.push_back(readProperty);
@@ -734,7 +749,8 @@ QString FileSystem::findPropertyFilePath(const QString& propertyName)
   return "";
 }
 
-Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
+Property FileSystem::readPropertyFromFile(const QString& propertyFilePath,
+                                          const QString& context)
 {
   QFile propertyFile(propertyFilePath);
   QString fileName = QFileInfo(propertyFile).fileName();
@@ -755,19 +771,34 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath)
     {
       /* extract equivalence and alternate process */
       int firstNewlineIndex = propertyText.indexOf("\n");
-      mcrl2::lts::lts_equivalence equivalence =
-          static_cast<mcrl2::lts::lts_equivalence>(
-              propertyText.left(firstNewlineIndex).toInt());
-      QString altProcess =
-          propertyText.right(propertyText.size() - firstNewlineIndex).trimmed();
+      if (firstNewlineIndex != -1)
+      {
+        mcrl2::lts::lts_equivalence equivalence =
+            getEquivalenceFromName(propertyText.left(firstNewlineIndex));
+        if (equivalence != mcrl2::lts::lts_eq_none)
+        {
+          QString altProcess =
+              propertyText.right(propertyText.size() - firstNewlineIndex)
+                  .trimmed();
 
-      return Property(propertyName, altProcess, false, equivalence);
+          return Property(propertyName, altProcess, false, equivalence);
+        }
+      }
+      executeInformationBox(
+          parent, context,
+          "Could not read the file " + propertyFilePath +
+              ": an equivalence property file should have the name of the "
+              "equivalence on the first line and the alternate process "
+              "starting from the second line");
     }
   }
   else
   {
-    return Property();
+    executeInformationBox(parent, context,
+                          "Could not read the file " + propertyFilePath);
   }
+
+  return Property();
 }
 
 bool FileSystem::deletePropertyFile(const QString& propFilePath,
@@ -861,7 +892,8 @@ std::list<Property> FileSystem::importProperties()
     {
       if (propertyFilePath.endsWith(".mcf"))
       {
-        Property importedProperty = readPropertyFromFile(propertyFilePath);
+        Property importedProperty =
+            readPropertyFromFile(propertyFilePath, "Import Properties");
         newProperty(importedProperty, false);
       }
     }
@@ -904,6 +936,21 @@ void FileSystem::editProperty(const Property& oldProperty,
   deleteUnlistedPropertyFiles();
 }
 
+void FileSystem::removePropertyFromProjectFile(const QString& propertyName)
+{
+  QDomNodeList propertyNodes = projectOptions.elementsByTagName("property");
+  for (int i = 0; i < propertyNodes.length(); i++)
+  {
+    QDomElement propertyElement = propertyNodes.at(i).toElement();
+    if (propertyElement.text() == propertyName)
+    {
+      propertyElement.parentNode().removeChild(propertyElement);
+    }
+  }
+
+  updateProjectFile();
+}
+
 bool FileSystem::deleteProperty(const Property& oldProperty)
 {
   /* show a message box to ask the user whether he is sure to delete the
@@ -915,7 +962,7 @@ bool FileSystem::deleteProperty(const Property& oldProperty)
   /* if the user agrees, delete the property */
   if (deleteIt)
   {
-    /* also delete the file if it exists */
+    /* also delete the file if it exists and remove it from the project file */
     if (deletePropertyFile(propertyFilePath(oldProperty)))
     {
       properties.remove(oldProperty);
@@ -925,18 +972,7 @@ bool FileSystem::deleteProperty(const Property& oldProperty)
       deleteIt = false;
     }
 
-    /* remove it from the project options */
-    QDomNodeList propertyNodes = projectOptions.elementsByTagName("property");
-    for (int i = 0; i < propertyNodes.length(); i++)
-    {
-      QDomElement propertyElement = propertyNodes.at(i).toElement();
-      if (propertyElement.text() == oldProperty.name)
-      {
-        propertyElement.parentNode().removeChild(propertyElement);
-      }
-    }
-
-    updateProjectFile();
+    removePropertyFromProjectFile(oldProperty.name);
   }
 
   return deleteIt;
@@ -1036,7 +1072,7 @@ void FileSystem::saveProperty(const Property& property)
   }
   else
   {
-    saveStream << QString::number(property.equivalence) << "\n"
+    saveStream << getEquivalenceName(property.equivalence) << "\n"
                << property.text;
   }
 

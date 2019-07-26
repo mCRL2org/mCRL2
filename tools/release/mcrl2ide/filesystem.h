@@ -497,9 +497,11 @@ class FileSystem : public QObject
   /**
    * @brief readPropertyFromFile Reads a property from a file
    * @param propertyFilePath The path to the property file
+   * @param context For what purpose the propertyFile is read
    * @return The property read from the file
    */
-  Property readPropertyFromFile(const QString& propertyFilePath);
+  Property readPropertyFromFile(const QString& propertyFilePath,
+                                const QString& context);
 
   /**
    * @brief deletePropertyFile Deletes the file of a property
@@ -510,6 +512,13 @@ class FileSystem : public QObject
    */
   bool deletePropertyFile(const QString& propFilePath,
                           bool showIfFailed = true);
+
+  /**
+   * @brief removePropertyFromProjectFile Removes a property from the project
+   *   file, assumes a project is open or being opened
+   * @param propertyName The name of the preperty to remove
+   */
+  void removePropertyFromProjectFile(const QString& propertyName);
 };
 
 #endif // FILESYSTEM_H
