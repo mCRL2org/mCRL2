@@ -163,7 +163,7 @@ void test_action_list()
   data::mutable_map_substitution<> sigma;
   sigma[b] = c;
 
-  l1 = process::replace_variables_capture_avoiding(l1, sigma, data::substitution_variables(sigma));
+  l1 = process::replace_variables_capture_avoiding(l1, sigma);
   BOOST_CHECK(l1 == l2);
 
   std::set<data::variable> v;

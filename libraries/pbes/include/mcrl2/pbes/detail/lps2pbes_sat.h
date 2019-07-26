@@ -122,19 +122,17 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
   void apply(const action_formulas::forall& x)
   {
     data::mutable_map_substitution<> sigma_x = pbes_system::detail::make_fresh_variable_substitution(x.variables(), id_generator, false);
-    std::set<data::variable> sigma_x_variables = data::substitution_variables(sigma_x);
     const action_formulas::action_formula& alpha = x.body();
     data::variable_list y = data::replace_variables(x.variables(), sigma_x);
-    push(tr::forall(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x, sigma_x_variables), id_generator, TermTraits())));
+    push(tr::forall(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x), id_generator, TermTraits())));
   }
 
   void apply(const action_formulas::exists& x)
   {
     data::mutable_map_substitution<> sigma_x = pbes_system::detail::make_fresh_variable_substitution(x.variables(), id_generator, false);
-    std::set<data::variable> sigma_x_variables = data::substitution_variables(sigma_x);
     const action_formulas::action_formula& alpha = x.body();
     data::variable_list y = data::replace_variables(x.variables(), sigma_x);
-    push(tr::exists(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x, sigma_x_variables), id_generator, TermTraits())));
+    push(tr::exists(y, Sat(a, action_formulas::replace_variables_capture_avoiding(alpha, sigma_x), id_generator, TermTraits())));
   }
 
   void apply(const action_formulas::at& x)

@@ -67,7 +67,7 @@ class propositional_variable_substitution: public std::unary_function<propositio
       }
 
       // return phi[d := e]
-      phi = pbes_system::replace_variables_capture_avoiding(phi, sigma, data::substitution_variables(sigma));
+      phi = pbes_system::replace_variables_capture_avoiding(phi, sigma);
       return phi;
     }
 

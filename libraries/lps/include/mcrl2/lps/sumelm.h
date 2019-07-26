@@ -53,12 +53,12 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
     {
       using namespace mcrl2::data;
       // First apply already present substitutions to rhs
-      data_expression new_rhs = data::replace_variables_capture_avoiding(rhs, replacements, substitution_variables(replacements));
+      data_expression new_rhs = data::replace_variables_capture_avoiding(rhs, replacements);
       for (auto& replacement: replacements)
       {
         data::mutable_map_substitution<> sigma;
         sigma[lhs] = new_rhs;
-        replacement.second = data::replace_variables_capture_avoiding(replacement.second, sigma, data::substitution_variables(sigma));
+        replacement.second = data::replace_variables_capture_avoiding(replacement.second, sigma);
       }
       replacements[lhs] = new_rhs;
     }
@@ -211,7 +211,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
       const data::variable_list summmation_variables = s.summation_variables();
       s.summation_variables() = data::variable_list();
 
-      lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
+      lps::replace_variables_capture_avoiding(s, substitutions);
 
       // restore the summation variables
       s.summation_variables() = summmation_variables;
@@ -227,7 +227,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
     {
       data::mutable_map_substitution<> substitutions;
       s.condition() = compute_substitutions(s, substitutions);
-      lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
+      lps::replace_variables_capture_avoiding(s, substitutions);
 
       const std::size_t var_count = s.summation_variables().size();
       super::summand_remove_unused_summand_variables(s);

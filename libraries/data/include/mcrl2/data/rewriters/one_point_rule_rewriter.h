@@ -204,7 +204,7 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
         if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
           mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
-          body = data::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
+          body = data::replace_variables_capture_avoiding(body, sigma);
           mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
           if (remaining_variables.empty())
           {
@@ -233,7 +233,7 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
         if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
           mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
-          body = data::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
+          body = data::replace_variables_capture_avoiding(body, sigma);
           mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
           if (remaining_variables.empty())
           {

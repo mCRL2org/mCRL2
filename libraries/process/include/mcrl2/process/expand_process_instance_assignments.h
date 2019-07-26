@@ -50,7 +50,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     {
       sigma[*di] = *ei;
     }
-    process_expression result = process::replace_variables_capture_avoiding(p, sigma, data::substitution_variables(sigma));
+    process_expression result = process::replace_variables_capture_avoiding(p, sigma);
     return result;
   }
 
@@ -65,7 +65,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     {
       sigma[a.lhs()] = a.rhs();
     }
-    process_expression result = process::replace_variables_capture_avoiding(p, sigma, data::substitution_variables(sigma));
+    process_expression result = process::replace_variables_capture_avoiding(p, sigma);
     return result;
   }
 };

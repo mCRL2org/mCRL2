@@ -148,12 +148,12 @@ void test_process_instance_assignment()
   sigma[c] = data::sort_bool::false_();
 
   process_expression x = p.equations().front().expression();
-  process_expression x1 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma));
+  process_expression x1 = process::replace_variables_capture_avoiding(x, sigma);
   std::cerr << process::pp(x1) << std::endl;
   BOOST_CHECK(process::pp(x1) == "P(c = true)");
 
   sigma[b] = data::sort_bool::false_();
-  process_expression x2 = process::replace_variables_capture_avoiding(x, sigma, data::substitution_variables(sigma));
+  process_expression x2 = process::replace_variables_capture_avoiding(x, sigma);
   std::cerr << process::pp(x2) << std::endl;
   BOOST_CHECK(process::pp(x2) == "P(b = false, c = true)");
 }
@@ -161,7 +161,7 @@ void test_process_instance_assignment()
 void test_replace_process_identifiers()
 {
   std::string text =
-    "proc P(b: Bool, c: Bool) = P(c = true) . P(false, false); \n"  
+    "proc P(b: Bool, c: Bool) = P(c = true) . P(false, false); \n"
     "proc Q(b: Bool, c: Bool) = P(c = true);                   \n"
     "proc R(b: Bool, c: Bool) = Q(c = true) . Q(false, false); \n"
     "                                                          \n"

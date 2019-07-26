@@ -90,7 +90,7 @@ data::mutable_map_substitution<> make_process_instance_substitution(const proces
 inline
 process_instance apply_substitution(const process_instance& x, data::mutable_map_substitution<>& sigma)
 {
-  return process_instance(x.identifier(), data::replace_variables_capture_avoiding(x.actual_parameters(), sigma, data::substitution_variables(sigma)));
+  return process_instance(x.identifier(), data::replace_variables_capture_avoiding(x.actual_parameters(), sigma));
 }
 
 struct process_instance_replace_builder: public process_expression_builder<process_instance_replace_builder>
@@ -103,7 +103,7 @@ struct process_instance_replace_builder: public process_expression_builder<proce
 
   const std::map<process_identifier, process_instance>& substitutions;
 
-  process_instance_replace_builder(const std::map<process_identifier, process_instance>& substitutions_)
+  explicit process_instance_replace_builder(const std::map<process_identifier, process_instance>& substitutions_)
     : substitutions(substitutions_)
   {}
 
@@ -147,7 +147,7 @@ void process_instance_replace(process_specification& procspec, const std::map<pr
     {
       continue;
     }
-    equations.push_back(process_equation(eqn.identifier(), eqn.formal_parameters(), process_instance_replace(eqn.expression(), substitutions)));
+    equations.emplace_back(eqn.identifier(), eqn.formal_parameters(), process_instance_replace(eqn.expression(), substitutions));
   }
   procspec.init() = process_instance_replace(procspec.init(), substitutions);
   procspec.equations() = equations;
@@ -162,7 +162,7 @@ struct eliminate_trivial_equations_algorithm
   std::vector<std::vector<process_identifier> > chains;
   std::map<process_identifier, process_instance> substitutions;
 
-  eliminate_trivial_equations_algorithm(process_specification& procspec_)
+  explicit eliminate_trivial_equations_algorithm(process_specification& procspec_)
     : procspec(procspec_)
   {}
 

@@ -78,7 +78,6 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
 {
   data::variable_list d1;                                   // d'
   data::mutable_map_substitution<> sigma;                   // the substitution [d := d'], where d is the sequence of process parameters of lps
-  std::set<data::variable> sigma_variables;
   std::map<lps::multi_action, propositional_variable> Zpos; // represents the additional equations { nu Zpos_ai(d, fi(x,y), d') = true }
   std::map<lps::multi_action, propositional_variable> Zneg; // represents the additional equations { nu Zneg_ai(d, fi(x,y), d') = false }
 
@@ -145,7 +144,6 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
   {
     const data::variable_list& d = lps.process_parameters();
     sigma = detail::make_fresh_variable_substitution(d, id_generator);
-    sigma_variables = data::substitution_variables(sigma);
     d1 = data::replace_variables(d, sigma);
 
     std::size_t index = 0;
@@ -381,7 +379,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
         left = tr::and_(left, data::greater(ti, parameters.T));
       }
 
-      right = pbes_system::replace_variables_capture_avoiding(right, sigma, data::substitution_variables(sigma));
+      right = pbes_system::replace_variables_capture_avoiding(right, sigma);
 
       pbes_expression p = parameters.rhs_may_must(is_must, yi, left, right, ai, gi, TermTraits());
       v.push_back(derived().apply_may_must_result(p));

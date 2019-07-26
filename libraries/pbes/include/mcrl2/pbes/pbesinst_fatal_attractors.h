@@ -42,18 +42,6 @@ deque_vertex_set attr_min_rank_todo_generic(const StructureGraph& G, const verte
 }
 
 template <typename StructureGraph>
-deque_vertex_set attr_min_rank_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
-{
-  return attr_min_rank_todo_generic(G, A, U, j, std::greater_equal<structure_graph::index_type>());
-}
-
-template <typename StructureGraph>
-deque_vertex_set attr_eq_rank_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
-{
-  return attr_min_rank_todo_generic(G, A, U, j, std::equal_to<structure_graph::index_type>());
-}
-
-template <typename StructureGraph>
 deque_vertex_set attr_min_rank_original_todo(const StructureGraph& G, const vertex_set& A, const vertex_set& U, std::size_t j)
 {
   std::size_t n = G.extent();

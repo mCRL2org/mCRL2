@@ -55,8 +55,8 @@ template <typename Summand>
 void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
 {
   const data::variable_list& summation_variables = summand.summation_variables();
-  std::set<core::identifier_string> v = variable_name_clashes(summation_variables, process_parameter_names);
-  if (!v.empty())
+  std::set<core::identifier_string> names = variable_name_clashes(summation_variables, process_parameter_names);
+  if (!names.empty())
   {
     data::mutable_map_substitution<> sigma;
     for (const data::variable& v: summation_variables)

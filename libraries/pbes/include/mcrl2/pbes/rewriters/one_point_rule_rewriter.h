@@ -61,7 +61,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
       {
         mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
-        body = pbes_system::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
+        body = pbes_system::replace_variables_capture_avoiding(body, sigma);
         mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
         if (remaining_variables.empty())
         {
@@ -90,7 +90,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
       {
         mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
-        body = pbes_system::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
+        body = pbes_system::replace_variables_capture_avoiding(body, sigma);
         mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
         if (remaining_variables.empty())
         {
