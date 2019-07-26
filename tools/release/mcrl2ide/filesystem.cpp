@@ -688,6 +688,27 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
 
 void FileSystem::openProject()
 {
+  /* ask to save changes if there are any */
+  if (isSpecificationModified())
+  {
+    QMessageBox::StandardButton result = executeQuestionBox(
+        parent, "mCRL2 IDE",
+        "There are changes in the current project, do you want to save?");
+    switch (result)
+    {
+    case QMessageBox::Yes:
+      if (!save())
+      {
+        return;
+      }
+      break;
+    case QMessageBox::Cancel:
+      return;
+    default:
+      break;
+    }
+  }
+
   /* ask the user for a project folder */
   QFileDialog* openProjectDialog = createFileDialog(2);
   if (openProjectDialog->exec() == QDialog::Accepted)
