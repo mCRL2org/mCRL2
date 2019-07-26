@@ -14,7 +14,6 @@
 #include <QDateTime>
 #include <QTextStream>
 #include <QDirIterator>
-#include <QMessageBox>
 #include <QInputDialog>
 #include <QDesktopServices>
 #include <QCoreApplication>
@@ -151,8 +150,7 @@ QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
          QDir::separator() + projectName +
          (propertyName.isEmpty() ? "" : "_" + propertyName) +
          (evidence ? "_evidence" : "") + "_lts_" +
-         QString(LTSEQUIVALENCEINFO.at(equivalence).first).replace(' ', '_') +
-         ".lts";
+         getEquivalenceName(equivalence, true) + ".lts";
 }
 
 QString FileSystem::propertyFilePath(const Property& property)
@@ -366,11 +364,9 @@ FileSystem::convertProjectFileToNewFormat(const QString& newProjectFolderPath,
                                           const QString& oldFormat)
 {
   /* notify the user of the conversion */
-  QMessageBox msgBox(QMessageBox::Information, "Open Project",
-                     "The project file of this project has an older format. It "
-                     "will be converted to the newest format.",
-                     QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-  msgBox.exec();
+  executeInformationBox(parent, "Open Project",
+                        "The project file of this project has an older format. "
+                        "It will be converted to the newest format.");
 
   QDomDocument newFormat = createNewProjectOptions();
 
@@ -417,16 +413,14 @@ FileSystem::convertProjectFileToNewFormat(const QString& newProjectFolderPath,
 bool FileSystem::newProject(bool askToSave, bool forNewProject)
 {
   bool success = false;
-  QString error = "";
   QString context = forNewProject ? "New Project" : "Save Project As";
 
   /* if there are changes in the current project, ask to save first */
   if (askToSave && isSpecificationModified())
   {
-    QMessageBox::StandardButton result = QMessageBox::question(
+    QMessageBox::StandardButton result = executeQuestionBox(
         parent, "New Project",
-        "There are changes in the current project, do you want to save?",
-        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        "There are changes in the current project, do you want to save?");
     switch (result)
     {
     case QMessageBox::Yes:
@@ -490,18 +484,11 @@ bool FileSystem::newProject(bool askToSave, bool forNewProject)
     else
     {
       /* if unsuccessful, tell the user */
-      error = "Could not create project";
+      executeInformationBox(parent, context, "Could not create project");
     }
   }
-  newProjectDialog->deleteLater();
 
-  if (!error.isEmpty())
-  {
-    /* if there was an error, tell the user */
-    QMessageBox msgBox(QMessageBox::Information, context, error,
-                       QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-    msgBox.exec();
-  }
+  newProjectDialog->deleteLater();
   return success;
 }
 
@@ -545,43 +532,34 @@ bool FileSystem::loadSpecification(QString specPath)
 
 void FileSystem::openFromArgument(const QString& inputFilePath)
 {
-  QString error = "";
   QFileInfo inputFileInfo(inputFilePath);
   if (!inputFileInfo.exists())
   {
-    error = "Could not find the provided input " + inputFilePath;
+    executeInformationBox(parent, "Open project",
+                          "Could not find the provided input " + inputFilePath);
+    return;
+  }
+
+  if (inputFileInfo.isDir())
+  {
+    openProjectFromFolder(inputFilePath);
+  }
+  else if (inputFileInfo.suffix() == "mcrl2")
+  {
+    loadSpecification(inputFilePath);
+    specificationOnlyMode = true;
+    emit enterSpecificationOnlyMode();
   }
   else
   {
-    if (inputFileInfo.isDir())
-    {
-      openProjectFromFolder(inputFilePath);
-    }
-    else if (inputFileInfo.suffix() == "mcrl2")
-    {
-      loadSpecification(inputFilePath);
-      specificationOnlyMode = true;
-      emit enterSpecificationOnlyMode();
-    }
-    else
-    {
-      error = "The provided input argument should be a project folder or an "
-              "mCRL2 specification (.mcrl2)";
-    }
-  }
-
-  /* if unsuccessful, tell the user */
-  if (!error.isEmpty())
-  {
-    QMessageBox msgBox(QMessageBox::Information, "Open Project", error,
-                       QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-    msgBox.exec();
+    executeInformationBox(parent, "Open project",
+                          "The provided input argument should be a project "
+                          "folder or an mCRL2 specification (.mcrl2)");
   }
 }
 
 void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
 {
-  QString error = "";
   QDir projectFolder(newProjectFolderPath);
 
   settings->setValue("fileDialogLocation",
@@ -597,119 +575,115 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     }
   }
 
+  /* check if there is exactly one project file */
   if (projectFiles.length() == 0)
   {
-    error = "Provided folder does not contain a project file (ending with " +
-            projectFileExtension + ")";
+    executeInformationBox(
+        parent, "Open project",
+        "Provided folder does not contain a project file (ending with " +
+            projectFileExtension + ")");
+    return;
   }
-  else if (projectFiles.length() > 1)
+  if (projectFiles.length() > 1)
   {
-    error = "Provided folder contains more than one project file";
+    executeInformationBox(
+        parent, "Open project",
+        "Provided folder contains more than one project file");
+    return;
+  }
+
+  /* read the project file to get the specification path */
+  QString newProjectFilePath =
+      newProjectFolderPath + QDir::separator() + projectFiles.first();
+  QFile projectFile(newProjectFilePath);
+  projectFile.open(QIODevice::ReadOnly);
+  QTextStream projectOpenStream(&projectFile);
+  QString newProjectFileContents = projectOpenStream.readAll();
+  projectFile.close();
+
+  bool successfullyParsed = true;
+  QString parseError = "";
+  int parseErrorRow = 0;
+  int parseErrorColumn = 0;
+  QDomDocument newProjectOptions;
+  /* if the project file begins with SPEC, it is old type of project file and
+   *   should be converted to the new format
+   * this should be removed in the future */
+  if (newProjectFileContents.startsWith("SPEC"))
+  {
+    newProjectOptions = convertProjectFileToNewFormat(
+        newProjectFolderPath, newProjectFilePath, newProjectFileContents);
   }
   else
   {
-    /* read the project file to get the specification path */
-    QString newProjectFilePath =
-        newProjectFolderPath + QDir::separator() + projectFiles.first();
-    QFile projectFile(newProjectFilePath);
-    projectFile.open(QIODevice::ReadOnly);
-    QTextStream projectOpenStream(&projectFile);
-    QString newProjectFileContents = projectOpenStream.readAll();
-    projectFile.close();
-
-    bool successfullyParsed = true;
-    QString parseError = "";
-    int parseErrorRow = 0;
-    int parseErrorColumn = 0;
-    QDomDocument newProjectOptions;
-    /* if the project file begins with SPEC, it is old type of project file and
-     *   should be converted to the new format
-     * this should be removed in the future */
-    if (newProjectFileContents.startsWith("SPEC"))
-    {
-      newProjectOptions = convertProjectFileToNewFormat(
-          newProjectFolderPath, newProjectFilePath, newProjectFileContents);
-    }
-    else
-    {
-      successfullyParsed =
-          newProjectOptions.setContent(newProjectFileContents, &parseError,
-                                       &parseErrorRow, &parseErrorColumn);
-    }
-
-    if (!successfullyParsed)
-    {
-      error = "Project file could not be parsed correctly: " + parseError +
-              " on line " + QString::number(parseErrorRow) + " and column " +
-              QString::number(parseErrorColumn);
-    }
-    else
-    {
-      /* check if the project info contains a path to the specification */
-      QDomElement specElement =
-          newProjectOptions.elementsByTagName("spec").at(0).toElement();
-      if (specElement.isNull())
-      {
-        error =
-            "Project file in provided project folder does not contain a "
-            "specification (should contain a \"spec\" element with the path "
-            "to the specification as value).";
-        projectFile.close();
-      }
-      else
-      {
-        /* get the path to the specification */
-        QString newSpecFilePath = specElement.text();
-        if (QFileInfo(newSpecFilePath).isRelative())
-        {
-          newSpecFilePath =
-              newProjectFolderPath + QDir::separator() + newSpecFilePath;
-        }
-
-        /* read the specification and put it in the specification editor */
-        if (!loadSpecification(newSpecFilePath))
-        {
-          error = "Specification file given in the project file in the "
-                  "provided project folder does not exist";
-        }
-        else
-        {
-          /* opening is successful, so set project variables */
-          projectFolderPath = QFileInfo(newProjectFilePath).path();
-          projectName = QFileInfo(newProjectFilePath).baseName();
-          projectOptions = newProjectOptions;
-
-          /* read all properties */
-          properties.clear();
-
-          QDomNodeList propertyNodes =
-              projectOptions.elementsByTagName("property");
-          for (int i = 0; i < propertyNodes.length(); i++)
-          {
-            QDomElement element = propertyNodes.at(i).toElement();
-            // TODO catch error when property file does not exist
-            Property readProperty =
-                readPropertyFromFile(findPropertyFilePath(element.text()));
-            if (!readProperty.name.isEmpty())
-            {
-              properties.push_back(readProperty);
-            }
-          }
-
-          projectOpen = true;
-          emit newProjectOpened();
-        }
-      }
-    }
+    successfullyParsed = newProjectOptions.setContent(
+        newProjectFileContents, &parseError, &parseErrorRow, &parseErrorColumn);
   }
 
-  /* if unsuccessful, tell the user */
-  if (!error.isEmpty())
+  if (!successfullyParsed)
   {
-    QMessageBox msgBox(QMessageBox::Information, "Open Project", error,
-                       QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-    msgBox.exec();
+    executeInformationBox(
+        parent, "Open project",
+        "Project file could not be parsed correctly: " + parseError +
+            " on line " + QString::number(parseErrorRow) + " and column " +
+            QString::number(parseErrorColumn));
+    return;
   }
+
+  /* check if the project info contains a path to the specification */
+  QDomElement specElement =
+      newProjectOptions.elementsByTagName("spec").at(0).toElement();
+  if (specElement.isNull())
+  {
+    executeInformationBox(
+        parent, "Open project",
+        "Project file in provided project folder does not contain a "
+        "specification (should contain a \"spec\" element with the path to the "
+        "specification as value).");
+    projectFile.close();
+    return;
+  }
+
+  /* get the path to the specification */
+  QString newSpecFilePath = specElement.text();
+  if (QFileInfo(newSpecFilePath).isRelative())
+  {
+    newSpecFilePath =
+        newProjectFolderPath + QDir::separator() + newSpecFilePath;
+  }
+
+  /* read the specification and put it in the specification editor */
+  if (!loadSpecification(newSpecFilePath))
+  {
+    executeInformationBox(parent, "Open project",
+                          "Specification file given in the project file in the "
+                          "provided project folder does not exist");
+    return;
+  }
+
+  /* opening is successful, so set project variables */
+  projectFolderPath = QFileInfo(newProjectFilePath).path();
+  projectName = QFileInfo(newProjectFilePath).baseName();
+  projectOptions = newProjectOptions;
+
+  /* read all properties */
+  properties.clear();
+
+  QDomNodeList propertyNodes = projectOptions.elementsByTagName("property");
+  for (int i = 0; i < propertyNodes.length(); i++)
+  {
+    QDomElement element = propertyNodes.at(i).toElement();
+    // TODO catch error when property file does not exist
+    Property readProperty =
+        readPropertyFromFile(findPropertyFilePath(element.text()));
+    if (!readProperty.name.isEmpty())
+    {
+      properties.push_back(readProperty);
+    }
+  }
+
+  projectOpen = true;
+  emit newProjectOpened();
 }
 
 void FileSystem::openProject()
@@ -786,11 +760,9 @@ bool FileSystem::deletePropertyFile(const QString& propFilePath,
     if (showIfFailed)
     {
       /* if deleting the file failed, tell the user */
-      QMessageBox msgBox(QMessageBox::Information, "Delete property",
-                         "Could not delete property file: " +
-                             propertyFile.errorString(),
-                         QMessageBox::Ok, parent, Qt::WindowCloseButtonHint);
-      msgBox.exec();
+      executeInformationBox(parent, "Delete property",
+                            "Could not delete property file: " +
+                                propertyFile.errorString());
     }
   }
 
@@ -915,12 +887,9 @@ bool FileSystem::deleteProperty(const Property& oldProperty)
 {
   /* show a message box to ask the user whether he is sure to delete the
    *   property */
-  bool deleteIt =
-      QMessageBox::question(parent, "Delete Property",
-                            "Are you sure you want to delete the property " +
-                                oldProperty.name + "?",
-                            QMessageBox::Yes | QMessageBox::Cancel) ==
-      QMessageBox::Yes;
+  bool deleteIt = executeBinaryQuestionBox(
+      parent, "Delete Property",
+      "Are you sure you want to delete the property " + oldProperty.name + "?");
 
   /* if the user agrees, delete the property */
   if (deleteIt)
@@ -1011,10 +980,8 @@ bool FileSystem::saveAs()
       else
       {
         /* if failed, tell the user */
-        QMessageBox msgBox(QMessageBox::Information, "Save Specification As",
-                           "Could not create specification", QMessageBox::Ok,
-                           parent, Qt::WindowCloseButtonHint);
-        msgBox.exec();
+        executeInformationBox(parent, "Save Specification As",
+                              "Could not create specification");
       }
     }
     return false;

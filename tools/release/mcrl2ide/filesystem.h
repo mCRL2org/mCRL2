@@ -11,6 +11,7 @@
 #define FILESYSTEM_H
 
 #include "codeeditor.h"
+#include "utilities.h"
 #include "mcrl2/lts/lts_equivalence.h"
 
 #include <QObject>
@@ -21,26 +22,6 @@
 #include <QSettings>
 #include <QDateTime>
 #include <QDomDocument>
-
-/* contains some extra info for lts equivalences:
- *   - the name of the equivalences
- *   - whether this equivalence makes use of abstraction */
-const std::map<mcrl2::lts::lts_equivalence, std::pair<QString, bool>>
-    LTSEQUIVALENCEINFO = {
-        {mcrl2::lts::lts_eq_none, std::pair<QString, bool>("None", false)},
-        {mcrl2::lts::lts_eq_bisim,
-         std::pair<QString, bool>("Strong Bisimulation", false)},
-        {mcrl2::lts::lts_eq_trace,
-         std::pair<QString, bool>("Trace equivalence", false)},
-        {mcrl2::lts::lts_eq_divergence_preserving_branching_bisim,
-         std::pair<QString, bool>(
-             "Divergence Preserving Branching Bisimulation", true)},
-        {mcrl2::lts::lts_eq_branching_bisim,
-         std::pair<QString, bool>("Branching Bisimulation", true)},
-        {mcrl2::lts::lts_eq_weak_bisim,
-         std::pair<QString, bool>("Weak Bisimulation", true)},
-        {mcrl2::lts::lts_eq_weak_trace,
-         std::pair<QString, bool>("Weak Trace Equivalence", true)}};
 
 enum IntermediateFileType
 {

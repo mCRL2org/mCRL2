@@ -13,6 +13,7 @@
 #include "processsystem.h"
 #include "filesystem.h"
 #include "addeditpropertydialog.h"
+#include "utilities.h"
 
 #include <QLabel>
 #include <QHBoxLayout>

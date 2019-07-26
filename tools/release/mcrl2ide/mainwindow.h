@@ -17,6 +17,7 @@
 #include "addeditpropertydialog.h"
 #include "findandreplacedialog.h"
 #include "codeeditor.h"
+#include "utilities.h"
 
 #include <QMainWindow>
 #include <QSettings>

@@ -15,7 +15,6 @@
 #include <QToolBar>
 #include <QInputDialog>
 #include <QDesktopWidget>
-#include <QMessageBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QStandardItemModel>
@@ -365,11 +364,9 @@ bool MainWindow::assertProjectOpened()
 {
   if (!fileSystem->projectOpened())
   {
-    QMessageBox msgBox(
-        QMessageBox::Information, "mCRL2 IDE",
-        "To use this tool it is required to create or open a project first",
-        QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox.exec();
+    executeInformationBox(
+        this, "mCRL2 IDE",
+        "To use this tool it is required to create or open a project first");
     return false;
   }
   else
@@ -633,21 +630,17 @@ bool MainWindow::event(QEvent* event)
         fileSystem->isSpecificationNewlyModifiedFromOutside())
     {
       reloadIsBeingHandled = true;
-      QMessageBox::StandardButton result =
-          QMessageBox::question(this, "mCRL2 IDE",
-                                "The specification has been modified from "
-                                "outside of the IDE, do you want to reload it?",
-                                QMessageBox::Yes | QMessageBox::No);
-      switch (result)
+      bool doReload = executeBinaryQuestionBox(
+          this, "mCRL2 IDE",
+          "The specification has been modified from outside "
+          "of the IDE, do you want to reload it?");
+      if (doReload)
       {
-      case QMessageBox::Yes:
         fileSystem->loadSpecification();
-        break;
-      case QMessageBox::No:
+      }
+      else
+      {
         specificationEditor->document()->setModified();
-        break;
-      default:
-        break;
       }
 
       reloadIsBeingHandled = false;
@@ -659,10 +652,9 @@ bool MainWindow::event(QEvent* event)
     /* if there are changes, ask the user to save the project first */
     if (fileSystem->isSpecificationModified())
     {
-      QMessageBox::StandardButton result = QMessageBox::question(
+      QMessageBox::StandardButton result = executeQuestionBox(
           this, "mCRL2 IDE",
-          "There are changes in the current project, do you want to save?",
-          QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+          "There are changes in the current project, do you want to save?");
       switch (result)
       {
       case QMessageBox::Yes:

@@ -9,70 +9,9 @@
 
 #include "addeditpropertydialog.h"
 #include "ui_addeditpropertydialog.h"
+#include "utilities.h"
 
-#include <QMessageBox>
 #include <QStandardItemModel>
-
-EquivalenceComboBox::EquivalenceComboBox(QWidget* parent) : QComboBox(parent)
-{
-  /* add equivalences to the combobox, including some seperators to indicate the
-   *   use of abstraction */
-  QStringList items;
-  int secondSeparatorIndex = 2;
-  items << "----- CHOOSE EQUIVALENCE -----"
-        << "--- WITHOUT ABSTRACTION ---";
-  for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
-       LTSEQUIVALENCEINFO)
-  {
-    if (!item.second.second && item.first != mcrl2::lts::lts_eq_none)
-    {
-      items << item.second.first;
-      secondSeparatorIndex++;
-    }
-  }
-
-  items << "--- WITH ABSTRACTION ---";
-  for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
-       LTSEQUIVALENCEINFO)
-  {
-    if (item.second.second)
-    {
-      items << item.second.first;
-    }
-  }
-
-  this->addItems(items);
-
-  /* Set separators to be unselectable */
-  QStandardItemModel* model = qobject_cast<QStandardItemModel*>(this->model());
-  model->item(0)->setFlags(model->item(0)->flags() & ~Qt::ItemIsEnabled);
-  model->item(1)->setFlags(model->item(1)->flags() & ~Qt::ItemIsEnabled);
-  model->item(secondSeparatorIndex)
-      ->setFlags(model->item(secondSeparatorIndex)->flags() &
-                 ~Qt::ItemIsEnabled);
-}
-
-mcrl2::lts::lts_equivalence EquivalenceComboBox::getSelectedEquivalence()
-{
-  QString selectedReduction = this->currentText();
-  mcrl2::lts::lts_equivalence reduction = mcrl2::lts::lts_eq_none;
-  for (std::pair<mcrl2::lts::lts_equivalence, std::pair<QString, bool>> item :
-       LTSEQUIVALENCEINFO)
-  {
-    if (item.second.first == selectedReduction)
-    {
-      reduction = item.first;
-      break;
-    }
-  }
-  return reduction;
-}
-
-void EquivalenceComboBox::setSelectedEquivalence(
-    mcrl2::lts::lts_equivalence equivalence)
-{
-  this->setCurrentText(LTSEQUIVALENCEINFO.at(equivalence).first);
-}
 
 AddEditPropertyDialog::AddEditPropertyDialog(bool add,
                                              ProcessSystem* processSystem,
@@ -169,31 +108,26 @@ void AddEditPropertyDialog::setOldProperty(const Property& oldProperty)
 bool AddEditPropertyDialog::checkInput()
 {
   QString propertyName = ui->propertyNameField->text();
-  QString error = "";
 
-  /* both input fields may not be empty and the propertyname may not exist
-   * already */
+  /* both input fields may not be empty and the property name may not exist
+   *   already */
   if (propertyName.count() == 0)
   {
-    error = "The property name may not be empty";
+    executeInformationBox(this, windowTitle,
+                          "The property name may not be empty");
   }
   else if (oldProperty.name != propertyName &&
            fileSystem->propertyNameExists(propertyName))
   {
-    error = "A property with this name already exists";
-  }
-
-  if (!error.isEmpty())
-  {
-    QMessageBox msgBox(QMessageBox::Information, windowTitle, error,
-                       QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox.exec();
-    return false;
+    executeInformationBox(this, windowTitle,
+                          "A property with this name already exists");
   }
   else
   {
     return true;
   }
+
+  return false;
 }
 
 void AddEditPropertyDialog::abortPropertyParsing()
@@ -238,7 +172,7 @@ void AddEditPropertyDialog::parseResults(int processid)
   if (processid == propertyParsingProcessid)
   {
     /* if valid accept, else show message */
-    QString text = "";
+    QString message = "";
     QString result = processSystem->getResult(processid);
     QString inputType = lastParsingPropertyIsMucalculus
                             ? "mu-calculus formula"
@@ -246,24 +180,20 @@ void AddEditPropertyDialog::parseResults(int processid)
 
     if (result == "valid")
     {
-      text = "The entered " + inputType + " is valid.";
+      message = "The entered " + inputType + " is valid.";
     }
     else if (result == "invalid")
     {
-      text = "The entered " + inputType +
-             "is not valid. See the "
-             "parsing console for more information";
+      message = "The entered " + inputType +
+                "is not valid. See the parsing console for more information";
     }
     else
     {
-      text = "Could not parse the entered " + inputType +
-             ". See the parsing console "
-             "for more information";
+      message = "Could not parse the entered " + inputType +
+                ". See the parsing console for more information";
     }
 
-    QMessageBox msgBox(QMessageBox::Information, windowTitle, text,
-                       QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox.exec();
+    executeInformationBox(this, windowTitle, message);
     ui->parseButton->setText("Parse");
     propertyParsingProcessid = -1;
   }

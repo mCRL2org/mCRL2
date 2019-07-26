@@ -9,11 +9,9 @@
 
 #include "propertywidget.h"
 
-#include <QMessageBox>
 #include <QSpacerItem>
 #include <QStyleOption>
 #include <QPainter>
-#include <QMessageBox>
 
 PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
                                FileSystem* fileSystem, QWidget* parent)
@@ -216,11 +214,9 @@ void PropertyWidget::actionShowEvidence()
   /* creating evidence is not (yet) enabled for equivalence properties */
   if (!property.mucalculus)
   {
-    QMessageBox msgBox(QMessageBox::Information, "Not yet implemented",
-                       "Creating evidence for equivalence properties has not "
-                       "yet been implemented",
-                       QMessageBox::Ok, this, Qt::WindowCloseButtonHint);
-    msgBox.exec();
+    executeInformationBox(this, "Not yet implemented",
+                          "Creating evidence for equivalence properties has "
+                          "not yet been implemented");
     return;
   }
 
