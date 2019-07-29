@@ -6,11 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/enumerator_variable_limit.h
-/// \brief add your file description here.
+/// \file mcrl2/data/detail/enumerator_iteration_limit.h
+/// \brief Stores a static variable that indicates the number of iterations
+/// allowed during enumeration
 
-#ifndef MCRL2_DATA_DETAIL_ENUMERATOR_VARIABLE_LIMIT_H
-#define MCRL2_DATA_DETAIL_ENUMERATOR_VARIABLE_LIMIT_H
+#ifndef MCRL2_DATA_DETAIL_ENUMERATOR_ITERATION_LIMIT_H
+#define MCRL2_DATA_DETAIL_ENUMERATOR_ITERATION_LIMIT_H
 
 #include <cstddef>
 
@@ -20,27 +21,27 @@ namespace data {
 
 namespace detail {
 
-// Stores the maximum number of variables that may be used during enumeration.
+// Stores the maximum number of iterations that may be performed during enumeration.
 template <class T> // note, T is only a dummy
-struct enumerator_variable_limit
+struct enumerator_iteration_limit
 {
-  static std::size_t max_enumerator_variables;
+  static std::size_t max_enumerator_iterations;
 };
 
 // Initialization
 template <class T>
-std::size_t enumerator_variable_limit<T>::max_enumerator_variables = 1000;
+std::size_t enumerator_iteration_limit<T>::max_enumerator_iterations = 1000;
 
 inline
-void set_enumerator_variable_limit(std::size_t size)
+void set_enumerator_iteration_limit(std::size_t size)
 {
-  enumerator_variable_limit<std::size_t>::max_enumerator_variables = size;
+  enumerator_iteration_limit<std::size_t>::max_enumerator_iterations = size;
 }
 
 inline
-std::size_t get_enumerator_variable_limit()
+std::size_t get_enumerator_iteration_limit()
 {
-  return enumerator_variable_limit<std::size_t>::max_enumerator_variables;
+  return enumerator_iteration_limit<std::size_t>::max_enumerator_iterations;
 }
 
 } // namespace detail
@@ -49,4 +50,4 @@ std::size_t get_enumerator_variable_limit()
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_ENUMERATOR_VARIABLE_LIMIT_H
+#endif // MCRL2_DATA_DETAIL_ENUMERATOR_ITERATION_LIMIT_H
