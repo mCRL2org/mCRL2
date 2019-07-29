@@ -393,7 +393,7 @@ data_expression Rewriter::quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const std::size_t max_count = sorts_are_finite ? std::numeric_limits<std::size_t>::max() : data::detail::get_enumerator_iteration_limit();
 
   struct is_not
   {

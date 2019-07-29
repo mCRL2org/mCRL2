@@ -14,7 +14,7 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/enumerator_identifier_generator.h"
-#include "mcrl2/data/detail/enumerator_variable_limit.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"

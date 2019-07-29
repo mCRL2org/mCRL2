@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_REWRITER_TOOL_H
 #define MCRL2_DATA_REWRITER_TOOL_H
 
-#include "mcrl2/data/detail/enumerator_variable_limit.h"
+#include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -54,7 +54,7 @@ class rewriter_tool: public Tool
 
       desc.add_option(
         "qlimit", utilities::make_mandatory_argument("NUM"),
-        "limit enumeration of quantifiers to NUM variables. (Default NUM=1000, NUM=0 for unlimited).",
+        "limit enumeration of quantifiers to NUM iterations. (Default NUM=1000, NUM=0 for unlimited).",
         'Q'
       );
 
@@ -70,7 +70,8 @@ class rewriter_tool: public Tool
       if(parser.options.count("qlimit"))
       {
         //Set enumerator limit for quantifier enumeration
-        data::detail::set_enumerator_variable_limit(parser.option_argument_as< std::size_t >("qlimit"));
+        std::size_t qlimit = parser.option_argument_as< std::size_t >("qlimit");
+        data::detail::set_enumerator_iteration_limit(qlimit == 0 ? std::numeric_limits<std::size_t>::max() : qlimit);
       }
     }
 
