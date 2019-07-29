@@ -3706,7 +3706,7 @@ class bisim_partitioner_dnj
 
         /* distribute the transitions over the data structures               */ ONLY_IF_DEBUG( bisim_gjkw::check_complexity::init(2 * max_transitions); )
 
-        block_bunch_entry* next_block_bunch(&part_tr.block_bunch.begin()[1]);
+        block_bunch_entry* next_block_bunch(1 + &part_tr.block_bunch.front());
         for (const transition& t: aut.get_transitions())
         {
             state_info_entry* const source =
@@ -3793,7 +3793,7 @@ class bisim_partitioner_dnj
                            extend_from_marked_states_for_init_and_postprocess); assert(!B->stable_block_bunch.empty());
                                                                                 assert(part_tr.unstable_block_bunch.empty());
                 /* We can ignore possible new non-inert transitions, as every*/ assert(B->stable_block_bunch.front().end <= part_tr.block_bunch_inert_begin);
-                /* red bottom state already has a transition in bunch.       */ assert(&part_tr.block_bunch.begin()[1] < B->stable_block_bunch.front().end);
+                /* red bottom state already has a transition in bunch.       */ assert(1 + &part_tr.block_bunch.front() < B->stable_block_bunch.front().end);
             B->marked_nonbottom_begin = B->end;                                 assert(!B->stable_block_bunch.front().empty());
             B->marked_bottom_begin = B->nonbottom_begin;
         }

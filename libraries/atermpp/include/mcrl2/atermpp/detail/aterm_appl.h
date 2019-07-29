@@ -110,7 +110,7 @@ class _aterm_appl_allocator
 {
 private:
   /// \returns The size (in bytes) of a class T with arity number of arguments placed at the end.
-  constexpr static std::uint64_t term_appl_size(std::uint64_t arity)
+  constexpr static std::size_t term_appl_size(std::size_t arity)
   {
     return sizeof(T) + (arity - 1) * sizeof(aterm);
   }
