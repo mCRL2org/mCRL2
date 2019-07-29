@@ -130,6 +130,23 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     super::apply(data::lazy::and_(vars_conditions, v.body()));
     out << ")";
   }
+
+  void apply(const data::where_clause& v)
+  {
+    out << "(let (";
+    for(const data::assignment_expression& a: v.declarations())
+    {
+      const data::assignment& as = atermpp::down_cast<data::assignment>(a);
+      out << "(";
+      apply(as.lhs());
+      out << " ";
+      super::apply(as.rhs());
+      out << ")";
+    }
+    out << ") ";
+    super::apply(v.body());
+    out << ")";
+  }
 };
 
 template <template <class> class Traverser, class OutputStream>
