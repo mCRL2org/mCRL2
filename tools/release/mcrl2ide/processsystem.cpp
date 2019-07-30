@@ -712,6 +712,7 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
               ProcessType::Verification,
               "Up to date evidence LPS already exists\n");
         }
+        break;
 
       default:
         break;
