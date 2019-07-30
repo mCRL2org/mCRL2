@@ -11,11 +11,9 @@
 
 #include <functional>
 
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/real.h"
 #include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2
@@ -23,7 +21,7 @@ namespace mcrl2
 namespace smt
 {
 
-typedef std::function<std::string(data::data_expression)> native_translation_t;
+typedef std::function<void(data::data_expression, std::function<void(std::string)>, std::function<void(data::data_expression)>)> native_translation_t;
 struct native_translations
 {
   // If f occurs in symbols, its translation should be symbols[f]
@@ -134,31 +132,6 @@ struct native_translations
   }
 };
 
-namespace detail {
-
-struct fixed_string_translation: public native_translation_t
-{
-  std::string translation;
-
-  fixed_string_translation(const std::string& s)
-  : translation(s)
-  {}
-
-  std::string operator()(const data::data_expression& /*expr*/) const
-  {
-    return translation;
-  }
-};
-
-static native_translation_t pp_translation = [](const data::data_expression& e){ return data::pp(e); };
-static native_translation_t pp_real_translation = [](const data::data_expression& e)
-{
-  assert(data::sort_real::is_creal_application(e));
-  const data::application& a = atermpp::down_cast<data::application>(e);
-  return "(/ " +  data::pp(a[0]) + ".0  " + data::pp(a[1]) + ".0)";
-};
-
-} // namespace detail
 
 native_translations initialise_native_translation(const data::data_specification& dataspec);
 
