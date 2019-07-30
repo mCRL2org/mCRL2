@@ -139,7 +139,7 @@ class data_specification: public sort_specification
     function_symbol_vector m_user_defined_mappings;
 
     /// \brief The equations of the specification.
-    std::vector< data_equation > m_user_defined_equations;
+    data_equation_vector m_user_defined_equations;
 
     /// \brief Set containing all constructors, including the system defined ones.
     /// The types in these constructors are normalised.
@@ -445,10 +445,12 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of equations_const_range
     void add_equation(const data_equation& e)
     {
-      import_system_defined_sorts(find_sort_expressions(e));
-      // m_user_defined_equations.push_back(data::translate_user_notation(e));
-      m_user_defined_equations.push_back(e);
-      data_is_not_necessarily_normalised_anymore();
+      if(std::find(m_user_defined_equations.begin(),m_user_defined_equations.end(),e)==m_user_defined_equations.end())
+      {
+        m_user_defined_equations.push_back(e);
+        import_system_defined_sorts(find_sort_expressions(e));
+        data_is_not_necessarily_normalised_anymore();
+      }
     }
 
   private:
@@ -1077,4 +1079,3 @@ std::set<core::identifier_string> function_and_mapping_identifiers(const data_sp
 } // namespace mcrl2
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H
-
