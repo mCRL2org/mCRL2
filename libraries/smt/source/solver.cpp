@@ -312,6 +312,61 @@ bool smt_solver::solve(const data::variable_list& vars, const data::data_express
 }
 
 
+namespace detail {
+
+struct fixed_string_translation: public native_translation_t
+{
+  std::string translation;
+
+  fixed_string_translation(const std::string& s)
+  : translation(s)
+  {}
+
+  void operator()(const data::data_expression& /*e*/,
+                         const std::function<void(std::string)>& output_func,
+                         const std::function<void(data::data_expression)>& /*translate_func*/) const
+  {
+    output_func(translation);
+  }
+};
+
+static const native_translation_t pp_translation = [](const data::data_expression& e,
+                                                      const std::function<void(std::string)>& output_func,
+                                                      const std::function<void(data::data_expression)>& /*translate_func*/)
+{
+  output_func(data::pp(e));
+};
+static const native_translation_t pp_real_translation = [](const data::data_expression& e,
+                                                           const std::function<void(std::string)>& output_func,
+                                                           const std::function<void(data::data_expression)>& /*translate_func*/)
+{
+  assert(data::sort_real::is_creal_application(e));
+  const data::application& a = atermpp::down_cast<data::application>(e);
+  output_func("(/ " +  data::pp(a[0]) + ".0  " + data::pp(a[1]) + ".0)");
+};
+static const native_translation_t reconstruct_divmod = [](const data::data_expression& e,
+                                                          const std::function<void(std::string)>& output_func,
+                                                          const std::function<void(data::data_expression)>& translate_func)
+{
+  assert(data::sort_nat::is_first_application(e) || data::sort_nat::is_last_application(e));
+  const data::application& a = atermpp::down_cast<data::application>(e);
+  if(data::sort_nat::is_divmod_application(a[0]))
+  {
+    const data::application& a2 = atermpp::down_cast<data::application>(a[0]);
+    output_func("(" + std::string(data::sort_nat::is_first_application(a2) ? "div" : "mod") + " ");
+    translate_func(a2[0]);
+    output_func(" ");
+    translate_func(a2[1]);
+    output_func(")");
+  }
+  else
+  {
+    throw translation_error("Cannot perform native translation of " + pp(e));
+  }
+};
+
+} // namespace detail
+
 inline
 native_translations initialise_native_translation(const data::data_specification& dataspec)
 {
@@ -409,6 +464,9 @@ native_translations initialise_native_translation(const data::data_specification
     nt.set_ambiguous(sort_real::succ(s));
     nt.set_ambiguous(sort_real::pred(s));
   }
+  nt.expressions[sort_nat::first()] = reconstruct_divmod;
+  nt.expressions[sort_nat::last()] = reconstruct_divmod;
+
   // TODO come up with equations for these
   // nt.mappings[sort_real::floor(s)]
   // nt.mappings[sort_real::ceil(s)]

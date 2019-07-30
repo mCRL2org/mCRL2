@@ -93,7 +93,10 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     auto find_result = m_native.find_native_translation(v);
     if(find_result != m_native.expressions.end())
     {
-      out << find_result->second(v) << " ";
+      auto translate_func = [&](const data::data_expression& e) { return translate_data_expression(e, out, m_native); };
+      auto output_func = [&](const std::string& s) { out << s; };
+      find_result->second(v, output_func, translate_func);
+      out << " ";
     }
     else
     {
