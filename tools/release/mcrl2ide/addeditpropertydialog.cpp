@@ -41,8 +41,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   setWindowTitle(windowTitle);
   setWindowFlags(Qt::Window);
 
-  ui->formulaTextField->setHighlightingRules(false);
-  ui->initTextField->setHighlightingRules(true);
+  ui->formulaTextField->setPurpose(false);
+  ui->initTextField->setPurpose(true);
 
   connect(ui->parseButton, SIGNAL(clicked()), this, SLOT(parseProperty()));
   connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));

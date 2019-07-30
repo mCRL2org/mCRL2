@@ -19,11 +19,11 @@ HighlightingRule::HighlightingRule(QRegExp pattern, QTextCharFormat format)
 {
 }
 
-CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
+CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
   /* identifiers */
-  identifierFormat.setForeground(Qt::black);
+  identifierFormat.setForeground(light ? Qt::black : Qt::white);
   highlightingRules.push_back(HighlightingRule(
       QRegExp("\\b[a-zA-Z_][a-zA-Z0-9_']*\\b"), identifierFormat));
 
@@ -31,7 +31,7 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
   if (spec)
   {
     /* specification keywords */
-    specificationKeywordFormat.setForeground(Qt::darkBlue);
+    specificationKeywordFormat.setForeground(light ? Qt::darkBlue : Qt::blue);
     QStringList specificationKeywordPatterns = {
         "\\bsort\\b", "\\bcons\\b", "\\bmap\\b",  "\\bvar\\b",   "\\beqn\\b",
         "\\bact\\b",  "\\bproc\\b", "\\binit\\b", "\\bstruct\\b"};
@@ -42,7 +42,7 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
     }
 
     /* process keywords */
-    processKeywordFormat.setForeground(Qt::darkCyan);
+    processKeywordFormat.setForeground(light ? Qt::darkCyan : Qt::cyan);
     QStringList processKeywordPatterns = {"\\bdelta\\b", "\\btau\\b"};
     for (const QString& pattern : processKeywordPatterns)
     {
@@ -51,7 +51,8 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
     }
 
     /* process operator keywords */
-    processOperatorKeywordFormat.setForeground(Qt::blue);
+    processOperatorKeywordFormat.setForeground(light ? Qt::blue
+                                                     : QColor(128, 128, 255));
     QStringList processOperatorKeywordPatterns = {
         "\\bsum\\b",  "\\bdist\\b",   "\\bblock\\b", "\\ballow\\b",
         "\\bhide\\b", "\\brename\\b", "\\bcomm\\b"};
@@ -65,7 +66,8 @@ CodeHighlighter::CodeHighlighter(bool spec, QTextDocument* parent)
   else
   {
     /* state formula operator keywords */
-    stateFormulaOpertorKeywordFormat.setForeground(Qt::blue);
+    stateFormulaOpertorKeywordFormat.setForeground(
+        light ? Qt::blue : QColor(128, 128, 255));
     QStringList processOperatorKeywordPatterns = {"\\bmu\\b", "\\bnu\\b",
                                                   "\\bdelay\\b", "\\byelad\\b"};
     for (const QString& pattern : processOperatorKeywordPatterns)
@@ -201,6 +203,7 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   setFontSize(13);
 
   lineNumberArea = new LineNumbersArea(this);
+  updateLineNumberAreaWidth(0);
 
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
@@ -211,14 +214,18 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
           SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this,
           SLOT(updateLineNumberArea(QRect, int)));
-
-  updateLineNumberAreaWidth(0);
 }
 
 CodeEditor::~CodeEditor()
 {
   lineNumberArea->deleteLater();
   highlighter->deleteLater();
+}
+
+void CodeEditor::setPurpose(bool isSpecificationEditor)
+{
+  this->isSpecificationEditor = isSpecificationEditor;
+  changeHighlightingRules();
 }
 
 void CodeEditor::setFontSize(int pixelSize)
@@ -232,9 +239,11 @@ void CodeEditor::setFontSize(int pixelSize)
   this->setTabStopWidth(codeFontMetrics.width("1234"));
 }
 
-void CodeEditor::setHighlightingRules(bool spec)
+void CodeEditor::changeHighlightingRules()
 {
-  highlighter = new CodeHighlighter(spec, this->document());
+  highlighter = new CodeHighlighter(
+      isSpecificationEditor, this->palette().window().color().red() > 128,
+      this->document());
 }
 
 void CodeEditor::showContextMenu(const QPoint& position)
@@ -311,6 +320,15 @@ void CodeEditor::wheelEvent(QWheelEvent* event)
   {
     QPlainTextEdit::wheelEvent(event);
   }
+}
+
+void CodeEditor::changeEvent(QEvent* event)
+{
+  if (event->type() == QEvent::PaletteChange)
+  {
+    changeHighlightingRules();
+  }
+  QPlainTextEdit::changeEvent(event);
 }
 
 void CodeEditor::deleteChar()

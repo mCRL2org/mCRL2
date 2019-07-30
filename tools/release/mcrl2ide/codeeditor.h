@@ -35,9 +35,10 @@ class CodeHighlighter : public QSyntaxHighlighter
    * @brief CodeHighlighter Constructor
    * @param spec Whether this code editor is for a mcrl2 specification or a
    *   mu-calculus formula
+   * @param light Whether the application has a light colour palette
    * @param parent The document on which the code highlighter should operate
    */
-  CodeHighlighter(bool spec, QTextDocument* parent = 0);
+  CodeHighlighter(bool spec, bool light, QTextDocument* parent = 0);
 
   protected:
   /**
@@ -114,11 +115,18 @@ class CodeEditor : public QPlainTextEdit
   ~CodeEditor();
 
   /**
-   * @brief setHighlightingRules Set what highlighting rules to use
-   * @param spec Whether to use the highlighting rules for mCRL2 specifications
-   *   (true) or for mu-calculus formulae (false)
+   * @brief setPurpose Set whether this code editor is for editing
+   *   specifications or mu-calculus formulae
+   * @param isSpecificationEditor Whether this code editor is for editing
+   *   specifications
    */
-  void setHighlightingRules(bool spec);
+  void setPurpose(bool isSpecificationEditor);
+
+  /**
+   * @brief changeHighlightingRules Change the highlighting rules depending on
+   *   the purpose of the code editor and its colour palette
+   */
+  void changeHighlightingRules();
 
   /**
    * @brief lineNumberAreaPaintEvent Paints the line number area on the screen
@@ -176,7 +184,15 @@ class CodeEditor : public QPlainTextEdit
    */
   void resizeEvent(QResizeEvent* event) override;
 
+  /**
+   * @brief changeEvent Changes the syntax highlighting when the colour palette
+   *   of the window changes
+   * @brief event The change event
+   */
+  void changeEvent(QEvent* event) override;
+
   private:
+  bool isSpecificationEditor;
   QFont codeFont;
   QFont lineNumberFont;
   LineNumbersArea* lineNumberArea;
