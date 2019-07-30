@@ -123,6 +123,13 @@ bool AddEditPropertyDialog::checkInput()
     executeInformationBox(this, windowTitle,
                           "A property with this name already exists");
   }
+  else if (ui->tabWidget->currentIndex() == 1 &&
+           ui->equivalenceComboBox->getSelectedEquivalence() ==
+               mcrl2::lts::lts_eq_none)
+  {
+    executeInformationBox(this, windowTitle,
+                          "No equivalence has been selected");
+  }
   else
   {
     return true;
