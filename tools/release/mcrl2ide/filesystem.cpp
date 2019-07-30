@@ -582,8 +582,8 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   {
     executeInformationBox(
         parent, context,
-        "Provided folder does not contain a project file (ending with " +
-            projectFileExtension + ")");
+        "Provided folder does not contain a project file (ending with '" +
+            projectFileExtension + "')");
     return;
   }
   if (projectFiles.length() > 1)
@@ -681,8 +681,8 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     {
       if (executeBinaryQuestionBox(
               parent, context,
-              "Could not find a property file with basename " + propertyName +
-                  ", do you want to remove it from the project file?"))
+              "Could not find a property file with basename '" + propertyName +
+                  "', do you want to remove it from the project file?"))
       {
         removePropertyFromProjectFile(propertyName);
         i--;
@@ -787,8 +787,8 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath,
       }
       executeInformationBox(
           parent, context,
-          "Could not read the file " + propertyFilePath +
-              ": an equivalence property file should have the name of the "
+          "Could not read the file '" + propertyFilePath +
+              "': an equivalence property file should have the name of the "
               "equivalence on the first line and the alternate process "
               "starting from the second line");
     }
@@ -796,7 +796,7 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath,
   else
   {
     executeInformationBox(parent, context,
-                          "Could not read the file " + propertyFilePath);
+                          "Could not read the file '" + propertyFilePath + "'");
   }
 
   return Property();
@@ -838,9 +838,9 @@ std::list<Property> FileSystem::importProperties()
         if (propertyNameExists(importedProperty.name))
         {
           executeInformationBox(parent, "Import properties",
-                                "A property with name " +
+                                "A property with name '" +
                                     importedProperty.name +
-                                    " already exists in this project");
+                                    "' already exists in this project");
         }
         else
         {
