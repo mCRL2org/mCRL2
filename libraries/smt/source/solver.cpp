@@ -98,7 +98,7 @@ bool smt_solver::execute_and_check(const std::string& command) const
   }
   else
   {
-    mCRL2log(error) << "Error when checking satisfiability of \n" << command << std::endl;
+    mCRL2log(log::error) << "Error when checking satisfiability of \n" << command << std::endl;
     throw mcrl2::runtime_error("Got unexpected response from SMT-solver: " + std::string(chBuf, totalRead));
   }
 #else

@@ -13,6 +13,12 @@
 
 #include "mcrl2/utilities/platform.h"
 #include "mcrl2/smt/native_translation.h"
+#ifdef MCRL2_PLATFORM_WINDOWS
+  #include <windows.h>
+  #include <tchar.h>
+  #include <stdio.h>
+  #include <strsafe.h>
+#endif // MCRL2_PLATFORM_WINDOWS
 
 namespace mcrl2
 {

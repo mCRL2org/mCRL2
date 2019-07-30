@@ -74,6 +74,7 @@ void translate_sort_definition(const data::basic_sort& s,
 }
 
 // Find the dependencies in the definition of a sort
+static inline
 std::set<data::sort_expression> find_dependencies(const data::data_specification& dataspec, const data::sort_expression& sort)
 {
   std::set<data::sort_expression> dependencies;
@@ -94,6 +95,7 @@ std::set<data::sort_expression> find_dependencies(const data::data_specification
 }
 
 // Find all sorts that need to be translated and the dependencies in their definitions
+static inline
 std::map<data::sort_expression, std::set<data::sort_expression>> find_sorts_and_dependencies(const data::data_specification& dataspec)
 {
   std::map<data::sort_expression, std::set<data::sort_expression>> result;
