@@ -1,4 +1,5 @@
 set(MCRL2_TOOLS
+  confcheck
   generatelts
   lpstransform
   mcrl2rewrite
