@@ -127,9 +127,10 @@ class MainWindow : public QMainWindow
   void actionAddPropertyResult();
 
   /**
-   * @brief actionImportProperty Allows the user to import a property from file
+   * @brief actionImportProperties Allows the user to import property files to
+   *   this project
    */
-  void actionImportProperty();
+  void actionImportProperties();
 
   /**
    * @brief actionVerifyAllProperties Allows the user to verify all defined
@@ -179,6 +180,7 @@ class MainWindow : public QMainWindow
   QString saveSpecificationAsText = "Save Specification As";
 
   QAction* openProjectFolderInExplorerAction;
+  QAction* importPropertiesAction;
   QAction* exitAction;
 
   QAction* undoAction;
@@ -218,7 +220,6 @@ class MainWindow : public QMainWindow
   QIcon showReducedLtsAbortIcon = QIcon(":/icons/create_reduced_LTS_abort.png");
 
   QAction* addPropertyAction;
-  QAction* importPropertyAction;
 
   QAction* verifyAllPropertiesAction;
   QString verifyAllPropertiesStartText = "Verify all Properties";

@@ -325,7 +325,7 @@ QFileDialog* FileSystem::createFileDialog(int type)
     fileDialog->setWindowTitle("Import Property");
     fileDialog->setLabelText(QFileDialog::FileName, "Property file:");
     fileDialog->setLabelText(QFileDialog::Accept, "Import");
-    fileDialog->setNameFilter("Mu-calculus file (*.mcf)");
+    fileDialog->setNameFilter("Property (*.mcf *.equ)");
     break;
   default:
     break;
@@ -830,16 +830,25 @@ std::list<Property> FileSystem::importProperties()
     /* if successful, extract the property and save it if it is a .mcf file */
     for (QString propertyFilePath : importPropertyDialog->selectedFiles())
     {
-      if (propertyFilePath.endsWith(".mcf"))
+      if (propertyFilePath.endsWith(".mcf") ||
+          propertyFilePath.endsWith(".equ"))
       {
         Property importedProperty =
             readPropertyFromFile(propertyFilePath, "Import Properties");
-        newProperty(importedProperty);
+        if (propertyNameExists(importedProperty.name))
+        {
+          executeInformationBox(parent, "Import properties",
+                                "A property with name " +
+                                    importedProperty.name +
+                                    " already exists in this project");
+        }
+        else
+        {
+          importedProperties.push_back(importedProperty);
+          newProperty(importedProperty);
+        }
       }
     }
-    /* add the imported properties to the list of properties */
-    properties.insert(properties.end(), importedProperties.begin(),
-                      importedProperties.end());
   }
   return importedProperties;
 }
@@ -1034,7 +1043,8 @@ void FileSystem::saveProperty(const Property& property, bool forParsing)
   propertyFile.close();
 }
 
-void FileSystem::createReinitialisedSpecification(const Property& property, bool forParsing)
+void FileSystem::createReinitialisedSpecification(const Property& property,
+                                                  bool forParsing)
 {
   if (!upToDateOutputFileExists(specificationFilePath(),
                                 specificationFilePath(property.name)) ||

@@ -127,6 +127,13 @@ void MainWindow::setupMenuBar()
 
   fileMenu->addSeparator();
 
+  importPropertiesAction = fileMenu->addAction(
+      "Import Properties", this, SLOT(actionImportProperties()),
+      QKeySequence(Qt::ALT + Qt::Key_I));
+  importPropertiesAction->setEnabled(false);
+
+  fileMenu->addSeparator();
+
   exitAction = fileMenu->addAction("Exit", this, SLOT(close()),
                                    QKeySequence(Qt::CTRL + Qt::Key_Q));
 
@@ -201,10 +208,6 @@ void MainWindow::setupMenuBar()
   addPropertyAction = toolsMenu->addAction(
       QIcon(":/icons/add_property.png"), "Add Property", this,
       SLOT(actionAddProperty()), QKeySequence(Qt::ALT + Qt::Key_A));
-
-  importPropertyAction = toolsMenu->addAction(
-      "Import Property", this, SLOT(actionImportProperty()),
-      QKeySequence(Qt::ALT + Qt::Key_I));
 
   verifyAllPropertiesAction = toolsMenu->addAction(
       verifyAllPropertiesStartIcon, verifyAllPropertiesStartText, this,
@@ -347,6 +350,15 @@ void MainWindow::actionOpenProjectFolderInExplorer()
   fileSystem->openProjectFolderInExplorer();
 }
 
+void MainWindow::actionImportProperties()
+{
+  std::list<Property> importedProperties = fileSystem->importProperties();
+  for (Property property : importedProperties)
+  {
+    propertiesDock->addProperty(property);
+  }
+}
+
 void MainWindow::actionFindAndReplace()
 {
   if (findAndReplaceDialog->isVisible())
@@ -366,7 +378,7 @@ bool MainWindow::assertProjectOpened()
   {
     executeInformationBox(
         this, "mCRL2 IDE",
-        "To use this tool it is required to create or open a project first");
+        "To use this it is required to create or open a project first");
     return false;
   }
   else
@@ -500,18 +512,6 @@ void MainWindow::actionAddPropertyResult()
   propertiesDock->addProperty(property);
 }
 
-void MainWindow::actionImportProperty()
-{
-  if (assertProjectOpened())
-  {
-    std::list<Property> importedProperties = fileSystem->importProperties();
-    for (Property property : importedProperties)
-    {
-      propertiesDock->addProperty(property);
-    }
-  }
-}
-
 void MainWindow::actionVerifyAllProperties()
 {
   if (assertProjectOpened())
@@ -543,6 +543,14 @@ void MainWindow::changeFileButtons(bool specificationOnlyMode)
     saveAction->setIcon(saveProjectIcon);
     saveAsAction->setText(saveProjectAsText);
     openProjectFolderInExplorerAction->setEnabled(true);
+  }
+  if (fileSystem->projectOpened())
+  {
+    importPropertiesAction->setEnabled(true);
+  }
+  else
+  {
+    importPropertiesAction->setEnabled(false);
   }
 }
 
