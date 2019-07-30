@@ -321,21 +321,17 @@ class FileSystem : public QObject
   void editProperty(const Property& oldProperty, const Property& newProperty);
 
   /**
-   * @brief deletePropertyFile Deletes the file of a property
-   * @param propFilePath The path of the property file
-   * @param showIfFailed Whether the user should be told if deleting a property
-   *   file was unsuccessful
-   * @return Whether deleting the property file was successful
+   * @brief deletePropertyFile Deletes the file of a property from the
+   *   properties folder
+   * @param propFilePath The property whose file to remove
    */
-  bool deletePropertyFile(const QString& propFilePath,
-                          bool showIfFailed = true);
+  void deletePropertyFile(const Property& property);
 
   /**
    * @brief deleteProperty Deletes an existing property
    * @param property The property to delete
-   * @return Whether the property has been deleted
    */
-  bool deleteProperty(const Property& property);
+  void deleteProperty(const Property& property);
 
   /**
    * @brief save Saves the project to file

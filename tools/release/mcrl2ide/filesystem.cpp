@@ -895,51 +895,16 @@ void FileSystem::removePropertyFromProjectFile(const QString& propertyName)
   updateProjectFile();
 }
 
-bool FileSystem::deletePropertyFile(const QString& propFilePath,
-                                    bool showIfFailed)
+void FileSystem::deletePropertyFile(const Property& property)
 {
-  QFile propertyFile(propFilePath);
-  bool deleteSucceeded = true;
-  if (!propertyFile.remove())
-  {
-    deleteSucceeded = false;
-    if (showIfFailed)
-    {
-      /* if deleting the file failed, tell the user */
-      executeInformationBox(parent, "Delete property",
-                            "Could not delete property file: " +
-                                propertyFile.errorString());
-    }
-  }
-
-  return deleteSucceeded;
+  QFile(propertyFilePath(property)).remove();
 }
 
-bool FileSystem::deleteProperty(const Property& oldProperty)
+void FileSystem::deleteProperty(const Property& oldProperty)
 {
-  /* show a message box to ask the user whether he is sure to delete the
-   *   property */
-  bool deleteIt = executeBinaryQuestionBox(
-      parent, "Delete Property",
-      "Are you sure you want to delete the property " + oldProperty.name + "?");
-
-  /* if the user agrees, delete the property */
-  if (deleteIt)
-  {
-    /* also delete the file if it exists and remove it from the project file */
-    if (deletePropertyFile(propertyFilePath(oldProperty)))
-    {
-      properties.remove(oldProperty);
-    }
-    else
-    {
-      deleteIt = false;
-    }
-
-    removePropertyFromProjectFile(oldProperty.name);
-  }
-
-  return deleteIt;
+  properties.remove(oldProperty);
+  removePropertyFromProjectFile(oldProperty.name);
+  deletePropertyFile(oldProperty);
 }
 
 bool FileSystem::save(bool forceSave)

@@ -288,8 +288,14 @@ void PropertyWidget::actionEditResult()
 
 void PropertyWidget::actionDelete()
 {
-  if (fileSystem->deleteProperty(property))
+  /* show a message box to ask the user whether he is sure to delete the
+   *   property */
+  if (executeBinaryQuestionBox(
+          parent, "Delete Property",
+          "Are you sure you want to delete the property '" + property.name +
+              "'?"))
   {
+    fileSystem->deleteProperty(property);
     emit deleteMe(this);
   }
 }

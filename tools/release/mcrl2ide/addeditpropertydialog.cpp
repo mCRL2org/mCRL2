@@ -215,8 +215,7 @@ void AddEditPropertyDialog::addEditProperty()
   {
     if (!oldProperty.name.isEmpty())
     {
-      fileSystem->deletePropertyFile(fileSystem->propertyFilePath(oldProperty),
-                                     false);
+      fileSystem->deletePropertyFile(oldProperty);
     }
     fileSystem->saveProperty(getProperty());
     accept();
