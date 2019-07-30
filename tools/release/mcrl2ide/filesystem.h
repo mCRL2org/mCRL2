@@ -161,9 +161,10 @@ class FileSystem : public QObject
   /**
    * @brief propertyFilePath Defines the file path of a property
    * @param property The property
+   * @param forParsing Whether we want to use the file to parse the property
    * @return The file path of the property
    */
-  QString propertyFilePath(const Property& property);
+  QString propertyFilePath(const Property& property, bool forParsing = false);
 
   /**
    * @brief pbesFilePath Defines the file path of a pbes
@@ -303,10 +304,8 @@ class FileSystem : public QObject
   /**
    * @brief newProperty Adds a new property
    * @param property The new property to add
-   * @param cleanPropertiesFolder Whether obsolete property files should be
-   *   removed
    */
-  void newProperty(const Property& property, bool cleanPropertiesFolder = true);
+  void newProperty(const Property& property);
 
   /**
    * @brief importProperties Imports properties from file
@@ -320,6 +319,16 @@ class FileSystem : public QObject
    * @param newProperty The property after editing
    */
   void editProperty(const Property& oldProperty, const Property& newProperty);
+
+  /**
+   * @brief deletePropertyFile Deletes the file of a property
+   * @param propFilePath The path of the property file
+   * @param showIfFailed Whether the user should be told if deleting a property
+   *   file was unsuccessful
+   * @return Whether deleting the property file was successful
+   */
+  bool deletePropertyFile(const QString& propFilePath,
+                          bool showIfFailed = true);
 
   /**
    * @brief deleteProperty Deletes an existing property
@@ -345,8 +354,9 @@ class FileSystem : public QObject
   /**
    * @brief saveProperty Saves a property to file
    * @param property The property to save
+   * @param forParsing Whether the saved property file will be used for parsing
    */
-  void saveProperty(const Property& property);
+  void saveProperty(const Property& property, bool forParsing = false);
 
   /**
    * @brief createReinitialisedSpecification Creates a new mCRL2 specification
@@ -354,8 +364,10 @@ class FileSystem : public QObject
    *   by a given one; assumes a specification is open
    * @param property The equivalence property for which the new specification
    *   needs to be created
+   * @param forParsing Whether we want to use the file to parse the property
    */
-  void createReinitialisedSpecification(const Property& property);
+  void createReinitialisedSpecification(const Property& property,
+                                        bool forParsing);
 
   /**
    * @brief actionOpenProjectFolderInExplorer Allows the user to open the
@@ -382,12 +394,6 @@ class FileSystem : public QObject
    * @param checked Whether an options was checked or unchecked
    */
   void setSaveIntermediateFilesOptions(bool checked);
-
-  /**
-   * @brief deleteUnlistedPropertyFiles Deletes all property files for which
-   *   there is no entry in the "properties" list
-   */
-  void deleteUnlistedPropertyFiles();
 
   signals:
   /**
@@ -502,16 +508,6 @@ class FileSystem : public QObject
    */
   Property readPropertyFromFile(const QString& propertyFilePath,
                                 const QString& context);
-
-  /**
-   * @brief deletePropertyFile Deletes the file of a property
-   * @param propFilePath The path of the property file
-   * @param showIfFailed Whether the user should be told if deleting a property
-   *   file was unsuccessful
-   * @return Whether deleting the property file was successful
-   */
-  bool deletePropertyFile(const QString& propFilePath,
-                          bool showIfFailed = true);
 
   /**
    * @brief removePropertyFromProjectFile Removes a property from the project

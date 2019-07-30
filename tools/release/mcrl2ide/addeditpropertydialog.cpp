@@ -19,7 +19,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
                                              QWidget* parent)
     : QDialog(parent), ui(new Ui::AddEditPropertyDialog),
       processSystem(processSystem), fileSystem(fileSystem),
-      propertyParsingProcessid(-1), lastParsingPropertyIsMucalculus(true)
+      oldProperty(Property()), propertyParsingProcessid(-1),
+      lastParsingPropertyIsMucalculus(true)
 {
   ui->setupUi(this);
 
@@ -157,7 +158,7 @@ void AddEditPropertyDialog::parseProperty()
     {
       /* save the property, start a parsing process and wait for a reply */
       Property property = getProperty();
-      fileSystem->saveProperty(property);
+      fileSystem->saveProperty(property, true);
       lastParsingPropertyIsMucalculus = property.mucalculus;
       propertyParsingProcessid = processSystem->parseProperty(property);
       ui->parseButton->setText("Abort Parsing");
@@ -185,7 +186,7 @@ void AddEditPropertyDialog::parseResults(int processid)
     else if (result == "invalid")
     {
       message = "The entered " + inputType +
-                "is not valid. See the parsing console for more information";
+                " is not valid. See the parsing console for more information";
     }
     else
     {
@@ -201,8 +202,16 @@ void AddEditPropertyDialog::parseResults(int processid)
 
 void AddEditPropertyDialog::addEditProperty()
 {
+  /* if the input is correct, remove the original property file if possible and
+   *   save the current one */
   if (checkInput())
   {
+    if (!oldProperty.name.isEmpty())
+    {
+      fileSystem->deletePropertyFile(fileSystem->propertyFilePath(oldProperty),
+                                     false);
+    }
+    fileSystem->saveProperty(getProperty());
     accept();
   }
 }
@@ -211,8 +220,4 @@ void AddEditPropertyDialog::onRejected()
 {
   /* abort the parsing process */
   abortPropertyParsing();
-
-  /* save the original property and clean up */
-  fileSystem->saveProperty(oldProperty);
-  fileSystem->deleteUnlistedPropertyFiles();
 }
