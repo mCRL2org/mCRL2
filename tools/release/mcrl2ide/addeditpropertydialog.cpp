@@ -68,6 +68,8 @@ void AddEditPropertyDialog::clearFields()
 {
   ui->propertyNameField->clear();
   ui->formulaTextField->clear();
+  ui->initTextField->clear();
+  ui->equivalenceComboBox->setCurrentIndex(0);
 }
 
 void AddEditPropertyDialog::setProperty(const Property& property)
