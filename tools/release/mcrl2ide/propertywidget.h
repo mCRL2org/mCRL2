@@ -44,7 +44,7 @@ class PropertyWidget : public QWidget
   ~PropertyWidget();
 
   /**
-   * @brief getPropertyName Gets the property of this widget
+   * @brief getProperty Gets the property of this widget
    * @return The property
    */
   Property getProperty();

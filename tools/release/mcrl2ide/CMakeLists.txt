@@ -16,7 +16,7 @@ add_mcrl2_tool(mcrl2ide
     processsystem.cpp
     propertiesdock.cpp
     propertywidget.cpp
-	utilities.cpp
+    utilities.cpp
   DEPENDS
     mcrl2_gui
     mcrl2_lts

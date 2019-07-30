@@ -57,7 +57,7 @@ class PropertiesDock : public QDockWidget
 
   public slots:
   /**
-   * @brief deleteProperty Removes a property from the dock
+   * @brief deletePropertyWidget Removes a property widget from the dock
    * @param propertyWidget The property widget to remove
    */
   void deletePropertyWidget(PropertyWidget* propertyWidget);

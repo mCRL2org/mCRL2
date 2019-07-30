@@ -91,7 +91,7 @@ class AddEditPropertyDialog : public QDialog
 
   /**
    * @brief onRejected On rejected (Cancel, escape, "X"), abort the last parsing
-   *   process, reset the property and clean up the properties folder
+   *   process
    */
   void onRejected();
 

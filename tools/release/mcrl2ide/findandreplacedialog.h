@@ -33,21 +33,22 @@ class FindAndReplaceDialog : public QDialog
 
   public slots:
   /**
-   * @brief textToFindChanged Is called when the text in the find field changes
+   * @brief setFindEnabled Is called when the text in the find field changes
    * Enables or disables the find button
    */
   void setFindEnabled();
 
   /**
    * @brief setReplaceEnabled Is called when the selection in the text editor
-   * has changed Enables or disables the replace button
+   *   has changed
+   * Enables or disables the replace button
    */
   void setReplaceEnabled();
 
   /**
    * @brief actionFind Allows the user to find a string in the editor
    * @param forReplaceAll Whether we are finding for replace all
-            This means that searching must go down and no wrap around is done
+   * This means that searching must go down and no wrap around is done
    */
   void actionFind(bool forReplaceAll = false);
 
@@ -58,7 +59,7 @@ class FindAndReplaceDialog : public QDialog
 
   /**
    * @brief actionReplaceAll Allows the user to replace all occurences of a
-   * string in the editor
+   *   string in the editor
    */
   void actionReplaceAll();
 

@@ -47,8 +47,8 @@ class MainWindow : public QMainWindow
   void setDocksToDefault();
 
   /**
-   * @brief onNewProjectOpened Changes the user interface whenever a new
-   *   project has been opened
+   * @brief onNewProjectOpened Changes the user interface whenever a new project
+   *   has been opened
    */
   void onNewProjectOpened();
 
@@ -139,8 +139,8 @@ class MainWindow : public QMainWindow
   void actionVerifyAllProperties();
 
   /**
-   * @brief changeToolButtons Whenever the IDE changes from specification only
-   *   mode to project mode or vice versa, change the file actions
+   * @brief changeToolButtons Whenever the IDE changes between nothing opened,
+   *   specification only mode and project mode, change the file actions
    * @param specificationOnlyMode Whether the IDE changed to specification only
    *   mode
    */
@@ -271,7 +271,7 @@ class MainWindow : public QMainWindow
   /**
    * @brief assertSpecificationOpened Forces the user to make a project if no
    *   specification was opened
-   * @return Whether a project has been succesfully made
+   * @return Whether a specification has been successfully made
    */
   bool assertSpecificationOpened();
 };

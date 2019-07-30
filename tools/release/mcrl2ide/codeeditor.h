@@ -23,8 +23,8 @@ class HighlightingRule
 };
 
 /**
- * @brief The CodeHighlighter class defines a syntax highlioghrt for mCRL2
- *   specifcations
+ * @brief The CodeHighlighter class defines a syntax highlighter for mCRL2
+ *   specifications or mu-calculus formulae
  */
 class CodeHighlighter : public QSyntaxHighlighter
 {
@@ -33,8 +33,8 @@ class CodeHighlighter : public QSyntaxHighlighter
   public:
   /**
    * @brief CodeHighlighter Constructor
-   * @param spec Whether this code editor is for a mcrl2 specifcation or a mcf
-   *   formula
+   * @param spec Whether this code editor is for a mcrl2 specification or a
+   *   mu-calculus formula
    * @param parent The document on which the code highlighter should operate
    */
   CodeHighlighter(bool spec, QTextDocument* parent = 0);
@@ -68,14 +68,14 @@ class CodeHighlighter : public QSyntaxHighlighter
 class CodeEditor;
 
 /**
- * @brief The LineNumberArea class defines the area with line numbers in the
+ * @brief The LineNumbersArea class defines the area with line numbers in the
  * code editor
  */
 class LineNumbersArea : public QWidget
 {
   public:
   /**
-   * @brief LineNumberArea Constructor
+   * @brief LineNumbersArea Constructor
    * @param editor The code editor this line number area belongs to
    */
   LineNumbersArea(CodeEditor* editor);
@@ -214,7 +214,7 @@ class CodeEditor : public QPlainTextEdit
    * @param rect The rectangle that covers the line number area
    * @param dy The amount of pixels scrolled
    */
-  void updateLineNumberArea(const QRect&, int);
+  void updateLineNumberArea(const QRect& rect, int dy);
 };
 
 #endif // CODEEDITOR_H

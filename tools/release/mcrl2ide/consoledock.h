@@ -125,7 +125,8 @@ class ConsoleDock : public QDockWidget
 
   /**
    * @brief logToConsole Write output in the console
-   * @param tab Which console tab to write to
+   * @param processType Which console tab to write to
+   * @param process The process that wants to write on the console
    */
   void logToConsole(ProcessType processType, QProcess* process);
 };

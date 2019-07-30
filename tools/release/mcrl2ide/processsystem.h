@@ -42,7 +42,7 @@ class ProcessThread : public QThread
 
   public:
   /**
-   * @brief ProcessThread The constructor
+   * @brief ProcessThread Constructor
    * @param processQueue The queue this thread needs to take the processes from
    * @param processType What process type this thread is for
    */
@@ -132,7 +132,7 @@ class ProcessSystem : public QObject
   ~ProcessSystem();
 
   /**
-   * @brief setConsoleDock Assigns the console dock to the file system for
+   * @brief setConsoleDock Assigns the console dock to the process system for
    *   logging
    * @param consoleDock The console dock
    */
@@ -145,7 +145,7 @@ class ProcessSystem : public QObject
   void testExecutableExistence();
 
   /**
-   * @brief getProcessThread Returns gets the process thread of type processType
+   * @brief getProcessThread Returns the process thread of type processType
    * @param processType The type of the processThread
    * @return The process thread of type processType
    */
@@ -173,7 +173,7 @@ class ProcessSystem : public QObject
   int simulate();
 
   /**
-   * @brief showLts Create and visualizes the lts of the current specification
+   * @brief showLts Creates and visualizes the lts of the current specification
    *   using mcrl22lps, lps2lts, optionally ltsconvert and ltsgraph
    * @param reduction What reduction to apply
    * @return The process id of the lts creation process
@@ -189,7 +189,8 @@ class ProcessSystem : public QObject
 
   /**
    * @brief verifyProperty Verifies a property using mcrl22lps, lps2pbes and
-   *   pbessolve
+   *   pbessolve in case of a mu-calculus property or mcrl22lps, lps2lts and
+   *   ltscompare in case of an equivalence property
    * @param property The property to verify
    * @return The process id of the verification process
    */
@@ -220,7 +221,7 @@ class ProcessSystem : public QObject
   void abortAllProcesses(ProcessType processType);
 
   /**
-   * @brief killProcess Kills a process by killing all it's subprocesses
+   * @brief killProcess Kills a process by killing all its subprocesses
    * @param processid The id of the process to kill
    */
   void killProcess(int processid);
@@ -234,9 +235,9 @@ class ProcessSystem : public QObject
   void deleteProcess(int processid, int fromSubprocessIndex = 0);
 
   /**
-   * @brief getResult Gets the result of a process
-   *   for a verification process, the result is either "" (in case of error),
-   *   "false" or "true"
+   * @brief getResult Gets the result of a process; for instance for a
+   *   verification process, the result is either "" (in case of error), "false"
+   *   or "true"
    * @param processid The id of the process to get the result from
    * @return The result of the process
    */

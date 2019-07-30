@@ -69,17 +69,17 @@ class EquivalenceComboBox : public QComboBox
  * @param equivalence An equivalence
  * @param fillSpaces Whether the spaces in the name need to be replaced by
  *   underscores
- * @return The name that corresponds to the given equivalence, lts_eq_none if
- *   not found
+ * @return The name that corresponds to the given equivalence
  */
 QString getEquivalenceName(mcrl2::lts::lts_equivalence equivalence,
                            bool fillSpaces = false);
 
 /**
- * @brief getEquivalenceName Returns the equivalance that corresponds to the
+ * @brief getEquivalenceFromName Returns the equivalence that corresponds to the
  *   given name
  * @param name The name of an equivalence
- * @return The equivalance that corresponds to the given name
+ * @return The equivalence that corresponds to the given name, lts_eq_none if
+ *   not found
  */
 mcrl2::lts::lts_equivalence getEquivalenceFromName(const QString& name);
 
@@ -96,9 +96,9 @@ void executeInformationBox(QWidget* parent, const QString& title,
 /**
  * @brief executeBinaryQuestionBox Executes a question box (popup dialog to the
  *   user with a message, a yes button and a no button)
- * @param parent The parent of the information box
- * @param title The title of the information box
- * @param message The message body of the information box
+ * @param parent The parent of the question box
+ * @param title The title of the question box
+ * @param message The message body of the question box
  * @return Whether the button Yes has been pressed (true) or another button
  *   (false)
  */
@@ -108,9 +108,9 @@ bool executeBinaryQuestionBox(QWidget* parent, const QString& title,
 /**
  * @brief executeQuestionBox Executes a question box (popup dialog to the user
  *   with a message, a yes button, a no button and a cancel button)
- * @param parent The parent of the information box
- * @param title The title of the information box
- * @param message The message body of the information box
+ * @param parent The parent of the question box
+ * @param title The title of the question box
+ * @param message The message body of the question box
  * @return The button that has been pressed by the user
  */
 QMessageBox::StandardButton executeQuestionBox(QWidget* parent,

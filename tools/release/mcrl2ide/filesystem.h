@@ -52,9 +52,9 @@ class Property
    * @brief Property Constructor
    * @param name The name of the property
    * @param text The text of the property
-   * @param mulcalculus Whether this is a mu-calculus property (true) or an
+   * @param mucalculus Whether this is a mu-calculus property (true) or an
    *   equivalence property (false)
-   * @param equivalence The equivalence in case this is an equivalance property
+   * @param equivalence The equivalence in case this is an equivalence property
    */
   Property(QString name, QString text, bool mucalculus = true,
            mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none);
@@ -141,7 +141,7 @@ class FileSystem : public QObject
 
   /**
    * @brief lpsFilePath Defines the file path of a lps
-   * @param propertyName The property name in case this is an evindence lps
+   * @param propertyName The property name in case this is an evidence lps
    * @param evidence Whether this is an evidence lps
    * @return The file path of the lps
    */
@@ -150,7 +150,7 @@ class FileSystem : public QObject
   /**
    * @brief ltsFilePath Defines the file path of a lts
    * @param equivalence The equivalence reduction applied to the lts
-   * @param propertyName The property name in case this is an evindence lts
+   * @param propertyName The property name in case this is an evidence lts
    * @param evidence Whether this is an evidence lts
    * @return The file path of the lts
    */
@@ -168,7 +168,7 @@ class FileSystem : public QObject
 
   /**
    * @brief pbesFilePath Defines the file path of a pbes
-   * @param propertyName The name of the property this pbes correspeonds to
+   * @param propertyName The name of the property this pbes corresponds to
    * @param evidence Whether the pbes has evidence info
    * @return The file path of the pbes
    */
@@ -182,7 +182,7 @@ class FileSystem : public QObject
   QString toolPath(const QString& tool);
 
   /**
-   * @brief parentFolderPath Returns the path the the folder that is the parent
+   * @brief parentFolderPath Returns the path to the folder that is the parent
    *   of the given folder
    * @param folderPath The folder to get the parent of
    * @return The path the the folder that is the parent of the given folder
@@ -197,8 +197,8 @@ class FileSystem : public QObject
   QString getProjectName();
 
   /**
-   * @brief getSpecificationFileName Gets the name of the specificationFile
-   * @return The name of the specificationFile or the empty string if no
+   * @brief getSpecificationFileName Gets the name of the specification file
+   * @return The name of the specification file or the empty string if no
    *   specification file is known
    */
   QString getSpecificationFileName();
@@ -223,16 +223,16 @@ class FileSystem : public QObject
   bool inSpecificationOnlyMode();
 
   /**
-   * @brief specificationModified Checks whether the specification has been
+   * @brief isSpecificationModified Checks whether the specification has been
    *   modified since it has been saved
    * @return Whether the specification has been modified since it has been saved
    */
   bool isSpecificationModified();
 
   /**
-   * @brief isSpecificationModifiedFromOutside Checks whether the specification
-   *   has been modified from outside the IDE since it was saved using the IDE
-   *   or since it was last modified from outside
+   * @brief isSpecificationNewlyModifiedFromOutside Checks whether the
+   *   specification has been modified from outside the IDE since it was saved
+   *   using the IDE or since it was last modified from outside
    * @return Whether the specification has been modified from outside
    */
   bool isSpecificationNewlyModifiedFromOutside();
@@ -286,9 +286,9 @@ class FileSystem : public QObject
 
   /**
    * @brief openProjectFromArgument Opens a project from the input argument
-   * @param InputFilePath The input argument
+   * @param inputFilePath The input argument
    */
-  void openFromArgument(const QString& InputFilePath);
+  void openFromArgument(const QString& inputFilePath);
 
   /**
    * @brief openProjectFromFolder Opens a project from a given project folder
@@ -323,7 +323,7 @@ class FileSystem : public QObject
   /**
    * @brief deletePropertyFile Deletes the file of a property from the
    *   properties folder
-   * @param propFilePath The property whose file to remove
+   * @param property The property whose file to delete
    */
   void deletePropertyFile(const Property& property);
 
@@ -334,7 +334,7 @@ class FileSystem : public QObject
   void deleteProperty(const Property& property);
 
   /**
-   * @brief save Saves the project to file
+   * @brief save Saves the current project
    * @param forceSave Whether the files should be saved even if they have not
    *   been modified
    * @return Whether saving was successful
@@ -342,7 +342,7 @@ class FileSystem : public QObject
   bool save(bool forceSave = false);
 
   /**
-   * @brief saveAs Saves the project to file under a new name
+   * @brief saveAs Saves the current project under a new name
    * @return Whether saving was successful
    */
   bool saveAs();
@@ -366,13 +366,13 @@ class FileSystem : public QObject
                                         bool forParsing);
 
   /**
-   * @brief actionOpenProjectFolderInExplorer Allows the user to open the
-   *   project folder in the native file explorer
+   * @brief openProjectFolderInExplorer Allows the user to open the project
+   *   folder in the native file explorer
    */
   void openProjectFolderInExplorer();
 
   /**
-   * @brief clearTemporaryFolder Removes the temporary folder and its contents
+   * @brief removeTemporaryFolder Removes the temporary folder and its contents
    */
   void removeTemporaryFolder();
 
@@ -443,8 +443,8 @@ class FileSystem : public QObject
   void updateSpecificationModificationTime();
 
   /**
-   * createFileDialog Creates a file dialog that can be used to ask the user for
-   *   a file (location)
+   * @brief createFileDialog Creates a file dialog that can be used to ask the
+   *   user for a file (location)
    * @param type What type of file window is needed: 0 = new project, 1 = save
    *   project as, 2 = open project, 3 = import property
    * @return The file dialog
@@ -452,8 +452,8 @@ class FileSystem : public QObject
   QFileDialog* createFileDialog(int type);
 
   /**
-   * @brief createNewProjectOptions Creates a DOM document containg the project
-   *   options, assumes that the project state is already set
+   * @brief createNewProjectOptions Creates a DOM document containing the
+   *   project options, assumes that the project state is already set
    * @return The DOM document containg the project options
    */
   QDomDocument createNewProjectOptions();
@@ -491,7 +491,7 @@ class FileSystem : public QObject
   /**
    * @brief propertyFilePath Find the file path of a property file with the
    *   given property name
-   * @param property The property name
+   * @param propertyName The property name
    * @return The file path of the property if found, the empty string otherwise
    */
   QString findPropertyFilePath(const QString& propertyName);
@@ -508,7 +508,7 @@ class FileSystem : public QObject
   /**
    * @brief removePropertyFromProjectFile Removes a property from the project
    *   file, assumes a project is open or being opened
-   * @param propertyName The name of the preperty to remove
+   * @param propertyName The name of the property to remove
    */
   void removePropertyFromProjectFile(const QString& propertyName);
 };
