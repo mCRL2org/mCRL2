@@ -85,7 +85,6 @@ class invelm_algorithm: public detail::lps_algorithm<Specification>
 
   private:
     data::detail::BDD_Prover f_bdd_prover;
-    const specification f_lps;
     bool f_simplify_all;
 
     /// \brief Adds an invariant to the condition of the summand s, and optionally applies the prover to it
