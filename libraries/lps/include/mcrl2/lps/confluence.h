@@ -99,7 +99,7 @@ struct confluence_summand
 {
   data::variable_list variables;
   data::data_expression condition;
-  multi_action multi_action;
+  lps::multi_action multi_action;
   stochastic_distribution distribution;
   data::data_expression_list next_state;
   std::set<data::variable> changed;
