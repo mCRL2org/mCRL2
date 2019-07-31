@@ -67,7 +67,8 @@ class Disjointness_Checker
     /// precondition: the arguments passed as parameters n_1 and n_2 correspond to summands in
     /// the proces equations passed as parameter a_process_equations. They lie in the interval from and including 1 upto and
     /// including the highest summand number
-    Disjointness_Checker(const linear_process& a_process_equation);
+    template <typename LinearProcess>
+    Disjointness_Checker(const LinearProcess& a_process_equation);
 
     /// \brief Indicates whether or not the summands with number n_1 and n_2 are disjoint.
     bool disjoint(std::size_t n1, std::size_t n2);
@@ -156,10 +157,10 @@ void Disjointness_Checker::process_summand(std::size_t n, const action_summand& 
   }
 }
 
-inline
-Disjointness_Checker::Disjointness_Checker(const linear_process& a_process_equation)
+template <typename LinearProcess>
+Disjointness_Checker::Disjointness_Checker(const LinearProcess& a_process_equation)
 {
-  const lps::action_summand_vector& v_summands = a_process_equation.action_summands();
+  const auto& v_summands = a_process_equation.action_summands();
   std::size_t v_summand_number = 1;
 
   f_number_of_summands = v_summands.size();

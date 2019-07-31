@@ -869,7 +869,7 @@ Confluence_Checker<Specification>::Confluence_Checker(
   bool a_counter_example,
   bool a_generate_invariants,
   std::string const& a_dot_file_name):
-  f_disjointness_checker(lps::linear_process_to_aterm(a_lps.process())),
+  f_disjointness_checker(a_lps.process()),
   f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
   f_bdd_prover(a_lps.data(), data::used_data_equation_selector(a_lps.data()), a_rewrite_strategy,
                      a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
