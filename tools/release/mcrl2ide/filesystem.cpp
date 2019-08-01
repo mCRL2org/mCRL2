@@ -1017,7 +1017,7 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
                                 specificationFilePath(property.name)))
   {
     QString spec = readSpecification();
-    int initIndex = spec.indexOf(QRegExp("init[^a-zA-Z0-9_]"));
+    int initIndex = spec.indexOf(QRegExp("[; \t\n\r]init[ \t\n\r]"));
     QString alternateSpec = spec;
     alternateSpec.replace(
         initIndex, spec.indexOf(";", initIndex) - initIndex + 1, property.text);
