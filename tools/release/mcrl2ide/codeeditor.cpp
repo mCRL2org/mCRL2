@@ -80,7 +80,8 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   /* shared syntax */
 
   /* primitive type keywords */
-  primitiveTypeKeywordFormat.setForeground(Qt::darkMagenta);
+  primitiveTypeKeywordFormat.setForeground(light ? Qt::darkMagenta
+                                                 : Qt::magenta);
   QStringList primitiveTypeKeywordPatterns = {
       "\\bBool\\b", "\\bPos\\b", "\\bNat\\b", "\\bInt\\b", "\\bReal\\b"};
   for (const QString& pattern : primitiveTypeKeywordPatterns)
@@ -90,7 +91,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   }
 
   /* container type keywords */
-  containerTypeKeywordFormat.setForeground(Qt::darkGreen);
+  containerTypeKeywordFormat.setForeground(light ? Qt::darkGreen : Qt::green);
   QStringList containerTypeKeywordPatterns = {
       "\\bList\\b", "\\bSet\\b", "\\bBag\\b", "\\bFSet\\b", "\\bFBag\\b"};
   for (const QString& pattern : containerTypeKeywordPatterns)
@@ -100,7 +101,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   }
 
   /* data keywords */
-  dataKeywordFormat.setForeground(Qt::darkYellow);
+  dataKeywordFormat.setForeground(light ? Qt::darkYellow : Qt::yellow);
   QStringList dataKeywordPatterns = {"\\btrue\\b", "\\bfalse\\b"};
   for (const QString& pattern : dataKeywordPatterns)
   {
@@ -109,7 +110,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   }
 
   /* data operator keywords */
-  dataOperatorKeywordFormat.setForeground(Qt::darkRed);
+  dataOperatorKeywordFormat.setForeground(light ? Qt::darkRed : Qt::red);
   QStringList dataOperatorKeywordPatterns = {
       "\\bwhr\\b",    "\\bend\\b", "\\blambda\\b", "\\bforall\\b",
       "\\bexists\\b", "\\bdiv\\b", "\\bmod\\b",    "\\bin\\b"};
@@ -120,7 +121,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   }
 
   /* to do keywords */
-  todoKeywordFormat.setForeground(Qt::red);
+  todoKeywordFormat.setForeground(light ? Qt::red : QColor(255, 128, 128));
   QStringList todoKeywordPatterns = {"\\bcontained\\b", "\\bTODO\\b",
                                      "\\bFIXME\\b", "\\bXXX\\b"};
   for (const QString& pattern : todoKeywordPatterns)
