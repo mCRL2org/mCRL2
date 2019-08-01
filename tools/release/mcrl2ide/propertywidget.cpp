@@ -97,7 +97,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
 
   /* lay them out */
   propertyLayout = new QHBoxLayout();
-  propertyLayout->addWidget(propertyNameScrollArea);
+  propertyLayout->addWidget(propertyNameScrollArea, 1);
   propertyLayout->addStretch();
   propertyLayout->addWidget(verificationWidgets);
   propertyLayout->addWidget(editButton);
@@ -282,6 +282,7 @@ void PropertyWidget::actionEditResult()
   {
     property = newProperty;
     propertyNameLabel->setText(property.name);
+    propertyNameLabel->adjustSize();
     resetWidget();
   }
 }
