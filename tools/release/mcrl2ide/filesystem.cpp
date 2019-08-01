@@ -1017,11 +1017,12 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
                                 specificationFilePath(property.name)))
   {
     QString spec = readSpecification();
-    int initIndex = spec.indexOf(QRegExp("[; \\t\\n\\r]init[ \\t\\n\\r]"));
+    int initIndex = spec.indexOf(QRegExp("(^|[; \\t\\n\\r])init[ \\t\\n\\r]"));
     QString alternateSpec = spec;
-    alternateSpec.replace(initIndex + 1,
-                          spec.indexOf(";", initIndex + 5) - initIndex,
-                          property.text);
+    int initSize = spec.indexOf(";", initIndex + 5) - initIndex +
+                   (spec.at(initIndex) == 'i' ? 1 : 0);
+    alternateSpec.replace(initIndex + (spec.at(initIndex) == 'i' ? 0 : 1),
+                          initSize, property.text);
 
     QFile alternateSpecFile(specificationFilePath(property.name));
     alternateSpecFile.open(QIODevice::WriteOnly);
