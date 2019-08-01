@@ -131,7 +131,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   }
 
   /* defined function keywords */
-  functionKeywordFormat.setForeground(Qt::darkCyan);
+  functionKeywordFormat.setForeground(light ? Qt::darkCyan : Qt::cyan);
   QStringList functionKeywordPatterns = {
       "\\bmin\\b",     "\\bmax\\b",     "\\bsucc\\b",   "\\bpred\\b",
       "\\babs\\b",     "\\bfloor\\b",   "\\bceil\\b",   "\\bround\\b",
@@ -145,7 +145,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   }
 
   /* operators */
-  operatorFormat.setForeground(Qt::darkGreen);
+  operatorFormat.setForeground(light ? Qt::darkGreen : Qt::green);
   highlightingRules.push_back(HighlightingRule(
       QRegExp("[\\.\\+|&<>:;=@(){}\\[\\],\\!\\*/\\\\-]"), operatorFormat));
   highlightingRules.push_back(
@@ -153,12 +153,12 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   highlightingRules.push_back(HighlightingRule(QRegExp("->"), operatorFormat));
 
   /* numbers */
-  numberFormat.setForeground(Qt::darkGreen);
+  numberFormat.setForeground(light ? Qt::darkGreen : Qt::green);
   highlightingRules.push_back(
       HighlightingRule(QRegExp("\\b[0-9]+\\b"), numberFormat));
 
   /* single line comments */
-  commentFormat.setForeground(Qt::gray);
+  commentFormat.setForeground(light ? Qt::gray : Qt::lightGray);
   highlightingRules.push_back(
       HighlightingRule(QRegExp("%[^\n]*"), commentFormat));
 }
