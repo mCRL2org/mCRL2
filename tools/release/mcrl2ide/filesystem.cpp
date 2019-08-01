@@ -247,9 +247,10 @@ bool FileSystem::isSpecificationNewlyModifiedFromOutside()
 
 bool FileSystem::propertyNameExists(const QString& propertyName)
 {
+  QString propertyNameLower = propertyName.toLower();
   for (Property property : properties)
   {
-    if (property.name == propertyName)
+    if (property.name.toLower() == propertyNameLower)
     {
       return true;
     }
