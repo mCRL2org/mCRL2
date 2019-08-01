@@ -844,8 +844,11 @@ std::list<Property> FileSystem::importProperties()
         }
         else
         {
-          importedProperties.push_back(importedProperty);
-          newProperty(importedProperty);
+          if (!importedProperty.name.isEmpty())
+          {
+            importedProperties.push_back(importedProperty);
+            newProperty(importedProperty);
+          }
         }
       }
     }
