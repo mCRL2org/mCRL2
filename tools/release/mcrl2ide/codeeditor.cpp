@@ -31,7 +31,8 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   if (spec)
   {
     /* specification keywords */
-    specificationKeywordFormat.setForeground(light ? Qt::darkBlue : Qt::blue);
+    specificationKeywordFormat.setForeground(light ? Qt::darkBlue
+                                                   : QColor(64, 64, 255));
     QStringList specificationKeywordPatterns = {
         "\\bsort\\b", "\\bcons\\b", "\\bmap\\b",  "\\bvar\\b",   "\\beqn\\b",
         "\\bact\\b",  "\\bproc\\b", "\\binit\\b", "\\bstruct\\b"};
@@ -242,9 +243,8 @@ void CodeEditor::setFontSize(int pixelSize)
 
 void CodeEditor::changeHighlightingRules()
 {
-  highlighter = new CodeHighlighter(
-      isSpecificationEditor, this->palette().window().color().red() > 128,
-      this->document());
+  highlighter = new CodeHighlighter(isSpecificationEditor, lightPalette,
+                                    this->document());
 }
 
 void CodeEditor::showContextMenu(const QPoint& position)
@@ -262,7 +262,8 @@ void CodeEditor::highlightCurrentLine()
   QList<QTextEdit::ExtraSelection> extraSelections;
   QTextEdit::ExtraSelection selection;
 
-  QColor lineColor = QColor(Qt::gray).lighter(140);
+  QColor lineColor =
+      lightPalette ? QColor(Qt::lightGray) : QColor(Qt::darkGray);
 
   selection.format.setBackground(lineColor);
   selection.format.setProperty(QTextFormat::FullWidthSelection, true);
@@ -327,6 +328,7 @@ void CodeEditor::changeEvent(QEvent* event)
 {
   if (event->type() == QEvent::PaletteChange)
   {
+    lightPalette = this->palette().window().color().red() > 128;
     changeHighlightingRules();
   }
   QPlainTextEdit::changeEvent(event);
@@ -394,7 +396,7 @@ void CodeEditor::resizeEvent(QResizeEvent* e)
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
 {
   QPainter painter(lineNumberArea);
-  painter.fillRect(event->rect(), Qt::lightGray);
+  painter.fillRect(event->rect(), lightPalette ? Qt::lightGray : Qt::darkGray);
 
   QTextBlock block = firstVisibleBlock();
   int blockNumber = block.blockNumber();
@@ -407,7 +409,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
     if (block.isVisible() && bottom >= event->rect().top())
     {
       QString number = QString::number(blockNumber + 1);
-      painter.setPen(Qt::black);
+      painter.setPen(lightPalette ? Qt::black : Qt::white);
       painter.setFont(lineNumberFont);
       painter.drawText(-2, top, lineNumberArea->width(), lineNumberHeight,
                        Qt::AlignRight | Qt::AlignBottom, number);

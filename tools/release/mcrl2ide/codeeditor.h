@@ -193,6 +193,7 @@ class CodeEditor : public QPlainTextEdit
 
   private:
   bool isSpecificationEditor;
+  bool lightPalette;
   QFont codeFont;
   QFont lineNumberFont;
   LineNumbersArea* lineNumberArea;
