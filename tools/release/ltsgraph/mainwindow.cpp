@@ -21,7 +21,8 @@
 #include "information.h"
 #include "springlayout.h"
 
-#define MAX_NODE_COUNT 400
+/// \brief The number of vertices before the user is prompted to enable exploration mode.
+constexpr std::size_t MAX_NODE_COUNT  = 400;
 
 MainWindow::MainWindow(QWidget* parent) :
   QMainWindow(parent),
@@ -157,9 +158,11 @@ void MainWindow::onExplore(bool enabled)
     m_graph.makeExploration();
     m_graph.toggleOpen(m_graph.initialState());
   }
-  else {
+  else
+  {
     m_graph.discardExploration();
   }
+
   m_glwidget->update();
 }
 
@@ -179,7 +182,10 @@ void MainWindow::openFile(const QString& fileName)
   {
     try
     {
+      // Indicates that exploration mode was previously enabled
       bool hadExploration = m_graph.hasExploration();
+
+      // Disable layouting and reset viewport.
       m_ui.actLayout->setChecked(false);
 
       m_glwidget->pause();
@@ -191,6 +197,9 @@ void MainWindow::openFile(const QString& fileName)
       // The argument '-' means we should read from stdin, the lts library
       // does that when supplied an empty string as the input file name
       m_graph.load(fileName == "-" ? "" : fileName, -limit, limit);
+
+      m_glwidget->rebuild();
+      on3DChanged(false);
 
       if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadExploration)
       {
@@ -208,9 +217,8 @@ void MainWindow::openFile(const QString& fileName)
         onExplore(hadExploration);
       }
 
-      m_glwidget->rebuild();
-      on3DChanged(false);
       m_glwidget->resume();
+
       m_information->update();
       setWindowTitle(QString("LTSGraph - ") + fileName);
       m_graph.setStable(false);
