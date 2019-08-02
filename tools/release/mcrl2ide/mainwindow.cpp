@@ -80,6 +80,10 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
     resize(QSize(QDesktopWidget().availableGeometry(this).width() * 0.5,
                  QDesktopWidget().availableGeometry(this).height() * 0.75));
   }
+  if (settings->contains("windowstate"))
+  {
+    restoreState(settings->value("windowstate").toByteArray());
+  }
 
   processSystem->testExecutableExistence();
 
@@ -271,6 +275,9 @@ void MainWindow::setDocksToDefault()
   toolbar->setObjectName("ToolbarObject");
   QByteArray array = saveState();
   restoreState(array);
+
+  /* Also put the toolbar in the default position */
+  addToolBar(Qt::TopToolBarArea, toolbar);
 }
 
 void MainWindow::setupDocks()
@@ -682,6 +689,7 @@ bool MainWindow::event(QEvent* event)
 
     /* save the settings for the main window */
     settings->setValue("geometry", saveGeometry());
+    settings->setValue("windowstate", saveState());
 
     /* remove the temporary folder */
     fileSystem->removeTemporaryFolder();
