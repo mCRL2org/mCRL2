@@ -485,7 +485,6 @@ class BDD_Prover: protected rewriter
     , f_time_limit(a_time_limit)
     , f_apply_induction(a_apply_induction)
     , f_bdd_simplifier(a_path_eliminator ? new BDD_Path_Eliminator(a_solver_type) : new BDD_Simplifier())
-    , f_induction(data_spec)
     {
       switch (a_rewrite_strategy)
       {

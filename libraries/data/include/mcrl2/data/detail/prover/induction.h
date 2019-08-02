@@ -12,9 +12,6 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 #define MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/prover/bdd_info.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -40,86 +37,30 @@ class Induction
     data_expression f_formula;
 
     /// \brief
-    function_symbol_list f_constructors;
-
-    /// \brief
-    core::identifier_string f_cons_name;
-
-    /// \brief
-    std::vector < variable >  f_list_variables;
-
-    /// \brief
-    std::map < variable, sort_expression > f_lists_to_sorts;
+    variable_vector f_list_variables;
 
     /// \brief
     // BDD_Info f_bdd_info;
 
     /// \brief
-    void recurse_expression_for_lists(const data_expression& a_expression)
+    variable_vector recurse_expression_for_lists(const data_expression& a_expression) const
     {
-      if (is_variable(a_expression))
+      variable_vector result;
+      for(const variable& v: find_free_variables(a_expression))
       {
-        const sort_expression v_sort = a_expression.sort();
-        if (sort_list::is_list(v_sort))  // the sort has shape List(D) for some sort D.
+        if(sort_list::is_list(v.sort()))
         {
-          if (std::find(f_list_variables.begin(), f_list_variables.end(),a_expression)==f_list_variables.end()) // not found
-          {
-            f_list_variables.push_back(atermpp::down_cast<variable>(a_expression));
-          }
+          result.push_back(v);
         }
       }
-      else if (is_application(a_expression))
-      {
-        const data::application& a = atermpp::down_cast<const data::application>(a_expression);
-        for (application::const_iterator i = a.begin(); i != a.end(); ++i)
-        {
-          recurse_expression_for_lists(*i);
-        }
-      }
+      return result;
     }
 
     /// \brief
-    void map_lists_to_sorts()
+    sort_expression get_sort_of_list_elements(const variable& a_list_variable) const
     {
-      for(std::vector < variable >::const_iterator it=f_list_variables.begin(); it!=f_list_variables.end(); ++it)
-      {
-        const variable v_list_variable = *it;
-        const sort_expression v_sort = get_sort_of_list_elements(v_list_variable);
-        f_lists_to_sorts[v_list_variable]=v_sort;
-      }
-    }
-
-    /// \brief
-    sort_expression get_sort_of_list_elements(const variable& a_list_variable)
-    {
-      function_symbol_list v_constructors;
-      function_symbol v_constructor;
-      core::identifier_string v_constructor_name;
-      sort_expression v_constructor_sort;
-      sort_expression v_constructor_element_sort;
-      sort_expression v_list_sort;
-      sort_expression v_result;
-
-      v_constructors = f_constructors;
-      v_list_sort = a_list_variable.sort();
-      while (!v_constructors.empty())
-      {
-        v_constructor = v_constructors.front();
-        v_constructors.pop_front();
-        v_constructor_name = v_constructor.name();
-        if (v_constructor_name == f_cons_name)
-        {
-          v_constructor_sort = v_constructor.sort();
-          v_constructor_element_sort = *(function_sort(v_constructor_sort).domain().begin());
-          v_constructor_sort = *(++(function_sort(v_constructor_sort).domain().begin()));
-          if (v_constructor_sort == v_list_sort)
-          {
-            v_result = v_constructor_element_sort;
-          }
-        }
-      }
-
-      return v_result;
+      assert(sort_list::is_list(a_list_variable.sort()));
+      return atermpp::down_cast<container_sort>(a_list_variable.sort()).element_sort();
     }
 
     /// \brief
@@ -129,26 +70,26 @@ class Induction
     }
 
 
-    /// \brief
-    data_expression apply_induction_one()
+    //TODO check if this special case can be integrated into create_clauses
+    data_expression apply_induction_one(const core::identifier_string& fresh_name) const
     {
       const variable v_induction_variable = f_list_variables.front();
+      assert(sort_list::is_list(v_induction_variable.sort()));
 
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
-      const variable v_dummy_variable = get_fresh_dummy(v_dummy_sort);
+      const variable v_dummy_variable(fresh_name, v_dummy_sort);
 
       mutable_map_substitution<> v_substitution1;
-      assert(sort_list::is_list(v_induction_variable.sort()));
-      v_substitution1[v_induction_variable]=sort_list::empty(atermpp::down_cast<container_sort>(v_induction_variable.sort()).element_sort());
+      v_substitution1[v_induction_variable] = sort_list::empty(v_dummy_sort);
       std::set<variable> variables_occurring_in_rhs_sigma;
-      const data_expression v_base_case = data::replace_variables_capture_avoiding(f_formula,v_substitution1,variables_occurring_in_rhs_sigma);
+      const data_expression v_base_case = replace_variables_capture_avoiding(f_formula, v_substitution1, variables_occurring_in_rhs_sigma);
 
       mutable_map_substitution<> v_substitution2;
-      v_substitution2[v_induction_variable]=sort_list::cons_(v_dummy_variable.sort(), v_dummy_variable, v_induction_variable);
+      v_substitution2[v_induction_variable] = sort_list::cons_(v_dummy_sort, v_dummy_variable, v_induction_variable);
       variables_occurring_in_rhs_sigma.clear();
       variables_occurring_in_rhs_sigma.insert(v_dummy_variable);
       variables_occurring_in_rhs_sigma.insert(v_induction_variable);
-      const data_expression v_induction_step = sort_bool::implies(f_formula, data::replace_variables_capture_avoiding(f_formula,v_substitution2,variables_occurring_in_rhs_sigma));
+      const data_expression v_induction_step = sort_bool::implies(f_formula, replace_variables_capture_avoiding(f_formula, v_substitution2, variables_occurring_in_rhs_sigma));
 
       return sort_bool::and_(v_base_case, v_induction_step);
     }
@@ -157,7 +98,7 @@ class Induction
     data_expression create_hypotheses(
                         const data_expression& a_hypothesis,
                         variable_list a_list_of_variables,
-                        variable_list a_list_of_dummies)
+                        variable_list a_list_of_dummies) const
     {
       if (a_list_of_variables.empty())
       {
@@ -172,13 +113,13 @@ class Induction
           {
             const variable v_dummy(a_list_of_dummies.front());
             a_list_of_dummies.pop_front();
-            
+
             mutable_map_substitution<> v_substitution;
-            v_substitution[v_variable]=sort_list::cons_(v_dummy.sort(), v_dummy, v_variable);
+            v_substitution[v_variable] = sort_list::cons_(v_dummy.sort(), v_dummy, v_variable);
             std::set<variable> variables_occurring_in_rhs_sigma;
             variables_occurring_in_rhs_sigma.insert(v_dummy);
             variables_occurring_in_rhs_sigma.insert(v_variable);
-            v_clause = sort_bool::and_(v_clause, data::replace_variables_capture_avoiding(a_hypothesis,v_substitution,variables_occurring_in_rhs_sigma));
+            v_clause = sort_bool::and_(v_clause, replace_variables_capture_avoiding(a_hypothesis, v_substitution,variables_occurring_in_rhs_sigma));
           }
         }
 
@@ -203,24 +144,24 @@ class Induction
       v_list_of_dummies.push_front(v_dummy);
 
       mutable_map_substitution<> v_substitution1;
-      v_substitution1[v_variable]=sort_list::cons_(v_dummy.sort(), v_dummy, v_variable);
+      v_substitution1[v_variable] = sort_list::cons_(v_dummy_sort, v_dummy, v_variable);
       std::set<variable> variables_occurring_in_rhs_sigma;
       variables_occurring_in_rhs_sigma.insert(v_dummy);
       variables_occurring_in_rhs_sigma.insert(v_variable);
-      const data_expression v_formula_1 = data::replace_variables_capture_avoiding(a_formula,v_substitution1,variables_occurring_in_rhs_sigma);
+      const data_expression v_formula_1 = replace_variables_capture_avoiding(a_formula, v_substitution1, variables_occurring_in_rhs_sigma);
 
       mutable_map_substitution<> v_substitution2;
       assert(sort_list::is_list(v_variable.sort()));
-      v_substitution2[v_variable]=sort_list::empty(atermpp::down_cast<container_sort>(v_variable.sort()).element_sort());
+      v_substitution2[v_variable] = sort_list::empty(v_dummy_sort);
       variables_occurring_in_rhs_sigma.clear();
-      const data_expression v_formula_2 = data::replace_variables_capture_avoiding(a_formula,v_substitution2,variables_occurring_in_rhs_sigma);
-      const data_expression v_hypothesis = data::replace_variables_capture_avoiding(a_hypothesis,v_substitution2,variables_occurring_in_rhs_sigma);
+      const data_expression v_formula_2 = replace_variables_capture_avoiding(a_formula, v_substitution2, variables_occurring_in_rhs_sigma);
+      const data_expression v_hypothesis = replace_variables_capture_avoiding(a_hypothesis, v_substitution2, variables_occurring_in_rhs_sigma);
 
       if (a_variable_number < a_number_of_variables - 1)
       {
         const data_expression_list v_list_1 = create_clauses(v_formula_1, a_hypothesis, a_variable_number + 1, a_number_of_variables, v_list_of_variables, v_list_of_dummies);
         const data_expression_list v_list_2 = create_clauses(v_formula_2, v_hypothesis, a_variable_number + 1, a_number_of_variables, a_list_of_variables, a_list_of_dummies);
-        return v_list_1+v_list_2;
+        return v_list_1 + v_list_2;
       }
       else
       {
@@ -234,51 +175,29 @@ class Induction
     }
 
   public:
-    /// \brief
-    Induction(const data_specification& a_data_spec)
-    {
-      f_constructors=function_symbol_list(a_data_spec.constructors().begin(),a_data_spec.constructors().end());
-      f_cons_name = sort_list::cons_name();
-    }
-
-    /// \brief
-    ~Induction()
-    {
-    }
-
-    /// \brief
     void initialize(const data_expression& a_formula)
     {
       f_formula = a_formula;
-      f_list_variables.clear();
-      recurse_expression_for_lists(a_formula);
-      map_lists_to_sorts();
+      f_list_variables = recurse_expression_for_lists(a_formula);
       f_count = 0;
     }
 
-    /// \brief
-    bool can_apply_induction()
+    bool can_apply_induction() const
     {
-      if (f_list_variables.size() == f_count)
-      {
-        return false;
-      }
-      else
-      {
-        f_count++;
-        return true;
-      }
+      return f_list_variables.size() != f_count;
     }
 
-    /// \brief
+    /// \requires can_apply_induction()
     data_expression apply_induction()
     {
+      assert(can_apply_induction());
       data_expression v_result;
 
+      f_count++;
       if (f_count == 1)
       {
         mCRL2log(log::verbose) << "Induction on one variable." << std::endl;
-        v_result = apply_induction_one();
+        v_result = apply_induction_one(fresh_identifier_generator("dummy$"));
       }
       else
       {
