@@ -18,7 +18,6 @@
 #include "mcrl2/data/detail/prover/induction.h"
 #include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/detail/prover/utilities.h"
 #include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
@@ -511,8 +510,8 @@ class BDD_Prover: protected rewriter
       }
 
       mCRL2log(log::debug1) << "Flags:" << std::endl
-                      << "  Reverse: " << bool_to_char_string(f_reverse) << "," << std::endl
-                      << "  Full: " << bool_to_char_string(f_full) << "," << std::endl;
+                      << "  Reverse: " << std::boolalpha << f_reverse << "," << std::endl
+                      << "  Full: " << f_full << "," << std::endl;
     }
 
     /// \brief Destructor that destroys the BDD simplifier BDD_Prover::f_bdd_simplifier.
