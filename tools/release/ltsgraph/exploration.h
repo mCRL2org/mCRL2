@@ -22,39 +22,43 @@ namespace Graph
 
 /**
  * \brief Class that stores information about 'exploration mode' of ltsgraph
- * \detail In exploration mode, only a part of the graph is shown. This part
+ * \details In exploration mode, only a part of the graph is shown. This part
  * should be reachable from the initial state.
  */
 class Exploration
 {
-  public:
+public:
   const std::vector<std::size_t>& nodes;
   const std::vector<std::size_t>& edges;
 
-  private:
+private:
   struct ExplorationNode
   {
     std::size_t id;                             // index in the complete node list
     std::size_t index;                          // index in the selected node list
     std::vector<std::size_t> inEdges, outEdges; // by edge id
-    std::size_t count;
+    std::size_t count;                          ///< A counter for the number of references to this node.
     bool bridge;
+
     ExplorationNode() = default;
   };
+
   struct Edge
   {
     std::size_t id;    // index in the complete edge list
     std::size_t index; // index in the selected edge list
     std::size_t count;
+
     Edge() = default;
   };
 
   Graph& m_graph;
 
-  // maps node/edge indices to exploration Node/Edge objects
+  // Maps indices of node and edge to exploration Node or Edge objects
   std::unordered_map<std::size_t, ExplorationNode> m_explorationNodes;
   std::unordered_map<std::size_t, Edge> m_edges;
-  // keeps track of node/edge indices in exploration
+
+  // Keeps track of indices for nodes and edges in exploration
   std::vector<std::size_t> m_nodeIndices;
   std::vector<std::size_t> m_edgeIndices;
 
@@ -90,10 +94,14 @@ class Exploration
 
     if (count != 0u)
     {
-      QVector3D rvec =
-          QVector3D(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(-1.0, 1.0));
-      rvec *= 50.0 / rvec.length();
-      m_graph.m_nodes[node.id].pos_mutable() = centroid / ((GLfloat)count) + rvec;
+      QVector3D random_vec = QVector3D(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(-1.0, 1.0));
+      random_vec.normalize();
+      random_vec *= 50.0f;
+
+      // Take the average of the centroid vector.
+      centroid = centroid / count;
+
+      m_graph.m_nodes[node.id].pos_mutable() = centroid + random_vec;
       clipVector(m_graph.m_nodes[node.id].pos_mutable(), m_graph.getClipMin(), m_graph.getClipMax());
     }
   }
@@ -221,11 +229,14 @@ class Exploration
     {
       std::size_t id;
       std::unordered_set<std::size_t> neighbors;
-      bool searched{false};
+
       std::size_t parent;
       std::unordered_set<std::size_t> backEdges;
-      bool visited{false};
-      bool leaf{false};
+
+      bool visited  = false;
+      bool leaf     = false;
+      bool searched = false;
+
       NodeInfo(std::size_t id = 0)
           : id(id),  parent(id)
       {
@@ -247,7 +258,7 @@ class Exploration
       std::size_t operator()(const EdgeInfo& e) const
       {
         return std::hash<std::size_t>()(e.u) ^ (std::hash<std::size_t>()(e.v) << 1);
-      };
+      }
     };
     std::unordered_map<std::size_t, NodeInfo> nodes;
     std::vector<std::size_t> order;
@@ -420,32 +431,6 @@ class Exploration
         }
       }
     }
-
-    // debug tree
-    /*{
-      FILE* fp = fopen("exploration.dot", "wt");
-      fputs("digraph {\n\tnode [shape=circle];\n", fp);
-      for (std::size_t i = 0; i < order.size(); ++i)
-      {
-        NodeInfo& node = nodes[order[i]];
-        const char *color = chains.count(EdgeInfo(node.id, node.parent)) ? "red"
-    : "black";
-        fprintf(fp, "\t\"%d\"->\"%d\" [color=%s];\n", node.id, node.parent,
-    color);
-        for (std::unordered_set<std::size_t>::iterator
-          it = node.backEdges.begin(); it != node.backEdges.end(); ++it)
-        {
-          const char *color = chains.count(EdgeInfo(node.id, *it)) ? "red" :
-    "black";
-          fprintf(fp, "\t\"%d\"->\"%d\"
-    [style=dashed,constraint=false,color=%s];\n", node.id, *it, color);
-        }
-        if (node.leaf)
-          fprintf(fp, "\t\"%d\" [style=dashed]\n", node.id);
-      }
-      fputs("}\n", fp);
-      fclose(fp);
-    }*/
   }
 
   // returns whether contracting this node will not leave orphans
