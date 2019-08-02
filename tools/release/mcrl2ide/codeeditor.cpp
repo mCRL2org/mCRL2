@@ -32,7 +32,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   {
     /* specification keywords */
     specificationKeywordFormat.setForeground(light ? Qt::darkBlue
-                                                   : QColor(64, 64, 255));
+                                                   : QColor(38, 139, 210));
     QStringList specificationKeywordPatterns = {
         "\\bsort\\b", "\\bcons\\b", "\\bmap\\b",  "\\bvar\\b",   "\\beqn\\b",
         "\\bact\\b",  "\\bproc\\b", "\\binit\\b", "\\bstruct\\b"};
@@ -53,7 +53,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
 
     /* process operator keywords */
     processOperatorKeywordFormat.setForeground(light ? Qt::blue
-                                                     : QColor(128, 128, 255));
+                                                     : QColor(108, 113, 196));
     QStringList processOperatorKeywordPatterns = {
         "\\bsum\\b",  "\\bdist\\b",   "\\bblock\\b", "\\ballow\\b",
         "\\bhide\\b", "\\brename\\b", "\\bcomm\\b"};
@@ -196,6 +196,8 @@ void LineNumbersArea::paintEvent(QPaintEvent* event)
 
 CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 {
+  lightPalette = this->palette().window().color().red() > 128;
+
   /* set the font used (monospaced) */
   codeFont.setFamily("Monospace");
   codeFont.setFixedPitch(true);
@@ -263,7 +265,7 @@ void CodeEditor::highlightCurrentLine()
   QTextEdit::ExtraSelection selection;
 
   QColor lineColor =
-      lightPalette ? QColor(Qt::lightGray) : QColor(Qt::darkGray);
+      lightPalette ? QColor(Qt::lightGray) : QColor(64, 64, 64);
 
   selection.format.setBackground(lineColor);
   selection.format.setProperty(QTextFormat::FullWidthSelection, true);
@@ -396,7 +398,7 @@ void CodeEditor::resizeEvent(QResizeEvent* e)
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
 {
   QPainter painter(lineNumberArea);
-  painter.fillRect(event->rect(), lightPalette ? Qt::lightGray : Qt::darkGray);
+  painter.fillRect(event->rect(), lightPalette ? Qt::lightGray : QColor(64, 64, 64));
 
   QTextBlock block = firstVisibleBlock();
   int blockNumber = block.blockNumber();
