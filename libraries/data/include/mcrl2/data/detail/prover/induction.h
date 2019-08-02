@@ -168,10 +168,8 @@ class Induction
         data_expression v_clause = a_hypothesis;
         if (a_list_of_variables.size() > 1)
         {
-          while (!a_list_of_variables.size())
+          for (const variable& v_variable: a_list_of_variables)
           {
-            const variable v_variable(a_list_of_variables.front());
-            a_list_of_variables.pop_front();
             const variable v_dummy(a_list_of_dummies.front());
             a_list_of_dummies.pop_front();
             
