@@ -81,15 +81,11 @@ class Induction
 
       mutable_map_substitution<> v_substitution1;
       v_substitution1[v_induction_variable] = sort_list::empty(v_dummy_sort);
-      std::set<variable> variables_occurring_in_rhs_sigma;
-      const data_expression v_base_case = replace_variables_capture_avoiding(f_formula, v_substitution1, variables_occurring_in_rhs_sigma);
+      const data_expression v_base_case = replace_variables_capture_avoiding(f_formula, v_substitution1);
 
       mutable_map_substitution<> v_substitution2;
       v_substitution2[v_induction_variable] = sort_list::cons_(v_dummy_sort, v_dummy_variable, v_induction_variable);
-      variables_occurring_in_rhs_sigma.clear();
-      variables_occurring_in_rhs_sigma.insert(v_dummy_variable);
-      variables_occurring_in_rhs_sigma.insert(v_induction_variable);
-      const data_expression v_induction_step = sort_bool::implies(f_formula, replace_variables_capture_avoiding(f_formula, v_substitution2, variables_occurring_in_rhs_sigma));
+      const data_expression v_induction_step = sort_bool::implies(f_formula, replace_variables_capture_avoiding(f_formula, v_substitution2));
 
       return sort_bool::and_(v_base_case, v_induction_step);
     }
@@ -116,10 +112,7 @@ class Induction
 
             mutable_map_substitution<> v_substitution;
             v_substitution[v_variable] = sort_list::cons_(v_dummy.sort(), v_dummy, v_variable);
-            std::set<variable> variables_occurring_in_rhs_sigma;
-            variables_occurring_in_rhs_sigma.insert(v_dummy);
-            variables_occurring_in_rhs_sigma.insert(v_variable);
-            v_clause = sort_bool::and_(v_clause, replace_variables_capture_avoiding(a_hypothesis, v_substitution,variables_occurring_in_rhs_sigma));
+            v_clause = sort_bool::and_(v_clause, replace_variables_capture_avoiding(a_hypothesis, v_substitution));
           }
         }
 
@@ -145,17 +138,13 @@ class Induction
 
       mutable_map_substitution<> v_substitution1;
       v_substitution1[v_variable] = sort_list::cons_(v_dummy_sort, v_dummy, v_variable);
-      std::set<variable> variables_occurring_in_rhs_sigma;
-      variables_occurring_in_rhs_sigma.insert(v_dummy);
-      variables_occurring_in_rhs_sigma.insert(v_variable);
-      const data_expression v_formula_1 = replace_variables_capture_avoiding(a_formula, v_substitution1, variables_occurring_in_rhs_sigma);
+      const data_expression v_formula_1 = replace_variables_capture_avoiding(a_formula, v_substitution1);
 
       mutable_map_substitution<> v_substitution2;
       assert(sort_list::is_list(v_variable.sort()));
       v_substitution2[v_variable] = sort_list::empty(v_dummy_sort);
-      variables_occurring_in_rhs_sigma.clear();
-      const data_expression v_formula_2 = replace_variables_capture_avoiding(a_formula, v_substitution2, variables_occurring_in_rhs_sigma);
-      const data_expression v_hypothesis = replace_variables_capture_avoiding(a_hypothesis, v_substitution2, variables_occurring_in_rhs_sigma);
+      const data_expression v_formula_2 = replace_variables_capture_avoiding(a_formula, v_substitution2);
+      const data_expression v_hypothesis = replace_variables_capture_avoiding(a_hypothesis, v_substitution2);
 
       if (a_variable_number < a_number_of_variables - 1)
       {
