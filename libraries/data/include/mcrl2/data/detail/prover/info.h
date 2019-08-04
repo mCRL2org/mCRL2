@@ -13,7 +13,6 @@
 #define MCRL2_DATA_DETAIL_PROVER_INFO_H
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/detail/prover/utilities.h"
 #include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
