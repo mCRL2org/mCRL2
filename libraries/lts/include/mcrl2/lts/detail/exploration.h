@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-// #define USE_INDEXED_SET
+#define USE_INDEXED_SET
 
 #ifndef MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 #define MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
