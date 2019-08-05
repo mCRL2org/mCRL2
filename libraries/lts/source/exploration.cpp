@@ -30,14 +30,22 @@ probabilistic_state<std::size_t, probabilistic_data_expression> lps2lts_algorith
   assert(!initial_states.empty());
   if (++initial_states.begin() == initial_states.end()) // Means initial_states.size()==1
   {
+#ifdef USE_INDEXED_SET
     std::size_t state_number=m_state_numbers.put(initial_states.front().state()).first;
+#else
+    std::size_t state_number=m_state_numbers.emplace(initial_states.front().state(),m_state_numbers.size()).first->second;
+#endif
     return probabilistic_state<std::size_t, probabilistic_data_expression>(state_number);
   }
   std::vector <state_probability_pair<std::size_t, lps::probabilistic_data_expression> > result;
   for(lps::next_state_generator::transition_t::state_probability_list::const_iterator i=initial_states.begin();
                     i!=initial_states.end(); ++i)
   {
+#ifdef USE_INDEXED_SET
     std::size_t state_number=m_state_numbers.put(i->state()).first;
+#else
+    std::size_t state_number=m_state_numbers.emplace(i->state(),m_state_numbers.size()).first->second;
+#endif
     result.push_back(state_probability_pair<std::size_t, probabilistic_data_expression>(state_number, i->probability()));
   }
   return probabilistic_state<std::size_t, probabilistic_data_expression>(result.begin(),result.end());
@@ -101,7 +109,9 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
   }
   else
   {
+#ifdef USE_INDEXED_SET
     m_state_numbers = atermpp::indexed_set<lps::state>(m_options.initial_table_size, 50);
+#endif
   }
 
   m_num_states = 0;
@@ -331,7 +341,11 @@ bool lps2lts_algorithm::generate_lts(const lts_generation_options& options)
     for(lps::next_state_generator::transition_t::state_probability_list::const_iterator i=m_initial_states.begin();
                     i!=m_initial_states.end(); ++i)
     {
+#ifdef USE_INDEXED_SET
       if (m_state_numbers.put(i->state()).second && m_options.outformat != lts_aut) // The state is new.
+#else
+      if (m_state_numbers.emplace(i->state(),m_state_numbers.size()).second && m_options.outformat != lts_aut) // The state is new.
+#endif
       {
         m_output_lts.add_state(state_label_lts(i->state()));
       }
@@ -356,7 +370,6 @@ bool lps2lts_algorithm::generate_lts(const lts_generation_options& options)
   {
     return true;
   }
-
   if (m_options.expl_strat == es_breadth || m_options.expl_strat == es_value_prioritized)
   {
     if (m_options.bithashing)
@@ -367,7 +380,7 @@ bool lps2lts_algorithm::generate_lts(const lts_generation_options& options)
     {
       if (m_options.todo_max==std::string::npos)
       {
-        generate_lts_breadth_todo_max_is_npos();
+        generate_lts_breadth_todo_max_is_npos(m_initial_states);
       }
       else
       {
@@ -757,7 +770,11 @@ void lps2lts_algorithm::check_divergence(
         mCRL2log(info) << "Failed to save trace to diverging state to the file " << filename << "." << std::endl;
       }
     }
+#ifdef USE_INDEXED_SET
     std::size_t state_number = m_state_numbers.index(state_pair.state());
+#else
+    std::size_t state_number = m_state_numbers[state_pair.state()];
+#endif
     mCRL2log(info) << "State index of diverging state is " << state_number << "." << std::endl;
   }
   else
@@ -773,7 +790,11 @@ void lps2lts_algorithm::check_divergence(
 
 void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_generator::transition_t& transition)
 {
+#ifdef USE_INDEXED_SET
   std::size_t state_number = m_state_numbers.index(state);
+#else
+  std::size_t state_number = m_state_numbers[state];
+#endif
   mCRL2log(info) << "Detected action '" << pp(transition.action()) << "' (state index " << state_number << ")";
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
@@ -805,7 +826,11 @@ void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_g
 void lps2lts_algorithm::save_nondeterministic_state(const lps::state& state,
                                                     const next_state_generator::transition_t& nondeterminist_transition)
 {
+#ifdef USE_INDEXED_SET
   std::size_t state_number = m_state_numbers.index(state);
+#else
+  std::size_t state_number = m_state_numbers[state];
+#endif
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
     std::string filename = m_options.trace_prefix + "_nondeterministic_" + std::to_string(m_traces_saved) + ".trc";
@@ -828,7 +853,11 @@ void lps2lts_algorithm::save_nondeterministic_state(const lps::state& state,
 
 void lps2lts_algorithm::save_deadlock(const lps::state& state)
 {
+#ifdef USE_INDEXED_SET
   std::size_t state_number = m_state_numbers.index(state);
+#else
+  std::size_t state_number = m_state_numbers[state];
+#endif
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
     std::string filename = m_options.trace_prefix + "_dlk_" + std::to_string(m_traces_saved) + ".trc";
@@ -876,7 +905,14 @@ std::pair<std::size_t, bool> lps2lts_algorithm::add_target_state(const lps::stat
   }
   else
   {
+#ifdef USE_INDEXED_SET
     destination_state_number = m_state_numbers.put(target_state);
+#else
+    // std::pair<mcrl2::utilities::unordered_map<lps::state, std::size_t>::iterator,bool> result = m_state_numbers.emplace(target_state,m_state_numbers.size());
+    std::pair<std::unordered_map<lps::state, std::size_t>::iterator,bool> result = m_state_numbers.emplace(target_state,m_state_numbers.size());
+    destination_state_number.first = result.first->second;
+    destination_state_number.second = result.second;
+#endif
   }
   if (destination_state_number.second) // The state is new.
   {
@@ -1114,7 +1150,7 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
   }
 }
 
-void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
+void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos(const next_state_generator::transition_t::state_probability_list& initial_states)
 {
   assert(m_options.todo_max==std::string::npos);
   std::size_t current_state = 0;
@@ -1123,15 +1159,36 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
   std::vector<next_state_generator::transition_t> transitions;
   time_t last_log_time = time(nullptr) - 1, new_log_time;
   next_state_generator::enumerator_queue_t enumeration_queue;
+#ifdef USE_INDEXED_SET
+  (void)initial_states; // suppress unused variable warning. 
+#else
+  std::deque<lps::state> states_to_be_investigated;
+  for(next_state_generator::transition_t::state_probability_list::const_iterator i=initial_states.begin(); i!=initial_states.end(); ++i)
+  {
+    states_to_be_investigated.push_back(i->state());
+  }
+#endif
 
   while (!m_must_abort && (current_state < m_state_numbers.size()) &&
          (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
+#ifdef USE_INDEXED_SET
     lps::state state=m_state_numbers.get(current_state);
+#else
+    lps::state state = states_to_be_investigated.front();
+    states_to_be_investigated.pop_front();
+#endif
     get_transitions(state,transitions,enumeration_queue);
     for (const next_state_generator::transition_t& t: transitions)
     {
+#ifdef USE_INDEXED_SET
       add_transition(state, t);
+#else
+      if (add_transition(state, t))
+      {
+        states_to_be_investigated.emplace_back(t.target_state());
+      }
+#endif
     }
     transitions.clear();
 

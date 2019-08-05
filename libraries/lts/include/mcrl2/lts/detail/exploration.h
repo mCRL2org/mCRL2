@@ -6,15 +6,23 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+// #define USE_INDEXED_SET
+
 #ifndef MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 #define MCRL2_LTS_DETAIL_EXPLORATION_NEW_H
 
 #include <string>
 #include <limits>
 #include <memory>
-#include <unordered_set>
 
+// #include "mcrl2/utilities/unordered_map.h"   // This version of an unordered set is more memory efficient
+                                             // but it does not guarantee linear time traversal of its stored elements.
+#include "unordered_map"   
+
+#ifdef USE_INDEXED_SET
 #include "mcrl2/atermpp/indexed_set.h"
+#endif
+
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -61,7 +69,12 @@ namespace detail
     class multi_action_indexed_set 
     {
       protected:
+#ifdef USE_INDEXED_SET
         atermpp::indexed_set<atermpp::aterm> storage;
+#else
+        // mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t> storage;
+        std::unordered_map<atermpp::aterm, std::size_t> storage;
+#endif
       
       public:
         inline
@@ -71,7 +84,13 @@ namespace detail
           {
             // If the time is undefined, which means the multi-action can take place
             // at any time, we find a number based on the actions. 
+#ifdef USE_INDEXED_SET
             return storage.put(ma.actions());
+#else
+            // std::pair<mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(ma.actions(), storage.size()); 
+            std::pair<std::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(ma.actions(), storage.size()); 
+            return std::pair<std::size_t, bool>(result.first->second, result.second);
+#endif
           }
           else 
           { 
@@ -79,7 +98,13 @@ namespace detail
             // list of actions. This is not very elegant but it works. 
             atermpp::aterm_list l=atermpp::down_cast<atermpp::aterm_list>(static_cast<const atermpp::aterm&>(ma.actions()));
             l.push_front(ma.time()); 
+#ifdef USE_INDEXED_SET
             return storage.put(l);
+#else
+            // std::pair<mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(l, storage.size()); 
+            std::pair<std::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(l, storage.size()); 
+            return std::pair<std::size_t, bool>(result.first->second, result.second);
+#endif
           }
         }
     };
@@ -100,7 +125,13 @@ class lps2lts_algorithm
     next_state_generator::summand_subset_t m_nonprioritized_subset;
     next_state_generator::summand_subset_t m_prioritized_subset;
 
+#ifdef USE_INDEXED_SET
     atermpp::indexed_set<lps::state> m_state_numbers;
+#else
+    // mcrl2::utilities::unordered_map<lps::state, std::size_t>m_state_numbers;
+    std::unordered_map<lps::state, std::size_t>m_state_numbers;
+#endif
+
     bit_hash_table m_bit_hash_table;
 
     probabilistic_lts_lts_t m_output_lts;
@@ -184,7 +215,7 @@ class lps2lts_algorithm
                          std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                          next_state_generator::enumerator_queue_t& enumeration_queue
     );
-    void generate_lts_breadth_todo_max_is_npos();
+    void generate_lts_breadth_todo_max_is_npos(const next_state_generator::transition_t::state_probability_list& initial_states);
     void generate_lts_breadth_todo_max_is_not_npos(const next_state_generator::transition_t::state_probability_list& initial_states);
     void generate_lts_breadth_bithashing(const next_state_generator::transition_t::state_probability_list& initial_states);
     void generate_lts_depth(const next_state_generator::transition_t::state_probability_list& initial_states);

@@ -35,7 +35,7 @@ class rewriter_class
     {
       return m_r(t,m_sigma);
     }
-};
+}; 
 
 class state_applier
 {
@@ -120,7 +120,6 @@ next_state_generator::next_state_generator(
   data::data_expression_list initial_state_raw = m_specification.initial_process().state(m_specification.process().process_parameters());
 
   mutable_indexed_substitution<> sigma;
-  rewriter_class r(m_rewriter,m_substitution);
   data::data_expression_vector initial_symbolic_state(initial_state_raw.begin(),initial_state_raw.end());
   m_initial_states = calculate_distribution(m_specification.initial_process().distribution(),
                                             initial_symbolic_state,
@@ -405,10 +404,10 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
                          const data::data_expression_vector& state_args,
                          substitution_t& sigma)
 {
-  rewriter_class r(m_rewriter,sigma);
   transition_t::state_probability_list resulting_state_probability_list;
   if (dist.variables().empty())
   {
+    rewriter_class r(m_rewriter,sigma);
     const lps::state target_state(state_args.begin(),state_args.size(),r);
     resulting_state_probability_list.push_front(state_probability_pair(target_state,probabilistic_data_expression::one()));
   }
@@ -435,14 +434,20 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
       rewriter_class r(m_rewriter,sigma);
       const lps::state target_state(state_args.begin(),state_args.size(),r);
       assert(probabilistic_solution->expression()==m_rewriter(dist.distribution(),sigma));
-      if (atermpp::down_cast<probabilistic_data_expression>(probabilistic_solution->expression())>probabilistic_data_expression::zero())
-      {
-        resulting_state_probability_list.push_front(state_probability_pair(target_state,probabilistic_solution->expression()));
-      }
+      const data_expression result=m_rewriter(data::less(probabilistic_data_expression::zero(),probabilistic_solution->expression()),sigma);
       // Reset substitution
       for(const variable& v: dist.variables())
       {
         sigma[v]=v;
+      }
+
+      if (result==sort_bool::true_())
+      {
+        resulting_state_probability_list.push_front(state_probability_pair(target_state,probabilistic_solution->expression()));
+      }
+      else if (result!=sort_bool::false_())
+      {
+        throw mcrl2::runtime_error("Comparison of fraction does not rewrite to true or false: " + pp(result) + ".");
       }
     }
 
@@ -608,8 +613,7 @@ void next_state_generator::iterator::increment()
     {
       // There are no state probability pairs. But this is wrong. The total probabilities should add up to one.
       // This means there should at least be one probability.
-      rewriter_class r(m_generator->m_rewriter,*m_substitution);
-      throw mcrl2::runtime_error("The distribution " + pp(r(dist.distribution())) + " has an empty set of instances.");
+      throw mcrl2::runtime_error("The distribution " + pp(m_generator->m_rewriter(dist.distribution(),*m_substitution)) + " has an empty set of instances.");
     }
     // Set one state as the resulting state, and leave the other states in the resulting_state_probability_list.
     m_transition.set_target_state(resulting_state_probability_list.front().state());
