@@ -10,7 +10,7 @@
 #ifndef MCRL2_UTILITIES_CACHE_POLICY_H
 #define MCRL2_UTILITIES_CACHE_POLICY_H
 
-#include "mcrl2/utilities/unordered_map.h"
+#include <forward_list>
 
 namespace mcrl2
 {
@@ -18,48 +18,46 @@ namespace utilities
 {
 
 /// \brief An interface to implement a replacement policy for the fixed_size_cache.
-template<typename Key,
-  typename T,
-  typename Map_ = unordered_map_large<Key, T>>
+template<typename Map>
 class replacement_policy
 {
 public:
-  using Map = Map_;
+  using typename Map::key_type;
 
 protected:
   /// \brief Called whenever the underlying cache is cleared.
   virtual void clear() = 0;
 
   /// \brief Called whenever a new element has been inserted into the cache.
-  virtual void inserted(const Key& key) = 0;
+  virtual void inserted(const key_type& key) = 0;
 
   /// \returns An iterator to the key that should be replaced when the cache is full.
   virtual typename Map::iterator replacement_candidate(Map& map) = 0;
 
   /// \brief Called whenever an element was found in the cache.
-  virtual void touch(const Key& key) = 0;
+  virtual void touch(const key_type& key) = 0;
 };
 
 /// \brief A policy that replaces an arbitrary (but not random) element.
-template<typename Key, typename T>
-class no_policy final : public replacement_policy<Key, T>
+template<typename Map>
+class no_policy final : public replacement_policy<Map>
 {
 public:
-  using Map = typename replacement_policy<Key, T>::Map;
+  using typename Map::key_type;
 
   typename Map::iterator replacement_candidate(Map& map) override { return map.begin(); }
 
   // Not implemented.
   void clear() override {}
-  void inserted(const Key&) override {}
-  void touch(const Key&) override {}
+  void inserted(const key_type&) override {}
+  void touch(const key_type&) override {}
 };
 
-template<typename Key, typename T>
-class fifo_policy final : public replacement_policy<Key, T>
+template<typename Map>
+class fifo_policy final : public replacement_policy<Map>
 {
 public:
-  using Map = typename replacement_policy<Key, T>::Map;
+  using typename Map::key_type;
 
   fifo_policy()
   {
@@ -99,13 +97,13 @@ public:
     return it;
   }
 
-  void inserted(const Key& key) override
+  void inserted(const key_type& key) override
   {
     // A new key was inserted, so it must be the last one to be removed.
     m_last_element_it = m_queue.insert_after(m_last_element_it, key);
   }
 
-  void touch(const Key&) override
+  void touch(const key_type&) override
   {}
 
 private:
@@ -118,8 +116,8 @@ private:
     }
   }
 
-  std::forward_list<Key> m_queue;
-  typename std::forward_list<Key>::iterator m_last_element_it;
+  std::forward_list<key_type> m_queue;
+  typename std::forward_list<key_type>::iterator m_last_element_it;
 };
 
 } // namespace utilities

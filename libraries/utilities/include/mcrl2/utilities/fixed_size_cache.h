@@ -11,6 +11,9 @@
 #define MCRL2_UTILITIES_FIXED_SIZE_CACHE_H
 
 #include "mcrl2/utilities/cache_policy.h"
+#include "mcrl2/utilities/unordered_map.h"
+
+#include <limits>
 
 namespace mcrl2
 {
@@ -21,17 +24,12 @@ namespace utilities
 ///        has (an optional) maximum size and a policy that determines what element gets evicted when
 ///        the cache is full.
 /// \details Works with arbirary maps that implement the unordered_map interface.
-template<typename Key,
-  typename T,
-  typename Policy = no_policy<Key, T>>
+template<typename Policy>
 class fixed_size_cache
 {
-private:
-  using Map = typename Policy::Map;
-  using Pair = std::pair<Key, T>;
-
 public:
-  using iterator = typename Map::iterator;
+  using typename Policy::key_type;
+  using typename Policy::iterator;
 
   explicit fixed_size_cache(std::size_t max_size = 1024)
     : m_map(max_size)
@@ -53,14 +51,14 @@ public:
 
   void clear() { m_map.clear(); m_policy.clear(); }
 
-  std::size_t count(const Key& key) const { return m_map.count(key); }
+  std::size_t count(const key_type& key) const { return m_map.count(key); }
 
-  iterator find(const Key& key)
+  iterator find(const key_type& key)
   {
     return m_map.find(key);
   }
 
-  /// \brief Stores the given key-value pair in the cache. Depending on the cache policy and capacity an existing elements
+  /// \brief Stores the given key-value pair in the cache. Depending on the cache policy and capacity an existing element
   ///        might be removed.
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args)
@@ -89,15 +87,14 @@ public:
   }
 
 private:
-  Map    m_map;    ///< The underlying mapping from keys to their cached results.
-  Policy m_policy; ///< The replacement policy for keys in the cache.
+  typename Policy::Map m_map;    ///< The underlying mapping from keys to their cached results.
+  Policy               m_policy; ///< The replacement policy for keys in the cache.
 
   std::size_t m_maximum_size; ///< The maximum number of elements to cache.
 };
 
-template<typename Key,
-  typename T>
-using fifo_cache = fixed_size_cache<Key, T, fifo_policy<Key, T>>;
+template<typename Key, typename T>
+using fifo_cache = fixed_size_cache<fifo_policy<mcrl2::utilities::unordered_map<Key, T>>>;
 
 } // namespace utilities
 } // namespace mcrl2
