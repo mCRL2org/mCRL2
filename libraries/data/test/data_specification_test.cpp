@@ -65,7 +65,7 @@ bool detailed_compare_for_equality(data_specification const& left, data_specific
        (left_sorts != right_sorts)
       || (left_constructors != right_constructors)
       || (left_mappings != right_mappings)
-      || (left_equations != right_equations))
+      || (left.equations() != right.equations()))
   {
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
                   << "Specification detailed comparison:" << std::endl;
@@ -91,7 +91,7 @@ bool detailed_compare_for_equality(data_specification const& left, data_specific
       std::clog << "Mappings (left)  " << data::pp(left.mappings()) << std::endl;
       std::clog << "Mappings (right) " << data::pp(right.mappings()) << std::endl;
     }
-    if (left_equations != right_equations)
+    if (left.equations() != right.equations())
     {
       std::clog << "Equations (left)  " << data::pp(left.equations()) << std::endl;
       std::clog << "Equations (right) " << data::pp(right.equations()) << std::endl;
