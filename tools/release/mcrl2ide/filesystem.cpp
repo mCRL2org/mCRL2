@@ -521,8 +521,18 @@ bool FileSystem::loadSpecification(QString specPath)
   QString spec;
   if (readSpecification(spec, specPath))
   {
-    specificationEditor->setPlainText(spec);
-    specificationModified = false;
+    // Workaround for QTBUG-42318
+    if (spec.isEmpty())
+    {
+      specificationEditor->selectAll();
+      specificationEditor->deleteChar();
+    }
+    else
+    {
+      specificationEditor->setPlainText(spec);
+    }
+
+    specificationEditor->document()->setModified(false);
     updateSpecificationModificationTime();
     return true;
   }
@@ -925,7 +935,6 @@ bool FileSystem::save(bool forceSave)
       QTextStream saveStream(&specificationFile);
       saveStream << specificationEditor->toPlainText();
       specificationFile.close();
-      specificationModified = false;
       updateSpecificationModificationTime();
     }
 
