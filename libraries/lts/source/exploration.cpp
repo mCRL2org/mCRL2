@@ -168,7 +168,9 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
       extra_function_symbols.insert(data::equal_to(data::sort_nat::nat()));
     }
 
-    rewriter = data::rewriter(specification.data(), data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), m_options.strat);
+    rewriter = data::rewriter(specification.data(), 
+                              data::used_data_equation_selector(specification.data(), extra_function_symbols, specification.global_variables()), 
+                              m_options.strat);
   }
   else
   {

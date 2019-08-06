@@ -290,9 +290,9 @@ std::string basic_data_specification::generate_distinct_assertion(const std::map
 
 void basic_data_specification::find_rewrite_rules(const data::data_specification& data_specification)
 {
-  for (data::data_equation_vector::const_iterator i = data_specification.equations().begin(); i != data_specification.equations().end(); i++)
+  for (const data::data_equation& e: data_specification.equations())
   {
-    data::data_expression lhs = i->lhs();
+    const data::data_expression& lhs = e.lhs();
     data::function_symbol function;
     if (data::is_application(lhs))
     {
@@ -315,7 +315,7 @@ void basic_data_specification::find_rewrite_rules(const data::data_specification
       continue;
     }
 
-    m_rewrite_rules[function].push_back(*i);
+    m_rewrite_rules[function].push_back(e);
   }
 
   /*

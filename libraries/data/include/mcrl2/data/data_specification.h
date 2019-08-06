@@ -157,7 +157,7 @@ class data_specification: public sort_specification
     //
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
-    mutable data_equation_vector m_normalised_equations;
+    mutable std::set<data_equation> m_normalised_equations;
 
     void data_is_not_necessarily_normalised_anymore() const
     {
@@ -208,7 +208,7 @@ class data_specification: public sort_specification
     /// \note this operation does not invalidate iterators of equations_const_range
     void add_normalised_equation(const data_equation& e) const
     {
-      m_normalised_equations.push_back(normalize_sorts(e,*this));
+      m_normalised_equations.insert(normalize_sorts(e,*this));
     }
 
     template < class Iterator >
@@ -391,7 +391,7 @@ class data_specification: public sort_specification
     /// \return All equations in this specification, including those for
     ///  structured sorts.
     inline
-    const data_equation_vector& equations() const
+    const std::set<data_equation>& equations() const
     {
       normalise_data_specification_if_required();
       return m_normalised_equations;

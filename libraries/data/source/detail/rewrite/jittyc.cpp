@@ -2698,12 +2698,11 @@ RewriterCompilingJitty::RewriterCompilingJitty(
   made_files = false;
   rewrite_rules.clear();
 
-  const data_equation_vector& l=data_spec.equations();
-  for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
+  for (const data_equation& e: data_spec.equations())
   {
-    if (data_equation_selector(*j))
+    if (data_equation_selector(e))
     {
-      const data_equation rule=*j;
+      const data_equation rule=e;
       try
       {
         CheckRewriteRule(rule);
@@ -2713,9 +2712,9 @@ RewriterCompilingJitty::RewriterCompilingJitty(
           // data_equation_selector.add_function_symbols(rule.lhs());
         }
       }
-      catch (std::runtime_error& e)
+      catch (std::runtime_error& error)
       {
-        mCRL2log(warning) << e.what() << std::endl;
+        mCRL2log(warning) << error.what() << std::endl;
       }
     }
   }

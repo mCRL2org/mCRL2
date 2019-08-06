@@ -59,9 +59,7 @@ bool detailed_compare_for_equality(data_specification const& left, data_specific
   std::set<data::function_symbol> right_mappings(right.mappings().begin(), right.mappings().end());
   BOOST_CHECK(left_mappings == right_mappings);
 
-  std::set<data_equation> left_equations(left.equations().begin(), left.equations().end());
-  std::set<data_equation> right_equations(right.equations().begin(), right.equations().end());
-  BOOST_CHECK(left_equations == right_equations);
+  BOOST_CHECK(left.equations() == right.equations());
 
   if (/*(left_aliases != right_aliases)*/
        (left_sorts != right_sorts)
@@ -109,42 +107,6 @@ bool detailed_compare_for_equality(data_specification const& left, data_specific
 bool compare_for_equality(data_specification const& left, data_specification const& right)
 {
   return detailed_compare_for_equality(left, right);
-  /*
-  if (!(left == right))
-  {
-    BOOST_CHECK(left == right);
-
-    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
-              << "Specification detailed comparison:" << std::endl;
-
-    if (left.sorts() != right.sorts())
-    {
-      std::clog << "Sorts (left)  " << data::pp(left.sorts()) << std::endl;
-      std::clog << "Sorts (right) " << data::pp(right.sorts()) << std::endl;
-    }
-    if (left.constructors() != right.constructors())
-    {
-      std::clog << "Constructors (left)  " << data::pp(left.constructors()) << std::endl;
-      std::clog << "Constructors (right) " << data::pp(right.constructors()) << std::endl;
-    }
-    if (left.mappings() != right.mappings())
-    {
-      std::clog << "Mappings (left)  " << data::pp(left.mappings()) << std::endl;
-      std::clog << "Mappings (right) " << data::pp(right.mappings()) << std::endl;
-    }
-    if (left.equations() != right.equations())
-    {
-      std::clog << "Equations (left)  " << data::pp(left.equations()) << std::endl;
-      std::clog << "Equations (right) " << data::pp(right.equations()) << std::endl;
-    }
-
-    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-
-    return false;
-  }
-
-  return true;
-  */
 }
 
 void test_sorts()
