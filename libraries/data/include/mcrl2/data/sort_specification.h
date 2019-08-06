@@ -257,7 +257,8 @@ class sort_specification
 
 
     /// \brief Gets a normalisation mapping that maps each sort to its unique normalised sort
-    /// \details This map is required in functions with the name normalize_sorts.
+    /// \details Sorts that are mapped to itself are not include in the mapping. 
+    ///    This map is required in functions with the name normalize_sorts.
     ///    When in a specification sort aliases are used, like sort A=B or
     ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
     ///    for each sort. The normalisation mapping maps each sort to a unique representant.
