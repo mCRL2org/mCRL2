@@ -512,14 +512,14 @@ QString FileSystem::readSpecification(QString specPath)
   }
   else
   {
-    return "";
+    return "ERROR_NON_EXISTENT";
   }
 }
 
 bool FileSystem::loadSpecification(QString specPath)
 {
   QString spec = readSpecification(specPath);
-  if (!spec.isEmpty())
+  if (spec != "ERROR_NON_EXISTENT")
   {
     specificationEditor->setPlainText(spec);
     specificationModified = false;

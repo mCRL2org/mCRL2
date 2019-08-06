@@ -483,7 +483,7 @@ class FileSystem : public QObject
    * @brief readSpecification Reads the contents of a specification
    * @param specPath The file path of the specification; picks the currently
    *   opened specification if empty
-   * @return The contents of the specification if successful, the empty string
+   * @return The contents of the specification if successful, an error string
    *   otherwise
    */
   QString readSpecification(QString specPath = "");
