@@ -494,7 +494,7 @@ bool FileSystem::newProject(bool askToSave, bool forNewProject)
   return success;
 }
 
-QString FileSystem::readSpecification(QString specPath)
+bool FileSystem::readSpecification(QString& specText, QString specPath)
 {
   if (specPath.isEmpty())
   {
@@ -506,20 +506,20 @@ QString FileSystem::readSpecification(QString specPath)
     specFilePath = specPath;
     specificationFile.open(QIODevice::ReadOnly);
     QTextStream specificationOpenStream(&specificationFile);
-    QString spec = specificationOpenStream.readAll();
+    specText = specificationOpenStream.readAll();
     specificationFile.close();
-    return spec;
+    return true;
   }
   else
   {
-    return "ERROR_NON_EXISTENT";
+    return false;
   }
 }
 
 bool FileSystem::loadSpecification(QString specPath)
 {
-  QString spec = readSpecification(specPath);
-  if (spec != "ERROR_NON_EXISTENT")
+  QString spec;
+  if (readSpecification(spec, specPath))
   {
     specificationEditor->setPlainText(spec);
     specificationModified = false;
@@ -1020,7 +1020,8 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
       !upToDateOutputFileExists(propertyFilePath(property, forParsing),
                                 specificationFilePath(property.name)))
   {
-    QString spec = readSpecification();
+    QString spec;
+    readSpecification(spec);
     int initIndex = spec.indexOf(QRegExp("(^|[; \\t\\n\\r])init[ \\t\\n\\r]"));
     QString alternateSpec = spec;
     int initSize = spec.indexOf(";", initIndex + 5) - initIndex +
