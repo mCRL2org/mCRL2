@@ -39,7 +39,7 @@ class prover_tool: public Tool
     /// \param desc An interface description
     void add_options(utilities::interface_description& desc)
     {
-      Tool::add_options(desc);
+      Tool::add_options(desc, true);  // The parameter true suppresses messages allowing the jittyp rewriter. 
 
       desc.add_option("smt-solver", utilities::make_enum_argument< smt_solver_type >("SOLVER")
                       .add_value(data::detail::solver_type_cvc)
