@@ -50,7 +50,6 @@ public:
   void clear() { m_map.clear(); }
   int count(const Key& key) { return m_map.count(key); }
 
-  template<typename ...Args>
   std::pair<iterator, bool> insert(const Key& key) { return m_map.emplace(key, size()); }
 
   iterator find(const Key& key) { return m_map.find(key); }
