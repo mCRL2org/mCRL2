@@ -300,6 +300,12 @@ char text_aterm_input::next_char(bool skip_whitespace, bool required)
         m_column++;
       }
 
+      if (m_history.size() >= m_history_limit)
+      {
+        // If the history is full the first element must be removed.
+        m_history.erase(m_history.begin());
+      }
+
       m_history.emplace_back(value);
     }
     else if (required)
