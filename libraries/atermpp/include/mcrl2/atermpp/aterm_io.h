@@ -127,7 +127,7 @@ private:
   bool m_newline = false; ///< Indicates that terms are separated by a newline.
 };
 
-/// \brief REads terms in textual format from an input stream.
+/// \brief Reads terms in textual format from an input stream.
 class text_aterm_input : public aterm_input
 {
 public:
@@ -171,6 +171,7 @@ private:
   int character; ///< The last character that was read.
 
   std::deque<char> m_history; ///< Stores the characters that have been read so-far.
+  std::size_t m_history_limit = 64; ///< Determines the maximum number of characters that are stored.
 };
 
 /// \brief Writes term t to a stream in binary aterm format.
