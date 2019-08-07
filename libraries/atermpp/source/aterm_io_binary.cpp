@@ -353,7 +353,7 @@ static const function_symbol& get_function_symbol(const aterm& t)
 static std::size_t get_fn_symbol_index(const aterm& t, const mcrl2::utilities::indexed_set_large<function_symbol>& index)
 {
   const function_symbol& sym = get_function_symbol(t);
-  std::size_t result = index.at(sym);
+  std::size_t result = index.index(sym);
   return result;
 }
 
@@ -424,10 +424,10 @@ static void add_term(sym_write_entry& entry, const aterm& term,
       std::size_t top_symbol_index = get_fn_symbol_index(arg, symbol_index_map);
       const function_symbol& top_symbol = sym_entries[top_symbol_index].id;
 
-      auto put_result = tss.index_into_symbols.insert(top_symbol);
+      const std::pair<std::size_t,bool> put_result = tss.index_into_symbols.insert(top_symbol);
       if (put_result.second)
       {
-        tss.symbols.emplace_back(top_symbol_index, (*put_result.first).second);
+        tss.symbols.emplace_back(top_symbol_index, put_result.first);
       }
     }
   }
@@ -453,13 +453,13 @@ static sym_write_entry& initialize_function_symbol(const function_symbol& func,
   mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
-  auto insert_result = symbol_index_map.insert(func);
+  const std::pair<std::size_t,bool> insert_result = symbol_index_map.insert(func);
   if(insert_result.second)
   {
     // We just found a new function symbol, it has 1 occurrence so far
     sym_entries.emplace_back(func);
   }
-  return sym_entries[(*insert_result.first).second];
+  return sym_entries[insert_result.first];
 }
 
 /**
@@ -552,7 +552,7 @@ static void write_term(const aterm& t, ostream& os,
   do
   {
     write_todo& current = stack.top();
-    sym_write_entry& cur_entry = sym_entries[symbol_index_map.at(get_function_symbol(current.term))];
+    sym_write_entry& cur_entry = sym_entries[symbol_index_map.index(get_function_symbol(current.term))];
 
     if (current.term.type_is_int())
     {
@@ -562,10 +562,10 @@ static void write_term(const aterm& t, ostream& os,
     else if (current.arg < get_function_symbol(current.term).arity())
     {
       write_todo item(subterm(current.term, current.arg));
-      sym_write_entry& item_entry = sym_entries[symbol_index_map.at(get_function_symbol(item.term))];
+      sym_write_entry& item_entry = sym_entries[symbol_index_map.index(get_function_symbol(item.term))];
 
       const top_symbols_t& symbol_table = cur_entry.top_symbols.at(current.arg);
-      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.at(item_entry.id));
+      const top_symbol& ts = symbol_table.symbols.at(symbol_table.index_into_symbols.index(item_entry.id));
       writeBits(ts.code, symbol_table.code_width, os);
       const sym_write_entry& arg_sym = sym_entries.at(ts.index);
       std::size_t arg_trm_idx = term_index_map.at(item.term);

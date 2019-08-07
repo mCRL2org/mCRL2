@@ -722,7 +722,7 @@ protected:
         {
           if(transition_exists(src, dest, as))
           {
-            lts::transition trans(indexed_partition.at(src), indexed_actions.at(as.multi_action().actions()), indexed_partition.at(dest));
+            lts::transition trans(indexed_partition.index(src), indexed_actions.index(as.multi_action().actions()), indexed_partition.index(dest));
             result.add_transition(trans);
           }
         }
@@ -734,7 +734,7 @@ protected:
     if(initial_block != data_expression())
     {
       // The intial block was found, set it as intial state
-      result.set_initial_state(indexed_partition.at(initial_block));
+      result.set_initial_state(indexed_partition.index(initial_block));
     }
     return result;
   }
