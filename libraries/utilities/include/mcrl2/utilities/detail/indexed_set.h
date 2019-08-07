@@ -31,8 +31,9 @@ static const std::size_t STEP = 1; /* The position on which the next hash entry 
 
 /* in the hashtable we use the following constant to indicate free positions */
 static const std::size_t EMPTY(std::numeric_limits<std::size_t>::max());
-static const float max_load=0.75;
+static const float max_load=0.7;
 static const size_t minimal_hashtable_size=8;  // With a max_load of 0.75 the minimal size of the hashtable must be 8.
+static const std::size_t PRIME_NUMBER = 999953;
 
 
 } // namespace detail
@@ -44,7 +45,7 @@ std::size_t indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::put_in_hashtable(
   /* Find a place to insert key,
      and find whether key already exists */
 
-  std::size_t start = Hash()(key) % m_hashtable.size();
+  std::size_t start = (Hash()(key)*detail::PRIME_NUMBER) % m_hashtable.size();
   std::size_t c = start;
   while (true)
   {
@@ -64,7 +65,7 @@ std::size_t indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::put_in_hashtable(
       /* key is already in the set, return position of key */
       return v;
     }
-    c = (c + detail::STEP) % m_hashtable.size() ;
+    c = (c + detail::STEP) % m_hashtable.size();
     assert(c!=start); // In this case the hashtable is full, which should never happen.
   }
   return c;
@@ -99,7 +100,7 @@ inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::indexed_set(std::size_
 template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
 inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::size_type indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::index(const Key& key) const
 {
-  std::size_t start = Hash()(key) % m_hashtable.size();
+  std::size_t start = (Hash()(key)*detail::PRIME_NUMBER) % m_hashtable.size();
   std::size_t c = start;
   do
   {
