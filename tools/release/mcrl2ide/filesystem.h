@@ -23,6 +23,10 @@
 #include <QDateTime>
 #include <QDomDocument>
 
+/**
+ * @brief IntermediateFileType Defines the type of files that can result
+ * from tools
+ */
 enum IntermediateFileType
 {
   Lps = 0,
@@ -30,11 +34,19 @@ enum IntermediateFileType
   Pbes = 2
 };
 
+/**
+ * @brief INTERMEDIATEFILETYPENAMES Defines the names for all intermediate file
+ *   types
+ */
 const std::map<IntermediateFileType, QString> INTERMEDIATEFILETYPENAMES = {
     {IntermediateFileType::Lps, "LPS"},
     {IntermediateFileType::Lts, "LTS"},
     {IntermediateFileType::Pbes, "PBES"}};
 
+/**
+ * @brief The Property class defines a property, which can be a mu-calculus
+ *   property or an equivalence property
+ */
 class Property
 {
   public:

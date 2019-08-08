@@ -13,12 +13,21 @@
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 
+/**
+ * @brief The HighlightingRule class defines a rule on how to highlight a given
+ *   pattern of syntactic elements
+ */
 class HighlightingRule
 {
   public:
   QRegExp pattern;
   QTextCharFormat format;
 
+  /**
+   * @brief HighlightingRule Constructor
+   * @param pattern The pattern of syntactic elements to highlight
+   * @param format The highlighting format for this pattern
+   */
   HighlightingRule(QRegExp pattern, QTextCharFormat format);
 };
 
