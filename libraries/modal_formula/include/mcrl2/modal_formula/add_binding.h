@@ -57,6 +57,50 @@ struct add_data_variable_binding: public lps::add_data_variable_binding<Builder,
   }
 };
 
+// TODO: get rid of this code duplication
+// special handling for where clauses
+template <template <class> class Builder, class Derived>
+struct add_data_variable_traverser_binding: public add_data_variable_binding<Builder, Derived>
+{
+  typedef add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::bound_variables;
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void apply(const data::where_clause& x)
+  {
+    static_cast<Derived&>(*this).apply(x.declarations());
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+};
+
+// special handling for where clauses
+template <template <class> class Builder, class Derived>
+struct add_data_variable_builder_binding: public add_data_variable_binding<Builder, Derived>
+{
+  typedef add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::bound_variables;
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  data::where_clause apply(const data::where_clause& x)
+  {
+    auto declarations = static_cast<Derived&>(*this).apply(x.declarations());
+    static_cast<Derived&>(*this).enter(x);
+    data::where_clause result = data::where_clause(static_cast<Derived&>(*this).apply(x.body()), declarations);
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+};
+
 } // namespace action_formulas
 
 namespace regular_formulas
@@ -73,6 +117,50 @@ struct add_data_variable_binding: public action_formulas::add_data_variable_bind
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
+};
+
+// TODO: get rid of this code duplication
+// special handling for where clauses
+template <template <class> class Builder, class Derived>
+struct add_data_variable_traverser_binding: public add_data_variable_binding<Builder, Derived>
+{
+  typedef add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::bound_variables;
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void apply(const data::where_clause& x)
+  {
+    static_cast<Derived&>(*this).apply(x.declarations());
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+};
+
+// special handling for where clauses
+template <template <class> class Builder, class Derived>
+struct add_data_variable_builder_binding: public add_data_variable_binding<Builder, Derived>
+{
+  typedef add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::bound_variables;
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  data::where_clause apply(const data::where_clause& x)
+  {
+    auto declarations = static_cast<Derived&>(*this).apply(x.declarations());
+    static_cast<Derived&>(*this).enter(x);
+    data::where_clause result = data::where_clause(static_cast<Derived&>(*this).apply(x.body()), declarations);
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
 };
 
 } // namespace regular_formulas
@@ -110,6 +198,50 @@ struct add_data_variable_binding: public regular_formulas::add_data_variable_bin
   void leave(forall const& x)
   {
     decrease_bind_count(x.variables());
+  }
+};
+
+// TODO: get rid of this code duplication
+// special handling for where clauses
+template <template <class> class Builder, class Derived>
+struct add_data_variable_traverser_binding: public add_data_variable_binding<Builder, Derived>
+{
+  typedef add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::bound_variables;
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void apply(const data::where_clause& x)
+  {
+    static_cast<Derived&>(*this).apply(x.declarations());
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+};
+
+// special handling for where clauses
+template <template <class> class Builder, class Derived>
+struct add_data_variable_builder_binding: public add_data_variable_binding<Builder, Derived>
+{
+  typedef add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::bound_variables;
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  data::where_clause apply(const data::where_clause& x)
+  {
+    auto declarations = static_cast<Derived&>(*this).apply(x.declarations());
+    static_cast<Derived&>(*this).enter(x);
+    data::where_clause result = data::where_clause(static_cast<Derived&>(*this).apply(x.body()), declarations);
+    static_cast<Derived&>(*this).leave(x);
+    return result;
   }
 };
 
