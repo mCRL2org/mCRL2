@@ -31,7 +31,8 @@ probabilistic_state<std::size_t, probabilistic_data_expression> lps2lts_algorith
   if (++initial_states.begin() == initial_states.end()) // Means initial_states.size()==1
   {
 #ifdef USE_INDEXED_SET
-    std::size_t state_number=m_state_numbers.put(initial_states.front().state()).first;
+    // std::size_t state_number=m_state_numbers.put(initial_states.front().state()).first;
+    std::size_t state_number=m_state_numbers.insert(initial_states.front().state()).first;
 #else
     std::size_t state_number=m_state_numbers.emplace(initial_states.front().state(),m_state_numbers.size()).first->second;
 #endif
@@ -42,7 +43,8 @@ probabilistic_state<std::size_t, probabilistic_data_expression> lps2lts_algorith
                     i!=initial_states.end(); ++i)
   {
 #ifdef USE_INDEXED_SET
-    std::size_t state_number=m_state_numbers.put(i->state()).first;
+    // std::size_t state_number=m_state_numbers.put(i->state()).first;
+    std::size_t state_number=m_state_numbers.insert(i->state()).first;
 #else
     std::size_t state_number=m_state_numbers.emplace(i->state(),m_state_numbers.size()).first->second;
 #endif
@@ -110,7 +112,8 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
   else
   {
 #ifdef USE_INDEXED_SET
-    m_state_numbers = atermpp::indexed_set<lps::state>(m_options.initial_table_size, 50);
+    // m_state_numbers = atermpp::indexed_set<lps::state>(m_options.initial_table_size, 50);
+    m_state_numbers = utilities::indexed_set<lps::state>(m_options.initial_table_size);
 #endif
   }
 
@@ -344,7 +347,8 @@ bool lps2lts_algorithm::generate_lts(const lts_generation_options& options)
                     i!=m_initial_states.end(); ++i)
     {
 #ifdef USE_INDEXED_SET
-      if (m_state_numbers.put(i->state()).second && m_options.outformat != lts_aut) // The state is new.
+      // if (m_state_numbers.put(i->state()).second && m_options.outformat != lts_aut) // The state is new.
+      if (m_state_numbers.insert(i->state()).second && m_options.outformat != lts_aut) // The state is new.
 #else
       if (m_state_numbers.emplace(i->state(),m_state_numbers.size()).second && m_options.outformat != lts_aut) // The state is new.
 #endif
@@ -773,6 +777,7 @@ void lps2lts_algorithm::check_divergence(
       }
     }
 #ifdef USE_INDEXED_SET
+    // std::size_t state_number = m_state_numbers.index(state_pair.state());
     std::size_t state_number = m_state_numbers.index(state_pair.state());
 #else
     std::size_t state_number = m_state_numbers[state_pair.state()];
@@ -793,6 +798,7 @@ void lps2lts_algorithm::check_divergence(
 void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_generator::transition_t& transition)
 {
 #ifdef USE_INDEXED_SET
+  // std::size_t state_number = m_state_numbers.index(state);
   std::size_t state_number = m_state_numbers.index(state);
 #else
   std::size_t state_number = m_state_numbers[state];
@@ -908,10 +914,11 @@ std::pair<std::size_t, bool> lps2lts_algorithm::add_target_state(const lps::stat
   else
   {
 #ifdef USE_INDEXED_SET
-    destination_state_number = m_state_numbers.put(target_state);
+    // destination_state_number = m_state_numbers.put(target_state);
+    destination_state_number = m_state_numbers.insert(target_state);
 #else
-    // std::pair<mcrl2::utilities::unordered_map<lps::state, std::size_t>::iterator,bool> result = m_state_numbers.emplace(target_state,m_state_numbers.size());
-    std::pair<std::unordered_map<lps::state, std::size_t>::iterator,bool> result = m_state_numbers.emplace(target_state,m_state_numbers.size());
+    std::pair<mcrl2::utilities::unordered_map<lps::state, std::size_t>::iterator,bool> result = m_state_numbers.emplace(target_state,m_state_numbers.size());
+    // std::pair<std::unordered_map<lps::state, std::size_t>::iterator,bool> result = m_state_numbers.emplace(target_state,m_state_numbers.size());
     destination_state_number.first = result.first->second;
     destination_state_number.second = result.second;
 #endif
@@ -988,7 +995,8 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, const nex
   }
   else
   {
-    source_state_number = m_state_numbers[source_state];
+    source_state_number = m_state_numbers.index(source_state);
+    // source_state_number = m_state_numbers[source_state];
   }
 
   const lps::state& destination = transition.target_state();
@@ -1175,7 +1183,8 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos(const next_state_g
          (current_state < m_options.max_states) && (!m_options.trace || m_traces_saved < m_options.max_traces))
   {
 #ifdef USE_INDEXED_SET
-    lps::state state=m_state_numbers.get(current_state);
+    // lps::state state=m_state_numbers.get(current_state);
+    lps::state state=m_state_numbers[current_state];
 #else
     lps::state state = states_to_be_investigated.front();
     states_to_be_investigated.pop_front();

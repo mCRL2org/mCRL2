@@ -15,12 +15,13 @@
 #include <limits>
 #include <memory>
 
-// #include "mcrl2/utilities/unordered_map.h"   // This version of an unordered set is more memory efficient
+#include "mcrl2/utilities/unordered_map.h"   // This version of an unordered set is more memory efficient
                                              // but it does not guarantee linear time traversal of its stored elements.
-#include "unordered_map"   
+// #include "unordered_map"   
 
 #ifdef USE_INDEXED_SET
-#include "mcrl2/atermpp/indexed_set.h"
+// #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/utilities/indexed_set.h"
 #endif
 
 #include "mcrl2/trace/trace.h"
@@ -70,10 +71,11 @@ namespace detail
     {
       protected:
 #ifdef USE_INDEXED_SET
-        atermpp::indexed_set<atermpp::aterm> storage;
+        // atermpp::indexed_set<atermpp::aterm> storage;
+        utilities::indexed_set<atermpp::aterm> storage;
 #else
-        // mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t> storage;
-        std::unordered_map<atermpp::aterm, std::size_t> storage;
+        mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t> storage;
+        // std::unordered_map<atermpp::aterm, std::size_t> storage;
 #endif
       
       public:
@@ -85,10 +87,11 @@ namespace detail
             // If the time is undefined, which means the multi-action can take place
             // at any time, we find a number based on the actions. 
 #ifdef USE_INDEXED_SET
-            return storage.put(ma.actions());
+            // return storage.put(ma.actions());
+            return storage.insert(ma.actions());
 #else
-            // std::pair<mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(ma.actions(), storage.size()); 
-            std::pair<std::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(ma.actions(), storage.size()); 
+            std::pair<mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(ma.actions(), storage.size()); 
+            // std::pair<std::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(ma.actions(), storage.size()); 
             return std::pair<std::size_t, bool>(result.first->second, result.second);
 #endif
           }
@@ -99,10 +102,11 @@ namespace detail
             atermpp::aterm_list l=atermpp::down_cast<atermpp::aterm_list>(static_cast<const atermpp::aterm&>(ma.actions()));
             l.push_front(ma.time()); 
 #ifdef USE_INDEXED_SET
-            return storage.put(l);
+            // return storage.put(l);
+            return storage.insert(l);
 #else
-            // std::pair<mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(l, storage.size()); 
-            std::pair<std::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(l, storage.size()); 
+            std::pair<mcrl2::utilities::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(l, storage.size()); 
+            // std::pair<std::unordered_map<atermpp::aterm, std::size_t>::iterator, bool> result = storage.emplace(l, storage.size()); 
             return std::pair<std::size_t, bool>(result.first->second, result.second);
 #endif
           }
@@ -126,10 +130,11 @@ class lps2lts_algorithm
     next_state_generator::summand_subset_t m_prioritized_subset;
 
 #ifdef USE_INDEXED_SET
-    atermpp::indexed_set<lps::state> m_state_numbers;
+    // atermpp::indexed_set<lps::state> m_state_numbers;
+    utilities::indexed_set<lps::state> m_state_numbers;
 #else
-    // mcrl2::utilities::unordered_map<lps::state, std::size_t>m_state_numbers;
-    std::unordered_map<lps::state, std::size_t>m_state_numbers;
+    mcrl2::utilities::unordered_map<lps::state, std::size_t>m_state_numbers;
+    // std::unordered_map<lps::state, std::size_t>m_state_numbers;
 #endif
 
     bit_hash_table m_bit_hash_table;
