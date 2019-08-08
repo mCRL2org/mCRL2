@@ -158,10 +158,10 @@ private:
   /// \returns A string indicating the parse error position.
   std::string print_parse_error_position();
 
-  /// \returns The first character that is not whitespace.
+  /// \returns The first character that is not whitespace or end-of-file (EOF).
   /// \param skip_whitespace, returns the next non space character.
   /// \param required Throw error when the next character is EOL.
-  char next_char(bool skip_whitespace = true, bool required = false);
+  int next_char(bool skip_whitespace = true, bool required = false);
 
   std::istream& m_stream;
 

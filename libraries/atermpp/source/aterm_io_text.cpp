@@ -125,7 +125,6 @@ aterm text_aterm_input::read_term()
   m_column = 0;
   m_history.clear();
 
-  std::cerr << "Read term " << term << "\n";
   return term;
 }
 
@@ -254,7 +253,6 @@ aterm_list text_aterm_input::parse_aterm_list(int& character, char begin, char e
         character = next_char(true, true);
         list.push_front(parse_aterm(character));
       }
-      while (character == ',');
 
       if (character != end)
       {
@@ -280,17 +278,25 @@ std::string text_aterm_input::print_parse_error_position()
   return s.str();
 }
 
-char text_aterm_input::next_char(bool skip_whitespace, bool required)
+int text_aterm_input::next_char(bool skip_whitespace, bool required)
 {
-  char character = 0;
+  character = EOF;
 
   do
   {
-    int value = m_stream.get();
-
-    if (value != EOF)
+    try
     {
-      if (value == '\n')
+      // In liblts_lts the exception bit is set, so we need to use exception to handle EOF.
+      character = m_stream.get();
+    }
+    catch (std::ios::failure&)
+    {
+      return EOF;
+    }
+
+    if (character != EOF)
+    {
+      if (character == '\n')
       {
         m_line++;
         m_column = 0;
@@ -306,18 +312,17 @@ char text_aterm_input::next_char(bool skip_whitespace, bool required)
         m_history.erase(m_history.begin());
       }
 
-      m_history.emplace_back(value);
+      m_history.emplace_back(character);
     }
     else if (required)
     {
       throw atermpp::runtime_error("Premature end of file while parsing.");
     }
-
-    character = static_cast<char>(value);
   }
   while (isspace(character) && skip_whitespace);
 
-  return character;
+  // The stream also returns a newline for the last symbol.
+  return character == '\n' ? EOF : character;
 }
 
 std::string text_aterm_input::parse_quoted_string(int& character)
@@ -325,7 +330,9 @@ std::string text_aterm_input::parse_quoted_string(int& character)
   // We need a buffer for printing and parsing.
   std::string string;
 
-  // First parse the identifier.
+  assert(character == '"');
+
+  // First obtain the first symbol after ".
   character = next_char();
 
   while (character != '"')
