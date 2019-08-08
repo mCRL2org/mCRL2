@@ -151,7 +151,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_binding>(o).apply(x);
+  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_traverser_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -162,7 +162,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_binding>(o, bound).apply(x);
+  data::detail::make_find_free_variables_traverser<process::data_expression_traverser, process::add_data_variable_traverser_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object

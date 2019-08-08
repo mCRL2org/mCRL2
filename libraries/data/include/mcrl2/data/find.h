@@ -41,7 +41,7 @@ struct find_identifiers_traverser: public Traverser<find_identifiers_traverser<T
 
   OutputIterator out;
 
-  find_identifiers_traverser(OutputIterator out_)
+  explicit find_identifiers_traverser(OutputIterator out_)
     : out(out_)
   {}
 
@@ -68,7 +68,7 @@ struct find_function_symbols_traverser: public Traverser<find_function_symbols_t
 
   OutputIterator out;
 
-  find_function_symbols_traverser(OutputIterator out_)
+  explicit find_function_symbols_traverser(OutputIterator out_)
     : out(out_)
   {}
 
@@ -95,7 +95,7 @@ struct find_sort_expressions_traverser: public Traverser<find_sort_expressions_t
 
   OutputIterator out;
 
-  find_sort_expressions_traverser(OutputIterator out_)
+  explicit find_sort_expressions_traverser(OutputIterator out_)
     : out(out_)
   {
   }
@@ -126,7 +126,7 @@ struct find_data_expressions_traverser: public Traverser<find_data_expressions_t
 
   OutputIterator out;
 
-  find_data_expressions_traverser(OutputIterator out_)
+  explicit find_data_expressions_traverser(OutputIterator out_)
     : out(out_)
   {}
 
@@ -156,7 +156,7 @@ struct find_all_variables_traverser: public Traverser<find_all_variables_travers
 
   OutputIterator out;
 
-  find_all_variables_traverser(OutputIterator out_)
+  explicit find_all_variables_traverser(OutputIterator out_)
     : out(out_)
   {}
 
@@ -172,6 +172,9 @@ make_find_all_variables_traverser(OutputIterator out)
 {
   return find_all_variables_traverser<Traverser, OutputIterator>(out);
 }
+
+template <typename T, typename OutputIterator> void find_free_variables(const T& x, OutputIterator o);
+
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
 struct find_free_variables_traverser: public Binder<Traverser, find_free_variables_traverser<Traverser, Binder, OutputIterator> >
 {
@@ -185,7 +188,7 @@ struct find_free_variables_traverser: public Binder<Traverser, find_free_variabl
 
   OutputIterator out;
 
-  find_free_variables_traverser(OutputIterator out_)
+  explicit find_free_variables_traverser(OutputIterator out_)
     : out(out_)
   {}
 
@@ -212,7 +215,6 @@ make_find_free_variables_traverser(OutputIterator out)
   return find_free_variables_traverser<Traverser, Binder, OutputIterator>(out);
 }
 
-
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator, class VariableContainer>
 find_free_variables_traverser<Traverser, Binder, OutputIterator>
 make_find_free_variables_traverser(OutputIterator out, const VariableContainer& v)
@@ -231,7 +233,7 @@ struct search_variable_traverser: public Traverser<search_variable_traverser<Tra
   bool found;
   const variable& v;
 
-  search_variable_traverser(const variable& v_)
+  explicit search_variable_traverser(const variable& v_)
     : found(false), v(v_)
   {}
 
@@ -265,7 +267,7 @@ struct search_free_variable_traverser: public Binder<Traverser, search_free_vari
   bool found;
   const data::variable& v;
 
-  search_free_variable_traverser(const data::variable& v_)
+  explicit search_free_variable_traverser(const data::variable& v_)
     : found(false), v(v_)
   {}
 
@@ -317,7 +319,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o).apply(x);
+  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_traverser_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -328,7 +330,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_binding>(o, bound).apply(x);
+  data::detail::make_find_free_variables_traverser<data::data_expression_traverser, data::add_data_variable_traverser_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -458,7 +460,7 @@ bool search_variable(const T& x, const variable& v)
 template <typename T>
 bool search_free_variable(const T& x, const variable& v)
 {
-  data::detail::search_free_variable_traverser<data::data_expression_traverser, data::add_data_variable_binding> f(v);
+  data::detail::search_free_variable_traverser<data::data_expression_traverser, data::add_data_variable_traverser_binding> f(v);
   f.apply(x);
   return f.found;
 }

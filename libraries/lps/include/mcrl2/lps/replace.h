@@ -549,7 +549,7 @@ make_replace_process_parameters_builder(Substitution sigma)
 template <typename Substitution>
 void replace_process_parameters(specification& spec, Substitution sigma)
 {
-  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma).update(spec);
+  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_builder_binding>(sigma).update(spec);
 }
 
 /// \brief Applies a substitution to the process parameters of the specification spec.
