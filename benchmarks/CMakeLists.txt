@@ -72,18 +72,18 @@ foreach(benchmark ${STATESPACE_BENCHMARKS})
   add_tool_benchmark("${NAME}_exploration" generatelts "${LPS_FILENAME}" "${LTS_FILENAME}" "-rjittyc")
 
   add_tool_benchmark("${NAME}_bisim" ltsconvert ${LTS_FILENAME} "" "-ebisim")
-  add_tool_benchmark("${NAME}_bisim-dnj" ltsconvert ${LTS_FILENAME} "" "-ebisim-dnj")
+  add_tool_benchmark("${NAME}_bisim-gjkw" ltsconvert ${LTS_FILENAME} "" "-ebisim-gjkw")
 
   add_tool_benchmark("${NAME}_branching-bisim" ltsconvert ${LTS_FILENAME} "" "-ebranching-bisim")
-  add_tool_benchmark("${NAME}_branching-bisim-dnj" ltsconvert ${LTS_FILENAME} "" "-ebranching-bisim-dnj")
+  add_tool_benchmark("${NAME}_branching-bisim-gjkw" ltsconvert ${LTS_FILENAME} "" "-ebranching-bisim-gjkw")
 
   # The ltsconvert benchmarks benchmarks depend on the generated statespace, the benchmark names are hardcoded and depend
   # on the names generated in add_tool_benchmark.
   set_tests_properties(
     "benchmark_ltsconvert_${NAME}_bisim" 
-    "benchmark_ltsconvert_${NAME}_bisim-dnj" 
+    "benchmark_ltsconvert_${NAME}_bisim-gjkw" 
     "benchmark_ltsconvert_${NAME}_branching-bisim" 
-    "benchmark_ltsconvert_${NAME}_branching-bisim-dnj" 
+    "benchmark_ltsconvert_${NAME}_branching-bisim-gjkw" 
     PROPERTIES DEPENDS "benchmark_generatelts_${NAME}_exploration")
 
   # Benchmark solving PBES
