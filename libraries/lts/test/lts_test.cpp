@@ -72,31 +72,31 @@ static void reduce_lts_in_various_ways(const std::string& test_description,
   test_lts(test_description + " (no reduction)",l, expected.labels_plain,expected.states_plain, expected.transitions_plain);
   l=l_in;
   reduce(l,lts::lts_eq_bisim);
-  test_lts(test_description + " (bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
+  test_lts(test_description + " (bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_bisim_gv);
   test_lts(test_description + " (bisimulation [Groote/Vaandrager 1990])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
   l=l_in;
-  reduce(l,lts::lts_eq_bisim_dnj);
-  test_lts(test_description + " (bisimulation directly on LTS)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
+  reduce(l,lts::lts_eq_bisim_gjkw);
+  test_lts(test_description + " (bisimulation [Groote/Jansen/Keiren/Wijs 2017)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_bisim_sigref);
   test_lts(test_description + " (bisimulation signature [Blom/Orzan 2003])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim);
-  test_lts(test_description + " (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  test_lts(test_description + " (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gv);
   test_lts(test_description + " (branching bisimulation [Groote/Vaandrager 1990])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
   l=l_in;
-  reduce(l,lts::lts_eq_branching_bisim_dnj);
-  test_lts(test_description + " (branching bisimulation directly on LTS)",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  reduce(l,lts::lts_eq_branching_bisim_gjkw);
+  test_lts(test_description + " (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
   test_lts(test_description + " (branching bisimulation signature [Blom/Orzan 2003])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
-  test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,
+  test_lts(test_description + " (divergence-preserving branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
                                       expected.states_divergence_preserving_branching_bisimulation,
                                       expected.transitions_divergence_preserving_branching_bisimulation);
@@ -107,8 +107,8 @@ static void reduce_lts_in_various_ways(const std::string& test_description,
                                       expected.states_divergence_preserving_branching_bisimulation,
                                       expected.transitions_divergence_preserving_branching_bisimulation);
   l=l_in;
-  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_dnj);
-  test_lts(test_description + " (divergence-preserving branching bisimulation directly on LTS)",l,
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gjkw);
+  test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,
                                      expected.labels_divergence_preserving_branching_bisimulation,
                                      expected.states_divergence_preserving_branching_bisimulation,
                                      expected.transitions_divergence_preserving_branching_bisimulation);
@@ -495,13 +495,13 @@ static void failing_test_groote_wijs_algorithm()
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim);
-  test_lts("gw problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  test_lts("gw problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_gv);
   test_lts("gw problem (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_dnj);
-  test_lts("gw problem (branching bisimulation directly on LTS)",l,expected_label_count, expected_state_count, expected_transition_count);
+  reduce(l,lts::lts_eq_branching_bisim_gjkw);
+  test_lts("gw problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
   test_lts("gw problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
@@ -624,13 +624,13 @@ static void counterexample_postprocessing()
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim);
-  test_lts("postprocessing problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  test_lts("postprocessing problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_gv);
   test_lts("postprocessing problem (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_dnj);
-  test_lts("postprocessing problem (branching bisimulation directly on LTS)",l,expected_label_count, expected_state_count, expected_transition_count);
+  reduce(l,lts::lts_eq_branching_bisim_gjkw);
+  test_lts("postprocessing problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
   test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
@@ -814,13 +814,13 @@ static void regression_delete_old_bb_slice()
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
-  test_lts("regression test for GJKW bug (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gv);
   test_lts("regression test for GJKW bug (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
-  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_dnj);
-  test_lts("regression test for GJKW bug (branching bisimulation directly on LTS)",l,expected_label_count, expected_state_count, expected_transition_count);
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gjkw);
+  test_lts("regression test for GJKW bug (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
   test_lts("regression test for GJKW bug (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);

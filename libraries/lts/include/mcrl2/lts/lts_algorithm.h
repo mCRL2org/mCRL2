@@ -95,15 +95,15 @@ bool destructive_compare(LTS_TYPE& l1,
         mCRL2log(mcrl2::log::warning) << "The default bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
         return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
       }
-      return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples);
     }
     case lts_eq_bisim_gv:
     {
       return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
     }
-    case lts_eq_bisim_dnj:
+    case lts_eq_bisim_gjkw:
     {
-      return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples);
     }
     case lts_eq_branching_bisim:
     {
@@ -112,15 +112,15 @@ bool destructive_compare(LTS_TYPE& l1,
         mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
         return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
       }
-      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples);
     }
     case lts_eq_branching_bisim_gv:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
     }
-    case lts_eq_branching_bisim_dnj:
+    case lts_eq_branching_bisim_gjkw:
     {
-      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples);
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
@@ -129,15 +129,15 @@ bool destructive_compare(LTS_TYPE& l1,
         mCRL2log(mcrl2::log::warning) << "The default divergence preserving branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
         return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
       }
-      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,true,generate_counter_examples);
     }
     case lts_eq_divergence_preserving_branching_bisim_gv:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
     }
-    case lts_eq_divergence_preserving_branching_bisim_dnj:
+    case lts_eq_divergence_preserving_branching_bisim_gjkw:
     {
-      return detail::destructive_bisimulation_compare_dnj(l1,l2, true,true,generate_counter_examples);
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples);
     }
     case lts_eq_weak_bisim:
     {
@@ -557,7 +557,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       return;
     case lts_eq_bisim:
     {
-      detail::bisimulation_reduce_gjkw(l,false,false);
+      detail::bisimulation_reduce_dnj(l,false,false);
       return;
     }
     case lts_eq_bisim_gv:
@@ -565,9 +565,9 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce(l,false,false);
       return;
     }
-    case lts_eq_bisim_dnj:
+    case lts_eq_bisim_gjkw:
     {
-      detail::bisimulation_reduce_dnj(l,false,false);
+      detail::bisimulation_reduce_gjkw(l,false,false);
       return;
     }
     case lts_eq_bisim_sigref:
@@ -578,7 +578,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_branching_bisim:
     {
-      detail::bisimulation_reduce_gjkw(l,true,false);
+      detail::bisimulation_reduce_dnj(l,true,false);
       return;
     }
     case lts_eq_branching_bisim_gv:
@@ -586,9 +586,9 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce(l,true,false);
       return;
     }
-    case lts_eq_branching_bisim_dnj:
+    case lts_eq_branching_bisim_gjkw:
     {
-      detail::bisimulation_reduce_dnj(l,true,false);
+      detail::bisimulation_reduce_gjkw(l,true,false);
       return;
     }
     case lts_eq_branching_bisim_sigref:
@@ -599,7 +599,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
-      detail::bisimulation_reduce_gjkw(l,true,true);
+      detail::bisimulation_reduce_dnj(l,true,true);
       return;
     }
     case lts_eq_divergence_preserving_branching_bisim_gv:
@@ -607,9 +607,9 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce(l,true,true);
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim_dnj:
+    case lts_eq_divergence_preserving_branching_bisim_gjkw:
     {
-      detail::bisimulation_reduce_dnj(l,true,true);
+      detail::bisimulation_reduce_gjkw(l,true,true);
       return;
     }
     case lts_eq_divergence_preserving_branching_bisim_sigref:
