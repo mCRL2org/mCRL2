@@ -282,10 +282,7 @@ class confluence_checker
       data::quantifiers_inside_rewriter R_quantifiers_inside;
       x = R_one_point(R_quantifiers_inside(x));
       std::set<data::variable> freevars = data::find_free_variables(x);
-      if (freevars.empty())
-      {
-        x = data::forall(freevars, x);
-      }
+      x = data::make_forall(data::variable_list(freevars.begin(), freevars.end()), x);
       x = m_rewr(x);
       return is_true(x);
     }

@@ -17,6 +17,8 @@
 
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/forall.h"
 
 namespace mcrl2 {
 
@@ -140,6 +142,36 @@ inline
 sort_expression bool_()
 {
   return sort_bool::bool_();
+}
+
+/// \brief Make a universal quantification. It checks for an empty variable list,
+/// which is not allowed.
+/// \param v A sequence of data variables
+/// \param x A data expression
+/// \return The value <tt>forall v.x</tt>
+inline
+data_expression make_forall(const data::variable_list& v, const data_expression& x)
+{
+  if (v.empty())
+  {
+    return x;
+  }
+  return forall(v, x);
+}
+
+/// \brief Make an existential quantification. It checks for an empty variable list,
+/// which is not allowed.
+/// \param v A sequence of data variables
+/// \param x A data expression
+/// \return The value <tt>exists v.x</tt>
+inline
+data_expression make_exists(const data::variable_list& v, const data_expression& x)
+{
+  if (v.empty())
+  {
+    return x;
+  }
+  return exists(v, x);
 }
 
 } // namespace data
