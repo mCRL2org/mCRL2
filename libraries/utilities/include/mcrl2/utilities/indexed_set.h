@@ -9,6 +9,8 @@
 #ifndef MCRL2_UTILITIES_INDEXED_SET_H
 #define MCRL2_UTILITIES_INDEXED_SET_H
 
+#include <deque>
+
 #include "mcrl2/utilities/unordered_map.h"
 #include "mcrl2/utilities/block_allocator.h"
 

@@ -23,7 +23,7 @@
 #include "unordered_set"
 #include "mcrl2/lts/detail/counter_example.h"
 #include "mcrl2/lps/exploration_strategy.h"
-#include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
+#include "mcrl2/lts/detail/liblts_bisim_gjkw.h"  // To be replaced with liblts_bisim_dnj.h when it makes its bisim_partitioner publicly accessible. 
 
 namespace mcrl2
 {
@@ -237,6 +237,7 @@ std::pair<std::size_t, bool> reduce(LTS_TYPE& lts,
     scc_part.replace_transition_system(preserve_divergence);
   }
 
+  // TODO: replace this bij the bisim_partitioner_dnj once it is available. 
   detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(lts, weak_reduction, preserve_divergence);
   // Assign the reduced LTS, and set init_l2.
   l2_init = bisim_part.get_eq_class(l2_init);

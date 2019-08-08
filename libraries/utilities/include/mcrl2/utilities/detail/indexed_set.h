@@ -17,8 +17,9 @@
 #include <cstddef>
 #include <limits>
 #include <cassert>
+#include <deque>
 
-#include "mcrl2/atermpp/indexed_set.h"    // necessary for header test. 
+#include "mcrl2/utilities/indexed_set.h"    // necessary for header test. 
 
 namespace mcrl2
 {
