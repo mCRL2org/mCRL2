@@ -35,8 +35,8 @@ class bucket_list
 {
 public:
 
-  /// \brief The nodes of the bucket list without carrying any additional informations
-  ///        Mainly used to make no different between the head and the tail of the list.
+  /// \brief The nodes of the bucket list without carrying any additional informations.
+  ///        Used to make no different between the head and the tail of the list.
   class node_base
   {
   public:
@@ -78,19 +78,20 @@ public:
 
   /// \brief Iterator over all keys in a bucket list.
   template<bool Constant = true>
-  class key_iterator : std::iterator_traits<Key>
+  class key_iterator
   {
-    using tag = std::input_iterator_tag;
-
     friend class bucket_list<Key, Allocator>;
-    using Bucket = typename std::conditional<Constant, const bucket_list<Key, Allocator>, bucket_list<Key, Allocator>>::type;
-    using reference = typename std::conditional<Constant, const Key&, Key&>::type;
-    using pointer = typename std::conditional<Constant, const Key*, Key*>::type;
+    using bucket_type = typename std::conditional<Constant, const bucket_list<Key, Allocator>, bucket_list<Key, Allocator>>::type;
 
     using node_pointer = typename std::conditional<Constant, const node*, node*>::type;
     using node_base_pointer = typename std::conditional<Constant, const node_base*, node_base*>::type;
 
   public:
+    using value_type = typename std::conditional<Constant, const Key, Key>::type;
+    using reference = typename std::conditional<Constant, const Key&, Key&>::type;
+    using pointer = typename std::conditional<Constant, const Key*, Key*>::type;
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::input_iterator_tag;
 
     explicit key_iterator(node_base_pointer node)
       : m_bucket_node(reinterpret_cast<node_pointer>(node))
@@ -141,6 +142,7 @@ public:
   using Bucket = bucket_list<Key, Allocator>;
   using iterator = key_iterator<false>;
   using const_iterator = key_iterator<true>;
+
   /// Rebind the passed to allocator to a bucket list node allocator.
   using NodeAllocator = typename Allocator::template rebind<typename Bucket::node>::other;
 
@@ -154,6 +156,9 @@ public:
   /// \returns A const iterator over the keys of this bucket and successor buckets.
   const_iterator begin() const { return const_iterator(m_head.next()); }
   const_iterator end() const { return const_iterator(); }
+
+  const_iterator cbegin() const { return const_iterator(m_head.next()); }
+  const_iterator cend() const { return const_iterator(); }
 
   /// \return A const iterator pointing to the before the head of the list.
   const_iterator before_begin() const { return const_iterator(&m_head); }
@@ -184,7 +189,7 @@ public:
     return iterator(next_node);
   }
 
-  const node_base* head() const noexcept { return &m_head; }
+  const node_base* front() const noexcept { return &m_head; }
 
   /// \brief Empties the bucket list.
   void clear() { m_head.next(nullptr); }

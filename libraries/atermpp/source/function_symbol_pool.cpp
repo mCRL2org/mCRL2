@@ -150,7 +150,7 @@ void function_symbol_pool::print_performance_stats() const noexcept
 {
   if (EnableFunctionSymbolHashtableMetrics)
   {
-    m_symbol_set.print_performance_statistics();
+    print_performance_statistics(m_symbol_set);
   }
 
   if (EnableFunctionSymbolMetrics)

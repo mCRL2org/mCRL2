@@ -155,7 +155,7 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
   if (EnableTermHashtableMetrics)
   {
     mCRL2log(mcrl2::log::info, "Performance") << "g_term_pool(" << identifier << ") hashtable:\n";
-    m_term_set.print_performance_statistics();
+    print_performance_statistics(m_term_set);
   }
 
   if (EnableGarbageCollectionMetrics && m_erasedBlocks > 0)
@@ -208,7 +208,7 @@ void ATERM_POOL_STORAGE::sweep()
   }
 
   // Clean up unnecessary blocks.
-  m_erasedBlocks = m_term_set.allocator().consolidate();
+  m_erasedBlocks = m_term_set.get_allocator().consolidate();
 }
 
 /// PRIVATE FUNCTIONS

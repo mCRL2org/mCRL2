@@ -15,6 +15,10 @@
 
 #include "mcrl2/utilities/unordered_set.h"
 
+#include "mcrl2/utilities/power_of_two.h"
+
+#include <memory>
+
 namespace mcrl2
 {
 namespace utilities
@@ -22,6 +26,7 @@ namespace utilities
 
 namespace /// local functions
 {
+static constexpr std::size_t minimum_size = 4UL;
 
 /// \brief A compile time check for allocate_args in the given allocator, calls allocate(1) otherwise.
 template<typename T, typename Allocator, typename ...Args>
@@ -46,7 +51,7 @@ inline float bytes_to_megabytes(std::size_t bytes)
 MCRL2_UNORDERED_SET_TEMPLATES
 MCRL2_UNORDERED_SET_CLASS::unordered_set(const unordered_set& set)
 {
-  resize(std::max<std::size_t>(round_up_to_power_of_two(set.size()), 4));
+  reserve(set.size());
 
   for (auto& element : set)
   {
@@ -58,7 +63,7 @@ MCRL2_UNORDERED_SET_TEMPLATES
 MCRL2_UNORDERED_SET_CLASS& MCRL2_UNORDERED_SET_CLASS::operator=(const unordered_set& set)
 {
   clear();
-  resize(std::max<std::size_t>(round_up_to_power_of_two(set.size()), 4));
+  reserve(set.size());
 
   for (auto& element : set)
   {
@@ -95,13 +100,6 @@ void MCRL2_UNORDERED_SET_CLASS::clear()
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-std::size_t MCRL2_UNORDERED_SET_CLASS::count(const Args&... args) const
-{
-  return find(args...) != end();
-}
-
-MCRL2_UNORDERED_SET_TEMPLATES
-template<typename ...Args>
 std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace(Args&&... args)
 {
   auto bucket_it = find_bucket(args...);
@@ -117,12 +115,11 @@ std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SE
   }
 }
 
-
 MCRL2_UNORDERED_SET_TEMPLATES
 typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(typename MCRL2_UNORDERED_SET_CLASS::iterator it)
 {
   // Find the bucket that is pointed to and remove the key after the before iterator.
-  Bucket& bucket = it.bucket();
+  bucket_type& bucket = it.bucket();
 
   // An element was removed from the hash table.
   --m_number_of_elements;
@@ -138,11 +135,11 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::erase(ty
 MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::erase(Key& key)
 {
-  Bucket& bucket = *find_bucket(key);
+  bucket_type& bucket = *find_bucket(key);
 
   // Loop over the elements in the bucket until the key was found.
-  typename Bucket::iterator before_it = bucket.before_begin();
-  for (typename Bucket::iterator it = bucket.begin(); it != bucket.end();)
+  typename bucket_type::iterator before_it = bucket.before_begin();
+  for (typename bucket_type::iterator it = bucket.begin(); it != bucket.end();)
   {
     if (Equals()(*it, key))
     {
@@ -162,6 +159,13 @@ void MCRL2_UNORDERED_SET_CLASS::erase(Key& key)
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
+std::size_t MCRL2_UNORDERED_SET_CLASS::count(const Args&... args) const
+{
+  return find(args...) != end();
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
+template<typename ...Args>
 typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find(const Args&... args) const
 {
   return find_impl(find_bucket(args...), args...);
@@ -175,28 +179,67 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find(con
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-void MCRL2_UNORDERED_SET_CLASS::print_performance_statistics() const
+void MCRL2_UNORDERED_SET_CLASS::rehash(std::size_t number_of_buckets)
+{
+  // Ensure that the number of buckets is a power of two greater than the minimum size.
+  number_of_buckets = std::max(utilities::round_up_to_power_of_two(number_of_buckets), minimum_size);
+
+  // If n is greater than the current number of buckets in the container (bucket_count), a rehash is forced.
+  // The new bucket count can either be equal or greater than n. Otherwise, it has no effect.
+  if (number_of_buckets <= bucket_count())
+  {
+    return;
+  }
+
+  // Create one bucket list for all elements in the hashtable.
+  bucket_type old_keys;
+  for (auto&& bucket : m_buckets)
+  {
+    for (auto it = bucket.begin(); it != bucket.end();)
+    {
+      // The insertion will change the current node, which influences the iterator.
+      typename bucket_type::node* node = it.get_node();
+      ++it;
+      old_keys.push_front(node);
+    }
+  }
+
+  // Recreate the hash table, but don't move or copy the old elements.
+  {
+    // clear() doesn't actually free the memory used and still results in an 3n peak.
+    std::vector<bucket_type>().swap(m_buckets);
+  }
+  m_buckets.resize(number_of_buckets);
+  m_buckets_mask = m_buckets.size() - 1;
+
+  // Fill the set with all elements of the previous unordered set.
+  for (auto it = old_keys.begin(); it != old_keys.end(); )
+  {
+    // The insertion will change the current node, which influences the iterator.
+    typename bucket_type::node* node = it.get_node();
+    ++it;
+    insert(node);
+  }
+
+  // The number of elements remain the same, so don't change this counter.
+}
+
+template<typename T>
+void print_performance_statistics(const T& unordered_set)
 {
   // Calculate a histogram of the bucket lengths.
   std::vector<std::size_t> histogram;
 
-  for (auto& bucket : m_buckets)
+  for (std::size_t index = 0; index < unordered_set.bucket_count(); ++index)
   {
-    std::size_t bucketLength = 0;
-    for (auto& key : bucket)
-    {
-      (void)key;
-      ++bucketLength;
-    }
-
     // Ensure that the current bucket fits within the histogram.
-    histogram.resize(std::max(histogram.size(), bucketLength + 1));
-    ++histogram[bucketLength];
+    std::size_t bucket_length = unordered_set.bucket_size(index);
+    histogram.resize(std::max(histogram.size(), bucket_length + 1));
+    ++histogram[bucket_length];
   }
 
-  mCRL2log(mcrl2::log::debug, "Performance") << "Table stores " << size() << " keys, using approximately "
-    << bytes_to_megabytes(m_allocator.capacity() * sizeof(typename Bucket::node)) << " MB for elements, and "
-    << bytes_to_megabytes(m_buckets.size() * sizeof(Bucket)) << " MB for buckets.\n";
+  mCRL2log(mcrl2::log::debug, "Performance") << "Table stores " << unordered_set.size() << " keys, in " << unordered_set.bucket_count() << " buckets.\n";
+
   for (std::size_t i = 0; i < histogram.size(); ++i)
   {
     mCRL2log(mcrl2::log::debug, "Performance") << "There are " << histogram[i] << " buckets that store " << i << " keys.\n";
@@ -207,26 +250,26 @@ void MCRL2_UNORDERED_SET_CLASS::print_performance_statistics() const
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace_impl(bucket_it bucket_it, Args&&... args)
+std::pair<typename MCRL2_UNORDERED_SET_CLASS::iterator, bool> MCRL2_UNORDERED_SET_CLASS::emplace_impl(bucket_iterator bucket_it, Args&&... args)
 {
   assert(bucket_it != m_buckets.end());
   auto& bucket = *bucket_it;
 
   // Construct a new node and put it at the front of the bucket list.
-  typename Bucket::node* new_node = allocate<typename Bucket::node>(m_allocator, args...);
-  std::allocator_traits<NodeAllocator>::construct(m_allocator, new_node, std::forward<Args>(args)...);
+  typename bucket_type::node* new_node = allocate<typename bucket_type::node>(m_allocator, args...);
+  std::allocator_traits<allocator_type>::construct(m_allocator, new_node, std::forward<Args>(args)...);
 
   bucket.push_front(new_node);
   ++m_number_of_elements;
-  resize_if_needed();
-  return std::make_pair(iterator(bucket_it, m_buckets.end(), bucket.before_begin(), typename Bucket::iterator(new_node)), true);
+  rehash_if_needed();
+  return std::make_pair(iterator(bucket_it, m_buckets.end(), bucket.before_begin(), typename bucket_type::iterator(new_node)), true);
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::bucket_const_it MCRL2_UNORDERED_SET_CLASS::find_bucket(const Args&... args) const
+typename MCRL2_UNORDERED_SET_CLASS::const_bucket_iterator MCRL2_UNORDERED_SET_CLASS::find_bucket(const Args&... args) const
 {
-  std::size_t hash = Hash()(args...);
+  std::size_t hash = m_hash(args...);
   /// n mod 2^i is equal to n & (2^i - 1).
   assert(m_buckets_mask == m_buckets.size() - 1);
   std::size_t index = hash & m_buckets_mask;
@@ -236,9 +279,9 @@ typename MCRL2_UNORDERED_SET_CLASS::bucket_const_it MCRL2_UNORDERED_SET_CLASS::f
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::bucket_it MCRL2_UNORDERED_SET_CLASS::find_bucket(const Args&... args)
+typename MCRL2_UNORDERED_SET_CLASS::bucket_iterator MCRL2_UNORDERED_SET_CLASS::find_bucket(const Args&... args)
 {
-  std::size_t hash = Hash()(args...);
+  std::size_t hash = m_hash(args...);
   /// n mod 2^i is equal to n & (2^i - 1).
   assert(m_buckets_mask == m_buckets.size() - 1);
   std::size_t index = hash & m_buckets_mask;
@@ -248,7 +291,7 @@ typename MCRL2_UNORDERED_SET_CLASS::bucket_it MCRL2_UNORDERED_SET_CLASS::find_bu
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find_impl(bucket_const_it bucket_it, const Args&... args) const
+typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::find_impl(const_bucket_iterator bucket_it, const Args&... args) const
 {
   assert(bucket_it != m_buckets.end());
   const auto& bucket = *bucket_it;
@@ -258,7 +301,7 @@ typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::fi
   for(auto it = bucket.begin(); it != bucket.end(); ++it)
   {
     auto& key = *it;
-    if (Equals()(key, args...))
+    if (m_equals(key, args...))
     {
       return const_iterator(bucket_it, m_buckets.end(), before_it, it);
     }
@@ -271,7 +314,7 @@ typename MCRL2_UNORDERED_SET_CLASS::const_iterator MCRL2_UNORDERED_SET_CLASS::fi
 
 MCRL2_UNORDERED_SET_TEMPLATES
 template<typename ...Args>
-typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find_impl(bucket_it bucket_it, const Args&... args)
+typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find_impl(bucket_iterator bucket_it, const Args&... args)
 {
   assert(bucket_it != m_buckets.end());
   auto& bucket = *bucket_it;
@@ -280,7 +323,7 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find_imp
   for(auto it = bucket.begin(); it != bucket.end(); ++it)
   {
     auto& key = *it;
-    if (Equals()(key, args...))
+    if (m_equals(key, args...))
     {
       return iterator(bucket_it, m_buckets.end(), before_it, it);
     }
@@ -292,50 +335,12 @@ typename MCRL2_UNORDERED_SET_CLASS::iterator MCRL2_UNORDERED_SET_CLASS::find_imp
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
-void MCRL2_UNORDERED_SET_CLASS::resize_if_needed()
+void MCRL2_UNORDERED_SET_CLASS::rehash_if_needed()
 {
-  if (m_number_of_elements > capacity() && !ThreadSafe)
+  if (load_factor() >= max_load_factor() && !ThreadSafe)
   {
-    resize(capacity() * 2);
+    rehash(m_buckets.size() * 2);
   }
-}
-
-MCRL2_UNORDERED_SET_TEMPLATES
-void MCRL2_UNORDERED_SET_CLASS::resize(std::size_t new_size)
-{
-  assert(new_size >= 2);
-
-  // Create one bucket list for all elements in the hashtable.
-  Bucket old_keys;
-  for (auto&& bucket : m_buckets)
-  {
-    for (auto it = bucket.begin(); it != bucket.end();)
-    {
-      // The insertion will change the current node, which influences the iterator.
-      typename Bucket::node* node = it.get_node();
-      ++it;
-      old_keys.push_front(node);
-    }
-  }
-
-  // Recreate the hash table, but don't move or copy the old elements.
-  {
-    // clear() doesn't actually free the memory used and still results in an 3n peak.
-    std::vector<Bucket>().swap(m_buckets);
-  }
-  m_buckets.resize(new_size);
-  m_buckets_mask = m_buckets.size() - 1;
-
-  // Fill the set with all elements of the previous unordered set.
-  for (auto it = old_keys.begin(); it != old_keys.end(); )
-  {
-    // The insertion will change the current node, which influences the iterator.
-    typename Bucket::node* node = it.get_node();
-    ++it;
-    insert(node);
-  }
-
-  // The number of elements remain the same, so don't change this counter.
 }
 
 #undef MCRL2_UNORDERED_SET_CLASS

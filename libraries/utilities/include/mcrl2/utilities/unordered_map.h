@@ -29,9 +29,13 @@ template<typename Key,
          bool ThreadSafe = false>
 class unordered_map
 {
+public:
+  using key_type = Key;
+  using mapped_type = T;
+  using value_type = std::pair<Key, T>;
+  using allocator = typename Allocator::template rebind<value_type>::other;
+
 private:
-  using Pair = std::pair<Key, T>;
-  using PairAllocator = typename Allocator::template rebind<Pair>::other;
 
   // Hashes only the keys of each pair.
   struct PairHash
@@ -39,7 +43,7 @@ private:
     /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
     PairHash() {}
 
-    std::size_t operator()(const Pair& pair) const
+    std::size_t operator()(const value_type& pair) const
     {
       return Hash()(pair.first);
     }
@@ -58,23 +62,23 @@ private:
   // Compares only the keys of each pair.
   struct PairEquals
   {
-    bool operator()(const Pair& first, const Pair& second) const
+    bool operator()(const value_type& first, const value_type& second) const
     {
       return Equals()(first.first, second.first);
     }
 
-    bool operator()(const Pair& first, const Key& key, const T&) const
+    bool operator()(const value_type& first, const Key& key, const T&) const
     {
       return Equals()(first.first, key);
     }
 
-    bool operator()(const Pair& first, const Key& key) const
+    bool operator()(const value_type& first, const Key& key) const
     {
       return Equals()(first.first, key);
     }
   };
 
-  using Set = unordered_set<Pair, PairHash, PairEquals, PairAllocator, ThreadSafe>;
+  using Set = unordered_set<value_type, PairHash, PairEquals, allocator, ThreadSafe>;
 
   Set m_set; ///< The underlying set storing <key, value> pairs.
 
@@ -117,7 +121,7 @@ public:
   template<typename ...Args>
   const_iterator find(const Args&... args) const { return m_set.find(args...); }
 
-  std::pair<iterator, bool> insert(const Pair& pair) { return m_set.emplace(pair); }
+  std::pair<iterator, bool> insert(const value_type& pair) { return m_set.emplace(pair); }
 
   std::size_t size() const { return m_set.size(); }
 };
