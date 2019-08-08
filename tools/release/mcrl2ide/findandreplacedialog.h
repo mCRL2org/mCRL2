@@ -18,6 +18,10 @@ namespace Ui
 class FindAndReplaceDialog;
 }
 
+/**
+ * @brief The FindAndReplaceDialog class defines a dialog for finding and
+ *   replacing text in a given code editor
+ */
 class FindAndReplaceDialog : public QDialog
 {
   Q_OBJECT

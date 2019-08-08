@@ -15,9 +15,10 @@
 #include <QComboBox>
 #include <QMessageBox>
 
-/* contains some extra info for lts equivalences:
- *   - the name of the equivalences
- *   - whether this equivalence makes use of abstraction */
+/**
+ * @brief LTSEQUIVALENCENAMES Defines a name for each supported equivalence to
+ *   show in the interface
+ */
 const std::map<mcrl2::lts::lts_equivalence, QString> LTSEQUIVALENCENAMES = {
     {mcrl2::lts::lts_eq_none, "None"},
     {mcrl2::lts::lts_eq_bisim, "Strong Bisimulation"},
@@ -28,11 +29,19 @@ const std::map<mcrl2::lts::lts_equivalence, QString> LTSEQUIVALENCENAMES = {
     {mcrl2::lts::lts_eq_weak_bisim, "Weak Bisimulation"},
     {mcrl2::lts::lts_eq_weak_trace, "Weak Trace Equivalence"}};
 
+/**
+ * @brief LTSEQUIVALENCESWITHABSTRACTION Defines which equivalences use
+ *   abstraction
+ */
 const std::list<mcrl2::lts::lts_equivalence> LTSEQUIVALENCESWITHABSTRACTION = {
     mcrl2::lts::lts_eq_branching_bisim,
     mcrl2::lts::lts_eq_divergence_preserving_branching_bisim,
     mcrl2::lts::lts_eq_weak_bisim, mcrl2::lts::lts_eq_weak_trace};
 
+/**
+ * @brief LTSEQUIVALENCESWITHOUTABSTRACTION Defines which equivalences do not
+ *   use abstraction
+ */
 const std::list<mcrl2::lts::lts_equivalence> LTSEQUIVALENCESWITHOUTABSTRACTION =
     {mcrl2::lts::lts_eq_bisim, mcrl2::lts::lts_eq_trace};
 

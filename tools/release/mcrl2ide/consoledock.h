@@ -15,6 +15,9 @@
 #include <QTabWidget>
 #include <QProcess>
 
+/**
+ * @brief ProcessType Defines all possible process types
+ */
 enum class ProcessType
 {
   Parsing,
@@ -25,16 +28,27 @@ enum class ProcessType
 
 Q_DECLARE_METATYPE(ProcessType)
 
+/**
+ * @brief PROCESSTYPES Defines a list of all process types so they can be
+ *   iterated over
+ */
 const std::vector<ProcessType> PROCESSTYPES = {
     ProcessType::Parsing, ProcessType::Simulation, ProcessType::LtsCreation,
     ProcessType::Verification};
 
+/**
+ * @brief PROCESSTYPENAMES Defines a name for each process type to show in the
+ *   interface
+ */
 const std::map<ProcessType, QString> PROCESSTYPENAMES = {
     {ProcessType::Parsing, "Parsing"},
     {ProcessType::Simulation, "Simulation"},
     {ProcessType::LtsCreation, "State Space Generation"},
     {ProcessType::Verification, "Verification"}};
 
+/**
+ * @brief The ConsoleWidget class defines a widget used to show console output
+ */
 class ConsoleWidget : public QPlainTextEdit
 {
   Q_OBJECT

@@ -18,6 +18,9 @@
 #include <QQueue>
 #include <QThread>
 
+/**
+ * @brief SubProcessType Defines all possible subprocess
+ */
 enum class SubprocessType
 {
   ParseMcrl2 = 0,

@@ -25,7 +25,7 @@
 class FileSystem;
 
 /**
- * @brief The MainWindow class defines the main window off the application
+ * @brief The MainWindow class defines the main window of the application
  */
 class MainWindow : public QMainWindow
 {
