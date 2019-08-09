@@ -45,7 +45,8 @@ lps::stochastic_action_summand cleave_summand(
   std::size_t summand_index,
   const data::variable_list& parameters,
   const data::variable_list& other_parameters,
-  std::vector<process::action_label>& sync_labels)
+  std::vector<process::action_label>& sync_labels,
+  const process::action& tag)
 {
   lps::stochastic_action_summand summand = spec.process().action_summands()[summand_index];
 
@@ -90,7 +91,7 @@ lps::stochastic_action_summand cleave_summand(
     other_assignment_dependencies.erase(param);
   }
 
-  // Gather all the necessary dependencies.
+  // Gather all the necessary dependencies S^i_V.
   dependencies.insert(action_dependencies.begin(), action_dependencies.end());
   dependencies.insert(assignment_dependencies.begin(), assignment_dependencies.end());
   dependencies.insert(other_assignment_dependencies.begin(), other_assignment_dependencies.end());
@@ -146,22 +147,34 @@ lps::stochastic_action_summand cleave_summand(
       // This summand is dependent on the other process.
       actions.push_front(process::action(sync_labels.back(), values));
     }
+    else
+    {
+      // We are independent, so tag it with our label.
+      actions.push_front(tag);
+    }
 
     action = lps::multi_action(actions);
   }
-  else if (!is_independent(other_parameters, dependencies, assignments))
+  else
   {
-    // The other process depends on our parameters and we do not perform state updates.
-    process::action_list actions;
-    actions.push_front(process::action(sync_labels.back(), values));
-    action = lps::multi_action(actions);
+    if (!is_independent(other_parameters, dependencies, assignments))
+    {
+      // The other process depends on our parameters and we do not perform state updates.
+      process::action_list actions;
+      actions.push_front(process::action(sync_labels.back(), values));
+      action = lps::multi_action(actions);
+    }
+    else
+    {
+      return lps::stochastic_action_summand(variables, data::sort_bool::false_(), action, assignments, summand.distribution());
+    }
   }
 
   return lps::stochastic_action_summand(variables, summand.condition(), action, assignments, summand.distribution());
 }
 
 /// \brief Performs the a dependency cleave based on the given parameters V, and the indices J.
-stochastic_specification dependency_cleave(const stochastic_specification& spec, const data::variable_list& parameters, const std::list<std::size_t>& indices)
+stochastic_specification dependency_cleave(const stochastic_specification& spec, const data::variable_list& parameters, const std::list<std::size_t>& indices, bool right_process)
 {
   // Check sanity conditions, no timed or stochastic processes.
   auto& process = spec.process();
@@ -185,6 +198,18 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts.
   std::vector<process::action_label> sync_labels;
 
+  // Add the tags for the left and right processes
+  if (right_process)
+  {
+    sync_labels.emplace_back(process::action_label("tag_right", {}));
+  }
+  else
+  {
+    sync_labels.emplace_back(process::action_label("tag_left", {}));
+  }
+
+  process::action tag(sync_labels.back(), {});
+
   // Change the summands to include the parameters of the other process and added the sync action.
   lps::stochastic_action_summand_vector cleave_summands;
 
@@ -193,7 +218,7 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   {
     if (index < process.action_summands().size())
     {
-      cleave_summands.push_back(cleave_summand<true>(spec, index, parameters, other_parameters, sync_labels));
+      cleave_summands.push_back(cleave_summand<true>(spec, index, parameters, other_parameters, sync_labels, tag));
     }
   }
 
@@ -217,12 +242,12 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
     }
 
     // Index is not an element of indices.
-    cleave_summands.push_back(cleave_summand<false>(spec, index, parameters, other_parameters, sync_labels));
+    cleave_summands.push_back(cleave_summand<false>(spec, index, parameters, other_parameters, sync_labels, tag));
   }
 
   // Add the labels to the LPS action specification.
   auto cleave_action_labels = spec.action_labels();
-  for (auto& label : sync_labels)
+  for (const auto& label : sync_labels)
   {
     cleave_action_labels.push_front(label);
   }
@@ -235,6 +260,9 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   // Create the new LPS and return it.
   return stochastic_specification(spec.data(), cleave_action_labels, spec.global_variables(), cleave_process, cleave_initial);
 }
+
+
+
 
 } // namespace lps
 } // namespace mcrl2
