@@ -10,6 +10,7 @@
 #include <ctime>
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/data/real.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
@@ -151,6 +152,8 @@ void lps2lts_algorithm::initialise_lts_generation(const lts_generation_options& 
     mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
     std::set<data::function_symbol> extra_function_symbols = lps::find_function_symbols(specification);
     extra_function_symbols.insert(data::sort_real::minus(data::sort_real::real_(),data::sort_real::real_()));
+    // The symbols below are needed to compare probabilities. Greater implies the inclusion of smaller. 
+    extra_function_symbols.insert(data::greater(data::sort_real::real_()));
 
     if (m_options.expl_strat == es_value_prioritized || m_options.expl_strat == es_value_random_prioritized)
     {
