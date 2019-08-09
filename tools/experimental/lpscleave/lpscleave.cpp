@@ -55,25 +55,6 @@ std::list<std::string> split_actions(const std::string& s)
   return result;
 }
 
-/// \brief Prints the parameters as comma separated values.
-void print_parameters(const data::variable_list& parameters)
-{
-  mCRL2log(log_level_t::info) << "Parameters: ";
-
-  bool first = true;
-  for (auto& param : parameters)
-  {
-    if (!first)
-    {
-      mCRL2log(log_level_t::info) << ", ";
-    }
-    mCRL2log(log_level_t::info) << param.name();
-    first = false;
-  }
-
-  mCRL2log(log_level_t::info) << "\n";
-}
-
 /// \brief Projects a list of parameters based on a list of names.
 /// \returns A list that only contains those parameters of the given parameters that are contained in the list of names.
 data::variable_list project_parameters(const data::variable_list& parameters, const std::list<std::string>& names)
@@ -123,7 +104,7 @@ class lpscleave_tool : public input_output_tool
       if (m_parameters.empty())
       {
         // Print the parameters and exit
-        print_parameters(spec.process().process_parameters());
+        print_names("Parameters", spec.process().process_parameters());
       }
       else
       {
@@ -163,9 +144,6 @@ class lpscleave_tool : public input_output_tool
 
           // Take the complement of the parameters
           parameters = get_other_parameters(spec.process(), parameters);
-
-          // Print to ensure that the complement is correct.
-          print_parameters(parameters);
         }
 
         // Cleave the process, requires the indices to be sorted.

@@ -32,6 +32,38 @@ data::assignment_list project(const data::assignment_list& assignments, const da
   return result;
 }
 
+/// \brief Prints the parameters as comma separated values.
+template<typename Container, typename F>
+void print_values(const std::string& identifier, const Container& elements, F name)
+{
+  mCRL2log(log::info) << identifier << ": ";
+
+  bool first = true;
+  for (const auto& element : elements)
+  {
+    if (!first)
+    {
+      mCRL2log(log::info) << ", ";
+    }
+    mCRL2log(log::info) << name(element);
+    first = false;
+  }
+
+  mCRL2log(log::info) << "\n";
+}
+
+template<typename Container>
+void print_names(const std::string& identifier, const Container& variables)
+{
+  print_values(identifier, variables, [](const data::variable& var) { return var.name(); });
+}
+
+template<template<typename ...Element> class Container, typename El>
+void print_elements(const std::string& identifier, const Container<El>& elements)
+{
+  print_values(identifier, elements, [](const El& element) { return element; });
+}
+
 bool is_independent(const data::variable_list& parameters, const std::set<data::variable>& dependencies, const data::assignment_list& other_assignments)
 {
   // We are independent whenever all dependencies are included in our own parameters and the other process does no assignments.
@@ -113,6 +145,7 @@ lps::stochastic_action_summand cleave_summand(
   dependencies.insert(assignment_dependencies.begin(), assignment_dependencies.end());
   dependencies.insert(other_assignment_dependencies.begin(), other_assignment_dependencies.end());
 
+  print_names(std::string("Dependencies of summand ") += std::to_string(summand_index), dependencies);
   // Remove the global variables.
 
   // This version crashes, but would be nicer/more efficient:
@@ -204,6 +237,9 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   // The parameters of the "other" component process.
   data::variable_list other_parameters = get_other_parameters(process, parameters);
 
+  print_names("Parameters", parameters);
+  print_names("Other parameters", other_parameters);
+  print_elements("Indices", indices);
   // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts.
   std::vector<process::action_label> sync_labels;
 
