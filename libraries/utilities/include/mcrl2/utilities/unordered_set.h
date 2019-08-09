@@ -134,9 +134,9 @@ public:
 
   /// \brief Counts the number of occurrences of the given key (1 when it exists and 0 otherwise).
   template<typename ...Args>
-  std::size_t count(const Args&... args) const;
+  size_type count(const Args&... args) const;
 
-  /// \brief Searches whether an object Key(args...) occurs in the set.
+  /// \brief Searches whether an object key_type(args...) occurs in the set.
   /// \returns An iterator to the matching element or the end when this object does not exist.
   template<typename...Args>
   const_iterator find(const Args&... args) const;
@@ -166,10 +166,10 @@ public:
   void max_load_factor(float factor) { m_max_load_factor = factor; }
 
   /// \brief Resize the number buckets to at least number_of_buckets.
-  void rehash(std::size_t number_of_buckets);
+  void rehash(size_type number_of_buckets);
 
   /// \brief Resizes the set to the given number of elements.
-  void reserve(std::size_t count) { rehash(std::ceil(static_cast<float>(count) / max_load_factor())); }
+  void reserve(size_type count) { rehash(std::ceil(static_cast<float>(count) / max_load_factor())); }
 
   /// \returns The number of elements that can be present in the set before resizing.
   size_type capacity() const noexcept { return m_buckets.size(); }
@@ -210,10 +210,10 @@ private:
   void rehash_if_needed();
 
   /// \brief The number of elements stored in this set.
-  std::size_t m_number_of_elements = 0;
+  size_type m_number_of_elements = 0;
 
   /// \brief Always equal to m_buckets.size() - 1.
-  std::size_t m_buckets_mask;
+  size_type m_buckets_mask;
 
   std::vector<bucket_type> m_buckets;
 

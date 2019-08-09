@@ -141,7 +141,7 @@ void MCRL2_UNORDERED_SET_CLASS::erase(Key& key)
   typename bucket_type::iterator before_it = bucket.before_begin();
   for (typename bucket_type::iterator it = bucket.begin(); it != bucket.end();)
   {
-    if (Equals()(*it, key))
+    if (m_equals(*it, key))
     {
       // Erase the current element and stop iterating.
       --m_number_of_elements;
