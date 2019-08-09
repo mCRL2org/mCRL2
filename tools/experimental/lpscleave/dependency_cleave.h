@@ -11,8 +11,6 @@
 
 namespace mcrl2
 {
-namespace lps
-{
 
 /// \brief Given a list of assignments and parameters returns a list of assignments that only contain the assignments
 ///        for the given parameters and not for the potential other variables.
@@ -95,7 +93,8 @@ lps::stochastic_action_summand cleave_summand(
   const data::variable_list& parameters,
   const data::variable_list& other_parameters,
   std::vector<process::action_label>& sync_labels,
-  const process::action& tag)
+  const process::action& tag,
+  const process::action& intern)
 {
   lps::stochastic_action_summand summand = spec.process().action_summands()[summand_index];
 
@@ -190,7 +189,21 @@ lps::stochastic_action_summand cleave_summand(
   if (owning)
   {
     // Here the action is performed by the current process.
-    process::action_list actions = summand.multi_action().actions();
+
+    // Convert tau actions to a visible action.
+    process::action_list actions;
+
+    for (const process::action& action : summand.multi_action().actions())
+    {
+      if (process::is_tau(action))
+      {
+        actions.push_front(intern);
+      }
+      else
+      {
+        actions.push_front(action);
+      }
+    }
 
     if (!is_independent(parameters, dependencies, other_assignments))
     {
@@ -240,20 +253,24 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   print_names("Parameters", parameters);
   print_names("Other parameters", other_parameters);
   print_elements("Indices", indices);
-  // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts.
-  std::vector<process::action_label> sync_labels;
+
+  // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts, a tag and an intern action.
+  std::vector<process::action_label> labels;
 
   // Add the tags for the left and right processes
   if (right_process)
   {
-    sync_labels.emplace_back(process::action_label("tag_right", {}));
+    labels.emplace_back(process::action_label("tag_right", {}));
   }
   else
   {
-    sync_labels.emplace_back(process::action_label("tag_left", {}));
+    labels.emplace_back(process::action_label("tag_left", {}));
   }
 
-  process::action tag(sync_labels.back(), {});
+  process::action tag(labels.back(), {});
+
+  labels.emplace_back(process::action_label("intern", {}));
+  process::action intern(labels.back(), {});
 
   // Change the summands to include the parameters of the other process and added the sync action.
   lps::stochastic_action_summand_vector cleave_summands;
@@ -263,7 +280,7 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   {
     if (index < process.action_summands().size())
     {
-      cleave_summands.push_back(cleave_summand<true>(spec, index, parameters, other_parameters, sync_labels, tag));
+      cleave_summands.push_back(cleave_summand<true>(spec, index, parameters, other_parameters, labels, tag, intern));
     }
   }
 
@@ -287,12 +304,12 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
     }
 
     // Index is not an element of indices.
-    cleave_summands.push_back(cleave_summand<false>(spec, index, parameters, other_parameters, sync_labels, tag));
+    cleave_summands.push_back(cleave_summand<false>(spec, index, parameters, other_parameters, labels, tag, intern));
   }
 
   // Add the labels to the LPS action specification.
   auto cleave_action_labels = spec.action_labels();
-  for (const auto& label : sync_labels)
+  for (const auto& label : labels)
   {
     cleave_action_labels.push_front(label);
   }
@@ -303,11 +320,7 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   lps::stochastic_process_initializer cleave_initial(project(spec.initial_process().assignments(), parameters), spec.initial_process().distribution());
 
   // Create the new LPS and return it.
-  return stochastic_specification(spec.data(), cleave_action_labels, spec.global_variables(), cleave_process, cleave_initial);
+  return lps::stochastic_specification(spec.data(), cleave_action_labels, spec.global_variables(), cleave_process, cleave_initial);
 }
 
-
-
-
-} // namespace lps
 } // namespace mcrl2
