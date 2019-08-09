@@ -17,7 +17,7 @@
 #include "mcrl2/utilities/detail/bucket_list.h"
 
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <vector>
 
