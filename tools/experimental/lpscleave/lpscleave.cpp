@@ -58,6 +58,8 @@ std::list<std::string> split_actions(const std::string& s)
 /// \brief Prints the parameters of the given LPS as comma separated values.
 void print_parameters(const stochastic_specification& spec)
 {
+  mCRL2log(log_level_t::info) << "Parameters: ";
+
   bool first = true;
   for (auto& param : spec.process().process_parameters())
   {
@@ -108,7 +110,15 @@ class lpscleave_tool : public input_output_tool
     bool run() override
     {
       stochastic_specification spec;
-      load_lps(spec, input_filename());
+
+      if (input_filename() == "-")
+      {
+        load_lps(spec, std::cin);
+      }
+      else
+      {
+        load_lps(spec, input_filename());
+      }
 
       if (m_parameters.empty())
       {
@@ -127,8 +137,15 @@ class lpscleave_tool : public input_output_tool
         stochastic_specification left_cleave = dependency_cleave(spec, parameters, m_indices);
 
         // Save the resulting left-cleave.
-        std::ofstream file(output_filename(), std::ios::binary);
-        left_cleave.save(file, true);
+        if (output_filename().empty())
+        {
+          left_cleave.save(std::cout, true);
+        }
+        else
+        {
+          std::ofstream file(output_filename(), std::ios::binary);
+          left_cleave.save(file, true);
+        }
       }
 
       return true;
@@ -156,9 +173,9 @@ class lpscleave_tool : public input_output_tool
       if (parser.options.count("summands"))
       {
         std::list<std::string> indices = split_actions(parser.option_argument("summands"));
-        for (auto& index : indices)
+        for (auto& string : indices)
         {
-          m_indices.push_back(std::atoi(index.c_str()));
+          m_indices.emplace_back(std::stoul(string));
         }
       }
 
