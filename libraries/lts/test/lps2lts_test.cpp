@@ -1,4 +1,4 @@
-// Author(s): anonymous
+// Author(s): mCRL2 team
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -91,6 +91,7 @@ static void check_lps2lts_specification(const std::string& specification,
                                         const std::size_t expected_states,
                                         const std::size_t expected_transitions,
                                         const std::size_t expected_labels,
+                                        const bool contains_probabilities=false,
                                         const std::string& priority_action = "")
 {
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
@@ -104,25 +105,52 @@ static void check_lps2lts_specification(const std::string& specification,
     exploration_strategy_vector estrategies(exploration_strategies());
     for (exploration_strategy_vector::const_iterator expl_strategy = estrategies.begin(); expl_strategy != estrategies.end(); ++expl_strategy)
     {
-      std::cerr << "AUT FORMAT\n";
-      lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
+      if (!contains_probabilities)
+      {
+        std::cerr << "AUT FORMAT\n";
+        lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
+        BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
+      }
+
+      std::cerr << "PROBABILISTIC AUT FORMAT\n";
+      lts::probabilistic_lts_aut_t result1 = translate_lps_to_lts<lts::probabilistic_lts_aut_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
       BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
       BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
       BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
 
-      std::cerr << "LTS FORMAT\n";
-      lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
+      if (!contains_probabilities)
+      {
+        std::cerr << "LTS FORMAT\n";
+        lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
+        BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
+      }
+
+      std::cerr << "PROBABILISTIC LTS FORMAT\n";
+      lts::probabilistic_lts_lts_t result2 = translate_lps_to_lts<lts::probabilistic_lts_lts_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
       BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
       BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
       BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
 
-      std::cerr << "FSM FORMAT\n";
-      lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
+      if (!contains_probabilities)
+      {
+        std::cerr << "FSM FORMAT\n";
+        lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
+        BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
+      }
+
+      std::cerr << "PROBABILISTIC FSM FORMAT\n";
+      lts::probabilistic_lts_fsm_t result3 = translate_lps_to_lts<lts::probabilistic_lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
 
       BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
       BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
@@ -201,7 +229,7 @@ BOOST_AUTO_TEST_CASE(test_abp)
     "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);\n"
   );
   check_lps2lts_specification(abp, 74, 92, 20);
-  check_lps2lts_specification(abp, 74, 92, 20, "tau");
+  check_lps2lts_specification(abp, 74, 92, 20, false, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_confluence)
@@ -225,7 +253,7 @@ BOOST_AUTO_TEST_CASE(test_confluence)
     "init P(1, S_FSM_UNINITIALIZED, []);\n"
   );
   check_lps2lts_specification(spec, 4, 3, 3);
-  check_lps2lts_specification(spec, 3, 2, 3, "tau");
+  check_lps2lts_specification(spec, 3, 2, 3, false, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_function_updates)
@@ -561,6 +589,107 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
   );
   check_lps2lts_specification(spec, 1, 8, 9);
 }
+
+BOOST_AUTO_TEST_CASE(test_whether_probabilistic_state_spaces_are_generated_correctly)   // Related to #1542
+{
+  std::string spec(
+    "act a;\n"
+    "proc P(b:Bool) = b->a.P(false);\n"
+    "init dist b: Bool[if(b, 1 / 4, 3 / 4)] . P(b);\n"
+  );
+  const bool contains_probabilities=true;
+  check_lps2lts_specification(spec, 2, 1, 2, contains_probabilities);
+}
+
+/* Test does not succeed as yet and is therefore outcommented. 
+BOOST_AUTO_TEST_CASE(coins_simulate_dice)   // Example from the probabilistic examples directory. 
+{
+    std::string spec(
+    "act  flip: Bool;\n"
+    "     dice: Nat;\n"
+    "\n"
+    "glob dc,dc3,dc4,dc5,dc6,dc7,dc8,dc9,dc10,dc11,dc12,dc13,dc14,dc15,dc16,dc17,dc18,dc19: Bool;\n"
+    "     dc1,dc2: Nat;\n"
+    "\n"
+    "proc P(s1: Pos, b3,b2: Bool, s,d: Nat) =\n"
+    "       (s1 == 1 && b2 && s == 0) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc3, b2 = b2, s = 1, d = 0)\n"
+    "     + (s1 == 1 && !b2 && s == 0) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc4, b2 = b2, s = 2, d = 0)\n"
+    "     + (s1 == 1 && b2 && s == 1 && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc5, b2 = b2, s = 3, d = 0)\n"
+    "     + (s1 == 1 && !b2 && s == 1 && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc6, b2 = b2, s = 4, d = 0)\n"
+    "     + (s1 == 1 && b2 && s == 2 && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc7, b2 = b2, s = 5, d = 0)\n"
+    "     + (s1 == 1 && !b2 && s == 2 && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc8, b2 = b2, s = 6, d = 0)\n"
+    "     + (s1 == 1 && b2 && s == 3 && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc9, b2 = b2, s = 1, d = 0)\n"
+    "     + (s1 == 1 && !b2 && s == 3 && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc10, b2 = b2, s = 7, d = 1)\n"
+    "     + (s1 == 1 && b2 && s == 4 && !(s == 3) && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc11, b2 = b2, s = 7, d = 2)\n"
+    "     + (s1 == 1 && !b2 && s == 4 && !(s == 3) && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc12, b2 = b2, s = 7, d = 3)\n"
+    "     + (s1 == 1 && b2 && s == 5 && !(s == 4) && !(s == 3) && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc13, b2 = b2, s = 7, d = 4)\n"
+    "     + (s1 == 1 && !b2 && s == 5 && !(s == 4) && !(s == 3) && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc14, b2 = b2, s = 7, d = 5)\n"
+    "     + (s1 == 1 && b2 && s == 6 && !(s == 5) && !(s == 4) && !(s == 3) && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc15, b2 = b2, s = 7, d = 6)\n"
+    "     + (s1 == 1 && !b2 && s == 6 && !(s == 5) && !(s == 4) && !(s == 3) && !(s == 2) && !(s == 1) && !(s == 0)) ->\n"
+    "         flip(b2) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc16, b2 = b2, s = 2, d = 0)\n"
+    "     + (s1 == 1 && s == 7) ->\n"
+    "         dice(d) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc17, b2 = b2)\n"
+    "     + (s1 == 2 && b3) ->\n"
+    "         flip(b3) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc18, b2 = b2, s = 1, d = 0)\n"
+    "     + (s1 == 2 && !b3) ->\n"
+    "         flip(b3) .\n"
+    "         dist b2: Bool[1 / 2] .\n"
+    "         P(s1 = 1, b3 = dc19, b2 = b2, s = 2, d = 0)\n"
+    "     + delta;\n"
+    "\n"
+    "init dist b3: Bool[1 / 2] . P(2, b3, dc, dc1, dc2);\n"
+  );
+  const bool contains_probabilities=true;
+  check_lps2lts_specification(spec, 26, 26, 9, contains_probabilities);
+} */
+
+
+
 
 #else // ndef MCRL2_SKIP_LONG_TESTS
 
