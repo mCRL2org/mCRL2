@@ -119,30 +119,7 @@ class lpscleave_tool : public input_output_tool
         if (m_right_process)
         {
           // Take the complement of the indices.
-          std::list<std::size_t> complement;
-
-          auto it = m_indices.begin();
-          for (std::size_t index = 0; index < spec.process().action_summands().size(); ++index)
-          {
-            // Invariant: The index of *it is always higher than the loop index or it is the end
-            if (it != m_indices.end())
-            {
-              if (*it < index)
-              {
-                // We have past the last index of the array.
-                ++it;
-              }
-              if (it != m_indices.end() && *it == index)
-              {
-                // This summand was already created above.
-                continue;
-              }
-
-              complement.emplace_back(index);
-            }
-          }
-
-          m_indices = complement;
+          m_indices = get_other_indices(spec.process(), m_indices);
 
           // Take the complement of the parameters
           parameters = get_other_parameters(spec.process(), parameters);
