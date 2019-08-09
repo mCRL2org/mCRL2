@@ -114,6 +114,8 @@ class lpscleave_tool : public input_output_tool
         auto parameters = project_parameters(spec.process().process_parameters(), m_parameters);
 
         m_indices.sort();
+        m_indices.unique();
+
         if (m_right_process)
         {
           // Take the complement of the indices.

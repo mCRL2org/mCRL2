@@ -98,6 +98,8 @@ lps::stochastic_action_summand cleave_summand(
 {
   lps::stochastic_action_summand summand = spec.process().action_summands()[summand_index];
 
+  /// Compute the set S^i_V
+
   // Find the dependencies of the condition.
   std::set<data::variable> dependencies = data::find_free_variables(summand.condition());
 
@@ -144,7 +146,6 @@ lps::stochastic_action_summand cleave_summand(
   dependencies.insert(assignment_dependencies.begin(), assignment_dependencies.end());
   dependencies.insert(other_assignment_dependencies.begin(), other_assignment_dependencies.end());
 
-  print_names(std::string("Dependencies of summand ") += std::to_string(summand_index), dependencies);
   // Remove the global variables.
 
   // This version crashes, but would be nicer/more efficient:
@@ -153,6 +154,8 @@ lps::stochastic_action_summand cleave_summand(
   {
     dependencies.erase(variable);
   }
+
+  print_names(std::string("Dependencies (S^i_X) of summand ") += std::to_string(summand_index), dependencies);
 
   // Add a summation for every parameter of the other process that we depend on.
   data::variable_list variables = summand.summation_variables();
@@ -197,6 +200,7 @@ lps::stochastic_action_summand cleave_summand(
     {
       if (process::is_tau(action))
       {
+        mCRL2log(log::info) << "Replaced tau.\n";
         actions.push_front(intern);
       }
       else
@@ -205,9 +209,11 @@ lps::stochastic_action_summand cleave_summand(
       }
     }
 
+    if (other_assignment_dependencies.empty() && action_dependencies.empty() && )
+
     if (!is_independent(parameters, dependencies, other_assignments))
     {
-      // This summand is dependent on the other process.
+      // This summand depends on the other process.
       actions.push_front(process::action(sync_labels.back(), values));
     }
     else
@@ -237,7 +243,10 @@ lps::stochastic_action_summand cleave_summand(
 }
 
 /// \brief Performs the a dependency cleave based on the given parameters V, and the indices J.
-stochastic_specification dependency_cleave(const stochastic_specification& spec, const data::variable_list& parameters, const std::list<std::size_t>& indices, bool right_process)
+lps::stochastic_specification dependency_cleave(const lps::stochastic_specification& spec,
+  const data::variable_list& parameters,
+  const std::list<std::size_t>& indices,
+  bool right_process)
 {
   // Check sanity conditions, no timed or stochastic processes.
   auto& process = spec.process();
