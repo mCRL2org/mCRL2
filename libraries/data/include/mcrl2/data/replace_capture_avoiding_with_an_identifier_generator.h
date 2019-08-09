@@ -88,6 +88,39 @@ class substitution_updater_with_an_identifier_generator
     }
 };
 
+template <typename Substitution, typename IdentifierGenerator>
+data::variable update_substitution(Substitution& sigma, const data::variable& v, const std::multiset<data::variable>& V, IdentifierGenerator& id_generator)
+{
+  using utilities::detail::contains;
+  if (!contains(V, v) && sigma(v) == v)
+  {
+    return v;
+  }
+  else
+  {
+    id_generator.add_identifier(v.name());
+    data::variable w(id_generator(v.name()), v.sort());
+
+    while (sigma(w) != w || contains(V, w))
+    {
+      w = data::variable(id_generator(v.name()), v.sort());
+    }
+    sigma[v] = w;
+    return w;
+  }
+}
+
+template <typename Substitution, typename IdentifierGenerator, typename VariableContainer>
+VariableContainer update_substitution(Substitution& sigma, const VariableContainer& v, const std::multiset<data::variable>& V, IdentifierGenerator& id_generator)
+{
+  std::vector<data::variable> result;
+  for (typename VariableContainer::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    result.push_back(update_substitution(sigma, *i, V, id_generator));
+  }
+  return VariableContainer(result.begin(), result.end());
+}
+
 // Helper code for replace_capture_avoiding_variables_with_an_identifier_generator.
 template<template<class> class Builder,
   template<template<class> class, class, class, class> class Binder, class Substitution, class IdentifierGenerator>

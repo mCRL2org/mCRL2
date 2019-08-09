@@ -110,91 +110,6 @@ apply_replace_capture_avoiding_variables_builder(Substitution& sigma, std::multi
   return replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>(sigma, V);
 }
 
-// Below the definitions are given for capture avoiding subsitution witn an identifier generator. 
-template <template <class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
-struct add_capture_avoiding_replacement_with_an_identifier_generator: public data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
-{
-  typedef data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-  using super::update;
-  using super::update_sigma;
-
-  data::assignment_list::const_iterator find_variable(const data::assignment_list& a, const data::variable& v) const
-  {
-    for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
-    {
-      if (i->lhs() == v)
-      {
-        return i;
-      }
-    }
-    return a.end();
-  }
-
-  add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
-    : super(sigma, id_generator)
-  { }
-
-  process::process_expression apply(const process::process_instance_assignment& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    const data::assignment_list& a = x.assignments();
-    std::vector<data::assignment> v;
-
-    for (const data::variable& variable: x.identifier().variables())
-    {
-      const data::assignment_list::const_iterator k = find_variable(a, variable);
-      if (k == a.end())
-      {
-        data::data_expression e = apply(variable);
-        if (e != variable)
-        {
-          v.emplace_back(variable, e);
-        }
-      }
-      else
-      {
-        v.emplace_back(k->lhs(), apply(k->rhs()));
-      }
-    }
-    process::process_expression result = process::process_instance_assignment(x.identifier(), data::assignment_list(v.begin(), v.end()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process_expression apply(const sum& x)
-  {
-    data::variable_list v = update_sigma.push(x.variables());
-    process_expression result = sum(v, apply(x.operand()));
-    update_sigma.pop(v);
-    return result;
-  }
-};
-
-template <template <class> class Builder, template <template <class> class, class, class, class> class Binder, class Substitution, class IdentifierGenerator>
-struct replace_capture_avoiding_variables__with_an_identifier_generator_builder: public Binder<Builder, replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator>
-{
-  typedef Binder<Builder, replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-  using super::update;
-
-  replace_capture_avoiding_variables__with_an_identifier_generator_builder(Substitution& sigma, IdentifierGenerator& id_generator)
-    : super(sigma, id_generator)
-  { }
-};
-
-template <template <class> class Builder, template <template <class> class, class, class, class> class Binder, class Substitution, class IdentifierGenerator>
-replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>
-apply_replace_capture_avoiding_variables__with_an_identifier_generator_builder(Substitution& sigma, IdentifierGenerator& id_generator)
-{
-  return replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>(sigma, id_generator);
-}
-/// \endcond
-
 } // namespace detail
 
 //--- start generated process replace code ---//
@@ -388,46 +303,6 @@ T replace_variables_capture_avoiding(const T& x,
   return process::replace_variables_capture_avoiding(x, sigma, substitution_variables(sigma));
 }
 //--- end generated process replace_capture_avoiding code ---//
-
-//--- start generated process replace_capture_avoiding_with_identifier_generator code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
-///          it requires an identifier generator that generates strings for fresh variables. These
-///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
-///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
-
-template <typename T, typename Substitution, typename IdentifierGenerator>
-void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
-                       Substitution& sigma,
-                       IdentifierGenerator& id_generator,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                      )
-{
-  data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<process::data_expression_builder, process::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
-}
-
-/// \brief Applies sigma as a capture avoiding substitution to x using an identifier generator..
-/// \details This substitution function is much faster than replace_variables_capture_avoiding, but
-///          it requires an identifier generator that generates strings for fresh variables. These
-///          strings must be unique in the sense that they have not been used for other variables.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A mutable substitution of which it can efficiently be checked whether a variable occurs in its
-///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
-/// \param id_generator A generator that generates unique strings, not yet used as variable names.
-/// \return The result is the term x to which sigma has been applied.
-template <typename T, typename Substitution, typename IdentifierGenerator>
-T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
-                    Substitution& sigma,
-                    IdentifierGenerator& id_generator,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                   )
-{
-  return data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<process::data_expression_builder, process::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(x);
-}
-//--- end generated process replace_capture_avoiding_with_identifier_generator code ---//
 
 struct process_identifier_assignment
 {

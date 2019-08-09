@@ -42,6 +42,7 @@
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/lps/find.h"
+#include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
 
 //mCRL2 data
 #include "mcrl2/data/structured_sort.h"
