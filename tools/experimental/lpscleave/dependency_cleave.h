@@ -38,6 +38,23 @@ bool is_independent(const data::variable_list& parameters, const std::set<data::
   return std::includes(parameters.begin(), parameters.end(), dependencies.begin(), dependencies.end()) && other_assignments.empty();
 }
 
+template<typename LinearProcess>
+data::variable_list get_other_parameters(const LinearProcess& process, const data::variable_list& parameters)
+{
+  // The parameters of the "other" component process.
+  data::variable_list other_parameters;
+
+  for (auto& param : process.process_parameters())
+  {
+    if (std::find(parameters.begin(), parameters.end(), param) == parameters.end())
+    {
+      other_parameters.push_front(param);
+    }
+  }
+
+  return other_parameters;
+}
+
 /// \brief Creates a single summand for the cleave process.
 template<bool owning = false>
 lps::stochastic_action_summand cleave_summand(
@@ -185,15 +202,7 @@ stochastic_specification dependency_cleave(const stochastic_specification& spec,
   }
 
   // The parameters of the "other" component process.
-  data::variable_list other_parameters;
-
-  for (auto& param : process.process_parameters())
-  {
-    if (std::find(parameters.begin(), parameters.end(), param) == parameters.end())
-    {
-      other_parameters.push_front(param);
-    }
-  }
+  data::variable_list other_parameters = get_other_parameters(process, parameters);
 
   // Extend the action specification with an actsync (that is unique) for every summand with the correct sorts.
   std::vector<process::action_label> sync_labels;

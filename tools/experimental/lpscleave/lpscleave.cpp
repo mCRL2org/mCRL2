@@ -55,13 +55,13 @@ std::list<std::string> split_actions(const std::string& s)
   return result;
 }
 
-/// \brief Prints the parameters of the given LPS as comma separated values.
-void print_parameters(const stochastic_specification& spec)
+/// \brief Prints the parameters as comma separated values.
+void print_parameters(const data::variable_list& parameters)
 {
   mCRL2log(log_level_t::info) << "Parameters: ";
 
   bool first = true;
-  for (auto& param : spec.process().process_parameters())
+  for (auto& param : parameters)
   {
     if (!first)
     {
@@ -123,7 +123,7 @@ class lpscleave_tool : public input_output_tool
       if (m_parameters.empty())
       {
         // Print the parameters and exit
-        print_parameters(spec);
+        print_parameters(spec.process().process_parameters());
       }
       else
       {
@@ -132,9 +132,44 @@ class lpscleave_tool : public input_output_tool
         // For now, the parameters are given by the user.
         auto parameters = project_parameters(spec.process().process_parameters(), m_parameters);
 
-        // Cleave the process, requires the indices to be sorted.
         m_indices.sort();
-        stochastic_specification left_cleave = dependency_cleave(spec, parameters, m_indices);
+        if (m_right_process)
+        {
+          // Take the complement of the indices.
+          std::list<std::size_t> complement;
+
+          auto it = m_indices.begin();
+          for (std::size_t index = 0; index < spec.process().action_summands().size(); ++index)
+          {
+            // Invariant: The index of *it is always higher than the loop index or it is the end
+            if (it != m_indices.end())
+            {
+              if (*it < index)
+              {
+                // We have past the last index of the array.
+                ++it;
+              }
+              if (it != m_indices.end() && *it == index)
+              {
+                // This summand was already created above.
+                continue;
+              }
+
+              complement.emplace_back(index);
+            }
+          }
+
+          m_indices = complement;
+
+          // Take the complement of the parameters
+          parameters = get_other_parameters(spec.process(), parameters);
+
+          // Print to ensure that the complement is correct.
+          print_parameters(parameters);
+        }
+
+        // Cleave the process, requires the indices to be sorted.
+        stochastic_specification left_cleave = dependency_cleave(spec, parameters, m_indices, m_right_process);
 
         // Save the resulting left-cleave.
         if (output_filename().empty())
