@@ -5977,9 +5977,20 @@ class specification_basic_type
       const variable& var,
       const data_expression_list& conditionlist)
     {
-      const data_expression unique=representative_generator_internal(var.sort(),false);
-      const data_expression newcondition=equal_to(var,unique);
-      return extend(newcondition,conditionlist);
+      try 
+      {
+        const data_expression unique=representative_generator_internal(var.sort(),false);
+        const data_expression newcondition=equal_to(var,unique);
+        return extend(newcondition,conditionlist);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        // The representative generator failed to find a term of var.sort(). 
+        // No condition is generated, meaning that var will be unrestrained. This
+        // is correct, and as the var.sort() has no concrete value, this will most
+        // likely not effect matters as state space generation. 
+        return conditionlist;
+      }
     }
 
 
@@ -6033,9 +6044,9 @@ class specification_basic_type
       variable_list v1h=(v2.empty()?reverse(v1):v1);
 
       variable_list result=v2;
-      for (variable_list::const_iterator i1=v1h.begin(); i1!=v1h.end() ; ++i1)
+      for (const variable& v_: v1h)
       {
-        variable v=*i1;
+        variable v=v_;
         if (!mergeoccursin(v,v2,
                            matchinglist,renamingpars,renamingargs,process_parameters))
         {
