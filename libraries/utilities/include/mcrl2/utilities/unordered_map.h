@@ -24,7 +24,7 @@ namespace utilities
 template<typename Key,
          typename T,
          typename Hash = std::hash<Key>,
-         typename Equals = std::equal_to<Key>,
+         typename KeyEqual = std::equal_to<Key>,
          typename Allocator = std::allocator<Key>,
          bool ThreadSafe = false>
 class unordered_map
@@ -32,8 +32,18 @@ class unordered_map
 public:
   using key_type = Key;
   using mapped_type = T;
-  using value_type = std::pair<Key, T>;
-  using allocator = typename Allocator::template rebind<value_type>::other;
+  using value_type = std::pair<const Key, T>;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+
+  using hasher = Hash;
+  using key_equals = KeyEqual;
+  using allocator_type = typename Allocator::template rebind<value_type>::other;
+
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using pointer = typename std::allocator_traits<Allocator>::pointer;
+  using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 
 private:
 
@@ -41,56 +51,82 @@ private:
   struct PairHash
   {
     /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
-    PairHash() {}
+    PairHash(const hasher& hash)
+      : hash(hash)
+    {}
+
+    hasher hash;
 
     std::size_t operator()(const value_type& pair) const
     {
-      return Hash()(pair.first);
+      return hash(pair.first);
     }
 
     std::size_t operator()(const Key& key, const T&) const
     {
-      return Hash()(key);
+      return hash(key);
     }
 
     std::size_t operator()(const Key& key) const
     {
-      return Hash()(key);
+      return hash(key);
     }
   };
 
   // Compares only the keys of each pair.
   struct PairEquals
   {
+    PairEquals(const key_equals& equals)
+      : equals(equals)
+    {}
+
+    key_equals equals;
+
     bool operator()(const value_type& first, const value_type& second) const
     {
-      return Equals()(first.first, second.first);
+      return equals(first.first, second.first);
     }
 
     bool operator()(const value_type& first, const Key& key, const T&) const
     {
-      return Equals()(first.first, key);
+      return equals(first.first, key);
     }
 
     bool operator()(const value_type& first, const Key& key) const
     {
-      return Equals()(first.first, key);
+      return equals(first.first, key);
     }
   };
 
-  using Set = unordered_set<value_type, PairHash, PairEquals, allocator, ThreadSafe>;
+  using Set = unordered_set<value_type, PairHash, PairEquals, allocator_type, ThreadSafe>;
 
   Set m_set; ///< The underlying set storing <key, value> pairs.
 
 public:
   using iterator = typename Set::iterator;
   using const_iterator = typename Set::const_iterator;
+  using local_iterator = typename Set::local_iterator;
+  using const_local_iterator = typename Set::const_local_iterator;
+
+  unordered_map()
+    : m_set(0, PairHash(hasher()), PairEquals(key_equals()))
+  {}
 
   /// \brief Constructs an unordered_map that can store initial_size number of elements before resizing.
-  unordered_map(std::size_t initial_size)
-    : m_set(initial_size)
+  unordered_map(std::size_t initial_size,
+    const hasher& hash = hasher(),
+    const key_equals& equals = key_equals())
+    : m_set(initial_size, PairHash(hash), PairEquals(equals))
   {}
-  unordered_map() {}
+
+  iterator begin() { return m_set.begin(); }
+  iterator end() { return m_set.end(); }
+
+  const_iterator begin() const { return m_set.begin(); }
+  const_iterator end() const { return m_set.end(); }
+
+  const_iterator cbegin() const { return m_set.begin(); }
+  const_iterator cend() const { return m_set.end(); }
 
   /// \brief Provides access to the value associated with the given key, constructs a default
   ///        value whenever the key was undefined.
@@ -99,14 +135,10 @@ public:
   /// \brief Provides access to the value associated with the given key.
   const T& at(const Key& key) const;
 
-  iterator begin() { return m_set.begin(); }
-  iterator end() { return m_set.end(); }
-
-  const_iterator begin() const { return m_set.begin(); }
-  const_iterator end() const { return m_set.end(); }
-
   std::size_t capacity() { return m_set.capacity(); }
+
   void clear() { m_set.clear(); }
+
   std::size_t count(const Key& key) const { return m_set.count(key); }
 
   template<typename ...Args>

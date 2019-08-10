@@ -61,6 +61,11 @@ public:
   using key_equal = Equals;
   using allocator_type = typename bucket_type::NodeAllocator;
 
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using pointer = typename std::allocator_traits<Allocator>::pointer;
+  using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
+
   using iterator = unordered_set_iterator<key_type, bucket_type, Allocator, false>;
   using local_iterator = typename bucket_type::iterator;
   using const_iterator = unordered_set_iterator<key_type, bucket_type, Allocator, true>;
@@ -219,8 +224,8 @@ private:
 
   float m_max_load_factor = 1.0f;
 
-  hasher m_hash;
-  key_equal m_equals;
+  hasher m_hash = hasher();
+  key_equal m_equals = key_equal();
   allocator_type m_allocator;
 };
 
