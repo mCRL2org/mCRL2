@@ -348,7 +348,6 @@ class specification_basic_type
         }
       }
     }
-
     objectdatatype& objectIndex(const aterm_appl& o) 
     {
       detail_check_objectdata(o);
@@ -2813,7 +2812,7 @@ class specification_basic_type
     void procstovarheadGNF(const std::vector < process_identifier>& procs)
     {
       /* transform the processes in procs into newprocs */
-      for (const process_identifier& i:procs)
+      for (const process_identifier& i: procs)
       {
         objectdatatype& object=objectIndex(i);
 
@@ -11032,10 +11031,10 @@ class specification_basic_type
 /* -----------------------------   split body  --------------------------- */
 
     process_expression split_body(
-      const process_expression& t, // intentionally not a reference.
+      const process_expression& t, 
       std::map < process_identifier,process_identifier >& visited_id,
       std::map < process_expression,process_expression>& visited_proc,
-      const variable_list& parameters)  //intentionally not a reference.
+      const variable_list& parameters)  
     {
       /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and

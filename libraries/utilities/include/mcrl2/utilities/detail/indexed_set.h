@@ -88,7 +88,7 @@ inline void indexed_set<Key, Hash, Equals, Allocator, ThreadSafe>::resize_hashta
 
 template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
 inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::indexed_set()
-      : m_hashtable(128,detail::EMPTY)
+      : indexed_set(128)
 {
 } 
 
@@ -108,7 +108,7 @@ inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::size_type ind
     std::size_t v=m_hashtable[c];
     if (v == detail::EMPTY)
     {
-      return detail::EMPTY; /* Not found. */
+      return npos; /* Not found. */
     }
     assert(v<m_keys.size());
     // if (Equals(key,m_keys[v]))
@@ -122,7 +122,7 @@ inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::size_type ind
   }
   while (true);
 
-  return detail::EMPTY; /* Not found. */
+  return npos; /* Not found. */
 }
 
 template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>

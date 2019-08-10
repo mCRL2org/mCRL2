@@ -14,7 +14,7 @@
 
 #define MCRL2_GUARDS 1
 
-#include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/utilities/indexed_set.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/detail/io.h"
@@ -82,7 +82,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
 class pins_data_type
 {
   protected:
-    atermpp::indexed_set<atermpp::aterm> m_indexed_set;
+    utilities::indexed_set<atermpp::aterm> m_indexed_set;
     const data::data_specification& m_data;
     const process::action_label_list& m_action_labels;
     bool m_is_bounded;
@@ -192,23 +192,23 @@ class pins_data_type
     /// \brief Returns the index of the value x
     std::size_t operator[](const atermpp::aterm& x)
     {
-      return m_indexed_set[x];
+      return m_indexed_set.insert(x).first;
     }
 
     /// \brief Returns the value at index i
     atermpp::aterm get(std::size_t i)
     {
-      return m_indexed_set.get(i);
+      return m_indexed_set.at(i);
     }
 
     /// \brief Returns the indexed_set holding the values
-    atermpp::indexed_set<atermpp::aterm>& indexed_set()
+    utilities::indexed_set<atermpp::aterm>& indexed_set()
     {
       return m_indexed_set;
     }
 
     /// \brief Returns the indexed_set holding the values
-    const atermpp::indexed_set<atermpp::aterm>& indexed_set() const
+    const utilities::indexed_set<atermpp::aterm>& indexed_set() const
     {
       return m_indexed_set;
     }
@@ -223,12 +223,12 @@ class state_data_type: public pins_data_type
 
     std::size_t expression2index(const data::data_expression& x)
     {
-      return m_indexed_set[x];
+      return m_indexed_set.insert(x).first;
     }
 
     data::data_expression index2expression(std::size_t i) const
     {
-      return static_cast<data::data_expression>(m_indexed_set.get(i));
+      return static_cast<data::data_expression>(m_indexed_set.at(i));
     }
 
   public:
@@ -293,23 +293,23 @@ class action_label_data_type: public pins_data_type
 
     std::string serialize(int i) const override
     {
-      return pp(m_indexed_set.get(i));
+      return pp(m_indexed_set.at(i));
     }
 
     std::size_t deserialize(const std::string& s) override
     {
-      return m_indexed_set[atermpp::read_term_from_string(s)];
+      return m_indexed_set.insert(atermpp::read_term_from_string(s)).first;
     }
 
     std::string print(int i) const override
     {
-      return lps::pp(lps::multi_action(atermpp::down_cast<atermpp::aterm_appl>(m_indexed_set.get(i))));
+      return lps::pp(lps::multi_action(atermpp::down_cast<atermpp::aterm_appl>(m_indexed_set.at(i))));
     }
 
     std::size_t parse(const std::string& s) override
     {
       lps::multi_action m = lps::parse_multi_action(s, m_action_labels, m_data);
-      return m_indexed_set[detail::multi_action_to_aterm(m)];
+      return m_indexed_set.insert(detail::multi_action_to_aterm(m)).first;
     }
 
     const std::string& name() const override
@@ -346,7 +346,7 @@ class pins
     std::vector<data::variable> m_parameters_list;
     std::vector<std::string> m_process_parameter_names;
 
-    atermpp::indexed_set<atermpp::aterm> m_guards;
+    utilities::indexed_set<atermpp::aterm> m_guards;
     std::vector<std::vector<std::size_t> > guard_parameters_list;
     std::vector<std::vector<std::size_t> > m_guard_info;
     std::vector<std::string> m_guard_names;
@@ -588,7 +588,7 @@ class pins
         {
           // check if the conjunct is new
           std::size_t at = m_guards.index(conjunct);
-          bool is_new = (at == atermpp::indexed_set<atermpp::aterm>::npos);
+          bool is_new = (at == utilities::indexed_set<atermpp::aterm>::npos);
           bool use_conjunct_as_guard = true;
 
           if (is_new) { // we have not encountered the guard yet
@@ -642,7 +642,7 @@ class pins
                 }
               }
               // add conjunct to the set of guards
-              at = m_guards[conjunct];
+              at = m_guards.insert(conjunct).first;
               m_guard_names.push_back(data::pp(conjunct));
               guard_parameters_list.push_back(guard_parameters);
             }
@@ -960,7 +960,7 @@ class pins
 
       // get the result by rewriting the guard with the substitution.
       data::data_expression result = m_generator_reduced.get_rewriter()(
-          static_cast<data::data_expression>(m_guards.get(guard)),
+          static_cast<data::data_expression>(m_guards.at(guard)),
           substitution);
 
       if(result == data::sort_bool::false_()) { // the guard rewrites to false.

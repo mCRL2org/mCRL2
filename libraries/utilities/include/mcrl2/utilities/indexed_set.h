@@ -19,6 +19,9 @@ namespace mcrl2
 namespace utilities
 {
 
+// TODO: As it stands Equals, Allocator and ThreadSafe are not used. 
+//       Either remove or make useful.
+//
 /// \brief A set that assigns each element an unique index.
 template<typename Key,
          typename Hash = std::hash<Key>,
@@ -56,6 +59,9 @@ public:
 
   typedef std::ptrdiff_t difference_type;
   
+  /// \brief Value returned when an element does not exist in the set.
+  /// \return Value indicating non existing element, equal to std::numeric_limits<std::size_t>::max(). 
+  static const size_type npos = std::numeric_limits<std::size_t>::max();
 
   // The interface of an unordered_map without the ability to remove individual elements.
 

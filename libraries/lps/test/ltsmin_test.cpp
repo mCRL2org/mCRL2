@@ -328,9 +328,12 @@ void test_serialisation()
   for(auto e : expressions)
   {
     std::string s = e.first;
+std::cerr << "STRING " << s << "\n";
     std::size_t type = e.second;
+std::cerr << "TYPE " << type << "\n";
 
     data::data_expression d1 = data::parse_data_expression(s, spec.data());
+std::cerr << "DATA EXPRESSION " << d1 << "\n";
     std::string serialised = p1.data_type(type).serialize(p1.data_type(type)[d1]);
     data::data_expression d2(p2.data_type(type).get(p2.data_type(type).deserialize(serialised)));
     std::cout << "string:     " << s << std::endl;
