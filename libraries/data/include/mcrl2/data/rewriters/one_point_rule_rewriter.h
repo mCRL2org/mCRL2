@@ -31,7 +31,7 @@ struct one_point_rule_subtitution_algorithm
   std::map<data::variable, std::vector<data::data_expression> > equalities;
   data::mutable_map_substitution<> sigma;
   std::set<data::variable> sigma_lhs_variables;
-  std::set<data::variable> sigma_rhs_variables; // variables appearing in the right hand side of the substitution
+  data::set_identifier_generator id_generator;
 
   // applies the substitution sigma to all right hand sides of equalities
   void apply_sigma()
@@ -40,7 +40,7 @@ struct one_point_rule_subtitution_algorithm
     {
       for (data::data_expression& e: p.second)
       {
-        e = data::replace_variables_capture_avoiding(e, sigma, sigma_rhs_variables);
+        e = data::replace_variables_capture_avoiding(e, sigma, id_generator);
       }
     }
   }
@@ -91,7 +91,10 @@ struct one_point_rule_subtitution_algorithm
           sigma[v] = e;
           sigma_lhs_variables.insert(v);
           std::set<data::variable> FV = data::find_free_variables(e);
-          sigma_rhs_variables.insert(FV.begin(), FV.end());
+          for (const data::variable& v: FV)
+          {
+            id_generator.add_identifier(v.name());
+          }
           to_be_removed.insert(v);
           to_be_removed.insert(FV.begin(), FV.end());
           break;

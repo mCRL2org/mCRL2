@@ -390,10 +390,14 @@ void rename_renamerule_variables(data::data_expression& rcond, process::action& 
     }
   }
 
-  std::set<data::variable> renamings_variables = data::substitution_variables(renamings);
-  rcond = data::replace_variables_capture_avoiding(rcond, renamings, renamings_variables);
-  rleft = process::replace_variables_capture_avoiding(rleft, renamings, renamings_variables);
-  rright = process::replace_variables_capture_avoiding(rright, renamings, renamings_variables);
+  data::set_identifier_generator id_generator;
+  for (const data::variable& v: data::substitution_variables(renamings))
+  {
+    id_generator.add_identifier(v.name());
+  }
+  rcond = data::replace_variables_capture_avoiding(rcond, renamings, id_generator);
+  rleft = process::replace_variables_capture_avoiding(rleft, renamings, id_generator);
+  rright = process::replace_variables_capture_avoiding(rright, renamings, id_generator);
 }
 
 /* ------------------------------------------ Normalise sorts ------------------------------------------ */

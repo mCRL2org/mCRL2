@@ -34,7 +34,7 @@ struct assignment_sequence_substitution: public std::unary_function<variable, da
 
   const assignment_list& assignments;
 
-  assignment_sequence_substitution(const assignment_list& assignments_)
+  explicit assignment_sequence_substitution(const assignment_list& assignments_)
     : assignments(assignments_)
   {}
 

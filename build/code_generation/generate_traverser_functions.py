@@ -151,7 +151,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).update(x);
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).update(x);
 }
 
 /// \\\\brief Applies the substitution sigma to x.
@@ -163,7 +163,7 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).apply(x);
+  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).apply(x);
 }
 
 /// \\\\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -176,7 +176,7 @@ void replace_free_variables(T& x,
                            )
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).update(x, bound_variables);
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).update(x, bound_variables);
 }
 
 /// \\\\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
@@ -189,71 +189,76 @@ T replace_free_variables(const T& x,
                         )
 {
   assert(data::is_simple_substitution(sigma));
-  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma).apply(x, bound_variables);
+  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
 }
 '''
 
 REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT = '''/// \\\\brief Applies sigma as a capture avoiding substitution to x.
 /// \\\\param x The object to which the subsitution is applied.
-/// \\\\param sigma A mutable substitution.
-/// \\\\param sigma_variables a container of variables.
-/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
-template <typename T, typename Substitution, typename VariableContainer>
+/// \\\\param sigma A substitution.
+/// \\\\param id_generator An identifier generator that generates names that do not appear in x and sigma
+template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                       Substitution& sigma,
-                       const VariableContainer& sigma_variables,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                      )
+                                        Substitution& sigma,
+                                        data::set_identifier_generator& id_generator,
+                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+)
 {
-  std::multiset<data::variable> V;
-  NAMESPACE::find_free_variables(x, std::inserter(V, V.end()));
-  V.insert(sigma_variables.begin(), sigma_variables.end());
-  data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V).update(x);
+  data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
+  data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma1).update(x);
 }
 
 /// \\\\brief Applies sigma as a capture avoiding substitution to x.
 /// \\\\param x The object to which the substiution is applied.
-/// \\\\param sigma A mutable substitution.
-/// \\\\param sigma_variables a container of variables.
-/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
-template <typename T, typename Substitution, typename VariableContainer>
+/// \\\\param sigma A substitution.
+/// \\\\param id_generator An identifier generator that generates names that do not appear in x and sigma
+template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                    Substitution& sigma,
-                    const VariableContainer& sigma_variables,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                   )
+                                     Substitution& sigma,
+                                     data::set_identifier_generator& id_generator,
+                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+)
 {
-  std::multiset<data::variable> V;
-  NAMESPACE::find_free_variables(x, std::inserter(V, V.end()));
-  V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V).apply(x);
+  data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
+  return data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
 }
 
 /// \\\\brief Applies sigma as a capture avoiding substitution to x.
 /// \\\\param x The object to which the subsitution is applied.
-/// \\\\param sigma A mutable substitution.
-/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
+/// \\\\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                       Substitution& sigma,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                      )
+                                        Substitution& sigma,
+                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+)
 {
-  NAMESPACE::replace_variables_capture_avoiding(x, sigma, substitution_variables(sigma));
+  data::set_identifier_generator id_generator;
+  id_generator.add_identifiers(NAMESPACE::find_identifiers(x));
+  for (const data::variable& v: substitution_variables(sigma))
+  {
+    id_generator.add_identifier(v.name());
+  }
+  NAMESPACE::replace_variables_capture_avoiding(x, sigma, id_generator);
 }
 
 /// \\\\brief Applies sigma as a capture avoiding substitution to x.
 /// \\\\param x The object to which the substiution is applied.
-/// \\\\param sigma A mutable substitution.
-/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
+/// \\\\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                    Substitution& sigma,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                   )
+                                     Substitution& sigma,
+                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+)
 {
-  return NAMESPACE::replace_variables_capture_avoiding(x, sigma, substitution_variables(sigma));
-}'''
+  data::set_identifier_generator id_generator;
+  id_generator.add_identifiers(NAMESPACE::find_identifiers(x));
+  for (const data::variable& v: substitution_variables(sigma))
+  {
+    id_generator.add_identifier(v.name());
+  }
+  return NAMESPACE::replace_variables_capture_avoiding(x, sigma, id_generator);
+}
+'''
 
 REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT = ''' /// \\\\brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
 /// \\\\details This substitution function is much faster than replace_variables_capture_avoiding, but
@@ -322,7 +327,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_binding>(o).apply(x);
+  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_traverser_binding>(o).apply(x);
 }
 
 /// \\\\brief Returns all variables that occur in an object
@@ -333,7 +338,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_binding>(o, bound).apply(x);
+  data::detail::make_find_free_variables_traverser<NAMESPACE::data_expression_traverser, NAMESPACE::add_data_variable_traverser_binding>(o, bound).apply(x);
 }
 
 /// \\\\brief Returns all variables that occur in an object
@@ -451,24 +456,24 @@ def generate_replace_functions():
 
 def generate_replace_capture_avoiding_functions():
     result = True
-    result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace.h'                  , 'data'            , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace.h'                    , 'lps'             , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace.h'                  , 'pbes_system'     , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace_capture_avoiding.h'                  , 'data'            , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace_capture_avoiding.h'                    , 'lps'             , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding.h', 'action_formulas' , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding.h', 'regular_formulas', 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding.h', 'state_formulas'  , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace_capture_avoiding.h'                  , 'pbes_system'     , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace_capture_avoiding.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     return result
 
 def generate_replace_capture_avoiding_with_identifier_generator_functions():
     result = True
-    result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace.h'                  , 'data'            , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace.h'                    , 'lps'             , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace.h'                  , 'pbes_system'     , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
-    result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace.h'            , 'process'         , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace_capture_avoiding_with_an_identifier_generator.h'                  , 'data'            , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h'                    , 'lps'             , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding_with_an_identifier_generator.h', 'action_formulas' , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding_with_an_identifier_generator.h', 'regular_formulas', 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding_with_an_identifier_generator.h', 'state_formulas'  , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/pbes/include/mcrl2/pbes/replace_capture_avoiding_with_an_identifier_generator.h'                  , 'pbes_system'     , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
+    result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace_capture_avoiding_with_an_identifier_generator.h'            , 'process'         , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     return result
 
 def generate_find_functions():

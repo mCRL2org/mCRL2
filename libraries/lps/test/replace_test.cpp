@@ -166,9 +166,8 @@ void test_action_list()
   l1 = process::replace_variables_capture_avoiding(l1, sigma);
   BOOST_CHECK(l1 == l2);
 
-  std::set<data::variable> v;
   l1 = process::replace_variables(l1, sigma);
-  l1 = process::replace_variables_capture_avoiding(l1, sigma, v);
+  l1 = process::replace_variables_capture_avoiding(l1, sigma);
 }
 
 BOOST_AUTO_TEST_CASE(test_main)

@@ -133,10 +133,8 @@ void replace_variables_capture_avoiding(T& x,
                                         typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
 )
 {
-std::cout << "replace_capture_avoiding: " << x << sigma << " = ";
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma1).update(x);
-std::cout << x << std::endl;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.
@@ -151,9 +149,7 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  auto result = data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
-std::cout << "replace_capture_avoiding: " << x << sigma << " = " << result << std::endl;
-  return result;
+  return data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.

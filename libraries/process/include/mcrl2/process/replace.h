@@ -16,101 +16,13 @@
 #include "mcrl2/process/add_binding.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/find.h"
+#include "mcrl2/process/replace_capture_avoiding.h"
 
 namespace mcrl2
 {
 
 namespace process
 {
-
-namespace detail {
-
-/// \cond INTERNAL_DOCS
-template <template <class> class Builder, class Derived, class Substitution>
-struct add_capture_avoiding_replacement: public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
-{
-  typedef data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-  using super::update;
-  using super::sigma;
-  using super::update_sigma;
-
-  data::assignment_list::const_iterator find_variable(const data::assignment_list& a, const data::variable& v) const
-  {
-    for (auto i = a.begin(); i != a.end(); ++i)
-    {
-      if (i->lhs() == v)
-      {
-        return i;
-      }
-    }
-    return a.end();
-  }
-
-  add_capture_avoiding_replacement(Substitution& sigma, std::multiset<data::variable>& V)
-    : super(sigma, V)
-  { }
-
-  process::process_expression apply(const process::process_instance_assignment& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    const data::assignment_list& a = x.assignments();
-    std::vector<data::assignment> v;
-
-    for (const data::variable& variable: x.identifier().variables())
-    {
-      auto k = find_variable(a, variable);
-      if (k == a.end())
-      {
-        data::data_expression e = apply(variable);
-        if (e != variable)
-        {
-          v.emplace_back(variable, e);
-        }
-      }
-      else
-      {
-        v.emplace_back(k->lhs(), apply(k->rhs()));
-      }
-    }
-    process::process_expression result = process::process_instance_assignment(x.identifier(), data::assignment_list(v.begin(), v.end()));
-    static_cast<Derived&>(*this).leave(x);
-    return result;
-  }
-
-  process_expression apply(const sum& x)
-  {
-    data::variable_list v = update_sigma.push(x.variables());
-    process_expression result = sum(v, apply(x.operand()));
-    update_sigma.pop(v);
-    return result;
-  }
-};
-
-template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
-struct replace_capture_avoiding_variables_builder: public Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>
-{
-  typedef Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-  using super::update;
-
-  replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
-    : super(sigma, V)
-  { }
-};
-
-template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
-replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>
-apply_replace_capture_avoiding_variables_builder(Substitution& sigma, std::multiset<data::variable>& V)
-{
-  return replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>(sigma, V);
-}
-
-} // namespace detail
 
 //--- start generated process replace code ---//
 template <typename T, typename Substitution>
@@ -239,70 +151,6 @@ T replace_free_variables(const T& x,
   return data::detail::make_replace_free_variables_builder<process::data_expression_builder, process::add_data_variable_builder_binding>(sigma).apply(x, bound_variables);
 }
 //--- end generated process replace code ---//
-
-//--- start generated process replace_capture_avoiding code ---//
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A mutable substitution.
-/// \param sigma_variables a container of variables.
-/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
-template <typename T, typename Substitution, typename VariableContainer>
-void replace_variables_capture_avoiding(T& x,
-                       Substitution& sigma,
-                       const VariableContainer& sigma_variables,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                      )
-{
-  std::multiset<data::variable> V;
-  process::find_free_variables(x, std::inserter(V, V.end()));
-  V.insert(sigma_variables.begin(), sigma_variables.end());
-  data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V).update(x);
-}
-
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A mutable substitution.
-/// \param sigma_variables a container of variables.
-/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
-template <typename T, typename Substitution, typename VariableContainer>
-T replace_variables_capture_avoiding(const T& x,
-                    Substitution& sigma,
-                    const VariableContainer& sigma_variables,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                   )
-{
-  std::multiset<data::variable> V;
-  process::find_free_variables(x, std::inserter(V, V.end()));
-  V.insert(sigma_variables.begin(), sigma_variables.end());
-  return data::detail::apply_replace_capture_avoiding_variables_builder<process::data_expression_builder, process::detail::add_capture_avoiding_replacement>(sigma, V).apply(x);
-}
-
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the subsitution is applied.
-/// \param sigma A mutable substitution.
-/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
-template <typename T, typename Substitution>
-void replace_variables_capture_avoiding(T& x,
-                       Substitution& sigma,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                      )
-{
-  process::replace_variables_capture_avoiding(x, sigma, substitution_variables(sigma));
-}
-
-/// \brief Applies sigma as a capture avoiding substitution to x.
-/// \param x The object to which the substiution is applied.
-/// \param sigma A mutable substitution.
-/// \pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
-template <typename T, typename Substitution>
-T replace_variables_capture_avoiding(const T& x,
-                    Substitution& sigma,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                   )
-{
-  return process::replace_variables_capture_avoiding(x, sigma, substitution_variables(sigma));
-}
-//--- end generated process replace_capture_avoiding code ---//
 
 struct process_identifier_assignment
 {

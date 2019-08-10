@@ -179,9 +179,7 @@ void check_result(const std::string& expression, const std::string& result, cons
   {
     std::cout << "--- failure in " << title << " ---" << std::endl;
     std::cout << "expression      = " << expression << std::endl;
-    std::cout << "result          = " << result << std::endl;
-    std::cout << "expected result = " << expected_result << std::endl;
-    BOOST_CHECK(result == expected_result);
+    BOOST_CHECK_EQUAL(result, expected_result);
   }
 }
 
@@ -259,8 +257,7 @@ void test_replace_variables_capture_avoiding(const std::string& x_text, const st
 {
   data::data_expression x = parse_expression(x_text);
   data::mutable_map_substitution<> sigma = parse_substitution(sigma_text);
-  std::set<data::variable> sv = sigma_variables(sigma);
-  std::string result = data::pp(data::replace_variables_capture_avoiding(x, sigma, sv));
+  std::string result = data::pp(data::replace_variables_capture_avoiding(x, sigma));
   check_result(x_text + " sigma = " + sigma_text, result, expected_result, "replace_variables_capture_avoiding");
 }
 
@@ -268,13 +265,13 @@ void test_replace_variables_capture_avoiding()
 {
   test_replace_variables_capture_avoiding("v", "v: Bool := w", "w");
   test_replace_variables_capture_avoiding("forall x: Bool . x => y", "x: Bool := z", "forall x1: Bool. x1 => y");
-  test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := z", "forall x: Bool. x => z");
+  test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := z", "forall x1: Bool. x1 => z");
   test_replace_variables_capture_avoiding("forall x: Bool . x => y", "y: Bool := x", "forall x1: Bool. x1 => x");
   test_replace_variables_capture_avoiding("forall x: Bool . x => x1 => y", "y: Bool := x", "forall x2: Bool. x2 => x1 => x");
   test_replace_variables_capture_avoiding("x => x1 => y whr x = y end", "y: Bool := x", "x2 => x1 => x whr x2 = x end");
-  test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => (forall k: Bool. k => n)");
+  test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => (forall k1: Bool. k1 => n)");
   test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => (forall n2: Bool. n2 => n)");
-  test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => (forall k: Bool. k => n)");
+  test_replace_variables_capture_avoiding("forall n: Bool. n => forall k: Bool. k => m", "m: Bool := n", "forall n1: Bool. n1 => (forall k1: Bool. k1 => n)");
   test_replace_variables_capture_avoiding("forall n: Bool. n => forall n: Bool. n => m", "m: Bool := n", "forall n1: Bool. n1 => (forall n2: Bool. n2 => n)");
 }
 
@@ -294,23 +291,21 @@ void test_replace_free_variables()
   data::assignment_list vb;
   vb.push_front(b);
   data::assignment_list vc = data::replace_free_variables(va, sigma);
-  BOOST_CHECK(vb == vc);
+  BOOST_CHECK_EQUAL(vb, vc);
 }
 
 void test_ticket_1209()
 {
   std::string text = "n whr n = m, m = 3 end whr m = 255 end";
-  std::string expected_result = "n whr n = m2, m3 = 3 end whr m2 = 255 end";
+  std::string expected_result = "n1 whr n1 = m2, m3 = 3 end whr m2 = 255 end";
   data::data_expression x = data::parse_data_expression(text);
   data::mutable_map_substitution<> sigma;
   data::variable m("m", data::sort_pos::pos());
   data::variable m1("m1", data::sort_pos::pos());
   sigma[m] = m1;
-  std::set<data::variable> v;
-  v.insert(m1);
-  data::data_expression x1 = data::replace_variables_capture_avoiding(x, sigma, v);
+  data::data_expression x1 = data::replace_variables_capture_avoiding(x, sigma);
   std::string result = data::pp(x1);
-  BOOST_CHECK(result == expected_result);
+  BOOST_CHECK_EQUAL(result, expected_result);
 }
 
 BOOST_AUTO_TEST_CASE(test_main)

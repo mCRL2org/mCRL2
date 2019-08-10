@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_H
 #define MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_H
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/find.h"
@@ -49,6 +50,10 @@ struct capture_avoiding_substitution_updater
     auto i = updates.find(v);
     id_generator.remove_identifier(i->second.back().name());
     i->second.pop_back();
+    if (i->second.empty())
+    {
+      updates.erase(i);
+    }
   }
 
   // adds the assignments [variables := variables'] to sigma, and returns variables'
@@ -88,6 +93,17 @@ struct capture_avoiding_substitution_updater
     }
   }
 };
+
+template <typename Substitution>
+std::ostream& operator<<(std::ostream& out, const capture_avoiding_substitution_updater<Substitution>& sigma)
+{
+  std::vector<std::string> updates;
+  for (const auto& p: sigma.updates)
+  {
+    updates.push_back(data::pp(p.first) + " := " + core::detail::print_list(p.second));
+  }
+  return out << sigma.sigma << " with updates " << core::detail::print_list(updates);
+}
 
 template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
 struct replace_capture_avoiding_variables_builder: public Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>
@@ -215,10 +231,8 @@ void replace_variables_capture_avoiding(T& x,
                                         typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
 )
 {
-std::cout << "replace_capture_avoiding: " << x << sigma << " = ";
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma1).update(x);
-std::cout << x << std::endl;
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.
@@ -233,9 +247,7 @@ T replace_variables_capture_avoiding(const T& x,
 )
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
-  auto result = data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
-std::cout << "replace_capture_avoiding: " << x << sigma << " = " << result << std::endl;
-  return result;
+  return data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma1).apply(x);
 }
 
 /// \brief Applies sigma as a capture avoiding substitution to x.
