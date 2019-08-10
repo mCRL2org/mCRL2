@@ -32,8 +32,8 @@ static const std::size_t STEP = 1; /* The position on which the next hash entry 
 
 /* in the hashtable we use the following constant to indicate free positions */
 static const std::size_t EMPTY(std::numeric_limits<std::size_t>::max());
-static const float max_load=0.7;
-static const size_t minimal_hashtable_size=8;  // With a max_load of 0.75 the minimal size of the hashtable must be 8.
+static const float max_load = 0.7f;
+static const size_t minimal_hashtable_size = 8;  // With a max_load of 0.75 the minimal size of the hashtable must be 8.
 static const std::size_t PRIME_NUMBER = 999953;
 
 
@@ -46,7 +46,7 @@ std::size_t indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::put_in_hashtable(
   /* Find a place to insert key,
      and find whether key already exists */
 
-  std::size_t start = (Hash()(key)*detail::PRIME_NUMBER) % m_hashtable.size();
+  std::size_t start = (m_hasher(key)*detail::PRIME_NUMBER) % m_hashtable.size();
   std::size_t c = start;
   while (true)
   {
@@ -93,15 +93,18 @@ inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::indexed_set()
 } 
 
 template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
-inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::indexed_set(std::size_t initial_size)
-      : m_hashtable(std::max(initial_size,detail::minimal_hashtable_size),detail::EMPTY)
-{
-} 
+inline indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::indexed_set(std::size_t initial_size,
+  const hasher& hasher,
+  const key_equal& equals)
+      : m_hashtable(std::max(initial_size,detail::minimal_hashtable_size),detail::EMPTY),
+        m_hasher(hasher),
+        m_equals(equals)
+{}
 
 template <class Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe>
 inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::size_type indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::index(const Key& key) const
 {
-  std::size_t start = (Hash()(key)*detail::PRIME_NUMBER) % m_hashtable.size();
+  std::size_t start = (m_hasher(key)*detail::PRIME_NUMBER) % m_hashtable.size();
   std::size_t c = start;
   do
   {
@@ -111,8 +114,7 @@ inline typename indexed_set<Key,Hash,Equals,Allocator,ThreadSafe>::size_type ind
       return npos; /* Not found. */
     }
     assert(v<m_keys.size());
-    // if (Equals(key,m_keys[v]))
-    if (key==m_keys[v])
+    if (m_equals(key,m_keys[v]))
     {
       return v;
     }

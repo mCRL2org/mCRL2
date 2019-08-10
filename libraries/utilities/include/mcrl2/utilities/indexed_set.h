@@ -33,18 +33,21 @@ class indexed_set
 private:
   std::vector<std::size_t> m_hashtable;
   // std::deque < Key, Allocator > m_keys;   The block allocator seems incompatible with a deque. 
-  std::deque < Key > m_keys;
+  std::deque<Key, Allocator> m_keys;
+
+  Hash m_hasher;
+  Equals m_equals;
 
   // Two auxiliary functions in this class. 
   std::size_t put_in_hashtable(const Key& key, std::size_t n);
   inline void resize_hashtable();
 
 public:
-  
   typedef Key key_type;
   typedef std::size_t size_type;
   typedef std::pair<const key_type, size_type> value_type;
-  typedef Equals key_compare;
+  typedef Equals key_equal;
+  typedef Hash hasher;
 
   typedef value_type& reference;
   typedef const value_type& const_reference;
@@ -63,14 +66,14 @@ public:
   /// \return Value indicating non existing element, equal to std::numeric_limits<std::size_t>::max(). 
   static const size_type npos = std::numeric_limits<std::size_t>::max();
 
-  // The interface of an unordered_map without the ability to remove individual elements.
-
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
   indexed_set();
 
   /// \brief Constructor of an empty index set. Starts with a hashtable of the indicated size. 
   /// \parameter initial_hashtable_size The initial size of the hashtable. 
-  indexed_set(std::size_t initial_hashtable_size);
+  indexed_set(std::size_t initial_hashtable_size,
+    const hasher& hash = hasher(),
+    const key_equal& equals = key_equal());
 
   /// \brief Returns a reference to the mapped value.
   /// \detail Returns an invalid value, larger or equal than the size of the indexed set, if there is no element with the given key. 
@@ -98,6 +101,19 @@ public:
   iterator end()
   { 
     return m_keys.end(); 
+  }
+
+  /// \brief Forward iterator which runs through the elements from the lowest to the largest number.
+  /// \detail Complexity is constant per operation.
+  iterator begin() const
+  {
+    return m_keys.begin();
+  }
+
+  /// \brief End of the forward iterator.
+  iterator end() const
+  {
+    return m_keys.end();
   }
 
   /// \brief const_iterator going through the elements in the set numbered from zero upwards. 
@@ -138,8 +154,6 @@ public:
 
   /// \brief Clears the indexed set by removing all its elements. It is not guaranteed that the memory is released too. 
   void clear();
-
-  // size_type count(const Key& key) const;
 
   /// \brief Insert a key in the indexed set and return its index. 
   /// \detail If the element was already in the set, the resulting bool is true, and the existing index is returned.
