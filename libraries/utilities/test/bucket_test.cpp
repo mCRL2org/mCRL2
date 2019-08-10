@@ -8,6 +8,8 @@
 //
 
 #include "mcrl2/utilities/detail/bucket_list.h"
+
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2::utilities::detail;
@@ -62,9 +64,4 @@ BOOST_AUTO_TEST_CASE(test_list)
   }
 
   BOOST_CHECK(length(list) == 0);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
-{
-  return nullptr;
 }
