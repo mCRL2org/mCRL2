@@ -19,15 +19,11 @@ namespace mcrl2
 namespace utilities
 {
 
-// TODO: As it stands Equals, Allocator and ThreadSafe are not used. 
-//       Either remove or make useful.
-//
 /// \brief A set that assigns each element an unique index.
 template<typename Key,
          typename Hash = std::hash<Key>,
          typename Equals = std::equal_to<Key>,
-         typename Allocator = std::allocator<Key>,
-         bool ThreadSafe = false>
+         typename Allocator = std::allocator<Key>>
 class indexed_set
 {
 private:
@@ -175,14 +171,6 @@ public:
     return m_keys.size();
   }
 };
-
-/// \brief A specialization for large indexed sets that uses the block_allocator internally (by default).
-template<typename Key,
-         typename Hash = std::hash<Key>,
-         typename Equals = std::equal_to<Key>,
-         typename Allocator = std::allocator<Key>, // mcrl2::utilities::block_allocator<Key>,
-         bool ThreadSafe = false>
-using indexed_set_large = indexed_set<Key, Hash, Equals, Allocator, ThreadSafe>;
 
 } // end namespace utilities
 } // end namespace mcrl2

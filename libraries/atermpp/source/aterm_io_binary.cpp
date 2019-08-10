@@ -350,7 +350,7 @@ static const function_symbol& get_function_symbol(const aterm& t)
  * of a term. Could be a special symbol (AS_INT, etc) when the term is not an application.
  * \details sym_entries[result].id == t.function()
  */
-static std::size_t get_fn_symbol_index(const aterm& t, const mcrl2::utilities::indexed_set_large<function_symbol>& index)
+static std::size_t get_fn_symbol_index(const aterm& t, const mcrl2::utilities::indexed_set<function_symbol>& index)
 {
   const function_symbol& sym = get_function_symbol(t);
   std::size_t result = index.index(sym);
@@ -402,7 +402,7 @@ static const aterm& subterm(const aterm& t, std::size_t i)
  * \brief Add a term to the global term table. Update the symbol tables.
  */
 static void add_term(sym_write_entry& entry, const aterm& term,
-  const mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
+  const mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
   mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -450,7 +450,7 @@ struct write_todo
  * \return The sym_write_entry belonging to func.
  */
 static sym_write_entry& initialize_function_symbol(const function_symbol& func,
-  mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
+  mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
   const std::pair<std::size_t,bool> insert_result = symbol_index_map.insert(func);
@@ -466,7 +466,7 @@ static sym_write_entry& initialize_function_symbol(const function_symbol& func,
  * \brief Collect all terms in the term tables of each symbol
  */
 static void collect_terms(const aterm& t,
-  mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
+  mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
   mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -542,7 +542,7 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
  * \brief Write the term t to os in BAF
  */
 static void write_term(const aterm& t, ostream& os,
-  const mcrl2::utilities::indexed_set_large<function_symbol>& symbol_index_map,
+  const mcrl2::utilities::indexed_set<function_symbol>& symbol_index_map,
   const mcrl2::utilities::unordered_map_large<aterm, std::size_t>& term_index_map,
   std::vector<sym_write_entry>& sym_entries)
 {
@@ -594,7 +594,7 @@ static void write_baf(const aterm& t, ostream& os)
   read_write_buffer = std::bitset<128>(0);
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-  mcrl2::utilities::indexed_set_large<function_symbol> symbol_index_map;
+  mcrl2::utilities::indexed_set<function_symbol> symbol_index_map;
   mcrl2::utilities::unordered_map_large<aterm, std::size_t> term_index_map;
   std::vector<sym_write_entry> sym_entries;
 
