@@ -12,6 +12,8 @@
 
 #include <forward_list>
 
+#include <assert.h>
+
 namespace mcrl2
 {
 namespace utilities
@@ -22,7 +24,8 @@ template<typename Map>
 class replacement_policy
 {
 public:
-  using typename Map::key_type;
+  using key_type = typename Map::key_type;
+  using map_type = Map;
 
 protected:
   /// \brief Called whenever the underlying cache is cleared.
@@ -43,7 +46,7 @@ template<typename Map>
 class no_policy final : public replacement_policy<Map>
 {
 public:
-  using typename Map::key_type;
+  using key_type = typename Map::key_type;
 
   typename Map::iterator replacement_candidate(Map& map) override { return map.begin(); }
 
@@ -57,7 +60,7 @@ template<typename Map>
 class fifo_policy final : public replacement_policy<Map>
 {
 public:
-  using typename Map::key_type;
+  using key_type = typename Map::key_type;
 
   fifo_policy()
   {
