@@ -459,9 +459,9 @@ class specification_basic_type
     data_expression_list getarguments(const action_list& multiAction)
     {
       data_expression_list result;
-      for (action_list::const_iterator l=multiAction.begin(); l!=multiAction.end(); ++l)
+      for (const action& a: multiAction)
       {
-        result=reverse(l->arguments()) + result;
+        result=reverse(a.arguments()) + result;
       }
       return reverse(result);
     }
@@ -470,9 +470,9 @@ class specification_basic_type
     {
       action_list result;
       data_expression_list::const_iterator e_walker=args.begin();
-      for (process::action_label_list::const_iterator l=actionIds.begin() ; l!=actionIds.end() ; ++l)
+      for (const process::action_label& l: actionIds)
       {
-        std::size_t arity=l->sorts().size();
+        std::size_t arity=l.sorts().size();
         data_expression_list temp_args;
         for (std::size_t i=0 ; i< arity; ++i,++e_walker)
         {
@@ -480,7 +480,7 @@ class specification_basic_type
           temp_args.push_front(*e_walker);
         }
         temp_args=reverse(temp_args);
-        result.push_front(action(*l,temp_args));
+        result.push_front(action(l,temp_args));
       }
       assert(e_walker==args.end());
       return reverse(result);
@@ -1374,13 +1374,13 @@ class specification_basic_type
     bool occursintermlist(const variable& var, const assignment_list& r, const process_identifier& proc_name) const
     {
       std::set<variable> assigned_variables;
-      for (assignment_list::const_iterator l=r.begin() ; l!=r.end() ; ++l)
+      for (const assignment& l: r)
       {
-        if (occursinterm(var,l->rhs()))
+        if (occursinterm(var,l.rhs()))
         {
           return true;
         }
-       assigned_variables.insert(l->lhs());
+       assigned_variables.insert(l.lhs());
       }
       // Check whether x does not occur in the assignment list. Then variable x is assigned to
       // itself, and it occurs in the process.
@@ -4387,10 +4387,10 @@ class specification_basic_type
 
           basic_sort stack_sort_alias(spec.fresh_identifier_generator("Stack"));
           structured_sort_constructor_argument_vector sp_push_arguments;
-          for (variable_list::const_iterator l = pl.begin() ; l!=pl.end() ; ++l)
+          for (const variable& v: pl)
           {
-            sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("get" + std::string(l->name())), l->sort()));
-            sorts.push_front(l->sort());
+            sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("get" + std::string(v.name())), v.sort()));
+            sorts.push_front(v.sort());
           }
           sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("pop"), stack_sort_alias));
           sorts=reverse(sorts);
@@ -5135,9 +5135,9 @@ class specification_basic_type
                   const variable_list& pars)
     {
       assert(is_variable(name));
-      for (variable_list::const_iterator l=pars.begin() ; l!=pars.end(); ++l)
+      for (const variable& v: pars)
       {
-        if (name.name()==l->name())
+        if (name.name()==v.name())
         {
           return true;
         }
@@ -5953,13 +5953,10 @@ class specification_basic_type
 
     data_expression_list extend(const data_expression& c, const data_expression_list& cl)
     {
-      if (cl.empty())
-      {
-        return cl;
-      }
-      data_expression_list result=extend(c,cl.tail());
-      result.push_front(data_expression(lazy::and_(c,cl.front())));
-      return result;
+      return data_expression_list(cl.begin(), 
+                                  cl.end(), 
+                                  [&c](const data_expression& e)->data_expression { return lazy::and_(c,e);} );
+
     }
 
     data_expression variables_are_equal_to_default_values(const variable_list& vl)
@@ -5997,16 +5994,20 @@ class specification_basic_type
 
     data_expression transform_matching_list(const variable_list& matchinglist)
     {
-      if (matchinglist.empty())
+      data_expression result=sort_bool::true_();
+      for(const variable& v: matchinglist)
       {
-        return sort_bool::true_();
+        try
+        {
+          data_expression unique=representative_generator_internal(v.sort(),false);
+          result=lazy::and_(result, equal_to(v,unique));
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          // No representant for sort v.sort() could be found. No condition is added. 
+        }
       }
-
-      const variable& var=matchinglist.front();
-      data_expression unique=representative_generator_internal(var.sort(),false);
-      return lazy::and_(
-               transform_matching_list(matchinglist.tail()),
-               equal_to(data_expression(var),unique));
+      return result;
     }
 
 
@@ -6225,9 +6226,9 @@ class specification_basic_type
       data_expression binarysumcondition;
       int equaluptillnow=1;
 
-      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
+      for (const stochastic_action_summand& smmnd: action_summands)
       {
-        const variable_list sumvars=walker->summation_variables();
+        const variable_list sumvars=smmnd.summation_variables();
         resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
       }
 
@@ -6251,9 +6252,8 @@ class specification_basic_type
 
       data_expression equalterm;
       equaluptillnow=1;
-      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+      for (const stochastic_action_summand& smmnd: action_summands)
       {
-        const stochastic_action_summand smmnd=*walker;
         const data_expression& condition=smmnd.condition();
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
@@ -6347,9 +6347,9 @@ class specification_basic_type
          of multiactions */
       std::vector < action_list > multiActionList;
 
-      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
+      for (const stochastic_action_summand& smmnd: action_summands)
       {
-        multiActionList.push_back(walker->multi_action().actions());
+        multiActionList.push_back(smmnd.multi_action().actions());
       }
 
       action_list resultmultiactionlist;
@@ -6456,9 +6456,9 @@ class specification_basic_type
       bool all_summands_have_time=true;
 
       // first find out whether there is a summand with explicit time.
-      for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin() ; walker!=action_summands.end(); ++walker)
+      for (const stochastic_action_summand& smmnd: action_summands)
       {
-        if (walker->has_time())
+        if (smmnd.has_time())
         {
           some_summand_has_time=true;
         }
@@ -6480,11 +6480,11 @@ class specification_basic_type
         std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
         std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
         data_expression_list auxresult;
-        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+        for (const stochastic_action_summand& smmnd: action_summands)
         {
-          if (walker->has_time())
+          if (smmnd.has_time())
           {
-            const data_expression actiontime=walker->multi_action().time();
+            const data_expression actiontime=smmnd.multi_action().time();
 
             assert(auxrename_list_pars!=rename_list_pars.end());
             assert(auxrename_list_args!=rename_list_args.end());
@@ -6559,9 +6559,9 @@ class specification_basic_type
       data_expression resulting_distribution=real_one();
       {
         data_expression_list stochastic_conditionlist;
-        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end() ; ++walker)
+        for (const stochastic_action_summand& smmnd: action_summands)
         {
-          const variable_list stochastic_vars=walker->distribution().variables();
+          const variable_list stochastic_vars=smmnd.distribution().variables();
           resulting_stochastic_variables=merge_var(stochastic_vars,resulting_stochastic_variables,
                               stochastic_rename_list_pars,stochastic_rename_list_args,stochastic_conditionlist,parameters);
         }
@@ -6575,9 +6575,8 @@ class specification_basic_type
         data_expression_list aux_result;
         data_expression equalterm;
         equaluptillnow=1;
-        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+        for (const stochastic_action_summand& smmnd: action_summands)
         {
-          const stochastic_action_summand smmnd=*walker;
           const data_expression dist=smmnd.distribution().distribution();
           const variable_list stochastic_variables=smmnd.distribution().variables();
           assert(auxrename_list_pars!=rename_list_pars.end());
@@ -6722,9 +6721,9 @@ class specification_basic_type
         std::vector < variable_list >::const_iterator stochastic_auxrename_list_pars=stochastic_rename_list_pars.begin();
         std::vector < data_expression_list >::const_iterator stochastic_auxrename_list_args=stochastic_rename_list_args.begin();
         data_expression_list auxresult;
-        for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
+        for (const stochastic_action_summand& smmnd: action_summands)
         {
-          const assignment_list nextstate=walker->assignments();
+          const assignment_list nextstate=smmnd.assignments();
           assert(auxrename_list_pars!=rename_list_pars.end());
           assert(auxrename_list_args!=rename_list_args.end());
           assert(stochastic_auxrename_list_pars!=stochastic_rename_list_pars.end());
@@ -6856,9 +6855,9 @@ class specification_basic_type
       data_expression binarysumcondition;
       int equaluptillnow=1;
 
-      for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end() ; ++walker)
+      for (const deadlock_summand& smmnd: deadlock_summands)
       {
-        const variable_list sumvars=walker->summation_variables();
+        const variable_list sumvars=smmnd.summation_variables();
         resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
       }
 
@@ -6882,9 +6881,8 @@ class specification_basic_type
 
       data_expression equalterm;
       equaluptillnow=1;
-      for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end(); ++walker)
+      for (const deadlock_summand& smmnd: deadlock_summands)
       {
-        const deadlock_summand smmnd=*walker;
         const data_expression& condition=smmnd.condition();
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
@@ -6988,9 +6986,9 @@ class specification_basic_type
       bool all_summands_have_time=true;
 
       // first find out whether there is a summand with explicit time.
-      for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin() ; walker!=deadlock_summands.end(); ++walker)
+      for (const deadlock_summand& smmnd: deadlock_summands)
       {
-        if (walker->deadlock().has_time())
+        if (smmnd.deadlock().has_time())
         {
           some_summand_has_time=true;
         }
@@ -7012,11 +7010,11 @@ class specification_basic_type
         std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
         std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
         data_expression_list auxresult;
-        for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end(); ++walker)
+        for (const deadlock_summand& smmnd: deadlock_summands)
         {
-          if (walker->deadlock().has_time())
+          if (smmnd.deadlock().has_time())
           {
-            const data_expression actiontime=walker->deadlock().time();
+            const data_expression actiontime=smmnd.deadlock().time();
 
             assert(auxrename_list_pars!=rename_list_pars.end());
             assert(auxrename_list_args!=rename_list_args.end());
@@ -7321,12 +7319,11 @@ class specification_basic_type
     {
       action_list resultactionlist;
 
-      for (action_list::const_iterator walker=multiaction.begin();
-           walker!=multiaction.end(); ++walker)
+      for (const action& a: multiaction)
       {
-        if (std::find(hidelist.begin(),hidelist.end(),walker->label().name())==hidelist.end())
+        if (std::find(hidelist.begin(),hidelist.end(),a.label().name())==hidelist.end())
         {
-          resultactionlist.push_front(*walker);
+          resultactionlist.push_front(a);
         }
       }
 
@@ -7674,11 +7671,10 @@ class specification_basic_type
     {
       action_list resultactionlist;
 
-      for (action_list::const_iterator walker=multiaction.begin();
-           walker!=multiaction.end(); ++walker)
+      for (const action& a: multiaction)
       {
         resultactionlist=linInsertActionInMultiActionList(
-                           rename_action(renamings,*walker),
+                           rename_action(renamings,a),
                            resultactionlist);
       }
       return resultactionlist;
@@ -7822,9 +7818,9 @@ class specification_basic_type
     {
       identifier_string_list result;
       const identifier_string_list& actionlabels(actionlabels1.names());
-      for (identifier_string_list::const_iterator i=actionlabels.begin(); i!=actionlabels.end(); ++i)
+      for (const identifier_string& id: actionlabels)
       {
-        result=insertActionLabel(*i,result);
+        result=insertActionLabel(id,result);
       }
       return action_name_multiset(result);
     }
@@ -7832,43 +7828,28 @@ class specification_basic_type
     template <typename List>
     sort_expression_list get_sorts(const List& l)
     {
-      if (l.empty())
-      {
-        return sort_expression_list();
-      }
-      sort_expression_list result=get_sorts(l.tail());
-      result.push_front(l.front().sort());
-      return result;
+      return sort_expression_list(l.begin(), l.end(), [](const typename List::value_type& d) -> sort_expression {return d.sort();});
     }
 
     // Check that the sorts of both termlists match.
     data_expression pairwiseMatch(const data_expression_list& l1, const data_expression_list& l2)
     {
-      if (l1.empty())
+      if (l1.size()!=l2.size())
       {
-        if (l2.empty())
+        return sort_bool::false_();
+      }
+      data_expression_list::const_iterator i2=l2.begin();
+      data_expression result=sort_bool::true_();
+      for(const data_expression& t1: l1)
+      {
+        if (t1.sort()!=i2->sort())
         {
-          return sort_bool::true_();
+          return sort_bool::false_();
         }
-        return sort_bool::false_();
+        result=lazy::and_(result,RewriteTerm(equal_to(t1,*i2)));
+        ++i2;
       }
-
-      if (l2.empty())
-      {
-        return sort_bool::false_();
-      }
-
-      const data_expression& t1=l1.front();
-      const data_expression& t2=l2.front();
-
-      if (t1.sort()!=t2.sort())
-      {
-        return sort_bool::false_();
-      }
-
-      data_expression result=pairwiseMatch(l1.tail(),l2.tail());
-
-      return lazy::and_(result,RewriteTerm(equal_to(t1,t2)));
+      return result;
     }
 
     // a tuple_list contains pairs of actions (multi-action) and the condition under which this action
@@ -7916,11 +7897,10 @@ class specification_basic_type
 
         comm_entry(const communication_expression_list& communications)
         {
-          for (communication_expression_list::const_iterator l=communications.begin();
-               l!=communications.end(); ++l)
+          for (const communication_expression& l: communications)
           {
-            lhs.push_back(l->action_name().names());
-            rhs.push_back(l->name());
+            lhs.push_back(l.action_name().names());
+            rhs.push_back(l.name());
             tmp.push_back(identifier_string_list());
             match_failed.push_back(false);
           }
@@ -7950,9 +7930,9 @@ class specification_basic_type
       }
 
       // m must match a lhs; check every action
-      for (action_list::const_iterator mwalker=m.begin(); mwalker!=m.end(); ++mwalker)
+      for (const action& a: m)
       {
-        identifier_string actionname=mwalker->label().name();
+        identifier_string actionname=a.label().name();
 
         // check every lhs for actionname
         bool comm_ok = false;
@@ -8023,9 +8003,9 @@ class specification_basic_type
       }
 
       // m must be contained in a lhs; check every action
-      for (action_list::const_iterator mwalker=m.begin(); mwalker!=m.end(); ++mwalker)
+      for (const action& a: m)
       {
-        const identifier_string actionname=mwalker->label().name();
+        const identifier_string actionname=a.label().name();
         // check every lhs for actionname
         bool comm_ok = false;
         for (std::size_t i=0; i<comm_table.size(); ++i)
