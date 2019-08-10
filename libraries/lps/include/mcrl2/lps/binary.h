@@ -71,8 +71,8 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     /// Mapping of variables to corresponding if-tree
     data::mutable_map_substitution<> m_if_trees;
 
-    /// Variables appearing in rhs of m_if_trees
-    std::set<data::variable> m_if_trees_variables;
+    /// Contains the names of variables appearing in rhs of m_if_trees
+    data::set_identifier_generator m_if_trees_generator;
 
     /// Identifier generator for the enumerator
     data::enumerator_identifier_generator m_id_generator;
@@ -194,7 +194,10 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       mCRL2log(log::debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
       m_spec.process().process_parameters() = data::variable_list(new_parameters.begin(),new_parameters.end());
-      m_if_trees_variables = data::substitution_variables(m_if_trees);
+      for (const data::variable& v: data::substitution_variables(m_if_trees))
+      {
+        m_if_trees_generator.add_identifier(v.name());
+      }
     }
 
     /// \brief Replace assignments in v that are of a finite sort with a
@@ -258,8 +261,8 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     /// \brief Update an action summand with the new Boolean parameters
     void update_action_summand(action_summand& s)
     {
-      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_variables);
-      lps::replace_variables_capture_avoiding(s.multi_action(), m_if_trees, m_if_trees_variables);
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_generator);
+      lps::replace_variables_capture_avoiding(s.multi_action(), m_if_trees, m_if_trees_generator);
       s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
     }
 
@@ -267,14 +270,14 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     void update_action_summand(stochastic_action_summand& s)
     {
       update_action_summand(static_cast<action_summand&>(s));
-      s.distribution() = lps::replace_variables_capture_avoiding(s.distribution(), m_if_trees, m_if_trees_variables);
+      s.distribution() = lps::replace_variables_capture_avoiding(s.distribution(), m_if_trees, m_if_trees_generator);
     }
 
     /// \brief Update a deadlock summand with the new Boolean parameters
     void update_deadlock_summand(deadlock_summand& s)
     {
-      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_variables);
-      lps::replace_variables_capture_avoiding(s.deadlock(), m_if_trees, m_if_trees_variables);
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_generator);
+      lps::replace_variables_capture_avoiding(s.deadlock(), m_if_trees, m_if_trees_generator);
     }
 
     process_initializer update_initial_process(const process_initializer& init)
@@ -285,7 +288,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     stochastic_process_initializer update_initial_process(const stochastic_process_initializer& init)
     {
       return stochastic_process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()),
-                                            lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_variables)
+                                            lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_generator)
                                            );
     }
 

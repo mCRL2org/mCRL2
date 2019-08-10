@@ -51,9 +51,6 @@ class bisimulation_algorithm
     /// \brief Store the address of the model.
     const lps::linear_process* model_ptr = nullptr;
 
-    /// \brief Store the address of the specification.
-    const lps::linear_process* spec_ptr = nullptr;
-
     /// \brief Generates a name for an action_list.
     /// \param l A sequence of actions
     /// \return A string representation of the list \p l
@@ -330,7 +327,6 @@ class bisimulation_algorithm
       set_summand_names(model);
       set_summand_names(spec);
       model_ptr = &model;
-      spec_ptr  = &spec;
       assert(is_from_model(model));
       assert(!is_from_model(spec));
     }
@@ -701,7 +697,11 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
 
       data::mutable_map_substitution<> sigma; // q.process_parameters() := d1
       make_substitution(parameters, d1, sigma);
-      std::set<data::variable> sigma_variables = data::find_free_variables(d1);
+      data::set_identifier_generator id_generator;
+      for (const data::variable& v: data::find_free_variables(d1))
+      {
+        id_generator.add_identifier(v.name());
+      }
 
       std::vector<pbes_expression> v;
       for (auto j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
@@ -719,23 +719,26 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         // replace d' by d1 (if needed)
         if (d1 != data::data_expression_list(parameters.begin(), parameters.end()))
         {
-          cj = data::replace_variables_capture_avoiding(cj, sigma, sigma_variables);
-          gj = data::replace_variables_capture_avoiding(gj, sigma, sigma_variables);
+          cj = data::replace_variables_capture_avoiding(cj, sigma, id_generator);
+          gj = data::replace_variables_capture_avoiding(gj, sigma, id_generator);
         }
 
         // replace e' (e1) by fresh variables e'' (e11)
         std::vector<data::variable> tmp;
-        for (const data::variable& v: e1)
+        for (const data::variable& w: e1)
         {
-          tmp.emplace_back(m_generator(std::string(v.name())), v.sort());
+          tmp.emplace_back(m_generator(std::string(w.name())), w.sort());
         }
         data::variable_list e11(tmp.begin(), tmp.end());
 
         data::mutable_map_substitution<> sigma1;
         make_substitution(e1, atermpp::container_cast<data::data_expression_list>(e11), sigma1);
-        std::set<data::variable> sigma1_variables(e11.begin(), e11.end());
-        data::data_expression cj_new = data::replace_variables_capture_avoiding(cj, sigma1, sigma1_variables);
-        data::data_expression_list gj_new = data::replace_variables_capture_avoiding(gj, sigma1, sigma1_variables);
+        for (const data::variable& w: e11)
+        {
+          id_generator.add_identifier(w.name());
+        }
+        data::data_expression cj_new = data::replace_variables_capture_avoiding(cj, sigma1, id_generator);
+        data::data_expression_list gj_new = data::replace_variables_capture_avoiding(gj, sigma1, id_generator);
 
         pbes_expression expr = make_exists(e11, optimized_and(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);
