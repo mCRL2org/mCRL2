@@ -50,7 +50,6 @@ private:
   // Hashes only the keys of each pair.
   struct PairHash
   {
-    /// Clang 3.8: Default initialization of an object of const type requires a user-provided default constructor
     PairHash(const hasher& hash)
       : hash(hash)
     {}
@@ -62,12 +61,12 @@ private:
       return hash(pair.first);
     }
 
-    std::size_t operator()(const Key& key, const T&) const
+    std::size_t operator()(const key_type& key, const mapped_type&) const
     {
       return hash(key);
     }
 
-    std::size_t operator()(const Key& key) const
+    std::size_t operator()(const key_type& key) const
     {
       return hash(key);
     }
@@ -87,12 +86,12 @@ private:
       return equals(first.first, second.first);
     }
 
-    bool operator()(const value_type& first, const Key& key, const T&) const
+    bool operator()(const value_type& first, const key_type& key, const mapped_type&) const
     {
       return equals(first.first, key);
     }
 
-    bool operator()(const value_type& first, const Key& key) const
+    bool operator()(const value_type& first, const key_type& key) const
     {
       return equals(first.first, key);
     }
@@ -130,21 +129,21 @@ public:
 
   /// \brief Provides access to the value associated with the given key, constructs a default
   ///        value whenever the key was undefined.
-  T& operator[](const Key& key);
+  mapped_type& operator[](const key_type& key);
 
   /// \brief Provides access to the value associated with the given key.
-  const T& at(const Key& key) const;
+  const T& at(const key_type& key) const;
 
-  std::size_t capacity() { return m_set.capacity(); }
+  size_type capacity() { return m_set.capacity(); }
 
   void clear() { m_set.clear(); }
 
-  std::size_t count(const Key& key) const { return m_set.count(key); }
+  size_type count(const key_type& key) const { return m_set.count(key); }
 
   template<typename ...Args>
   std::pair<iterator, bool> emplace(Args&&... args) { return m_set.emplace(std::forward<Args>(args)...); }
 
-  void erase(const Key& key) { m_set.erase(key); }
+  void erase(const key_type& key) { m_set.erase(key); }
   iterator erase(iterator it) { return m_set.erase(it); }
 
   template<typename ...Args>
@@ -155,7 +154,7 @@ public:
 
   std::pair<iterator, bool> insert(const value_type& pair) { return m_set.emplace(pair); }
 
-  std::size_t size() const { return m_set.size(); }
+  size_type size() const { return m_set.size(); }
 };
 
 /// \brief A specialization for large unordered maps that uses the block_allocator internally by default.

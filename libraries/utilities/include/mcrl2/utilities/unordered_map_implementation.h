@@ -22,15 +22,15 @@ namespace utilities
 {
 
 MCRL2_UNORDERED_MAP_TEMPLATES
-T& MCRL2_UNORDERED_MAP_CLASS::operator[](const Key& key)
+T& MCRL2_UNORDERED_MAP_CLASS::operator[](const key_type& key)
 {
   // Insert a new object and return a reference to it;
-  auto pair = m_set.emplace(std::make_pair(key, T()));
+  auto pair = m_set.emplace(std::make_pair(key, mapped_type()));
   return (*pair.first).second;
 }
 
 MCRL2_UNORDERED_MAP_TEMPLATES
-const T& MCRL2_UNORDERED_MAP_CLASS::at(const Key& key) const
+const T& MCRL2_UNORDERED_MAP_CLASS::at(const key_type& key) const
 {
   auto it = m_set.find(key);
   assert(it != m_set.end());

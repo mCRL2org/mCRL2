@@ -9,7 +9,8 @@
 
 #include "mcrl2/utilities/unordered_set.h"
 
-#include <boost/test/included/unit_test_framework.hpp>
+#define BOOST_TEST_MAIN
+#include <boost/test/unit_test.hpp>
 
 #include <random>
 #include <unordered_set>
@@ -125,9 +126,4 @@ BOOST_AUTO_TEST_CASE(test_erase_begin)
   // Try to erase an element using the iterator returned by find.
   unordered_set<int> set = construct({5,3,2,5});
   set.erase(set.begin());
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
-{
-  return nullptr;
 }

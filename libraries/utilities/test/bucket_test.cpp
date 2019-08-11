@@ -9,8 +9,8 @@
 
 #include "mcrl2/utilities/detail/bucket_list.h"
 
-#define BOOST_AUTO_TEST_MAIN
-#include <boost/test/included/unit_test_framework.hpp>
+#define BOOST_TEST_MAIN
+#include <boost/test/unit_test.hpp>
 
 using namespace mcrl2::utilities::detail;
 
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_list)
     list.push_front(node);
   }
 
-  BOOST_CHECK(length(list) == 100);
+  BOOST_CHECK_EQUAL(length(list), 100);
 
   /// Erase the first 10 elements.
   std::size_t count = 10;
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_list)
     }
   }
 
-  BOOST_CHECK(length(list) == 90);
+  BOOST_CHECK_EQUAL(length(list), 90);
 
   /// Clean up the remaining nodes.
   for (Bucket::iterator it = list.before_begin(); it != list.end();)
@@ -63,5 +63,5 @@ BOOST_AUTO_TEST_CASE(test_list)
     it = list.erase_after(list.before_begin(), allocator);
   }
 
-  BOOST_CHECK(length(list) == 0);
+  BOOST_CHECK_EQUAL(length(list), 0);
 }
