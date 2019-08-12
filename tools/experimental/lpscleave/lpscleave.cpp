@@ -57,6 +57,7 @@ class lpscleave_tool : public input_output_tool
         // Print the parameters and exit
         print_names("Parameters", spec.process().process_parameters());
         mCRL2log(log::info) << "Number of summands: " << spec.process().summand_count() << "\n";
+
       }
       else
       {
@@ -64,6 +65,8 @@ class lpscleave_tool : public input_output_tool
 
         // For now, the parameters are given by the user.
         auto parameters = project_parameters(spec.process().process_parameters(), m_parameters);
+
+        print_elements("Local indices", compute_indices(spec, parameters));
 
         m_indices.sort();
         m_indices.unique();

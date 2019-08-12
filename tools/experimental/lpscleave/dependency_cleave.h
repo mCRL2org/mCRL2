@@ -7,16 +7,26 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "mcrl2/lps/stochastic_specification.h"
+#ifndef MCRL2_DEPENDENCY_CLEAVE_H_
+#define MCRL2_DEPENDENCY_CLEAVE_H_
 
+#include "mcrl2/lps/stochastic_specification.h"
 
 namespace mcrl2
 {
 
+/// \brief Determine the least subset of indices that should belong to the left process.
+std::list<std::size_t> compute_indices(
+  const lps::stochastic_specification& spec,
+  const data::variable_list& parameters);
+
 /// \brief Performs the a dependency cleave based on the given parameters V, and the indices J.
-lps::stochastic_specification dependency_cleave(const lps::stochastic_specification& spec,
+lps::stochastic_specification dependency_cleave(
+  const lps::stochastic_specification& spec,
   const data::variable_list& parameters,
   const std::list<std::size_t>& indices,
   bool right_process);
 
 } // namespace mcrl2
+
+#endif // MCRL2_DEPENDENCY_CLEAVE_H_
