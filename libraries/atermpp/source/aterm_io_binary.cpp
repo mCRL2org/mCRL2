@@ -119,9 +119,9 @@ void binary_aterm_output::write_term(const aterm& term)
         m_stream.write_bits(symbol_index, function_symbol_index_width());
         for (const auto& argument : current.term)
         {
-          auto result = m_terms.find(argument);
-          assert(result != m_terms.end());
-          m_stream.write_bits(result->second, term_index_width());
+          std::size_t index = m_terms.index(argument);
+          assert(index < m_terms.size());
+          m_stream.write_bits(index, term_index_width());
         }
       }
 
@@ -138,7 +138,7 @@ void binary_aterm_output::write_term(const aterm& term)
     {
       // Take the argument according to current.arg and increase the argument index.
       const aterm_appl& term = static_cast<const aterm_appl&>(current.term[current.arg]);
-      if (m_terms.count(term) == 0)
+      if (m_terms.index(term) >= m_terms.size())
       {
         stack.emplace(term);
       }
@@ -184,11 +184,11 @@ binary_aterm_input::binary_aterm_input(std::istream& is)
 
 std::size_t binary_aterm_output::write_function_symbol(const function_symbol& symbol)
 {
-  auto result = m_function_symbols.find(symbol);
+  std::size_t result = m_function_symbols.index(symbol);
 
-  if (result != m_function_symbols.end())
+  if (result < m_function_symbols.size())
   {
-    return result->second;
+    return result;
   }
   else
   {
@@ -198,7 +198,8 @@ std::size_t binary_aterm_output::write_function_symbol(const function_symbol& sy
     m_stream.write_integer(symbol.arity());
     auto result = m_function_symbols.insert(symbol);
     m_function_symbol_index_width = static_cast<unsigned int>(std::log2(m_function_symbols.size()) + 1);
-    return result.first->second;
+
+    return result.first;
   }
 }
 
