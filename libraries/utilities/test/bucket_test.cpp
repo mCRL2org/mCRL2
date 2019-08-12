@@ -9,8 +9,8 @@
 
 #include "mcrl2/utilities/detail/bucket_list.h"
 
-#define BOOST_TEST_MAIN
-#include <boost/test/unit_test.hpp>
+#define BOOST_AUTO_TEST_MAIN
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2::utilities::detail;
 
