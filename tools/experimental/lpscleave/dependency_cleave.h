@@ -95,22 +95,22 @@ std::list<std::size_t> get_other_indices(const LinearProcess& process, const std
    auto it = indices.begin();
    for (std::size_t index = 0; index < process.action_summands().size(); ++index)
    {
-     // Invariant: The index of *it is always higher than the loop index or it is the end
+     // Invariant: The index of *it is always higher than the loop index or it is the end.
      if (it != indices.end())
      {
        if (*it < index)
        {
-         // We have past the last index of the array.
+         // We have past the last index seen sofar.
          ++it;
        }
        if (it != indices.end() && *it == index)
        {
-         // This summand was already created above.
+         // This index is contained in indices.
          continue;
        }
-
-       complement.emplace_back(index);
      }
+
+     complement.emplace_back(index);
    }
 
    return complement;

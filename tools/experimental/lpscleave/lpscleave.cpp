@@ -105,6 +105,7 @@ class lpscleave_tool : public input_output_tool
       {
         // Print the parameters and exit
         print_names("Parameters", spec.process().process_parameters());
+        mCRL2log(log::info) << "Number of summands: " << spec.process().summand_count() << "\n";
       }
       else
       {
