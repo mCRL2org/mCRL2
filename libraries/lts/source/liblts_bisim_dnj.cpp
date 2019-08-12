@@ -2832,7 +2832,21 @@ class part_trans_t
                 if (new_noninert_bunch->is_trivial())
                 {                                                               // Only during initialisation, it may happen that we add new non-inert
                     make_nontrivial(new_noninert_bunch);                        // transitions to a nontrivial bunch:
-                }                                                               else assert(action_block_begin == new_noninert_bunch->begin);
+                }
+                                                                                #ifndef NDEBUG
+                                                                                    else
+                                                                                    {
+                                                                                        // We make sure that new_noninert_bunch is the first bunch in
+                                                                                        // action_block (and because it's always the last one, it will be the
+                                                                                        // only one, so there is only one bunch, as ).
+                                                                                        for (action_block_entry* iter = action_block_begin;
+                                                                                                                      iter < new_noninert_bunch->begin; ++iter)
+                                                                                        {
+                                                                                            assert(nullptr == iter->succ);
+                                                                                            assert(nullptr == iter->begin_or_before_end);
+                                                                                        }
+                                                                                    }
+                                                                                #endif
             }
 
             /* adapt the out-slice                                           */ assert(source != succ.front().block_bunch->pred->source);
@@ -3513,6 +3527,14 @@ class bisim_partitioner_dnj
              << "bisimulation partitioner created for " << part_st.state_size()
              << " states and " << aut.num_transitions() << " transitions\n";
 
+        if (part_st.state_size() > 2 * aut.num_transitions() + 1)
+        {
+            mCRL2log(log::warning) << "There are several isolated states "
+                "without incoming or outgoing transition. It is not "
+                "guaranteed that branching bisimulation minimisation runs in "
+                "time O(m log n).\n";
+        }
+
         // create one block for all states
         block_t* B(
                 #ifdef USE_POOL_ALLOCATOR
@@ -3607,18 +3629,15 @@ class bisim_partitioner_dnj
         while (++state_iter <= &part_st.state_info.back());
 
         // Line 1.4: Pi_t := { { all non-inert transitions } }
-        // create a single bunch containing all non-inert transitions
-
         part_tr.action_block_inert_begin =
-                                  part_tr.action_block_end - inert_transitions;
+                                  part_tr.action_block_end - inert_transitions; assert(part_tr.action_block_begin <= part_tr.action_block_inert_begin);
         part_tr.block_bunch_inert_begin =
-                           1 + &part_tr.block_bunch.back() - inert_transitions;
-
+                           1 + &part_tr.block_bunch.back() - inert_transitions; assert(1 + &part_tr.block_bunch.front() <= part_tr.block_bunch_inert_begin);
         bunch_t* bunch(nullptr);
 
-        // create a single block_bunch entry for all non-inert transitions
-        if (part_tr.action_block_begin < part_tr.action_block_inert_begin)
-        {
+        if (1 + &part_tr.block_bunch.front() < part_tr.block_bunch_inert_begin)
+        {                                                                       assert(part_tr.action_block_begin < part_tr.action_block_inert_begin);
+            // create a single bunch containing all non-inert transitions
             bunch =
                 #ifdef USE_POOL_ALLOCATOR
                     part_tr.storage.template construct<bunch_t>
@@ -3627,6 +3646,8 @@ class bisim_partitioner_dnj
                 #endif
                                             (part_tr.action_block_begin,
                                              part_tr.action_block_inert_begin); assert(nullptr != bunch);  assert(part_tr.unstable_block_bunch.empty());
+
+            // create a single block_bunch entry for all non-inert transitions
             part_tr.unstable_block_bunch.emplace_front(
                 #ifdef USE_SIMPLE_LIST
                     ONLY_IF_POOL_ALLOCATOR( part_tr.storage, )
@@ -3653,7 +3674,7 @@ class bisim_partitioner_dnj
         {
             --label;
             if (0 < action_label[label].count)
-            {
+            {                                                                   assert(nullptr != bunch);
                 if (++num_labels_with_transitions == 2)
                 {
                     // This is the second action_block-slice, so the bunch is
@@ -3750,6 +3771,7 @@ class bisim_partitioner_dnj
                                                                                 assert(action_block_pos->begin_or_before_end <= action_block_pos ||
                                                                                                 action_block_pos->begin_or_before_end->
                                                                                                                       begin_or_before_end == action_block_pos);
+                                                                                assert(!part_tr.unstable_block_bunch.empty());
                 block_bunch_pos->slice = part_tr.unstable_block_bunch.begin();  assert(action_block_pos < part_tr.action_block_inert_begin);
             }                                                                   assert(target->bl.ed_noninert_end <= target->pred_inert.begin);
             succ_pos->block_bunch = block_bunch_pos;
@@ -3780,23 +3802,25 @@ class bisim_partitioner_dnj
             {                                                                   assert(nullptr == bunch->end[-1].begin_or_before_end);
                 --bunch->end;                                                   assert(bunch->begin < bunch->end);
             }                                                                   assert(nullptr != bunch->end[-1].begin_or_before_end);
-        }
-        /* Line 1.2: B_vis := { s in S | there exists a visible transition   */ mCRL2complexity(B, add_work(bisim_gjkw::check_complexity::
-        /*                               that is reachable from s }          */                                          create_initial_partition, 1U), *this);
-        //           B_invis := S \ B_vis
-        // Line 1.3: Pi_s := { B_vis, B_invis } \ { emptyset }
-        if (0 < B->marked_size())
-        {                                                                       ONLY_IF_DEBUG( part_st.print_part(*this);
-                                                                                part_tr.print_trans(*this); )
-            B = refine(B,
-               /* splitter block_bunch */ part_tr.unstable_block_bunch.begin(),
+
+            /* Line 1.2: B_vis := { s in S | there exists a visible          */ mCRL2complexity(B, add_work(bisim_gjkw::check_complexity::
+            /*                               transition that is reachable    */                                          create_initial_partition, 1U), *this);
+            //                               from s }
+            //           B_invis := S \ B_vis
+            // Line 1.3: Pi_s := { B_vis, B_invis } \ { emptyset }
+            if (0 < B->marked_size())
+            {                                                                   ONLY_IF_DEBUG( part_st.print_part(*this);
+                                                                                               part_tr.print_trans(*this); )
+                B = refine(B, /* splitter block_bunch */
+                           part_tr.unstable_block_bunch.begin(),
                            extend_from_marked_states_for_init_and_postprocess); assert(!B->stable_block_bunch.empty());
                                                                                 assert(part_tr.unstable_block_bunch.empty());
                 /* We can ignore possible new non-inert transitions, as every*/ assert(B->stable_block_bunch.front().end <= part_tr.block_bunch_inert_begin);
                 /* red bottom state already has a transition in bunch.       */ assert(1 + &part_tr.block_bunch.front() < B->stable_block_bunch.front().end);
-            B->marked_nonbottom_begin = B->end;                                 assert(!B->stable_block_bunch.front().empty());
-            B->marked_bottom_begin = B->nonbottom_begin;
-        }
+                B->marked_nonbottom_begin = B->end;                             assert(!B->stable_block_bunch.front().empty());
+                B->marked_bottom_begin = B->nonbottom_begin;
+            }
+        }                                                                       else  assert(0 == B->marked_size());
     }
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief assert that the data structure is consistent and stable
