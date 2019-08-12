@@ -9,6 +9,8 @@
 
 #include "dependency_cleave.h"
 
+#include "lpscleave_utility.h"
+
 using namespace mcrl2;
 
 /// \brief Creates a single summand for the dependency cleave process. We are always constructing the

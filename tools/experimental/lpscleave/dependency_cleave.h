@@ -9,7 +9,6 @@
 
 #include "mcrl2/lps/stochastic_specification.h"
 
-#include "utility.h"
 
 namespace mcrl2
 {

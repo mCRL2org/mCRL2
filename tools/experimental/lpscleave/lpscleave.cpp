@@ -12,7 +12,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 
 #include "dependency_cleave.h"
-#include "utility.h"
+#include "lpscleave_utility.h"
 
 #include <fstream>
 #include <iostream>
