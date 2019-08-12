@@ -71,7 +71,7 @@ public:
       m_indices.unique();
 
       // Compute the independent summands for this process.
-      print_elements("Independent summands: ", compute_indices(spec, parameters));
+      print_elements("Independent summands", compute_indices(spec, parameters));
 
       // Save the resulting left-cleave.
       {

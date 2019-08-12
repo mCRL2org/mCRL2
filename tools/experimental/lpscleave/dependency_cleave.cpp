@@ -172,15 +172,15 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
     summand_dependencies other_dependencies = compute_dependencies(spec, summand, other_parameters, parameters);
     if (other_dependencies.in_L_X)
     {
+      mCRL2log(log::info) << "Summand is independent in the other component, so " << summand_index << " in L_W.\n";
+      return std::make_pair(summand, false);
+    }
+    else
+    {
       // The other process depends on our parameters and we do not perform state updates.
       process::action_list actions;
       actions.push_front(process::action(sync_labels.back(), values));
       action = lps::multi_action(actions);
-    }
-    else
-    {
-      mCRL2log(log::info) << "Summand is independent in the other component, so " << summand_index << " in L_W.\n";
-      return std::make_pair(summand, false);
     }
   }
 
