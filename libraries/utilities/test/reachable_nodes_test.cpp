@@ -6,12 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file reachable_nodes_test.cpp
 
-#define BOOST_TEST_MODULE reachable_nodes_test.cpp
-
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/reachable_nodes.h"
+
+#define BOOST_AUTO_TEST_MAIN
+#include <boost/test/included/unit_test_framework.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 using namespace mcrl2::utilities;

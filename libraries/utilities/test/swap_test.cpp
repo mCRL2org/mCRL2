@@ -6,9 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file swap_test.cpp
-/// \brief Test for std::swap usage
 
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include <algorithm>
@@ -145,9 +144,4 @@ BOOST_AUTO_TEST_CASE(template_class_swap)
   swap(x, y);
   BOOST_CHECK(x.val() == 2);
   BOOST_CHECK(y.val() == 1);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

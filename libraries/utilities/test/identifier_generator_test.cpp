@@ -6,11 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file identifier_generator_test.cpp
-/// \brief Test for identifier generators.
 
 #include "mcrl2/utilities/number_postfix_generator.h"
+
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -65,9 +66,4 @@ BOOST_AUTO_TEST_CASE(identifier_generator_test)
   generator.add_identifier("a0");
   s = generator("a2");
   BOOST_CHECK_EQUAL(s, "a5");
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

@@ -9,6 +9,7 @@
 
 #include "mcrl2/utilities/block_allocator.h"
 
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include <vector>
@@ -65,9 +66,4 @@ BOOST_AUTO_TEST_CASE(test_has_extension)
   }
 
   BOOST_CHECK(allocator.consolidate() == 1024/16); // Whole allocator should be emptied.
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
-{
-  return nullptr;
 }

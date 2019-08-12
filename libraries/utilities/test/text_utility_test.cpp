@@ -6,10 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file text_utility_test.cpp
-/// \brief Add your file description here.
 
 #include "mcrl2/utilities/text_utility.h"
+
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
@@ -68,9 +68,4 @@ BOOST_AUTO_TEST_CASE(test_regex_split)
 {
   BOOST_CHECK(utilities::regex_split("a := b; \n", ":=") == std::vector<std::string>({ "a", "b;" }));
   BOOST_CHECK(utilities::regex_split("a+b*c/d ", "[+*/]") == std::vector<std::string>({ "a", "b", "c", "d" }));
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

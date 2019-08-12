@@ -6,9 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file parse_test.cpp
-/// \brief Add your file description here.
 
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/utilities/parse_numbers.h"
@@ -52,9 +51,4 @@ BOOST_AUTO_TEST_CASE(parse_number_test)
   BOOST_CHECK_THROW(utilities::parse_natural_number("a"), mcrl2::runtime_error);
   BOOST_CHECK_THROW(utilities::parse_natural_number("12 a"), mcrl2::runtime_error);
   BOOST_CHECK_THROW(utilities::parse_natural_number("12 3a "), mcrl2::runtime_error);
-}
-
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
-{
-  return nullptr;
 }

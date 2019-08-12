@@ -6,16 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file indexed_set_test.cpp
-/// \brief Add your file description here.
 
-#define BOOST_TEST_MODULE indexed_set_test
-#include <iostream>
-#include <string>
+#include "mcrl2/utilities/indexed_set.h"
+
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include <map>
-#include "mcrl2/utilities/indexed_set.h"
+#include <iostream>
+#include <string>
 
 using namespace std;
 using namespace mcrl2::utilities;
