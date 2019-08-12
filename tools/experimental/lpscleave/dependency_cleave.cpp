@@ -115,7 +115,7 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
 
   summand_dependencies dependencies = compute_dependencies(spec, summand, parameters, other_parameters);
 
-  print_names(std::string("Dependencies  of summand S^i_X := ") += std::to_string(summand_index), dependencies.S_i_X);
+  print_names(std::string("Dependencies of summand ") += std::to_string(summand_index) += std::string(" (S^i_X) := "), dependencies.S_i_X);
 
   // Add a summation for every parameter of the other process that we depend on.
   data::variable_list variables = summand.summation_variables();
