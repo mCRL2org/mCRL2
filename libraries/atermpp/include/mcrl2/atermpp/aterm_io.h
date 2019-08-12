@@ -80,8 +80,8 @@ private:
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
 
-  mcrl2::utilities::indexed_set_large<aterm> m_terms; ///< An index of already written terms.
-  mcrl2::utilities::indexed_set_large<function_symbol> m_function_symbols; ///< An index of already written function symbols.
+  mcrl2::utilities::indexed_set<aterm> m_terms; ///< An index of already written terms.
+  mcrl2::utilities::indexed_set<function_symbol> m_function_symbols; ///< An index of already written function symbols.
 };
 
 /// \brief Reads terms from a stream in the steamable binary aterm format.
