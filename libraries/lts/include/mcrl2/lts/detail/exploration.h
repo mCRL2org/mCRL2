@@ -181,11 +181,11 @@ class lps2lts_algorithm
     void save_nondeterministic_state(const lps::state& state, const next_state_generator::transition_t& nondeterminist_transition);
     void save_error(const lps::state& state);
     std::pair<std::size_t, bool> get_state_number(const lps::state& target_state);
-    std::pair<std::size_t, bool> add_target_state(
+    std::size_t add_target_state(
                          const lps::state& source_state, 
                          const lps::state& target_state,
                          const std::function<void(const lps::state&)> add_state_to_todo_queue_function);
-    bool add_transition(const lps::state& source_state, 
+    void add_transition(const lps::state& source_state, 
                          const next_state_generator::transition_t& transition,
                          const std::function<void(const lps::state&)> add_state_to_todo_queue_function);
     void get_transitions(const lps::state& state,
