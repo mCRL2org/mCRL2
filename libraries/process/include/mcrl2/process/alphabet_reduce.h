@@ -44,10 +44,6 @@ void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equa
 {
   mCRL2log(log::verbose) << "applying alphabet reduction..." << std::endl;
   process_expression init = procspec.init();
-  if (is_pcrl(init))
-  {
-    init = expand_process_instance_assignments(init, procspec.equations());
-  }
 
   // cache the alphabet of pcrl equations and apply alphabet reduction to block({}, init)
   std::vector<process_equation>& equations = procspec.equations();
