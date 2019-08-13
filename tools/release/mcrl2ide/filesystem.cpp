@@ -22,21 +22,24 @@
 #include <QDomNodeList>
 
 Property::Property()
-    : name(""), text(""), mucalculus(true), equivalence(mcrl2::lts::lts_eq_none)
+    : name(""), text(""), mucalculus(true),
+      equivalence(mcrl2::lts::lts_eq_none), text2("")
 {
 }
 
 Property::Property(QString name, QString text, bool mucalculus,
-                   mcrl2::lts::lts_equivalence equivalence)
-    : name(name), text(text), mucalculus(mucalculus), equivalence(equivalence)
+                   mcrl2::lts::lts_equivalence equivalence, QString text2)
+    : name(name), text(text), mucalculus(mucalculus), equivalence(equivalence),
+      text2(text2)
 {
 }
 
 bool Property::operator==(const Property& property) const
 {
-  return this->name == property.name && this->text == property.text &&
-         this->mucalculus == property.mucalculus &&
-         this->equivalence == property.equivalence;
+  return name == property.name && text == property.text &&
+         mucalculus == property.mucalculus &&
+         (mucalculus ||
+          equivalence == property.equivalence && text2 == property.text2);
 }
 
 bool Property::operator!=(const Property& property) const
@@ -115,9 +118,10 @@ QString FileSystem::defaultSpecificationFilePath()
   return projectFolderPath + QDir::separator() + projectName + "_spec.mcrl2";
 }
 
-QString FileSystem::specificationFilePath(const QString& propertyName)
+QString FileSystem::specificationFilePath(SpecType specType,
+                                          const QString& propertyName)
 {
-  if (propertyName.isEmpty())
+  if (specType == SpecType::Main)
   {
     if (specFilePath.isEmpty())
     {
@@ -131,26 +135,29 @@ QString FileSystem::specificationFilePath(const QString& propertyName)
   else
   {
     return temporaryFolder.path() + QDir::separator() + projectName + "_" +
-           propertyName + "_spec.mcrl2";
+           propertyName + SPECTYPEEXTENSION.at(specType) + "_spec.mcrl2";
   }
 }
 
-QString FileSystem::lpsFilePath(const QString& propertyName, bool evidence)
+QString FileSystem::lpsFilePath(SpecType specType, const QString& propertyName,
+                                bool evidence)
 {
   return intermediateFilesFolderPath(IntermediateFileType::Lps) +
          QDir::separator() + projectName +
          (propertyName.isEmpty() ? "" : "_" + propertyName) +
-         (evidence ? "_evidence" : "") + "_lps.lps";
+         SPECTYPEEXTENSION.at(specType) + (evidence ? "_evidence" : "") +
+         "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
-                                const QString& propertyName, bool evidence)
+                                SpecType specType, const QString& propertyName,
+                                bool evidence)
 {
   return intermediateFilesFolderPath(IntermediateFileType::Lts) +
          QDir::separator() + projectName +
          (propertyName.isEmpty() ? "" : "_" + propertyName) +
-         (evidence ? "_evidence" : "") + "_lts_" +
-         getEquivalenceName(equivalence, true) + ".lts";
+         SPECTYPEEXTENSION.at(specType) + (evidence ? "_evidence" : "") +
+         "_lts_" + getEquivalenceName(equivalence, true) + ".lts";
 }
 
 QString FileSystem::propertyFilePath(const Property& property, bool forParsing)
@@ -782,26 +789,23 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath,
     else // fileExtension == "equ"
     {
       /* extract equivalence and alternate process */
-      int firstNewlineIndex = propertyText.indexOf("\n");
-      if (firstNewlineIndex != -1)
+      QStringList propertyParts = propertyText.split(equivalenceFileSeparator);
+      if (propertyParts.size() == 3)
       {
         mcrl2::lts::lts_equivalence equivalence =
-            getEquivalenceFromName(propertyText.left(firstNewlineIndex));
+            getEquivalenceFromName(propertyParts.at(1));
         if (equivalence != mcrl2::lts::lts_eq_none)
         {
-          QString altProcess =
-              propertyText.right(propertyText.size() - firstNewlineIndex)
-                  .trimmed();
-
-          return Property(propertyName, altProcess, false, equivalence);
+          return Property(propertyName, propertyParts.at(0), false, equivalence,
+                          propertyParts.at(2));
         }
       }
-      executeInformationBox(
-          parent, context,
-          "Could not read the file '" + propertyFilePath +
-              "': an equivalence property file should have the name of the "
-              "equivalence on the first line and the alternate process "
-              "starting from the second line");
+      executeInformationBox(parent, context,
+                            "Could not read the file '" + propertyFilePath +
+                                "': an equivalence property file should have "
+                                "the name of the equivalence and two process "
+                                "expressions, all three separated by '" +
+                                equivalenceFileSeparator + "'");
     }
   }
   else
@@ -1014,31 +1018,49 @@ void FileSystem::saveProperty(const Property& property, bool forParsing)
   }
   else
   {
-    saveStream << getEquivalenceName(property.equivalence) << "\n"
-               << property.text;
+    saveStream << property.text << equivalenceFileSeparator
+               << getEquivalenceName(property.equivalence)
+               << equivalenceFileSeparator << property.text2;
   }
 
   propertyFile.close();
 }
 
 void FileSystem::createReinitialisedSpecification(const Property& property,
-                                                  bool forParsing)
+                                                  bool forParsing,
+                                                  SpecType specType)
 {
-  if (!upToDateOutputFileExists(specificationFilePath(),
-                                specificationFilePath(property.name)) ||
+  /* only create a reinitialised specification if there does not already exist
+   *   one that is up to date compared to the main specification and the
+   *   corresponding property */
+  if (!upToDateOutputFileExists(
+          specificationFilePath(),
+          specificationFilePath(specType, property.name)) ||
       !upToDateOutputFileExists(propertyFilePath(property, forParsing),
-                                specificationFilePath(property.name)))
+                                specificationFilePath(specType, property.name)))
   {
     QString spec;
     readSpecification(spec);
-    int initIndex = spec.indexOf(QRegExp("(^|[; \\t\\n\\r])init[ \\t\\n\\r]"));
     QString alternateSpec = spec;
-    int initSize = spec.indexOf(";", initIndex + 5) - initIndex +
-                   (spec.at(initIndex) == 'i' ? 1 : 0);
-    alternateSpec.replace(initIndex + (spec.at(initIndex) == 'i' ? 0 : 1),
-                          initSize, property.text);
+    QString procExp =
+        (specType == SpecType::First ? property.text : property.text2);
 
-    QFile alternateSpecFile(specificationFilePath(property.name));
+    int initIndex = spec.indexOf(QRegExp("(^|[; \\t\\n\\r])init[ \\t\\n\\r]"));
+    /* if there is no init block in the main spec, add an init block, else
+     *   replace the contents of the init block */
+    if (initIndex == -1)
+    {
+      alternateSpec.append("\ninit " + procExp + ";");
+    }
+    else
+    {
+      int initSize = spec.indexOf(";", initIndex + 5) - initIndex +
+                     (spec.at(initIndex) == 'i' ? 1 : 0) - 6;
+      alternateSpec.replace(initIndex + (spec.at(initIndex) == 'i' ? 0 : 1) + 5,
+                            initSize, procExp);
+    }
+
+    QFile alternateSpecFile(specificationFilePath(specType, property.name));
     alternateSpecFile.open(QIODevice::WriteOnly);
     QTextStream saveStream(&alternateSpecFile);
     saveStream << alternateSpec;

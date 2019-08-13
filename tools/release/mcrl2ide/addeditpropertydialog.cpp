@@ -42,7 +42,8 @@ AddEditPropertyDialog::AddEditPropertyDialog(bool add,
   setWindowFlags(Qt::Window);
 
   ui->formulaTextField->setPurpose(false);
-  ui->initTextField->setPurpose(true);
+  ui->initTextField1->setPurpose(true);
+  ui->initTextField2->setPurpose(true);
 
   connect(ui->parseButton, SIGNAL(clicked()), this, SLOT(parseProperty()));
   connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(addEditProperty()));
@@ -68,7 +69,8 @@ void AddEditPropertyDialog::clearFields()
 {
   ui->propertyNameField->clear();
   ui->formulaTextField->clear();
-  ui->initTextField->clear();
+  ui->initTextField1->clear();
+  ui->initTextField2->clear();
   ui->equivalenceComboBox->setCurrentIndex(0);
 }
 
@@ -83,7 +85,8 @@ void AddEditPropertyDialog::setProperty(const Property& property)
   else
   {
     ui->equivalenceComboBox->setSelectedEquivalence(property.equivalence);
-    ui->initTextField->setPlainText(property.text);
+    ui->initTextField1->setPlainText(property.text);
+    ui->initTextField2->setPlainText(property.text2);
     ui->tabWidget->setCurrentIndex(1);
   }
 }
@@ -98,8 +101,9 @@ Property AddEditPropertyDialog::getProperty()
   else // equivalence tab
   {
     return Property(ui->propertyNameField->text(),
-                    ui->initTextField->toPlainText(), false,
-                    ui->equivalenceComboBox->getSelectedEquivalence());
+                    ui->initTextField1->toPlainText(), false,
+                    ui->equivalenceComboBox->getSelectedEquivalence(),
+                    ui->initTextField2->toPlainText());
   }
 }
 
