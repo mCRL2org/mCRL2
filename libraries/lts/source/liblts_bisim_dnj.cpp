@@ -1,3 +1,7 @@
+#if 0
+// The code in this file is no longer needed -- it has all been moved to the
+// .h file because Jan Friso Groote wanted to have a thick interface.
+
 // Author(s): David N. Jansen, Institute of Software, Chinese Academy of
 // Sciences, Beijing, PR China
 //
@@ -71,17 +75,20 @@
 // wide.  The left 80 columns contain the main text of the program.  The right
 // 80 columns contain assertions and other code used for debugging.
 
-#include "mcrl2/lts/detail/liblts_bisim_dnj.h"
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/detail/liblts_scc.h"
-#include "mcrl2/lts/detail/liblts_merge.h"
-#include "mcrl2/lts/detail/coroutine.h"
-#include "mcrl2/lts/detail/check_complexity.h"
-#include "mcrl2/lts/detail/fixed_vector.h"
+// The following #includes are commented out because otherwise, the make depend
+// utility might mistake them for real dependencies.
 
-#include <algorithm> // for std::lower_bound()
+//#include "mcrl2/lts/detail/liblts_bisim_dnj.h"
+//#include "mcrl2/lts/lts_lts.h"
+//#include "mcrl2/lts/lts_aut.h"
+//#include "mcrl2/lts/lts_fsm.h"
+//#include "mcrl2/lts/detail/liblts_scc.h"
+//#include "mcrl2/lts/detail/liblts_merge.h"
+//#include "mcrl2/lts/detail/coroutine.h"
+//#include "mcrl2/lts/detail/check_complexity.h"
+//#include "mcrl2/lts/detail/fixed_vector.h"
+
+//#include <algorithm> // for std::lower_bound()
 
 // My provisional recommendation is to always use simple lists and pool
 // allocators.  Using standard allocation and standard lists is 5-15% slower and
@@ -1979,6 +1986,7 @@ class part_trans_t
         #endif
     #endif
 
+    state_type number_of_new_bottom_states;
 
     /// \brief constructor
     /// \details The constructor sets up the dummy transitions at the beginning
@@ -1999,7 +2007,8 @@ class part_trans_t
         block_bunch_inert_begin(1 + &block_bunch.back()),
         action_block_inert_begin(action_block_end),
         unstable_block_bunch(),
-        first_nontrivial(nullptr)
+        first_nontrivial(nullptr),
+        number_of_new_bottom_states(0)
     {
         succ.front().block_bunch = &block_bunch.front();                        ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<bunch_t>::value);)
         succ.back() .block_bunch = &block_bunch.front();                        ONLY_IF_POOL_ALLOCATOR(assert(std::is_trivially_destructible<simple_list<
@@ -2016,11 +2025,11 @@ class part_trans_t
     /// \brief destructor
     ~part_trans_t()
     {
+        mCRL2log(log::verbose, "bisim_dnj") << "The algorithm found "
+                     << number_of_new_bottom_states << " new bottom states.\n";
         #ifndef USE_POOL_ALLOCATOR
             // The destructor also deallocates the bunches, as they are not
             // directly referenced from anywhere.
-            // mCRL2log(log::verbose, "bisim_dnj") << "The algorithm found "
-            //       << number_of_new_bottom_states << " new bottom states.\n";
             action_block_entry* action_block_iter(action_block_begin);
             for (;;)
             {
@@ -2782,6 +2791,7 @@ class part_trans_t
                                       *source_block->marked_nonbottom_begin++);
             }                                                                   assert(source->pos < source->bl.ock->marked_nonbottom_begin);
             std::swap(*source->pos, *source_block->nonbottom_begin++);
+            ++number_of_new_bottom_states;
             became_bottom = true;
         }
 
@@ -3393,32 +3403,8 @@ class bisim_partitioner_dnj
     ///
     /// The main parameter and return value are implicit with this function: a
     /// reference to the LTS was stored in the object by the constructor.
-    /// \param[out] arbitrary_state_per_block    If this pointer is != nullptr,
-    ///                                the function fills the vector with, per
-    ///                                equivalence class, the number of an
-    ///                                arbitrary original state in the class.
-    void finalize_minimized_LTS(std::vector<std::size_t>* const
-                                                     arbitrary_state_per_block)
+    void finalize_minimized_LTS()
     {
-        if (nullptr != arbitrary_state_per_block)
-        {
-            arbitrary_state_per_block->resize(num_eq_classes());
-                                                                                #ifndef NDEBUG
-                                                                                    arbitrary_state_per_block->assign(num_eq_classes(), (state_type) -1);
-                                                                                #endif
-            // for all blocks
-            const permutation_entry* s_iter(&part_st.permutation.front());      assert(s_iter <= &part_st.permutation.back());
-            do
-            {
-                const block_t* const B(s_iter->st->bl.ock);                     assert(0 <= B->seqnr);  assert(B->seqnr < arbitrary_state_per_block->size());
-                                                                                assert((state_type) -1 == (*arbitrary_state_per_block)[B->seqnr]);
-                (*arbitrary_state_per_block)[B->seqnr] =
-                                      s_iter->st - &part_st.state_info.front();
-                s_iter = B->end;
-            }
-            while (s_iter <= &part_st.permutation.back());
-        }
-
         // The labels have already been stored in
         // next_nontrivial_and_label.label by
         // refine_partition_until_it_becomes_stable().
@@ -5226,14 +5212,9 @@ class bisim_partitioner_dnj
 ///                                    actions on states must be preserved.  If
 ///                                    false these are removed.  If true these
 ///                                    are preserved.
-/// \param[out]    arbitrary_state_per_block    If this pointer is != nullptr,
-///                                    the function fills the vector with, per
-///                                    equivalence class, the number of an
-///                                    arbitrary original state in the class.
 template <class LTS_TYPE>
 void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching /* = false */,
-     bool const preserve_divergence /* = false */,
-     std::vector<std::size_t>* const arbitrary_state_per_block /* = nullptr */)
+                                  bool const preserve_divergence /* = false */)
 {
     // Line 1.1: Find tau-SCCs and contract each of them to a single state
     if (branching)
@@ -5249,7 +5230,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching /* = false */,
                                                           preserve_divergence);
 
         // Assign the reduced LTS
-        bisim_part.finalize_minimized_LTS(arbitrary_state_per_block);
+        bisim_part.finalize_minimized_LTS();
     }
 }
 
@@ -5281,7 +5262,7 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
 {
     if (generate_counter_examples)
     {
-        mCRL2log(log::warning) << "The DNJ branching bisimulation "
+        mCRL2log(log::warning) << "The JGKW19 branching bisimulation "
                               "algorithm does not generate counterexamples.\n";
     }
     std::size_t init_l2(l2.initial_state() + l1.num_states());
@@ -5310,12 +5291,12 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
 
 
 
-template void bisimulation_reduce_dnj(lts_lts_t& l, bool branching, bool
-     preserve_divergence, std::vector<std::size_t>* arbitrary_state_per_block);
-template void bisimulation_reduce_dnj(lts_aut_t& l, bool branching, bool
-     preserve_divergence, std::vector<std::size_t>* arbitrary_state_per_block);
-template void bisimulation_reduce_dnj(lts_fsm_t& l, bool branching, bool
-     preserve_divergence, std::vector<std::size_t>* arbitrary_state_per_block);
+template void bisimulation_reduce_dnj(lts_lts_t& l, bool branching,
+                                                     bool preserve_divergence);
+template void bisimulation_reduce_dnj(lts_aut_t& l, bool branching,
+                                                     bool preserve_divergence);
+template void bisimulation_reduce_dnj(lts_fsm_t& l, bool branching,
+                                                     bool preserve_divergence);
 
 template bool destructive_bisimulation_compare_dnj(lts_lts_t& l1,lts_lts_t& l2,
      bool branching, bool preserve_divergence, bool generate_counter_examples);
@@ -5329,3 +5310,5 @@ template bool destructive_bisimulation_compare_dnj(lts_fsm_t& l1,lts_fsm_t& l2,
 } // end namespace detail
 } // end namespace lts
 } // end namespace mcrl2
+
+#endif

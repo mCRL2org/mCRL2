@@ -23,7 +23,7 @@
 #include "unordered_set"
 #include "mcrl2/lts/detail/counter_example.h"
 #include "mcrl2/lps/exploration_strategy.h"
-#include "mcrl2/lts/detail/liblts_bisim_gjkw.h"  // To be replaced with liblts_bisim_dnj.h when it makes its bisim_partitioner publicly accessible. 
+#include "mcrl2/lts/detail/liblts_bisim_dnj.h"
 
 namespace mcrl2
 {
@@ -237,11 +237,11 @@ std::pair<std::size_t, bool> reduce(LTS_TYPE& lts,
     scc_part.replace_transition_system(preserve_divergence);
   }
 
-  // TODO: replace this bij the bisim_partitioner_dnj once it is available. 
-  detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(lts, weak_reduction, preserve_divergence);
+  detail::bisim_partitioner_dnj<LTS_TYPE> bisim_part(lts, weak_reduction,
+                                                          preserve_divergence);
   // Assign the reduced LTS, and set init_l2.
   l2_init = bisim_part.get_eq_class(l2_init);
-  bisim_part.replace_transition_system(weak_reduction, preserve_divergence);
+  bisim_part.finalize_minimized_LTS();
 
   return std::make_pair(l2_init, l2_init == lts.initial_state());
 }
@@ -292,12 +292,12 @@ bool destructive_refinement_checker(
 
     if (initial_equal && weak_reduction)
     {
-      mCRL2log(log::verbose) << "Both LTSs are";
+      mCRL2log(log::verbose) << "The two LTSs are";
       if (preserve_divergence)
       {
         mCRL2log(log::verbose) << " divergence-preserving";
       }
-      mCRL2log(log::verbose) << " branching bisimular, so no need to check refinement relation.\n";
+      mCRL2log(log::verbose) << " branching bisimilar, so there is no need to check the refinement relation.\n";
       return true;
     }
   }
