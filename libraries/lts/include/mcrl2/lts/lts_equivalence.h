@@ -278,11 +278,11 @@ inline std::string description(const lts_equivalence eq)
     case lts_eq_bisim_sigref:
       return "strong bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_branching_bisim:
-      return "branching bisimilarity using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017]";
+      return "branching bisimilarity using the O(m log n) algorithm [Jansen/Groote/Keiren/Wijs 2019]";
     case lts_eq_branching_bisim_gv:
       return "branching bisimilarity using the O(mn) algorithm [Groote/Vaandrager 1990]";
     case lts_eq_branching_bisim_gjkw:
-      return "branching bisimilarity using the O(m log n) algorithm directly on an LTS. This option is experimental.";
+      return "branching bisimilarity using the O(m log n) algorithm [Groote/Jansen/Keiren/Wijs 2017]";
     case lts_eq_branching_bisim_sigref:
       return "branching bisimilarity using the signature refinement algorithm [Blom/Orzan 2003]";
     case lts_eq_divergence_preserving_branching_bisim:

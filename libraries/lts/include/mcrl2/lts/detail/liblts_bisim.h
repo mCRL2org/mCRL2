@@ -82,8 +82,7 @@ class bisim_partitioner
      * internal, which is detected using the function is_tau, then it is only returned
      * if t!=t' or preserve_divergence=true. This effectively removes all inert transitions.
      * Duplicates are removed from the transitions in the new lts.
-     * Note that the number of states nor the initial state are not adapted by this method.
-     * These must be set separately.
+     * Also the number of states and the initial state are adapted by this method.
      *
      * \pre The bisimulation equivalence classes have been computed.
      * \param[in] branching Causes non internal transitions to be removed.
