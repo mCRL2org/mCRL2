@@ -601,7 +601,6 @@ BOOST_AUTO_TEST_CASE(test_whether_probabilistic_state_spaces_are_generated_corre
   check_lps2lts_specification(spec, 2, 1, 2, contains_probabilities);
 }
 
-/* Test does not succeed as yet and is therefore outcommented. 
 BOOST_AUTO_TEST_CASE(coins_simulate_dice)   // Example from the probabilistic examples directory. 
 {
     std::string spec(
@@ -686,7 +685,7 @@ BOOST_AUTO_TEST_CASE(coins_simulate_dice)   // Example from the probabilistic ex
   );
   const bool contains_probabilities=true;
   check_lps2lts_specification(spec, 26, 26, 9, contains_probabilities);
-} */
+} 
 
 
 
