@@ -23,11 +23,14 @@ namespace utilities
 namespace tools
 {
 
-/// \brief Base class for tools that take one file as input, and writes the results
-///        to two files.
-class input_output_output_tool : public input_tool
+/// \brief Base class for tools that optionally takes one file as input, and writes the results
+///        to two output files.
+class input_output_output_tool: public tool
 {
 protected:
+  /// The input file name
+  std::string m_input_filename;
+
   /// The output file names.
   std::string m_output_filename1;
   std::string m_output_filename2;
@@ -45,21 +48,31 @@ protected:
   /// \brief Returns the synopsis of the tool.
   std::string synopsis() const
   {
-    return "[OPTION]... INFILE [OUTFILE1 [OUTFILE2]]\n";
+    return "[OPTION]... [INFILE] OUTFILE1 OUTFILE2\n";
   }
 
   /// \brief Parse non-standard options
   /// \param parser A command line parser
   void parse_options(const command_line_parser& parser)
   {
-    input_tool::parse_options(parser);
-    if (parser.arguments.size() <= 2)
+    tool::parse_options(parser);
+
+    if (parser.arguments.size() < 2)
     {
-      parser.error("This tool requires at least an input and two output filenames.");
+      parser.error("This tool requires at least an two output filenames.");
     }
 
-    m_output_filename1 = parser.arguments[1];
-    m_output_filename2 = parser.arguments[2];
+    // Take the input filename if there are at least three file arguments.
+    std::size_t index = 0;
+    if (parser.arguments.size() >= 3)
+    {
+      m_input_filename = parser.arguments[index];
+      ++index;
+    }
+
+    m_output_filename1 = parser.arguments[index];
+    ++index;
+    m_output_filename2 = parser.arguments[index];
   }
 
   /// \brief Returns a message about the output filename
@@ -84,8 +97,12 @@ public:
                            const std::string& tool_description,
                            std::string known_issues = ""
                          )
-    : input_tool(name, author, what_is, tool_description, known_issues)
+    : tool(name, author, what_is, tool_description, known_issues)
   {}
+
+  /// \brief Returns a const reference to the input filename.
+  const std::string& input_filename() const { return m_input_filename; }
+  std::string& input_filename() { return m_input_filename; }
 
   /// \brief Returns a const reference to the first output filename.
   const std::string& output_filename1() const { return m_output_filename1; }

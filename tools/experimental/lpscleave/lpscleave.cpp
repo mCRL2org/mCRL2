@@ -36,14 +36,16 @@ public:
       "lpscleave",
       "Maurice Laveaux",
       "Cleaves LPSs",
-      "")
+      "Decomposes the data parameters of the linear process specification (LPS) "
+      "in INFILE and write the result of the left component to OUTFILE1 and the right"
+      "component to OUTFILE2. If INFILE is not present, stdin is used.")
   {}
 
   bool run() override
   {
     stochastic_specification spec;
 
-    if (input_filename() == "-")
+    if (input_filename().empty())
     {
       load_lps(spec, std::cin);
     }
@@ -57,7 +59,6 @@ public:
       // Print the parameters and exit
       print_names("Parameters", spec.process().process_parameters());
       mCRL2log(log::info) << "Number of summands: " << spec.process().summand_count() << "\n";
-
     }
     else
     {
@@ -75,7 +76,7 @@ public:
 
       // Save the resulting left-cleave.
       {
-        stochastic_specification left_spec = dependency_cleave(spec, parameters, m_indices, m_right_process);
+        stochastic_specification left_spec = dependency_cleave(spec, parameters, m_indices, false);
         std::ofstream file(output_filename1(), std::ios::binary);
         left_spec.save(file, true);
       }
@@ -88,7 +89,7 @@ public:
 
       // Save the resulting right-cleave.
       {
-        stochastic_specification right_spec = dependency_cleave(spec, parameters, m_indices, m_right_process);
+        stochastic_specification right_spec = dependency_cleave(spec, parameters, m_indices, true);
         std::ofstream file(output_filename2(), std::ios::binary);
         right_spec.save(file, true);
       }
@@ -123,18 +124,11 @@ protected:
         m_indices.emplace_back(std::stoul(string));
       }
     }
-
-    if (parser.options.count("right"))
-    {
-      m_right_process = true;
-    }
   }
 
 private:
-
   std::list<std::string> m_parameters;
   std::list<std::size_t> m_indices;
-  bool m_right_process = false;
 };
 
 } // namespace mcrl2
