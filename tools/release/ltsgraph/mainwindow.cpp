@@ -298,11 +298,12 @@ void MainWindow::onExportXML()
 
 void MainWindow::updateStatusBar()
 {
+  QString ctrlKey = QKeySequence(Qt::ControlModifier).toString(QKeySequence::NativeText);
   QString msg =
     m_glwidget->isPainting() ?
       "Click to paint a node" :
       !m_ui.act3D->isChecked() ?
-        "Ctrl + drag: move camera; scroll: zoom in/out; Esc: reset viewpoint; Right click: fix a node/handle" :
-        "Ctrl + drag: move camera; Shift + drag: rotate camera; scroll: zoom in/out; Esc: reset viewpoint; Right click: fix a node/handle";
+        ctrlKey + "drag: move camera; scroll: zoom in/out; Esc: reset viewpoint; Right click: fix a node/handle" :
+        ctrlKey + "drag: move camera; Shift + drag: rotate camera; scroll: zoom in/out; Esc: reset viewpoint; Right click: fix a node/handle";
   m_ui.statusBar->showMessage(msg);
 }
