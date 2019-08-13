@@ -24,6 +24,27 @@
 #include <QDomDocument>
 
 /**
+ * @brief SpecType Defines the possible types of specification files: the main
+ *   specification file and the specifications that correspond to the first
+ *   respectively second initial process of an equivalance property
+ */
+enum SpecType
+{
+  Main,
+  First,
+  Second
+};
+
+/**
+ * @brief SPECTYPEEXTENSION Defines the extension needed for the file name
+ *   depending on the specification type
+ */
+const std::map<SpecType, QString> SPECTYPEEXTENSION = {
+    {SpecType::Main, ""},
+    {SpecType::First, "_first"},
+    {SpecType::Second, "_second"}};
+
+/**
  * @brief IntermediateFileType Defines the type of files that can result
  * from tools
  */
@@ -53,6 +74,7 @@ class Property
   QString name;
   QString text;
   bool mucalculus;
+  QString text2;
   mcrl2::lts::lts_equivalence equivalence;
 
   /**
@@ -63,13 +85,18 @@ class Property
   /**
    * @brief Property Constructor
    * @param name The name of the property
-   * @param text The text of the property
+   * @param text The text of the property; the mu-calculus formula in case of a
+   *   mu-calculus property and the first initial process expression in case of
+   *   an equivalence property
    * @param mucalculus Whether this is a mu-calculus property (true) or an
    *   equivalence property (false)
    * @param equivalence The equivalence in case this is an equivalence property
+   * @param text2 The second initial process expression in case of an
+   *   equivalence property
    */
   Property(QString name, QString text, bool mucalculus = true,
-           mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none);
+           mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+           QString text2 = "");
 
   /**
    * @brief operator== Defines equality on two properties
@@ -145,29 +172,35 @@ class FileSystem : public QObject
 
   /**
    * @brief specificationFilePath Defines the file path of a specification
+   * @param specType The type of the specification
    * @param propertyName The property name in case this is a generated
    *   specification to compare against
    * @return The file path of the specification
    */
-  QString specificationFilePath(const QString& propertyName = "");
+  QString specificationFilePath(SpecType specType = SpecType::Main,
+                                const QString& propertyName = "");
 
   /**
    * @brief lpsFilePath Defines the file path of a lps
+   * @param specType The type of the specification this lps is created from
    * @param propertyName The property name in case this is an evidence lps
    * @param evidence Whether this is an evidence lps
    * @return The file path of the lps
    */
-  QString lpsFilePath(const QString& propertyName = "", bool evidence = false);
+  QString lpsFilePath(SpecType specType = SpecType::Main,
+                      const QString& propertyName = "", bool evidence = false);
 
   /**
    * @brief ltsFilePath Defines the file path of a lts
    * @param equivalence The equivalence reduction applied to the lts
+   * @param specType The type of the specification this lts is created from
    * @param propertyName The property name in case this is an evidence lts
    * @param evidence Whether this is an evidence lts
    * @return The file path of the lts
    */
   QString
   ltsFilePath(mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+              SpecType specType = SpecType::Main,
               const QString& propertyName = "", bool evidence = false);
 
   /**
@@ -373,9 +406,10 @@ class FileSystem : public QObject
    * @param property The equivalence property for which the new specification
    *   needs to be created
    * @param forParsing Whether we want to use the file to parse the property
+   * @param specType The specificationType
    */
   void createReinitialisedSpecification(const Property& property,
-                                        bool forParsing);
+                                        bool forParsing, SpecType specType);
 
   /**
    * @brief openProjectFolderInExplorer Allows the user to open the project
@@ -422,6 +456,8 @@ class FileSystem : public QObject
   QString propertiesFolderName = "properties";
   QString artefactsFolderName = "artefacts";
   QTemporaryDir temporaryFolder;
+
+  QString equivalenceFileSeparator = "\n#####\n";
 
   QWidget* parent;
   CodeEditor* specificationEditor;

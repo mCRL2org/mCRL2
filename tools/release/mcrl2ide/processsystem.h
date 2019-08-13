@@ -270,6 +270,47 @@ class ProcessSystem : public QObject
   std::map<ProcessType, ProcessThread*> processThreads;
 
   /**
+   * @brief createSubprocess Creates a subprocess (overload: for doing
+   *   reductions only)
+   * @param subprocessType The subprocess type of the subprocess
+   * @param processid The id of the process corresponding to this subprocess
+   * @param subprocessIndex The index of this subprocess in the corresponding
+   *   process
+   * @param equivalence An equivalence
+   */
+  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
+                             int subprocessIndex,
+                             mcrl2::lts::lts_equivalence equivalence);
+
+  /**
+   * @brief createSubprocess Creates a subprocess (overload: for verifying
+   * equivalence properties only)
+   * @param subprocessType The subprocess type of the subprocess
+   * @param processid The id of the process corresponding to this subprocess
+   * @param subprocessIndex The index of this subprocess in the corresponding
+   *   process
+   * @param property A property
+   * @param equivalence An equivalence
+   */
+  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
+                             int subprocessIndex, const Property& property,
+                             mcrl2::lts::lts_equivalence equivalence);
+
+  /**
+   * @brief createSubprocess Creates a subprocess (overload: for handling
+   *   reinitialised specifications only)
+   * @param subprocessType The subprocess type of the subprocess
+   * @param processid The id of the process corresponding to this subprocess
+   * @param subprocessIndex The index of this subprocess in the corresponding
+   *   process
+   * @param property A property
+   * @param specType The type of the specification that the process uses
+   */
+  QProcess* createSubprocess(SubprocessType subprocessType, int processid,
+                             int subprocessIndex, const Property& property,
+                             SpecType specType);
+
+  /**
    * @brief createSubprocess Creates a subprocess
    * @param subprocessType The subprocess type of the subprocess
    * @param processid The id of the process corresponding to this subprocess
@@ -278,11 +319,14 @@ class ProcessSystem : public QObject
    * @param property A property (if needed)
    * @param evidence Whether the subprocess is for creating evidence
    * @param equivalence An equivalence (if needed)
+   * @param specType The type of the specification that the process uses (if
+   *   needed)
    */
   QProcess* createSubprocess(
       SubprocessType subprocessType, int processid, int subprocessIndex,
       const Property& property = Property(), bool evidence = false,
-      mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none);
+      mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+      SpecType specType = SpecType::Main);
 
   private slots:
   /**
