@@ -22,9 +22,9 @@
 #include "rewriter.h"
 #include "solver.h"
 
-#include "mcrl2/gui/numberedtextedit.h"
+#include "mcrl2/gui/codeeditor.h"
 
-class DocumentWidget : public mcrl2::gui::qt::NumberedTextEdit
+class DocumentWidget : public mcrl2::gui::qt::CodeEditor
 {
     Q_OBJECT
 
@@ -57,12 +57,6 @@ class DocumentWidget : public mcrl2::gui::qt::NumberedTextEdit
      * @param fileName The file to which the contents should be saved
      */
     void saveFile(QString fileName);
-
-    void highlightParenthesis(int pos);
-    void matchParenthesis(int which);
-
-  public slots:
-    void onCursorPositionChanged();
 
   private:
     QString m_filename;         ///< The filename currently loaded, null String if none available

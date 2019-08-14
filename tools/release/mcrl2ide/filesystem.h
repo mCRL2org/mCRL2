@@ -10,7 +10,7 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-#include "codeeditor.h"
+#include "mcrl2/gui/codeeditor.h"
 #include "utilities.h"
 #include "mcrl2/lts/lts_equivalence.h"
 
@@ -127,8 +127,8 @@ class FileSystem : public QObject
    * @param settings The application settings
    * @param parent The main widget (main window)
    */
-  FileSystem(CodeEditor* specificationEditor, QSettings* settings,
-             QWidget* parent);
+  FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor,
+             QSettings* settings, QWidget* parent);
 
   /**
    * @brief projectFilePath Defines the file path for the project file,
@@ -460,7 +460,7 @@ class FileSystem : public QObject
   QString equivalenceFileSeparator = "\n#####\n";
 
   QWidget* parent;
-  CodeEditor* specificationEditor;
+  mcrl2::gui::qt::CodeEditor* specificationEditor;
   QSettings* settings;
   std::map<IntermediateFileType, bool> saveIntermediateFilesOptions;
 

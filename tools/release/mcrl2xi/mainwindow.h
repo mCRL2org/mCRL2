@@ -28,7 +28,6 @@
 #endif // Q_MOC_RUN
 #include "mcrl2/gui/persistentfiledialog.h"
 
-#include "highlighter.h"
 #include "documentwidget.h"
 #include "documentmanager.h"
 #include "parser.h"

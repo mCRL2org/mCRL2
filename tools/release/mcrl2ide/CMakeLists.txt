@@ -5,7 +5,6 @@ add_mcrl2_tool(mcrl2ide
   SOURCES
     addeditpropertydialog.cpp
     addeditpropertydialog.ui
-    codeeditor.cpp
     consoledock.cpp
     filesystem.cpp
     findandreplacedialog.cpp

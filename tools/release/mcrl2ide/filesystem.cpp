@@ -47,8 +47,8 @@ bool Property::operator!=(const Property& property) const
   return !operator==(property);
 }
 
-FileSystem::FileSystem(CodeEditor* specificationEditor, QSettings* settings,
-                       QWidget* parent)
+FileSystem::FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor,
+                       QSettings* settings, QWidget* parent)
     : parent(parent), specificationEditor(specificationEditor),
       settings(settings), projectOpen(false), specificationModified(false),
       specificationOnlyMode(false)

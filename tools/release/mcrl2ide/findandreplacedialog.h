@@ -11,7 +11,7 @@
 #define FINDANDREPLACEDIALOG_H
 
 #include <QDialog>
-#include "codeeditor.h"
+#include "mcrl2/gui/codeeditor.h"
 
 namespace Ui
 {
@@ -32,7 +32,8 @@ class FindAndReplaceDialog : public QDialog
    * @param codeEditor The editor to find/replace in
    * @param parent The parent of this widget
    */
-  explicit FindAndReplaceDialog(CodeEditor* codeEditor, QWidget* parent = 0);
+  explicit FindAndReplaceDialog(mcrl2::gui::qt::CodeEditor* codeEditor,
+                                QWidget* parent = 0);
   ~FindAndReplaceDialog();
 
   public slots:
@@ -70,7 +71,7 @@ class FindAndReplaceDialog : public QDialog
   private:
   Ui::FindAndReplaceDialog* ui;
 
-  CodeEditor* codeEditor;
+  mcrl2::gui::qt::CodeEditor* codeEditor;
 
   /**
    * @brief showMessage Shows a message on the dialog

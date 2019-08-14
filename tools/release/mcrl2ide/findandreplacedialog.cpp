@@ -10,8 +10,8 @@
 #include "findandreplacedialog.h"
 #include "ui_findandreplacedialog.h"
 
-FindAndReplaceDialog::FindAndReplaceDialog(CodeEditor* codeEditor,
-                                           QWidget* parent)
+FindAndReplaceDialog::FindAndReplaceDialog(
+    mcrl2::gui::qt::CodeEditor* codeEditor, QWidget* parent)
     : QDialog(parent), ui(new Ui::FindAndReplaceDialog), codeEditor(codeEditor)
 {
   ui->setupUi(this);
