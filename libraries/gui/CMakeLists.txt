@@ -8,6 +8,7 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
       extendedtabwidget.cpp
       codeeditor.cpp
       persistentfiledialog.cpp
+      utilities.cpp
     DEPENDS
       mcrl2_utilities
       Qt5::Core

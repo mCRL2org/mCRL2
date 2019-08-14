@@ -12,6 +12,7 @@
 #include <QWidget>
 #include <QDateTime>
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/gui/utilities.h"
 
 using namespace mcrl2::log;
 

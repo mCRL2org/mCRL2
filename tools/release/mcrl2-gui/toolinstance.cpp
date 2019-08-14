@@ -362,14 +362,7 @@ void ToolInstance::onStandardOutput()
   QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
   bool end = scrollbar->value() == scrollbar->maximum();
 
-  if (m_ui.edtOutput->palette().window().color().red() > 128)
-  {
-    m_ui.edtOutput->setTextColor(Qt::black);
-  }
-  else
-  {
-    m_ui.edtOutput->setTextColor(Qt::white);
-  }
+  mcrl2::gui::qt::setTextEditTextColor(m_ui.edtOutput, Qt::black, Qt::white);
   QByteArray outText = m_process.readAllStandardOutput();
   m_ui.edtOutput->append(QString(outText).replace("\n\n", "\n"));
 
@@ -384,15 +377,7 @@ void ToolInstance::onStandardError()
   QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
   bool end = scrollbar->value() == scrollbar->maximum();
 
-  /* check if the background is light or dark */
-  if (m_ui.edtOutput->palette().window().color().red() > 128)
-  {
-    m_ui.edtOutput->setTextColor(Qt::black);
-  }
-  else
-  {
-    m_ui.edtOutput->setTextColor(Qt::white);
-  }
+  mcrl2::gui::qt::setTextEditTextColor(m_ui.edtOutput, Qt::black, Qt::white);
   QByteArray outText = m_process.readAllStandardError();
   m_ui.edtOutput->append(QString(outText).replace("\n\n", "\n"));
 
