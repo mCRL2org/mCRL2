@@ -22,7 +22,7 @@
 MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
     : QMainWindow(parent)
 {
-  specificationEditor = new CodeEditor(this);
+  specificationEditor = new mcrl2::gui::qt::CodeEditor(this);
   specificationEditor->setPlaceholderText("Type your mCRL2 specification here");
   specificationEditor->setPurpose(true);
   setCentralWidget(specificationEditor);

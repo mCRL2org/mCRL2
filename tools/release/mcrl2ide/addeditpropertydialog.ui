@@ -48,7 +48,7 @@
         </widget>
        </item>
        <item>
-        <widget class="CodeEditor" name="formulaTextField">
+        <widget class="mcrl2::gui::qt::CodeEditor" name="formulaTextField">
          <property name="placeholderText">
           <string>Type your mu-calculus formula here</string>
          </property>
@@ -69,7 +69,7 @@
         </widget>
        </item>
        <item>
-        <widget class="CodeEditor" name="initTextField1">
+        <widget class="mcrl2::gui::qt::CodeEditor" name="initTextField1">
          <property name="placeholderText">
           <string>Type your process expression here</string>
          </property>
@@ -93,7 +93,7 @@
         </widget>
        </item>
        <item>
-        <widget class="CodeEditor" name="initTextField2">
+        <widget class="mcrl2::gui::qt::CodeEditor" name="initTextField2">
          <property name="placeholderText">
           <string>Type your process expression here</string>
          </property>
@@ -147,14 +147,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CodeEditor</class>
-   <extends>QPlainTextEdit</extends>
-   <header>codeeditor.h</header>
-  </customwidget>
-  <customwidget>
    <class>EquivalenceComboBox</class>
    <extends>QComboBox</extends>
    <header>addeditpropertydialog.h</header>
+  </customwidget>
+  <customwidget>
+   <class>mcrl2::gui::qt::CodeEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>mcrl2/gui/codeeditor.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

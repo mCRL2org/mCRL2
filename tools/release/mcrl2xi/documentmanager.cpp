@@ -35,6 +35,7 @@ DocumentWidget* DocumentManager::createDocument(QString title)
 {
 
   DocumentWidget *document = new DocumentWidget(this, m_atermThread, m_strategy);
+  document->setPurpose(true);
   addTab(document, title);
 
   emit(documentCreated(document));

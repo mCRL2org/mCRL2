@@ -13,6 +13,15 @@
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 
+namespace mcrl2
+{
+
+namespace gui
+{
+
+namespace qt
+{
+
 /**
  * @brief The HighlightingRule class defines a rule on how to highlight a given
  *   pattern of syntactic elements
@@ -78,17 +87,17 @@ class CodeHighlighter : public QSyntaxHighlighter
 class CodeEditor;
 
 /**
- * @brief The LineNumbersArea class defines the area with line numbers in the
+ * @brief The LineNumberArea class defines the area with line numbers in the
  * code editor
  */
-class LineNumbersArea : public QWidget
+class LineNumberArea : public QWidget
 {
   public:
   /**
-   * @brief LineNumbersArea Constructor
+   * @brief LineNumberArea Constructor
    * @param editor The code editor this line number area belongs to
    */
-  LineNumbersArea(CodeEditor* editor);
+  LineNumberArea(CodeEditor* editor);
 
   /**
    * @brief sizeHint Returns the recommended size of the widget
@@ -205,7 +214,7 @@ class CodeEditor : public QPlainTextEdit
   bool lightPalette;
   QFont codeFont;
   QFont lineNumberFont;
-  LineNumbersArea* lineNumberArea;
+  LineNumberArea* lineNumberArea;
   CodeHighlighter* highlighter;
 
   QAction* zoomInAction;
@@ -242,5 +251,11 @@ class CodeEditor : public QPlainTextEdit
    */
   void updateLineNumberArea(const QRect& rect, int dy);
 };
+
+} // namespace qt
+
+} // namespace gui
+
+} // namespace mcrl2
 
 #endif // CODEEDITOR_H

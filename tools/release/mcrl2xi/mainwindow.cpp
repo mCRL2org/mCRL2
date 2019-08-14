@@ -138,8 +138,6 @@ void MainWindow::formatDocument(DocumentWidget *document)
   font.setWeight(QFont::Light);
 
   document->setFont(font);
-  new Highlighter(document->document());
-
 
   connect(document->rewriter(), SIGNAL(rewritten(QString)), this, SLOT(rewritten(QString)));
   connect(document->rewriter(), SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));

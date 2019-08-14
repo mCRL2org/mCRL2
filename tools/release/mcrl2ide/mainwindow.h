@@ -16,7 +16,7 @@
 #include "consoledock.h"
 #include "addeditpropertydialog.h"
 #include "findandreplacedialog.h"
-#include "codeeditor.h"
+#include "mcrl2/gui/codeeditor.h"
 #include "utilities.h"
 
 #include <QMainWindow>
@@ -230,7 +230,7 @@ class MainWindow : public QMainWindow
   QMenu* viewMenu;
   QMenu* saveIntermediateFilesMenu;
   QToolBar* toolbar;
-  CodeEditor* specificationEditor;
+  mcrl2::gui::qt::CodeEditor* specificationEditor;
   PropertiesDock* propertiesDock;
   ConsoleDock* consoleDock;
 

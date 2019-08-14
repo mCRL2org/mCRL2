@@ -8,7 +8,6 @@
 //
 
 #include <QtGui>
-#include <QTextEdit>
 
 #include "findreplacedialog.h"
 
@@ -28,7 +27,7 @@ FindReplaceDialog::FindReplaceDialog(QWidget *parent) :
   connect(m_ui.replaceAllButton, SIGNAL(clicked()), this, SLOT(replaceAll()));
 }
 
-void FindReplaceDialog::setTextEdit(QTextEdit *textEdit)
+void FindReplaceDialog::setTextEdit(QPlainTextEdit *textEdit)
 {
   if (m_textEdit)
   {

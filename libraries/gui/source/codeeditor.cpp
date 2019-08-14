@@ -7,12 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "codeeditor.h"
+#include "mcrl2/gui/codeeditor.h"
 
 #include <QPainter>
 #include <QTextBlock>
 #include <QWidget>
 #include <QMenu>
+
+using namespace mcrl2::gui::qt;
 
 HighlightingRule::HighlightingRule(QRegExp pattern, QTextCharFormat format)
     : pattern(pattern), format(format)
@@ -179,17 +181,17 @@ void CodeHighlighter::highlightBlock(const QString& text)
   }
 }
 
-LineNumbersArea::LineNumbersArea(CodeEditor* editor)
+LineNumberArea::LineNumberArea(CodeEditor* editor)
     : QWidget(editor), codeEditor(editor)
 {
 }
 
-QSize LineNumbersArea::sizeHint() const
+QSize LineNumberArea::sizeHint() const
 {
   return QSize(codeEditor->lineNumberAreaWidth(), 0);
 }
 
-void LineNumbersArea::paintEvent(QPaintEvent* event)
+void LineNumberArea::paintEvent(QPaintEvent* event)
 {
   codeEditor->lineNumberAreaPaintEvent(event);
 }
@@ -206,7 +208,7 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 
   setFontSize(13);
 
-  lineNumberArea = new LineNumbersArea(this);
+  lineNumberArea = new LineNumberArea(this);
   updateLineNumberAreaWidth(0);
 
   this->setContextMenuPolicy(Qt::CustomContextMenu);

@@ -9,7 +9,6 @@ add_mcrl2_tool(mcrl2xi
     mcrl2xi.qrc
     main.cpp
     mainwindow.cpp
-    highlighter.cpp
     documentmanager.cpp
     documentwidget.cpp
     parser.cpp
