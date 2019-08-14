@@ -332,7 +332,7 @@ void CodeEditor::changeEvent(QEvent* event)
 {
   if (event->type() == QEvent::PaletteChange)
   {
-    lightPalette = this->palette().window().color().red() > 128;
+    lightPalette = hasLightBackground(this);
     changeHighlightingRules();
   }
   QPlainTextEdit::changeEvent(event);

@@ -12,6 +12,7 @@
 
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
+#include "mcrl2/gui/utilities.h"
 
 namespace mcrl2
 {
