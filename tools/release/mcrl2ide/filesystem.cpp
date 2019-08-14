@@ -800,12 +800,13 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath,
                           propertyParts.at(2));
         }
       }
-      executeInformationBox(parent, context,
-                            "Could not read the file '" + propertyFilePath +
-                                "': an equivalence property file should have "
-                                "the name of the equivalence and two process "
-                                "expressions, all three separated by '" +
-                                equivalenceFileSeparator + "'");
+      executeInformationBox(
+          parent, context,
+          "Could not read the file '" + propertyFilePath +
+              "': an equivalence property file should contain a process "
+              "expression, the name of an equivalence and another process "
+              "expression, all three separated by '" +
+              equivalenceFileSeparator + "'");
     }
   }
   else
