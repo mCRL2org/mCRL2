@@ -16,7 +16,7 @@ Example:
    \nu V(n{:}\mathbb{N}, b{:}\mathbb{B}) = (b \Rightarrow V(n + 1, b)) \land W(n, b)\\
    \mu W(n{:}\mathbb{N}, b{:}\mathbb{B}) = b \lor (b \land W(n+1, b))\\
    ~\\
-   \mathbf{init } V(0,\mathit{true})
+   \mathbf{init}\ V(0,\mathit{true})
    \end{array}
 
 Instantiation of this PBES using tools such as :ref:`tool-pbes2bool` or :ref:`tool-pbessolve` does not terminate. However, in this PBES, parameter :math:`n` of both equations is redundant (it does not appear positively in any equation), and can be removed. The resulting PBES will be:
@@ -27,7 +27,7 @@ Instantiation of this PBES using tools such as :ref:`tool-pbes2bool` or :ref:`to
    \nu V(b{:}\mathbb{B}) = (b \Rightarrow V(b)) \land W(b)\\
    \mu W(b{:}\mathbb{B}) = b \lor (b \land W(b))\\
    ~\\
-   \mathbf{init } V(0,\mathit{true})
+   \mathbf{init}\ V(0,\mathit{true})
    \end{array}
 
-The algorithm is described in detail in [OWW09]_.
+The algorithm underlying the tool is described in detail in [OWW09]_.
