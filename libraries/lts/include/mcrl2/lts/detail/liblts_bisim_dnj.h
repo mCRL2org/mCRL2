@@ -129,11 +129,10 @@ namespace detail
 /// \brief type used to store label numbers and counts
 typedef std::size_t label_type;
 
-namespace bisim_dnj
-{
-
 template <class LTS_TYPE> class bisim_partitioner_dnj;
 
+namespace bisim_dnj
+{
 
 /// \class iterator_or_counter
 /// \brief union: either iterator or counter (for initialisation)
@@ -4164,8 +4163,8 @@ class bisim_partitioner_dnj
                                                                                                            refine_partition_until_it_becomes_stable__find_pred,
             /*----------------- stabilise the partition again ---------------*/                                                  max_splitter_counter), *this);
 
-            /* Line 1.13: for all T'_B--> in the list of instable            */ ONLY_IF_DEBUG( block_bunch_slice_iter_or_null_t new_bunch_slice(nullptr); )
-            //                    block--bunch-slices do
+            /* Line 1.13: for all T'_B--> in the list of instable            */ ONLY_IF_DEBUG( bisim_dnj::block_bunch_slice_iter_or_null_t
+            /*                    block--bunch-slices do                     */                                                     new_bunch_slice(nullptr); )
             while (!part_tr.unstable_block_bunch.empty())
             {
                 bisim_dnj::block_bunch_slice_iter_t splitter(                   // We have to call mCRL2complexity here because splitter may be split up later.
@@ -4281,7 +4280,7 @@ class bisim_partitioner_dnj
                                                                                 #ifndef NDEBUG
                                                                                     if (splitter_end[-1].pred->source->bl.ock == refine_block)
                                                                                     {   assert(!splitter_end[-1].slice.is_null());
-                                                                                        splitter = (block_bunch_slice_iter_t) splitter_end[-1].slice;
+                                                                                        splitter = (bisim_dnj::block_bunch_slice_iter_t)splitter_end[-1].slice;
                                                                                     }
                         /* Line 1.27: end if                                 */     assert(nullptr==refine_block || splitter->source_block() == refine_block);
                                                                                 #endif
@@ -4564,7 +4563,7 @@ class bisim_partitioner_dnj
                                     {
                                         goto continuation;
                                                // i. e. break and then continue
-                                    }                                           ONLY_IF_DEBUG( succ_entry::add_work_to_out_slice(*this, blue_end,
+                                    }                                           ONLY_IF_DEBUG( bisim_dnj::succ_entry::add_work_to_out_slice(*this, blue_end,
                                 /* Line 2.21l: end for                       */                    bisim_gjkw::check_complexity::refine_blue__slow_test, 1U); )
                                 }
                                 END_COROUTINE_WHILE;
@@ -4692,7 +4691,8 @@ class bisim_partitioner_dnj
                                                                                         {
                                                                                             assert(&part_tr.block_bunch.cbegin()[1]<red_visited_begin.fromred);
                                                                                             --red_visited_begin.fromred;
-                                                                                            state_info_entry* s(red_visited_begin.fromred->pred->source);
+                                                                                            bisim_dnj::state_info_entry*
+                                                                                                                    s(red_visited_begin.fromred->pred->source);
                                                                                             assert(s->bl.ock == refine_block);  assert(s->pos->st == s);
                                                                                             assert(s->pos < refine_block->nonbottom_begin ||
                                                                                                                refine_block->marked_nonbottom_begin <= s->pos);
