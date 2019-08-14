@@ -201,7 +201,7 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   lightPalette = this->palette().window().color().red() > 128;
 
   /* set the font used (monospaced) */
-  codeFont.setFamily("Monospace");
+  codeFont.setFamily("Courier");
   codeFont.setFixedPitch(true);
   codeFont.setWeight(QFont::Light);
   lineNumberFont = this->font();
