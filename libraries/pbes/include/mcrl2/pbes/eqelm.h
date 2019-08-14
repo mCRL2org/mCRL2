@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
@@ -65,10 +66,6 @@ class pbes_eqelm_algorithm
     std::map<core::identifier_string, bool> m_discovered;
 
     // TODO: design a more generic solution for printing sets
-    std::string print(const core::identifier_string& x) const
-    {
-      return core::pp(x);
-    }
     template <typename Set>
     std::string print_set(const Set& s) const
     {
@@ -80,8 +77,9 @@ class pbes_eqelm_algorithm
         {
           out << ", ";
         }
-        out << print(atermpp::deprecated_cast<core::identifier_string>(*i));
+        out << pp(*i);
       }
+      out << " }";
       return out.str();
     }
 
@@ -241,6 +239,7 @@ class pbes_eqelm_algorithm
       {
         core::identifier_string X = eqn.variable().name();
         data::mutable_map_substitution<> sigma = compute_substitution(X);
+
         if (!sigma.empty())
         {
           eqn.formula() = pbes_system::replace_variables_capture_avoiding(eqn.formula(), sigma);
@@ -259,8 +258,10 @@ class pbes_eqelm_algorithm
           {
             to_be_removed[X].push_back(index_of(*k, m_parameters[X]));
           }
+          std::sort(to_be_removed[X].begin(), to_be_removed[X].end());
         }
       }
+
       pbes_system::algorithms::remove_parameters(p, to_be_removed);
     }
 
