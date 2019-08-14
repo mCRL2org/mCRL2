@@ -8,5 +8,5 @@ function getParams()
 }
 var params = getParams();
 var script = document.createElement("script");
-script.src = "https://cdn.mathjax.org/mathjax/latest/MathJax.js" + params;
+script.src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js" + params;
 document.head.appendChild(script);
