@@ -200,7 +200,7 @@ void LineNumberArea::paintEvent(QPaintEvent* event)
 
 CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 {
-  lightPalette = this->palette().window().color().red() > 128;
+  lightPalette = hasLightBackground(this);
 
   /* set the font used (monospaced) */
   codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
