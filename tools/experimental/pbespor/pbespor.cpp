@@ -36,14 +36,19 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
   protected:
     typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>> super;
 
+    bool m_use_condition_L;
+
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
+      m_use_condition_L = parser.options.count("no-L") == 0;
     }
 
     void add_options(interface_description& desc) override
     {
       super::add_options(desc);
+      desc.add_option("no-L",
+                  "do not apply the condition L");
     }
 
   public:
@@ -67,7 +72,8 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
               output_filename(),
               pbes_input_format(),
               pbes_output_format(),
-              rewrite_strategy()
+              rewrite_strategy(),
+              m_use_condition_L
              );
 
       return true;

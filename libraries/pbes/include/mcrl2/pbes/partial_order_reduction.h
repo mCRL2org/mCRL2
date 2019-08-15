@@ -1264,7 +1264,8 @@ class partial_order_reduction_algorithm
     void explore(
       const propositional_variable_instantiation& X_init,
       EmitNode emit_node = EmitNode(),
-      EmitEdge emit_edge = EmitEdge()
+      EmitEdge emit_edge = EmitEdge(),
+      bool use_condition_L = true
     )
     {
       using utilities::detail::contains;
@@ -1289,7 +1290,7 @@ class partial_order_reduction_algorithm
         std::set<std::size_t> en_X_e = en(X_e);
         std::set<propositional_variable_instantiation> next = succ(X_e, set_intersection(stubborn_set_X_e, en_X_e));
         mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
-        if (std::any_of(todo.begin(), todo.end(), [&](const propositional_variable_instantiation& pv){ return contains(seen, pv); }))
+        if (use_condition_L && std::any_of(todo.begin(), todo.end(), [&](const propositional_variable_instantiation& pv){ return contains(seen, pv); }))
         {
           next = set_union(next, succ(X_e, set_difference(en_X_e, stubborn_set_X_e)));
         }

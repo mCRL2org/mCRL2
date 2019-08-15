@@ -1,5 +1,3 @@
-#include <utility>
-
 // Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -19,6 +17,8 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/utilities/logger.h"
+
+#include <utility>
 
 namespace mcrl2 {
 
@@ -117,7 +117,7 @@ struct pbespor_pbes_composer
     return result;
   }
 
-  pbes run(const pbes& p, data::rewrite_strategy rewrite_strategy)
+  pbes run(const pbes& p, data::rewrite_strategy rewrite_strategy, bool use_condition_L)
   {
     partial_order_reduction_algorithm algorithm(p, rewrite_strategy);
     algorithm.print();
@@ -137,7 +137,9 @@ struct pbespor_pbes_composer
       {
         mCRL2log(log::verbose) << "emit edge " << X << " -> " << Y << std::endl;
         add_expression(X, Y);
-      }
+      },
+
+      use_condition_L
     );
 
     return compose_result(p.data(), algorithm.initial_state());
@@ -148,14 +150,15 @@ void pbespor(const std::string& input_filename,
              const std::string& output_filename,
              const utilities::file_format& input_format,
              const utilities::file_format& output_format,
-             data::rewrite_strategy rewrite_strategy
+             data::rewrite_strategy rewrite_strategy,
+             bool use_condition_L
             )
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
   algorithms::normalize(p);
   pbespor_pbes_composer composer;
-  pbes result = composer.run(p, rewrite_strategy);
+  pbes result = composer.run(p, rewrite_strategy, use_condition_L);
   save_pbes(result, output_filename, output_format);
 }
 
