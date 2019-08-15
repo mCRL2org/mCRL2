@@ -16,7 +16,7 @@ use the mCRL2 tool-set and its language. With this tool the user can
 
 .. note::
 
-   Although mcrl2ide is marked as a release tool, it is still in developement.
+   Although mcrl2ide is marked as a release tool, it is still in development.
 
 .. note::
 
