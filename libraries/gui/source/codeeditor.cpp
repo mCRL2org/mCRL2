@@ -9,6 +9,8 @@
 
 #include "mcrl2/gui/codeeditor.h"
 
+#include "mcrl2/utilities/platform.h"
+
 #include <QPainter>
 #include <QTextBlock>
 #include <QWidget>
@@ -201,7 +203,12 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   lightPalette = this->palette().window().color().red() > 128;
 
   /* set the font used (monospaced) */
+#ifdef MCRL2_PLATFORM_MAC
   codeFont.setFamily("Courier");
+#else
+  codeFont.setFamily("Monospace");
+#endif
+
   codeFont.setFixedPitch(true);
   codeFont.setWeight(QFont::Light);
   lineNumberFont = this->font();
