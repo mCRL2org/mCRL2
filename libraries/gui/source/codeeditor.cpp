@@ -203,13 +203,7 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   lightPalette = this->palette().window().color().red() > 128;
 
   /* set the font used (monospaced) */
-#ifdef MCRL2_PLATFORM_MAC
-  codeFont.setFamily("Courier");
-#else
-  codeFont.setFamily("Monospace");
-#endif
-
-  codeFont.setFixedPitch(true);
+  codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
   codeFont.setWeight(QFont::Light);
   lineNumberFont = this->font();
 
