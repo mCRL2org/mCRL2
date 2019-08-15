@@ -109,10 +109,10 @@ class BDD_Prover: protected rewriter
     data_expression f_formula;
 
     /// \brief A class that provides information about expressions.
-    const Info f_info;
+    const Info f_info = Info(f_full, f_reverse);
 
     /// \brief A class that can be used to manipulate expressions.
-    Manipulator f_manipulator;
+    Manipulator f_manipulator = Manipulator(f_info);
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
     bool f_processed = false;
@@ -456,20 +456,6 @@ class BDD_Prover: protected rewriter
     data_expression f_bdd;
   public:
 
-    /// \brief Constructor that initializes the attributes BDD_Prover::f_data_spec, Prover::f_time_limit and
-    /// \brief BDD_Prover::f_bdd_simplifier.
-    /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
-    /// to 0, no time limit will be enforced
-    /// precondition: the argument passed as parameter a_lps is an LPS
-    /* BDD_Prover(
-      const data_specification& data_spec,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::data::jitty,
-      int a_time_limit = 0,
-      bool a_path_eliminator = false,
-      SMT_Solver_Type a_solver_type = solver_type_ario,
-      bool a_apply_induction = false
-    ); */
-
     BDD_Prover(
       const data_specification& data_spec,
       const used_data_equation_selector& equations_selector,
@@ -479,8 +465,6 @@ class BDD_Prover: protected rewriter
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
     : rewriter(data_spec, equations_selector, a_rewrite_strategy)
-    , f_info(f_full, f_reverse)
-    , f_manipulator(f_info)
     , f_time_limit(a_time_limit)
     , f_apply_induction(a_apply_induction)
     , f_bdd_simplifier(a_path_eliminator ? new BDD_Path_Eliminator(a_solver_type) : new BDD_Simplifier())
@@ -513,6 +497,13 @@ class BDD_Prover: protected rewriter
                       << "  Reverse: " << std::boolalpha << f_reverse << "," << std::endl
                       << "  Full: " << f_full << "," << std::endl;
     }
+
+    BDD_Prover(const rewriter& r, int time_limit = 0, bool apply_induction = false)
+    : rewriter(r)
+    , f_time_limit(time_limit)
+    , f_apply_induction(apply_induction)
+    , f_bdd_simplifier(new BDD_Simplifier())
+    {}
 
     /// \brief Destructor that destroys the BDD simplifier BDD_Prover::f_bdd_simplifier.
     ~BDD_Prover()
