@@ -828,10 +828,20 @@ void FileSystem::newProperty(const Property& property)
   QDomNode propertiesNode =
       projectOptions.elementsByTagName("properties").at(0);
 
+  /* make sure that no duplicates can be added to the project file */
+  QDomNodeList propertyNodes = propertiesNode.childNodes();
+  for (int i = 0; i < propertyNodes.size(); i++)
+  {
+    if (propertyNodes.at(i).toElement().text() == property.name)
+    {
+      return;
+    }
+  }
+
   QDomElement propertyElement = projectOptions.createElement("property");
   propertiesNode.appendChild(propertyElement);
-  QDomText propertyPathNode = projectOptions.createTextNode(property.name);
-  propertyElement.appendChild(propertyPathNode);
+  QDomText propertyNameText = projectOptions.createTextNode(property.name);
+  propertyElement.appendChild(propertyNameText);
 
   updateProjectFile();
 }
