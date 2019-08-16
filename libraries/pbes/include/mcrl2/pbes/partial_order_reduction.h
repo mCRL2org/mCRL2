@@ -534,21 +534,28 @@ class partial_order_reduction_algorithm
       return result == data::sort_bool::true_();
     }
 
-    bool summand_can_enable_data(const std::size_t k, const std::size_t k1)
+    bool summand_can_enable_data(const std::size_t k, const std::size_t k1) const
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
 
-      const data::data_expression condition_k = summand_k.f;
-      const data::data_expression condition_k1 = summand_k1.f;
-
       const data::variable_list& parameters = m_pbes.equations()[0].variable().parameters();
-      //TODO: rename clashing variables
-      data::variable_list combined_quantified_vars = summand_k.e + summand_k1.e;
+      data::set_identifier_generator id_gen;
+      for(const data::variable& v: parameters)
+      {
+        id_gen.add_identifier(v.name());
+      }
 
-      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, summand_k1.g);
+      summand_equivalence_key new_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
+      summand_equivalence_key new_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
+      data::variable_list qvars_k  = new_k.e;  data::data_expression condition_k  = new_k.f;
+      data::variable_list qvars_k1 = new_k1.e; data::data_expression condition_k1 = new_k1.f; data::data_expression_list updates_k1 = new_k1.g;
 
-      data::data_expression can_enable = data::exists(
+      data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
+
+      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, updates_k1);
+
+      data::data_expression can_enable = make_abstraction(data::exists_binder(),
         parameters + combined_quantified_vars,
         data::sort_bool::and_(
           data::sort_bool::and_(
@@ -559,7 +566,44 @@ class partial_order_reduction_algorithm
         )
       );
 
-      return is_true(can_enable);
+      return !is_true(data::sort_bool::not_(can_enable));
+    }
+
+    /// \brief Return true iff k1 can never happen after k happens, as deduced from
+    /// predicate dependencies.
+    bool permanently_disables(const std::size_t k, const std::size_t k1) const
+    {
+      std::size_t N = m_summand_classes.size();
+      const summand_class& summand_k = m_summand_classes[k];
+      std::set<std::size_t> reachable_after_k;
+
+      // Check to which equations k can lead
+      for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
+      {
+        reachable_after_k.insert(summand_k.nxt[i].begin(), summand_k.nxt[i].end());
+      }
+
+      // Explore the rest of the dependency relation
+      std::list<std::size_t> todo(reachable_after_k.begin(), reachable_after_k.end());
+      while (!todo.empty())
+      {
+        std::size_t i = todo.front();
+        todo.pop_front();
+        for (std::size_t k2 = 0; k2 < N; k2++)
+        {
+          for (const std::size_t j: m_summand_classes[k2].nxt[i])
+          {
+            if (reachable_after_k.count(j) == 0)
+            {
+              todo.push_back(j);
+              reachable_after_k.insert(j);
+            }
+          }
+        }
+      }
+
+      return !std::any_of(reachable_after_k.begin(), reachable_after_k.end(),
+        [&](const std::size_t i) { return depends(i, k1); });
     }
 
     void compute_NES(const std::vector<parameter_info>& info)
@@ -592,7 +636,7 @@ class partial_order_reduction_algorithm
         std::set<std::size_t>& NES = summand_k.NES;
         for (std::size_t k1 = 0; k1 < N; k1++)
         {
-          if (!TsWs_has_empty_intersection(k, k1) && summand_can_enable_data(k, k1))
+          if (!permanently_disables(k1, k) && !TsWs_has_empty_intersection(k, k1) && summand_can_enable_data(k, k1))
           {
             NES.insert(k1);
           }
@@ -944,6 +988,10 @@ class partial_order_reduction_algorithm
       {
         for (std::size_t k1 = 0; k1 < N; k1++)
         {
+          if (k == k1)
+          {
+            continue;
+          }
           bool DNL_DNS_affect_sets = has_empty_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1)));
           bool DNT_affect_sets = has_empty_intersection(Ws(k), Rs(k1)) && has_empty_intersection(Ws(k), Ts(k1)) && set_includes(Ws(k), Ws(k1));
 
