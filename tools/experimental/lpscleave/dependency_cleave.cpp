@@ -34,7 +34,7 @@ summand_dependencies compute_dependencies(
   std::set<data::variable> set_1;
   for (auto& action : summand.multi_action().actions())
   {
-    auto dependencies = data::find_free_variables(action);
+    auto dependencies = data::find_free_variables(action.arguments());
     set_1.insert(dependencies.begin(), dependencies.end());
   }
 
@@ -114,7 +114,11 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
 {
   lps::stochastic_action_summand summand = spec.process().action_summands()[summand_index];
 
-  summand_dependencies dependencies = compute_dependencies(spec, summand, parameters, other_parameters);
+  // Compute S_i_X depending on whether we are a left or right summand.
+  summand_dependencies dependencies =
+    owning ?
+      compute_dependencies(spec, summand, parameters, other_parameters)
+      : compute_dependencies(spec, summand, other_parameters, parameters);
 
   print_names(std::string("Dependencies of summand ") += std::to_string(summand_index) += std::string(" (S^i_X) := "), dependencies.S_i_X);
 
