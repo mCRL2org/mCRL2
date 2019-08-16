@@ -188,16 +188,22 @@ void AddEditPropertyDialog::parseResults(int processid)
     /* if valid accept, else show message */
     QString message = "";
     QString result = processSystem->getResult(processid);
-    QString inputType = lastParsingPropertyIsMucalculus
-                            ? "mu-calculus formula"
-                            : "alternate initial process";
+    QString inputType = lastParsingPropertyIsMucalculus ? "mu-calculus formula"
+                                                        : "process expressions";
 
     if (result == "valid")
     {
-      message = "The entered " + inputType + " is valid.";
+      message = "The entered " + inputType +
+                (lastParsingPropertyIsMucalculus ? " is" : " are") + " valid.";
     }
-    else if (result == "invalid")
+    else if (result.startsWith("invalid"))
     {
+      if (!lastParsingPropertyIsMucalculus)
+      {
+        inputType = (result.endsWith(SPECTYPEEXTENSION.at(SpecType::First))
+                         ? "first process expression"
+                         : "second process expression");
+      }
       message = "The entered " + inputType +
                 " is not valid. See the parsing console for more information";
     }
