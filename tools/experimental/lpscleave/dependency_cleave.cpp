@@ -108,6 +108,7 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
   const data::variable_list& parameters,
   const data::variable_list& other_parameters,
   std::vector<process::action_label>& sync_labels,
+  std::string syncname,
   const process::action& tag,
   const process::action& intern)
 {
@@ -137,7 +138,7 @@ std::pair<lps::stochastic_action_summand, bool> cleave_summand(
     sorts.push_front(dependency.sort());
   }
 
-  sync_labels.emplace_back(std::string("actsync_") += std::to_string(summand_index), sorts);
+  sync_labels.emplace_back(syncname += std::string("_") += std::to_string(summand_index), sorts);
 
   auto assignments = project(summand.assignments(), parameters);
 
@@ -236,17 +237,20 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
   // Add the tags for the left and right processes
   if (right_process)
   {
-    labels.emplace_back(process::action_label("tag_right", {}));
+    labels.emplace_back(process::action_label("tagright", {}));
   }
   else
   {
-    labels.emplace_back(process::action_label("tag_left", {}));
+    labels.emplace_back(process::action_label("tagleft", {}));
   }
 
   process::action tag(labels.back(), {});
 
   labels.emplace_back(process::action_label("intern", {}));
   process::action intern(labels.back(), {});
+
+  // Define the synchronization actions for the left and right components.
+  std::string synclabel = right_process ? "syncright" : "syncleft";
 
   // Change the summands to include the parameters of the other process and added the sync action.
   lps::stochastic_action_summand_vector cleave_summands;
@@ -256,7 +260,7 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
   {
     if (index < process.action_summands().size())
     {
-      auto pair = cleave_summand<true>(spec, index, parameters, other_parameters, labels, tag, intern);
+      auto pair = cleave_summand<true>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
       if (pair.second)
       {
         cleave_summands.emplace_back(pair.first);
@@ -270,7 +274,7 @@ lps::stochastic_specification mcrl2::dependency_cleave(const lps::stochastic_spe
 
   for (auto& index : get_other_indices(process, indices))
   {
-    auto pair = cleave_summand<false>(spec, index, parameters, other_parameters, labels, tag, intern);
+    auto pair = cleave_summand<false>(spec, index, parameters, other_parameters, labels, synclabel, tag, intern);
     if (pair.second)
     {
       cleave_summands.emplace_back(pair.first);
