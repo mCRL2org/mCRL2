@@ -59,7 +59,7 @@ protected:
 
     if (parser.arguments.size() < 2)
     {
-      parser.error("This tool requires at least an two output filenames.");
+      parser.error("This tool requires at least two output filenames.");
     }
 
     // Take the input filename if there are at least three file arguments.
