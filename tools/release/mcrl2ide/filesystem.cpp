@@ -39,7 +39,7 @@ bool Property::operator==(const Property& property) const
   return name == property.name && text == property.text &&
          mucalculus == property.mucalculus &&
          (mucalculus ||
-          equivalence == property.equivalence && text2 == property.text2);
+          (equivalence == property.equivalence && text2 == property.text2));
 }
 
 bool Property::operator!=(const Property& property) const
