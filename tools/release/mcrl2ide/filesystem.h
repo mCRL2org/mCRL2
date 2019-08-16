@@ -74,8 +74,8 @@ class Property
   QString name;
   QString text;
   bool mucalculus;
-  QString text2;
   mcrl2::lts::lts_equivalence equivalence;
+  QString text2;
 
   /**
    * @brief Property Default constructor
