@@ -815,7 +815,7 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
   /* if parsing failed or this was the last subprocess, signal that the process
    *   has finished */
   if (previousExitCode > 0 ||
-      processes[processid].size() == subprocessIndex + 1)
+      subprocessIndex + 1 == int(processes[processid].size()))
   {
     emit processFinished(processid);
   }
