@@ -600,174 +600,174 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
     processid = previousProcess->property("processid").toInt();
     nextSubprocessIndex =
         previousProcess->property("subprocessIndex").toInt() + 1;
-  }
 
-  /* if the previous process was the last process, we are done */
-  if (nextSubprocessIndex < int(processes[processid].size()))
-  {
-    /* check if the previous process terminated successfully */
-    if (previousExitCode > 0)
+    /* if there are more subprocesses to run, check if the previous subprocess
+     *   terminated successfully */
+    if (nextSubprocessIndex < int(processes[processid].size()) &&
+        previousExitCode > 0)
     {
       /* if not, abort the process */
       consoleDock->writeToConsole(processTypes[processid],
                                   "Process finished unsuccessfully\n");
       emit processFinished(processid);
       deleteProcess(processid, nextSubprocessIndex);
+      return;
+    }
+  }
+
+  /* if the previous process was the last process, we are done */
+  if (nextSubprocessIndex < int(processes[processid].size()))
+  {
+
+    /* get the process and its properties */
+    ProcessType processType = processTypes[processid];
+    QProcess* subprocess = processes[processid][nextSubprocessIndex];
+
+    SubprocessType subprocessType = static_cast<SubprocessType>(
+        subprocess->property("subprocessType").toInt());
+    QString inputFile = subprocess->property("inputFile").toString();
+    QString inputFile2 = subprocess->property("inputFile2").toString();
+    QString outputFile = subprocess->property("outputFile").toString();
+    QString propertyName = subprocess->property("propertyName").toString();
+    bool evidence = subprocess->property("evidence").toBool();
+
+    bool noNeedToRun = false;
+
+    /* prepare for execution (mention in console, check if the subprocess can
+     *   be skipped, emit processFinished when executing a UI tool) */
+    switch (subprocessType)
+    {
+    case SubprocessType::ParseMcrl2:
+      consoleDock->writeToConsole(ProcessType::Parsing,
+                                  "##### PARSING SPECIFICATION #####\n");
+      if (processType != ProcessType::Parsing)
+      {
+        consoleDock->writeToConsole(processType,
+                                    "##### PARSING SPECIFICATION #####\n");
+      }
+
+      /* no need to parse the main mcrl2 file when there is an up to date lps
+       *   file */
+      if (nextSubprocessIndex == 0 &&
+          fileSystem->upToDateOutputFileExists(inputFile, outputFile))
+      {
+        noNeedToRun = true;
+        consoleDock->writeToConsole(
+            ProcessType::Parsing,
+            "Parsing is not needed as specification has not changed\n");
+      }
+      break;
+
+    case SubprocessType::Mcrl22lps:
+      consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
+
+      /* no need to run if there is an up to date lps file with respect to the
+       *   input mcrl2 file */
+      if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
+      {
+        noNeedToRun = true;
+        consoleDock->writeToConsole(processType,
+                                    "Up to date LPS already exists\n");
+      }
+      break;
+
+    case SubprocessType::Lpsxsim:
+      consoleDock->writeToConsole(processType,
+                                  "##### SHOWING SIMULATION #####\n");
+
+      emit processFinished(processid);
+      break;
+
+    case SubprocessType::Lps2lts:
+      consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
+
+      /* no need to run if there is an up to date lts file with respect to the
+       *   input lps file */
+      if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
+      {
+        noNeedToRun = true;
+        consoleDock->writeToConsole(
+            processType, "Up to date" + QString(evidence ? " evidence" : "") +
+                             " LTS already exists\n");
+      }
+      break;
+
+    case SubprocessType::Ltsconvert:
+      consoleDock->writeToConsole(processType, "##### REDUCING LTS #####\n");
+
+      /* no need to run if there is an up to date reduced lts file with
+       *   respect to the input unreduced lts file */
+      if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
+      {
+        noNeedToRun = true;
+        consoleDock->writeToConsole(processType,
+                                    "Up to date LTS already exists\n");
+      }
+      break;
+
+    case SubprocessType::Ltscompare:
+      consoleDock->writeToConsole(processType, "##### COMPARING LTSS #####\n");
+      break;
+
+    case SubprocessType::Ltsgraph:
+      consoleDock->writeToConsole(processType, "##### SHOWING LTS #####\n");
+
+      emit processFinished(processid);
+      break;
+
+    case SubprocessType::ParseMcf:
+      consoleDock->writeToConsole(ProcessType::Parsing,
+                                  "##### PARSING PROPERTY " +
+                                      propertyName.toUpper() + " #####\n");
+      if (processType != ProcessType::Parsing)
+      {
+        consoleDock->writeToConsole(processType, "##### PARSING PROPERTY " +
+                                                     propertyName.toUpper() +
+                                                     " #####\n");
+      }
+      break;
+
+    case SubprocessType::Lps2pbes:
+      consoleDock->writeToConsole(processType, "##### CREATING PBES #####\n");
+
+      /* no need to run if there is an up to date pbes file with respect to
+       *   the input lps and property files */
+      if (fileSystem->upToDateOutputFileExists(inputFile, outputFile,
+                                               inputFile2))
+      {
+        noNeedToRun = true;
+        consoleDock->writeToConsole(processType,
+                                    "Up to date PBES already exists\n");
+      }
+      break;
+
+    case SubprocessType::Pbessolve:
+      consoleDock->writeToConsole(processType, "##### SOLVING PBES #####\n");
+
+      /* no need to run if there is an up to date evidence lps file with
+       *   respect to the input pbes and lps files */
+      if (evidence && fileSystem->upToDateOutputFileExists(
+                          inputFile, outputFile, inputFile2))
+      {
+        noNeedToRun = true;
+        consoleDock->writeToConsole(ProcessType::Verification,
+                                    "Up to date evidence LPS already exists\n");
+      }
+      break;
+
+    default:
+      break;
+    }
+
+    /* if we can skip this subprocess act like it has finished, else execute
+     *   it */
+    if (noNeedToRun)
+    {
+      emit subprocess->finished(0);
     }
     else
     {
-      /* get the process and its properties */
-      ProcessType processType = processTypes[processid];
-      QProcess* subprocess = processes[processid][nextSubprocessIndex];
-
-      SubprocessType subprocessType = static_cast<SubprocessType>(
-          subprocess->property("subprocessType").toInt());
-      QString inputFile = subprocess->property("inputFile").toString();
-      QString inputFile2 = subprocess->property("inputFile2").toString();
-      QString outputFile = subprocess->property("outputFile").toString();
-      QString propertyName = subprocess->property("propertyName").toString();
-      bool evidence = subprocess->property("evidence").toBool();
-
-      bool noNeedToRun = false;
-
-      /* prepare for execution (mention in console, check if the subprocess can
-       *   be skipped, emit processFinished when executing a UI tool) */
-      switch (subprocessType)
-      {
-      case SubprocessType::ParseMcrl2:
-        consoleDock->writeToConsole(ProcessType::Parsing,
-                                    "##### PARSING SPECIFICATION #####\n");
-        if (processType != ProcessType::Parsing)
-        {
-          consoleDock->writeToConsole(processType,
-                                      "##### PARSING SPECIFICATION #####\n");
-        }
-
-        /* no need to parse the main mcrl2 file when there is an up to date lps
-         *   file */
-        if (nextSubprocessIndex == 0 &&
-            fileSystem->upToDateOutputFileExists(inputFile, outputFile))
-        {
-          noNeedToRun = true;
-          consoleDock->writeToConsole(
-              ProcessType::Parsing,
-              "Parsing is not needed as specification has not changed\n");
-        }
-        break;
-
-      case SubprocessType::Mcrl22lps:
-        consoleDock->writeToConsole(processType, "##### CREATING LPS #####\n");
-
-        /* no need to run if there is an up to date lps file with respect to the
-         *   input mcrl2 file */
-        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
-        {
-          noNeedToRun = true;
-          consoleDock->writeToConsole(processType,
-                                      "Up to date LPS already exists\n");
-        }
-        break;
-
-      case SubprocessType::Lpsxsim:
-        consoleDock->writeToConsole(processType,
-                                    "##### SHOWING SIMULATION #####\n");
-
-        emit processFinished(processid);
-        break;
-
-      case SubprocessType::Lps2lts:
-        consoleDock->writeToConsole(processType, "##### CREATING LTS #####\n");
-
-        /* no need to run if there is an up to date lts file with respect to the
-         *   input lps file */
-        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
-        {
-          noNeedToRun = true;
-          consoleDock->writeToConsole(
-              processType, "Up to date" + QString(evidence ? " evidence" : "") +
-                               " LTS already exists\n");
-        }
-        break;
-
-      case SubprocessType::Ltsconvert:
-        consoleDock->writeToConsole(processType, "##### REDUCING LTS #####\n");
-
-        /* no need to run if there is an up to date reduced lts file with
-         *   respect to the input unreduced lts file */
-        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile))
-        {
-          noNeedToRun = true;
-          consoleDock->writeToConsole(processType,
-                                      "Up to date LTS already exists\n");
-        }
-        break;
-
-      case SubprocessType::Ltscompare:
-        consoleDock->writeToConsole(processType,
-                                    "##### COMPARING LTSS #####\n");
-        break;
-
-      case SubprocessType::Ltsgraph:
-        consoleDock->writeToConsole(processType, "##### SHOWING LTS #####\n");
-
-        emit processFinished(processid);
-        break;
-
-      case SubprocessType::ParseMcf:
-        consoleDock->writeToConsole(ProcessType::Parsing,
-                                    "##### PARSING PROPERTY " +
-                                        propertyName.toUpper() + " #####\n");
-        if (processType != ProcessType::Parsing)
-        {
-          consoleDock->writeToConsole(processType, "##### PARSING PROPERTY " +
-                                                       propertyName.toUpper() +
-                                                       " #####\n");
-        }
-        break;
-
-      case SubprocessType::Lps2pbes:
-        consoleDock->writeToConsole(processType, "##### CREATING PBES #####\n");
-
-        /* no need to run if there is an up to date pbes file with respect to
-         *   the input lps and property files */
-        if (fileSystem->upToDateOutputFileExists(inputFile, outputFile,
-                                                 inputFile2))
-        {
-          noNeedToRun = true;
-          consoleDock->writeToConsole(processType,
-                                      "Up to date PBES already exists\n");
-        }
-        break;
-
-      case SubprocessType::Pbessolve:
-        consoleDock->writeToConsole(processType, "##### SOLVING PBES #####\n");
-
-        /* no need to run if there is an up to date evidence lps file with
-         *   respect to the input pbes and lps files */
-        if (evidence && fileSystem->upToDateOutputFileExists(
-                            inputFile, outputFile, inputFile2))
-        {
-          noNeedToRun = true;
-          consoleDock->writeToConsole(
-              ProcessType::Verification,
-              "Up to date evidence LPS already exists\n");
-        }
-        break;
-
-      default:
-        break;
-      }
-
-      /* if we can skip this subprocess act like it has finished, else execute
-       *   it */
-      if (noNeedToRun)
-      {
-        emit subprocess->finished(0);
-      }
-      else
-      {
-        subprocess->start();
-      }
+      subprocess->start();
     }
   }
 }
