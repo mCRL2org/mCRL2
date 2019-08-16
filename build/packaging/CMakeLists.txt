@@ -146,9 +146,10 @@ set(CPACK_COMPONENT_EXAMPLES_INSTALL_TYPES Full Default)
 # -----
 
 #Variables for RPM packaging
-set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
+set(CPACK_RPM_PACKAGE_LICENSE "Boost")
 set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")
 set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
+set(CPACK_RPM_PACKAGE_URL "https://mcrl2.org")
 set(CPACK_RPM_PACKAGE_REQUIRES "gcc")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     "/usr/share/applications"
