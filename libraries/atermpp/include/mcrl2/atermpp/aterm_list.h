@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/aterm_list.h
-/// \brief List of terms.
 
 #ifndef MCRL2_ATERMPP_ATERM_LIST_H
 #define MCRL2_ATERMPP_ATERM_LIST_H
@@ -26,11 +24,12 @@
 namespace atermpp
 {
 
+/// \brief A list of aterm objects.
 template <typename Term>
 class term_list: public aterm
 {
 protected:
-  /// constructor for termlists from internally constructed terms delivered as reference.
+  /// \brief Constructor for term lists from internally constructed terms delivered as reference.
   explicit term_list(detail::_aterm* t) noexcept :aterm(t)
   {
     assert(!defined() || type_is_list());
@@ -61,7 +60,7 @@ public:
   /// Const iterator used to iterate through an term_list.
   typedef term_list_iterator<Term> const_iterator;
 
-  /// Default constructor. Creates an empty list.
+  /// \brief Default constructor. Creates an empty list.
   term_list() noexcept
     : aterm(detail::g_term_pool().empty_list())
   {}
@@ -240,6 +239,11 @@ public:
   /// \param el The term that is added.
   void push_front(const Term& el);
 
+  /// \brief Construct and insert a new element at the beginning of the current list.
+  /// \param el The term that is added.
+  template<typename ...Args>
+  void emplace_front(Args&&... arguments);
+
   /// \brief Returns the size of the term_list.
   /// \details The complexity of this function is linear in the size of the list.
   /// \return The size of the list.
@@ -298,10 +302,10 @@ class _aterm_list : public _aterm_appl<2>
 {
 public:
   /// \returns A reference to the head of the list.
-  Term& head() { return static_cast<Term&>(arg(0)); };
+  Term& head() { return static_cast<Term&>(arg(0)); }
 
   /// \returns A reference to the tail of the list.
-  term_list<Term>& tail() { return static_cast<term_list<Term>&>(arg(1)); };
+  term_list<Term>& tail() { return static_cast<term_list<Term>&>(arg(1)); }
 };
 
 } // namespace detail

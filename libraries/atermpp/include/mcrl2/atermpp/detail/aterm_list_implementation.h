@@ -33,6 +33,13 @@ void term_list<Term>::push_front(const Term& el)
   *this = down_cast<term_list<Term>>(detail::g_term_pool().create_appl(detail::g_term_pool().as_list(), el, *this));
 }
 
+template <class Term>
+template<typename ...Args>
+void term_list<Term>::emplace_front(Args&&... arguments)
+{
+  *this = down_cast<term_list<Term>>(detail::g_term_pool().create_appl(detail::g_term_pool().as_list(), Term(std::forward<Args>(arguments)...), *this));
+}
+
 template <typename Term>
 inline
 term_list<Term> push_back(const term_list<Term>& l, const Term& el)
