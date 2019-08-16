@@ -259,6 +259,7 @@ QProcess* ProcessSystem::createSubprocess(
   subprocess->setProperty("subprocessIndex", subprocessIndex);
   subprocess->setProperty("propertyName", property.name);
   subprocess->setProperty("evidence", evidence);
+  subprocess->setProperty("specType", int(specType));
 
   QString program = "";
   QString inputFile = "";
@@ -630,6 +631,8 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
     QString outputFile = subprocess->property("outputFile").toString();
     QString propertyName = subprocess->property("propertyName").toString();
     bool evidence = subprocess->property("evidence").toBool();
+    SpecType specType =
+        static_cast<SpecType>(subprocess->property("specType").toInt());
 
     bool noNeedToRun = false;
 
@@ -648,7 +651,7 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
 
       /* no need to parse the main mcrl2 file when there is an up to date lps
        *   file */
-      if (nextSubprocessIndex == 0 &&
+      if (specType == SpecType::Main &&
           fileSystem->upToDateOutputFileExists(inputFile, outputFile))
       {
         noNeedToRun = true;
@@ -776,9 +779,11 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
 {
   QProcess* mcrl2ParsingProcess = qobject_cast<QProcess*>(sender());
   int processid = mcrl2ParsingProcess->property("processid").toInt();
+  ProcessType processType = processTypes[processid];
   int subprocessIndex =
       mcrl2ParsingProcess->property("subprocessIndex").toInt();
-  ProcessType processType = processTypes[processid];
+  SpecType specType =
+      static_cast<SpecType>(mcrl2ParsingProcess->property("specType").toInt());
 
   /* if parsing resulted in an error, go to the parsing tab */
   if (previousExitCode > 0)
@@ -787,7 +792,7 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
   }
 
   /* if parsing a reinitialised specification, set the corresponding result */
-  if (processType == ProcessType::Parsing && subprocessIndex == 1)
+  if (processType == ProcessType::Parsing && specType != SpecType::Main)
   {
     if (previousExitCode == 0)
     {
@@ -809,7 +814,7 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
 
   /* if parsing the main specification gave an error, move the cursor in the
    *   code editor to the parsing error if possible */
-  if (subprocessIndex == 0 && previousExitCode > 0)
+  if (specType == SpecType::Main && previousExitCode > 0)
   {
     consoleDock->writeToConsole(
         ProcessType::Parsing,
