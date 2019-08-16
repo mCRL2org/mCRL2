@@ -1,6 +1,7 @@
 set(MCRL2_TOOLS
   besconvert  
   lpscleave
+  lpscombine
   lpsrealelm
   lpsstategraph
   lpssymbolicbisim
