@@ -597,10 +597,12 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
   }
   else
   {
-    QProcess* previousProcess = qobject_cast<QProcess*>(sender());
-    processid = previousProcess->property("processid").toInt();
+    QProcess* previousSubprocess = qobject_cast<QProcess*>(sender());
+    processid = previousSubprocess->property("processid").toInt();
     nextSubprocessIndex =
-        previousProcess->property("subprocessIndex").toInt() + 1;
+        previousSubprocess->property("subprocessIndex").toInt() + 1;
+    SubprocessType previousSubprocessType = static_cast<SubprocessType>(
+        previousSubprocess->property("subprocessType").toInt());
 
     /* if there are more subprocesses to run, check if the previous subprocess
      *   terminated successfully */
@@ -608,9 +610,15 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
         previousExitCode > 0)
     {
       /* if not, abort the process */
-      consoleDock->writeToConsole(processTypes[processid],
-                                  "Process finished unsuccessfully\n");
-      emit processFinished(processid);
+      /* in case the previous subprocess was for parsing mcrl2, let
+       *   parseMcrl2Result handle finishing the process to prevent a race
+       *   condition with storing the result of parsing */
+      if (previousSubprocessType != SubprocessType::ParseMcrl2)
+      {
+        consoleDock->writeToConsole(processTypes[processid],
+                                    "Process finished unsuccessfully\n");
+        emit processFinished(processid);
+      }
       deleteProcess(processid, nextSubprocessIndex);
       return;
     }
@@ -804,9 +812,9 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
     }
   }
 
-  /* if the full process was only for parsing specifications and this is the
-   *   last one, signal that the process has finished */
-  if (processType == ProcessType::Parsing &&
+  /* if parsing failed or this was the last subprocess, signal that the process
+   *   has finished */
+  if (previousExitCode > 0 ||
       processes[processid].size() == subprocessIndex + 1)
   {
     emit processFinished(processid);
