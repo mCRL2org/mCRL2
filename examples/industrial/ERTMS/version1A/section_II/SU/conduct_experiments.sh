@@ -1,8 +1,8 @@
 mcrl22lps -vb ertms-hl3.mcrl2 | lpssumelm -vc | lpsconstelm -vst | lpsparelm -v > ertms-hl3.lps
 
-time lps2lts -vrjittyc --cached --tau=break,split_train,enter,leave,extend_EoA,move,connect,disconnect --timings=lps2lts_times.txt ertms-hl3.lps ertms-hl3.mod.aut
+time lps2lts -vrjittyc --cached --timings=lps2lts_times.txt ertms-hl3.lps ertms-hl3.mod.aut
 
-time ltsconvert --timings=ltsmin_times.txt -vedpbranching-bisim  ertms-hl3.mod.aut ertms-hl3.mod.min.aut
+time ltsconvert --timings=ltsmin_times.txt --tau=break,split_train,enter,leave,extend_EoA,move,connect,disconnect -vedpbranching-bisim  ertms-hl3.mod.aut ertms-hl3.mod.min.aut
 
 time ltsconvert -vl ertms-hl3.lps ertms-hl3.mod.min.aut ertms-hl3.mod.min.lts
 
