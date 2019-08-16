@@ -808,7 +808,7 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
     }
     else
     {
-      results[processid] = "invalid";
+      results[processid] = "invalid" + SPECTYPEEXTENSION.at(specType);
     }
   }
 
