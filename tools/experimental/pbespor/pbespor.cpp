@@ -41,7 +41,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
-      m_use_condition_L = parser.options.count("no-L") == 0;
+      m_use_condition_L = parser.options.count("no-l") == 0;
     }
 
     void add_options(interface_description& desc) override
