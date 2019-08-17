@@ -164,7 +164,7 @@ public:
   size_type max_bucket_count() const noexcept { return m_buckets.max_size(); }
 
   size_type bucket_size(size_type n) const noexcept { return std::distance(m_buckets[n].begin(), m_buckets[n].end()); }
-  size_type bucket(const key_type& key) const noexcept { return std::distance(m_buckets.begin(), find_bucket(key)); }
+  size_type bucket(const key_type& key) const noexcept { return std::distance(m_buckets.begin(), find_bucket_index(key)); }
 
   float load_factor() const { return static_cast<float>(size()) / bucket_count(); }
   float max_load_factor() const { return m_max_load_factor; }
@@ -186,28 +186,24 @@ private:
 
   /// \brief Inserts T(args...) into the given bucket, assumes that it did not exists before.
   template<typename ...Args>
-  std::pair<iterator, bool> emplace_impl(bucket_iterator bucket_iterator, Args&&... args);
+  std::pair<iterator, bool> emplace_impl(size_type bucket_index, Args&&... args);
 
-  /// \returns An iterator to the bucket that might contain the element constructed by the given arguments.
-  /// \details The returned iterator always points to a valid bucket.
+  /// \returns The index of the bucket that might contain the element constructed by the given arguments.
   template<typename ...Args>
-  const_bucket_iterator find_bucket(const Args&... args) const;
-
-  template<typename ...Args>
-  bucket_iterator find_bucket(const Args&... args);
+  size_type find_bucket_index(const Args&... args) const;
 
   /// \brief Searches for the element in the given bucket.
   template<typename ...Args>
-  const_iterator find_impl(const_bucket_iterator bucket_iterator, const Args&... args) const;
+  const_iterator find_impl(size_type bucket_index, const Args&... args) const;
 
   template<typename ...Args>
-  iterator find_impl(bucket_iterator bucket_iterator, const Args&... args);
+  iterator find_impl(size_type bucket_index, const Args&... args);
 
   /// \brief Inserts a bucket node into the hash table.
   /// \details Does not increment the m_number_of_elements.
   void insert(typename bucket_type::node* node)
   {
-    bucket_type& bucket = *find_bucket(node->key());
+    bucket_type& bucket = m_buckets[find_bucket_index(node->key())];
     bucket.push_front(node);
   }
 
