@@ -34,7 +34,7 @@ void Solver::solve(QString specification, QString dataExpression)
       mcrl2xi_qt::parseMcrl2Specification(m_specification.toStdString(), m_data_spec, m_global_vars);
       m_parsed = true;
     }
-    catch (mcrl2::runtime_error e)
+    catch (const mcrl2::runtime_error& e)
     {
       m_parseError = QString::fromStdString(e.what());
     }
@@ -116,7 +116,7 @@ void Solver::solve(QString specification, QString dataExpression)
       }
       mCRL2log(info) << (m_abort ? "Abort by user." : "Done solving.") << std::endl;
     }
-    catch (mcrl2::runtime_error e)
+    catch (const mcrl2::runtime_error& e)
     {
       QString err = QString::fromStdString(e.what());
       emit(exprError(err));

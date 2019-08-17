@@ -30,7 +30,7 @@ void LtsManagerHelper::loadLts(QString filename)
       return;
     }
   }
-  catch (mcrl2::runtime_error e)
+  catch (const mcrl2::runtime_error& e)
   {
     delete lts;
     mCRL2log(mcrl2::log::error) << e.what();

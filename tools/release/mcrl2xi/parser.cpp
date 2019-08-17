@@ -23,7 +23,7 @@ void Parser::parse(QString specification)
   {
     mcrl2xi_qt::parseMcrl2Specification(specification.toStdString());
   }
-  catch (mcrl2::runtime_error e)
+  catch (const mcrl2::runtime_error& e)
   {
     QString err = QString::fromStdString(e.what());
     emit(parseError(err));

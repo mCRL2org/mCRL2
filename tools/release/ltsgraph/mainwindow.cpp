@@ -223,7 +223,7 @@ void MainWindow::openFile(const QString& fileName)
       setWindowTitle(QString("LTSGraph - ") + fileName);
       m_graph.setStable(false);
     }
-    catch (mcrl2::runtime_error e)
+    catch (const mcrl2::runtime_error& e)
     {
       QMessageBox::critical(this, "Error opening file", e.what());
       mCRL2log(mcrl2::log::error) << "Error opening file: " << e.what() << std::endl;

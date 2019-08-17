@@ -314,7 +314,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           context_variables = p.global_variables();
           return p.data();
         }
-        catch (mcrl2::runtime_error)
+        catch (const mcrl2::runtime_error&)
         {
           try
           {

@@ -56,7 +56,7 @@ void parseMcrl2Specification(const std::string& input, mcrl2::data::data_specifi
       return;
     }
   }
-  catch (mcrl2::runtime_error e)
+  catch (const mcrl2::runtime_error& e)
   {
     throw(mcrl2::runtime_error(QString("Specification does not contain a valid data or mCRL2 specification.\n").append(e.what()).toStdString()));
   }
