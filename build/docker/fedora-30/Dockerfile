@@ -1,4 +1,4 @@
-FROM fedora:27
+FROM fedora:30
 MAINTAINER Wieger Wesselink <j.w.wesselink@tue.nl>
 
 # 1. Cloning and building
@@ -22,9 +22,9 @@ RUN cd ~/ && git clone git://github.com/mcrl2org/mcrl2.git mcrl2
 RUN mkdir ~/mcrl2-build && cd ~/mcrl2-build && cmake \
  -DCMAKE_BUILD_TYPE=RELEASE \
  -DBUILD_SHARED_LIBS=ON \
- -DMCRL2_ENABLE_DEVELOPER=ON \
+ -DMCRL2_ENABLE_DEVELOPER=OFF \
  -DMCRL2_ENABLE_DEPRECATED=OFF \
- -DMCRL2_ENABLE_EXPERIMENTAL=ON \
+ -DMCRL2_ENABLE_EXPERIMENTAL=OFF \
  -DMCRL2_ENABLE_GUI_TOOLS=ON \
  -DCMAKE_INSTALL_PREFIX=`pwd`/install \
  ~/mcrl2
@@ -53,3 +53,4 @@ RUN dnf install -y \
 RUN cd ~/mcrl2-build && cmake . && make doc 
 
 # 4. Package the build
+RUN cd ~/mcrl2-build && cmake -DMCRL2_PACKAGE_RELEASE=ON . && cpack -G RPM
