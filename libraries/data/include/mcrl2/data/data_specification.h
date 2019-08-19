@@ -157,6 +157,9 @@ class data_specification: public sort_specification
     //
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
+    /// \details The normalised equations are a set as the number of equations
+    ///          can become large, in which case removing duplicates while inserting equations can be 
+    ///          very time consuming. 
     mutable std::set<data_equation> m_normalised_equations;
 
     void data_is_not_necessarily_normalised_anymore() const
