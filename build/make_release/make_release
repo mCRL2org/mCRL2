@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright: Wieger Wesselink <j.w.wesselink@tue.nl> 2014-2018
+# Copyright: Wieger Wesselink <j.w.wesselink@tue.nl> 2014-2019
 #
 # This script is used for building debian packages.
 #
@@ -30,8 +30,8 @@
 # do_ppa_upload. If these steps fail, it makes no sense to do an upload. After
 # every failed upload attempt the version number needs to be updated.
 
-MCRL2_RELEASE_BRANCH="release-201808"
-MCRL2_VERSION="201808.0"
+MCRL2_RELEASE_BRANCH="release-201908"
+MCRL2_VERSION="201908.0"
 UBUNTU_VERSION="1ubuntu1ppa1"
 DEBEMAIL="j.w.wesselink@tue.nl"
 DEBFULLNAME="Wieger Wesselink"
@@ -263,6 +263,8 @@ function build_ppa_package
 }
 
 #--- Build ppa packages
-#build_ppa_package trusty
+#download_mcrl2_release
+#build_source_package
 #build_ppa_package xenial
 #build_ppa_package bionic
+#build_ppa_package disco
