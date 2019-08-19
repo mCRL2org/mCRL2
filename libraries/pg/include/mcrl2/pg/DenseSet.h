@@ -53,8 +53,8 @@ public:
         typedef Key*                       pointer;
         typedef Key&                       reference;
 
-        Iterator(const DenseSet *set, Key key) : set_(set), key_(key) { };
-        Iterator(const Iterator &it) : set_(it.set_), key_(it.key_) { };
+        Iterator(const DenseSet *set, Key key) : set_(set), key_(key) { }
+        Iterator(const Iterator &it) : set_(it.set_), key_(it.key_) { }
 
         Iterator& operator=(const Iterator &it)
         {
@@ -63,14 +63,14 @@ public:
             return *this;
         }
 
-        bool operator== (const Iterator &other) { return key_ == other.key_; }
-        bool operator!= (const Iterator &other) { return key_ != other.key_; }
-        bool operator<  (const Iterator &other) { return key_ <  other.key_; }
-        bool operator>  (const Iterator &other) { return key_ >  other.key_; }
-        bool operator<= (const Iterator &other) { return key_ <= other.key_; }
-        bool operator>= (const Iterator &other) { return key_ >= other.key_; }
+        bool operator== (const Iterator &other) const { return key_ == other.key_; }
+        bool operator!= (const Iterator &other) const { return key_ != other.key_; }
+        bool operator<  (const Iterator &other) const { return key_ <  other.key_; }
+        bool operator>  (const Iterator &other) const { return key_ >  other.key_; }
+        bool operator<= (const Iterator &other) const { return key_ <= other.key_; }
+        bool operator>= (const Iterator &other) const { return key_ >= other.key_; }
 
-        value_type operator*() { return key_; };
+        value_type operator*() { return key_; }
 
         Iterator& operator++()
         {
