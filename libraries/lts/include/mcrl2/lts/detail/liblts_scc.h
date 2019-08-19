@@ -210,12 +210,16 @@ class scc_partitioner
 
 template < class LTS_TYPE>
 scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
-  :aut(l)
+  :aut(l),
+    block_index_of_a_state(aut.num_states(),0),
+    equivalence_class_index(0)
 {
   mCRL2log(log::debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
               l.num_transitions() << " transitions" << std::endl;
 
-  // Initialise the data structures
+  dfsn2state.reserve(aut.num_states());
+
+  // Initialise the data structures used in the recursive DFS procedure.
   std::vector<bool> visited(aut.num_states(),false); 
   indexed_sorted_vector_for_tau_transitions<LTS_TYPE> src_tgt(aut,true); // Group the tau transitions ordered per outgoing states. 
 
@@ -227,8 +231,6 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   src_tgt.clear();
 
   indexed_sorted_vector_for_tau_transitions<LTS_TYPE> tgt_src(aut,false);
-  equivalence_class_index=0;
-  block_index_of_a_state=std::vector < state_type >(aut.num_states(),0);
   for (std::vector < state_type >::reverse_iterator i=dfsn2state.rbegin();
        i!=dfsn2state.rend(); ++i)
   {
@@ -265,7 +267,7 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
     }
   }
 
-  aut.clear_transitions();
+  aut.clear_transitions(resulting_transitions.size());
   // Copy the transitions from the set into the transition system.
 
   for (const transition& t: resulting_transitions)
