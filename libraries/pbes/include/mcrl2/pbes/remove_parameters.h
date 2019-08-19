@@ -11,12 +11,13 @@
 #ifndef MCRL2_PBES_REMOVE_PARAMETERS_H
 #define MCRL2_PBES_REMOVE_PARAMETERS_H
 
-#include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/pbes.h"
+#include <cassert>
 #include <algorithm>
 #include <functional>
 #include <map>
 #include <vector>
+#include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
 {
@@ -30,15 +31,16 @@ namespace detail
 
 /// \brief Removes elements with indices in a given sequence from the sequence l
 /// \param l A sequence of terms
-/// \param to_be_removed A sequence of integers
+/// \param to_be_removed A sorted sequence of integers
 /// \return The removal result
 template <typename Term>
-atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::vector<std::size_t>& to_be_removed)
+atermpp::term_list<Term> remove_elements(const atermpp::term_list<Term>& l, const std::vector<std::size_t>& to_be_removed)
 {
+  assert(std::is_sorted(to_be_removed.begin(), to_be_removed.end()));
   std::size_t index = 0;
   std::vector<Term> result;
   auto j = to_be_removed.begin();
-  for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
+  for (auto i = l.begin(); i != l.end(); ++i, ++index)
   {
     if (j != to_be_removed.end() && index == *j)
     {
@@ -49,7 +51,7 @@ atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::
       result.push_back(*i);
     }
   }
-  return atermpp::term_list< Term >(result.begin(),result.end());
+  return atermpp::term_list<Term>(result.begin(),result.end());
 }
 
 template <typename Derived>
@@ -199,7 +201,8 @@ T remove_parameters(const T& x,
 
 /// \brief Removes parameters from propositional variable instantiations in a pbes expression
 /// \param x A PBES library object that does not derive from atermpp::aterm_appl
-/// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
+/// \param to_be_removed A mapping that maps propositional variable names to a sorted vector of parameter indices that
+/// need to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
 void remove_parameters(T& x,
