@@ -47,7 +47,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
     void add_options(interface_description& desc) override
     {
       super::add_options(desc);
-      desc.add_option("no-L",
+      desc.add_option("no-l",
                   "do not apply the condition L");
     }
 
