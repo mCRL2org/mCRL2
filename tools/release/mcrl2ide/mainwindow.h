@@ -60,10 +60,8 @@ class MainWindow : public QMainWindow
 
   /**
    * @brief actionNewProject Allows the user to create a new project
-   * @param askToSave Whether the user should be asked to save before creating a
-   *   new project if the specification has been modified
    */
-  void actionNewProject(bool askToSave = true);
+  void actionNewProject();
 
   /**
    * @brief actionOpenProject Allows the user to open a project
@@ -137,6 +135,14 @@ class MainWindow : public QMainWindow
    *   properties on the current specification
    */
   void actionVerifyAllProperties();
+
+  /**
+   * @brief askToSaveChanges Asks the user whether to save changes, saves the
+   *   project if yes was answered
+   * context In what context this is asked
+   * @return Whether to proceed (true) or to cancel (false)
+   */
+  bool askToSaveChanges(QString context);
 
   /**
    * @brief changeToolButtons Whenever the IDE changes between nothing opened,

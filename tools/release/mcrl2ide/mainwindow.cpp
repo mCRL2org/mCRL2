@@ -105,7 +105,7 @@ void MainWindow::setupMenuBar()
 
   newProjectAction =
       fileMenu->addAction(QIcon(":/icons/new_project.png"), "New Project", this,
-                          SLOT(actionNewProject(bool)), QKeySequence::New);
+                          SLOT(actionNewProject()), QKeySequence::New);
 
   fileMenu->addSeparator();
 
@@ -325,16 +325,22 @@ void MainWindow::onEnterSpecificationOnlyMode()
   changeFileButtons(true);
 }
 
-void MainWindow::actionNewProject(bool askToSave)
+void MainWindow::actionNewProject()
 {
-  fileSystem->newProject(askToSave);
+  if (askToSaveChanges("New Project"))
+  {
+    fileSystem->newProject();
+  }
 }
 
 void MainWindow::actionOpenProject(const QString& inputFilePath)
 {
   if (inputFilePath.isEmpty())
   {
-    fileSystem->openProject();
+    if (askToSaveChanges("Open Project"))
+    {
+      fileSystem->openProject();
+    }
   }
   else
   {
@@ -534,6 +540,29 @@ void MainWindow::actionVerifyAllProperties()
   }
 }
 
+bool MainWindow::askToSaveChanges(QString context)
+{
+  if (fileSystem->isSpecificationModified() && fileSystem->projectOpened())
+  {
+    QMessageBox::StandardButton result = executeQuestionBox(
+        this, context,
+        "There are changes in the current project, do you want to save?");
+    switch (result)
+    {
+    case QMessageBox::Yes:
+      return fileSystem->save();
+    case QMessageBox::No:
+      return true;
+    default:
+      return false;
+    }
+  }
+  else
+  {
+    return true;
+  }
+}
+
 void MainWindow::changeFileButtons(bool specificationOnlyMode)
 {
   saveIntermediateFilesMenu->setEnabled(true);
@@ -665,26 +694,10 @@ bool MainWindow::event(QEvent* event)
 
   case QEvent::Close:
     /* if there are changes, ask the user to save the project first */
-    if (fileSystem->isSpecificationModified())
+    if (!askToSaveChanges("mCRL2 IDE"))
     {
-      QMessageBox::StandardButton result = executeQuestionBox(
-          this, "mCRL2 IDE",
-          "There are changes in the current project, do you want to save?");
-      switch (result)
-      {
-      case QMessageBox::Yes:
-        if (!fileSystem->save())
-        {
-          event->ignore();
-          return false;
-        }
-        break;
-      case QMessageBox::Cancel:
-        event->ignore();
-        return false;
-      default:
-        break;
-      }
+      event->ignore();
+      return false;
     }
 
     /* save the settings for the main window */

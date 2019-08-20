@@ -419,28 +419,10 @@ FileSystem::convertProjectFileToNewFormat(const QString& newProjectFolderPath,
   return newFormat;
 }
 
-bool FileSystem::newProject(bool askToSave, bool forNewProject)
+bool FileSystem::newProject(bool forNewProject)
 {
   bool success = false;
   QString context = forNewProject ? "New Project" : "Save Project As";
-
-  /* if there are changes in the current project, ask to save first */
-  if (askToSave && isSpecificationModified())
-  {
-    QMessageBox::StandardButton result = executeQuestionBox(
-        parent, "New Project",
-        "There are changes in the current project, do you want to save?");
-    switch (result)
-    {
-    case QMessageBox::Yes:
-      save();
-      break;
-    case QMessageBox::Cancel:
-      return "";
-    default:
-      break;
-    }
-  }
 
   /* ask the user for a project folder */
   QFileDialog* newProjectDialog = createFileDialog(forNewProject ? 0 : 1);
@@ -733,27 +715,6 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
 
 void FileSystem::openProject()
 {
-  /* ask to save changes if there are any */
-  if (isSpecificationModified())
-  {
-    QMessageBox::StandardButton result = executeQuestionBox(
-        parent, "mCRL2 IDE",
-        "There are changes in the current project, do you want to save?");
-    switch (result)
-    {
-    case QMessageBox::Yes:
-      if (!save())
-      {
-        return;
-      }
-      break;
-    case QMessageBox::Cancel:
-      return;
-    default:
-      break;
-    }
-  }
-
   /* ask the user for a project folder */
   QFileDialog* openProjectDialog = createFileDialog(2);
   if (openProjectDialog->exec() == QDialog::Accepted)
@@ -1015,7 +976,7 @@ bool FileSystem::saveAs()
    *   current as and save if successful */
   else
   {
-    if (newProject(false, false))
+    if (newProject(false))
     {
       return save(true);
     }
