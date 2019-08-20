@@ -30,7 +30,7 @@ struct push_block_cache
   // Caches the alphabet of pCRL equations
   std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache;
 
-  push_block_cache(std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache_)
+  explicit push_block_cache(std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache_)
     : pcrl_equation_cache(pcrl_equation_cache_)
   {}
 };
@@ -85,7 +85,7 @@ struct push_block_printer
 {
   const std::set<core::identifier_string>& B;
 
-  push_block_printer(const std::set<core::identifier_string>& B_)
+  explicit push_block_printer(const std::set<core::identifier_string>& B_)
     : B(B_)
   {}
 
@@ -147,7 +147,7 @@ std::string print_B(const std::set<core::identifier_string>& B)
 {
   std::ostringstream out;
   out << "{";
-  for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
+  for (auto i = B.begin(); i != B.end(); ++i)
   {
     if (i != B.begin())
     {

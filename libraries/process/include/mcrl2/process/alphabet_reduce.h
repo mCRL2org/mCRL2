@@ -18,7 +18,6 @@
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
-#include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"

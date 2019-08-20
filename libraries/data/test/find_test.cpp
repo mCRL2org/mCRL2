@@ -10,142 +10,158 @@
 /// \brief Test for find functions.
 
 #define BOOST_TEST_MODULE find_test
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/standard_utility.h"
-#include <algorithm>
-#include <boost/test/included/unit_test_framework.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
+#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2;
-using namespace mcrl2::core;
-using namespace mcrl2::data;
 
 inline
-variable nat(const std::string& name)
+data::variable bool_(const std::string& name)
 {
-  return variable(identifier_string(name), sort_nat::nat());
+  return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }
 
 inline
-variable pos(const std::string& name)
+data::variable nat(const std::string& name)
 {
-  return variable(identifier_string(name), sort_pos::pos());
+  return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
 inline
-variable bool_(const std::string& name)
+data::variable pos(const std::string& name)
 {
-  return variable(identifier_string(name), sort_bool::bool_());
+  return data::variable(core::identifier_string(name), data::sort_pos::pos());
 }
 
-void test_search_variable()
+inline
+data::data_expression parse_data_expression(const std::string& text)
 {
-  variable b = bool_("b");
-  variable c = bool_("c");
-  data::variable_vector v;
-  v.push_back(b);
-  v.push_back(c);
-  std::set<variable> s = data::find_all_variables(v);
-  BOOST_CHECK(s.size() == 2);
-  BOOST_CHECK(s.find(b) != s.end());
-  BOOST_CHECK(s.find(c) != s.end());
+  std::vector<data::variable> variable_context
+  {
+    nat("n"),
+    nat("n1"),
+    nat("n2"),
+    nat("n3"),
+    nat("n4"),
+    bool_("b"),
+    bool_("b1"),
+    bool_("b2"),
+    bool_("b3"),
+    bool_("b4"),
+    pos("p"),
+    pos("p1"),
+    pos("p2"),
+    pos("p3"),
+    pos("p4")
+  };
+  return data::parse_data_expression(text, variable_context);
+};
+
+template <typename T>
+std::string print_set(const std::set<T>& v)
+{
+  std::set<std::string> s;
+  for (const T& v_i: v)
+  {
+    s.insert(data::pp(v_i));
+  }
+  return core::detail::print_set(s);
+}
+
+BOOST_AUTO_TEST_CASE(test_containers)
+{
+  data::variable b = bool_("b");
+  data::variable c = bool_("c");
+  data::variable_vector v{b, c};
+  BOOST_CHECK_EQUAL(print_set(find_all_variables(v)), "{ b, c }");
   BOOST_CHECK(data::search_variable(v, b));
   BOOST_CHECK(data::search_variable(v, c));
 
-  data::variable_list l(v.begin(), v.end());
-  s = data::find_all_variables(l);
-  BOOST_CHECK(s.size() == 2);
-  BOOST_CHECK(s.find(b) != s.end());
-  BOOST_CHECK(s.find(c) != s.end());
-  BOOST_CHECK(data::search_variable(v, b));
-  BOOST_CHECK(data::search_variable(v, c));
+  data::variable_list l{b, c};
+  BOOST_CHECK_EQUAL(print_set(find_all_variables(l)), "{ b, c }");
+  BOOST_CHECK(data::search_variable(l, b));
+  BOOST_CHECK(data::search_variable(l, c));
 }
 
-BOOST_AUTO_TEST_CASE(test_main)
+BOOST_AUTO_TEST_CASE(test_find)
 {
-  variable n1 = nat("n1");
-  variable n2 = nat("n2");
-  variable n3 = nat("n3");
-  variable n4 = nat("n4");
+  using utilities::detail::contains;
 
-  variable b1 = bool_("b1");
-  variable b2 = bool_("b2");
-  variable b3 = bool_("b3");
-  variable b4 = bool_("b4");
+  data::variable n1 = nat("n1");
+  data::variable n2 = nat("n2");
+  data::variable n3 = nat("n3");
+  data::variable n4 = nat("n4");
 
-  variable p1 = pos("p1");
-  variable p2 = pos("p2");
-  variable p3 = pos("p3");
-  variable p4 = pos("p4");
+  data::variable b1 = bool_("b1");
+  data::variable b2 = bool_("b2");
+  data::variable b3 = bool_("b3");
+  data::variable b4 = bool_("b4");
 
-  std::set<variable> S;
-  S.insert(b1);
-  S.insert(p1);
-  S.insert(n1);
+  data::variable p1 = pos("p1");
+  data::variable p2 = pos("p2");
+  data::variable p3 = pos("p3");
+  data::variable p4 = pos("p4");
 
-  std::vector<variable> V;
-  V.push_back(b1);
-  V.push_back(p1);
-  V.push_back(n1);
+  std::set<data::variable> S{b1, p1, n1};
+  BOOST_CHECK_EQUAL(print_set(find_all_variables(S)), "{ b1, n1, p1 }");
+  BOOST_CHECK_EQUAL(print_set(find_sort_expressions(S)), "{ Bool, Nat, Pos }");
+  BOOST_CHECK(search_variable(S, n1));
+  BOOST_CHECK(!search_variable(S, n2));
 
-  sort_expression_vector domain {sort_pos::pos(), sort_bool::bool_()};
-  sort_expression sexpr = function_sort(domain, sort_nat::nat());
-  variable q1(identifier_string("q1"), sexpr);
+  std::vector<data::variable> V{b1, p1, n1};
+  BOOST_CHECK_EQUAL(print_set(find_all_variables(S)), "{ b1, n1, p1 }");
+  BOOST_CHECK(search_variable(V, n1));
+  BOOST_CHECK(!search_variable(V, n2));
 
-  data_expression x = sort_bool::and_(equal_to(n1, n2), not_equal_to(n2, n3));
-  data_expression y = sort_bool::or_(equal_to(p1, p2), sort_bool::and_(x, b2));
+  data::sort_expression_vector domain {data::sort_pos::pos(), data::sort_bool::bool_()};
+  data::sort_expression sexpr = data::function_sort(domain, data::sort_nat::nat());
+  data::variable q1(core::identifier_string("q1"), sexpr);
+  BOOST_CHECK_EQUAL(print_set(find_sort_expressions(q1)), "{ Bool, Nat, Pos, Pos # Bool -> Nat }");
 
-  //--- search_variable ---//
+  data::data_expression x = parse_data_expression("(n1 == n2) && (n2 != n3)");
+  BOOST_CHECK_EQUAL(print_set(find_all_variables(x)), "{ n1, n2, n3 }");
+  BOOST_CHECK_EQUAL(print_set(find_free_variables(x)), "{ n1, n2, n3 }");
   BOOST_CHECK(search_variable(x, n1));
   BOOST_CHECK(search_variable(x, n2));
   BOOST_CHECK(search_variable(x, n3));
   BOOST_CHECK(!search_variable(x, n4));
-  BOOST_CHECK(search_variable(S, n1));
-  BOOST_CHECK(!search_variable(S, n2));
-  BOOST_CHECK(search_variable(V, n1));
-  BOOST_CHECK(!search_variable(V, n2));
 
-
-  //--- find_all_variables ---//
-  std::set<variable> v = find_all_variables(x);
-  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
-  BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
-  BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
-
-  std::set<variable> vS = find_all_variables(S);
-  std::set<variable> vV = find_all_variables(V);
-  BOOST_CHECK(vS == vV);
-
-  //--- find_free_variables ---//
-  v = find_free_variables(x);
-  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
-  BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
-  BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
-  v = find_free_variables(data_expression(n1));
-  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
-
-  //--- find_sort_expressions ---//
-  std::set<sort_expression> e = find_sort_expressions(q1);
-  BOOST_CHECK(std::find(e.begin(), e.end(), sort_nat::nat())   != e.end());
-  BOOST_CHECK(std::find(e.begin(), e.end(), sort_pos::pos())   != e.end());
-  BOOST_CHECK(std::find(e.begin(), e.end(), sort_bool::bool_()) != e.end());
-  BOOST_CHECK(std::find(e.begin(), e.end(), sexpr)              != e.end());
-
-  std::set<sort_expression> eS = find_sort_expressions(S);
-  std::set<sort_expression> eV = find_sort_expressions(V);
-  BOOST_CHECK(eS == eV);
-
-  std::set<sort_expression> Z;
+  std::set<data::sort_expression> Z;
   find_sort_expressions(q1, std::inserter(Z, Z.end()));
   find_sort_expressions(S, std::inserter(Z, Z.end()));
+  BOOST_CHECK_EQUAL(print_set(Z), "{ Bool, Nat, Pos, Pos # Bool -> Nat }");
+}
 
-  test_search_variable();
+BOOST_AUTO_TEST_CASE(find_all_variables_test)
+{
+  auto all_variables = [&](const std::string& text)
+  {
+    return print_set(data::find_all_variables(parse_data_expression(text)));
+  };
 
-  //--- data_specification ---//
-  // TODO: discuss whether this test should fail or not
-  //BOOST_CHECK(search_data_expression(data_specification().constructors(), sort_bool::true_()));
+  BOOST_CHECK_EQUAL(all_variables("n"), "{ n }");
+  BOOST_CHECK_EQUAL(all_variables("exists n: Nat. (n == n)"), "{ n }");
+  BOOST_CHECK_EQUAL(all_variables("exists n: Nat. true"), "{ n }");
+  BOOST_CHECK_EQUAL(all_variables("2 whr n = n end"), "{ n }");
+  BOOST_CHECK_EQUAL(all_variables("2 whr p = 3 end"), "{ p }");
+}
+
+BOOST_AUTO_TEST_CASE(find_free_variables_test)
+{
+  auto free_variables = [&](const std::string& text)
+  {
+    return print_set(data::find_free_variables(parse_data_expression(text)));
+  };
+
+  BOOST_CHECK_EQUAL(free_variables("n"), "{ n }");
+  BOOST_CHECK_EQUAL(free_variables("exists n: Nat. (n == n)"), "{  }");
+  BOOST_CHECK_EQUAL(free_variables("2 whr n = n end"), "{ n }");
+  BOOST_CHECK_EQUAL(free_variables("2 whr p = 3 end"), "{  }");
 }

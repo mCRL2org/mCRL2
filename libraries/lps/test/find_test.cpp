@@ -23,19 +23,6 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-std::string SPEC =
-  "glob                      \n"
-  "  m: Nat;                 \n"
-  "                          \n"
-  "act                       \n"
-  "  a: Nat;                 \n"
-  "                          \n"
-  "proc                      \n"
-  "  P(n:Nat) = a(m).P(n+1); \n"
-  "                          \n"
-  "init P(0);                \n"
-  ;
-
 inline
 data::variable nat(const std::string& name)
 {
@@ -54,27 +41,43 @@ data::variable bool_(const std::string& name)
   return data::variable(core::identifier_string(name), data::bool_());
 }
 
-void test_find()
+template <typename T>
+std::string print_set(const std::set<T>& v)
 {
-  specification spec = parse_linear_process_specification(SPEC);
-  std::cout << spec.process().action_summands().size() << std::endl;
-  action_summand s = spec.process().action_summands().front();
-  process::action a = s.multi_action().actions().front();
-
-  //--- find_all_variables ---//
-  data::variable m = nat("m");
-  std::set<data::variable> v = lps::find_all_variables(a);
-  v = lps::find_all_variables(s);
-  BOOST_CHECK(v.find(m) != v.end());
-
-  //--- find_sort_expressions ---//
-  std::set<data::sort_expression> e = lps::find_sort_expressions(a);
-  std::cout << "e.size() = " << e.size() << std::endl;
-  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
-  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
+  std::set<std::string> s;
+  for (const T& v_i: v)
+  {
+    s.insert(data::pp(v_i));
+  }
+  return core::detail::print_set(s);
 }
 
-void test_free_variables()
+BOOST_AUTO_TEST_CASE(test_find)
+{
+  using utilities::detail::contains;
+
+  std::string SPEC =
+    "glob                      \n"
+    "  m: Nat;                 \n"
+    "                          \n"
+    "act                       \n"
+    "  a: Nat;                 \n"
+    "                          \n"
+    "proc                      \n"
+    "  P(n:Nat) = a(m).P(n+1); \n"
+    "                          \n"
+    "init P(0);                \n"
+  ;
+
+  specification lpsspec = parse_linear_process_specification(SPEC);
+  action_summand s = lpsspec.process().action_summands().front();
+  process::action a = s.multi_action().actions().front();
+
+  BOOST_CHECK_EQUAL(print_set(lps::find_all_variables(s)), "{ m, n }");
+  BOOST_CHECK_EQUAL(print_set(lps::find_sort_expressions(a)), "{ Nat }");
+}
+
+BOOST_AUTO_TEST_CASE(test_free_variables)
 {
   std::set<data::variable> free_variables;
 
@@ -106,7 +109,7 @@ void test_free_variables()
   BOOST_CHECK(check_well_typedness(specification));
 }
 
-void test_search()
+BOOST_AUTO_TEST_CASE(test_search)
 {
   lps::specification spec(parse_linear_process_specification(
                             "glob dc: Nat;\n"
@@ -124,7 +127,7 @@ void test_search()
   BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), dc));
 }
 
-void test_search_sort_expression()
+BOOST_AUTO_TEST_CASE(test_search_sort_expression)
 {
   std::string text =
     "act a: List(Bool);                   \n"
@@ -134,12 +137,4 @@ void test_search_sort_expression()
   lps::specification spec = parse_linear_process_specification(text);
   data::sort_expression s = data::parse_sort_expression("List(Bool)");
   BOOST_CHECK(data::search_sort_expression(spec.data().sorts(), s));
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test_find();
-  test_free_variables();
-  test_search();
-  test_search_sort_expression();
 }
