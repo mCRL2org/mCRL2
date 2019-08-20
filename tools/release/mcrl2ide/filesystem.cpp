@@ -461,12 +461,21 @@ bool FileSystem::newProject(bool askToSave, bool forNewProject)
       projectName = newProjectName;
       specFilePath = defaultSpecificationFilePath();
 
-      projectOptions = createNewProjectOptions();
-      /* we add the relative path to the specification to the project options,
-       *   which is simply the name of the specification file */
+      /* in case of creating a new project we create new project options, in
+       *   case of save as we change the project options */
       QDomText specPathNode =
           projectOptions.createTextNode(QFileInfo(specFilePath).fileName());
-      projectOptions.elementsByTagName("spec").at(0).appendChild(specPathNode);
+      if (forNewProject)
+      {
+        projectOptions = createNewProjectOptions();
+        projectOptions.elementsByTagName("spec").at(0).appendChild(
+            specPathNode);
+      }
+      else
+      {
+        QDomNode specNode = projectOptions.elementsByTagName("spec").at(0);
+        specNode.replaceChild(specPathNode, specNode.firstChild());
+      }
       updateProjectFile();
 
       QDir(projectFolderPath).mkdir(propertiesFolderName);
