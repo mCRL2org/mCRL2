@@ -475,7 +475,9 @@ bool FileSystem::newProject(bool askToSave, bool forNewProject)
        *   if there was already a project open */
       if (forNewProject && projectOpened())
       {
-        specificationEditor->clear();
+        // Workaround for QTBUG-42318
+        specificationEditor->selectAll();
+        specificationEditor->deleteChar();
         properties.clear();
       }
 
