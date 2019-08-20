@@ -313,13 +313,11 @@ class FileSystem : public QObject
   /**
    * @brief newProject Creates a new project with the corresponding file
    *   structure
-   * @param askToSave Whether the user should be asked to save before creating a
-   *   new project if the specification has been modified
    * @param forNewProject Whether this is done for "New Project" or "Save
    *   Project As"
    * @return Whether creating a new project was successful
    */
-  bool newProject(bool askToSave = true, bool forNewProject = true);
+  bool newProject(bool forNewProject = true);
 
   /**
    * @brief loadSpecification Loads the specification from its file and puts it
