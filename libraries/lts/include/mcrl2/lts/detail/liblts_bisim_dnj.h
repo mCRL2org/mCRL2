@@ -1278,24 +1278,24 @@ class part_state_t
                                                                                     {   assert(B->begin <= begin_print);  assert(end_print <= B->end);
                                                                                         if (end_print == begin_print)  return;
 
-                                                                                        mCRL2log(log::debug, "bisim_dnj") << '\t' << message
+                                                                                        mCRL2log(log::debug, "bisim_jgkw") << '\t' << message
                                                                                                              << (1 < end_print - begin_print ? "s:\n" : ":\n");
                                                                                         assert(begin_print < end_print);
                                                                                         do
                                                                                         {
-                                                                                            mCRL2log(log::debug,"bisim_dnj") << "\t\t"
+                                                                                            mCRL2log(log::debug,"bisim_jgkw") << "\t\t"
                                                                                                                      << begin_print->st->debug_id(partitioner);
                                                                                             if (B != begin_print->st->bl.ock)
                                                                                             {
-                                                                                                mCRL2log(log::debug,"bisim_dnj") << ", inconsistent: points "
+                                                                                                mCRL2log(log::debug,"bisim_jgkw") << ", inconsistent: points "
                                                                                                        "to " << begin_print->st->bl.ock->debug_id(partitioner);
                                                                                             }
                                                                                             if (begin_print != begin_print->st->pos)
                                                                                             {
-                                                                                                mCRL2log(log::debug, "bisim_dnj")
+                                                                                                mCRL2log(log::debug, "bisim_jgkw")
                                                                                                                << ", inconsistent pointer to state_info_entry";
                                                                                             }
-                                                                                            mCRL2log(log::debug, "bisim_dnj") << '\n';
+                                                                                            mCRL2log(log::debug, "bisim_jgkw") << '\n';
                                                                                         }
                                                                                         while (++begin_print < end_print);
                                                                                     }
@@ -1306,11 +1306,11 @@ class part_state_t
                                                                                     template<class LTS_TYPE>
                                                                                     void print_part(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
-                                                                                        if (!mCRL2logEnabled(log::debug, "bisim_dnj"))  return;
+                                                                                        if (!mCRL2logEnabled(log::debug, "bisim_jgkw"))  return;
                                                                                         const block_t* B(permutation.front().st->bl.ock);
                                                                                         do
                                                                                         {
-                                                                                            mCRL2log(log::debug, "bisim_dnj")<<B->debug_id(partitioner)<<":\n";
+                                                                                            mCRL2log(log::debug, "bisim_jgkw")<<B->debug_id(partitioner)<<":\n";
                                                                                             print_block(B, "Bottom state",
                                                                                                                 B->begin, B->marked_bottom_begin, partitioner);
                                                                                             print_block(B, "Marked bottom state",
@@ -2017,7 +2017,7 @@ class part_trans_t
     /// \brief destructor
     ~part_trans_t()
     {
-        mCRL2log(log::verbose, "bisim_dnj") << "The algorithm found "
+        mCRL2log(log::verbose, "bisim_jgkw") << "The algorithm found "
                      << number_of_new_bottom_states << " new bottom states.\n";
         #ifndef USE_POOL_ALLOCATOR
             // The destructor also deallocates the bunches, as they are not
@@ -3076,16 +3076,16 @@ class part_trans_t
                                                                                     template <class LTS_TYPE>
                                                                                     void print_trans(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
-                                                                                        if (!mCRL2logEnabled(log::debug, "bisim_dnj"))  return;
+                                                                                        if (!mCRL2logEnabled(log::debug, "bisim_jgkw"))  return;
                                                                                         // print all outgoing transitions ordered per successor and out-slice
                                                                                         const succ_entry* succ_iter(&succ.cbegin()[1]);
                                                                                         if (succ_iter >= &succ.back())
                                                                                         {
-                                                                                            mCRL2log(log::debug, "bisim_dnj") << "No transitions.\n";
+                                                                                            mCRL2log(log::debug, "bisim_jgkw") << "No transitions.\n";
                                                                                             return;
                                                                                         }
                                                                                         const state_info_entry* source(succ_iter->block_bunch->pred->source);
-                                                                                        mCRL2log(log::debug, "bisim_dnj") << source->debug_id(partitioner)
+                                                                                        mCRL2log(log::debug, "bisim_jgkw") << source->debug_id(partitioner)
                                                                                                                                                       << ":\n";
                                                                                         block_bunch_slice_iter_or_null_t current_out_bunch(
                                                                                                   const_cast<part_trans_t*>(this)->unstable_block_bunch.end());
@@ -3094,7 +3094,7 @@ class part_trans_t
                                                                                             if (source != succ_iter->block_bunch->pred->source)
                                                                                             {   assert(source < succ_iter->block_bunch->pred->source);
                                                                                                 source = succ_iter->block_bunch->pred->source;
-                                                                                                mCRL2log(log::debug, "bisim_dnj")
+                                                                                                mCRL2log(log::debug, "bisim_jgkw")
                                                                                                     << source->debug_id(partitioner) << ":\n";
                                                                                                 current_out_bunch =
                                                                                                    const_cast<part_trans_t*>(this)->unstable_block_bunch.end();
@@ -3103,7 +3103,7 @@ class part_trans_t
                                                                                             {   assert(!current_out_bunch.is_null());
                                                                                                 if (succ_iter->block_bunch->slice.is_null())
                                                                                                 {   assert(succ_iter == source->succ_inert.begin);
-                                                                                                    mCRL2log(log::debug, "bisim_dnj")<<"\tInert successors:\n";
+                                                                                                    mCRL2log(log::debug, "bisim_jgkw")<<"\tInert successors:\n";
                                                                                                     current_out_bunch = nullptr;
                                                                                                 }
                                                                                                 else
@@ -3111,12 +3111,12 @@ class part_trans_t
                                                                                                     assert(!current_out_bunch.is_null());
                                                                                                     assert(current_out_bunch == unstable_block_bunch.end() ||
                                                                                                                current_out_bunch->bunch != succ_iter->bunch());
-                                                                                                    mCRL2log(log::debug, "bisim_dnj") << "\tSuccessors in "
+                                                                                                    mCRL2log(log::debug, "bisim_jgkw") << "\tSuccessors in "
                                                                                                       <<succ_iter->bunch()->debug_id_short(partitioner)<<":\n";
                                                                                                     current_out_bunch = succ_iter->block_bunch->slice;
                                                                                                 }
                                                                                             }
-                                                                                            mCRL2log(log::debug, "bisim_dnj") << "\t\t"
+                                                                                            mCRL2log(log::debug, "bisim_jgkw") << "\t\t"
                                                                                                 << succ_iter->block_bunch->pred->debug_id(partitioner) << '\n';
                                                                                         }
                                                                                         while (++succ_iter < &succ.back());
@@ -3134,14 +3134,14 @@ class part_trans_t
                                                                                             assert(nullptr != action_block_iter->succ);
                                                                                             if (action_block_iter->succ->block_bunch->slice.is_null())
                                                                                             {   assert(action_block_iter == action_block_inert_begin);
-                                                                                                mCRL2log(log::debug, "bisim_dnj") <<"Inert transition slice [";
+                                                                                                mCRL2log(log::debug, "bisim_jgkw") <<"Inert transition slice [";
                                                                                                 action_block_slice_end = bunch_end = action_block_end;
                                                                                             }
                                                                                             else
                                                                                             {
                                                                                                 const bunch_t* const bunch(action_block_iter->succ->bunch());
                                                                                                 assert(nullptr != bunch);
-                                                                                                mCRL2log(log::debug, "bisim_dnj") << bunch->debug_id_short(
+                                                                                                mCRL2log(log::debug, "bisim_jgkw") << bunch->debug_id_short(
                                                                                                                    partitioner) << ":\n\taction_block-slice [";
                                                                                                 assert(bunch->begin == action_block_iter);
                                                                                                 bunch_end = bunch->end;
@@ -3154,7 +3154,7 @@ class part_trans_t
                                                                                             // for all action_block-slices in bunch
                                                                                             for (;;)
                                                                                             {
-                                                                                                mCRL2log(log::debug,"bisim_dnj") << (action_block_iter -
+                                                                                                mCRL2log(log::debug,"bisim_jgkw") << (action_block_iter -
                                                                                                                                      action_block_begin) << ","
                                                                                                     << (action_block_slice_end - action_block_begin) << "):\n";
                                                                                                 // for all transitions in the action_block-slice
@@ -3162,7 +3162,7 @@ class part_trans_t
                                                                                                 do
                                                                                                 {
                                                                                                     assert(nullptr != action_block_iter->succ);
-                                                                                                    mCRL2log(log::debug, "bisim_dnj") << "\t\t"
+                                                                                                    mCRL2log(log::debug, "bisim_jgkw") << "\t\t"
                                                                                                             << action_block_iter->succ->block_bunch->
                                                                                                                            pred->debug_id(partitioner) << '\n';
                                                                                                 }
@@ -3179,7 +3179,7 @@ class part_trans_t
                                                                                                 assert(nullptr != action_block_iter->begin_or_before_end);
                                                                                                 action_block_slice_end =
                                                                                                                   action_block_iter->begin_or_before_end + 1;
-                                                                                                mCRL2log(log::debug, "bisim_dnj") << "\taction_block-slice [";
+                                                                                                mCRL2log(log::debug, "bisim_jgkw") << "\taction_block-slice [";
                                                                                             }
                                                                                             // go to next bunch
                                                                                             assert(action_block_iter == bunch_end);
@@ -3498,7 +3498,7 @@ class bisim_partitioner_dnj
     /// same slice.)
     void create_initial_partition()
     {
-        mCRL2log(log::verbose, "bisim_dnj") << "Strictly O(m log n) "
+        mCRL2log(log::verbose, "bisim_gjkw") << "Strictly O(m log n) "
              << (branching ? (preserve_divergence
                                            ? "divergence-preserving branching "
                                            : "branching ")
@@ -4115,7 +4115,7 @@ class bisim_partitioner_dnj
             // |ab_slice_T_a_B| <= 1/2 |bunch_T|
             bisim_dnj::bunch_t* const bunch_T(part_tr.get_some_nontrivial());
             if (nullptr == bunch_T)  break;
-            /* Line 1.7: Pi_t := Pi_t \ { bunch_T }                          */ ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_dnj") << "Refining "
+            /* Line 1.7: Pi_t := Pi_t \ { bunch_T }                          */ ONLY_IF_DEBUG( mCRL2log(log::debug, "bisim_jgkw") << "Refining "
             /*                  union { bunch_T_a_B, bunch_T \ bunch_T_a_B } */                                          << bunch_T->debug_id(*this) << '\n'; )
             #ifdef USE_POOL_ALLOCATOR
                 bisim_dnj::bunch_t* const bunch_T_a_B(part_tr.storage.template
@@ -4127,7 +4127,7 @@ class bisim_partitioner_dnj
                          bunch_T->split_off_small_action_block_slice(part_tr));
             #endif
                                                                                 #ifndef NDEBUG
-            /*-------------- find predecessors of bunch_T_a_B ---------------*/     mCRL2log(log::debug, "bisim_dnj") << "Splitting off "
+            /*-------------- find predecessors of bunch_T_a_B ---------------*/     mCRL2log(log::debug, "bisim_jgkw") << "Splitting off "
                                                                                                                        << bunch_T_a_B->debug_id(*this) << '\n';
             /* Line 1.8: for all B in splittableBlocks(T--a-->B') do         */     unsigned const max_splitter_counter(bunch_T_a_B->max_work_counter(*this));
                 // we actually run through the transitions in T--a-->B'
@@ -4411,7 +4411,7 @@ class bisim_partitioner_dnj
                                                                               )
     {                                                                           assert(refine_block == splitter->source_block());
                                                                                 #ifndef NDEBUG
-                                                                                    mCRL2log(log::debug, "bisim_dnj") << "refine("
+                                                                                    mCRL2log(log::debug, "bisim_jgkw") << "refine("
                                                                                         << refine_block->debug_id(*this)
                                                                                         << ',' << splitter->debug_id(*this)
                                                                                         << (bisim_dnj::extend_from_marked_states_for_init_and_postprocess==mode
