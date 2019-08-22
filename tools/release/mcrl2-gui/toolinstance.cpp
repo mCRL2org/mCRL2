@@ -12,6 +12,7 @@
 
 #include "filepicker.h"
 
+#include <cassert>
 #include <limits>
 #include <QCheckBox>
 #include <QRadioButton>
@@ -36,11 +37,34 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 {
   m_ui.setupUi(this);
 
+  if (m_info.guiTool)
+  {
+    // GUI-based tools run half-detached in the sense they are not terminated
+    // when the tab is closed, and multiple instance may be created from the
+    // same tab.
+    // m_process will be set to the last spawned process
+    m_process = m_mprocess = new QMultiProcess();
+
+    connect(m_mprocess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
+    connect(m_mprocess, &QProcess::readyReadStandardOutput, this,
+      [this]() { onOutputLog(m_mprocess->readAllStandardOutput()); });
+    connect(m_process, &QProcess::readyReadStandardError, this,
+      [this]() { onErrorLog(m_mprocess->readAllStandardError()); });
+  }
+  else
+  {
+    m_process = new QProcess();
+    m_mprocess = nullptr;
+
+    connect(m_process, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
+    connect(m_process, &QProcess::readyReadStandardOutput, this,
+      [this]() { onOutputLog(m_process->readAllStandardOutput()); });
+    connect(m_process, &QProcess::readyReadStandardError, this,
+      [this]() { onErrorLog(m_process->readAllStandardError()); });
+  }
+
   connect(this, SIGNAL(colorChanged(QColor)), this, SLOT(onColorChanged(QColor)));
 
-  connect(&m_process, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
-  connect(&m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(onStandardOutput()));
-  connect(&m_process, SIGNAL(readyReadStandardError()), this, SLOT(onStandardError()));
   connect(m_ui.btnRun, SIGNAL(clicked()), this, SLOT(onRun()));
   connect(m_ui.btnAbort, SIGNAL(clicked()), this, SLOT(onAbort()));
   connect(m_ui.btnSave, SIGNAL(clicked()), this, SLOT(onSave()));
@@ -48,7 +72,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
   QFileInfo fileInfo(filename);
 
-  m_process.setWorkingDirectory(fileInfo.absoluteDir().absolutePath());
+  m_process->setWorkingDirectory(fileInfo.absoluteDir().absolutePath());
   m_ui.lblDirectoryValue->setText(fileInfo.absoluteDir().absolutePath());
   m_ui.lblFileValue->setText(fileInfo.fileName());
 
@@ -85,6 +109,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     m_ui.pckFileIn->setVisible(false);
   }
 
+  // Gui-based tools have a 'Open' button instead of a 'Run'.
   if (m_info.guiTool)
   {
     m_ui.btnRun->setText("Open");
@@ -244,7 +269,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
               QLabel *lblVal = new QLabel(val.description, this);
               lblVal->setWordWrap(true);
- 
+
               lytValues->addRow(rbVal, lblVal);
               lytValues->setLabelAlignment(Qt::AlignLeft);
             }
@@ -267,6 +292,12 @@ ToolInstance::~ToolInstance()
   {
     delete *option;
   }
+  if (m_info.guiTool)
+    delete m_mprocess;
+  else
+    delete m_process;
+  m_process = nullptr;
+  m_mprocess = nullptr;
 }
 
 QString ToolInstance::executable()
@@ -316,7 +347,10 @@ void ToolInstance::onStateChange(QProcess::ProcessState state)
   switch (state)
   {
     case QProcess::NotRunning:
-      if (m_process.exitCode() == 0 && m_process.error() != QProcess::FailedToStart && m_process.error() != QProcess::Crashed && m_process.error() != QProcess::Timedout)
+      if (m_process->exitCode() == 0
+        && m_process->error() != QProcess::FailedToStart
+        && m_process->error() != QProcess::Crashed
+        && m_process->error() != QProcess::Timedout)
       {
         m_ui.lblState->setText("[Ready]");
         emit(titleChanged(fileInfo.fileName().append(" [Ready]")));
@@ -349,13 +383,12 @@ void ToolInstance::onStateChange(QProcess::ProcessState state)
   }
 }
 
-void ToolInstance::onStandardOutput()
+void ToolInstance::onOutputLog(const QByteArray &outText)
 {
   QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
   bool end = scrollbar->value() == scrollbar->maximum();
 
   mcrl2::gui::qt::setTextEditTextColor(m_ui.edtOutput, Qt::black, Qt::white);
-  QByteArray outText = m_process.readAllStandardOutput();
   m_ui.edtOutput->append(QString(outText).replace("\n\n", "\n"));
 
   if (end)
@@ -364,13 +397,12 @@ void ToolInstance::onStandardOutput()
   }
 }
 
-void ToolInstance::onStandardError()
+void ToolInstance::onErrorLog(const QByteArray &outText)
 {
   QScrollBar* scrollbar = m_ui.edtOutput->verticalScrollBar();
   bool end = scrollbar->value() == scrollbar->maximum();
 
   mcrl2::gui::qt::setTextEditTextColor(m_ui.edtOutput, Qt::black, Qt::white);
-  QByteArray outText = m_process.readAllStandardError();
   m_ui.edtOutput->append(QString(outText).replace("\n\n", "\n"));
 
   if (end)
@@ -397,31 +429,28 @@ void ToolInstance::onRun()
     scrollbar->setValue(oldValue);
   }
 
-  // Start gui-based tools detached from the main executable
-  bool success = false;
   if (m_info.guiTool)
   {
-    success = m_process.startDetached(executable(), arguments(),
-      m_process.workingDirectory());
+    // For GUI-based tools we spawn a new process
+    m_mprocess->setProgram(executable());
+    m_mprocess->setArguments(arguments());
+    m_process = m_mprocess->start(QIODevice::ReadOnly);
   }
   else
   {
-    m_process.start(executable(), arguments(), QIODevice::ReadOnly);
-    success = m_process.waitForStarted(1000);
+    m_process->setProgram(executable());
+    m_process->setArguments(arguments());
+    m_process->start(QIODevice::ReadOnly);
   }
 
-  if (success)
+  if (m_process->waitForStarted(1000))
   {
     mCRL2log(mcrl2::log::info) << "Started " << executable().toStdString() << std::endl;
-    if (!m_info.guiTool)
-    {
-      // Switch to logging tab for non-gui tools only, since gui-based tools do not log.
-      m_ui.tabWidget->setCurrentIndex(1);
-    }
+    m_ui.tabWidget->setCurrentIndex(1);
   }
   else
   {
-    mCRL2log(mcrl2::log::error) << m_process.errorString().toStdString()
+    mCRL2log(mcrl2::log::error) << m_process->errorString().toStdString()
       << " (" << executable().toStdString() << ")" << std::endl;
     onStateChange(QProcess::NotRunning);
   }
@@ -429,13 +458,15 @@ void ToolInstance::onRun()
 
 void ToolInstance::onAbort()
 {
+  assert(!m_info.guiTool);
   mCRL2log(mcrl2::log::info) << "Attempting to terminate " << executable().toStdString() << std::endl;
-  m_process.terminate();
+  m_process->terminate();
 
-  if (!m_process.waitForFinished(10000) && m_process.state() == QProcess::Running)
+  if (!m_process->waitForFinished(10000)
+    && m_process->state() == QProcess::Running)
   {
     mCRL2log(mcrl2::log::warning) << "Killing " << executable().toStdString() << std::endl;
-    m_process.kill();
+    m_process->kill();
   }
 }
 
@@ -459,13 +490,3 @@ void ToolInstance::onColorChanged(QColor color)
 {
   m_ui.lblState->setStyleSheet(QString("background: %1;").arg(color.name()));
 }
-
-
-
-
-
-
-
-
-
-

@@ -21,6 +21,7 @@ add_mcrl2_tool(mcrl2-gui
     copydialog.cpp
     copythread.cpp
     optionvalue.cpp
+    multiprocess.cpp
   DEPENDS
     mcrl2_utilities
     mcrl2_gui
