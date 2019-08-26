@@ -1,4 +1,42 @@
 ===============================================================================
+Changes between toolset releases 201808.0 and 201908.0:
+===============================================================================
+
+The 201908.0 release mainly contains improvements under the hood. First, the
+ATerm library, which is the main internal data storage engine of mCRL2, has been
+re-implemented completely. The new implementation should lend itself better to
+future experiments, such as multi-threading.
+
+The mCRL2ide, which was introduced in the previous release, has been developed
+further. A major new feature is the possibility to compare processes under some
+equivalence relation. This release also brings many small changes, improving
+the overall ease of use.
+
+59 issues were closed since the last release.
+List of other changes:
+- LTSgraph has been upgraded to use OpenGL 3.3. This should improve stability of
+  the tool. Furthermore, 3D mode (which can be actived from the 'View' menu) now
+  looks more realistic. The option to export the graph to a vector image was
+  broken and has been removed. This feature may return in the future.
+- pbessolve, the new tool for solving PBESs and generating counter-examples,
+  has undergone significant changes to its higher optimisation levels
+  (available via the option --strategy). The higher levels should now be more
+  robust.
+- The implementation of the Jansen/Groote/Keiren/Wijs branching bisimulation
+  algorithm that operates directly on LTSs is now standard. The old algorithm
+  that includes a translation to Kripke structures is still available in
+  ltsconvert/ltscompare with the option --equivalence=bisim-gjkw.
+- The MAINTAINER build type has been removed from CMake. Builds for debugging
+  should now be build with the DEBUG build type.
+- Writing large ATerm files (basically all binary files that the toolset
+  produces) is now faster and more memory efficient. We plan to further improve
+  this in the coming year.
+- The quantifiers inside rewriter (available via 'pbesrewr -pquantifier-inside')
+  has been slightly generalised.
+- The algorithm and implementation of failure refinement (ltscompare -pfailures)
+  have been greatly improved. This improves scalability and fixes a bug.
+
+===============================================================================
 Changes between toolset releases 201707.0 and 201808.0:
 ===============================================================================
 
