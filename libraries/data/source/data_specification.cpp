@@ -314,17 +314,17 @@ static sort_expression find_normal_form(
 // it forms a confluent terminating rewriting system using which
 // sorts can be normalised.
 // This algorithm is described in the document: algorithm-for-sort-equivalence.tex in
-// the developers library of the mCRL2 toolset. 
+// the developers library of the mCRL2 toolset.
 void sort_specification::reconstruct_m_normalised_aliases() const
 {
   // First reset the normalised aliases and the mappings and constructors that have been
   // inherited to basic sort aliases during a previous round of sort normalisation.
   m_normalised_aliases.clear();
 
-  // This is the first step of the algorithm. 
+  // This is the first step of the algorithm.
   // Check for loops in the aliases. The type checker should already have done this,
   // but we check it again here. If there is a loop m_normalised_aliases will not be
-  // built. 
+  // built.
     for(const alias& a: m_user_defined_aliases)
     {
       std::set < sort_expression > sorts_already_seen; // Empty set.
@@ -334,12 +334,12 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     }
     catch (mcrl2::runtime_error &)
     {
-      mCRL2log(log::debug) << "Encountered an alias loop in the alias for " << a.name() <<". The normalised aliases are not constructed\n"; 
+      mCRL2log(log::debug) << "Encountered an alias loop in the alias for " << a.name() <<". The normalised aliases are not constructed\n";
       return;
     }
   }
 
-  // This is the second step of the algorithm. 
+  // This is the second step of the algorithm.
   // Copy m_normalised_aliases. All aliases are stored from left to right,
   // except structured sorts, which are stored from right to left. The reason is
   // that structured sorts can be recursive, and therefore, they cannot be
@@ -390,7 +390,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
           // Check whether the inserted sort rewrite rule is already in sort_aliases_to_be_investigated.
           if (std::find_if(sort_aliases_to_be_investigated.lower_bound(normalised_lhs),
                         sort_aliases_to_be_investigated.upper_bound(normalised_lhs),
-                        [&rhs](const std::pair<sort_expression,sort_expression>& x){ return x.second==rhs; }) 
+                        [&rhs](const std::pair<sort_expression,sort_expression>& x){ return x.second==rhs; })
                    == sort_aliases_to_be_investigated.upper_bound(normalised_lhs)) // Not found.
           {
             sort_aliases_to_be_investigated.insert(
@@ -417,7 +417,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
             // Check whether the inserted sort rewrite rule is already in sort_aliases_to_be_investigated.
             if (std::find_if(sort_aliases_to_be_investigated.lower_bound(normalised_lhs),
                           sort_aliases_to_be_investigated.upper_bound(normalised_lhs),
-                          [&rhs](const std::pair<sort_expression,sort_expression>& x){ return x.second==rhs; }) 
+                          [&rhs](const std::pair<sort_expression,sort_expression>& x){ return x.second==rhs; })
                      == sort_aliases_to_be_investigated.upper_bound(normalised_lhs)) // Not found.
             {
               sort_aliases_to_be_investigated.insert(
@@ -432,7 +432,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     const sort_expression normalised_rhs = find_normal_form(rhs,resulting_normalized_sort_aliases);
     if (normalised_lhs!=normalised_rhs)
     {
-      resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression >(normalised_lhs,normalised_rhs)); 
+      resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression >(normalised_lhs,normalised_rhs));
     }
   }
   // Copy resulting_normalized_sort_aliases into m_normalised_aliases, i.e. from multimap to map.
@@ -511,10 +511,10 @@ void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
   }
 
   // Store the mappings.
-  for(const function_symbol& f: term_mappings) 
+  for(const function_symbol& f: term_mappings)
   {
     add_mapping(f);
-  } 
+  }
 
   // Store the equations.
   for(const data_equation& e: term_equations)
@@ -524,4 +524,3 @@ void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
 }
 } // namespace data
 } // namespace mcrl2
-

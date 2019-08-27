@@ -81,8 +81,8 @@ class used_data_equation_selector
           add_symbol(sort_fset::insert(s.element_sort()));
         }
 
-        // Always add the if:Bool#S#S->S for every sort as enumerating elements over function sorts S1 #... # S # ... # Sn -> S 
-        // rewriting over functions of this shape. 
+        // Always add the if:Bool#S#S->S for every sort as enumerating elements over function sorts S1 #... # S # ... # Sn -> S
+        // rewriting over functions of this shape.
         add_symbol(if_(sort));
       }
 
@@ -106,7 +106,7 @@ class used_data_equation_selector
         std::size_t equation_count=0;
         for (const data_equation& e: specification.equations())
         {
-          if (!equations_of_which_symbols_have_been_added[equation_count] && 
+          if (!equations_of_which_symbols_have_been_added[equation_count] &&
               std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[e].begin(), symbols_for_equation[e].end()))
           {
             add_function_symbols(e.rhs());
@@ -116,7 +116,7 @@ class used_data_equation_selector
           }
           equation_count++;
         }
-      } 
+      }
     }
 
   public:
@@ -195,4 +195,3 @@ class used_data_equation_selector
 } // namespace mcrl2
 
 #endif // MCRL2_DATA_SELECTION_H
-

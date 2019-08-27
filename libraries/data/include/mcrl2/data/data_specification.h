@@ -158,8 +158,8 @@ class data_specification: public sort_specification
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
     /// \details The normalised equations are a set as the number of equations
-    ///          can become large, in which case removing duplicates while inserting equations can be 
-    ///          very time consuming. 
+    ///          can become large, in which case removing duplicates while inserting equations can be
+    ///          very time consuming.
     mutable std::set<data_equation> m_normalised_equations;
 
     void data_is_not_necessarily_normalised_anymore() const
@@ -514,7 +514,6 @@ class data_specification: public sort_specification
 
     ///\brief Adds the system defined sorts to the sets with constructors, mappings, and equations for
     //        a given sort. If the boolean skip_equations is true, no equations are added.
-
     void find_associated_system_defined_data_types_for_a_sort(
                        const sort_expression& sort,
                        std::set < function_symbol >& constructors,
