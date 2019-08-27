@@ -13,26 +13,11 @@
 #ifndef MCRL2_DATA_SORT_SPECIFICATION_H
 #define MCRL2_DATA_SORT_SPECIFICATION_H
 
-#include "mcrl2/utilities/logger.h"
-
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/sort_expression.h"
-
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/bag.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/set.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/structured_sort.h"
-
-// Predefined datatypes
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/standard.h"
-
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -308,11 +293,7 @@ class sort_specification
       }
     }
 
-    void add_predefined_basic_sorts()
-    {
-        add_system_defined_sort(sort_bool::bool_());
-        add_system_defined_sort(sort_pos::pos());
-    }
+    void add_predefined_basic_sorts();
 
     template <class CONTAINER>
     void import_system_defined_sorts(const CONTAINER& sorts)
@@ -323,98 +304,15 @@ class sort_specification
       }
     }
 
-    ///\brief Adds the system defined sorts in a sequence.
+    /// \brief Adds the system defined sorts in a sequence.
     ///       The second argument is used to check which sorts are added, to prevent
     ///       useless repetitions of additions of sorts.
-    /// The function normalise_sorts imports for the given sort_expression sort all sorts, constructors,
+    /// \detail The function normalise_sorts imports for the given sort_expression sort all sorts, constructors,
     /// mappings and equations that belong to this sort to the `normalised' sets in this
     /// data type. E.g. for the sort Nat of natural numbers, it is required that Pos
     /// (positive numbers) are defined.
-    void import_system_defined_sort(const sort_expression& sort)
-    {
+    void import_system_defined_sort(const sort_expression& sort);
 
-      if (is_untyped_sort(sort) || is_untyped_possible_sorts(sort))
-      {
-        mCRL2log(mcrl2::log::debug) << "Erroneous attempt to insert an untyped sort into the a sort specification\n";
-        return;
-      }
-      // Add an element, and stop if it was already added.
-      if (!m_sorts_in_context.insert(sort).second)
-      {
-        return;
-      }
-
-      sorts_are_not_necessarily_normalised_anymore();
-      // add the sorts on which this sorts depends.
-      if (sort == sort_real::real_())
-      {
-        // Int is required as the rewrite rules of Real rely on it.
-        import_system_defined_sort(sort_int::int_());
-      }
-      else if (sort == sort_int::int_())
-      {
-        // See above, Int requires Nat.
-        import_system_defined_sort(sort_nat::nat());
-      }
-      else if (sort == sort_nat::nat())
-      {
-        // Nat requires NatPair.
-        import_system_defined_sort(sort_nat::natpair());
-      }
-      else if (is_function_sort(sort))
-      {
-        const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
-        import_system_defined_sorts(fsort.domain());
-        import_system_defined_sort(fsort.codomain());
-      }
-      else if (is_container_sort(sort))
-      {
-        const sort_expression element_sort(container_sort(sort).element_sort());
-        // Import the element sort (which may be a complex sort also).
-        import_system_defined_sort(element_sort);
-        if (sort_list::is_list(sort))
-        {
-          import_system_defined_sort(sort_nat::nat()); // Required for lists.
-        }
-        else if (sort_set::is_set(sort))
-        {
-          import_system_defined_sort(sort_fset::fset(element_sort));
-        }
-        else if (sort_fset::is_fset(sort))
-        {
-          // Import the functions from element_sort->Bool.
-          sort_expression_list element_sorts;
-          element_sorts.push_front(element_sort);
-          import_system_defined_sort(function_sort(element_sorts,sort_bool::bool_()));
-        }
-        else if (sort_bag::is_bag(sort))
-        {
-          // Add the sorts Nat and set_(element_sort) to the specification.
-          import_system_defined_sort(sort_nat::nat()); // Required for bags.
-          import_system_defined_sort(sort_set::set_(element_sort));
-          import_system_defined_sort(sort_fbag::fbag(element_sort));
-        }
-        else if (sort_fbag::is_fbag(sort))
-        {
-          import_system_defined_sort(sort_nat::nat()); // Required for bags.
-
-          // Add the function sort element_sort->Nat to the specification
-          sort_expression_list element_sorts ;
-          element_sorts.push_front(element_sort);
-          import_system_defined_sort(function_sort(element_sorts,sort_nat::nat()));
-        }
-      }
-      else if (is_structured_sort(sort))
-      {
-        structured_sort s_sort(sort);
-        function_symbol_vector f(s_sort.constructor_functions(sort));
-        for(const function_symbol& f: s_sort.constructor_functions(sort))
-        {
-          import_system_defined_sort(f.sort());
-        }
-      }
-    }
-    
     // The function below recalculates m_normalised_aliases, such that
     // it forms a confluent terminating rewriting system using which
     // sorts can be normalised.

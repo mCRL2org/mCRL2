@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 #define MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 
+#include "mcrl2/data/list.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"

@@ -17,6 +17,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/fset.h"
 #include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2

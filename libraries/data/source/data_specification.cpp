@@ -14,6 +14,17 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
+// Predefined datatypes
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/standard.h"
+
 namespace mcrl2
 {
 
@@ -310,6 +321,97 @@ static sort_expression find_normal_form(
   return result_sort;
 }
 
+void sort_specification::add_predefined_basic_sorts()
+{
+    add_system_defined_sort(sort_bool::bool_());
+    add_system_defined_sort(sort_pos::pos());
+}
+
+void sort_specification::import_system_defined_sort(const sort_expression& sort)
+{
+
+  if (is_untyped_sort(sort) || is_untyped_possible_sorts(sort))
+  {
+    mCRL2log(mcrl2::log::debug) << "Erroneous attempt to insert an untyped sort into the a sort specification\n";
+    return;
+  }
+  // Add an element, and stop if it was already added.
+  if (!m_sorts_in_context.insert(sort).second)
+  {
+    return;
+  }
+
+  sorts_are_not_necessarily_normalised_anymore();
+  // add the sorts on which this sorts depends.
+  if (sort == sort_real::real_())
+  {
+    // Int is required as the rewrite rules of Real rely on it.
+    import_system_defined_sort(sort_int::int_());
+  }
+  else if (sort == sort_int::int_())
+  {
+    // See above, Int requires Nat.
+    import_system_defined_sort(sort_nat::nat());
+  }
+  else if (sort == sort_nat::nat())
+  {
+    // Nat requires NatPair.
+    import_system_defined_sort(sort_nat::natpair());
+  }
+  else if (is_function_sort(sort))
+  {
+    const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
+    import_system_defined_sorts(fsort.domain());
+    import_system_defined_sort(fsort.codomain());
+  }
+  else if (is_container_sort(sort))
+  {
+    const sort_expression element_sort(container_sort(sort).element_sort());
+    // Import the element sort (which may be a complex sort also).
+    import_system_defined_sort(element_sort);
+    if (sort_list::is_list(sort))
+    {
+      import_system_defined_sort(sort_nat::nat()); // Required for lists.
+    }
+    else if (sort_set::is_set(sort))
+    {
+      import_system_defined_sort(sort_fset::fset(element_sort));
+    }
+    else if (sort_fset::is_fset(sort))
+    {
+      // Import the functions from element_sort->Bool.
+      sort_expression_list element_sorts;
+      element_sorts.push_front(element_sort);
+      import_system_defined_sort(function_sort(element_sorts,sort_bool::bool_()));
+    }
+    else if (sort_bag::is_bag(sort))
+    {
+      // Add the sorts Nat and set_(element_sort) to the specification.
+      import_system_defined_sort(sort_nat::nat()); // Required for bags.
+      import_system_defined_sort(sort_set::set_(element_sort));
+      import_system_defined_sort(sort_fbag::fbag(element_sort));
+    }
+    else if (sort_fbag::is_fbag(sort))
+    {
+      import_system_defined_sort(sort_nat::nat()); // Required for bags.
+
+      // Add the function sort element_sort->Nat to the specification
+      sort_expression_list element_sorts ;
+      element_sorts.push_front(element_sort);
+      import_system_defined_sort(function_sort(element_sorts,sort_nat::nat()));
+    }
+  }
+  else if (is_structured_sort(sort))
+  {
+    structured_sort s_sort(sort);
+    function_symbol_vector f(s_sort.constructor_functions(sort));
+    for(const function_symbol& f: s_sort.constructor_functions(sort))
+    {
+      import_system_defined_sort(f.sort());
+    }
+  }
+}
+
 // The function below recalculates m_normalised_aliases, such that
 // it forms a confluent terminating rewriting system using which
 // sorts can be normalised.
@@ -446,6 +548,193 @@ void sort_specification::reconstruct_m_normalised_aliases() const
 
     assert(p.first!=normalised_rhs);
   }
+}
+
+///\brief Adds the system defined sorts to the sets with constructors, mappings, and equations for
+//        a given sort. If the boolean skip_equations is true, no equations are added.
+void data_specification::find_associated_system_defined_data_types_for_a_sort(
+                   const sort_expression& sort,
+                   std::set < function_symbol >& constructors,
+                   std::set < function_symbol >& mappings,
+                   std::set < data_equation >& equations,
+                   const bool skip_equations) const
+{
+  // add sorts, constructors, mappings and equations
+  if (sort == sort_bool::bool_())
+  {
+    function_symbol_vector f(sort_bool::bool_generate_constructors_code());
+    constructors.insert(f.begin(), f.end());
+    f = sort_bool::bool_generate_functions_code();
+    mappings.insert(f.begin(), f.end());
+    if (!skip_equations)
+    {
+      data_equation_vector e(sort_bool::bool_generate_equations_code());
+      equations.insert(e.begin(),e.end());
+    }
+  }
+  else if (sort == sort_real::real_())
+  {
+    function_symbol_vector f(sort_real::real_generate_constructors_code());
+    constructors.insert(f.begin(),f.end());
+    f = sort_real::real_generate_functions_code();
+    mappings.insert(f.begin(),f.end());
+    if (!skip_equations)
+    {
+      data_equation_vector e(sort_real::real_generate_equations_code());
+      equations.insert(e.begin(),e.end());
+    }
+  }
+  else if (sort == sort_int::int_())
+  {
+    function_symbol_vector f(sort_int::int_generate_constructors_code());
+    constructors.insert(f.begin(),f.end());
+    f = sort_int::int_generate_functions_code();
+    mappings.insert(f.begin(),f.end());
+    if (!skip_equations)
+    {
+      data_equation_vector e(sort_int::int_generate_equations_code());
+      equations.insert(e.begin(),e.end());
+    }
+  }
+  else if (sort == sort_nat::nat())
+  {
+    function_symbol_vector f(sort_nat::nat_generate_constructors_code());
+    constructors.insert(f.begin(),f.end());
+    f = sort_nat::nat_generate_functions_code();
+    mappings.insert(f.begin(),f.end());
+    if (!skip_equations)
+    {
+      data_equation_vector e(sort_nat::nat_generate_equations_code());
+      equations.insert(e.begin(),e.end());
+    }
+  }
+  else if (sort == sort_pos::pos())
+  {
+    function_symbol_vector f(sort_pos::pos_generate_constructors_code());
+    constructors.insert(f.begin(),f.end());
+    f = sort_pos::pos_generate_functions_code();
+    mappings.insert(f.begin(),f.end());
+    if (!skip_equations)
+    {
+      data_equation_vector e(sort_pos::pos_generate_equations_code());
+      equations.insert(e.begin(),e.end());
+    }
+  }
+  else if (is_function_sort(sort))
+  {
+    const sort_expression& t=function_sort(sort).codomain();
+    const sort_expression_list& l=function_sort(sort).domain();
+    if (l.size()==1)
+    {
+      const function_symbol_vector f = function_update_generate_functions_code(l.front(),t);
+      mappings.insert(f.begin(),f.end());
+
+      if (!skip_equations)
+      {
+        data_equation_vector e(function_update_generate_equations_code(l.front(),t));
+        equations.insert(e.begin(),e.end());
+      }
+    }
+  }
+  else if (is_container_sort(sort))
+  {
+    sort_expression element_sort(container_sort(sort).element_sort());
+    if (sort_list::is_list(sort))
+    {
+      function_symbol_vector f(sort_list::list_generate_constructors_code(element_sort));
+      constructors.insert(f.begin(),f.end());
+      f = sort_list::list_generate_functions_code(element_sort);
+      mappings.insert(f.begin(),f.end());
+      if (!skip_equations)
+      {
+        data_equation_vector e(sort_list::list_generate_equations_code(element_sort));
+        equations.insert(e.begin(),e.end());
+      }
+    }
+    else if (sort_set::is_set(sort))
+    {
+      sort_expression_list element_sorts;
+      element_sorts.push_front(element_sort);
+      function_symbol_vector f(sort_set::set_generate_constructors_code(element_sort));
+      constructors.insert(f.begin(),f.end());
+      f = sort_set::set_generate_functions_code(element_sort);
+      mappings.insert(f.begin(),f.end());
+      if (!skip_equations)
+      {
+        data_equation_vector e(sort_set::set_generate_equations_code(element_sort));
+        equations.insert(e.begin(),e.end());
+      }
+    }
+    else if (sort_fset::is_fset(sort))
+    {
+      function_symbol_vector f = sort_fset::fset_generate_constructors_code(element_sort);
+      constructors.insert(f.begin(),f.end());
+      f = sort_fset::fset_generate_functions_code(element_sort);
+      mappings.insert(f.begin(),f.end());
+      if (!skip_equations)
+      {
+        data_equation_vector e = sort_fset::fset_generate_equations_code(element_sort);
+        equations.insert(e.begin(),e.end());
+      }
+    }
+    else if (sort_bag::is_bag(sort))
+    {
+      sort_expression_list element_sorts;
+      element_sorts.push_front(element_sort);
+      function_symbol_vector f(sort_bag::bag_generate_constructors_code(element_sort));
+      constructors.insert(f.begin(),f.end());
+      f = sort_bag::bag_generate_functions_code(element_sort);
+      mappings.insert(f.begin(),f.end());
+      if (!skip_equations)
+      {
+        data_equation_vector e(sort_bag::bag_generate_equations_code(element_sort));
+        equations.insert(e.begin(),e.end());
+      }
+    }
+    else if (sort_fbag::is_fbag(sort))
+    {
+      function_symbol_vector f = sort_fbag::fbag_generate_constructors_code(element_sort);
+      constructors.insert(f.begin(),f.end());
+      f = sort_fbag::fbag_generate_functions_code(element_sort);
+      mappings.insert(f.begin(),f.end());
+      if (!skip_equations)
+      {
+        data_equation_vector e = sort_fbag::fbag_generate_equations_code(element_sort);
+        equations.insert(e.begin(),e.end());
+      }
+    }
+  }
+  else if (is_structured_sort(sort))
+  {
+    insert_mappings_constructors_for_structured_sort(
+                    atermpp::down_cast<structured_sort>(sort),
+                    constructors, mappings, equations, skip_equations);
+  }
+  add_standard_mappings_and_equations(sort, mappings, equations, skip_equations);
+}
+
+void data_specification::get_system_defined_sorts_constructors_and_mappings(
+            std::set < sort_expression >& sorts,
+            std::set < function_symbol >& constructors,
+            std::set <function_symbol >& mappings) const
+{
+  sorts.insert(sort_bool::bool_());
+  sorts.insert(sort_pos::pos());
+  sorts.insert(sort_nat::nat());
+  sorts.insert(sort_int::int_());
+  sorts.insert(sort_real::real_());
+  sorts.insert(sort_list::list(sort_pos::pos()));
+  sorts.insert(sort_fset::fset(sort_pos::pos()));
+  sorts.insert(sort_set::set_(sort_pos::pos()));
+  sorts.insert(sort_fbag::fbag(sort_pos::pos()));
+  sorts.insert(sort_bag::bag(sort_pos::pos()));
+
+  std::set < data_equation > dummy_equations;
+  for(const sort_expression& s: sorts)
+  {
+    find_associated_system_defined_data_types_for_a_sort(s, constructors, mappings, dummy_equations, true);
+  }
+  assert(dummy_equations.size()==0);
 }
 
 bool data_specification::is_well_typed() const
