@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_IDENTITY_H
 #define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_IDENTITY_H
 
-#include "mcrl2/data/enumerator.h"
-
 #include "simplifier.h"
 
 namespace mcrl2

@@ -12,9 +12,6 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_H
 #define MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_H
 
-#include "mcrl2/data/linear_inequalities.h"
-#include "mcrl2/data/merge_data_specifications.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
 #include "simplifier_mode.h"
