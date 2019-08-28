@@ -11,6 +11,8 @@
 #include <queue>
 #include <set>
 
+#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/algorithms.h"

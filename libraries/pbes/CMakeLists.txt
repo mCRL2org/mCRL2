@@ -13,6 +13,7 @@ add_mcrl2_library(pbes
   SOURCES
     algorithms.cpp
     pbes.cpp
+    io.cpp
     tools.cpp
     tools2.cpp
     pbes_explorer.cpp
