@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <string>
+#include <boost/algorithm/string.hpp>
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
