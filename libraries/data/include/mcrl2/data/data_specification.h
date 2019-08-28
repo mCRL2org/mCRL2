@@ -17,20 +17,9 @@
 #include <vector>
 
 #include "mcrl2/atermpp/aterm_appl.h"
-
-#include "mcrl2/core/load_aterm.h"
-
-// utilities
 #include "mcrl2/data/detail/data_functional.h"
-
-// sort_specification
 #include "mcrl2/data/sort_specification.h"
-
-// data expressions
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/function_update.h"
-#include "mcrl2/data/detail/io.h"
-
 
 namespace mcrl2
 {
@@ -663,17 +652,7 @@ class data_specification: public sort_specification
     /// \param binary An boolean that if true means the stream contains a term in binary encoding.
     //                Otherwise the encoding is textual.
     /// \param source The source from which the stream originates. Used for error messages.
-    void load(std::istream& stream, bool binary = true, const std::string& source = "")
-    {
-      atermpp::aterm t = core::load_aterm(stream, binary, "data specification", source);
-      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-      t = data::detail::add_index(t, cache);
-      if (!t.type_is_appl() || !is_data_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
-      {
-        throw mcrl2::runtime_error("Input stream does not contain a data specification");
-      }
-      build_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
-    }
+    void load(std::istream& stream, bool binary = true, const std::string& source = "");
 
     /// \brief Writes the data specification to a stream.
     /// \param stream The output stream.
@@ -681,19 +660,8 @@ class data_specification: public sort_specification
     /// If binary is true the data specification is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    void save(std::ostream& stream, bool binary=true) const
-    {
-      atermpp::aterm t = detail::data_specification_to_aterm(*this);
-      t = data::detail::remove_index(t);
-      if (binary)
-      {
-        atermpp::write_term_to_binary_stream(t, stream);
-      }
-      else
-      {
-        atermpp::write_term_to_text_stream(t, stream);
-      }
-    }
+    void save(std::ostream& stream, bool binary=true) const;
+
 }; // class data_specification
 
 //--- start generated class data_specification ---//

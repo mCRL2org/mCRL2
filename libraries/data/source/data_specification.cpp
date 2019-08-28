@@ -9,14 +9,17 @@
 /// \file mcrl2/data/data_specification.h
 /// \brief The class data_specification.
 
+#include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
 // Predefined datatypes
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/function_update.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/nat.h"
@@ -811,5 +814,32 @@ void data_specification::build_from_aterm(const atermpp::aterm_appl& term)
     add_equation(e);
   }
 }
+
+void data_specification::load(std::istream& stream, bool binary, const std::string& source)
+{
+  atermpp::aterm t = core::load_aterm(stream, binary, "data specification", source);
+  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+  t = data::detail::add_index(t, cache);
+  if (!t.type_is_appl() || !is_data_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
+  {
+    throw mcrl2::runtime_error("Input stream does not contain a data specification");
+  }
+  build_from_aterm(atermpp::down_cast<atermpp::aterm_appl>(t));
+}
+
+void data_specification::save(std::ostream& stream, bool binary) const
+{
+  atermpp::aterm t = detail::data_specification_to_aterm(*this);
+  t = data::detail::remove_index(t);
+  if (binary)
+  {
+    atermpp::write_term_to_binary_stream(t, stream);
+  }
+  else
+  {
+    atermpp::write_term_to_text_stream(t, stream);
+  }
+}
+
 } // namespace data
 } // namespace mcrl2

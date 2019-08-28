@@ -18,6 +18,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
+#include "mcrl2/data/function_update.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/data/standard_utility.h"
