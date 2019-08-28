@@ -19,6 +19,8 @@
 #include <string>
 #include <utility>
 
+#include <boost/algorithm/string.hpp>
+
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/bes/pbes_input_output_tool.h"

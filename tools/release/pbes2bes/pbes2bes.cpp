@@ -56,6 +56,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/io.h"
+#include "mcrl2/bes/pbesinst_conversion.h"
 #include "mcrl2/bes/remove_level.h"
 
 using namespace std;

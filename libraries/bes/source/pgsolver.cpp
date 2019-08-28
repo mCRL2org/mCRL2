@@ -10,6 +10,7 @@
 /// \brief Add your file description here.
 
 #include "mcrl2/bes/io.h"
+#include "mcrl2/bes/join.h"
 #include "mcrl2/bes/normal_forms.h"
 
 namespace mcrl2

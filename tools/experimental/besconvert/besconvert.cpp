@@ -26,6 +26,7 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/io.h"
+#include "mcrl2/bes/join.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"

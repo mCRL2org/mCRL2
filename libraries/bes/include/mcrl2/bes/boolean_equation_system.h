@@ -13,11 +13,7 @@
 #define MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
 
 #include "mcrl2/bes/boolean_equation.h"
-#include "mcrl2/bes/detail/io.h"
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/load_aterm.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/exception.h"
 #include <algorithm>
@@ -126,21 +122,7 @@ class boolean_equation_system
     /// \param stream The stream to read from.
     /// \param binary An indicaton whether the stream is in binary format.
     /// \param source The source from which the stream originates. Used for error messages.
-    void load(std::istream& stream, bool binary = true, const std::string& source = "")
-    {
-      atermpp::aterm t = core::load_aterm(stream, binary, "BES", source);
-      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-      t = bes::detail::add_index(t, cache);
-      if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::down_cast<atermpp::aterm_appl>(t)))
-      {
-        throw mcrl2::runtime_error("The loaded ATerm is not a BES.");
-      }
-      init_term(atermpp::down_cast<atermpp::aterm_appl>(t));
-      if (!is_well_typed())
-      {
-        throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::load())");
-      }
-    }
+    void load(std::istream& stream, bool binary = true, const std::string& source = "");
 
     /// \brief Writes the boolean equation system to a stream.
     /// \param binary If binary is true the boolean equation system is saved in compressed binary format.
@@ -148,18 +130,7 @@ class boolean_equation_system
     /// much more compact than the ascii representation.
     /// \param stream An output stream
     /// \param binary If true, the file is saved in binary format
-    void save(std::ostream& stream, bool binary = true) const
-    {
-      assert(is_well_typed());
-      if (binary)
-      {
-        atermpp::write_term_to_binary_stream(bes::detail::remove_index(boolean_equation_system_to_aterm(*this)), stream);
-      }
-      else
-      {
-        atermpp::write_term_to_text_stream(bes::detail::remove_index(boolean_equation_system_to_aterm(*this)), stream);
-      }
-    }
+    void save(std::ostream& stream, bool binary = true) const;
 
     /// \brief Returns the set of binding variables of the boolean_equation_system, i.e. the
     /// variables that occur on the left hand side of an equation.
@@ -218,21 +189,6 @@ inline
 bool operator==(const boolean_equation_system& x, const boolean_equation_system& y)
 {
 	return x.equations() == y.equations() && x.initial_state() == y.initial_state();
-}
-
-/// \brief Conversion to aterm_appl.
-/// \return The boolean equation system converted to aterm format.
-inline
-atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system& p)
-{
-  atermpp::aterm_list eqn_list;
-  const std::vector<boolean_equation>& eqn = p.equations();
-  for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
-  {
-    atermpp::aterm a = boolean_equation_to_aterm(*i);
-    eqn_list.push_front(a);
-  }
-  return atermpp::aterm_appl(core::detail::function_symbol_BES(), eqn_list, p.initial_state());
 }
 
 } // namespace bes

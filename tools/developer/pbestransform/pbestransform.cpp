@@ -33,6 +33,7 @@
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/unify_parameters.h"
