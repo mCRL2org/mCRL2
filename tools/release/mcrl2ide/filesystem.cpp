@@ -976,7 +976,7 @@ bool FileSystem::saveAs()
    *   current as and save if successful */
   else
   {
-    if (newProject(false))
+    if (newProject(!projectOpen))
     {
       return save(true);
     }
