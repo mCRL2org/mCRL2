@@ -1053,7 +1053,8 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
 
 void FileSystem::openProjectFolderInExplorer()
 {
-  QDesktopServices::openUrl(projectFolderPath);
+  QDesktopServices::openUrl(
+      QUrl(QString("file:///") + projectFolderPath, QUrl::TolerantMode));
 }
 
 void FileSystem::removeTemporaryFolder()
