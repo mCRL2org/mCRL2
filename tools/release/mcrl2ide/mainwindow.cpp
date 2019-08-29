@@ -125,7 +125,7 @@ void MainWindow::setupMenuBar()
   fileMenu->addSeparator();
 
   openProjectFolderInExplorerAction =
-      fileMenu->addAction("Open Project Folder in Explorer", this,
+      fileMenu->addAction("Open Project Folder in File Manager", this,
                           SLOT(actionOpenProjectFolderInExplorer()));
   openProjectFolderInExplorerAction->setEnabled(false);
 
