@@ -37,6 +37,14 @@
        the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
+
+  The 201908.0 release of mCRL2 is now available. Packages for various platforms can be
+  found on the :ref:`download<download>` page. In this release, the ATerm library, which is
+  the main internal data storage engine of mCRL2, has been re-implemented completely.
+  Furthermore, the mCRL2ide has seen many improvements, including the ability to check
+  whether two processes are equal under a given behavioural equivalence.
+
+.. note::
   .. image:: tacas-ae.png
           :align: right
           :width: 90px
@@ -71,13 +79,6 @@
    Verum provides model based software development environments for the languages ASD and Dezyne that
    allow to program proven correct embedded software with much less effort than "classical" programming.
    As it stands Verum is the industry leader in reliable software design.
-
-.. note::
-
-   mCRL2 now can be compiled using `Zapcc 1.0.1 <https://www.zapcc.com/>`_, a fast C++ compiler
-   based on clang-5.0. This speeds up the compilation with about 40%. To make it work add
-   ``*/libraries/utilities/source/command_line_interface.cpp`` to the ``[DoNotZap]`` section in
-   ``bin/zapccs.config``.
 
 .. list-table::
    :class: teamcity-blurb

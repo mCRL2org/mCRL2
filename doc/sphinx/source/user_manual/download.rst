@@ -64,12 +64,7 @@ If you are using a Linux distribution that is not listed, you may wish to try
 Known issues
 ------------
 
-* Running LTSgraph on Windows with an NVDIA GPU might result in a crash.
-  There are two workarounds for this: disabling the drawing of state and
-  transition labels resolves the issue. This can be done by starting
-  LTSgraph without arguments and disabling these options in the visualisation
-  pane. The other option is to force LTSgraph to use the integrated Intel or
-  AMD GPU, if available. This can be done using the NVIDIA control panel.
+There are no major known issues at the moment.
 
 
 
