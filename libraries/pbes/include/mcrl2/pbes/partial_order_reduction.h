@@ -1319,37 +1319,85 @@ class partial_order_reduction_algorithm
       using utilities::detail::contains;
       using utilities::detail::has_empty_intersection;
       using utilities::detail::set_difference;
+      using utilities::detail::set_includes;
       using utilities::detail::set_intersection;
       using utilities::detail::set_union;
 
+      enum todo_state
+      {
+        NEW,            ///< Will be partially expanded
+        DONE_PARTIALLY, ///< Has been partially expanded
+        STARTS_CYCLE,   ///< Needs to be fully expanded, because it starts a cycle
+        DONE            ///< Has been fully expanded
+      };
+      typedef std::pair<propositional_variable_instantiation, todo_state> todo_pair;
+
       std::unordered_set<propositional_variable_instantiation> seen;
-      std::list<propositional_variable_instantiation> todo{X_init};
+      std::list<todo_pair> todo{todo_pair(X_init, NEW)};
       while (!todo.empty())
       {
-        const propositional_variable_instantiation X_e = todo.front();
+        todo_pair& p = todo.back();
+        const propositional_variable_instantiation X_e = p.first;
+        todo_state& s = p.second;
         mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
-        std::size_t rank = m_equation_index.rank(X_e.name());
-        std::size_t i = m_equation_index.index(X_e.name());
-        bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
-        emit_node(X_e, is_conjunctive, rank);
-        seen.insert(X_e);
-        std::set<std::size_t> stubborn_set_X_e = stubborn_set(X_e);
-        mCRL2log(log::debug) << "stubborn_set(X_e) = " << core::detail::print_set(stubborn_set_X_e) << std::endl;
-        std::set<std::size_t> en_X_e = en(X_e);
-        std::set<propositional_variable_instantiation> next = succ(X_e, set_intersection(stubborn_set_X_e, en_X_e));
-        mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
-        if (use_condition_L && std::any_of(todo.begin(), todo.end(), [&](const propositional_variable_instantiation& pv){ return contains(seen, pv); }))
+
+        if (s == DONE || s == DONE_PARTIALLY)
         {
-          next = set_union(next, succ(X_e, set_difference(en_X_e, stubborn_set_X_e)));
+          todo.pop_back();
+          continue;
         }
-        todo.pop_front();
+
+        std::set<propositional_variable_instantiation> next;
+        std::set<std::size_t> en_X_e = en(X_e);
+
+        if (s == NEW)
+        {
+          std::set<std::size_t> stubborn_set_X_e = stubborn_set(X_e);
+          mCRL2log(log::debug) << "stubborn_set(X_e) = " << core::detail::print_set(stubborn_set_X_e) << std::endl;
+          next = succ(X_e, set_intersection(stubborn_set_X_e, en_X_e));
+
+          bool fully_expanded = set_includes(stubborn_set_X_e, en_X_e);
+          s = fully_expanded ? DONE : DONE_PARTIALLY;
+
+          // Check if a cycle is closed
+          // At the same time, check whether some node on the stack is fully expanded
+          // If both are true, some node will be fully expanded
+          bool cycle_found = false;
+          auto& cycle_node = todo.front();
+          bool fully_expanded_node_found = false;
+          for (todo_pair& tp: todo)
+          {
+            if (contains(next, tp.first))
+            {
+              cycle_found = true;
+              cycle_node = tp;
+            }
+            fully_expanded_node_found |= cycle_found && (tp.second == STARTS_CYCLE || tp.second == DONE);
+          }
+          if (use_condition_L && cycle_found && !fully_expanded_node_found)
+          {
+            cycle_node.second = STARTS_CYCLE;
+          }
+        }
+        else
+        {
+          assert(s == STARTS_CYCLE);
+          next = succ(X_e, en_X_e);
+          s = DONE;
+        }
+
+        mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
         for (const propositional_variable_instantiation& Y_f: next)
         {
-          if (contains(todo, Y_f) || contains(seen, Y_f))
+          if (!contains(seen, Y_f))
           {
-            continue;
+            std::size_t rank = m_equation_index.rank(Y_f.name());
+            std::size_t i = m_equation_index.index(Y_f.name());
+            bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
+            emit_node(Y_f, is_conjunctive, rank);
+            seen.insert(Y_f);
+            todo.emplace_back(Y_f, NEW);
           }
-          todo.push_front(Y_f);
         }
         for (const propositional_variable_instantiation& Y_f: next)
         {
