@@ -30,6 +30,7 @@ Contents
    - :doc:`guidelines`
    - :doc:`code_generation`
    - :doc:`performance`
+   - :doc:`packaging`
 
 Old pages
 =========
@@ -37,7 +38,6 @@ Old pages
 .. compound::
    :class: toctree-wrapper
 
-   - :doc:`packaging`
    - :doc:`cronjobs`
 
 .. toctree::
