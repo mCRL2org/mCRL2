@@ -1334,6 +1334,14 @@ class partial_order_reduction_algorithm
 
       std::unordered_set<propositional_variable_instantiation> seen;
       std::list<todo_pair> todo{todo_pair(X_init, NEW)};
+
+      {
+        std::size_t rank = m_equation_index.rank(X_init.name());
+        std::size_t i = m_equation_index.index(X_init.name());
+        bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
+        emit_node(X_init, is_conjunctive, rank);
+      }
+
       while (!todo.empty())
       {
         todo_pair& p = todo.back();
