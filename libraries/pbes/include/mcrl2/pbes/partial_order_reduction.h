@@ -1340,6 +1340,7 @@ class partial_order_reduction_algorithm
         std::size_t i = m_equation_index.index(X_init.name());
         bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
         emit_node(X_init, is_conjunctive, rank);
+        seen.insert(X_init);
       }
 
       while (!todo.empty())
