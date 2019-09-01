@@ -1372,20 +1372,20 @@ class partial_order_reduction_algorithm
           // At the same time, check whether some node on the stack is fully expanded
           // If both are true, some node will be fully expanded
           bool cycle_found = false;
-          auto& cycle_node = todo.front();
+          auto cycle_node = todo.begin();
           bool fully_expanded_node_found = false;
-          for (todo_pair& tp: todo)
+          for (auto it = todo.begin(); it != todo.end(); ++it)
           {
-            if (contains(next, tp.first))
+            if (contains(next, it->first))
             {
               cycle_found = true;
-              cycle_node = tp;
+              cycle_node = it;
             }
-            fully_expanded_node_found |= cycle_found && (tp.second == STARTS_CYCLE || tp.second == DONE);
+            fully_expanded_node_found |= cycle_found && (it->second == STARTS_CYCLE || it->second == DONE);
           }
           if (use_condition_L && cycle_found && !fully_expanded_node_found)
           {
-            cycle_node.second = STARTS_CYCLE;
+            cycle_node->second = STARTS_CYCLE;
           }
         }
         else
