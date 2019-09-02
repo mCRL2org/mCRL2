@@ -10,9 +10,14 @@
 #define MCRL2_SMT_TRANSLATE_EXPRESSION_H
 
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/forall.h"
 #include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/traverser.h"
+#include "mcrl2/data/where_clause.h"
 #include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/translate_sort.h"
 #include "mcrl2/smt/utilities.h"
