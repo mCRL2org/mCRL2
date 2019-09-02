@@ -91,8 +91,8 @@ static probabilistic_lts_lts_t::probabilistic_state_t decode_probabilistic_state
     ++it;
 
     // The indices are already added to the header before.
-    const lps::probabilistic_data_expression& probability = down_cast<lps::probabilistic_data_expression>(*it);
-    result.push_back(lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>(state_number, probability));
+    const lps::probabilistic_data_expression& probability = down_cast<lps::probabilistic_data_expression>(data::detail::add_index(*it, cache));
+    result.emplace_back(state_number, probability);
   }
 
   return probabilistic_lts_lts_t::probabilistic_state_t(result.begin(), result.end());

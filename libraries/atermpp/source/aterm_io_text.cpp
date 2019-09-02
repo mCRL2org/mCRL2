@@ -233,7 +233,7 @@ aterm_int text_aterm_input::parse_aterm_int(int& character)
     character = next_char();
   }
 
-  return aterm_int(static_cast<std::size_t>(atol(number.begin())));
+  return aterm_int(static_cast<std::size_t>(atol(number.data())));
 }
 
 aterm_list text_aterm_input::parse_aterm_list(int& character, char begin, char end)
