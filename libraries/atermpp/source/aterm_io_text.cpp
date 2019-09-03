@@ -216,7 +216,7 @@ aterm_appl text_aterm_input::parse_aterm_appl(const std::string& function_name, 
 
 aterm_int text_aterm_input::parse_aterm_int(int& character)
 {
-  std::array<char, 64> number;
+  std::array<char, 32> number;
   auto it = number.begin();
 
   if (character == '-')
@@ -233,6 +233,7 @@ aterm_int text_aterm_input::parse_aterm_int(int& character)
     character = next_char();
   }
 
+  *it = '\0';
   return aterm_int(static_cast<std::size_t>(atol(number.data())));
 }
 
