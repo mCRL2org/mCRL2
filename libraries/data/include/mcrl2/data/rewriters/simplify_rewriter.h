@@ -15,7 +15,6 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 #include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2 {
