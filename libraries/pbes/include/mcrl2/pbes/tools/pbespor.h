@@ -84,12 +84,17 @@ struct pbespor_pbes_composer
 
   void add_expression(const propositional_variable_instantiation& X, const propositional_variable_instantiation& Y)
   {
-    auto i = equations.find(X);
-    if (i == equations.end())
+    auto i_X = equations.find(X);
+    if (i_X == equations.end())
     {
-      i = equations.insert(std::make_pair(X, equation_info(make_variable(X)))).first;
+      i_X = equations.insert(std::make_pair(X, equation_info(make_variable(X)))).first;
     }
-    i->second.add(make_variable(Y));
+    auto i_Y = equations.find(Y);
+    if (i_Y == equations.end())
+    {
+      i_Y = equations.insert(std::make_pair(Y, equation_info(make_variable(Y)))).first;
+    }
+    i_X->second.add(i_Y->second.X);
   }
 
   pbes compose_result(const data::data_specification& dataspec, const propositional_variable_instantiation& initial_state) const
