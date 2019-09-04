@@ -553,7 +553,8 @@ class partial_order_reduction_algorithm
 
       data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
 
-      data::assignment_list assignments_k1 = data::make_assignment_list(parameters, updates_k1);
+      data::mutable_indexed_substitution<> sigma_k1;
+      data::add_assignments(sigma_k1, parameters, updates_k1);
 
       data::data_expression can_enable = make_abstraction(data::exists_binder(),
         parameters + combined_quantified_vars,
@@ -562,7 +563,7 @@ class partial_order_reduction_algorithm
             data::sort_bool::not_(condition_k),
             condition_k1
           ),
-          make_where_clause(condition_k, assignments_k1)
+          data::replace_variables_capture_avoiding(condition_k, sigma_k1, id_gen)
         )
       );
 
@@ -728,8 +729,10 @@ class partial_order_reduction_algorithm
       summand_equivalence_key new1_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
       data::variable_list qvars1_k  = new1_k.e;  data::data_expression condition1_k  = new1_k.f;  data::data_expression_list updates1_k  = new1_k.g;
       data::variable_list qvars1_k1 = new1_k1.e; data::data_expression condition1_k1 = new1_k1.f; data::data_expression_list updates1_k1 = new1_k1.g;
-      data::assignment_list assignments1_k = data::make_assignment_list(parameters, updates1_k);
-      data::assignment_list assignments1_k1 = data::make_assignment_list(parameters, updates1_k1);
+      data::mutable_indexed_substitution<> sigma_k;
+      data::add_assignments(sigma_k, parameters, updates1_k);
+      data::mutable_indexed_substitution<> sigma_k1;
+      data::add_assignments(sigma_k1, parameters, updates1_k1);
 
       summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
       summand_equivalence_key new2_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
@@ -738,27 +741,20 @@ class partial_order_reduction_algorithm
 
       data::variable_list combined_quantified_vars = qvars1_k + qvars1_k1;
 
-      data::data_expression antecedent = data::sort_bool::and_(condition1_k1, make_where_clause(condition1_k, assignments1_k1));
+      data::data_expression antecedent = data::sort_bool::and_(condition1_k1, data::replace_variables_capture_avoiding(condition1_k, sigma_k1, id_gen));
       data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
       if (is_true(yes_condition))
       {
         return yes;
       }
-      data::data_expression parameters_equal = data::sort_bool::true_();
-      auto it_k = updates2_k.begin();
-      auto it_k1 = updates2_k1.begin();
-      while (it_k != updates2_k.end())
-      {
-        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(make_where_clause(*it_k, assignments1_k1), make_where_clause(*it_k1, assignments1_k)));
-        ++it_k; ++it_k1;
-      }
+
+      data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
+                                                                data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
       data::data_expression consequent = make_abstraction(data::exists_binder(),
         qvars2_k + qvars2_k1,
-        data::sort_bool::and_(
-          data::sort_bool::and_(
-            condition2_k,
-            make_where_clause(condition2_k1, assignments1_k)
-          ),
+        detail::make_and(
+          condition2_k,
+          data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
           parameters_equal
         )
       );
@@ -785,8 +781,10 @@ class partial_order_reduction_algorithm
       summand_equivalence_key new1_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
       data::variable_list qvars1_k  = new1_k.e;  data::data_expression condition1_k  = new1_k.f;  data::data_expression_list updates1_k  = new1_k.g;
       data::variable_list qvars1_k1 = new1_k1.e; data::data_expression condition1_k1 = new1_k1.f; data::data_expression_list updates1_k1 = new1_k1.g;
-      data::assignment_list assignments1_k = data::make_assignment_list(parameters, updates1_k);
-      data::assignment_list assignments1_k1 = data::make_assignment_list(parameters, updates1_k1);
+      data::mutable_indexed_substitution<> sigma_k;
+      data::add_assignments(sigma_k, parameters, updates1_k);
+      data::mutable_indexed_substitution<> sigma_k1;
+      data::add_assignments(sigma_k1, parameters, updates1_k1);
 
       summand_equivalence_key new2_k = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k));
       summand_equivalence_key new2_k1 = rename_duplicate_variables(id_gen, summand_equivalence_key(summand_k1));
@@ -802,21 +800,14 @@ class partial_order_reduction_algorithm
       {
         return yes;
       }
-      data::data_expression parameters_equal = data::sort_bool::true_();
-      auto it_k = updates2_k.begin();
-      auto it_k1 = updates2_k1.begin();
-      while (it_k != updates2_k.end())
-      {
-        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(make_where_clause(*it_k, assignments1_k1), make_where_clause(*it_k1, assignments1_k)));
-        ++it_k; ++it_k1;
-      }
+
+      data::data_expression parameters_equal = detail::equal_to(data::replace_variables_capture_avoiding(updates2_k, sigma_k1, id_gen),
+                                                                data::replace_variables_capture_avoiding(updates2_k1, sigma_k, id_gen));
       data::data_expression consequent = make_abstraction(data::exists_binder(),
         qvars2_k + qvars2_k1,
-        data::sort_bool::and_(
-          data::sort_bool::and_(
-            make_where_clause(condition2_k, assignments1_k1),
-            make_where_clause(condition2_k1, assignments1_k)
-          ),
+        detail::make_and(
+          data::replace_variables_capture_avoiding(condition2_k, sigma_k1, id_gen),
+          data::replace_variables_capture_avoiding(condition2_k1, sigma_k, id_gen),
           parameters_equal
         )
       );
@@ -846,7 +837,8 @@ class partial_order_reduction_algorithm
 
       data::variable_list combined_quantified_vars = qvars_k + qvars_k1;
 
-      data::assignment_list assignments_k = data::make_assignment_list(parameters, updates_k);
+      data::mutable_indexed_substitution<> sigma_k;
+      data::add_assignments(sigma_k, parameters, updates_k);
 
       data::data_expression antecedent = data::sort_bool::and_(condition_k, condition_k1);
       data::data_expression yes_condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::not_(antecedent));
@@ -854,12 +846,8 @@ class partial_order_reduction_algorithm
       {
         return yes;
       }
-      data::data_expression parameters_equal = data::sort_bool::true_();
-      for (const data::data_expression& gi: updates_k1)
-      {
-        parameters_equal = data::lazy::and_(parameters_equal, data::equal_to(gi, make_where_clause(gi, assignments_k)));
-      }
-      data::data_expression consequent = data::sort_bool::and_(make_where_clause(condition_k1, assignments_k), parameters_equal);
+      data::data_expression parameters_equal = detail::equal_to(updates_k1, data::replace_variables_capture_avoiding(updates_k1, sigma_k, id_gen));
+      data::data_expression consequent = data::sort_bool::and_(data::replace_variables_capture_avoiding(condition_k1, sigma_k, id_gen), parameters_equal);
       data::data_expression condition = make_abstraction(data::forall_binder(), parameters + combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
       // mCRL2log(log::verbose) << "Triangle condition for " << k << " and " << k1 << ": " << m_rewr(condition) << " original " << condition << std::endl;
@@ -997,7 +985,9 @@ class partial_order_reduction_algorithm
 
           // Use lambda lifting for short-circuiting the && operator on tribools
           bool left_accords     = [&]{ return left_accords_equations(k, k1); }     && [&]{ return left_accords_data(k, k1); };
-          bool square_accords   = [&]{ return square_accords_equations(k, k1); }   && [&]{ return square_accords_data(k, k1); };
+          // The DNS relation is symmetric
+          bool square_accords   = (k1 < k && !DNS(k1).test(k)) ||
+                                  (k1 > k && ([&]{ return square_accords_equations(k, k1); } && [&]{ return square_accords_data(k, k1); }));
           bool accords          = square_accords ||
                                   ([&]{ return triangle_accords_equations(k, k1); } && [&]{ return triangle_accords_data(k, k1); });
 
