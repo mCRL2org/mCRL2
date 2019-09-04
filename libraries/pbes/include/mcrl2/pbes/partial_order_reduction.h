@@ -1392,6 +1392,7 @@ class partial_order_reduction_algorithm
         seen.insert(X_init);
       }
 
+      std::size_t iteration = 0;
       while (!todo.empty())
       {
         todo_pair& p = todo.back();
@@ -1460,6 +1461,13 @@ class partial_order_reduction_algorithm
         for (const propositional_variable_instantiation& Y_f: next)
         {
           emit_edge(X_e, Y_f);
+        }
+
+        iteration++;
+        if(iteration == 100)
+        {
+          mCRL2log(log::status) << "Found " << seen.size() << " nodes. Todo set contains " << todo.size() << " nodes.\n";
+          iteration = 0;
         }
       }
     }

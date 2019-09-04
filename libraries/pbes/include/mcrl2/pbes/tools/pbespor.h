@@ -129,14 +129,14 @@ struct pbespor_pbes_composer
       // emit_node
       [&](const propositional_variable_instantiation& X, bool is_conjunctive, std::size_t rank)
       {
-        mCRL2log(log::verbose) << "emit node " << X << std::endl;
+        mCRL2log(log::debug) << "emit node " << X << std::endl;
         add_equation(X, is_conjunctive, rank, algorithm.symbol(X.name()));
       },
 
       // emit_edge
       [&](const propositional_variable_instantiation& X, const propositional_variable_instantiation& Y)
       {
-        mCRL2log(log::verbose) << "emit edge " << X << " -> " << Y << std::endl;
+        mCRL2log(log::debug) << "emit edge " << X << " -> " << Y << std::endl;
         add_expression(X, Y);
       },
 
