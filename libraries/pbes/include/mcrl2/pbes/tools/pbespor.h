@@ -109,11 +109,7 @@ struct pbespor_pbes_composer
       result.equations().push_back(eqn.make_equation());
     }
 
-    if (!result.is_well_typed())
-    {
-      mCRL2log(log::error) << "The result is not well typed!" << std::endl;
-      mCRL2log(log::error) << pp(result) << std::endl;
-    }
+    assert(result.is_well_typed());
     return result;
   }
 
