@@ -2955,7 +2955,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
    rewriter_so = std::shared_ptr<uncompiled_library>(new uncompiled_library(compile_script));
 
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
-  stopwatch time;
+  mcrl2::utilities::stopwatch time;
 
   jittyc_eqns.clear();
   for(std::set < data_equation >::const_iterator it = rewrite_rules.begin(); it != rewrite_rules.end(); ++it)
