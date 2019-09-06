@@ -13,7 +13,6 @@
 #include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/translate_user_notation.h"
 
@@ -125,12 +124,12 @@ sort_expression data_expression::sort() const
   // data_expression we do need to provide an implementation here).
   if (is_variable(*this))
   {
-    const variable& v = atermpp::down_cast<variable>(*this);
+    const auto& v = atermpp::down_cast<variable>(*this);
     return v.sort();
   }
   else if (is_function_symbol(*this))
   {
-    const function_symbol& f = atermpp::down_cast<function_symbol>(*this);
+    const auto& f = atermpp::down_cast<function_symbol>(*this);
     return f.sort();
   }
   else if (is_abstraction(*this))
@@ -141,7 +140,7 @@ sort_expression data_expression::sort() const
     }
     else if (is_lambda(*this))
     {
-      const atermpp::term_list<aterm_appl> &v_variables = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      const auto& v_variables = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
       sort_expression_vector s;
       for (const auto & v_variable : v_variables)
       {
@@ -152,7 +151,7 @@ sort_expression data_expression::sort() const
     else
     {
       assert(is_set_comprehension(*this) || is_bag_comprehension(*this) || is_untyped_set_or_bag_comprehension(*this));
-      const atermpp::term_list<aterm_appl> &v_variables  = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
+      const auto& v_variables  = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
       assert(v_variables.size() == 1);
 
       if (is_bag_comprehension(*this))
@@ -176,11 +175,11 @@ sort_expression data_expression::sort() const
   }
 
   assert(is_application(*this));
-  const data_expression& head = atermpp::down_cast<const data_expression>((*this)[0]);
+  const auto& head = atermpp::down_cast<const data_expression>((*this)[0]);
   sort_expression s(head.sort());
   if (is_function_sort(s))
   {
-    const function_sort& fs = atermpp::down_cast<function_sort>(s);
+    const auto& fs = atermpp::down_cast<function_sort>(s);
     assert(fs.domain().size()+1==this->size());
     return (fs.codomain());
   }
@@ -190,7 +189,7 @@ sort_expression data_expression::sort() const
 std::set<data::variable> substitution_variables(const mutable_map_substitution<>& sigma)
 {
   std::set<data::variable> result;
-  for (const auto & i : sigma)
+  for (const auto& i: sigma)
   {
     data::find_free_variables(i.second, std::inserter(result, result.end()));
   }

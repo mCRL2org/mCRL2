@@ -187,21 +187,28 @@ struct square_confluence_condition
     const auto& gi = summand_i.next_state;
 
     const auto& cj = summand_j.condition;
-    const auto& fj = summand_j.multi_action.arguments();
     const auto& gj = summand_j.next_state;
 
     data::add_assignments(sigma, d, gi);
     data::data_expression cj_gi = data::replace_variables_capture_avoiding(cj, sigma);
-    data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
     data::data_expression_list gj_gi = data::replace_variables_capture_avoiding(gj, sigma);
 
     data::add_assignments(sigma, d, gj);
     data::data_expression ci_gj = data::replace_variables_capture_avoiding(ci, sigma);
     data::data_expression_list gi_gj = data::replace_variables_capture_avoiding(gi, sigma);
 
-    data::remove_assignments(sigma, d);
-
-    return imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gi_gj)));
+    if (summand_j.is_tau())
+    {
+      data::remove_assignments(sigma, d);
+      return imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(gj_gi, gi_gj)));
+    }
+    else
+    {
+      const auto& fj = summand_j.multi_action.arguments();
+      data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
+      data::remove_assignments(sigma, d);
+      return imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gi_gj)));
+    }
   }
 };
 
@@ -227,17 +234,24 @@ struct triangular_confluence_condition
     const auto& gi = summand_i.next_state;
 
     const auto& cj = summand_j.condition;
-    const auto& fj = summand_j.multi_action.arguments();
     const auto& gj = summand_j.next_state;
 
     data::add_assignments(sigma, d, gi);
     data::data_expression cj_gi = data::replace_variables_capture_avoiding(cj, sigma);
-    data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
     data::data_expression_list gj_gi = data::replace_variables_capture_avoiding(gj, sigma);
 
-    data::remove_assignments(sigma, d);
-
-    return imp(and_(ci, cj), detail::make_and(cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gj)));
+    if (summand_j.is_tau())
+    {
+      data::remove_assignments(sigma, d);
+      return imp(and_(ci, cj), and_(cj_gi, detail::equal_to(gj_gi, gj)));
+    }
+    else
+    {
+      const auto& fj = summand_j.multi_action.arguments();
+      data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
+      data::remove_assignments(sigma, d);
+      return imp(and_(ci, cj), detail::make_and(cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gj)));
+    }
   }
 };
 

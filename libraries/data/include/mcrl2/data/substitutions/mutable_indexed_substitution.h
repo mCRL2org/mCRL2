@@ -58,8 +58,8 @@ protected:
   std::vector < substitution_type > m_container;
   std::vector <std::size_t> m_index_table;
   std::stack<std::size_t> m_free_positions;
-  bool m_variables_in_rhs_set_is_defined;
-  std::multiset<variable> m_variables_in_rhs;
+  mutable bool m_variables_in_rhs_set_is_defined;
+  mutable std::multiset<variable> m_variables_in_rhs;
 
 public:
 
@@ -318,6 +318,12 @@ template <typename VariableType, typename ExpressionType>
 std::ostream& operator<<(std::ostream& out, const mutable_indexed_substitution<VariableType, ExpressionType>& sigma)
 {
   return out << sigma.to_string();
+}
+
+template <typename VariableType = variable, typename ExpressionType = data_expression>
+std::multiset<variable> substitution_variables(const mutable_indexed_substitution<VariableType, ExpressionType>& sigma)
+{
+  return sigma.variables_occurring_in_right_hand_sides();
 }
 
 } // namespace data
