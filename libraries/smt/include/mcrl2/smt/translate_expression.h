@@ -28,7 +28,7 @@ namespace smt
 {
 
 template <typename T, typename OutputStream>
-void translate_data_expression(const T& x, OutputStream& o, const native_translations& nt);
+void translate_data_expression(const T& x, OutputStream& o, std::unordered_map<data::data_expression, std::string>& c, const native_translations& nt);
 
 namespace detail
 {
@@ -80,25 +80,43 @@ template <template <class> class Traverser, class OutputStream>
 struct translate_data_expression_traverser: public Traverser<translate_data_expression_traverser<Traverser, OutputStream> >
 {
   typedef Traverser<translate_data_expression_traverser<Traverser, OutputStream> > super;
-  using super::enter;
-  using super::leave;
   using super::apply;
 
-  OutputStream& out;
+  stack_outstream<OutputStream> out;
+  std::unordered_map<data::data_expression, std::string>& m_cache;
   const native_translations& m_native;
 
-  translate_data_expression_traverser(OutputStream& out_, const native_translations& nt)
+  translate_data_expression_traverser(OutputStream& out_, std::unordered_map<data::data_expression, std::string>& cache, const native_translations& nt)
     : out(out_)
+    , m_cache(cache)
     , m_native(nt)
   {}
 
+  void apply(const data::data_expression& d)
+  {
+    auto c = m_cache.find(d);
+    if(c == m_cache.end())
+    {
+      out.push();
+      super::apply(d);
+      if(out.top_size() <= 400)
+      {
+        out.copy_top(m_cache[d]);
+      }
+      out.pop();
+    }
+    else
+    {
+      out << c->second;
+    }
+  }
 
   void apply(const data::application& v)
   {
     auto find_result = m_native.find_native_translation(v);
     if(find_result != m_native.expressions.end())
     {
-      auto translate_func = [&](const data::data_expression& e) { return translate_data_expression(e, out, m_native); };
+      auto translate_func = [&](const data::data_expression& e) { return apply(e); };
       auto output_func = [&](const std::string& s) { out << s; };
       find_result->second(v, output_func, translate_func);
       out << " ";
@@ -126,7 +144,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     out << "(forall ";
     data::data_expression vars_conditions = declare_variables_binder(v.variables(), out, m_native);
     out << " ";
-    super::apply(data::lazy::implies(vars_conditions, v.body()));
+    apply(data::lazy::implies(vars_conditions, v.body()));
     out << ")";
   }
 
@@ -135,7 +153,7 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
     out << "(exists ";
     data::data_expression vars_conditions = declare_variables_binder(v.variables(), out, m_native);
     out << " ";
-    super::apply(data::lazy::and_(vars_conditions, v.body()));
+    apply(data::lazy::and_(vars_conditions, v.body()));
     out << ")";
   }
 
@@ -148,40 +166,33 @@ struct translate_data_expression_traverser: public Traverser<translate_data_expr
       out << "(";
       apply(as.lhs());
       out << " ";
-      super::apply(as.rhs());
+      apply(as.rhs());
       out << ")";
     }
     out << ") ";
-    super::apply(v.body());
+    apply(v.body());
     out << ")";
   }
 };
 
-template <template <class> class Traverser, class OutputStream>
-translate_data_expression_traverser<Traverser, OutputStream>
-make_translate_data_expression_traverser(OutputStream& out, const native_translations& nt)
-{
-  return translate_data_expression_traverser<Traverser, OutputStream>(out, nt);
-}
-
 } // namespace detail
 
 template <typename T, typename OutputStream>
-void translate_data_expression(const T& x, OutputStream& o, const native_translations& nt)
+void translate_data_expression(const T& x, OutputStream& o, std::unordered_map<data::data_expression, std::string>& c, const native_translations& nt)
 {
-  detail::make_translate_data_expression_traverser<data::data_expression_traverser>(o, nt).apply(x);
+  detail::translate_data_expression_traverser<data::data_expression_traverser, OutputStream>(o, c, nt).apply(x);
 }
 
 template <typename T, typename OutputStream>
-void translate_assertion(const T& x, OutputStream& o, const native_translations& nt)
+void translate_assertion(const T& x, OutputStream& o, std::unordered_map<data::data_expression, std::string>& c, const native_translations& nt)
 {
   o << "(assert ";
-  translate_data_expression(x, o, nt);
+  translate_data_expression(x, o, c, nt);
   o << ")\n";
 }
 
 template <typename Container, typename OutputStream>
-void translate_variable_declaration(const Container& vars, OutputStream& o, const native_translations& nt)
+void translate_variable_declaration(const Container& vars, OutputStream& o, std::unordered_map<data::data_expression, std::string>& c, const native_translations& nt)
 {
   data::data_expression vars_conditions = data::sort_bool::true_();
   for(const data::variable& v: vars)
@@ -206,7 +217,7 @@ void translate_variable_declaration(const Container& vars, OutputStream& o, cons
     translate_sort_expression(v.sort().target_sort(), o, nt);
     o << ")\n";
   }
-  translate_assertion(vars_conditions, o, nt);
+  translate_assertion(vars_conditions, o, c, nt);
 }
 
 } // namespace smt
