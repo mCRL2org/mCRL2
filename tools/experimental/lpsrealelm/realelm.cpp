@@ -386,7 +386,7 @@ static void normalize_specification(
                                         real_sum_variables,
                                         get_nonreal_variables(t.summation_variables()),
                                         inequalities,
-                                        replacements);
+                                        data::mutable_map_substitution<>(replacements));
             summand_info.push_back(s);
           }
         }
@@ -466,7 +466,7 @@ static void normalize_specification(
                                       variable_list(), // All sum variables over reals have been eliminated.
                                       get_nonreal_variables(t.summation_variables()),
                                       inequalities,
-                                      std::map<variable, data_expression>());
+                                      data::mutable_map_substitution<>(std::map<variable, data_expression>()));
           summand_info.push_back(s);
         }
       }

@@ -480,7 +480,7 @@ protected:
                                     variable_list(),
                                     nonreal_summation_variables,
                                     std::vector< linear_inequality >(),
-                                    std::map< variable, data_expression >()
+                                    data::mutable_map_substitution<>(std::map< variable, data_expression >())
                                     ));
 
       next_zone++;
