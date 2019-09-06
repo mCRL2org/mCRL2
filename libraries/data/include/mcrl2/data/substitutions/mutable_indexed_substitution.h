@@ -231,25 +231,6 @@ public:
     return false;
   }
 
-  /// \brief Provides a set of variables that occur in the right hand sides of the assignments.
-//   const std::multiset<variable>& variables_in_rhs()
-  bool variable_occurs_in_a_rhs(const variable& v)
-  {
-    if (!m_variables_in_rhs_set_is_defined)
-    {
-      for(const std::size_t i: m_index_table)
-      {
-        if (i != std::size_t(-1))
-        {
-          std::set<variable_type> s=find_free_variables(m_container[i].second);
-          m_variables_in_rhs.insert(s.begin(),s.end());
-        }
-      }
-      m_variables_in_rhs_set_is_defined=true;
-    }
-    return m_variables_in_rhs.find(v)!=m_variables_in_rhs.end();
-  }
-
   /// \brief Provides a multiset containing the variables in the rhs.
   /// \return A multiset with variables in the right hand side. 
   const std::multiset<variable>& variables_occurring_in_right_hand_sides() const
@@ -267,6 +248,14 @@ public:
       m_variables_in_rhs_set_is_defined=true;
     }
     return m_variables_in_rhs;
+  }
+
+  /// \brief Checks whether a variable v occurs in one of the rhs's of the current substitution.
+  /// \return A boolean indicating whether v occurs in sigma(x) for some variable x. 
+  bool variable_occurs_in_a_rhs(const variable& v)
+  {
+    const std::multiset<variable>& variables_in_rhs=variables_occurring_in_right_hand_sides();
+    return variables_in_rhs.find(v)!=variables_in_rhs.end();
   }
 
   /// \brief Returns the number of assigned variables in the substitution.
