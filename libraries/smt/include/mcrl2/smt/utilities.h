@@ -150,6 +150,53 @@ std::vector<T> topological_sort(std::map<T, std::set<T>> dependencies)
   }
 }
 
+template <typename OutStream>
+class stack_outstream
+{
+protected:
+  std::stack<typename OutStream::pos_type> m_stack;
+  std::ostringstream buf;
+  OutStream& m_out;
+
+public:
+  stack_outstream(OutStream& out)
+  : m_out(out)
+  {}
+
+  ~stack_outstream()
+  {
+    m_out << buf.str();
+  }
+
+  void push()
+  {
+    m_stack.push(buf.tellp());
+  }
+
+  void pop()
+  {
+    m_stack.pop();
+  }
+
+  typename OutStream::pos_type top_size()
+  {
+    assert(!m_stack.empty());
+    return buf.tellp() - m_stack.top();
+  }
+
+  void copy_top(std::string& dest)
+  {
+    dest = buf.str().substr(m_stack.top(), std::string::npos);
+  }
+
+  template <typename T>
+  stack_outstream& operator<<(const T& s)
+  {
+    buf << s;
+    return *this;
+  }
+};
+
 } // namespace smt
 } // namespace mcrl2
 

@@ -39,7 +39,8 @@ int main(int /*argc*/, char** /*argv*/)
   smt::native_translations ntm = smt::initialise_native_translation(data_spec);
 
   std::ostringstream out;
-  smt::translate_data_specification(data_spec, out, ntm);
+  std::unordered_map<data::data_expression, std::string> cache;
+  smt::translate_data_specification(data_spec, out, cache, ntm);
   std::cout << out.str() << std::endl;
 
   smt::smt_solver solv(data_spec);

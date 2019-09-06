@@ -20,6 +20,8 @@
   #include <strsafe.h>
 #endif // MCRL2_PLATFORM_WINDOWS
 
+#include <unordered_map>
+
 namespace mcrl2
 {
 namespace smt
@@ -29,6 +31,7 @@ class smt_solver
 {
 protected:
   native_translations m_native;
+  std::unordered_map<data::data_expression, std::string> m_cache;
 
 #ifdef MCRL2_PLATFORM_WINDOWS
   HANDLE g_hChildStd_IN_Rd = NULL;
@@ -54,7 +57,7 @@ public:
 
   ~smt_solver();
 
-  bool solve(const data::variable_list& vars, const data::data_expression& expr) const;
+  bool solve(const data::variable_list& vars, const data::data_expression& expr);
 };
 
 } // namespace smt

@@ -243,8 +243,10 @@ void translate_mapping(const data::function_symbol& f, OutputStream& out, const 
 
 template <typename OutputStream>
 inline
-void translate_native_mappings(OutputStream& out, const native_translations& nt,
-                       const std::map<data::structured_sort, std::string>& snm)
+void translate_native_mappings(OutputStream& out,
+                               std::unordered_map<data::data_expression, std::string>& c,
+                               const native_translations& nt,
+                               const std::map<data::structured_sort, std::string>& snm)
 {
   out << "(define-funs-rec (\n";
   for(const auto& f: nt.mappings)
@@ -274,7 +276,7 @@ void translate_native_mappings(OutputStream& out, const native_translations& nt,
       continue;
     }
 
-    translate_data_expression(eqn.rhs(), out, nt);
+    translate_data_expression(eqn.rhs(), out, c, nt);
     out << "\n";
   }
   out << "))\n";
@@ -282,7 +284,10 @@ void translate_native_mappings(OutputStream& out, const native_translations& nt,
 
 template <typename OutputStream>
 inline
-void translate_equation(const data::data_equation& eq, OutputStream& out, const native_translations& nt)
+void translate_equation(const data::data_equation& eq,
+                        OutputStream& out,
+                        std::unordered_map<data::data_expression, std::string>& c,
+                        const native_translations& nt)
 {
   if(is_higher_order(eq) || nt.has_native_definition(eq))
   {
@@ -293,15 +298,16 @@ void translate_equation(const data::data_equation& eq, OutputStream& out, const 
   data::data_expression body(data::lazy::implies(eq.condition(), data::equal_to(eq.lhs(), eq.rhs())));
   data::data_expression definition(vars.empty() ? body : data::forall(vars, body));
 
-  out << "(assert ";
-  translate_data_expression(definition, out, nt);
-  out << ")\n";
+  translate_assertion(definition, out, c, nt);
 }
 
 } // namespace detail
 
 template <typename OutputStream>
-void translate_data_specification(const data::data_specification& dataspec, OutputStream& o, const native_translations& nt)
+void translate_data_specification(const data::data_specification& dataspec,
+                                  OutputStream& o,
+                                  std::unordered_map<data::data_expression, std::string>& c,
+                                  const native_translations& nt)
 {
   // Generator for new names of projection functions and structs
   data::set_identifier_generator id_gen;
@@ -325,12 +331,12 @@ void translate_data_specification(const data::data_specification& dataspec, Outp
   {
     detail::translate_mapping(f, o, nt, struct_name_map);
   }
-  detail::translate_native_mappings(o, nt, struct_name_map);
+  detail::translate_native_mappings(o, c, nt, struct_name_map);
 
   // Translate remaining equations
   for(const data::data_equation& eq: dataspec.equations())
   {
-    detail::translate_equation(eq, o, nt);
+    detail::translate_equation(eq, o, c, nt);
   }
 }
 
