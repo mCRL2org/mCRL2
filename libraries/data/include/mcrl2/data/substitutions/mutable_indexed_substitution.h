@@ -250,6 +250,25 @@ public:
     return m_variables_in_rhs.find(v)!=m_variables_in_rhs.end();
   }
 
+  /// \brief Provides a multiset containing the variables in the rhs.
+  /// \return A multiset with variables in the right hand side. 
+  const std::multiset<variable>& variables_occurring_in_right_hand_sides() const
+  {
+    if (!m_variables_in_rhs_set_is_defined)
+    {
+      for(const std::size_t i: m_index_table)
+      {
+        if (i != std::size_t(-1))
+        {
+          std::set<variable_type> s=find_free_variables(m_container[i].second);
+          m_variables_in_rhs.insert(s.begin(),s.end());
+        }
+      }
+      m_variables_in_rhs_set_is_defined=true;
+    }
+    return m_variables_in_rhs;
+  }
+
   /// \brief Returns the number of assigned variables in the substitution.
   bool size()
   {
