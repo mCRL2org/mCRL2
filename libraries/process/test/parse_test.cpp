@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE parse_test
 
 #include "mcrl2/process/parse.h"
+#include "mcrl2/process/parse_impl.h"
 #include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 

@@ -12,6 +12,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/normalize_sorts.h"
+#include "mcrl2/data/parse_impl.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/translate_user_notation.h"
@@ -200,6 +201,87 @@ variable_list free_variables(const data_expression& x)
 {
   std::set<variable> v = find_free_variables(x);
   return variable_list(v.begin(), v.end());
+}
+
+namespace detail {
+
+sort_expression parse_sort_expression_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  sort_expression result = data_expression_actions(p).parse_SortExpr(node);
+  return result;
+}
+
+variable_list parse_variables_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("VarSpec");
+  bool partial_parses = false;
+  std::string var_text("var " + text);
+  core::parse_node node = p.parse(var_text, start_symbol_index, partial_parses);
+  variable_list result = data_specification_actions(p).parse_VarSpec(node);
+  return result;
+}
+
+data_expression parse_data_expression_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  data_expression result = data_expression_actions(p).parse_DataExpr(node);
+  return result;
+}
+
+data_specification parse_data_specification_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("DataSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  untyped_data_specification untyped_dataspec = data_specification_actions(p).parse_DataSpec(node);
+  data_specification result = untyped_dataspec.construct_data_specification();
+  return result;
+}
+
+variable_list parse_variable_declaration_list(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("VarsDeclList");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  variable_list result = data_specification_actions(p).parse_VarsDeclList(node);
+  return result;
+}
+
+} // namespace detail
+
+std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("SortSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  std::vector<atermpp::aterm_appl> elements = detail::data_specification_actions(p).parse_SortSpec(node);
+  basic_sort_vector sorts;
+  alias_vector aliases;
+  for (const atermpp::aterm_appl& x: elements)
+  {
+    if (is_basic_sort(x))
+    {
+      sorts.push_back(atermpp::down_cast<basic_sort>(x));
+    }
+    else if (is_alias(x))
+    {
+      aliases.push_back(atermpp::down_cast<alias>(x));
+    }
+  }
+  auto result = std::make_pair(sorts, aliases);
+  return result;
 }
 
 } // namespace data

@@ -17,6 +17,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/parse_impl.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
 #include "mcrl2/utilities/text_utility.h"

@@ -8,6 +8,7 @@
 //
 /// \file mcrl2/pbes/pbes_explorer.cpp
 /// \brief
+#include <climits>
 #include <queue>
 #include <set>
 

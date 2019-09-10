@@ -8,6 +8,7 @@
 //
 
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "rewriter.h"
 #include "parsing.h"
 

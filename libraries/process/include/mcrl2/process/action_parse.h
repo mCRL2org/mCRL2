@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_ACTION_PARSE_H
 
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/parse_impl.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/typecheck.h"
 

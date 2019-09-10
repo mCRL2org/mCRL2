@@ -23,6 +23,7 @@
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/set.h"
 #include "mcrl2/data/structured_sort.h"
 
 using namespace mcrl2;

@@ -9,12 +9,30 @@
 /// \file process.cpp
 /// \brief
 
+#include <algorithm>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include "mcrl2/core/parser_utility.h"
+#include "mcrl2/data/parse_impl.h"
+#include "mcrl2/process/action_parse.h"
+#include "mcrl2/process/alphabet_reduce.h"
+#include "mcrl2/process/detail/alphabet_push_block.h"
+#include "mcrl2/process/detail/pcrl_equation_cache.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/index_traits.h"
 #include "mcrl2/process/normalize_sorts.h"
+#include "mcrl2/process/parse_impl.h"
 #include "mcrl2/process/print.h"
-#include "mcrl2/process/replace.h"
 #include "mcrl2/process/translate_user_notation.h"
+#include "mcrl2/process/remove_equations.h"
+#include "mcrl2/process/traverser.h"
+#include "mcrl2/process/typecheck.h"
+#include "mcrl2/process/utility.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/separate_keyword_section.h"
+#include "mcrl2/utilities/text_utility.h"
+
 
 namespace mcrl2
 {
@@ -88,6 +106,73 @@ static bool register_hooks()
   return true;
 }
 static bool mcrl2_register_process(register_hooks());
+
+void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equation_limit)
+{
+  mCRL2log(log::verbose) << "applying alphabet reduction..." << std::endl;
+  process_expression init = procspec.init();
+
+  // cache the alphabet of pcrl equations and apply alphabet reduction to block({}, init)
+  std::vector<process_equation>& equations = procspec.equations();
+  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
+  data::set_identifier_generator id_generator;
+  for (process_equation& equation: equations)
+  {
+    id_generator.add_identifier(equation.identifier().name());
+  }
+  pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations, init);
+  core::identifier_string_list empty_blockset;
+  procspec.init() = push_block(empty_blockset, init, equations, id_generator, pcrl_equation_cache);
+
+  // remove duplicate equations
+  if (procspec.equations().size() < duplicate_equation_limit)
+  {
+    mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
+    remove_duplicate_equations(procspec);
+    mCRL2log(log::debug) << "removing duplicate equations finished" << std::endl;
+  }
+
+  mCRL2log(log::debug) << "alphabet reduction finished" << std::endl;
+}
+
+namespace detail {
+
+process_expression parse_process_expression_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("ProcExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  core::warn_left_merge_merge(node);
+  process_expression result = process_actions(p).parse_ProcExpr(node);
+  return result;
+}
+
+process_specification parse_process_specification_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("mCRL2Spec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  core::warn_left_merge_merge(node);
+  untyped_process_specification untyped_procspec = process_actions(p).parse_mCRL2Spec(node);
+  process_specification result = untyped_procspec.construct_process_specification();
+  return result;
+}
+
+void complete_process_specification(process_specification& x, bool alpha_reduce = false)
+{
+  typecheck_process_specification(x);
+  if (alpha_reduce)
+  {
+    alphabet_reduce(x, 1000ul);
+  }
+  process::translate_user_notation(x);
+}
+
+} // namespace detail
 
 } // namespace process
 

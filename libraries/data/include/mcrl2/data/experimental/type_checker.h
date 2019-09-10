@@ -13,6 +13,7 @@
 #define MCRL2_DATA_TYPE_CHECKER_H
 
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/parse_impl.h"
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/standard_container_utility.h"
 #include <algorithm>
