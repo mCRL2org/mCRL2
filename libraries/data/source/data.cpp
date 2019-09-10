@@ -205,7 +205,7 @@ variable_list free_variables(const data_expression& x)
 
 namespace detail {
 
-sort_expression parse_sort_expression_new(const std::string& text)
+sort_expression parse_sort_expression(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
@@ -215,7 +215,7 @@ sort_expression parse_sort_expression_new(const std::string& text)
   return result;
 }
 
-variable_list parse_variables_new(const std::string& text)
+variable_list parse_variables(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("VarSpec");
@@ -226,7 +226,7 @@ variable_list parse_variables_new(const std::string& text)
   return result;
 }
 
-data_expression parse_data_expression_new(const std::string& text)
+data_expression parse_data_expression(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("DataExpr");

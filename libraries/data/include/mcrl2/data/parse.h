@@ -23,14 +23,10 @@ namespace data
 
 namespace detail {
 
-sort_expression parse_sort_expression_new(const std::string& text);
-
-variable_list parse_variables_new(const std::string& text);
-
-data_expression parse_data_expression_new(const std::string& text);
-
+sort_expression parse_sort_expression(const std::string& text);
+variable_list parse_variables(const std::string& text);
+data_expression parse_data_expression(const std::string& text);
 data_specification parse_data_specification_new(const std::string& text);
-
 variable_list parse_variable_declaration_list(const std::string& text);
 
 inline static data_specification const& default_specification()
@@ -128,7 +124,7 @@ void parse_variables(std::istream& in,
 
   if (!text.empty())
   {
-    data_vars = detail::parse_variables_new(text);
+    data_vars = detail::parse_variables(text);
     data_type_checker type_checker(data_spec);
     // Check the variable in an empty variable context.
     type_checker(data_vars,detail::variable_context());
@@ -287,7 +283,7 @@ data_expression parse_data_expression(std::istream& in,
                                      )
 {
   std::string text = utilities::read_text(in);
-  data_expression x = detail::parse_data_expression_new(text);
+  data_expression x = detail::parse_data_expression(text);
   if (type_check)
   {
     x = data::typecheck_data_expression(x, variables, dataspec);
@@ -386,7 +382,7 @@ sort_expression parse_sort_expression(std::istream& in,
                                       const data_specification& data_spec = detail::default_specification())
 {
   std::string text = utilities::read_text(in);
-  sort_expression x = detail::parse_sort_expression_new(text);
+  sort_expression x = detail::parse_sort_expression(text);
   typecheck_sort_expression(x, data_spec);
   x = normalize_sorts(x, data_spec);
   return x;

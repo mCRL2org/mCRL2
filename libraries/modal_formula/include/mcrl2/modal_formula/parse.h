@@ -15,6 +15,7 @@
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/parse_impl.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/resolve_name_clashes.h"
 #include "mcrl2/modal_formula/state_formula.h"

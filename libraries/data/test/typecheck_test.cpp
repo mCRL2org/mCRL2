@@ -66,7 +66,7 @@ data::sort_expression parse_sort_expression(const std::string& de_in)
 {
   data::sort_expression result;
   try {
-    result = data::detail::parse_sort_expression_new(de_in);
+    result = data::detail::parse_sort_expression(de_in);
     std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
@@ -88,7 +88,7 @@ data::data_expression parse_data_expression(const std::string& de_in)
 {
   data::data_expression result;
   try {
-    result = data::detail::parse_data_expression_new(de_in);
+    result = data::detail::parse_data_expression(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
     std::string de_out = data::pp(result);
     if (de_in != de_out)

@@ -33,6 +33,13 @@ void complete_process_specification(process_specification& x, bool alpha_reduce 
 
 } // namespace detail
 
+/// \brief Parses an action declaration from a string
+/// \param text A string containing an action declaration
+/// \param[in] data_spec A data specification used for sort normalization
+/// \return A list of action labels
+/// \exception mcrl2::runtime_error when the input does not match the syntax of an action declaration.
+process::action_label_list parse_action_declaration(const std::string& text, const data::data_specification& data_spec = data::detail::default_specification());
+
 /// \brief Parses a process specification from an input stream
 /// \param in An input stream
 /// \param alpha_reduce Indicates whether alphabet reductions need to be performed

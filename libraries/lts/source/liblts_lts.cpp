@@ -14,6 +14,7 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lts/lts_lts.h"
 
+#include <fstream>
 #include <string>
 #include <cstring>
 #include <sstream>

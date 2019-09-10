@@ -15,7 +15,7 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lps/exploration_strategy.h"
-#include "mcrl2/process/action_parse.h"
+#include "mcrl2/process/parse.h"
 
 namespace mcrl2
 {

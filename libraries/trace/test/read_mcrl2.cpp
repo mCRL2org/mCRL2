@@ -13,7 +13,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include <exception>
 #include <sstream>
-#include "mcrl2/process/action_parse.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/core/print.h"
 

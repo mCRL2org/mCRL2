@@ -140,7 +140,7 @@ bool test_application_of_Fourier_Motzkin(const std::string& vars,
   data_spec.add_context_sort(sort_real::real_());
   const variable_list variables=parse_variables(vars);
   const data_expression e_in=parse_data_expression(inequalities,variables,data_spec);
-  const variable_list v_elim=data::detail::parse_variables_new(variables_to_be_eliminated);
+  const variable_list v_elim= data::detail::parse_variables(variables_to_be_eliminated);
 
   rewriter r(data_spec);
   std::vector < linear_inequality > v_inequalities;

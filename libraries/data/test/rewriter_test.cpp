@@ -32,7 +32,6 @@
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::data::detail;
 
 data::rewriter make_data_rewriter(const data_specification& data_spec)
 {
@@ -194,6 +193,9 @@ void one_point_rule_preprocessor_test()
 
 void simplify_rewriter_test()
 {
+  using data::detail::N;
+  using data::detail::I;
+
   data::simplify_rewriter R;
   test_rewriters(N(R), N(I), "!(true && false)", "true");
   test_rewriters(N(R), N(I), "exists n:Nat, b:Bool. b", "exists b:Bool. b");

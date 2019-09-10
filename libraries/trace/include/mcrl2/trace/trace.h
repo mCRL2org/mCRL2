@@ -26,7 +26,7 @@
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/process/action_parse.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/data/data_specification.h"
@@ -247,7 +247,7 @@ class Trace
       {
         ++pos;
       }
-    } 
+    }
 
     /// \brief Decrease the current position in the trace by one provided the largest position is larger than 0.
     /// \details The initial position corresponds to pos=0.
@@ -400,7 +400,7 @@ class Trace
       assert(m_actions.size()+1 >= m_states.size() && pos <=m_actions.size());
       if (pos>m_states.size())
       {
-        throw mcrl2::runtime_error("Setting a state in a trace at a position " + std::to_string(pos) + 
+        throw mcrl2::runtime_error("Setting a state in a trace at a position " + std::to_string(pos) +
                                    " where there are no states at earlier positions.");
       }
 

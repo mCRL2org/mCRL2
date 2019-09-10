@@ -21,7 +21,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 
 #include "mcrl2/lps/io.h"
-#include "mcrl2/process/action_parse.h"
+#include "mcrl2/process/parse.h"
 
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/exploration.h"

@@ -15,13 +15,13 @@
 #include <sstream>
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse_impl.h"
-#include "mcrl2/process/action_parse.h"
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/index_traits.h"
 #include "mcrl2/process/normalize_sorts.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/process/parse_impl.h"
 #include "mcrl2/process/print.h"
 #include "mcrl2/process/translate_user_notation.h"
@@ -135,6 +135,19 @@ void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equa
   mCRL2log(log::debug) << "alphabet reduction finished" << std::endl;
 }
 
+process::action_label_list parse_action_declaration(const std::string& text, const data::data_specification& data_spec)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("ActDecl");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  action_label_vector result;
+  detail::action_actions(p).callback_ActDecl(node, result);
+  process::action_label_list v(result.begin(), result.end());
+  v = process::normalize_sorts(v, data_spec);
+  return v;
+}
+
 namespace detail {
 
 process_expression parse_process_expression_new(const std::string& text)
@@ -162,7 +175,7 @@ process_specification parse_process_specification_new(const std::string& text)
   return result;
 }
 
-void complete_process_specification(process_specification& x, bool alpha_reduce = false)
+void complete_process_specification(process_specification& x, bool alpha_reduce)
 {
   typecheck_process_specification(x);
   if (alpha_reduce)

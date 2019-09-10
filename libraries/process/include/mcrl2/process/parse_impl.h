@@ -14,7 +14,6 @@
 
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/parse_impl.h"
-#include "mcrl2/process/action_parse.h"
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
@@ -49,6 +48,54 @@ struct untyped_process_specification: public data::untyped_data_specification
 
 namespace detail
 {
+
+struct action_actions: public data::detail::data_specification_actions
+{
+  action_actions(const core::parser& parser_)
+    : data::detail::data_specification_actions(parser_)
+  {}
+
+  data::untyped_data_parameter parse_Action(const core::parse_node& node) const
+  {
+    return data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+  }
+
+  data::untyped_data_parameter_list parse_ActionList(const core::parse_node& node) const
+  {
+    return parse_list<data::untyped_data_parameter>(node, "Action", [&](const core::parse_node& node) { return parse_Action(node); });
+  }
+
+  bool callback_ActDecl(const core::parse_node& node, action_label_vector& result) const
+  {
+    if (symbol_name(node) == "ActDecl")
+    {
+      core::identifier_string_list ids = parse_IdList(node.child(0));
+      data::sort_expression_list sorts;
+      if (node.child(1).child(0))
+      {
+        sorts = parse_SortProduct(node.child(1).child(0).child(1));
+      }
+      for (const core::identifier_string& id: ids)
+      {
+        result.push_back(action_label(id, sorts));
+      }
+      return true;
+    }
+    return false;
+  };
+
+  action_label_list parse_ActDeclList(const core::parse_node& node) const
+  {
+    action_label_vector result;
+    traverse(node, [&](const core::parse_node& node) { return callback_ActDecl(node, result); });
+    return process::action_label_list(result.begin(), result.end());
+  }
+
+  action_label_list parse_ActSpec(const core::parse_node& node) const
+  {
+    return parse_ActDeclList(node.child(1));
+  }
+};
 
 struct process_actions: public process::detail::action_actions
 {

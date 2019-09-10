@@ -25,7 +25,7 @@
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/process/action_parse.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
@@ -43,16 +43,16 @@ namespace lts
 
 /** \brief This class contains state labels for an labelled transition system in .lts format.
     \details A state label in .lts format consists of lists of balanced tree of data expressions.
-             These represent sets of state vectors. The reason for the sets is that states can 
-             be merged by operations on state spaces, and if so, the sets of labels can easily 
-             be joined. 
+             These represent sets of state vectors. The reason for the sets is that states can
+             be merged by operations on state spaces, and if so, the sets of labels can easily
+             be joined.
 */
 class state_label_lts : public atermpp::term_list< lps::state >
 {
   public:
     typedef atermpp::term_list< lps::state > super;
 
-    /** \brief Default constructor. 
+    /** \brief Default constructor.
     */
     state_label_lts()
     {}
@@ -105,7 +105,7 @@ class state_label_lts : public atermpp::term_list< lps::state >
 
 /** \brief Pretty print a state value of this LTS.
     \details The label is printed as (t1,...,tn) if it consists of a single label.
-             Otherwise the labels are printed with square brackets surrounding it. 
+             Otherwise the labels are printed with square brackets surrounding it.
     \param[in] label  The state value to pretty print.
     \return           The pretty-printed representation of value. */
 
@@ -117,7 +117,7 @@ inline std::string pp(const state_label_lts& label)
     s += "[";
   }
   bool first=true;
-  for(const lps::state& l: label) 
+  for(const lps::state& l: label)
   {
     if (!first)
     {
@@ -139,7 +139,7 @@ inline std::string pp(const state_label_lts& label)
   {
     s += "]";
   }
-  return s; 
+  return s;
 }
 
 /** \brief A class containing the values for action labels for the .lts format.
@@ -213,14 +213,14 @@ inline action_label_lts parse_lts_action(
   const data::data_specification& data_spec,
   lps::multi_action_type_checker& typechecker)
 {
-  std::string l(multi_action_string); 
+  std::string l(multi_action_string);
   lps::multi_action al;
   // Find an @ symbol in the action, in which case it is timed.
   size_t position_of_at=l.find_first_of('@');
   std::string time_expression_string;
   if (position_of_at!=std::string::npos)
   {
-    // The at symbol is found. It is a timed action. 
+    // The at symbol is found. It is a timed action.
     time_expression_string=l.substr(position_of_at+1,l.size());
     l=l.substr(0,position_of_at-1);
   }
@@ -232,7 +232,7 @@ inline action_label_lts parse_lts_action(
   {
     throw mcrl2::runtime_error("Parse error in action label " + multi_action_string + ".\n" + e.what());
   }
-  
+
   if (time_expression_string.size()>0)
   {
     try
@@ -252,7 +252,7 @@ inline action_label_lts parse_lts_action(
         time = data::sort_real::creal(time, data::sort_pos::c1());
       }
       if (time.sort()!=data::sort_real::real_())
-      {  
+      {
         throw mcrl2::runtime_error("The time is not of sort Pos, Nat, Int or Real\n");
       }
       return action_label_lts(lps::multi_action(al.actions(),time));
@@ -286,7 +286,7 @@ class lts_lts_base
     lts_lts_base(const lts_lts_base& l)
     : m_data_spec(l.m_data_spec),
       m_parameters(l.m_parameters),
-      m_action_decls(l.m_action_decls) 
+      m_action_decls(l.m_action_decls)
     {}
 
     void swap(lts_lts_base& l)
@@ -412,15 +412,15 @@ class lts_lts_t : public lts< state_label_lts, action_label_lts, detail::lts_lts
            state label is an expression of the form STATE(t1,...,tn) where
            ti are data expressions.
 */
-class probabilistic_lts_lts_t : 
-         public probabilistic_lts< state_label_lts, 
-                                   action_label_lts, 
-                                   probabilistic_state<std::size_t, lps::probabilistic_data_expression>, 
+class probabilistic_lts_lts_t :
+         public probabilistic_lts< state_label_lts,
+                                   action_label_lts,
+                                   probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
                                    detail::lts_lts_base >
 {
   public:
-    typedef probabilistic_lts< state_label_lts, 
-                               action_label_lts, 
+    typedef probabilistic_lts< state_label_lts,
+                               action_label_lts,
                                probabilistic_state_t,
                                detail::lts_lts_base > super;
 
