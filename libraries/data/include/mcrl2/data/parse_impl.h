@@ -28,6 +28,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/undefined.h"
+#include "mcrl2/data/untyped_data_specification.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -36,52 +37,11 @@ namespace mcrl2 {
 
 namespace data {
 
-struct untyped_data_specification
-{
-  std::vector<basic_sort> basic_sorts;
-  std::vector<alias> aliases;
-  std::vector<function_symbol>  constructors;
-  std::vector<function_symbol> mappings;
-  std::vector<data_equation> equations;
-
-  void add_sort(const basic_sort& x) { basic_sorts.push_back(x); }
-  void add_alias(const alias& x) { aliases.push_back(x); }
-  void add_constructor(const function_symbol& x) { constructors.push_back(x); }
-  void add_mapping(const function_symbol& x) { mappings.push_back(x); }
-  void add_equation(const data_equation& x) { equations.push_back(x); }
-
-  data_specification construct_data_specification() const
-  {
-    data_specification dataspec;
-    for (const basic_sort& x: basic_sorts)
-    {
-      dataspec.add_sort(x);
-    }
-    for (const alias& x: aliases)
-    {
-      dataspec.add_alias(x);
-    }
-    for (const function_symbol& x: constructors)
-    {
-      dataspec.add_constructor(x);
-    }
-    for (const function_symbol& x: mappings)
-    {
-      dataspec.add_mapping(x);
-    }
-    for (const data_equation& x: equations)
-    {
-      dataspec.add_equation(x);
-    }
-    return dataspec;
-  }
-};
-
 namespace detail {
 
 struct sort_expression_actions: public core::default_parser_actions
 {
-  sort_expression_actions(const core::parser& parser_)
+  explicit sort_expression_actions(const core::parser& parser_)
     : core::default_parser_actions(parser_)
   {}
 

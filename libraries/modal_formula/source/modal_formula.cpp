@@ -16,6 +16,7 @@
 #include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/parse_impl.h"
 #include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
@@ -41,6 +42,21 @@ std::string pp(const action_formulas::true_& x) { return action_formulas::pp< ac
 std::set<data::variable> find_all_variables(const action_formulas::action_formula& x) { return action_formulas::find_all_variables< action_formulas::action_formula >(x); }
 //--- end generated action_formulas overloads ---//
 
+namespace detail {
+
+action_formula parse_action_formula(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("ActFrm");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  action_formula result = action_formula_actions(p).parse_ActFrm(node);
+  return result;
+}
+
+} // namespace detail
+
 } // namespace action_formulas
 
 namespace regular_formulas
@@ -54,6 +70,21 @@ std::string pp(const regular_formulas::trans& x) { return regular_formulas::pp< 
 std::string pp(const regular_formulas::trans_or_nil& x) { return regular_formulas::pp< regular_formulas::trans_or_nil >(x); }
 std::string pp(const regular_formulas::untyped_regular_formula& x) { return regular_formulas::pp< regular_formulas::untyped_regular_formula >(x); }
 //--- end generated regular_formulas overloads ---//
+
+namespace detail
+{
+
+regular_formula parse_regular_formula(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("RegFrm");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  regular_formula result = regular_formula_actions(p).parse_RegFrm(node);
+  return result;
+}
+
+} // namespace detail
 
 } // namespace regular_formulas
 
@@ -88,6 +119,35 @@ std::set<data::variable> find_free_variables(const state_formulas::state_formula
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
 std::set<process::action_label> find_action_labels(const state_formulas::state_formula& x) { return state_formulas::find_action_labels< state_formulas::state_formula >(x); }
 //--- end generated state_formulas overloads ---//
+
+namespace detail {
+
+state_formula parse_state_formula(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("StateFrm");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  state_formula result = state_formula_actions(p).parse_StateFrm(node);
+  return result;
+}
+
+state_formula_specification parse_state_formula_specification(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("StateFrmSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  core::warn_left_merge_merge(node);
+
+  untyped_state_formula_specification untyped_statespec = state_formula_actions(p).parse_StateFrmSpec(node);
+  state_formula_specification result = untyped_statespec.construct_state_formula_specification();
+  return result;
+}
+
+} // namespace detail
 
 namespace algorithms {
 

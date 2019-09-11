@@ -15,11 +15,12 @@
 #include "mcrl2/pbes/detail/is_well_typed.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 #include "mcrl2/pbes/index_traits.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/normalize_sorts.h"
+#include "mcrl2/pbes/parse_impl.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/translate_user_notation.h"
+#include "mcrl2/pbes/untyped_pbes.h"
 
 namespace mcrl2
 {
@@ -126,6 +127,58 @@ static bool register_hooks()
   return true;
 }
 static bool mcrl2_register_pbes(register_hooks());
+
+namespace detail {
+
+pbes_expression parse_pbes_expression_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  pbes_expression result = pbes_actions(p).parse_PbesExpr(node);
+  return result;
+}
+
+untyped_pbes parse_pbes_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  untyped_pbes result = pbes_actions(p).parse_PbesSpec(node);
+  return result;
+}
+
+void complete_pbes(pbes& x)
+{
+  typecheck_pbes(x);
+  pbes_system::translate_user_notation(x);
+  complete_data_specification(x);
+}
+
+propositional_variable parse_propositional_variable(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PropVarDecl");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return detail::pbes_actions(p).parse_PropVarDecl(node);
+}
+
+pbes_expression parse_pbes_expression(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  return detail::pbes_actions(p).parse_PbesExpr(node);
+}
+
+} // namespace detail
 
 } // namespace pbes_system
 

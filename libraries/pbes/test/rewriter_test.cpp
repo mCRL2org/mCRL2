@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE rewriter_test
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/detail/parse_substitution.h"
+#include "mcrl2/data/list.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/parse.h"
