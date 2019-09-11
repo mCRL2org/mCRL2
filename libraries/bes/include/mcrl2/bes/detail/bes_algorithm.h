@@ -13,6 +13,7 @@
 #define MCRL2_BES_DETAIL_BES_ALGORITHM_H
 
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/find.h"
 #include "mcrl2/bes/print.h"
 
 namespace mcrl2

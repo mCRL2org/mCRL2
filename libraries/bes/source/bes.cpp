@@ -9,6 +9,7 @@
 /// \file bes.cpp
 /// \brief
 
+#include "mcrl2/bes/find.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/bes/index_traits.h"
 
@@ -37,6 +38,17 @@ static bool register_hooks()
   return true;
 }
 static bool mcrl2_register_bes(register_hooks());
+
+std::set<boolean_variable> boolean_equation_system::occurring_variables() const
+{
+  std::set<boolean_variable> result;
+  for (const boolean_equation& eqn: m_equations)
+  {
+    find_boolean_variables(eqn.formula(), std::inserter(result, result.end()));
+  }
+  find_boolean_variables(m_initial_state, std::inserter(result, result.end()));
+  return result;
+}
 
 } // namespace bes
 

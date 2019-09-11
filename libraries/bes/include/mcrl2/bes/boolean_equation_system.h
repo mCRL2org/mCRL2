@@ -12,16 +12,12 @@
 #ifndef MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
 #define MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
 
+#include <algorithm>
+#include <iostream>
 #include "mcrl2/bes/boolean_equation.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/utilities/exception.h"
-#include <algorithm>
-#include <cassert>
-#include <iostream>
-#include <iterator>
-#include <sstream>
-#include <string>
 
 namespace mcrl2
 {
@@ -31,9 +27,6 @@ namespace bes
 
 // forward declarations
 class boolean_equation_system;
-
-template <typename Object, typename OutputIterator>
-void find_boolean_variables(const Object& container, OutputIterator o);
 
 atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system& p);
 
@@ -55,13 +48,13 @@ class boolean_equation_system
     /// \param t A term
     void init_term(const atermpp::aterm_appl& t)
     {
-      atermpp::aterm_appl::iterator i = t.begin();
+      auto i = t.begin();
       atermpp::aterm_list equations = atermpp::down_cast<atermpp::aterm_list>(*i++);
       m_initial_state = boolean_expression(*i);
       m_equations.reserve(equations.size());
       for (const atermpp::aterm& eqn: equations)
       {
-        m_equations.push_back(boolean_equation(eqn));
+        m_equations.emplace_back(eqn);
       }
     }
 
@@ -149,16 +142,7 @@ class boolean_equation_system
     /// the variables that occur in the right hand side of an equation or in the
     /// initial state.
     /// \return The occurring variables of the equation system
-    std::set<boolean_variable> occurring_variables() const
-    {
-      std::set<boolean_variable> result;
-      for (const boolean_equation& eqn: m_equations)
-      {
-        find_boolean_variables(eqn.formula(), std::inserter(result, result.end()));
-      }
-      find_boolean_variables(m_initial_state, std::inserter(result, result.end()));
-      return result;
-    }
+    std::set<boolean_variable> occurring_variables() const;
 
     /// \brief Returns true if all occurring variables are binding variables.
     /// \return True if the equation system is closed
@@ -194,9 +178,5 @@ bool operator==(const boolean_equation_system& x, const boolean_equation_system&
 } // namespace bes
 
 } // namespace mcrl2
-
-#ifndef MCRL2_BES_FIND_H
-#include "mcrl2/bes/find.h"
-#endif
 
 #endif // MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
