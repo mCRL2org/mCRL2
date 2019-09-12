@@ -7,15 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "mcrl2/atermpp/aterm_io.h"
+
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_list.h"
-
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/platform.h"
-#include "mcrl2/utilities/unordered_map.h"
 
 #include <cassert>
 #include <cmath>
@@ -56,8 +52,9 @@ enum class packet_type
 /// \brief The number of bits needed to store an element of packet_type.
 static constexpr unsigned int packet_bits = 2;
 
-binary_aterm_output::binary_aterm_output(std::ostream& stream)
-  : m_stream(stream)
+binary_aterm_output::binary_aterm_output(std::ostream& stream, std::function<aterm_transformer> transformer)
+  : m_stream(stream),
+    m_transformer(transformer)
 {
   // The term with function symbol index 0 indicates the end of the stream, its actual value does not matter.
   m_function_symbols.insert(detail::g_as_int);
@@ -76,14 +73,14 @@ binary_aterm_output::~binary_aterm_output()
   m_stream.write_integer(0);
 }
 
-/// \brief Keep track of the remaining arguments that still has to be processed for this term.
+/// \brief Keep track of whether the term can be written to the stream.
 struct write_todo
 {
   const aterm_appl& term;
-  std::size_t arg = 0;
+  bool write = false;
 
   write_todo(const aterm_appl& term)
-   :  term(term)
+   : term(term)
   {}
 };
 
@@ -97,54 +94,68 @@ void binary_aterm_output::write_term(const aterm& term)
 
   do
   {
-    auto& current = stack.top();
-    if (current.arg >= current.term.function().arity())
-    {
-      // Indicates that this term is output and not a subterm.
-      bool is_output = stack.size() == 1;
+    write_todo& current = stack.top();
+    aterm_appl transformed = m_transformer(current.term);
 
-      if (current.term.type_is_int())
+    // Indicates that this term is output and not a subterm, these should always be written.
+    bool is_output = stack.size() == 1;
+    if (m_terms.index(current.term) >= m_terms.size() || is_output)
+    {
+      if (current.write)
       {
-        // Write the packet identifier of an aterm_int followed by its value.
-        m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm_int), packet_bits);
-        m_stream.write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+        if (transformed.type_is_int())
+        {
+          // Write the packet identifier of an aterm_int followed by its value.
+          m_stream.write_bits(static_cast<std::size_t>(packet_type::aterm_int), packet_bits);
+          m_stream.write_integer(reinterpret_cast<const aterm_int&>(current.term).value());
+        }
+        else
+        {
+          std::size_t symbol_index = write_function_symbol(transformed.function());
+
+          // Write the packet identifier, followed by the indices of its function symbol and arguments.
+          m_stream.write_bits(static_cast<std::size_t>(is_output ? packet_type::aterm_output : packet_type::aterm), packet_bits);
+          m_stream.write_bits(symbol_index, function_symbol_index_width());
+
+          for (const aterm& argument : transformed)
+          {
+            std::size_t index = m_terms.index(argument);
+            assert(index < m_terms.size()); // Every argument must already be written.
+            m_stream.write_bits(index, term_index_width());
+          }
+        }
+
+        if (!is_output)
+        {
+          // Output terms are not shared and thus can be forgotten.
+          bool assigned = m_terms.insert(current.term).second;
+          assert(assigned); mcrl2_unused(assigned); // This term should have a new index assigned.
+          m_term_index_width = static_cast<std::uint8_t>(std::log2(m_terms.size()) + 1);
+        }
+
+        stack.pop();
       }
       else
       {
-        // We are finished processing the arguments of this term (arg >= arity)
-        std::size_t symbol_index = write_function_symbol(current.term.function());
-
-        // Write the packet identifier, followed by the indices of its function symbol and arguments.
-        m_stream.write_bits(static_cast<std::size_t>(is_output ? packet_type::aterm_output : packet_type::aterm), packet_bits);
-        m_stream.write_bits(symbol_index, function_symbol_index_width());
-        for (const auto& argument : current.term)
+        // Add all the arguments to the stack; to be processed first.
+        for (const aterm& argument : transformed)
         {
-          std::size_t index = m_terms.index(argument);
-          assert(index < m_terms.size());
-          m_stream.write_bits(index, term_index_width());
+          const aterm_appl& term = static_cast<const aterm_appl&>(argument);
+          if (m_terms.index(term) >= m_terms.size())
+          {
+            // Only add arguments that have not been written before.
+            stack.emplace(term);
+          }
         }
-      }
 
-      if (!is_output)
-      {
-        // Output terms are not shared and thus can be forgotten.
-        m_terms.insert(current.term);
-        m_term_index_width = static_cast<std::uint8_t>(std::log2(m_terms.size()) + 1);
+        current.write = true;
       }
-
-      stack.pop();
     }
     else
     {
-      // Take the argument according to current.arg and increase the argument index.
-      const aterm_appl& term = static_cast<const aterm_appl&>(current.term[current.arg]);
-      if (m_terms.index(term) >= m_terms.size())
-      {
-        stack.emplace(term);
-      }
-      ++current.arg;
+     stack.pop(); // This term was already written and as such should be skipped. This can happen if
+                  // one term has two equal subterms.
     }
-
   }
   while (!stack.empty());
 }
@@ -161,8 +172,9 @@ unsigned int binary_aterm_output::function_symbol_index_width()
   return m_function_symbol_index_width;
 }
 
-binary_aterm_input::binary_aterm_input(std::istream& is)
-  : m_stream(is)
+binary_aterm_input::binary_aterm_input(std::istream& is, std::function<aterm_transformer> transformer)
+  : m_stream(is),
+    m_transformer(transformer)
 {
   // The term with function symbol index 0 indicates the end of the stream.
   m_function_symbols.emplace_back();
@@ -196,6 +208,7 @@ std::size_t binary_aterm_output::write_function_symbol(const function_symbol& sy
     m_stream.write_bits(static_cast<std::size_t>(packet_type::function_symbol), packet_bits);
     m_stream.write_string(symbol.name());
     m_stream.write_integer(symbol.arity());
+
     auto result = m_function_symbols.insert(symbol);
     m_function_symbol_index_width = static_cast<unsigned int>(std::log2(m_function_symbols.size()) + 1);
 
@@ -237,15 +250,18 @@ aterm binary_aterm_input::read_term()
         arguments[argument] = m_terms[m_stream.read_bits(term_index_width())];
       }
 
+      // Transform the resulting term.
+      aterm transformed = m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
+
       if (packet == packet_type::aterm_output)
       {
         // This aterm was marked as output in the file so return it.
-        return static_cast<aterm>(aterm_appl(symbol, arguments.begin(), arguments.end()));
+        return transformed;
       }
       else
       {
         // Construct the term appl from the function symbol and the already read arguments and insert it.
-        m_terms.emplace_back(aterm_appl(symbol, arguments.begin(), arguments.end()));
+        m_terms.emplace_back(transformed);
         m_term_index_width = static_cast<unsigned int>(std::log2(m_terms.size()) + 1);
       }
     }

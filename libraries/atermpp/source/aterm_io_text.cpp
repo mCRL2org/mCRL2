@@ -84,8 +84,9 @@ static void write_string_with_escape_symbols(const std::string& s, std::ostream&
 
 // Public functions
 
-text_aterm_output::text_aterm_output(std::ostream& os, bool newline)
+text_aterm_output::text_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer, bool newline)
   : m_stream(os),
+    m_transformer(transformer),
     m_newline(newline)
 {}
 
@@ -99,8 +100,9 @@ void text_aterm_output::write_term(const aterm& term)
   }
 }
 
-text_aterm_input::text_aterm_input(std::istream& is)
-  : m_stream(is)
+text_aterm_input::text_aterm_input(std::istream& is, std::function<aterm_transformer> transformer)
+  : m_stream(is),
+    m_transformer(transformer)
 {
   character = next_char();
 }
@@ -158,16 +160,15 @@ void text_aterm_output::write_term_line(const aterm& t)
     // An aterm_appl f(t0, ..., tn) is written as f(t0, ..., tn)
     assert(t.type_is_appl());
 
-    const aterm_appl& appl = down_cast<aterm_appl>(t);
-    const function_symbol& sym = appl.function();
+    aterm_appl appl = m_transformer(down_cast<aterm_appl>(t));
 
-    write_string_with_escape_symbols(sym.name(), m_stream);
+    write_string_with_escape_symbols(appl.function().name(), m_stream);
 
-    if (sym.arity() > 0)
+    if (appl.function().arity() > 0)
     {
       m_stream << "(";
       write_term_line(appl[0]);
-      for (std::size_t i = 1; i < sym.arity(); i++)
+      for (std::size_t i = 1; i < appl.function().arity(); i++)
       {
         m_stream << ",";
         write_term_line(appl[i]);
@@ -211,7 +212,7 @@ aterm_appl text_aterm_input::parse_aterm_appl(const std::string& function_name, 
 
   // Wrap up this function application.
   function_symbol symbol(function_name, arguments.size());
-  return aterm_appl(symbol, arguments.begin(), arguments.end());
+  return m_transformer(aterm_appl(symbol, arguments.begin(), arguments.end()));
 }
 
 aterm_int text_aterm_input::parse_aterm_int(int& character)

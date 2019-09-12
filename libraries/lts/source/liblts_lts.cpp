@@ -67,20 +67,20 @@ static atermpp::function_symbol multi_action_header()
 // Utility functions
 
 /// \brief Converts a probabilistic state into an aterm that encodes it.
-static aterm_list encode_probabilitistic_state(const probabilistic_lts_lts_t::probabilistic_state_t& target, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+static aterm_list encode_probabilitistic_state(const probabilistic_lts_lts_t::probabilistic_state_t& target)
 {
   aterm_list result;
   for(const auto& state : target)
   {
     // Push a (index, probability) pair into the list.
-    result.push_front(data::detail::remove_index(state.probability(), cache));
+    result.push_front(state.probability());
     result.push_front(aterm_int(state.state()));
   }
 
   return result;
 }
 
-static probabilistic_lts_lts_t::probabilistic_state_t decode_probabilistic_state(const atermpp::aterm_list& list, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+static probabilistic_lts_lts_t::probabilistic_state_t decode_probabilistic_state(const atermpp::aterm_list& list)
 {
   // Convert the list into a vector of pairs.
   std::vector<lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>> result;
@@ -92,21 +92,21 @@ static probabilistic_lts_lts_t::probabilistic_state_t decode_probabilistic_state
     ++it;
 
     // The indices are already added to the header before.
-    const lps::probabilistic_data_expression& probability = down_cast<lps::probabilistic_data_expression>(data::detail::add_index(*it, cache));
+    const lps::probabilistic_data_expression& probability = down_cast<lps::probabilistic_data_expression>(*it);
     result.emplace_back(state_number, probability);
   }
 
   return probabilistic_lts_lts_t::probabilistic_state_t(result.begin(), result.end());
 }
 
-static aterm encode_initial_state(const probabilistic_lts_lts_t& lts, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+static aterm encode_initial_state(const probabilistic_lts_lts_t& lts)
 {
-  return encode_probabilitistic_state(lts.initial_probabilistic_state(), cache);
+  return encode_probabilitistic_state(lts.initial_probabilistic_state());
 }
 
-static aterm encode_initial_state(const lts_lts_t& lts, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+static aterm encode_initial_state(const lts_lts_t& lts)
 {
-  return encode_probabilitistic_state(probabilistic_lts_lts_t::probabilistic_state_t(lts.initial_state()), cache);
+  return encode_probabilitistic_state(probabilistic_lts_lts_t::probabilistic_state_t(lts.initial_state()));
 }
 
 static void decode_initial_state(lts_lts_t& lts, const probabilistic_lts_lts_t::probabilistic_state_t& initial_state)
@@ -124,7 +124,7 @@ static void decode_initial_state(probabilistic_lts_lts_t& lts, const probabilist
   lts.set_initial_probabilistic_state(initial_state);
 }
 
-static aterm encode_transition(const lts_lts_t& lts, const transition& trans, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>&)
+static aterm encode_transition(const lts_lts_t& lts, const transition& trans)
 {
   return atermpp::aterm_appl(transition_header(),
     aterm_int(trans.from()),
@@ -132,7 +132,7 @@ static aterm encode_transition(const lts_lts_t& lts, const transition& trans, st
     aterm_int(trans.to()));
 }
 
-static aterm encode_transition(const probabilistic_lts_lts_t& lts, const transition& trans, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+static aterm encode_transition(const probabilistic_lts_lts_t& lts, const transition& trans)
 {
   const probabilistic_lts_lts_t::probabilistic_state_t& probabilistic_state = lts.probabilistic_state(trans.to());
 
@@ -149,12 +149,12 @@ static aterm encode_transition(const probabilistic_lts_lts_t& lts, const transit
     return atermpp::aterm_appl(probabilistic_transition_header(),
       aterm_int(trans.from()),
       aterm_int(lts.apply_hidden_label_map(trans.label())),
-      encode_probabilitistic_state(probabilistic_state, cache));
+      encode_probabilitistic_state(probabilistic_state));
   }
 
 }
 
-static void decode_transition(lts_lts_t& lts, const aterm_appl& appl, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>&)
+static void decode_transition(lts_lts_t& lts, const aterm_appl& appl)
 {
   if (appl.function() == probabilistic_transition_header())
   {
@@ -167,7 +167,7 @@ static void decode_transition(lts_lts_t& lts, const aterm_appl& appl, std::unord
     static_cast<const aterm_int&>(appl[2]).value()));
 }
 
-static void decode_transition(probabilistic_lts_lts_t& lts, const aterm_appl& appl, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+static void decode_transition(probabilistic_lts_lts_t& lts, const aterm_appl& appl)
 {
   std::size_t target_index = 0;
 
@@ -180,7 +180,7 @@ static void decode_transition(probabilistic_lts_lts_t& lts, const aterm_appl& ap
   else
   {
     assert(appl.function() == probabilistic_transition_header());
-    auto target = decode_probabilistic_state(static_cast<const aterm_list&>(appl[2]), cache);
+    auto target = decode_probabilistic_state(static_cast<const aterm_list&>(appl[2]));
     target_index = lts.add_probabilistic_state(target);
   }
 
@@ -220,10 +220,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
 
   try
   {
-    // Used for bottom_up_replace, keeping track of already defined terms.
-    std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-
-    binary_aterm_input stream(filename.empty() ? std::cin : fstream);
+    data::binary_data_input stream(filename.empty() ? std::cin : fstream);
 
     while (true)
     {
@@ -238,12 +235,11 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
       if (term.function() == transition_header() || term.function() == probabilistic_transition_header())
       {
         const aterm_appl& appl = static_cast<const aterm_appl&>(term);
-        decode_transition(lts, appl, cache);
+        decode_transition(lts, appl);
       }
       else if (term.function() == multi_action_header())
       {
-        // Add the indices again, construct a multi_action and add it to the lts.
-        aterm_appl appl = down_cast<aterm_appl>(data::detail::add_index(term, cache));
+        const aterm_appl& appl = static_cast<const aterm_appl&>(term);
 
         const lps::multi_action action = lps::multi_action(
           down_cast<process::action_list>(appl[0]),
@@ -254,12 +250,11 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
       else if (term.function() == atermpp::detail::g_term_pool().as_list())
       {
         // Lists always represent state labels, only need to add the indices.
-        term = data::detail::add_index(term, cache);
         lts.add_state(reinterpret_cast<const state_label_lts&>(term));
       }
       else if (term.function() == lts_header())
       {
-        aterm_appl header = down_cast<aterm_appl>(data::detail::add_index(term, cache));
+        const aterm_appl& header= static_cast<const aterm_appl&>(term);
 
         lts.set_data(data::data_specification(static_cast<const aterm_appl&>(header[0])));
         lts.set_process_parameters(static_cast<const data::variable_list&>(header[1]));
@@ -275,7 +270,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
         }
 
         // The initial state can only be set after the states are known.
-        decode_initial_state(lts, decode_probabilistic_state(static_cast<const aterm_list&>(header[3]), cache));
+        decode_initial_state(lts, decode_probabilistic_state(static_cast<const aterm_list&>(header[3])));
       }
     }
   }
@@ -316,17 +311,14 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
 
   try
   {
-    // Used for bottom_up_replace, keeping track of already defined terms.
-    std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-
-    atermpp::binary_aterm_output stream(filename.empty() ? std::cout : fstream);
+    data::binary_data_output stream(filename.empty() ? std::cout : fstream);
 
     if (lts.has_state_info())
     {
       for (std::size_t i = 0; i < lts.num_state_labels(); ++i)
       {
         // Write state labels as such, we assume that all list terms without headers are state labels.
-        stream.write_term(data::detail::remove_index(lts.state_label(i), cache));
+        stream.write_term(lts.state_label(i));
       }
     }
 
@@ -334,13 +326,13 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
     {
       for (std::size_t i = 1; i < lts.num_action_labels(); ++i)
       {
-        stream.write_term(data::detail::remove_index(atermpp::aterm_appl(multi_action_header(), lts.action_label(i).actions(), lts.action_label(i).time()), cache));
+        stream.write_term(atermpp::aterm_appl(multi_action_header(), lts.action_label(i).actions(), lts.action_label(i).time()));
       }
     }
 
     for (auto& trans : lts.get_transitions())
     {
-      stream.write_term(encode_transition(lts, trans, cache));
+      stream.write_term(encode_transition(lts, trans));
     }
 
     // Write the header of the labelled transition system at the end, because the initial state must be set of adding the transitions.
@@ -348,11 +340,11 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
                 data::detail::data_specification_to_aterm(lts.data()),
                 lts.process_parameters(),
                 lts.action_label_declarations(),
-                encode_initial_state(lts, cache),
+                encode_initial_state(lts),
                 aterm_int(lts.num_states()));
 
     // Write the header with the indices of dedicated terms removed.
-    stream.write_term(data::detail::remove_index(header, cache));
+    stream.write_term(header);
   }
   catch (std::ofstream::failure&)
   {

@@ -27,7 +27,6 @@ public:
   /// \brief Write the given term to the stream, this aterm is also returned from
   ///        the corresponding aterm_input::read_term() call.
   virtual void write_term(const aterm& term) = 0;
-
 };
 
 /// \brief The interface for a class that reads aterm from a stream.
@@ -39,8 +38,15 @@ public:
   /// \brief Reads a single term from this stream.
   /// \details The default constructed term aterm() indicates the end of the stream.
   virtual aterm read_term() = 0;
-
 };
+
+/// \brief A function that is applied to all terms. The resulting term should only use
+///        a subset of the original arguments (i.e. not introduce new terms).
+/// \details Typical usage is removing the index traits from function symbols that represent operators.
+using aterm_transformer = aterm_appl(const aterm_appl&);
+
+/// \brief The default transformer that maps each term to itself.
+static inline aterm_appl identity(const aterm_appl& x) { return x; }
 
 /// \brief Writes terms in a streamable binary aterm format to an output stream.
 /// \details The streamable aterm format:
@@ -58,7 +64,8 @@ class binary_aterm_output : public aterm_output
 {
 public:
   /// \brief Provide the output stream to which the terms are written.
-  binary_aterm_output(std::ostream& os);
+  /// \param transformer A function transforming the function symbols before writing, see the type for details.
+  binary_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer = identity);
   ~binary_aterm_output() override;
 
   /// \brief Writes an aterm in a compact binary format that keeps subterms shared. The term that is
@@ -69,13 +76,14 @@ private:
   /// \brief Write a function symbol to the output stream.
   std::size_t write_function_symbol(const function_symbol& symbol);
 
-  mcrl2::utilities::obitstream m_stream;
-
   /// \returns The number of bits needed to index terms.
   unsigned int term_index_width();
 
   /// \returns The number of bits needed to index function symbols.
   unsigned int function_symbol_index_width();
+
+  mcrl2::utilities::obitstream m_stream;
+  std::function<aterm_transformer> m_transformer;
 
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
@@ -89,18 +97,20 @@ class binary_aterm_input : public aterm_input
 {
 public:
   /// \brief Provide the input stream from which terms are read.
-  binary_aterm_input(std::istream& is);
+  /// \param transformer A function transforming the function symbols after reading, see the type for details.
+  binary_aterm_input(std::istream& is, std::function<aterm_transformer> transformer = identity);
 
   aterm read_term() override;
 
 private:
-  mcrl2::utilities::ibitstream m_stream;
-
   /// \returns The number of bits needed to index terms.
   unsigned int term_index_width();
 
   /// \returns The number of bits needed to index function symbols.
   unsigned int function_symbol_index_width();
+
+  mcrl2::utilities::ibitstream m_stream;
+  std::function<aterm_transformer> m_transformer;
 
   unsigned int m_term_index_width; ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width; ///< caches the result of function_symbol_index_width().
@@ -114,7 +124,8 @@ class text_aterm_output : public aterm_output
 {
 public:
   /// \param newline When true each term is written on a new line.
-  text_aterm_output(std::ostream& os, bool newline = false);
+  /// \param transformer A function transforming the function symbols before writing, see the type for details.
+  text_aterm_output(std::ostream& os, std::function<aterm_transformer> transformer = identity, bool newline = false);
 
   void write_term(const aterm& term) override;
 
@@ -123,6 +134,7 @@ private:
   void write_term_line(const aterm& term);
 
   std::ostream& m_stream;
+  std::function<aterm_transformer> m_transformer;
 
   bool m_newline = false; ///< Indicates that terms are separated by a newline.
 };
@@ -131,7 +143,7 @@ private:
 class text_aterm_input : public aterm_input
 {
 public:
-  text_aterm_input(std::istream& os);
+  text_aterm_input(std::istream& os, std::function<aterm_transformer> transformer = identity);
 
   aterm read_term() override;
 
@@ -164,6 +176,7 @@ private:
   int next_char(bool skip_whitespace = true, bool required = false);
 
   std::istream& m_stream;
+  std::function<aterm_transformer> m_transformer;
 
   std::size_t m_line = 0; ///< The line number of the current character.
   std::size_t m_column = 0; ///< The column of the current character.
