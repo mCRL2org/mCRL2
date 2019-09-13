@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_CONFLUENCE_H
 #define MCRL2_LPS_CONFLUENCE_H
 
+#include <memory>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/join.h"
@@ -20,6 +21,7 @@
 #include "mcrl2/data/standard.h" // equal_to
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/smt/solver.h"
 
 namespace mcrl2 {
 
@@ -145,7 +147,7 @@ bool disjoint(const confluence_summand& summand1, const confluence_summand& summ
          && has_empty_intersection(summand1.changed, summand2.changed);
 }
 
-/// \brief Creates an identifier for the for the ctau action
+/// \brief Creates an identifier for the ctau action
 inline process::action_label make_ctau_act_id()
 {
   static atermpp::aterm_appl ctau_act_id = atermpp::aterm_appl(core::detail::function_symbol_ActId(), atermpp::aterm_appl(atermpp::function_symbol("ctau", 0)), atermpp::aterm_list());
@@ -289,8 +291,10 @@ class confluence_checker
     data::variable_list m_process_parameters;
     data::rewriter m_rewr;
     mutable data::mutable_indexed_substitution<> m_sigma;
+    std::unique_ptr<smt::smt_solver> m_solver;
 
-    bool is_tautology(data::data_expression x) const
+    // check if x is a tautology using the data rewriter
+    bool is_tautology_rewriter(data::data_expression x) const
     {
       data::one_point_rule_rewriter R_one_point;
       data::quantifiers_inside_rewriter R_quantifiers_inside;
@@ -299,6 +303,21 @@ class confluence_checker
       x = data::make_forall(data::variable_list(freevars.begin(), freevars.end()), x);
       x = m_rewr(x);
       return is_true(x);
+    }
+
+    // check if x is a tautology using an smt solver
+    bool is_tautology_smt(const data::data_expression& x) const
+    {
+      std::set<data::variable> freevars = data::find_free_variables(x);
+      // determine if the negation is satisfiable
+      bool result = m_solver->solve(data::variable_list(freevars.begin(), freevars.end()), data::sort_bool::not_(x));
+      return !result;
+    }
+
+    // check if x is a tautology
+    bool is_tautology(const data::data_expression& x) const
+    {
+      return m_solver ? is_tautology_smt(x) : is_tautology_rewriter(x);
     }
 
     template <typename ConfluenceCondition>
@@ -366,8 +385,13 @@ class confluence_checker
 
     /// \brief Applies confluent reduction to an LPS
     template <typename Specification>
-    void run(Specification& lpsspec, char confluence_type)
+    void run(Specification& lpsspec, char confluence_type, bool use_smt_solver = false)
     {
+      if (use_smt_solver)
+      {
+        m_solver = std::unique_ptr<smt::smt_solver>(new smt::smt_solver(lpsspec.data()));
+      }
+
       multi_action ctau{make_ctau_action()};
       std::vector<std::size_t> I = compute_confluent_summands(lpsspec, confluence_type);
       auto& summands = lpsspec.process().action_summands();
