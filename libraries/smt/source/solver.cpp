@@ -367,7 +367,6 @@ static const native_translation_t reconstruct_divmod = [](const data::data_expre
 
 } // namespace detail
 
-inline
 native_translations initialise_native_translation(const data::data_specification& dataspec)
 {
   using namespace detail;
