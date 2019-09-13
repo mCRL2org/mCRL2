@@ -24,56 +24,28 @@ namespace bes {
 namespace detail {
 
 // transforms BooleanVariable to BooleanVariableNoIndex
-struct index_remover
+static atermpp::aterm_appl remove_index_impl(const atermpp::aterm_appl& x)
 {
-  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  if (x.function() == core::detail::function_symbol_BooleanVariable())
   {
-    if (x.function() == core::detail::function_symbol_BooleanVariable())
-    {
-      return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariableNoIndex(), x.begin(), --x.end());
-    }
-    return x;
+    return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariableNoIndex(), x.begin(), --x.end());
   }
-};
+  return x;
+}
 
 // transforms BooleanVariableNoIndex to BooleanVariable
-struct index_adder
+static atermpp::aterm_appl add_index_impl(const atermpp::aterm_appl& x)
 {
-  atermpp::aterm_appl operator()(const atermpp::aterm_appl& x) const
+  if (x.function() == core::detail::function_symbol_BooleanVariableNoIndex())
   {
-    if (x.function() == core::detail::function_symbol_BooleanVariableNoIndex())
-    {
-      const bes::boolean_variable& y = atermpp::down_cast<const bes::boolean_variable>(x);
-      std::size_t index = core::index_traits<bes::boolean_variable, bes::boolean_variable_key_type, 1>::insert(y.name());
-      return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariable(), x[0], atermpp::aterm_int(index));
-    }
-    return x;
+    const bes::boolean_variable& y = atermpp::down_cast<const bes::boolean_variable>(x);
+    std::size_t index = core::index_traits<bes::boolean_variable, bes::boolean_variable_key_type, 1>::insert(y.name());
+    return atermpp::aterm_appl(core::detail::function_symbol_BooleanVariable(), x[0], atermpp::aterm_int(index));
   }
-};
-
-inline
-atermpp::aterm add_index(const atermpp::aterm& x)
-{
-  return atermpp::bottom_up_replace(x, detail::index_adder());
+  return x;
 }
 
-inline
-atermpp::aterm remove_index(const atermpp::aterm& x)
-{
-  return atermpp::bottom_up_replace(x, detail::index_remover());
-}
 
-inline
-atermpp::aterm add_index(const atermpp::aterm& x, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
-{
-  return atermpp::bottom_up_replace(x, detail::index_adder(), cache);
-}
-
-inline
-atermpp::aterm remove_index(const atermpp::aterm& x, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
-{
-  return atermpp::bottom_up_replace(x, detail::index_remover(), cache);
-}
 
 } // namespace detail
 

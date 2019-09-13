@@ -272,11 +272,13 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 {
   atermpp::aterm_list eqn_list;
   const std::vector<boolean_equation>& eqn = p.equations();
+
   for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
   {
     atermpp::aterm a = boolean_equation_to_aterm(*i);
     eqn_list.push_front(a);
   }
+
   return atermpp::aterm_appl(core::detail::function_symbol_BES(), eqn_list, p.initial_state());
 }
 
@@ -287,14 +289,15 @@ atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_syst
 /// \param source The source from which the stream originates. Used for error messages.
 void boolean_equation_system::load(std::istream& stream, bool binary, const std::string& source)
 {
-  atermpp::aterm t = core::load_aterm(stream, binary, "BES", source);
-  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-  t = bes::detail::add_index(t, cache);
+  atermpp::aterm t = core::load_aterm(stream, binary, "BES", source, bes::detail::add_index_impl);
+
   if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::down_cast<atermpp::aterm_appl>(t)))
   {
     throw mcrl2::runtime_error("The loaded ATerm is not a BES.");
   }
+
   init_term(atermpp::down_cast<atermpp::aterm_appl>(t));
+
   if (!is_well_typed())
   {
     throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::load())");
@@ -312,11 +315,11 @@ void boolean_equation_system::save(std::ostream& stream, bool binary) const
   assert(is_well_typed());
   if (binary)
   {
-    atermpp::write_term_to_binary_stream(bes::detail::remove_index(boolean_equation_system_to_aterm(*this)), stream);
+    atermpp::binary_aterm_output(stream, bes::detail::remove_index_impl).write_term(boolean_equation_system_to_aterm(*this));
   }
   else
   {
-    atermpp::write_term_to_text_stream(bes::detail::remove_index(boolean_equation_system_to_aterm(*this)), stream);
+    atermpp::text_aterm_output(stream, bes::detail::remove_index_impl).write_term(boolean_equation_system_to_aterm(*this));
   }
 }
 
