@@ -25,6 +25,7 @@
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_options.h"
+#include "mcrl2/lps/find_representative.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
@@ -385,91 +386,14 @@ class explorer: public abortable
       return result;
     }
 
-    // This function is based an iterative version of Tarjan's strongly connected components algorithm.
-    // It returns the smallest node of the first SCC that is detected. The first SCC is a TSCC, meaning
-    // that it has no outgoing edges. In a confluent tau graph there is only one TSCC, so this should
-    // guarantee a unique representative.
-    // N.B. The implementation is based on https://llbit.se/?p=3379
+    // Find a unique representative in the confluent tau-graph reachable from u0.
     template <typename SummandSequence>
     state find_representative(state& u0, const SummandSequence& summands)
     {
-      using utilities::detail::contains;
       data::data_expression_list process_parameter_undo = process_parameter_values();
-
-      std::vector<state> stack;
-      std::map<state, std::size_t> low;
-      std::map<state, std::size_t> disc;
-
-      std::map<state, std::vector<state>> successors;
-      std::vector<std::pair<state, std::size_t>> work;
-
-      successors[u0] = generate_successors(u0, summands);
-      work.emplace_back(std::make_pair(u0, 0));
-
-      while (!work.empty())
-      {
-        state u = work.back().first;
-        std::size_t i = work.back().second;
-        work.pop_back();
-
-        if (i == 0)
-        {
-          std::size_t k = disc.size();
-          disc[u] = k;
-          low[u] = k;
-          stack.push_back(u);
-        }
-
-        bool recurse = false;
-        const std::vector<state>& succ = successors[u];
-        for (std::size_t j = i; j < succ.size(); j++)
-        {
-          const state& v = succ[j];
-          if (disc.find(v) == disc.end())
-          {
-            successors[v] = generate_successors(v, summands);
-            work.emplace_back(std::make_pair(u, j + 1));
-            work.emplace_back(std::make_pair(v, 0));
-            recurse = true;
-            break;
-          }
-          else if (contains(stack, v))
-          {
-            low[u] = std::min(low[u], disc[v]);
-          }
-        }
-        if (recurse)
-        {
-          continue;
-        }
-        if (disc[u] == low[u])
-        {
-          // an SCC has been found; return the node with the minimum value in this SCC
-          state result = u;
-          while (true)
-          {
-            const auto& v = stack.back();
-            if (v == u)
-            {
-              break;
-            }
-            if (v < result)
-            {
-              result = v;
-            }
-            stack.pop_back();
-          }
-          set_process_parameter_values(process_parameter_undo);
-          return result;
-        }
-        if (!work.empty())
-        {
-          state v = u;
-          u = work.back().first;
-          low[u] = std::min(low[u], low[v]);
-        }
-      }
-      throw mcrl2::runtime_error("find_representative did not find a solution");
+      state result = lps::find_representative(u0, [&](const state& u) { return generate_successors(u, summands); });
+      set_process_parameter_values(process_parameter_undo);
+      return result;
     }
 
     template <typename DataExpressionSequence>
