@@ -85,38 +85,6 @@ atermpp::aterm remove_index(const atermpp::aterm& x, std::unordered_map<atermpp:
 
 } // namespace detail
 
-class binary_data_output : public atermpp::binary_aterm_output
-{
-public:
-  binary_data_output(std::ostream& os)
-    : atermpp::binary_aterm_output(os, std::bind(data::detail::remove_index_impl, std::placeholders::_1))
-  {}
-};
-
-class text_data_output : public atermpp::text_aterm_output
-{
-public:
-  text_data_output(std::ostream& os)
-    : atermpp::text_aterm_output(os, std::bind(data::detail::remove_index_impl, std::placeholders::_1))
-  {}
-};
-
-class binary_data_input : public atermpp::binary_aterm_input
-{
-public:
-  binary_data_input(std::istream& is)
-    : atermpp::binary_aterm_input(is, std::bind(data::detail::add_index_impl, std::placeholders::_1))
-  {}
-};
-
-class text_data_input : public atermpp::text_aterm_input
-{
-public:
-  text_data_input(std::istream& is)
-    : atermpp::text_aterm_input(is, std::bind(data::detail::add_index_impl, std::placeholders::_1))
-  {}
-};
-
 } // namespace data
 
 } // namespace mcrl2
