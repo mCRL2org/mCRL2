@@ -1381,15 +1381,21 @@ class partial_order_reduction_algorithm
       };
       typedef std::pair<propositional_variable_instantiation, todo_state> todo_pair;
 
-      std::unordered_set<propositional_variable_instantiation> seen;
-      std::list<todo_pair> todo{todo_pair(X_init, NEW)};
+      // The set seen also stores for each node an index and a boolean that expresses whether
+      // the node is currently in the DFS stack.
+      std::unordered_map<propositional_variable_instantiation, std::pair<std::size_t, bool>> seen;
+      std::deque<todo_pair> todo{todo_pair(X_init, NEW)};
+      // Each state is given unique index, based on the order of discovery.
+      // This means that the indices in the DFS stack are sorted from low to high.
+      std::size_t index = 0;
 
       {
         std::size_t rank = m_equation_index.rank(X_init.name());
         std::size_t i = m_equation_index.index(X_init.name());
         bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
         emit_node(X_init, is_conjunctive, rank);
-        seen.insert(X_init);
+        seen.insert(std::make_pair(X_init, std::make_pair(index, true)));
+        index++;
       }
 
       std::size_t iteration = 0;
@@ -1403,6 +1409,7 @@ class partial_order_reduction_algorithm
         if (s == DONE || s == DONE_PARTIALLY)
         {
           todo.pop_back();
+          seen[X_e].second = false;
           continue;
         }
 
@@ -1415,27 +1422,45 @@ class partial_order_reduction_algorithm
           mCRL2log(log::debug) << "stubborn_set(X_e) = " << print_summand_set(stubborn_set_X_e) << std::endl;
           next = succ(X_e, stubborn_set_X_e & en_X_e);
 
-          bool fully_expanded = en_X_e.is_subset_of(stubborn_set_X_e);
-          s = fully_expanded ? DONE : DONE_PARTIALLY;
+          bool vis_expanded = stubborn_set_X_e.is_subset_of(m_vis);
+          s = vis_expanded ? DONE : DONE_PARTIALLY;
 
           // Check if a cycle is closed
           // At the same time, check whether some node on the stack is fully expanded
           // If both are true, some node will be fully expanded
           bool cycle_found = false;
-          auto cycle_node = todo.begin();
-          bool fully_expanded_node_found = false;
-          for (auto it = todo.begin(); it != todo.end() && !fully_expanded_node_found; ++it)
+          std::size_t min_index = std::numeric_limits<std::size_t>::max();
+          propositional_variable_instantiation min_node;
+          for (const propositional_variable_instantiation& Y_f: next)
           {
-            if (contains(next, it->first))
+            auto node = seen.find(Y_f);
+            if (node == seen.end())
+            {
+              continue;
+            }
+            std::size_t node_index = node->second.first;
+            std::size_t node_instack = node->second.second;
+            if (node_instack && node_index < min_index)
             {
               cycle_found = true;
-              cycle_node = it;
+              min_index = std::min(min_index, node_index);
+              min_node = Y_f;
             }
-            fully_expanded_node_found |= cycle_found && (it->second == STARTS_CYCLE || it->second == DONE);
           }
-          if (use_condition_L && cycle_found && !fully_expanded_node_found)
+          bool fully_expanded_node_found = false;
+          auto it = todo.rbegin();
+          for (; cycle_found && !fully_expanded_node_found; ++it)
           {
-            cycle_node->second = STARTS_CYCLE;
+            assert(it != todo.rend());
+            fully_expanded_node_found |= (it->second == STARTS_CYCLE || it->second == DONE);
+            if(it->first == min_node)
+            {
+              break;
+            }
+          }
+          if (cycle_found && !fully_expanded_node_found)
+          {
+            it->second = STARTS_CYCLE;
           }
         }
         else
@@ -1448,13 +1473,14 @@ class partial_order_reduction_algorithm
         mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
         for (const propositional_variable_instantiation& Y_f: next)
         {
-          if (!contains(seen, Y_f))
+          if (seen.find(Y_f) == seen.end())
           {
             std::size_t rank = m_equation_index.rank(Y_f.name());
             std::size_t i = m_equation_index.index(Y_f.name());
             bool is_conjunctive = m_pbes.equations()[i].is_conjunctive();
             emit_node(Y_f, is_conjunctive, rank);
-            seen.insert(Y_f);
+            seen.insert(std::make_pair(Y_f, std::make_pair(index, true)));
+            index++;
             todo.emplace_back(Y_f, NEW);
           }
         }
