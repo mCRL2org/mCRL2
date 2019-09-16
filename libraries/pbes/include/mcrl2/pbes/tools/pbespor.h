@@ -118,9 +118,9 @@ struct pbespor_pbes_composer
     return result;
   }
 
-  pbes run(const pbes& p, data::rewrite_strategy rewrite_strategy, bool use_condition_L)
+  pbes run(const pbes& p, data::rewrite_strategy rewrite_strategy, bool use_condition_L, bool use_smt_solver)
   {
-    partial_order_reduction_algorithm algorithm(p, rewrite_strategy);
+    partial_order_reduction_algorithm algorithm(p, rewrite_strategy, use_smt_solver);
     algorithm.print();
 
     algorithm.explore(
@@ -152,14 +152,15 @@ void pbespor(const std::string& input_filename,
              const utilities::file_format& input_format,
              const utilities::file_format& output_format,
              data::rewrite_strategy rewrite_strategy,
-             bool use_condition_L
+             bool use_condition_L,
+             bool use_smt_solver
             )
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
   algorithms::normalize(p);
   pbespor_pbes_composer composer;
-  pbes result = composer.run(p, rewrite_strategy, use_condition_L);
+  pbes result = composer.run(p, rewrite_strategy, use_condition_L, use_smt_solver);
   save_pbes(result, output_filename, output_format);
 }
 

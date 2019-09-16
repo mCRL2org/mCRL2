@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/unify_parameters.h"
+#include "mcrl2/smt/solver.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/skip.h"
 
@@ -77,6 +78,8 @@ struct summand_class
   data::variable_list e;
   data::data_expression f;
   data::data_expression_list g;
+  /// \brief Encodes the dependency relation belonging to this summand_class
+  /// \detail nxt[i] contains j iff X_i --this--> X_j
   std::vector<std::set<std::size_t>> nxt;
   summand_set NES;
   summand_set DNA;
@@ -271,6 +274,8 @@ class partial_order_reduction_algorithm
     // One NES for every predicate variable X_i that can be used for summand
     // class k when !depends(i,k).
     std::vector<summand_set> m_dependency_nes;
+
+    smt::smt_solver* m_solver;
 
     std::size_t summand_index(const srf_summand& summand) const
     {
@@ -581,17 +586,32 @@ class partial_order_reduction_algorithm
       return result;
     }
 
-    bool is_true(const data::data_expression& expr) const
+    bool is_true(data::data_expression expr)
     {
-      data::data_expression result = m_rewr(data::one_point_rule_rewrite(data::quantifiers_inside_rewrite(m_rewr(expr))));
-      if (result != data::sort_bool::true_() && result != data::sort_bool::false_())
+      if(m_solver != nullptr)
       {
-        mCRL2log(log::verbose) << "Cannot rewrite " << result << " any further" << std::endl;
+        bool negate = false;
+        if(data::is_forall(expr))
+        {
+          negate = true;
+          const data::forall& f = atermpp::down_cast<data::forall>(expr);
+          expr = make_abstraction(data::exists_binder(), f.variables(), data::sort_bool::not_(f.body()));
+        }
+        // data::data_expression result = data::one_point_rule_rewrite(m_rewr(expr));
+        return negate ^ m_solver->solve(data::variable_list(), expr);
       }
-      return result == data::sort_bool::true_();
+      else
+      {
+        data::data_expression result = m_rewr(data::one_point_rule_rewrite(data::quantifiers_inside_rewrite(m_rewr(expr))));
+        if (result != data::sort_bool::true_() && result != data::sort_bool::false_())
+        {
+          mCRL2log(log::verbose) << "Cannot rewrite " << result << " any further" << std::endl;
+        }
+        return result == data::sort_bool::true_();
+      }
     }
 
-    bool summand_can_enable_data(const std::size_t k, const std::size_t k1) const
+    bool summand_can_enable_data(const std::size_t k, const std::size_t k1)
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
@@ -771,7 +791,7 @@ class partial_order_reduction_algorithm
       return al.empty() ? expr : data::where_clause(expr, al);
     }
 
-    tribool left_accords_data(std::size_t k, std::size_t k1) const
+    tribool left_accords_data(std::size_t k, std::size_t k1)
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
@@ -823,7 +843,7 @@ class partial_order_reduction_algorithm
       return is_true(condition) ? maybe : no;
     }
 
-    tribool square_accords_data(std::size_t k, std::size_t k1) const
+    tribool square_accords_data(std::size_t k, std::size_t k1)
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
@@ -876,7 +896,7 @@ class partial_order_reduction_algorithm
       return is_true(condition) ? maybe : no;
     }
 
-    tribool triangle_accords_data(std::size_t k, std::size_t k1) const
+    tribool triangle_accords_data(std::size_t k, std::size_t k1)
     {
       const summand_class& summand_k = m_summand_classes[k];
       const summand_class& summand_k1 = m_summand_classes[k1];
@@ -1299,7 +1319,7 @@ class partial_order_reduction_algorithm
     }
 
   public:
-    explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy)
+    explicit partial_order_reduction_algorithm(const pbes& p, data::rewrite_strategy strategy, bool use_smt_solver)
      : m_rewr(p.data(),
               //TODO temporarily disabled used_data_equation_selector so the rewriter can rewrite accordance conditions
               // data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()),
@@ -1308,7 +1328,8 @@ class partial_order_reduction_algorithm
        m_enumerator(m_pbes_rewr, p.data(), m_rewr, m_id_generator, false),
        m_pbes(pbes2srf(p)),
        m_equation_index(m_pbes),
-       m_dependency_nes(m_pbes.equations().size())
+       m_dependency_nes(m_pbes.equations().size()),
+       m_solver(use_smt_solver ? new smt::smt_solver(p.data()) : nullptr)
     {
       unify_parameters(m_pbes);
 
@@ -1331,6 +1352,14 @@ class partial_order_reduction_algorithm
 
       mCRL2log(log::verbose) << p << std::endl;
       print_pbes();
+    }
+
+    ~partial_order_reduction_algorithm()
+    {
+      if(m_solver != nullptr)
+      {
+        delete m_solver;
+      }
     }
 
     const propositional_variable_instantiation& initial_state() const

@@ -4,4 +4,5 @@ add_mcrl2_tool(pbespor
   DEPENDS
     mcrl2_pbes
     mcrl2_bes
+    mcrl2_smt
 )

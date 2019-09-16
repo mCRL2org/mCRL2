@@ -36,12 +36,14 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
   protected:
     typedef pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool>>>> super;
 
-    bool m_use_condition_L;
+    bool m_use_condition_L = true;
+    bool m_use_smt_solver = false;
 
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
-      m_use_condition_L = parser.options.count("no-l") == 0;
+      m_use_condition_L = !parser.has_option("no-l");
+      m_use_smt_solver = parser.has_option("use-smt-solver");
     }
 
     void add_options(interface_description& desc) override
@@ -49,6 +51,7 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
       super::add_options(desc);
       desc.add_option("no-l",
                   "do not apply the condition L");
+       desc.add_option("use-smt-solver", "Use the SMT solver Z3 (must be in the path)", 's');
     }
 
   public:
@@ -73,7 +76,8 @@ class pbespor_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool<r
               pbes_input_format(),
               pbes_output_format(),
               rewrite_strategy(),
-              m_use_condition_L
+              m_use_condition_L,
+              m_use_smt_solver
              );
 
       return true;
