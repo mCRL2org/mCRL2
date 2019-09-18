@@ -10,6 +10,7 @@
 
 #include "mcrl2/smt/child_process.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/platform.h"
 
 #ifdef MCRL2_PLATFORM_WINDOWS
   #include <windows.h>
