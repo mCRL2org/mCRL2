@@ -88,7 +88,9 @@
 //#include "mcrl2/lts/detail/check_complexity.h"
 //#include "mcrl2/lts/detail/fixed_vector.h"
 
-//#include <algorithm> // for std::lower_bound()
+#ifndef NDEBUG
+//    #include <algorithm> // for std::lower_bound()
+#endif
 
 // My provisional recommendation is to always use simple lists and pool
 // allocators.  Using standard allocation and standard lists is 5-15% slower and
@@ -106,7 +108,9 @@
 #define USE_POOL_ALLOCATOR
 
 #ifdef USE_POOL_ALLOCATOR
-    #include <type_traits> // for std::is_trivially_destructible<class>
+    #ifndef NDEBUG
+        #include <type_traits> // for std::is_trivially_destructible<class>
+    #endif
 
     #define ONLY_IF_POOL_ALLOCATOR(...) __VA_ARGS__
     #ifndef USE_SIMPLE_LIST
@@ -3410,28 +3414,25 @@ class bisim_partitioner_dnj
         // refine_partition_until_it_becomes_stable().
 
         // for all blocks
+        const permutation_entry* s_iter(&part_st.permutation.front());          assert(s_iter <= &part_st.permutation.back());
+        do
         {
-            const permutation_entry* s_iter(&part_st.permutation.front());      assert(s_iter <= &part_st.permutation.back());
-            do
-            {
-                const block_t* const B(s_iter->st->bl.ock);
-                // for all block_bunch-slices of the block
-                for (const block_bunch_slice_t& block_bunch :
-                                                         B->stable_block_bunch)
-                {                                                               assert(block_bunch.is_stable());  assert(!block_bunch.empty());
-                    const pred_entry* const pred(block_bunch.end[-1].pred);     assert(pred->source->bl.ock == B);
+            const block_t* const B(s_iter->st->bl.ock);
+            // for all block_bunch-slices of the block
+            for(const block_bunch_slice_t& block_bunch : B->stable_block_bunch)
+            {                                                                   assert(block_bunch.is_stable());  assert(!block_bunch.empty());
+                const pred_entry* const pred(block_bunch.end[-1].pred);         assert(pred->source->bl.ock == B);
                                                                                 assert(nullptr != pred->action_block->succ);
-                    /* add a transition from the source block to the goal    */ assert(pred->action_block->succ->block_bunch->pred == pred);
-                    /* block with the indicated label.                       */ assert(pred->action_block->succ->block_bunch->slice == &block_bunch);
-                    label_type label(
+                /* add a transition from the source block to the goal block  */ assert(pred->action_block->succ->block_bunch->pred == pred);
+                /* with the indicated label.                                 */ assert(pred->action_block->succ->block_bunch->slice == &block_bunch);
+                label_type label(
                            block_bunch.bunch->next_nontrivial_and_label.label); assert(0 <= label);  assert(label < action_label.size());
-                    aut.add_transition(transition(B->seqnr, label,
+                aut.add_transition(transition(B->seqnr, label,
                                                  pred->target->bl.ock->seqnr));
-                }
-                s_iter = B->end;
             }
-            while (s_iter <= &part_st.permutation.back());
+            s_iter = B->end;
         }
+        while (s_iter <= &part_st.permutation.back());
 
         // Merge the states, by setting the state labels of each state to the
         // concatenation of the state labels of its equivalence class.
@@ -3716,10 +3717,10 @@ class bisim_partitioner_dnj
         block_bunch_entry* next_block_bunch(1 + &part_tr.block_bunch.front());
         for (const transition& t: aut.get_transitions())
         {
-            state_info_entry* const source =
-                                        &part_st.state_info.front() + t.from();
-            state_info_entry* const target =
-                                        &part_st.state_info.front() + t.to();
+            state_info_entry* const
+                                source(&part_st.state_info.front() + t.from());
+            state_info_entry* const
+                                target(&part_st.state_info.front() + t.to());
             succ_entry* succ_pos;
             block_bunch_entry* block_bunch_pos;
             pred_entry* pred_pos;
@@ -3961,8 +3962,7 @@ class bisim_partitioner_dnj
                                                                                                 const succ_entry* const succ_iter(action_block->succ);
                                                                                                 assert(nullptr != succ_iter);
                                                                                                 assert(succ_iter->block_bunch->slice.is_null());
-                                                                                                const pred_entry* const pred_iter(
-                                                                                                                                 succ_iter->block_bunch->pred);
+                                                                                                const pred_entry*const pred_iter(succ_iter->block_bunch->pred);
                                                                                                 assert(action_block == pred_iter->action_block);
                                                                                                 assert(part_tr.block_bunch_inert_begin <=
                                                                                                                                        succ_iter->block_bunch);
@@ -3988,8 +3988,8 @@ class bisim_partitioner_dnj
                                                                                             assert(part_tr.block_bunch_inert_begin ==
                                                                                                                               1 + &part_tr.block_bunch.back());
                                                                                         }
-                                                                                        const action_block_entry* action_slice_end(
-                                                                                                                             part_tr.action_block_inert_begin);
+                                                                                        const action_block_entry*
+                                                                                                            action_slice_end(part_tr.action_block_inert_begin);
                                                                                         // for all action labels and bunches
                                                                                         label_type label(0);
                                                                                         assert(label < action_label.size());
@@ -4000,8 +4000,8 @@ class bisim_partitioner_dnj
                                                                                             assert(action_label[label].begin <= action_slice_end);
                                                                                             assert(action_slice_end <= part_tr.action_block_inert_begin);
                                                                                             // for all action_block slices
-                                                                                            for (const action_block_entry* action_block_slice_end(
-                                                                                                                                            action_slice_end);
+                                                                                            for (const action_block_entry*
+                                                                                                                     action_block_slice_end(action_slice_end);
                                                                                                           action_label[label].begin < action_block_slice_end; )
                                                                                             {
                                                                                                 const action_block_entry* const action_block_slice_begin(
@@ -4012,8 +4012,8 @@ class bisim_partitioner_dnj
                                                                                                 assert(nullptr != action_block_slice_begin->succ);
                                                                                                 const block_t* const target_block(action_block_slice_begin->
                                                                                                                       succ->block_bunch->pred->target->bl.ock);
-                                                                                                const bunch_t* const bunch(action_block_slice_begin->
-                                                                                                                                                succ->bunch());
+                                                                                                const bunch_t* const
+                                                                                                                bunch(action_block_slice_begin->succ->bunch());
                                                                                                 if (previous_bunch != bunch)
                                                                                                 {
                                                                                                     assert(nullptr == previous_bunch);
@@ -4045,8 +4045,8 @@ class bisim_partitioner_dnj
                                                                                                     --action_block;
                                                                                                     const succ_entry* const succ_iter(action_block->succ);
                                                                                                     assert(nullptr != succ_iter);
-                                                                                                    const pred_entry* const pred_iter(
-                                                                                                                                 succ_iter->block_bunch->pred);
+                                                                                                    const pred_entry* const
+                                                                                                                       pred_iter(succ_iter->block_bunch->pred);
                                                                                                     assert(action_block == pred_iter->action_block);
                                                                                                     assert(succ_iter->block_bunch <
                                                                                                                               part_tr.block_bunch_inert_begin);
@@ -4133,8 +4133,8 @@ class bisim_partitioner_dnj
             action_block_entry* splitter_iter(bunch_T_a_B->begin);              assert(splitter_iter < bunch_T_a_B->end);
             do
             {                                                                   assert(nullptr != splitter_iter->succ);
-                state_info_entry* const source(
-                               splitter_iter->succ->block_bunch->pred->source); assert(splitter_iter->succ->block_bunch->pred->action_block == splitter_iter);
+                state_info_entry* const
+                        source(splitter_iter->succ->block_bunch->pred->source); assert(splitter_iter->succ->block_bunch->pred->action_block == splitter_iter);
                 // Line 1.10: Mark all transitions in bunch_T_a_B
                     // actually we make the initial state red
                 bool const first_transition_of_state(
@@ -4198,8 +4198,8 @@ class bisim_partitioner_dnj
                                                                                 #endif
                 if (1 < refine_block->size())
                 {
-                    permutation_entry* const refine_block_begin(
-                                                          refine_block->begin); assert(refine_block_begin->st->pos == refine_block_begin);
+                    permutation_entry* const
+                                       refine_block_begin(refine_block->begin); assert(refine_block_begin->st->pos == refine_block_begin);
                     // Line 1.14: Remove T'_B--> from the list of instable
                     //            block--bunch-slices
                     // Line 1.15: (R, U) := split(B, T'_B-->)
@@ -4219,8 +4219,8 @@ class bisim_partitioner_dnj
                         {                                                       assert(splitter->bunch == bunch_T_a_B);
                             // Line 1.18: Remove T_U--> \ T_U--a-->B' from the
                             //            list of instable block-bunch-slices
-                            block_t* const block_U(
-                                               refine_block_begin->st->bl.ock); assert(block_U->end == refine_block->begin);
+                            block_t* const
+                                       block_U(refine_block_begin->st->bl.ock); assert(block_U->end == refine_block->begin);
                             block_bunch_slice_iter_t blue_splitter(
                                          part_tr.unstable_block_bunch.begin()); assert(0 == block_U->marked_size());
                             if(part_tr.unstable_block_bunch.end() !=
@@ -4345,13 +4345,13 @@ class bisim_partitioner_dnj
         // As every action_block-slice is a (trivial) bunch at the same time,
         // we can reuse the field next_nontrivial_and_label.label (instead of
         // next_nontrivial_and_label.next_nontrivial) to store the label.
-        const action_block_entry* action_block_iter_end(
-                                             part_tr.action_block_inert_begin);
+        const action_block_entry*
+                       action_block_iter_end(part_tr.action_block_inert_begin);
         label_type label(0);                                                    assert(label < action_label.size());
         do
         {
-            for (action_block_entry* action_block_iter(
-                                                   action_label[label].begin);
+            for (action_block_entry*
+                                 action_block_iter(action_label[label].begin);
               action_block_iter < action_block_iter_end;
               action_block_iter = action_block_iter->begin_or_before_end + 1)
             {                                                                   assert(nullptr != action_block_iter->succ);
@@ -4457,8 +4457,8 @@ class bisim_partitioner_dnj
 
         COROUTINES_SECTION
             // shared variables of both coroutines
-            permutation_entry* notblue_initialised_end(
-                                                refine_block->nonbottom_begin);
+            permutation_entry*
+                        notblue_initialised_end(refine_block->nonbottom_begin);
             permutation_entry* blue_nonbottom_end(notblue_initialised_end);
 
             // variable declarations of the blue coroutine
@@ -4830,8 +4830,8 @@ class bisim_partitioner_dnj
                     part_tr.unstable_block_bunch.front().source_block() ==
                                                                  refine_block))
             {
-                block_bunch_slice_iter_t blue_slice =
-                               std::next(part_tr.unstable_block_bunch.begin());
+                block_bunch_slice_iter_t blue_slice(
+                              std::next(part_tr.unstable_block_bunch.begin()));
                 if (part_tr.unstable_block_bunch.end() != blue_slice &&
                                       blue_slice->source_block() == blue_block)
                 {
@@ -4893,8 +4893,8 @@ class bisim_partitioner_dnj
                                      refine_block->stable_block_bunch.begin());
                   refine_block->stable_block_bunch.end() != block_bunch_iter; )
         {                                                                       assert(block_bunch_iter->is_stable());
-            block_bunch_slice_iter_t const next_block_bunch_iter(
-                                                  std::next(block_bunch_iter));
+            block_bunch_slice_iter_t const
+                            next_block_bunch_iter(std::next(block_bunch_iter));
             if (&*block_bunch_iter != &*last_splitter &&
                               &*block_bunch_iter != &*new_noninert_block_bunch)
             {
@@ -4946,8 +4946,8 @@ class bisim_partitioner_dnj
                                                    old_block_bunch_pos->slice);
                 if (!slice->is_stable())
                 {                                                               assert(&*slice != &*last_splitter && slice != new_noninert_block_bunch);
-                    block_bunch_entry* new_block_bunch_pos =
-                                                      slice->prepaid_begin - 1;
+                    block_bunch_entry*
+                                 new_block_bunch_pos(slice->prepaid_begin - 1);
                     if (old_block_bunch_pos <= new_block_bunch_pos)
                     {
                         // It may happen that the transition was already paid
@@ -5235,11 +5235,11 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching /* = false */,
 }
 
 
-/// \brief Checks whether the initial states of two LTSs are strong or
-/// (divergence-preserving) branching bisimilar
+/// \brief Checks whether the two initial states of two LTSs are strong or
+/// (divergence-preserving) branching bisimilar.
 /// \details This routine uses the O(m log n) branching bisimulation algorithm
 /// developed in 2018 by David N. Jansen.  It runs in O(m log n) time and uses
-/// O(n) memory, where n is the number of states and m is the number of
+/// O(m) memory, where n is the number of states and m is the number of
 /// transitions.
 ///
 /// The LTSs l1 and l2 are not usable anymore after this call.

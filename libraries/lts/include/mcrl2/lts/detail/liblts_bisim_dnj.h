@@ -12,12 +12,12 @@
 ///
 /// \brief O(m log n)-time branching bisimulation algorithm
 ///
-/// \details This file declares an efficient partition refinement algorithm
+/// \details This file implements an efficient partition refinement algorithm
 /// for labelled transition systems inspired by Groote / Jansen / Keiren / Wijs
 /// (2017) and Valmari (2009) to calculate the branching bisimulation classes
 /// of a labelled transition system.  Different from the 2017 article, it does
 /// not translate the LTS to a Kripke structure, but works on the LTS directly.
-/// We hope that in this way the memory use can be reduced.
+/// In this way the memory use can be reduced.
 ///
 /// Partition refinement means that the algorithm maintains a partition of the
 /// state space of the LTS into ``blocks''.  A block contains all states in one
@@ -52,8 +52,8 @@
 ///
 /// Overall, we spend time as follows:
 /// - Every transition is moved to a new bunch at most
-///   log<SUB>2</SUB>(n<SUP>2</SUP>) = 2*log<SUB>2</SUB>(n) times.  Every move
-///   leads to O(1) work.
+///   log<SUB>2</SUB>(2 * n<SUP>2</SUP>) = 2*log<SUB>2</SUB>(n) + 1 times.
+///   Every move leads to O(1) work.
 /// - Every state is moved to a new block at most log<SUB>2</SUB>(n) times.
 ///   Every move leads to work proportional to the number of its incoming and
 ///   outgoing transitions.
@@ -66,6 +66,10 @@
 ///
 /// \author David N. Jansen, Institute of Software, Chinese Academy of
 /// Sciences, Beijing, PR China
+
+// The file is best viewed on a screen or in a window that is 160 characters
+// wide.  The left 80 columns contain the main text of the program.  The right
+// 80 columns contain assertions and other code used for debugging.
 
 #ifndef LIBLTS_BISIM_DNJ_H
 #define LIBLTS_BISIM_DNJ_H
@@ -3403,8 +3407,8 @@ class bisim_partitioner_dnj
         // refine_partition_until_it_becomes_stable().
 
         // for all blocks
-        const bisim_dnj::permutation_entry* s_iter(
-                                                 &part_st.permutation.front()); assert(s_iter <= &part_st.permutation.back());
+        const bisim_dnj::permutation_entry*
+                                          s_iter(&part_st.permutation.front()); assert(s_iter <= &part_st.permutation.back());
         do
         {
             const bisim_dnj::block_t* const B(s_iter->st->bl.ock);
@@ -3412,13 +3416,13 @@ class bisim_partitioner_dnj
             for (const bisim_dnj::block_bunch_slice_t& block_bunch :
                                                          B->stable_block_bunch)
             {                                                                   assert(block_bunch.is_stable());  assert(!block_bunch.empty());
-                const bisim_dnj::pred_entry* const pred(
-                                                     block_bunch.end[-1].pred); assert(pred->source->bl.ock == B);
+                const bisim_dnj::pred_entry* const
+                                                pred(block_bunch.end[-1].pred); assert(pred->source->bl.ock == B);
                                                                                 assert(nullptr != pred->action_block->succ);
                 /* add a transition from the source block to the goal block  */ assert(pred->action_block->succ->block_bunch->pred == pred);
                 /* with the indicated label.                                 */ assert(pred->action_block->succ->block_bunch->slice == &block_bunch);
-                label_type label(
-                           block_bunch.bunch->next_nontrivial_and_label.label); assert(0 <= label);  assert(label < action_label.size());
+                label_type
+                     label(block_bunch.bunch->next_nontrivial_and_label.label); assert(0 <= label);  assert(label < action_label.size());
                 aut.add_transition(transition(B->seqnr, label,
                                                  pred->target->bl.ock->seqnr));
             }
@@ -3644,8 +3648,8 @@ class bisim_partitioner_dnj
         // Every such transition block except the last one ends with a dummy
         /* entry.  If there are transition labels without transitions,       */ assert((size_t) (part_tr.action_block_end - part_tr.action_block_begin) ==
         /* multiple dummy entries will be placed side-by-side.               */                               aut.num_transitions() + action_label.size() - 1);
-        bisim_dnj::action_block_entry* next_action_label_begin(
-                                                   part_tr.action_block_begin);
+        bisim_dnj::action_block_entry*
+                           next_action_label_begin(part_tr.action_block_begin);
         label_type num_labels_with_transitions(0);
         trans_type const n_square(part_st.state_size() * part_st.state_size()); ONLY_IF_DEBUG( trans_type max_transitions = n_square; )
         label_type label(action_label.size());                                  assert(0 < label);
@@ -5224,8 +5228,8 @@ class bisim_partitioner_dnj
 /// \param         branching           If true branching bisimulation is
 ///                                    applied, otherwise strong bisimulation.
 /// \param         preserve_divergence Indicates whether loops of internal
-///                                    actions on states must be preserved. If
-///                                    false these are removed. If true these
+///                                    actions on states must be preserved.  If
+///                                    false these are removed.  If true these
 ///                                    are preserved.
 template <class LTS_TYPE>
 void bisimulation_reduce_dnj(LTS_TYPE& l, bool branching = false,
@@ -5251,7 +5255,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool branching = false,
 
 
 /// \brief Checks whether the two initial states of two LTSs are strong or
-/// branching bisimilar.
+/// (divergence-preserving) branching bisimilar.
 /// \details This routine uses the O(m log n) branching bisimulation algorithm
 /// developed in 2018 by David N. Jansen.  It runs in O(m log n) time and uses
 /// O(m) memory, where n is the number of states and m is the number of
@@ -5268,7 +5272,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool branching = false,
 /// \param         generate_counter_examples  (non-functional, only in the
 ///                                    interface for historical reasons)
 /// \returns True iff the initial states of the transition systems l1 and l2
-/// are (divergence-preserving) (branching) bisimilar.
+/// are ((divergence-preserving) branching) bisimilar.
 template <class LTS_TYPE>
 bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
                 bool branching = false, bool preserve_divergence = false,
@@ -5299,7 +5303,7 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
 
 
 /// \brief Checks whether the two initial states of two LTSs are strong or
-/// branching bisimilar.
+/// (divergence-preserving) branching bisimilar.
 /// \details The LTSs l1 and l2 are first duplicated and subsequently reduced
 /// modulo bisimulation.  If memory is a concern, one could consider to use
 /// destructive_bisimulation_compare().  This routine uses the O(m log n)
@@ -5313,7 +5317,7 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
 /// \param preserve_divergence If true and branching is true, preserve tau
 ///                            loops on states.
 /// \retval True iff the initial states of the transition systems l1 and l2
-/// are (divergence-preserving) (branching) bisimilar.
+/// are ((divergence-preserving) branching) bisimilar.
 template <class LTS_TYPE>
 inline bool bisimulation_compare_dnj(const LTS_TYPE& l1, const LTS_TYPE& l2,
           bool const branching = false, bool const preserve_divergence = false)
