@@ -24,6 +24,24 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+namespace detail {
+
+inline
+pbes_expression make_not(const pbes_expression& x)
+{
+  if(data::is_data_expression(x) && data::sort_bool::is_not_application(x))
+  {
+    return data::sort_bool::arg(atermpp::down_cast<data::data_expression>(x));
+  }
+  else if(is_not(x))
+  {
+    return accessors::arg(x);
+  }
+  return not_(x);
+}
+
+} // namespace detail
+
 class srf_summand
 {
   protected:
@@ -388,7 +406,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
       apply(x.right());
       for (auto i = summands.begin() + size; i != summands.end(); ++i)
       {
-        i->add_condition(not_(x.left()));
+        i->add_condition(detail::make_not(x.left()));
       }
     }
     else if (is_simple_expression(x.right()))
@@ -397,7 +415,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
       apply(x.left());
       for (auto i = summands.begin() + size; i != summands.end(); ++i)
       {
-        i->add_condition(not_(x.right()));
+        i->add_condition(detail::make_not(x.right()));
       }
     }
     else
@@ -450,7 +468,7 @@ struct srf_and_traverser: public pbes_expression_traverser<srf_and_traverser>
     {
       const propositional_variable_instantiation& X = propositional_variable_instantiation(X_false, {});
       const pbes_expression& f = x;
-      summands.emplace_back(data::variable_list(), not_(f), X);
+      summands.emplace_back(data::variable_list(), detail::make_not(f), X);
     }
     else
     {
