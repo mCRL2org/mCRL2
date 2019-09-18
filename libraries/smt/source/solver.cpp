@@ -278,7 +278,6 @@ smt_solver::smt_solver(const data::data_specification& dataspec)
   initialize_solver();
   std::ostringstream out;
   translate_data_specification(dataspec, out, m_cache, m_native);
-  mCRL2log(log::debug) << out.str() << std::endl;
   execute(out.str());
 }
 
@@ -305,7 +304,6 @@ bool smt_solver::solve(const data::variable_list& vars, const data::data_express
   translate_variable_declaration(vars, out, m_cache, m_native);
   translate_assertion(expr, out, m_cache, m_native);
   out << "(check-sat)\n";
-  mCRL2log(log::debug) << out.str() << std::endl;
   bool result = execute_and_check(out.str());
   execute("(pop)\n");
   return result;
