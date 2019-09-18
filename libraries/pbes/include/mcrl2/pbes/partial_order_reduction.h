@@ -1529,6 +1529,7 @@ class partial_order_reduction_algorithm
           iteration = 0;
         }
       }
+      mCRL2log(log::verbose) << "Finished exploration, found " << seen.size() << " nodes." << std::endl;
     }
 };
 
