@@ -530,7 +530,6 @@ class partial_order_reduction_algorithm
     {
       const auto& d = m_parameters;
       const auto& e = X_e.parameters();
-      data::add_assignments(m_sigma, d, e);
 
       std::set<propositional_variable_instantiation> result;
       std::size_t i = m_equation_index.index(X_e.name());
@@ -541,6 +540,11 @@ class partial_order_reduction_algorithm
         const pbes_expression& f_k = summand_k.f;
         const data::data_expression_list& g_k = summand_k.g;
         const auto& J = summand_k.nxt[i];
+
+        // Add assignments for parameters during every iteration,
+        // because they might have been removed on the previous one if
+        // a parameter coincides with a quantified variable.
+        data::add_assignments(m_sigma, d, e);
         m_enumerator.enumerate(enumerator_element(e_k, f_k),
                                m_sigma,
                                [&](const enumerator_element& p) {
