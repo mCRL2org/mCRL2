@@ -12,13 +12,8 @@
 #define MCRL2_SMT_SOLVER_H
 
 #include "mcrl2/utilities/platform.h"
+#include "mcrl2/smt/child_process.h"
 #include "mcrl2/smt/native_translation.h"
-#ifdef MCRL2_PLATFORM_WINDOWS
-  #include <windows.h>
-  #include <tchar.h>
-  #include <stdio.h>
-  #include <strsafe.h>
-#endif // MCRL2_PLATFORM_WINDOWS
 
 #include <unordered_map>
 
@@ -32,30 +27,14 @@ class smt_solver
 protected:
   native_translations m_native;
   std::unordered_map<data::data_expression, std::string> m_cache;
-
-#ifdef MCRL2_PLATFORM_WINDOWS
-  HANDLE g_hChildStd_IN_Rd = NULL;
-  HANDLE g_hChildStd_IN_Wr = NULL;
-  HANDLE g_hChildStd_OUT_Rd = NULL;
-  HANDLE g_hChildStd_OUT_Wr = NULL;
-#else
-  int pipe_stdin[2];
-  int pipe_stdout[2];
-  int pipe_stderr[2];
-#endif // MCRL2_PLATFORM_WINDOWS
+  child_process z3;
 
 protected:
 
-  void execute(const std::string& command) const;
-
   bool execute_and_check(const std::string& command) const;
-
-  void initialize_solver();
 
 public:
   smt_solver(const data::data_specification& dataspec);
-
-  ~smt_solver();
 
   bool solve(const data::variable_list& vars, const data::data_expression& expr);
 };

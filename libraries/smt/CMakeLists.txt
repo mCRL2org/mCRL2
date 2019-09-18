@@ -1,6 +1,7 @@
 add_mcrl2_library(smt
   INSTALL_HEADERS TRUE
   SOURCES
+    child_process.cpp
     solver.cpp
   DEPENDS
     mcrl2_core
