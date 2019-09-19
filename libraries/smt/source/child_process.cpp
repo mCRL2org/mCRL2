@@ -36,10 +36,10 @@ namespace smt
 
 struct child_process::pipes
 {
-  HANDLE m_pipes->g_hChildStd_IN_Rd = NULL;
-  HANDLE m_pipes->g_hChildStd_IN_Wr = NULL;
-  HANDLE m_pipes->g_hChildStd_OUT_Rd = NULL;
-  HANDLE m_pipes->g_hChildStd_OUT_Wr = NULL;
+  HANDLE g_hChildStd_IN_Rd = NULL;
+  HANDLE g_hChildStd_IN_Wr = NULL;
+  HANDLE g_hChildStd_OUT_Rd = NULL;
+  HANDLE g_hChildStd_OUT_Wr = NULL;
 };
 
 void child_process::write(const std::string& command) const
@@ -47,7 +47,7 @@ void child_process::write(const std::string& command) const
   DWORD dwWritten;
   BOOL bSuccess = FALSE;
 
-  bSuccess = WriteFile(m_pipes->g_hChildStd_IN_Wr, command.c_str(), command.size(), &dwWritten, NULL);
+  bSuccess = WriteFile(m_pipes->g_hChildStd_IN_Wr, command.c_str(), static_cast<DWORD>(command.size()), &dwWritten, NULL);
   if(!bSuccess || dwWritten != command.size())
   {
     throw mcrl2::runtime_error("Failed to write SMT problem to the solver.\n" + command);
@@ -76,7 +76,7 @@ std::string child_process::read() const
 
 void child_process::initialize()
 {
-  m_pipes = std::make_shared<detail::pipes>();
+  m_pipes = std::make_shared<child_process::pipes>();
   SECURITY_ATTRIBUTES saAttr;
   // Set the bInheritHandle flag so pipe handles are inherited.
   saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
