@@ -69,7 +69,7 @@ std::string child_process::read() const
   } while(bSuccess && output[totalRead-1] != '\n');
   if(!bSuccess || totalRead == 0 )
   {
-    throw mcrl2::runtime_error("Reading from child process " + m_name + "failed.");
+    throw mcrl2::runtime_error("Reading from child process " + m_name + " failed.");
   }
   return std::string(output, totalRead);
 }

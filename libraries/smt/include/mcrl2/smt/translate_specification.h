@@ -32,7 +32,8 @@ template <typename OutputStream>
 inline
 void translate_sort_definition(const std::string& sort_name,
                                const data::sort_expression& s,
-                               const data::data_specification& dataspec, OutputStream& out,
+                               const data::data_specification& dataspec,
+                               OutputStream& out,
                                const native_translations& nt,
                                std::map<data::structured_sort, std::string>& struct_name_map)
 {

@@ -61,9 +61,9 @@ struct translate_sort_expression_traverser: public Traverser<translate_sort_expr
 
   void apply(const data::container_sort& s)
   {
-    out << "(" << pp(s.container_name()) << " (";
+    out << "(" << pp(s.container_name()) << " ";
     super::apply(s.element_sort());
-    out << "))";
+    out << ")";
   }
 
   void apply(const data::structured_sort& s)

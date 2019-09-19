@@ -145,7 +145,13 @@ native_translations initialise_native_translation(const data::data_specification
   nt.sorts[sort_real::real_()] = "Real";
 
   std::vector<sort_expression> number_sorts({ sort_pos::pos(), sort_nat::nat(), sort_int::int_(), sort_real::real_() });
-  for(const sort_expression& sort: dataspec.sorts())
+  std::set<sort_expression> sorts = dataspec.sorts();
+  // Add native definitions for the left-hand side of every alias
+  for(const auto& alias: dataspec.sort_alias_map())
+  {
+    sorts.insert(alias.first);
+  }
+  for(const sort_expression& sort: sorts)
   {
     if(is_basic_sort(sort) || is_container_sort(sort))
     {
