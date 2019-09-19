@@ -8,6 +8,9 @@
 //
 /// \file child_process.h
 
+#ifndef MCRL2_SMT_CHILD_PROCESS_H
+#define MCRL2_SMT_CHILD_PROCESS_H
+
 #include <string>
 #include <memory>
 
@@ -41,5 +44,7 @@ public:
   std::string read() const;
 };
 
-}
-}
+} // namespace smt
+} // namespace mcrl2
+
+#endif // MCRL2_SMT_CHILD_PROCESS_H
