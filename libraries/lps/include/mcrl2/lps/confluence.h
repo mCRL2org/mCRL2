@@ -98,6 +98,24 @@ std::set<data::variable> changed_variables(const action_summand& summand)
   return result;
 }
 
+// This is an alternative version of data::make_assignment_list that removes trivial assignments
+inline
+data::assignment_list make_assignment_list(const data::variable_list& variables, const data::data_expression_list& expressions)
+{
+  assert(variables.size() == expressions.size());
+  std::vector<data::assignment> result;
+  auto vi = variables.begin();
+  auto ei = expressions.begin();
+  for (; vi != variables.end(); ++vi, ++ei)
+  {
+    if (*vi != *ei)
+    {
+      result.emplace_back(*vi, *ei);
+    }
+  }
+  return data::assignment_list(result.begin(), result.end());
+}
+
 struct confluence_summand
 {
   data::variable_list variables;
@@ -126,15 +144,17 @@ struct confluence_summand
 };
 
 inline
-std::ostream& operator<<(std::ostream& out, const confluence_summand& summand)
+std::string print_confluence_summand(const confluence_summand& summand, const data::variable_list& process_parameters)
 {
-  return out << lps::stochastic_action_summand(
+  std::ostringstream out;
+  out << lps::stochastic_action_summand(
     summand.variables,
     summand.condition,
     summand.multi_action,
-    data::make_assignment_list(summand.variables, summand.next_state),
+    make_assignment_list(process_parameters, summand.next_state),
     summand.distribution
   );
+  return out.str();
 }
 
 /// \brief Indicates whether or not two summands are disjoint.
@@ -202,7 +222,7 @@ struct square_confluence_condition
     if (summand_j.is_tau())
     {
       data::remove_assignments(sigma, d);
-      return imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(gj_gi, gi_gj)));
+      return imp(data::and_(ci, cj), or_(detail::equal_to(gi, gj), detail::make_and(ci_gj, cj_gi, detail::equal_to(gj_gi, gi_gj))));
     }
     else
     {
@@ -320,34 +340,52 @@ class confluence_checker
       return m_solver ? is_tautology_smt(x) : is_tautology_rewriter(x);
     }
 
+    // Returns whether tau_summand is confluent. If not, the second value returned is the index of the summand
+    // for which a violation was detected.
     template <typename ConfluenceCondition>
-    bool is_confluent(const confluence_summand& tau_summand, ConfluenceCondition confluence_condition) const
+    std::pair<bool, std::size_t> is_confluent(const confluence_summand& tau_summand, ConfluenceCondition confluence_condition, bool check_disjointness) const
     {
-      for (const confluence_summand& summand: m_summands)
+      for (std::size_t i = 0; i < m_summands.size(); i++)
       {
+        const confluence_summand& summand =  m_summands[i];
+
+        if (check_disjointness && disjoint(tau_summand, summand))
+        {
+          mCRL2log(log::info) << ':';
+          continue;
+        }
+
         data::data_expression condition = confluence_condition(tau_summand, summand);
+        mCRL2log(log::debug) << "\nsummand = " << print_confluence_summand(summand, m_process_parameters);
+        mCRL2log(log::debug) << "\ntau summand = " << print_confluence_summand(tau_summand, m_process_parameters);
+        mCRL2log(log::debug) << "\nconfluence condition = " << condition << std::endl;
+        mCRL2log(log::debug) << "\nrewritten confluence condition = " << m_rewr(condition) << std::endl;
         if (!is_tautology(condition))
         {
-          return false;
+          return { false, i };
         }
+        mCRL2log(log::info) << '+';
       }
-      return true;
+      return { true, 0 };
     }
 
   public:
-    bool is_square_confluent(const confluence_summand& tau_summand) const
+    std::pair<bool, std::size_t> is_square_confluent(const confluence_summand& tau_summand) const
     {
-      return is_confluent(tau_summand, square_confluence_condition(m_process_parameters, m_sigma));
+      bool check_disjointness = true;
+      return is_confluent(tau_summand, square_confluence_condition(m_process_parameters, m_sigma), check_disjointness);
     }
 
-    bool is_triangular_confluent(const confluence_summand& tau_summand) const
+    std::pair<bool, std::size_t> is_triangular_confluent(const confluence_summand& tau_summand) const
     {
-      return is_confluent(tau_summand, triangular_confluence_condition(m_process_parameters, m_sigma));
+      bool check_disjointness = false;
+      return is_confluent(tau_summand, triangular_confluence_condition(m_process_parameters, m_sigma), check_disjointness);
     }
 
-    bool is_trivial_confluent(const confluence_summand& tau_summand) const
+    std::pair<bool, std::size_t> is_trivial_confluent(const confluence_summand& tau_summand) const
     {
-      return is_confluent(tau_summand, trivial_confluence_condition(m_sigma));
+      bool check_disjointness = false;
+      return is_confluent(tau_summand, trivial_confluence_condition(m_sigma), check_disjointness);
     }
 
     template <typename Specification>
@@ -365,6 +403,7 @@ class confluence_checker
       }
 
       std::size_t n = m_summands.size();
+      std::size_t tau_summand_count = 0;
       for (std::size_t i = 0; i < n; i++)
       {
         const auto& summand = m_summands[i];
@@ -372,14 +411,29 @@ class confluence_checker
         {
           continue;
         }
-        if (    (confluence_type == 'C' && is_square_confluent(summand))
-             || (confluence_type == 'T' && is_triangular_confluent(summand))
-             || (confluence_type == 'Z' && is_trivial_confluent(summand))
-           )
+        tau_summand_count++;
+        mCRL2log(log::info) << "summand " << (i + 1) << " of " << n << " (condition = " << confluence_type << "): ";
+        bool confluent;
+        std::size_t summand_index;
+        switch (confluence_type)
+        {
+          case 'C': std::tie(confluent, summand_index) = is_square_confluent(summand); break;
+          case 'T': std::tie(confluent, summand_index) = is_triangular_confluent(summand); break;
+          case 'Z': std::tie(confluent, summand_index) = is_trivial_confluent(summand); break;
+          default: throw mcrl2::runtime_error("Unknown confluence type " + std::to_string(confluence_type));
+        }
+        if (confluent)
         {
           result.push_back(i);
+          mCRL2log(log::info) << "Confluent with all summands";
         }
+        else
+        {
+          mCRL2log(log::info) << "Not confluent with summand " << (summand_index + 1);
+        }
+        mCRL2log(log::info) << std::endl;
       }
+      mCRL2log(log::info) << result.size() << " of " << tau_summand_count << " tau summands were found to be confluent";
       return result;
     }
 
