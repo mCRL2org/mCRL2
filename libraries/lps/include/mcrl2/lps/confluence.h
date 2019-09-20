@@ -330,7 +330,15 @@ class confluence_checker
     {
       std::set<data::variable> freevars = data::find_free_variables(x);
       // determine if the negation is satisfiable
-      bool result = m_solver->solve(data::variable_list(freevars.begin(), freevars.end()), data::sort_bool::not_(x));
+      bool result;
+      switch(m_solver->solve(data::variable_list(freevars.begin(), freevars.end()), data::sort_bool::not_(x)))
+      {
+        case smt::answer::SAT: result = true; break;
+        case smt::answer::UNSAT: result = false; break;
+        // since the formula is negated, we over-approximate unknown results
+        // the result of this function will then be an under-approximation
+        case smt::answer::UNKNOWN: result = true; break;
+      }
       return !result;
     }
 

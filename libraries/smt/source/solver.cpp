@@ -32,21 +32,21 @@ namespace mcrl2
 namespace smt
 {
 
-bool smt_solver::execute_and_check(const std::string& s) const
+answer smt_solver::execute_and_check(const std::string& s) const
 {
   z3.write(s);
   std::string result = z3.read();
   if(result.compare(0, 3, "sat") == 0)
   {
-    return true;
+    return answer::SAT;
   }
   else if(result.compare(0, 5, "unsat") == 0)
   {
-    return false;
+    return answer::UNSAT;
   }
   else if(result.compare(0, 7, "unknown") == 0)
   {
-    throw mcrl2::runtime_error("Cannot determine whether this formula is satisfiable or not.");
+    throw answer::UNKNOWN;
   }
   else
   {
@@ -64,14 +64,14 @@ smt_solver::smt_solver(const data::data_specification& dataspec)
   z3.write(out.str());
 }
 
-bool smt_solver::solve(const data::variable_list& vars, const data::data_expression& expr)
+answer smt_solver::solve(const data::variable_list& vars, const data::data_expression& expr)
 {
   z3.write("(push)\n");
   std::ostringstream out;
   translate_variable_declaration(vars, out, m_cache, m_native);
   translate_assertion(expr, out, m_cache, m_native);
   out << "(check-sat)\n";
-  bool result = execute_and_check(out.str());
+  answer result = execute_and_check(out.str());
   z3.write("(pop)\n");
   return result;
 }

@@ -14,6 +14,7 @@
 #include "mcrl2/utilities/platform.h"
 #include "mcrl2/smt/child_process.h"
 #include "mcrl2/smt/native_translation.h"
+#include "mcrl2/smt/answer.h"
 
 #include <unordered_map>
 
@@ -31,12 +32,12 @@ protected:
 
 protected:
 
-  bool execute_and_check(const std::string& command) const;
+  answer execute_and_check(const std::string& command) const;
 
 public:
   smt_solver(const data::data_specification& dataspec);
 
-  bool solve(const data::variable_list& vars, const data::data_expression& expr);
+  answer solve(const data::variable_list& vars, const data::data_expression& expr);
 };
 
 } // namespace smt

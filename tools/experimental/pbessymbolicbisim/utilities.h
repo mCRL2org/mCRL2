@@ -52,7 +52,13 @@ struct data_manipulators
   {
     try
     {
-      return smt_solver->solve(vars, expr);
+      switch(smt_solver->solve(vars, expr))
+      {
+        case smt::answer::SAT: return true;
+        case smt::answer::UNSAT: return false;
+        // if UNKNOWN, we continue and try the rewriter
+        default: ;
+      }
     }
     catch(const smt::translation_error&)
     {}

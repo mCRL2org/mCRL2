@@ -602,7 +602,12 @@ class partial_order_reduction_algorithm
           expr = make_abstraction(data::exists_binder(), f.variables(), data::sort_bool::not_(f.body()));
         }
         // data::data_expression result = data::one_point_rule_rewrite(m_rewr(expr));
-        return negate ^ m_solver->solve(data::variable_list(), expr);
+        switch(m_solver->solve(data::variable_list(), expr))
+        {
+          case smt::answer::SAT: return negate ^ true;
+          case smt::answer::UNSAT: return negate ^ false;
+          case smt::answer::UNKNOWN: return negate ^ false;
+        }
       }
       else
       {

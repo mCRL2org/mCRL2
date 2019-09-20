@@ -542,7 +542,13 @@ protected:
   {
     try
     {
-      return m_smt_solver.solve(vars, expr);
+      switch(m_smt_solver.solve(vars, expr))
+      {
+        case smt::answer::SAT: return true;
+        case smt::answer::UNSAT: return false;
+        // if UNKNOWN, we continue and try the rewriter
+        default: ;
+      }
     }
     catch(const smt::translation_error& e)
     {

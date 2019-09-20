@@ -38,12 +38,12 @@ int main(int /*argc*/, char** /*argv*/)
                                  );
 
   smt::smt_solver solv(data_spec);
-  bool result;
   data::variable vb1 = data::parse_variable("bit_1: Bit", data_spec);
   data::variable vb2 = data::parse_variable("bit_2: Bit", data_spec);
   data::variable_list bit_vars({vb1});
-  result = solv.solve(bit_vars, data::parse_data_expression("invert(invert(bit_1)) != bit_1", bit_vars, data_spec));
-  std::cout << "result " << std::boolalpha << result << std::endl;
+  // This may not terminate
+  smt::answer result = solv.solve(bit_vars, data::parse_data_expression("invert(invert(bit_1)) != bit_1", bit_vars, data_spec));
+  std::cout << "result " << result << std::endl;
 
   return 0;
 }
