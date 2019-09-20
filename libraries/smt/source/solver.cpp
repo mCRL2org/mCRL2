@@ -46,7 +46,7 @@ answer smt_solver::execute_and_check(const std::string& s) const
   }
   else if(result.compare(0, 7, "unknown") == 0)
   {
-    throw answer::UNKNOWN;
+    return answer::UNKNOWN;
   }
   else
   {
