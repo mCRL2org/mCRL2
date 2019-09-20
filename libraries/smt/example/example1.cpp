@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
   data::variable vb2 = data::parse_variable("bit_2: Bit", data_spec);
   data::variable_list bit_vars({vb1});
   // This may not terminate
-  smt::answer result = solv.solve(bit_vars, data::parse_data_expression("invert(invert(bit_1)) != bit_1", bit_vars, data_spec));
+  smt::answer result = solv.solve(bit_vars, data::parse_data_expression("invert(invert(bit_1)) != bit_1", bit_vars, data_spec), std::chrono::seconds(5));
   std::cout << "result " << result << std::endl;
 
   return 0;

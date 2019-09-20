@@ -32,10 +32,10 @@ namespace mcrl2
 namespace smt
 {
 
-answer smt_solver::execute_and_check(const std::string& s) const
+answer smt_solver::execute_and_check(const std::string& s, const std::chrono::microseconds& timeout) const
 {
   z3.write(s);
-  std::string result = z3.read();
+  std::string result = timeout == std::chrono::microseconds::zero() ? z3.read() : z3.read(timeout);
   if(result.compare(0, 3, "sat") == 0)
   {
     return answer::SAT;
@@ -64,14 +64,14 @@ smt_solver::smt_solver(const data::data_specification& dataspec)
   z3.write(out.str());
 }
 
-answer smt_solver::solve(const data::variable_list& vars, const data::data_expression& expr)
+answer smt_solver::solve(const data::variable_list& vars, const data::data_expression& expr, const std::chrono::microseconds& timeout)
 {
   z3.write("(push)\n");
   std::ostringstream out;
   translate_variable_declaration(vars, out, m_cache, m_native);
   translate_assertion(expr, out, m_cache, m_native);
   out << "(check-sat)\n";
-  answer result = execute_and_check(out.str());
+  answer result = execute_and_check(out.str(), timeout);
   z3.write("(pop)\n");
   return result;
 }

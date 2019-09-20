@@ -16,6 +16,7 @@
 #include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/answer.h"
 
+#include <chrono>
 #include <unordered_map>
 
 namespace mcrl2
@@ -32,12 +33,12 @@ protected:
 
 protected:
 
-  answer execute_and_check(const std::string& command) const;
+  answer execute_and_check(const std::string& command, const std::chrono::microseconds& timeout) const;
 
 public:
   smt_solver(const data::data_specification& dataspec);
 
-  answer solve(const data::variable_list& vars, const data::data_expression& expr);
+  answer solve(const data::variable_list& vars, const data::data_expression& expr, const std::chrono::microseconds& timeout = std::chrono::microseconds::zero());
 };
 
 } // namespace smt
