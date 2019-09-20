@@ -54,6 +54,19 @@ data::data_expression equal_to(const data::data_expression_list& x, const data::
   return data::join_and(conjuncts.begin(), conjuncts.end());
 }
 
+inline
+std::pair<std::size_t, std::size_t> make_sorted_pair(std::size_t i, std::size_t j)
+{
+  return (i < j) ? std::make_pair(i, j) : std::make_pair(j, i);
+}
+
+inline
+data::data_expression make_forall(const data::data_expression& x)
+{
+  std::set<data::variable> freevars = data::find_free_variables(x);
+  return data::make_forall(data::variable_list(freevars.begin(), freevars.end()), x);
+}
+
 } // namespace detail
 
 // TODO: reuse this code
@@ -203,6 +216,9 @@ struct square_confluence_condition
   data::data_expression operator()(const confluence_summand& summand_i, const confluence_summand& summand_j) const
   {
     assert(summand_i.is_tau());
+
+    data::data_expression result;
+
     const auto& d = process_parameters;
 
     const auto& ci = summand_i.condition;
@@ -222,15 +238,17 @@ struct square_confluence_condition
     if (summand_j.is_tau())
     {
       data::remove_assignments(sigma, d);
-      return imp(data::and_(ci, cj), or_(detail::equal_to(gi, gj), detail::make_and(ci_gj, cj_gi, detail::equal_to(gj_gi, gi_gj))));
+      result = imp(data::and_(ci, cj), or_(detail::equal_to(gi, gj), detail::make_and(ci_gj, cj_gi, detail::equal_to(gj_gi, gi_gj))));
     }
     else
     {
       const auto& fj = summand_j.multi_action.arguments();
       data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
       data::remove_assignments(sigma, d);
-      return imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gi_gj)));
+      result = imp(data::and_(ci, cj), detail::make_and(ci_gj, cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gi_gj)));
     }
+
+    return detail::make_forall(result);
   }
 };
 
@@ -250,6 +268,9 @@ struct triangular_confluence_condition
   data::data_expression operator()(const confluence_summand& summand_i, const confluence_summand& summand_j) const
   {
     assert(summand_i.is_tau());
+
+    data::data_expression result;
+    
     const auto& d = process_parameters;
 
     const auto& ci = summand_i.condition;
@@ -265,15 +286,17 @@ struct triangular_confluence_condition
     if (summand_j.is_tau())
     {
       data::remove_assignments(sigma, d);
-      return imp(and_(ci, cj), and_(cj_gi, detail::equal_to(gj_gi, gj)));
+      result = imp(and_(ci, cj), and_(cj_gi, detail::equal_to(gj_gi, gj)));
     }
     else
     {
       const auto& fj = summand_j.multi_action.arguments();
       data::data_expression_list fj_gi = data::replace_variables_capture_avoiding(fj, sigma);
       data::remove_assignments(sigma, d);
-      return imp(and_(ci, cj), detail::make_and(cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gj)));
+      result = imp(and_(ci, cj), detail::make_and(cj_gi, detail::equal_to(fj, fj_gi), detail::equal_to(gj_gi, gj)));
     }
+    
+    return detail::make_forall(result);
   }
 };
 
@@ -292,6 +315,9 @@ struct trivial_confluence_condition
   data::data_expression operator()(const confluence_summand& summand_i, const confluence_summand& summand_j) const
   {
     assert(summand_i.is_tau());
+
+    data::data_expression result;
+
     data::data_expression aj_is_tau = summand_j.is_tau() ? data::true_() : data::false_();
 
     const auto& ci = summand_i.condition;
@@ -300,7 +326,9 @@ struct trivial_confluence_condition
     const auto& cj = summand_j.condition;
     const auto& gj = summand_j.next_state;
 
-    return imp(and_(ci, cj), and_(aj_is_tau, detail::equal_to(gi, gj)));
+    result = imp(and_(ci, cj), and_(aj_is_tau, detail::equal_to(gi, gj)));
+
+    return detail::make_forall(result);
   }
 };
 
@@ -313,87 +341,133 @@ class confluence_checker
     mutable data::mutable_indexed_substitution<> m_sigma;
     std::unique_ptr<smt::smt_solver> m_solver;
 
+    // cache for the value of is_confluent for pairs (i, j) with i <= j, and i and j both tau-summands
+    mutable std::map<std::pair<std::size_t, std::size_t>, bool> m_cache;
+
+    enum cache_result
+    {
+      yes, no, indeterminate
+    };
+
+    cache_result cache_lookup(std::size_t i, std::size_t j) const
+    {
+      // check if the combination (i, j) is already in the cache
+      auto found = m_cache.find(detail::make_sorted_pair(i, j));
+      if (found != m_cache.end())
+      {
+        return found->second ? yes : no;
+      }
+      return indeterminate;
+    }
+
+    void cache_store(std::size_t i, std::size_t j, bool confluent) const
+    {
+      m_cache[detail::make_sorted_pair(i, j)] = confluent;
+    }
+
     // check if x is a tautology using the data rewriter
-    bool is_tautology_rewriter(data::data_expression x) const
+    bool is_true_rewriter(data::data_expression x) const
     {
       data::one_point_rule_rewriter R_one_point;
       data::quantifiers_inside_rewriter R_quantifiers_inside;
-      x = R_one_point(R_quantifiers_inside(x));
-      std::set<data::variable> freevars = data::find_free_variables(x);
-      x = data::make_forall(data::variable_list(freevars.begin(), freevars.end()), x);
-      x = m_rewr(x);
-      return is_true(x);
+      x = m_rewr(R_one_point(R_quantifiers_inside(x)));
+      return data::is_true(x);
     }
 
     // check if x is a tautology using an smt solver
-    bool is_tautology_smt(const data::data_expression& x) const
+    bool is_true_smt(const data::data_expression& x) const
     {
-      std::set<data::variable> freevars = data::find_free_variables(x);
-      // determine if the negation is satisfiable
-      bool result;
-      switch(m_solver->solve(data::variable_list(freevars.begin(), freevars.end()), data::sort_bool::not_(x)))
+      if (data::is_forall(x))
       {
-        case smt::answer::SAT: result = true; break;
-        case smt::answer::UNSAT: result = false; break;
-        // since the formula is negated, we over-approximate unknown results
-        // the result of this function will then be an under-approximation
-        case smt::answer::UNKNOWN: result = true; break;
+        const auto& x_ = atermpp::down_cast<data::forall>(x);
+        bool result = true;
+        switch (m_solver->solve(x_.variables(), data::sort_bool::not_(x_.body())))
+        {
+          case smt::answer::SAT: result = true; break;
+          case smt::answer::UNSAT: result = false; break;
+            // since the formula is negated, we over-approximate unknown results
+            // the result of this function will then be an under-approximation
+          case smt::answer::UNKNOWN: result = true; break;
+        }
+        return !result;
       }
-      return !result;
+      else
+      {
+        // x has no free variables, so just evaluate the expression
+        return data::is_true(m_rewr(x));
+      }
     }
 
-    // check if x is a tautology
-    bool is_tautology(const data::data_expression& x) const
+    // check if x evaluates true
+    bool is_true(const data::data_expression& x) const
     {
-      return m_solver ? is_tautology_smt(x) : is_tautology_rewriter(x);
+      return m_solver ? is_true_smt(x) : is_true_rewriter(x);
     }
 
-    // Returns whether tau_summand is confluent. If not, the second value returned is the index of the summand
-    // for which a violation was detected.
+    // Returns whether the tau summand with index j is confluent. If not, the second value returned is
+    // the index of the summand for which a violation was detected.
     template <typename ConfluenceCondition>
-    std::pair<bool, std::size_t> is_confluent(const confluence_summand& tau_summand, ConfluenceCondition confluence_condition, bool check_disjointness) const
+    std::pair<bool, std::size_t> is_confluent(std::size_t j, ConfluenceCondition confluence_condition, bool check_disjointness) const
     {
+      const confluence_summand& summand_j = m_summands[j];
       for (std::size_t i = 0; i < m_summands.size(); i++)
       {
-        const confluence_summand& summand =  m_summands[i];
+        const confluence_summand& summand_i =  m_summands[i];
 
-        if (check_disjointness && disjoint(tau_summand, summand))
+        // check if the value for (i, j) is already in the cache
+        if (summand_j.is_tau())
         {
+          auto value = cache_lookup(i, j);
+          if (value == yes)
+          {
+            mCRL2log(log::info) << '.';
+            continue;
+          }
+          else if (value == no)
+          {
+            return { false, i };
+          }
+        }
+
+        if (check_disjointness && disjoint(summand_j, summand_i))
+        {
+          cache_store(i, j, true);
           mCRL2log(log::info) << ':';
           continue;
         }
 
-        data::data_expression condition = confluence_condition(tau_summand, summand);
-        mCRL2log(log::debug) << "\nsummand = " << print_confluence_summand(summand, m_process_parameters);
-        mCRL2log(log::debug) << "\ntau summand = " << print_confluence_summand(tau_summand, m_process_parameters);
-        mCRL2log(log::debug) << "\nconfluence condition = " << condition << std::endl;
-        mCRL2log(log::debug) << "\nrewritten confluence condition = " << m_rewr(condition) << std::endl;
-        if (!is_tautology(condition))
+        data::data_expression condition = confluence_condition(summand_j, summand_i);
+        bool confluent = is_true(condition);
+        cache_store(i, j, confluent);
+        if (confluent)
+        {
+          mCRL2log(log::info) << '+';
+        }
+        else
         {
           return { false, i };
         }
-        mCRL2log(log::info) << '+';
       }
       return { true, 0 };
     }
 
   public:
-    std::pair<bool, std::size_t> is_square_confluent(const confluence_summand& tau_summand) const
+    std::pair<bool, std::size_t> is_square_confluent(std::size_t j) const
     {
       bool check_disjointness = true;
-      return is_confluent(tau_summand, square_confluence_condition(m_process_parameters, m_sigma), check_disjointness);
+      return is_confluent(j, square_confluence_condition(m_process_parameters, m_sigma), check_disjointness);
     }
 
-    std::pair<bool, std::size_t> is_triangular_confluent(const confluence_summand& tau_summand) const
+    std::pair<bool, std::size_t> is_triangular_confluent(std::size_t j) const
     {
       bool check_disjointness = false;
-      return is_confluent(tau_summand, triangular_confluence_condition(m_process_parameters, m_sigma), check_disjointness);
+      return is_confluent(j, triangular_confluence_condition(m_process_parameters, m_sigma), check_disjointness);
     }
 
-    std::pair<bool, std::size_t> is_trivial_confluent(const confluence_summand& tau_summand) const
+    std::pair<bool, std::size_t> is_trivial_confluent(std::size_t j) const
     {
       bool check_disjointness = false;
-      return is_confluent(tau_summand, trivial_confluence_condition(m_sigma), check_disjointness);
+      return is_confluent(j, trivial_confluence_condition(m_sigma), check_disjointness);
     }
 
     template <typename Specification>
@@ -401,6 +475,7 @@ class confluence_checker
     {
       std::vector<std::size_t> result;
 
+      m_cache.clear();
       m_summands.clear();
       m_process_parameters = lpsspec.process().process_parameters();
       m_rewr = data::rewriter(lpsspec.data());
@@ -412,32 +487,32 @@ class confluence_checker
 
       std::size_t n = m_summands.size();
       std::size_t tau_summand_count = 0;
-      for (std::size_t i = 0; i < n; i++)
+      for (std::size_t j = 0; j < n; j++)
       {
-        const auto& summand = m_summands[i];
-        if (!summand.is_tau())
+        const auto& summand_j = m_summands[j];
+        if (!summand_j.is_tau())
         {
           continue;
         }
         tau_summand_count++;
-        mCRL2log(log::info) << "summand " << (i + 1) << " of " << n << " (condition = " << confluence_type << "): ";
+        mCRL2log(log::info) << "summand " << (j + 1) << " of " << n << " (condition = " << confluence_type << "): ";
         bool confluent;
-        std::size_t summand_index;
+        std::size_t violating_index;
         switch (confluence_type)
         {
-          case 'C': std::tie(confluent, summand_index) = is_square_confluent(summand); break;
-          case 'T': std::tie(confluent, summand_index) = is_triangular_confluent(summand); break;
-          case 'Z': std::tie(confluent, summand_index) = is_trivial_confluent(summand); break;
+          case 'C': std::tie(confluent, violating_index) = is_square_confluent(j); break;
+          case 'T': std::tie(confluent, violating_index) = is_triangular_confluent(j); break;
+          case 'Z': std::tie(confluent, violating_index) = is_trivial_confluent(j); break;
           default: throw mcrl2::runtime_error("Unknown confluence type " + std::to_string(confluence_type));
         }
         if (confluent)
         {
-          result.push_back(i);
+          result.push_back(j);
           mCRL2log(log::info) << "Confluent with all summands";
         }
         else
         {
-          mCRL2log(log::info) << "Not confluent with summand " << (summand_index + 1);
+          mCRL2log(log::info) << "Not confluent with summand " << (violating_index + 1);
         }
         mCRL2log(log::info) << std::endl;
       }
@@ -449,6 +524,11 @@ class confluence_checker
     template <typename Specification>
     void run(Specification& lpsspec, char confluence_type, bool use_smt_solver = false)
     {
+      if (has_ctau_action(lpsspec))
+      {
+        throw mcrl2::runtime_error("An action named \'ctau\' already exists.\n");
+      }
+
       if (use_smt_solver)
       {
         m_solver = std::unique_ptr<smt::smt_solver>(new smt::smt_solver(lpsspec.data()));
